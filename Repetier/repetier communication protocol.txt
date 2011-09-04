@@ -1,0 +1,73 @@
+repetier communication protocol
+
+Why a new protocol?
+
+The current reprap communication is just sending the gcode string to the reprap.
+If communication is to slow, the printer waits. If communication fails very
+strange things can happen, depending on the detection of the error. The current
+checksum method is not very secure. I've seen errors with correct checksums.
+The last disadvantage is the required parsing. It is for an arduino quite
+time consuming.
+
+What is better in this protocol?
+
+1. Data is send in binary form, no need for number conversion
+2. Binary format is shorter. We can transfer more commands with the same
+   bandwidth.
+3. Improved checksum validation. 
+
+Comparison of sizes:
+Command 1:
+G1 E10810.1  F1000
+Original size: 21 Bytes
+Updated for errorcheck:
+N6654 G1 E10810.1  F1000 *65
+Errorcheck size: 29 Bytes
+repetier-protocol: 15 Bytes 
+
+Command 2:
+G1 X69.4864 Y48.1169 E10813.1 F2400
+Original size: 36 Bytes
+Updated for errorcheck:
+N7665 G1 X69.4864 Y48.1169 E10813.1 F2400 *78
+Errorcheck size: 56 Bytes
+Repetier-protocol:23 Bytes
+
+As you can see, this protocol reduces the average data transfered to
+less then 50%.
+
+Gcode Letter to Bit and Datatype:
+N : Bit 0 : 16-Bit Integer
+M : Bit 1 :  8-Bit unsigned byte
+G : Bit 2 :  8-Bit unsigned byte
+X : Bit 3 :  32-Bit Float
+Y : Bit 4 :  32-Bit Float
+Z : Bit 5 :  32-Bit Float
+E : Bit 6 :  32-Bit Float
+  : Bit 7 :  always set to distinguish binary from ASCII line.
+F : Bit 8 :  32-Bit Float
+T : Bit 9 :  8 Bit Integer
+S : Bit 10 : 16 Bit Value
+P : Bit 11 : 32 Bit Integer
+Text : Bit 15 : 8 Bit size + Data
+
+A GCode line is transformed into a binary parameterization. 
+16 bit integer with given parameter set
+if bit 0 set: 16 bit linenumber
+if bit 1 set: 8 bit  M value
+if bit 2 set: 8 bit  G value
+if bit 3 set: 32 bit floatpoint X value
+if bit 4 set: 32 bit floatpoint Y value
+if bit 5 set: 32 bit floatpoint Z value
+if bit 6 set: 32 bit floatpoint E value
+if bit 7 set: 32 bit floatpoint F value
+if bit 8 set: 8 bit  T value
+if bit 9 set: 8 bit string length + string data
+16 Bit checksum
+
+The checksum is computed by Fletcher-16 checksum algorithm.
+See http://en.wikipedia.org/wiki/Fletcher's_checksum
+Advantage: We build checksum over checksum and both bytes are 0 if
+correct.
+
+The maximum size for a command without string is 2+2+3+5*4+2=29 Byte.
