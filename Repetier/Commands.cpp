@@ -374,7 +374,7 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
-        out.println_P(PSTR("FIRMWARE_NAME:Repetier FIRMWARE_URL:http://github.com/reptier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
+        out.println_P(PSTR("FIRMWARE_NAME:Repetier FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
         break;
       case 114: // M114
 	out.print_float_P(PSTR("X:"),printer_state.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));

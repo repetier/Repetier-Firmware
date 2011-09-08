@@ -42,7 +42,7 @@
 /** \brief Number of steps for a 1mm move in y direction */
 #define YAXIS_STEPS_PER_MM 40
 /** \brief Number of steps for a 1mm move in z direction */
-#define ZAXIS_STEPS_PER_MM 3333.592
+#define ZAXIS_STEPS_PER_MM 3360
 
 // ##########################################################################################
 // ##                           Extruder configuration                                     ##
@@ -240,7 +240,7 @@
 
 /** \brief Activates path dependend acceleration 
 
-DON'T USE THIS - IT'S NOT FINISHED AND DOSN'T WORK YET
+DON'T USE THIS - IT'S NOT FINISHED AND DOESN'T WORK YET
 
 The normal RAMP will accelerate until target speed is reached and deaccelerate at the end to end speed.
 If the next segment is already buffered and the path change is small, no deacceleration - acceleration between
