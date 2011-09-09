@@ -1,0 +1,5 @@
+Version 0.3a 9.9.2011
+  Fixed compile error with RAMPS/MEGA boards
+  
+Version 0.3  4.9.2011
+  First public version.

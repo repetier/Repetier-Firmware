@@ -436,7 +436,7 @@ void manage_temperatures(bool critical) {
          monitor_temp(time,act->currentTemperatureC,act->targetTemperatureC,(on?255:0));
       }
 #if LED_PIN>-1
-      if(act == currentExtruder)
+      if(act == current_extruder)
         digitalWrite(LED_PIN,on);
 #endif       
        act->lastTemperatureUpdate = time;
