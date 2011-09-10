@@ -1,7 +1,7 @@
 Repetier-Firmware 
 by repetier  (repetierdev@googlemail.com)
 
-Version 0.3  4.9.2011
+Version 0.31  10.9.2011
 
 1) Introduction
 

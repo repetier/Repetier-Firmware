@@ -42,6 +42,11 @@ Extruder extruder[NUM_EXTRUDER] = {
  } 
 #endif
 };
+
+#ifdef USE_GENERIC_THERMISTORTABLE
+short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
+#endif
+
 #if HEATED_BED_SENSOR_TYPE!=0
   int current_bed_raw = 0;
   int target_bed_raw = 0;
@@ -100,6 +105,31 @@ for temperature reading.
 void initExtruder() {
   byte i;
   current_extruder = &extruder[0];
+#ifdef USE_GENERIC_THERMISTORTABLE
+#define GENERIC_THERM_T0K (GENERIC_THERM_T0+273.15f)
+#if GENERIC_THERM_R1==0
+#define GENERIC_VS GENERIC_THERM_VREF
+#define GENERIC_RS GENERIC_THERM_R2
+#else
+#define GENERIC_VS (float)(GENERIC_THERM_VREF*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
+#define GENERIC_RS (float)(GENERIC_THERM_R2*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
+#endif
+  float k = GENERIC_THERM_R0*exp(-GENERIC_THERM_BETA/GENERIC_THERM_T0K);
+  float delta = 1022.0f/GENERIC_THERM_NUM_ENTRIES;
+  for(i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
+    int adc = (int)(i*delta+1);
+    if(adc>1023) adc=1023;
+    temptable_generic[i][0] = adc;
+    float v = (float)(adc*GENERIC_THERM_VADC)/1024.0f;
+    float r = GENERIC_RS*v/(GENERIC_VS-v);
+    temptable_generic[i][1] = (int)(GENERIC_THERM_BETA/log(r/k)-273.15f+0.5f /* for correct rounding */);
+#ifdef DEBUG_GENERIC
+    out.print_int_P(PSTR("GenTemp: "),temptable_generic[i][0]); 
+    out.println_int_P(PSTR(","),temptable_generic[i][1]); 
+#endif
+  }
+#endif
+  
   for(i=0;i<NUM_EXTRUDER;++i) {
     Extruder *act = &extruder[i];
     pinMode(act->directionPin,OUTPUT);
@@ -266,9 +296,9 @@ short temptable_4[NUMTEMPS_4][2] PROGMEM = {
    {1, 430},{54, 137},{107, 107},{160, 91},{213, 80},{266, 71},{319, 64},{372, 57},{425, 51},
    {478, 46},{531, 41},{584, 35},{637, 30},{690, 25},{743, 20},{796, 14},{849, 7},{902, 0},
    {955, -11},{1008, -35}};
-
-const short *temptables[4] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]};
-const byte temptables_num[4] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4};
+short temptable_5[NUM_TEMPS_USERTHERMISTOR][2] PROGMEM = USER_THERMISTORTABLE ;
+const short *temptables[5] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0],(short int *)&temptable_5[0][0]};
+const byte temptables_num[5] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR};
 
 int read_raw_temperature(byte type,byte pin) {
   switch(type) {
@@ -276,6 +306,8 @@ int read_raw_temperature(byte type,byte pin) {
     case 2:
     case 3:
     case 4:
+    case 5:
+    case 99:
       return 1023-(osAnalogInputValues[pin]>>ANALOG_INPUT_SAMPLE);
     case 100: // AD595
       return (osAnalogInputValues[pin]>>ANALOG_INPUT_SAMPLE);
@@ -291,7 +323,8 @@ int conv_raw_temp(byte type,int raw_temp) {
     case 1:
     case 2:
     case 3:
-    case 4: {
+    case 4:
+    case 5: {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
       byte i=2;
@@ -316,6 +349,25 @@ int conv_raw_temp(byte type,int raw_temp) {
     case 101: // MAX6675
       return raw_temp /4;
 #endif
+#ifdef USE_GENERIC_THERMISTORTABLE
+    case 99: {
+      byte i=2;
+      const short *temptable = (const short *)temptable_generic; 
+      short oldraw = temptable[0];
+      short oldtemp = temptable[1];
+      short newraw,newtemp;
+      raw_temp = 1023-raw_temp;
+      while(i<GENERIC_THERM_NUM_ENTRIES*2) {
+        newraw = temptable[i++];
+        newtemp = temptable[i++];
+        if (newraw > raw_temp)
+          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+        oldtemp = newtemp;
+        oldraw = newraw;
+      }
+      // Overflow: Set to last value in the table
+      return newtemp;}
+#endif
   }
 }
 int conv_temp_raw(byte type,int temp) {
@@ -323,7 +375,8 @@ int conv_temp_raw(byte type,int temp) {
     case 1:
     case 2:
     case 3:
-    case 4: {
+    case 4:
+    case 5: {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
       byte i=2;
@@ -347,6 +400,25 @@ int conv_temp_raw(byte type,int temp) {
 #ifdef SUPPORT_MAX6675
     case 101:  // defined HEATER_USES_MAX6675
       return temp * 4;
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE
+    case 99: {
+      byte i=2;
+      const short *temptable = (const short *)temptable_generic;
+      short oldraw = temptable[0];
+      short oldtemp = temptable[1];
+      short newraw,newtemp;
+      while(i<GENERIC_THERM_NUM_ENTRIES*2) {
+        newraw = temptable[i++];
+        newtemp = temptable[i++];
+        if (newtemp < temp)
+          return 1023- oldraw + (long)(oldtemp-temp)*(long)(oldraw-newraw)/(oldtemp-newtemp);
+        oldtemp = newtemp;
+        oldraw = newraw;
+      }
+      // Overflow: Set to last value in the table
+      return 1023-newraw;
+    }
 #endif
   }
 }

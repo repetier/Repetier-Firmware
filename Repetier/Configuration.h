@@ -60,9 +60,11 @@
 // 2 is 200k thermistor
 // 3 is mendel-parts thermistor
 // 4 is 10k thermistor
+// 5 is userdefined thermistor table
+// 99 Generic thermistor table
 // 100 is AD595
 // 101 is MAX6675
-#define EXT0_TEMPSENSOR_TYPE 3
+#define EXT0_TEMPSENSOR_TYPE 5
 // Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN 0
 // WHich pin enables the heater
@@ -101,6 +103,66 @@
 #define EXT0_PID_DGAIN 2000
 // maximum time the heater is can be switched on. Max = 255
 #define EXT0_PID_MAX 200
+
+/** Number of entries in the user thermistortable */
+#define NUM_TEMPS_USERTHERMISTOR 28
+/** Userdefined thermistor table
+
+There are many different thermistors, which can be combined with different resistors. This result
+in unpredictable number of tables. As a resolution, the user can define one table here, that can
+be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries
+matches the value in NUM_TEMPS_USERTHERMISTOR. If you span definition over multiple lines, make sure to end
+each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with
+increasing adc values. For more informations, read 
+http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html
+
+*/
+#define USER_THERMISTORTABLE  {\
+  {1,864},{21,300},{25,290},{29,280},{33,270},{39,260},{46,250},{54,240},{64,230},{75,220},\
+  {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\
+  {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20}	}
+  
+/** If defined, creates a thermistortable at startup.
+
+If you dont feel like computing the table on your own, you can use this generic method. It is
+a simple approximation which may be not as accurate as a good table computed from the reference
+values in the datasheet. You can increase precision if you use a temperature/resistance for
+R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures,
+which are not realy important. The resistors must fit the following schematic:
+@code
+VREF ---- R2 ---+--- Termistor ---+-- GND
+                |                 |
+                +------ R1 -------+
+                |                 |
+                +---- Capacitor --+
+                |
+                V measured
+@endcode                
+                
+If you don't have R1, set it to 0.
+The capacitor is for reducing noise from long thermistor cable. If you don't have have one, it's OK.
+
+If you don't need the generic table, uncomment the following define.
+*/
+//#define USE_GENERIC_THERMISTORTABLE 1
+/** Reference resistance */
+#define GENERIC_THERM_R0 1042.7
+/** Temperature at reference resistance */
+#define GENERIC_THERM_T0 170
+/** Beta value of thermistor
+
+You can use the beta from the datasheet or compute it yourself. See
+http://reprap.org/wiki/MeasuringThermistorBeta
+for more details.
+*/
+#define GENERIC_THERM_BETA 4036
+#define GENERIC_THERM_R1 0
+#define GENERIC_THERM_R2 4700
+#define GENERIC_THERM_VREF 5
+/** Supply voltage to ADC, can be changed be setting ANALOG_REF below to different value. */
+#define GENERIC_THERM_VADC 5
+/** Number of entries in generated table. One entry takes 4 bytes. Higher number of entries increase computation time too. */
+#define GENERIC_THERM_NUM_ENTRIES 40
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
@@ -337,6 +399,8 @@ with a dry run, you can test the speed of path computations, which are still per
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. */
 //#define DEBUG_FREE_MEMORY
+/** If enabled, writes the created generic table to serial port at startup. */
+//#define DEBUG_GENERIC
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 // ####################################################################################

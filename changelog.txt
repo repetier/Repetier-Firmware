@@ -1,3 +1,7 @@
+Version 0.31 10.9.2011
+  Added userdefines thermistortable in configuration
+  Added generic thermistortable defined by r0,t0,beta,r1,r2
+
 Version 0.3a 9.9.2011
   Fixed compile error with RAMPS/MEGA boards
   

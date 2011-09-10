@@ -289,10 +289,10 @@ void setup()
   if(Z_ENABLE_PIN > -1) pinMode(Z_ENABLE_PIN,OUTPUT);
   printer_state.feedrate = 1500; ///< Current feedrate in mm/min.
   
-  initExtruder();
-  epr_init(); // Read settings from eeprom if wanted
   Serial.begin(baudrate);
   out.println_P(PSTR("start"));
+  initExtruder();
+  epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
 
 #ifdef SDSUPPORT
