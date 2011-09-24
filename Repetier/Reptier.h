@@ -21,17 +21,12 @@
 
 #include <WProgram.h>
 #include "gcode.h"
+#include "fastio.h"
 #ifdef SDSUPPORT
 #include "Sd2Card.h"
 #include "SdFat.h"
 extern void initsd();
 #endif
-// Wanted to use digitalWriteFast but it didn't work correct on my gen6
-// but you can test it, if it works on your board.
-//#include "digitalWriteFast.h"
-// These defines overwrite the used functions, so the original arduino methods are always called.
-#define digitalWriteFast2 digitalWrite
-#define digitalReadFast2 digitalRead
 
 #define uint uint16_t
 #define uint8 uint8_t
@@ -66,9 +61,9 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   int currentTemperatureC; ///< Current temperature in °C.
   int targetTemperatureC; ///< Target temperature in °C.
   long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-  char dir; ///< Extruder direction for next steps. Is 1 or -1.
   byte heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
   int watchPeriod; ///< Time in seconds, a M109 command will wait to stabalize temperature
+  float advanceK; ///< Koefficient for advance algorithm. 0 = off
 #ifdef TEMP_PID
   long tempIState; ///< Temp. var. for PID computation.
   byte pidDriveMax; ///< Used for windup in PID calculation.
@@ -77,7 +72,6 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
   byte pidMax; ///< Maximum PWM value, the heater should be set.
 #endif
-  volatile byte *stepPort; ///< Port of the stepper pin. Used for increased speed.
 } Extruder;
 
 
@@ -85,6 +79,10 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 extern long last_bed_check = 0;
 extern int current_bed_raw = 0;
 extern int target_bed_raw = 0;
+#endif
+#ifdef USE_ADVANCE
+extern int maxadv;
+extern float maxadvspeed;
 #endif
 
 extern Extruder *current_extruder;
@@ -101,9 +99,46 @@ extern int extruder_get_temperature();
 extern void heated_bed_set_temperature(int temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
 extern void extruder_set_direction(byte steps);
-extern void extruder_step();
-extern void extruder_unstep();
 extern void extruder_disable();
+/** \brief Sends the high-signal to the stepper for next extruder step. 
+
+Call this function only, if interrupts are disabled.
+*/
+inline void extruder_step() {
+#if NUM_EXTRUDER==1
+  WRITE(EXT0_STEP_PIN,HIGH);
+#else
+  digitalWrite(current_extruder->stepPin,HIGH);
+#endif
+}
+/** \brief Sets stepper signal to low for current extruder. 
+
+Call this function only, if interrupts are disabled.
+*/
+inline void extruder_unstep() {
+#if NUM_EXTRUDER==1
+  WRITE(EXT0_STEP_PIN,LOW);
+#else
+  digitalWrite(current_extruder->stepPin,LOW);
+#endif
+}
+/** \brief Activates the extruder stepper and sets the direction. */
+inline void extruder_set_direction(byte dir) {  
+#if NUM_EXTRUDER==1
+  if(dir)
+    WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+  else
+    WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+#if EXT0_ENABLE_PIN>-1
+    WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON ); 
+#endif
+#else
+  digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
+  if(current_extruder->enablePin > -1) 
+    digitalWrite(current_extruder->enablePin,current_extruder->enableOn); 
+#endif
+}
+
 // Read a temperature and return its value in °C
 // this high level method supports all known methods
 extern int read_raw_temperature(byte type,byte pin);
@@ -124,12 +159,13 @@ void process_command(GCode *code);
 void manage_inactivity(byte debug);
 
 extern void update_ramps_parameter();
+extern void finishNextSegment();
 extern void get_coordinates(GCode *com);
 extern void queue_move(byte check_endstops);
 extern void linear_move(long steps_remaining[]);
-extern void disable_x();
-extern void disable_y();
-extern void disable_z();
+extern inline void disable_x();
+extern inline void disable_y();
+extern inline void disable_z();
 extern inline void enable_x();
 extern inline void enable_y();
 extern inline void enable_z();
@@ -143,7 +179,6 @@ extern float homing_feedrate[];
 extern float max_start_speed_units_per_second[];
 extern long max_acceleration_units_per_sq_second[];
 extern long max_travel_acceleration_units_per_sq_second[];
-extern unsigned long axis_max_interval[];
 extern unsigned long axis_steps_per_sqr_second[];
 extern unsigned long axis_travel_steps_per_sqr_second[];
 extern byte relative_mode;    ///< Determines absolute (false) or relative Coordinates (true).
@@ -154,11 +189,10 @@ extern unsigned long previous_millis_cmd;
 extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;
 
-// Set the timer to time ticks, so we get up to processor frequency precition (<65536 ticks)
-extern void setTimer(unsigned long ticks);
 extern void setupTimerInterrupt();
+extern long Div4U2U(unsigned long a,unsigned int b);
 
-typedef struct { // RAM usage: 32 Byte
+typedef struct { // RAM usage: 72 Byte
   long offsetX; ///< X-offset for different extruder positions.
   long offsetY; ///< Y-offset for different extruder positions.
   long currentPositionSteps[4]; ///< Position in steps from origin.
@@ -166,15 +200,18 @@ typedef struct { // RAM usage: 32 Byte
   long xMaxSteps; ///< For software endstops, limit of move in positive direction.
   long yMaxSteps; ///< For software endstops, limit of move in positive direction.
   long zMaxSteps; ///< For software endstops, limit of move in positive direction.
-  long interval; ///< Last step duration in ticks*256.
-  long stepNumber; ///< Step number in current move.
-  long n; ///< virtual step number for acceleration computation * 256.
+  long interval; ///< Last step duration in ticks.
+  unsigned long stepNumber; ///< Step number in current move.
+  unsigned int n; ///< virtual step number for acceleration computation.
   float feedrate; ///< Last requested feedrate.
+  float maxJerk; ///< Maximum allowed jerk in mm/s
+  long advance_target; ///< Target advance steps
+  unsigned int advance_executed; ///< Executed advance steps
 } PrinterState;
 extern PrinterState printer_state;
 
 /** Marks the first step of a new move */
-#define FLAG_FIRST_STEP 1
+//#define FLAG_FIRST_STEP 1
 #define FLAG_ACCELERATING 2
 #define FLAG_DECELERATING 4
 #define FLAG_ACCELERATION_ENABLED 8
@@ -183,10 +220,20 @@ extern PrinterState printer_state;
 #define FLAG_SKIP_DEACCELERATING 64
 #define FLAG_BLOCKED 128
 
+/** Segment reaches full speed. Blockt to the left are fixed. */
+#define FLAG_JOIN_LIMIT_REACHED 1
+/** The right speed is fixed. Don't check this block or any block to the left. */
+#define FLAG_JOIN_END_FIXED 2
+/** The left speed is fixed. Don't check left block. */
+#define FLAG_JOIN_START_FIXED 4
+/** Are the step parameter computed */
+#define FLAG_JOIN_STEPPARAMS_COMPUTED 8
 // Printing related data
-typedef struct { // RAM usage: 59 Byte
+typedef struct { // RAM usage: 58 Byte
   byte primaryAxis;
   byte flags;
+  byte joinFlags;
+  byte halfstep; ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir; ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
 //  long axisStepsRemaining[4]; ///< Steps per axis, we have still to perform.
   long delta[4]; ///< Steps we want to move.
@@ -194,16 +241,32 @@ typedef struct { // RAM usage: 59 Byte
 //  long acceleration; ///< Acceleration in steps/s^2
 //  long vMin; ///< Starting/ending speed in steps/s.
 //  long vMax; ///< Maximum reached speed in steps/s.
-  long startN; ///< Start speed for acceleration calculation
+  unsigned int startN; ///< Start speed for acceleration calculation
+  unsigned int endN;
 //  long interval;     ///< Current interval between two steps in ticks.
-  long startInterval;  ///< Start interval (v0) in ticks/step.
-  long fullInterval; ///< interval at full speed in ticks/step.
-  long endInterval; ///< End interval in ticks/step.  
-  long stepsRemaining; ///< Remaining steps, until move is finished
-  long accelSteps; ///< How much steps does it take, to reach the plateau.
-  long decelSteps; ///< How much steps does it take, to reach the end speed.
-  long acceleration;
-  long plateauN;
+  float speedX; ///< Speed in x direction at fullInterval in mm/s
+  float speedY; ///< Speed in y direction at fullInterval in mm/s
+  float speedZ; ///< Speed in y direction at fullInterval in mm/s
+  float fullSpeed; ///< Desired speed mm/s
+  float acceleration; ///< Real acceleration mm/s²
+  float distance;
+  float startFactor;
+  float endFactor;
+  unsigned long startInterval;  ///< Start interval (v0) in ticks/step.
+  unsigned long fullInterval; ///< interval at full speed in ticks/step.
+  unsigned long endInterval; ///< End interval in ticks/step.  
+  unsigned long stepsRemaining; ///< Remaining steps, until move is finished
+  unsigned int accelSteps; ///< How much steps does it take, to reach the plateau.
+  unsigned int decelSteps; ///< How much steps does it take, to reach the end speed.
+  unsigned long accelerationPrim; ///< Acceleration along primary axis
+  unsigned int plateauN;
+  long vMax;
+#ifdef USE_ADVANCE
+  long advanceRate; ///< Advance steps at full speed
+  long advanceFull; ///< Maximum advance at fullInterval [steps*65536]
+  long advanceStart;
+  long advanceEnd;
+#endif
 } PrintLine;
 
 extern PrintLine lines[];
@@ -216,7 +279,7 @@ extern long baudrate;
 extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 #endif
 #define BEGIN_INTERRUPT_PROTECTED {byte sreg=SREG;__asm volatile( "cli" ::: "memory" );
-#define END_INTERRUPT_PROTECTED __asm volatile( "sei" ::: "memory" ); SREG=sreg;}
+#define END_INTERRUPT_PROTECTED SREG=sreg;}
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*F_CPU)
 
 #ifdef SDSUPPORT
@@ -232,3 +295,4 @@ extern bool savetosd;
 extern int16_t n;
 
 #endif
+

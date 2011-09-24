@@ -47,10 +47,11 @@ public:
   void println_P(PGM_P ptr);
   void print_long_P(PGM_P ptr,long value);
   void print_int_P(PGM_P ptr,int value);
-  void print_float_P(PGM_P ptr,float value);
+  void print_float_P(PGM_P ptr,float value,uint8_t digits = 2);
   void println_long_P(PGM_P ptr,long value);
   void println_int_P(PGM_P ptr,int value);
-  void println_float_P(PGM_P ptr,float value);
+  void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
+  void printFloat(double number, uint8_t digits=2); 
 
 };
 

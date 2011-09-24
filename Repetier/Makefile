@@ -90,10 +90,10 @@ CWARN = -Wall
 CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 #CEXTRA = -Wa,-adhlns=$(<:.c=.lst)
 
-CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA)
-CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT)
+CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) -MD -MP
+CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT) -MD -MP
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
-LDFLAGS = -lm -lC
+LDFLAGS = -lm -lC -Wl,-Map=applet/$(TARGET).map
 
 
 # Programming support using avrdude. Settings and variables.
@@ -131,7 +131,7 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 # Default target.
 all: applet_files build sizeafter
 
-build: elf hex 
+build: elf hex lss
 
 applet_files: $(TARGET).pde
 	# Here is the "preprocessing".

@@ -179,6 +179,40 @@ void SerialOutput::write(uint8_t value) {
   Serial.write(value);
 }
 #endif
+void SerialOutput::printFloat(double number, uint8_t digits) 
+{ 
+  // Handle negative numbers
+  if (number < 0.0)
+  {
+     print('-');
+     number = -number;
+  }
+
+  // Round correctly so that print(1.999, 2) prints as "2.00"
+  double rounding = 0.5;
+  for (uint8_t i=0; i<digits; ++i)
+    rounding /= 10.0;
+  
+  number += rounding;
+
+  // Extract the integer part of the number and print it
+  unsigned long int_part = (unsigned long)number;
+  double remainder = number - (double)int_part;
+  print(int_part);
+
+  // Print the decimal point, but only if there are digits beyond
+  if (digits > 0)
+    print("."); 
+
+  // Extract digits from the remainder one at a time
+  while (digits-- > 0)
+  {
+    remainder *= 10.0;
+    int toPrint = int(remainder);
+    print(toPrint);
+    remainder -= toPrint; 
+  } 
+}
 
 /**
   Print a string stored in program memory on serial console.
@@ -209,9 +243,9 @@ void SerialOutput::print_int_P(PGM_P ptr,int value) {
   out.print(value);
 }
 
-void SerialOutput::print_float_P(PGM_P ptr,float value) {
+void SerialOutput::print_float_P(PGM_P ptr,float value,uint8_t digits) {
   print_P(ptr);
-  out.print(value);
+  out.printFloat(value,digits);
 }
 void SerialOutput::println_long_P(PGM_P ptr,long value) {
   print_P(ptr);
@@ -222,9 +256,10 @@ void SerialOutput::println_int_P(PGM_P ptr,int value) {
   println(value);
 }
 
-void SerialOutput::println_float_P(PGM_P ptr,float value) {
+void SerialOutput::println_float_P(PGM_P ptr,float value,uint8_t digits) {
   print_P(ptr);
-  out.println(value);
+  printFloat(value,digits);
+  println();
 }
 
 /** \brief request resend of the expected line.
@@ -599,7 +634,7 @@ void gcode_print_command(GCode *code) {
     out.print_float_P(PSTR(" Z"),code->Z);
   }
   if(GCODE_HAS_E(code)) {
-    out.print_float_P(PSTR(" E"),code->E);
+    out.print_float_P(PSTR(" E"),code->E,4);
   }
   if(GCODE_HAS_F(code)) {
     out.print_float_P(PSTR(" F"),code->F);

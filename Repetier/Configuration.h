@@ -103,7 +103,8 @@
 #define EXT0_PID_DGAIN 2000
 // maximum time the heater is can be switched on. Max = 255
 #define EXT0_PID_MAX 200
-
+/** \brief Faktor for the advance algorithm. 0 disables the algorithm. */
+#define EXT0_ADVANCE_K 0.0f
 /** Number of entries in the user thermistortable */
 #define NUM_TEMPS_USERTHERMISTOR 28
 /** Userdefined thermistor table
@@ -283,7 +284,7 @@ for more details.
 #define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z, E */
-#define MAX_FEEDRATE {20000, 20000, 2, 50}
+#define MAX_FEEDRATE {12000, 12000, 3, 20}
 /** Speed in mm/min for finding the home position */
 #define HOMING_FEEDRATE {1500,1500,100}
 
@@ -291,28 +292,52 @@ for more details.
 #define RAMP_ACCELERATION 1
 
 //// Acceleration settings
+
+/** \brief Use RAMP acceleration for faster printing speed. */
 #ifdef RAMP_ACCELERATION
-/** \brief X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot. */
-#define MAX_START_SPEED_UNITS_PER_SECOND {25.0,25.0,0.2,10.0}
 /** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {750,750,50,1000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves. */
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {750,750,50,1000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000}
 #endif
 
-/** \brief Activates path dependend acceleration 
+/** \brief Maximum allowable jerk.
 
-DON'T USE THIS - IT'S NOT FINISHED AND DOESN'T WORK YET
+Caution: This is no real jerk in a physical meaning.
 
-The normal RAMP will accelerate until target speed is reached and deaccelerate at the end to end speed.
-If the next segment is already buffered and the path change is small, no deacceleration - acceleration between
-the to segments are necessary. This will result in a smoother motion with a more continuous extruded filament.
-A saftety mechanism will disbable or reduce the deacceleration only, if the next move is in defined and acceptable
-tolerances.
+The jerk determines your start speed and the maximum speed at the join of two segments.
+It's unit is mm/s. If the printer is standing still, the start speed is jerk/2. At the
+join of two segments, the speed difference is limited to the jerk value.
+
+Examples:
+For all examples jerk is assumed as 40.
+
+Segment 1: vx = 50, vy = 0
+Segment 2: vx = 0, vy = 50
+v_diff = sqrt((50-0)^2+(0-50)^2) = 70.71
+v_diff > jerk => vx_1 = vy_2 = jerk/v_diff*vx_1 = 40/70.71*50 = 28.3 mm/s at the join
+
+Segment 1: vx = 50, vy = 0
+Segment 2: vx = 35.36, vy = 35.36
+v_diff = sqrt((50-35.36)^2+(0-35.36)^2) = 38.27 < jerk
+Corner can be printed with full speed of 50 mm/s
+
 */
-//#define PATHDEPENDEND_RAMP
-/** \brief Maximum velocity change between two path segments. */
-#define PATHDEPENDEND_DELTAV 30
+#define MAX_JERK 40.0
+
+/** \brief Enable advance algorithm.
+
+Without a correct adjusted advance algorithm, you get blobs at points, where acceleration changes. The
+effect increases with speed and acceleration difference. Using the advance method decreases this effect.
+For more informations, read the wiki.
+*/
+#define USE_ADVANCE
+
+/** The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in
+the double computation cost. For slow movements this is not an issue, but for really fast moves this is 
+too much. The value specified here is the number of clock cycles between a step on the driving axis.
+If the interval at full speed is below this value, smoothing is disabled for that line.*/
+#define MAX_HALFSTEP_INTERVAL 2002
 
 // ##########################################################################################
 // ##                           Communication configuration                                ##
@@ -322,14 +347,15 @@ tolerances.
 
 /** \brief Communication speed.
 
-- 115200 : Fastes, but may produce communication errors on quite regular basis, Error rate -3,5%
+- 250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
+- 115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%
 - 76800 : Best setting for Arduino with 16 MHz, Error rate 0,2% page 198 AVR1284 Manual. Result: Faster communication then 115200
 - 57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection
 - 38600
 */
 #define BAUDRATE 76800
 //#define BAUDRATE 57600
-
+//#define BAUDRATE 250000
 /** \brief Size in byte of the output buffer */
 #define OUTPUT_BUFFER_SIZE 64
 /** \brief Activates buffered output.
@@ -346,7 +372,7 @@ keep with your slow communication version.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty.
 */
-#define MOVE_CACHE_SIZE 15
+#define MOVE_CACHE_SIZE 16
 /** \brief Cache size for incoming commands.
 
 There should be no reason to increase this cache. Commands are nearly immediately send to
@@ -394,11 +420,12 @@ to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
-#define INCLUDE_DEBUG_NO_MOVE
+//#define INCLUDE_DEBUG_NO_MOVE
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. */
 //#define DEBUG_FREE_MEMORY
+#define DEBUG_ADVANCE
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 // Uncomment the following line to enable debugging. You can better control debugging below the following line

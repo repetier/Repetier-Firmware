@@ -1,3 +1,12 @@
+Version 0.32 24.9.2011
+  Improved speed in stepper interrupt.
+  Added trajectory smoothing.
+  Added pressure control (advance algorithm from Matthew Roberts).
+  Added path planning algorithm for better printing speed.
+  Using fastio instead of slow digitalWrite/Read where possible
+  Included faster wiring_serial.c
+  Removed some bugs.
+
 Version 0.31 10.9.2011
   Added userdefines thermistortable in configuration
   Added generic thermistortable defined by r0,t0,beta,r1,r2

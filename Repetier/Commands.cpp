@@ -340,7 +340,7 @@ void process_command(GCode *com)
         if(GCODE_HAS_S(com)){ stepper_inactive_time = com->S * 1000; }
         else{             
           wait_until_end_of_move();
-          disable_x(); disable_y(); disable_z(); extruder_disable();
+          kill(true);
         }
         break;
       case 85: // M85
@@ -354,15 +354,7 @@ void process_command(GCode *com)
         if(GCODE_HAS_Y(com)) axis_steps_per_unit[1] = com->Y;
         if(GCODE_HAS_Z(com)) axis_steps_per_unit[2] = com->Z;
         if(GCODE_HAS_E(com)) current_extruder->stepsPerMM = com->E;
-        
-        //Update start speed intervals and axis order. TODO: refactor axis_max_interval[] calculation into a function, as it
-        // should also be used in setup() as well
-        #ifdef RAMP_ACCELERATION
-          for(byte i=0; i < 4; i++) {
-            axis_max_interval[i] = (float)F_CPU / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);//TODO: do this for
-                  // all steps_per_unit related variables
-          }
-        #endif
+        update_ramps_parameter();        
         break;
       case 111:
         if(GCODE_HAS_S(com)) debug_level = com->S;
@@ -434,6 +426,17 @@ void process_command(GCode *com)
       case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
         epr_update(com);
         break;
+#ifdef USE_ADVANCE
+      case 230:
+       out.print_int_P(PSTR("Max advance="),maxadv);
+       if(maxadv>0) 
+         out.println_float_P(PSTR(", speed="),maxadvspeed); 
+       else
+         out.println();
+       maxadv=0;
+       maxadvspeed=0;
+       break;
+#endif
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();

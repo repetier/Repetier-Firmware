@@ -36,9 +36,9 @@ have problems with other modules using the eeprom */
 #define EPR_X_HOMING_FEEDRATE 27
 #define EPR_Y_HOMING_FEEDRATE 31
 #define EPR_Z_HOMING_FEEDRATE 35
-#define EPR_X_MAX_START_SPEED 39
-#define EPR_Y_MAX_START_SPEED 43
-#define EPR_Z_MAX_START_SPEED 47
+#define EPR_MAX_JERK 39
+//#define EPR_Y_MAX_START_SPEED 43
+//#define EPR_Z_MAX_START_SPEED 47
 #define EPR_X_MAX_ACCEL 51
 #define EPR_Y_MAX_ACCEL 55
 #define EPR_Z_MAX_ACCEL 59
@@ -68,6 +68,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_X_OFFSET 31
 #define EPR_EXTRUDER_Y_OFFSET 35
 #define EPR_EXTRUDER_WATCH_PERIOD 39
+#define EPR_EXTRUDER_ADVANCE_K 41
 
 #if EEPROM_MODE!=0
 extern inline byte epr_get_byte(uint pos);
@@ -84,5 +85,6 @@ extern inline void epr_set_float(uint pos,float value);
 extern void epr_output_settings();
 extern void epr_update(GCode *com);
 extern void epr_init();
+extern void epr_init_baudrate();
 #endif
 

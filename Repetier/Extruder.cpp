@@ -26,19 +26,17 @@
 Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {
  {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_HEATER_PIN,EXT0_ENABLE_PIN,EXT0_DIR_PIN,EXT0_STEP_PIN,EXT0_ENABLE_ON,EXT0_INVERSE,
-   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD
+   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD,EXT0_ADVANCE_K
 #ifdef TEMP_PID
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_PGAIN,EXT0_PID_IGAIN,EXT0_PID_DGAIN,EXT0_PID_MAX
 #endif 
-  ,0
  } 
 #if NUM_EXTRUDER>1
  ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_HEATER_PIN,EXT1_ENABLE_PIN,EXT1_DIR_PIN,EXT1_STEP_PIN,EXT1_ENABLE_ON,EXT1_INVERSE,
-   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD
+   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD,EXT1_ADVANCE_K
 #ifdef TEMP_PID
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_PGAIN,EXT1_PID_IGAIN,EXT1_PID_DGAIN,EXT1_PID_MAX
 #endif
-  ,0
  } 
 #endif
 };
@@ -134,8 +132,6 @@ void initExtruder() {
     Extruder *act = &extruder[i];
     pinMode(act->directionPin,OUTPUT);
     pinMode(act->stepPin,OUTPUT);
-    act->stepPort = portInputRegister(digitalPinToPort(act->stepPin));
-    //act->stepPin=digitalPinToBitMask(act->stepPin);
     if(act->enablePin > -1) {
       pinMode(act->enablePin,OUTPUT);
       if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
@@ -144,12 +140,12 @@ void initExtruder() {
     act->lastTemperatureUpdate = millis();
 #ifdef SUPPORT_MAX6675
     if(act->sensorType==101) {
-      digitalWrite(SCK_PIN,0);
-      pinMode(SCK_PIN,OUTPUT);
-      digitalWrite(MOSI_PIN,1);
-      pinMode(MOSI_PIN,OUTPUT);
-      digitalWrite(MISO_PIN,1);
-      pinMode(MISO_PIN,INPUT);
+      WRITE(SCK_PIN,0);
+      SET_OUTPUT(SCK_PIN);
+      WRITE(MOSI_PIN,1);
+      SET_OUTPUT(MOSI_PIN);
+      WRITE(MISO_PIN,1);
+      SET_INPUT(MISO_PIN);
       digitalWrite(act->sensorPin,1);
       pinMode(act->sensorPin,OUTPUT);
     }
@@ -192,9 +188,8 @@ void extruder_select(byte ext_num) {
    inv_axis_steps_per_unit[3] = 1.0f/axis_steps_per_unit[3];
    printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
    max_feedrate[3] = current_extruder->maxFeedrate;
-   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
+//   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
-   axis_max_interval[3] = F_CPU / (max_start_speed_units_per_second[3] * axis_steps_per_unit[3]);
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
    queue_move(false); // Move head of new extruder to old position using last feedrate
 }
@@ -228,45 +223,10 @@ int heated_bed_get_temperature() {
 #endif     
 }
 
-/*long extruder_steps_to_position(float value,byte relative) {
-  long target = value*current_extruder->stepsPerMM;
-  if(relative) return target;
-  return target-current_extruder->extrudePosition;  
-}*/
-/** \brief Activates the extruder stepper and sets the direction. */
-void extruder_set_direction(byte dir) {  
- // serial_println_int(PSTR("Extruder dir "),dir);
- // serial_println_int(PSTR("Extr pin "),current_extruder->directionPin);
-  pinMode(current_extruder->directionPin,OUTPUT);
-  digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
- // serial_println_int(PSTR("Extr step pin "),current_extruder->stepPin);
-  current_extruder->dir = dir ? 1 : -1;
-  if(current_extruder->enablePin > -1) 
-    digitalWrite(current_extruder->enablePin,current_extruder->enableOn); 
-}
 /** \brief Disable stepper motor of current extruder. */
 void extruder_disable() {
   if(current_extruder->enablePin > -1) 
     digitalWrite(current_extruder->enablePin,!current_extruder->enableOn); 
-}
-/** \brief Sends the high-signal to the stepper for next extruder step. 
-
-Call this function only, if interrupts are disabled.
-*/
-void extruder_step() {
-  digitalWrite(current_extruder->stepPin,HIGH);
-//  *current_extruder->stepPort |= current_extruder->stepPin;
-  //current_extruder->extrudePosition+= current_extruder->dir;
-  //*(current_extruder->stepPort) = *(current_extruder->stepPort) | digitalPinToBitMask(current_extruder->stepPin);
-}
-/** \brief Sets stepper signal to low for current extruder. 
-
-Call this function only, if interrupts are disabled.
-*/
-void extruder_unstep() {
-  digitalWrite(current_extruder->stepPin,LOW);
-//  *current_extruder->stepPort &= ~current_extruder->stepPin;
-//  *(current_extruder->stepPort) = *(current_extruder->stepPort) & (~digitalPinToBitMask(current_extruder->stepPin));
 }
 #define NUMTEMPS_1 61
 const short temptable_1[NUMTEMPS_1][2] PROGMEM = {

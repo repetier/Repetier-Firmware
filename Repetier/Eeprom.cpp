@@ -103,10 +103,10 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_X_HOMING_FEEDRATE,homing_feedrate[0]);
   epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[1]);
   epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[2]);
+  epr_set_float(EPR_MAX_JERK,printer_state.maxJerk);
 #ifdef RAMP_ACCELERATION
-  epr_set_float(EPR_X_MAX_START_SPEED,max_start_speed_units_per_second[0]);
-  epr_set_float(EPR_Y_MAX_START_SPEED,max_start_speed_units_per_second[1]);
-  epr_set_float(EPR_Z_MAX_START_SPEED,max_start_speed_units_per_second[2]);
+  //epr_set_float(EPR_Y_MAX_START_SPEED,max_start_speed_units_per_second[1]);
+  //epr_set_float(EPR_Z_MAX_START_SPEED,max_start_speed_units_per_second[2]);
   epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[0]);
   epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_ACCEL,max_acceleration_units_per_sq_second[2]);
@@ -133,8 +133,8 @@ void epr_data_to_eeprom() {
 #endif
     epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
     epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
-    epr_set_long(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
-    
+    epr_set_int(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
+    epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
   }
 }
 /** \brief Copy data from EEPROM to variables.
@@ -153,10 +153,11 @@ void epr_eeprom_to_data() {
   homing_feedrate[0] = epr_get_float(EPR_X_HOMING_FEEDRATE);
   homing_feedrate[1] = epr_get_float(EPR_Y_HOMING_FEEDRATE);
   homing_feedrate[2] = epr_get_float(EPR_Z_HOMING_FEEDRATE);
+  printer_state.maxJerk = epr_get_float(EPR_MAX_JERK);
 #ifdef RAMP_ACCELERATION
-  max_start_speed_units_per_second[0] = epr_get_float(EPR_X_MAX_START_SPEED);
-  max_start_speed_units_per_second[1] = epr_get_float(EPR_Y_MAX_START_SPEED);
-  max_start_speed_units_per_second[2] = epr_get_float(EPR_Z_MAX_START_SPEED);
+  //max_start_speed_units_per_second[0] = epr_get_float(EPR_X_MAX_START_SPEED);
+  //max_start_speed_units_per_second[1] = epr_get_float(EPR_Y_MAX_START_SPEED);
+  //max_start_speed_units_per_second[2] = epr_get_float(EPR_Z_MAX_START_SPEED);
   max_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_ACCEL);
   max_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_ACCEL);
   max_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_ACCEL);
@@ -182,14 +183,19 @@ void epr_eeprom_to_data() {
 #endif
     e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
     e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
-    e->watchPeriod = epr_get_long(o+EPR_EXTRUDER_WATCH_PERIOD);    
+    e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);    
+    e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
   }
   extruder_select(current_extruder->id);
   update_ramps_parameter();
   
 }
 #endif
-
+void epr_init_baudrate() {
+  if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE) {
+    baudrate = epr_get_long(EPR_BAUDRATE);    
+  }
+}
 void epr_init() {
 #if EEPROM_MODE!=0
   if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE)
@@ -228,10 +234,11 @@ void epr_output_settings() {
   epr_out_float(EPR_X_HOMING_FEEDRATE,PSTR("X-axis homing feedrate [mm/min]"));
   epr_out_float(EPR_Y_HOMING_FEEDRATE,PSTR("Y-axis homing feedrate [mm/min]"));
   epr_out_float(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/min]"));
+  epr_out_float(EPR_MAX_JERK,PSTR("Max. jerk [mm/s]"));
 #ifdef RAMP_ACCELERATION
-  epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
-  epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
-  epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
+  //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
+  //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
+  //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
   epr_out_float(EPR_X_MAX_ACCEL,PSTR("X-axis acceleration [mm/s^2]"));
   epr_out_float(EPR_Y_MAX_ACCEL,PSTR("Y-axis acceleration [mm/s^2]"));
   epr_out_float(EPR_Z_MAX_ACCEL,PSTR("Z-axis acceleration [mm/s^2]"));
@@ -258,7 +265,8 @@ void epr_output_settings() {
 #endif
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
-    epr_out_long(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
+    epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
+    epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("Advance K [0=off]"));
     
   }
 #else

@@ -1,7 +1,7 @@
-Repetier-Firmware 
+Repetier-Firmware - the user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
-Version 0.31  10.9.2011
+Version 0.32  24.9.2011
 
 1) Introduction
 
@@ -44,7 +44,7 @@ coming from this. E.g. for a mendel this would contain:
 For Stepper controller with 1/8 step, metric system
 #define XAXIS_STEPS_PER_MM 40
 #define YAXIS_STEPS_PER_MM 40
-#define ZAXIS_STEPS_PER_MM 3333.592
+#define ZAXIS_STEPS_PER_MM 3360
 
 which are all parameter affected by the printer type. If you have some 
 parameters, which are not included, please send them 
@@ -53,6 +53,10 @@ to repetierdev@googlemail.com
 2) Features
 
 - RAMP acceleration support.
+- Path planning for higher print speeds.
+- Trajectory smoothing for smoother lines.
+- Nozzle pressure control for improved print quality with RAMPS.
+- Fast - 16000 Hz stepper frequency is possible with a 16 MHz AVR. 
 - Multiple extruder supported (experimental).
 - Standard ASCII and improved binary (Repetier protocol) communication.
 - Autodetect the command protocol, so it will work with any host software.
@@ -96,6 +100,11 @@ the correct Board under Tools->Board. Klick the "Upload" button. After a while
 your new firmware should be uploaded and ready to start. If the upload doesn't
 start, after the files are compiled, try pressing the reset button on your
 board.
+
+Update from older version:
+
+Version 0.32 changed the EEPROM usage, because some parameter aren't used
+any more. Check the settings before using the new version.
 
 4) Things you should know
 
