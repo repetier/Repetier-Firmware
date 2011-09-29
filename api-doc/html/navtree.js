@@ -33,10 +33,10 @@ var NAVTREE =
     [ "File List", "files.html", [
       [ "Repetier/Commands.cpp", "_commands_8cpp.html", null ],
       [ "Repetier/Configuration.h", "_configuration_8h.html", null ],
-      [ "Repetier/digitalWriteFast.h", "digital_write_fast_8h.html", null ],
       [ "Repetier/Eeprom.cpp", "_eeprom_8cpp.html", null ],
       [ "Repetier/Eeprom.h", "_eeprom_8h.html", null ],
       [ "Repetier/Extruder.cpp", "_extruder_8cpp.html", null ],
+      [ "Repetier/fastio.h", "fastio_8h.html", null ],
       [ "Repetier/FatStructs.h", "_fat_structs_8h.html", null ],
       [ "Repetier/gcode.cpp", "gcode_8cpp.html", null ],
       [ "Repetier/gcode.h", "gcode_8h.html", null ],

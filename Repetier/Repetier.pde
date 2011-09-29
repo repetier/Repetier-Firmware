@@ -289,9 +289,6 @@ void setup()
   if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
   SET_OUTPUT(Z_ENABLE_PIN);
 #endif
-#if E_ENABLE_PIN > -1 
-  if(!E_ENABLE_ON) WRITE(E_ENABLE_PIN,HIGH);
-#endif
 
   //endstop pullups
 #ifdef ENDSTOPPULLUPS
@@ -524,8 +521,11 @@ void updateStepsParameter(PrintLine *p) {
     p->endN = (vEnd*vEnd/p->accelerationPrim)>>1;
     p->accelSteps = p->plateauN-p->startN;
     p->decelSteps = p->plateauN-p->endN;
-    p->startInterval = p->fullInterval/p->startFactor; // interval in ticks/step at startspeed feedrate
-    p->endInterval = p->startInterval/p->endFactor;
+    float c0 = F_CPU*sqrt(2.0f/(float)p->accelerationPrim);
+    p->startInterval = c0*(sqrt(p->startN+1)-sqrt(p->startN));
+    p->endInterval = c0*(sqrt(p->endN+1)-sqrt(p->endN));
+    //p->startInterval = p->fullInterval/p->startFactor; // interval in ticks/step at startspeed feedrate
+    //p->endInterval = p->startInterval/p->endFactor;
 #ifdef RAMP_ACCELERATION
     p->flags |= FLAG_ACCELERATION_ENABLED;
     if(p->fullInterval > p->startInterval || p->accelSteps<0) p->flags &= ~FLAG_ACCELERATION_ENABLED; // can start with target speedrate
@@ -1070,7 +1070,7 @@ inline long bresenham_step() {
       if(printer_state.n==5) // Special case 0 => 1 as the error is too high in this case
         printer_state.interval = Div4U2U(printer_state.interval*1000,406); // Reduce error in step 0
       else
-        printer_state.interval -= Div4U2U(2*printer_state.interval,printer_state.n);
+        printer_state.interval -= Div4U2U(printer_state.interval<<1,printer_state.n);
       if (printer_state.interval < cur->fullInterval) { // target speed reached, stop accelerating
         cur->flags &= ~FLAG_ACCELERATING;
         printer_state.interval = cur->fullInterval;
@@ -1084,10 +1084,11 @@ inline long bresenham_step() {
     } else if (cur->stepsRemaining <= cur->decelSteps && (cur->flags & FLAG_SKIP_DEACCELERATING)==0) { // time to slow down
         if ((cur->flags & FLAG_DECELERATING)==0) {
            cur->flags |= FLAG_DECELERATING;
-           printer_state.n = -printer_state.n+2; // includes the 4 added later 
-        }				
-        printer_state.n += 4;
-        printer_state.interval -= Div4U2U(2*printer_state.interval,printer_state.n);
+           printer_state.n = printer_state.n-2; // includes the 4 subtracted later 
+        }
+        if(printer_state.n>4)				
+          printer_state.n -= 4;        
+        printer_state.interval += Div4U2U(printer_state.interval<<1,printer_state.n);
         if (printer_state.interval > cur->endInterval) {// we don't want to slow down under this value
 	  printer_state.interval = cur->endInterval;
         }
@@ -1098,6 +1099,7 @@ inline long bresenham_step() {
 #endif
     } else {
       printer_state.interval = cur->fullInterval;
+      printer_state.n = (cur->plateauN<<2)+1;
       cur->flags &= ~FLAG_ACCELERATING;
     }
   } else { // No acceleration 

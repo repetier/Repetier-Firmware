@@ -105,15 +105,51 @@ Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#ae0c88e0ff9a23bbf829ae0ebc41a3c21">zMaxSteps</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">For software endstops, limit of move in positive direction.  <a href="#ae0c88e0ff9a23bbf829ae0ebc41a3c21"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a788ed9263eee312665050cca232c6c90">interval</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Last step duration in ticks*256.  <a href="#a788ed9263eee312665050cca232c6c90"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#aa821ff7e586574121f2bec2d71e44830">stepNumber</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Step number in current move.  <a href="#aa821ff7e586574121f2bec2d71e44830"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a0a627514f9cfe29006d6bcd8e4ba2b2e">n</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">virtual step number for acceleration computation * 256.  <a href="#a0a627514f9cfe29006d6bcd8e4ba2b2e"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Last step duration in ticks.  <a href="#a788ed9263eee312665050cca232c6c90"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a648a9d8aa6e009ed42e31edcf5b2944e">stepNumber</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Step number in current move.  <a href="#a648a9d8aa6e009ed42e31edcf5b2944e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a76f11d9a0a47b94f72c2d0e77fb32240">n</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">virtual step number for acceleration computation.  <a href="#a76f11d9a0a47b94f72c2d0e77fb32240"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a9f39a8d208c6033453098cb81815969c">feedrate</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Last requested feedrate.  <a href="#a9f39a8d208c6033453098cb81815969c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a765e97f98514dc7eea60e5e816fbb082">maxJerk</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowed jerk in mm/s.  <a href="#a765e97f98514dc7eea60e5e816fbb082"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#a8a4f345d724e92a65ce60a2b6cd34493">advance_target</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Target advance steps.  <a href="#a8a4f345d724e92a65ce60a2b6cd34493"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_printer_state.html#afa4b9908c19d6a4d4fc8705e6677caac">advance_executed</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Executed advance steps.  <a href="#afa4b9908c19d6a4d4fc8705e6677caac"></a><br/></td></tr>
 </table>
 <hr/><h2>Field Documentation</h2>
+<a class="anchor" id="afa4b9908c19d6a4d4fc8705e6677caac"></a><!-- doxytag: member="PrinterState::advance_executed" ref="afa4b9908c19d6a4d4fc8705e6677caac" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="struct_printer_state.html#afa4b9908c19d6a4d4fc8705e6677caac">advance_executed</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Executed advance steps. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8a4f345d724e92a65ce60a2b6cd34493"></a><!-- doxytag: member="PrinterState::advance_target" ref="a8a4f345d724e92a65ce60a2b6cd34493" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long <a class="el" href="struct_printer_state.html#a8a4f345d724e92a65ce60a2b6cd34493">advance_target</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Target advance steps. </p>
+
+</div>
+</div>
 <a class="anchor" id="a3c12771512ee5ec89eda7e4607986c3b"></a><!-- doxytag: member="PrinterState::currentPositionSteps" ref="a3c12771512ee5ec89eda7e4607986c3b" args="[4]" -->
 <div class="memitem">
 <div class="memproto">
@@ -170,22 +206,37 @@ Data Fields</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Last step duration in ticks*256. </p>
+<p>Last step duration in ticks. </p>
 
 </div>
 </div>
-<a class="anchor" id="a0a627514f9cfe29006d6bcd8e4ba2b2e"></a><!-- doxytag: member="PrinterState::n" ref="a0a627514f9cfe29006d6bcd8e4ba2b2e" args="" -->
+<a class="anchor" id="a765e97f98514dc7eea60e5e816fbb082"></a><!-- doxytag: member="PrinterState::maxJerk" ref="a765e97f98514dc7eea60e5e816fbb082" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_printer_state.html#a0a627514f9cfe29006d6bcd8e4ba2b2e">n</a></td>
+          <td class="memname">float <a class="el" href="struct_printer_state.html#a765e97f98514dc7eea60e5e816fbb082">maxJerk</a></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>virtual step number for acceleration computation * 256. </p>
+<p>Maximum allowed jerk in mm/s. </p>
+
+</div>
+</div>
+<a class="anchor" id="a76f11d9a0a47b94f72c2d0e77fb32240"></a><!-- doxytag: member="PrinterState::n" ref="a76f11d9a0a47b94f72c2d0e77fb32240" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="struct_printer_state.html#a76f11d9a0a47b94f72c2d0e77fb32240">n</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>virtual step number for acceleration computation. </p>
 
 </div>
 </div>
@@ -219,12 +270,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa821ff7e586574121f2bec2d71e44830"></a><!-- doxytag: member="PrinterState::stepNumber" ref="aa821ff7e586574121f2bec2d71e44830" args="" -->
+<a class="anchor" id="a648a9d8aa6e009ed42e31edcf5b2944e"></a><!-- doxytag: member="PrinterState::stepNumber" ref="a648a9d8aa6e009ed42e31edcf5b2944e" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_printer_state.html#aa821ff7e586574121f2bec2d71e44830">stepNumber</a></td>
+          <td class="memname">unsigned long <a class="el" href="struct_printer_state.html#a648a9d8aa6e009ed42e31edcf5b2944e">stepNumber</a></td>
         </tr>
       </table>
 </div>
@@ -287,7 +338,7 @@ Data Fields</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="struct_printer_state.html">PrinterState</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

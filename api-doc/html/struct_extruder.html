@@ -130,19 +130,32 @@ Data Fields</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Target temperature in °C.  <a href="#ab6be068c42776208951625289e7a1352"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#ac02104790a43903059930ea7ae04ba1c">lastTemperatureUpdate</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Time in millis of the last temperature update.  <a href="#ac02104790a43903059930ea7ae04ba1c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#afc966782c25222ee96a1bdd1d4b360f8">dir</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_extruder.html" title="Data to drive one extruder.">Extruder</a> direction for next steps. Is 1 or -1.  <a href="#afc966782c25222ee96a1bdd1d4b360f8"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#a1ffe51aed85855bb7c40b6ab0948d02b">heatManager</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">How is temperature controled. 0 = on/off, 1 = PID-Control.  <a href="#a1ffe51aed85855bb7c40b6ab0948d02b"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#ab537835ed55505f5df48d156f76bc301">watchPeriod</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Time in seconds, a M109 command will wait to stabalize temperature.  <a href="#ab537835ed55505f5df48d156f76bc301"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile byte *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#a629b3a4efa2ebb7fb5ae37b011e8f2bc">stepPort</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Port of the stepper pin. Used for increased speed.  <a href="#a629b3a4efa2ebb7fb5ae37b011e8f2bc"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_extruder.html#a6b0a939e61aee8b202f6a5e601a49c2e">advanceK</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Koefficient for advance algorithm. 0 = off.  <a href="#a6b0a939e61aee8b202f6a5e601a49c2e"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Data to drive one extruder. </p>
 <p>This structure contains all definitions for an extruder and all current state variables, like current temperature, feeder position etc. </p>
 </div><hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a6b0a939e61aee8b202f6a5e601a49c2e"></a><!-- doxytag: member="Extruder::advanceK" ref="a6b0a939e61aee8b202f6a5e601a49c2e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float <a class="el" href="struct_extruder.html#a6b0a939e61aee8b202f6a5e601a49c2e">advanceK</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Koefficient for advance algorithm. 0 = off. </p>
+
+</div>
+</div>
 <a class="anchor" id="a312344cfcf54842935c4df4d67d24154"></a><!-- doxytag: member="Extruder::currentTemperature" ref="a312344cfcf54842935c4df4d67d24154" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -170,21 +183,6 @@ Data Fields</h2></td></tr>
 <div class="memdoc">
 
 <p>Current temperature in °C. </p>
-
-</div>
-</div>
-<a class="anchor" id="afc966782c25222ee96a1bdd1d4b360f8"></a><!-- doxytag: member="Extruder::dir" ref="afc966782c25222ee96a1bdd1d4b360f8" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char <a class="el" href="struct_extruder.html#afc966782c25222ee96a1bdd1d4b360f8">dir</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p><a class="el" href="struct_extruder.html" title="Data to drive one extruder.">Extruder</a> direction for next steps. Is 1 or -1. </p>
 
 </div>
 </div>
@@ -407,21 +405,6 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a629b3a4efa2ebb7fb5ae37b011e8f2bc"></a><!-- doxytag: member="Extruder::stepPort" ref="a629b3a4efa2ebb7fb5ae37b011e8f2bc" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">volatile byte* <a class="el" href="struct_extruder.html#a629b3a4efa2ebb7fb5ae37b011e8f2bc">stepPort</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Port of the stepper pin. Used for increased speed. </p>
-
-</div>
-</div>
 <a class="anchor" id="a54c14a56d7cef564c2b5387fcf02adbd"></a><!-- doxytag: member="Extruder::stepsPerMM" ref="a54c14a56d7cef564c2b5387fcf02adbd" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -516,7 +499,7 @@ Data Fields</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="struct_extruder.html">Extruder</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

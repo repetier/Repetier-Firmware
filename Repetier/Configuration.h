@@ -60,7 +60,9 @@
 // 2 is 200k thermistor
 // 3 is mendel-parts thermistor
 // 4 is 10k thermistor
-// 5 is userdefined thermistor table
+// 5 is userdefined thermistor table 0
+// 6 is userdefined thermistor table 1
+// 7 is userdefined thermistor table 2
 // 99 Generic thermistor table
 // 100 is AD595
 // 101 is MAX6675
@@ -72,10 +74,10 @@
 #define EXT0_STEP_PIN E_STEP_PIN
 #define EXT0_DIR_PIN E_DIR_PIN
 // set to 0/1 for normal / inverse direction
-#define EXT0_INVERSE 0
+#define EXT0_INVERSE false
 #define EXT0_ENABLE_PIN E_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON 0
+#define EXT0_ENABLE_ON false
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
@@ -105,24 +107,39 @@
 #define EXT0_PID_MAX 200
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm. */
 #define EXT0_ADVANCE_K 0.0f
-/** Number of entries in the user thermistortable */
-#define NUM_TEMPS_USERTHERMISTOR 28
+/** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR0 28
+/** Number of entries in the user thermistortable 1. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR1 0
+/** Number of entries in the user thermistortable 2. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR2 0
+/** \brief Set PID scaling 
+
+PID values assume a usable range from 0-255. This can be further limited to EXT0_PID_MAX by to methods.
+Set the value to 0: Normal computation, just clip output to EXT0_PID_MAX if computed value is too high.
+Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX.
+If your EXT0_PID_MAX is low, you should prefer the second method.
+*/
+#define SCALE_PID_TO_MAX 0
 /** Userdefined thermistor table
 
 There are many different thermistors, which can be combined with different resistors. This result
 in unpredictable number of tables. As a resolution, the user can define one table here, that can
 be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries
-matches the value in NUM_TEMPS_USERTHERMISTOR. If you span definition over multiple lines, make sure to end
+matches the value in NUM_TEMPS_USERTHERMISTOR0. If you span definition over multiple lines, make sure to end
 each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with
 increasing adc values. For more informations, read 
 http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html
 
 */
-#define USER_THERMISTORTABLE  {\
+#define USER_THERMISTORTABLE0  {\
   {1,864},{21,300},{25,290},{29,280},{33,270},{39,260},{46,250},{54,240},{64,230},{75,220},\
   {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\
   {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20}	}
-  
+
+#define USER_THERMISTORTABLE1  {}  
+#define USER_THERMISTORTABLE2  {}  
+
 /** If defined, creates a thermistortable at startup.
 
 If you dont feel like computing the table on your own, you can use this generic method. It is
@@ -238,7 +255,6 @@ for more details.
 #define X_ENABLE_ON 0
 #define Y_ENABLE_ON 0
 #define Z_ENABLE_ON 0
-#define E_ENABLE_ON 0
 
 // Disables axis when it's not being used.
 #define DISABLE_X false
@@ -250,7 +266,6 @@ for more details.
 #define INVERT_X_DIR false
 #define INVERT_Y_DIR true
 #define INVERT_Z_DIR false
-#define INVERT_E_DIR false
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -284,9 +299,9 @@ for more details.
 #define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z, E */
-#define MAX_FEEDRATE {12000, 12000, 3, 20}
+#define MAX_FEEDRATE {15000, 15000, 100, 100}
 /** Speed in mm/min for finding the home position */
-#define HOMING_FEEDRATE {1500,1500,100}
+#define HOMING_FEEDRATE {2400,2400,100}
 
 /** Comment this to disable ramp acceleration */
 #define RAMP_ACCELERATION 1
@@ -295,10 +310,10 @@ for more details.
 
 /** \brief Use RAMP acceleration for faster printing speed. */
 #ifdef RAMP_ACCELERATION
-/** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000} 
+/** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! */
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,50,1000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves. */
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,50,1000}
 #endif
 
 /** \brief Maximum allowable jerk.

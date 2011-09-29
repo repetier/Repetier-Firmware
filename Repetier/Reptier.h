@@ -202,7 +202,7 @@ typedef struct { // RAM usage: 72 Byte
   long zMaxSteps; ///< For software endstops, limit of move in positive direction.
   long interval; ///< Last step duration in ticks.
   unsigned long stepNumber; ///< Step number in current move.
-  unsigned int n; ///< virtual step number for acceleration computation.
+  int n; ///< virtual step number for acceleration computation.
   float feedrate; ///< Last requested feedrate.
   float maxJerk; ///< Maximum allowed jerk in mm/s
   long advance_target; ///< Target advance steps
@@ -241,8 +241,8 @@ typedef struct { // RAM usage: 58 Byte
 //  long acceleration; ///< Acceleration in steps/s^2
 //  long vMin; ///< Starting/ending speed in steps/s.
 //  long vMax; ///< Maximum reached speed in steps/s.
-  unsigned int startN; ///< Start speed for acceleration calculation
-  unsigned int endN;
+  int startN; ///< Start speed for acceleration calculation
+  int endN;
 //  long interval;     ///< Current interval between two steps in ticks.
   float speedX; ///< Speed in x direction at fullInterval in mm/s
   float speedY; ///< Speed in y direction at fullInterval in mm/s
@@ -259,7 +259,7 @@ typedef struct { // RAM usage: 58 Byte
   unsigned int accelSteps; ///< How much steps does it take, to reach the plateau.
   unsigned int decelSteps; ///< How much steps does it take, to reach the end speed.
   unsigned long accelerationPrim; ///< Acceleration along primary axis
-  unsigned int plateauN;
+  int plateauN;
   long vMax;
 #ifdef USE_ADVANCE
   long advanceRate; ///< Advance steps at full speed

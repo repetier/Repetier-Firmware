@@ -141,257 +141,270 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00060"></a>00060 <span class="comment">// 2 is 200k thermistor</span>
 <a name="l00061"></a>00061 <span class="comment">// 3 is mendel-parts thermistor</span>
 <a name="l00062"></a>00062 <span class="comment">// 4 is 10k thermistor</span>
-<a name="l00063"></a>00063 <span class="comment">// 5 is userdefined thermistor table</span>
-<a name="l00064"></a>00064 <span class="comment">// 99 Generic thermistor table</span>
-<a name="l00065"></a>00065 <span class="comment">// 100 is AD595</span>
-<a name="l00066"></a>00066 <span class="comment">// 101 is MAX6675</span>
-<a name="l00067"></a><a class="code" href="_configuration_8h.html#aa36796338507f6dddbf7d4964c6f740d">00067</a> <span class="preprocessor">#define EXT0_TEMPSENSOR_TYPE 5</span>
-<a name="l00068"></a>00068 <span class="preprocessor"></span><span class="comment">// Position in analog input table below for reading temperatures or pin enabling SS for MAX6675</span>
-<a name="l00069"></a><a class="code" href="_configuration_8h.html#ad34404c86e225ce594c317b84556541e">00069</a> <span class="preprocessor">#define EXT0_TEMPSENSOR_PIN 0</span>
-<a name="l00070"></a>00070 <span class="preprocessor"></span><span class="comment">// WHich pin enables the heater</span>
-<a name="l00071"></a><a class="code" href="_configuration_8h.html#aeefa06ad16c004185a5dbcf6f4f8642f">00071</a> <span class="preprocessor">#define EXT0_HEATER_PIN HEATER_0_PIN</span>
-<a name="l00072"></a><a class="code" href="_configuration_8h.html#a500527759a4c15569c4a69efe2811dc1">00072</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_STEP_PIN E_STEP_PIN</span>
-<a name="l00073"></a><a class="code" href="_configuration_8h.html#aa05066c7d6379276615dcab8f5e5eb1f">00073</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_DIR_PIN E_DIR_PIN</span>
-<a name="l00074"></a>00074 <span class="preprocessor"></span><span class="comment">// set to 0/1 for normal / inverse direction</span>
-<a name="l00075"></a><a class="code" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">00075</a> <span class="preprocessor">#define EXT0_INVERSE 0</span>
-<a name="l00076"></a><a class="code" href="_configuration_8h.html#a1d2b536d0751a942656d556613481b95">00076</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_ENABLE_PIN E_ENABLE_PIN</span>
-<a name="l00077"></a>00077 <span class="preprocessor"></span><span class="comment">// For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1</span>
-<a name="l00078"></a><a class="code" href="_configuration_8h.html#a30f9bdf00c36767d4c9329f636de4e82">00078</a> <span class="preprocessor">#define EXT0_ENABLE_ON 0</span>
-<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="comment">// The following speed settings are for skeinforge 40+ where e is the</span>
-<a name="l00080"></a>00080 <span class="comment">// length of filament pulled inside the heater. For repsnap or older</span>
-<a name="l00081"></a>00081 <span class="comment">// skeinforge use hiher values.</span>
-<a name="l00082"></a><a class="code" href="_configuration_8h.html#ac436a35cc3678431777106325f0db62a">00082</a> <span class="preprocessor">#define EXT0_MAX_FEEDRATE 1200</span>
-<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="comment">// Feedrate from halted extruder in mm/s</span>
-<a name="l00084"></a><a class="code" href="_configuration_8h.html#ae711b829c8bd6a1f837a3bc448154404">00084</a> <span class="preprocessor">#define EXT0_MAX_START_FEEDRATE 10</span>
-<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="comment">// Acceleration in mm/s^2</span>
-<a name="l00086"></a><a class="code" href="_configuration_8h.html#aff146e72c56b77076a697555b8e04c42">00086</a> <span class="preprocessor">#define EXT0_MAX_ACCELERATION 10000</span>
-<a name="l00087"></a>00087 <span class="preprocessor"></span>
-<a name="l00092"></a><a class="code" href="_configuration_8h.html#a4f7bb4c4c6b5ace3ef06f93a95bc1320">00092</a> <span class="preprocessor">#define EXT0_HEAT_MANAGER 1</span>
-<a name="l00093"></a>00093 <span class="preprocessor"></span>
-<a name="l00094"></a><a class="code" href="_configuration_8h.html#a8dd829694ef267199fcf8b11e7c7e961">00094</a> <span class="preprocessor">#define EXT0_WATCHPERIOD 40</span>
+<a name="l00063"></a>00063 <span class="comment">// 5 is userdefined thermistor table 0</span>
+<a name="l00064"></a>00064 <span class="comment">// 6 is userdefined thermistor table 1</span>
+<a name="l00065"></a>00065 <span class="comment">// 7 is userdefined thermistor table 2</span>
+<a name="l00066"></a>00066 <span class="comment">// 99 Generic thermistor table</span>
+<a name="l00067"></a>00067 <span class="comment">// 100 is AD595</span>
+<a name="l00068"></a>00068 <span class="comment">// 101 is MAX6675</span>
+<a name="l00069"></a><a class="code" href="_configuration_8h.html#aa36796338507f6dddbf7d4964c6f740d">00069</a> <span class="preprocessor">#define EXT0_TEMPSENSOR_TYPE 5</span>
+<a name="l00070"></a>00070 <span class="preprocessor"></span><span class="comment">// Position in analog input table below for reading temperatures or pin enabling SS for MAX6675</span>
+<a name="l00071"></a><a class="code" href="_configuration_8h.html#ad34404c86e225ce594c317b84556541e">00071</a> <span class="preprocessor">#define EXT0_TEMPSENSOR_PIN 0</span>
+<a name="l00072"></a>00072 <span class="preprocessor"></span><span class="comment">// WHich pin enables the heater</span>
+<a name="l00073"></a><a class="code" href="_configuration_8h.html#aeefa06ad16c004185a5dbcf6f4f8642f">00073</a> <span class="preprocessor">#define EXT0_HEATER_PIN HEATER_0_PIN</span>
+<a name="l00074"></a><a class="code" href="_configuration_8h.html#a500527759a4c15569c4a69efe2811dc1">00074</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_STEP_PIN E_STEP_PIN</span>
+<a name="l00075"></a><a class="code" href="_configuration_8h.html#aa05066c7d6379276615dcab8f5e5eb1f">00075</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_DIR_PIN E_DIR_PIN</span>
+<a name="l00076"></a>00076 <span class="preprocessor"></span><span class="comment">// set to 0/1 for normal / inverse direction</span>
+<a name="l00077"></a><a class="code" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">00077</a> <span class="preprocessor">#define EXT0_INVERSE false</span>
+<a name="l00078"></a><a class="code" href="_configuration_8h.html#a1d2b536d0751a942656d556613481b95">00078</a> <span class="preprocessor"></span><span class="preprocessor">#define EXT0_ENABLE_PIN E_ENABLE_PIN</span>
+<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="comment">// For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1</span>
+<a name="l00080"></a><a class="code" href="_configuration_8h.html#a30f9bdf00c36767d4c9329f636de4e82">00080</a> <span class="preprocessor">#define EXT0_ENABLE_ON false</span>
+<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="comment">// The following speed settings are for skeinforge 40+ where e is the</span>
+<a name="l00082"></a>00082 <span class="comment">// length of filament pulled inside the heater. For repsnap or older</span>
+<a name="l00083"></a>00083 <span class="comment">// skeinforge use hiher values.</span>
+<a name="l00084"></a><a class="code" href="_configuration_8h.html#ac436a35cc3678431777106325f0db62a">00084</a> <span class="preprocessor">#define EXT0_MAX_FEEDRATE 1200</span>
+<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="comment">// Feedrate from halted extruder in mm/s</span>
+<a name="l00086"></a><a class="code" href="_configuration_8h.html#ae711b829c8bd6a1f837a3bc448154404">00086</a> <span class="preprocessor">#define EXT0_MAX_START_FEEDRATE 10</span>
+<a name="l00087"></a>00087 <span class="preprocessor"></span><span class="comment">// Acceleration in mm/s^2</span>
+<a name="l00088"></a><a class="code" href="_configuration_8h.html#aff146e72c56b77076a697555b8e04c42">00088</a> <span class="preprocessor">#define EXT0_MAX_ACCELERATION 10000</span>
+<a name="l00089"></a>00089 <span class="preprocessor"></span>
+<a name="l00094"></a><a class="code" href="_configuration_8h.html#a4f7bb4c4c6b5ace3ef06f93a95bc1320">00094</a> <span class="preprocessor">#define EXT0_HEAT_MANAGER 1</span>
 <a name="l00095"></a>00095 <span class="preprocessor"></span>
-<a name="l00097"></a><a class="code" href="_configuration_8h.html#ac396977aff5c8f768351c6657497e4af">00097</a> <span class="preprocessor">#define EXT0_PID_INTEGRAL_DRIVE_MAX 130</span>
-<a name="l00098"></a>00098 <span class="preprocessor"></span>
-<a name="l00099"></a><a class="code" href="_configuration_8h.html#a2805d778655fee7a113e7ca96708f01e">00099</a> <span class="preprocessor">#define EXT0_PID_PGAIN   300</span>
+<a name="l00096"></a><a class="code" href="_configuration_8h.html#a8dd829694ef267199fcf8b11e7c7e961">00096</a> <span class="preprocessor">#define EXT0_WATCHPERIOD 40</span>
+<a name="l00097"></a>00097 <span class="preprocessor"></span>
+<a name="l00099"></a><a class="code" href="_configuration_8h.html#ac396977aff5c8f768351c6657497e4af">00099</a> <span class="preprocessor">#define EXT0_PID_INTEGRAL_DRIVE_MAX 130</span>
 <a name="l00100"></a>00100 <span class="preprocessor"></span>
-<a name="l00101"></a><a class="code" href="_configuration_8h.html#a75dd4d8c5cfa2b9359e15aecef67a03e">00101</a> <span class="preprocessor">#define EXT0_PID_IGAIN   2</span>
+<a name="l00101"></a><a class="code" href="_configuration_8h.html#a2805d778655fee7a113e7ca96708f01e">00101</a> <span class="preprocessor">#define EXT0_PID_PGAIN   300</span>
 <a name="l00102"></a>00102 <span class="preprocessor"></span>
-<a name="l00103"></a><a class="code" href="_configuration_8h.html#aa5bd7c9ee76a4f1ec7b8dc3bc3b45d70">00103</a> <span class="preprocessor">#define EXT0_PID_DGAIN 2000</span>
-<a name="l00104"></a>00104 <span class="preprocessor"></span><span class="comment">// maximum time the heater is can be switched on. Max = 255</span>
-<a name="l00105"></a><a class="code" href="_configuration_8h.html#adfb2192d3c11c6eb519b2a67e7957a4f">00105</a> <span class="preprocessor">#define EXT0_PID_MAX 200</span>
-<a name="l00106"></a>00106 <span class="preprocessor"></span>
-<a name="l00108"></a><a class="code" href="_configuration_8h.html#ac810524b2d8027f204d09519b3357c72">00108</a> <span class="preprocessor">#define NUM_TEMPS_USERTHERMISTOR 28</span>
-<a name="l00109"></a>00109 <span class="preprocessor"></span>
-<a name="l00120"></a><a class="code" href="_configuration_8h.html#ae62f54d9ac97f2f9c9c4556b9b2a5d32">00120</a> <span class="preprocessor">#define USER_THERMISTORTABLE  {\</span>
-<a name="l00121"></a>00121 <span class="preprocessor">  {1,864},{21,300},{25,290},{29,280},{33,270},{39,260},{46,250},{54,240},{64,230},{75,220},\</span>
-<a name="l00122"></a>00122 <span class="preprocessor">  {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\</span>
-<a name="l00123"></a>00123 <span class="preprocessor">  {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20} }</span>
-<a name="l00124"></a>00124 <span class="preprocessor"></span>  
-<a name="l00147"></a><a class="code" href="_configuration_8h.html#a03e2eac4f7cebc0157410cb76db3489c">00147</a> <span class="preprocessor">#define USE_GENERIC_THERMISTORTABLE 1</span>
-<a name="l00148"></a>00148 <span class="preprocessor"></span>
-<a name="l00149"></a><a class="code" href="_configuration_8h.html#a2542fe5805acbc279293f7496ee76272">00149</a> <span class="preprocessor">#define GENERIC_THERM_R0 1042.7</span>
-<a name="l00150"></a>00150 <span class="preprocessor"></span>
-<a name="l00151"></a><a class="code" href="_configuration_8h.html#ae9349d0c6e09727f13d32d49d2c7605a">00151</a> <span class="preprocessor">#define GENERIC_THERM_T0 170</span>
-<a name="l00152"></a>00152 <span class="preprocessor"></span>
-<a name="l00158"></a><a class="code" href="_configuration_8h.html#aeec5dcc0d69fe07d72515d4fad674e4c">00158</a> <span class="preprocessor">#define GENERIC_THERM_BETA 4036</span>
-<a name="l00159"></a><a class="code" href="_configuration_8h.html#a7e8c1fd3baae2e63065866ae1797e679">00159</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_R1 0</span>
-<a name="l00160"></a><a class="code" href="_configuration_8h.html#afa65e7d140dc84860880a9a11caf9029">00160</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_R2 4700</span>
-<a name="l00161"></a><a class="code" href="_configuration_8h.html#a45fa6366f5bfe2d85b6e5218a9ed39cd">00161</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_VREF 5</span>
-<a name="l00162"></a>00162 <span class="preprocessor"></span>
-<a name="l00163"></a><a class="code" href="_configuration_8h.html#a6d91fe198bb8e68d2efd82ffe21f4ec5">00163</a> <span class="preprocessor">#define GENERIC_THERM_VADC 5</span>
-<a name="l00164"></a>00164 <span class="preprocessor"></span>
-<a name="l00165"></a><a class="code" href="_configuration_8h.html#a050ae208528dd0f3604240bf56e7abbc">00165</a> <span class="preprocessor">#define GENERIC_THERM_NUM_ENTRIES 40</span>
-<a name="l00166"></a>00166 <span class="preprocessor"></span>
-<a name="l00167"></a>00167 <span class="comment">// uncomment the following line for MAX6675 support.</span>
-<a name="l00168"></a>00168 <span class="comment">//#define SUPPORT_MAX6675</span>
-<a name="l00169"></a>00169 <span class="comment">// Select type of your heated bed. It&#39;s the same as for EXT0_TEMPSENSOR_TYPE</span>
-<a name="l00170"></a>00170 <span class="comment">// set to 0 if you don&#39;t have a heated bed</span>
-<a name="l00171"></a><a class="code" href="_configuration_8h.html#a5df62475b1594399911a233e82fdd66c">00171</a> <span class="preprocessor">#define HEATED_BED_SENSOR_TYPE 0</span>
-<a name="l00172"></a>00172 <span class="preprocessor"></span><span class="comment">// Pin to enable heater for bed</span>
-<a name="l00173"></a><a class="code" href="_configuration_8h.html#ad800cbe7e9d08c57fc0055cc875559b9">00173</a> <span class="preprocessor">#define HEATED_BED_SENSOR_PIN -1</span>
-<a name="l00174"></a>00174 <span class="preprocessor"></span><span class="comment">// Pin to read temperature of heated bed</span>
-<a name="l00175"></a><a class="code" href="_configuration_8h.html#ae2a519d2386a922335b64968bee3a675">00175</a> <span class="preprocessor">#define HEATED_BED_HEATER_PIN -1</span>
-<a name="l00176"></a>00176 <span class="preprocessor"></span>
-<a name="l00177"></a>00177 <span class="comment">// uncomment to use AREF for reference voltage</span>
-<a name="l00178"></a>00178 <span class="comment">// on a GEN6 you want AVCC</span>
-<a name="l00179"></a><a class="code" href="_configuration_8h.html#abae1e8e1e803579cc303b31318258bd7">00179</a> <span class="preprocessor">#define USE_AVCC_FOR_TEMP</span>
-<a name="l00180"></a>00180 <span class="preprocessor"></span><span class="comment">// how many samples do we want per reading. 1 sample takes 1/125000 seconds.</span>
-<a name="l00181"></a>00181 <span class="comment">// more samples get more reliable values, but take more time.</span>
-<a name="l00182"></a><a class="code" href="_configuration_8h.html#a6c18cd5a3259471b8b8cb519e6ac1039">00182</a> <span class="preprocessor">#define ANALOG_SUPERSAMPLE 10</span>
-<a name="l00183"></a><a class="code" href="_configuration_8h.html#ada4d618c45d2bbd2f6974630f9e5416e">00183</a> <span class="preprocessor"></span><span class="preprocessor">#define NUM_ANALOG_SENSORS 1</span>
-<a name="l00184"></a><a class="code" href="_configuration_8h.html#ad777d29bd4ac79d5f408b9528f9e8f61">00184</a> <span class="preprocessor"></span><span class="preprocessor">#define NUM_DIGITAL_SENSORS 0</span>
-<a name="l00185"></a><a class="code" href="_configuration_8h.html#af348f6d0d21ffcb39ae86cb2e2188999">00185</a> <span class="preprocessor"></span><span class="preprocessor">#define TEMP_PID true</span>
-<a name="l00186"></a>00186 <span class="preprocessor"></span>
-<a name="l00188"></a>00188 <span class="comment">// The watchdog waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature</span>
-<a name="l00189"></a>00189 <span class="comment">// If the temperature has not increased at the end of that period, the target temperature is set to zero. It can be reset with another M104/M109</span>
-<a name="l00190"></a>00190 <span class="comment">//#define WATCHPERIOD 5000 //5 seconds</span>
-<a name="l00191"></a>00191 
-<a name="l00193"></a><a class="code" href="_configuration_8h.html#ae8103ab99028a60b42da51ee9b20da06">00193</a> <span class="preprocessor">#define MINTEMP 5</span>
+<a name="l00103"></a><a class="code" href="_configuration_8h.html#a75dd4d8c5cfa2b9359e15aecef67a03e">00103</a> <span class="preprocessor">#define EXT0_PID_IGAIN   2</span>
+<a name="l00104"></a>00104 <span class="preprocessor"></span>
+<a name="l00105"></a><a class="code" href="_configuration_8h.html#aa5bd7c9ee76a4f1ec7b8dc3bc3b45d70">00105</a> <span class="preprocessor">#define EXT0_PID_DGAIN 2000</span>
+<a name="l00106"></a>00106 <span class="preprocessor"></span><span class="comment">// maximum time the heater is can be switched on. Max = 255</span>
+<a name="l00107"></a><a class="code" href="_configuration_8h.html#adfb2192d3c11c6eb519b2a67e7957a4f">00107</a> <span class="preprocessor">#define EXT0_PID_MAX 200</span>
+<a name="l00108"></a>00108 <span class="preprocessor"></span>
+<a name="l00109"></a><a class="code" href="_configuration_8h.html#adba446ad427bf3bf4f1aa23d0dadfb0a">00109</a> <span class="preprocessor">#define EXT0_ADVANCE_K 0.0f</span>
+<a name="l00110"></a>00110 <span class="preprocessor"></span>
+<a name="l00111"></a><a class="code" href="_configuration_8h.html#a32325a715535efb34c4b98105b50745e">00111</a> <span class="preprocessor">#define NUM_TEMPS_USERTHERMISTOR0 28</span>
+<a name="l00112"></a>00112 <span class="preprocessor"></span>
+<a name="l00113"></a><a class="code" href="_configuration_8h.html#aca1b42d580395a27d2a46e064d83bac7">00113</a> <span class="preprocessor">#define NUM_TEMPS_USERTHERMISTOR1 0</span>
+<a name="l00114"></a>00114 <span class="preprocessor"></span>
+<a name="l00115"></a><a class="code" href="_configuration_8h.html#a82c8102a4461b6d9dfc74074f89ac5c5">00115</a> <span class="preprocessor">#define NUM_TEMPS_USERTHERMISTOR2 0</span>
+<a name="l00116"></a>00116 <span class="preprocessor"></span>
+<a name="l00123"></a><a class="code" href="_configuration_8h.html#aeba3c210690a31bfb8fabc07afce1f6b">00123</a> <span class="preprocessor">#define SCALE_PID_TO_MAX 0</span>
+<a name="l00124"></a>00124 <span class="preprocessor"></span>
+<a name="l00135"></a><a class="code" href="_configuration_8h.html#a550e80efe233bf43601feaebe50fa9a8">00135</a> <span class="preprocessor">#define USER_THERMISTORTABLE0  {\</span>
+<a name="l00136"></a>00136 <span class="preprocessor">  {1,864},{21,300},{25,290},{29,280},{33,270},{39,260},{46,250},{54,240},{64,230},{75,220},\</span>
+<a name="l00137"></a>00137 <span class="preprocessor">  {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\</span>
+<a name="l00138"></a>00138 <span class="preprocessor">  {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20} }</span>
+<a name="l00139"></a>00139 <span class="preprocessor"></span>
+<a name="l00140"></a><a class="code" href="_configuration_8h.html#a661012a52420483eda439846f00fabd2">00140</a> <span class="preprocessor">#define USER_THERMISTORTABLE1  {}  </span>
+<a name="l00141"></a><a class="code" href="_configuration_8h.html#a4c15037cdc427465c0a591093ad7f00a">00141</a> <span class="preprocessor"></span><span class="preprocessor">#define USER_THERMISTORTABLE2  {}  </span>
+<a name="l00142"></a>00142 <span class="preprocessor"></span>
+<a name="l00165"></a>00165 <span class="comment">//#define USE_GENERIC_THERMISTORTABLE 1</span>
+<a name="l00167"></a><a class="code" href="_configuration_8h.html#a2542fe5805acbc279293f7496ee76272">00167</a> <span class="comment"></span><span class="preprocessor">#define GENERIC_THERM_R0 1042.7</span>
+<a name="l00168"></a>00168 <span class="preprocessor"></span>
+<a name="l00169"></a><a class="code" href="_configuration_8h.html#ae9349d0c6e09727f13d32d49d2c7605a">00169</a> <span class="preprocessor">#define GENERIC_THERM_T0 170</span>
+<a name="l00170"></a>00170 <span class="preprocessor"></span>
+<a name="l00176"></a><a class="code" href="_configuration_8h.html#aeec5dcc0d69fe07d72515d4fad674e4c">00176</a> <span class="preprocessor">#define GENERIC_THERM_BETA 4036</span>
+<a name="l00177"></a><a class="code" href="_configuration_8h.html#a7e8c1fd3baae2e63065866ae1797e679">00177</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_R1 0</span>
+<a name="l00178"></a><a class="code" href="_configuration_8h.html#afa65e7d140dc84860880a9a11caf9029">00178</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_R2 4700</span>
+<a name="l00179"></a><a class="code" href="_configuration_8h.html#a45fa6366f5bfe2d85b6e5218a9ed39cd">00179</a> <span class="preprocessor"></span><span class="preprocessor">#define GENERIC_THERM_VREF 5</span>
+<a name="l00180"></a>00180 <span class="preprocessor"></span>
+<a name="l00181"></a><a class="code" href="_configuration_8h.html#a6d91fe198bb8e68d2efd82ffe21f4ec5">00181</a> <span class="preprocessor">#define GENERIC_THERM_VADC 5</span>
+<a name="l00182"></a>00182 <span class="preprocessor"></span>
+<a name="l00183"></a><a class="code" href="_configuration_8h.html#a050ae208528dd0f3604240bf56e7abbc">00183</a> <span class="preprocessor">#define GENERIC_THERM_NUM_ENTRIES 40</span>
+<a name="l00184"></a>00184 <span class="preprocessor"></span>
+<a name="l00185"></a>00185 <span class="comment">// uncomment the following line for MAX6675 support.</span>
+<a name="l00186"></a>00186 <span class="comment">//#define SUPPORT_MAX6675</span>
+<a name="l00187"></a>00187 <span class="comment">// Select type of your heated bed. It&#39;s the same as for EXT0_TEMPSENSOR_TYPE</span>
+<a name="l00188"></a>00188 <span class="comment">// set to 0 if you don&#39;t have a heated bed</span>
+<a name="l00189"></a><a class="code" href="_configuration_8h.html#a5df62475b1594399911a233e82fdd66c">00189</a> <span class="preprocessor">#define HEATED_BED_SENSOR_TYPE 0</span>
+<a name="l00190"></a>00190 <span class="preprocessor"></span><span class="comment">// Pin to enable heater for bed</span>
+<a name="l00191"></a><a class="code" href="_configuration_8h.html#ad800cbe7e9d08c57fc0055cc875559b9">00191</a> <span class="preprocessor">#define HEATED_BED_SENSOR_PIN -1</span>
+<a name="l00192"></a>00192 <span class="preprocessor"></span><span class="comment">// Pin to read temperature of heated bed</span>
+<a name="l00193"></a><a class="code" href="_configuration_8h.html#ae2a519d2386a922335b64968bee3a675">00193</a> <span class="preprocessor">#define HEATED_BED_HEATER_PIN -1</span>
 <a name="l00194"></a>00194 <span class="preprocessor"></span>
-<a name="l00196"></a>00196 <span class="comment">// When temperature exceeds max temp, your heater will be switched off.</span>
-<a name="l00197"></a>00197 <span class="comment">// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!</span>
-<a name="l00198"></a>00198 <span class="comment">// You should use MINTEMP for thermistor short/failure protection.</span>
-<a name="l00199"></a><a class="code" href="_configuration_8h.html#a1b93da4072588f486fb962e7aa094d73">00199</a> <span class="preprocessor">#define MAXTEMP 275</span>
-<a name="l00200"></a>00200 <span class="preprocessor"></span>
-<a name="l00202"></a><a class="code" href="_configuration_8h.html#a4791bfa40258d27fa714fff6d8e62a30">00202</a> <span class="preprocessor">#define ANALOG_INPUTS NUM_ANALOG_SENSORS</span>
-<a name="l00203"></a>00203 <span class="preprocessor"></span><span class="preprocessor">#if ANALOG_INPUTS&gt;0</span>
-<a name="l00204"></a>00204 <span class="preprocessor"></span><span class="comment">// Channels are the MUX-part of ADMUX register</span>
-<a name="l00205"></a><a class="code" href="_configuration_8h.html#a24a64a1f575248a06f4ba8689a578c3f">00205</a> <span class="preprocessor">#define ANALOG_INPUT_CHANNELS {TEMP_0_PIN}</span>
-<a name="l00206"></a>00206 <span class="preprocessor"></span><span class="comment">// Bits of the ADC converter</span>
-<a name="l00207"></a><a class="code" href="_configuration_8h.html#a1972fe1bfaa6fb52001d04fc1059e3ad">00207</a> <span class="preprocessor">#define ANALOG_INPUT_BITS 10</span>
-<a name="l00208"></a>00208 <span class="preprocessor"></span><span class="comment">// Build median from 2^ANALOG_INPUT_SAMPLE samples</span>
-<a name="l00209"></a><a class="code" href="_configuration_8h.html#aae780ad1da65e93031c8819fa64c133e">00209</a> <span class="preprocessor">#define ANALOG_INPUT_SAMPLE 2</span>
-<a name="l00210"></a><a class="code" href="_configuration_8h.html#ada2f40f8c390192e11c232c758afcb57">00210</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_AREF 0</span>
-<a name="l00211"></a><a class="code" href="_configuration_8h.html#ac4969cdff62b814d6be75510e4fd1f46">00211</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_AVCC _BV(REFS0)</span>
-<a name="l00212"></a><a class="code" href="_configuration_8h.html#a1e9dea4096b6f1e3d0c3416ad4902370">00212</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_INT_1_1 _BV(REFS1)</span>
-<a name="l00213"></a><a class="code" href="_configuration_8h.html#a3edc5729832b16c40d5df64fbfba0098">00213</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)</span>
-<a name="l00214"></a>00214 <span class="preprocessor"></span>
-<a name="l00215"></a><a class="code" href="_configuration_8h.html#af5eb7e3dc57a2c282b06f32e51970839">00215</a> <span class="preprocessor">#define ANALOG_REF ANALOG_REF_AVCC</span>
-<a name="l00216"></a><a class="code" href="_configuration_8h.html#a2fc5c022ca08920b3cf6eba085e5798e">00216</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)</span>
-<a name="l00217"></a>00217 <span class="preprocessor"></span>
-<a name="l00218"></a>00218 
-<a name="l00219"></a>00219 <span class="preprocessor">#endif</span>
-<a name="l00220"></a>00220 <span class="preprocessor"></span><span class="comment">// ##########################################################################################</span>
-<a name="l00221"></a>00221 <span class="comment">// ##                            Endstop configuration                                     ##</span>
-<a name="l00222"></a>00222 <span class="comment">// ##########################################################################################</span>
-<a name="l00223"></a>00223 
-<a name="l00225"></a><a class="code" href="_configuration_8h.html#a390cc608dbb85cd8fb58707effbff15b">00225</a> <span class="preprocessor">#define ENDSTOPPULLUPS 0 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors</span>
-<a name="l00226"></a>00226 <span class="preprocessor"></span><span class="comment">// The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.</span>
-<a name="l00227"></a>00227 <span class="comment">//set to true to invert the logic of the endstops</span>
-<a name="l00228"></a><a class="code" href="_configuration_8h.html#ab0c6075aef1a3f424ce1d19be200491d">00228</a> <span class="preprocessor">#define ENDSTOPS_INVERTING false</span>
-<a name="l00229"></a>00229 <span class="preprocessor"></span><span class="comment">//If your axes are only moving in one direction, make sure the endstops are connected properly.</span>
-<a name="l00230"></a>00230 <span class="comment">//If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here</span>
-<a name="l00231"></a>00231 
-<a name="l00232"></a>00232 
-<a name="l00233"></a>00233 
-<a name="l00235"></a>00235 
-<a name="l00236"></a>00236 <span class="comment">// For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1</span>
-<a name="l00237"></a><a class="code" href="_configuration_8h.html#a7afdf61cfd5a42d565ac71759dc05974">00237</a> <span class="preprocessor">#define X_ENABLE_ON 0</span>
-<a name="l00238"></a><a class="code" href="_configuration_8h.html#acc0bb5bd702433e1d38a31f6584ed821">00238</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_ENABLE_ON 0</span>
-<a name="l00239"></a><a class="code" href="_configuration_8h.html#a6ed17da670ae70c7666be298862e3c27">00239</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_ENABLE_ON 0</span>
-<a name="l00240"></a><a class="code" href="_configuration_8h.html#a31ec3d059470f9e1ecd20005b1731bb3">00240</a> <span class="preprocessor"></span><span class="preprocessor">#define E_ENABLE_ON 0</span>
-<a name="l00241"></a>00241 <span class="preprocessor"></span>
-<a name="l00242"></a>00242 <span class="comment">// Disables axis when it&#39;s not being used.</span>
-<a name="l00243"></a><a class="code" href="_configuration_8h.html#a9f7183dc5b8aa69d693ee84b906f2641">00243</a> <span class="preprocessor">#define DISABLE_X false</span>
-<a name="l00244"></a><a class="code" href="_configuration_8h.html#a80a96c3a651dda99af25b7dc3f2d2f17">00244</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_Y false</span>
-<a name="l00245"></a><a class="code" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">00245</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_Z true</span>
-<a name="l00246"></a><a class="code" href="_configuration_8h.html#a3ea6d4ec2118ee62a5171b02a295018a">00246</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_E false</span>
-<a name="l00247"></a>00247 <span class="preprocessor"></span>
-<a name="l00248"></a>00248 <span class="comment">// Inverting axis direction</span>
-<a name="l00249"></a><a class="code" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">00249</a> <span class="preprocessor">#define INVERT_X_DIR false</span>
-<a name="l00250"></a><a class="code" href="_configuration_8h.html#a1b0a90f40d48a2f35f6265ba5ab7399c">00250</a> <span class="preprocessor"></span><span class="preprocessor">#define INVERT_Y_DIR true</span>
-<a name="l00251"></a><a class="code" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">00251</a> <span class="preprocessor"></span><span class="preprocessor">#define INVERT_Z_DIR false</span>
-<a name="l00252"></a><a class="code" href="_configuration_8h.html#a11a674adadbde70fc6a0a1a83b78b4c7">00252</a> <span class="preprocessor"></span><span class="preprocessor">#define INVERT_E_DIR false</span>
-<a name="l00253"></a>00253 <span class="preprocessor"></span>
-<a name="l00255"></a>00255 <span class="comment">// Sets direction of endstops when homing; 1=MAX, -1=MIN</span>
-<a name="l00256"></a><a class="code" href="_configuration_8h.html#a2944654fc8082ed77783a57c21a634bc">00256</a> <span class="preprocessor">#define X_HOME_DIR -1</span>
-<a name="l00257"></a><a class="code" href="_configuration_8h.html#a9fea75ea9dba3ccfd3e37bb262efdb4c">00257</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_HOME_DIR -1</span>
-<a name="l00258"></a><a class="code" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">00258</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_HOME_DIR -1</span>
-<a name="l00259"></a>00259 <span class="preprocessor"></span>
-<a name="l00260"></a>00260  <span class="comment">//If true, axis won&#39;t move to coordinates less than zero.</span>
-<a name="l00261"></a><a class="code" href="_configuration_8h.html#ae0bc603e2f7b76d06df2b40d55d8658f">00261</a> <span class="preprocessor">#define min_software_endstops false</span>
-<a name="l00262"></a>00262 <span class="preprocessor"></span><span class="comment">//If true, axis won&#39;t move to coordinates greater than the defined lengths below.</span>
-<a name="l00263"></a><a class="code" href="_configuration_8h.html#a361b0a359c6a6220a58f04d2ea48023f">00263</a> <span class="preprocessor">#define max_software_endstops true</span>
-<a name="l00264"></a>00264 <span class="preprocessor"></span><span class="comment">// maximum positions - only fixed numbers!</span>
-<a name="l00265"></a><a class="code" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">00265</a> <span class="preprocessor">#define X_MAX_LENGTH 200</span>
-<a name="l00266"></a><a class="code" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">00266</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_MAX_LENGTH 200</span>
-<a name="l00267"></a><a class="code" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">00267</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_MAX_LENGTH 100</span>
-<a name="l00268"></a>00268 <span class="preprocessor"></span>
-<a name="l00269"></a>00269 <span class="comment">// ##########################################################################################</span>
-<a name="l00270"></a>00270 <span class="comment">// ##                           Mevement settings                                         ##</span>
-<a name="l00271"></a>00271 <span class="comment">// ##########################################################################################</span>
-<a name="l00272"></a>00272 
-<a name="l00277"></a><a class="code" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">00277</a> <span class="preprocessor">#define STEPPER_INACTIVE_TIME 120L</span>
-<a name="l00278"></a>00278 <span class="preprocessor"></span>
-<a name="l00283"></a><a class="code" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">00283</a> <span class="preprocessor">#define MAX_INACTIVE_TIME 0L</span>
+<a name="l00195"></a>00195 <span class="comment">// uncomment to use AREF for reference voltage</span>
+<a name="l00196"></a>00196 <span class="comment">// on a GEN6 you want AVCC</span>
+<a name="l00197"></a><a class="code" href="_configuration_8h.html#abae1e8e1e803579cc303b31318258bd7">00197</a> <span class="preprocessor">#define USE_AVCC_FOR_TEMP</span>
+<a name="l00198"></a>00198 <span class="preprocessor"></span><span class="comment">// how many samples do we want per reading. 1 sample takes 1/125000 seconds.</span>
+<a name="l00199"></a>00199 <span class="comment">// more samples get more reliable values, but take more time.</span>
+<a name="l00200"></a><a class="code" href="_configuration_8h.html#a6c18cd5a3259471b8b8cb519e6ac1039">00200</a> <span class="preprocessor">#define ANALOG_SUPERSAMPLE 10</span>
+<a name="l00201"></a><a class="code" href="_configuration_8h.html#ada4d618c45d2bbd2f6974630f9e5416e">00201</a> <span class="preprocessor"></span><span class="preprocessor">#define NUM_ANALOG_SENSORS 1</span>
+<a name="l00202"></a><a class="code" href="_configuration_8h.html#ad777d29bd4ac79d5f408b9528f9e8f61">00202</a> <span class="preprocessor"></span><span class="preprocessor">#define NUM_DIGITAL_SENSORS 0</span>
+<a name="l00203"></a><a class="code" href="_configuration_8h.html#af348f6d0d21ffcb39ae86cb2e2188999">00203</a> <span class="preprocessor"></span><span class="preprocessor">#define TEMP_PID true</span>
+<a name="l00204"></a>00204 <span class="preprocessor"></span>
+<a name="l00206"></a>00206 <span class="comment">// The watchdog waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature</span>
+<a name="l00207"></a>00207 <span class="comment">// If the temperature has not increased at the end of that period, the target temperature is set to zero. It can be reset with another M104/M109</span>
+<a name="l00208"></a>00208 <span class="comment">//#define WATCHPERIOD 5000 //5 seconds</span>
+<a name="l00209"></a>00209 
+<a name="l00211"></a><a class="code" href="_configuration_8h.html#ae8103ab99028a60b42da51ee9b20da06">00211</a> <span class="preprocessor">#define MINTEMP 5</span>
+<a name="l00212"></a>00212 <span class="preprocessor"></span>
+<a name="l00214"></a>00214 <span class="comment">// When temperature exceeds max temp, your heater will be switched off.</span>
+<a name="l00215"></a>00215 <span class="comment">// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!</span>
+<a name="l00216"></a>00216 <span class="comment">// You should use MINTEMP for thermistor short/failure protection.</span>
+<a name="l00217"></a><a class="code" href="_configuration_8h.html#a1b93da4072588f486fb962e7aa094d73">00217</a> <span class="preprocessor">#define MAXTEMP 275</span>
+<a name="l00218"></a>00218 <span class="preprocessor"></span>
+<a name="l00220"></a><a class="code" href="_configuration_8h.html#a4791bfa40258d27fa714fff6d8e62a30">00220</a> <span class="preprocessor">#define ANALOG_INPUTS NUM_ANALOG_SENSORS</span>
+<a name="l00221"></a>00221 <span class="preprocessor"></span><span class="preprocessor">#if ANALOG_INPUTS&gt;0</span>
+<a name="l00222"></a>00222 <span class="preprocessor"></span><span class="comment">// Channels are the MUX-part of ADMUX register</span>
+<a name="l00223"></a><a class="code" href="_configuration_8h.html#a24a64a1f575248a06f4ba8689a578c3f">00223</a> <span class="preprocessor">#define ANALOG_INPUT_CHANNELS {TEMP_0_PIN}</span>
+<a name="l00224"></a>00224 <span class="preprocessor"></span><span class="comment">// Bits of the ADC converter</span>
+<a name="l00225"></a><a class="code" href="_configuration_8h.html#a1972fe1bfaa6fb52001d04fc1059e3ad">00225</a> <span class="preprocessor">#define ANALOG_INPUT_BITS 10</span>
+<a name="l00226"></a>00226 <span class="preprocessor"></span><span class="comment">// Build median from 2^ANALOG_INPUT_SAMPLE samples</span>
+<a name="l00227"></a><a class="code" href="_configuration_8h.html#aae780ad1da65e93031c8819fa64c133e">00227</a> <span class="preprocessor">#define ANALOG_INPUT_SAMPLE 2</span>
+<a name="l00228"></a><a class="code" href="_configuration_8h.html#ada2f40f8c390192e11c232c758afcb57">00228</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_AREF 0</span>
+<a name="l00229"></a><a class="code" href="_configuration_8h.html#ac4969cdff62b814d6be75510e4fd1f46">00229</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_AVCC _BV(REFS0)</span>
+<a name="l00230"></a><a class="code" href="_configuration_8h.html#a1e9dea4096b6f1e3d0c3416ad4902370">00230</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_INT_1_1 _BV(REFS1)</span>
+<a name="l00231"></a><a class="code" href="_configuration_8h.html#a3edc5729832b16c40d5df64fbfba0098">00231</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)</span>
+<a name="l00232"></a>00232 <span class="preprocessor"></span>
+<a name="l00233"></a><a class="code" href="_configuration_8h.html#af5eb7e3dc57a2c282b06f32e51970839">00233</a> <span class="preprocessor">#define ANALOG_REF ANALOG_REF_AVCC</span>
+<a name="l00234"></a><a class="code" href="_configuration_8h.html#a2fc5c022ca08920b3cf6eba085e5798e">00234</a> <span class="preprocessor"></span><span class="preprocessor">#define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)</span>
+<a name="l00235"></a>00235 <span class="preprocessor"></span>
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237 <span class="preprocessor">#endif</span>
+<a name="l00238"></a>00238 <span class="preprocessor"></span><span class="comment">// ##########################################################################################</span>
+<a name="l00239"></a>00239 <span class="comment">// ##                            Endstop configuration                                     ##</span>
+<a name="l00240"></a>00240 <span class="comment">// ##########################################################################################</span>
+<a name="l00241"></a>00241 
+<a name="l00243"></a><a class="code" href="_configuration_8h.html#a390cc608dbb85cd8fb58707effbff15b">00243</a> <span class="preprocessor">#define ENDSTOPPULLUPS 0 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors</span>
+<a name="l00244"></a>00244 <span class="preprocessor"></span><span class="comment">// The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.</span>
+<a name="l00245"></a>00245 <span class="comment">//set to true to invert the logic of the endstops</span>
+<a name="l00246"></a><a class="code" href="_configuration_8h.html#ab0c6075aef1a3f424ce1d19be200491d">00246</a> <span class="preprocessor">#define ENDSTOPS_INVERTING false</span>
+<a name="l00247"></a>00247 <span class="preprocessor"></span><span class="comment">//If your axes are only moving in one direction, make sure the endstops are connected properly.</span>
+<a name="l00248"></a>00248 <span class="comment">//If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here</span>
+<a name="l00249"></a>00249 
+<a name="l00250"></a>00250 
+<a name="l00251"></a>00251 
+<a name="l00253"></a>00253 
+<a name="l00254"></a>00254 <span class="comment">// For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1</span>
+<a name="l00255"></a><a class="code" href="_configuration_8h.html#a7afdf61cfd5a42d565ac71759dc05974">00255</a> <span class="preprocessor">#define X_ENABLE_ON 0</span>
+<a name="l00256"></a><a class="code" href="_configuration_8h.html#acc0bb5bd702433e1d38a31f6584ed821">00256</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_ENABLE_ON 0</span>
+<a name="l00257"></a><a class="code" href="_configuration_8h.html#a6ed17da670ae70c7666be298862e3c27">00257</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_ENABLE_ON 0</span>
+<a name="l00258"></a>00258 <span class="preprocessor"></span>
+<a name="l00259"></a>00259 <span class="comment">// Disables axis when it&#39;s not being used.</span>
+<a name="l00260"></a><a class="code" href="_configuration_8h.html#a9f7183dc5b8aa69d693ee84b906f2641">00260</a> <span class="preprocessor">#define DISABLE_X false</span>
+<a name="l00261"></a><a class="code" href="_configuration_8h.html#a80a96c3a651dda99af25b7dc3f2d2f17">00261</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_Y false</span>
+<a name="l00262"></a><a class="code" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">00262</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_Z true</span>
+<a name="l00263"></a><a class="code" href="_configuration_8h.html#a3ea6d4ec2118ee62a5171b02a295018a">00263</a> <span class="preprocessor"></span><span class="preprocessor">#define DISABLE_E false</span>
+<a name="l00264"></a>00264 <span class="preprocessor"></span>
+<a name="l00265"></a>00265 <span class="comment">// Inverting axis direction</span>
+<a name="l00266"></a><a class="code" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">00266</a> <span class="preprocessor">#define INVERT_X_DIR false</span>
+<a name="l00267"></a><a class="code" href="_configuration_8h.html#a1b0a90f40d48a2f35f6265ba5ab7399c">00267</a> <span class="preprocessor"></span><span class="preprocessor">#define INVERT_Y_DIR true</span>
+<a name="l00268"></a><a class="code" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">00268</a> <span class="preprocessor"></span><span class="preprocessor">#define INVERT_Z_DIR false</span>
+<a name="l00269"></a>00269 <span class="preprocessor"></span>
+<a name="l00271"></a>00271 <span class="comment">// Sets direction of endstops when homing; 1=MAX, -1=MIN</span>
+<a name="l00272"></a><a class="code" href="_configuration_8h.html#a2944654fc8082ed77783a57c21a634bc">00272</a> <span class="preprocessor">#define X_HOME_DIR -1</span>
+<a name="l00273"></a><a class="code" href="_configuration_8h.html#a9fea75ea9dba3ccfd3e37bb262efdb4c">00273</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_HOME_DIR -1</span>
+<a name="l00274"></a><a class="code" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">00274</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_HOME_DIR -1</span>
+<a name="l00275"></a>00275 <span class="preprocessor"></span>
+<a name="l00276"></a>00276  <span class="comment">//If true, axis won&#39;t move to coordinates less than zero.</span>
+<a name="l00277"></a><a class="code" href="_configuration_8h.html#ae0bc603e2f7b76d06df2b40d55d8658f">00277</a> <span class="preprocessor">#define min_software_endstops false</span>
+<a name="l00278"></a>00278 <span class="preprocessor"></span><span class="comment">//If true, axis won&#39;t move to coordinates greater than the defined lengths below.</span>
+<a name="l00279"></a><a class="code" href="_configuration_8h.html#a361b0a359c6a6220a58f04d2ea48023f">00279</a> <span class="preprocessor">#define max_software_endstops true</span>
+<a name="l00280"></a>00280 <span class="preprocessor"></span><span class="comment">// maximum positions - only fixed numbers!</span>
+<a name="l00281"></a><a class="code" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">00281</a> <span class="preprocessor">#define X_MAX_LENGTH 200</span>
+<a name="l00282"></a><a class="code" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">00282</a> <span class="preprocessor"></span><span class="preprocessor">#define Y_MAX_LENGTH 200</span>
+<a name="l00283"></a><a class="code" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">00283</a> <span class="preprocessor"></span><span class="preprocessor">#define Z_MAX_LENGTH 100</span>
 <a name="l00284"></a>00284 <span class="preprocessor"></span>
-<a name="l00286"></a><a class="code" href="_configuration_8h.html#ab036b14c3a6a68ca8d621fb69bc573bb">00286</a> <span class="preprocessor">#define MAX_FEEDRATE {20000, 20000, 2, 50}</span>
-<a name="l00287"></a>00287 <span class="preprocessor"></span>
-<a name="l00288"></a><a class="code" href="_configuration_8h.html#a82fdd5c2a99a72c813ad7729d9e2c843">00288</a> <span class="preprocessor">#define HOMING_FEEDRATE {1500,1500,100}</span>
-<a name="l00289"></a>00289 <span class="preprocessor"></span>
-<a name="l00291"></a><a class="code" href="_configuration_8h.html#aab3784ed69df9d091236d23f3224b896">00291</a> <span class="preprocessor">#define RAMP_ACCELERATION 1</span>
-<a name="l00292"></a>00292 <span class="preprocessor"></span>
-<a name="l00294"></a>00294 <span class="preprocessor">#ifdef RAMP_ACCELERATION</span>
-<a name="l00295"></a>00295 <span class="preprocessor"></span>
-<a name="l00296"></a><a class="code" href="_configuration_8h.html#abd7113c25760ee7575751d7bfc8d2ecd">00296</a> <span class="preprocessor">#define MAX_START_SPEED_UNITS_PER_SECOND {25.0,25.0,0.2,10.0}</span>
-<a name="l00297"></a>00297 <span class="preprocessor"></span>
-<a name="l00298"></a><a class="code" href="_configuration_8h.html#a8a563face72a663eb32bc8840a750434">00298</a> <span class="preprocessor">#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {750,750,50,1000} </span>
-<a name="l00299"></a>00299 <span class="preprocessor"></span>
-<a name="l00300"></a><a class="code" href="_configuration_8h.html#a06b584eef87db0b0177bd940e4bdac50">00300</a> <span class="preprocessor">#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {750,750,50,1000}</span>
-<a name="l00301"></a>00301 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00302"></a>00302 <span class="preprocessor"></span>
-<a name="l00313"></a>00313 <span class="comment">//#define PATHDEPENDEND_RAMP</span>
-<a name="l00315"></a><a class="code" href="_configuration_8h.html#ac282229ed7d70bb57b34d07522d9266d">00315</a> <span class="comment"></span><span class="preprocessor">#define PATHDEPENDEND_DELTAV 30</span>
-<a name="l00316"></a>00316 <span class="preprocessor"></span>
-<a name="l00317"></a>00317 <span class="comment">// ##########################################################################################</span>
-<a name="l00318"></a>00318 <span class="comment">// ##                           Communication configuration                                ##</span>
-<a name="l00319"></a>00319 <span class="comment">// ##########################################################################################</span>
-<a name="l00320"></a>00320 
-<a name="l00322"></a>00322 
-<a name="l00330"></a><a class="code" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">00330</a> <span class="preprocessor">#define BAUDRATE 76800</span>
-<a name="l00331"></a>00331 <span class="preprocessor"></span><span class="comment">//#define BAUDRATE 57600</span>
-<a name="l00332"></a>00332 
-<a name="l00334"></a><a class="code" href="_configuration_8h.html#a29a61474854edfeed19457644161249f">00334</a> <span class="preprocessor">#define OUTPUT_BUFFER_SIZE 64</span>
-<a name="l00335"></a>00335 <span class="preprocessor"></span>
-<a name="l00343"></a><a class="code" href="_configuration_8h.html#a786dbfefcae53c0e493eff1b63804d6b">00343</a> <span class="preprocessor">#define USE_BUFFERED_OUTPUT </span>
-<a name="l00344"></a>00344 <span class="preprocessor"></span>
-<a name="l00349"></a><a class="code" href="_configuration_8h.html#a814de552a068ff380ac7ec841e7b595b">00349</a> <span class="preprocessor">#define MOVE_CACHE_SIZE 15</span>
+<a name="l00285"></a>00285 <span class="comment">// ##########################################################################################</span>
+<a name="l00286"></a>00286 <span class="comment">// ##                           Mevement settings                                         ##</span>
+<a name="l00287"></a>00287 <span class="comment">// ##########################################################################################</span>
+<a name="l00288"></a>00288 
+<a name="l00293"></a><a class="code" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">00293</a> <span class="preprocessor">#define STEPPER_INACTIVE_TIME 120L</span>
+<a name="l00294"></a>00294 <span class="preprocessor"></span>
+<a name="l00299"></a><a class="code" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">00299</a> <span class="preprocessor">#define MAX_INACTIVE_TIME 0L</span>
+<a name="l00300"></a>00300 <span class="preprocessor"></span>
+<a name="l00302"></a><a class="code" href="_configuration_8h.html#ab036b14c3a6a68ca8d621fb69bc573bb">00302</a> <span class="preprocessor">#define MAX_FEEDRATE {12000, 12000, 3, 20}</span>
+<a name="l00303"></a>00303 <span class="preprocessor"></span>
+<a name="l00304"></a><a class="code" href="_configuration_8h.html#a82fdd5c2a99a72c813ad7729d9e2c843">00304</a> <span class="preprocessor">#define HOMING_FEEDRATE {2400,2400,100}</span>
+<a name="l00305"></a>00305 <span class="preprocessor"></span>
+<a name="l00307"></a><a class="code" href="_configuration_8h.html#aab3784ed69df9d091236d23f3224b896">00307</a> <span class="preprocessor">#define RAMP_ACCELERATION 1</span>
+<a name="l00308"></a>00308 <span class="preprocessor"></span>
+<a name="l00310"></a>00310 
+<a name="l00312"></a>00312 <span class="preprocessor">#ifdef RAMP_ACCELERATION</span>
+<a name="l00313"></a>00313 <span class="preprocessor"></span>
+<a name="l00314"></a><a class="code" href="_configuration_8h.html#a8a563face72a663eb32bc8840a750434">00314</a> <span class="preprocessor">#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000} </span>
+<a name="l00315"></a>00315 <span class="preprocessor"></span>
+<a name="l00316"></a><a class="code" href="_configuration_8h.html#a06b584eef87db0b0177bd940e4bdac50">00316</a> <span class="preprocessor">#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,1000}</span>
+<a name="l00317"></a>00317 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00318"></a>00318 <span class="preprocessor"></span>
+<a name="l00341"></a><a class="code" href="_configuration_8h.html#aef98e140e44898a5ff54c4055621fb43">00341</a> <span class="preprocessor">#define MAX_JERK 40.0</span>
+<a name="l00342"></a>00342 <span class="preprocessor"></span>
+<a name="l00349"></a><a class="code" href="_configuration_8h.html#a3e38843cf1b7d9902feaf622292096c0">00349</a> <span class="preprocessor">#define USE_ADVANCE</span>
 <a name="l00350"></a>00350 <span class="preprocessor"></span>
-<a name="l00355"></a><a class="code" href="_configuration_8h.html#af6168edd26520974b8660182d040051a">00355</a> <span class="preprocessor">#define GCODE_BUFFER_SIZE 2</span>
+<a name="l00355"></a><a class="code" href="_configuration_8h.html#aa7b579fe75903d3cbbe6b266221e053f">00355</a> <span class="preprocessor">#define MAX_HALFSTEP_INTERVAL 2002</span>
 <a name="l00356"></a>00356 <span class="preprocessor"></span>
-<a name="l00357"></a><a class="code" href="_configuration_8h.html#ac047bf179fdf448c1b3616e2597d8a20">00357</a> <span class="preprocessor">#define ACK_WITH_LINENUMBER</span>
-<a name="l00358"></a>00358 <span class="preprocessor"></span>
-<a name="l00361"></a><a class="code" href="_configuration_8h.html#a74f1dce7f5b438fc0b54cc94707e91d2">00361</a> <span class="preprocessor">#define WAITING_IDENTIFIER &quot;wait&quot;</span>
-<a name="l00362"></a>00362 <span class="preprocessor"></span>
-<a name="l00372"></a><a class="code" href="_configuration_8h.html#ac367c9a6d11165da67e68db5ef270307">00372</a> <span class="preprocessor">#define ECHO_ON_EXECUTE</span>
-<a name="l00373"></a>00373 <span class="preprocessor"></span>
-<a name="l00382"></a><a class="code" href="_configuration_8h.html#a39741ee55d77198f9c1f4e47f0a5d478">00382</a> <span class="preprocessor">#define EEPROM_MODE 1</span>
-<a name="l00383"></a>00383 <span class="preprocessor"></span>
-<a name="l00384"></a>00384 <span class="comment">//#define SDSUPPORT 1</span>
-<a name="l00385"></a>00385 
-<a name="l00386"></a>00386 <span class="comment">// ##########################################################################################</span>
-<a name="l00387"></a>00387 <span class="comment">// ##                                  Debug configuration                                 ##</span>
-<a name="l00388"></a>00388 <span class="comment">// ##########################################################################################</span>
-<a name="l00389"></a>00389 
-<a name="l00391"></a>00391 <span class="comment">//#define DEBUG_QUEUE_MOVE</span>
-<a name="l00394"></a><a class="code" href="_configuration_8h.html#a77e164a49bf252fcb13d3bfbde4f7360">00394</a> <span class="comment"></span><span class="preprocessor">#define INCLUDE_DEBUG_COMMUNICATION</span>
-<a name="l00395"></a>00395 <span class="preprocessor"></span>
-<a name="l00397"></a><a class="code" href="_configuration_8h.html#ad512cb595c1b9726414ad6f3b4c7d57a">00397</a> <span class="preprocessor">#define INCLUDE_DEBUG_NO_MOVE</span>
-<a name="l00398"></a>00398 <span class="preprocessor"></span>
-<a name="l00401"></a>00401 <span class="comment">//#define DEBUG_FREE_MEMORY</span>
-<a name="l00403"></a>00403 <span class="comment"></span><span class="comment">//#define DEBUG_GENERIC</span>
-<a name="l00404"></a>00404 <span class="comment">// Uncomment the following line to enable debugging. You can better control debugging below the following line</span>
-<a name="l00405"></a>00405 <span class="comment">//#define DEBUG</span>
-<a name="l00406"></a>00406 <span class="comment">// ####################################################################################</span>
-<a name="l00407"></a>00407 <span class="comment">// #                         Below this line only for experts                         #</span>
-<a name="l00408"></a>00408 <span class="comment">// ####################################################################################</span>
-<a name="l00409"></a>00409 
-<a name="l00410"></a>00410 
-<a name="l00411"></a>00411 <span class="comment">// ####################################################################################</span>
-<a name="l00412"></a>00412 <span class="comment">// #          No configuration below this line - just some errorchecking              #</span>
-<a name="l00413"></a>00413 <span class="comment">// ####################################################################################</span>
-<a name="l00414"></a>00414 <span class="preprocessor">#ifdef SUPPORT_MAX6675</span>
-<a name="l00415"></a>00415 <span class="preprocessor"></span><span class="preprocessor">#if !defined SCK_PIN || !defined MOSI_PIN || !defined MISO_PIN</span>
-<a name="l00416"></a>00416 <span class="preprocessor"></span><span class="preprocessor">#error For MAX6675 support, you need to define SCK_PIN, MISO_PIN and MOSI_PIN in pins.h</span>
-<a name="l00417"></a>00417 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00418"></a>00418 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00419"></a>00419 <span class="preprocessor"></span><span class="preprocessor">#if X_STEP_PIN&lt;0 || Y_STEP_PIN&lt;0 || Z_STEP_PIN&lt;0</span>
-<a name="l00420"></a>00420 <span class="preprocessor"></span><span class="preprocessor">#error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN</span>
-<a name="l00421"></a>00421 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00422"></a>00422 <span class="preprocessor"></span><span class="preprocessor">#if EXT0_STEP_PIN&lt;0</span>
-<a name="l00423"></a>00423 <span class="preprocessor"></span><span class="preprocessor">#error EXT0_STEP_PIN not set to a pin number.</span>
-<a name="l00424"></a>00424 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00425"></a>00425 <span class="preprocessor"></span><span class="preprocessor">#if EXT0_DIR_PIN&lt;0</span>
-<a name="l00426"></a>00426 <span class="preprocessor"></span><span class="preprocessor">#error EXT0_DIR_PIN not set to a pin number.</span>
-<a name="l00427"></a>00427 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00428"></a>00428 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00429"></a>00429 <span class="preprocessor"></span>
+<a name="l00357"></a>00357 <span class="comment">// ##########################################################################################</span>
+<a name="l00358"></a>00358 <span class="comment">// ##                           Communication configuration                                ##</span>
+<a name="l00359"></a>00359 <span class="comment">// ##########################################################################################</span>
+<a name="l00360"></a>00360 
+<a name="l00362"></a>00362 
+<a name="l00371"></a><a class="code" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">00371</a> <span class="preprocessor">#define BAUDRATE 76800</span>
+<a name="l00372"></a>00372 <span class="preprocessor"></span><span class="comment">//#define BAUDRATE 57600</span>
+<a name="l00373"></a>00373 <span class="comment">//#define BAUDRATE 250000</span>
+<a name="l00375"></a><a class="code" href="_configuration_8h.html#a29a61474854edfeed19457644161249f">00375</a> <span class="comment"></span><span class="preprocessor">#define OUTPUT_BUFFER_SIZE 64</span>
+<a name="l00376"></a>00376 <span class="preprocessor"></span>
+<a name="l00384"></a><a class="code" href="_configuration_8h.html#a786dbfefcae53c0e493eff1b63804d6b">00384</a> <span class="preprocessor">#define USE_BUFFERED_OUTPUT </span>
+<a name="l00385"></a>00385 <span class="preprocessor"></span>
+<a name="l00390"></a><a class="code" href="_configuration_8h.html#a814de552a068ff380ac7ec841e7b595b">00390</a> <span class="preprocessor">#define MOVE_CACHE_SIZE 16</span>
+<a name="l00391"></a>00391 <span class="preprocessor"></span>
+<a name="l00396"></a><a class="code" href="_configuration_8h.html#af6168edd26520974b8660182d040051a">00396</a> <span class="preprocessor">#define GCODE_BUFFER_SIZE 2</span>
+<a name="l00397"></a>00397 <span class="preprocessor"></span>
+<a name="l00398"></a><a class="code" href="_configuration_8h.html#ac047bf179fdf448c1b3616e2597d8a20">00398</a> <span class="preprocessor">#define ACK_WITH_LINENUMBER</span>
+<a name="l00399"></a>00399 <span class="preprocessor"></span>
+<a name="l00402"></a><a class="code" href="_configuration_8h.html#a74f1dce7f5b438fc0b54cc94707e91d2">00402</a> <span class="preprocessor">#define WAITING_IDENTIFIER &quot;wait&quot;</span>
+<a name="l00403"></a>00403 <span class="preprocessor"></span>
+<a name="l00413"></a><a class="code" href="_configuration_8h.html#ac367c9a6d11165da67e68db5ef270307">00413</a> <span class="preprocessor">#define ECHO_ON_EXECUTE</span>
+<a name="l00414"></a>00414 <span class="preprocessor"></span>
+<a name="l00423"></a><a class="code" href="_configuration_8h.html#a39741ee55d77198f9c1f4e47f0a5d478">00423</a> <span class="preprocessor">#define EEPROM_MODE 1</span>
+<a name="l00424"></a>00424 <span class="preprocessor"></span>
+<a name="l00425"></a>00425 <span class="comment">//#define SDSUPPORT 1</span>
+<a name="l00426"></a>00426 
+<a name="l00427"></a>00427 <span class="comment">// ##########################################################################################</span>
+<a name="l00428"></a>00428 <span class="comment">// ##                                  Debug configuration                                 ##</span>
+<a name="l00429"></a>00429 <span class="comment">// ##########################################################################################</span>
+<a name="l00430"></a>00430 
+<a name="l00432"></a>00432 <span class="comment">//#define DEBUG_QUEUE_MOVE</span>
+<a name="l00435"></a><a class="code" href="_configuration_8h.html#a77e164a49bf252fcb13d3bfbde4f7360">00435</a> <span class="comment"></span><span class="preprocessor">#define INCLUDE_DEBUG_COMMUNICATION</span>
+<a name="l00436"></a>00436 <span class="preprocessor"></span>
+<a name="l00438"></a>00438 <span class="comment">//#define INCLUDE_DEBUG_NO_MOVE</span>
+<a name="l00442"></a>00442 <span class="comment"></span><span class="comment">//#define DEBUG_FREE_MEMORY</span>
+<a name="l00443"></a><a class="code" href="_configuration_8h.html#abf1066bc1565bd863e92bd598167eae8">00443</a> <span class="preprocessor">#define DEBUG_ADVANCE</span>
+<a name="l00444"></a>00444 <span class="preprocessor"></span>
+<a name="l00445"></a>00445 <span class="comment">//#define DEBUG_GENERIC</span>
+<a name="l00446"></a>00446 <span class="comment">// Uncomment the following line to enable debugging. You can better control debugging below the following line</span>
+<a name="l00447"></a>00447 <span class="comment">//#define DEBUG</span>
+<a name="l00448"></a>00448 <span class="comment">// ####################################################################################</span>
+<a name="l00449"></a>00449 <span class="comment">// #                         Below this line only for experts                         #</span>
+<a name="l00450"></a>00450 <span class="comment">// ####################################################################################</span>
+<a name="l00451"></a>00451 
+<a name="l00452"></a>00452 
+<a name="l00453"></a>00453 <span class="comment">// ####################################################################################</span>
+<a name="l00454"></a>00454 <span class="comment">// #          No configuration below this line - just some errorchecking              #</span>
+<a name="l00455"></a>00455 <span class="comment">// ####################################################################################</span>
+<a name="l00456"></a>00456 <span class="preprocessor">#ifdef SUPPORT_MAX6675</span>
+<a name="l00457"></a>00457 <span class="preprocessor"></span><span class="preprocessor">#if !defined SCK_PIN || !defined MOSI_PIN || !defined MISO_PIN</span>
+<a name="l00458"></a>00458 <span class="preprocessor"></span><span class="preprocessor">#error For MAX6675 support, you need to define SCK_PIN, MISO_PIN and MOSI_PIN in pins.h</span>
+<a name="l00459"></a>00459 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00460"></a>00460 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00461"></a>00461 <span class="preprocessor"></span><span class="preprocessor">#if X_STEP_PIN&lt;0 || Y_STEP_PIN&lt;0 || Z_STEP_PIN&lt;0</span>
+<a name="l00462"></a>00462 <span class="preprocessor"></span><span class="preprocessor">#error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN</span>
+<a name="l00463"></a>00463 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00464"></a>00464 <span class="preprocessor"></span><span class="preprocessor">#if EXT0_STEP_PIN&lt;0</span>
+<a name="l00465"></a>00465 <span class="preprocessor"></span><span class="preprocessor">#error EXT0_STEP_PIN not set to a pin number.</span>
+<a name="l00466"></a>00466 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00467"></a>00467 <span class="preprocessor"></span><span class="preprocessor">#if EXT0_DIR_PIN&lt;0</span>
+<a name="l00468"></a>00468 <span class="preprocessor"></span><span class="preprocessor">#error EXT0_DIR_PIN not set to a pin number.</span>
+<a name="l00469"></a>00469 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00470"></a>00470 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00471"></a>00471 <span class="preprocessor"></span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="_configuration_8h.html">Configuration.h</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:50 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

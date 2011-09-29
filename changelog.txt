@@ -1,3 +1,6 @@
+Version 0.33  26.9.2011
+  Added configuration option SCALE_PID_TO_MAX 
+
 Version 0.32 24.9.2011
   Improved speed in stepper interrupt.
   Added trajectory smoothing.

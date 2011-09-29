@@ -103,9 +103,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ade4042dbe39efc939de8a75e0102ee4b">EPR_X_HOMING_FEEDRATE</a>&#160;&#160;&#160;27</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a848be186f70158156487357cea8a076f">EPR_Y_HOMING_FEEDRATE</a>&#160;&#160;&#160;31</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a2bbc6d31ec012b522b7b8700852fb236">EPR_Z_HOMING_FEEDRATE</a>&#160;&#160;&#160;35</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a818e35a47f4dded6ea5c82d297feaea2">EPR_X_MAX_START_SPEED</a>&#160;&#160;&#160;39</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a372a812792e97d818c6a815cc6555a13">EPR_Y_MAX_START_SPEED</a>&#160;&#160;&#160;43</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#abd05eaef85eb7a9282f8fae7f571d419">EPR_Z_MAX_START_SPEED</a>&#160;&#160;&#160;47</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aa90bbc0fc3c7b8e8e0a1bca0c99a5a44">EPR_MAX_JERK</a>&#160;&#160;&#160;39</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac5c699b9db85fa31d55057190d426f8a">EPR_X_MAX_ACCEL</a>&#160;&#160;&#160;51</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac92348123f02b917797b1f1aeabae211">EPR_Y_MAX_ACCEL</a>&#160;&#160;&#160;55</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a5348a179e18b172568cde394861318a8">EPR_Z_MAX_ACCEL</a>&#160;&#160;&#160;59</td></tr>
@@ -130,12 +128,14 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aaa75ec8857ee428f5d27ab0af6ef8e57">EPR_EXTRUDER_X_OFFSET</a>&#160;&#160;&#160;31</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a6b8073d98b5971c76db78f4618c95165">EPR_EXTRUDER_Y_OFFSET</a>&#160;&#160;&#160;35</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac50372ef9cb0166493cdee63d63e5ee6">EPR_EXTRUDER_WATCH_PERIOD</a>&#160;&#160;&#160;39</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aa80919dea6acb89e650815fa56958297">EPR_EXTRUDER_ADVANCE_K</a>&#160;&#160;&#160;41</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a56159747b47dd1eda34659f51287c89d">epr_output_settings</a> ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes all eeprom settings to serial console.  <a href="#a56159747b47dd1eda34659f51287c89d"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a1688d15668bdcefb7c078e75161f5242">epr_update</a> (<a class="el" href="struct_g_code.html">GCode</a> *com)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a739c1d676ce722809e48629d65217b08">epr_init</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ae8e836ee3254ec9a160e904dcb631bde">epr_init_baudrate</a> ()</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
 <a class="anchor" id="a2b0a7c91c014b194d4f3b523d9d3dc80"></a><!-- doxytag: member="Eeprom.h::EEPROM_EXTRUDER_LENGTH" ref="a2b0a7c91c014b194d4f3b523d9d3dc80" args="" -->
@@ -197,6 +197,19 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define EPR_BAUDRATE&#160;&#160;&#160;75</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa80919dea6acb89e650815fa56958297"></a><!-- doxytag: member="Eeprom.h::EPR_EXTRUDER_ADVANCE_K" ref="aa80919dea6acb89e650815fa56958297" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define EPR_EXTRUDER_ADVANCE_K&#160;&#160;&#160;41</td>
         </tr>
       </table>
 </div>
@@ -399,6 +412,19 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa90bbc0fc3c7b8e8e0a1bca0c99a5a44"></a><!-- doxytag: member="Eeprom.h::EPR_MAX_JERK" ref="aa90bbc0fc3c7b8e8e0a1bca0c99a5a44" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define EPR_MAX_JERK&#160;&#160;&#160;39</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a3e3982e8d6fbf37b06de3253722170bc"></a><!-- doxytag: member="Eeprom.h::EPR_STEPPER_INACTIVE_TIME" ref="a3e3982e8d6fbf37b06de3253722170bc" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -444,19 +470,6 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define EPR_X_MAX_FEEDRATE&#160;&#160;&#160;15</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a818e35a47f4dded6ea5c82d297feaea2"></a><!-- doxytag: member="Eeprom.h::EPR_X_MAX_START_SPEED" ref="a818e35a47f4dded6ea5c82d297feaea2" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EPR_X_MAX_START_SPEED&#160;&#160;&#160;39</td>
         </tr>
       </table>
 </div>
@@ -529,19 +542,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a372a812792e97d818c6a815cc6555a13"></a><!-- doxytag: member="Eeprom.h::EPR_Y_MAX_START_SPEED" ref="a372a812792e97d818c6a815cc6555a13" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EPR_Y_MAX_START_SPEED&#160;&#160;&#160;43</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a74134773b5ecd9fe785c7124c03923a1"></a><!-- doxytag: member="Eeprom.h::EPR_Y_MAX_TRAVEL_ACCEL" ref="a74134773b5ecd9fe785c7124c03923a1" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -607,19 +607,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abd05eaef85eb7a9282f8fae7f571d419"></a><!-- doxytag: member="Eeprom.h::EPR_Z_MAX_START_SPEED" ref="abd05eaef85eb7a9282f8fae7f571d419" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EPR_Z_MAX_START_SPEED&#160;&#160;&#160;47</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ae9bb5eec63a8826ccac85b3245a4ec3b"></a><!-- doxytag: member="Eeprom.h::EPR_Z_MAX_TRAVEL_ACCEL" ref="ae9bb5eec63a8826ccac85b3245a4ec3b" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -653,6 +640,22 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">void epr_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae8e836ee3254ec9a160e904dcb631bde"></a><!-- doxytag: member="Eeprom.h::epr_init_baudrate" ref="ae8e836ee3254ec9a160e904dcb631bde" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void epr_init_baudrate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -712,7 +715,7 @@ Functions</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="_eeprom_8h.html">Eeprom.h</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

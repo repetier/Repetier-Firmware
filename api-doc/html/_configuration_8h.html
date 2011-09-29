@@ -107,9 +107,9 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeefa06ad16c004185a5dbcf6f4f8642f">EXT0_HEATER_PIN</a>&#160;&#160;&#160;HEATER_0_PIN</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a500527759a4c15569c4a69efe2811dc1">EXT0_STEP_PIN</a>&#160;&#160;&#160;E_STEP_PIN</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa05066c7d6379276615dcab8f5e5eb1f">EXT0_DIR_PIN</a>&#160;&#160;&#160;E_DIR_PIN</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1d2b536d0751a942656d556613481b95">EXT0_ENABLE_PIN</a>&#160;&#160;&#160;E_ENABLE_PIN</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a30f9bdf00c36767d4c9329f636de4e82">EXT0_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a30f9bdf00c36767d4c9329f636de4e82">EXT0_ENABLE_ON</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac436a35cc3678431777106325f0db62a">EXT0_MAX_FEEDRATE</a>&#160;&#160;&#160;1200</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae711b829c8bd6a1f837a3bc448154404">EXT0_MAX_START_FEEDRATE</a>&#160;&#160;&#160;10</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aff146e72c56b77076a697555b8e04c42">EXT0_MAX_ACCELERATION</a>&#160;&#160;&#160;10000</td></tr>
@@ -120,9 +120,16 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a75dd4d8c5cfa2b9359e15aecef67a03e">EXT0_PID_IGAIN</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa5bd7c9ee76a4f1ec7b8dc3bc3b45d70">EXT0_PID_DGAIN</a>&#160;&#160;&#160;2000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adfb2192d3c11c6eb519b2a67e7957a4f">EXT0_PID_MAX</a>&#160;&#160;&#160;200</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac810524b2d8027f204d09519b3357c72">NUM_TEMPS_USERTHERMISTOR</a>&#160;&#160;&#160;28</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae62f54d9ac97f2f9c9c4556b9b2a5d32">USER_THERMISTORTABLE</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a03e2eac4f7cebc0157410cb76db3489c">USE_GENERIC_THERMISTORTABLE</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adba446ad427bf3bf4f1aa23d0dadfb0a">EXT0_ADVANCE_K</a>&#160;&#160;&#160;0.0f</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Faktor for the advance algorithm. 0 disables the algorithm.  <a href="#adba446ad427bf3bf4f1aa23d0dadfb0a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a32325a715535efb34c4b98105b50745e">NUM_TEMPS_USERTHERMISTOR0</a>&#160;&#160;&#160;28</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aca1b42d580395a27d2a46e064d83bac7">NUM_TEMPS_USERTHERMISTOR1</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a82c8102a4461b6d9dfc74074f89ac5c5">NUM_TEMPS_USERTHERMISTOR2</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeba3c210690a31bfb8fabc07afce1f6b">SCALE_PID_TO_MAX</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Set PID scaling.  <a href="#aeba3c210690a31bfb8fabc07afce1f6b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a550e80efe233bf43601feaebe50fa9a8">USER_THERMISTORTABLE0</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a661012a52420483eda439846f00fabd2">USER_THERMISTORTABLE1</a>&#160;&#160;&#160;{}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4c15037cdc427465c0a591093ad7f00a">USER_THERMISTORTABLE2</a>&#160;&#160;&#160;{}</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2542fe5805acbc279293f7496ee76272">GENERIC_THERM_R0</a>&#160;&#160;&#160;1042.7</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae9349d0c6e09727f13d32d49d2c7605a">GENERIC_THERM_T0</a>&#160;&#160;&#160;170</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeec5dcc0d69fe07d72515d4fad674e4c">GENERIC_THERM_BETA</a>&#160;&#160;&#160;4036</td></tr>
@@ -158,7 +165,6 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7afdf61cfd5a42d565ac71759dc05974">X_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#acc0bb5bd702433e1d38a31f6584ed821">Y_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6ed17da670ae70c7666be298862e3c27">Z_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a31ec3d059470f9e1ecd20005b1731bb3">E_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9f7183dc5b8aa69d693ee84b906f2641">DISABLE_X</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a80a96c3a651dda99af25b7dc3f2d2f17">DISABLE_Y</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">DISABLE_Z</a>&#160;&#160;&#160;true</td></tr>
@@ -166,7 +172,6 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">INVERT_X_DIR</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1b0a90f40d48a2f35f6265ba5ab7399c">INVERT_Y_DIR</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">INVERT_Z_DIR</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a11a674adadbde70fc6a0a1a83b78b4c7">INVERT_E_DIR</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2944654fc8082ed77783a57c21a634bc">X_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9fea75ea9dba3ccfd3e37bb262efdb4c">Y_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">Z_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
@@ -177,24 +182,25 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">Z_MAX_LENGTH</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;120L</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">MAX_INACTIVE_TIME</a>&#160;&#160;&#160;0L</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ab036b14c3a6a68ca8d621fb69bc573bb">MAX_FEEDRATE</a>&#160;&#160;&#160;{20000, 20000, 2, 50}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a82fdd5c2a99a72c813ad7729d9e2c843">HOMING_FEEDRATE</a>&#160;&#160;&#160;{1500,1500,100}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ab036b14c3a6a68ca8d621fb69bc573bb">MAX_FEEDRATE</a>&#160;&#160;&#160;{12000, 12000, 3, 20}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a82fdd5c2a99a72c813ad7729d9e2c843">HOMING_FEEDRATE</a>&#160;&#160;&#160;{2400,2400,100}</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aab3784ed69df9d091236d23f3224b896">RAMP_ACCELERATION</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#abd7113c25760ee7575751d7bfc8d2ecd">MAX_START_SPEED_UNITS_PER_SECOND</a>&#160;&#160;&#160;{25.0,25.0,0.2,10.0}</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.  <a href="#abd7113c25760ee7575751d7bfc8d2ecd"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8a563face72a663eb32bc8840a750434">MAX_ACCELERATION_UNITS_PER_SQ_SECOND</a>&#160;&#160;&#160;{750,750,50,1000}</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts.  <a href="#a8a563face72a663eb32bc8840a750434"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a06b584eef87db0b0177bd940e4bdac50">MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND</a>&#160;&#160;&#160;{750,750,50,1000}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8a563face72a663eb32bc8840a750434">MAX_ACCELERATION_UNITS_PER_SQ_SECOND</a>&#160;&#160;&#160;{1000,1000,50,1000}</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Use RAMP acceleration for faster printing speed.  <a href="#a8a563face72a663eb32bc8840a750434"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a06b584eef87db0b0177bd940e4bdac50">MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND</a>&#160;&#160;&#160;{1000,1000,50,1000}</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z max acceleration in mm/s^2 for travel moves.  <a href="#a06b584eef87db0b0177bd940e4bdac50"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac282229ed7d70bb57b34d07522d9266d">PATHDEPENDEND_DELTAV</a>&#160;&#160;&#160;30</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Activates path dependend acceleration.  <a href="#ac282229ed7d70bb57b34d07522d9266d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aef98e140e44898a5ff54c4055621fb43">MAX_JERK</a>&#160;&#160;&#160;40.0</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum allowable jerk.  <a href="#aef98e140e44898a5ff54c4055621fb43"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3e38843cf1b7d9902feaf622292096c0">USE_ADVANCE</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable advance algorithm.  <a href="#a3e38843cf1b7d9902feaf622292096c0"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa7b579fe75903d3cbbe6b266221e053f">MAX_HALFSTEP_INTERVAL</a>&#160;&#160;&#160;2002</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a>&#160;&#160;&#160;76800</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Communication speed.  <a href="#a734bbab06e1a9fd2e5522db0221ff6e3"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a29a61474854edfeed19457644161249f">OUTPUT_BUFFER_SIZE</a>&#160;&#160;&#160;64</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Size in byte of the output buffer.  <a href="#a29a61474854edfeed19457644161249f"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a786dbfefcae53c0e493eff1b63804d6b">USE_BUFFERED_OUTPUT</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Activates buffered output.  <a href="#a786dbfefcae53c0e493eff1b63804d6b"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a814de552a068ff380ac7ec841e7b595b">MOVE_CACHE_SIZE</a>&#160;&#160;&#160;15</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a814de552a068ff380ac7ec841e7b595b">MOVE_CACHE_SIZE</a>&#160;&#160;&#160;16</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of moves we can cache in advance.  <a href="#a814de552a068ff380ac7ec841e7b595b"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af6168edd26520974b8660182d040051a">GCODE_BUFFER_SIZE</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache size for incoming commands.  <a href="#af6168edd26520974b8660182d040051a"></a><br/></td></tr>
@@ -205,7 +211,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a39741ee55d77198f9c1f4e47f0a5d478">EEPROM_MODE</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">EEPROM storage mode.  <a href="#a39741ee55d77198f9c1f4e47f0a5d478"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a77e164a49bf252fcb13d3bfbde4f7360">INCLUDE_DEBUG_COMMUNICATION</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad512cb595c1b9726414ad6f3b4c7d57a">INCLUDE_DEBUG_NO_MOVE</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#abf1066bc1565bd863e92bd598167eae8">DEBUG_ADVANCE</a></td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
 <a class="anchor" id="ac047bf179fdf448c1b3616e2597d8a20"></a><!-- doxytag: member="Configuration.h::ACK_WITH_LINENUMBER" ref="ac047bf179fdf448c1b3616e2597d8a20" args="" -->
@@ -382,11 +388,26 @@ Defines</h2></td></tr>
 
 <p>Communication speed. </p>
 <ul>
-<li>115200 : Fastes, but may produce communication errors on quite regular basis, Error rate -3,5%</li>
+<li>250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt</li>
+<li>115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%</li>
 <li>76800 : Best setting for Arduino with 16 MHz, Error rate 0,2% page 198 AVR1284 Manual. Result: Faster communication then 115200</li>
 <li>57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection</li>
 <li>38600 </li>
 </ul>
+
+</div>
+</div>
+<a class="anchor" id="abf1066bc1565bd863e92bd598167eae8"></a><!-- doxytag: member="Configuration.h::DEBUG_ADVANCE" ref="abf1066bc1565bd863e92bd598167eae8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEBUG_ADVANCE</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination with a dry run, you can test the speed of path computations, which are still performed. Writes the free RAM to output, if it is less then at the last test. Should always return values &gt;500 for safety, since it doesn't catch every function call. Nice to tweak cache usage or for seraching for memory induced errors. </p>
 
 </div>
 </div>
@@ -435,19 +456,6 @@ Defines</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define DISABLE_Z&#160;&#160;&#160;true</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a31ec3d059470f9e1ecd20005b1731bb3"></a><!-- doxytag: member="Configuration.h::E_ENABLE_ON" ref="a31ec3d059470f9e1ecd20005b1731bb3" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define E_ENABLE_ON&#160;&#160;&#160;0</td>
         </tr>
       </table>
 </div>
@@ -513,6 +521,21 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="adba446ad427bf3bf4f1aa23d0dadfb0a"></a><!-- doxytag: member="Configuration.h::EXT0_ADVANCE_K" ref="adba446ad427bf3bf4f1aa23d0dadfb0a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define EXT0_ADVANCE_K&#160;&#160;&#160;0.0f</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Faktor for the advance algorithm. 0 disables the algorithm. </p>
+
+</div>
+</div>
 <a class="anchor" id="aa05066c7d6379276615dcab8f5e5eb1f"></a><!-- doxytag: member="Configuration.h::EXT0_DIR_PIN" ref="aa05066c7d6379276615dcab8f5e5eb1f" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -531,7 +554,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define EXT0_ENABLE_ON&#160;&#160;&#160;0</td>
+          <td class="memname">#define EXT0_ENABLE_ON&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -588,7 +611,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define EXT0_INVERSE&#160;&#160;&#160;0</td>
+          <td class="memname">#define EXT0_INVERSE&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -851,7 +874,17 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Reference resistance </p>
+<p>If defined, creates a thermistortable at startup.</p>
+<p>If you dont feel like computing the table on your own, you can use this generic method. It is a simple approximation which may be not as accurate as a good table computed from the reference values in the datasheet. You can increase precision if you use a temperature/resistance for R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures, which are not realy important. The resistors must fit the following schematic: </p>
+<div class="fragment"><pre class="fragment">VREF ---- R2 ---+--- Termistor ---+-- GND
+                |                 |
+                +------ R1 -------+
+                |                 |
+                +---- Capacitor --+
+                |
+                V measured
+</pre></div><p>If you don't have R1, set it to 0. The capacitor is for reducing noise from long thermistor cable. If you don't have have one, it's OK.</p>
+<p>If you don't need the generic table, uncomment the following define. Reference resistance </p>
 
 </div>
 </div>
@@ -966,7 +999,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define HOMING_FEEDRATE&#160;&#160;&#160;{1500,1500,100}</td>
+          <td class="memname">#define HOMING_FEEDRATE&#160;&#160;&#160;{2400,2400,100}</td>
         </tr>
       </table>
 </div>
@@ -986,33 +1019,6 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>Comment out (using // at the start of the line) to disable SD support: Uncomment, to see detailed data for every move. Only for debugging purposes! Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used to test your data througput or search for communication problems. </p>
-
-</div>
-</div>
-<a class="anchor" id="ad512cb595c1b9726414ad6f3b4c7d57a"></a><!-- doxytag: member="Configuration.h::INCLUDE_DEBUG_NO_MOVE" ref="ad512cb595c1b9726414ad6f3b4c7d57a" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define INCLUDE_DEBUG_NO_MOVE</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination with a dry run, you can test the speed of path computations, which are still performed. </p>
-
-</div>
-</div>
-<a class="anchor" id="a11a674adadbde70fc6a0a1a83b78b4c7"></a><!-- doxytag: member="Configuration.h::INVERT_E_DIR" ref="a11a674adadbde70fc6a0a1a83b78b4c7" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define INVERT_E_DIR&#160;&#160;&#160;false</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
 
 </div>
 </div>
@@ -1060,13 +1066,14 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND&#160;&#160;&#160;{750,750,50,1000}</td>
+          <td class="memname">#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND&#160;&#160;&#160;{1000,1000,50,1000}</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. </p>
+<p>Use RAMP acceleration for faster printing speed. </p>
+<p>X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts </p>
 
 </div>
 </div>
@@ -1075,12 +1082,26 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MAX_FEEDRATE&#160;&#160;&#160;{20000, 20000, 2, 50}</td>
+          <td class="memname">#define MAX_FEEDRATE&#160;&#160;&#160;{12000, 12000, 3, 20}</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 <p>Maximum feedrate, the system allows. Higher feedrates are reduced to these values. The axis order in all axis related arrays is X, Y, Z, E </p>
+
+</div>
+</div>
+<a class="anchor" id="aa7b579fe75903d3cbbe6b266221e053f"></a><!-- doxytag: member="Configuration.h::MAX_HALFSTEP_INTERVAL" ref="aa7b579fe75903d3cbbe6b266221e053f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX_HALFSTEP_INTERVAL&#160;&#160;&#160;2002</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in the double computation cost. For slow movements this is not an issue, but for really fast moves this is too much. The value specified here is the number of clock cycles between a step on the driving axis. If the interval at full speed is below this value, smoothing is disabled for that line. </p>
 
 </div>
 </div>
@@ -1098,6 +1119,26 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aef98e140e44898a5ff54c4055621fb43"></a><!-- doxytag: member="Configuration.h::MAX_JERK" ref="aef98e140e44898a5ff54c4055621fb43" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX_JERK&#160;&#160;&#160;40.0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Maximum allowable jerk. </p>
+<p>Caution: This is no real jerk in a physical meaning.</p>
+<p>The jerk determines your start speed and the maximum speed at the join of two segments. It's unit is mm/s. If the printer is standing still, the start speed is jerk/2. At the join of two segments, the speed difference is limited to the jerk value.</p>
+<p>Examples: For all examples jerk is assumed as 40.</p>
+<p>Segment 1: vx = 50, vy = 0 Segment 2: vx = 0, vy = 50 v_diff = sqrt((50-0)^2+(0-50)^2) = 70.71 v_diff &gt; jerk =&gt; vx_1 = vy_2 = jerk/v_diff*vx_1 = 40/70.71*50 = 28.3 mm/s at the join</p>
+<p>Segment 1: vx = 50, vy = 0 Segment 2: vx = 35.36, vy = 35.36 v_diff = sqrt((50-35.36)^2+(0-35.36)^2) = 38.27 &lt; jerk Corner can be printed with full speed of 50 mm/s </p>
+
+</div>
+</div>
 <a class="anchor" id="a361b0a359c6a6220a58f04d2ea48023f"></a><!-- doxytag: member="Configuration.h::max_software_endstops" ref="a361b0a359c6a6220a58f04d2ea48023f" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1111,27 +1152,12 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abd7113c25760ee7575751d7bfc8d2ecd"></a><!-- doxytag: member="Configuration.h::MAX_START_SPEED_UNITS_PER_SECOND" ref="abd7113c25760ee7575751d7bfc8d2ecd" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MAX_START_SPEED_UNITS_PER_SECOND&#160;&#160;&#160;{25.0,25.0,0.2,10.0}</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot. </p>
-
-</div>
-</div>
 <a class="anchor" id="a06b584eef87db0b0177bd940e4bdac50"></a><!-- doxytag: member="Configuration.h::MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND" ref="a06b584eef87db0b0177bd940e4bdac50" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND&#160;&#160;&#160;{750,750,50,1000}</td>
+          <td class="memname">#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND&#160;&#160;&#160;{1000,1000,50,1000}</td>
         </tr>
       </table>
 </div>
@@ -1198,7 +1224,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MOVE_CACHE_SIZE&#160;&#160;&#160;15</td>
+          <td class="memname">#define MOVE_CACHE_SIZE&#160;&#160;&#160;16</td>
         </tr>
       </table>
 </div>
@@ -1249,17 +1275,45 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac810524b2d8027f204d09519b3357c72"></a><!-- doxytag: member="Configuration.h::NUM_TEMPS_USERTHERMISTOR" ref="ac810524b2d8027f204d09519b3357c72" args="" -->
+<a class="anchor" id="a32325a715535efb34c4b98105b50745e"></a><!-- doxytag: member="Configuration.h::NUM_TEMPS_USERTHERMISTOR0" ref="a32325a715535efb34c4b98105b50745e" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define NUM_TEMPS_USERTHERMISTOR&#160;&#160;&#160;28</td>
+          <td class="memname">#define NUM_TEMPS_USERTHERMISTOR0&#160;&#160;&#160;28</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Number of entries in the user thermistortable </p>
+<p>Number of entries in the user thermistortable 0. Set to 0 to disable it. </p>
+
+</div>
+</div>
+<a class="anchor" id="aca1b42d580395a27d2a46e064d83bac7"></a><!-- doxytag: member="Configuration.h::NUM_TEMPS_USERTHERMISTOR1" ref="aca1b42d580395a27d2a46e064d83bac7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NUM_TEMPS_USERTHERMISTOR1&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Number of entries in the user thermistortable 1. Set to 0 to disable it. </p>
+
+</div>
+</div>
+<a class="anchor" id="a82c8102a4461b6d9dfc74074f89ac5c5"></a><!-- doxytag: member="Configuration.h::NUM_TEMPS_USERTHERMISTOR2" ref="a82c8102a4461b6d9dfc74074f89ac5c5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NUM_TEMPS_USERTHERMISTOR2&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Number of entries in the user thermistortable 2. Set to 0 to disable it. </p>
 
 </div>
 </div>
@@ -1278,23 +1332,6 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac282229ed7d70bb57b34d07522d9266d"></a><!-- doxytag: member="Configuration.h::PATHDEPENDEND_DELTAV" ref="ac282229ed7d70bb57b34d07522d9266d" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PATHDEPENDEND_DELTAV&#160;&#160;&#160;30</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Activates path dependend acceleration. </p>
-<p>DON'T USE THIS - IT'S NOT FINISHED AND DOESN'T WORK YET</p>
-<p>The normal RAMP will accelerate until target speed is reached and deaccelerate at the end to end speed. If the next segment is already buffered and the path change is small, no deacceleration - acceleration between the to segments are necessary. This will result in a smoother motion with a more continuous extruded filament. A saftety mechanism will disbable or reduce the deacceleration only, if the next move is in defined and acceptable tolerances.Maximum velocity change between two path segments. </p>
-
-</div>
-</div>
 <a class="anchor" id="aab3784ed69df9d091236d23f3224b896"></a><!-- doxytag: member="Configuration.h::RAMP_ACCELERATION" ref="aab3784ed69df9d091236d23f3224b896" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1306,6 +1343,22 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>Comment this to disable ramp acceleration </p>
+
+</div>
+</div>
+<a class="anchor" id="aeba3c210690a31bfb8fabc07afce1f6b"></a><!-- doxytag: member="Configuration.h::SCALE_PID_TO_MAX" ref="aeba3c210690a31bfb8fabc07afce1f6b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCALE_PID_TO_MAX&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Set PID scaling. </p>
+<p>PID values assume a usable range from 0-255. This can be further limited to EXT0_PID_MAX by to methods. Set the value to 0: Normal computation, just clip output to EXT0_PID_MAX if computed value is too high. Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX. If your EXT0_PID_MAX is low, you should prefer the second method. </p>
 
 </div>
 </div>
@@ -1333,6 +1386,22 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3e38843cf1b7d9902feaf622292096c0"></a><!-- doxytag: member="Configuration.h::USE_ADVANCE" ref="a3e38843cf1b7d9902feaf622292096c0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USE_ADVANCE</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Enable advance algorithm. </p>
+<p>Without a correct adjusted advance algorithm, you get blobs at points, where acceleration changes. The effect increases with speed and acceleration difference. Using the advance method decreases this effect. For more informations, read the wiki. </p>
 
 </div>
 </div>
@@ -1365,36 +1434,12 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a03e2eac4f7cebc0157410cb76db3489c"></a><!-- doxytag: member="Configuration.h::USE_GENERIC_THERMISTORTABLE" ref="a03e2eac4f7cebc0157410cb76db3489c" args="" -->
+<a class="anchor" id="a550e80efe233bf43601feaebe50fa9a8"></a><!-- doxytag: member="Configuration.h::USER_THERMISTORTABLE0" ref="a550e80efe233bf43601feaebe50fa9a8" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define USE_GENERIC_THERMISTORTABLE&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>If defined, creates a thermistortable at startup.</p>
-<p>If you dont feel like computing the table on your own, you can use this generic method. It is a simple approximation which may be not as accurate as a good table computed from the reference values in the datasheet. You can increase precision if you use a temperature/resistance for R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures, which are not realy important. The resistors must fit the following schematic: </p>
-<div class="fragment"><pre class="fragment">VREF ---- R2 ---+--- Termistor ---+-- GND
-                |                 |
-                +------ R1 -------+
-                |                 |
-                +---- Capacitor --+
-                |
-                V measured
-</pre></div><p>If you don't have R1, set it to 0. The capacitor is for reducing noise from long thermistor cable. If you don't have have one, it's OK.</p>
-<p>If you don't need the generic table, uncomment the following define. </p>
-
-</div>
-</div>
-<a class="anchor" id="ae62f54d9ac97f2f9c9c4556b9b2a5d32"></a><!-- doxytag: member="Configuration.h::USER_THERMISTORTABLE" ref="ae62f54d9ac97f2f9c9c4556b9b2a5d32" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define USER_THERMISTORTABLE</td>
+          <td class="memname">#define USER_THERMISTORTABLE0</td>
         </tr>
       </table>
 </div>
@@ -1404,7 +1449,33 @@ Defines</h2></td></tr>
   {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\
   {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20} }
 </pre></div><p>Userdefined thermistor table</p>
-<p>There are many different thermistors, which can be combined with different resistors. This result in unpredictable number of tables. As a resolution, the user can define one table here, that can be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries matches the value in NUM_TEMPS_USERTHERMISTOR. If you span definition over multiple lines, make sure to end each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with increasing adc values. For more informations, read <a href="http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html">http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html</a> </p>
+<p>There are many different thermistors, which can be combined with different resistors. This result in unpredictable number of tables. As a resolution, the user can define one table here, that can be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries matches the value in NUM_TEMPS_USERTHERMISTOR0. If you span definition over multiple lines, make sure to end each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with increasing adc values. For more informations, read <a href="http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html">http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html</a> </p>
+
+</div>
+</div>
+<a class="anchor" id="a661012a52420483eda439846f00fabd2"></a><!-- doxytag: member="Configuration.h::USER_THERMISTORTABLE1" ref="a661012a52420483eda439846f00fabd2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USER_THERMISTORTABLE1&#160;&#160;&#160;{}</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a4c15037cdc427465c0a591093ad7f00a"></a><!-- doxytag: member="Configuration.h::USER_THERMISTORTABLE2" ref="a4c15037cdc427465c0a591093ad7f00a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USER_THERMISTORTABLE2&#160;&#160;&#160;{}</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -1589,7 +1660,7 @@ Defines</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="_configuration_8h.html">Configuration.h</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

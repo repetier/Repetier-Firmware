@@ -1,7 +1,7 @@
 Repetier-Firmware - the user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
-Version 0.32  24.9.2011
+Version 0.33  28.9.2011
 
 1) Introduction
 

@@ -92,49 +92,85 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a108ecd1305cf288b2fad8f8b2f6d785a">primaryAxis</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#afef38e3da58f5f4c6ea39213f1615e93">flags</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a288a990ad313ced3b2937aa843194cdc">joinFlags</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#aa09e2c75f62d5236e6f1d59d8e3f872a">halfstep</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">0 = disabled, 1 = halfstep, 2 = fulstep  <a href="#aa09e2c75f62d5236e6f1d59d8e3f872a"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#af38c52325d074ec604af08968a91d29a">dir</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.  <a href="#af38c52325d074ec604af08968a91d29a"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#acddb9b941799c58b09b9ba557a550ba9">delta</a> [4]</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Steps we want to move.  <a href="#acddb9b941799c58b09b9ba557a550ba9"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a3c6de671d3ddb66984484dc28d461238">error</a> [4]</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Error calculation for Bresenham algorithm.  <a href="#a3c6de671d3ddb66984484dc28d461238"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ac56455b5ffc565ed80048f75db843edf">startN</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start speed for acceleration calculation.  <a href="#ac56455b5ffc565ed80048f75db843edf"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a9f104b03681fffd19ae2033c210767fe">startInterval</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start interval (v0) in ticks/step.  <a href="#a9f104b03681fffd19ae2033c210767fe"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a5bab12471c8c69ef831c392491c6e42e">fullInterval</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">interval at full speed in ticks/step.  <a href="#a5bab12471c8c69ef831c392491c6e42e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ad4262b05ac632b84d804da23abb0a4d6">endInterval</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">End interval in ticks/step.  <a href="#ad4262b05ac632b84d804da23abb0a4d6"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a5a87d2c42cc21fa0022be9e1450a6877">stepsRemaining</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Remaining steps, until move is finished.  <a href="#a5a87d2c42cc21fa0022be9e1450a6877"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a71838985ff7934d9f81398b298712440">accelSteps</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">How much steps does it take, to reach the plateau.  <a href="#a71838985ff7934d9f81398b298712440"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ab3edf1c7ee2b81a3b97bd2f9ead61716">decelSteps</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">How much steps does it take, to reach the end speed.  <a href="#ab3edf1c7ee2b81a3b97bd2f9ead61716"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#aa086e112c3ba3b9792468605b359ed30">acceleration</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a831bca68a10b8e43a00dcabd500c3951">plateauN</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a6ce33e4f7788d34d53c4e29b79f6fd01">startN</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start speed for acceleration calculation.  <a href="#a6ce33e4f7788d34d53c4e29b79f6fd01"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#addbb01e5107f242ca1a7521959da29b2">endN</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#aa0076a8395b89235fd3411ef7f96bc99">speedX</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Speed in x direction at fullInterval in mm/s.  <a href="#aa0076a8395b89235fd3411ef7f96bc99"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a742025f2597ee001a8c61abea1070f0b">speedY</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Speed in y direction at fullInterval in mm/s.  <a href="#a742025f2597ee001a8c61abea1070f0b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#aec11ac0ec6a0c95d25828f3a5d38f8d3">speedZ</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Speed in y direction at fullInterval in mm/s.  <a href="#aec11ac0ec6a0c95d25828f3a5d38f8d3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#af2dda87e11a7a84a9ae816f22066d84f">fullSpeed</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired speed mm/s.  <a href="#af2dda87e11a7a84a9ae816f22066d84f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a97712bccaedef08f6d8c525bdda2f7ef">acceleration</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Real acceleration mm/s²  <a href="#a97712bccaedef08f6d8c525bdda2f7ef"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a06f14a9abd47b91465f895d5259cdc1b">distance</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a1a90048ad3c78f23f51478f7393f2808">startFactor</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ab1250412e941471f70dca36216aaf99f">endFactor</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ad86932f49fd6ce6eb135042439bc3e64">startInterval</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start interval (v0) in ticks/step.  <a href="#ad86932f49fd6ce6eb135042439bc3e64"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a6a17f69df69ed31c06a836edfa3409a6">fullInterval</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">interval at full speed in ticks/step.  <a href="#a6a17f69df69ed31c06a836edfa3409a6"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a83813293664bfabfb17e1a6f02591f0f">endInterval</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">End interval in ticks/step.  <a href="#a83813293664bfabfb17e1a6f02591f0f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a9a6897c21ccf9d38cde385a42654d328">stepsRemaining</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Remaining steps, until move is finished.  <a href="#a9a6897c21ccf9d38cde385a42654d328"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#afd69a1548f5674700c6ba5fd6a55914c">accelSteps</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">How much steps does it take, to reach the plateau.  <a href="#afd69a1548f5674700c6ba5fd6a55914c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a9ff32dda312a8ba553474117042721d4">decelSteps</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">How much steps does it take, to reach the end speed.  <a href="#a9ff32dda312a8ba553474117042721d4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#ab47d96a0400955944bcb72926bd98841">accelerationPrim</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Acceleration along primary axis.  <a href="#ab47d96a0400955944bcb72926bd98841"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#aab91ac414761ecd6f5c28d5698872dae">plateauN</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_print_line.html#a596be4d39d2e9d6fa0b8309b71898ce1">vMax</a></td></tr>
 </table>
 <hr/><h2>Field Documentation</h2>
-<a class="anchor" id="aa086e112c3ba3b9792468605b359ed30"></a><!-- doxytag: member="PrintLine::acceleration" ref="aa086e112c3ba3b9792468605b359ed30" args="" -->
+<a class="anchor" id="a97712bccaedef08f6d8c525bdda2f7ef"></a><!-- doxytag: member="PrintLine::acceleration" ref="a97712bccaedef08f6d8c525bdda2f7ef" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#aa086e112c3ba3b9792468605b359ed30">acceleration</a></td>
+          <td class="memname">float <a class="el" href="struct_print_line.html#a97712bccaedef08f6d8c525bdda2f7ef">acceleration</a></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
+<p>Real acceleration mm/s² </p>
+
 </div>
 </div>
-<a class="anchor" id="a71838985ff7934d9f81398b298712440"></a><!-- doxytag: member="PrintLine::accelSteps" ref="a71838985ff7934d9f81398b298712440" args="" -->
+<a class="anchor" id="ab47d96a0400955944bcb72926bd98841"></a><!-- doxytag: member="PrintLine::accelerationPrim" ref="ab47d96a0400955944bcb72926bd98841" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#a71838985ff7934d9f81398b298712440">accelSteps</a></td>
+          <td class="memname">unsigned long <a class="el" href="struct_print_line.html#ab47d96a0400955944bcb72926bd98841">accelerationPrim</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Acceleration along primary axis. </p>
+
+</div>
+</div>
+<a class="anchor" id="afd69a1548f5674700c6ba5fd6a55914c"></a><!-- doxytag: member="PrintLine::accelSteps" ref="afd69a1548f5674700c6ba5fd6a55914c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="struct_print_line.html#afd69a1548f5674700c6ba5fd6a55914c">accelSteps</a></td>
         </tr>
       </table>
 </div>
@@ -144,12 +180,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab3edf1c7ee2b81a3b97bd2f9ead61716"></a><!-- doxytag: member="PrintLine::decelSteps" ref="ab3edf1c7ee2b81a3b97bd2f9ead61716" args="" -->
+<a class="anchor" id="a9ff32dda312a8ba553474117042721d4"></a><!-- doxytag: member="PrintLine::decelSteps" ref="a9ff32dda312a8ba553474117042721d4" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#ab3edf1c7ee2b81a3b97bd2f9ead61716">decelSteps</a></td>
+          <td class="memname">unsigned int <a class="el" href="struct_print_line.html#a9ff32dda312a8ba553474117042721d4">decelSteps</a></td>
         </tr>
       </table>
 </div>
@@ -189,18 +225,57 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad4262b05ac632b84d804da23abb0a4d6"></a><!-- doxytag: member="PrintLine::endInterval" ref="ad4262b05ac632b84d804da23abb0a4d6" args="" -->
+<a class="anchor" id="a06f14a9abd47b91465f895d5259cdc1b"></a><!-- doxytag: member="PrintLine::distance" ref="a06f14a9abd47b91465f895d5259cdc1b" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#ad4262b05ac632b84d804da23abb0a4d6">endInterval</a></td>
+          <td class="memname">float <a class="el" href="struct_print_line.html#a06f14a9abd47b91465f895d5259cdc1b">distance</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab1250412e941471f70dca36216aaf99f"></a><!-- doxytag: member="PrintLine::endFactor" ref="ab1250412e941471f70dca36216aaf99f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float <a class="el" href="struct_print_line.html#ab1250412e941471f70dca36216aaf99f">endFactor</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a83813293664bfabfb17e1a6f02591f0f"></a><!-- doxytag: member="PrintLine::endInterval" ref="a83813293664bfabfb17e1a6f02591f0f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned long <a class="el" href="struct_print_line.html#a83813293664bfabfb17e1a6f02591f0f">endInterval</a></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>End interval in ticks/step. </p>
+
+</div>
+</div>
+<a class="anchor" id="addbb01e5107f242ca1a7521959da29b2"></a><!-- doxytag: member="PrintLine::endN" ref="addbb01e5107f242ca1a7521959da29b2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="struct_print_line.html#addbb01e5107f242ca1a7521959da29b2">endN</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -232,12 +307,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5bab12471c8c69ef831c392491c6e42e"></a><!-- doxytag: member="PrintLine::fullInterval" ref="a5bab12471c8c69ef831c392491c6e42e" args="" -->
+<a class="anchor" id="a6a17f69df69ed31c06a836edfa3409a6"></a><!-- doxytag: member="PrintLine::fullInterval" ref="a6a17f69df69ed31c06a836edfa3409a6" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#a5bab12471c8c69ef831c392491c6e42e">fullInterval</a></td>
+          <td class="memname">unsigned long <a class="el" href="struct_print_line.html#a6a17f69df69ed31c06a836edfa3409a6">fullInterval</a></td>
         </tr>
       </table>
 </div>
@@ -247,12 +322,55 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a831bca68a10b8e43a00dcabd500c3951"></a><!-- doxytag: member="PrintLine::plateauN" ref="a831bca68a10b8e43a00dcabd500c3951" args="" -->
+<a class="anchor" id="af2dda87e11a7a84a9ae816f22066d84f"></a><!-- doxytag: member="PrintLine::fullSpeed" ref="af2dda87e11a7a84a9ae816f22066d84f" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#a831bca68a10b8e43a00dcabd500c3951">plateauN</a></td>
+          <td class="memname">float <a class="el" href="struct_print_line.html#af2dda87e11a7a84a9ae816f22066d84f">fullSpeed</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Desired speed mm/s. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa09e2c75f62d5236e6f1d59d8e3f872a"></a><!-- doxytag: member="PrintLine::halfstep" ref="aa09e2c75f62d5236e6f1d59d8e3f872a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">byte <a class="el" href="struct_print_line.html#aa09e2c75f62d5236e6f1d59d8e3f872a">halfstep</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>0 = disabled, 1 = halfstep, 2 = fulstep </p>
+
+</div>
+</div>
+<a class="anchor" id="a288a990ad313ced3b2937aa843194cdc"></a><!-- doxytag: member="PrintLine::joinFlags" ref="a288a990ad313ced3b2937aa843194cdc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">byte <a class="el" href="struct_print_line.html#a288a990ad313ced3b2937aa843194cdc">joinFlags</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aab91ac414761ecd6f5c28d5698872dae"></a><!-- doxytag: member="PrintLine::plateauN" ref="aab91ac414761ecd6f5c28d5698872dae" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int <a class="el" href="struct_print_line.html#aab91ac414761ecd6f5c28d5698872dae">plateauN</a></td>
         </tr>
       </table>
 </div>
@@ -273,12 +391,70 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9f104b03681fffd19ae2033c210767fe"></a><!-- doxytag: member="PrintLine::startInterval" ref="a9f104b03681fffd19ae2033c210767fe" args="" -->
+<a class="anchor" id="aa0076a8395b89235fd3411ef7f96bc99"></a><!-- doxytag: member="PrintLine::speedX" ref="aa0076a8395b89235fd3411ef7f96bc99" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#a9f104b03681fffd19ae2033c210767fe">startInterval</a></td>
+          <td class="memname">float <a class="el" href="struct_print_line.html#aa0076a8395b89235fd3411ef7f96bc99">speedX</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Speed in x direction at fullInterval in mm/s. </p>
+
+</div>
+</div>
+<a class="anchor" id="a742025f2597ee001a8c61abea1070f0b"></a><!-- doxytag: member="PrintLine::speedY" ref="a742025f2597ee001a8c61abea1070f0b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float <a class="el" href="struct_print_line.html#a742025f2597ee001a8c61abea1070f0b">speedY</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Speed in y direction at fullInterval in mm/s. </p>
+
+</div>
+</div>
+<a class="anchor" id="aec11ac0ec6a0c95d25828f3a5d38f8d3"></a><!-- doxytag: member="PrintLine::speedZ" ref="aec11ac0ec6a0c95d25828f3a5d38f8d3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float <a class="el" href="struct_print_line.html#aec11ac0ec6a0c95d25828f3a5d38f8d3">speedZ</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Speed in y direction at fullInterval in mm/s. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1a90048ad3c78f23f51478f7393f2808"></a><!-- doxytag: member="PrintLine::startFactor" ref="a1a90048ad3c78f23f51478f7393f2808" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float <a class="el" href="struct_print_line.html#a1a90048ad3c78f23f51478f7393f2808">startFactor</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad86932f49fd6ce6eb135042439bc3e64"></a><!-- doxytag: member="PrintLine::startInterval" ref="ad86932f49fd6ce6eb135042439bc3e64" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned long <a class="el" href="struct_print_line.html#ad86932f49fd6ce6eb135042439bc3e64">startInterval</a></td>
         </tr>
       </table>
 </div>
@@ -288,12 +464,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac56455b5ffc565ed80048f75db843edf"></a><!-- doxytag: member="PrintLine::startN" ref="ac56455b5ffc565ed80048f75db843edf" args="" -->
+<a class="anchor" id="a6ce33e4f7788d34d53c4e29b79f6fd01"></a><!-- doxytag: member="PrintLine::startN" ref="a6ce33e4f7788d34d53c4e29b79f6fd01" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#ac56455b5ffc565ed80048f75db843edf">startN</a></td>
+          <td class="memname">unsigned int <a class="el" href="struct_print_line.html#a6ce33e4f7788d34d53c4e29b79f6fd01">startN</a></td>
         </tr>
       </table>
 </div>
@@ -303,18 +479,31 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5a87d2c42cc21fa0022be9e1450a6877"></a><!-- doxytag: member="PrintLine::stepsRemaining" ref="a5a87d2c42cc21fa0022be9e1450a6877" args="" -->
+<a class="anchor" id="a9a6897c21ccf9d38cde385a42654d328"></a><!-- doxytag: member="PrintLine::stepsRemaining" ref="a9a6897c21ccf9d38cde385a42654d328" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">long <a class="el" href="struct_print_line.html#a5a87d2c42cc21fa0022be9e1450a6877">stepsRemaining</a></td>
+          <td class="memname">unsigned long <a class="el" href="struct_print_line.html#a9a6897c21ccf9d38cde385a42654d328">stepsRemaining</a></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>Remaining steps, until move is finished. </p>
+
+</div>
+</div>
+<a class="anchor" id="a596be4d39d2e9d6fa0b8309b71898ce1"></a><!-- doxytag: member="PrintLine::vMax" ref="a596be4d39d2e9d6fa0b8309b71898ce1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long <a class="el" href="struct_print_line.html#a596be4d39d2e9d6fa0b8309b71898ce1">vMax</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -326,7 +515,7 @@ Data Fields</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="struct_print_line.html">PrintLine</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

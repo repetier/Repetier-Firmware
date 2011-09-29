@@ -256,9 +256,33 @@ short temptable_4[NUMTEMPS_4][2] PROGMEM = {
    {1, 430},{54, 137},{107, 107},{160, 91},{213, 80},{266, 71},{319, 64},{372, 57},{425, 51},
    {478, 46},{531, 41},{584, 35},{637, 30},{690, 25},{743, 20},{796, 14},{849, 7},{902, 0},
    {955, -11},{1008, -35}};
-short temptable_5[NUM_TEMPS_USERTHERMISTOR][2] PROGMEM = USER_THERMISTORTABLE ;
-const short *temptables[5] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0],(short int *)&temptable_5[0][0]};
-const byte temptables_num[5] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR};
+#if NUM_TEMPS_USERTHERMISTOR0>0
+short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
+#endif
+#if NUM_TEMPS_USERTHERMISTOR1>0
+short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORTABLE1 ;
+#endif
+#if NUM_TEMPS_USERTHERMISTOR2>0
+short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
+#endif
+const short *temptables[7] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+#if NUM_TEMPS_USERTHERMISTOR0>0
+,(short int *)&temptable_5[0][0]
+#else
+,0
+#endif
+#if NUM_TEMPS_USERTHERMISTOR1>0
+,(short int *)&temptable_6[0][0]
+#else
+,0
+#endif
+#if NUM_TEMPS_USERTHERMISTOR2>0
+,(short int *)&temptable_7[0][0]
+#else
+,0
+#endif
+};
+const byte temptables_num[7] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2};
 
 int read_raw_temperature(byte type,byte pin) {
   switch(type) {
@@ -267,6 +291,8 @@ int read_raw_temperature(byte type,byte pin) {
     case 3:
     case 4:
     case 5:
+    case 6:
+    case 7:
     case 99:
       return 1023-(osAnalogInputValues[pin]>>ANALOG_INPUT_SAMPLE);
     case 100: // AD595
@@ -284,7 +310,10 @@ int conv_raw_temp(byte type,int raw_temp) {
     case 2:
     case 3:
     case 4:
-    case 5: {
+    case 5: 
+    case 6:
+    case 7:
+    {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
       byte i=2;
@@ -336,7 +365,10 @@ int conv_temp_raw(byte type,int temp) {
     case 2:
     case 3:
     case 4:
-    case 5: {
+    case 5:
+    case 6:
+    case 7:
+    {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
       byte i=2;
@@ -453,6 +485,9 @@ void manage_temperatures(bool critical) {
            pidTerm += act->pidIGain * act->tempIState; 
          }
          pidTerm += act->pidDGain * (oldTemp-act->currentTemperatureC); //*100
+#if SCALE_PID_TO_MAX==1
+         pidTerm = (pidTerm*act->pidMax)>>8:
+#endif
          byte output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;    
          if(act->targetTemperatureC<20) output = 0; // off is off, even if damping term wants a heat peak!
          analogWrite(act->heaterPin, output);

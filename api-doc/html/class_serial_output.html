@@ -96,10 +96,11 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a5ac652bc3699e2ad3373403101b3a42d">println_P</a> (PGM_P ptr)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a66634e140d1163449d94054199a6f2fe">print_long_P</a> (PGM_P ptr, long value)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a7715cd08fd3b9abc2eeed9526bc52303">print_int_P</a> (PGM_P ptr, int value)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a0a35bd8132bdb566d7c05508f8f955ea">print_float_P</a> (PGM_P ptr, float value)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#ad8b6061ce6a03224a04577a317eaaafc">print_float_P</a> (PGM_P ptr, float value, uint8_t digits=2)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#ae53b9d6a1292979888eb3eefe06c092f">println_long_P</a> (PGM_P ptr, long value)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a9a0062a2cc7e750b395334c4778c63b2">println_int_P</a> (PGM_P ptr, int value)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a98a7d713d5081ba6a49cd7d85b6a4478">println_float_P</a> (PGM_P ptr, float value)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#af12cbebadb4f88f32f273fd1a7dee724">println_float_P</a> (PGM_P ptr, float value, uint8_t digits=2)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_serial_output.html#a9069fbc52a5b3042869673ad5f42af1e">printFloat</a> (double number, uint8_t digits=2)</td></tr>
 </table>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ab8b90f364edebdacac713d3fa76d7e48"></a><!-- doxytag: member="SerialOutput::SerialOutput" ref="ab8b90f364edebdacac713d3fa76d7e48" args="()" -->
@@ -119,7 +120,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a0a35bd8132bdb566d7c05508f8f955ea"></a><!-- doxytag: member="SerialOutput::print_float_P" ref="a0a35bd8132bdb566d7c05508f8f955ea" args="(PGM_P ptr, float value)" -->
+<a class="anchor" id="ad8b6061ce6a03224a04577a317eaaafc"></a><!-- doxytag: member="SerialOutput::print_float_P" ref="ad8b6061ce6a03224a04577a317eaaafc" args="(PGM_P ptr, float value, uint8_t digits=2)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -133,7 +134,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>value</em>&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>digits</em> = <code>2</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -219,7 +226,34 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a98a7d713d5081ba6a49cd7d85b6a4478"></a><!-- doxytag: member="SerialOutput::println_float_P" ref="a98a7d713d5081ba6a49cd7d85b6a4478" args="(PGM_P ptr, float value)" -->
+<a class="anchor" id="a9069fbc52a5b3042869673ad5f42af1e"></a><!-- doxytag: member="SerialOutput::printFloat" ref="a9069fbc52a5b3042869673ad5f42af1e" args="(double number, uint8_t digits=2)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void printFloat </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>number</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>digits</em> = <code>2</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af12cbebadb4f88f32f273fd1a7dee724"></a><!-- doxytag: member="SerialOutput::println_float_P" ref="af12cbebadb4f88f32f273fd1a7dee724" args="(PGM_P ptr, float value, uint8_t digits=2)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -233,7 +267,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>value</em>&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>digits</em> = <code>2</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -345,7 +385,7 @@ Public Member Functions</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="class_serial_output.html">SerialOutput</a>      </li>
-      <li class="footer">Generated on Sat Sep 10 2011 12:48:51 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
