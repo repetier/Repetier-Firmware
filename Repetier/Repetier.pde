@@ -1442,7 +1442,7 @@ inline long bresenham_step() {
         printer_state.interval = CPUDivU2(v);
         printer_state.timer+=printer_state.interval;
 #ifdef USE_ADVANCE
-        int advance_target =printer_state.advance_executed+cur->advanceRate;
+        long advance_target =printer_state.advance_executed+cur->advanceRate;
         if(advance_target>cur->advanceFull)
           advance_target = cur->advanceFull;
         cli();
@@ -1462,7 +1462,7 @@ inline long bresenham_step() {
         printer_state.interval = CPUDivU2(v);
         printer_state.timer+=printer_state.interval;
 #ifdef USE_ADVANCE
-        int advance_target =printer_state.advance_executed-cur->advanceRate;
+        long advance_target =printer_state.advance_executed-cur->advanceRate;
         if(advance_target<cur->advanceEnd)
           advance_target = cur->advanceEnd;
         int tred = (advance_target>>16);
