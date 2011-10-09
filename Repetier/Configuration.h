@@ -277,7 +277,11 @@ for more details.
 #define min_software_endstops false
 //If true, axis won't move to coordinates greater than the defined lengths below.
 #define max_software_endstops true
-// maximum positions - only fixed numbers!
+// You can disable endstop checking for print moves. This is needed, if you get sometimes
+// false signals from your endstops. If your endstops don't give false signals, you
+// can set it on for safety.
+#define ALWAYS_CHECK_ENDSTOPS false
+// maximum positions in mm - only fixed numbers!
 #define X_MAX_LENGTH 200
 #define Y_MAX_LENGTH 200
 #define Z_MAX_LENGTH 100
@@ -311,9 +315,9 @@ for more details.
 /** \brief Use RAMP acceleration for faster printing speed. */
 #ifdef RAMP_ACCELERATION
 /** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,50,1000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,100,1000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves. */
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,50,1000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,100,1000}
 #endif
 
 /** \brief Maximum allowable jerk.
@@ -339,6 +343,87 @@ Corner can be printed with full speed of 50 mm/s
 
 */
 #define MAX_JERK 40.0
+#define MAX_ZJERK 0.3
+
+// ##########################################################################################
+// ##                           Extruder control                                           ##
+// ##########################################################################################
+
+/** \brief Prescale factor, timer0 runs at.
+
+All known arduino boards use 64. This value is needed for the extruder timing. */
+#define TIMER0_PRESCALE 64
+
+/** \brief speed of the extruder feeder
+
+This is the maximum speed, the filament can be moved forward and backward without acceleration.
+The value determines, how often we can update the extruder stepper, to come up with the desired
+extruder position. Higher values increase precision. If you set the value too high, you will
+lose steps. Only discrete values between 1 and 255 can be set for the timer. The effectife update
+frequency is computed as:
+
+f = floor(F_CPU/(TIMER0_PRESCALE*EXTRUDER_SPEED*STEPS_PER_MM))
+
+Important: This is the speed, filament is pushed inside the extruder not the speed at the nozzle!
+If you set the extruder steps_per_mm for 1mm pushed outside, sile skainforge<40 needed it, you must
+increase the value to reflect this. (*filament_diameter^2/nozzle_diameter^2)
+*/
+#define EXTRUDER_SPEED 25.0
+
+/* \brief Minimum temperature for extruder operation
+
+This is a saftey value. If your extruder temperature is below this temperature, no
+extruder steps are executed. This is to prevent your extruder to move unless the fiament
+is at least molten.
+*/
+
+#define MIN_EXTRUDER_TEMP 160
+/** \brief Activate ooze prevention system 
+
+The ooze prevention system tries to prevent ooze, by a fast retract of the filament every time
+printing stops. Most slicing software have already an option to do this. Using OPS_MODE=1 will
+in fact mimic this. This works good, but can increase printing time. To reduce the additional
+waiting time, the OPS has a fast mode, which performs the retraction during the travelling move.
+The only reason, your slicer doesn't do it, is because it can't tell. There is simple no
+G-Code command telling the firmware to do that.
+
+You can always compile including OPS. Then you can disable/enable it anytime you want.
+
+Caution: Don't enable anti-ooze in your slicer if you are using this. 
+*/
+#define USE_OPS 1
+
+/** \brief Sets the ops operation mode
+
+0: Off
+1: Classic mode. Stop head, retract move to target, push filament back.
+2: Fast mode. Retract during move, start pushing back the filament during move. For safty, we start
+   at with a low speed and wait for the push back, before the pintmove starts. Normally there is some
+   time needed to wait for the filament.
+*/
+#define OPS_MODE 0
+
+/** \brief Minimum distance for retraction.
+
+If a travel move is shorter than this distance, no retraction will occur. This is to prevent
+retraction with infill, where the angle to the perimeter needs a short stop. Unit is mm.
+*/
+#define OPS_MIN_DISTANCE 0.8
+
+/** \brief Move printhead only after x% of retract distance have been retracted */
+#define OPS_MOVE_AFTER 50.0
+/** \brief Retraction distance in mm. If you want to enable OPS only sometimes, compile with
+OPS support and set retraction distance to 0. If you set it to e.g. 3 in your eeprom settings it is enabled. */
+#define OPS_RETRACT_DISTANCE 3.0
+
+/** \brief Backslash produced by extruder reversal
+
+If you are using a bowden extruder, you may need some extra distance to push the filament back into the 
+original place. This is the value you enter here. Unit is mm.
+*/
+#define OPS_RETRACT_BACKSLASH 0.0
+
+
 
 /** \brief Enable advance algorithm.
 
@@ -352,7 +437,7 @@ For more informations, read the wiki.
 the double computation cost. For slow movements this is not an issue, but for really fast moves this is 
 too much. The value specified here is the number of clock cycles between a step on the driving axis.
 If the interval at full speed is below this value, smoothing is disabled for that line.*/
-#define MAX_HALFSTEP_INTERVAL 2002
+#define MAX_HALFSTEP_INTERVAL 1999
 
 // ##########################################################################################
 // ##                           Communication configuration                                ##
@@ -385,9 +470,23 @@ keep with your slow communication version.
 /** \brief Number of moves we can cache in advance.
 
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
-many very short moves the cache may go empty.
+many very short moves the cache may go empty. The minimum value is 5.
 */
 #define MOVE_CACHE_SIZE 16
+
+/** \brief Low filled cache size. 
+
+If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is limited to LOW_TICKS_PER_MOVE clock cycles.
+If a move would be shorter, the feedrate will be reduced. This should prevent buffer underflows. Set this to 0 if you
+don't care about empty buffers during print.
+*/
+#define MOVE_CACHE_LOW 12
+/** \brief Cycles per move, if move cache is low. 
+
+This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
+if you are printing many very short segments at high speed.
+*/
+#define LOW_TICKS_PER_MOVE 200000
 /** \brief Cache size for incoming commands.
 
 There should be no reason to increase this cache. Commands are nearly immediately send to
@@ -438,9 +537,11 @@ with a dry run, you can test the speed of path computations, which are still per
 //#define INCLUDE_DEBUG_NO_MOVE
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. */
+usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
 #define DEBUG_ADVANCE
+/** \brief print ops related debug info. */
+//#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
@@ -466,6 +567,12 @@ usage or for seraching for memory induced errors. */
 #endif
 #if EXT0_DIR_PIN<0
 #error EXT0_DIR_PIN not set to a pin number.
+#endif
+#if MOVE_CACHE_SIZE<4
+#error MOVE_CACHE_SIZE must be at least 5
+#endif
+#if OUTPUT_BUFFER_SIZE>250 || OUTPUT_BUFFER_SIZE<16
+#error OUTPUT_BUFFER_SIZE must be in range 16..250
 #endif
 #endif
 

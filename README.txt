@@ -1,7 +1,7 @@
-Repetier-Firmware - the user friendly firmware
+Repetier-Firmware - the fast and user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
-Version 0.33  28.9.2011
+Version 0.35  9.10.2011
 
 1) Introduction
 
@@ -10,8 +10,9 @@ an arduino compatible controller.
 This firmware is a nearly complete rewrite of the sprinter firmware
 by kliment (https://github.com/kliment/Sprinter)
 which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+Some ideas were also taken from Teacup, Grbl and Marlin.
 While I changed nearly all parts, I kept the sprinter logic as far intact as
-possible. As a result, all boards with at least 32kB RAM working with Sprinter
+possible. As a result, all boards with at least 64kB RAM working with Sprinter
 should work with this firmware. This includes Saguino/GEN 6/Mega/RAMPS Boards.
 
 You may ask, why did I rewrite a functioning firmware. First, let me say, there
@@ -54,9 +55,10 @@ to repetierdev@googlemail.com
 
 - RAMP acceleration support.
 - Path planning for higher print speeds.
+- Ooze prevention system for faster anti ooze then slicer can do,
 - Trajectory smoothing for smoother lines.
 - Nozzle pressure control for improved print quality with RAMPS.
-- Fast - 16000 Hz stepper frequency is possible with a 16 MHz AVR. 
+- Fast - 20000 Hz and more stepper frequency is possible with a 16 MHz AVR. 
 - Multiple extruder supported (experimental).
 - Standard ASCII and improved binary (Repetier protocol) communication.
 - Autodetect the command protocol, so it will work with any host software.
@@ -103,8 +105,10 @@ board.
 
 Update from older version:
 
-Version 0.32 changed the EEPROM usage, because some parameter aren't used
-any more. Check the settings before using the new version.
+Version 0.32 and 0.34 changed the EEPROM usage, because some parameter aren't 
+used any more and new parameter were added. Check the settings before using
+the new version. Watch out for new values, tellung you they are 0 - they are 
+probably not. Illegal numbers are returned as 0, too.
 
 4) Things you should know
 

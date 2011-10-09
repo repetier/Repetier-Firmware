@@ -106,6 +106,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a05dd69e54275d0ffb23aa062e522f72c">int8</a>&#160;&#160;&#160;int8_t</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a9695cf1104606879c5d3f0221635a069">uint32</a>&#160;&#160;&#160;uint32_t</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ae5125ea470cb5e419d49e07ad57eeba2">int32</a>&#160;&#160;&#160;int32_t</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6a2aad6af3e26a70043bb667d9fe6722">FLAG_WARMUP</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a30d2756f81cfbf18684d69d7696af078">FLAG_ACCELERATING</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ae80288e7929d2dd9a7a4aedcbbb53dbc">FLAG_DECELERATING</a>&#160;&#160;&#160;4</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a2c78abde6b572b9cce3ba10bd79b5c7b">FLAG_ACCELERATION_ENABLED</a>&#160;&#160;&#160;8</td></tr>
@@ -113,13 +114,18 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a1ce63ff7ba772791b6a64c15f80af9b9">FLAG_SKIP_ACCELERATING</a>&#160;&#160;&#160;32</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#afc633f974340414dfcc3da9489f8a9c3">FLAG_SKIP_DEACCELERATING</a>&#160;&#160;&#160;64</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#aafd724d9cac420e263072927b00d9a45">FLAG_BLOCKED</a>&#160;&#160;&#160;128</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a523ca09e5641227dbb4ebc37d4661ccf">FLAG_JOIN_LIMIT_REACHED</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a5f7d3ac3ef6f32915b3893dd59c3ca9b">FLAG_JOIN_STEPPARAMS_COMPUTED</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a59de958cd229719951c39ec47980612a">FLAG_JOIN_END_FIXED</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#afd2aa0f699051519425a93e6d2b3ea86">FLAG_JOIN_START_FIXED</a>&#160;&#160;&#160;4</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a5f7d3ac3ef6f32915b3893dd59c3ca9b">FLAG_JOIN_STEPPARAMS_COMPUTED</a>&#160;&#160;&#160;8</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ae3200ea7e0c130f7954f879bf2134652">FLAG_JOIN_START_RETRACT</a>&#160;&#160;&#160;8</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6bce9130720024781aa7d8b24b08d1fc">FLAG_JOIN_END_RETRACT</a>&#160;&#160;&#160;16</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6c722c1ac9bb7f554885dc6d746d1283">FLAG_JOIN_NO_RETRACT</a>&#160;&#160;&#160;32</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a20fd0b9b6301f01d0127ab40b93ca860">FLAG_JOIN_WAIT_EXTRUDER_UP</a>&#160;&#160;&#160;64</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ac8e3ee431a59c64705f133d526eb435b">FLAG_JOIN_WAIT_EXTRUDER_DOWN</a>&#160;&#160;&#160;128</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a0f536b06f8e01ba1a6d1d60416b7e3f7">BEGIN_INTERRUPT_PROTECTED</a>&#160;&#160;&#160;{byte sreg=SREG;__asm volatile( &quot;cli&quot; ::: &quot;memory&quot; );</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a1f77fa92e63e79db1d3b45fbefbd26d8">END_INTERRUPT_PROTECTED</a>&#160;&#160;&#160;SREG=sreg;}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6252b6137f2c7128b048b21f86157df7">SECONDS_TO_TICKS</a>(s)&#160;&#160;&#160;(unsigned long)(s*F_CPU)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a4f7ca723afd6908e40906f955d39de5a">ESCAPE_INTERRUPT_PROTECTED</a>&#160;&#160;&#160;SREG=sreg;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6252b6137f2c7128b048b21f86157df7">SECONDS_TO_TICKS</a>(s)&#160;&#160;&#160;(unsigned long)(s*(float)F_CPU)</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a299b2711d43b3492a9915f93c65c006a">initExtruder</a> ()</td></tr>
@@ -136,6 +142,7 @@ Functions</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends the high-signal to the stepper for next extruder step.  <a href="#a796f444ca584e0acdd98758b07138548"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a2ea8b79d8cd1da07dbc2902d31c3be45">extruder_unstep</a> ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets stepper signal to low for current extruder.  <a href="#a2ea8b79d8cd1da07dbc2902d31c3be45"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ad872a3ccc545975b0ba7e5fe9c420e20">extruder_enable</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ac0ade933e4f4ea31a59a46bb4b3d1d0f">read_raw_temperature</a> (byte type, byte pin)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a34408b8d8c3a52304e79462fc9b5cc74">heated_bed_get_temperature</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6057d18f676401e17b75b87a15b102b3">conv_raw_temp</a> (byte type, int raw_temp)</td></tr>
@@ -146,8 +153,8 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a736afa7b6bfd973b42efcc5578934a23">manage_inactivity</a> (byte debug)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a73999a2c6862176c9e89d85f9a43994c">update_ramps_parameter</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#acb8c2930412c809a09ed3752e7e7e0dc">finishNextSegment</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a70f315ca1fc5bdb9077029dcac573ed6">get_coordinates</a> (<a class="el" href="struct_g_code.html">GCode</a> *com)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the destination coordinates to values stored in com.  <a href="#a70f315ca1fc5bdb9077029dcac573ed6"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a1e3089ca9d131010477a923a3a5a2b9a">get_coordinates</a> (<a class="el" href="struct_g_code.html">GCode</a> *com)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the destination coordinates to values stored in com.  <a href="#a1e3089ca9d131010477a923a3a5a2b9a"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#adbc31e48d3ecb1681879282b142d6ed3">queue_move</a> (byte check_endstops)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a65a322bad41be18bfefa92002f0be2fa">linear_move</a> (long steps_remaining[])</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a1597da8cfe46f1754892a4457dda8d38">disable_x</a> ()</td></tr>
@@ -165,9 +172,8 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#aa61299be27447d82755b79c3a46a0e72">kill</a> (byte only_steppers)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop heater and stepper motors. Disable power,if possible.  <a href="#aa61299be27447d82755b79c3a46a0e72"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a0764a6316281ac76f1e8fa8a07b0332e">setupTimerInterrupt</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the timer interrupt for the steppers.  <a href="#a0764a6316281ac76f1e8fa8a07b0332e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#af02c6632f8aad33e7a0026d2a4c0a405">Div4U2U</a> (unsigned long a, unsigned int b)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimized division.  <a href="#af02c6632f8aad33e7a0026d2a4c0a405"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a7e111cca1359d85efb144985c3a83dbd">CPUDivU2</a> (unsigned int divisor)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">approximates division of F_CPU/divisor  <a href="#a7e111cca1359d85efb144985c3a83dbd"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_extruder.html">Extruder</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#ab84dda104f284de062a86af121a2914e">current_extruder</a></td></tr>
@@ -206,6 +212,7 @@ Variables</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Position for executing line movement.  <a href="#a736c91be6736cfe1715ab2435ccd3a2a"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">volatile byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a6a852ff930456df19f757ebeaf5e8188">lines_count</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of lines cached 0 = nothing to do.  <a href="#a6a852ff930456df19f757ebeaf5e8188"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a7a376d259198f4b0b6119fbb04d43827">printmoveSeen</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_reptier_8h.html#a758f659f15b3784c13d14aee2e89e6a2">baudrate</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Communication speed rate.  <a href="#a758f659f15b3784c13d14aee2e89e6a2"></a><br/></td></tr>
 </table>
@@ -236,6 +243,19 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a4f7ca723afd6908e40906f955d39de5a"></a><!-- doxytag: member="Reptier.h::ESCAPE_INTERRUPT_PROTECTED" ref="a4f7ca723afd6908e40906f955d39de5a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ESCAPE_INTERRUPT_PROTECTED&#160;&#160;&#160;SREG=sreg;</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a30d2756f81cfbf18684d69d7696af078"></a><!-- doxytag: member="Reptier.h::FLAG_ACCELERATING" ref="a30d2756f81cfbf18684d69d7696af078" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -246,7 +266,6 @@ Variables</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Marks the first step of a new move </p>
 
 </div>
 </div>
@@ -316,17 +335,31 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a523ca09e5641227dbb4ebc37d4661ccf"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_LIMIT_REACHED" ref="a523ca09e5641227dbb4ebc37d4661ccf" args="" -->
+<a class="anchor" id="a6bce9130720024781aa7d8b24b08d1fc"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_END_RETRACT" ref="a6bce9130720024781aa7d8b24b08d1fc" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define FLAG_JOIN_LIMIT_REACHED&#160;&#160;&#160;1</td>
+          <td class="memname">#define FLAG_JOIN_END_RETRACT&#160;&#160;&#160;16</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Segment reaches full speed. Blockt to the left are fixed. </p>
+<p>Wait for filament pushback, before ending move </p>
+
+</div>
+</div>
+<a class="anchor" id="a6c722c1ac9bb7f554885dc6d746d1283"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_NO_RETRACT" ref="a6c722c1ac9bb7f554885dc6d746d1283" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAG_JOIN_NO_RETRACT&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Disable retract for this line </p>
 
 </div>
 </div>
@@ -344,17 +377,59 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae3200ea7e0c130f7954f879bf2134652"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_START_RETRACT" ref="ae3200ea7e0c130f7954f879bf2134652" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAG_JOIN_START_RETRACT&#160;&#160;&#160;8</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Start filament retraction at move start </p>
+
+</div>
+</div>
 <a class="anchor" id="a5f7d3ac3ef6f32915b3893dd59c3ca9b"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_STEPPARAMS_COMPUTED" ref="a5f7d3ac3ef6f32915b3893dd59c3ca9b" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define FLAG_JOIN_STEPPARAMS_COMPUTED&#160;&#160;&#160;8</td>
+          <td class="memname">#define FLAG_JOIN_STEPPARAMS_COMPUTED&#160;&#160;&#160;1</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 <p>Are the step parameter computed </p>
+
+</div>
+</div>
+<a class="anchor" id="ac8e3ee431a59c64705f133d526eb435b"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_WAIT_EXTRUDER_DOWN" ref="ac8e3ee431a59c64705f133d526eb435b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAG_JOIN_WAIT_EXTRUDER_DOWN&#160;&#160;&#160;128</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Wait for the extruder to finish it's down movement </p>
+
+</div>
+</div>
+<a class="anchor" id="a20fd0b9b6301f01d0127ab40b93ca860"></a><!-- doxytag: member="Reptier.h::FLAG_JOIN_WAIT_EXTRUDER_UP" ref="a20fd0b9b6301f01d0127ab40b93ca860" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAG_JOIN_WAIT_EXTRUDER_UP&#160;&#160;&#160;64</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Wait for the extruder to finish it's up movement </p>
 
 </div>
 </div>
@@ -381,6 +456,20 @@ Variables</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6a2aad6af3e26a70043bb667d9fe6722"></a><!-- doxytag: member="Reptier.h::FLAG_WARMUP" ref="a6a2aad6af3e26a70043bb667d9fe6722" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAG_WARMUP&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Marks the first step of a new move </p>
 
 </div>
 </div>
@@ -419,7 +508,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">s</td><td>)</td>
-          <td>&#160;&#160;&#160;(unsigned long)(s*F_CPU)</td>
+          <td>&#160;&#160;&#160;(unsigned long)(s*(float)F_CPU)</td>
         </tr>
       </table>
 </div>
@@ -521,6 +610,26 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a7e111cca1359d85efb144985c3a83dbd"></a><!-- doxytag: member="Reptier.h::CPUDivU2" ref="a7e111cca1359d85efb144985c3a83dbd" args="(unsigned int divisor)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long CPUDivU2 </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>divisor</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>approximates division of F_CPU/divisor </p>
+<p>In the stepper interrupt a division is needed, which is a slow operation. The result is used for timer calculation where small errors are ok. This function uses lookup tables to find a fast approximation of the result. </p>
+
+</div>
+</div>
 <a class="anchor" id="a1597da8cfe46f1754892a4457dda8d38"></a><!-- doxytag: member="Reptier.h::disable_x" ref="a1597da8cfe46f1754892a4457dda8d38" args="()" -->
 <div class="memitem">
 <div class="memproto">
@@ -572,36 +681,6 @@ Variables</h2></td></tr>
 <div class="memdoc">
 
 <p>Disable stepper motor for z direction. </p>
-
-</div>
-</div>
-<a class="anchor" id="af02c6632f8aad33e7a0026d2a4c0a405"></a><!-- doxytag: member="Reptier.h::Div4U2U" ref="af02c6632f8aad33e7a0026d2a4c0a405" args="(unsigned long a, unsigned int b)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">long Div4U2U </td>
-          <td>(</td>
-          <td class="paramtype">unsigned long&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>b</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Optimized division. </p>
-<p>Normally the C compiler will compute a long/long division, which takes ~670 Ticks. This version is optimized for a 16 bit dividend and recognises the special cases of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the interval. </p>
 
 </div>
 </div>
@@ -674,6 +753,22 @@ Variables</h2></td></tr>
 <div class="memdoc">
 
 <p>Disable stepper motor of current extruder. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad872a3ccc545975b0ba7e5fe9c420e20"></a><!-- doxytag: member="Reptier.h::extruder_enable" ref="ad872a3ccc545975b0ba7e5fe9c420e20" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void extruder_enable </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -801,12 +896,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a70f315ca1fc5bdb9077029dcac573ed6"></a><!-- doxytag: member="Reptier.h::get_coordinates" ref="a70f315ca1fc5bdb9077029dcac573ed6" args="(GCode *com)" -->
+<a class="anchor" id="a1e3089ca9d131010477a923a3a5a2b9a"></a><!-- doxytag: member="Reptier.h::get_coordinates" ref="a1e3089ca9d131010477a923a3a5a2b9a" args="(GCode *com)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void get_coordinates </td>
+          <td class="memname">byte get_coordinates </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_g_code.html">GCode</a> *&#160;</td>
           <td class="paramname"><em>com</em></td><td>)</td>
@@ -1031,8 +1126,6 @@ Variables</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-
-<p>Initializes the timer interrupt for the steppers. </p>
 
 </div>
 </div>
@@ -1341,6 +1434,19 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a7a376d259198f4b0b6119fbb04d43827"></a><!-- doxytag: member="Reptier.h::printmoveSeen" ref="a7a376d259198f4b0b6119fbb04d43827" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">byte <a class="el" href="_reptier_8h.html#a7a376d259198f4b0b6119fbb04d43827">printmoveSeen</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a92abf10f286fc144a3f0a4ba5f0cd844"></a><!-- doxytag: member="Reptier.h::relative_mode" ref="a92abf10f286fc144a3f0a4ba5f0cd844" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1404,7 +1510,7 @@ Variables</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="_reptier_8h.html">Reptier.h</a>      </li>
-      <li class="footer">Generated on Thu Sep 29 2011 15:56:23 for Repetier-Firmware by&#160;
+      <li class="footer">Generated on Sun Oct 9 2011 17:34:11 for Repetier-Firmware by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

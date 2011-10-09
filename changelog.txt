@@ -1,3 +1,11 @@
+Version 0.35 3.10.2011
+  Changed aceleration/deceleration computation.
+  Moved extruder handling in its own interrupt routine.
+  Added an ooze prevention system.
+  Fixed path planning algorithm.
+  Path planning now works from the first line on.
+  Changed advance debug M230 command to M232
+  
 Version 0.33  26.9.2011
   Added configuration option SCALE_PID_TO_MAX 
 

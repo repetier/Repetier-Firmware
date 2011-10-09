@@ -129,16 +129,20 @@ inline void extruder_set_direction(byte dir) {
     WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
   else
     WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+#else
+  digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
+#endif
+}
+inline void extruder_enable() {
+#if NUM_EXTRUDER==1
 #if EXT0_ENABLE_PIN>-1
     WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON ); 
 #endif
 #else
-  digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
   if(current_extruder->enablePin > -1) 
     digitalWrite(current_extruder->enablePin,current_extruder->enableOn); 
 #endif
 }
-
 // Read a temperature and return its value in °C
 // this high level method supports all known methods
 extern int read_raw_temperature(byte type,byte pin);
@@ -160,7 +164,7 @@ void manage_inactivity(byte debug);
 
 extern void update_ramps_parameter();
 extern void finishNextSegment();
-extern void get_coordinates(GCode *com);
+extern byte get_coordinates(GCode *com);
 extern void queue_move(byte check_endstops);
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
@@ -190,28 +194,46 @@ extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;
 
 extern void setupTimerInterrupt();
-extern long Div4U2U(unsigned long a,unsigned int b);
 
 typedef struct { // RAM usage: 72 Byte
-  long offsetX; ///< X-offset for different extruder positions.
-  long offsetY; ///< Y-offset for different extruder positions.
-  long currentPositionSteps[4]; ///< Position in steps from origin.
-  long destinationSteps[4]; ///< Target position in steps.
-  long xMaxSteps; ///< For software endstops, limit of move in positive direction.
-  long yMaxSteps; ///< For software endstops, limit of move in positive direction.
-  long zMaxSteps; ///< For software endstops, limit of move in positive direction.
-  long interval; ///< Last step duration in ticks.
-  unsigned long stepNumber; ///< Step number in current move.
-  int n; ///< virtual step number for acceleration computation.
-  float feedrate; ///< Last requested feedrate.
-  float maxJerk; ///< Maximum allowed jerk in mm/s
-  long advance_target; ///< Target advance steps
-  unsigned int advance_executed; ///< Executed advance steps
+  byte timer0Interval;              ///< Update interval of timer0 compare
+  long interval;                    ///< Last step duration in ticks.
+#if USE_OPS==1
+  bool filamentRetracted;           ///< Is the extruder filament retracted
+#endif
+  volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+  unsigned long timer;              ///< used for acceleration/deceleration timing
+  unsigned long stepNumber;         ///< Step number in current move.
+#ifdef USE_ADVANCE
+  long advance_executed;             ///< Executed advance steps
+  int advance_steps_set;
+#endif
+  long currentPositionSteps[4];     ///< Position in steps from origin.
+  long destinationSteps[4];         ///< Target position in steps.
+  float extruderSpeed;              ///< Extruder speed in mm/s.
+#if USE_OPS==1
+  int opsRetractSteps;              ///< Retract filament this much steps
+  int opsPushbackSteps;             ///< Retract+extra distance for backslash
+  float opsMinDistance;
+  float opsRetractDistance;
+  float opsRetractBackslash;
+  byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
+  float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
+  int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
+#endif
+  long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+  long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+  long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+  float feedrate;                   ///< Last requested feedrate.
+  float maxJerk;                    ///< Maximum allowed jerk in mm/s
+  float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
+  long offsetX;                     ///< X-offset for different extruder positions.
+  long offsetY;                     ///< Y-offset for different extruder positions.
 } PrinterState;
 extern PrinterState printer_state;
 
 /** Marks the first step of a new move */
-//#define FLAG_FIRST_STEP 1
+#define FLAG_WARMUP 1
 #define FLAG_ACCELERATING 2
 #define FLAG_DECELERATING 4
 #define FLAG_ACCELERATION_ENABLED 8
@@ -220,52 +242,56 @@ extern PrinterState printer_state;
 #define FLAG_SKIP_DEACCELERATING 64
 #define FLAG_BLOCKED 128
 
-/** Segment reaches full speed. Blockt to the left are fixed. */
-#define FLAG_JOIN_LIMIT_REACHED 1
+/** Are the step parameter computed */
+#define FLAG_JOIN_STEPPARAMS_COMPUTED 1
 /** The right speed is fixed. Don't check this block or any block to the left. */
 #define FLAG_JOIN_END_FIXED 2
 /** The left speed is fixed. Don't check left block. */
 #define FLAG_JOIN_START_FIXED 4
-/** Are the step parameter computed */
-#define FLAG_JOIN_STEPPARAMS_COMPUTED 8
+/** Start filament retraction at move start */
+#define FLAG_JOIN_START_RETRACT 8
+/** Wait for filament pushback, before ending move */
+#define FLAG_JOIN_END_RETRACT 16
+/** Disable retract for this line */
+#define FLAG_JOIN_NO_RETRACT 32
+/** Wait for the extruder to finish it's up movement */
+#define FLAG_JOIN_WAIT_EXTRUDER_UP 64
+/** Wait for the extruder to finish it's down movement */
+#define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
-typedef struct { // RAM usage: 58 Byte
+typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte primaryAxis;
   byte flags;
   byte joinFlags;
-  byte halfstep; ///< 0 = disabled, 1 = halfstep, 2 = fulstep
-  byte dir; ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
-//  long axisStepsRemaining[4]; ///< Steps per axis, we have still to perform.
-  long delta[4]; ///< Steps we want to move.
-  long error[4]; ///< Error calculation for Bresenham algorithm
-//  long acceleration; ///< Acceleration in steps/s^2
-//  long vMin; ///< Starting/ending speed in steps/s.
-//  long vMax; ///< Maximum reached speed in steps/s.
-  int startN; ///< Start speed for acceleration calculation
-  int endN;
-//  long interval;     ///< Current interval between two steps in ticks.
-  float speedX; ///< Speed in x direction at fullInterval in mm/s
-  float speedY; ///< Speed in y direction at fullInterval in mm/s
-  float speedZ; ///< Speed in y direction at fullInterval in mm/s
-  float fullSpeed; ///< Desired speed mm/s
-  float acceleration; ///< Real acceleration mm/s²
+  byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
+  byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+  long delta[4];                  ///< Steps we want to move.
+  long error[4];                  ///< Error calculation for Bresenham algorithm
+  float speedX;                   ///< Speed in x direction at fullInterval in mm/s
+  float speedY;                   ///< Speed in y direction at fullInterval in mm/s
+  float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
+  float fullSpeed;                ///< Desired speed mm/s
+  float acceleration;             ///< Real acceleration mm/s²
   float distance;
   float startFactor;
   float endFactor;
-  unsigned long startInterval;  ///< Start interval (v0) in ticks/step.
-  unsigned long fullInterval; ///< interval at full speed in ticks/step.
-  unsigned long endInterval; ///< End interval in ticks/step.  
-  unsigned long stepsRemaining; ///< Remaining steps, until move is finished
-  unsigned int accelSteps; ///< How much steps does it take, to reach the plateau.
-  unsigned int decelSteps; ///< How much steps does it take, to reach the end speed.
+  unsigned long fullInterval;     ///< interval at full speed in ticks/step.
+  unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
+  unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
+  unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
   unsigned long accelerationPrim; ///< Acceleration along primary axis
-  int plateauN;
-  long vMax;
+  unsigned long facceleration;    ///< accelerationPrim*262144/F_CPU
+  unsigned int vMax;              ///< Maximum reached speed in steps/s.
+  unsigned int vStart;            ///< Starting speed in steps/s.
+  unsigned int vEnd;              ///< End speed in steps/s
 #ifdef USE_ADVANCE
-  long advanceRate; ///< Advance steps at full speed
-  long advanceFull; ///< Maximum advance at fullInterval [steps*65536]
+  long advanceRate;               ///< Advance steps at full speed
+  long advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
   long advanceStart;
   long advanceEnd;
+#endif
+#if USE_OPS==1
+  long opsReverseSteps;           ///< How many steps are needed to reverse retracted filament at full speed
 #endif
 } PrintLine;
 
@@ -273,6 +299,7 @@ extern PrintLine lines[];
 extern byte lines_write_pos; // Position where we write the next cached line move
 extern byte lines_pos; // Position for executing line movement
 extern volatile byte lines_count; // Number of lines cached 0 = nothing to do
+extern byte printmoveSeen;
 extern long baudrate;
 #if OS_ANALOG_INPUTS>0
 // Get last result for pin x
@@ -280,7 +307,10 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 #endif
 #define BEGIN_INTERRUPT_PROTECTED {byte sreg=SREG;__asm volatile( "cli" ::: "memory" );
 #define END_INTERRUPT_PROTECTED SREG=sreg;}
-#define SECONDS_TO_TICKS(s) (unsigned long)(s*F_CPU)
+#define ESCAPE_INTERRUPT_PROTECTED SREG=sreg;
+
+#define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+extern long CPUDivU2(unsigned int divisor);
 
 #ifdef SDSUPPORT
 extern Sd2Card card; // ~14 Byte

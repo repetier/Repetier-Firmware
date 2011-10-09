@@ -69,8 +69,8 @@ void process_command(GCode *com)
     {
       case 0: // G0 -> G1
       case 1: // G1
-        get_coordinates(com); // For X Y Z E F
-        queue_move(false);
+        if(get_coordinates(com)) // For X Y Z E F
+          queue_move(ALWAYS_CHECK_ENDSTOPS);
         break;
       case 4: // G4 dwell
         codenum = 0;
@@ -169,7 +169,6 @@ void process_command(GCode *com)
         if(GCODE_HAS_Y(com)) printer_state.currentPositionSteps[1] = com->Y*axis_steps_per_unit[1]*(unit_inches?25.4:1.0)-printer_state.offsetY;
         if(GCODE_HAS_Z(com)) printer_state.currentPositionSteps[2] = com->Z*axis_steps_per_unit[2]*(unit_inches?25.4:1.0);
         if(GCODE_HAS_E(com)) {
-          wait_until_end_of_move();
           printer_state.currentPositionSteps[3] = com->E*axis_steps_per_unit[3]*(unit_inches?25.4:1.0);
         }
         break;
@@ -278,6 +277,7 @@ void process_command(GCode *com)
           if(DEBUG_DRYRUN) break;
           wait_until_end_of_move();
           if (GCODE_HAS_S(com)) extruder_set_temperature(com->S);
+          if(current_extruder->currentTemperatureC >= current_extruder->targetTemperature) break;
           codenum = millis(); 
           long waituntil = 0;
           while(waituntil==0 || (waituntil!=0 && waituntil>millis())) {
@@ -426,8 +426,19 @@ void process_command(GCode *com)
       case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
         epr_update(com);
         break;
+      case 222: //M222 F_CPU / S
+       if(GCODE_HAS_S(com))
+         out.println_long_P(PSTR("F_CPU/x="),CPUDivU2(com->S));
+       break;
+      case 223:
+         if(GCODE_HAS_S(com)) {
+           extruder_enable();
+           printer_state.extruderStepsNeeded+=(int)com->S;
+           out.println_int_P(PSTR("Added to:"),printer_state.extruderStepsNeeded);
+         }
+         break;
 #ifdef USE_ADVANCE
-      case 230:
+      case 232:
        out.print_int_P(PSTR("Max advance="),maxadv);
        if(maxadv>0) 
          out.println_float_P(PSTR(", speed="),maxadvspeed); 
@@ -436,6 +447,42 @@ void process_command(GCode *com)
        maxadv=0;
        maxadvspeed=0;
        break;
+#endif
+#if USE_OPS==1
+      case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
+        if(GCODE_HAS_S(com) && com->S>=0 && com->S<3)
+          printer_state.opsMode = com->S;
+        if(GCODE_HAS_X(com) && com->X>=0)
+          printer_state.opsMinDistance = com->X;
+        if(GCODE_HAS_Y(com) && com->Y>=0)
+          printer_state.opsRetractDistance = com->Y;
+        if(GCODE_HAS_Z(com) && com->Z>=-printer_state.opsRetractDistance)
+          printer_state.opsRetractBackslash = com->Z;
+        if(GCODE_HAS_F(com) && com->F>=0 && com->F<=100)
+          printer_state.opsMoveAfter = com->F;
+        extruder_select(current_extruder->id);
+        if(printer_state.opsMode==0) {
+          out.println_P(PSTR("OPS disabled"));
+        } else {
+          if(printer_state.opsMode==1) 
+            out.print_P(PSTR("OPS classic mode:"));
+          else
+            out.print_P(PSTR("OPS fast mode:"));
+        
+          out.print_float_P(PSTR("min distance = "),printer_state.opsMinDistance);
+          out.print_float_P(PSTR(", retract = "),printer_state.opsRetractDistance);
+          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractDistance);
+          if(printer_state.opsMode==2)
+            out.print_float_P(PSTR(", move after = "),printer_state.opsMoveAfter);
+          out.println();
+        }
+#ifdef DEBUG_OPS
+       out.println_int_P(PSTR("Timer diff"),printer_state.timer0Interval);
+       out.println_int_P(PSTR("Ret. steps:"),printer_state.opsRetractSteps);
+       out.println_int_P(PSTR("PushBack Steps:"),printer_state.opsPushbackSteps);
+       out.println_int_P(PSTR("Move after steps:"),printer_state.opsMoveAfterSteps);
+#endif
+        break;
 #endif
     }
   } else if(GCODE_HAS_T(com))  { // Process T code

@@ -191,6 +191,15 @@ void extruder_select(byte ext_num) {
 //   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
+   printer_state.timer0Interval = F_CPU/(TIMER0_PRESCALE*printer_state.extruderSpeed*current_extruder->stepsPerMM);
+#if USE_OPS==1
+   printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
+   printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBackslash)*current_extruder->stepsPerMM;
+   if(printer_state.opsMode<=1)
+     printer_state.opsMoveAfterSteps = 0;
+   else
+     printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
+#endif
    queue_move(false); // Move head of new extruder to old position using last feedrate
 }
 /*void extruder_set_position(float pos,bool relative) {
@@ -205,6 +214,12 @@ void extruder_set_temperature(int temp_celsius) {
 #endif
   current_extruder->targetTemperature = conv_temp_raw(current_extruder->sensorType,temp_celsius);
   current_extruder->targetTemperatureC = temp_celsius;
+#if USE_OPS==1  
+  if(temp_celsius<MIN_EXTRUDER_TEMP) {
+    printer_state.filamentRetracted = false;
+    printmoveSeen = 0;
+  }
+#endif
 }
 int extruder_get_temperature() {
   return conv_raw_temp(current_extruder->sensorType,current_extruder->currentTemperature);
@@ -438,6 +453,7 @@ void manage_temperatures(bool critical) {
        if(act->sensorType>100) { // no analog values needed
          if(critical) return;
          act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
+         act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
          manage_extruder++; // next to test
          return;
        }
@@ -486,7 +502,7 @@ void manage_temperatures(bool critical) {
          }
          pidTerm += act->pidDGain * (oldTemp-act->currentTemperatureC); //*100
 #if SCALE_PID_TO_MAX==1
-         pidTerm = (pidTerm*act->pidMax)>>8:
+         pidTerm = (pidTerm*act->pidMax)>>8;
 #endif
          byte output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;    
          if(act->targetTemperatureC<20) output = 0; // off is off, even if damping term wants a heat peak!

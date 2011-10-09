@@ -117,28 +117,32 @@ void osFifoInit(uint8 *buffer,uint8 bufferSize) {
 The function returns 0 if it was not successfull, because the buffer was full.
 */
 uint8 osFifoPutByte(uint8 *buffer,uint8 value) {
-	volatile uint8 *count = &buffer[1];
-	if (*count >= buffer[0])
-		return 0;
-	buffer[4+buffer[3]++] = value;
-	if(buffer[3]==buffer[0]) buffer[3] = 0;
-	uint8 sreg = SREG;
-	cli();
-	(*count)++;
-	SREG = sreg;
-	return 1;
+  BEGIN_INTERRUPT_PROTECTED
+  volatile uint8 *count = &buffer[1];
+  if (*count >= buffer[0]) {
+    ESCAPE_INTERRUPT_PROTECTED
+	return 0;
+  }
+  buffer[4+buffer[3]++] = value;
+  if(buffer[3]==buffer[0]) buffer[3] = 0;
+  (*count)++;
+  END_INTERRUPT_PROTECTED
+  return 1;
 }
 
 int osFifoGetByte(uint8 *buffer) {
-	volatile uint8 *count = &buffer[1];
-	if(*count==0) return -1; // Buffer empty
-	uint8 val = buffer[4+buffer[2]++];
-	uint8 sreg = SREG;
-	cli();
-	(*count)--;
-	SREG = sreg;
-	if(buffer[2]==buffer[0]) buffer[2] = 0;
-	return val;
+  uint8 val;
+  BEGIN_INTERRUPT_PROTECTED
+  volatile uint8 *count = &buffer[1];
+  if(*count==0) {
+    ESCAPE_INTERRUPT_PROTECTED
+    return -1; // Buffer empty
+  }
+  val = buffer[4+buffer[2]++];
+  (*count)--;
+  if(buffer[2]==buffer[0]) buffer[2] = 0;
+  END_INTERRUPT_PROTECTED
+  return val;
 }
 
 uint8 osFifoGetWaitByte(uint8 *buffer) {
@@ -149,12 +153,12 @@ uint8 osFifoGetWaitByte(uint8 *buffer) {
   return (uint8)val;
 }
 uint8 osFifoEmpty(uint8 *buffer) {
-	volatile uint8 *count = &buffer[1];
-	return (*count!=0?0:1);
+  volatile uint8 *count = &buffer[1];
+  return (*count!=0?0:1);
 }
 uint8 osFifoFull(uint8 *buffer) {
-	volatile uint8 *count = &buffer[1];
-	return (*count==buffer[0]?1:0);
+  volatile uint8 *count = &buffer[1];
+  return (*count==buffer[0]?1:0);
 }
 SerialOutput::SerialOutput() {
   osFifoInit(out_buffer,OUTPUT_BUFFER_SIZE);
@@ -184,7 +188,7 @@ void SerialOutput::printFloat(double number, uint8_t digits)
   // Handle negative numbers
   if (number < 0.0)
   {
-     print('-');
+     write('-');
      number = -number;
   }
 
@@ -202,7 +206,7 @@ void SerialOutput::printFloat(double number, uint8_t digits)
 
   // Print the decimal point, but only if there are digits beyond
   if (digits > 0)
-    print("."); 
+    write('.'); 
 
   // Extract digits from the remainder one at a time
   while (digits-- > 0)
@@ -222,7 +226,7 @@ void SerialOutput::printFloat(double number, uint8_t digits)
 void SerialOutput::print_P(PGM_P ptr) {
   char c;
   while ((c=pgm_read_byte(ptr++)) != 0x00) 
-     out.print(c);
+     write(c);
 }
 
 /**
@@ -240,7 +244,7 @@ void SerialOutput::print_long_P(PGM_P ptr,long value) {
 }
 void SerialOutput::print_int_P(PGM_P ptr,int value) {
   print_P(ptr);
-  out.print(value);
+  print(value);
 }
 
 void SerialOutput::print_float_P(PGM_P ptr,float value,uint8_t digits) {

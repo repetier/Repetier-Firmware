@@ -104,15 +104,22 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[1]);
   epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[2]);
   epr_set_float(EPR_MAX_JERK,printer_state.maxJerk);
+  epr_set_float(EPR_MAX_ZJERK,printer_state.maxZJerk);
 #ifdef RAMP_ACCELERATION
-  //epr_set_float(EPR_Y_MAX_START_SPEED,max_start_speed_units_per_second[1]);
-  //epr_set_float(EPR_Z_MAX_START_SPEED,max_start_speed_units_per_second[2]);
   epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[0]);
   epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_ACCEL,max_acceleration_units_per_sq_second[2]);
   epr_set_float(EPR_X_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[0]);
   epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
+#endif
+  epr_set_float(EPR_EXTRUDER_SPEED,printer_state.extruderSpeed);
+#if USE_OPS==1
+  epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
+  epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
+  epr_set_float(EPR_OPS_MOVE_AFTER,printer_state.opsMoveAfter);
+  epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer_state.opsRetractDistance);
+  epr_set_float(EPR_OPS_RETRACT_BACKSLASH,printer_state.opsRetractBackslash);
 #endif
 
   // now the extruder
@@ -154,16 +161,22 @@ void epr_eeprom_to_data() {
   homing_feedrate[1] = epr_get_float(EPR_Y_HOMING_FEEDRATE);
   homing_feedrate[2] = epr_get_float(EPR_Z_HOMING_FEEDRATE);
   printer_state.maxJerk = epr_get_float(EPR_MAX_JERK);
+  printer_state.maxZJerk = epr_get_float(EPR_MAX_ZJERK);
 #ifdef RAMP_ACCELERATION
-  //max_start_speed_units_per_second[0] = epr_get_float(EPR_X_MAX_START_SPEED);
-  //max_start_speed_units_per_second[1] = epr_get_float(EPR_Y_MAX_START_SPEED);
-  //max_start_speed_units_per_second[2] = epr_get_float(EPR_Z_MAX_START_SPEED);
   max_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_ACCEL);
   max_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_ACCEL);
   max_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_ACCEL);
   max_travel_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
+#endif
+  printer_state.extruderSpeed = epr_get_float(EPR_EXTRUDER_SPEED);
+#if USE_OPS==1
+  printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
+  printer_state.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);
+  printer_state.opsMinDistance = epr_get_float(EPR_OPS_MIN_DISTANCE);
+  printer_state.opsRetractDistance = epr_get_float(EPR_OPS_RETRACT_DISTANCE);
+  printer_state.opsRetractBackslash = epr_get_float(EPR_OPS_RETRACT_BACKSLASH);
 #endif
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
@@ -235,6 +248,7 @@ void epr_output_settings() {
   epr_out_float(EPR_Y_HOMING_FEEDRATE,PSTR("Y-axis homing feedrate [mm/min]"));
   epr_out_float(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/min]"));
   epr_out_float(EPR_MAX_JERK,PSTR("Max. jerk [mm/s]"));
+  epr_out_float(EPR_MAX_ZJERK,PSTR("Max. Z-jerk [mm/s]"));
 #ifdef RAMP_ACCELERATION
   //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
   //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
@@ -246,7 +260,14 @@ void epr_output_settings() {
   epr_out_float(EPR_Y_MAX_TRAVEL_ACCEL,PSTR("Y-axis travel acceleration [mm/s^2]"));
   epr_out_float(EPR_Z_MAX_TRAVEL_ACCEL,PSTR("Z-axis travel acceleration [mm/s^2]"));
 #endif
-
+  epr_out_float(EPR_EXTRUDER_SPEED,PSTR("Max. extruder speed in [mm/s]"));
+#if USE_OPS==1
+  epr_out_byte(EPR_OPS_MODE,PSTR("OPS operation mode [0=Off,1=Classic,2=Fast]"));
+  epr_out_float(EPR_OPS_MOVE_AFTER,PSTR("OPS move after x% retract [%]"));
+  epr_out_float(EPR_OPS_MIN_DISTANCE,PSTR("OPS min. distance for fil. retraction [mm]"));
+  epr_out_float(EPR_OPS_RETRACT_DISTANCE,PSTR("OPS retraction length [mm]"));
+  epr_out_float(EPR_OPS_RETRACT_BACKSLASH,PSTR("OPS retraction backslash [mm]"));
+#endif
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;

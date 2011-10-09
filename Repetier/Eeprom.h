@@ -37,8 +37,8 @@ have problems with other modules using the eeprom */
 #define EPR_Y_HOMING_FEEDRATE 31
 #define EPR_Z_HOMING_FEEDRATE 35
 #define EPR_MAX_JERK 39
-//#define EPR_Y_MAX_START_SPEED 43
-//#define EPR_Z_MAX_START_SPEED 47
+#define EPR_OPS_MIN_DISTANCE 43
+#define EPR_MAX_ZJERK 47
 #define EPR_X_MAX_ACCEL 51
 #define EPR_Y_MAX_ACCEL 55
 #define EPR_Z_MAX_ACCEL 59
@@ -48,6 +48,11 @@ have problems with other modules using the eeprom */
 #define EPR_BAUDRATE 75
 #define EPR_MAX_INACTIVE_TIME 79
 #define EPR_STEPPER_INACTIVE_TIME 83
+#define EPR_OPS_RETRACT_DISTANCE 87
+#define EPR_OPS_RETRACT_BACKSLASH 91
+#define EPR_EXTRUDER_SPEED 95
+#define EPR_OPS_MOVE_AFTER 99
+#define EPR_OPS_MODE 103
 
 #define EEPROM_EXTRUDER_OFFSET 150
 // bytes per extruder needed, leave some space for future development
