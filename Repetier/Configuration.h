@@ -525,7 +525,7 @@ eeprom settings with configuration defaults, just select an other value. On the 
 it will detect a mismatch of the first byte and copys default values into EEPROM. If the first byte
 matches, the stored values are used to overwrite the settings.
 */
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
 //#define SDSUPPORT 1
 
