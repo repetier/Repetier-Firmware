@@ -259,6 +259,17 @@ void process_command(GCode *com)
         //processed in write to file routine above
         //savetosd = false;
         break;
+      case 30: // M30 filename - Delete file
+        if(sdactive){
+            sdmode = false;
+            file.close();
+            if(SdFile::remove(&root, com->text)) {
+              out.println_P(PSTR("File deleted"));
+            } else {
+              out.println_P(PSTR("Deletion failed"));
+            }
+        }
+        break;
 #endif
       case 104: // M104
         if(DEBUG_DRYRUN) break;
@@ -424,7 +435,11 @@ void process_command(GCode *com)
         epr_output_settings();
         break;
       case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
-        epr_update(com);
+#if EEPROM_MODE!=0
+          epr_update(com);
+#else
+          out.println_P(PSTR("Error: No EEPROM support compiled."));
+#endif
         break;
       case 222: //M222 F_CPU / S
        if(GCODE_HAS_S(com))

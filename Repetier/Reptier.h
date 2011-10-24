@@ -75,10 +75,9 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 } Extruder;
 
 
-#if HEATED_BED_TYPE!=0
-extern long last_bed_check = 0;
-extern int current_bed_raw = 0;
-extern int target_bed_raw = 0;
+#if HEATED_BED_SENSOR_TYPE!=0
+extern int current_bed_raw;
+extern int target_bed_raw;
 #endif
 #ifdef USE_ADVANCE
 extern int maxadv;
@@ -324,5 +323,19 @@ extern bool sdactive;
 extern bool savetosd;
 extern int16_t n;
 
+#endif
+
+#if MOTHERBOARD==6 || MOTHERBOARD==62
+#define EXTRUDER_TIMER_VECTOR TIMER2_COMPA_vect
+#define EXTRUDER_OCR OCR2A
+#define EXTRUDER_TCCR TCCR2A
+#define EXTRUDER_TIMSK TIMSK2
+#define EXTRUDER_OCIE OCIE2A
+#else
+#define EXTRUDER_TIMER_VECTOR TIMER0_COMPA_vect
+#define EXTRUDER_OCR OCR0A
+#define EXTRUDER_TCCR TCCR0A
+#define EXTRUDER_TIMSK TIMSK0
+#define EXTRUDER_OCIE OCIE0A
 #endif
 

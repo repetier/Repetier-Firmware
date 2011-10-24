@@ -273,14 +273,20 @@ for more details.
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
- //If true, axis won't move to coordinates less than zero.
-#define min_software_endstops false
+//If true, axis won't move to coordinates less than zero.
+#define min_software_endstop_x false
+#define min_software_endstop_y false
+#define min_software_endstop_z false
+
 //If true, axis won't move to coordinates greater than the defined lengths below.
-#define max_software_endstops true
+#define max_software_endstop_x true
+#define max_software_endstop_y true
+#define max_software_endstop_z true
+
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-#define ALWAYS_CHECK_ENDSTOPS false
+#define ALWAYS_CHECK_ENDSTOPS true
 // maximum positions in mm - only fixed numbers!
 #define X_MAX_LENGTH 200
 #define Y_MAX_LENGTH 200
@@ -315,9 +321,9 @@ for more details.
 /** \brief Use RAMP acceleration for faster printing speed. */
 #ifdef RAMP_ACCELERATION
 /** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,100,1000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100,1000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves. */
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {7000,7000,100,1000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100,1000}
 #endif
 
 /** \brief Maximum allowable jerk.
@@ -365,10 +371,10 @@ frequency is computed as:
 f = floor(F_CPU/(TIMER0_PRESCALE*EXTRUDER_SPEED*STEPS_PER_MM))
 
 Important: This is the speed, filament is pushed inside the extruder not the speed at the nozzle!
-If you set the extruder steps_per_mm for 1mm pushed outside, sile skainforge<40 needed it, you must
-increase the value to reflect this. (*filament_diameter^2/nozzle_diameter^2)
+If you set the extruder steps_per_mm for 1mm pushed outside, cause skeinforge<40 needed it, you must
+decrease the value to reflect this. (*filament_diameter^2/nozzle_diameter^2)
 */
-#define EXTRUDER_SPEED 25.0
+#define EXTRUDER_SPEED 20.0
 
 /* \brief Minimum temperature for extruder operation
 
@@ -519,7 +525,7 @@ eeprom settings with configuration defaults, just select an other value. On the 
 it will detect a mismatch of the first byte and copys default values into EEPROM. If the first byte
 matches, the stored values are used to overwrite the settings.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 0
 /** Comment out (using // at the start of the line) to disable SD support: */
 //#define SDSUPPORT 1
 
@@ -541,7 +547,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_FREE_MEMORY
 #define DEBUG_ADVANCE
 /** \brief print ops related debug info. */
-//#define DEBUG_OPS
+#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 // Uncomment the following line to enable debugging. You can better control debugging below the following line

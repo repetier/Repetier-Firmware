@@ -344,8 +344,8 @@ void setup()
   initsd();
 
 #endif
-  TCCR0A = 0; // need Normal not fastPWM set by arduino init
-  TIMSK0 |= (1<<OCIE0A); // Activate compa interrupt on timer 0
+  EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
+  EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
   TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
   TCCR1C = 0;
   TIMSK1 = 0;  
@@ -982,16 +982,25 @@ END_INTERRUPT_PROTECTED
   else p->flags = 0;
   p->joinFlags = 0;
   p->dir = 0;
-  if (min_software_endstops) {
+#if min_software_endstop_x == true
     if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
+#endif
+#if min_software_endstop_y == true
     if (printer_state.destinationSteps[1] < 0) printer_state.destinationSteps[1] = 0.0;
+#endif
+#if min_software_endstop_z == true
     if (printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0.0;
-  }
-  if (max_software_endstops) {
+#endif
+
+#if max_software_endstop_x == true
     if (printer_state.destinationSteps[0] > printer_state.xMaxSteps) printer_state.destinationSteps[0] = printer_state.xMaxSteps;
+#endif
+#if max_software_endstop_y == true
     if (printer_state.destinationSteps[1] > printer_state.yMaxSteps) printer_state.destinationSteps[1] = printer_state.yMaxSteps;
+#endif
+#if max_software_endstop_z == true
     if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
-  }
+#endif
   //Find direction
   for(byte i=0; i < 4; i++) {
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
@@ -1362,7 +1371,7 @@ inline long bresenham_step() {
      printer_state.extruderStepsNeeded+=(cur->advanceStart>>16)-printer_state.advance_steps_set;
      printer_state.advance_executed = cur->advanceStart;
 #endif
-  }
+  } // End cur=0
   sei();
   /* For halfstepping, we divide the actions into even and odd actions to split
      time used per loop. */
@@ -1484,12 +1493,16 @@ inline long bresenham_step() {
 #if USE_OPS==1
     if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
 #ifdef DEBUG_OPS
-      out.println_P(PSTR("DownX"));
+      out.println_long_P(PSTR("DownX"),cur->stepsRemaining);
 #endif
       // Point for retraction reversal reached.
       printer_state.filamentRetracted = false;
       cli();
       printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
+#ifdef DEBUG_OPS
+      sei();
+      out.println_long_P(PSTR("N="),printer_state.extruderStepsNeeded);
+#endif
     }
 #endif
   } // stepsRemaining
@@ -1511,8 +1524,16 @@ inline long bresenham_step() {
         }
         cli();
         if(printer_state.extruderStepsNeeded) {
+#ifdef DEBUG_OPS
+          sei();
+          out.println_int_P(PSTR("W"),printer_state.extruderStepsNeeded);
+#endif
           return 4000; // wait, work is done in other interrupt
         }
+#ifdef DEBUG_OPS
+          sei();
+          out.println_int_P(PSTR("X"),printer_state.extruderStepsNeeded);
+#endif
      }
 #endif
      cli();
@@ -1528,7 +1549,7 @@ inline long bresenham_step() {
 #ifdef DEBUG_FREE_MEMORY
     check_mem();
 #endif  
-  }
+  } // Do even
   return interval;
 }
 
@@ -1649,6 +1670,8 @@ ISR(TIMER1_COMPA_vect)
 }
 //byte OCR0A_next=0;
 
+byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
+char extruder_last_dir = 0;
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optima result,
@@ -1658,23 +1681,38 @@ is executed. This will keep the extruder moving, until the total
 wanted movement is achieved. This will be done with the maximum
 allowable speed for the extruder.
 */
-ISR(TIMER0_COMPA_vect)
+ISR(EXTRUDER_TIMER_VECTOR)
 {
   // The stepper signals are in strategical positions for optimal timing. If you
   // still have timeing issues, add dummy commands between.
   extruder_unstep();
-  OCR0A += printer_state.timer0Interval;
+  EXTRUDER_OCR += printer_state.timer0Interval;
   //OCR0A_next += printer_state.timer0Interval; // time to come back
   if(printer_state.extruderStepsNeeded) {
     if(printer_state.extruderStepsNeeded<0) { // Backward step
       extruder_set_direction(0);
+      if(extruder_wait_dirchange && extruder_last_dir==-1) {
+        extruder_wait_dirchange--;
+        return;
+      }
+      extruder_last_dir = 1;
+      extruder_wait_dirchange=2;
       printer_state.extruderStepsNeeded++;
     } else { // Forward step
       extruder_set_direction(1);
+      if(extruder_wait_dirchange && extruder_last_dir==1) {
+        extruder_wait_dirchange--;
+        return;
+      }
+      extruder_last_dir = -1;
+      extruder_wait_dirchange=2;
       printer_state.extruderStepsNeeded--;
     }
     if(current_extruder->currentTemperatureC>=MIN_EXTRUDER_TEMP) // Saftey first
       extruder_step();
+  } else {
+    if(extruder_wait_dirchange)
+      extruder_wait_dirchange--;
   }
 }
 

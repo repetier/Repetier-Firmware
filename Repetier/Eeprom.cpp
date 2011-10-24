@@ -86,6 +86,24 @@ void epr_out_byte(uint pos,PGM_P text) {
   out.println_P(text);  
 }
 
+void epr_update(GCode *com) {
+  if(GCODE_HAS_T(com) && GCODE_HAS_P(com)) switch(com->T) {
+    case 0:
+      if(GCODE_HAS_S(com)) epr_set_byte(com->P,(byte)com->S);
+      break;
+    case 1:
+      if(GCODE_HAS_S(com)) epr_set_int(com->P,(int)com->S);
+      break;
+    case 2:
+      if(GCODE_HAS_S(com)) epr_set_long(com->P,(long)com->S);
+      break;
+    case 3:
+      if(GCODE_HAS_X(com)) epr_set_float(com->P,com->X);
+      break;
+  }
+  epr_eeprom_to_data();
+}
+
 /** \brief Moves current settings to EEPROM.
 
 The values the are currently set are used to fill the eeprom.*/
@@ -205,9 +223,11 @@ void epr_eeprom_to_data() {
 }
 #endif
 void epr_init_baudrate() {
+#if EEPROM_MODE!=0
   if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE) {
     baudrate = epr_get_long(EPR_BAUDRATE);    
   }
+#endif
 }
 void epr_init() {
 #if EEPROM_MODE!=0
@@ -293,22 +313,5 @@ void epr_output_settings() {
 #else
   out.println_P(PSTR("No EEPROM support compiled."));
 #endif
-}
-void epr_update(GCode *com) {
-  if(GCODE_HAS_T(com) && GCODE_HAS_P(com)) switch(com->T) {
-    case 0:
-      if(GCODE_HAS_S(com)) epr_set_byte(com->P,(byte)com->S);
-      break;
-    case 1:
-      if(GCODE_HAS_S(com)) epr_set_int(com->P,(int)com->S);
-      break;
-    case 2:
-      if(GCODE_HAS_S(com)) epr_set_long(com->P,(long)com->S);
-      break;
-    case 3:
-      if(GCODE_HAS_X(com)) epr_set_float(com->P,com->X);
-      break;
-  }
-  epr_eeprom_to_data();
 }
 

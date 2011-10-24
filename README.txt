@@ -7,8 +7,7 @@ Version 0.35  9.10.2011
 
 Repetier-Firmware is a firmware for RepRap like 3d-printer powered with
 an arduino compatible controller.
-This firmware is a nearly complete rewrite of the sprinter firmware
-by kliment (https://github.com/kliment/Sprinter)
+This firmware is a nearly complete rewrite of the sprinter firmware by kliment
 which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 Some ideas were also taken from Teacup, Grbl and Marlin.
 While I changed nearly all parts, I kept the sprinter logic as far intact as
@@ -26,6 +25,18 @@ no conversion from ascii to float/int is needed. An improved checksum method
 should make mistakes nearly impossible. While programming this, I saw some
 parts that could be improved, so I did it. Then I read in the forum about
 the idea of using the EEPROM for parameter. 
+
+Supported boards:
+
+The following boards should work by changing the configuration settings. If the 
+extruder heater pin uses Timer 0 or 1, no PID control should be compiled. These
+interrupts are needed for internal purposes. Other boards can made running by
+adding a pin definition in pins.h
+
+Gen 6 : Full support
+Ramps 1.0 : No PID control
+Ramps 1.1/1.2/1.3 : Full Support
+Sanguinololu : No PID control
 
 Help wanted:
 
@@ -50,6 +61,7 @@ For Stepper controller with 1/8 step, metric system
 which are all parameter affected by the printer type. If you have some 
 parameters, which are not included, please send them 
 to repetierdev@googlemail.com   
+
 
 2) Features
 
@@ -98,7 +110,7 @@ The IDE will open all other files in that directory, too. Select the file
 "Configuration.h" and edit the paramaters, to fir your RepRap. All parameters
 are documented in the file, so no further explanation is required.
 Connect your board, select the correct COM-Port under Tools->Serial Port and
-the correct Board under Tools->Board. Klick the "Upload" button. After a while
+the correct Board under Tools->Board. Click the "Upload" button. After a while
 your new firmware should be uploaded and ready to start. If the upload doesn't
 start, after the files are compiled, try pressing the reset button on your
 board.
@@ -107,7 +119,7 @@ Update from older version:
 
 Version 0.32 and 0.34 changed the EEPROM usage, because some parameter aren't 
 used any more and new parameter were added. Check the settings before using
-the new version. Watch out for new values, tellung you they are 0 - they are 
+the new version. Watch out for new values, telling you they are 0 - they are 
 probably not. Illegal numbers are returned as 0, too.
 
 4) Things you should know
@@ -276,4 +288,4 @@ output with the EXT0_PID_MAX value.
 
 5. Changelog
 
-4.9.2011 First public version
+See changelog.txt
