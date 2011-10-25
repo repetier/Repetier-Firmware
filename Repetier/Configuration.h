@@ -547,7 +547,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_FREE_MEMORY
 #define DEBUG_ADVANCE
 /** \brief print ops related debug info. */
-#define DEBUG_OPS
+//#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 // Uncomment the following line to enable debugging. You can better control debugging below the following line

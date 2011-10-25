@@ -1525,14 +1525,13 @@ inline long bresenham_step() {
         cli();
         if(printer_state.extruderStepsNeeded) {
 #ifdef DEBUG_OPS
-          sei();
-          out.println_int_P(PSTR("W"),printer_state.extruderStepsNeeded);
+    //      sei();
+    //      out.println_int_P(PSTR("W"),printer_state.extruderStepsNeeded);
 #endif
           return 4000; // wait, work is done in other interrupt
         }
 #ifdef DEBUG_OPS
           sei();
-          out.println_int_P(PSTR("X"),printer_state.extruderStepsNeeded);
 #endif
      }
 #endif
