@@ -26,6 +26,7 @@
 #include "Eeprom.h"
 
 #if EEPROM_MODE!=0
+extern void epr_eeprom_to_data();
 inline byte epr_get_byte(uint pos) {
    return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
 }

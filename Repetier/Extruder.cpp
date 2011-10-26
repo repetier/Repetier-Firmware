@@ -57,6 +57,10 @@ byte manage_pin = 0;       ///< Used sensor pin.
 long manage_lastcall = 0;  ///< Time of last call. So we can limit calls to desired frequency.
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 
+#if HEATED_BED_HEATER_PIN > -1
+unsigned long last_bed_set = 0;       ///< Time of last temperature setting for heated bed. So we can limit settings to desired frequency.
+#endif
+
 #ifdef SUPPORT_MAX6675
 extern int read_max6675(byte ss_pin);
 #endif
@@ -528,7 +532,10 @@ void manage_temperatures(bool critical) {
 #if HEATED_BED_SENSOR_TYPE!=0
       current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
 #if HEATED_BED_HEATER_PIN > -1
-      digitalWrite(HEATED_BED_HEATER_PIN,current_bed_raw >= target_bed_raw ? LOW : HIGH);
+     if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
+        digitalWrite(HEATED_BED_HEATER_PIN,current_bed_raw >= target_bed_raw ? LOW : HIGH);
+        last_bed_set = time;
+      }
 #endif
       monitor_temp(time,conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw),conv_raw_temp(HEATED_BED_SENSOR_TYPE,target_bed_raw),current_bed_raw >= target_bed_raw ? 0 : 255);
 #endif

@@ -95,7 +95,15 @@
 /** Wait x seconds, after reaching target temperature. Only used for M109 */
 #define EXT0_WATCHPERIOD 40
 
-/** The maximum value, I-gain can contribute to the output. */
+/** \brief The maximum value, I-gain can contribute to the output. 
+
+A good value is slightly higher then the output needed for your temperature.
+Values for startes:
+130 => PLA for temperatures from 170-180°C
+180 => ABS for temperatures around 240°C
+
+The precice values may differ for different nozzle/resistor combination. 
+*/
 #define EXT0_PID_INTEGRAL_DRIVE_MAX 130
 /** P-gain in 0,01 units */
 #define EXT0_PID_PGAIN   300
@@ -184,13 +192,27 @@ for more details.
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
+
+// ############# Heated bed configuration ########################
+
+/** \brief Switches fast between config for heated bed and non heated bed */
+#define HAVE_HEATED_BED false
+
+#if HAVE_HEATED_BED==true
 // Select type of your heated bed. It's the same as for EXT0_TEMPSENSOR_TYPE
 // set to 0 if you don't have a heated bed
 #define HEATED_BED_SENSOR_TYPE 0
-// Pin to enable heater for bed
+/** Index of analog sensor to read temperature of heated bed. look at ANALOG_INPUT_CHANNELS for the position or to add the Arduino pin id there. */
+#define HEATED_BED_SENSOR_PIN 1
+/** \brief Pin to enable heater for bed. */
+#define HEATED_BED_HEATER_PIN HEATER_1_PIN
+// How often the temperature of the heated bed is set (msec)
+#define HEATED_BED_SET_INTERVAL 5000
+#else
+#define HEATED_BED_SENSOR_TYPE 0
 #define HEATED_BED_SENSOR_PIN -1
-// Pin to read temperature of heated bed
 #define HEATED_BED_HEATER_PIN -1
+#endif
 
 // uncomment to use AREF for reference voltage
 // on a GEN6 you want AVCC
@@ -198,6 +220,8 @@ for more details.
 // how many samples do we want per reading. 1 sample takes 1/125000 seconds.
 // more samples get more reliable values, but take more time.
 #define ANALOG_SUPERSAMPLE 10
+/** The number of analog sensors, we need to read out. These are the thermistors used for temperature
+reading of the extruder and heated bed. */
 #define NUM_ANALOG_SENSORS 1
 #define NUM_DIGITAL_SENSORS 0
 #define TEMP_PID true
@@ -219,7 +243,13 @@ for more details.
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
 #define ANALOG_INPUTS NUM_ANALOG_SENSORS
 #if ANALOG_INPUTS>0
-// Channels are the MUX-part of ADMUX register
+/** Channels are the MUX-part of ADMUX register 
+
+Put all the pin numbers for the analog sensors (temp. sensor for extruder and heated bed) in here.
+In the configs of the sensor, use the index in this array. For the typical combination of
+one extruder with heated bed, write:
+#define  ANALOG_INPUT_CHANNELS {TEMP_0_PIN,TEMP_1_PIN}
+*/
 #define ANALOG_INPUT_CHANNELS {TEMP_0_PIN}
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 10
@@ -524,6 +554,9 @@ set it to a value not stored in the first EEPROM-byte used. If you later want to
 eeprom settings with configuration defaults, just select an other value. On the first call to epr_init()
 it will detect a mismatch of the first byte and copys default values into EEPROM. If the first byte
 matches, the stored values are used to overwrite the settings.
+
+IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, as they are 
+           taken from the EEPROM.
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
