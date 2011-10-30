@@ -196,6 +196,8 @@ void extruder_select(byte ext_num) {
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
    printer_state.timer0Interval = F_CPU/(TIMER0_PRESCALE*printer_state.extruderSpeed*current_extruder->stepsPerMM);
+   float fmax=((float)F_CPU/((float)printer_state.timer0Interval*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
+   if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
 #if USE_OPS==1
    printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
    printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBackslash)*current_extruder->stepsPerMM;

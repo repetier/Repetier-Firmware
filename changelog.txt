@@ -1,3 +1,6 @@
+Version 0.38 30.10.2011
+  Fixed errors with high frequency (thanks Theodleif)
+  
 Version 0.37 26.10.2011
   Added individual check interval for heated bed.
   Better comments in configuration for heated bed.

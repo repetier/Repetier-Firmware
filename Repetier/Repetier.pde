@@ -330,6 +330,16 @@ void setup()
   epr_init_baudrate();
   Serial.begin(baudrate);
   out.println_P(PSTR("start"));
+  
+  // Check startup - does nothing if bootloader sets MCUSR to 0
+  byte mcu = MCUSR;
+  if(mcu & 1) out.println_P(PSTR("PowerUp"));
+  if(mcu & 2) out.println_P(PSTR("External Reset"));
+  if(mcu & 4) out.println_P(PSTR("Brown out Reset"));
+  if(mcu & 8) out.println_P(PSTR("Watchdog Reset"));
+  if(mcu & 32) out.println_P(PSTR("Software Reset"));
+  MCUSR=0;
+  
   initExtruder();
   epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
@@ -1604,10 +1614,12 @@ inline void setTimer(unsigned long delay)
     OCR1A = 32768;
   }*/
 }
+volatile byte insideTimer0=0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
 {
+  if(insideTimer0) return;
   byte doExit;
   __asm__ __volatile__ (
   "ldi %[ex],0 \n\t"
@@ -1634,7 +1646,7 @@ ISR(TIMER1_COMPA_vect)
   "end%=: \n\t" 
   :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
   if(doExit) return;
-  TIMSK1 &= ~(1<<OCIE1A);
+  insideTimer0=1;
   if(lines_count) {
     setTimer(bresenham_step());
   } else {
@@ -1665,9 +1677,8 @@ ISR(TIMER1_COMPA_vect)
 #ifdef DEBUG_FREE_MEMORY
   check_mem();
 #endif
-  TIMSK1 |= (1<<OCIE1A); // Enable interrupt
+  insideTimer0=0;
 }
-//byte OCR0A_next=0;
 
 byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
 char extruder_last_dir = 0;
@@ -1685,8 +1696,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
   // The stepper signals are in strategical positions for optimal timing. If you
   // still have timeing issues, add dummy commands between.
   extruder_unstep();
-  EXTRUDER_OCR += printer_state.timer0Interval;
-  //OCR0A_next += printer_state.timer0Interval; // time to come back
+  EXTRUDER_OCR += printer_state.timer0Interval; // time to come back
   if(printer_state.extruderStepsNeeded) {
     if(printer_state.extruderStepsNeeded<0) { // Backward step
       extruder_set_direction(0);
