@@ -586,16 +586,14 @@ bool gcode_parse_ascii(GCode *code,char *line) {
   }
   if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30)) {
      // after M command we got a filename for sd card management
-     byte i = 0;
      char *sp = line;
      while(*sp!='M') sp++; // Search M command
      while(*sp!=' ') sp++; // search next whitespace
      while(*sp==' ') sp++; // skip leading whitespaces
      char *wp = code->text;
-     while(i++<16 && *sp) {
+     while(*sp) {
         if(*sp==' ' || *sp=='*') break; // end of filename reached
         *wp++ = *sp++;
-        ++i;
      }
      *wp = 0; // ensure ending 0 
      code->params |= 32768;
