@@ -70,6 +70,7 @@ Custom M Codes
 - M27  - Report SD print status
 - M28  - Start SD write (M28 filename.g)
 - M29  - Stop SD write
+- M30 <filename> - Delete file on sd card
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
@@ -89,6 +90,7 @@ Custom M Codes
 - M206 - Set EEPROM value
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
+- M233 X<AdvanceK> - Set temporary advance K-value to X
 */
 #include "Configuration.h"
 #include "Reptier.h"
@@ -311,8 +313,10 @@ void setup()
   SET_INPUT(Z_MAX_PIN); WRITE(Z_MAX_PIN,HIGH);
 #endif
 #endif
+#if USE_OPS==1 || defined(USE_ADVANCE)
   printer_state.timer0Interval = 200;
   printer_state.extruderSpeed = EXTRUDER_SPEED;  
+#endif
 #if USE_OPS==1
   printer_state.opsMode = OPS_MODE;
   printer_state.opsMinDistance = OPS_MIN_DISTANCE;
@@ -354,8 +358,10 @@ void setup()
   initsd();
 
 #endif
+#if USE_OPS==1 || defined(USE_ADVANCE)
   EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
   EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
+#endif
   TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
   TCCR1C = 0;
   TIMSK1 = 0;  
@@ -383,6 +389,14 @@ void loop()
             savetosd = false;
             out.println_P(PSTR("Done saving file."));
         }
+#ifdef ECHO_ON_EXECUTE
+        if(DEBUG_ECHO) {
+           out.print_P(PSTR("Echo:"));
+           gcode_print_command(code);
+           out.println();
+        }
+#endif
+        gcode_command_finished(); 
     } else {
         process_command(code);
     }
@@ -1377,6 +1391,13 @@ inline long bresenham_step() {
       } else {
         WRITE(Z_DIR_PIN,INVERT_Z_DIR);
       }
+#if USE_OPS==0 && !defined(USE_ADVANCE)
+      if(cur->dir & 8) {
+        extruder_set_direction(1);
+      } else {
+        extruder_set_direction(0);
+      }
+#endif
 #ifdef USE_ADVANCE
      printer_state.extruderStepsNeeded+=(cur->advanceStart>>16)-printer_state.advance_steps_set;
      printer_state.advance_executed = cur->advanceStart;
@@ -1423,10 +1444,14 @@ inline long bresenham_step() {
     cli();
     if(cur->dir & 128) {
       if((cur->error[3] -= cur->delta[3]) < 0) {
+#if USE_OPS==1 || defined(USE_ADVANCE)
         if(cur->dir & 8)
           printer_state.extruderStepsNeeded++;
         else
           printer_state.extruderStepsNeeded--;
+#else
+        extruder_step();
+#endif
         cur->error[3] += cur_errupd;
       }
     }    
@@ -1451,6 +1476,9 @@ inline long bresenham_step() {
     WRITE(X_STEP_PIN,LOW);
     WRITE(Y_STEP_PIN,LOW);
     WRITE(Z_STEP_PIN,LOW);
+#if USE_OPS==0 && !defined(USE_ADVANCE)
+    extruder_unstep();
+#endif
     if(do_even) {
       sei(); // Allow interrupts for other types, timer1 is still disabled
 #ifdef RAMP_ACCELERATION
@@ -1614,12 +1642,12 @@ inline void setTimer(unsigned long delay)
     OCR1A = 32768;
   }*/
 }
-volatile byte insideTimer0=0;
+volatile byte insideTimer1=0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
 {
-  if(insideTimer0) return;
+  if(insideTimer1) return;
   byte doExit;
   __asm__ __volatile__ (
   "ldi %[ex],0 \n\t"
@@ -1646,7 +1674,7 @@ ISR(TIMER1_COMPA_vect)
   "end%=: \n\t" 
   :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
   if(doExit) return;
-  insideTimer0=1;
+  insideTimer1=1;
   if(lines_count) {
     setTimer(bresenham_step());
   } else {
@@ -1669,7 +1697,11 @@ ISR(TIMER1_COMPA_vect)
         printer_state.advance_steps_set = 0;
       }
 #endif
+#if USE_OPS==1 || defined(USE_ADVANCE)
       if(!printer_state.extruderStepsNeeded) if(DISABLE_E) extruder_disable(); 
+#else
+      if(DISABLE_E) extruder_disable(); 
+#endif
     } else waitRelax--;
     stepperWait = 0; // Importent becaus of optimization in asm at begin
     OCR1A = 65500; // Wait for next move
@@ -1677,9 +1709,10 @@ ISR(TIMER1_COMPA_vect)
 #ifdef DEBUG_FREE_MEMORY
   check_mem();
 #endif
-  insideTimer0=0;
+  insideTimer1=0;
 }
 
+#if USE_OPS==1 || defined(USE_ADVANCE)
 byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
 char extruder_last_dir = 0;
 /** \brief Timer routine for extruder stepper.
@@ -1724,4 +1757,5 @@ ISR(EXTRUDER_TIMER_VECTOR)
       extruder_wait_dirchange--;
   }
 }
+#endif
 

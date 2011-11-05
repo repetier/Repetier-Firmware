@@ -132,7 +132,9 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
 #endif
+#if USE_OPS==1 || defined(USE_ADVANCE)
   epr_set_float(EPR_EXTRUDER_SPEED,printer_state.extruderSpeed);
+#endif
 #if USE_OPS==1
   epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
   epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
@@ -189,7 +191,9 @@ void epr_eeprom_to_data() {
   max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
+#if USE_OPS==1 || defined(USE_ADVANCE)
   printer_state.extruderSpeed = epr_get_float(EPR_EXTRUDER_SPEED);
+#endif
 #if USE_OPS==1
   printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
   printer_state.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);

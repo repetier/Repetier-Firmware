@@ -1,3 +1,8 @@
+Version 0.39 5.11.2011
+  Now recovers from communication errors send in ASCII mode. 
+  SD card commands now fully tested and functional
+  No extruder interrupt if advance and ops support are disabled. 
+
 Version 0.38 30.10.2011
   Fixed errors with high frequency (thanks Theodleif)
   

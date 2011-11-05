@@ -23,7 +23,7 @@
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // MEGA/RAMPS up to 1.2  = 3,
-// RAMPS 1.3 = 33
+// RAMPS 1.3/RAMPS 1.4 = 33
 // Gen6 = 5, 
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
@@ -223,6 +223,7 @@ for more details.
 /** The number of analog sensors, we need to read out. These are the thermistors used for temperature
 reading of the extruder and heated bed. */
 #define NUM_ANALOG_SENSORS 1
+/** Number of digital temp. sensors like MAX6675 */
 #define NUM_DIGITAL_SENSORS 0
 #define TEMP_PID true
 
@@ -423,7 +424,8 @@ waiting time, the OPS has a fast mode, which performs the retraction during the 
 The only reason, your slicer doesn't do it, is because it can't tell. There is simple no
 G-Code command telling the firmware to do that.
 
-You can always compile including OPS. Then you can disable/enable it anytime you want.
+You can always compile including OPS. Then you can disable/enable it anytime you want. To disable it
+set USE_OPS 0
 
 Caution: Don't enable anti-ooze in your slicer if you are using this. 
 */
@@ -561,7 +563,8 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
 //#define SDSUPPORT 1
-
+/** Show extended directory including file length. Don't use this with pronterface! */
+#define SD_EXTENDED_DIR
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################

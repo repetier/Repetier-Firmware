@@ -31,6 +31,7 @@ byte gcode_windex=0; ///< Write position in gcode_buffer.
 byte gcode_transbuffer[MAX_CMD_SIZE]; ///< Current received command. 
 byte gcode_wpos=0; ///< Writing position in gcode_transbuffer.
 byte gcode_binary; ///< Flags the command as binary input.
+byte gcode_last_binary=0; ///< Was the last successful command in binary mode?
 byte gcode_comment=false; ///< Flags true if we are reading the comment part of a command.
 byte gcode_binary_size; ///< Expected size of the incoming binary command.
 long gcode_lastN=0; ///< Last line number received.
@@ -314,6 +315,7 @@ void gcode_checkinsert(GCode *act) {
 #else
   out.println_P(PSTR("ok"));
 #endif
+  gcode_last_binary = gcode_binary;
   gcode_wait_resend = -1; // everything is ok.
 #ifndef ECHO_ON_EXECUTE
   if(DEBUG_ECHO) {
@@ -360,8 +362,9 @@ void gcode_read_serial() {
   unsigned long time = millis();
   if(gcode_buflen>=GCODE_BUFFER_SIZE) return; // all buffers full
   if(Serial.available()==0) {
-    if((gcode_wait_resend>=0 || gcode_wpos>0) && time-gcode_lastdata>50) {
-      gcode_resend(); // Something is wrong, a started line was not continued in the last second    
+    if((gcode_wait_resend>=0 || gcode_wpos>0) && time-gcode_lastdata>200) {
+      gcode_resend(); // Something is wrong, a started line was not continued in the last second 
+       //  out.println_P(PSTR("Timeout"));   
       gcode_lastdata = time;
     }
 #ifdef WAITING_IDENTIFIER
@@ -376,7 +379,7 @@ void gcode_read_serial() {
     gcode_transbuffer[gcode_wpos++] = Serial.read();
     // first lets detect, if we got an old type ascii command
     if(gcode_wpos==1) {
-      if(gcode_wait_resend>=0) {
+      if(gcode_wait_resend>=0 && gcode_last_binary) {
          if(!gcode_transbuffer[0]) {gcode_wait_resend--;} // Skip 30 zeros to get in sync
          else gcode_wait_resend = 30;
          gcode_wpos = 0;
@@ -581,7 +584,7 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->P = gcode_value_long(++pos);
      code->params |= 2048;
   }
-  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29)) {
+  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30)) {
      // after M command we got a filename for sd card management
      byte i = 0;
      char *sp = line;

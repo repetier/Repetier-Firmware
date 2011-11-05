@@ -184,7 +184,11 @@ void process_command(GCode *com)
         
       case 20: // M20 - list SD card
         out.println_P(PSTR("Begin file list"));
+#ifdef SD_EXTENDED_DIR
+        root.ls(LS_SIZE);
+#else
         root.ls();
+#endif
         out.println_P(PSTR("End file list"));
         break;
       case 21: // M21 - init SD card
@@ -445,13 +449,6 @@ void process_command(GCode *com)
        if(GCODE_HAS_S(com))
          out.println_long_P(PSTR("F_CPU/x="),CPUDivU2(com->S));
        break;
-      case 223:
-         if(GCODE_HAS_S(com)) {
-           extruder_enable();
-           printer_state.extruderStepsNeeded+=(int)com->S;
-           out.println_int_P(PSTR("Added to:"),printer_state.extruderStepsNeeded);
-         }
-         break;
 #ifdef USE_ADVANCE
       case 232:
        out.print_int_P(PSTR("Max advance="),maxadv);
@@ -497,6 +494,13 @@ void process_command(GCode *com)
        out.println_int_P(PSTR("PushBack Steps:"),printer_state.opsPushbackSteps);
        out.println_int_P(PSTR("Move after steps:"),printer_state.opsMoveAfterSteps);
 #endif
+        break;
+#endif
+#ifdef USE_ADVANCE
+      case 233:
+        if(GCODE_HAS_X(com)) {
+          current_extruder->advanceK = com->X;
+        }
         break;
 #endif
     }

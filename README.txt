@@ -35,8 +35,8 @@ adding a pin definition in pins.h
 
 Gen 6 : Full support
 Ramps 1.0 : No PID control
-Ramps 1.1/1.2/1.3 : Full Support
-Sanguinololu : No PID control
+Ramps 1.1/1.2/1.3/1.4 : Full Support
+Sanguinololu : Full support
 
 Help wanted:
 
@@ -83,7 +83,7 @@ to repetierdev@googlemail.com
 - Interrupt based sending buffer (Arduino library normally waits for the
   recipient to receive written data)
 - Small RAM memory print, resulting in large caches.
-- Supports SD-cards (experimental, don't have a card to test it)
+- Supports SD-cards.
 - mm and inches can be used for G0/G1
 - Works with Skeinforge 41, all unknown commands are ignored.
 - Dry run : Execute yout GCode without using the extruder. This way you can

@@ -92,7 +92,14 @@ ISR(ADC_vect) {
     osAnalogInputCounter[osAnalogInputPos] = 0;
     // Start next conversion
     if(++osAnalogInputPos>=ANALOG_INPUTS) osAnalogInputPos = 0;
-    ADMUX = (ADMUX & ~(0x1F)) | (pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]));
+    byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+#if defined(ADCSRB) && defined(MUX5)
+      if(channel & 8)  // Reading channel 0-7 or 8-15?
+        ADCSRB |= _BV(MUX5);
+      else
+        ADCSRB &= ~_BV(MUX5);
+#endif
+    ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
   }
   ADCSRA |= _BV(ADSC);  // start next conversion
 }
@@ -173,7 +180,14 @@ void initExtruder() {
   uint dummyADCResult;
   dummyADCResult = ADCW;
   // Enable interrupt driven conversion loop
-  ADMUX = (ADMUX & ~(0x1F)) | (osAnalogInputChannels[osAnalogInputPos]);
+  byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+#if defined(ADCSRB) && defined(MUX5)
+  if(channel & 8)  // Reading channel 0-7 or 8-15?
+        ADCSRB |= _BV(MUX5);
+  else
+        ADCSRB &= ~_BV(MUX5);
+#endif
+  ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
   ADCSRA |= _BV(ADSC) | _BV(ADIE);
 #endif
   
@@ -195,9 +209,11 @@ void extruder_select(byte ext_num) {
 //   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
+#if USE_OPS==1 || defined(USE_ADVANCE)
    printer_state.timer0Interval = F_CPU/(TIMER0_PRESCALE*printer_state.extruderSpeed*current_extruder->stepsPerMM);
    float fmax=((float)F_CPU/((float)printer_state.timer0Interval*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
+#endif
 #if USE_OPS==1
    printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
    printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBackslash)*current_extruder->stepsPerMM;

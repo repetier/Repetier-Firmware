@@ -411,7 +411,7 @@
     
     
     #define SDPOWER          -1
-    #define SDSS          17
+    #define SDSS          16 // SCL pin of I2C header
     #define LED_PIN         -1    //changed @ rkoeppl 20110410
     #define TEMP_1_PIN      -1    //changed @ rkoeppl 20110410
     #define FAN_PIN         -1    //changed @ rkoeppl 20110410

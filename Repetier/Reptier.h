@@ -195,12 +195,15 @@ extern unsigned long stepper_inactive_time;
 extern void setupTimerInterrupt();
 
 typedef struct { // RAM usage: 72 Byte
+#if USE_OPS==1 || defined(USE_ADVANCE)
   byte timer0Interval;              ///< Update interval of timer0 compare
+  volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+  float extruderSpeed;              ///< Extruder speed in mm/s.
+#endif
   long interval;                    ///< Last step duration in ticks.
 #if USE_OPS==1
   bool filamentRetracted;           ///< Is the extruder filament retracted
 #endif
-  volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
   unsigned long timer;              ///< used for acceleration/deceleration timing
   unsigned long stepNumber;         ///< Step number in current move.
 #ifdef USE_ADVANCE
@@ -209,7 +212,6 @@ typedef struct { // RAM usage: 72 Byte
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
-  float extruderSpeed;              ///< Extruder speed in mm/s.
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
   int opsPushbackSteps;             ///< Retract+extra distance for backslash
