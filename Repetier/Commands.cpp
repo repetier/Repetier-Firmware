@@ -37,15 +37,15 @@
 void wait_until_end_of_move() {
   while(lines_count) {
     gcode_read_serial();
-    manage_temperatures(false); 
+    check_periodical(); 
   }
 }
 void print_temperatures() {
 #if HEATED_BED_SENSOR_TYPE==0 
-  out.println_int_P(PSTR("T:"),extruder_get_temperature()); 
+  out.println_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
 #else
-  out.print_int_P(PSTR("T:"),extruder_get_temperature()); 
-  out.println_int_P(PSTR(" B:"),heated_bed_get_temperature()); 
+  out.print_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
+  out.println_int_P(PSTR(" B:"),heated_bed_get_temperature()>>CELSIUS_EXTRA_BITS); 
 #endif
 }
 /**
@@ -79,7 +79,7 @@ void process_command(GCode *com)
         codenum += millis();  // keep track of when we started waiting
         while(millis()  < codenum ){
           gcode_read_serial();
-          manage_temperatures(false);
+          check_periodical();
         }
         break;
       case 20: // Units to inches
@@ -278,11 +278,11 @@ void process_command(GCode *com)
       case 104: // M104
         if(DEBUG_DRYRUN) break;
         wait_until_end_of_move();
-        if (GCODE_HAS_S(com)) extruder_set_temperature(com->S);
+        if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         break;
       case 140: // M140 set bed temp
         if(DEBUG_DRYRUN) break;
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
+        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         break;
       case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         print_temperatures();
@@ -291,7 +291,7 @@ void process_command(GCode *com)
         {
           if(DEBUG_DRYRUN) break;
           wait_until_end_of_move();
-          if (GCODE_HAS_S(com)) extruder_set_temperature(com->S);
+          if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
           if(current_extruder->currentTemperatureC >= current_extruder->targetTemperature) break;
           codenum = millis(); 
           long waituntil = 0;
@@ -300,7 +300,7 @@ void process_command(GCode *com)
               print_temperatures();
               codenum = millis(); 
             }
-            manage_temperatures(false);
+            check_periodical();
             gcode_read_serial();
             if(waituntil==0 && current_extruder->currentTemperatureC >= current_extruder->targetTemperatureC)
               waituntil = millis()+1000*(long)current_extruder->watchPeriod; // now wait for temp. to stabalize
@@ -311,14 +311,14 @@ void process_command(GCode *com)
         if(DEBUG_DRYRUN) break;
         wait_until_end_of_move();
 #if HEATED_BED_SENSOR_TYPE!=0
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
+        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         codenum = millis(); 
         while(current_bed_raw < target_bed_raw) {
           if( (millis()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
             print_temperatures();
             codenum = millis(); 
           }
-          manage_temperatures(false);
+          check_periodical();
         }
 #endif
         break;

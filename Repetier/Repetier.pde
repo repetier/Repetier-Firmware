@@ -103,6 +103,7 @@ Custom M Codes
 #include "SdFat.h"
 #endif
 
+#define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 // RAM usage of variables: Non RAMPS 114+MOVE_CACHE_SIZE*59+printer_state(32) = 382 Byte with MOVE_CACHE_SIZE=4
 // RAM usage RAMPS adds: 96
 // RAM usage SD Card:
@@ -315,7 +316,9 @@ void setup()
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
   printer_state.timer0Interval = 200;
-  printer_state.extruderSpeed = EXTRUDER_SPEED;  
+  printer_state.extruderSpeed = EXTRUDER_SPEED;
+#else  
+  printer_state.timer0Interval = 100;
 #endif
 #if USE_OPS==1
   printer_state.opsMode = OPS_MODE;
@@ -358,10 +361,8 @@ void setup()
   initsd();
 
 #endif
-#if USE_OPS==1 || defined(USE_ADVANCE)
   EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
   EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
-#endif
   TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
   TCCR1C = 0;
   TIMSK1 = 0;  
@@ -405,7 +406,7 @@ void loop()
 #endif
   }
   //check heater every n milliseconds
-  manage_temperatures(false);
+  check_periodical();
   if(max_inactive_time!=0 && (millis()-previous_millis_cmd) >  max_inactive_time ) kill(false); 
   if(stepper_inactive_time!=0 && (millis()-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
   //void finishNextSegment();
@@ -839,7 +840,7 @@ void updateStepsParameter(PrintLine *p,byte caller) {
       out.println_int_P(PSTR("/"),p->vEnd);
       out.print_int_P(PSTR("accel/decel steps:"),p->accelSteps);
       out.println_int_P(PSTR("/"),p->decelSteps);
-      out.print_float_P(PSTR("start/end factor:"),p->startFactor);
+      out.print_float_P(PSTR("st./end factor:"),p->startFactor);
       out.println_float_P(PSTR("/"),p->endFactor);
 #if USE_OPS==1
       if(!(p->dir & 128) && printer_state.opsMode==2)
@@ -974,7 +975,7 @@ void queue_move(byte check_endstops)
 {
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
-    manage_temperatures(false); 
+    check_periodical();
   }
   PrintLine *p = &lines[lines_write_pos];
   byte newPath=0;
@@ -1074,17 +1075,17 @@ END_INTERRUPT_PROTECTED
   }
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-  axis_interval[0] = abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+  axis_interval[0] = 60.0*abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-  axis_interval[1] = abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
+  axis_interval[1] = 60.0*abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
   if(p->dir & 64) { // normally no move in z direction
-    axis_interval[2] = abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
+    axis_interval[2] = 60.0*abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
-  axis_interval[3] = abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
-  if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
-  p->fullInterval = limitInterval; // This is our target speed
+  axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
+  if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];  
+  p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
   // new time at full speed = limitInterval*p->stepsRemaining [ticks]
   time_for_move = (float)limitInterval*(float)p->stepsRemaining; // for large z-distance this overflows with long computation
   float inv_time_s = (float)F_CPU/time_for_move;
@@ -1715,6 +1716,7 @@ ISR(TIMER1_COMPA_vect)
 #if USE_OPS==1 || defined(USE_ADVANCE)
 byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
 char extruder_last_dir = 0;
+#endif
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optima result,
@@ -1726,10 +1728,16 @@ allowable speed for the extruder.
 */
 ISR(EXTRUDER_TIMER_VECTOR)
 {
+  EXTRUDER_OCR += printer_state.timer0Interval; // time to come back
+  counter_periodical+= printer_state.timer0Interval; // Appxoimate a 10ms timer
+  if(counter_periodical>OVERFLOW_PERIODICAL) {
+    counter_periodical-=OVERFLOW_PERIODICAL;
+    execute_periodical=1;
+  }
+#if USE_OPS==1 || defined(USE_ADVANCE)
   // The stepper signals are in strategical positions for optimal timing. If you
   // still have timeing issues, add dummy commands between.
   extruder_unstep();
-  EXTRUDER_OCR += printer_state.timer0Interval; // time to come back
   if(printer_state.extruderStepsNeeded) {
     if(printer_state.extruderStepsNeeded<0) { // Backward step
       extruder_set_direction(0);
@@ -1750,12 +1758,13 @@ ISR(EXTRUDER_TIMER_VECTOR)
       extruder_wait_dirchange=2;
       printer_state.extruderStepsNeeded--;
     }
-    if(current_extruder->currentTemperatureC>=MIN_EXTRUDER_TEMP) // Saftey first
+    if(current_extruder->currentTemperatureC>=MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS) // Saftey first
       extruder_step();
   } else {
     if(extruder_wait_dirchange)
       extruder_wait_dirchange--;
   }
-}
 #endif
+}
+
 

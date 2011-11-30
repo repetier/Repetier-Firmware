@@ -74,6 +74,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_Y_OFFSET 35
 #define EPR_EXTRUDER_WATCH_PERIOD 39
 #define EPR_EXTRUDER_ADVANCE_K 41
+#define EPR_EXTRUDER_DRIVE_MIN 45
 
 #if EEPROM_MODE!=0
 extern inline byte epr_get_byte(uint pos);

@@ -105,14 +105,24 @@ Values for startes:
 The precice values may differ for different nozzle/resistor combination. 
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MAX 130
+/** \brief lower value for integral part
+
+The I state should converge to the exact heater output needed for the target temperature.
+To prevent a long deviation from the target zone, this value limits the lower value.
+A good start is 30 lower then the optimal value. You need to leave room for cooling.
+*/
+#define EXT0_PID_INTEGRAL_DRIVE_MIN 50
 /** P-gain in 0,01 units */
-#define EXT0_PID_PGAIN   300
-/** I-gain in 0,01 units */
-#define EXT0_PID_IGAIN   2
+#define EXT0_PID_PGAIN   500
+/** I-gain in 0,001 units 
+
+WATCH OUT: This value was in 0,01 units in earlier versions!
+*/
+#define EXT0_PID_IGAIN   1
 /** Dgain in 0,01 units. */
-#define EXT0_PID_DGAIN 2000
+#define EXT0_PID_DGAIN 3000
 // maximum time the heater is can be switched on. Max = 255
-#define EXT0_PID_MAX 200
+#define EXT0_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm. */
 #define EXT0_ADVANCE_K 0.0f
 /** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
@@ -139,11 +149,14 @@ each line, except the last, with a backslash. The table format is {{adc1,temp1},
 increasing adc values. For more informations, read 
 http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html
 
+If you have a sprinter temperature table, you have to multiply the first value with 4 and the second with 8.
+This firmware works with increased precision, so the value read goes from 0 to 4095 and the temperature is 
+temperature*8.
 */
 #define USER_THERMISTORTABLE0  {\
-  {1,864},{21,300},{25,290},{29,280},{33,270},{39,260},{46,250},{54,240},{64,230},{75,220},\
-  {90,210},{107,200},{128,190},{154,180},{184,170},{221,160},{265,150},{316,140},{375,130},\
-  {441,120},{513,110},{588,100},{734,80},{856,60},{938,40},{986,20},{1008,0},{1018,-20}	}
+  {1*4,864*8},{21*4,300*8},{25*4,290*8},{29*4,280*8},{33*4,270*8},{39*4,260*8},{46*4,250*8},{54*4,240*8},{64*4,230*8},{75*4,220*8},\
+  {90*4,210*8},{107*4,200*8},{128*4,190*8},{154*4,180*8},{184*4,170*8},{221*4,160*8},{265*4,150*8},{316*4,140*8},{375*4,130*8},\
+  {441*4,120*8},{513*4,110*8},{588*4,100*8},{734*4,80*8},{856*4,60*8},{938*4,40*8},{986*4,20*8},{1008*4,0*8},{1018*4,-20*8}	}
 
 #define USER_THERMISTORTABLE1  {}  
 #define USER_THERMISTORTABLE2  {}  
@@ -255,7 +268,7 @@ one extruder with heated bed, write:
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 10
 // Build median from 2^ANALOG_INPUT_SAMPLE samples
-#define ANALOG_INPUT_SAMPLE 2
+#define ANALOG_INPUT_SAMPLE 5
 #define ANALOG_REF_AREF 0
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
@@ -411,10 +424,11 @@ decrease the value to reflect this. (*filament_diameter^2/nozzle_diameter^2)
 
 This is a saftey value. If your extruder temperature is below this temperature, no
 extruder steps are executed. This is to prevent your extruder to move unless the fiament
-is at least molten.
+is at least molten. After havong some complains that the extruder does not work, I leave
+it 0 as default.
 */
 
-#define MIN_EXTRUDER_TEMP 160
+#define MIN_EXTRUDER_TEMP 0
 /** \brief Activate ooze prevention system 
 
 The ooze prevention system tries to prevent ooze, by a fast retract of the filament every time
@@ -491,8 +505,8 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 - 57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection
 - 38600
 */
-#define BAUDRATE 76800
-//#define BAUDRATE 57600
+//#define BAUDRATE 76800
+#define BAUDRATE 57600
 //#define BAUDRATE 250000
 /** \brief Size in byte of the output buffer */
 #define OUTPUT_BUFFER_SIZE 64
@@ -562,9 +576,10 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT 1
+#define SDSUPPORT 1
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
+
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################

@@ -1,3 +1,8 @@
+Version 0.40 30.11.2011
+  Interrupt based temperature control.
+  Higher precision temp. tables.
+  Fixed bug causing reset under some conditions.
+
 Version 0.39 5.11.2011
   Now recovers from communication errors send in ASCII mode. 
   SD card commands now fully tested and functional

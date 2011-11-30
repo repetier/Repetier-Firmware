@@ -67,10 +67,15 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #ifdef TEMP_PID
   long tempIState; ///< Temp. var. for PID computation.
   byte pidDriveMax; ///< Used for windup in PID calculation.
+  byte pidDriveMin; ///< Used for windup in PID calculation.
   long pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
   long pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
   long pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
   byte pidMax; ///< Maximum PWM value, the heater should be set.
+  long tempIStateLimitMax;
+  long tempIStateLimitMin;
+  byte tempPointer;
+  int tempArray[8];
 #endif
 } Extruder;
 
@@ -153,7 +158,7 @@ extern int conv_raw_temp(byte type,int raw_temp);
 extern int conv_temp_raw(byte type,int temp);
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggels the heater power if necessary.
-extern void manage_temperatures(bool critical);
+extern void manage_temperatures();
 
 extern byte manage_monitor;
 
@@ -195,8 +200,8 @@ extern unsigned long stepper_inactive_time;
 extern void setupTimerInterrupt();
 
 typedef struct { // RAM usage: 72 Byte
-#if USE_OPS==1 || defined(USE_ADVANCE)
   byte timer0Interval;              ///< Update interval of timer0 compare
+#if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
   float extruderSpeed;              ///< Extruder speed in mm/s.
 #endif
@@ -312,6 +317,24 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 extern long CPUDivU2(unsigned int divisor);
+
+extern int counter_periodical;
+extern volatile byte execute_periodical;
+extern byte counter_250ms;
+extern void write_monitor();
+inline void check_periodical() {
+  if(!execute_periodical) return;
+  execute_periodical=0;
+  manage_temperatures();
+  if(--counter_250ms==0) {
+     if(manage_monitor<=1+NUM_EXTRUDER)
+        write_monitor();
+     counter_250ms=10;
+  } 
+}
+#define CELSIUS_EXTRA_BITS 3
+#define ANALOG_REDUCE_BITS 0
+#define ANALOG_REDUCE_FACTOR 1
 
 #ifdef SDSUPPORT
 extern Sd2Card card; // ~14 Byte

@@ -154,6 +154,7 @@ void epr_data_to_eeprom() {
     epr_set_byte(o+EPR_EXTRUDER_HEAT_MANAGER,e->heatManager);
 #ifdef TEMP_PID
     epr_set_byte(o+EPR_EXTRUDER_DRIVE_MAX,e->pidDriveMax);
+    epr_set_byte(o+EPR_EXTRUDER_DRIVE_MIN,e->pidDriveMin);
     epr_set_long(o+EPR_EXTRUDER_PID_PGAIN,e->pidPGain);
     epr_set_long(o+EPR_EXTRUDER_PID_IGAIN,e->pidIGain);
     epr_set_long(o+EPR_EXTRUDER_PID_DGAIN,e->pidDGain);
@@ -212,6 +213,7 @@ void epr_eeprom_to_data() {
     e->heatManager = epr_get_byte(o+EPR_EXTRUDER_HEAT_MANAGER);
 #ifdef TEMP_PID
     e->pidDriveMax = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MAX);
+    e->pidDriveMin = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MIN);
     e->pidPGain = epr_get_long(o+EPR_EXTRUDER_PID_PGAIN);
     e->pidIGain = epr_get_long(o+EPR_EXTRUDER_PID_IGAIN);
     e->pidDGain = epr_get_long(o+EPR_EXTRUDER_PID_DGAIN);
@@ -304,8 +306,9 @@ void epr_output_settings() {
     epr_out_byte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("Heat manager [0-1]"));
 #ifdef TEMP_PID
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MAX,PSTR("PID drive max"));
+    epr_out_byte(o+EPR_EXTRUDER_DRIVE_MIN,PSTR("PID drive min"));
     epr_out_long(o+EPR_EXTRUDER_PID_PGAIN,PSTR("PID P-gain [*0.01]"));
-    epr_out_long(o+EPR_EXTRUDER_PID_IGAIN,PSTR("PID I-gain [*0.01]"));
+    epr_out_long(o+EPR_EXTRUDER_PID_IGAIN,PSTR("PID I-gain [*0.001]"));
     epr_out_long(o+EPR_EXTRUDER_PID_DGAIN,PSTR("PID D-gain [*0.01]"));
     epr_out_byte(o+EPR_EXTRUDER_PID_MAX,PSTR("PID max value [0-255]"));
 #endif
