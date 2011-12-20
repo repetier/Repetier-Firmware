@@ -1,3 +1,10 @@
+Version 0.41 20.12.2011
+  Fixed everything for compilation with Arduino 1.0 IDE
+  Added software PWM, so now Sanguino boards can use PID control.
+  Fixed Issue 4 - Wrong output monitoring if heated bed is present.
+  Added pin configuration for gen7 (thanks bryanandaimee)
+  No changes is configuration.h from version 0.40
+
 Version 0.40 30.11.2011
   Interrupt based temperature control.
   Higher precision temp. tables.

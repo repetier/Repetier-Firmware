@@ -19,7 +19,12 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include <WProgram.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#define COMPAT_PRE1
+#endif
 #include "gcode.h"
 #include "fastio.h"
 #ifdef SDSUPPORT
@@ -33,6 +38,21 @@ extern void initsd();
 #define int8 int8_t
 #define uint32 uint32_t
 #define int32 int32_t
+
+#if MOTHERBOARD==6 || MOTHERBOARD==62
+#define SIMULATE_PWM
+#define EXTRUDER_TIMER_VECTOR TIMER2_COMPA_vect
+#define EXTRUDER_OCR OCR2A
+#define EXTRUDER_TCCR TCCR2A
+#define EXTRUDER_TIMSK TIMSK2
+#define EXTRUDER_OCIE OCIE2A
+#else
+#define EXTRUDER_TIMER_VECTOR TIMER0_COMPA_vect
+#define EXTRUDER_OCR OCR0A
+#define EXTRUDER_TCCR TCCR0A
+#define EXTRUDER_TIMSK TIMSK0
+#define EXTRUDER_OCIE OCIE0A
+#endif
 
 /** \brief Data to drive one extruder.
 
@@ -76,6 +96,10 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long tempIStateLimitMin;
   byte tempPointer;
   int tempArray[8];
+#ifdef SIMULATE_PWM
+  int pwm;  // Switch of at this timing
+  int pwmState; // Current timing
+#endif
 #endif
 } Extruder;
 
@@ -350,17 +374,4 @@ extern int16_t n;
 
 #endif
 
-#if MOTHERBOARD==6 || MOTHERBOARD==62
-#define EXTRUDER_TIMER_VECTOR TIMER2_COMPA_vect
-#define EXTRUDER_OCR OCR2A
-#define EXTRUDER_TCCR TCCR2A
-#define EXTRUDER_TIMSK TIMSK2
-#define EXTRUDER_OCIE OCIE2A
-#else
-#define EXTRUDER_TIMER_VECTOR TIMER0_COMPA_vect
-#define EXTRUDER_OCR OCR0A
-#define EXTRUDER_TCCR TCCR0A
-#define EXTRUDER_TIMSK TIMSK0
-#define EXTRUDER_OCIE OCIE0A
-#endif
 

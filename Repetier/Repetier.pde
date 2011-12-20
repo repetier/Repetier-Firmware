@@ -1765,6 +1765,50 @@ ISR(EXTRUDER_TIMER_VECTOR)
       extruder_wait_dirchange--;
   }
 #endif
+#ifdef SIMULATE_PWM
+  // Sanguino boards have the heater output on a pin with PWM for
+  // timer 1. This software pwm solves the problem with the timer
+  // already in use.
+#if NUM_EXTRUDER==1
+  Extruder *ext = &extruder[0];
+  if(ext->heatManager) { // Extruder with pid control found
+    if(ext->pwmState<=ext->pwm) {
+      ext->pwmState+=printer_state.timer0Interval;
+      if(ext->pwmState>ext->pwm) {
+        WRITE(EXT0_HEATER_PIN,0 ); 
+      }
+    } else {
+      ext->pwmState+=printer_state.timer0Interval;
+      if(ext->pwmState>=2047) {
+        ext->pwmState=0;
+        if(ext->pwm>0) { // Turn only on for values > 0
+          WRITE(EXT0_HEATER_PIN,1 ); 
+        }
+      }
+    }
+  }
+#else
+  for(byte e=0;e<NUM_EXTRUDER;e++) {
+    Extruder *ext = &extruder[e];
+    if(ext->heatManager) { // Extruder with pid control found
+      if(ext->pwmState<=ext->pwm) {
+        ext->pwmState+=printer_state.timer0Interval;
+        if(ext->pwmState>ext->pwm) {
+          digitalWrite(ext->heaterPin,off);
+        }
+      } else {
+        ext->pwmState+=printer_state.timer0Interval;
+        if(ext->pwmState>=2047) {
+          ext->pwmState=0;
+          if(ext->pwm) { // Turn only on for values > 0
+            digitalWrite(ext->heaterPin,on);
+          }
+        }
+      }
+    }
+  }
+#endif
+#endif // SIMULATE_PWM
 }
 
 

@@ -19,7 +19,12 @@
  */
 #include "Configuration.h"
 #ifdef SDSUPPORT
-#include <WProgram.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#define COMPAT_PRE1
+#endif
 #include "Sd2Card.h"
 //------------------------------------------------------------------------------
 #ifndef SOFTWARE_SPI

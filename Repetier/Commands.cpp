@@ -245,7 +245,6 @@ void process_command(GCode *com)
         break;
       case 28: //M28 - Start SD write
         if(sdactive){
-          char* npos = 0;
             file.close();
             sdmode = false;
             if (!file.open(&root,com->text, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))  {

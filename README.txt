@@ -34,9 +34,10 @@ interrupts are needed for internal purposes. Other boards can made running by
 adding a pin definition in pins.h
 
 Gen 6 : Full support
-Ramps 1.0 : No PID control
+Ramps 1.0 : Full support with PWM simulation (uncomment SIMULATE_PWM)
 Ramps 1.1/1.2/1.3/1.4 : Full Support
-Sanguinololu : Full support
+Sanguinololu : Full support  with PWM simulation
+Gen 7: Full support
 
 Help wanted:
 

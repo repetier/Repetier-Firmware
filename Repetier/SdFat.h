@@ -19,6 +19,13 @@
  */
 #ifndef SdFat_h
 #define SdFat_h
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#define COMPAT_PRE1
+#endif
+
 /**
  * \file
  * SdFile and SdVolume classes
@@ -283,7 +290,11 @@ class SdFile : public Print {
   }
   /** \return SdVolume that contains this file. */
   SdVolume* volume(void) const {return vol_;}
+#ifdef COMPAT_PRE1
   void write(uint8_t b);
+#else
+  size_t write(uint8_t b);
+#endif
   int16_t write(const void* buf, uint16_t nbyte);
   void write(const char* str);
   void write_P(PGM_P str);

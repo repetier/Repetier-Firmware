@@ -39,6 +39,9 @@ long gcode_actN; ///< Line number of current command.
 char gcode_wait_resend=-1; ///< Waiting for line to be resend. -1 = no wait.
 volatile byte gcode_buflen=0; ///< Number of commands stored in gcode_buffer
 unsigned long gcode_lastdata=0; ///< Time, when we got the last data packet. Used to detect missing bytes.
+#ifndef COMPAT_PRE1
+#undef USE_BUFFERED_OUTPUT
+#endif
 #ifdef USE_BUFFERED_OUTPUT 
 byte out_buffer[OUTPUT_BUFFER_SIZE+4]; ///< Buffer for serial write operations.
 #endif
@@ -180,8 +183,16 @@ ISR (USART0_UDRE_vect) {
 #else
 SerialOutput::SerialOutput() {
 }
-void SerialOutput::write(uint8_t value) {
+#ifdef COMPAT_PRE1
+void 
+#else
+size_t
+#endif
+SerialOutput::write(uint8_t value) {
   Serial.write(value);
+#ifndef COMPAT_PRE1
+  return 1;
+#endif
 }
 #endif
 void SerialOutput::printFloat(double number, uint8_t digits) 

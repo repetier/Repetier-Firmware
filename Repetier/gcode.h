@@ -42,7 +42,11 @@ typedef struct { // 52 bytes per command needed
 class SerialOutput : public Print {
 public:
   SerialOutput();
+#ifdef COMPAT_PRE1
   void write(uint8_t);
+#else
+  size_t write(uint8_t);
+#endif
   void print_P(PGM_P ptr);
   void println_P(PGM_P ptr);
   void print_long_P(PGM_P ptr,long value);

@@ -29,6 +29,9 @@ Extruder extruder[NUM_EXTRUDER] = {
    EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD,EXT0_ADVANCE_K
 #ifdef TEMP_PID
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN,EXT0_PID_IGAIN,EXT0_PID_DGAIN,EXT0_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+#ifdef SIMULATE_PWM
+  ,0,0
+#endif
 #endif 
  } 
 #if NUM_EXTRUDER>1
@@ -36,6 +39,9 @@ Extruder extruder[NUM_EXTRUDER] = {
    EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD,EXT1_ADVANCE_K
 #ifdef TEMP_PID
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN,EXT1_PID_IGAIN,EXT1_PID_DGAIN,EXT1_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+#ifdef SIMULATE_PWM
+  ,0,0
+#endif
 #endif
  } 
 #endif
@@ -579,8 +585,13 @@ void manage_temperatures() {
             out.println_long_P(PSTR(" "),dgain);
           } */
          }
+#ifdef SIMULATE_PWM
+        act->pwm = output<<3;
+#else
          analogWrite(act->heaterPin, output);
-         mon_output = output;
+#endif
+         if (manage_monitor==manage_extruder)
+           mon_output = output;
        }
 #endif
        if(act->heatManager == 0
@@ -589,7 +600,8 @@ void manage_temperatures() {
 #endif
        ) {
          digitalWrite(act->heaterPin,on);
-         mon_output = (on?255:0);
+         if (manage_monitor==manage_extruder)
+           mon_output = (on?255:0);
       }
 #if LED_PIN>-1
       if(act == current_extruder)
@@ -606,7 +618,8 @@ void manage_temperatures() {
      last_bed_set = time;
   }
 #endif
-  mon_output = current_bed_raw >= target_bed_raw ? 0 : 255;
+  if (manage_monitor==(NUM_EXTRUDER))
+    mon_output = current_bed_raw >= target_bed_raw ? 0 : 255;
 #endif
 }
 // ------------------------------------------------------------------------------------------------------------------

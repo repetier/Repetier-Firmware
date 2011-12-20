@@ -27,10 +27,23 @@
 // Gen6 = 5, 
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
+// Gen7 1.1 and above = 7
 #define MOTHERBOARD 5 
-
 #include <avr/io.h>
 #include "pins.h"
+
+
+// ##########################################################################################
+// ##                                        IMPORTANT                                     ##
+// ##########################################################################################
+
+// For easy configuration, the default settings enable parameter storage in EEPROM.
+// This means, after the first upload many variables can only be changed using the special
+// M commands as described in the documentation. Changing these value sin the configuration.h
+// has no effect. Parameters overriden by EEPROM settings are calibartion values, extruder 
+// values except thermistor tables and some other parameter likely to change during usage
+// like advance steps or ops mode.
+// To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -139,6 +152,16 @@ Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX.
 If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
+
+/** \brief Simulate PWM
+
+If your extruder uses a pin without pwm or with a pwm already in use for other functions, you
+can enable the PWM simulator instead. Only with PWM you can use PID control.
+For Sanguino boards (6 and 62) this is enabled by default. To force simulated PWM uncomment
+the define.
+*/
+//#define SIMULATE_PWM
+
 /** Userdefined thermistor table
 
 There are many different thermistors, which can be combined with different resistors. This result

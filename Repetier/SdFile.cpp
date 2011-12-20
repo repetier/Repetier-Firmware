@@ -19,9 +19,14 @@
  */
 #include "Configuration.h"
 #ifdef SDSUPPORT
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#define COMPAT_PRE1
+#endif
 #include "SdFat.h"
 #include <avr/pgmspace.h>
-#include <WProgram.h>
 #include "gcode.h"
 //------------------------------------------------------------------------------
 // callback function for date/time
@@ -1222,8 +1227,16 @@ int16_t SdFile::write(const void* buf, uint16_t nbyte) {
  *
  * Use SdFile::writeError to check for errors.
  */
-void SdFile::write(uint8_t b) {
+#ifdef COMPAT_PRE1
+void
+#else
+size_t
+#endif
+SdFile::write(uint8_t b) {
   write(&b, 1);
+#ifndef COMPAT_PRE1
+  return 1;
+#endif
 }
 //------------------------------------------------------------------------------
 /**
