@@ -1,3 +1,8 @@
+Version 0.42 28.12.2011
+  Added hardware PWM PID control for Gen 7 boards
+  Easier config if you have a heated bed.
+  configuration.h from version 0.40 works
+  
 Version 0.41 20.12.2011
   Fixed everything for compilation with Arduino 1.0 IDE
   Added software PWM, so now Sanguino boards can use PID control.

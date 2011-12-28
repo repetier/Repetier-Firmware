@@ -39,8 +39,10 @@ extern void initsd();
 #define uint32 uint32_t
 #define int32 int32_t
 
-#if MOTHERBOARD==6 || MOTHERBOARD==62
+#if MOTHERBOARD==6 || MOTHERBOARD==62 || MOTHERBOARD==7
+#if MOTHERBOARD!=7
 #define SIMULATE_PWM
+#endif
 #define EXTRUDER_TIMER_VECTOR TIMER2_COMPA_vect
 #define EXTRUDER_OCR OCR2A
 #define EXTRUDER_TCCR TCCR2A

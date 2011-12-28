@@ -258,7 +258,11 @@ for more details.
 #define ANALOG_SUPERSAMPLE 10
 /** The number of analog sensors, we need to read out. These are the thermistors used for temperature
 reading of the extruder and heated bed. */
+#if HAVE_HEATED_BED==true
+#define NUM_ANALOG_SENSORS 2
+#else
 #define NUM_ANALOG_SENSORS 1
+#endif
 /** Number of digital temp. sensors like MAX6675 */
 #define NUM_DIGITAL_SENSORS 0
 #define TEMP_PID true
@@ -287,7 +291,11 @@ In the configs of the sensor, use the index in this array. For the typical combi
 one extruder with heated bed, write:
 #define  ANALOG_INPUT_CHANNELS {TEMP_0_PIN,TEMP_1_PIN}
 */
+#if HAVE_HEATED_BED==true
+#define  ANALOG_INPUT_CHANNELS {TEMP_0_PIN,TEMP_1_PIN}
+#else
 #define ANALOG_INPUT_CHANNELS {TEMP_0_PIN}
+#endif
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 10
 // Build median from 2^ANALOG_INPUT_SAMPLE samples
@@ -599,7 +607,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-#define SDSUPPORT 1
+#define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
