@@ -1,4 +1,4 @@
-current_bed_raw /*
+/*
     This file is part of Repetier-Firmware.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -447,7 +447,8 @@ int conv_raw_temp(byte type,int raw_temp) {
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;}
+      return newtemp;
+    }
     case 100: // AD595
       return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
 #ifdef SUPPORT_MAX6675
@@ -471,7 +472,8 @@ int conv_raw_temp(byte type,int raw_temp) {
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;}
+      return newtemp;
+    }
 #endif
   }
 }
