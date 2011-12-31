@@ -1,4 +1,4 @@
-/*
+current_bed_raw /*
     This file is part of Repetier-Firmware.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -381,6 +381,10 @@ int read_raw_temperature(byte type,byte pin) {
     case 7:
     case 99:
       return (1023<<(2-ANALOG_REDUCE_BITS))-(osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result
+    case 50: // User defined PTC table
+    case 51:
+    case 52:
+      return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result    
     case 100: // AD595
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
 #ifdef SUPPORT_MAX6675
@@ -413,6 +417,27 @@ int conv_raw_temp(byte type,int raw_temp) {
       short oldtemp = pgm_read_word(&temptable[1]);
       short newraw,newtemp;
       raw_temp = (1023<<(2-ANALOG_REDUCE_BITS))-raw_temp;
+      while(i<num) {
+        newraw = pgm_read_word(&temptable[i++]);
+        newtemp = pgm_read_word(&temptable[i++]);
+        if (newraw > raw_temp)
+          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+        oldtemp = newtemp;
+        oldraw = newraw;
+      }
+      // Overflow: Set to last value in the table
+      return newtemp;}
+    case 50: // User defined PTC thermistor
+    case 51:
+    case 52:
+    {
+      type-=46;
+      byte num = pgm_read_byte(&temptables_num[type])<<1;
+      byte i=2;
+      const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
+      short oldraw = pgm_read_word(&temptable[0]);
+      short oldtemp = pgm_read_word(&temptable[1]);
+      short newraw,newtemp;
       while(i<num) {
         newraw = pgm_read_word(&temptable[i++]);
         newtemp = pgm_read_word(&temptable[i++]);
@@ -482,6 +507,28 @@ int conv_temp_raw(byte type,int temp) {
       }
       // Overflow: Set to last value in the table
       return (1023<<(2-ANALOG_REDUCE_BITS))-newraw;
+    }
+    case 50: // user defined PTC thermistor
+    case 51:
+    case 52:
+    {
+      type-=46;
+      byte num = pgm_read_byte(&temptables_num[type])<<1;
+      byte i=2;
+      const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
+      short oldraw = pgm_read_word(&temptable[0]);
+      short oldtemp = pgm_read_word(&temptable[1]);
+      short newraw,newtemp;
+      while(i<num) {
+        newraw = pgm_read_word(&temptable[i++]);
+        newtemp = pgm_read_word(&temptable[i++]);
+        if (newtemp > temp)
+          return oldraw + (long)(oldtemp-temp)*(long)(oldraw-newraw)/(oldtemp-newtemp);
+        oldtemp = newtemp;
+        oldraw = newraw;
+      }
+      // Overflow: Set to last value in the table
+      return newraw;
     }
     case 100: // HEATER_USES_AD595
       return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);

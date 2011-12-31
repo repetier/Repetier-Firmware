@@ -1,3 +1,6 @@
+Version 0.43 31-12-2011
+  Added support for PTC thermistors
+  
 Version 0.42 28.12.2011
   Added hardware PWM PID control for Gen 7 boards
   Easier config if you have a heated bed.

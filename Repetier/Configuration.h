@@ -76,6 +76,9 @@
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
+// 50 is userdefined thermistor table 0 for PTC thermistors
+// 51 is userdefined thermistor table 0 for PTC thermistors
+// 52 is userdefined thermistor table 0 for PTC thermistors
 // 99 Generic thermistor table
 // 100 is AD595
 // 101 is MAX6675
@@ -175,6 +178,8 @@ http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html
 If you have a sprinter temperature table, you have to multiply the first value with 4 and the second with 8.
 This firmware works with increased precision, so the value read goes from 0 to 4095 and the temperature is 
 temperature*8.
+
+If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7! 
 */
 #define USER_THERMISTORTABLE0  {\
   {1*4,864*8},{21*4,300*8},{25*4,290*8},{29*4,280*8},{33*4,270*8},{39*4,260*8},{46*4,250*8},{54*4,240*8},{64*4,230*8},{75*4,220*8},\
