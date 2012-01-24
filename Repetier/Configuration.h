@@ -28,7 +28,7 @@
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 and above = 7
-#define MOTHERBOARD 5 
+#define MOTHERBOARD 5
 #include <avr/io.h>
 #include "pins.h"
 
@@ -612,7 +612,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT 1
+#define SDSUPPORT 1
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 

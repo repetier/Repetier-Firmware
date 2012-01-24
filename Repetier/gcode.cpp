@@ -296,10 +296,18 @@ void gcode_resend() {
   If not, a resend and ok is send.
 */
 void gcode_checkinsert(GCode *act) {
-  if(GCODE_HAS_M(act) && act->M==110) { // Reset line number
-    gcode_lastN = gcode_actN;
-    out.println_P(PSTR("ok"));
-    return;
+  if(GCODE_HAS_M(act)) {
+   if(act->M==110) { // Reset line number
+     gcode_lastN = gcode_actN;
+     out.println_P(PSTR("ok"));
+     return;
+   }
+   if(act->M==112) { // Emergency kill - freeze printer
+     cli(); // Don't allow interrupts to do their work
+     kill(false);
+     manage_temperatures();
+     while(1) {}
+   }
   }
   if(GCODE_HAS_N(act)) {
     if((((gcode_lastN+1) & 0xffff)!=(gcode_actN&0xffff))) {

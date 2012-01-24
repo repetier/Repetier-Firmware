@@ -79,6 +79,7 @@ Custom M Codes
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axis_steps_per_unit - same syntax as G92
+- M112 - Emergency kill
 - M115	- Capabilities string
 - M140 - Set bed target temp
 - M190 - Wait for bed current temp to reach target temp.
@@ -407,8 +408,11 @@ void loop()
   }
   //check heater every n milliseconds
   check_periodical();
-  if(max_inactive_time!=0 && (millis()-previous_millis_cmd) >  max_inactive_time ) kill(false); 
-  if(stepper_inactive_time!=0 && (millis()-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
+  unsigned long curtime = millis();
+  if(lines_count)
+    previous_millis_cmd = curtime;
+  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false); 
+  if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
   //void finishNextSegment();
 #ifdef DEBUG_FREE_MEMORY
   send_mem();
@@ -1737,8 +1741,8 @@ ISR(EXTRUDER_TIMER_VECTOR)
 #if USE_OPS==1 || defined(USE_ADVANCE)
   // The stepper signals are in strategical positions for optimal timing. If you
   // still have timeing issues, add dummy commands between.
-  extruder_unstep();
   if(printer_state.extruderStepsNeeded) {
+    extruder_unstep();
     if(printer_state.extruderStepsNeeded<0) { // Backward step
       extruder_set_direction(0);
       if(extruder_wait_dirchange && extruder_last_dir==-1) {

@@ -73,11 +73,12 @@ void process_command(GCode *com)
           queue_move(ALWAYS_CHECK_ENDSTOPS);
         break;
       case 4: // G4 dwell
+        wait_until_end_of_move();
         codenum = 0;
         if(GCODE_HAS_P(com)) codenum = com->P; // milliseconds to wait
         if(GCODE_HAS_S(com)) codenum = (long)com->S * 1000; // seconds to wait
         codenum += millis();  // keep track of when we started waiting
-        while(millis()  < codenum ){
+        while((unsigned long)(codenum-millis())  < 2000000000 ){
           gcode_read_serial();
           check_periodical();
         }
