@@ -1,3 +1,9 @@
+Version 0.45 28-01-2012
+  Fan settings don't wait for moves to finish any more. This could cause a longer
+  stop making blobs possible.
+  M109 now takes direction of temp. change in account and allows a target
+  temperature range (TEMP_HYSTERESIS)
+  
 Version 0.44 24-01-2012
   Added M112 command (Emergency kill)
   G4 dwell now waits until move queue is empty before dwelling

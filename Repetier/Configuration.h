@@ -109,7 +109,7 @@
 */
 #define EXT0_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109 */
-#define EXT0_WATCHPERIOD 40
+#define EXT0_WATCHPERIOD 20
 
 /** \brief The maximum value, I-gain can contribute to the output. 
 
@@ -155,6 +155,12 @@ Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX.
 If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
+
+/** Temperature range for target temperature to hold in M109 command. 5 means +/-5°C
+
+Uncomment define to use force the temperature into the range for given watchperiod. 
+*/
+//#define TEMP_HYSTERESIS 5
 
 /** \brief Simulate PWM
 
