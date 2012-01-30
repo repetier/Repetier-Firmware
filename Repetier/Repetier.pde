@@ -1109,13 +1109,6 @@ END_INTERRUPT_PROTECTED
     axis_interval[3] = time_for_move/p->delta[3];
   p->fullSpeed = p->distance*inv_time_s;
   
-  //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
-  // TODO: maybe it's better to refactor into a generic enable(int axis) function, that will probably take more ram,
-  // but will reduce code size
-  if(p->dir & 16) enable_x();
-  if(p->dir & 32) enable_y();
-  if(p->dir & 64) enable_z();
-  if(p->dir & 128) extruder_enable();
 
   //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
   byte is_print_move = (p->dir & 136)==136; // are we printing
@@ -1316,6 +1309,11 @@ inline long bresenham_step() {
           --lines_count;
           return(cur->accelerationPrim); // waste some time for path optimization to fill up
       } // End if WARMUP
+      //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
+      if(cur->dir & 16) enable_x();
+      if(cur->dir & 32) enable_y();
+      if(cur->dir & 64) enable_z();
+      if(cur->dir & 128) extruder_enable();
       cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
 #if USE_OPS==1
       if(printer_state.opsMode) { // Enabled?
@@ -1582,11 +1580,10 @@ inline long bresenham_step() {
      lines_pos++;
      if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
      cur = 0;
-     if(!--lines_count) {
+     --lines_count;
        if(DISABLE_X) disable_x();
        if(DISABLE_Y) disable_y();
        if(DISABLE_Z) disable_z();
-     }
    }  
 #ifdef DEBUG_FREE_MEMORY
     check_mem();

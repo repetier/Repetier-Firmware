@@ -1,3 +1,7 @@
+Version 0.46
+  DISABLE_(XYZ) now works on a move basis as expected, not on a job basis.
+  Only Repetier.pde was changed.
+
 Version 0.45 28-01-2012
   Fan settings don't wait for moves to finish any more. This could cause a longer
   stop making blobs possible.
