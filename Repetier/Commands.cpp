@@ -346,7 +346,7 @@ void process_command(GCode *com)
         
         digitalWrite(FAN_PIN, LOW);
         break;
-      case 80: // M81 - ATX Power On
+      case 80: // M80 - ATX Power On
         wait_until_end_of_move();
         if(PS_ON_PIN > -1) pinMode(PS_ON_PIN,OUTPUT); //GND
         break;

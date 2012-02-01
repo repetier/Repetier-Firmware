@@ -573,7 +573,7 @@ disabled, the function is not called.
 */
 void write_monitor() {
     out.print_long_P(PSTR("MTEMP:"),millis());
-    if(manage_monitor<=NUM_EXTRUDER) {
+    if(manage_monitor<NUM_EXTRUDER) {
       Extruder *e = &extruder[manage_monitor];
       out.print_int_P(PSTR(" "),e->currentTemperatureC>>CELSIUS_EXTRA_BITS); 
       out.print_int_P(PSTR(" "),e->targetTemperatureC>>CELSIUS_EXTRA_BITS);
