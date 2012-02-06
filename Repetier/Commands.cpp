@@ -333,18 +333,28 @@ void process_command(GCode *com)
         break;
       case 106: //M106 Fan On
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
+#ifdef SIMULATE_FAN_PWM
+        if (GCODE_HAS_S(com))
+            fan_speed = constrain(com->S,0,255)<<3;
+        else
+            fan_speed = 2040;
+#else
         if (GCODE_HAS_S(com)){
             digitalWrite(FAN_PIN, HIGH);
             analogWrite(FAN_PIN, constrain(com->S,0,255) );
         }
         else
             digitalWrite(FAN_PIN, HIGH);
+#endif
         break;
       case 107: //M107 Fan Off
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
-        analogWrite(FAN_PIN, 0);
-        
+#ifdef SIMULATE_FAN_PWM
+        fan_speed=0;
+#else
+        analogWrite(FAN_PIN, 0);        
         digitalWrite(FAN_PIN, LOW);
+#endif
         break;
       case 80: // M80 - ATX Power On
         wait_until_end_of_move();

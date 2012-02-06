@@ -292,6 +292,18 @@ reading of the extruder and heated bed. */
 // You should use MINTEMP for thermistor short/failure protection.
 #define MAXTEMP 275
 
+/**
+Normally you need a PWM controlable output, to define different fan speeds. If you
+don't have one, you can only turn your fan on or off.
+
+As a sulution, you can simulate PWM for your pin. This works for all pins, even non-PWM pins!
+If your fan is connected to a PWM output that is used by the firmware internally, you must
+activate PWM simulation.
+
+To active fan PWM simulation uncomment the next define.
+*/
+//#define SIMULATE_FAN_PWM
+
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
 #define ANALOG_INPUTS NUM_ANALOG_SENSORS
 #if ANALOG_INPUTS>0

@@ -143,6 +143,10 @@ long baudrate = BAUDRATE;         ///< Communication speed rate.
 int maxadv=0;
 float maxadvspeed=0;
 #endif
+#ifdef SIMULATE_FAN_PWM
+int fan_speed=0;
+int fan_pwm_pos=0;
+#endif
 int waitRelax=0; // Delay filament relax at the end of print, could be a simple timeout
 #ifdef USE_OPS
 byte printmoveSeen=0;
@@ -1810,6 +1814,23 @@ ISR(EXTRUDER_TIMER_VECTOR)
   }
 #endif
 #endif // SIMULATE_PWM
+#ifdef SIMULATE_FAN_PWM
+  // If your fan output has no pwm or pwm is blocked by this interrupt routine
+  if(fan_pwm_pos<=fan_speed) {
+    fan_pwm_pos+=printer_state.timer0Interval;
+    if(fan_pwm_pos>fan_speed) {
+      WRITE(FAN_PIN,0 ); 
+    }
+  } else {
+    fan_pwm_pos+=printer_state.timer0Interval;
+    if(fan_pwm_pos>=2047) {
+      fan_pwm_pos=0;
+      if(fan_speed>0) { // Turn only on for values > 0
+        WRITE(FAN_PIN,1 ); 
+      }
+    }
+  }
+#endif
 }
 
 

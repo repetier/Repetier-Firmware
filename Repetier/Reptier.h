@@ -333,6 +333,9 @@ extern byte lines_pos; // Position for executing line movement
 extern volatile byte lines_count; // Number of lines cached 0 = nothing to do
 extern byte printmoveSeen;
 extern long baudrate;
+#ifdef SIMULATE_FAN_PWM
+extern int fan_speed;
+#endif
 #if OS_ANALOG_INPUTS>0
 // Get last result for pin x
 extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
