@@ -319,6 +319,10 @@ void setup()
   SET_INPUT(Z_MAX_PIN); WRITE(Z_MAX_PIN,HIGH);
 #endif
 #endif
+#if FAN_PIN>-1
+  SET_OUTPUT(FAN_PIN);
+  WRITE(FAN_PIN,LOW);
+#endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
   printer_state.timer0Interval = 200;
   printer_state.extruderSpeed = EXTRUDER_SPEED;
