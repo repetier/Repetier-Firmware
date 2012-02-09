@@ -1,3 +1,7 @@
+Version 0.47
+  Added software PWM for fan.
+  Updated software PWM for heater.  
+  
 Version 0.46
   DISABLE_(XYZ) now works on a move basis as expected, not on a job basis.
   Only Repetier.pde was changed.

@@ -335,9 +335,9 @@ void process_command(GCode *com)
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
 #ifdef SIMULATE_FAN_PWM
         if (GCODE_HAS_S(com))
-            fan_speed = constrain(com->S,0,255)<<3;
+            fan_speed = constrain(com->S,0,255)<<4;
         else
-            fan_speed = 2040;
+            fan_speed = 4080;
 #else
         if (GCODE_HAS_S(com)){
             digitalWrite(FAN_PIN, HIGH);

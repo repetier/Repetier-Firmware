@@ -1783,12 +1783,14 @@ ISR(EXTRUDER_TIMER_VECTOR)
   if(ext->heatManager) { // Extruder with pid control found
     if(ext->pwmState<=ext->pwm) {
       ext->pwmState+=printer_state.timer0Interval;
+      if(ext->pwmState>=2040)
+        ext->pwmState=0;
       if(ext->pwmState>ext->pwm) {
         WRITE(EXT0_HEATER_PIN,0 ); 
       }
     } else {
       ext->pwmState+=printer_state.timer0Interval;
-      if(ext->pwmState>=2047) {
+      if(ext->pwmState>=2040) {
         ext->pwmState=0;
         if(ext->pwm>0) { // Turn only on for values > 0
           WRITE(EXT0_HEATER_PIN,1 ); 
@@ -1802,12 +1804,14 @@ ISR(EXTRUDER_TIMER_VECTOR)
     if(ext->heatManager) { // Extruder with pid control found
       if(ext->pwmState<=ext->pwm) {
         ext->pwmState+=printer_state.timer0Interval;
+        if(ext->pwmState>=2040)
+          ext->pwmState=0;
         if(ext->pwmState>ext->pwm) {
           digitalWrite(ext->heaterPin,off);
         }
       } else {
         ext->pwmState+=printer_state.timer0Interval;
-        if(ext->pwmState>=2047) {
+        if(ext->pwmState>=2040) {
           ext->pwmState=0;
           if(ext->pwm) { // Turn only on for values > 0
             digitalWrite(ext->heaterPin,on);
@@ -1822,12 +1826,14 @@ ISR(EXTRUDER_TIMER_VECTOR)
   // If your fan output has no pwm or pwm is blocked by this interrupt routine
   if(fan_pwm_pos<=fan_speed) {
     fan_pwm_pos+=printer_state.timer0Interval;
+    if(fan_pwm_pos>=4080) 
+      fan_pwm_pos=0;
     if(fan_pwm_pos>fan_speed) {
       WRITE(FAN_PIN,0 ); 
     }
   } else {
     fan_pwm_pos+=printer_state.timer0Interval;
-    if(fan_pwm_pos>=2047) {
+    if(fan_pwm_pos>=4080) {
       fan_pwm_pos=0;
       if(fan_speed>0) { // Turn only on for values > 0
         WRITE(FAN_PIN,1 ); 
