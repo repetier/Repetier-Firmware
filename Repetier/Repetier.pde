@@ -324,7 +324,7 @@ void setup()
   WRITE(FAN_PIN,LOW);
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
-  printer_state.timer0Interval = 200;
+  printer_state.timer0Interval = 50;
   printer_state.extruderSpeed = EXTRUDER_SPEED;
 #else  
   printer_state.timer0Interval = 100;
