@@ -1,4 +1,4 @@
-Version 0.47
+Version 0.47b 13-02-2012
   Added software PWM for fan.
   Updated software PWM for heater.  
   
