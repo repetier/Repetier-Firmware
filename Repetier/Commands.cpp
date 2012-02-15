@@ -278,7 +278,9 @@ void process_command(GCode *com)
 #endif
       case 104: // M104
         if(DEBUG_DRYRUN) break;
+#ifdef EXACT_TEMPERATURE_TIMING
         wait_until_end_of_move();
+#endif
         if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         break;
       case 140: // M140 set bed temp

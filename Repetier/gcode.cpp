@@ -306,6 +306,19 @@ void gcode_checkinsert(GCode *act) {
      cli(); // Don't allow interrupts to do their work
      kill(false);
      manage_temperatures();
+#ifdef SIMULATE_PWM
+#if NUM_EXTRUDER==1
+     WRITE(EXT0_HEATER_PIN,0 ); 
+#else
+  for(byte e=0;e<NUM_EXTRUDER;e++) {
+    Extruder *ext = &extruder[e];
+    digitalWrite(ext->heaterPin,off);
+  }
+#endif
+#endif // SIMULATE_PWM
+#ifdef SIMULATE_FAN_PWM
+      WRITE(FAN_PIN,0 ); 
+#endif
      while(1) {}
    }
   }
