@@ -341,6 +341,7 @@ void setup()
   printer_state.advance_executed = 0;
   printer_state.advance_steps_set = 0;
 #endif
+  printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
   printer_state.maxJerk = MAX_JERK;
   printer_state.maxZJerk = MAX_ZJERK;
   epr_init_baudrate();
