@@ -463,13 +463,9 @@ void gcode_read_serial() {
   while( filesize > sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
     int n = file.read();
-    sdpos = file.curPosition();
-    if(sdpos >= filesize || n==-1){
-       sdmode = false;
-       out.println_P(PSTR("Done printing file"));
-       gcode_wpos = 0;
-       break;
-    }
+    if(n==-1) break;
+
+    sdpos++; // = file.curPosition();
     gcode_transbuffer[gcode_wpos++] = (byte)n;
   
     // first lets detect, if we got an old type ascii command
@@ -508,6 +504,9 @@ void gcode_read_serial() {
       }           
     }
   }
+     sdmode = false;
+     out.println_P(PSTR("Done printing file"));
+     gcode_wpos = 0;
 #endif
 }
 

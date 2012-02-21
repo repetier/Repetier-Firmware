@@ -60,7 +60,9 @@ byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EX
 int counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
-
+#ifdef TEMP_PID
+byte current_extruder_out=0;
+#endif
 #if HEATED_BED_HEATER_PIN > -1
 unsigned long last_bed_set = 0;       ///< Time of last temperature setting for heated bed. So we can limit settings to desired frequency.
 #endif
@@ -626,7 +628,7 @@ void manage_temperatures() {
 #if SCALE_PID_TO_MAX==1
            pidTerm = (pidTerm*act->pidMax)>>8;
 #endif
-           output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;   
+           output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;
           /*if(counter_250ms==1) { // some debug infos
             out.print_long_P(PSTR("PID:"),act->tempIState);
             out.print_long_P(PSTR(" "),pidTerm);
@@ -634,6 +636,7 @@ void manage_temperatures() {
             out.println_long_P(PSTR(" "),dgain);
           } */
          }
+         if(act==current_extruder) current_extruder_out = output;   
 #ifdef SIMULATE_PWM
         act->pwm = output<<3;
 #else

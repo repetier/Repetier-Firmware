@@ -391,7 +391,7 @@ one extruder with heated bed, write:
 #define Z_MAX_LENGTH 100
 
 // ##########################################################################################
-// ##                           Mevement settings                                         ##
+// ##                           Movement settings                                          ##
 // ##########################################################################################
 
 /** After x seconds of inactivity, the stepper motors are disabled.

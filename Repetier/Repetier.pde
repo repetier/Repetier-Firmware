@@ -210,7 +210,7 @@ void send_mem() {
       byte buf[52];
       byte p=2;
       file.writeError = false;
-      int params = code->params & ~1;
+      int params = 128 | (code->params & ~1);
       *(int*)buf = params;      
       if(code->params & 2) {buf[p++] = code->M;}
       if(code->params & 4) {buf[p++] = code->G;}

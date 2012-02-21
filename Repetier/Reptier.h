@@ -130,6 +130,10 @@ extern void heated_bed_set_temperature(int temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
 extern void extruder_set_direction(byte steps);
 extern void extruder_disable();
+#ifdef TEMP_PID
+extern byte current_extruder_out;
+#endif
+
 /** \brief Sends the high-signal to the stepper for next extruder step. 
 
 Call this function only, if interrupts are disabled.

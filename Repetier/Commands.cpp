@@ -43,11 +43,15 @@ void wait_until_end_of_move() {
 }
 void print_temperatures() {
 #if HEATED_BED_SENSOR_TYPE==0 
-  out.println_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
+  out.print_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
 #else
   out.print_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
-  out.println_int_P(PSTR(" B:"),heated_bed_get_temperature()>>CELSIUS_EXTRA_BITS); 
+  out.print_int_P(PSTR(" B:"),heated_bed_get_temperature()>>CELSIUS_EXTRA_BITS); 
 #endif
+#ifdef TEMP_PID
+  out.print_int_P(PSTR(" @:"),(int)current_extruder_out);
+#endif
+  out.println();
 }
 /**
   \brief Execute the command stored in com.
