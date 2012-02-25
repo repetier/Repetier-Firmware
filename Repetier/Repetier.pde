@@ -268,6 +268,13 @@ Interrupt routines to measure analog values and for the stepper timerloop are st
 */
 void setup()
 { 
+#ifdef ENABLE_POWER_ON_STARTUP
+  if(PS_ON_PIN > -1) {
+     pinMode(PS_ON_PIN,OUTPUT); //GND
+     digitalWrite(PS_ON_PIN, LOW);
+  }
+
+#endif
   //Initialize Step Pins
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
@@ -1613,7 +1620,11 @@ void kill(byte only_steppers)
   if(!only_steppers) {  
     extruder_set_temperature(0);
     heated_bed_set_temperature(0);
-    if(PS_ON_PIN > -1) pinMode(PS_ON_PIN,INPUT);  
+    if(PS_ON_PIN > -1) {
+      //pinMode(PS_ON_PIN,INPUT);  
+      pinMode(PS_ON_PIN,OUTPUT); //GND
+      digitalWrite(PS_ON_PIN, HIGH);
+    }
   }
 }
 long stepperWait = 0;

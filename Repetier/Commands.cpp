@@ -364,11 +364,17 @@ void process_command(GCode *com)
         break;
       case 80: // M80 - ATX Power On
         wait_until_end_of_move();
-        if(PS_ON_PIN > -1) pinMode(PS_ON_PIN,OUTPUT); //GND
+        if(PS_ON_PIN > -1) {
+          pinMode(PS_ON_PIN,OUTPUT); //GND
+          digitalWrite(PS_ON_PIN, LOW);
+        }
         break;
       case 81: // M81 - ATX Power Off
         wait_until_end_of_move();
-        if(PS_ON_PIN > -1) pinMode(PS_ON_PIN,INPUT); //Floating
+        if(PS_ON_PIN > -1) {
+          pinMode(PS_ON_PIN,OUTPUT); //GND
+          digitalWrite(PS_ON_PIN, HIGH);
+        }
         break;
       case 82:
         relative_mode_e = false;

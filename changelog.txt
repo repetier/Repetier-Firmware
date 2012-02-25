@@ -1,3 +1,8 @@
+Version 0.50 25-02-2012
+  Changed implementation of Power ON/OFF.
+  Added #define ENABLE_POWER_ON_STARTUP to config, so Gen7 boards are powered
+  up on start. No more need to send M80 after startup.
+
 Version 0.49 21-02-2012
   SD upload in ascii mode now works.
   SD print now prints also the last command.
