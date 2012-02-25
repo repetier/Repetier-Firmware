@@ -90,7 +90,7 @@
 #define EXT0_STEP_PIN E_STEP_PIN
 #define EXT0_DIR_PIN E_DIR_PIN
 // set to 0/1 for normal / inverse direction
-
+#define EXT0_INVERSE false
 #define EXT0_ENABLE_PIN E_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT0_ENABLE_ON false
