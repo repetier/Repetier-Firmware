@@ -98,6 +98,7 @@ Custom M Codes
 #include "Eeprom.h"
 #include "pins_arduino.h"
 #include "fastio.h"
+#include "ui.h"
 #include <util/delay.h>
 
 #ifdef SDSUPPORT
@@ -275,6 +276,7 @@ void setup()
   }
 
 #endif
+  UI_INITIALIZE;
   //Initialize Step Pins
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
@@ -424,6 +426,7 @@ void loop()
   }
   //check heater every n milliseconds
   check_periodical();
+  UI_SLOW; // do longer timed user interface action
   unsigned long curtime = millis();
   if(lines_count)
     previous_millis_cmd = curtime;
@@ -1439,24 +1442,24 @@ inline long bresenham_step() {
    cli();
    if(cur->flags & FLAG_CHECK_ENDSTOPS) {
 #if X_MIN_PIN>-1
-    if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOPS_INVERTING) {cur->dir&=~16;}
+    if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {cur->dir&=~16;}
 #endif
 #if Y_MIN_PIN>-1
-    if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOPS_INVERTING) {cur->dir&=~32;}
+    if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {cur->dir&=~32;}
 #endif
 #if X_MAX_PIN>-1
-    if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOPS_INVERTING) {cur->dir&=~16;}
+    if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {cur->dir&=~16;}
 #endif
 #if Y_MAX_PIN>-1
-    if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOPS_INVERTING) {cur->dir&=~32;}
+    if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {cur->dir&=~32;}
 #endif
    }
    // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
 #if Z_MIN_PIN>-1
-   if((cur->dir & 68)==64) if(READ(Z_MIN_PIN) != ENDSTOPS_INVERTING) {cur->dir&=~64;}
+   if((cur->dir & 68)==64) if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING) {cur->dir&=~64;}
 #endif
 #if Z_MAX_PIN>-1
-   if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOPS_INVERTING) {cur->dir&=~64;}
+   if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {cur->dir&=~64;}
 #endif
   }
   if(cur->stepsRemaining) {
@@ -1856,6 +1859,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
     }
   }
 #endif
+ UI_FAST; // Short timed user interface action
 }
 
 

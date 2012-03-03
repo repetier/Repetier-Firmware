@@ -28,7 +28,7 @@
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 and above = 7
-#define MOTHERBOARD 5
+#define MOTHERBOARD 33
 #include <avr/io.h>
 #include "pins.h"
 
@@ -348,7 +348,13 @@ one extruder with heated bed, write:
 #define ENDSTOPPULLUPS 0 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
 // The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
 //set to true to invert the logic of the endstops
-#define ENDSTOPS_INVERTING false
+#define ENDSTOP_X_MIN_INVERTING false
+#define ENDSTOP_Y_MIN_INVERTING false
+#define ENDSTOP_Z_MIN_INVERTING false
+#define ENDSTOP_X_MAX_INVERTING false
+#define ENDSTOP_Y_MAX_INVERTING false
+#define ENDSTOP_Z_MAX_INVERTING false
+
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
 
@@ -583,8 +589,8 @@ If the interval at full speed is below this value, smoothing is disabled for tha
  Overridden if EEPROM activated.
 */
 //#define BAUDRATE 76800
-#define BAUDRATE 57600
-//#define BAUDRATE 250000
+//#define BAUDRATE 57600
+#define BAUDRATE 250000
 /** \brief Size in byte of the output buffer */
 #define OUTPUT_BUFFER_SIZE 64
 /** \brief Activates buffered output.

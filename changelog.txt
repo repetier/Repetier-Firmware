@@ -1,3 +1,7 @@
+Version 0.51 03-03-2012
+  Individual endstop inverting for all with different entstop types.
+  SD support with Arduino 1.0 now works.
+
 Version 0.50 25-02-2012
   Changed implementation of Power ON/OFF.
   Added #define ENABLE_POWER_ON_STARTUP to config, so Gen7 boards are powered

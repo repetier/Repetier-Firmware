@@ -221,7 +221,7 @@ void SdFile::ls(uint8_t flags, uint8_t indent) {
     if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
 
     // print any indent spaces
-    for (int8_t i = 0; i < indent; i++) out.print(' ');
+    for (int8_t i = 0; i < indent; i++) out.write(' ');
 
     // print file name with possible blank fill
     printDirName(*p, flags & (LS_DATE | LS_SIZE) ? 14 : 0);
@@ -234,7 +234,7 @@ void SdFile::ls(uint8_t flags, uint8_t indent) {
     }
     // print size if requested
     if (!DIR_IS_SUBDIR(p) && (flags & LS_SIZE)) {
-      out.print(' ');
+      out.write(' ');
       out.print(p->fileSize);
     }
     out.println();
@@ -595,18 +595,18 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
     if (i == 8) {
-      out.print('.');
+      out.write('.');
       w++;
     }
-    out.print(dir.name[i]);
+    out.write(dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir)) {
-    out.print('/');
+    out.write('/');
     w++;
   }
   while (w < width) {
-    out.print(' ');
+    out.write(' ');
     w++;
   }
 }
@@ -619,9 +619,9 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
  */
 void SdFile::printFatDate(uint16_t fatDate) {
   out.print(FAT_YEAR(fatDate));
-  out.print('-');
+  out.write('-');
   printTwoDigits(FAT_MONTH(fatDate));
-  out.print('-');
+  out.write('-');
   printTwoDigits(FAT_DAY(fatDate));
 }
 //------------------------------------------------------------------------------
@@ -633,9 +633,9 @@ void SdFile::printFatDate(uint16_t fatDate) {
  */
 void SdFile::printFatTime(uint16_t fatTime) {
   printTwoDigits(FAT_HOUR(fatTime));
-  out.print(':');
+  out.write(':');
   printTwoDigits(FAT_MINUTE(fatTime));
-  out.print(':');
+  out.write(':');
   printTwoDigits(FAT_SECOND(fatTime));
 }
 //------------------------------------------------------------------------------

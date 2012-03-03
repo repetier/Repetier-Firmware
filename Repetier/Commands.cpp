@@ -345,7 +345,7 @@ void process_command(GCode *com)
         else
             fan_speed = 4080;
 #else
-        if (GCODE_HAS_S(com)){
+        if (GCODE_HAS_S(com) && com->S<255){
             digitalWrite(FAN_PIN, HIGH);
             analogWrite(FAN_PIN, constrain(com->S,0,255) );
         }
@@ -424,27 +424,27 @@ void process_command(GCode *com)
         wait_until_end_of_move();
       	#if (X_MIN_PIN > -1)
       	out.print_P(PSTR("x_min:"));
-        out.print_P((digitalRead(X_MIN_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (X_MAX_PIN > -1)
       	out.print_P(PSTR("x_max:"));
-        out.print_P((digitalRead(X_MAX_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MIN_PIN > -1)
       	out.print_P(PSTR("y_min:"));
-        out.print_P((digitalRead(Y_MIN_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MAX_PIN > -1)
       	out.print_P(PSTR("y_max:"));
-        out.print_P((digitalRead(Y_MAX_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MIN_PIN > -1)
       	out.print_P(PSTR("z_min:"));
-        out.print_P((digitalRead(Z_MIN_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MAX_PIN > -1)
       	out.print_P(PSTR("z_max:"));
-        out.print_P((digitalRead(Z_MAX_PIN)^ENDSTOPS_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((digitalRead(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
         out.println();
       	break;
