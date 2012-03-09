@@ -1,3 +1,10 @@
+Version 0.52 09-03-2012
+  Improved timings of steper signals. (Thanks alainm for your analysis)
+  Compiles with the newest AVR toolchain (Thanks TinHead)
+  Power on after stepper inactivity works now without tricks.
+  Better configuration for homing operation.
+  M104 waits until move queue is empty, if P0 is set: M104 S0 P0 
+
 Version 0.51 03-03-2012
   Individual endstop inverting for all with different entstop types.
   SD support with Arduino 1.0 now works.

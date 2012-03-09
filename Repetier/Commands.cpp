@@ -111,10 +111,11 @@ void process_command(GCode *com)
             queue_move(true);
             wait_until_end_of_move();
             printer_state.currentPositionSteps[0] = 0;
-            printer_state.destinationSteps[0] = axis_steps_per_unit[0]*-5 * X_HOME_DIR;
+            printer_state.destinationSteps[0] = axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR;
             queue_move(true);
             wait_until_end_of_move();
-            printer_state.destinationSteps[0] = axis_steps_per_unit[0]*10 * X_HOME_DIR;
+            printer_state.feedrate/=ENDSTOP_X_RETEST_REDUCTION_FACTOR;
+            printer_state.destinationSteps[0] = axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR;
             queue_move(true);    
             wait_until_end_of_move();
             printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? 0 : printer_state.xMaxSteps;
@@ -131,10 +132,11 @@ void process_command(GCode *com)
             queue_move(true);         
             wait_until_end_of_move();
             printer_state.currentPositionSteps[1] = 0;
-            printer_state.destinationSteps[1] = axis_steps_per_unit[1]*-5 * Y_HOME_DIR;
+            printer_state.destinationSteps[1] = axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR;
             queue_move(true);          
             wait_until_end_of_move();
-            printer_state.destinationSteps[1] = axis_steps_per_unit[1]*10 * Y_HOME_DIR;
+            printer_state.feedrate/=ENDSTOP_Y_RETEST_REDUCTION_FACTOR;
+            printer_state.destinationSteps[1] = axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR;
             queue_move(true);
             wait_until_end_of_move();
             printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? 0 : printer_state.yMaxSteps;
@@ -151,10 +153,11 @@ void process_command(GCode *com)
             queue_move(true);
             wait_until_end_of_move();          
             printer_state.currentPositionSteps[2] = 0;
-            printer_state.destinationSteps[2] = axis_steps_per_unit[2]*-2 * Z_HOME_DIR;
+            printer_state.destinationSteps[2] = axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR;
             queue_move(true);
             wait_until_end_of_move();          
-            printer_state.destinationSteps[2] = axis_steps_per_unit[2]*10 * Z_HOME_DIR;
+            printer_state.feedrate/=ENDSTOP_Z_RETEST_REDUCTION_FACTOR;
+            printer_state.destinationSteps[2] = axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR;
             queue_move(true);
             wait_until_end_of_move();          
             printer_state.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? 0 : printer_state.zMaxSteps;
@@ -281,13 +284,18 @@ void process_command(GCode *com)
         break;
 #endif
       case 104: // M104
+        previous_millis_cmd = millis();
         if(DEBUG_DRYRUN) break;
 #ifdef EXACT_TEMPERATURE_TIMING
         wait_until_end_of_move();
+#else
+        if(GCODE_HAS_P(com))
+          wait_until_end_of_move();
 #endif
         if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         break;
       case 140: // M140 set bed temp
+        previous_millis_cmd = millis();
         if(DEBUG_DRYRUN) break;
         if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
         break;
@@ -296,6 +304,7 @@ void process_command(GCode *com)
         break;
       case 109: // M109 - Wait for extruder heater to reach target.
         {
+          previous_millis_cmd = millis();
           if(DEBUG_DRYRUN) break;
           wait_until_end_of_move();
           if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
@@ -321,6 +330,7 @@ void process_command(GCode *com)
             }
           } while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
         }
+        previous_millis_cmd = millis();
         break;
       case 190: // M190 - Wait bed for heater to reach target.
         if(DEBUG_DRYRUN) break;
@@ -336,6 +346,7 @@ void process_command(GCode *com)
           check_periodical();
         }
 #endif
+        previous_millis_cmd = millis();
         break;
       case 106: //M106 Fan On
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
@@ -364,6 +375,7 @@ void process_command(GCode *com)
         break;
       case 80: // M80 - ATX Power On
         wait_until_end_of_move();
+        previous_millis_cmd = millis();
         if(PS_ON_PIN > -1) {
           pinMode(PS_ON_PIN,OUTPUT); //GND
           digitalWrite(PS_ON_PIN, LOW);

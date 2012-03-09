@@ -265,6 +265,7 @@ typedef struct { // RAM usage: 72 Byte
   float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
   long offsetX;                     ///< X-offset for different extruder positions.
   long offsetY;                     ///< Y-offset for different extruder positions.
+  unsigned int vMaxReached;       ///< MAximumu reached speed
 } PrinterState;
 extern PrinterState printer_state;
 
@@ -328,6 +329,9 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
 #endif
 #if USE_OPS==1
   long opsReverseSteps;           ///< How many steps are needed to reverse retracted filament at full speed
+#endif
+#ifdef DEBUG_STEPCOUNT
+  long totalStepsRemaining;
 #endif
 } PrintLine;
 

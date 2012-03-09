@@ -16,7 +16,7 @@
 
 */
 
-#include "configuration.h"
+#include "Configuration.h"
 #include "ui.h"
 #include <math.h>
 #include <stdlib.h>

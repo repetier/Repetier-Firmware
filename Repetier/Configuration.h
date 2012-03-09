@@ -28,7 +28,7 @@
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 and above = 7
-#define MOTHERBOARD 33
+#define MOTHERBOARD 5
 #include <avr/io.h>
 #include "pins.h"
 
@@ -394,6 +394,17 @@ one extruder with heated bed, write:
 #define max_software_endstop_y true
 #define max_software_endstop_z true
 
+// If during homing the endstop is reached, ho many mm should the printer move back for the second try
+#define ENDSTOP_X_BACK_MOVE 5
+#define ENDSTOP_Y_BACK_MOVE 5
+#define ENDSTOP_Z_BACK_MOVE 2
+
+// For higher precision you can reduce the speed for the second test on the endstop
+// during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 2
+
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
@@ -666,7 +677,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-#define SDSUPPORT 1
+//#define SDSUPPORT 1
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
@@ -691,6 +702,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
+/** If enabled, steps to move and moved steps are compared. */
+//#define DEBUG_STEPCOUNT
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 // ####################################################################################
