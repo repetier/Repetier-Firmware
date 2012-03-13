@@ -1,3 +1,6 @@
+Version 0.53 13-03-2012 
+  Added support for Teensyduino and Printboard. Thanks lincomatic for the patch.
+  
 Version 0.52 09-03-2012
   Improved timings of steper signals. (Thanks alainm for your analysis)
   Compiles with the newest AVR toolchain (Thanks TinHead)

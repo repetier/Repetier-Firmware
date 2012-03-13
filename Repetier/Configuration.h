@@ -28,6 +28,8 @@
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 and above = 7
+// Teensylu (at90usb) = 8 // requires Teensyduino
+// Printrboard (at90usb) = 9 // requires Teensyduino
 #define MOTHERBOARD 5
 #include <avr/io.h>
 #include "pins.h"
@@ -619,7 +621,9 @@ the power will be turned on without the need to call M80 if initially started.
 */
 #define ENABLE_POWER_ON_STARTUP
 
+#if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__) // not needed for USB serial
 #define USE_BUFFERED_OUTPUT 
+#endif
 /** \brief Number of moves we can cache in advance.
 
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
@@ -735,4 +739,5 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #error OUTPUT_BUFFER_SIZE must be in range 16..250
 #endif
 #endif
+
 
