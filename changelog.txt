@@ -1,3 +1,7 @@
+Version 0.54 14-03-2012
+  Fixed bug introduced in 0.52 if ops enabled.
+  M106/M107 Fan commands could crash if no pin was assigned. Fixed.
+  
 Version 0.53 13-03-2012 
   Added support for Teensyduino and Printboard. Thanks lincomatic for the patch.
   

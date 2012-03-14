@@ -1463,51 +1463,50 @@ inline long bresenham_step() {
 #if Z_MAX_PIN>-1
    if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {cur->dir&=~64;}
 #endif
-   printer_state.stepNumber++;
-   cur->stepsRemaining--;
   }
-  if(cur->dir & 128) {
-    if((cur->error[3] -= cur->delta[3]) < 0) {
+  if(cur->stepsRemaining>0) {
+    if(cur->dir & 128) {
+      if((cur->error[3] -= cur->delta[3]) < 0) {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-      if(cur->dir & 8)
-        printer_state.extruderStepsNeeded++;
-      else
-        printer_state.extruderStepsNeeded--;
+        if(cur->dir & 8)
+          printer_state.extruderStepsNeeded++;
+        else
+          printer_state.extruderStepsNeeded--;
 #else
-      extruder_step();
+        extruder_step();
 #endif
-      cur->error[3] += cur_errupd;
-    }
-  }    
-  if(cur->dir & 16) {
-    if((cur->error[0] -= cur->delta[0]) < 0) {
-      WRITE(X_STEP_PIN,HIGH);
-      cur->error[0] += cur_errupd;
+        cur->error[3] += cur_errupd;
+      }
+    }    
+    if(cur->dir & 16) {
+      if((cur->error[0] -= cur->delta[0]) < 0) {
+        WRITE(X_STEP_PIN,HIGH);
+        cur->error[0] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
-      cur->totalStepsRemaining--;
+        cur->totalStepsRemaining--;
 #endif
+      }
     }
-  }
-  if(cur->dir & 32) {
-    if((cur->error[1] -= cur->delta[1]) < 0) {
-      WRITE(Y_STEP_PIN,HIGH);
-      cur->error[1] += cur_errupd;
+    if(cur->dir & 32) {
+      if((cur->error[1] -= cur->delta[1]) < 0) {
+        WRITE(Y_STEP_PIN,HIGH);
+        cur->error[1] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
-      cur->totalStepsRemaining--;
+        cur->totalStepsRemaining--;
 #endif
+      }
     }
-  }
-  if(cur->dir & 64) {
-    if((cur->error[2] -= cur->delta[2]) < 0) {
-      WRITE(Z_STEP_PIN,HIGH);
-      cur->error[2] += cur_errupd;
+    if(cur->dir & 64) {
+      if((cur->error[2] -= cur->delta[2]) < 0) {
+        WRITE(Z_STEP_PIN,HIGH);
+        cur->error[2] += cur_errupd;
+      }
     }
-  }
-  WRITE(X_STEP_PIN,LOW);
-  WRITE(Y_STEP_PIN,LOW);
-  WRITE(Z_STEP_PIN,LOW);
+    WRITE(X_STEP_PIN,LOW);
+    WRITE(Y_STEP_PIN,LOW);
+    WRITE(Z_STEP_PIN,LOW);
 #if USE_OPS==0 && !defined(USE_ADVANCE)
-  extruder_unstep();
+    extruder_unstep();
 #endif
   if(do_odd) {
       sei(); // Allow interrupts for other types, timer1 is still disabled
@@ -1560,7 +1559,12 @@ inline long bresenham_step() {
 #else
       printer_state.interval = cur->fullInterval; // without RAMPS always use full speed
 #endif
+    } // do_odd
+    if(do_even) {
+     printer_state.stepNumber++;
+     cur->stepsRemaining--;
     }
+
 #if USE_OPS==1
     if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
 #ifdef DEBUG_OPS
@@ -1576,6 +1580,7 @@ inline long bresenham_step() {
 #endif
   }
 #endif
+  } // stepsRemaining
   long interval;
   if(cur->halfstep) interval = (printer_state.interval>>1); // time to come back
   else interval = printer_state.interval;  

@@ -349,6 +349,7 @@ void process_command(GCode *com)
         previous_millis_cmd = millis();
         break;
       case 106: //M106 Fan On
+#if FAN_PIN>=0
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
 #ifdef SIMULATE_FAN_PWM
         if (GCODE_HAS_S(com))
@@ -363,14 +364,17 @@ void process_command(GCode *com)
         else
             digitalWrite(FAN_PIN, HIGH);
 #endif
+#endif
         break;
       case 107: //M107 Fan Off
+#if FAN_PIN>=0
         //wait_until_end_of_move(); // uncomment this to change the speed exactly at that point, but it may cause blobs if you do!
 #ifdef SIMULATE_FAN_PWM
         fan_speed=0;
 #else
         analogWrite(FAN_PIN, 0);        
         digitalWrite(FAN_PIN, LOW);
+#endif
 #endif
         break;
       case 80: // M80 - ATX Power On
