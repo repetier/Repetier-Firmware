@@ -530,7 +530,7 @@ void process_command(GCode *com)
         
           out.print_float_P(PSTR("min distance = "),printer_state.opsMinDistance);
           out.print_float_P(PSTR(", retract = "),printer_state.opsRetractDistance);
-          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractDistance);
+          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractBackslash);
           if(printer_state.opsMode==2)
             out.print_float_P(PSTR(", move after = "),printer_state.opsMoveAfter);
           out.println();
