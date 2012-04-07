@@ -83,9 +83,10 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   int currentTemperatureC; ///< Current temperature in °C.
   int targetTemperatureC; ///< Target temperature in °C.
   long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-  byte heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+  char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
   int watchPeriod; ///< Time in seconds, a M109 command will wait to stabalize temperature
   float advanceK; ///< Koefficient for advance algorithm. 0 = off
+  byte output; ///< Output value 0 = off, 255=MAX
 #ifdef TEMP_PID
   long tempIState; ///< Temp. var. for PID computation.
   byte pidDriveMax; ///< Used for windup in PID calculation.
@@ -106,6 +107,7 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 } Extruder;
 
 
+extern int target_bed_celsius;
 #if HEATED_BED_SENSOR_TYPE!=0
 extern int current_bed_raw;
 extern int target_bed_raw;
@@ -123,16 +125,17 @@ extern void extruder_select(byte ext_num);
 // Set current extruder position
 //extern void extruder_set_position(float pos,bool relative);
 // set the temperature of current extruder
-extern void extruder_set_temperature(int temp_celsius);
+extern void extruder_set_temperature(int temp_celsius,byte extr);
 extern int extruder_get_temperature();
 // Set temperature of heated bed
 extern void heated_bed_set_temperature(int temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
 extern void extruder_set_direction(byte steps);
 extern void extruder_disable();
-#ifdef TEMP_PID
-extern byte current_extruder_out;
-#endif
+extern byte heated_bed_output;
+//#ifdef TEMP_PID
+//extern byte current_extruder_out;
+//#endif
 
 /** \brief Sends the high-signal to the stepper for next extruder step. 
 
@@ -196,10 +199,15 @@ void process_command(GCode *code);
 
 void manage_inactivity(byte debug);
 
+extern void wait_until_end_of_move();
 extern void update_ramps_parameter();
 extern void finishNextSegment();
+extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
+extern void fan_speed(int speed,bool wait); /// Set fan speed 0..255
+extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 extern byte get_coordinates(GCode *com);
-extern void queue_move(byte check_endstops);
+extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd);
+extern void queue_move(byte check_endstops,byte pathOptimize);
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
 extern inline void disable_y();
@@ -230,6 +238,7 @@ extern unsigned long stepper_inactive_time;
 extern void setupTimerInterrupt();
 
 typedef struct { // RAM usage: 72 Byte
+  byte flag0; // 1 = stepper disabled
   byte timer0Interval;              ///< Update interval of timer0 compare
 #if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -261,6 +270,7 @@ typedef struct { // RAM usage: 72 Byte
   long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   float feedrate;                   ///< Last requested feedrate.
+  int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
   float maxJerk;                    ///< Maximum allowed jerk in mm/s
   float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
   long offsetX;                     ///< X-offset for different extruder positions.
@@ -359,16 +369,7 @@ extern int counter_periodical;
 extern volatile byte execute_periodical;
 extern byte counter_250ms;
 extern void write_monitor();
-inline void check_periodical() {
-  if(!execute_periodical) return;
-  execute_periodical=0;
-  manage_temperatures();
-  if(--counter_250ms==0) {
-     if(manage_monitor<=1+NUM_EXTRUDER)
-        write_monitor();
-     counter_250ms=10;
-  } 
-}
+extern void check_periodical();
 #define CELSIUS_EXTRA_BITS 3
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1

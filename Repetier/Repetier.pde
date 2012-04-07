@@ -71,6 +71,7 @@ Custom M Codes
 - M28  - Start SD write (M28 filename.g)
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
+- M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
@@ -80,7 +81,9 @@ Custom M Codes
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axis_steps_per_unit - same syntax as G92
 - M112 - Emergency kill
-- M115	- Capabilities string
+- M115- Capabilities string
+- M117 <message> - Write message in status row on lcd
+- M119 - Report endstop status
 - M140 - Set bed target temp
 - M190 - Wait for bed current temp to reach target temp.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
@@ -89,6 +92,7 @@ Custom M Codes
 - M204 - Set PID parameter X => Kp Y => Ki Z => Kd
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
+- M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> - Set temporary advance K-value to X
@@ -276,7 +280,6 @@ void setup()
   }
 
 #endif
-  UI_INITIALIZE;
   //Initialize Step Pins
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
@@ -346,6 +349,7 @@ void setup()
   printer_state.filamentRetracted = false;
 #endif
   printer_state.feedrate = 3000; ///< Current feedrate in mm/min.
+  printer_state.feedrateMultiply = 100;
 #ifdef USE_ADVANCE
   printer_state.advance_executed = 0;
   printer_state.advance_steps_set = 0;
@@ -353,9 +357,11 @@ void setup()
   printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
   printer_state.maxJerk = MAX_JERK;
   printer_state.maxZJerk = MAX_ZJERK;
+  printer_state.flag0 = 1;
   epr_init_baudrate();
   Serial.begin(baudrate);
   out.println_P(PSTR("start"));
+  UI_INITIALIZE;
   
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
@@ -398,6 +404,7 @@ void loop()
 {
   gcode_read_serial();
   GCode *code = gcode_next_command();
+  UI_SLOW; // do longer timed user interface action
   if(code){
 #ifdef SDSUPPORT
     if(savetosd){
@@ -408,6 +415,7 @@ void loop()
             file.close();
             savetosd = false;
             out.println_P(PSTR("Done saving file."));
+            UI_CLEAR_STATUS;
         }
 #ifdef ECHO_ON_EXECUTE
         if(DEBUG_ECHO) {
@@ -741,6 +749,9 @@ byte get_coordinates(GCode *com)
 {
   register long p;
   register byte r=0;
+  if(lines_count==0) {
+    UI_STATUS(UI_TEXT_PRINTING);
+  }
   if(GCODE_HAS_X(com)) {
     r = 1;
     if(unit_inches)
@@ -789,9 +800,9 @@ byte get_coordinates(GCode *com)
       printer_state.feedrate = 10;
     else
       if(unit_inches)
-        printer_state.feedrate = com->F*25.4f;
+        printer_state.feedrate = com->F*0.254f*(float)printer_state.feedrateMultiply;
       else
-        printer_state.feedrate = com->F;
+        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.01;
   }
   return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unprductive moves
 }
@@ -988,21 +999,37 @@ void updateTrapezoids(byte p) {
     updateStepsParameter(act,13);
   act->flags &= ~FLAG_BLOCKED;
 }
+void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd) {
+  float saved_feedrate = printer_state.feedrate;
+  for(byte i=0; i < 4; i++) {
+      printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
+  }
+  printer_state.destinationSteps[0]+=x;
+  printer_state.destinationSteps[1]+=y;
+  printer_state.destinationSteps[2]+=z;
+  printer_state.destinationSteps[3]+=e;
+  printer_state.feedrate = feedrate;
+  queue_move(true,false);
+  printer_state.feedrate = saved_feedrate;
+  if(waitEnd)
+    wait_until_end_of_move();
+}
 /**
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
   wait communication and temperature control is enabled.
   @param check_endstops Read endstop during move.
 */
-void queue_move(byte check_endstops)
+void queue_move(byte check_endstops,byte pathOptimize)
 {
+  printer_state.flag0 &= ~1; // Motor is enabled now 
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
     check_periodical();
   }
   PrintLine *p = &lines[lines_write_pos];
   byte newPath=0;
-  if(lines_count==0 && waitRelax==0) { // First line after some time - warmup needed
+  if(lines_count==0 && waitRelax==0 && pathOptimize) { // First line after some time - warmup needed
 #ifdef DEBUG_OPS
     out.println_P(PSTR("New path"));
 #endif
@@ -1029,6 +1056,7 @@ END_INTERRUPT_PROTECTED
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS; 
   else p->flags = 0;
   p->joinFlags = 0;
+  if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
   p->dir = 0;
 #if min_software_endstop_x == true
     if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
@@ -1162,9 +1190,9 @@ END_INTERRUPT_PROTECTED
     p->advanceRate = 0; // No head move or E move only or sucking filament back 
     p->advanceFull = 0;
   } else {
-    float speedE = axis_diff[3]*inv_time_s;
-    p->advanceFull = 65536*current_extruder->advanceK*speedE*speedE;
-    long steps = (U16SquaredToU32(p->vMax))/(p->accelerationPrim<<1);
+    float speedE = axis_diff[3]*inv_time_s; // [mm/s]
+    p->advanceFull = 65536*current_extruder->advanceK*speedE*speedE; // Steps*65536 at full speed
+    long steps = (U16SquaredToU32(p->vMax))/(p->accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
     p->advanceRate = p->advanceFull/steps;
     if((p->advanceFull>>16)>maxadv) {
         maxadv = (p->advanceFull>>16);
@@ -1623,6 +1651,7 @@ inline long bresenham_step() {
        if(DISABLE_X) disable_x();
        if(DISABLE_Y) disable_y();
        if(DISABLE_Z) disable_z();
+     if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
    }  
 #ifdef DEBUG_FREE_MEMORY
     check_mem();
@@ -1636,19 +1665,25 @@ inline long bresenham_step() {
 */
 void kill(byte only_steppers)
 {
+  if((printer_state.flag0 & 1) && only_steppers) return;
+  printer_state.flag0 |=1; 
   disable_x();
   disable_y();
   disable_z();
   extruder_disable();
   if(!only_steppers) {  
-    extruder_set_temperature(0);
+    extruder_set_temperature(0,0);
+ #if NUM_EXTRUDER>1
+    extruder_set_temperature(0,1);
+ #endif
     heated_bed_set_temperature(0);
+    UI_STATUS_UPD(UI_TEXT_KILLED);
     if(PS_ON_PIN > -1) {
       //pinMode(PS_ON_PIN,INPUT);  
       pinMode(PS_ON_PIN,OUTPUT); //GND
       digitalWrite(PS_ON_PIN, HIGH);
     }
-  }
+  } else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
 }
 long stepperWait = 0;
 /** \brief Sets the timer 1 compare value to delay ticks.

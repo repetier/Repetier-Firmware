@@ -86,6 +86,8 @@ extern inline void epr_set_byte(uint pos,byte value);
 extern inline void epr_set_int(uint pos,int value);
 extern inline void epr_set_long(uint pos,long value);
 extern inline void epr_set_float(uint pos,float value);
+extern void epr_data_to_eeprom();
+extern void epr_eeprom_to_data();
 #endif
 
 extern void epr_output_settings();

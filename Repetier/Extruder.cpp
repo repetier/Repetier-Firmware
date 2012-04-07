@@ -60,9 +60,8 @@ byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EX
 int counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
-#ifdef TEMP_PID
-byte current_extruder_out=0;
-#endif
+byte heated_bed_output=0;
+int target_bed_celsius=0;
 #if HEATED_BED_HEATER_PIN > -1
 unsigned long last_bed_set = 0;       ///< Time of last temperature setting for heated bed. So we can limit settings to desired frequency.
 #endif
@@ -248,24 +247,25 @@ void extruder_select(byte ext_num) {
    else
      printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
 #endif
-   queue_move(false); // Move head of new extruder to old position using last feedrate
+   queue_move(false,true); // Move head of new extruder to old position using last feedrate
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- extruder_set_temperature ------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-void extruder_set_temperature(int temp_celsius) {
+void extruder_set_temperature(int temp_celsius,byte extr) {
 #ifdef MAXTEMP
   if(temp_celsius>(MAXTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MAXTEMP<<CELSIUS_EXTRA_BITS);
 #endif
-#ifdef MINTEMP
-  if(temp_celsius<(MINTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MINTEMP<<CELSIUS_EXTRA_BITS);
-#endif
-  current_extruder->targetTemperature = conv_temp_raw(current_extruder->sensorType,temp_celsius);
-  current_extruder->targetTemperatureC = temp_celsius;
+  if(temp_celsius<0) temp_celsius=0;
+//#ifdef MINTEMP
+//  if(temp_celsius<(MINTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MINTEMP<<CELSIUS_EXTRA_BITS);
+//#endif
+  extruder[extr].targetTemperature = conv_temp_raw(extruder[extr].sensorType,temp_celsius);
+  extruder[extr].targetTemperatureC = temp_celsius;
 #if USE_OPS==1  
-  if(temp_celsius<(MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS)) {
+  if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS)) { // Protect for cold filament
     printer_state.filamentRetracted = false;
     printmoveSeen = 0;
   }
@@ -287,6 +287,7 @@ int extruder_get_temperature() {
 void heated_bed_set_temperature(int temp_celsius) {
 #if HEATED_BED_SENSOR_TYPE!=0  
    if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
+   target_bed_celsius=temp_celsius;
    target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
 #endif     
 }
@@ -566,8 +567,6 @@ int conv_temp_raw(byte type,int temp) {
 // ---------------------------------------------- write_monitor -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int mon_output; ///< Last output to the monitored heater
-
 /** \brief Writes monitored temperatures.
 
 This function is called every 250ms to write the monitored temperature. If monitoring is
@@ -579,14 +578,15 @@ void write_monitor() {
       Extruder *e = &extruder[manage_monitor];
       out.print_int_P(PSTR(" "),e->currentTemperatureC>>CELSIUS_EXTRA_BITS); 
       out.print_int_P(PSTR(" "),e->targetTemperatureC>>CELSIUS_EXTRA_BITS);
+      out.println_int_P(PSTR(" "),(int)e->output);
     }
 #if HEATED_BED_SENSOR_TYPE!=0
     else {
       out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw)>>CELSIUS_EXTRA_BITS); 
       out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,target_bed_raw)>>CELSIUS_EXTRA_BITS);
+      out.println_int_P(PSTR(" "),(int)heated_bed_output);
     }
 #endif
-    out.println_int_P(PSTR(" "),mon_output);
 }
 
 // ------------------------------------------------------------------------------------------------------------------
@@ -636,14 +636,12 @@ void manage_temperatures() {
             out.println_long_P(PSTR(" "),dgain);
           } */
          }
-         if(act==current_extruder) current_extruder_out = output;   
+         act->output = output;
 #ifdef SIMULATE_PWM
         act->pwm = output<<3;
 #else
          analogWrite(act->heaterPin, output);
 #endif
-         if (manage_monitor==manage_extruder)
-           mon_output = output;
        }
 #endif
        if(act->heatManager == 0
@@ -651,9 +649,8 @@ void manage_temperatures() {
         || true
 #endif
        ) {
+         act->output = (on?255:0);
          digitalWrite(act->heaterPin,on);
-         if (manage_monitor==manage_extruder)
-           mon_output = (on?255:0);
       }
 #if LED_PIN>-1
       if(act == current_extruder)
@@ -670,8 +667,7 @@ void manage_temperatures() {
      last_bed_set = time;
   }
 #endif
-  if (manage_monitor==(NUM_EXTRUDER))
-    mon_output = current_bed_raw >= target_bed_raw ? 0 : 255;
+  heated_bed_output = current_bed_raw >= target_bed_raw ? 0 : 255;
 #endif
 }
 // ------------------------------------------------------------------------------------------------------------------

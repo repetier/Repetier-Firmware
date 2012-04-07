@@ -226,6 +226,7 @@ class SdFile : public Print {
     return type_ == FAT_FILE_TYPE_ROOT16 || type_ == FAT_FILE_TYPE_ROOT32;
   }
   void ls(uint8_t flags = 0, uint8_t indent = 0);
+//  void lcdrefresh();  // Show directory on lcd
   uint8_t makeDir(SdFile* dir, const char* dirName);
   uint8_t open(SdFile* dirFile, uint16_t index, uint8_t oflag);
   uint8_t open(SdFile* dirFile, const char* fileName, uint8_t oflag);
@@ -390,7 +391,7 @@ class SdFile : public Print {
 #if ((F_UNUSED | F_FILE_UNBUFFERED_READ | F_FILE_DIR_DIRTY) & F_OFLAG)
 #error flags_ bits conflict
 #endif  // flags_ bits
-
+public:
   // private data
   uint8_t   flags_;         // See above for definition of flags_ bits
   uint8_t   type_;          // type of file see above for values

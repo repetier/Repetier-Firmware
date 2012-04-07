@@ -15,6 +15,8 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+#ifndef _GCODE_H
+#define _GCODE_H
 
 #include <avr/pgmspace.h>
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734 
@@ -69,6 +71,7 @@ extern void gcode_read_serial();
 extern void gcode_print_command(GCode *code);
 extern bool gcode_parse_binary(GCode *code,byte *buffer);
 extern bool gcode_parse_ascii(GCode *code,char *line);
+extern void emergencyStop();
 
 // Helper macros to detect, if parameter is stored in GCode struct
 #define GCODE_HAS_N(a) ((a->params & 1)!=0)
@@ -77,6 +80,7 @@ extern bool gcode_parse_ascii(GCode *code,char *line);
 #define GCODE_HAS_X(a) ((a->params & 8)!=0)
 #define GCODE_HAS_Y(a) ((a->params & 16)!=0)
 #define GCODE_HAS_Z(a) ((a->params & 32)!=0)
+#define GCODE_HAS_XYZ(a) ((a->params & 56)==56)
 #define GCODE_HAS_E(a) ((a->params & 64)!=0)
 #define GCODE_HAS_F(a) ((a->params & 256)!=0)
 #define GCODE_HAS_T(a) ((a->params & 512)!=0)
@@ -91,3 +95,6 @@ extern byte debug_level;
 #define DEBUG_DRYRUN ((debug_level & 8)!=0)
 #define DEBUG_COMMUNICATION ((debug_level & 16)!=0)
 #define DEBUG_NO_MOVES ((debug_level & 32)!=0)
+
+#endif
+

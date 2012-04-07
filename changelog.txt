@@ -1,3 +1,13 @@
+Version 0.60 07-04-2012
+  Added LCD support directly connected or via I2C
+  Added push button/click encoder/key matrix support
+  Added push button/click encode via I2C support
+  Added beeper support
+  Added multilangual and flexible menu system
+  Added feedrate multiplier: M220 S<Feedrate multiplier in percent>
+  Added pin output command: M42 P<pin number> S<value 0..255>
+  M105 now also sends heater output power (0..255) in @: 
+  
 Version 0.54 14-03-2012
   Fixed bug introduced in 0.52 if ops enabled.
   M106/M107 Fan commands could crash if no pin was assigned. Fixed.

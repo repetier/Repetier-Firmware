@@ -290,19 +290,7 @@ void gcode_resend() {
   out.println_long_P(PSTR("Resend:"),gcode_lastN+1);
   out.println_P(PSTR("ok"));
 }
-
-/**
-  Check if result is plausible. If it is, an ok is send and the command is stored in queue.
-  If not, a resend and ok is send.
-*/
-void gcode_checkinsert(GCode *act) {
-  if(GCODE_HAS_M(act)) {
-   if(act->M==110) { // Reset line number
-     gcode_lastN = gcode_actN;
-     out.println_P(PSTR("ok"));
-     return;
-   }
-   if(act->M==112) { // Emergency kill - freeze printer
+void emergencyStop() {
      cli(); // Don't allow interrupts to do their work
      kill(false);
      manage_temperatures();
@@ -320,6 +308,20 @@ void gcode_checkinsert(GCode *act) {
       WRITE(FAN_PIN,0 ); 
 #endif
      while(1) {}
+}
+/**
+  Check if result is plausible. If it is, an ok is send and the command is stored in queue.
+  If not, a resend and ok is send.
+*/
+void gcode_checkinsert(GCode *act) {
+  if(GCODE_HAS_M(act)) {
+   if(act->M==110) { // Reset line number
+     gcode_lastN = gcode_actN;
+     out.println_P(PSTR("ok"));
+     return;
+   }
+   if(act->M==112) { // Emergency kill - freeze printer
+     emergencyStop();
    }
   }
   if(GCODE_HAS_N(act)) {
@@ -615,7 +617,7 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->P = gcode_value_long(++pos);
      code->params |= 2048;
   }
-  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30)) {
+  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 117)) {
      // after M command we got a filename for sd card management
      char *sp = line;
      while(*sp!='M') sp++; // Search M command

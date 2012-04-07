@@ -226,7 +226,7 @@ The capacitor is for reducing noise from long thermistor cable. If you don't hav
 
 If you don't need the generic table, uncomment the following define.
 */
-//#define USE_GENERIC_THERMISTORTABLE 1
+//#define USE_GENERIC_THERMISTORTABLE
 /** Reference resistance */
 #define GENERIC_THERM_R0 1042.7
 /** Temperature at reference resistance */
@@ -251,14 +251,23 @@ for more details.
 
 // ############# Heated bed configuration ########################
 
-/** \brief Switches fast between config for heated bed and non heated bed */
+/** \brief Switches fast between config for heated bed and non heated bed. Default setting is autodetect
+assuming only 2 heater outputs are available. */
+#if HEATER_1_PIN>-1 && NUM_EXTRUDER==1
+#define HAVE_HEATED_BED true
+#else
 #define HAVE_HEATED_BED false
+#endif
+//#define HAVE_HEATED_BED false  // Override autodetected value
 
 #if HAVE_HEATED_BED==true
 // Select type of your heated bed. It's the same as for EXT0_TEMPSENSOR_TYPE
 // set to 0 if you don't have a heated bed
-#define HEATED_BED_SENSOR_TYPE 0
-/** Index of analog sensor to read temperature of heated bed. look at ANALOG_INPUT_CHANNELS for the position or to add the Arduino pin id there. */
+#define HEATED_BED_SENSOR_TYPE 1
+/** Index of analog sensor to read temperature of heated bed. 
+THIS IS NOT A PIN NUMBER - IT'S A REFERENCE TO A TABLE WITH PIN NUMBERS!!!
+Look at ANALOG_INPUT_CHANNELS for the position 
+or to add the Arduino pin id there. */
 #define HEATED_BED_SENSOR_PIN 1
 /** \brief Pin to enable heater for bed. */
 #define HEATED_BED_HEATER_PIN HEATER_1_PIN
@@ -347,7 +356,7 @@ one extruder with heated bed, write:
 // ##########################################################################################
 
 //// Endstop Settings
-#define ENDSTOPPULLUPS 0 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
+#define ENDSTOPPULLUPS // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
 // The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
 //set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING false
@@ -701,7 +710,7 @@ with a dry run, you can test the speed of path computations, which are still per
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
-#define DEBUG_ADVANCE
+//#define DEBUG_ADVANCE
 /** \brief print ops related debug info. */
 //#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
