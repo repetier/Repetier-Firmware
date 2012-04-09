@@ -28,7 +28,7 @@ int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0};
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <compat/twi.h>
-#include "eeprom.h"
+#include "Eeprom.h"
 #include <ctype.h>
 
 #if BEEPER_TYPE==2 && defined(UI_HAS_I2C_KEYS) && UI_I2C_KEY_ADDRESS!=BEEPER_ADDRESS
@@ -83,8 +83,6 @@ void beep(byte duration,byte count)
 **************************************************************************/
 #include <inttypes.h>
 #include <compat/twi.h>
-
-#include <i2cmaster.h>
 
 /* I2C clock in Hz */
 #define SCL_CLOCK  100000L
