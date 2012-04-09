@@ -483,7 +483,9 @@ void initializeLCD() {
   SET_OUTPUT(UI_DISPLAY_D6_PIN);
   SET_OUTPUT(UI_DISPLAY_D7_PIN);
   SET_OUTPUT(UI_DISPLAY_RS_PIN);
+#if UI_DISPLAY_RW_PIN>-1
   SET_OUTPUT(UI_DISPLAY_RW_PIN);
+#endif
   SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
 
   // Now we pull both RS and R/W low to begin commands
@@ -1602,19 +1604,19 @@ void UIDisplay::executeAction(int action) {
 #endif
 #if FAN_PIN>-1
     case UI_ACTION_FAN_OFF:
-      fan_speed(0,false);
+      set_fan_speed(0,false);
       break;
     case UI_ACTION_FAN_25:
-      fan_speed(64,false);
+      set_fan_speed(64,false);
       break;
     case UI_ACTION_FAN_50:
-      fan_speed(128,false);
+      set_fan_speed(128,false);
       break;
     case UI_ACTION_FAN_75:
-      fan_speed(192,false);
+      set_fan_speed(192,false);
       break;
     case UI_ACTION_FAN_FULL:
-      fan_speed(255,false);
+      set_fan_speed(255,false);
       break;
 #endif
     case UI_ACTION_MENU_XPOS:

@@ -203,7 +203,7 @@ extern void wait_until_end_of_move();
 extern void update_ramps_parameter();
 extern void finishNextSegment();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
-extern void fan_speed(int speed,bool wait); /// Set fan speed 0..255
+extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
 extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd);

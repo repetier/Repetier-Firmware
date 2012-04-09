@@ -73,7 +73,7 @@ void change_feedrate_multiply(int factor) {
   printer_state.feedrate *= (float)factor/(float)printer_state.feedrateMultiply;
   printer_state.feedrateMultiply = factor;
 }
-void fan_speed(int speed,bool wait) {  
+void set_fan_speed(int speed,bool wait) {  
 #if FAN_PIN>=0
   speed = constrain(speed,0,255);
   if(wait)
@@ -390,10 +390,10 @@ void process_command(GCode *com)
         previous_millis_cmd = millis();
         break;
       case 106: //M106 Fan On
-        fan_speed(GCODE_HAS_S(com)?com->S:255,GCODE_HAS_P(com));
+        set_fan_speed(GCODE_HAS_S(com)?com->S:255,GCODE_HAS_P(com));
         break;
       case 107: //M107 Fan Off
-        fan_speed(0,GCODE_HAS_P(com));
+        set_fan_speed(0,GCODE_HAS_P(com));
         break;
       case 80: // M80 - ATX Power On
         wait_until_end_of_move();
