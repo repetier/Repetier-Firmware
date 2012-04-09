@@ -52,7 +52,6 @@
 #define UI_ACTION_EPOSITION             1008
 #define UI_ACTION_BED_TEMP              1009
 #define UI_ACTION_EXTRUDER_TEMP         1010
-#define UI_ACTION_SELECT_EXTRUDER       1011
 #define UI_ACTION_SD_DELETE             1012
 #define UI_ACTION_SD_PRINT              1013
 #define UI_ACTION_SD_PAUSE              1014
