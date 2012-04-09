@@ -115,7 +115,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   if(yaxis) {
     if ((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
-      steps = printer_state.xMaxSteps * Y_HOME_DIR;         
+      steps = printer_state.yMaxSteps * Y_HOME_DIR;         
       printer_state.currentPositionSteps[1] = -steps;
       move_steps(0,2*steps,0,0,homing_feedrate[1],true);
       printer_state.currentPositionSteps[1] = 0;
@@ -127,7 +127,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   if(zaxis) {
     if ((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
-      steps = printer_state.xMaxSteps * Z_HOME_DIR;         
+      steps = printer_state.zMaxSteps * Z_HOME_DIR;         
       printer_state.currentPositionSteps[2] = -steps;
       move_steps(0,0,2*steps,0,homing_feedrate[2],true);
       printer_state.currentPositionSteps[2] = 0;

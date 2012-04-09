@@ -1451,8 +1451,10 @@ inline long bresenham_step() {
       }
 #endif
 #ifdef USE_ADVANCE
-     printer_state.extruderStepsNeeded+=(cur->advanceStart>>16)-printer_state.advance_steps_set;
+     int tred = cur->advanceStart>>16;
+     printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
      printer_state.advance_executed = cur->advanceStart;
+     printer_state.advance_steps_set = tred;
 #endif
   } // End cur=0
   sei();
@@ -1815,7 +1817,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
   }
 #if USE_OPS==1 || defined(USE_ADVANCE)
   // The stepper signals are in strategical positions for optimal timing. If you
-  // still have timeing issues, add dummy commands between.
+  // still have timing issues, add dummy commands between.
   if(printer_state.extruderStepsNeeded) {
     extruder_unstep();
     if(printer_state.extruderStepsNeeded<0) { // Backward step
