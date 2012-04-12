@@ -526,8 +526,54 @@ void initializeLCD() {
   uid.createChar(3,character_selected);
   uid.createChar(4,character_unselected);
 }
-
+// ----------- end direct LCD driver
 #endif
+
+#if UI_DISPLAY_TYPE==4
+// Use LiquidCrystal library instead
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(UI_DISPLAY_RS_PIN, UI_DISPLAY_RW_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN);
+
+void UIDisplay::createChar(byte location,const byte PROGMEM charmap[]) {
+  location &= 0x7; // we only have 8 locations 0-7
+  byte data[8];
+  for (int i=0; i<8; i++) {
+    data[i]=pgm_read_byte(&(charmap[i]));
+  }
+  lcd.createChar(location, data);
+}
+void UIDisplay::printRow(byte r,char *txt) {    
+ byte col=0;
+ // Set row
+ if(r >= UI_ROWS) return;
+ lcd.setCursor(0,r);
+ char c;
+ while(col<UI_COLS && (c=*txt) != 0x00) {
+   txt++;
+   lcd.write(c);
+   col++;
+ }
+ while(col<UI_COLS) {
+   lcd.write(' ');
+  col++; 
+ }
+#if UI_HAS_KEYS==1
+ ui_check_slow_encoder();
+#endif
+}
+
+void initializeLCD() {
+  lcd.begin(UI_COLS,UI_ROWS);
+  uid.lastSwitch = uid.lastRefresh = millis();
+  uid.createChar(1,character_back);
+  uid.createChar(2,character_degree);
+  uid.createChar(3,character_selected);
+  uid.createChar(4,character_unselected);  
+}
+// ------------------ End LiquidCrystal library as LCD driver
+#endif
+
 char printCols[UI_COLS+1];
 UIDisplay::UIDisplay() {
 #ifdef COMPILE_I2C_DRIVER
@@ -552,10 +598,6 @@ void UIDisplay::initialize() {
   // Make sure the beeper is off
   i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
   i2c_write(255); // Disable beeper, enable read for other pins.
-  i2c_stop();
-  // Skip this wrong reading
-  i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_READ);
-  i2c_readNak();
   i2c_stop();
 #endif
 }
@@ -1034,8 +1076,9 @@ void UIDisplay::refreshPage() {
       sdrefresh(r);
     }
 #endif
+  printCols[0]=0;
   while(r<UI_ROWS)
-    printRowP(r++,PSTR(""));
+    printRow(r++,printCols);
 }
 void UIDisplay::pushMenu(void *men,bool refresh) {
   if(men==menu[menuLevel]) {

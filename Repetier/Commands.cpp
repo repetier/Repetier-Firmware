@@ -436,6 +436,9 @@ void process_command(GCode *com)
         if(GCODE_HAS_E(com)) current_extruder->stepsPerMM = com->E;
         update_ramps_parameter();        
         break;
+      case 100:
+        UI_INITIALIZE;
+        break;
       case 111:
         if(GCODE_HAS_S(com)) debug_level = com->S;
         if(DEBUG_DRYRUN) { // simulate movements without printing

@@ -109,6 +109,10 @@ Custom M Codes
 #include "SdFat.h"
 #endif
 
+#if UI_DISPLAY_TYPE==4
+#include <LiquidCrystal.h>
+#endif
+
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 // RAM usage of variables: Non RAMPS 114+MOVE_CACHE_SIZE*59+printer_state(32) = 382 Byte with MOVE_CACHE_SIZE=4
 // RAM usage RAMPS adds: 96
@@ -1695,6 +1699,7 @@ at delay ticks measured from the last interrupt. delay must be << 2^24
 */
 inline void setTimer(unsigned long delay)
 {
+  if(delay<60000 && TCNT1+100>delay) delay=TCNT1+100; // Recapture missed interrupt
   __asm__ __volatile__ (
   "tst %C[delay] \n\t" //if(delay<65536) {
   "brne else%= \n\t"
@@ -1757,6 +1762,7 @@ ISR(TIMER1_COMPA_vect)
   :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
   if(doExit) return;
   insideTimer1=1;
+  OCR1A=61000;
   if(lines_count) {
     setTimer(bresenham_step());
   } else {

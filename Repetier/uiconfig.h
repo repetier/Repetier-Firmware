@@ -91,6 +91,7 @@ What display type do you use?
 1 = LCD Display with 4 bit data bus
 2 = LCD Display with 8 bit data bus
 3 = LCD Display with I2C connection, 4 bit mode
+4 = Use the slower LiquiedCrystal library bundled with arduino
 */
 #define UI_DISPLAY_TYPE 0
 
@@ -144,7 +145,8 @@ Define the pin
 #if UI_COLS==16
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
 #elif UI_COLS==20
-#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20
+//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
+#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
 #else
 #error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
 #endif
@@ -284,7 +286,7 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void ui_init_keys() {
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
-// UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
+//  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
@@ -313,7 +315,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS); // push button, connects gnd to pin  
 #endif
 
- // UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
+  //UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
 }
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
