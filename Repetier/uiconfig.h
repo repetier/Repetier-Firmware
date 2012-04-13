@@ -91,7 +91,9 @@ What display type do you use?
 1 = LCD Display with 4 bit data bus
 2 = LCD Display with 8 bit data bus
 3 = LCD Display with I2C connection, 4 bit mode
-4 = Use the slower LiquiedCrystal library bundled with arduino
+4 = Use the slower LiquiedCrystal library bundled with arduino. 
+    IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
+               If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
 #define UI_DISPLAY_TYPE 0
 

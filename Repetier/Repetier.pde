@@ -110,7 +110,7 @@ Custom M Codes
 #endif
 
 #if UI_DISPLAY_TYPE==4
-#include <LiquidCrystal.h>
+//#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
 #endif
 
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
@@ -1699,6 +1699,7 @@ at delay ticks measured from the last interrupt. delay must be << 2^24
 */
 inline void setTimer(unsigned long delay)
 {
+  cli();
   if(delay<60000 && TCNT1+100>delay) delay=TCNT1+100; // Recapture missed interrupt
   __asm__ __volatile__ (
   "tst %C[delay] \n\t" //if(delay<65536) {
