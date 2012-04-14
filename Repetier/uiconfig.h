@@ -95,7 +95,7 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0
+#define UI_DISPLAY_TYPE 0   
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Orig. Mendel"
@@ -178,7 +178,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 1
+#define UI_HAS_BACK_KEY 0
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
@@ -285,6 +285,13 @@ Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin
 #ifdef UI_MATRIX_ACTIONS
 const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 #endif
+
+/* Normally cou want a next/previous actions with every click of your encoder.
+Unfotunately, the encoder have a different count of phase changes between clicks.
+Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
+*/
+#define UI_ENCODER_SPEED 1
+
 void ui_init_keys() {
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
@@ -413,6 +420,12 @@ more then one information page.
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
 
+/** Uncomment if you don't want automatic page switching. You can still switch the
+info pages with next/previous button/click-encoder */
+//#define UI_DISABLE_AUTO_PAGESWITCH
+
+/** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
+#define UI_AUTORETURN_TO_MENU_AFTER 30000
 
 /* Define your pages using dynamic strings. To define a page use
 UI_PAGE4(name,row1,row2,row3,row4);
@@ -615,7 +628,7 @@ UI_MENU_CHANGEACTION(ui_menu_ops_mindist,UI_TEXT_OPS_MINDIST,UI_ACTION_OPS_MINDI
 UI_MENU_CHANGEACTION(ui_menu_ops_moveafter,UI_TEXT_OPS_MOVE_AFTER,UI_ACTION_OPS_MOVE_AFTER);
 #define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backslash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
 UI_MENU(ui_menu_ops,UI_MENU_OPS,7+UI_MENU_BACKCNT);
-UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTO_OOZE,ui_menu_ops);
+UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTI_OOZE,ui_menu_ops);
 #define UI_MENU_ADDCONDOPS &ui_menu_ops_sub,
 #else
 #define UI_MENU_ADDCONDOPS

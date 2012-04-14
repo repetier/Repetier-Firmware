@@ -18,8 +18,7 @@
 
 #define UI_MAIN
 #include <avr/pgmspace.h>
-int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0};
-
+extern int8_t encoder_table[16] PROGMEM ;
 #include "ui.h"
 #include "Reptier.h"
 #include <math.h>
@@ -31,6 +30,15 @@ int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0};
 #include "Eeprom.h"
 #include <ctype.h>
 
+#if UI_ENCODER_SPEED==0
+int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; // Full speed
+#elif UI_ENCODER_SPEED==1
+int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
+#else
+int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
+#endif
+
+
 #if BEEPER_TYPE==2 && defined(UI_HAS_I2C_KEYS) && UI_I2C_KEY_ADDRESS!=BEEPER_ADDRESS
 #error Beeper address and i2c key address must be identical
 #else
@@ -39,24 +47,28 @@ int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0};
 #endif
 #endif
 
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+long ui_autoreturn_time=0;
+#endif
+
 void beep(byte duration,byte count)
 {
 #if BEEPER_TYPE!=0
 #if BEEPER_TYPE==1
-  OUTPUT(BEEPER_PIN);
+  SET_OUTPUT(BEEPER_PIN);
 #endif
 #if BEEPER_TYPE==2
   i2c_start_wait(BEEPER_ADDRESS+I2C_WRITE);
 #endif
   for(byte i=0;i<count;i++){
 #if BEEPER_TYPE==1
-    WRITE(BEEPER,HIGH);
+    WRITE(BEEPER_PIN,HIGH);
 #else
     i2c_write(~BEEPER_PIN);
 #endif
     delay(duration);
 #if BEEPER_TYPE==1
-    WRITE(BEEPER,LOW);
+    WRITE(BEEPER_PIN,LOW);
 #else
     i2c_write(255);
 #endif
@@ -559,7 +571,7 @@ void UIDisplay::printRow(byte r,char *txt) {
   col++; 
  }
 #if UI_HAS_KEYS==1
- ui_check_slow_encoder();
+ mediumAction();
 #endif
 }
 
@@ -1190,9 +1202,20 @@ void UIDisplay::okAction() {
 #endif
 }
 #define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
-void UIDisplay::nextPreviousAction(byte next) {
+void UIDisplay::nextPreviousAction(char next) {
 #if UI_HAS_KEYS==1
   if(menuLevel==0) { 
+    lastSwitch = millis();
+    if(next>0) {
+      menuPos[0]++;
+      if(menuPos[0]>=UI_NUM_PAGES)
+        menuPos[0]=0;
+    } else {
+      if(menuPos[0]==0)
+        menuPos[0]=UI_NUM_PAGES-1;
+      else
+        menuPos[0]--;
+    }
     return;
   }
   UIMenu *men = (UIMenu*)menu[menuLevel];
@@ -1203,7 +1226,7 @@ void UIDisplay::nextPreviousAction(byte next) {
   unsigned char entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
   int action = pgm_read_word(&(ent->action));
   if(mtype==2 && activeAction==0) { // browse through menu items
-    if(next) {
+    if(next>0) {
       if(menuPos[menuLevel]+1<nr) menuPos[menuLevel]++;
     } else if(menuPos[menuLevel]>0)
       menuPos[menuLevel]--;
@@ -1215,7 +1238,7 @@ void UIDisplay::nextPreviousAction(byte next) {
   }
 #ifdef SDSUPPORT
     if(mtype==1) { // SD listing
-      if(next) {
+      if(next>0) {
         if(menuPos[menuLevel]<nFilesOnCard) menuPos[menuLevel]++;
       } else if(menuPos[menuLevel]>0)
         menuPos[menuLevel]--;
@@ -1227,28 +1250,35 @@ void UIDisplay::nextPreviousAction(byte next) {
     }
 #endif
   if(mtype==3) action = pgm_read_word(&(men->id)); else action=activeAction;
-  char increment = next ? 1 : -1;
+  char increment = next;
   switch(action) {
   case UI_ACTION_XPOSITION:
     move_steps(increment,0,0,0,homing_feedrate[0],true);
+    printPosition();
     break;
   case UI_ACTION_YPOSITION:
     move_steps(0,increment,0,0,homing_feedrate[1],true);
+    printPosition();
     break;
   case UI_ACTION_ZPOSITION:
     move_steps(0,0,increment,0,homing_feedrate[2],true);
+    printPosition();
     break;
   case UI_ACTION_XPOSITION_FAST:
     move_steps(axis_steps_per_unit[0]*increment,0,0,0,homing_feedrate[0],true);
+    printPosition();
     break;
   case UI_ACTION_YPOSITION_FAST:
     move_steps(0,axis_steps_per_unit[1]*increment,0,0,homing_feedrate[1],true);
+    printPosition();
     break;
   case UI_ACTION_ZPOSITION_FAST:
     move_steps(0,0,axis_steps_per_unit[2]*increment,0,homing_feedrate[2],true);
+    printPosition();
     break;
   case UI_ACTION_EPOSITION:
     move_steps(0,0,0,axis_steps_per_unit[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true);
+    printPosition();
     break;
   case UI_ACTION_HEATED_BED_TEMP:
 #if HAVE_HEATED_BED==true
@@ -1393,6 +1423,7 @@ void UIDisplay::nextPreviousAction(byte next) {
       do {
         rate = pgm_read_dword(&(baudrates[p]));
         if(rate==baudrate) break;
+        p++;
       } while(rate!=0);
       if(rate==0) p-=2;
       p+=increment;
@@ -1458,6 +1489,9 @@ void UIDisplay::nextPreviousAction(byte next) {
       INCREMENT_MIN_MAX(current_extruder->advanceK,0.5,0,200);
       break;
   }
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+    ui_autoreturn_time=millis()+UI_AUTORETURN_TO_MENU_AFTER;
+#endif
 #endif
 }
 
@@ -1467,7 +1501,6 @@ void UIDisplay::finishAction(int action) {
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
 void UIDisplay::executeAction(int action) {
 #if UI_HAS_KEYS==1
-  out.println_int_P(PSTR("Action:"),action);
   bool skipBeep = false;
   if(action>=2000 && action<3000)
   {
@@ -1483,10 +1516,10 @@ void UIDisplay::executeAction(int action) {
       if(menuLevel>0) menuLevel--;
       break;
     case UI_ACTION_NEXT:
-      nextPreviousAction(true);
+      nextPreviousAction(1);
       break;
     case UI_ACTION_PREVIOUS:
-      nextPreviousAction(false);
+      nextPreviousAction(-1);
       break;
     case UI_ACTION_MENU_UP:
       if(menuLevel>0) menuLevel--;
@@ -1499,15 +1532,19 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_HOME_ALL:
       home_axis(true,true,true);
+      printPosition();
       break;
     case UI_ACTION_HOME_X:
       home_axis(true,false,false);
+      printPosition();
       break;
     case UI_ACTION_HOME_Y:
       home_axis(false,true,false);
+      printPosition();
       break;
     case UI_ACTION_HOME_Z:
       home_axis(false,false,true);
+      printPosition();
       break;
     case UI_ACTION_SET_ORIGIN:
       printer_state.currentPositionSteps[0] = -printer_state.offsetX;
@@ -1693,7 +1730,13 @@ void UIDisplay::executeAction(int action) {
   refreshPage();
   if(!skipBeep)
     BEEP_SHORT
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+    ui_autoreturn_time=millis()+UI_AUTORETURN_TO_MENU_AFTER;
 #endif
+#endif
+}
+void UIDisplay::mediumAction() {
+  ui_check_slow_encoder();
 }
 void UIDisplay::slowAction() {
   unsigned long time = millis();
@@ -1709,54 +1752,64 @@ void UIDisplay::slowAction() {
       flags|=2; // Mark slow action
     }
   }
-  // Reset click encoder
-  cli();
-  char epos = encoderPos;
-  encoderPos=0;
-  sei();
-  while(epos>0) {
-    nextPreviousAction(true);
-    epos--;
-    BEEP_SHORT
-    refresh=1;
-  }
-  while(epos<0) {
-    nextPreviousAction(false);
-    epos++;
-    BEEP_SHORT
-    refresh=1;
-  }
-  if(lastAction!=lastButtonAction) {
-    if(lastButtonAction==0) {
-      if(lastAction>=2000 && lastAction<3000)
-      {
-        statusMsg[0] = 0;
+  if((flags & 4)==0) {
+    flags |= 4; 
+    // Reset click encoder
+    cli();
+    char epos = encoderPos;
+    encoderPos=0;
+    sei();
+    if(epos) {
+      nextPreviousAction(epos);
+      BEEP_SHORT
+      refresh=1;
+    }
+    if(lastAction!=lastButtonAction) {
+      if(lastButtonAction==0) {
+        if(lastAction>=2000 && lastAction<3000)
+        {
+          statusMsg[0] = 0;
+        }
+        lastAction = 0;
+        flags &= ~3;
+      } else if(time-lastButtonStart>UI_KEY_BOUNCETIME) { // New key pressed
+        lastAction = lastButtonAction;
+        executeAction(lastAction);
+        nextRepeat = time+UI_KEY_FIRST_REPEAT;
+        repeatDuration = UI_KEY_FIRST_REPEAT;
       }
-      lastAction = 0;
-      flags &= ~3;
-    } else if(time-lastButtonStart>UI_KEY_BOUNCETIME) { // New key pressed
-      lastAction = lastButtonAction;
-      executeAction(lastAction);
-      nextRepeat = time+UI_KEY_FIRST_REPEAT;
-      repeatDuration = UI_KEY_FIRST_REPEAT;
+    } else if(lastAction<1000 && lastAction) { // Repeatable key
+      if(time-nextRepeat<10000) {
+        executeAction(lastAction);
+        repeatDuration -=UI_KEY_REDUCE_REPEAT;
+        if(repeatDuration<UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
+        nextRepeat = time+repeatDuration;      
+      }
     }
-  } else if(lastAction<1000 && lastAction) { // Repeatable key
-    if(time-nextRepeat<10000) {
-      executeAction(lastAction);
-      repeatDuration -=UI_KEY_REDUCE_REPEAT;
-      if(repeatDuration<UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
-      nextRepeat = time+repeatDuration;      
-    }
+    flags -=4;
   }
+#endif
+#if UI_AUTORETURN_TO_MENU_AFTER!=0
+    if(menuLevel>0 && ui_autoreturn_time<time) {
+      lastSwitch = time;
+      menuLevel=0;
+    }
 #endif
   if(menuLevel==0 && time>4000) {
     if(time-lastSwitch>UI_PAGES_DURATION) {
       lastSwitch = time;
+#ifndef UI_DISABLE_AUTO_PAGESWITCH
       menuPos[0]++;
       if(menuPos[0]>=UI_NUM_PAGES)
         menuPos[0]=0;
+#endif
       refresh = 1;
     } else if(time-lastRefresh>=1000) refresh=1;
+  } else if(time-lastRefresh>=1000) {
+    UIMenu *men = (UIMenu*)menu[menuLevel];
+    byte mtype = pgm_read_byte((void*)&(men->menuType));
+    if(mtype!=1)
+      refresh=1;
   }
   if(refresh) {
     refreshPage();

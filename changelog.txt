@@ -1,3 +1,10 @@
+Version 0.61 14-04-2012
+  Added LiquidCrystal library as alternative LCD driver.
+  Several bugfixes in user interface.
+  Info pages can now be static or dynamic switching.
+  Autoreturn to info panel after x seconds of inactivity.
+  Smoother stepper control with high stepper rates.
+  
 Version 0.60 07-04-2012
   Added LCD support directly connected or via I2C
   Added push button/click encoder/key matrix support

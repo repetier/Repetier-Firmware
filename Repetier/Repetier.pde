@@ -1699,15 +1699,27 @@ at delay ticks measured from the last interrupt. delay must be << 2^24
 */
 inline void setTimer(unsigned long delay)
 {
-  cli();
-  if(delay<60000 && TCNT1+100>delay) delay=TCNT1+100; // Recapture missed interrupt
   __asm__ __volatile__ (
+  "cli \n\t"
   "tst %C[delay] \n\t" //if(delay<65536) {
   "brne else%= \n\t"
+  "cpi %B[delay],255 \n\t"
+  "breq else%= \n\t" // delay <65280
   "sts stepperWait,r1 \n\t" // stepperWait = 0;
   "sts stepperWait+1,r1 \n\t"	
-  "sts stepperWait+2,r1 \n\t"	   
-  "sts %[ocr]+1,%B[delay] \n\t" //  OCR1A = delay;
+  "sts stepperWait+2,r1 \n\t"  
+  "lds %C[delay],%[time] \n\t" // Read TCNT1
+  "lds %D[delay],%[time]+1 \n\t"
+  "ldi r18,100 \n\t" // Add 100 to TCNT1
+  "add %C[delay],r18 \n\t"
+  "adc %D[delay],r1 \n\t"
+  "cp %A[delay],%C[delay] \n\t" // delay<TCNT1+1
+  "cpc %B[delay],%D[delay] \n\t"
+  "brcc exact%= \n\t"	   
+  "sts %[ocr]+1,%D[delay] \n\t" //  OCR1A = TCNT1+100;
+  "sts %[ocr],%C[delay] \n\t"
+  "rjmp end%= \n\t"  
+  "exact%=: sts %[ocr]+1,%B[delay] \n\t" //  OCR1A = delay;
   "sts %[ocr],%A[delay] \n\t"
   "rjmp end%= \n\t"  
   "else%=: subi	%B[delay], 0x80 \n\t" //} else { stepperWait = delay-32768;
@@ -1719,12 +1731,18 @@ inline void setTimer(unsigned long delay)
   "sts	%[ocr]+1, %D[delay] \n\t"
   "sts	%[ocr], r1 \n\t"
   "end%=: \n\t" 
-  :[delay]"=&d"(delay):"0"(delay),[ocr]"i" (_SFR_MEM_ADDR(OCR1A))
+  :[delay]"=&d"(delay) // Output
+  :"0"(delay),[ocr]"i" (_SFR_MEM_ADDR(OCR1A)),[time]"i"(_SFR_MEM_ADDR(TCNT1)) // Input
+  :"r18" // Clobber
   );
- /* // Assembler above replaced this code 
-  if(delay<65536) {
+/* // Assembler above replaced this code 
+  if(delay<65280) {
     stepperWait = 0;
-    OCR1A = delay;
+    unsigned int count = TCNT1+100;
+    if(delay<count)
+      OCR1A = count;
+    else
+      OCR1A = delay;
   } else {
     stepperWait = delay-32768;
     OCR1A = 32768;

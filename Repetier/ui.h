@@ -339,7 +339,7 @@ extern unsigned char i2c_read(unsigned char ack);
 
 class UIDisplay {
   public:
-    byte flags; // 1 = fast key action, 2 = slow key action
+    byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running
     byte col; // current col for buffer prefill
     byte menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
     byte menuPos[5]; // Positions in menu
@@ -360,7 +360,7 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,byte digits);
     void addStringP(PGM_P text);
     void okAction();
-    void nextPreviousAction(byte next);
+    void nextPreviousAction(char next);
     void updateSDFileCount();
     void sdrefresh(byte &r);
     char statusMsg[17];
@@ -378,6 +378,7 @@ class UIDisplay {
     void finishAction(int action);
     void slowAction();
     void fastAction();
+    void mediumAction();
     void pushMenu(void *men,bool refresh);
     void setStatusP(PGM_P txt);
     void setStatus(char *txt);
@@ -386,7 +387,7 @@ extern UIDisplay uid;
 
 #include "uiconfig.h"
 
-#define UI_VERSION_STRING "Repetier 0.60"
+#define UI_VERSION_STRING "Repetier 0.61"
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER
@@ -403,6 +404,7 @@ extern UIDisplay uid;
 
 #define UI_INITIALIZE uid.initialize();
 #define UI_FAST uid.fastAction();
+#define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW uid.slowAction();
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
@@ -413,6 +415,7 @@ extern UIDisplay uid;
 #else
 #define UI_INITIALIZE {}
 #define UI_FAST {}
+#define UI_MEDIUM {}
 #define UI_SLOW {}
 #define UI_STATUS(status) {}
 #define UI_STATUS_UPD(status) {}
