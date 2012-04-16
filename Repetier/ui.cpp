@@ -866,6 +866,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='c') {addLong(baudrate,6);break;}
         if(c2=='e') {if(errorMsg!=0)addStringP((prog_char*)errorMsg);break;}
         if(c2=='B') {addInt((int)lines_count,2);break;}
+        if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
         // Extruder output level
         if(c2>='0' && c2<='9') ivalue=extruder[c2-'0'].output;
         else if(c2=='b') ivalue=heated_bed_output;
@@ -1685,18 +1686,23 @@ void UIDisplay::executeAction(int action) {
 #if FAN_PIN>-1
     case UI_ACTION_FAN_OFF:
       set_fan_speed(0,false);
+      out.println_int_P(PSTR("Fanspeed:0"));
       break;
     case UI_ACTION_FAN_25:
       set_fan_speed(64,false);
+      out.println_int_P(PSTR("Fanspeed:64"));
       break;
     case UI_ACTION_FAN_50:
       set_fan_speed(128,false);
+      out.println_int_P(PSTR("Fanspeed:128"));
       break;
     case UI_ACTION_FAN_75:
       set_fan_speed(192,false);
+      out.println_int_P(PSTR("Fanspeed:192"));
       break;
     case UI_ACTION_FAN_FULL:
       set_fan_speed(255,false);
+      out.println_int_P(PSTR("Fanspeed:255"));
       break;
 #endif
     case UI_ACTION_MENU_XPOS:

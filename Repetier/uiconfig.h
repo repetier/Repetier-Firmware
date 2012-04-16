@@ -346,6 +346,7 @@ List of placeholder:
 %os : Status message
 %oe : Error message
 %oB : Buffer length
+%om : Speed multiplier
 %oc : Connection baudrate
 %o0..9 : Output level extruder 0..9 is % including %sign.
 %oC : Output level current extruder
@@ -564,8 +565,9 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat,UI_TEXT_PREHEAT,UI_ACTION_PREHEAT);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN,UI_ACTION_COOLDOWN);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_origin,UI_TEXT_SET_TO_ORIGIN,UI_ACTION_SET_ORIGIN);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER);
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,5+UI_MENU_BACKCNT);
+UI_MENU_CHANGEACTION(ui_menu_quick_speedmultiply,UI_TEXT_SPEED_MULTIPLY,UI_ACTION_FEEDRATE_MULTIPLY);
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat,&ui_menu_quick_speedmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,6+UI_MENU_BACKCNT);
 
 // **** Fan menu
 

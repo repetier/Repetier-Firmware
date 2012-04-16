@@ -151,6 +151,7 @@
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 
 // *************** german translation ****************
 
@@ -284,6 +285,7 @@
 #define UI_TEXT_PAGE_BUFFER       "Puffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_SPEED_MULTIPLY    "Geschw.Mul:%om%%%"
 
 #endif
 
@@ -428,5 +430,6 @@
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 
 #endif

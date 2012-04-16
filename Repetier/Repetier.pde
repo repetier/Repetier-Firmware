@@ -408,7 +408,8 @@ void loop()
 {
   gcode_read_serial();
   GCode *code = gcode_next_command();
-  UI_SLOW; // do longer timed user interface action
+  //UI_SLOW; // do longer timed user interface action
+  UI_MEDIUM; // do check encoder
   if(code){
 #ifdef SDSUPPORT
     if(savetosd){
@@ -438,7 +439,7 @@ void loop()
   }
   //check heater every n milliseconds
   check_periodical();
-  UI_SLOW; // do longer timed user interface action
+  UI_MEDIUM; // do check encoder
   unsigned long curtime = millis();
   if(lines_count)
     previous_millis_cmd = curtime;
@@ -908,13 +909,14 @@ void finishNextSegment() {
 
 void updateTrapezoids(byte p) {
   PrintLine *act = &lines[p],*prev;
-  if(lines_count<3) {
+  if(lines_count<4) {
     if(!(act->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED))
       updateStepsParameter(act,2);
     return;
   }
-  byte n=lines_count-1; // ignore active segment and following segment
-  while(n>0) {
+  byte n=lines_count-2; // ignore active segment and following segment
+  if(n>PATH_PLANNER_CHECK_SEGMENTS) n=PATH_PLANNER_CHECK_SEGMENTS; // Limit time spend in updating path. If we have many short moves this takes to much time and with large moves it is not necessary.
+  while(n>0 && lines_count>2) {
     p--;if(p==255) p = MOVE_CACHE_SIZE-1;
     prev = &lines[p];
     BEGIN_INTERRUPT_PROTECTED; 
@@ -1055,6 +1057,7 @@ END_INTERRUPT_PROTECTED
     }
   }
   
+  bool critical=false;
   float axis_diff[4]; // Axis movement in mm
   long axis_interval[4];  
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS; 
@@ -1126,7 +1129,8 @@ END_INTERRUPT_PROTECTED
   }    
   float time_for_move = (float)(60*F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
-    time_for_move = LOW_TICKS_PER_MOVE; 
+    time_for_move = LOW_TICKS_PER_MOVE;
+    critical=true; 
   }
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
@@ -1204,6 +1208,7 @@ END_INTERRUPT_PROTECTED
       }
   }
 #endif
+    UI_MEDIUM; // do check encoder
 
     updateTrapezoids(lines_write_pos);
     // how much steps on primary axis do we need to reach target feedrate
@@ -1216,7 +1221,7 @@ END_INTERRUPT_PROTECTED
   #endif
   
   // Correct integers for fixed point math used in bresenham_step
-  if(p->fullInterval<MAX_HALFSTEP_INTERVAL) 
+  if(p->fullInterval<MAX_HALFSTEP_INTERVAL || critical) 
     p->halfstep = 0;
   else {
     p->halfstep = 1;
@@ -1301,7 +1306,7 @@ inline long bresenham_step() {
       if(cur->flags & FLAG_BLOCKED) { // This step is in computation - shouldn't happen
         if(lastblk!=(int)cur) {
           lastblk = (int)cur;
-          out.println_int_P(PSTR("BLK"),(unsigned int)cur);
+          out.println_int_P(PSTR("BLK "),(unsigned int)lines_count);
         }
         cur = 0;
         return 2000;

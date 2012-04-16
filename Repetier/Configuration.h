@@ -639,7 +639,12 @@ This number of moves can be cached in advance. If you wan't to cache more, incre
 many very short moves the cache may go empty. The minimum value is 5.
 */
 #define MOVE_CACHE_SIZE 16
-
+/* How many line segments can the path planner use for path optimization. The maximum possible
+value is MOVE_CACHE_SIZE-2. Higher values need more computation time, which can cause blocking for many
+short subsequent moves. If this happens you will see BLK messages in your log and then you now the
+value is to high for your printer settings.
+*/
+#define PATH_PLANNER_CHECK_SEGMENTS 7
 /** \brief Low filled cache size. 
 
 If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is limited to LOW_TICKS_PER_MOVE clock cycles.
@@ -650,9 +655,9 @@ don't care about empty buffers during print.
 /** \brief Cycles per move, if move cache is low. 
 
 This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
-if you are printing many very short segments at high speed.
+if you are printing many very short segments at high speed. Higher delays here allow higher values in PATH_PLANNER_CHECK_SEGMENTS.
 */
-#define LOW_TICKS_PER_MOVE 200000
+#define LOW_TICKS_PER_MOVE 400000
 /** \brief Cache size for incoming commands.
 
 There should be no reason to increase this cache. Commands are nearly immediately send to

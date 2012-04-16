@@ -40,7 +40,7 @@ void check_periodical() {
         write_monitor();
      counter_250ms=10;
   }
- UI_SLOW; 
+  UI_SLOW; 
 }
 
 /** \brief Waits until movement cache is empty.
@@ -187,7 +187,7 @@ void process_command(GCode *com)
         unit_inches = 0;
         break;
       case 28: {//G28 Home all Axis one at a time
-          byte home_all_axis = (GCODE_HAS_XYZ(com));
+          byte home_all_axis = (GCODE_HAS_NO_XYZ(com));
           home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
         }
         break;
@@ -442,9 +442,6 @@ void process_command(GCode *com)
         if(GCODE_HAS_Z(com)) axis_steps_per_unit[2] = com->Z;
         if(GCODE_HAS_E(com)) current_extruder->stepsPerMM = com->E;
         update_ramps_parameter();        
-        break;
-      case 100:
-        UI_INITIALIZE;
         break;
       case 111:
         if(GCODE_HAS_S(com)) debug_level = com->S;

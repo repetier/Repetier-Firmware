@@ -80,7 +80,7 @@ extern void emergencyStop();
 #define GCODE_HAS_X(a) ((a->params & 8)!=0)
 #define GCODE_HAS_Y(a) ((a->params & 16)!=0)
 #define GCODE_HAS_Z(a) ((a->params & 32)!=0)
-#define GCODE_HAS_XYZ(a) ((a->params & 56)==56)
+#define GCODE_HAS_NO_XYZ(a) ((a->params & 56)==0)
 #define GCODE_HAS_E(a) ((a->params & 64)!=0)
 #define GCODE_HAS_F(a) ((a->params & 256)!=0)
 #define GCODE_HAS_T(a) ((a->params & 512)!=0)
