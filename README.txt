@@ -1,7 +1,7 @@
 Repetier-Firmware - the fast and user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
-Version 0.61  14.04.2012
+Version 0.62  17.04.2012
 
 1) Introduction
 

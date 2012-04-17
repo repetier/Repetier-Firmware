@@ -89,13 +89,13 @@ Values must be in range 1..255
 What display type do you use?
 0 = No display
 1 = LCD Display with 4 bit data bus
-2 = LCD Display with 8 bit data bus
+2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
 3 = LCD Display with I2C connection, 4 bit mode
 4 = Use the slower LiquiedCrystal library bundled with arduino. 
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0   
+#define UI_DISPLAY_TYPE 0 
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Orig. Mendel"
@@ -324,7 +324,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS); // push button, connects gnd to pin  
 #endif
 
-  //UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
+//  UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
 }
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain

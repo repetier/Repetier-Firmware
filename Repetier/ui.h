@@ -387,7 +387,7 @@ extern UIDisplay uid;
 
 #include "uiconfig.h"
 
-#define UI_VERSION_STRING "Repetier 0.61"
+#define UI_VERSION_STRING "Repetier 0.62"
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER

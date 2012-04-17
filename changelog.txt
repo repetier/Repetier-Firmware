@@ -1,3 +1,8 @@
+Version 0.62 17-04-2012
+  Feedback of ui actions for host software.
+  Fixed some ui issues.
+  Added speed multiply in user interface.
+  
 Version 0.61 14-04-2012
   Added LiquidCrystal library as alternative LCD driver.
   Several bugfixes in user interface.

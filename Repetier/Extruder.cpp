@@ -264,6 +264,8 @@ void extruder_set_temperature(int temp_celsius,byte extr) {
 //#endif
   extruder[extr].targetTemperature = conv_temp_raw(extruder[extr].sensorType,temp_celsius);
   extruder[extr].targetTemperatureC = temp_celsius;
+   out.print_int_P(PSTR("TargetExtr"),(int)extr);
+   out.println_int_P(PSTR(":"),temp_celsius>>CELSIUS_EXTRA_BITS);
 #if USE_OPS==1  
   if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS)) { // Protect for cold filament
     printer_state.filamentRetracted = false;
@@ -289,6 +291,7 @@ void heated_bed_set_temperature(int temp_celsius) {
    if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
    target_bed_celsius=temp_celsius;
    target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
+   out.println_int_P(PSTR("TargetBed:"),target_bed_celsius>>CELSIUS_EXTRA_BITS);
 #endif     
 }
 

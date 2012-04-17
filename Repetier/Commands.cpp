@@ -79,6 +79,7 @@ void change_feedrate_multiply(int factor) {
   if(factor>500) factor=500;
   printer_state.feedrate *= (float)factor/(float)printer_state.feedrateMultiply;
   printer_state.feedrateMultiply = factor;
+  out.println_int_P(PSTR("SpeedMultiply:"),factor);
 }
 void set_fan_speed(int speed,bool wait) {  
 #if FAN_PIN>=0

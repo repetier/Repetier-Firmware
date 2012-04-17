@@ -1515,6 +1515,7 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_BACK:
       if(menuLevel>0) menuLevel--;
+      activeAction = 0;
       break;
     case UI_ACTION_NEXT:
       nextPreviousAction(1);
@@ -1589,7 +1590,7 @@ void UIDisplay::executeAction(int action) {
       UI_STATUS(UI_TEXT_COOLDOWN);
       extruder_set_temperature(0,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature0,1);
+      extruder_set_temperature(0,1);
 #endif
 #if HAVE_HEATED_BED==true
       heated_bed_set_temperature(0);
@@ -1686,23 +1687,23 @@ void UIDisplay::executeAction(int action) {
 #if FAN_PIN>-1
     case UI_ACTION_FAN_OFF:
       set_fan_speed(0,false);
-      out.println_int_P(PSTR("Fanspeed:0"));
+      out.println_P(PSTR("Fanspeed:0"));
       break;
     case UI_ACTION_FAN_25:
       set_fan_speed(64,false);
-      out.println_int_P(PSTR("Fanspeed:64"));
+      out.println_P(PSTR("Fanspeed:64"));
       break;
     case UI_ACTION_FAN_50:
       set_fan_speed(128,false);
-      out.println_int_P(PSTR("Fanspeed:128"));
+      out.println_P(PSTR("Fanspeed:128"));
       break;
     case UI_ACTION_FAN_75:
       set_fan_speed(192,false);
-      out.println_int_P(PSTR("Fanspeed:192"));
+      out.println_P(PSTR("Fanspeed:192"));
       break;
     case UI_ACTION_FAN_FULL:
       set_fan_speed(255,false);
-      out.println_int_P(PSTR("Fanspeed:255"));
+      out.println_P(PSTR("Fanspeed:255"));
       break;
 #endif
     case UI_ACTION_MENU_XPOS:
@@ -1799,6 +1800,7 @@ void UIDisplay::slowAction() {
     if(menuLevel>0 && ui_autoreturn_time<time) {
       lastSwitch = time;
       menuLevel=0;
+      activeAction = 0;
     }
 #endif
   if(menuLevel==0 && time>4000) {
