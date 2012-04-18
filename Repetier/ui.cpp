@@ -1750,15 +1750,22 @@ void UIDisplay::slowAction() {
   byte refresh=0;
 #if UI_HAS_KEYS==1
   // Update key buffer
-  if((flags & 1)==0) {
+  cli();
+  if((flags & 9)==0) {
+    flags|=8;
+    sei();
     int nextAction = 0;
     ui_check_slow_keys(nextAction);
     if(lastButtonAction!=nextAction) {
       lastButtonStart = time;
       lastButtonAction = nextAction;
+      cli();
       flags|=2; // Mark slow action
     }
+    cli();
+    flags-=8;
   }
+  cli();
   if((flags & 4)==0) {
     flags |= 4; 
     // Reset click encoder
@@ -1778,6 +1785,7 @@ void UIDisplay::slowAction() {
           statusMsg[0] = 0;
         }
         lastAction = 0;
+        cli();
         flags &= ~3;
       } else if(time-lastButtonStart>UI_KEY_BOUNCETIME) { // New key pressed
         lastAction = lastButtonAction;
@@ -1793,8 +1801,10 @@ void UIDisplay::slowAction() {
         nextRepeat = time+repeatDuration;      
       }
     }
+    cli();
     flags -=4;
   }
+  sei();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     if(menuLevel>0 && ui_autoreturn_time<time) {
@@ -1827,15 +1837,22 @@ void UIDisplay::slowAction() {
 void UIDisplay::fastAction() {
 #if UI_HAS_KEYS==1
   // Check keys
-  if((flags & 2)==0) {
+  cli();
+  if((flags & 10)==0) {
+    flags |= 8;
+    sei();
     int nextAction = 0;
     ui_check_keys(nextAction);
     if(lastButtonAction!=nextAction) {
       lastButtonStart = millis();
       lastButtonAction = nextAction;
+      cli();
       flags|=1;
     }
+    cli();
+    flags-=8;
   }
+  sei();
 #endif
 }
 

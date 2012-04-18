@@ -171,7 +171,7 @@ Define the pin
 /** \brief Reduction of repeat time until next execution. */
 #define UI_KEY_REDUCE_REPEAT 50
 /** \brief Lowest repeat time. */
-#define UI_KEY_MIN_REPEAT 100
+#define UI_KEY_MIN_REPEAT 50
 
 /** \brief Is a back key present.
 
@@ -324,7 +324,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS); // push button, connects gnd to pin  
 #endif
 
-//  UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
+  //UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
 }
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain

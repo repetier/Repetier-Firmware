@@ -339,7 +339,7 @@ extern unsigned char i2c_read(unsigned char ack);
 
 class UIDisplay {
   public:
-    byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running
+    volatile byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     byte col; // current col for buffer prefill
     byte menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
     byte menuPos[5]; // Positions in menu
