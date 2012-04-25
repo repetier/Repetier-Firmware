@@ -154,7 +154,7 @@
 #include "fastio.h"
 
 typedef struct {
-  char *text; // Menu text 
+  const char *text; // Menu text 
   unsigned char menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
   unsigned int action;
 } const UIMenuEntry;
@@ -167,7 +167,7 @@ typedef struct {
   unsigned char menuType;
   int id; // Type of modification
   int numEntries;
-  UIMenuEntry **entries;
+  const UIMenuEntry * const * entries;
 } const UIMenu;
 
 //#ifdef COMPILE_I2C_DRIVER
@@ -301,19 +301,19 @@ extern unsigned char i2c_read(unsigned char ack);
 #define UI_KEYS_I2C_CLICKENCODER_HIGH_REV(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (keymask & pinA) uid.encoderLast |=2;if (keymask & pinB) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&encoder_table[uid.encoderLast]);
 #define UI_KEYS_I2C_BUTTON_HIGH(pin,action_) if((pin & keymask)!=0) action=action_;
 
-#define UI_STRING(name,text) prog_char name[] PROGMEM = text;
+#define UI_STRING(name,text) const char PROGMEM name[] = text;
 
 #define UI_PAGE4(name,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0};\
   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0};\
   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0};\
-  const UIMenuEntry *name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {0,0,4,name ## _entries};
 #define UI_PAGE2(name,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0};\
-  const UIMenuEntry *name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {0,0,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows) UI_MENU_ACTION4(name,action,rows)
 #define UI_MENU_ACTION2C(name,action,rows) UI_MENU_ACTION2(name,action,rows)
@@ -322,19 +322,19 @@ extern unsigned char i2c_read(unsigned char ack);
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0};\
   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0};\
   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0};\
-  const UIMenuEntry *name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {3,action,4,name ## _entries};
 #define UI_MENU_ACTION2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0};\
-  const UIMenuEntry *name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {3,action,2,name ## _entries};
 #define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0};
 #define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action};
 #define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action};
 #define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries};
 #define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries};
-#define UI_MENU(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
+#define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 class UIDisplay {

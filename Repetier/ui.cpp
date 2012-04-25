@@ -18,7 +18,7 @@
 
 #define UI_MAIN
 #include <avr/pgmspace.h>
-extern int8_t encoder_table[16] PROGMEM ;
+extern const int8_t encoder_table[16] PROGMEM ;
 #include "ui.h"
 #include "Reptier.h"
 #include <math.h>
@@ -31,11 +31,11 @@ extern int8_t encoder_table[16] PROGMEM ;
 #include <ctype.h>
 
 #if UI_ENCODER_SPEED==0
-int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; // Full speed
+const int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; // Full speed
 #elif UI_ENCODER_SPEED==1
-int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
+const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
 #else
-int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
+const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
 #endif
 
 
@@ -353,7 +353,7 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define lcdPutChar(value) lcdWriteByte(value,1)
 #define lcdCommand(value) lcdWriteByte(value,0)
 
-static byte LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
+static const byte LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
 static const char versionString[] PROGMEM = UI_VERSION_STRING;
 static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 
@@ -864,7 +864,7 @@ void UIDisplay::parse(char *txt,bool ram) {
           break;
         }
         if(c2=='c') {addLong(baudrate,6);break;}
-        if(c2=='e') {if(errorMsg!=0)addStringP((prog_char*)errorMsg);break;}
+        if(c2=='e') {if(errorMsg!=0)addStringP((char PROGMEM *)errorMsg);break;}
         if(c2=='B') {addInt((int)lines_count,2);break;}
         if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
         // Extruder output level
@@ -964,7 +964,7 @@ void UIDisplay::setStatus(char *txt) {
   statusMsg[i]=0;
 }
 
-const UIMenu *ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
+const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
 #ifdef SDSUPPORT
 byte nFilesOnCard;
 
