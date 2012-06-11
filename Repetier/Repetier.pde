@@ -113,6 +113,11 @@ Custom M Codes
 #if UI_DISPLAY_TYPE==4
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
 #endif
+#if UI_DISPLAY_TYPE==5
+#include <Wire.h>
+#include <Adafruit_MCP23017.h>
+#include <Adafruit_RGBLCDShield.h>
+#endif
 
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 // RAM usage of variables: Non RAMPS 114+MOVE_CACHE_SIZE*59+printer_state(32) = 382 Byte with MOVE_CACHE_SIZE=4

@@ -1,3 +1,8 @@
+This fork is pre-configured for Printrboard.
+The SD card support is enabled, and I added code to support the Adafruit LCD shield http://www.adafruit.com/products/772 via the Adafruit LCD library.
+To compile this fork, you must install the Adafruit RGB LCD shield library, as ddescribed here:  http://ladyada.net/make/rgblcdshield/use.html
+
+-----------------
 Repetier-Firmware - the fast and user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
