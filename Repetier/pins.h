@@ -665,7 +665,7 @@
 #define HEATER_1_PIN       14 // bed
 
 #define SDPOWER            -1
-#define SDSS                2
+#define SDSS                26 // B6
 #define LED_PIN            -1
 
 #define FAN_PIN            16 // Fan
@@ -674,13 +674,14 @@
 #define KILL_PIN           -1
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
 #define E1_PINS
+/*
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
   #define SCK_PIN          21
   #define MISO_PIN         22
   #define MOSI_PIN         23
 #endif
-
+*/
 #endif
 
 #if NUM_EXTRUDER==1

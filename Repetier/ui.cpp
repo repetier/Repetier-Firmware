@@ -541,11 +541,16 @@ void initializeLCD() {
 // ----------- end direct LCD driver
 #endif
 
-#if UI_DISPLAY_TYPE==4
+#if UI_DISPLAY_TYPE==4||UI_DISPLAY_TYPE==5
+
+#if UI_DISPLAY_TYPE==5
+Adafruit_RGBLCDShield lcd;
+#else
 // Use LiquidCrystal library instead
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(UI_DISPLAY_RS_PIN, UI_DISPLAY_RW_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN);
+#endif
 
 void UIDisplay::createChar(byte location,const byte PROGMEM charmap[]) {
   location &= 0x7; // we only have 8 locations 0-7

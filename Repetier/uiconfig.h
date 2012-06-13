@@ -57,7 +57,7 @@ Select the language to use.
 0 = english
 1 = german
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 #include "uilang.h"
 
 /** Select type of beeper
@@ -94,8 +94,18 @@ What display type do you use?
 4 = Use the slower LiquiedCrystal library bundled with arduino. 
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
+5 = Adafruit RGB LCD library
 */
-#define UI_DISPLAY_TYPE 0 
+#define UI_DISPLAY_TYPE 5
+
+#if UI_DISPLAY_TYPE==5
+#include <Wire.h>
+#include <Adafruit_MCP23017.h>
+#include <Adafruit_RGBLCDShield.h>
+
+extern Adafruit_RGBLCDShield lcd;
+#endif
+
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Orig. Mendel"
@@ -108,7 +118,7 @@ Typical values are 16 and 20
 /**
 Rows of your display. 2 or 4
 */
-#define UI_ROWS 4
+#define UI_ROWS 2
 
 
 /**
@@ -161,7 +171,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -178,7 +188,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 0
+#define UI_HAS_BACK_KEY 1
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
@@ -323,6 +333,16 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS); // push button, connects gnd to pin  
 #endif
+#if (UI_HAS_KEYS==1) && (UI_DISPLAY_TYPE==5)
+    uint8_t keymask = lcd.readButtons();
+
+    UI_KEYS_I2C_BUTTON_HIGH(BUTTON_UP,UI_ACTION_PREVIOUS);
+    UI_KEYS_I2C_BUTTON_HIGH(BUTTON_DOWN,UI_ACTION_NEXT);
+    UI_KEYS_I2C_BUTTON_HIGH(BUTTON_LEFT,UI_ACTION_BACK);
+    UI_KEYS_I2C_BUTTON_HIGH(BUTTON_RIGHT,UI_ACTION_OK);
+    UI_KEYS_I2C_BUTTON_HIGH(BUTTON_SELECT,UI_ACTION_MENU_QUICKSETTINGS);
+#endif
+
 
   //UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
 }
