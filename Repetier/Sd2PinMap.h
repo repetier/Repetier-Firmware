@@ -222,7 +222,11 @@ uint8_t const SDA_PIN = 1;
 uint8_t const SCL_PIN = 0;
 
 // SPI port
-uint8_t const SS_PIN = 20;
+#if MOTHERBOARD == 9 //printrboard
+uint8_t const SS_PIN = 26;	
+#else
+uint8_t const SS_PIN = 20;    
+#endif
 uint8_t const MOSI_PIN = 22;
 uint8_t const MISO_PIN = 23;
 uint8_t const SCK_PIN = 21;

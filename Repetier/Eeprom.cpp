@@ -132,9 +132,6 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
 #endif
-#if USE_OPS==1 || defined(USE_ADVANCE)
-  epr_set_float(EPR_EXTRUDER_SPEED,printer_state.extruderSpeed);
-#endif
 #if USE_OPS==1
   epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
   epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
@@ -163,7 +160,12 @@ void epr_data_to_eeprom() {
     epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
     epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
     epr_set_int(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
+#endif
+    epr_set_float(o+EPR_EXTRUDER_ADVANCE_L,e->advanceL);
+#endif
   }
 }
 /** \brief Copy data from EEPROM to variables.
@@ -192,9 +194,6 @@ void epr_eeprom_to_data() {
   max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
-#if USE_OPS==1 || defined(USE_ADVANCE)
-  printer_state.extruderSpeed = epr_get_float(EPR_EXTRUDER_SPEED);
-#endif
 #if USE_OPS==1
   printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
   printer_state.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);
@@ -222,7 +221,12 @@ void epr_eeprom_to_data() {
     e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
     e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
     e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);    
+ #ifdef USE_ADVANCE
+ #ifdef ENABLE_QUADRATIC_ADVANCE
     e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
+ #endif
+    e->advanceL = epr_get_float(o+EPR_EXTRUDER_ADVANCE_L);
+ #endif
   }
   extruder_select(current_extruder->id);
   update_ramps_parameter();
@@ -287,7 +291,6 @@ void epr_output_settings() {
   epr_out_float(EPR_Y_MAX_TRAVEL_ACCEL,PSTR("Y-axis travel acceleration [mm/s^2]"));
   epr_out_float(EPR_Z_MAX_TRAVEL_ACCEL,PSTR("Z-axis travel acceleration [mm/s^2]"));
 #endif
-  epr_out_float(EPR_EXTRUDER_SPEED,PSTR("Max. extruder speed in [mm/s]"));
 #if USE_OPS==1
   epr_out_byte(EPR_OPS_MODE,PSTR("OPS operation mode [0=Off,1=Classic,2=Fast]"));
   epr_out_float(EPR_OPS_MOVE_AFTER,PSTR("OPS move after x% retract [%]"));
@@ -315,8 +318,12 @@ void epr_output_settings() {
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
     epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("Advance K [0=off]"));
-    
+#endif
+    epr_out_float(o+EPR_EXTRUDER_ADVANCE_L,PSTR("Advance L [0=off]"));
+#endif    
   }
 #else
   out.println_P(PSTR("No EEPROM support compiled."));

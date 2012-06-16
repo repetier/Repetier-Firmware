@@ -1,3 +1,19 @@
+Version 0.70 16-06-2012
+  IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
+  Improved advance algorithm, now uses also a linear advance term.
+  Extruder acceleration with OPS or advance allowing faster retracts.
+  Higher possible stepper frequency (tested 40000hz with analyzer).
+  Improved interrupt handling resulting in less jitter.
+  All PWM are software controlled, no more timer hell.
+  Less false retracts with OPS for scanned objects.
+  Added command M221 S<Extruder flow rate in percent>
+  Simplified configuration, more options.
+  I2C click encoder are more responsive.
+  Support for Adafruit RGB shield or other MCP23017 based I2C interfaces.
+  Support for non orthogonal drive system (xy H-gantry)
+  Z backslash support
+  Some minor fixes.  
+  
 Version 0.62 17-04-2012
   Feedback of ui actions for host software.
   Fixed some ui issues.

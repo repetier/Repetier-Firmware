@@ -59,18 +59,42 @@ void beep(byte duration,byte count)
 #endif
 #if BEEPER_TYPE==2
   i2c_start_wait(BEEPER_ADDRESS+I2C_WRITE);
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  i2c_write( 0x14); // Start at port a  
+#endif
 #endif
   for(byte i=0;i<count;i++){
 #if BEEPER_TYPE==1
     WRITE(BEEPER_PIN,HIGH);
 #else
+#if UI_DISPLAY_I2C_CHIPTYPE==0
+#if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
+    i2c_write(uid.outputMask & ~BEEPER_PIN);
+#else
     i2c_write(~BEEPER_PIN);
+#endif
+#endif
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+    i2c_write((BEEPER_PIN) | uid.outputMask);
+    i2c_write(((BEEPER_PIN) | uid.outputMask)>>8);
+#endif
 #endif
     delay(duration);
 #if BEEPER_TYPE==1
     WRITE(BEEPER_PIN,LOW);
 #else
+#if UI_DISPLAY_I2C_CHIPTYPE==0
+
+#if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
+    i2c_write((BEEPER_PIN) | uid.outputMask);
+#else
     i2c_write(255);
+#endif    
+#endif
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+    i2c_write( uid.outputMask);
+    i2c_write(uid.outputMask>>8);
+#endif
 #endif
     delay(duration);
   }
@@ -97,7 +121,7 @@ void beep(byte duration,byte count)
 #include <compat/twi.h>
 
 /* I2C clock in Hz */
-#define SCL_CLOCK  100000L
+#define SCL_CLOCK  UI_I2C_CLOCKSPEED
 
 
 /*************************************************************************
@@ -106,10 +130,34 @@ void beep(byte duration,byte count)
 inline void i2c_init(void)
 {
   /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
-  
+  uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
   TWSR = 0;                         /* no prescaler */
-  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
-
+  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */ 
+#if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
+#if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
+  uid.outputMask |= BEEPER_PIN
+#endif
+#endif
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  // set direction of pins
+  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0); // IODIRA
+  i2c_write(~(UI_DISPLAY_I2C_OUTPUT_PINS & 255));
+//  i2c_stop();
+//  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+//  i2c_write(1); // IODIRB
+  i2c_write(~(UI_DISPLAY_I2C_OUTPUT_PINS >> 8));
+  i2c_stop();
+  // Set pullups according to  UI_DISPLAY_I2C_PULLUP
+  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x0C); // GPPUA 
+  i2c_write(UI_DISPLAY_I2C_PULLUP & 255);	
+//  i2c_stop();
+//  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+//  i2c_write(0x0D); // GPPUB 
+  i2c_write(UI_DISPLAY_I2C_PULLUP >> 8);	
+  i2c_stop();
+#endif
 }/* i2c_init */
 
 
@@ -299,6 +347,17 @@ const byte character_selected[8] PROGMEM = {0,31,31,31,31,31,0,0};
 // ..... 0
 // ..... 0
 const byte character_unselected[8] PROGMEM = {0,31,17,17,17,31,0,0};
+// unselected - code 5
+// ..*.. 4
+// .*.*. 10
+// .*.*. 10
+// .*.*. 10
+// .*.*. 10
+// .***. 14
+// ***** 31
+// ***** 31
+// .***. 14
+const byte character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
 const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,0};
 
 #define LCD_ENTRYMODE			0x04			/**< Set entrymode */
@@ -363,20 +422,35 @@ static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 // ============= I2C LCD Display driver ================
 inline void lcdStartWrite() {
   i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  i2c_write( 0x14); // Start at port a  
+#endif
 }
 inline void lcdStopWrite() {
   i2c_stop();
 }
 void lcdWriteNibble(byte value) {
+#if UI_DISPLAY_I2C_CHIPTYPE==0
+  value|=uid.outputMask;
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
   i2c_write(value);
 #else
   byte v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0);
+  i2c_write((v) | UI_DISPLAY_ENABLE_PIN);
+  i2c_write(v);
+#endif
+#endif
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  unsigned int v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0) | uid.outputMask;
+  unsigned int v2 = v | UI_DISPLAY_ENABLE_PIN;
+  i2c_write(v2 & 255);i2c_write(v2 >> 8);
+  i2c_write(v & 255);i2c_write(v >> 8);
 #endif
 }
 void lcdWriteByte(byte c,byte rs) {
-  byte mod = (rs?UI_DISPLAY_RS_PIN:0); // | (UI_DISPLAY_RW_PIN);
+#if UI_DISPLAY_I2C_CHIPTYPE==0
+  byte mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
   byte value = (c >> 4) | mod;
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
@@ -392,11 +466,26 @@ void lcdWriteByte(byte c,byte rs) {
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
   i2c_write(value);  
 #endif
+#endif
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  unsigned int mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
+  unsigned int value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
+  unsigned int value2 = (value) | UI_DISPLAY_ENABLE_PIN;
+  i2c_write(value2 & 255);i2c_write(value2 >>8);
+  i2c_write(value & 255);i2c_write(value>>8);  
+  value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
+  value2 = (value) | UI_DISPLAY_ENABLE_PIN;
+  i2c_write(value2 & 255);i2c_write(value2 >>8);
+  i2c_write(value & 255);i2c_write(value>>8);  
+#endif
 }
 void initializeLCD() {
   delay(135);
   lcdStartWrite();
-  i2c_write(0);  
+  i2c_write(uid.outputMask & 255);  
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+  i2c_write(uid.outputMask >> 16);
+#endif
   delayMicroseconds(10);
   lcdWriteNibble(0x03);
   delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
@@ -420,6 +509,7 @@ void initializeLCD() {
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
   uid.createChar(4,character_unselected);
+  uid.createChar(5,character_temperature);
   lcdStopWrite();
 }
 #endif
@@ -537,6 +627,7 @@ void initializeLCD() {
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
   uid.createChar(4,character_unselected);
+  uid.createChar(5,character_temperature);
 }
 // ----------- end direct LCD driver
 #endif
@@ -642,7 +733,7 @@ void UIDisplay::printRow(byte r,char *txt) {
 #if UI_DISPLAY_TYPE==3
   lcdStopWrite();
 #endif
-#if UI_HAS_KEYS==1
+#if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
  ui_check_slow_encoder();
 #endif
 }
@@ -814,7 +905,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='c') ivalue=current_extruder->targetTemperatureC;
         else if(c2>='0' && c2<='9') ivalue=extruder[c2-'0'].targetTemperatureC;
         else if(c2=='b') ivalue=target_bed_celsius;
-        addInt(ivalue>>CELSIUS_EXTRA_BITS,3);
+        addInt(((1<<(CELSIUS_EXTRA_BITS-1))+ivalue>>CELSIUS_EXTRA_BITS),3);
         break;
   
       case 'f':
@@ -866,11 +957,12 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='c') {addLong(baudrate,6);break;}
         if(c2=='e') {if(errorMsg!=0)addStringP((char PROGMEM *)errorMsg);break;}
         if(c2=='B') {addInt((int)lines_count,2);break;}
+        if(c2=='f') {addInt(printer_state.extrudeMultiply,3);break;}
         if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
         // Extruder output level
-        if(c2>='0' && c2<='9') ivalue=extruder[c2-'0'].output;
+        if(c2>='0' && c2<='9') ivalue=pwm_pos[c2-'0'];
         else if(c2=='b') ivalue=heated_bed_output;
-        else if(c2=='C') ivalue=current_extruder->output;
+        else if(c2=='C') ivalue=pwm_pos[current_extruder->id];
         ivalue=(ivalue*100)/255;
         addInt(ivalue,3);
         if(col<UI_COLS)
@@ -892,7 +984,12 @@ void UIDisplay::parse(char *txt,bool ram) {
 #endif
         else if(c2=='w') {addInt(current_extruder->watchPeriod,4);}
         else if(c2=='h') {addStringP(!current_extruder->heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));}
-        else if(c2=='a') {addFloat(current_extruder->advanceK,3,1);}
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+        else if(c2=='a') {addFloat(current_extruder->advanceK,3,0);}
+#endif
+        else if(c2=='l') {addFloat(current_extruder->advanceL,3,0);}
+#endif
         else if(c2=='x') {addFloat(current_extruder->xOffset,4,2);}
         else if(c2=='y') {addFloat(current_extruder->yOffset,4,2);}
         else if(c2=='f') {addFloat(current_extruder->maxStartFeedrate,5,0);}
@@ -1207,7 +1304,7 @@ void UIDisplay::nextPreviousAction(char next) {
 #if UI_HAS_KEYS==1
   if(menuLevel==0) { 
     lastSwitch = millis();
-    if(next>0) {
+    if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0)) {
       menuPos[0]++;
       if(menuPos[0]>=UI_NUM_PAGES)
         menuPos[0]=0;
@@ -1227,7 +1324,7 @@ void UIDisplay::nextPreviousAction(char next) {
   unsigned char entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
   int action = pgm_read_word(&(ent->action));
   if(mtype==2 && activeAction==0) { // browse through menu items
-    if(next>0) {
+    if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0)) {
       if(menuPos[menuLevel]+1<nr) menuPos[menuLevel]++;
     } else if(menuPos[menuLevel]>0)
       menuPos[menuLevel]--;
@@ -1348,6 +1445,12 @@ void UIDisplay::nextPreviousAction(char next) {
       int fr = printer_state.feedrateMultiply;
       INCREMENT_MIN_MAX(fr,1,25,500);
       change_feedrate_multiply(fr);
+    }
+    break;
+  case UI_ACTION_FLOWRATE_MULTIPLY:
+    {
+      INCREMENT_MIN_MAX(printer_state.extrudeMultiply,1,25,500);
+       out.println_int_P(PSTR("FlowrateMultiply:"),printer_state.extrudeMultiply);
     }
     break;
   case UI_ACTION_STEPPER_INACTIVE:
@@ -1486,9 +1589,16 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_EXTR_WATCH_PERIOD:
       INCREMENT_MIN_MAX(current_extruder->watchPeriod,1,0,999);
       break;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
   case UI_ACTION_ADVANCE_K:
-      INCREMENT_MIN_MAX(current_extruder->advanceK,0.5,0,200);
+      INCREMENT_MIN_MAX(current_extruder->advanceK,1,0,200);
       break;
+#endif
+  case UI_ACTION_ADVANCE_L:
+      INCREMENT_MIN_MAX(current_extruder->advanceL,1,0,600);
+      break;
+#endif
   }
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     ui_autoreturn_time=millis()+UI_AUTORETURN_TO_MENU_AFTER;
@@ -1503,6 +1613,10 @@ void UIDisplay::finishAction(int action) {
 void UIDisplay::executeAction(int action) {
 #if UI_HAS_KEYS==1
   bool skipBeep = false;
+  if(action & UI_ACTION_TOPMENU) { // Go to start menu
+    action -= UI_ACTION_TOPMENU;
+    menuLevel = 0;
+  }
   if(action>=2000 && action<3000)
   {
       setStatusP(ui_action);
@@ -1576,14 +1690,24 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_POWER:
       break;
-    case UI_ACTION_PREHEAT:
-      UI_STATUS(UI_TEXT_PREHEAT);
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER0_TEMP<<CELSIUS_EXTRA_BITS,0);
+    case UI_ACTION_PREHEAT_PLA:
+      UI_STATUS(UI_TEXT_PREHEAT_PLA);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA<<CELSIUS_EXTRA_BITS,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER1_TEMP<<CELSIUS_EXTRA_BITS,1);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA<<CELSIUS_EXTRA_BITS,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP<<CELSIUS_EXTRA_BITS);
+      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA<<CELSIUS_EXTRA_BITS);
+#endif 
+      break;
+    case UI_ACTION_PREHEAT_ABS:
+      UI_STATUS(UI_TEXT_PREHEAT_ABS);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS<<CELSIUS_EXTRA_BITS,0);
+#if NUM_EXTRUDER>1
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS<<CELSIUS_EXTRA_BITS,1);
+#endif
+#if HAVE_HEATED_BED==true
+      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS<<CELSIUS_EXTRA_BITS);
 #endif 
       break;
     case UI_ACTION_COOLDOWN:
@@ -1733,6 +1857,120 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_MENU_POSITIONS:
       pushMenu((void*)&ui_menu_positions,false);
       break;
+#ifdef UI_USERMENU1
+    case UI_ACTION_SHOW_USERMENU1:
+      pushMenu((void*)&UI_USERMENU1,false);
+      break;
+#endif
+#ifdef UI_USERMENU2
+    case UI_ACTION_SHOW_USERMENU2:
+      pushMenu((void*)&UI_USERMENU2,false);
+      break;
+#endif
+#ifdef UI_USERMENU3
+    case UI_ACTION_SHOW_USERMENU3:
+      pushMenu((void*)&UI_USERMENU3,false);
+      break;
+#endif
+#ifdef UI_USERMENU4
+    case UI_ACTION_SHOW_USERMENU4:
+      pushMenu((void*)&UI_USERMENU4,false);
+      break;
+#endif
+#ifdef UI_USERMENU5
+    case UI_ACTION_SHOW_USERMENU5:
+      pushMenu((void*)&UI_USERMENU5,false);
+      break;
+#endif
+#ifdef UI_USERMENU6
+    case UI_ACTION_SHOW_USERMENU6:
+      pushMenu((void*)&UI_USERMENU6,false);
+      break;
+#endif
+#ifdef UI_USERMENU7
+    case UI_ACTION_SHOW_USERMENU7:
+      pushMenu((void*)&UI_USERMENU7,false);
+      break;
+#endif
+#ifdef UI_USERMENU8
+    case UI_ACTION_SHOW_USERMENU8:
+      pushMenu((void*)&UI_USERMENU8,false);
+      break;
+#endif
+#ifdef UI_USERMENU9
+    case UI_ACTION_SHOW_USERMENU9:
+      pushMenu((void*)&UI_USERMENU9,false);
+      break;
+#endif
+#ifdef UI_USERMENU10
+    case UI_ACTION_SHOW_USERMENU10:
+      pushMenu((void*)&UI_USERMENU10,false);
+      break;
+#endif
+    case UI_ACTION_X_UP:
+      move_steps(axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false);
+      break;
+    case UI_ACTION_X_DOWN:
+      move_steps(-axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false);
+      break;
+    case UI_ACTION_Y_UP:
+      move_steps(0,axis_steps_per_unit[1],0,0,homing_feedrate[1],false);
+      break;
+    case UI_ACTION_Y_DOWN:
+      move_steps(0,-axis_steps_per_unit[1],0,0,homing_feedrate[1],false);
+      break;
+    case UI_ACTION_Z_UP:
+      move_steps(0,0,axis_steps_per_unit[2],0,homing_feedrate[2],false);
+      break;
+    case UI_ACTION_Z_DOWN:
+      move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false);
+      break;
+    case UI_ACTION_EXTRUDER_UP:
+      move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false);
+      break;
+    case UI_ACTION_EXTRUDER_DOWN:
+      move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false);
+      break;
+    case UI_ACTION_EXTRUDER_TEMP_UP: {
+         int tmp = (current_extruder->targetTemperatureC>>CELSIUS_EXTRA_BITS)+1;
+         if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+         else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+         extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,current_extruder->id);
+      }
+      break;
+    case UI_ACTION_EXTRUDER_TEMP_DOWN: {
+         int tmp = (current_extruder->targetTemperatureC>>CELSIUS_EXTRA_BITS)-1;
+         if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+         extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,current_extruder->id);
+      }
+      break;
+    case UI_ACTION_HEATED_BED_UP:
+#if HAVE_HEATED_BED==true
+    {
+       int tmp = (target_bed_celsius>>CELSIUS_EXTRA_BITS)+1;
+       if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
+       else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
+       heated_bed_set_temperature(tmp<<CELSIUS_EXTRA_BITS);
+    }
+#endif
+      break;
+    case UI_ACTION_HEATED_BED_DOWN:
+#if HAVE_HEATED_BED==true
+    {
+       int tmp = (target_bed_celsius>>CELSIUS_EXTRA_BITS)-1;
+       if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
+       heated_bed_set_temperature(tmp<<CELSIUS_EXTRA_BITS);
+    }
+#endif
+      break;
+    case UI_ACTION_FAN_UP:
+      set_fan_speed(pwm_pos[3]+32,false);
+      out.println_int_P(PSTR("Fanspeed:"),(int)pwm_pos[3]);
+      break;
+    case UI_ACTION_FAN_DOWN:
+      set_fan_speed(pwm_pos[3]-32,false);
+      out.println_int_P(PSTR("Fanspeed:"),(int)pwm_pos[3]);
+      break;
   }
   refreshPage();
   if(!skipBeep)
@@ -1743,7 +1981,9 @@ void UIDisplay::executeAction(int action) {
 #endif
 }
 void UIDisplay::mediumAction() {
-  ui_check_slow_encoder();
+#if UI_HAS_I2C_ENCODER>0
+ui_check_slow_encoder();
+#endif
 }
 void UIDisplay::slowAction() {
   unsigned long time = millis();

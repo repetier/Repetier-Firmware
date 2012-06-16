@@ -33,12 +33,29 @@
 // 1-999     : Autorepeat
 // 1000-1999 : Execute
 // 2000-2999 : Write code
-// 3000-3999 : Show menu
+// 4000-4999 : Show menu
+// Add UI_ACTION_TOPMENU to show a menu as top menu
 // ----------------------------------------------------------------------------
+
+#define UI_ACTION_TOPMENU 8192
 
 #define UI_ACTION_NEXT 1
 #define UI_ACTION_PREVIOUS 2
 
+#define UI_ACTION_X_UP                 100
+#define UI_ACTION_X_DOWN               101
+#define UI_ACTION_Y_UP                 102
+#define UI_ACTION_Y_DOWN               103
+#define UI_ACTION_Z_UP                 104
+#define UI_ACTION_Z_DOWN               105
+#define UI_ACTION_EXTRUDER_UP          106
+#define UI_ACTION_EXTRUDER_DOWN        107
+#define UI_ACTION_EXTRUDER_TEMP_UP     108
+#define UI_ACTION_EXTRUDER_TEMP_DOWN   109
+#define UI_ACTION_HEATED_BED_UP        110
+#define UI_ACTION_HEATED_BED_DOWN      111
+#define UI_ACTION_FAN_UP               112
+#define UI_ACTION_FAN_DOWN             113
 
 #define UI_ACTION_DUMMY 10000
 #define UI_ACTION_BACK                  1000
@@ -119,7 +136,7 @@
 #define UI_ACTION_DEBUG_ERROR           1076
 #define UI_ACTION_DEBUG_DRYRUN          1077
 #define UI_ACTION_POWER                 1078
-#define UI_ACTION_PREHEAT               1079
+#define UI_ACTION_PREHEAT_PLA           1079
 #define UI_ACTION_COOLDOWN              1080
 #define UI_ACTION_HEATED_BED_OFF        1081
 #define UI_ACTION_EXTRUDER0_OFF         1082
@@ -134,6 +151,9 @@
 #define UI_ACTION_RESET_EXTRUDER        1091
 #define UI_ACTION_EXTRUDER_RELATIVE     1092
 #define UI_ACTION_SELECT_EXTRUDER0      1093
+#define UI_ACTION_ADVANCE_L             1094
+#define UI_ACTION_PREHEAT_ABS           1095
+#define UI_ACTION_FLOWRATE_MULTIPLY     1096
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -145,6 +165,17 @@
 #define UI_ACTION_MENU_QUICKSETTINGS    4007
 #define UI_ACTION_MENU_EXTRUDER         4008
 #define UI_ACTION_MENU_POSITIONS        4009
+
+#define UI_ACTION_SHOW_USERMENU1        4101
+#define UI_ACTION_SHOW_USERMENU2        4102
+#define UI_ACTION_SHOW_USERMENU3        4103
+#define UI_ACTION_SHOW_USERMENU4        4104
+#define UI_ACTION_SHOW_USERMENU5        4105
+#define UI_ACTION_SHOW_USERMENU6        4106
+#define UI_ACTION_SHOW_USERMENU7        4107
+#define UI_ACTION_SHOW_USERMENU8        4108
+#define UI_ACTION_SHOW_USERMENU9        4109
+#define UI_ACTION_SHOW_USERMENU10       4110
 
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
@@ -354,6 +385,7 @@ class UIDisplay {
     unsigned int lastButtonAction;
     unsigned long lastButtonStart;
     unsigned long nextRepeat; // Time of next autorepeat
+    unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
     void addInt(int value,byte digits); // Print int into printCols
     void addLong(long value,char digits);
@@ -382,12 +414,14 @@ class UIDisplay {
     void pushMenu(void *men,bool refresh);
     void setStatusP(PGM_P txt);
     void setStatus(char *txt);
+    inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
+    inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
 };
 extern UIDisplay uid;
 
 #include "uiconfig.h"
 
-#define UI_VERSION_STRING "Repetier 0.62"
+#define UI_VERSION_STRING "Repetier " REPETIER_VERSION
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER
@@ -403,7 +437,7 @@ extern UIDisplay uid;
 
 
 #define UI_INITIALIZE uid.initialize();
-#define UI_FAST uid.fastAction();
+#define UI_FAST if(pwm_count & 4) {uid.fastAction();}
 #define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW uid.slowAction();
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));

@@ -25,23 +25,29 @@
 
 Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {
- {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_HEATER_PIN,EXT0_ENABLE_PIN,EXT0_DIR_PIN,EXT0_STEP_PIN,EXT0_ENABLE_ON,EXT0_INVERSE,
-   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD,EXT0_ADVANCE_K,0
+ {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
+   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT0_ADVANCE_K
+#endif
+   ,EXT0_ADVANCE_L
+#endif
 #ifdef TEMP_PID
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN,EXT0_PID_IGAIN,EXT0_PID_DGAIN,EXT0_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
-#ifdef SIMULATE_PWM
-  ,0,0
-#endif
 #endif 
  } 
 #if NUM_EXTRUDER>1
- ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_HEATER_PIN,EXT1_ENABLE_PIN,EXT1_DIR_PIN,EXT1_STEP_PIN,EXT1_ENABLE_ON,EXT1_INVERSE,
-   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD,EXT1_ADVANCE_K,0
+ ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
+   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT1_ADVANCE_K
+#endif
+   ,EXT1_ADVANCE_L
+#endif
 #ifdef TEMP_PID
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN,EXT1_PID_IGAIN,EXT1_PID_DGAIN,EXT1_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
-#ifdef SIMULATE_PWM
-  ,0,0
-#endif
 #endif
  } 
 #endif
@@ -57,7 +63,7 @@ short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
 #endif
 
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
-int counter_periodical=0;
+byte counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
 byte heated_bed_output=0;
@@ -70,45 +76,11 @@ unsigned long last_bed_set = 0;       ///< Time of last temperature setting for 
 extern int read_max6675(byte ss_pin);
 #endif
 
-#if ANALOG_INPUTS>0
-const static uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
-static uint8 osAnalogInputCounter[ANALOG_INPUTS];
-static uint osAnalogInputBuildup[ANALOG_INPUTS];
-static uint8 osAnalogInputPos=0; // Current sampling position
+const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
+uint8 osAnalogInputCounter[ANALOG_INPUTS];
+uint osAnalogInputBuildup[ANALOG_INPUTS];
+uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
-ISR(ADC_vect) {
-  osAnalogInputBuildup[osAnalogInputPos] += ADCW;
-  if(++osAnalogInputCounter[osAnalogInputPos]>=_BV(ANALOG_INPUT_SAMPLE)) {
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE<12
-    osAnalogInputValues[osAnalogInputPos] =
-      osAnalogInputBuildup[osAnalogInputPos] <<
-      (12-ANALOG_INPUT_BITS-ANALOG_INPUT_SAMPLE);
-#endif
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE>12
-    osAnalogInputValues[osAnalogInputPos] =
-      osAnalogInputBuildup[osAnalogInputPos] >>
-      (ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE-12);
-#endif
-#if ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE==12
-    osAnalogInputValues[osAnalogInputPos] =
-      osAnalogInputBuildup[osAnalogInputPos];
-#endif
-    osAnalogInputBuildup[osAnalogInputPos] = 0;
-    osAnalogInputCounter[osAnalogInputPos] = 0;
-    // Start next conversion
-    if(++osAnalogInputPos>=ANALOG_INPUTS) osAnalogInputPos = 0;
-    byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
-#if defined(ADCSRB) && defined(MUX5)
-      if(channel & 8)  // Reading channel 0-7 or 8-15?
-        ADCSRB |= _BV(MUX5);
-      else
-        ADCSRB &= ~_BV(MUX5);
-#endif
-    ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
-  }
-  ADCSRA |= _BV(ADSC);  // start next conversion
-}
-#endif
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- initExtruder ------------------------------------------------------
@@ -147,16 +119,23 @@ void initExtruder() {
 #endif
   }
 #endif
+  SET_OUTPUT(EXT0_DIR_PIN);
+  SET_OUTPUT(EXT0_STEP_PIN);
+#ifdef EXT1_STEP_PIN
+  SET_OUTPUT(EXT1_DIR_PIN);
+  SET_OUTPUT(EXT1_STEP_PIN);
+#endif
+#ifdef EXT2_STEP_PIN
+  SET_OUTPUT(EXT2_DIR_PIN);
+  SET_OUTPUT(EXT2_STEP_PIN);
+#endif
   
   for(i=0;i<NUM_EXTRUDER;++i) {
     Extruder *act = &extruder[i];
-    pinMode(act->directionPin,OUTPUT);
-    pinMode(act->stepPin,OUTPUT);
     if(act->enablePin > -1) {
       pinMode(act->enablePin,OUTPUT);
       if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
     }
-    if(act->heaterPin > -1) pinMode(act->heaterPin,OUTPUT);
     act->lastTemperatureUpdate = millis();
 #ifdef SUPPORT_MAX6675
     if(act->sensorType==101) {
@@ -197,7 +176,7 @@ void initExtruder() {
         ADCSRB &= ~_BV(MUX5);
 #endif
   ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
-  ADCSRA |= _BV(ADSC) | _BV(ADIE);
+  ADCSRA |= _BV(ADSC); // start conversion without interrupt!
 #endif
   
 }
@@ -227,10 +206,16 @@ void extruder_select(byte ext_num) {
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
 #if USE_OPS==1 || defined(USE_ADVANCE)
-   printer_state.timer0Interval = F_CPU/(TIMER0_PRESCALE*printer_state.extruderSpeed*current_extruder->stepsPerMM);
-   if(printer_state.timer0Interval<15)
-     printer_state.timer0Interval = 15; // Leave time for other work. Limit Interrupt to 16666 Hz
-   float fmax=((float)F_CPU/((float)printer_state.timer0Interval*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
+   printer_state.minExtruderSpeed = (byte)(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
+   printer_state.maxExtruderSpeed = (byte)(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   if(printer_state.maxExtruderSpeed>=printer_state.minExtruderSpeed) {
+     printer_state.maxExtruderSpeed = printer_state.minExtruderSpeed;
+   } else {
+     float maxdist = current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.00013888/current_extruder->maxAcceleration;
+     maxdist-= current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.5/current_extruder->maxAcceleration;     
+     printer_state.extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(printer_state.minExtruderSpeed-printer_state.maxExtruderSpeed)),0,255);
+   }
+   float fmax=((float)F_CPU/((float)printer_state.maxExtruderSpeed*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
 #endif
 #ifdef TEMP_PID
@@ -316,15 +301,20 @@ void extruder_disable() {
   if(current_extruder->enablePin > -1) 
     digitalWrite(current_extruder->enablePin,!current_extruder->enableOn); 
 }
-#define NUMTEMPS_1 61
+#define NUMTEMPS_1 28
+// Epcos B57560G0107F000
 const short temptable_1[NUMTEMPS_1][2] PROGMEM = {
+{0,4000},{92,2400},{105,2320},{121,2240},{140,2160},{162,2080},{189,2000},{222,1920},{261,1840},{308,1760},
+{365,1680},{434,1600},{519,1520},{621,1440},{744,1360},{891,1280},{1067,1200},{1272,1120},
+{1771,960},{2357,800},{2943,640},{3429,480},{3760,320},{3869,240},{3912,200},{3948,160},{4077,-160},{4094,-440}
+/* Old table for 100k unknown type 61 values
 {23*4,300*8},{25*4,295*8},{27*4,290*8},{28*4,285*8},{31*4,280*8},{33*4,275*8},{35*4,270*8},{38*4,265*8},{41*4,260*8},{44*4,255*8},
 {48*4,250*8},{52*4,245*8},{56*4,240*8},{61*4,235*8},{66*4,230*8},{71*4,225*8},{78*4,220*8},{84*4,215*8},{92*4,210*8},{100*4,205*8},
 {109*4,200*8},{120*4,195*8},{131*4,190*8},{143*4,185*8},{156*4,180*8},{171*4,175*8},{187*4,170*8},{205*4,165*8},{224*4,160*8},
 {245*4,155*8},{268*4,150*8},{293*4,145*8},{320*4,140*8},{348*4,135*8},{379*4,130*8},{411*4,125*8},{445*4,120*8},{480*4,115*8},
 {516*4,110*8},{553*4,105*8},{591*4,100*8},{628*4,95*8},{665*4,90*8},{702*4,85*8},{737*4,80*8},{770*4,75*8},{801*4,70*8},{830*4,65*8},
 {857*4,60*8},{881*4,55*8},{903*4,50*8},{922*4,45*8},{939*4,40*8},{954*4,35*8},{966*4,30*8},{977*4,25*8},{985*4,20*8},{993*4,15*8},
-{999*4,10*8},{1004*4,5*8},{1008*4,0*8} //safety
+{999*4,10*8},{1004*4,5*8},{1008*4,0*8} //safety*/
 };
 #define NUMTEMPS_2 21
 const short temptable_2[NUMTEMPS_2][2] PROGMEM = {
@@ -398,7 +388,7 @@ int read_raw_temperature(byte type,byte pin) {
       return read_max6675(pin);
 #endif
   }
-  return 2000; // unknown method, return high value to switch heater off for safety
+  return 4095; // unknown method, return high value to switch heater off for safety
 }
 
 // ------------------------------------------------------------------------------------------------------------------
@@ -581,12 +571,12 @@ void write_monitor() {
       Extruder *e = &extruder[manage_monitor];
       out.print_int_P(PSTR(" "),e->currentTemperatureC>>CELSIUS_EXTRA_BITS); 
       out.print_int_P(PSTR(" "),e->targetTemperatureC>>CELSIUS_EXTRA_BITS);
-      out.println_int_P(PSTR(" "),(int)e->output);
+      out.println_int_P(PSTR(" "),(int)pwm_pos[e->id]);
     }
 #if HEATED_BED_SENSOR_TYPE!=0
     else {
       out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw)>>CELSIUS_EXTRA_BITS); 
-      out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,target_bed_raw)>>CELSIUS_EXTRA_BITS);
+      out.print_int_P(PSTR(" "),target_bed_celsius>>CELSIUS_EXTRA_BITS);
       out.println_int_P(PSTR(" "),(int)heated_bed_output);
     }
 #endif
@@ -618,9 +608,9 @@ void manage_temperatures() {
          byte output;
          int error = act->targetTemperatureC - act->currentTemperatureC;
          if(act->targetTemperatureC<(20<<CELSIUS_EXTRA_BITS)) output = 0; // off is off, even if damping term wants a heat peak!
-         else if(error>(10<<CELSIUS_EXTRA_BITS)) 
+         else if(error>(PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS)) 
            output = act->pidMax;
-         else if(error<(-10<<CELSIUS_EXTRA_BITS))
+         else if(error<(-PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS))
            output = 0;
          else {
            long pidTerm = act->pidPGain * error; // *100
@@ -639,12 +629,7 @@ void manage_temperatures() {
             out.println_long_P(PSTR(" "),dgain);
           } */
          }
-         act->output = output;
-#ifdef SIMULATE_PWM
-        act->pwm = output<<3;
-#else
-         analogWrite(act->heaterPin, output);
-#endif
+         pwm_pos[act->id] = output;
        }
 #endif
        if(act->heatManager == 0
@@ -652,8 +637,7 @@ void manage_temperatures() {
         || true
 #endif
        ) {
-         act->output = (on?255:0);
-         digitalWrite(act->heaterPin,on);
+         pwm_pos[act->id] = (on?255:0);
       }
 #if LED_PIN>-1
       if(act == current_extruder)

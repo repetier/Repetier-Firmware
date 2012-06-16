@@ -64,13 +64,13 @@ void printPosition() {
 }
 void print_temperatures() {
 #if HEATED_BED_SENSOR_TYPE==0 
-  out.print_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
+  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
 #else
-  out.print_int_P(PSTR("T:"),extruder_get_temperature()>>CELSIUS_EXTRA_BITS); 
-  out.print_int_P(PSTR(" B:"),heated_bed_get_temperature()>>CELSIUS_EXTRA_BITS); 
+  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
+  out.print_int_P(PSTR(" B:"),((1<<(CELSIUS_EXTRA_BITS-1))+heated_bed_get_temperature())>>CELSIUS_EXTRA_BITS); 
 #endif
 #ifdef TEMP_PID
-  out.print_int_P(PSTR(" @:"),(int)current_extruder->output);
+  out.print_int_P(PSTR(" @:"),(int)pwm_pos[current_extruder->id]);
 #endif
   out.println();
 }
@@ -86,24 +86,7 @@ void set_fan_speed(int speed,bool wait) {
   speed = constrain(speed,0,255);
   if(wait)
     wait_until_end_of_move(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
-  if(speed>0) {
-#ifdef SIMULATE_FAN_PWM
-     fan_speed = speed<<4;
-#else
-     if (speed<255){
-       digitalWrite(FAN_PIN, HIGH);
-       analogWrite(FAN_PIN, speed );
-    } else
-      digitalWrite(FAN_PIN, HIGH);
-#endif
-  } else {
-#ifdef SIMULATE_FAN_PWM
-    fan_speed=0;
-#else
-    analogWrite(FAN_PIN, 0);        
-    digitalWrite(FAN_PIN, LOW);
-#endif
-  }
+  pwm_pos[3] = speed;
 #endif
 }
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
@@ -457,7 +440,7 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
-        out.println_P(PSTR("FIRMWARE_NAME:Repetier FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
+        out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
         break;
       case 114: // M114
         printPosition();
@@ -527,24 +510,47 @@ void process_command(GCode *com)
           out.println_P(PSTR("Error: No EEPROM support compiled."));
 #endif
         break;
+      case 207: // M207 X<XY jerk> Z<Z Jerk>
+        if(GCODE_HAS_X(com))
+          printer_state.maxJerk = com->X;
+        if(GCODE_HAS_Z(com))
+          printer_state.maxZJerk = com->Z;
+        if(GCODE_HAS_E(com)) {
+          current_extruder->maxStartFeedrate = com->E;
+          extruder_select(current_extruder->id);
+        }
+        out.print_float_P(PSTR("Jerk:"),printer_state.maxJerk);
+        out.println_float_P(PSTR(" ZJerk:"),printer_state.maxZJerk);
+        break;
       case 220: // M220 S<Feedrate multiplier in percent>
         if(GCODE_HAS_S(com))
           change_feedrate_multiply(com->S);
         else          
           change_feedrate_multiply(100);
         break;
+      case 221: // M221 S<Extrusion flow multiplier in percent>
+        if(GCODE_HAS_S(com))
+          printer_state.extrudeMultiply = com->S;
+        break;
       case 222: //M222 F_CPU / S
        if(GCODE_HAS_S(com))
          out.println_long_P(PSTR("F_CPU/x="),CPUDivU2(com->S));
        break;
-#ifdef USE_ADVANCE
-      case 232:
-       out.print_int_P(PSTR("Max advance="),maxadv);
-       if(maxadv>0) 
-         out.println_float_P(PSTR(", speed="),maxadvspeed); 
-       else
-         out.println();
+ #ifdef USE_ADVANCE
+     case 223: // Extruder interrupt test
+        if(GCODE_HAS_S(com))
+          printer_state.extruderStepsNeeded+=com->S;
+          break;
+     case 232:
+       out.print_int_P(PSTR(" linear steps:"),maxadv2);
+ #ifdef ENABLE_QUADRATIC_ADVANCE
+       out.print_int_P(PSTR(" quadratic steps:"),maxadv);
+ #endif
+       out.println_float_P(PSTR(", speed="),maxadvspeed); 
+#ifdef ENABLE_QUADRATIC_ADVANCE
        maxadv=0;
+#endif
+       maxadv2=0;
        maxadvspeed=0;
        break;
 #endif
@@ -577,7 +583,6 @@ void process_command(GCode *com)
           out.println();
         }
 #ifdef DEBUG_OPS
-       out.println_int_P(PSTR("Timer diff"),printer_state.timer0Interval);
        out.println_int_P(PSTR("Ret. steps:"),printer_state.opsRetractSteps);
        out.println_int_P(PSTR("PushBack Steps:"),printer_state.opsPushbackSteps);
        out.println_int_P(PSTR("Move after steps:"),printer_state.opsMoveAfterSteps);
@@ -586,9 +591,15 @@ void process_command(GCode *com)
 #endif
 #ifdef USE_ADVANCE
       case 233:
-        if(GCODE_HAS_X(com)) {
+        if(GCODE_HAS_Y(com)) 
+          current_extruder->advanceL = com->Y;
+        out.print_float_P(PSTR("linear L:"),current_extruder->advanceL);
+#ifdef ENABLE_QUADRATIC_ADVANCE
+        if(GCODE_HAS_X(com)) 
           current_extruder->advanceK = com->X;
-        }
+        out.print_float_P(PSTR(" quadratic K:"),current_extruder->advanceK);
+#endif        
+        out.println();
         break;
 #endif
     }

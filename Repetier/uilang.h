@@ -43,7 +43,8 @@
 #define UI_TEXT_HOME_X           "Home X"
 #define UI_TEXT_HOME_Y           "Home Y"
 #define UI_TEXT_HOME_Z           "Home Z"
-#define UI_TEXT_PREHEAT          "Preheat"
+#define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
+#define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
 #define UI_TEXT_DISABLE_STEPPER  "Disable stepper"
@@ -128,7 +129,8 @@
 #define UI_TEXT_EXTR_MAX_FEED     "Max FR:%XF"
 #define UI_TEXT_EXTR_ACCEL        "Accel:%XA"
 #define UI_TEXT_EXTR_WATCH        "Stab.Time:%Xw"
-#define UI_TEXT_EXTR_ADVANCEK     "Advance K:%Xa"
+#define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:Xl%"
+#define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:Xa%"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
 #define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
@@ -152,6 +154,7 @@
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
+#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 
 // *************** german translation ****************
 
@@ -178,7 +181,8 @@
 #define UI_TEXT_HOME_X           "Home X"
 #define UI_TEXT_HOME_Y           "Home Y"
 #define UI_TEXT_HOME_Z           "Home Z"
-#define UI_TEXT_PREHEAT          "Vorheizen"
+#define UI_TEXT_PREHEAT_PLA      "Vorheizen PLA"
+#define UI_TEXT_PREHEAT_ABS      "Vorheizen ABS"
 #define UI_TEXT_COOLDOWN         "Abk\xf5hlen"
 #define UI_TEXT_SET_TO_ORIGIN    "Setze Nullpunkt"
 #define UI_TEXT_DISABLE_STEPPER  "Motoren Aussch."
@@ -262,7 +266,8 @@
 #define UI_TEXT_EXTR_MAX_FEED     "Max FR:%XF"
 #define UI_TEXT_EXTR_ACCEL        "Beschl.:%XA"
 #define UI_TEXT_EXTR_WATCH        "Stab.Zeit:%Xw"
-#define UI_TEXT_EXTR_ADVANCEK     "Advance K:%Xa"
+#define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:Xl%"
+#define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:Xa%"
 #define UI_TEXT_EXTR_MANAGER      "Regler:%Xh"
 #define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
@@ -286,6 +291,9 @@
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Geschw.Mul:%om%%%"
+#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
+#define UI_TEXT_ADVANCE_L         "Advance lin:Xl%"
+#define UI_TEXT_ADVANCE_K         "Advance quad:Xa%"
 
 #endif
 
@@ -322,7 +330,8 @@
 #define UI_TEXT_HOME_X           "Home X"
 #define UI_TEXT_HOME_Y           "Home Y"
 #define UI_TEXT_HOME_Z           "Home Z"
-#define UI_TEXT_PREHEAT          "Preheat"
+#define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
+#define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
 #define UI_TEXT_DISABLE_STEPPER  "Disable stepper"
@@ -407,7 +416,8 @@
 #define UI_TEXT_EXTR_MAX_FEED     "Max FR:%XF"
 #define UI_TEXT_EXTR_ACCEL        "Accel:%XA"
 #define UI_TEXT_EXTR_WATCH        "Stab.Time:%Xw"
-#define UI_TEXT_EXTR_ADVANCEK     "Advance K:%Xa"
+#define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:Xl%"
+#define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:Xa%"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
 #define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
@@ -431,5 +441,6 @@
 #define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
+#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 
 #endif

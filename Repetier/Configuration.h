@@ -71,9 +71,9 @@
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT0_STEPS_PER_MM 373
 // What type of sensor is used?
-// 1 is 100k thermistor
+// 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
-// 3 is mendel-parts thermistor
+// 3 is mendel-parts thermistor (EPCOS G550)
 // 4 is 10k thermistor
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
@@ -84,7 +84,7 @@
 // 99 Generic thermistor table
 // 100 is AD595
 // 101 is MAX6675
-#define EXT0_TEMPSENSOR_TYPE 5
+#define EXT0_TEMPSENSOR_TYPE 1
 // Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN 0
 // WHich pin enables the heater
@@ -100,17 +100,16 @@
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 1200
+#define EXT0_MAX_FEEDRATE 1500
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_START_FEEDRATE 10
+#define EXT0_MAX_START_FEEDRATE 18
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 10000
+#define EXT0_MAX_ACCELERATION 6000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
-- 1 = PID Temperature control. Is better, but needs an output with PWM, which doesn't
-      use Timer 0 and 1
+- 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
  Overridden if EEPROM activated.
 */
 #define EXT0_HEAT_MANAGER 1
@@ -120,11 +119,11 @@
 /** \brief The maximum value, I-gain can contribute to the output. 
 
 A good value is slightly higher then the output needed for your temperature.
-Values for startes:
+Values for starts:
 130 => PLA for temperatures from 170-180°C
 180 => ABS for temperatures around 240°C
 
-The precice values may differ for different nozzle/resistor combination. 
+The precise values may differ for different nozzle/resistor combination. 
  Overridden if EEPROM activated.
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MAX 130
@@ -148,8 +147,20 @@ WATCH OUT: This value was in 0,01 units in earlier versions!
 #define EXT0_PID_DGAIN 3000
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
-/** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.*/
+/** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
+K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
+the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
+L is the linear factor and seems to be working better then the quadratic dependency.
+*/
 #define EXT0_ADVANCE_K 0.0f
+#define EXT0_ADVANCE_L 0.0f
+
+/** PID control only works target temperature +/- PID_CONTROL_RANGE.
+If you get much overshoot at the first temperature set, because the heater is going full power to long, you
+need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15.
+*/
+#define PID_CONTROL_RANGE 15
+
 /** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR0 28
 /** Number of entries in the user thermistortable 1. Set to 0 to disable it. */
@@ -355,9 +366,17 @@ one extruder with heated bed, write:
 // ##                            Endstop configuration                                     ##
 // ##########################################################################################
 
-//// Endstop Settings
-#define ENDSTOPPULLUPS // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
-// The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
+/* By default all endstops are pulled up to high. You need a pullup if you
+use a mechanical endstop connected with gnd. Set value to false for no pullup
+on this endstop.
+*/
+#define ENDSTOP_PULLUP_X_MIN true
+#define ENDSTOP_PULLUP_Y_MIN true
+#define ENDSTOP_PULLUP_Z_MIN true
+#define ENDSTOP_PULLUP_X_MAX true
+#define ENDSTOP_PULLUP_Y_MAX true
+#define ENDSTOP_PULLUP_Z_MAX true
+
 //set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING false
 #define ENDSTOP_Y_MIN_INVERTING false
@@ -450,8 +469,42 @@ one extruder with heated bed, write:
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE {2400,2400,100}
 
+/* If you have a backslash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
+own weight, so this is nearly never needed. */
+//#define Z_BACKSLASH 0.1
+
 /** Comment this to disable ramp acceleration */
 #define RAMP_ACCELERATION 1
+
+/** If your stepper needs a longer high signal then given, you can add a delay here.
+The delay is realized as a simple loop wasting time, which is not available for other
+computations. So make it as low as possible. For the most common drivers no delay is needed, as the
+included delay is already enough.
+*/
+#define STEPPER_HIGH_DELAY 0
+
+/** The firmware can only handle 16000Hz interrupt frequency cleanly. If you need higher speeds 
+a faster solution is needed, and this is to double/quadruple the steps in one interrupt call.
+This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheaper then 1 or 3
+additional stepper interrupts with all it's overhead. As a result you can go as high as
+40000Hz.
+*/
+#define STEP_DOUBLER_FREQUENCY 10000
+/** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping 
+enabling this may cause to stall your moves when 20000Hz is reached.
+*/
+#define ALLOW_QUADSTEPPING false
+/** If you reach STEP_DOUBLER_FREQUENCY the firmware will do 2 or 4 steps with nearly no delay. That can be too fast
+for some printers causing an early stall. 
+
+*/
+#define DOUBLE_STEP_DELAY 1 // time in us
+
+/** The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in
+the double computation cost. For slow movements this is not an issue, but for really fast moves this is 
+too much. The value specified here is the number of clock cycles between a step on the driving axis.
+If the interval at full speed is below this value, smoothing is disabled for that line.*/
+#define MAX_HALFSTEP_INTERVAL 1999
 
 //// Acceleration settings
 
@@ -491,6 +544,43 @@ Overridden if EEPROM activated.
 #define MAX_JERK 40.0
 #define MAX_ZJERK 0.3
 
+/* Define the type of axis movements needed for your printer. The typical case
+is a full cartesian system where x, y and z moves are handled by seperate motors.
+
+0 = full cartesian system, xyz have seperate motors.
+1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
+2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
+Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in 
+the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
+*/
+#define DRIVE_SYSTEM 0
+
+/** \brief Number of moves we can cache in advance.
+
+This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
+many very short moves the cache may go empty. The minimum value is 5.
+*/
+#define MOVE_CACHE_SIZE 16
+/* How many line segments can the path planner use for path optimization. The maximum possible
+value is MOVE_CACHE_SIZE-2. Higher values need more computation time, which can cause blocking for many
+short subsequent moves. If this happens you will see BLK messages in your log and then you now the
+value is to high for your printer settings.
+*/
+#define PATH_PLANNER_CHECK_SEGMENTS 12
+/** \brief Low filled cache size. 
+
+If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is limited to LOW_TICKS_PER_MOVE clock cycles.
+If a move would be shorter, the feedrate will be reduced. This should prevent buffer underflows. Set this to 0 if you
+don't care about empty buffers during print.
+*/
+#define MOVE_CACHE_LOW 12
+/** \brief Cycles per move, if move cache is low. 
+
+This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
+if you are printing many very short segments at high speed. Higher delays here allow higher values in PATH_PLANNER_CHECK_SEGMENTS.
+*/
+#define LOW_TICKS_PER_MOVE 400000
+
 // ##########################################################################################
 // ##                           Extruder control                                           ##
 // ##########################################################################################
@@ -499,22 +589,6 @@ Overridden if EEPROM activated.
 
 All known arduino boards use 64. This value is needed for the extruder timing. */
 #define TIMER0_PRESCALE 64
-
-/** \brief speed of the extruder feeder
-
-This is the maximum speed, the filament can be moved forward and backward without acceleration.
-The value determines, how often we can update the extruder stepper, to come up with the desired
-extruder position. Higher values increase precision. If you set the value too high, you will
-lose steps. Only discrete values between 1 and 255 can be set for the timer. The effectife update
-frequency is computed as:
-
-f = floor(F_CPU/(TIMER0_PRESCALE*EXTRUDER_SPEED*STEPS_PER_MM))
-
-Important: This is the speed, filament is pushed inside the extruder not the speed at the nozzle!
-If you set the extruder steps_per_mm for 1mm pushed outside, cause skeinforge<40 needed it, you must
-decrease the value to reflect this. (*filament_diameter^2/nozzle_diameter^2)
-*/
-#define EXTRUDER_SPEED 20.0
 
 /* \brief Minimum temperature for extruder operation
 
@@ -588,11 +662,11 @@ For more informations, read the wiki.
 */
 #define USE_ADVANCE
 
-/** The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in
-the double computation cost. For slow movements this is not an issue, but for really fast moves this is 
-too much. The value specified here is the number of clock cycles between a step on the driving axis.
-If the interval at full speed is below this value, smoothing is disabled for that line.*/
-#define MAX_HALFSTEP_INTERVAL 1999
+/** \brief enables quadratic component.
+
+Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
+to activate the quadratic term. Only adds lots of computations and storage usage. */
+//#define ENABLE_QUADRATIC_ADVANCE
 
 // ##########################################################################################
 // ##                           Communication configuration                                ##
@@ -633,31 +707,6 @@ the power will be turned on without the need to call M80 if initially started.
 #if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__) // not needed for USB serial
 #define USE_BUFFERED_OUTPUT 
 #endif
-/** \brief Number of moves we can cache in advance.
-
-This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
-many very short moves the cache may go empty. The minimum value is 5.
-*/
-#define MOVE_CACHE_SIZE 16
-/* How many line segments can the path planner use for path optimization. The maximum possible
-value is MOVE_CACHE_SIZE-2. Higher values need more computation time, which can cause blocking for many
-short subsequent moves. If this happens you will see BLK messages in your log and then you now the
-value is to high for your printer settings.
-*/
-#define PATH_PLANNER_CHECK_SEGMENTS 7
-/** \brief Low filled cache size. 
-
-If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is limited to LOW_TICKS_PER_MOVE clock cycles.
-If a move would be shorter, the feedrate will be reduced. This should prevent buffer underflows. Set this to 0 if you
-don't care about empty buffers during print.
-*/
-#define MOVE_CACHE_LOW 12
-/** \brief Cycles per move, if move cache is low. 
-
-This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
-if you are printing many very short segments at high speed. Higher delays here allow higher values in PATH_PLANNER_CHECK_SEGMENTS.
-*/
-#define LOW_TICKS_PER_MOVE 400000
 /** \brief Cache size for incoming commands.
 
 There should be no reason to increase this cache. Commands are nearly immediately send to
@@ -724,34 +773,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_STEPCOUNT
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
-// ####################################################################################
-// #                         Below this line only for experts                         #
-// ####################################################################################
 
-
-// ####################################################################################
-// #          No configuration below this line - just some errorchecking              #
-// ####################################################################################
-#ifdef SUPPORT_MAX6675
-#if !defined SCK_PIN || !defined MOSI_PIN || !defined MISO_PIN
-#error For MAX6675 support, you need to define SCK_PIN, MISO_PIN and MOSI_PIN in pins.h
-#endif
-#endif
-#if X_STEP_PIN<0 || Y_STEP_PIN<0 || Z_STEP_PIN<0
-#error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN
-#endif
-#if EXT0_STEP_PIN<0
-#error EXT0_STEP_PIN not set to a pin number.
-#endif
-#if EXT0_DIR_PIN<0
-#error EXT0_DIR_PIN not set to a pin number.
-#endif
-#if MOVE_CACHE_SIZE<4
-#error MOVE_CACHE_SIZE must be at least 5
-#endif
-#if OUTPUT_BUFFER_SIZE>250 || OUTPUT_BUFFER_SIZE<16
-#error OUTPUT_BUFFER_SIZE must be in range 16..250
-#endif
 #endif
 
 

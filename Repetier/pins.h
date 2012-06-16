@@ -298,6 +298,8 @@
 #define LED_PIN            13
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
+#define SCL                21
+#define SDA                20
 
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
 #define E1_PINS
@@ -665,7 +667,7 @@
 #define HEATER_1_PIN       14 // bed
 
 #define SDPOWER            -1
-#define SDSS                2
+#define SDSS                26 // old value 2
 #define LED_PIN            -1
 
 #define FAN_PIN            16 // Fan
@@ -688,6 +690,6 @@
 #endif
 
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
-                        HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS  TEMP_0_PIN, TEMP_1_PIN }
+                        HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS  TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
 

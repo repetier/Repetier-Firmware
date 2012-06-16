@@ -1,0 +1,23 @@
+If you are upgrading from an earlier version, make sure you followed the upgrade
+instructions for that version.
+
+
+Upgrade to 0.70
+
+The configurations files Configuration.h and uiconfig.h have undergone larger
+modifications. The best is to use the new config files and copy your values into them.
+If you don't use the printer user interface you don't need to modify uiconfig.h
+
+The new firmware stores one more parameter into EEPROM. This place is not initalized
+with a useful value, so you must explicitly overwrite it if you are using EEPROM. The
+easiest way is to send the following code after the first upload:
+
+M206 T3 X0 P196
+
+The advance algorithm changed. Now the new linear term Advance-L is preferred and the
+quadratic term is now disabled by default. If you still want to use the quadratic term
+add a
+
+#define ENABLE_QUADRATIC_ADVANCE 
+
+to the configuration.

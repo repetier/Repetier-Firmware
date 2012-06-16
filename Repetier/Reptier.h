@@ -32,6 +32,7 @@
 #include "SdFat.h"
 extern void initsd();
 #endif
+#define REPETIER_VERSION "0.70"
 
 #define uint uint16_t
 #define uint8 uint8_t
@@ -39,7 +40,7 @@ extern void initsd();
 #define uint32 uint32_t
 #define int32 int32_t
 
-#if MOTHERBOARD==6 || MOTHERBOARD==62 || MOTHERBOARD==7
+/*#if MOTHERBOARD==6 || MOTHERBOARD==62 || MOTHERBOARD==7
 #if MOTHERBOARD!=7
 #define SIMULATE_PWM
 #endif
@@ -48,13 +49,23 @@ extern void initsd();
 #define EXTRUDER_TCCR TCCR2A
 #define EXTRUDER_TIMSK TIMSK2
 #define EXTRUDER_OCIE OCIE2A
-#else
+#define PWM_TIMER_VECTOR TIMER2_COMPB_vect
+#define PWM_OCR OCR2B
+#define PWM_TCCR TCCR2B
+#define PWM_TIMSK TIMSK2
+#define PWM_OCIE OCIE2B
+#else*/
 #define EXTRUDER_TIMER_VECTOR TIMER0_COMPA_vect
 #define EXTRUDER_OCR OCR0A
 #define EXTRUDER_TCCR TCCR0A
 #define EXTRUDER_TIMSK TIMSK0
 #define EXTRUDER_OCIE OCIE0A
-#endif
+#define PWM_TIMER_VECTOR TIMER0_COMPB_vect
+#define PWM_OCR OCR0B
+#define PWM_TCCR TCCR0A
+#define PWM_TIMSK TIMSK0
+#define PWM_OCIE OCIE0B
+//#endif
 
 /** \brief Data to drive one extruder.
 
@@ -68,12 +79,11 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   float stepsPerMM; ///< Steps per mm.
   byte sensorType; ///< Type of temperature sensor.
   byte sensorPin; ///< Pin to read extruder temperature.
-  byte heaterPin; ///< Pin to enable the heater.
   byte enablePin; ///< Pin to enable extruder stepper motor.
-  byte directionPin; ///< Pin number to assign the direction.
-  byte stepPin; ///< Pin number for a step.
+//  byte directionPin; ///< Pin number to assign the direction.
+//  byte stepPin; ///< Pin number for a step.
   byte enableOn;
-  byte invertDir; ///< 1 if the direction of the extruder should be inverted.
+//  byte invertDir; ///< 1 if the direction of the extruder should be inverted.
   float maxFeedrate;
   float maxAcceleration; ///< Maximum acceleration in mm/s^2.
   float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
@@ -85,8 +95,13 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
   char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
   int watchPeriod; ///< Time in seconds, a M109 command will wait to stabalize temperature
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
   float advanceK; ///< Koefficient for advance algorithm. 0 = off
-  byte output; ///< Output value 0 = off, 255=MAX
+#endif
+  float advanceL;
+#endif
+ // byte output; ///< Output value 0 = off, 255=MAX
 #ifdef TEMP_PID
   long tempIState; ///< Temp. var. for PID computation.
   byte pidDriveMax; ///< Used for windup in PID calculation.
@@ -99,21 +114,25 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long tempIStateLimitMin;
   byte tempPointer;
   int tempArray[8];
-#ifdef SIMULATE_PWM
-  int pwm;  // Switch of at this timing
-  int pwmState; // Current timing
-#endif
 #endif
 } Extruder;
 
-
+extern const uint8 osAnalogInputChannels[] PROGMEM;
+extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
+extern uint osAnalogInputBuildup[ANALOG_INPUTS];
+extern uint8 osAnalogInputPos; // Current sampling position
+extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
+extern byte pwm_pos[4]; // 0-2 = Heater 0-2 of extruder, 3 = Fan
 extern int target_bed_celsius;
 #if HEATED_BED_SENSOR_TYPE!=0
 extern int current_bed_raw;
 extern int target_bed_raw;
 #endif
 #ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
+#endif
+extern int maxadv2;
 extern float maxadvspeed;
 #endif
 
@@ -145,7 +164,21 @@ inline void extruder_step() {
 #if NUM_EXTRUDER==1
   WRITE(EXT0_STEP_PIN,HIGH);
 #else
-  digitalWrite(current_extruder->stepPin,HIGH);
+  switch(current_extruder->id) {
+  case 0:
+    WRITE(EXT0_STEP_PIN,HIGH);
+    break;
+#ifdef EXT1_STEP_PIN
+  case 1:
+    WRITE(EXT1_STEP_PIN,HIGH);
+    break;
+#endif
+#ifdef EXT2_STEP_PIN
+  case 2:
+    WRITE(EXT2_STEP_PIN,HIGH);
+    break;
+#endif
+  }
 #endif
 }
 /** \brief Sets stepper signal to low for current extruder. 
@@ -156,7 +189,21 @@ inline void extruder_unstep() {
 #if NUM_EXTRUDER==1
   WRITE(EXT0_STEP_PIN,LOW);
 #else
-  digitalWrite(current_extruder->stepPin,LOW);
+  switch(current_extruder->id) {
+  case 0:
+    WRITE(EXT0_STEP_PIN,LOW);
+    break;
+#ifdef EXT1_STEP_PIN
+  case 1:
+    WRITE(EXT1_STEP_PIN,LOW);
+    break;
+#endif
+#ifdef EXT2_STEP_PIN
+  case 2:
+    WRITE(EXT2_STEP_PIN,LOW);
+    break;
+#endif
+  }
 #endif
 }
 /** \brief Activates the extruder stepper and sets the direction. */
@@ -167,6 +214,31 @@ inline void extruder_set_direction(byte dir) {
   else
     WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
 #else
+  switch(current_extruder->id) {
+  case 0:
+  if(dir)
+    WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+  else
+    WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+    break;
+#ifdef EXT1_DIR_PIN
+  case 1:
+  if(dir)
+    WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
+  else
+    WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
+    break;
+#endif
+#ifdef EXT2_DIR_PIN
+  case 2:
+  if(dir)
+    WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
+  else
+    WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
+    break;
+#endif
+  }
+
   digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
 #endif
 }
@@ -240,10 +312,12 @@ extern void setupTimerInterrupt();
 
 typedef struct { // RAM usage: 72 Byte
   byte flag0; // 1 = stepper disabled
-  byte timer0Interval;              ///< Update interval of timer0 compare
 #if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-  float extruderSpeed;              ///< Extruder speed in mm/s.
+//  float extruderSpeed;              ///< Extruder speed in mm/s.
+  byte minExtruderSpeed;            ///< Timer delay for start extruder speed
+  byte maxExtruderSpeed;            ///< Timer delay for end extruder speed
+  byte extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
   long interval;                    ///< Last step duration in ticks.
 #if USE_OPS==1
@@ -252,8 +326,11 @@ typedef struct { // RAM usage: 72 Byte
   unsigned long timer;              ///< used for acceleration/deceleration timing
   unsigned long stepNumber;         ///< Step number in current move.
 #ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
   long advance_executed;             ///< Executed advance steps
+#endif
   int advance_steps_set;
+  unsigned int advance_lin_set;
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
@@ -272,11 +349,13 @@ typedef struct { // RAM usage: 72 Byte
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   float feedrate;                   ///< Last requested feedrate.
   int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
+  unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
   float maxJerk;                    ///< Maximum allowed jerk in mm/s
   float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
   long offsetX;                     ///< X-offset for different extruder positions.
   long offsetY;                     ///< Y-offset for different extruder positions.
   unsigned int vMaxReached;       ///< MAximumu reached speed
+  byte stepper_loops;
 } PrinterState;
 extern PrinterState printer_state;
 
@@ -333,10 +412,13 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   unsigned int vStart;            ///< Starting speed in steps/s.
   unsigned int vEnd;              ///< End speed in steps/s
 #ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
   long advanceRate;               ///< Advance steps at full speed
   long advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
   long advanceStart;
   long advanceEnd;
+#endif
+  unsigned int advanceL;         ///< Recomputated L value
 #endif
 #if USE_OPS==1
   long opsReverseSteps;           ///< How many steps are needed to reverse retracted filament at full speed
@@ -366,7 +448,7 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 extern long CPUDivU2(unsigned int divisor);
 
-extern int counter_periodical;
+extern byte counter_periodical;
 extern volatile byte execute_periodical;
 extern byte counter_250ms;
 extern void write_monitor();
