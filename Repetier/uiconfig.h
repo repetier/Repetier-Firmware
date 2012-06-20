@@ -56,6 +56,7 @@ Currently supported hardware:
 Select the language to use.
 0 = english
 1 = german
+2 = dutch
 */
 #define UI_LANGUAGE 1
 #include "uilang.h"
