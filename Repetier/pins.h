@@ -298,8 +298,8 @@
 #define LED_PIN            13
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
-#define SCL                21
-#define SDA                20
+//#define SCL                21
+//#define SDA                20
 
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
 #define E1_PINS

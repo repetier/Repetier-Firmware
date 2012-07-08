@@ -238,8 +238,6 @@ inline void extruder_set_direction(byte dir) {
     break;
 #endif
   }
-
-  digitalWrite(current_extruder->directionPin,dir!=0 ? (!(current_extruder->invertDir)) : current_extruder->invertDir);
 #endif
 }
 inline void extruder_enable() {

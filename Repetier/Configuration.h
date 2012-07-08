@@ -64,7 +64,7 @@
 // ##########################################################################################
 
 /** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 1
+#define NUM_EXTRUDER 2
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
@@ -154,6 +154,98 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT0_ADVANCE_K 0.0f
 #define EXT0_ADVANCE_L 0.0f
+
+
+// =========================== Configuration for second extruder ========================
+#define EXT1_X_OFFSET 0
+#define EXT1_Y_OFFSET 0
+// for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
+#define EXT1_STEPS_PER_MM 373
+// What type of sensor is used?
+// 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
+// 2 is 200k thermistor
+// 3 is mendel-parts thermistor (EPCOS G550)
+// 4 is 10k thermistor
+// 5 is userdefined thermistor table 0
+// 6 is userdefined thermistor table 1
+// 7 is userdefined thermistor table 2
+// 50 is userdefined thermistor table 0 for PTC thermistors
+// 51 is userdefined thermistor table 0 for PTC thermistors
+// 52 is userdefined thermistor table 0 for PTC thermistors
+// 99 Generic thermistor table
+// 100 is AD595
+// 101 is MAX6675
+#define EXT1_TEMPSENSOR_TYPE 1
+// Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
+#define EXT1_TEMPSENSOR_PIN 0
+// WHich pin enables the heater
+#define EXT1_HEATER_PIN HEATER_0_PIN
+#define EXT1_STEP_PIN E_STEP_PIN
+#define EXT1_DIR_PIN E_DIR_PIN
+// set to 0/1 for normal / inverse direction
+#define EXT1_INVERSE false
+#define EXT1_ENABLE_PIN E_ENABLE_PIN
+// For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
+#define EXT1_ENABLE_ON false
+// The following speed settings are for skeinforge 40+ where e is the
+// length of filament pulled inside the heater. For repsnap or older
+// skeinforge use hiher values.
+//  Overridden if EEPROM activated.
+#define EXT1_MAX_FEEDRATE 1500
+// Feedrate from halted extruder in mm/s
+//  Overridden if EEPROM activated.
+#define EXT1_MAX_START_FEEDRATE 18
+// Acceleration in mm/s^2
+//  Overridden if EEPROM activated.
+#define EXT1_MAX_ACCELERATION 6000
+/** Type of heat manager for this extruder. 
+- 0 = Simply switch on/off if temperature is reached. Works always.
+- 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
+ Overridden if EEPROM activated.
+*/
+#define EXT1_HEAT_MANAGER 1
+/** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
+#define EXT1_WATCHPERIOD 20
+
+/** \brief The maximum value, I-gain can contribute to the output. 
+
+A good value is slightly higher then the output needed for your temperature.
+Values for starts:
+130 => PLA for temperatures from 170-180°C
+180 => ABS for temperatures around 240°C
+
+The precise values may differ for different nozzle/resistor combination. 
+ Overridden if EEPROM activated.
+*/
+#define EXT1_PID_INTEGRAL_DRIVE_MAX 130
+/** \brief lower value for integral part
+
+The I state should converge to the exact heater output needed for the target temperature.
+To prevent a long deviation from the target zone, this value limits the lower value.
+A good start is 30 lower then the optimal value. You need to leave room for cooling.
+ Overridden if EEPROM activated.
+*/
+#define EXT1_PID_INTEGRAL_DRIVE_MIN 50
+/** P-gain in 0,01 units.  Overridden if EEPROM activated. */
+#define EXT1_PID_PGAIN   500
+/** I-gain in 0,001 units 
+
+WATCH OUT: This value was in 0,01 units in earlier versions!
+ Overridden if EEPROM activated.
+*/
+#define EXT1_PID_IGAIN   1
+/** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
+#define EXT1_PID_DGAIN 3000
+// maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
+#define EXT1_PID_MAX 255
+/** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
+K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
+the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
+L is the linear factor and seems to be working better then the quadratic dependency.
+*/
+#define EXT1_ADVANCE_K 0.0f
+#define EXT1_ADVANCE_L 0.0f
+
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power to long, you
