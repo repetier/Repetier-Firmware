@@ -64,7 +64,7 @@
 // ##########################################################################################
 
 /** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 2
+#define NUM_EXTRUDER 1
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
