@@ -1125,7 +1125,7 @@ void updateTrapezoids(byte p) {
     updateStepsParameter(act/*,13*/);
   act->flags &= ~FLAG_BLOCKED;
 }
-void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd) {
+void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
   for(byte i=0; i < 4; i++) {
       printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
@@ -1144,7 +1144,7 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd) {
 #endif
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
-  queue_move(true,false);
+  queue_move(check_endstop,false);
   printer_state.feedrate = saved_feedrate;
   if(waitEnd)
     wait_until_end_of_move();
