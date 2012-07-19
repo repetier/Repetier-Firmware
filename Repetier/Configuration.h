@@ -560,10 +560,10 @@ on this endstop.
 */
 #define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
-    The axis order in all axis related arrays is X, Y, Z, E dummy which is never used
+    The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
     */
-#define MAX_FEEDRATE {15000, 15000, 100, 100}
+#define MAX_FEEDRATE {15000, 15000, 100}
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE {2400,2400,100}
 
@@ -608,12 +608,12 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 
 /** \brief Use RAMP acceleration for faster printing speed. */
 #ifdef RAMP_ACCELERATION
-/** \brief X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
+/** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100,1000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100,1000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100}
 #endif
 
 /** \brief Maximum allowable jerk.
