@@ -179,7 +179,7 @@ L is the linear factor and seems to be working better then the quadratic depende
 // Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
 #define EXT1_TEMPSENSOR_PIN 1
 // WHich pin enables the heater
-#define EXT1_HEATER_PIN HEATER_1_PIN
+#define EXT1_HEATER_PIN -1
 #define EXT1_STEP_PIN E_STEP_PIN
 #define EXT1_DIR_PIN E_DIR_PIN
 // set to 0/1 for normal / inverse direction
@@ -560,7 +560,7 @@ on this endstop.
 */
 #define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
-    The axis order in all axis related arrays is X, Y, Z, E 
+    The axis order in all axis related arrays is X, Y, Z, E dummy which is never used
      Overridden if EEPROM activated.
     */
 #define MAX_FEEDRATE {15000, 15000, 100, 100}
