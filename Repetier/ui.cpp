@@ -1351,31 +1351,31 @@ void UIDisplay::nextPreviousAction(char next) {
   char increment = next;
   switch(action) {
   case UI_ACTION_XPOSITION:
-    move_steps(increment,0,0,0,homing_feedrate[0],true);
+    move_steps(increment,0,0,0,homing_feedrate[0],true,true);
     printPosition();
     break;
   case UI_ACTION_YPOSITION:
-    move_steps(0,increment,0,0,homing_feedrate[1],true);
+    move_steps(0,increment,0,0,homing_feedrate[1],true,true);
     printPosition();
     break;
   case UI_ACTION_ZPOSITION:
-    move_steps(0,0,increment,0,homing_feedrate[2],true);
+    move_steps(0,0,increment,0,homing_feedrate[2],true,true);
     printPosition();
     break;
   case UI_ACTION_XPOSITION_FAST:
-    move_steps(axis_steps_per_unit[0]*increment,0,0,0,homing_feedrate[0],true);
+    move_steps(axis_steps_per_unit[0]*increment,0,0,0,homing_feedrate[0],true,true);
     printPosition();
     break;
   case UI_ACTION_YPOSITION_FAST:
-    move_steps(0,axis_steps_per_unit[1]*increment,0,0,homing_feedrate[1],true);
+    move_steps(0,axis_steps_per_unit[1]*increment,0,0,homing_feedrate[1],true,true);
     printPosition();
     break;
   case UI_ACTION_ZPOSITION_FAST:
-    move_steps(0,0,axis_steps_per_unit[2]*increment,0,homing_feedrate[2],true);
+    move_steps(0,0,axis_steps_per_unit[2]*increment,0,homing_feedrate[2],true,true);
     printPosition();
     break;
   case UI_ACTION_EPOSITION:
-    move_steps(0,0,0,axis_steps_per_unit[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true);
+    move_steps(0,0,0,axis_steps_per_unit[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
     printPosition();
     break;
   case UI_ACTION_HEATED_BED_TEMP:
@@ -1908,28 +1908,28 @@ void UIDisplay::executeAction(int action) {
       break;
 #endif
     case UI_ACTION_X_UP:
-      move_steps(axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false);
+      move_steps(axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
       break;
     case UI_ACTION_X_DOWN:
-      move_steps(-axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false);
+      move_steps(-axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
       break;
     case UI_ACTION_Y_UP:
-      move_steps(0,axis_steps_per_unit[1],0,0,homing_feedrate[1],false);
+      move_steps(0,axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
       break;
     case UI_ACTION_Y_DOWN:
-      move_steps(0,-axis_steps_per_unit[1],0,0,homing_feedrate[1],false);
+      move_steps(0,-axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
       break;
     case UI_ACTION_Z_UP:
-      move_steps(0,0,axis_steps_per_unit[2],0,homing_feedrate[2],false);
+      move_steps(0,0,axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
     case UI_ACTION_Z_DOWN:
-      move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false);
+      move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
     case UI_ACTION_EXTRUDER_UP:
-      move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false);
+      move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
     case UI_ACTION_EXTRUDER_DOWN:
-      move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false);
+      move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
     case UI_ACTION_EXTRUDER_TEMP_UP: {
          int tmp = (current_extruder->targetTemperatureC>>CELSIUS_EXTRA_BITS)+1;

@@ -177,9 +177,9 @@ L is the linear factor and seems to be working better then the quadratic depende
 // 101 is MAX6675
 #define EXT1_TEMPSENSOR_TYPE 1
 // Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN 0
+#define EXT1_TEMPSENSOR_PIN 1
 // WHich pin enables the heater
-#define EXT1_HEATER_PIN HEATER_0_PIN
+#define EXT1_HEATER_PIN HEATER_1_PIN
 #define EXT1_STEP_PIN E_STEP_PIN
 #define EXT1_DIR_PIN E_DIR_PIN
 // set to 0/1 for normal / inverse direction

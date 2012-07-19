@@ -1,3 +1,7 @@
+Version 0.71 18-07-2012
+  Fixed bug not heating extruder since bugfix upload
+  Added uncheck end stop on homing
+
 Version 0.70 16-06-2012
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Improved advance algorithm, now uses also a linear advance term.
