@@ -323,7 +323,8 @@
 // SPI for Max6675 Thermocouple 
 
 #ifndef SDSUPPORT
-// these pins are defined in the SD library if building with SD support  #define SCK_PIN          52
+// these pins are defined in the SD library if building with SD support  
+  #define SCK_PIN          52
   #define MISO_PIN         50
   #define MOSI_PIN         51
   #define MAX6675_SS       53
