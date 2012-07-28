@@ -197,10 +197,12 @@ void extruder_select(byte ext_num) {
    current_extruder = &extruder[ext_num];
    printer_state.currentPositionSteps[0] += current_extruder->xOffset;
    printer_state.currentPositionSteps[1] += current_extruder->yOffset;
-   printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;   
+#ifdef SEPERATE_EXTRUDER_POSITIONS
+   // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
+   printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
+#endif
    axis_steps_per_unit[3] = current_extruder->stepsPerMM;
    inv_axis_steps_per_unit[3] = 1.0f/axis_steps_per_unit[3];
-   printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
    max_feedrate[3] = current_extruder->maxFeedrate;
 //   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
