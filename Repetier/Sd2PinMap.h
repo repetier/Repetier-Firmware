@@ -50,7 +50,9 @@ uint8_t const MOSI_PIN = 51;
 uint8_t const MISO_PIN = 50;
 #endif
 
+#ifndef SCK_PIN
 uint8_t const SCK_PIN = 52;
+#endif
 
 static const pin_map_t digitalPinMap[] = {
   {&DDRE, &PINE, &PORTE, 0},  // E0  0

@@ -91,7 +91,7 @@
 #define EXT0_HEATER_PIN HEATER_0_PIN
 #define EXT0_STEP_PIN E_STEP_PIN
 #define EXT0_DIR_PIN E_DIR_PIN
-// set to 0/1 for normal / inverse direction
+// set to false/true for normal / inverse direction
 #define EXT0_INVERSE false
 #define EXT0_ENABLE_PIN E_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
@@ -591,7 +591,7 @@ additional stepper interrupts with all it's overhead. As a result you can go as 
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping 
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
-#define ALLOW_QUADSTEPPING false
+#define ALLOW_QUADSTEPPING true
 /** If you reach STEP_DOUBLER_FREQUENCY the firmware will do 2 or 4 steps with nearly no delay. That can be too fast
 for some printers causing an early stall. 
 
@@ -842,7 +842,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT 1
+#define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
