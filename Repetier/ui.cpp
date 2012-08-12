@@ -1971,6 +1971,29 @@ void UIDisplay::executeAction(int action) {
       set_fan_speed(pwm_pos[3]-32,false);
       out.println_int_P(PSTR("Fanspeed:"),(int)pwm_pos[3]);
       break;
+    case UI_ACTION_KILL:
+      cli(); // Don't allow interrupts to do their work
+      kill(false);
+      manage_temperatures();
+      pwm_pos[0] = pwm_pos[1] = pwm_pos[2] = pwm_pos[3]=0;
+#if EXT0_HEATER_PIN>-1
+     WRITE(EXT0_HEATER_PIN,0);
+#endif
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
+     WRITE(EXT1_HEATER_PIN,0);
+#endif
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
+     WRITE(EXT2_HEATER_PIN,0);
+#endif
+#if FAN_PIN>-1
+     WRITE(FAN_PIN,0);
+#endif
+      while(1) {}
+
+      break;
+    case UI_ACTION_RESET:
+      resetFunc();
+      break;
   }
   refreshPage();
   if(!skipBeep)

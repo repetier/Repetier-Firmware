@@ -291,6 +291,9 @@ void gcode_resend() {
   out.println_P(PSTR("ok"));
 }
 void emergencyStop() {
+#if defined(KILL_METHOD) && KILL_METHOD==1
+  resetFunc();
+#else
      cli(); // Don't allow interrupts to do their work
      kill(false);
      manage_temperatures();
@@ -308,6 +311,7 @@ void emergencyStop() {
     WRITE(FAN_PIN,0);
 #endif
      while(1) {}
+#endif
 }
 /**
   Check if result is plausible. If it is, an ok is send and the command is stored in queue.

@@ -154,6 +154,8 @@
 #define UI_ACTION_ADVANCE_L             1094
 #define UI_ACTION_PREHEAT_ABS           1095
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
+#define UI_ACTION_KILL                  1097
+#define UI_ACTION_RESET                 1098
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
