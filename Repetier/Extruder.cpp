@@ -192,15 +192,16 @@ void extruder_select(byte ext_num) {
    if(ext_num>=NUM_EXTRUDER)
      ext_num = 0;
    current_extruder->extrudePosition = printer_state.currentPositionSteps[3];
-   printer_state.currentPositionSteps[0] -= current_extruder->xOffset;
-   printer_state.currentPositionSteps[1] -= current_extruder->yOffset;
+   printer_state.destinationSteps[0] -= current_extruder->xOffset;
+   printer_state.destinationSteps[1] -= current_extruder->yOffset;
    current_extruder = &extruder[ext_num];
-   printer_state.currentPositionSteps[0] += current_extruder->xOffset;
-   printer_state.currentPositionSteps[1] += current_extruder->yOffset;
+   printer_state.destinationSteps[0] += current_extruder->xOffset;
+   printer_state.destinationSteps[1] += current_extruder->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
    // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
    printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
 #endif
+   printer_state.destinationSteps[3] = printer_state.currentPositionSteps[3];
    axis_steps_per_unit[3] = current_extruder->stepsPerMM;
    inv_axis_steps_per_unit[3] = 1.0f/axis_steps_per_unit[3];
    max_feedrate[3] = current_extruder->maxFeedrate;
@@ -208,14 +209,14 @@ void extruder_select(byte ext_num) {
    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
 #if USE_OPS==1 || defined(USE_ADVANCE)
-   printer_state.minExtruderSpeed = (byte)(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
-   printer_state.maxExtruderSpeed = (byte)(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   printer_state.minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
+   printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
    if(printer_state.maxExtruderSpeed>=printer_state.minExtruderSpeed) {
      printer_state.maxExtruderSpeed = printer_state.minExtruderSpeed;
    } else {
-     float maxdist = current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.00013888/current_extruder->maxAcceleration;
+     float maxdist = current_extruder->maxFeedrate*current_extruder->maxFeedrate*0.00013888/current_extruder->maxAcceleration;
      maxdist-= current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.5/current_extruder->maxAcceleration;     
-     printer_state.extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(printer_state.minExtruderSpeed-printer_state.maxExtruderSpeed)),0,255);
+     printer_state.extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(printer_state.minExtruderSpeed-printer_state.maxExtruderSpeed)),1,255);
    }
    float fmax=((float)F_CPU/((float)printer_state.maxExtruderSpeed*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;

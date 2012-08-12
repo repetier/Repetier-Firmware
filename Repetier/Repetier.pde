@@ -2037,6 +2037,7 @@ inline long bresenham_step() {
   return interval;
 }
 
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
@@ -2214,19 +2215,21 @@ allowable speed for the extruder.
 ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-  static byte extruder_mode=1;
   static byte accdelay=10;
   byte timer = EXTRUDER_OCR;
   byte wait; // Time to wait until next interrupt
   bool increasing = printer_state.extruderStepsNeeded>0;
   if(printer_state.extruderStepsNeeded==0) {
-    extruder_last_dir = 0;
-    extruder_mode = 1;
-    extruder_speed=printer_state.minExtruderSpeed;
-    accdelay =printer_state.extruderAccelerateDelay;
-    EXTRUDER_OCR = timer+50; // 5000 Hz wait timer
+    if(extruder_speed<printer_state.minExtruderSpeed) {
+      extruder_speed++;
+      EXTRUDER_OCR = timer+extruder_speed;
+    } else {
+      extruder_last_dir = 0;
+      extruder_speed=printer_state.minExtruderSpeed;
+      accdelay =printer_state.extruderAccelerateDelay;
+      EXTRUDER_OCR = timer+extruder_speed; // wait at start extruder speed for optimized delay
+    }
   }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
-    extruder_mode = 1;
     EXTRUDER_OCR = timer+150; // Little delay to accomodate to reversed direction     
     extruder_last_dir = (increasing ? 1 : -1);
     extruder_set_direction(increasing ? 1 : 0);    

@@ -250,6 +250,7 @@ inline void extruder_enable() {
     digitalWrite(current_extruder->enablePin,current_extruder->enableOn); 
 #endif
 }
+extern void(* resetFunc) (void); 
 // Read a temperature and return its value in °C
 // this high level method supports all known methods
 extern int read_raw_temperature(byte type,byte pin);

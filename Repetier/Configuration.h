@@ -443,7 +443,7 @@ one extruder with heated bed, write:
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 10
 // Build median from 2^ANALOG_INPUT_SAMPLE samples
-#define ANALOG_INPUT_SAMPLE 5
+#define ANALOG_INPUT_SAMPLE 3
 #define ANALOG_REF_AREF 0
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
@@ -801,6 +801,12 @@ Some boards like Gen7 have a power on pin, to enable the atx power supply. If th
 the power will be turned on without the need to call M80 if initially started.
 */
 #define ENABLE_POWER_ON_STARTUP
+
+/** What shall the printer do, when it receives an M112 emergency stop signal?
+ 0 = Disable heaters/motors, wait for ever until someone presses reset.
+ 1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
+*/
+#define KILL_METHOD 1
 
 #if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__) // not needed for USB serial
 #define USE_BUFFERED_OUTPUT 

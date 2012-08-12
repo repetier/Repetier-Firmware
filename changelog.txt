@@ -1,6 +1,12 @@
+Next version
+  Fixed extrusion bug when advance or ops is compiled in.
+  Kill command now resets AVR by default. set KILL_METHOD 0 for old style.
+  Simulating multiple extruders with 1 extruder now works. Compile with use and T0/T1 as 
+    you want. Important if slic3r with multiple extruders is used.
+  
 Version 0.71 18-07-2012
-  Fixed bug not heating extruder since bugfix upload
-  Added uncheck end stop on homing
+  Fixed bug not heating extruder since bugfix upload.
+  Added uncheck end stop on homing.
 
 Version 0.70 16-06-2012
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
