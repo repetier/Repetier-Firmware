@@ -593,8 +593,8 @@
 
 #define Y_STEP_PIN         30
 #define Y_DIR_PIN          31
-#define Y_ENABLE_PIN       26
-#define Y_MIN_PIN           20
+#define Y_ENABLE_PIN       20
+#define Y_MIN_PIN          26
 #define Y_MAX_PIN          -1
 
 #define Z_STEP_PIN         32
