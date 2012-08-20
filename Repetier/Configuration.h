@@ -138,7 +138,6 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 /** P-gain in 0,01 units.  Overridden if EEPROM activated. */
 #define EXT0_PID_PGAIN   500
 /** I-gain in 0,001 units 
-
 WATCH OUT: This value was in 0,01 units in earlier versions!
  Overridden if EEPROM activated.
 */
