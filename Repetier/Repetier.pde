@@ -156,6 +156,27 @@ Custom M Codes
 #error OUTPUT_BUFFER_SIZE must be in range 16..250
 #endif
 
+#ifdef ROSTOCK_DELTA
+#define SIN_60 0.8660254037844386
+#define COS_60 0.5
+#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
+#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
+#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
+
+#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER3_X_STEPS 0.0
+#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
+
+#define NUM_AXIS 4
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+#define E_AXIS 3
+
+#endif
 
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 // RAM usage of variables: Non RAMPS 114+MOVE_CACHE_SIZE*59+printer_state(32) = 382 Byte with MOVE_CACHE_SIZE=4
@@ -306,9 +327,13 @@ void send_mem() {
 #endif
 
 void update_ramps_parameter() {
+#ifdef ROSTOCK_DELTA
+  printer_state.rodSteps = axis_steps_per_unit[0]*ROD_MAX_LENGTH;
+#else
   printer_state.xMaxSteps = axis_steps_per_unit[0]*X_MAX_LENGTH;
   printer_state.yMaxSteps = axis_steps_per_unit[1]*Y_MAX_LENGTH;
   printer_state.zMaxSteps = axis_steps_per_unit[2]*Z_MAX_LENGTH;
+#endif
   for(byte i=0;i<4;i++) {
     inv_axis_steps_per_unit[i] = 1.0f/axis_steps_per_unit[i];
 #ifdef RAMP_ACCELERATION
@@ -434,6 +459,10 @@ void setup()
   printer_state.advance_lin_set = 0;
 #endif
   printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
+ #ifdef ROSTOCK_DELTA
+  printer_state.currentDeltaPositionSteps[0] = printer_state.currentDeltaPositionSteps[1] = printer_state.currentDeltaPositionSteps[2] = printer_state.currentDeltaPositionSteps[3] = 0;
+  printer_state.offsetX = printer_state.offsetY = 0;
+#endif
   printer_state.maxJerk = MAX_JERK;
   printer_state.maxZJerk = MAX_ZJERK;
   printer_state.interval = 5000;
@@ -443,7 +472,6 @@ void setup()
   Serial.begin(baudrate);
   out.println_P(PSTR("start"));
   UI_INITIALIZE;
-  
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
   if(mcu & 1) out.println_P(PSTR("PowerUp"));
@@ -452,7 +480,6 @@ void setup()
   if(mcu & 8) out.println_P(PSTR("Watchdog Reset"));
   if(mcu & 32) out.println_P(PSTR("Software Reset"));
   MCUSR=0;
-  
   initExtruder();
   epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
@@ -1125,6 +1152,23 @@ void updateTrapezoids(byte p) {
     updateStepsParameter(act/*,13*/);
   act->flags &= ~FLAG_BLOCKED;
 }
+#ifdef ROSTOCK_DELTA
+void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
+  float saved_feedrate = printer_state.feedrate;
+  for(byte i=0; i < 4; i++) {
+      printer_state.destinationDeltaPositionSteps[i] = printer_state.currentDeltaPositionSteps[i];
+  }
+  printer_state.destinationDeltaPositionSteps[0]+=x;
+  printer_state.destinationDeltaPositionSteps[1]+=y;
+  printer_state.destinationDeltaPositionSteps[2]+=z;
+  printer_state.destinationDeltaPositionSteps[3]+=e;
+  printer_state.feedrate = feedrate;
+  queue_move(check_endstop,false);
+  printer_state.feedrate = saved_feedrate;
+  if(waitEnd)
+    wait_until_end_of_move();
+}
+#endif
 void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
   for(byte i=0; i < 4; i++) {
@@ -1144,7 +1188,11 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
 #endif
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
+#ifdef ROSTOCK_DELTA
+  queue_delta_move(check_endstop,false);
+#else
   queue_move(check_endstop,false);
+#endif
   printer_state.feedrate = saved_feedrate;
   if(waitEnd)
     wait_until_end_of_move();
@@ -1194,6 +1242,27 @@ END_INTERRUPT_PROTECTED
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
   p->dir = 0;
+#ifdef ROSTOCK_DELTA
+#if min_software_endstop_x == true
+    if (printer_state.destinationDeltaSteps[0] < 0) printer_state.destinationDeltaSteps[0] = 0;
+#endif
+#if min_software_endstop_y == true
+    if (printer_state.destinationDeltaSteps[1] < 0) printer_state.destinationDeltaSteps[1] = 0;
+#endif
+#if min_software_endstop_z == true
+    if (printer_state.destinationDeltaSteps[2] < 0) printer_state.destinationDeltaSteps[2] = 0;
+#endif
+
+#if max_software_endstop_x == true
+    if (printer_state.destinationDeltaSteps[0] > printer_state.rodSteps) printer_state.destinationDeltaSteps[0] = printer_state.xMaxSteps;
+#endif
+#if max_software_endstop_y == true
+    if (printer_state.destinationDeltaSteps[1] > printer_state.rodSteps) printer_state.destinationDeltaSteps[1] = printer_state.yMaxSteps;
+#endif
+#if max_software_endstop_z == true
+    if (printer_state.destinationDeltaSteps[2] > printer_state.rodSteps) printer_state.destinationDeltaSteps[2] = printer_state.zMaxSteps;
+#endif
+#else
 #if min_software_endstop_x == true
     if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
 #endif
@@ -1213,10 +1282,15 @@ END_INTERRUPT_PROTECTED
 #if max_software_endstop_z == true
     if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
 #endif
+#endif
   //Find direction
 #if DRIVE_SYSTEM==0
   for(byte i=0; i < 4; i++) {
+#ifdef ROSTOCK_DELTA  
+    if((p->delta[i]=printer_state.destinationDeltaPositionSteps[i]-printer_state.currentDeltaPositionSteps[i])>=0) {
+#else
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
+#endif
       p->dir |= 1<<i;
       axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     } else {
@@ -1224,7 +1298,11 @@ END_INTERRUPT_PROTECTED
       p->delta[i] = -p->delta[i];
     }
     if(p->delta[i]) p->dir |= 16<<i;
+#ifdef ROSTOCK_DELTA  
+    printer_state.currentDeltaPositionSteps[i] = printer_state.destinationDeltaPositionSteps[i];
+#else
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
+#endif
   }
 #else
   long deltax = printer_state.destinationSteps[0]-printer_state.currentPositionSteps[0];
@@ -1427,6 +1505,89 @@ END_INTERRUPT_PROTECTED
     check_mem();
 #endif
 }
+
+#ifdef ROSTOCK_DELTA
+/////////////// DELTA CODE ////////////////
+void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis) {
+	printer_state.destinationDeltaPositionSteps[0] = xaxis;
+	printer_state.destinationDeltaPositionSteps[1] = yaxis;
+	printer_state.destinationDeltaPositionSteps[2] = zaxis;
+	printer_state.destinationDeltaPositionSteps[3] = eaxis;
+}
+
+void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis) {
+	printer_state.currentDeltaPositionSteps[0] = xaxis;
+	printer_state.currentDeltaPositionSteps[1] = yaxis;
+	printer_state.currentDeltaPositionSteps[2] = zaxis;
+	printer_state.currentDeltaPositionSteps[3] = eaxis;
+}
+
+void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
+		deltaPosSteps[X_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
+			 - sq(DELTA_TOWER1_X_STEPS - cartesianPosSteps[X_AXIS])
+			 - sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS])
+			 ) + cartesianPosSteps[Z_AXIS];
+		
+		deltaPosSteps[Y_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
+    		 - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])
+			 - sq(DELTA_TOWER2_Y_STEPS - cartesianPosSteps[Y_AXIS])
+			 ) + cartesianPosSteps[Z_AXIS];
+
+		deltaPosSteps[Z_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
+			 - sq(DELTA_TOWER3_X_STEPS - cartesianPosSteps[X_AXIS])
+			 - sq(DELTA_TOWER3_Y_STEPS - cartesianPosSteps[Y_AXIS])
+			 ) + cartesianPosSteps[Z_AXIS];
+
+}
+
+void queue_delta_move(byte check_endstops,byte pathOptimize) {
+	printer_state.flag0 &= ~1; // Motor is enabled now 
+
+	long difference[NUM_AXIS];
+	for(byte i=0; i < NUM_AXIS; i++) {
+		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
+	}
+
+	float cartesian_mm = sqrt(sq(difference[X_AXIS] * inv_axis_steps_per_unit[X_AXIS]) +
+			    sq(difference[Y_AXIS] * inv_axis_steps_per_unit[Y_AXIS]) +
+			    sq(difference[Z_AXIS] * inv_axis_steps_per_unit[Z_AXIS]));
+
+	if ( cartesian_mm < 0.000001 ) {
+		cartesian_mm = abs(difference[E_AXIS] * inv_axis_steps_per_unit[E_AXIS]);
+	}
+	
+	if ( cartesian_mm < 0.000001 ) {
+		return;
+	}
+	float seconds = 6000 * cartesian_mm / printer_state.feedrate / printer_state.feedrateMultiply;
+	int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
+	UI_STATUS_UPD("Delta Calc");
+	out.println_float_P(PSTR("Delta mm:"), cartesian_mm);
+	out.println_float_P(PSTR("Delta seconds:"), seconds);
+	out.println_long_P(PSTR("Delta steps:"), steps);
+
+	for (int s = 1; s <= steps; s++) {
+
+		float fraction = float(s) / float(steps);
+	
+		for(int8_t i=0; i < NUM_AXIS; i++) {
+			printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i] + (difference[i] * fraction);
+		}
+
+		calculate_delta(printer_state.destinationSteps, printer_state.destinationDeltaPositionSteps);
+		printer_state.destinationDeltaPositionSteps[3] = printer_state.destinationSteps[3];
+		
+		queue_move(check_endstops, pathOptimize);
+	}
+	
+	for(byte i=0; i < NUM_AXIS; i++) {
+		printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
+	}
+}
+
+///////////////////////////////////////////
+#endif
+
 inline unsigned int ComputeV(long timer,long accel) {
   unsigned int res;
   // 38 Ticks
@@ -1787,6 +1948,18 @@ inline long bresenham_step() {
       if((cur->error[0] -= cur->delta[0]) < 0) {
         WRITE(X_STEP_PIN,HIGH);
         cur->error[0] += cur_errupd;
+#ifdef STEP_COUNTER
+		if (INVERT_X_DIR)
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[0]--;
+			else
+				printer_state.countPositionSteps[0]++;
+		else
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[0]++;
+			else
+				printer_state.countPositionSteps[0]--;
+#endif
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
 #endif
@@ -1796,6 +1969,18 @@ inline long bresenham_step() {
       if((cur->error[1] -= cur->delta[1]) < 0) {
         WRITE(Y_STEP_PIN,HIGH);
         cur->error[1] += cur_errupd;
+#ifdef STEP_COUNTER
+		if (INVERT_Y_DIR)
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[1]--;
+			else
+				printer_state.countPositionSteps[1]++;
+		else
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[1]++;
+			else
+				printer_state.countPositionSteps[1]--;
+#endif
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
 #endif
@@ -1805,6 +1990,18 @@ inline long bresenham_step() {
       if((cur->error[2] -= cur->delta[2]) < 0) {
         WRITE(Z_STEP_PIN,HIGH);
         cur->error[2] += cur_errupd;
+#ifdef STEP_COUNTER
+		if (INVERT_Z_DIR)
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[2]--;
+			else
+				printer_state.countPositionSteps[2]++;
+		else
+			if(cur->dir & 1)
+				printer_state.countPositionSteps[2]++;
+			else
+				printer_state.countPositionSteps[2]--;
+#endif
       }
     }
 #if STEPPER_HIGH_DELAY>0

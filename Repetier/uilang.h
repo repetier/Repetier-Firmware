@@ -39,6 +39,7 @@
 #define UI_TEXT_EXTRUDER         "Extruder"
 #define UI_TEXT_SD_CARD          "SD Card"
 #define UI_TEXT_DEBUGGING        "Debugging"
+#define UI_TEXT_HOME_DELTA       "Home Delta"
 #define UI_TEXT_HOME_ALL         "Home All"
 #define UI_TEXT_HOME_X           "Home X"
 #define UI_TEXT_HOME_Y           "Home Y"

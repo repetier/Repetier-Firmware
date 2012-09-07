@@ -58,7 +58,7 @@ Select the language to use.
 1 = german
 2 = dutch
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 #include "uilang.h"
 
 /** Select type of beeper
@@ -66,10 +66,12 @@ Select the language to use.
 1 = Piezo connected to pin
 2 = Piezo connected to a pin over I2C 
 */
-#define BEEPER_TYPE 0
+#define BEEPER_TYPE 1
 
 #if BEEPER_TYPE==1
-#define BEEPER_PIN 42
+// Note - Changed for eBay display
+
+#define BEEPER_PIN 37
 #endif
 #if BEEPER_TYPE==2
 #define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin
@@ -96,16 +98,19 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0 
+// Note - Changed for eBay display
+#define UI_DISPLAY_TYPE 1 
 
 // This is line 2 of the status display at startup
-#define UI_VERSION_STRING2 "Orig. Mendel"
+#define UI_VERSION_STRING2 "Rostock"
 
 /** Number of columns per row
 
 Typical values are 16 and 20
 */
-#define UI_COLS 16
+// Note - Changed for eBay display
+
+#define UI_COLS 20
 /**
 Rows of your display. 2 or 4
 */
@@ -159,17 +164,18 @@ Define the pin
 #define UI_DISPLAY_D7_PIN _BV(9)*/
 
 #else // Direct display connections
+// Note - Changed for eBay display
 #define UI_DISPLAY_RS_PIN 16
-#define UI_DISPLAY_RW_PIN 17
-#define UI_DISPLAY_ENABLE_PIN 31
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 17
 #define UI_DISPLAY_D0_PIN 23
-#define UI_DISPLAY_D1_PIN 29
-#define UI_DISPLAY_D2_PIN 25
-#define UI_DISPLAY_D3_PIN 27
+#define UI_DISPLAY_D1_PIN 25
+#define UI_DISPLAY_D2_PIN 27
+#define UI_DISPLAY_D3_PIN 29
 #define UI_DISPLAY_D4_PIN 23
-#define UI_DISPLAY_D5_PIN 29
-#define UI_DISPLAY_D6_PIN 25
-#define UI_DISPLAY_D7_PIN 27
+#define UI_DISPLAY_D5_PIN 25
+#define UI_DISPLAY_D6_PIN 27
+#define UI_DISPLAY_D7_PIN 29
 #define UI_DELAYPERCHAR 320
 #endif
 
@@ -191,7 +197,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -345,15 +351,18 @@ Unfotunately, the encoder have a different count of phase changes between clicks
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
 #define UI_ENCODER_SPEED 1
-
+// Note - Changed for eBay display
 void ui_init_keys() {
-//  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-//  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
+	UI_KEYS_INIT_CLICKENCODER_LOW(31,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+	UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
+	UI_KEYS_INIT_BUTTON_LOW(41); // push button, connects gnd to pin
+	
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
-//  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-//  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
+  UI_KEYS_CLICKENCODER_LOW_REV(31,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
+  UI_KEYS_BUTTON_LOW(41,UI_ACTION_DISABLE_STEPPER); // push button, connects gnd to pin
 }
 inline void ui_check_slow_encoder() {
 #ifdef UI_HAS_I2C_KEYS
@@ -519,12 +528,13 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 #if UI_ROWS>=4
-#if HAVE_HEATED_BED==true
-UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
-#else
-UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
-#endif
-UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+// #if HAVE_HEATED_BED==true
+// UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
+// #else
+// UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+// #endif
+UI_PAGE4(ui_page1,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}

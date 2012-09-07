@@ -276,10 +276,20 @@ extern void finishNextSegment();
 extern void printPosition();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
 extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
+#ifndef ROSTOCK_DELTA
 extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+#endif
 extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_move(byte check_endstops,byte pathOptimize);
+#ifdef ROSTOCK_DELTA
+extern void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
+extern void delta_home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+extern void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
+extern void queue_delta_move(byte check_endstops,byte pathOptimize);
+extern void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis);
+extern void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis);
+#endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
 extern inline void disable_y();
@@ -333,6 +343,13 @@ typedef struct { // RAM usage: 72 Byte
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
+#ifdef STEP_COUNTER
+  long countPositionSteps[3];		///< Count of steps from last position reset
+#endif
+#ifdef ROSTOCK_DELTA
+  long currentDeltaPositionSteps[4];
+  long destinationDeltaPositionSteps[4];
+#endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
   int opsPushbackSteps;             ///< Retract+extra distance for backslash
@@ -343,9 +360,13 @@ typedef struct { // RAM usage: 72 Byte
   float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
   int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
+#ifdef ROSTOCK_DELTA
+  long rodSteps;
+#else
   long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+#endif
   float feedrate;                   ///< Last requested feedrate.
   int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
   unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)

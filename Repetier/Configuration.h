@@ -30,7 +30,7 @@
 // Gen7 1.1 and above = 7
 // Teensylu (at90usb) = 8 // requires Teensyduino
 // Printrboard (at90usb) = 9 // requires Teensyduino
-#define MOTHERBOARD 5
+#define MOTHERBOARD 33
 #include <avr/io.h>
 #include "pins.h"
 
@@ -51,13 +51,32 @@
 // ##                               Calibration                                            ##
 // ##########################################################################################
 
+/** Preprocess movement for the Rostock Delta printer
+*/
+#define ROSTOCK_DELTA 0
 
+#ifdef ROSTOCK_DELTA
+#define BELT_PITCH 2
+#define PULLEY_TEETH 20
+#define STEPS_PER_ROTATION 400
+#define MICRO_STEPS 8
+
+#define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / (BELT_PITCH * PULLEY_TEETH))
+#define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+// Maximum travel length - For delta robot this is the maximum travel of the towers not cartesian
+// This is also stored in the eeprom
+#define ROD_MAX_LENGTH 600
+
+#else
 /** \brief Number of steps for a 1mm move in x direction. Overridden if EEPROM activated. */
 #define XAXIS_STEPS_PER_MM 40
 /** \brief Number of steps for a 1mm move in y direction  Overridden if EEPROM activated.*/
 #define YAXIS_STEPS_PER_MM 40
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
 #define ZAXIS_STEPS_PER_MM 3360
+#endif
 
 // ##########################################################################################
 // ##                           Extruder configuration                                     ##
@@ -472,9 +491,9 @@ on this endstop.
 #define ENDSTOP_X_MIN_INVERTING false
 #define ENDSTOP_Y_MIN_INVERTING false
 #define ENDSTOP_Z_MIN_INVERTING false
-#define ENDSTOP_X_MAX_INVERTING false
-#define ENDSTOP_Y_MAX_INVERTING false
-#define ENDSTOP_Z_MAX_INVERTING false
+#define ENDSTOP_X_MAX_INVERTING true
+#define ENDSTOP_Y_MAX_INVERTING true
+#define ENDSTOP_Z_MAX_INVERTING true
 
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
@@ -491,19 +510,19 @@ on this endstop.
 // Disables axis when it's not being used.
 #define DISABLE_X false
 #define DISABLE_Y false
-#define DISABLE_Z true
+#define DISABLE_Z false
 #define DISABLE_E false
 
 // Inverting axis direction
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
+#define INVERT_Y_DIR false
 #define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
-#define X_HOME_DIR -1
-#define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
+#define X_HOME_DIR 1
+#define Y_HOME_DIR 1
+#define Z_HOME_DIR 1
 
 //If true, axis won't move to coordinates less than zero.
 #define min_software_endstop_x false
@@ -511,14 +530,14 @@ on this endstop.
 #define min_software_endstop_z false
 
 //If true, axis won't move to coordinates greater than the defined lengths below.
-#define max_software_endstop_x true
-#define max_software_endstop_y true
-#define max_software_endstop_z true
+#define max_software_endstop_x false
+#define max_software_endstop_y false
+#define max_software_endstop_z false
 
 // If during homing the endstop is reached, ho many mm should the printer move back for the second try
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
-#define ENDSTOP_Z_BACK_MOVE 2
+#define ENDSTOP_Z_BACK_MOVE 5
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed
@@ -537,13 +556,42 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS true
 // maximum positions in mm - only fixed numbers!
-#define X_MAX_LENGTH 200
-#define Y_MAX_LENGTH 200
-#define Z_MAX_LENGTH 100
-
+#ifndef ROSTOCK_DELTA 
+#define X_MAX_LENGTH 100
+#define Y_MAX_LENGTH 100
+#define Z_MAX_LENGTH 400
+#endif
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
+
+
+
+#ifdef ROSTOCK_DELTA
+
+#define DELTA_HOMING_OFFSET 128.0 // mm
+
+#define DELTA_DIAGONAL_ROD 250.0 // mm
+
+#define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
+
+#define DELTA_ZERO_OFFSET -9 // print surface is lower than bottom endstops
+
+/** Horizontal offset of the universal joints on the end effector (moving platform).
+*/
+#define END_EFFECTOR_HORIZONTAL_OFFSET 33
+/** Horizontal offset of the universal joints on the vertical carriages.
+*/
+#define CARRIAGE_HORIZONTAL_OFFSET 18
+/** Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
+*/
+#define PRINTER_RADIUS 175
+/**  Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
+*/
+#define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+
+#define STEP_COUNTER
+#endif
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -562,9 +610,9 @@ on this endstop.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
     */
-#define MAX_FEEDRATE {15000, 15000, 100}
+#define MAX_FEEDRATE {15000, 15000, 15000}
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE {2400,2400,100}
+#define HOMING_FEEDRATE {2400,2400,2400}
 
 /* If you have a backslash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
@@ -639,7 +687,7 @@ Corner can be printed with full speed of 50 mm/s
 Overridden if EEPROM activated.
 */
 #define MAX_JERK 40.0
-#define MAX_ZJERK 0.3
+#define MAX_ZJERK 40.0
 
 /* Define the type of axis movements needed for your printer. The typical case
 is a full cartesian system where x, y and z moves are handled by seperate motors.
@@ -782,8 +830,8 @@ to activate the quadratic term. Only adds lots of computations and storage usage
  Overridden if EEPROM activated.
 */
 //#define BAUDRATE 76800
-//#define BAUDRATE 57600
-#define BAUDRATE 250000
+#define BAUDRATE 57600
+//#define BAUDRATE 115200
 /** \brief Size in byte of the output buffer */
 #define OUTPUT_BUFFER_SIZE 64
 /** \brief Activates buffered output.
@@ -845,9 +893,9 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, as they are 
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 0
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT 0
+#define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
@@ -856,26 +904,26 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
+#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
-#define INCLUDE_DEBUG_COMMUNICATION
+//#define INCLUDE_DEBUG_COMMUNICATION
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
-//#define INCLUDE_DEBUG_NO_MOVE
+#define INCLUDE_DEBUG_NO_MOVE
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
-//#define DEBUG_ADVANCE
+#define DEBUG_ADVANCE
 /** \brief print ops related debug info. */
-//#define DEBUG_OPS
+#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
 //#define DEBUG_STEPCOUNT
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
-//#define DEBUG
+#define DEBUG
 
 #endif
 

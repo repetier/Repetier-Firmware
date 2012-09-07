@@ -89,12 +89,64 @@ void set_fan_speed(int speed,bool wait) {
   pwm_pos[3] = speed;
 #endif
 }
+#ifdef ROSTOCK_DELTA
+void delta_move_to_top_endstops(float feedrate) {
+	long up_steps = printer_state.rodSteps;
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(up_steps,up_steps,up_steps,0,feedrate,true,true);
+	// In case X hit the endstop first, move Y and Z up.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(0,up_steps,up_steps,0,feedrate,true,true);
+	// In case Y hit the endstop first, move X and Z up.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(up_steps,0,up_steps,0,feedrate,true,true);
+	// In case Z hit the endstop first, move X and Y up.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(up_steps,up_steps,0,0,feedrate,true,true);
+	// Move X up all the way.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(up_steps,0,0,0,feedrate,true,true);
+	// Move Y up all the way.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(0,up_steps,0,0,feedrate,true,true);
+	// Move Z up all the way.
+	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
+	move_delta_steps(0,0,up_steps,0,feedrate,true,true);
+	set_delta_position(up_steps,up_steps,up_steps, printer_state.currentDeltaPositionSteps[3]);
+}
+
+void delta_home_axis(bool xaxis,bool yaxis,bool zaxis) {
+	long steps;
+	bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
+	if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1) {
+		UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+		// Homing Z axis means that you must home X and Y
+		if (homeallaxis || zaxis) {
+			delta_move_to_top_endstops(homing_feedrate[0]);	
+			move_delta_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE,axis_steps_per_unit[0]*-ENDSTOP_Y_BACK_MOVE,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,		homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
+			delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);	
+			printer_state.currentPositionSteps[0] = 0;
+			printer_state.currentPositionSteps[1] = 0;
+			printer_state.currentPositionSteps[2] = printer_state.rodSteps;
+			calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+		} 
+		else 
+		{
+			if (xaxis) printer_state.destinationSteps[0] = 0;
+			if (yaxis) printer_state.destinationSteps[1] = 0;
+			queue_delta_move(true, false); 
+		}
+		UI_CLEAR_STATUS 
+	}
+}
+#else
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
+  out.println_P(PSTR("Home"));
   if(xaxis) {
     if ((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
-      steps = printer_state.xMaxSteps * X_HOME_DIR;         
+      steps = printer_state.rodSteps * X_HOME_DIR;         
       printer_state.currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
       printer_state.currentPositionSteps[0] = 0;
@@ -141,6 +193,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   }
   UI_CLEAR_STATUS  
 }
+#endif
 /**
   \brief Execute the command stored in com.
 */
@@ -163,7 +216,7 @@ void process_command(GCode *com)
       case 0: // G0 -> G1
       case 1: // G1
         if(get_coordinates(com)) // For X Y Z E F
-          queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+          queue_delta_move(ALWAYS_CHECK_ENDSTOPS,true);
         break;
       case 4: // G4 dwell
         wait_until_end_of_move();
@@ -184,8 +237,12 @@ void process_command(GCode *com)
         break;
       case 28: {//G28 Home all Axis one at a time
           byte home_all_axis = (GCODE_HAS_NO_XYZ(com));
-          home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
-        }
+//#ifdef ROSTOCK_DELTA
+          delta_home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
+//#else
+//          home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
+//#endif		  
+		}
         break;
       case 90: // G90
         relative_mode = false;
@@ -452,7 +509,11 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
+#ifdef ROSTOCK_DELTA
+        out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Rostock EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
+#else
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
+#endif
         break;
       case 114: // M114
         printPosition();

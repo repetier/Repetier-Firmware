@@ -972,6 +972,10 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
         addFloat(fvalue,3,2);
         break;
+      case 'y':
+        if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentDeltaPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+        addFloat(fvalue,3,2);
+        break;
       case 'X': // Extruder related 
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
 #ifdef TEMP_PID
@@ -1647,19 +1651,29 @@ void UIDisplay::executeAction(int action) {
       emergencyStop();
       break;
     case UI_ACTION_HOME_ALL:
+#ifdef ROSTOCK_DELTA
+      delta_home_axis(true,true,true);
+#else
       home_axis(true,true,true);
+#endif
       printPosition();
       break;
     case UI_ACTION_HOME_X:
+#ifndef ROSTOCK_DELTA
       home_axis(true,false,false);
+#endif
       printPosition();
       break;
     case UI_ACTION_HOME_Y:
+#ifndef ROSTOCK_DELTA
       home_axis(false,true,false);
+#endif
       printPosition();
       break;
     case UI_ACTION_HOME_Z:
+#ifndef ROSTOCK_DELTA
       home_axis(false,false,true);
+#endif
       printPosition();
       break;
     case UI_ACTION_SET_ORIGIN:
