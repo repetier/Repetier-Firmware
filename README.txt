@@ -1,6 +1,9 @@
 Repetier-Firmware - the fast and user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
+Alpha version with added delta move and homing calculations based on Johann Rocholl's Marlin firmware.
+Not yet tested on a live machine .... use (if you choose) with caution.
+
 Version 0.62  17.04.2012
 
 1) Introduction
