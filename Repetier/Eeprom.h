@@ -53,6 +53,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_SPEED 95
 #define EPR_OPS_MOVE_AFTER 99
 #define EPR_OPS_MODE 103
+#define EPR_RODSTEPS 107
 
 #define EEPROM_EXTRUDER_OFFSET 150
 // bytes per extruder needed, leave some space for future development

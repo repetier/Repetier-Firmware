@@ -132,6 +132,9 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
 #endif
+#ifdef ROSTOCK_DELTA
+  epr_set_float(EPR_RODSTEPS,rodMaxLength);
+#endif
 #if USE_OPS==1
   epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
   epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
@@ -193,6 +196,9 @@ void epr_eeprom_to_data() {
   max_travel_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
+#endif
+#ifdef ROSTOCK_DELTA
+  rodMaxLength = epr_get_float(EPR_RODSTEPS);
 #endif
 #if USE_OPS==1
   printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
@@ -290,6 +296,9 @@ void epr_output_settings() {
   epr_out_float(EPR_X_MAX_TRAVEL_ACCEL,PSTR("X-axis travel acceleration [mm/s^2]"));
   epr_out_float(EPR_Y_MAX_TRAVEL_ACCEL,PSTR("Y-axis travel acceleration [mm/s^2]"));
   epr_out_float(EPR_Z_MAX_TRAVEL_ACCEL,PSTR("Z-axis travel acceleration [mm/s^2]"));
+#endif
+#ifdef ROSTOCK_DELTA
+  epr_out_float(EPR_RODSTEPS, PSTR("Rod length (Z max)"));
 #endif
 #if USE_OPS==1
   epr_out_byte(EPR_OPS_MODE,PSTR("OPS operation mode [0=Off,1=Classic,2=Fast]"));

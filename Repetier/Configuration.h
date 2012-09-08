@@ -53,7 +53,7 @@
 
 /** Preprocess movement for the Rostock Delta printer
 */
-#define ROSTOCK_DELTA 0
+#define ROSTOCK_DELTA
 
 #ifdef ROSTOCK_DELTA
 #define BELT_PITCH 2
@@ -66,7 +66,9 @@
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 // Maximum travel length - For delta robot this is the maximum travel of the towers not cartesian
-// This is also stored in the eeprom
+// This is also the maximum Z value. I plan to add a measure mode to set this
+// This value will be overidden with the value in the EEPROM
+// Defined in mm
 #define ROD_MAX_LENGTH 600
 
 #else
@@ -893,7 +895,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, as they are 
            taken from the EEPROM.
 */
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
 #define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */

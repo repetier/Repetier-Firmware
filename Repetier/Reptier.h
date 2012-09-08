@@ -289,6 +289,7 @@ extern void move_delta_steps(long x,long y,long z,long e,float feedrate,bool wai
 extern void queue_delta_move(byte check_endstops,byte pathOptimize);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis);
 extern void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis);
+extern float rodMaxLength;
 #endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();

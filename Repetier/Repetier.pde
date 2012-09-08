@@ -198,6 +198,9 @@ byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
   /** Acceleration in steps/s^2 in movement mode.*/
   unsigned long axis_travel_steps_per_sqr_second[4];
 #endif
+#ifdef ROSTOCK_DELTA
+float rodMaxLength = ROD_MAX_LENGTH;
+#endif
 PrinterState printer_state;
 byte relative_mode = false;  ///< Determines absolute (false) or relative Coordinates (true).
 byte relative_mode_e = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
@@ -328,7 +331,7 @@ void send_mem() {
 
 void update_ramps_parameter() {
 #ifdef ROSTOCK_DELTA
-  printer_state.rodSteps = axis_steps_per_unit[0]*ROD_MAX_LENGTH;
+  printer_state.rodSteps = axis_steps_per_unit[0]*rodMaxLength;
 #else
   printer_state.xMaxSteps = axis_steps_per_unit[0]*X_MAX_LENGTH;
   printer_state.yMaxSteps = axis_steps_per_unit[1]*Y_MAX_LENGTH;
