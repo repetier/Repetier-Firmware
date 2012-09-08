@@ -81,6 +81,12 @@ void change_feedrate_multiply(int factor) {
   printer_state.feedrateMultiply = factor;
   out.println_int_P(PSTR("SpeedMultiply:"),factor);
 }
+void change_flowate_multiply(int factor) {
+  if(factor<25) factor=25;
+  if(factor>200) factor=200;
+  printer_state.extrudeMultiply = factor;
+  out.println_int_P(PSTR("FlowMultiply:"),factor);
+}
 void set_fan_speed(int speed,bool wait) {  
 #if FAN_PIN>=0
   speed = constrain(speed,0,255);
@@ -542,7 +548,9 @@ void process_command(GCode *com)
         break;
       case 221: // M221 S<Extrusion flow multiplier in percent>
         if(GCODE_HAS_S(com))
-          printer_state.extrudeMultiply = com->S;
+          change_flowate_multiply(com->S);
+        else
+          change_flowate_multiply(100);
         break;
       case 222: //M222 F_CPU / S
        if(GCODE_HAS_S(com))

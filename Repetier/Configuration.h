@@ -27,10 +27,11 @@
 // Gen6 = 5, 
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
-// Gen7 1.1 and above = 7
+// Gen7 1.1 until 1.3.x = 7
+// Gen6 1.4.1 an dlater = 71
 // Teensylu (at90usb) = 8 // requires Teensyduino
 // Printrboard (at90usb) = 9 // requires Teensyduino
-#define MOTHERBOARD 5
+#define MOTHERBOARD 71
 #include <avr/io.h>
 #include "pins.h"
 
