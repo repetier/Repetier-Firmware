@@ -257,6 +257,12 @@ void epr_init() {
 #endif
 }
 
+#ifdef ROSTOCK_DELTA
+void epr_set_rod_length() {
+  epr_set_float(EPR_RODSTEPS,rodMaxLength);
+}
+#endif
+
 /** \brief Writes all eeprom settings to serial console.
 
 For each value stored, this function generates one line with syntax

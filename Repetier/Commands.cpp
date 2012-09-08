@@ -675,6 +675,30 @@ void process_command(GCode *com)
         out.println();
         break;
 #endif
+#ifdef STEP_COUNTER
+#ifdef ROSTOCK_DELTA
+		case 251:
+			if(GCODE_HAS_S(com)) {
+				if (com->S == 0) {
+					for (byte i=0; i<3; i++)
+						printer_state.countPositionSteps[i] = 0;
+				} else if (com->S == 1) {
+					out.println_long_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
+					out.println_long_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
+					out.println_long_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
+				} else if (com->S = 2) {
+					if (printer_state.countPositionSteps[2] < 0)
+						printer_state.countPositionSteps[2] = -printer_state.countPositionSteps[2];
+					rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countPositionSteps[2];
+					printer_state.rodSteps = printer_state.countPositionSteps[2];
+#if EEPROM_MODE!=0
+					epr_set_rod_length();
+#endif
+				}
+			}
+			break;
+#endif
+#endif
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();
