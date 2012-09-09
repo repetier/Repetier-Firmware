@@ -132,7 +132,7 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   epr_set_float(EPR_RODSTEPS,rodMaxLength);
 #endif
 #if USE_OPS==1
@@ -197,7 +197,7 @@ void epr_eeprom_to_data() {
   max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   rodMaxLength = epr_get_float(EPR_RODSTEPS);
 #endif
 #if USE_OPS==1
@@ -257,7 +257,7 @@ void epr_init() {
 #endif
 }
 
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 void epr_set_rod_length() {
   epr_set_float(EPR_RODSTEPS,rodMaxLength);
 }
@@ -303,7 +303,7 @@ void epr_output_settings() {
   epr_out_float(EPR_Y_MAX_TRAVEL_ACCEL,PSTR("Y-axis travel acceleration [mm/s^2]"));
   epr_out_float(EPR_Z_MAX_TRAVEL_ACCEL,PSTR("Z-axis travel acceleration [mm/s^2]"));
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   epr_out_float(EPR_RODSTEPS, PSTR("Rod length (Z max)"));
 #endif
 #if USE_OPS==1

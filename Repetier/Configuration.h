@@ -47,15 +47,26 @@
 // like advance steps or ops mode.
 // To override EEPROM settings with config settings, set EEPROM_MODE 0
 
+/* Define the type of axis movements needed for your printer. The typical case
+is a full cartesian system where x, y and z moves are handled by seperate motors.
+
+0 = full cartesian system, xyz have seperate motors.
+1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
+2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
+3 = Rostock Delta
+Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in 
+the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
+*/
+#define DRIVE_SYSTEM 3
+
 // ##########################################################################################
 // ##                               Calibration                                            ##
 // ##########################################################################################
 
 /** Preprocess movement for the Rostock Delta printer
 */
-#define ROSTOCK_DELTA
 
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 #define BELT_PITCH 2
 #define PULLEY_TEETH 20
 #define STEPS_PER_ROTATION 400
@@ -558,7 +569,7 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS true
 // maximum positions in mm - only fixed numbers!
-#ifndef ROSTOCK_DELTA 
+#if DRIVE_SYSTEM != 3 
 #define X_MAX_LENGTH 100
 #define Y_MAX_LENGTH 100
 #define Z_MAX_LENGTH 400
@@ -569,15 +580,11 @@ on this endstop.
 
 
 
-#ifdef ROSTOCK_DELTA
-
 #define DELTA_HOMING_OFFSET 128.0 // mm
 
 #define DELTA_DIAGONAL_ROD 250.0 // mm
 
 #define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
-
-#define DELTA_ZERO_OFFSET -9 // print surface is lower than bottom endstops
 
 /** Horizontal offset of the universal joints on the end effector (moving platform).
 */
@@ -593,7 +600,7 @@ on this endstop.
 #define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 
 #define STEP_COUNTER
-#endif
+
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -660,9 +667,9 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,3000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,100}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,3000}
 #endif
 
 /** \brief Maximum allowable jerk.
@@ -691,16 +698,6 @@ Overridden if EEPROM activated.
 #define MAX_JERK 40.0
 #define MAX_ZJERK 40.0
 
-/* Define the type of axis movements needed for your printer. The typical case
-is a full cartesian system where x, y and z moves are handled by seperate motors.
-
-0 = full cartesian system, xyz have seperate motors.
-1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
-2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
-Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in 
-the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
-*/
-#define DRIVE_SYSTEM 0
 
 /** \brief Number of moves we can cache in advance.
 
@@ -897,7 +894,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-#define SDSUPPORT 0
+//#define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 

@@ -156,7 +156,7 @@ Custom M Codes
 #error OUTPUT_BUFFER_SIZE must be in range 16..250
 #endif
 
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 #define SIN_60 0.8660254037844386
 #define COS_60 0.5
 #define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
@@ -198,7 +198,7 @@ byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
   /** Acceleration in steps/s^2 in movement mode.*/
   unsigned long axis_travel_steps_per_sqr_second[4];
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 float rodMaxLength = ROD_MAX_LENGTH;
 #endif
 PrinterState printer_state;
@@ -330,7 +330,7 @@ void send_mem() {
 #endif
 
 void update_ramps_parameter() {
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   printer_state.rodSteps = axis_steps_per_unit[0]*rodMaxLength;
 #else
   printer_state.xMaxSteps = axis_steps_per_unit[0]*X_MAX_LENGTH;
@@ -462,7 +462,7 @@ void setup()
   printer_state.advance_lin_set = 0;
 #endif
   printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
- #ifdef ROSTOCK_DELTA
+ #if DRIVE_SYSTEM==3
   printer_state.currentDeltaPositionSteps[0] = printer_state.currentDeltaPositionSteps[1] = printer_state.currentDeltaPositionSteps[2] = printer_state.currentDeltaPositionSteps[3] = 0;
   printer_state.offsetX = printer_state.offsetY = 0;
 #endif
@@ -1155,7 +1155,7 @@ void updateTrapezoids(byte p) {
     updateStepsParameter(act/*,13*/);
   act->flags &= ~FLAG_BLOCKED;
 }
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
   for(byte i=0; i < 4; i++) {
@@ -1191,7 +1191,7 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
 #endif
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   queue_delta_move(check_endstop,false);
 #else
   queue_move(check_endstop,false);
@@ -1245,7 +1245,7 @@ END_INTERRUPT_PROTECTED
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
   p->dir = 0;
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 #if min_software_endstop_x == true
     if (printer_state.destinationDeltaSteps[0] < 0) printer_state.destinationDeltaSteps[0] = 0;
 #endif
@@ -1287,9 +1287,9 @@ END_INTERRUPT_PROTECTED
 #endif
 #endif
   //Find direction
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
   for(byte i=0; i < 4; i++) {
-#ifdef ROSTOCK_DELTA  
+#if DRIVE_SYSTEM==3  
     if((p->delta[i]=printer_state.destinationDeltaPositionSteps[i]-printer_state.currentDeltaPositionSteps[i])>=0) {
 #else
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
@@ -1301,7 +1301,7 @@ END_INTERRUPT_PROTECTED
       p->delta[i] = -p->delta[i];
     }
     if(p->delta[i]) p->dir |= 16<<i;
-#ifdef ROSTOCK_DELTA  
+#if DRIVE_SYSTEM==3  
     printer_state.currentDeltaPositionSteps[i] = printer_state.destinationDeltaPositionSteps[i];
 #else
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
@@ -1509,7 +1509,7 @@ END_INTERRUPT_PROTECTED
 #endif
 }
 
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 /////////////// DELTA CODE ////////////////
 void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis) {
 	printer_state.destinationDeltaPositionSteps[0] = xaxis;

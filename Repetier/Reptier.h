@@ -276,15 +276,12 @@ extern void finishNextSegment();
 extern void printPosition();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
 extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
-#ifndef ROSTOCK_DELTA
 extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
-#endif
 extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_move(byte check_endstops,byte pathOptimize);
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 extern void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
-extern void delta_home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 extern void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_delta_move(byte check_endstops,byte pathOptimize);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis);
@@ -347,7 +344,7 @@ typedef struct { // RAM usage: 72 Byte
 #ifdef STEP_COUNTER
   long countPositionSteps[3];		///< Count of steps from last position reset
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   long currentDeltaPositionSteps[4];
   long destinationDeltaPositionSteps[4];
 #endif
@@ -361,7 +358,7 @@ typedef struct { // RAM usage: 72 Byte
   float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
   int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
   long rodSteps;
 #else
   long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.

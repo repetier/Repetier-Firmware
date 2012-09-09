@@ -89,7 +89,7 @@ void set_fan_speed(int speed,bool wait) {
   pwm_pos[3] = speed;
 #endif
 }
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
 	long up_steps = printer_state.rodSteps;
 	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
@@ -115,7 +115,7 @@ void delta_move_to_top_endstops(float feedrate) {
 	set_delta_position(up_steps,up_steps,up_steps, printer_state.currentDeltaPositionSteps[3]);
 }
 
-void delta_home_axis(bool xaxis,bool yaxis,bool zaxis) {
+void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 	long steps;
 	bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
 	if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1) {
@@ -237,11 +237,7 @@ void process_command(GCode *com)
         break;
       case 28: {//G28 Home all Axis one at a time
           byte home_all_axis = (GCODE_HAS_NO_XYZ(com));
-//#ifdef ROSTOCK_DELTA
-          delta_home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
-//#else
-//          home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
-//#endif		  
+          home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
 		}
         break;
       case 90: // G90
@@ -509,7 +505,7 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Rostock EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
 #else
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
@@ -676,7 +672,7 @@ void process_command(GCode *com)
         break;
 #endif
 #ifdef STEP_COUNTER
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 		case 251:
 			if(GCODE_HAS_S(com)) {
 				if (com->S == 0) {

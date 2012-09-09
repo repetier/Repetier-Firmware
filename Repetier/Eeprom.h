@@ -88,7 +88,7 @@ extern inline void epr_set_byte(uint pos,byte value);
 extern inline void epr_set_int(uint pos,int value);
 extern inline void epr_set_long(uint pos,long value);
 extern inline void epr_set_float(uint pos,float value);
-#ifdef ROSTOCK_DELTA
+#if DRIVE_SYSTEM==3
 extern void epr_set_rod_length();
 #endif
 
