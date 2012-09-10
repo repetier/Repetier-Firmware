@@ -160,6 +160,7 @@ Custom M Codes
 #define SIN_60 0.8660254037844386
 #define COS_60 0.5
 #define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
+#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
 #define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
 #define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
 
@@ -1510,7 +1511,6 @@ END_INTERRUPT_PROTECTED
 }
 
 #if DRIVE_SYSTEM==3
-/////////////// DELTA CODE ////////////////
 void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis) {
 	printer_state.destinationDeltaPositionSteps[0] = xaxis;
 	printer_state.destinationDeltaPositionSteps[1] = yaxis;
@@ -1526,17 +1526,17 @@ void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis) {
 }
 
 void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
-		deltaPosSteps[X_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
+		deltaPosSteps[X_AXIS] = sqrt(DELTA_DIAGONAL_ROD_STEPS_SQUARED
 			 - sq(DELTA_TOWER1_X_STEPS - cartesianPosSteps[X_AXIS])
 			 - sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS])
 			 ) + cartesianPosSteps[Z_AXIS];
 		
-		deltaPosSteps[Y_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
-    		 - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])
+		deltaPosSteps[Y_AXIS] = sqrt(DELTA_DIAGONAL_ROD_STEPS_SQUARED
+			 - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])
 			 - sq(DELTA_TOWER2_Y_STEPS - cartesianPosSteps[Y_AXIS])
 			 ) + cartesianPosSteps[Z_AXIS];
 
-		deltaPosSteps[Z_AXIS] = sqrt(sq(DELTA_DIAGONAL_ROD_STEPS)
+		deltaPosSteps[Z_AXIS] = sqrt(DELTA_DIAGONAL_ROD_STEPS_SQUARED
 			 - sq(DELTA_TOWER3_X_STEPS - cartesianPosSteps[X_AXIS])
 			 - sq(DELTA_TOWER3_Y_STEPS - cartesianPosSteps[Y_AXIS])
 			 ) + cartesianPosSteps[Z_AXIS];
@@ -1564,31 +1564,44 @@ void queue_delta_move(byte check_endstops,byte pathOptimize) {
 	}
 	float seconds = 6000 * cartesian_mm / printer_state.feedrate / printer_state.feedrateMultiply;
 	int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
-	UI_STATUS_UPD("Delta Calc");
+	int fractional_steps[4]; 
+	long final_destination_steps[4];
+	
+	// Pre calculate the steps to avoid float division and multiplication in loop
+	for(byte i=0; i < NUM_AXIS; i++) {
+		fractional_steps[i] = (1.0/steps) * difference[i];
+		// Save final position
+		final_destination_steps[i] = printer_state.destinationSteps[i];
+		printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
+	}
+	
+#ifdef DEBUG_QUEUE_MOVE
 	out.println_float_P(PSTR("Delta mm:"), cartesian_mm);
 	out.println_float_P(PSTR("Delta seconds:"), seconds);
 	out.println_long_P(PSTR("Delta steps:"), steps);
+#endif
 
-	for (int s = 1; s <= steps; s++) {
+	for (int s = 1; s <= steps - 1; s++) {
 
-		float fraction = float(s) / float(steps);
-	
-		for(int8_t i=0; i < NUM_AXIS; i++) {
-			printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i] + (difference[i] * fraction);
-		}
+		// Just a long to int addition now. Wonder if the compiler optimises a long to int addition or whether it casts int to long?
+		for(byte i=0; i < NUM_AXIS; i++)
+			printer_state.destinationSteps[i] += fractional_steps[i];
 
 		calculate_delta(printer_state.destinationSteps, printer_state.destinationDeltaPositionSteps);
 		printer_state.destinationDeltaPositionSteps[3] = printer_state.destinationSteps[3];
 		
 		queue_move(check_endstops, pathOptimize);
 	}
-	
-	for(byte i=0; i < NUM_AXIS; i++) {
-		printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
-	}
-}
 
-///////////////////////////////////////////
+	// Set final destination manually to avoid rounding errors
+	calculate_delta(final_destination_steps, printer_state.destinationDeltaPositionSteps);
+	printer_state.destinationDeltaPositionSteps[3] = final_destination_steps[3];
+	queue_move(check_endstops, pathOptimize);	
+
+	// Update current position
+	for(byte i=0; i < NUM_AXIS; i++)
+		printer_state.currentPositionSteps[i] = final_destination_steps[i];
+}
 #endif
 
 inline unsigned int ComputeV(long timer,long accel) {
