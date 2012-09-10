@@ -156,7 +156,10 @@
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
-
+#define UI_TEXT_SHOW_MEASUREMENT  "Show meas."
+#define UI_TEXT_RESET_MEASUREMENT "Reset meas."
+#define UI_TEXT_SET_MEASURED_ORIGIN "Set meas. origin"
+#define UI_TEXT_DELTA			  "Delta Calib."
 // *************** german translation ****************
 
 #if UI_LANGUAGE==1

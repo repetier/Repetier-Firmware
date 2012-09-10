@@ -1929,6 +1929,24 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_Z_DOWN:
       move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
+    case UI_ACTION_Z_UP_MICRO:
+      move_steps(0,0,axis_steps_per_unit[2] * 0.1,0,homing_feedrate[2],false,true);
+      break;
+    case UI_ACTION_Z_DOWN_MICRO:
+      move_steps(0,0,-axis_steps_per_unit[2] * 0.1,0,homing_feedrate[2],false,true);
+      break;
+    case UI_ACTION_Z_UP_CENTI:
+      move_steps(0,0,axis_steps_per_unit[2] * 10,0,homing_feedrate[2],false,true);
+      break;
+    case UI_ACTION_Z_DOWN_CENTI:
+      move_steps(0,0,-axis_steps_per_unit[2] * 10,0,homing_feedrate[2],false,true);
+      break;
+    case UI_ACTION_Z_UP_DECI:
+      move_steps(0,0,axis_steps_per_unit[2] * 100,0,homing_feedrate[2],false,true);
+      break;
+    case UI_ACTION_Z_DOWN_DECI:
+      move_steps(0,0,-axis_steps_per_unit[2] * 100,0,homing_feedrate[2],false,true);
+      break;
     case UI_ACTION_EXTRUDER_UP:
       move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
@@ -1958,6 +1976,44 @@ void UIDisplay::executeAction(int action) {
     }
 #endif
       break;
+	case UI_ACTION_SHOW_MEASUREMENT:
+#ifdef STEP_COUNTER
+	{
+		out.print_float_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
+		out.print_float_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
+		out.print_float_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
+	}
+#endif
+      break;
+	case UI_ACTION_RESET_MEASUREMENT:
+#ifdef STEP_COUNTER
+	{
+		for (byte i=0; i<3; i++)
+			printer_state.countPositionSteps[i] = 0;
+		out.println_P(PSTR("Measurement reset."));
+	}
+#endif
+      break;
+	case UI_ACTION_SET_MEASURED_ORIGIN:
+#ifdef STEP_COUNTER
+	{
+		if (printer_state.countPositionSteps[2] < 0)
+			printer_state.countPositionSteps[2] = -printer_state.countPositionSteps[2];
+		rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countPositionSteps[2];
+		printer_state.rodSteps = printer_state.countPositionSteps[2];
+		for (byte i=0; i<3; i++) {
+			printer_state.currentPositionSteps[i] = 0;
+			printer_state.rodSteps = printer_state.countPositionSteps[2];
+		}
+		calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+		out.println_P(PSTR("Measured origin set. Measurement reset."));
+#if EEPROM_MODE!=0
+		epr_set_rod_length();
+		out.println_P(PSTR("EEPROM updated"));
+#endif
+	}
+#endif
+      break;	
     case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED==true
     {

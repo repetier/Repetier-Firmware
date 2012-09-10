@@ -623,6 +623,13 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast,UI_TEXT_Z_POS_FAST,ui_menu_zpos_fast);
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z,&ui_menu_go_xfast,&ui_menu_go_xpos,&ui_menu_go_yfast,&ui_menu_go_ypos,&ui_menu_go_zfast,&ui_menu_go_zpos,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,11+UI_MENU_BACKCNT);
 
+// **** Delta calibration menu
+UI_MENU_ACTIONCOMMAND(ui_menu_show_measurement,UI_TEXT_SHOW_MEASUREMENT,UI_ACTION_SHOW_MEASUREMENT);
+UI_MENU_ACTIONCOMMAND(ui_menu_reset_measurement,UI_TEXT_RESET_MEASUREMENT,UI_ACTION_RESET_MEASUREMENT);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);
+#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_show_measurement,&ui_menu_reset_measurement,&ui_menu_set_measured_origin,&ui_menu_home_all,&ui_menu_go_zpos,&ui_menu_go_zfast}
+UI_MENU(ui_menu_delta,UI_MENU_DELTA,6+UI_MENU_BACKCNT);
+
 // **** Extruder menu
 
 UI_MENU_CHANGEACTION(ui_menu_ext_temp0,UI_TEXT_EXTR0_TEMP,UI_ACTION_EXTRUDER0_TEMP);
@@ -825,8 +832,16 @@ UI_MENU_ACTION2C(ui_menu_eeprom_loaded,UI_ACTION_DUMMY,UI_TEXT_EEPROM_LOADED);
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND}
-UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+4);
+#ifdef STEP_COUNTER
+#define UI_MENU_DELTA_COND ,&ui_menu_conf_delta
+#define UI_MENU_DELTA_CNT 1
+UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_DELTA, ui_menu_delta);
+#else
+#define UI_MENU_DELTA_COND
+#define UI_MENU_DELTA_CNT 0
+#endif 
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND}
+UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+4);
 // Main menu
 UI_MENU_SUBMENU(ui_menu_main1,UI_TEXT_QUICK_SETTINGS,ui_menu_quick);
 UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);

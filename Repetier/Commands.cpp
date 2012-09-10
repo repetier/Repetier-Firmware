@@ -680,18 +680,26 @@ void process_command(GCode *com)
 				if (com->S == 0) {
 					for (byte i=0; i<3; i++)
 						printer_state.countPositionSteps[i] = 0;
+					out.println_P(PSTR("Measurement reset."));
 				} else if (com->S == 1) {
-					out.println_long_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
-					out.println_long_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
-					out.println_long_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
+					out.print_float_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
+					out.print_float_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
+					out.print_float_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
 				} else if (com->S = 2) {
 					if (printer_state.countPositionSteps[2] < 0)
 						printer_state.countPositionSteps[2] = -printer_state.countPositionSteps[2];
 					rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countPositionSteps[2];
 					printer_state.rodSteps = printer_state.countPositionSteps[2];
-#if EEPROM_MODE!=0
+					for (byte i=0; i<3; i++) {
+						printer_state.currentPositionSteps[i] = 0;
+						printer_state.rodSteps = printer_state.countPositionSteps[2];
+					}
+					calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+					out.println_P(PSTR("Measured origin set. Measurement reset."));
+			#if EEPROM_MODE!=0
 					epr_set_rod_length();
-#endif
+					out.println_P(PSTR("EEPROM updated"));
+			#endif
 				}
 			}
 			break;
