@@ -136,6 +136,8 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 			if (yaxis) printer_state.destinationSteps[1] = 0;
 			queue_delta_move(true, false); 
 		}
+		for (byte i=0; i<3; i++)
+			printer_state.countPositionSteps[i] = 0;
 		UI_CLEAR_STATUS 
 	}
 }
