@@ -32,7 +32,7 @@
 #include "SdFat.h"
 extern void initsd();
 #endif
-#define REPETIER_VERSION "0.71"
+#define REPETIER_VERSION "0.73"
 
 #define uint uint16_t
 #define uint8 uint8_t
@@ -308,6 +308,8 @@ extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;
 
 extern void setupTimerInterrupt();
+extern void digipot_init();
+extern void microstep_init();
 
 typedef struct { // RAM usage: 72 Byte
   byte flag0; // 1 = stepper disabled

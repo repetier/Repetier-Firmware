@@ -28,6 +28,7 @@
 #ifdef SDSUPPORT
 #include "SdFat.h"
 #endif
+#include <SPI.h>
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
@@ -147,6 +148,103 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   }
   UI_CLEAR_STATUS  
 }
+
+
+// Digipot methods for controling current and microstepping
+
+#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
+int digitalPotWrite(int address, int value) // From Arduino DigitalPotControl example
+{
+    digitalWrite(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
+    SPI.transfer(address); //  send in the address and value via SPI:
+    SPI.transfer(value);
+    digitalWrite(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
+    //delay(10);
+}
+
+void digipot_current(uint8_t driver, int current)
+{
+    const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
+    digitalPotWrite(digipot_ch[driver], current);
+}
+#endif
+
+void digipot_init() //Initialize Digipot Motor Current
+{
+  #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
+    const uint8_t digipot_motor_current[] = DIGIPOT_MOTOR_CURRENT;
+    
+    SPI.begin(); 
+    SET_OUTPUT(DIGIPOTSS_PIN);    
+    for(int i=0;i<=4;i++) 
+      //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
+      digipot_current(i,digipot_motor_current[i]);
+  #endif
+}
+
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+void microstep_ms(uint8_t driver, int8_t ms1, int8_t ms2)
+{
+  if(ms1 > -1) switch(driver)
+  {
+    case 0: WRITE( X_MS1_PIN,ms1); break;
+    case 1: WRITE( Y_MS1_PIN,ms1); break;
+    case 2: WRITE( Z_MS1_PIN,ms1); break;
+    case 3: WRITE(E0_MS1_PIN,ms1); break;
+    case 4: WRITE(E1_MS1_PIN,ms1); break;
+  }
+  if(ms2 > -1) switch(driver)
+  {
+    case 0: WRITE( X_MS2_PIN,ms2); break;
+    case 1: WRITE( Y_MS2_PIN,ms2); break;
+    case 2: WRITE( Z_MS2_PIN,ms2); break;
+    case 3: WRITE(E0_MS2_PIN,ms2); break;
+    case 4: WRITE(E1_MS2_PIN,ms2); break;
+  }
+}
+
+void microstep_mode(uint8_t driver, uint8_t stepping_mode)
+{
+  switch(stepping_mode)
+  {
+    case 1: microstep_ms(driver,MICROSTEP1); break;
+    case 2: microstep_ms(driver,MICROSTEP2); break;
+    case 4: microstep_ms(driver,MICROSTEP4); break;
+    case 8: microstep_ms(driver,MICROSTEP8); break;
+    case 16: microstep_ms(driver,MICROSTEP16); break;
+  }
+}
+void microstep_readings()
+{
+      out.println_P(PSTR("MS1,MS2 Pins"));
+      out.print_int_P(PSTR("X: "), READ(X_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(X_MS2_PIN));
+      out.print_int_P(PSTR("Y: "), READ(Y_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(Y_MS2_PIN));
+      out.print_int_P(PSTR("Z: "), READ(Z_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(Z_MS2_PIN));
+      out.print_int_P(PSTR("E0: "), READ(E0_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(E0_MS2_PIN));
+      out.print_int_P(PSTR("E1: "), READ(E1_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(E1_MS2_PIN));
+}
+#endif
+
+void microstep_init()
+{
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+  const uint8_t microstep_modes[] = MICROSTEP_MODES;
+  SET_OUTPUT(X_MS2_PIN);
+  SET_OUTPUT(Y_MS2_PIN);
+  SET_OUTPUT(Z_MS2_PIN);
+  SET_OUTPUT(E0_MS2_PIN);
+  SET_OUTPUT(E1_MS2_PIN);
+  for(int i=0;i<=4;i++) microstep_mode(i,microstep_modes[i]);
+#endif
+}
+
+
+
 /**
   \brief Execute the command stored in com.
 */
@@ -622,6 +720,32 @@ void process_command(GCode *com)
         out.println();
         break;
 #endif
+    case 210:
+    case 908: // Control digital trimpot directly.
+    {
+#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
+        uint8_t channel,current;
+        if(GCODE_HAS_P(com) && GCODE_HAS_S(com)) 
+          digitalPotWrite((uint8_t)com->P, (uint8_t)com->S);
+#endif
+    }
+    break;
+    case 211:
+    case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
+    {
+      out.println_P(PSTR("Set Microstepping"));
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+        if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S); 
+        if(GCODE_HAS_X(com)) microstep_mode(0,(uint8_t)com->X);
+        if(GCODE_HAS_Y(com)) microstep_mode(1,(uint8_t)com->Y);
+        if(GCODE_HAS_Z(com)) microstep_mode(2,(uint8_t)com->Z);
+        if(GCODE_HAS_E(com)) microstep_mode(3,(uint8_t)com->E);
+        if(GCODE_HAS_P(com)) microstep_mode(4,com->P); // Original B but is not supported here
+        microstep_readings();
+#endif
+    }
+    break;
+
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();

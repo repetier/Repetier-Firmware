@@ -1,5 +1,8 @@
 Version 0.73
   Added motherboard type 71 for Gen7 1.4.1
+  Added motherboard type 70 for MegaTronics
+  Added RAMBO motherboard type 301
+  Added support for Digipot/microstepping adjustment in firmware for RAMBO boards.
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

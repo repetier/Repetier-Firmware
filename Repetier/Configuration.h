@@ -31,7 +31,9 @@
 // Gen6 1.4.1 an dlater = 71
 // Teensylu (at90usb) = 8 // requires Teensyduino
 // Printrboard (at90usb) = 9 // requires Teensyduino
-#define MOTHERBOARD 71
+// MegaTronics = 70
+// Rambo = 301
+#define MOTHERBOARD 301
 #include <avr/io.h>
 #include "pins.h"
 
@@ -545,6 +547,19 @@ on this endstop.
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#define MICROSTEP16 HIGH,HIGH
+
+// Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
+#define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
+
+// Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
+#define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
