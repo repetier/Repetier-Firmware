@@ -427,7 +427,7 @@ void gcode_read_serial() {
       gcode_binary = (gcode_transbuffer[0] & 128)!=0;
     }
     if(gcode_binary) {
-      if(gcode_wpos < 2 ) continue;
+     if(gcode_wpos < 2 ) continue;
       if(gcode_wpos == 2) gcode_binary_size = gcode_comp_binary_size(*(unsigned int*)gcode_transbuffer);
       else if(gcode_wpos==gcode_binary_size) {
         act = &gcode_buffer[gcode_windex];
@@ -548,8 +548,13 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    p = buffer;
    code->params = *(unsigned int *)p;p+=2;
    if(code->params & 1) {gcode_actN=code->N=*(unsigned int *)p;p+=2;}
+   if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
+     if(code->params & 2) {code->M=*(unsigned int *)p+=2;}
+     if(code->params & 4) {code->G=*(unsigned int *)p+=2;}
+   } else {
    if(code->params & 2) {code->M=*p++;}
    if(code->params & 4) {code->G=*p++;}
+   }
    //if(code->params & 8) {memcpy(&code->X,p,4);p+=4;}
    if(code->params & 8) {code->X=*(float *)p;p+=4;}
    if(code->params & 16) {code->Y=*(float *)p;p+=4;}
@@ -582,11 +587,11 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->N = gcode_actN & 0xffff;
   }
   if((pos = strchr(line,'M'))!=0) { // M command
-     code->M = gcode_value_long(++pos) & 0xff;
+     code->M = gcode_value_long(++pos) & 0xffff;
      code->params |= 2;
   }
   if((pos = strchr(line,'G'))!=0) { // G command
-     code->G = gcode_value_long(++pos) & 0xff;
+     code->G = gcode_value_long(++pos) & 0xffff;
      code->params |= 4;
   }
   if((pos = strchr(line,'X'))!=0) { 

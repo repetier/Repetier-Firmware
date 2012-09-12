@@ -106,6 +106,7 @@ Custom M Codes
 #include "fastio.h"
 #include "ui.h"
 #include <util/delay.h>
+#include <SPI.h>
 
 #ifdef SDSUPPORT
 #include "SdFat.h"
@@ -366,7 +367,11 @@ void setup()
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
   SET_OUTPUT(Z_STEP_PIN);
-  
+#if MOTHERBOARD==301
+  // Additional setup for digipot/microstepping
+  digipot_init();
+  microstep_init();
+#endif
   //Initialize Dir Pins
 #if X_DIR_PIN>-1
   SET_OUTPUT(X_DIR_PIN);
@@ -1881,8 +1886,7 @@ inline long bresenham_step() {
      long h = mulu6xu16to32(cur->vStart,cur->advanceL);
      int tred = ((
 #ifdef ENABLE_QUADRATIC_ADVANCE
-     printer_state.advance_executed = cur->advanceStart;
-     cur->advanceStart+
+     (printer_state.advance_executed = cur->advanceStart)+
 #endif
      h)>>16);
      printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
@@ -2159,7 +2163,7 @@ inline long bresenham_step() {
         }
 #ifdef ENABLE_QUADRATIC_ADVANCE
         long h=mulu6xu16to32(cur->advanceL,v);
-        int tred = ((advance_target+h)>>16);
+        int tred = ((printer_state.advance_executed+h)>>16);
         cli();  
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;

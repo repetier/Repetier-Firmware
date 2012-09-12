@@ -27,9 +27,12 @@
 // Gen6 = 5, 
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
-// Gen7 1.1 and above = 7
+// Gen7 1.1 until 1.3.x = 7
+// Gen6 1.4.1 an dlater = 71
 // Teensylu (at90usb) = 8 // requires Teensyduino
 // Printrboard (at90usb) = 9 // requires Teensyduino
+// MegaTronics = 70
+// Rambo = 301
 #define MOTHERBOARD 33
 #include <avr/io.h>
 #include "pins.h"
@@ -590,6 +593,20 @@ on this endstop.
 // ##                           Movement settings                                          ##
 // ##########################################################################################
 
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#define MICROSTEP16 HIGH,HIGH
+
+// Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
+#define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
+
+// Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
+#define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+
+// Delta settings
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 250.0 // mm
@@ -922,7 +939,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 //#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
-//#define INCLUDE_DEBUG_COMMUNICATION
+#define INCLUDE_DEBUG_COMMUNICATION
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
 //#define INCLUDE_DEBUG_NO_MOVE

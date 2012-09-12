@@ -28,6 +28,7 @@
 #ifdef SDSUPPORT
 #include "SdFat.h"
 #endif
+#include <SPI.h>
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
@@ -80,6 +81,12 @@ void change_feedrate_multiply(int factor) {
   printer_state.feedrate *= (float)factor/(float)printer_state.feedrateMultiply;
   printer_state.feedrateMultiply = factor;
   out.println_int_P(PSTR("SpeedMultiply:"),factor);
+}
+void change_flowate_multiply(int factor) {
+  if(factor<25) factor=25;
+  if(factor>200) factor=200;
+  printer_state.extrudeMultiply = factor;
+  out.println_int_P(PSTR("FlowMultiply:"),factor);
 }
 void set_fan_speed(int speed,bool wait) {  
 #if FAN_PIN>=0
@@ -144,11 +151,10 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 #else
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
-  out.println_P(PSTR("Home"));
   if(xaxis) {
     if ((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
-      steps = printer_state.rodSteps * X_HOME_DIR;         
+      steps = printer_state.xMaxSteps * X_HOME_DIR;         
       printer_state.currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
       printer_state.currentPositionSteps[0] = 0;
@@ -196,6 +202,102 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   UI_CLEAR_STATUS  
 }
 #endif
+
+// Digipot methods for controling current and microstepping
+
+#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
+int digitalPotWrite(int address, int value) // From Arduino DigitalPotControl example
+{
+    digitalWrite(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
+    SPI.transfer(address); //  send in the address and value via SPI:
+    SPI.transfer(value);
+    digitalWrite(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
+    //delay(10);
+}
+
+void digipot_current(uint8_t driver, int current)
+{
+    const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
+    digitalPotWrite(digipot_ch[driver], current);
+}
+#endif
+
+void digipot_init() //Initialize Digipot Motor Current
+{
+  #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
+    const uint8_t digipot_motor_current[] = DIGIPOT_MOTOR_CURRENT;
+    
+    SPI.begin(); 
+    SET_OUTPUT(DIGIPOTSS_PIN);    
+    for(int i=0;i<=4;i++) 
+      //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
+      digipot_current(i,digipot_motor_current[i]);
+  #endif
+}
+
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+void microstep_ms(uint8_t driver, int8_t ms1, int8_t ms2)
+{
+  if(ms1 > -1) switch(driver)
+  {
+    case 0: WRITE( X_MS1_PIN,ms1); break;
+    case 1: WRITE( Y_MS1_PIN,ms1); break;
+    case 2: WRITE( Z_MS1_PIN,ms1); break;
+    case 3: WRITE(E0_MS1_PIN,ms1); break;
+    case 4: WRITE(E1_MS1_PIN,ms1); break;
+  }
+  if(ms2 > -1) switch(driver)
+  {
+    case 0: WRITE( X_MS2_PIN,ms2); break;
+    case 1: WRITE( Y_MS2_PIN,ms2); break;
+    case 2: WRITE( Z_MS2_PIN,ms2); break;
+    case 3: WRITE(E0_MS2_PIN,ms2); break;
+    case 4: WRITE(E1_MS2_PIN,ms2); break;
+  }
+}
+
+void microstep_mode(uint8_t driver, uint8_t stepping_mode)
+{
+  switch(stepping_mode)
+  {
+    case 1: microstep_ms(driver,MICROSTEP1); break;
+    case 2: microstep_ms(driver,MICROSTEP2); break;
+    case 4: microstep_ms(driver,MICROSTEP4); break;
+    case 8: microstep_ms(driver,MICROSTEP8); break;
+    case 16: microstep_ms(driver,MICROSTEP16); break;
+  }
+}
+void microstep_readings()
+{
+      out.println_P(PSTR("MS1,MS2 Pins"));
+      out.print_int_P(PSTR("X: "), READ(X_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(X_MS2_PIN));
+      out.print_int_P(PSTR("Y: "), READ(Y_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(Y_MS2_PIN));
+      out.print_int_P(PSTR("Z: "), READ(Z_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(Z_MS2_PIN));
+      out.print_int_P(PSTR("E0: "), READ(E0_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(E0_MS2_PIN));
+      out.print_int_P(PSTR("E1: "), READ(E1_MS1_PIN));
+      out.println_int_P(PSTR(","),READ(E1_MS2_PIN));
+}
+#endif
+
+void microstep_init()
+{
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+  const uint8_t microstep_modes[] = MICROSTEP_MODES;
+  SET_OUTPUT(X_MS2_PIN);
+  SET_OUTPUT(Y_MS2_PIN);
+  SET_OUTPUT(Z_MS2_PIN);
+  SET_OUTPUT(E0_MS2_PIN);
+  SET_OUTPUT(E1_MS2_PIN);
+  for(int i=0;i<=4;i++) microstep_mode(i,microstep_modes[i]);
+#endif
+}
+
+
+
 /**
   \brief Execute the command stored in com.
 */
@@ -218,7 +320,11 @@ void process_command(GCode *com)
       case 0: // G0 -> G1
       case 1: // G1
         if(get_coordinates(com)) // For X Y Z E F
+#if DRIVE_SYSTEM == 3
           queue_delta_move(ALWAYS_CHECK_ENDSTOPS,true);
+#else
+          queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+#endif
         break;
       case 4: // G4 dwell
         wait_until_end_of_move();
@@ -601,7 +707,9 @@ void process_command(GCode *com)
         break;
       case 221: // M221 S<Extrusion flow multiplier in percent>
         if(GCODE_HAS_S(com))
-          printer_state.extrudeMultiply = com->S;
+          change_flowate_multiply(com->S);
+        else
+          change_flowate_multiply(100);
         break;
       case 222: //M222 F_CPU / S
        if(GCODE_HAS_S(com))
@@ -673,6 +781,31 @@ void process_command(GCode *com)
         out.println();
         break;
 #endif
+    case 210:
+    case 908: // Control digital trimpot directly.
+    {
+#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
+        uint8_t channel,current;
+        if(GCODE_HAS_P(com) && GCODE_HAS_S(com)) 
+          digitalPotWrite((uint8_t)com->P, (uint8_t)com->S);
+#endif
+    }
+    break;
+    case 211:
+    case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
+    {
+      out.println_P(PSTR("Set Microstepping"));
+#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+        if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S); 
+        if(GCODE_HAS_X(com)) microstep_mode(0,(uint8_t)com->X);
+        if(GCODE_HAS_Y(com)) microstep_mode(1,(uint8_t)com->Y);
+        if(GCODE_HAS_Z(com)) microstep_mode(2,(uint8_t)com->Z);
+        if(GCODE_HAS_E(com)) microstep_mode(3,(uint8_t)com->E);
+        if(GCODE_HAS_P(com)) microstep_mode(4,com->P); // Original B but is not supported here
+        microstep_readings();
+#endif
+    }
+    break;
 #ifdef STEP_COUNTER
 #if DRIVE_SYSTEM==3
 		case 251:
