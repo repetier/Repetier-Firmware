@@ -67,11 +67,23 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 
 #if DRIVE_SYSTEM==3
+/** \brief Pitch in mm of drive belt. GT2 = 2mm
+*/
 #define BELT_PITCH 2
+
+/** \brief Number of teeth on X, Y and Z tower pulleys
+*/
 #define PULLEY_TEETH 20
+
+/** \brief Steps per rotation of stepper motor
+*/
 #define STEPS_PER_ROTATION 400
+
+/** \brief Micro stepping rate of stepper driver
+*/
 #define MICRO_STEPS 8
 
+// Calculations
 #define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / (BELT_PITCH * PULLEY_TEETH))
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
@@ -578,29 +590,33 @@ on this endstop.
 // ##                           Movement settings                                          ##
 // ##########################################################################################
 
-
-
-#define DELTA_HOMING_OFFSET 128.0 // mm
-
+/** \brief Delta rod length
+*/
 #define DELTA_DIAGONAL_ROD 250.0 // mm
 
+/** \brief Number of segments to generate for delta conversions per second of move
+*/
 #define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
 
-/** Horizontal offset of the universal joints on the end effector (moving platform).
+/** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
 #define END_EFFECTOR_HORIZONTAL_OFFSET 33
-/** Horizontal offset of the universal joints on the vertical carriages.
+
+/** \brief Horizontal offset of the universal joints on the vertical carriages.
 */
 #define CARRIAGE_HORIZONTAL_OFFSET 18
-/** Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
+
+/** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
 #define PRINTER_RADIUS 175
-/**  Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
+
+/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 
+/** \brief Enable counter to count steps for Z max calculations
+*/
 #define STEP_COUNTER
-
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -903,26 +919,26 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-#define DEBUG_QUEUE_MOVE
+//#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 //#define INCLUDE_DEBUG_COMMUNICATION
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
-#define INCLUDE_DEBUG_NO_MOVE
+//#define INCLUDE_DEBUG_NO_MOVE
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
-#define DEBUG_ADVANCE
+//#define DEBUG_ADVANCE
 /** \brief print ops related debug info. */
-#define DEBUG_OPS
+//#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
 //#define DEBUG_STEPCOUNT
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
-#define DEBUG
+//#define DEBUG
 
 #endif
 

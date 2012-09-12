@@ -959,6 +959,7 @@ inline float computeJerk(PrintLine *p1,PrintLine *p2) {
 }
 inline float safeSpeed(PrintLine *p) {
   float safe = printer_state.maxJerk*0.5;
+  // TODO - May not be relevant for delta
   if(p->dir & 64) {
     if(abs(p->speedZ)>printer_state.maxZJerk*0.5) {
       float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/abs(p->speedZ);
@@ -1066,10 +1067,11 @@ void updateTrapezoids(byte p) {
     BEGIN_INTERRUPT_PROTECTED; 
     prev->flags |= FLAG_BLOCKED;    
     END_INTERRUPT_PROTECTED;
+	// TODO - OPS should only happen at the start and end of the delta move
 #if USE_OPS==1
     if(printer_state.opsMode && printmoveSeen) {
-      if((prev->dir & 136)==136 && (act->dir & 136)!=136) {
-        if((act->dir & 64)!=0 || act->distance>printer_state.opsMinDistance) { // Switch printing - travel
+      if((prev->dir & 136)==136 && (act->dir & 136)!=136) { // Switch printing - travel
+        if((act->dir & 64)!=0 || act->distance>printer_state.opsMinDistance) { 
           act->joinFlags |= FLAG_JOIN_START_RETRACT | FLAG_JOIN_START_FIXED; // enable retract for this point
           prev->joinFlags |= FLAG_JOIN_END_FIXED;
           updateStepsParameter(prev/*,4*/);
@@ -1336,6 +1338,7 @@ p->delta[1] = deltay-deltax;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
 #endif
+	// TODO - Could be the same for all blocks
   if(printer_state.extrudeMultiply!=100) {
     p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
   }
@@ -1346,6 +1349,7 @@ p->delta[1] = deltay-deltax;
     }
     return; // No move in command
   }
+	// TODO - Could be the same for all blocks
 #if USE_OPS==1
   p->opsReverseSteps=0;
 #endif
@@ -1359,6 +1363,7 @@ p->delta[1] = deltay-deltax;
   p->primaryAxis = primary_axis;
   p->stepsRemaining = p->delta[primary_axis];
   //Feedrate calc based on XYZ travel distance
+  // TODO - Simplify since Z will always move
   if(p->dir & 112) {
     if(p->dir & 64) {
       p->distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
@@ -1370,11 +1375,13 @@ p->delta[1] = deltay-deltax;
   else {
     return; // no steps to take, we are finished
   }    
+	// TODO - The time for the move should be constant (i.e. the time computed for each slice done by the johann algorithm)
   float time_for_move = (float)(60*F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
     time_for_move = LOW_TICKS_PER_MOVE;
     critical=true; 
   }
+  // TODO - Do this less perhaps
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
@@ -1382,10 +1389,12 @@ p->delta[1] = deltay-deltax;
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
   axis_interval[1] = 60.0*abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
+  // TODO - Not the case for delta
   if(p->dir & 64) { // normally no move in z direction
     axis_interval[2] = 60.0*abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
+  // TODO - Could be the same for all blocks in one delta move
   axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
   if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];  
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
@@ -1410,6 +1419,7 @@ p->delta[1] = deltay-deltax;
   
 
   //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
+  // TODO - definitely can come outside loop.
   byte is_print_move = (p->dir & 136)==136; // are we printing
 #if USE_OPS==1
   if(is_print_move) printmoveSeen = 1;
@@ -1465,6 +1475,7 @@ p->delta[1] = deltay-deltax;
 #endif
     UI_MEDIUM; // do check encoder
 
+	// Need to check if trampezoids during delta move can be calculated
     updateTrapezoids(lines_write_pos);
     // how much steps on primary axis do we need to reach target feedrate
     //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
@@ -1556,20 +1567,22 @@ void queue_delta_move(byte check_endstops,byte pathOptimize) {
 			    sq(difference[Z_AXIS] * inv_axis_steps_per_unit[Z_AXIS]));
 
 	if ( cartesian_mm < 0.000001 ) {
+		// TODO - E only move. No need to do this. Can just move E directly
 		cartesian_mm = abs(difference[E_AXIS] * inv_axis_steps_per_unit[E_AXIS]);
 	}
 	
 	if ( cartesian_mm < 0.000001 ) {
 		return;
 	}
-	float seconds = 6000 * cartesian_mm / printer_state.feedrate / printer_state.feedrateMultiply;
+	float seconds = 6000 * cartesian_mm / (printer_state.feedrate * printer_state.feedrateMultiply);
 	int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
 	int fractional_steps[4]; 
 	long final_destination_steps[4];
 	
 	// Pre calculate the steps to avoid float division and multiplication in loop
+	float steps_inv = 1.0 / steps;
 	for(byte i=0; i < NUM_AXIS; i++) {
-		fractional_steps[i] = (1.0/steps) * difference[i];
+		fractional_steps[i] = steps_inv * difference[i];
 		// Save final position
 		final_destination_steps[i] = printer_state.destinationSteps[i];
 		printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
@@ -1892,50 +1905,56 @@ inline long bresenham_step() {
   }
   cli();
   if(do_even) {
-   if(cur->flags & FLAG_CHECK_ENDSTOPS) {
+	if(cur->flags & FLAG_CHECK_ENDSTOPS) {
 #if X_MIN_PIN>-1
-    if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0
-      cur->dir&=~16;
+		if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+			cur->dir&=~16;
 #else
-      cur->dir&=~48;
+			cur->dir&=~48;
 #endif
-    }
+		}
 #endif
 #if Y_MIN_PIN>-1
-    if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0
-      cur->dir&=~32;
+		if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+			cur->dir&=~32;
 #else
-      cur->dir&=~48;
+			cur->dir&=~48;
 #endif
-    }
+		}
 #endif
 #if X_MAX_PIN>-1
-    if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0
-      cur->dir&=~16;
+		if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+			cur->dir&=~16;
 #else
-      cur->dir&=~48;
+			cur->dir&=~48;
 #endif
-    }
+		}
 #endif
 #if Y_MAX_PIN>-1
-    if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0
-      cur->dir&=~32;
+		if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+			cur->dir&=~32;
 #else
-      cur->dir&=~48;
+			cur->dir&=~48;
 #endif
-    }
+		}
 #endif
+#if DRIVE_SYSTEM!=3
    }
+#endif
    // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
 #if Z_MIN_PIN>-1
    if((cur->dir & 68)==64) if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING) {cur->dir&=~64;}
 #endif
 #if Z_MAX_PIN>-1
    if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {cur->dir&=~64;}
+#endif
+#if DRIVE_SYSTEM==3
+	// Z axis treated the same as other axis on Delta
+	}
 #endif
   }
   byte max_loops = (printer_state.stepper_loops<=cur->stepsRemaining ? printer_state.stepper_loops : cur->stepsRemaining);
