@@ -33,7 +33,7 @@
 // Printrboard (at90usb) = 9 // requires Teensyduino
 // MegaTronics = 70
 // Rambo = 301
-#define MOTHERBOARD 301
+#define MOTHERBOARD 5
 #include <avr/io.h>
 #include "pins.h"
 

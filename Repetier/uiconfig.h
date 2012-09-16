@@ -96,7 +96,7 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0 
+#define UI_DISPLAY_TYPE 3 
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Orig. Mendel"
@@ -191,7 +191,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -208,7 +208,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 0
+#define UI_HAS_BACK_KEY 1
 
 /* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.
 If you set it to true, next will go to previous menu instead of the next menu.
@@ -217,7 +217,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 #define UI_INVERT_MENU_DIRECTION false
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
-//#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_KEYS
 
 // Do you have a I2C connected encoder? 
 #define UI_HAS_I2C_ENCODER 1
