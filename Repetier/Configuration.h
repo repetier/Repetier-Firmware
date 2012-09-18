@@ -519,9 +519,9 @@ on this endstop.
 #define ENDSTOP_X_MIN_INVERTING false
 #define ENDSTOP_Y_MIN_INVERTING false
 #define ENDSTOP_Z_MIN_INVERTING false
-#define ENDSTOP_X_MAX_INVERTING true
-#define ENDSTOP_Y_MAX_INVERTING true
-#define ENDSTOP_Z_MAX_INVERTING true
+#define ENDSTOP_X_MAX_INVERTING false
+#define ENDSTOP_Y_MAX_INVERTING false
+#define ENDSTOP_Z_MAX_INVERTING false
 
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
@@ -582,7 +582,7 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-#define ALWAYS_CHECK_ENDSTOPS true
+#define ALWAYS_CHECK_ENDSTOPS false
 // maximum positions in mm - only fixed numbers!
 #if DRIVE_SYSTEM != 3 
 #define X_MAX_LENGTH 100
@@ -613,7 +613,7 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND 200 // make delta curves from many straight lines
+#define DELTA_SEGMENTS_PER_SECOND 70 // make delta curves from many straight lines
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
@@ -654,7 +654,7 @@ on this endstop.
     */
 #define MAX_FEEDRATE {15000, 15000, 15000}
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE {2400,2400,2400}
+#define HOMING_FEEDRATE {5000,5000,5000}
 
 /* If you have a backslash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
@@ -756,7 +756,7 @@ don't care about empty buffers during print.
 This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
 if you are printing many very short segments at high speed. Higher delays here allow higher values in PATH_PLANNER_CHECK_SEGMENTS.
 */
-#define LOW_TICKS_PER_MOVE 400000
+#define LOW_TICKS_PER_MOVE 300000
 
 // ##########################################################################################
 // ##                           Extruder control                                           ##

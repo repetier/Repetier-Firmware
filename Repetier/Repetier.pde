@@ -954,13 +954,35 @@ byte get_coordinates(GCode *com)
   }
   return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unprductive moves
 }
-inline float computeJerk(PrintLine *p1,PrintLine *p2) {
-   float dx = p2->speedX*p2->startFactor-p1->speedX*p1->endFactor;
-   float dy = p2->speedY*p2->startFactor-p1->speedY*p1->endFactor;
+/*inline float computeJerk(PrintLine *p1,PrintLine *p2) {
+   float dx = p2->speedX*p2->-p1->speedX*p1->endFactor;
+   float dy = p2->speedY*p2->-p1->speedY*p1->endFactor;
    if((p1->dir & 128)==0 && (p2->dir & 128)==0)
      return sqrt(dx*dx+dy*dy);
-   float dz = (p2->speedZ-p1->speedZ)*printer_state.maxJerk/printer_state.maxZJerk;
+   float dz = (p2->speedZ*p2->-p1->speedZ*p1->endFactor)*printer_state.maxJerk/printer_state.maxZJerk;
    return sqrt(dx*dx+dy*dy+dz*dz);
+}*/
+/**
+Computes the maximum junction speed 
+*/
+inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
+  if(p1->flags & FLAG_WARMUP) {
+    p2->joinFlags |= FLAG_JOIN_START_FIXED;
+    return;
+  }
+   // First we compute the normalized jerk for spped 1
+   float dx = p2->speedX*p2->invFullSpeed-p1->speedX*p1->invFullSpeed;
+   float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
+   float normJerk;
+   if((p1->dir & 128)==0 && (p2->dir & 128)==0)
+     normJerk = sqrt(dx*dx+dy*dy);
+   else {
+     float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
+     normJerk = sqrt(dx*dx+dy*dy+dz*dz);
+   }
+   p1->maxJunctionSpeed = printer_state.maxJerk/normJerk;
+   if(p1->maxJunctionSpeed>p1->fullSpeed) p1->maxJunctionSpeed = p1->fullSpeed;
+   if(p1->maxJunctionSpeed>p2->fullSpeed) p1->maxJunctionSpeed = p2->fullSpeed;
 }
 inline float safeSpeed(PrintLine *p) {
   float safe = printer_state.maxJerk*0.5;
@@ -994,19 +1016,24 @@ inline unsigned long U16SquaredToU32(unsigned int val) {
    );
   return res;
 }
-/** Update parameter used by 
+/** Update parameter used by updateTrapezoids
+
+Computes the acceleration/decelleration steps and advanced parameter associated.
 */
 void updateStepsParameter(PrintLine *p/*,byte caller*/) {
     if(p->flags & FLAG_WARMUP) return;
-    p->vStart = p->vMax*p->startFactor; //starting speed
-    p->vEnd = p->vMax*p->endFactor;
+    if(p->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED) return; // Already up to date, spare time
+    float startFactor = p->startSpeed*p->invFullSpeed;
+    float endFactor = p->endSpeed*p->invFullSpeed;
+    p->vStart = p->vMax*startFactor; //starting speed
+    p->vEnd = p->vMax*endFactor;
     unsigned long vmax2 = U16SquaredToU32(p->vMax);
     p->accelSteps = ((vmax2-U16SquaredToU32(p->vStart))/(p->accelerationPrim<<1))+1; // Always add 1 for missing precision
     p->decelSteps = ((vmax2-U16SquaredToU32(p->vEnd))/(p->accelerationPrim<<1))+1;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceStart = (float)p->advanceFull*p->startFactor*p->startFactor;
-    p->advanceEnd = (float)p->advanceFull*p->endFactor*p->endFactor;
+    p->advanceStart = (float)p->advanceFull**;
+    p->advanceEnd = (float)p->advanceFull*endFactor*endFactor;
 #endif
 #endif
     if(p->accelSteps+p->decelSteps>=p->stepsRemaining) { // can't reach limit speed
@@ -1029,8 +1056,8 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
       out.println_int_P(PSTR("/"),p->vEnd);
       out.print_int_P(PSTR("accel/decel steps:"),p->accelSteps);
       out.println_int_P(PSTR("/"),p->decelSteps);
-      out.print_float_P(PSTR("st./end factor:"),p->startFactor);
-      out.println_float_P(PSTR("/"),p->endFactor);
+      out.print_float_P(PSTR("st./end speed:"),p->startSpeed);
+      out.println_float_P(PSTR("/"),p->endSpeed);
 #if USE_OPS==1
       if(!(p->dir & 128) && printer_state.opsMode==2)
         out.println_long_P(PSTR("Reverse at:"),p->opsReverseSteps);
@@ -1043,7 +1070,7 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
 /** Checks, if the next segment has its stepping parameter computed. Normally this is the case and we have nothing to do.
 If not, we do it here, bofore we have to do it in the interrupt routine.
 */
-void finishNextSegment() {
+/*void finishNextSegment() {
   if(lines_count<=1) return; // nothing to do
   byte pos = lines_pos+1;
   if(pos>=MOVE_CACHE_SIZE) pos = 0;
@@ -1052,37 +1079,26 @@ void finishNextSegment() {
   BEGIN_INTERRUPT_PROTECTED; 
   p->flags |= FLAG_BLOCKED;
   END_INTERRUPT_PROTECTED;
-  updateStepsParameter(p/*,1*/);
+  updateStepsParameter(p);
   p->flags &= ~FLAG_BLOCKED;
-}
+}*/
+#define PREVIOUS_PLANNER_INDEX(p) p--;if(p==255) p = MOVE_CACHE_SIZE-1;
+#define NEXT_PLANNER_INDEX(idx) ++idx;if(idx==MOVE_CACHE_SIZE) idx=0;
 
-
-void updateTrapezoids(byte p) {
+inline void backwardPlanner(byte p,byte last) {
   PrintLine *act = &lines[p],*prev;
-  if(lines_count<4) {
-    if(!(act->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED))
-      updateStepsParameter(act/*,2*/);
-    return;
-  }
-  byte n=lines_count-2; // ignore active segment and following segment
-  if(n>PATH_PLANNER_CHECK_SEGMENTS) n=PATH_PLANNER_CHECK_SEGMENTS; // Limit time spend in updating path. If we have many short moves this takes to much time and with large moves it is not necessary.
-  while(n>0 && lines_count>2) {
-    p--;if(p==255) p = MOVE_CACHE_SIZE-1;
+  float lastJunctionSpeed = act->startSpeed;
+  PREVIOUS_PLANNER_INDEX(last);
+  while(p!=last) {
+    PREVIOUS_PLANNER_INDEX(p);
     prev = &lines[p];
-    BEGIN_INTERRUPT_PROTECTED; 
-    prev->flags |= FLAG_BLOCKED;    
-    END_INTERRUPT_PROTECTED;
-	// TODO - OPS should only happen at the start and end of the delta move
 #if USE_OPS==1
+    // Retraction points are fixed points where the extruder movement stops anyway. Finish the computation for the move and exit.
     if(printer_state.opsMode && printmoveSeen) {
-      if((prev->dir & 136)==136 && (act->dir & 136)!=136) { // Switch printing - travel
-        if((act->dir & 64)!=0 || act->distance>printer_state.opsMinDistance) { 
+      if((prev->dir & 136)==136 && (act->dir & 136)!=136) {
+        if((act->dir & 64)!=0 || act->distance>printer_state.opsMinDistance) { // Switch printing - travel
           act->joinFlags |= FLAG_JOIN_START_RETRACT | FLAG_JOIN_START_FIXED; // enable retract for this point
           prev->joinFlags |= FLAG_JOIN_END_FIXED;
-          updateStepsParameter(prev/*,4*/);
-          updateStepsParameter(act/*,4*/);
-          act->flags &= ~FLAG_BLOCKED;
-          prev->flags &= ~FLAG_BLOCKED;
           return;
         } else {
           act->joinFlags |= FLAG_JOIN_NO_RETRACT;
@@ -1096,73 +1112,35 @@ void updateTrapezoids(byte p) {
           if(prev->opsReverseSteps>ponr)
             prev->opsReverseSteps = ponr;
         }
-       //if((prev->joinFlags & FLAG_JOIN_START_RETRACT) /*&& (prev->distance<printer_state.opsMinDistance)*/) {
-       /*   prev->joinFlags &= ~(FLAG_JOIN_END_RETRACT | FLAG_JOIN_START_RETRACT); // Disable retract, because the distance is short
-          prev->joinFlags |= FLAG_JOIN_NO_RETRACT;
-        } else {*/
           act->joinFlags |= FLAG_JOIN_START_FIXED; // Wait only with safe speeds!
-          updateStepsParameter(prev/*,5*/);
-          updateStepsParameter(act/*,5*/);
-          act->flags &= ~FLAG_BLOCKED;
-          prev->flags &= ~FLAG_BLOCKED;
           return;
-       // }
       }
     }
 #endif
     if(prev->joinFlags & FLAG_JOIN_END_FIXED) { // Nothing to update from here on
       act->joinFlags |= FLAG_JOIN_START_FIXED; // Wait only with safe speeds!
-      prev->flags &= ~FLAG_BLOCKED;      
-      updateStepsParameter(act/*,3*/);
-      act->flags &= ~FLAG_BLOCKED;
       return;
     }
-    float vmax = (act->fullSpeed>prev->fullSpeed?prev->fullSpeed:act->fullSpeed);
-    float vleft = act->fullSpeed*act->endFactor;
-    float vmax_left = sqrt(vleft*vleft+2.0*act->acceleration*act->distance);
-    float vright = prev->fullSpeed*prev->startFactor;
-    float vmax_right = sqrt(vright*vright+2.0*prev->acceleration*prev->distance);
-    float junction_speed = (vmax_left<vmax_right?vmax_left:vmax_right);
-    if(junction_speed>vmax) junction_speed = vmax;
-    prev->endFactor = junction_speed/prev->fullSpeed;
-    act->startFactor = junction_speed/act->fullSpeed;
-    float jerk = computeJerk(prev,act);
-    if(jerk>printer_state.maxJerk) {
-      jerk =printer_state.maxJerk/jerk;
-      prev->endFactor *= jerk;
-      act->startFactor *= jerk;
-      prev->joinFlags |= FLAG_JOIN_END_FIXED;
-      act->joinFlags |= FLAG_JOIN_START_FIXED;
-      updateStepsParameter(prev/*,6*/);
-      updateStepsParameter(act/*,6*/);
-      act->flags &= ~FLAG_BLOCKED;
-      prev->flags &= ~FLAG_BLOCKED;
+    lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->acceleration); // acceleration is acceleration*distance*2! What can be reached if we try?
+    if(lastJunctionSpeed>=prev->maxJunctionSpeed) { // Limit is reached
+        act->startSpeed = prev->endSpeed = prev->maxJunctionSpeed; // possibly unneeded???
+        //prev->joinFlags |= FLAG_JOIN_END_FIXED;
+        prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
+        //act->joinFlags |= FLAG_JOIN_START_FIXED;
+        act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
       return;
     }
-    if(prev->endFactor>0.999 || act->startFactor>0.999) { // speed fixed by limit 
-      prev->joinFlags |= FLAG_JOIN_END_FIXED;
-      act->joinFlags |= FLAG_JOIN_START_FIXED;
-      updateStepsParameter(act/*,7*/);
-      updateStepsParameter(prev/*,7*/);
-      act->flags &= ~FLAG_BLOCKED;
-      prev->flags &= ~FLAG_BLOCKED;
-      return;
-    }
-    // here prev is blocked
-    updateStepsParameter(act/*,7*/);
-    act->flags &= ~FLAG_BLOCKED; // unblock for interrupt routine
-    prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
+    act->startSpeed = prev->endSpeed = lastJunctionSpeed;
+    prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
+    act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
     act = prev;
-    n--;
     if(lines_count>=MOVE_CACHE_LOW) { // we have time for checks
         UI_MEDIUM; // do check encoder
         check_periodical(); // Temperature update
     }
+  } // while loop
   }
-  if(!(act->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) // Always stop with computed segments
-    updateStepsParameter(act/*,13*/);
-  act->flags &= ~FLAG_BLOCKED;
-}
+
 #if DRIVE_SYSTEM==3
 void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
@@ -1180,6 +1158,81 @@ void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bo
     wait_until_end_of_move();
 }
 #endif
+
+inline void forwardPlanner(byte p) {
+  PrintLine *act = &lines[p],*next;
+  float leftspeed = act->startSpeed;
+  byte last = lines_write_pos;
+  NEXT_PLANNER_INDEX(last);
+  next = &lines[p];
+  while(p!=last) { // All except last segment, which has fixed end speed
+    act = next;
+    NEXT_PLANNER_INDEX(p);
+    next = &lines[p];
+    if(act->joinFlags & FLAG_JOIN_END_FIXED) {
+      leftspeed = act->endSpeed;
+      continue; // Nothing to do here
+    }
+    float vmax_right = sqrt(leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
+    if(vmax_right>act->endSpeed) { // Could be higher next run
+      act->startSpeed = leftspeed;
+      leftspeed = vmax_right;
+      act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
+    } else { // We can accelerate full speed without reaching limit, which is as fast as possible. Fix it!
+      act->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
+      act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
+      act->startSpeed = leftspeed;
+      act->endSpeed = next->startSpeed = leftspeed = vmax_right;
+      next->joinFlags |= FLAG_JOIN_START_FIXED;
+}
+  }
+}
+
+/**
+This is the path planner.
+
+It goes from the last entry and tries to increase the end speed of previous moves in a fashion that the maximum jerk
+is never exceeded. If a segment with reached maximum speed is met, the planner stops. Everything left from this
+is already optimal from previous updates.
+The first 2 entries in the queue are not checked. The first is the one that is already in print and the following will likely become active.
+
+The method is called before lines_count is increased!
+*/
+void updateTrapezoids(byte p) {
+  byte first;
+  PrintLine *firstLine;
+  BEGIN_INTERRUPT_PROTECTED; 
+  first = lines_pos; // first non fixed segment
+  NEXT_PLANNER_INDEX(first);
+  while(first!=p && (lines[p].joinFlags | FLAG_JOIN_END_FIXED)) {
+    NEXT_PLANNER_INDEX(first);
+  }
+  firstLine = &lines[first];
+  firstLine->flags |= FLAG_BLOCKED; // don't let printer touch this or following segments during update
+  END_INTERRUPT_PROTECTED; 
+  PrintLine *act = &lines[p];
+
+  byte previdx = p-1;
+  if(previdx>=MOVE_CACHE_SIZE) previdx = MOVE_CACHE_SIZE-1;
+  if(lines_count)
+    computeMaxJunctionSpeed(&lines[previdx],act); // Set maximum junction speed
+  else
+    act->joinFlags |= FLAG_JOIN_START_FIXED;
+
+  backwardPlanner(p,first);  
+  // Reduce speed to reachable speeds
+  forwardPlanner(first);
+  
+  // Update precomputed data
+  do {
+    updateStepsParameter(&lines[first]);
+    NEXT_PLANNER_INDEX(first);
+  } while(first!=lines_write_pos);
+  updateStepsParameter(act);
+  firstLine->flags &= ~FLAG_BLOCKED; // unblock for interrupt routine
+}
+
+
 void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
   for(byte i=0; i < 4; i++) {
@@ -1443,11 +1496,12 @@ p->delta[1] = deltay-deltax;
                (float)axis_interval[i] * (float)(is_print_move ?  axis_steps_per_sqr_second[i] : axis_travel_steps_per_sqr_second[i])); //  steps/s^2 * step/tick  Ticks/s^2
       }
     }
+    p->invFullSpeed = 1.0/p->fullSpeed;
     p->accelerationPrim = slowest_axis_plateau_time_repro / axis_interval[primary_axis]; // a = v/t = F_CPU/(c*t): Steps/s^2
     //Now we can calculate the new primary axis acceleration, so that the slowest axis max acceleration is not violated
     p->facceleration = 262144.0*(float)p->accelerationPrim/F_CPU; // will overflow without float!
-    p->acceleration = slowest_axis_plateau_time_repro*p->fullSpeed/((float)F_CPU); // mm/s^2
-    p->startFactor = p->endFactor = safeSpeed(p)/p->fullSpeed;
+    p->acceleration = 2.0*p->distance*slowest_axis_plateau_time_repro*p->fullSpeed/((float)F_CPU); // mm^2/s^2
+    p->startSpeed = p->endSpeed = safeSpeed(p);
     p->vMax = F_CPU / p->fullInterval; // maximum steps per second, we can reach
    // if(p->vMax>46000)  // gets overflow in N computation
    //   p->vMax = 46000;
@@ -1853,7 +1907,8 @@ inline long bresenham_step() {
       } else
         cur_errupd = cur->delta[cur->primaryAxis];      
       if(!(cur->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) {// should never happen, but with bad timings???
-        updateStepsParameter(cur/*,8*/);
+        out.println_int_P(PSTR("LATE "),(unsigned int)lines_count);
+		updateStepsParameter(cur/*,8*/);
       }
       printer_state.vMaxReached = cur->vStart;
       printer_state.stepNumber=0;

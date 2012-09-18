@@ -409,7 +409,7 @@ extern PrinterState printer_state;
 // Printing related data
 typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte primaryAxis;
-  byte flags;
+  volatile byte flags;
   byte joinFlags;
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
@@ -419,10 +419,14 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   float speedY;                   ///< Speed in y direction at fullInterval in mm/s
   float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
   float fullSpeed;                ///< Desired speed mm/s
-  float acceleration;             ///< Real acceleration mm/s²
+  float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
+  float acceleration;             ///< Real 2.0*distanceÜacceleration mm²/s²
+  float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
+  float startSpeed;               ///< Staring speed in mm/s
+  float endSpeed;                 ///< Exit speed in mm/s
   float distance;
-  float startFactor;
-  float endFactor;
+  //float startFactor;
+  //float endFactor;
   unsigned long fullInterval;     ///< interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
   unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
