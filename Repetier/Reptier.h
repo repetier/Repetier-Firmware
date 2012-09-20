@@ -407,6 +407,16 @@ extern PrinterState printer_state;
 /** Wait for the extruder to finish it's down movement */
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
+#if DRIVE_SYSTEM==3
+#define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
+typedef struct { 
+	byte dir;
+	unsigned int fractionalSteps[3];
+} DeltaSegment;
+extern DeltaSegment segments[];
+extern unsigned int delta_segment_write_pos; // Position where we write the next cached delta move
+extern volatile unsigned int  delta_segment_count; // Number of delta moves cached 0 = nothing in cache
+#endif
 typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte primaryAxis;
   volatile byte flags;
@@ -427,6 +437,14 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   float distance;
   //float startFactor;
   //float endFactor;
+#if DRIVE_SYSTEM==3
+  byte numDeltaSegments;		  		 ///< Number of delta segments left in line
+  unsigned int deltaSegmentReadPos; 	 ///< Pointer to next DeltaSegment
+  byte deltaSegmentCount;
+  unsigned int deltaSegmentError[3]; 	 ///< Error substeps in delta algorithm
+  unsigned long numPrimaryStepPerSegment;
+  unsigned long primaryStepPerSegmentRemaining;
+#endif
   unsigned long fullInterval;     ///< interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
   unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.

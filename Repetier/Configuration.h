@@ -86,6 +86,8 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define MICRO_STEPS 8
 
+#define MAX_DELTA_SEGMENTS_PER_LINE 20
+
 // Calculations
 #define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / (BELT_PITCH * PULLEY_TEETH))
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
@@ -700,9 +702,9 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,3000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {6000,6000,6000} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,3000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {6000,6000,6000}
 #endif
 
 /** \brief Maximum allowable jerk.
@@ -743,7 +745,7 @@ value is MOVE_CACHE_SIZE-2. Higher values need more computation time, which can 
 short subsequent moves. If this happens you will see BLK messages in your log and then you now the
 value is to high for your printer settings.
 */
-#define PATH_PLANNER_CHECK_SEGMENTS 12
+#define PATH_PLANNER_CHECK_SEGMENTS 14
 /** \brief Low filled cache size. 
 
 If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is limited to LOW_TICKS_PER_MOVE clock cycles.

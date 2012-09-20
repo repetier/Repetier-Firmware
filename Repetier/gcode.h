@@ -53,6 +53,7 @@ public:
   void println_P(PGM_P ptr);
   void print_long_P(PGM_P ptr,long value);
   void print_int_P(PGM_P ptr,int value);
+  void println_byte_P(PGM_P ptr,byte value);
   void print_float_P(PGM_P ptr,float value,uint8_t digits = 2);
   void println_long_P(PGM_P ptr,long value);
   void println_int_P(PGM_P ptr,int value);
