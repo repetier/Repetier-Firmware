@@ -1915,22 +1915,31 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 		byte save_primaryAxis = p->primaryAxis;
 		unsigned long save_stepsRemaining = p->stepsRemaining;
 		float save_distance = p->distance;
-		
-		for (int line=0; line < num_lines - 1; line++) {
+
+		// Create all but the last line
+		int line;
+		if (line < num_lines - 1)
+		while (0) {
 			calculate_delta_segments(p);
 			calculate_move(p,axis_diff,check_endstops,pathOptimize);
 			while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
 				gcode_read_serial();
 				check_periodical();
 			}
+			for (byte i=0; i < 4; i++) {
+				printer_state.currentPositionSteps[i] += fractional_steps[i];
+			}
+			line++;
+			if (line==num_lines - 2)
+				break;
+			// lines_write_pos will be updated by calculate_move
 			p = &lines[lines_write_pos];
+			for (byte i=0; i < 4; i++) {
+				p->delta[i] = save_delta[i];
+			}
 			p->flags = save_flags;
 			p->joinFlags = save_joinFlags;
 			p->dir = save_dir;
-			for (byte i=0; i < 4; i++) {
-				p->delta[i] = save_delta[i];
-				printer_state.currentPositionSteps[i] += difference[i];
-			}
 			p->primaryAxis = save_primaryAxis;
 			p->stepsRemaining = save_stepsRemaining;
 			p->distance = save_distance;
@@ -1940,6 +1949,8 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 			p->opsReverseSteps=0;
 	#endif
 		}
+		// Make the last line arrive exactly at the destination
+		// Is this really necessary?
 		for(byte i=0; i < NUM_AXIS; i++) {
 			difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		}
@@ -1952,16 +1963,19 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 		p = &lines[lines_write_pos];
 		p->flags = save_flags;
 		p->joinFlags = save_joinFlags;
-		// TODO - I might need to recalculate these two since the segment delta step count may have changed.
 		p->numDeltaSegments = steps_per_line;
 		p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = save_numPrimaryStepPerSegment;
+		// Recalculate for the last line. This calculates delta, dir, primaryAxis, stepsRemaining and distance
 		calculate_dir_delta(difference, axis_diff, p);
 #if USE_OPS==1
 		p->opsReverseSteps=0;
 #endif
+		// Now calculate the cached delta moves
 		calculate_delta_segments(p);
+		// And queue the line
 		calculate_move(p,axis_diff,check_endstops,pathOptimize);
 	}
+	// Move to the destination
 	for (byte i=0; i< 4; i++)
 		printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
 }
