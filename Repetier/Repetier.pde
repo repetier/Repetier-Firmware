@@ -2000,8 +2000,8 @@ int lastblk=-1;
 long cur_errupd;
 #if DRIVE_SYSTEM==3
 DeltaSegment *curd;
-unsigned long two_times_step[3];
-unsigned long two_times_primary_step;
+long two_times_step[3];
+long two_times_primary_step;
 byte movement;
 inline long bresenham_step() {
 	if(cur == 0) {
@@ -2086,6 +2086,7 @@ inline long bresenham_step() {
 				cur->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
 			}
 			two_times_primary_step = cur->numPrimaryStepPerSegment << 1;
+			out.println_long_P(PSTR("Step"),two_times_primary_step);
 		} else curd=0;
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
@@ -2312,7 +2313,12 @@ inline long bresenham_step() {
 							WRITE(X_STEP_PIN,HIGH);
 							cur->deltaSegmentError[0] -= two_times_primary_step;
 							curd->deltaSteps[0]--;
-							if (!curd->deltaSteps[0])
+							if (cur->dir & 4)
+								printer_state.countZSteps++;
+							else
+								printer_state.countZSteps--;
+
+							if (curd->deltaSteps[0]<=0)
 								curd->dir ^= 16;
 						} else
 							movement ^= 16;
@@ -2322,7 +2328,7 @@ inline long bresenham_step() {
 							WRITE(Y_STEP_PIN,HIGH);
 							cur->deltaSegmentError[1] -= two_times_primary_step;
 							curd->deltaSteps[1]--;
-							if (!curd->deltaSteps[1])
+							if (curd->deltaSteps[1]<=0)
 								curd->dir ^= 32;
 						} else
 							movement ^= 32;
@@ -2332,7 +2338,7 @@ inline long bresenham_step() {
 							WRITE(Y_STEP_PIN,HIGH);
 							cur->deltaSegmentError[2] -= two_times_primary_step;
 							curd->deltaSteps[2]--;
-							if (!curd->deltaSteps[2])
+							if (curd->deltaSteps[2]<=0)
 								curd->dir ^= 64;
 						} else
 							movement ^= 64;
