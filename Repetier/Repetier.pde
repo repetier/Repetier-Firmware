@@ -1624,7 +1624,7 @@ void calculate_delta_segments(PrintLine *p) {
 	}
 
 	int fractional_steps[3]; 
-	long destination_steps[3], final_destination_steps[3], start_delta_steps[3], destination_delta_steps[3];
+	long destination_steps[3], final_destination_steps[3], destination_delta_steps[3];
 
 	float steps_inv = 1.0 / p->numDeltaSegments;
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
@@ -1634,9 +1634,6 @@ void calculate_delta_segments(PrintLine *p) {
 		destination_steps[i] = printer_state.currentPositionSteps[i];
 	}	
 
-	// TODO - Add total to check for rounding error
-	for (byte i=0; i < NUM_AXIS - 1; i++)
-		start_delta_steps[i] = current_delta_steps[i];
 	for (int s = 1; s < p->numDeltaSegments; s++) {
 		// use the actual destination on the final step to avoid any error
 		if (s == p->numDeltaSegments - 1)
@@ -2178,8 +2175,8 @@ inline long bresenham_step() {
 			if(curd->dir & 64) enable_z();
 			// Initialize bresenham for the first segment
 			for (byte i=0; i<3; i++) {
-				two_times_step[i] = curd->deltaStep[i] << 1;
-				curd->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
+				two_times_step[i] = curd->deltaSteps[i] << 1;
+				cur->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
 			}
 			two_times_primary_step = cur->numPrimaryStepPerSegment << 1;
 		} else curd=0;
@@ -2453,8 +2450,8 @@ inline long bresenham_step() {
 
 						// Initialize bresenham for this segment
 						for (byte i=0; i<3; i++) {
-							two_times_step[i] = curd->deltaStep[i] << 1;
-							curd->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
+							two_times_step[i] = curd->deltaSteps[i] << 1;
+							cur->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
 						}
 						two_times_primary_step = cur->numPrimaryStepPerSegment << 1;
 
