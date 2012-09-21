@@ -411,7 +411,7 @@ extern PrinterState printer_state;
 #define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
 typedef struct { 
 	byte dir;
-	unsigned int fractionalSteps[3];
+	unsigned int deltaSteps[3];
 } DeltaSegment;
 extern DeltaSegment segments[];
 extern unsigned int delta_segment_write_pos; // Position where we write the next cached delta move
@@ -440,8 +440,7 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
 #if DRIVE_SYSTEM==3
   byte numDeltaSegments;		  		 ///< Number of delta segments left in line
   unsigned int deltaSegmentReadPos; 	 ///< Pointer to next DeltaSegment
-  byte deltaSegmentCount;
-  unsigned int deltaSegmentError[3]; 	 ///< Error substeps in delta algorithm
+  long deltaSegmentError[3]; 	  ///< Bresenham error in delta algorithm
   unsigned long numPrimaryStepPerSegment;
   unsigned long primaryStepPerSegmentRemaining;
 #endif

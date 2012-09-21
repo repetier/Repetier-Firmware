@@ -1624,11 +1624,9 @@ void calculate_delta_segments(PrintLine *p) {
 	}
 
 	int fractional_steps[3]; 
-	long destination_steps[3], final_destination_steps[3], start_delta_steps[3], current_delta_steps[3], destination_delta_steps[3];
+	long destination_steps[3], final_destination_steps[3], start_delta_steps[3], destination_delta_steps[3];
 
 	float steps_inv = 1.0 / p->numDeltaSegments;
-	// Multiply by a factor of 256 to capture fractional part in int calculations
-	float steps_remaining_per_segment_inv = 256/(p->stepsRemaining * steps_inv);
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
 		fractional_steps[i] = steps_inv * difference[i];
 		// Save final position
@@ -1636,7 +1634,6 @@ void calculate_delta_segments(PrintLine *p) {
 		destination_steps[i] = printer_state.currentPositionSteps[i];
 	}	
 
-	calculate_delta(printer_state.currentPositionSteps, current_delta_steps);
 	// TODO - Add total to check for rounding error
 	for (byte i=0; i < NUM_AXIS - 1; i++)
 		start_delta_steps[i] = current_delta_steps[i];
@@ -1661,18 +1658,24 @@ void calculate_delta_segments(PrintLine *p) {
 		calculate_delta(destination_steps, destination_delta_steps);
 		for(byte i=0; i < NUM_AXIS - 1; i++) {
 			d->dir = 0;
-			long delta = destination_delta_steps[i] - current_delta_steps[i];
+			long delta = destination_delta_steps[i] - printer_state.currentDeltaPositionSteps[i];
 			if (delta > 0) {
 				d->dir |= 1<<i;
 				d->dir |= 16<<i;
-				// TODO - Debug test for overflow here
-				d->fractionalSteps[i] = delta * steps_remaining_per_segment_inv;
+#ifdef DEBUG_DELTA_OVERFLOW
+				if (delta > 65535)
+					out.println_long_P(PSTR("Delta overflow:"), delta);
+#endif
+				d->deltaSteps[i] = delta;
 			} else if (delta < 0) {
 				d->dir |= 16<<i;
-				// TODO - Debug test for overflow here
-				d->fractionalSteps[i] = (-delta) * steps_remaining_per_segment_inv;
+#ifdef DEBUG_DELTA_OVERFLOW
+				if (-delta > 65535)
+					out.println_long_P(PSTR("Delta overflow:"), delta);
+#endif
+				d->deltaSteps[i] = -delta;
 			}
-			current_delta_steps[i] = destination_delta_steps[i];
+			printer_state.currentDeltaPositionSteps[i] = destination_delta_steps[i];
 		}
 		// Move to the next segment
 		delta_segment_write_pos++; if (delta_segment_write_pos >= DELTA_CACHE_SIZE) delta_segment_write_pos=0;
@@ -1886,11 +1889,15 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 		calculate_dir_delta(difference, axis_diff, p);
 		calculate_delta_segments(p);
 		// Calculate the amount of cartesian steps per delta segment
-		p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = p->stepsRemaining / steps;
+		p->primaryStepPerSegmentRemaining 
+			= p->numPrimaryStepPerSegment 
+			= p->stepsRemaining / steps;
 		calculate_move(p,axis_diff,check_endstops,pathOptimize);
 	// The line needs to be split
 	} else {
+		// Round up the number of lines
 		int num_lines = (steps + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
+		// Store the delta steps per line segment 
 		int steps_per_line = steps / num_lines;
 		p->numDeltaSegments = steps_per_line;
 		long fractional_steps[4]; 
@@ -1905,7 +1912,10 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 		calculate_dir_delta(fractional_steps, axis_diff, p);
 
 		// Cache all the calculated parameters so we don't have to do it again
-		unsigned long save_numPrimaryStepPerSegment = p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = p->stepsRemaining / (num_lines * steps_per_line);
+		unsigned long save_numPrimaryStepPerSegment 
+			= p->primaryStepPerSegmentRemaining 
+			= p->numPrimaryStepPerSegment 
+			= p->stepsRemaining / (num_lines * steps_per_line);
 		byte save_dir = p->dir;
 		long save_delta[4];
 		for (byte i=0; i < 4; i++)
@@ -2079,11 +2089,16 @@ inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
 /**
   Moves the stepper motors one step. If the last step is reached, the next movement is started.
   The function must be called from a timer loop. It returns the time for the next call.
+  This is a modified version that implements a bresenham 'multi-step' algorithm where the dominant
+  cartesian axis steps may be less than the changing dominant delta axis.
 */
 int lastblk=-1;
 long cur_errupd;
 #if DRIVE_SYSTEM==3
 DeltaSegment *curd;
+unsigned long two_times_step[3];
+unsigned long two_times_primary_step;
+byte movement;
 inline long bresenham_step() {
 	if(cur == 0) {
 		sei();
@@ -2151,15 +2166,22 @@ inline long bresenham_step() {
 			--lines_count;
 			return(wait); // waste some time for path optimization to fill up
 		} // End if WARMUP
-		//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
+		// Set up delta segments
 		if (!cur->numDeltaSegments) {
 			// If there are delta segments point to them here
 			curd = &segments[cur->deltaSegmentReadPos++];
 			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0; 
 			// Enable axis
+			//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
 			if(curd->dir & 16) enable_x();
 			if(curd->dir & 32) enable_y();
 			if(curd->dir & 64) enable_z();
+			// Initialize bresenham for the first segment
+			for (byte i=0; i<3; i++) {
+				two_times_step[i] = curd->deltaStep[i] << 1;
+				curd->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
+			}
+			two_times_primary_step = cur->numPrimaryStepPerSegment << 1;
 		} else curd=0;
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
@@ -2228,7 +2250,7 @@ inline long bresenham_step() {
 		printer_state.stepNumber=0;
 		printer_state.timer = 0;
 		cli();
-		//Determine direction of movement,check if endstop was hit
+		//Determine direction of movement
 		if (curd) {
 			if(curd->dir & 1) {
 				WRITE(X_DIR_PIN,!INVERT_X_DIR);
@@ -2321,67 +2343,143 @@ inline long bresenham_step() {
 				}		
 			} 
 			if (curd) {
-				if(curd->dir & 16)
-					cur->deltaSegmentError[0] += curd->fractionalSteps[0];
-				if(curd->dir & 32)
-					cur->deltaSegmentError[1] += curd->fractionalSteps[1];
-				if(curd->dir & 64)
-					cur->deltaSegmentError[2] += curd->fractionalSteps[2];
+				movement=0;
+				// Take first step
+				if(curd->dir & 16) {
+					if(cur->deltaSegmentError[0]>0) {
+						WRITE(X_STEP_PIN,HIGH);
+						curd->deltaSteps[0]--;
+						cur->deltaSegmentError[0] -= two_times_primary_step;
+						if (curd->deltaSteps[0])
+							movement|=16;
+						else
+							curd->dir ^= 16;
+					}
+					cur->deltaSegmentError[0] += two_times_step[0];
+				}
+				
+				if(curd->dir & 32) {
+					if(cur->deltaSegmentError[1]>0) {
+						WRITE(Y_STEP_PIN,HIGH);
+						curd->deltaSteps[1]--;
+						cur->deltaSegmentError[1] -= two_times_primary_step;
+						if (curd->deltaSteps[1])
+							movement|=32;
+						else
+							curd->dir ^= 32;
+					}
+					cur->deltaSegmentError[0] += two_times_step[1];
+				}
+				if(curd->dir & 64) {
+					if(cur->deltaSegmentError[2]>0) {
+						WRITE(Y_STEP_PIN,HIGH);
+						curd->deltaSteps[1]--;
+						cur->deltaSegmentError[2] -= two_times_primary_step;
+						if (curd->deltaSteps[1])
+							movement|=64;
+						else
+							curd->dir ^= 64;
+					}
+					cur->deltaSegmentError[0] += two_times_step[2];
+				}
 
-				byte delta_steps = 0;
-				while (delta_steps && !cur->primaryStepPerSegmentRemaining) {
-					if(curd->dir & 16) {
-						if(cur->deltaSegmentError[0]>>8) {
+			#if STEPPER_HIGH_DELAY>0
+				delayMicroseconds(STEPPER_HIGH_DELAY);
+			#endif
+				WRITE(X_STEP_PIN,LOW);
+				WRITE(Y_STEP_PIN,LOW);
+				WRITE(Z_STEP_PIN,LOW);
+
+				// Now take subsequent steps if necessary.
+				// Keep checking an axis until it doesn't take any more steps
+				while (movement) {
+					if(movement & 16) {
+						if(cur->deltaSegmentError[0]>two_times_step[0]) {
 							WRITE(X_STEP_PIN,HIGH);
-							cur->deltaSegmentError[0] -= 256;
-							delta_steps = delta_steps | (cur->deltaSegmentError[0]>>8);
-						}
+							cur->deltaSegmentError[0] -= two_times_primary_step;
+							curd->deltaSteps[0]--;
+							if (!curd->deltaSteps[0])
+								curd->dir ^= 16;
+						} else
+							movement ^= 16;
 					}
-					if(curd->dir & 32) {
-						if(cur->deltaSegmentError[1]>>8) {
+					if(movement & 2) {
+						if(cur->deltaSegmentError[1]>two_times_step[1]) {
 							WRITE(Y_STEP_PIN,HIGH);
-							cur->deltaSegmentError[1] -= 256;
-							delta_steps = delta_steps | (cur->deltaSegmentError[1]>>8);
-						}
+							cur->deltaSegmentError[1] -= two_times_primary_step;
+							curd->deltaSteps[1]--;
+							if (!curd->deltaSteps[1])
+								curd->dir ^= 32;
+						} else
+							movement ^= 32;
 					}
-					if(curd->dir & 64) {
-						if(cur->deltaSegmentError[2]>>8) {
+					if(movement & 4) {
+						if(cur->deltaSegmentError[2]>two_times_step[2]) {
 							WRITE(Y_STEP_PIN,HIGH);
-							cur->deltaSegmentError[2] -= 256;
-							delta_steps = delta_steps | (cur->deltaSegmentError[2]>>8);
-						}
+							cur->deltaSegmentError[2] -= two_times_primary_step;
+							curd->deltaSteps[2]--;
+							if (!curd->deltaSteps[2])
+								curd->dir ^= 64;
+						} else
+							movement ^= 64;
 					}
-				#if STEPPER_HIGH_DELAY>0
-					delayMicroseconds(STEPPER_HIGH_DELAY);
-				#endif
-					WRITE(X_STEP_PIN,LOW);
-					WRITE(Y_STEP_PIN,LOW);
-					WRITE(Z_STEP_PIN,LOW);
+					if (movement) {
+					#if STEPPER_HIGH_DELAY>0
+						delayMicroseconds(STEPPER_HIGH_DELAY);
+					#endif
+						// Flip the movement bits for any axis that has run out of moves
+						movement = movement & curd->dir;
+						WRITE(X_STEP_PIN,LOW);
+						WRITE(Y_STEP_PIN,LOW);
+						WRITE(Z_STEP_PIN,LOW);
+					}
 				}
 
 				cur->primaryStepPerSegmentRemaining--;
-				if (cur->primaryStepPerSegmentRemaining && !cur->deltaSegmentCount) {
-					curd = &segments[cur->deltaSegmentReadPos++]; 
-					if (cur->deltaSegmentReadPos > DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
-					delta_segment_count--;
-					cur->deltaSegmentCount--;
-					// reset the counter
-					cur->primaryStepPerSegmentRemaining = cur->numPrimaryStepPerSegment;
-					if(curd->dir & 1) {
-						WRITE(X_DIR_PIN,!INVERT_X_DIR);
-					} else {
-						WRITE(X_DIR_PIN,INVERT_X_DIR);
-					}
-					if(curd->dir & 2) {
-						WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
-					} else {
-						WRITE(Y_DIR_PIN,INVERT_Y_DIR);
-					}
-					if(curd->dir & 4) {
-						WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
-					} else {
-						WRITE(Z_DIR_PIN,INVERT_Z_DIR);
-					}
+				if (cur->primaryStepPerSegmentRemaining) {
+					if (cur->numDeltaSegments) {
+						// Get the next delta segment
+						curd = &segments[cur->deltaSegmentReadPos++]; 
+						if (cur->deltaSegmentReadPos > DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
+						delta_segment_count--;
+
+						// Count delta segments in this line
+						cur->numDeltaSegments--;
+
+						// Switch on appropriate axis
+						if(curd->dir & 16) enable_x();
+						if(curd->dir & 32) enable_y();
+						if(curd->dir & 64) enable_z();
+
+						// Initialize bresenham for this segment
+						for (byte i=0; i<3; i++) {
+							two_times_step[i] = curd->deltaStep[i] << 1;
+							curd->deltaSegmentError[i] = two_times_step[i] - cur->numPrimaryStepPerSegment;
+						}
+						two_times_primary_step = cur->numPrimaryStepPerSegment << 1;
+
+						// Reset the counter of the primary steps. This is initialized in the line
+						// generation so don't have to do this the first time.
+						cur->primaryStepPerSegmentRemaining = cur->numPrimaryStepPerSegment;
+						
+						// Change direction if necessary
+						if(curd->dir & 1) {
+							WRITE(X_DIR_PIN,!INVERT_X_DIR);
+						} else {
+							WRITE(X_DIR_PIN,INVERT_X_DIR);
+						}
+						if(curd->dir & 2) {
+							WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+						} else {
+							WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+						}
+						if(curd->dir & 4) {
+							WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+						} else {
+							WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+						}
+					} else
+						curd=0;
 				}
 			}
 #if USE_OPS==0 && !defined(USE_ADVANCE)
