@@ -274,7 +274,7 @@ void SerialOutput::println_int_P(PGM_P ptr,int value) {
 
 void SerialOutput::println_byte_P(PGM_P ptr,byte value) {
   print_P(ptr);
-  println(value);
+  println((int)value);
 }
 
 void SerialOutput::println_float_P(PGM_P ptr,float value,uint8_t digits) {

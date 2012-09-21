@@ -282,11 +282,9 @@ extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,b
 extern void queue_move(byte check_endstops,byte pathOptimize);
 #if DRIVE_SYSTEM==3
 extern void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
-extern void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
-extern void queue_delta_move(byte check_endstops,byte pathOptimize);
-extern void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis);
-extern void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis);
+extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
+extern void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate);
 #endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
@@ -345,11 +343,10 @@ typedef struct { // RAM usage: 72 Byte
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
 #ifdef STEP_COUNTER
-  long countPositionSteps[3];		///< Count of steps from last position reset
+  long countZSteps;					///< Count of steps from last position reset
 #endif
 #if DRIVE_SYSTEM==3
   long currentDeltaPositionSteps[4];
-  long destinationDeltaPositionSteps[4];
 #endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps

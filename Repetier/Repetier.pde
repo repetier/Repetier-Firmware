@@ -1142,25 +1142,7 @@ inline void backwardPlanner(byte p,byte last) {
         check_periodical(); // Temperature update
     }
   } // while loop
-  }
-
-#if DRIVE_SYSTEM==3
-void move_delta_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
-  float saved_feedrate = printer_state.feedrate;
-  for(byte i=0; i < 4; i++) {
-      printer_state.destinationDeltaPositionSteps[i] = printer_state.currentDeltaPositionSteps[i];
-  }
-  printer_state.destinationDeltaPositionSteps[0]+=x;
-  printer_state.destinationDeltaPositionSteps[1]+=y;
-  printer_state.destinationDeltaPositionSteps[2]+=z;
-  printer_state.destinationDeltaPositionSteps[3]+=e;
-  printer_state.feedrate = feedrate;
-  queue_move(check_endstop,false);
-  printer_state.feedrate = saved_feedrate;
-  if(waitEnd)
-    wait_until_end_of_move();
 }
-#endif
 
 inline void forwardPlanner(byte p) {
   PrintLine *act = &lines[p],*next;
@@ -1256,7 +1238,7 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
 #if DRIVE_SYSTEM==3
-  queue_delta_move(check_endstop,false);
+  split_delta_move(check_endstop,false,DELTA_SEGMENTS_PER_SECOND_HOME);
 #else
   queue_move(check_endstop,false);
 #endif
@@ -1486,6 +1468,7 @@ void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   p->distance = abs(axis_diff[3]);
   calculate_move(p,axis_diff,check_endstops,pathOptimize);
 }
+#if DRIVE_SYSTEM != 3
 /**
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
@@ -1506,7 +1489,6 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
   p->dir = 0;
-#if DRIVE_SYSTEM!=3
 #if min_software_endstop_x == true
     if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
 #endif
@@ -1526,15 +1508,10 @@ void queue_move(byte check_endstops,byte pathOptimize) {
 #if max_software_endstop_z == true
     if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
 #endif
-#endif
   //Find direction
-#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==0
   for(byte i=0; i < 4; i++) {
-#if DRIVE_SYSTEM==3  
-    if((p->delta[i]=printer_state.destinationDeltaPositionSteps[i]-printer_state.currentDeltaPositionSteps[i])>=0) {
-#else
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
-#endif
       p->dir |= 1<<i;
       axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     } else {
@@ -1542,11 +1519,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
       p->delta[i] = -p->delta[i];
     }
     if(p->delta[i]) p->dir |= 16<<i;
-#if DRIVE_SYSTEM==3  
-    printer_state.currentDeltaPositionSteps[i] = printer_state.destinationDeltaPositionSteps[i];
-#else
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
-#endif
   }
 #else
   long deltax = printer_state.destinationSteps[0]-printer_state.currentPositionSteps[0];
@@ -1614,9 +1587,10 @@ p->delta[1] = deltay-deltax;
   }
   calculate_move(p,axis_diff,check_endstops,pathOptimize);
 }
-
+#endif
 
 #if DRIVE_SYSTEM==3
+#define DEBUG_DELTA_OVERFLOW
 void calculate_delta_segments(PrintLine *p) {
 	long difference[NUM_AXIS - 1];
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
@@ -1633,8 +1607,11 @@ void calculate_delta_segments(PrintLine *p) {
 		final_destination_steps[i] = printer_state.destinationSteps[i];
 		destination_steps[i] = printer_state.currentPositionSteps[i];
 	}	
-
-	for (int s = 1; s < p->numDeltaSegments; s++) {
+	
+	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
+	p->deltaSegmentReadPos = delta_segment_write_pos;
+	
+	for (int s = 0; s < p->numDeltaSegments; s++) {
 		// use the actual destination on the final step to avoid any error
 		if (s == p->numDeltaSegments - 1)
 			for(byte i=0; i < NUM_AXIS - 1; i++)
@@ -1682,81 +1659,10 @@ void calculate_delta_segments(PrintLine *p) {
 	}
 }
 
-void queue_delta_move(byte check_endstops,byte pathOptimize) {
-	printer_state.flag0 &= ~1; // Motor is enabled now 
-
-	long difference[NUM_AXIS];
-	for(byte i=0; i < NUM_AXIS; i++) {
-		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
-	}
-
-	float cartesian_mm = sqrt(sq(difference[X_AXIS] * inv_axis_steps_per_unit[X_AXIS]) +
-			    sq(difference[Y_AXIS] * inv_axis_steps_per_unit[Y_AXIS]) +
-			    sq(difference[Z_AXIS] * inv_axis_steps_per_unit[Z_AXIS]));
-
-	if ( cartesian_mm < 0.000001 ) {
-		// TODO - E only move. No need to do this. Can just move E directly
-		cartesian_mm = abs(difference[E_AXIS] * inv_axis_steps_per_unit[E_AXIS]);
-	}
-	
-	if ( cartesian_mm < 0.000001 ) {
-		return;
-	}
-	float seconds = 6000 * cartesian_mm / (printer_state.feedrate * printer_state.feedrateMultiply);
-	int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
-	int fractional_steps[4]; 
-	long final_destination_steps[4];
-	
-	// Pre calculate the steps to avoid float division and multiplication in loop
-	float steps_inv = 1.0 / steps;
-	for(byte i=0; i < NUM_AXIS; i++) {
-		fractional_steps[i] = steps_inv * difference[i];
-		// Save final position
-		final_destination_steps[i] = printer_state.destinationSteps[i];
-		printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
-	}
-	
-#ifdef DEBUG_QUEUE_MOVE
-	out.println_float_P(PSTR("Delta mm:"), cartesian_mm);
-	out.println_float_P(PSTR("Delta seconds:"), seconds);
-	out.println_long_P(PSTR("Delta steps:"), steps);
-#endif
-
-	for (int s = 1; s <= steps - 1; s++) {
-
-		// Just a long to int addition now. Wonder if the compiler optimises a long to int addition or whether it casts int to long?
-		for(byte i=0; i < NUM_AXIS; i++)
-			printer_state.destinationSteps[i] += fractional_steps[i];
-
-		calculate_delta(printer_state.destinationSteps, printer_state.destinationDeltaPositionSteps);
-		printer_state.destinationDeltaPositionSteps[3] = printer_state.destinationSteps[3];
-		
-		queue_move(check_endstops, pathOptimize);
-	}
-
-	// Set final destination manually to avoid rounding errors
-	calculate_delta(final_destination_steps, printer_state.destinationDeltaPositionSteps);
-	printer_state.destinationDeltaPositionSteps[3] = final_destination_steps[3];
-	queue_move(check_endstops, pathOptimize);	
-
-	// Update current position
-	for(byte i=0; i < NUM_AXIS; i++)
-		printer_state.currentPositionSteps[i] = final_destination_steps[i];
-}
-
-
-void set_delta_destination(long xaxis, long yaxis, long zaxis, long eaxis) {
-	printer_state.destinationDeltaPositionSteps[0] = xaxis;
-	printer_state.destinationDeltaPositionSteps[1] = yaxis;
-	printer_state.destinationDeltaPositionSteps[2] = zaxis;
-	printer_state.destinationDeltaPositionSteps[3] = eaxis;
-}
-
-void set_delta_position(long xaxis, long yaxis, long zaxis, long eaxis) {
+void set_delta_position(long xaxis, long yaxis, long zaxis) {
 	printer_state.currentDeltaPositionSteps[0] = xaxis;
 	printer_state.currentDeltaPositionSteps[1] = yaxis;
 	printer_state.currentDeltaPositionSteps[2] = zaxis;
-	printer_state.currentDeltaPositionSteps[3] = eaxis;
 }
 
 void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
@@ -1811,7 +1717,7 @@ void calculate_dir_delta(long difference[], float axis_diff[], PrintLine *p) {
   }
 }
 
-void split_delta_move(byte check_endstops,byte pathOptimize) {
+void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate) {
 #if min_software_endstop_x == true
     if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
 #endif
@@ -1852,6 +1758,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 		   printer_state.currentPositionSteps[i]=printer_state.destinationSteps[i];
 		if (difference[3] != 0)
 			queue_E_move(difference[3],check_endstops,pathOptimize);
+		out.println_float_P(PSTR("Move discarded 1:"), cartesian_mm);
 		return;
 	}
 	
@@ -1876,7 +1783,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize) {
 #endif
 
 	float seconds = 6000 * cartesian_mm / (printer_state.feedrate * printer_state.feedrateMultiply);
-	int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
+	int steps = max(1, int(delta_step_rate * seconds));
 	// Steps fit into one line
 	if (steps <= MAX_DELTA_SEGMENTS_PER_LINE) {
 		p->numDeltaSegments = steps;
@@ -2164,7 +2071,7 @@ inline long bresenham_step() {
 			return(wait); // waste some time for path optimization to fill up
 		} // End if WARMUP
 		// Set up delta segments
-		if (!cur->numDeltaSegments) {
+		if (cur->numDeltaSegments) {
 			// If there are delta segments point to them here
 			curd = &segments[cur->deltaSegmentReadPos++];
 			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0; 
@@ -2285,6 +2192,7 @@ inline long bresenham_step() {
 		return printer_state.interval; // Wait an other 50% fro last step to make the 100% full
 	} // End cur=0
 	sei();
+
   /* For halfstepping, we divide the actions into even and odd actions to split
      time used per loop. */
 	byte do_even;
@@ -2345,6 +2253,11 @@ inline long bresenham_step() {
 				if(curd->dir & 16) {
 					if(cur->deltaSegmentError[0]>0) {
 						WRITE(X_STEP_PIN,HIGH);
+						if (cur->dir & 4)
+							printer_state.countZSteps++;
+						else
+							printer_state.countZSteps--;
+						
 						curd->deltaSteps[0]--;
 						cur->deltaSegmentError[0] -= two_times_primary_step;
 						if (curd->deltaSteps[0])
@@ -2365,19 +2278,19 @@ inline long bresenham_step() {
 						else
 							curd->dir ^= 32;
 					}
-					cur->deltaSegmentError[0] += two_times_step[1];
+					cur->deltaSegmentError[1] += two_times_step[1];
 				}
 				if(curd->dir & 64) {
 					if(cur->deltaSegmentError[2]>0) {
 						WRITE(Y_STEP_PIN,HIGH);
-						curd->deltaSteps[1]--;
+						curd->deltaSteps[2]--;
 						cur->deltaSegmentError[2] -= two_times_primary_step;
-						if (curd->deltaSteps[1])
+						if (curd->deltaSteps[2])
 							movement|=64;
 						else
 							curd->dir ^= 64;
 					}
-					cur->deltaSegmentError[0] += two_times_step[2];
+					cur->deltaSegmentError[2] += two_times_step[2];
 				}
 
 			#if STEPPER_HIGH_DELAY>0
@@ -2389,7 +2302,11 @@ inline long bresenham_step() {
 
 				// Now take subsequent steps if necessary.
 				// Keep checking an axis until it doesn't take any more steps
+				int test =0;
 				while (movement) {
+					if (test++>16)
+						UI_STATUS_UPD("Loop");
+
 					if(movement & 16) {
 						if(cur->deltaSegmentError[0]>two_times_step[0]) {
 							WRITE(X_STEP_PIN,HIGH);
@@ -2400,7 +2317,7 @@ inline long bresenham_step() {
 						} else
 							movement ^= 16;
 					}
-					if(movement & 2) {
+					if(movement & 32) {
 						if(cur->deltaSegmentError[1]>two_times_step[1]) {
 							WRITE(Y_STEP_PIN,HIGH);
 							cur->deltaSegmentError[1] -= two_times_primary_step;
@@ -2410,7 +2327,7 @@ inline long bresenham_step() {
 						} else
 							movement ^= 32;
 					}
-					if(movement & 4) {
+					if(movement & 64) {
 						if(cur->deltaSegmentError[2]>two_times_step[2]) {
 							WRITE(Y_STEP_PIN,HIGH);
 							cur->deltaSegmentError[2] -= two_times_primary_step;
@@ -2433,7 +2350,7 @@ inline long bresenham_step() {
 				}
 
 				cur->primaryStepPerSegmentRemaining--;
-				if (cur->primaryStepPerSegmentRemaining) {
+				if (!cur->primaryStepPerSegmentRemaining) {
 					if (cur->numDeltaSegments) {
 						// Get the next delta segment
 						curd = &segments[cur->deltaSegmentReadPos++]; 

@@ -99,27 +99,18 @@ void set_fan_speed(int speed,bool wait) {
 #if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
 	long up_steps = printer_state.rodSteps;
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(up_steps,up_steps,up_steps,0,feedrate,true,true);
-	// In case X hit the endstop first, move Y and Z up.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(0,up_steps,up_steps,0,feedrate,true,true);
-	// In case Y hit the endstop first, move X and Z up.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(up_steps,0,up_steps,0,feedrate,true,true);
-	// In case Z hit the endstop first, move X and Y up.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(up_steps,up_steps,0,0,feedrate,true,true);
-	// Move X up all the way.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(up_steps,0,0,0,feedrate,true,true);
-	// Move Y up all the way.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(0,up_steps,0,0,feedrate,true,true);
-	// Move Z up all the way.
-	set_delta_position(-up_steps, -up_steps, -up_steps, printer_state.currentDeltaPositionSteps[3]);
-	move_delta_steps(0,0,up_steps,0,feedrate,true,true);
-	set_delta_position(up_steps,up_steps,up_steps, printer_state.currentDeltaPositionSteps[3]);
+	set_delta_position(-up_steps, -up_steps, -up_steps);
+	for (byte i=0; i<3; i++)
+		printer_state.currentPositionSteps[i] = 0;
+	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
+	set_delta_position(-up_steps, -up_steps, -up_steps);
+	for (byte i=0; i<3; i++)
+		printer_state.currentPositionSteps[i] = 0;
+	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
+	set_delta_position(-up_steps, -up_steps, -up_steps);
+	for (byte i=0; i<3; i++)
+		printer_state.currentPositionSteps[i] = 0;
+	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
 }
 
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
@@ -130,7 +121,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 		// Homing Z axis means that you must home X and Y
 		if (homeallaxis || zaxis) {
 			delta_move_to_top_endstops(homing_feedrate[0]);	
-			move_delta_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE,axis_steps_per_unit[0]*-ENDSTOP_Y_BACK_MOVE,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,		homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
+			move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
 			delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);	
 			printer_state.currentPositionSteps[0] = 0;
 			printer_state.currentPositionSteps[1] = 0;
@@ -141,10 +132,9 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 		{
 			if (xaxis) printer_state.destinationSteps[0] = 0;
 			if (yaxis) printer_state.destinationSteps[1] = 0;
-			queue_delta_move(true, false); 
+			split_delta_move(true,false,DELTA_SEGMENTS_PER_SECOND_HOME);
 		}
-		for (byte i=0; i<3; i++)
-			printer_state.countPositionSteps[i] = 0;
+		printer_state.countZSteps = 0;
 		UI_CLEAR_STATUS 
 	}
 }
@@ -321,7 +311,7 @@ void process_command(GCode *com)
       case 1: // G1
         if(get_coordinates(com)) // For X Y Z E F
 #if DRIVE_SYSTEM == 3
-          queue_delta_move(ALWAYS_CHECK_ENDSTOPS,true);
+		  split_delta_move(ALWAYS_CHECK_ENDSTOPS,true,DELTA_SEGMENTS_PER_SECOND);
 #else
           queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
@@ -811,21 +801,17 @@ void process_command(GCode *com)
 		case 251:
 			if(GCODE_HAS_S(com)) {
 				if (com->S == 0) {
-					for (byte i=0; i<3; i++)
-						printer_state.countPositionSteps[i] = 0;
+					printer_state.countZSteps = 0;
 					out.println_P(PSTR("Measurement reset."));
 				} else if (com->S == 1) {
-					out.print_float_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
-					out.print_float_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
-					out.print_float_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
+					out.print_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
 				} else if (com->S = 2) {
-					if (printer_state.countPositionSteps[2] < 0)
-						printer_state.countPositionSteps[2] = -printer_state.countPositionSteps[2];
-					rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countPositionSteps[2];
-					printer_state.rodSteps = printer_state.countPositionSteps[2];
+					if (printer_state.countZSteps < 0)
+						printer_state.countZSteps = -printer_state.countZSteps;
+					rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+					printer_state.rodSteps = printer_state.countZSteps;
 					for (byte i=0; i<3; i++) {
 						printer_state.currentPositionSteps[i] = 0;
-						printer_state.rodSteps = printer_state.countPositionSteps[2];
 					}
 					calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 					out.println_P(PSTR("Measured origin set. Measurement reset."));

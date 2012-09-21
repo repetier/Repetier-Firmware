@@ -235,7 +235,11 @@ void extruder_select(byte ext_num) {
    else
      printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
 #endif
+#if DRIVE_SYSTEM==3
+	split_delta_move(false,true,DELTA_SEGMENTS_PER_SECOND);
+#else
    queue_move(false,true); // Move head of new extruder to old position using last feedrate
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------------------------

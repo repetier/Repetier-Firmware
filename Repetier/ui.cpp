@@ -1979,17 +1979,14 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SHOW_MEASUREMENT:
 #ifdef STEP_COUNTER
 	{
-		out.print_float_P(PSTR("Measure/x="),printer_state.countPositionSteps[0] * inv_axis_steps_per_unit[0]);
-		out.print_float_P(PSTR("Measure/y="),printer_state.countPositionSteps[1] * inv_axis_steps_per_unit[1]);
-		out.print_float_P(PSTR("Measure/z="),printer_state.countPositionSteps[2] * inv_axis_steps_per_unit[2]);
+		out.print_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
 	}
 #endif
       break;
 	case UI_ACTION_RESET_MEASUREMENT:
 #ifdef STEP_COUNTER
 	{
-		for (byte i=0; i<3; i++)
-			printer_state.countPositionSteps[i] = 0;
+		printer_state.countZSteps = 0;
 		out.println_P(PSTR("Measurement reset."));
 	}
 #endif
@@ -1997,13 +1994,12 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SET_MEASURED_ORIGIN:
 #ifdef STEP_COUNTER
 	{
-		if (printer_state.countPositionSteps[2] < 0)
-			printer_state.countPositionSteps[2] = -printer_state.countPositionSteps[2];
-		rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countPositionSteps[2];
-		printer_state.rodSteps = printer_state.countPositionSteps[2];
+		if (printer_state.countZSteps < 0)
+			printer_state.countZSteps = -printer_state.countZSteps;
+		rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+		printer_state.rodSteps = printer_state.countZSteps;
 		for (byte i=0; i<3; i++) {
 			printer_state.currentPositionSteps[i] = 0;
-			printer_state.rodSteps = printer_state.countPositionSteps[2];
 		}
 		calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 		out.println_P(PSTR("Measured origin set. Measurement reset."));

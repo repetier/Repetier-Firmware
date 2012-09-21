@@ -616,6 +616,7 @@ on this endstop.
 /** \brief Number of segments to generate for delta conversions per second of move
 */
 #define DELTA_SEGMENTS_PER_SECOND 70 // make delta curves from many straight lines
+#define DELTA_SEGMENTS_PER_SECOND_HOME 40 // make delta curves from many straight lines
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
