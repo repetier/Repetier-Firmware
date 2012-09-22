@@ -99,17 +99,17 @@ void set_fan_speed(int speed,bool wait) {
 #if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
 	long up_steps = printer_state.rodSteps;
-	set_delta_position(-up_steps, -up_steps, -up_steps);
 	for (byte i=0; i<3; i++)
 		printer_state.currentPositionSteps[i] = 0;
+	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
-	set_delta_position(-up_steps, -up_steps, -up_steps);
 	for (byte i=0; i<3; i++)
 		printer_state.currentPositionSteps[i] = 0;
+	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
-	set_delta_position(-up_steps, -up_steps, -up_steps);
 	for (byte i=0; i<3; i++)
 		printer_state.currentPositionSteps[i] = 0;
+	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
 }
 
