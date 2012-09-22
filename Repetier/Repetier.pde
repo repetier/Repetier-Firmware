@@ -2315,12 +2315,7 @@ inline long bresenham_step() {
 
 				// Now take subsequent steps if necessary.
 				// Keep checking an axis until it doesn't take any more steps
-				int test =0;
-//				while (movement & 112) {
 				while (movement) {
-					if (test++>16)
-						UI_STATUS_UPD("Loop");
-
 					if(movement & 16) {
 						if(cur->deltaSegmentError[0]>two_times_step[0]) {
 							WRITE(X_STEP_PIN,HIGH);
