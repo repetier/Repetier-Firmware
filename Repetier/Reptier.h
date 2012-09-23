@@ -420,7 +420,11 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte joinFlags;
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+  #if DRIVE_SYSTEM==3
+  long delta[5];                  ///< Steps we want to move.
+  #else
   long delta[4];                  ///< Steps we want to move.
+  #endif
   long error[4];                  ///< Error calculation for Bresenham algorithm
   float speedX;                   ///< Speed in x direction at fullInterval in mm/s
   float speedY;                   ///< Speed in y direction at fullInterval in mm/s
