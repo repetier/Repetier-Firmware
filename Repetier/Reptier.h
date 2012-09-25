@@ -281,7 +281,7 @@ extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_move(byte check_endstops,byte pathOptimize);
 #if DRIVE_SYSTEM==3
-extern void calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
+extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
 extern void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate);
@@ -421,6 +421,7 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
   #if DRIVE_SYSTEM==3
+  // TODO - This is very lazy but I'll change when it all works
   long delta[5];                  ///< Steps we want to move.
   #else
   long delta[4];                  ///< Steps we want to move.
@@ -441,7 +442,6 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
 #if DRIVE_SYSTEM==3
   byte numDeltaSegments;		  		 ///< Number of delta segments left in line
   int deltaSegmentReadPos; 	 ///< Pointer to next DeltaSegment
-  long deltaSegmentError[3]; 	  ///< Bresenham error in delta algorithm
   long numPrimaryStepPerSegment;
   long primaryStepPerSegmentRemaining;
 #endif
