@@ -1849,10 +1849,13 @@ out.println_int_P(PSTR("dZ:"), printer_state.currentDeltaPositionSteps[0]);
 		calculate_dir_delta(difference, axis_diff, p);
 		// calculate_delta_segments returns the maximum abs axis move in a delta segment
 		long max_delta_step = calculate_delta_segments(p);
+		// The virtual axis. This reprents the minimum step rate to achieve the fastest axis move in any of the delta segments.
 		long virtual_axis_move = max_delta_step * segment_count;
+		// One two axis can lead the bresenham algorithm. The extruder or the virtual delta axis. The virtual delta axis will always 
+		// be faster (or the same speed in pure Z move) than the cartesian XYZ axis.
 		if (virtual_axis_move > p->delta[3]) { // Is virtual axis or E axis leading
 			p->primaryAxis = 4; // Virtual axis will lead bresenham step since it's greater
-			p->delta[4] = p->stepsRemaining = virtual_axis_move;
+			p->stepsRemaining = virtual_axis_move;
 			axis_diff[4] = virtual_axis_move * inv_axis_steps_per_unit[0]; // Steps/unit same as all the towers
 			// Virtual axis steps per segment
 			p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = max_delta_step;
@@ -1869,16 +1872,22 @@ out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
 out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
 #endif
 		calculate_move(p,axis_diff,check_endstops,pathOptimize);
+		// Move to the destination
+		for (byte i=0; i< 4; i++)
+			printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
+
 	// The line needs to be split
 	} else {
 		// Round up the number of lines
 		int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
 		// Store the delta steps per line segment 
+		// TODO - inv_num_lines can come out.
 		int segments_per_line = segment_count / num_lines;
 		p->numDeltaSegments = segments_per_line;
 		long fractional_steps[4]; 
 		long final_destination_steps[4];
-		
+
+		// Precompute the fractional cartesian step in each line
 		for(byte i=0; i < NUM_AXIS; i++) {
 			fractional_steps[i] = difference[i] / num_lines;
 #ifdef DEBUG_SPLIT
@@ -1887,6 +1896,7 @@ out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
 
 			// Save final position
 			final_destination_steps[i] = printer_state.destinationSteps[i];
+			// Precompute axis diff. It's the same for all segments.
 			axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
 		}
 		calculate_dir_delta(fractional_steps, axis_diff, p);
@@ -1900,7 +1910,6 @@ out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
 		byte save_joinFlags = p->joinFlags;
 		float save_distance = p->distance;
 
-		// Create all but the last line
 		int line = 0;
 		while (1) {
 			long max_delta_step = calculate_delta_segments(p);
@@ -1911,7 +1920,7 @@ out.println_int_P(PSTR("Max DS:"), segments_per_line);
 			long virtual_axis_move = max_delta_step * segments_per_line;
 			if (virtual_axis_move > p->delta[3]) { // Is virtual axis or E axis leading
 				p->primaryAxis = 4; // Virtual axis will lead bresenham step since it's greater
-				p->delta[4] = p->stepsRemaining = virtual_axis_move;
+				p->stepsRemaining = virtual_axis_move;
 				axis_diff[4] = virtual_axis_move * inv_axis_steps_per_unit[0]; // Steps/unit same as all the towers
 				// Virtual axis steps per segment
 				p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = max_delta_step;
@@ -1942,7 +1951,7 @@ out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
 			out.println_int_P(PSTR("dY:"), printer_state.currentDeltaPositionSteps[1]);
 			out.println_int_P(PSTR("dZ:"), printer_state.currentDeltaPositionSteps[2]);
 #endif
-			// lines_write_pos will be updated by calculate_move
+			// lines_write_pos will already be updated by calculate_move
 			p = &lines[lines_write_pos];
 			for (byte i=0; i < 4; i++) {
 				p->delta[i] = save_delta[i];
@@ -1957,9 +1966,6 @@ out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
 	#endif
 		}
 	}
-	// Move to the destination
-	for (byte i=0; i< 4; i++)
-		printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
 }
 
 #endif
@@ -2209,11 +2215,8 @@ inline long bresenham_step() {
 		} // End if opsMode
 #endif
 		sei(); // Allow interrupts
-		if(cur->halfstep) {
-			cur_errupd = cur->delta[cur->primaryAxis]<<1;
-		//printer_state.interval = CPUDivU2(cur->vStart);
-		} else
-			cur_errupd = cur->delta[cur->primaryAxis];      
+		cur_errupd = (cur->halfstep ? cur->stepsRemaining << 1 : cur->stepsRemaining);
+
 		if(!(cur->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) {// should never happen, but with bad timings???
 			out.println_int_P(PSTR("LATE "),(unsigned int)lines_count);
 			updateStepsParameter(cur/*,8*/);

@@ -420,12 +420,7 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte joinFlags;
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
-  #if DRIVE_SYSTEM==3
-  // TODO - This is very lazy but I'll change when it all works
-  long delta[5];                  ///< Steps we want to move.
-  #else
   long delta[4];                  ///< Steps we want to move.
-  #endif
   long error[4];                  ///< Error calculation for Bresenham algorithm
   float speedX;                   ///< Speed in x direction at fullInterval in mm/s
   float speedY;                   ///< Speed in y direction at fullInterval in mm/s
@@ -440,10 +435,10 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   //float startFactor;
   //float endFactor;
 #if DRIVE_SYSTEM==3
-  byte numDeltaSegments;		  		 ///< Number of delta segments left in line
-  int deltaSegmentReadPos; 	 ///< Pointer to next DeltaSegment
-  long numPrimaryStepPerSegment;
-  long primaryStepPerSegmentRemaining;
+  byte numDeltaSegments;		  		///< Number of delta segments left in line
+  int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
+  long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
+  long primaryStepPerSegmentRemaining;	///< Counter for remaining primary steps in current delta segment
 #endif
   unsigned long fullInterval;     ///< interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
