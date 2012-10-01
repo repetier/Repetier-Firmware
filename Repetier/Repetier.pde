@@ -1290,7 +1290,6 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     time_for_move = LOW_TICKS_PER_MOVE;
     critical=true; 
   }
-  // TODO - Do this less perhaps
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
@@ -1298,15 +1297,14 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
   axis_interval[1] = 60.0*abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
-  // TODO - Not the case for delta
   if(p->dir & 64) { // normally no move in z direction
     axis_interval[2] = 60.0*abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
-  // TODO - Could be the same for all blocks in one delta move
   axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
   if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];  
   #if DRIVE_SYSTEM==3
+  // TODO - How about E driven virtual axis? This is not correct in that case
   if (p->primaryAxis == 4)
 	  axis_interval[4] = 60.0*abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
   #endif
@@ -1337,7 +1335,6 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   
 
   //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
-  // TODO - definitely can come outside loop.
   byte is_print_move = (p->dir & 136)==136; // are we printing
 #if USE_OPS==1
   if(is_print_move) printmoveSeen = 1;
@@ -1617,10 +1614,15 @@ p->delta[1] = deltay-deltax;
 
 #if DRIVE_SYSTEM==3
 #define DEBUG_DELTA_OVERFLOW
+/**
+  Calculate and cache the delta robot positions of the cartesian move in a line.
+  @return The largest delta axis move in a single segment
+  @param p The line to examine.
+*/
 long calculate_delta_segments(PrintLine *p) {
 	long difference[NUM_AXIS - 1];
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
-		difference[i] = (p->dir & 1<<i ? p->delta[i] : -p->delta[i]);
+		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 	}
 
 	int fractional_steps[3]; 
@@ -1628,14 +1630,14 @@ long calculate_delta_segments(PrintLine *p) {
 
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
 		fractional_steps[i] = difference[i] / p->numDeltaSegments;
-	out.println_int_P(PSTR("Dif:"), difference[i]);
-	out.println_int_P(PSTR("Frac:"), fractional_steps[i]);
+//	out.println_int_P(PSTR("Dif:"), difference[i]);
+//	out.println_int_P(PSTR("Frac:"), fractional_steps[i]);
 		// Save final position
 		final_destination_steps[i] = printer_state.currentPositionSteps[i] + difference[i];
 		destination_steps[i] = printer_state.currentPositionSteps[i];
 	}	
 	
-	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
+//	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
 	p->deltaSegmentReadPos = delta_segment_write_pos;
 #ifdef DEBUG_STEPCOUNT
 	p->totalStepsRemaining=0;
@@ -1647,7 +1649,7 @@ long calculate_delta_segments(PrintLine *p) {
 		// use the actual destination on the final step to avoid any error
 		if (s == p->numDeltaSegments - 1)
 			for(byte i=0; i < NUM_AXIS - 1; i++)
-				destination_steps[i] = final_destination_steps[i];			
+				destination_steps[i] = final_destination_steps[i];
 		else
 			for(byte i=0; i < NUM_AXIS - 1; i++)
 				destination_steps[i] += fractional_steps[i];
@@ -1662,15 +1664,13 @@ long calculate_delta_segments(PrintLine *p) {
 		
 		// Verify that delta calc has a solution
 		if (calculate_delta(destination_steps, destination_delta_steps)) {
+			d->dir = 0;
 			for(byte i=0; i < NUM_AXIS - 1; i++) {
-				d->dir = 0;
 				long delta = destination_delta_steps[i] - printer_state.currentDeltaPositionSteps[i];
-			#ifdef DEBUG_STEPCOUNT
-				p->totalStepsRemaining += delta;
-			#endif
-				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
-				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
-				out.println_long_P(PSTR("delta:"), delta);
+//#ifdef DEBUG_DELTA_CALC
+//				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
+//				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
+//#endif
 				if (delta >= 0) {
 					d->dir |= 17<<i;
 	#ifdef DEBUG_DELTA_OVERFLOW
@@ -1678,7 +1678,7 @@ long calculate_delta_segments(PrintLine *p) {
 						out.println_long_P(PSTR("Delta overflow:"), delta);
 	#endif
 					d->deltaSteps[i] = delta;
-				} else if (delta < 0) {
+				} else {
 					d->dir |= 16<<i;
 	#ifdef DEBUG_DELTA_OVERFLOW
 					if (-delta > 65535)
@@ -1686,11 +1686,16 @@ long calculate_delta_segments(PrintLine *p) {
 	#endif
 					d->deltaSteps[i] = -delta;
 				}
+	#ifdef DEBUG_STEPCOUNT
+				p->totalStepsRemaining += d->deltaSteps[i];
+	#endif
+
 				if (max_axis_move < d->deltaSteps[i]) max_axis_move = d->deltaSteps[i]; 
 				printer_state.currentDeltaPositionSteps[i] = destination_delta_steps[i];
 			}
 		} else {
 			// Illegal position - idnore move
+			out.println_P(PSTR("Invalid delta coordinate"));
 			d->dir = 0;
 			for(byte i=0; i < NUM_AXIS - 1; i++) {
 				d->deltaSteps[i]=0;
@@ -1702,15 +1707,30 @@ long calculate_delta_segments(PrintLine *p) {
 		delta_segment_count++;
 		END_INTERRUPT_PROTECTED
 	}
+	#ifdef DEBUG_STEPCOUNT
+//		out.println_long_P(PSTR("totalStepsRemaining:"), p->totalStepsRemaining);
+	#endif
 	return max_axis_move;
 }
 
+/**
+  Set delta tower positions
+  @param xaxis X tower position.
+  @param yaxis Y tower position.
+  @param zaxis Z tower position.
+*/
 void set_delta_position(long xaxis, long yaxis, long zaxis) {
 	printer_state.currentDeltaPositionSteps[0] = xaxis;
 	printer_state.currentDeltaPositionSteps[1] = yaxis;
 	printer_state.currentDeltaPositionSteps[2] = zaxis;
 }
 
+/**
+  Calculate the delta tower position from a cartesian position
+  @param cartesianPosSteps Array containing cartesian coordinates.
+  @param deltaPosSteps Result array with tower coordinates.
+  @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
+*/
 byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 	long temp;
 
@@ -1738,232 +1758,166 @@ byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 	return 1;
 }
 
-void calculate_dir_delta(long difference[], float axis_diff[], PrintLine *p) {
-  p->dir = 0;
-  //Find direction
-  for(byte i=0; i < 4; i++) {
-    if(difference[i]>=0) {
-	  p->delta[i] = difference[i];
-      p->dir |= 1<<i;
-    } else {
-      p->delta[i] = -difference[i];
-    }
-    if(p->delta[i]) p->dir |= 16<<i;
-  }
-  if(printer_state.extrudeMultiply!=100) {
-    p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-  }
-  //Feedrate calc based on XYZ travel distance
-  if(p->dir & 112) {
-    if(p->dir & 64) {
-      p->distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
-    } else {
-      p->distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
-    }
-  }  else if(p->dir & 128)
-    p->distance = abs(axis_diff[3]);
-  else {
-    return; // no steps to take, we are finished
-  }
+void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
+  *dir = 0;
+	//Find direction
+	for(byte i=0; i < 4; i++) {
+		if(difference[i]>=0) {
+			delta[i] = difference[i];
+			*dir |= 1<<i;
+		} else {
+			delta[i] = -difference[i];
+	}
+		if(delta[i]) *dir |= 16<<i;
+	}
+	if(printer_state.extrudeMultiply!=100) {
+		delta[3]=(delta[3]*printer_state.extrudeMultiply)/100;
+	}
 }
 
-void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate) {
-#if min_software_endstop_x == true
-    if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
-#endif
-#if min_software_endstop_y == true
-    if (printer_state.destinationSteps[1] < 0) printer_state.destinationSteps[1] = 0.0;
-#endif
-#if min_software_endstop_z == true
-    if (printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0.0;
-#endif
+byte calculate_distance(float axis_diff[], byte dir, float *distance) {
+  // Calculate distance depending on direction
+	if(dir & 112) {
+		if(dir & 64) {
+			*distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
+		} else {
+			*distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
+		}
+	} else if(dir & 128)
+		*distance = abs(axis_diff[3]);
+	else {
+		return 0; // no steps to take, we are finished
+	}
+  return 1;
+}
 
-#if max_software_endstop_x == true
-    if (printer_state.destinationSteps[0] > printer_state.xMaxSteps) printer_state.destinationSteps[0] = printer_state.xMaxSteps;
+/**
+  Split a line up into a series of lines with at most MAX_DELTA_SEGMENTS_PER_LINE delta segments.
+  @param check_endstops Check endstops during the move.
+  @param pathOptimize Run the path optimizer.
+  @param delta_step_rate delta step rate in segments per second for the move.
+*/
+void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate) {
+#if min_software_endstop_z == true
+    if (printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0;
 #endif
-#if max_software_endstop_y == true
-    if (printer_state.destinationSteps[1] > printer_state.yMaxSteps) printer_state.destinationSteps[1] = printer_state.yMaxSteps;
-#endif
-#if max_software_endstop_z == true
-    if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
+#if max_software_endstop_r == true
+// TODO - Implement radius checking
 #endif
 	long difference[NUM_AXIS];
+	float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
 	for(byte i=0; i < NUM_AXIS; i++) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
+		axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
 	}
-	
-	if (difference[0] == 0 && difference[1] == 0 && difference[2] == 0) {
-		// If the move is only e
-		if (difference[3] != 0)
-			queue_E_move(difference[3],check_endstops,pathOptimize);
+	float save_distance;
+	byte save_dir;
+	long save_delta[4];
+	calculate_dir_delta(difference, &save_dir, save_delta);
+	if (!calculate_distance(axis_diff, save_dir, &save_distance))
+		return;
+
+	if (!(save_dir & 112)) {
+		queue_E_move(difference[3],check_endstops,pathOptimize);
 		return;
 	}
-
-	float cartesian_mm = sqrt(sq(difference[X_AXIS] * inv_axis_steps_per_unit[X_AXIS]) +
-			    sq(difference[Y_AXIS] * inv_axis_steps_per_unit[Y_AXIS]) +
-			    sq(difference[Z_AXIS] * inv_axis_steps_per_unit[Z_AXIS]));
-
-	if ( cartesian_mm < 0.000001 ) {
-		return;
-	}
+	// Compute number of seconds for move and hence number of segments needed
+	float seconds = 6000 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
+	int segment_count = max(1, int(delta_step_rate * seconds));
+	// Now compute the number of lines needed
+	int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
+	// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
+	int segments_per_line = segment_count / num_lines;
 	
-	// TODO - Detect E moves with small XYZ
+	long start_position[4], fractional_steps[4];
+	for (byte i = 0; i < 4; i++) {
+		start_position[i] = printer_state.currentPositionSteps[i];
+	}
+		
+#ifdef DEBUG_SPLIT
+	out.println_float_P(PSTR("Seconds: "), seconds); 
+	out.println_int_P(PSTR("Segments:"), segment_count);
+	out.println_int_P(PSTR("Num lines:"), num_lines);
+	out.println_int_P(PSTR("segments_per_line:"), segments_per_line);
+#endif
 	
 	printer_state.flag0 &= ~1; // Motor is enabled now 
 	while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
 		gcode_read_serial();
 		check_periodical();
 	}
+	
 	// Insert dummy moves if necessary
 	byte newPath=check_new_move(pathOptimize);
-	PrintLine *p = &lines[lines_write_pos];
-	float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
-
-	if(check_endstops) 
-		p->flags = FLAG_CHECK_ENDSTOPS; 
-	else 
-		p->flags = 0;
-	p->joinFlags = 0;
-	if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
-#if USE_OPS==1
-	p->opsReverseSteps=0;
-#endif
 	
-	float seconds = 6000 * cartesian_mm / (printer_state.feedrate * printer_state.feedrateMultiply);
-	int segment_count = max(1, int(delta_step_rate * seconds));
-#ifdef DEBUG_SPLIT
-out.println_float_P(PSTR("Seconds: "), seconds); 
-out.println_int_P(PSTR("Segments:"), segment_count);
-out.println_int_P(PSTR("X:"), printer_state.currentPositionSteps[0]);
-out.println_int_P(PSTR("Y:"), printer_state.currentPositionSteps[0]);
-out.println_int_P(PSTR("Z:"), printer_state.currentPositionSteps[0]);
-out.println_int_P(PSTR("dX:"), printer_state.currentDeltaPositionSteps[0]);
-out.println_int_P(PSTR("dY:"), printer_state.currentDeltaPositionSteps[0]);
-out.println_int_P(PSTR("dZ:"), printer_state.currentDeltaPositionSteps[0]);
-#endif
-	if (segment_count <= MAX_DELTA_SEGMENTS_PER_LINE) {
-		p->numDeltaSegments = segment_count;
-		for (byte i=0; i<4; i++)
-			axis_diff[i] = difference[i]*inv_axis_steps_per_unit[i];
+	for (int line_number=1; line_number < num_lines + 1; line_number++) {
+		while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
+			gcode_read_serial();
+			check_periodical();
+		}
+		PrintLine *p = &lines[lines_write_pos];
+		// Downside a comparison per loop. Upside one less distance calculation and simpler code.
+		if (num_lines == 1) {
+			p->numDeltaSegments = segment_count;
+			p->dir = save_dir;
+			for (byte i=0; i < 4; i++) {
+				p->delta[i] = save_delta[i];
+				fractional_steps[i] = difference[i];
+			}
+			p->distance = save_distance;			
+		} else {
+			for (byte i=0; i < 4; i++) {
+				printer_state.destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
+				fractional_steps[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
+				axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
+			}
+			calculate_dir_delta(fractional_steps, &p->dir, p->delta);
+			calculate_distance(axis_diff, p->dir, &p->distance);			
+		}
 		
-		calculate_dir_delta(difference, axis_diff, p);
-		// calculate_delta_segments returns the maximum abs axis move in a delta segment
+		p->joinFlags = 0;
+		
+		// Only set fixed on last segment
+		if (line_number == num_lines && !pathOptimize)
+			p->joinFlags = FLAG_JOIN_END_FIXED;
+
+		if(check_endstops) 
+			p->flags = FLAG_CHECK_ENDSTOPS; 
+		else 
+			p->flags = 0;
+
+		p->numDeltaSegments = segments_per_line;
+
+	#if USE_OPS==1
+		p->opsReverseSteps=0;
+	#endif
+	
 		long max_delta_step = calculate_delta_segments(p);
-		// The virtual axis. This reprents the minimum step rate to achieve the fastest axis move in any of the delta segments.
-		long virtual_axis_move = max_delta_step * segment_count;
-		// One two axis can lead the bresenham algorithm. The extruder or the virtual delta axis. The virtual delta axis will always 
-		// be faster (or the same speed in pure Z move) than the cartesian XYZ axis.
-		if (virtual_axis_move > p->delta[3]) { // Is virtual axis or E axis leading
-			p->primaryAxis = 4; // Virtual axis will lead bresenham step since it's greater
+
+	#ifdef DEBUG_SPLIT
+		out.println_long_P(PSTR("Max DS:"), max_delta_step);
+	#endif
+		long virtual_axis_move = max_delta_step * segments_per_line;
+		p->primaryAxis = 4; // Virtual axis will lead bresenham step either way
+		if (virtual_axis_move > p->delta[3]) { // Is delta move or E axis leading
 			p->stepsRemaining = virtual_axis_move;
 			axis_diff[4] = virtual_axis_move * inv_axis_steps_per_unit[0]; // Steps/unit same as all the towers
 			// Virtual axis steps per segment
-			p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = max_delta_step;
+			p->numPrimaryStepPerSegment = max_delta_step;
 		} else {
-			p->primaryAxis = 3;
-			p->stepsRemaining = p->delta[3];
-			// Calculate the amount of cartesian steps per delta segment
-			p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = p->stepsRemaining / segment_count;
+			// Round up to get something divisible by segment count which is greater than E move
+			p->numPrimaryStepPerSegment = (p->delta[3] + segment_count - 1) / segment_count;
+			p->stepsRemaining = p->numPrimaryStepPerSegment * segment_count;
+			axis_diff[4] = p->stepsRemaining * inv_axis_steps_per_unit[3];
 		}
 #ifdef DEBUG_SPLIT
-out.println_long_P(PSTR("Max DS:"), max_delta_step);
-out.println_long_P(PSTR("StepsRemaining:"), p->stepsRemaining);
-out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
-out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
+		out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
+		out.println_long_P(PSTR("Virtual axis step:"), p->stepsRemaining);
 #endif
+
 		calculate_move(p,axis_diff,check_endstops,pathOptimize);
-		// Move to the destination
-		for (byte i=0; i< 4; i++)
-			printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
-
-	// The line needs to be split
-	} else {
-		// Round up the number of lines
-		int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
-		// Store the delta steps per line segment 
-		// TODO - inv_num_lines can come out.
-		int segments_per_line = segment_count / num_lines;
-		p->numDeltaSegments = segments_per_line;
-		long fractional_steps[4]; 
-		long final_destination_steps[4];
-
-		// Precompute the fractional cartesian step in each line
-		for(byte i=0; i < NUM_AXIS; i++) {
-			fractional_steps[i] = difference[i] / num_lines;
-#ifdef DEBUG_SPLIT
-			out.println_long_P(PSTR("Frac1:"), difference[i]);
-#endif
-
-			// Save final position
-			final_destination_steps[i] = printer_state.destinationSteps[i];
-			// Precompute axis diff. It's the same for all segments.
-			axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
-		}
-		calculate_dir_delta(fractional_steps, axis_diff, p);
-
-		// Cache all the calculated parameters so we don't have to do it again
-		byte save_dir = p->dir;
-		long save_delta[4];
-		for (byte i=0; i < 4; i++)
-			save_delta[i] = p->delta[i];
-		byte save_flags = p->flags;
-		byte save_joinFlags = p->joinFlags;
-		float save_distance = p->distance;
-
-		int line = 0;
-		while (1) {
-			long max_delta_step = calculate_delta_segments(p);
-#ifdef DEBUG_SPLIT
-out.println_long_P(PSTR("Max DS:"), max_delta_step);
-out.println_int_P(PSTR("Max DS:"), segments_per_line);
-#endif
-			long virtual_axis_move = max_delta_step * segments_per_line;
-			if (virtual_axis_move > p->delta[3]) { // Is virtual axis or E axis leading
-				p->primaryAxis = 4; // Virtual axis will lead bresenham step since it's greater
-				p->stepsRemaining = virtual_axis_move;
-				axis_diff[4] = virtual_axis_move * inv_axis_steps_per_unit[0]; // Steps/unit same as all the towers
-				// Virtual axis steps per segment
-				p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = max_delta_step;
-#ifdef DEBUG_SPLIT
-out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
-out.println_long_P(PSTR("Virtual axis step:"), max_delta_step);
-#endif
-			} else {
-				p->primaryAxis = 3;
-				p->stepsRemaining = p->delta[3];
-				// Calculate the amount of cartesian steps per delta segment
-				p->primaryStepPerSegmentRemaining = p->numPrimaryStepPerSegment = p->stepsRemaining / segment_count;
-			}
-
-			calculate_move(p,axis_diff,check_endstops,pathOptimize);
-			while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
-				gcode_read_serial();
-				check_periodical();
-			}
-			for (byte i=0; i < 4; i++) {
-				printer_state.currentPositionSteps[i] += fractional_steps[i];
-			}
-			line++;
-			if (line>=num_lines)
-				break;
-#ifdef DEBUG_SPLIT
-			out.println_int_P(PSTR("dX:"), printer_state.currentDeltaPositionSteps[0]);
-			out.println_int_P(PSTR("dY:"), printer_state.currentDeltaPositionSteps[1]);
-			out.println_int_P(PSTR("dZ:"), printer_state.currentDeltaPositionSteps[2]);
-#endif
-			// lines_write_pos will already be updated by calculate_move
-			p = &lines[lines_write_pos];
-			for (byte i=0; i < 4; i++) {
-				p->delta[i] = save_delta[i];
-			}
-			p->flags = save_flags;
-			p->joinFlags = save_joinFlags;
-			p->dir = save_dir;
-			p->distance = save_distance;
-			p->numDeltaSegments = segments_per_line;
-	#if USE_OPS==1
-			p->opsReverseSteps=0;
-	#endif
+		for (byte i=0; i < 4; i++) {
+			printer_state.currentPositionSteps[i] += fractional_steps[i];
 		}
 	}
 }
@@ -2073,7 +2027,10 @@ inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
 int lastblk=-1;
 long cur_errupd;
 #if DRIVE_SYSTEM==3
+//#define DEBUG_DELTA_TIMER
+// Current delta segment
 DeltaSegment *curd;
+// Current delta segment primary error increment
 long curd_errupd;
 inline long bresenham_step() {
 	if(cur == 0) {
@@ -2152,10 +2109,16 @@ inline long bresenham_step() {
 			if(curd->dir & 16) enable_x();
 			if(curd->dir & 32) enable_y();
 			if(curd->dir & 64) enable_z();
-			// Initialize bresenham for the first segment
 			
-			curd_errupd = (cur->halfstep ? cur->numPrimaryStepPerSegment : cur->numPrimaryStepPerSegment << 1);
-			cur->error[0] = cur->error[1] = cur->error[2] = curd_errupd;
+			// Initialize bresenham for the first segment			
+			if (cur->halfstep) {			
+				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment;
+				curd_errupd = cur->numPrimaryStepPerSegment = cur->numPrimaryStepPerSegment<<1;
+			} else {
+				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
+				curd_errupd = cur->numPrimaryStepPerSegment;
+			}
+			cur->primaryStepPerSegmentRemaining = cur->numPrimaryStepPerSegment;
 #ifdef DEBUG_DELTA_TIMER
 			out.println_byte_P(PSTR("HS: "),cur->halfstep);
 			out.println_long_P(PSTR("Error: "),curd_errupd);
@@ -2357,10 +2320,9 @@ inline long bresenham_step() {
 				WRITE(X_STEP_PIN,LOW);
 				WRITE(Y_STEP_PIN,LOW);
 				WRITE(Z_STEP_PIN,LOW);
-
-				if (!cur->primaryStepPerSegmentRemaining--) {
-					out.println_long_P(PSTR("Count: "),printer_state.countZSteps);
-
+				cur->primaryStepPerSegmentRemaining--;
+				if (!cur->primaryStepPerSegmentRemaining) {
+					cur->numDeltaSegments--;
 					if (cur->numDeltaSegments) {
 
 						// Get the next delta segment
@@ -2368,16 +2330,13 @@ inline long bresenham_step() {
 						if (cur->deltaSegmentReadPos > DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
 						delta_segment_count--;
 
-						// Count delta segments in this line
-						cur->numDeltaSegments--;
-
 						// Switch on appropriate axis
 						if(curd->dir & 16) enable_x();
 						if(curd->dir & 32) enable_y();
 						if(curd->dir & 64) enable_z();
 
-						// Initialize bresenham for this segment
-						cur->error[0] = cur->error[1] = cur->error[2] = curd_errupd;
+						// Initialize bresenham for this segment (numPrimaryStepPerSegment is already correct for the half step setting)
+						cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
 
 						// Reset the counter of the primary steps. This is initialized in the line
 						// generation so don't have to do this the first time.
@@ -2399,8 +2358,11 @@ inline long bresenham_step() {
 						} else {
 							WRITE(Z_DIR_PIN,INVERT_Z_DIR);
 						}
-					} else
+					} else {
+						// Release the last segment
+						delta_segment_count--;
 						curd=0;
+					}
 				}
 			}
 #if USE_OPS==0 && !defined(USE_ADVANCE)
@@ -2471,108 +2433,108 @@ inline long bresenham_step() {
 					if(v>STEP_DOUBLER_FREQUENCY*2) {
 						printer_state.stepper_loops = 4;
 						v = v>>2;
-				} else {
-					printer_state.stepper_loops = 2;
-					v = v>>1;
-				}
-#else
-				printer_state.stepper_loops = 2;
-				v = v>>1;
-#endif
-			} else {
-				printer_state.stepper_loops = 1;
-			}
-			printer_state.interval = CPUDivU2(v);
-			printer_state.timer+=printer_state.interval;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
-			long advance_target =printer_state.advance_executed-cur->advanceRate;
-			for(byte loop=1;loop<max_loops;loop++) advance_target-=cur->advanceRate;
-			if(advance_target<cur->advanceEnd)
-				advance_target = cur->advanceEnd;
-			long h=mulu6xu16to32(cur->advanceL,v);
-			int tred = ((advance_target+h)>>16);
-			cli();  
-			printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
-			printer_state.advance_steps_set = tred;
-			sei();
-			printer_state.advance_executed = advance_target;
-#else
-			int tred=mulu6xu16shift16(cur->advanceL,v);
-			cli();  
-			printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
-			printer_state.advance_steps_set = tred;
-			sei();
-#endif
-#endif
-		} else {
-			// If we had acceleration, we need to use the latest vMaxReached and interval
-			// If we started full speed, we need to use cur->fullInterval and vMax
-#ifdef USE_ADVANCE
-			unsigned int v;
-			if(!cur->accelSteps) {
-				v = cur->vMax;
-			} else {
-				v = printer_state.vMaxReached;
-			}
-#ifdef ENABLE_QUADRATIC_ADVANCE
-			long h=mulu6xu16to32(cur->advanceL,v);
-			int tred = ((printer_state.advance_executed+h)>>16);
-			cli();  
-			printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
-			printer_state.advance_steps_set = tred;
-			sei();
-#else
-			int tred=mulu6xu16shift16(cur->advanceL,v);
-			cli();  
-			printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
-			printer_state.advance_steps_set = tred;
-			sei();
-#endif
-#endif
-			if(!cur->accelSteps) {
-				if(cur->vMax>STEP_DOUBLER_FREQUENCY) {
-#if ALLOW_QUADSTEPPING
-					if(cur->vMax>STEP_DOUBLER_FREQUENCY*2) {
-						printer_state.stepper_loops = 4;
-						printer_state.interval = cur->fullInterval>>2;
 					} else {
 						printer_state.stepper_loops = 2;
-						printer_state.interval = cur->fullInterval>>1;
+						v = v>>1;
 					}
 #else
 					printer_state.stepper_loops = 2;
-					printer_state.interval = cur->fullInterval>>1;
+					v = v>>1;
 #endif
 				} else {
 					printer_state.stepper_loops = 1;
-					printer_state.interval = cur->fullInterval;
+				}
+				printer_state.interval = CPUDivU2(v);
+				printer_state.timer+=printer_state.interval;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+				long advance_target =printer_state.advance_executed-cur->advanceRate;
+				for(byte loop=1;loop<max_loops;loop++) advance_target-=cur->advanceRate;
+				if(advance_target<cur->advanceEnd)
+					advance_target = cur->advanceEnd;
+				long h=mulu6xu16to32(cur->advanceL,v);
+				int tred = ((advance_target+h)>>16);
+				cli();  
+				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
+				printer_state.advance_steps_set = tred;
+				sei();
+				printer_state.advance_executed = advance_target;
+#else
+				int tred=mulu6xu16shift16(cur->advanceL,v);
+				cli();  
+				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
+				printer_state.advance_steps_set = tred;
+				sei();
+#endif
+#endif
+			} else {
+				// If we had acceleration, we need to use the latest vMaxReached and interval
+				// If we started full speed, we need to use cur->fullInterval and vMax
+#ifdef USE_ADVANCE
+				unsigned int v;
+				if(!cur->accelSteps) {
+					v = cur->vMax;
+				} else {
+					v = printer_state.vMaxReached;
+				}
+#ifdef ENABLE_QUADRATIC_ADVANCE
+				long h=mulu6xu16to32(cur->advanceL,v);
+				int tred = ((printer_state.advance_executed+h)>>16);
+				cli();  
+				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
+				printer_state.advance_steps_set = tred;
+				sei();
+#else
+				int tred=mulu6xu16shift16(cur->advanceL,v);
+				cli();  
+				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
+				printer_state.advance_steps_set = tred;
+				sei();
+#endif
+#endif
+				if(!cur->accelSteps) {
+					if(cur->vMax>STEP_DOUBLER_FREQUENCY) {
+#if ALLOW_QUADSTEPPING
+						if(cur->vMax>STEP_DOUBLER_FREQUENCY*2) {
+							printer_state.stepper_loops = 4;
+							printer_state.interval = cur->fullInterval>>2;
+						} else {
+							printer_state.stepper_loops = 2;
+							printer_state.interval = cur->fullInterval>>1;
+						}
+#else
+						printer_state.stepper_loops = 2;
+						printer_state.interval = cur->fullInterval>>1;
+#endif
+					} else {
+						printer_state.stepper_loops = 1;
+						printer_state.interval = cur->fullInterval;
+					}
 				}
 			}
-		}
 #else
-		printer_state.interval = cur->fullInterval; // without RAMPS always use full speed
+			printer_state.interval = cur->fullInterval; // without RAMPS always use full speed
 #endif
-	} // do_odd
-	if(do_even) {
-		printer_state.stepNumber+=max_loops;
-		cur->stepsRemaining-=max_loops;
-    }
+		} // do_odd
+		if(do_even) {
+			printer_state.stepNumber+=max_loops;
+			cur->stepsRemaining-=max_loops;
+		}
 
 #if USE_OPS==1
-    if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
+		if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
 #ifdef DEBUG_OPS
-		out.println_long_P(PSTR("DownX"),cur->stepsRemaining);
+			out.println_long_P(PSTR("DownX"),cur->stepsRemaining);
 #endif
-		// Point for retraction reversal reached.
-		printer_state.filamentRetracted = false;
-		cli();
-		printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
+			// Point for retraction reversal reached.
+			printer_state.filamentRetracted = false;
+			cli();
+			printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
 #ifdef DEBUG_OPS
-		sei();
-		out.println_long_P(PSTR("N="),printer_state.extruderStepsNeeded);
+			sei();
+			out.println_long_P(PSTR("N="),printer_state.extruderStepsNeeded);
 #endif
-	}
+		}
 #endif
 	} // stepsRemaining
 	long interval;
@@ -2583,8 +2545,12 @@ inline long bresenham_step() {
 	if(do_even) {
 		if(cur->stepsRemaining<=0 || (cur->dir & 240)==0) { // line finished
 #ifdef DEBUG_STEPCOUNT
-			if(cur->totalStepsRemaining)
-				out.println_long_P(PSTR("Missed steps:"),cur->totalStepsRemaining);
+			if(cur->totalStepsRemaining) {
+				out.println_long_P(PSTR("Missed steps:"), cur->totalStepsRemaining);
+				out.println_long_P(PSTR("Step/seg r:"), cur->primaryStepPerSegmentRemaining);
+				out.println_int_P(PSTR("NDS:"), (int) cur->numDeltaSegments);
+				out.println_int_P(PSTR("HS:"), (int) cur->halfstep);
+			}
 #endif
 
 #if USE_OPS==1

@@ -37,7 +37,7 @@
 #include <avr/io.h>
 #include "pins.h"
 
-
+#define DEBUG_STEPCOUNT
 // ##########################################################################################
 // ##                                        IMPORTANT                                     ##
 // ##########################################################################################
@@ -553,6 +553,9 @@ on this endstop.
 #define X_HOME_DIR 1
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR 1
+
+// Delta robot radius endstop
+#define max_software_endstop_r false
 
 //If true, axis won't move to coordinates less than zero.
 #define min_software_endstop_x false

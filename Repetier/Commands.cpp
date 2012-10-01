@@ -804,7 +804,8 @@ void process_command(GCode *com)
 					printer_state.countZSteps = 0;
 					out.println_P(PSTR("Measurement reset."));
 				} else if (com->S == 1) {
-					out.print_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+					out.println_long_P(PSTR("Measure/delta (Steps) ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+					out.println_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
 				} else if (com->S = 2) {
 					if (printer_state.countZSteps < 0)
 						printer_state.countZSteps = -printer_state.countZSteps;
