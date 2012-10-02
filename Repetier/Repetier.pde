@@ -19,7 +19,7 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
     Main author: repetier
-    
+
 Changelog:
     v0.2 20.8.2011  - first public version
 */
@@ -76,7 +76,7 @@ Custom M Codes
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)
 - M83  - Set E codes relative while in Absolute Coordinates (G90) mode
-- M84  - Disable steppers until next move, 
+- M84  - Disable steppers until next move,
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axis_steps_per_unit - same syntax as G92
@@ -187,7 +187,7 @@ Custom M Codes
 byte unit_inches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float axis_steps_per_unit[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEPS_PER_MM,1}; ///< Number of steps per mm needed.
-float inv_axis_steps_per_unit[4]; ///< Inverse of axis_steps_per_unit for faster conversion 
+float inv_axis_steps_per_unit[4]; ///< Inverse of axis_steps_per_unit for faster conversion
 float max_feedrate[4] = MAX_FEEDRATE; ///< Maximum allowed feedrate.
 float homing_feedrate[3] = HOMING_FEEDRATE;
 byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
@@ -216,7 +216,7 @@ unsigned long previous_millis_cmd = 0;
 unsigned long max_inactive_time = MAX_INACTIVE_TIME*1000L;
 unsigned long stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
 PrintLine lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
-PrintLine *cur = 0;               ///< Current printing line                
+PrintLine *cur = 0;               ///< Current printing line
 byte lines_write_pos=0;           ///< Position where we write the next cached line move.
 byte lines_pos=0;                 ///< Position for executing line movement.
 volatile byte lines_count=0;      ///< Number of lines cached 0 = nothing to do.
@@ -257,7 +257,7 @@ END_INTERRUPT_PROTECTED
 void send_mem() {
   if(lowest_send>lowest_ram) {
     lowest_send = lowest_ram;
-    out.println_int_P(PSTR("Free RAM:"),lowest_ram); 
+    out.println_int_P(PSTR("Free RAM:"),lowest_ram);
   }
 }
 #endif
@@ -273,7 +273,7 @@ void send_mem() {
   bool sdactive = false;
   bool savetosd = false;
   int16_t n;
-  
+
   void initsd(){
   sdactive = false;
   #if SDSS >- 1
@@ -285,20 +285,20 @@ void send_mem() {
     }
     else if (!volume.init(&card))
           out.println_P(PSTR("volume.init failed"));
-    else if (!root.openRoot(&volume)) 
+    else if (!root.openRoot(&volume))
           out.println_P(PSTR("openRoot failed"));
-    else 
+    else
             sdactive = true;
   #endif
   }
-  
+
   inline void write_command(GCode *code){
      unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
       byte buf[52];
       byte p=2;
       file.writeError = false;
       int params = 128 | (code->params & ~1);
-      *(int*)buf = params;      
+      *(int*)buf = params;
       if(code->params & 2) {buf[p++] = code->M;}
       if(code->params & 4) {buf[p++] = code->G;}
       if(code->params & 8) {*(float*)&buf[p] = code->X;p+=4;}
@@ -337,6 +337,11 @@ void send_mem() {
 void update_ramps_parameter() {
 #if DRIVE_SYSTEM==3
   printer_state.rodSteps = axis_steps_per_unit[0]*rodMaxLength;
+  long cart[3], delta[3];
+  cart[0] = cart[1] = 0;
+  cart[2] = printer_state.rodSteps;
+  calculate_delta(cart, delta);
+  printer_state.maxDeltaPositionSteps = delta[0];
 #else
   printer_state.xMaxSteps = axis_steps_per_unit[0]*X_MAX_LENGTH;
   printer_state.yMaxSteps = axis_steps_per_unit[1]*Y_MAX_LENGTH;
@@ -358,7 +363,7 @@ Sets the output and input pins in accordance to your configuration. Initializes 
 Interrupt routines to measure analog values and for the stepper timerloop are started.
 */
 void setup()
-{ 
+{
 #ifdef ENABLE_POWER_ON_STARTUP
   if(PS_ON_PIN > -1) {
      pinMode(PS_ON_PIN,OUTPUT); //GND
@@ -387,15 +392,15 @@ void setup()
 #endif
 
   //Steppers default to disabled.
-#if X_ENABLE_PIN > -1 
+#if X_ENABLE_PIN > -1
   if(!X_ENABLE_ON) WRITE(X_ENABLE_PIN,HIGH);
   SET_OUTPUT(X_ENABLE_PIN);
 #endif
-#if Y_ENABLE_PIN > -1 
+#if Y_ENABLE_PIN > -1
   if(!Y_ENABLE_ON) WRITE(Y_ENABLE_PIN,HIGH);
   SET_OUTPUT(Y_ENABLE_PIN);
 #endif
-#if Z_ENABLE_PIN > -1 
+#if Z_ENABLE_PIN > -1
   if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
   SET_OUTPUT(Z_ENABLE_PIN);
 #endif
@@ -408,7 +413,7 @@ void setup()
 #endif
 #endif
 #if Y_MIN_PIN>-1
-  SET_INPUT(Y_MIN_PIN); 
+  SET_INPUT(Y_MIN_PIN);
 #if ENDSTOP_PULLUP_Y_MIN
   WRITE(Y_MIN_PIN,HIGH);
 #endif
@@ -500,7 +505,7 @@ void setup()
 
   //power to SD reader
   #if SDPOWER > -1
-    pinMode(SDPOWER,OUTPUT); 
+    pinMode(SDPOWER,OUTPUT);
     digitalWrite(SDPOWER,HIGH);
   #endif
   initsd();
@@ -512,11 +517,11 @@ void setup()
 #endif
   PWM_TCCR = 0;  // Setup PWM interrupt
   PWM_OCR = 64;
-  PWM_TIMSK |= (1<<PWM_OCIE);  
+  PWM_TIMSK |= (1<<PWM_OCIE);
 
   TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
   TCCR1C = 0;
-  TIMSK1 = 0;  
+  TIMSK1 = 0;
   TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
   OCR1A=65500; //start off with a slow frequency.
   TIMSK1 |= (1<<OCIE1A); // Enable interrupt
@@ -551,7 +556,7 @@ void loop()
            out.println();
         }
 #endif
-        gcode_command_finished(); 
+        gcode_command_finished();
     } else {
         process_command(code);
     }
@@ -565,7 +570,7 @@ void loop()
   unsigned long curtime = millis();
   if(lines_count)
     previous_millis_cmd = curtime;
-  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false); 
+  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
   if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
   //void finishNextSegment();
 #ifdef DEBUG_FREE_MEMORY
@@ -582,7 +587,7 @@ void log_long_array(PGM_P ptr,long *arr) {
 }
 void log_float_array(PGM_P ptr,float *arr) {
   out.print_P(ptr);
-  for(byte i=0;i<3;i++) 
+  for(byte i=0;i<3;i++)
     out.print_float_P(PSTR(" "),arr[i]);
   out.println_float_P(PSTR(" "),arr[3]);
 }
@@ -607,15 +612,15 @@ void log_printLine(PrintLine *p) {
 #endif
 }
 /** \brief Disable stepper motor for x direction. */
-inline void disable_x() { 
-#if (X_ENABLE_PIN > -1) 
-  WRITE(X_ENABLE_PIN,!X_ENABLE_ON); 
+inline void disable_x() {
+#if (X_ENABLE_PIN > -1)
+  WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
 #endif
 }
 /** \brief Disable stepper motor for y direction. */
-inline void disable_y() { 
-#if (Y_ENABLE_PIN > -1) 
-  WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON); 
+inline void disable_y() {
+#if (Y_ENABLE_PIN > -1)
+  WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
 #endif
 }
 /** \brief Disable stepper motor for z direction. */
@@ -625,14 +630,14 @@ inline void disable_z() {
 #endif
 }
 /** \brief Enable stepper motor for x direction. */
-inline void  enable_x() { 
+inline void  enable_x() {
 #if (X_ENABLE_PIN > -1)
  WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
 }
 /** \brief Enable stepper motor for y direction. */
 inline void  enable_y() {
-#if (Y_ENABLE_PIN > -1) 
+#if (Y_ENABLE_PIN > -1)
   WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
 }
@@ -642,7 +647,7 @@ inline void  enable_z() {
  WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 }
-/** \brief Optimized division 
+/** \brief Optimized division
 
 Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
 This version is optimized for a 16 bit dividend and recognises the special cases
@@ -727,7 +732,7 @@ inline long Div4U2U(unsigned long a,unsigned int b) {
   :"0"(a),"r"(b)
   :"r14","r15","r16"
   );
- return a; 
+ return a;
 }
 
 const uint16_t fast_div_lut[17] PROGMEM = {0,F_CPU/4096,F_CPU/8192,F_CPU/12288,F_CPU/16384,F_CPU/20480,F_CPU/24576,F_CPU/28672,F_CPU/32768,F_CPU/36864
@@ -753,9 +758,9 @@ const uint16_t slow_div_lut[257] PROGMEM = {0,F_CPU/32,F_CPU/64,F_CPU/96,F_CPU/1
  ,F_CPU/7456,F_CPU/7488,F_CPU/7520,F_CPU/7552,F_CPU/7584,F_CPU/7616,F_CPU/7648,F_CPU/7680,F_CPU/7712,F_CPU/7744,F_CPU/7776,F_CPU/7808,F_CPU/7840,F_CPU/7872,F_CPU/7904
  ,F_CPU/7936,F_CPU/7968,F_CPU/8000,F_CPU/8032,F_CPU/8064,F_CPU/8096,F_CPU/8128,F_CPU/8160,F_CPU/8192
  };
-/** \brief approximates division of F_CPU/divisor 
+/** \brief approximates division of F_CPU/divisor
 
-In the stepper interrupt a division is needed, which is a slow operation. 
+In the stepper interrupt a division is needed, which is a slow operation.
 The result is used for timer calculation where small errors are ok. This
 function uses lookup tables to find a fast approximation of the result.
 
@@ -763,7 +768,7 @@ function uses lookup tables to find a fast approximation of the result.
 long CPUDivU2(unsigned int divisor) {
   long res;
   unsigned short table;
-  if(divisor<8192) {  
+  if(divisor<8192) {
     if(divisor<512) {
       if(divisor<10) divisor = 10;
       return Div4U2U(F_CPU,divisor); // These entries have overflows in lookuptable!
@@ -871,7 +876,7 @@ char lastzdir=0;
 
 /**
   \brief Sets the destination coordinates to values stored in com.
-  
+
   For the computation of the destination, the following facts are considered:
   - Are units inches or mm.
   - Reltive or absolute positioning with special case only extruder relative.
@@ -966,7 +971,7 @@ byte get_coordinates(GCode *com)
    return sqrt(dx*dx+dy*dy+dz*dz);
 }*/
 /**
-Computes the maximum junction speed 
+Computes the maximum junction speed
 */
 inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
   if(p1->flags & FLAG_WARMUP) {
@@ -1079,7 +1084,7 @@ If not, we do it here, bofore we have to do it in the interrupt routine.
   if(pos>=MOVE_CACHE_SIZE) pos = 0;
   PrintLine *p = &lines[pos];
   if(p->joinFlags & FLAG_JOIN_END_FIXED) return;
-  BEGIN_INTERRUPT_PROTECTED; 
+  BEGIN_INTERRUPT_PROTECTED;
   p->flags |= FLAG_BLOCKED;
   END_INTERRUPT_PROTECTED;
   updateStepsParameter(p);
@@ -1186,7 +1191,7 @@ The method is called before lines_count is increased!
 void updateTrapezoids(byte p) {
   byte first;
   PrintLine *firstLine;
-  BEGIN_INTERRUPT_PROTECTED; 
+  BEGIN_INTERRUPT_PROTECTED;
   first = lines_pos; // first non fixed segment
   NEXT_PLANNER_INDEX(first);
   while(first!=p && (lines[p].joinFlags | FLAG_JOIN_END_FIXED)) {
@@ -1194,7 +1199,7 @@ void updateTrapezoids(byte p) {
   }
   firstLine = &lines[first];
   firstLine->flags |= FLAG_BLOCKED; // don't let printer touch this or following segments during update
-  END_INTERRUPT_PROTECTED; 
+  END_INTERRUPT_PROTECTED;
   PrintLine *act = &lines[p];
 
   byte previdx = p-1;
@@ -1204,10 +1209,10 @@ void updateTrapezoids(byte p) {
   else
     act->joinFlags |= FLAG_JOIN_START_FIXED;
 
-  backwardPlanner(p,first);  
+  backwardPlanner(p,first);
   // Reduce speed to reachable speeds
   forwardPlanner(first);
-  
+
   // Update precomputed data
   do {
     updateStepsParameter(&lines[first]);
@@ -1238,7 +1243,7 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
 #if DRIVE_SYSTEM==3
-  split_delta_move(check_endstop,false,DELTA_SEGMENTS_PER_SECOND_HOME);
+  split_delta_move(check_endstop,false,false);
 #else
   queue_move(check_endstop,false);
 #endif
@@ -1280,15 +1285,15 @@ END_INTERRUPT_PROTECTED
 void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte pathOptimize)
 {
 #if DRIVE_SYSTEM==3
-  long axis_interval[5];  
+  long axis_interval[5];
 #else
-  long axis_interval[4];  
+  long axis_interval[4];
 #endif
   float time_for_move = (float)(60*F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   bool critical=false;
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
     time_for_move = LOW_TICKS_PER_MOVE;
-    critical=true; 
+    critical=true;
   }
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
@@ -1302,13 +1307,11 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
   axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
-  if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];  
+  if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
   #if DRIVE_SYSTEM==3
-  // TODO - How about E driven virtual axis? This is not correct in that case
-  if (p->primaryAxis == 4)
-	  axis_interval[4] = 60.0*abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
+  axis_interval[4] = 60.0*abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
   #endif
-  
+
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
   // new time at full speed = limitInterval*p->stepsRemaining [ticks]
   time_for_move = (float)limitInterval*(float)p->stepsRemaining; // for large z-distance this overflows with long computation
@@ -1332,7 +1335,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 	axis_interval[4] = time_for_move/p->stepsRemaining;
 #endif
   p->fullSpeed = p->distance*inv_time_s;
-  
+
 
   //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
   byte is_print_move = (p->dir & 136)==136; // are we printing
@@ -1341,11 +1344,12 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #endif
   //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
   #ifdef RAMP_ACCELERATION
-    
+
     // slowest time to accelerate from v0 to limitInterval determines used acceleration
     // t = (v_end-v_start)/a
     float slowest_axis_plateau_time_repro = 1e20; // repro to reduce division Unit: 1/s
     for(byte i=0; i < 4 ; i++) {
+	// Errors for delta move are initialized in timer
 	#if DRIVE_SYSTEM!=3
       p->error[i] = p->delta[p->primaryAxis] >> 1;
 	#endif
@@ -1355,6 +1359,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
                (float)axis_interval[i] * (float)(is_print_move ?  axis_steps_per_sqr_second[i] : axis_travel_steps_per_sqr_second[i])); //  steps/s^2 * step/tick  Ticks/s^2
       }
     }
+	// Errors for delta move are initialized in timer (except extruder)
 	#if DRIVE_SYSTEM==3
 	p->error[3] = p->stepsRemaining >> 1;
 	#endif
@@ -1371,7 +1376,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #ifdef USE_ADVANCE
   if((p->dir & 112)==0 || (p->dir & 128)==0 || (p->dir & 8)==0) {
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceRate = 0; // No head move or E move only or sucking filament back 
+    p->advanceRate = 0; // No head move or E move only or sucking filament back
     p->advanceFull = 0;
 #endif
     p->advanceL = 0;
@@ -1408,9 +1413,9 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   #endif
   #endif
   #endif
-  
+
   // Correct integers for fixed point math used in bresenham_step
-  if(p->fullInterval<MAX_HALFSTEP_INTERVAL || critical) 
+  if(p->fullInterval<MAX_HALFSTEP_INTERVAL || critical)
     p->halfstep = 0;
   else {
     p->halfstep = 1;
@@ -1422,14 +1427,14 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 	#endif
   }
 #ifdef DEBUG_STEPCOUNT
-// Set in delta move calculation 
+// Set in delta move calculation
 #if DRIVE_SYSTEM!=3
   p->totalStepsRemaining = abs(p->delta[0])+abs(p->delta[1]);
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE
   if(DEBUG_ECHO) {
-    log_printLine(p);  
+    log_printLine(p);
       out.println_long_P(PSTR("limitInterval:"), limitInterval);
       out.println_float_P(PSTR("Move distance on the XYZ space:"), p->distance);
       out.println_float_P(PSTR("Commanded feedrate:"), printer_state.feedrate);
@@ -1450,7 +1455,7 @@ END_INTERRUPT_PROTECTED
 #endif
 }
 void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
-  printer_state.flag0 &= ~1; // Motor is enabled now 
+  printer_state.flag0 &= ~1; // Motor is enabled now
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
     check_periodical();
@@ -1458,7 +1463,7 @@ void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   byte newPath=check_new_move(pathOptimize);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
-  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS; 
+  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
   else p->flags = 0;
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
@@ -1468,7 +1473,7 @@ void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
 	p->delta[i] = 0;
 	axis_diff[i] = 0;
   }
-  axis_diff[3] = e_diff*inv_axis_steps_per_unit[3]; 
+  axis_diff[3] = e_diff*inv_axis_steps_per_unit[3];
   if (e_diff >= 0) {
 	p->delta[3] = e_diff;
 	p->dir = 0x88;
@@ -1499,7 +1504,7 @@ void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   @param check_endstops Read endstop during move.
 */
 void queue_move(byte check_endstops,byte pathOptimize) {
-  printer_state.flag0 &= ~1; // Motor is enabled now 
+  printer_state.flag0 &= ~1; // Motor is enabled now
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
     check_periodical();
@@ -1507,7 +1512,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   byte newPath=check_new_move(pathOptimize);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
-  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS; 
+  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
   else p->flags = 0;
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
@@ -1549,25 +1554,25 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   long deltay = printer_state.destinationSteps[1]-printer_state.currentPositionSteps[1];
 #if DRIVE_SYSTEM==1
   p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
-  p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3]; 
-  p->delta[0] = deltax+deltay; 
-  p->delta[1] = deltax-deltay; 
+  p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
+  p->delta[0] = deltax+deltay;
+  p->delta[1] = deltax-deltay;
 #endif
-#if DRIVE_SYSTEM==2 
-p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2]; 
-p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3]; 
-p->delta[0] = deltay+deltax; 
-p->delta[1] = deltay-deltax; 
+#if DRIVE_SYSTEM==2
+p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
+p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
+p->delta[0] = deltay+deltax;
+p->delta[1] = deltay-deltax;
 #endif
-  //Find direction 
-  for(byte i=0; i < 4; i++) { 
-    if(p->delta[i]>=0) { 
+  //Find direction
+  for(byte i=0; i < 4; i++) {
+    if(p->delta[i]>=0) {
       p->dir |= 1<<i;
-      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i]; 
-    } else { 
-      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i]; 
-      p->delta[i] = -p->delta[i]; 
-    } 
+      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
+    } else {
+      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
+      p->delta[i] = -p->delta[i];
+    }
     if(p->delta[i]) p->dir |= 16<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
@@ -1619,13 +1624,13 @@ p->delta[1] = deltay-deltax;
   @return The largest delta axis move in a single segment
   @param p The line to examine.
 */
-long calculate_delta_segments(PrintLine *p) {
+inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 	long difference[NUM_AXIS - 1];
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 	}
 
-	int fractional_steps[3]; 
+	int fractional_steps[3];
 	long destination_steps[3], final_destination_steps[3], destination_delta_steps[3];
 
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
@@ -1635,17 +1640,17 @@ long calculate_delta_segments(PrintLine *p) {
 		// Save final position
 		final_destination_steps[i] = printer_state.currentPositionSteps[i] + difference[i];
 		destination_steps[i] = printer_state.currentPositionSteps[i];
-	}	
-	
+	}
+
 //	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
 	p->deltaSegmentReadPos = delta_segment_write_pos;
 #ifdef DEBUG_STEPCOUNT
 	p->totalStepsRemaining=0;
 #endif
-	
+
 	long max_axis_move = 0;
 	for (int s = 0; s < p->numDeltaSegments; s++) {
-		
+
 		// use the actual destination on the final step to avoid any error
 		if (s == p->numDeltaSegments - 1)
 			for(byte i=0; i < NUM_AXIS - 1; i++)
@@ -1659,13 +1664,15 @@ long calculate_delta_segments(PrintLine *p) {
 			gcode_read_serial();
 			check_periodical();
 		}
-		
+
 		DeltaSegment *d = &segments[delta_segment_write_pos];
-		
+
 		// Verify that delta calc has a solution
 		if (calculate_delta(destination_steps, destination_delta_steps)) {
 			d->dir = 0;
 			for(byte i=0; i < NUM_AXIS - 1; i++) {
+				if (softEndstop && destination_delta_steps[i] > printer_state.maxDeltaPositionSteps)
+					destination_delta_steps[i] = printer_state.maxDeltaPositionSteps;
 				long delta = destination_delta_steps[i] - printer_state.currentDeltaPositionSteps[i];
 //#ifdef DEBUG_DELTA_CALC
 //				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
@@ -1690,7 +1697,7 @@ long calculate_delta_segments(PrintLine *p) {
 				p->totalStepsRemaining += d->deltaSteps[i];
 	#endif
 
-				if (max_axis_move < d->deltaSteps[i]) max_axis_move = d->deltaSteps[i]; 
+				if (max_axis_move < d->deltaSteps[i]) max_axis_move = d->deltaSteps[i];
 				printer_state.currentDeltaPositionSteps[i] = destination_delta_steps[i];
 			}
 		} else {
@@ -1719,7 +1726,7 @@ long calculate_delta_segments(PrintLine *p) {
   @param yaxis Y tower position.
   @param zaxis Z tower position.
 */
-void set_delta_position(long xaxis, long yaxis, long zaxis) {
+inline void set_delta_position(long xaxis, long yaxis, long zaxis) {
 	printer_state.currentDeltaPositionSteps[0] = xaxis;
 	printer_state.currentDeltaPositionSteps[1] = yaxis;
 	printer_state.currentDeltaPositionSteps[2] = zaxis;
@@ -1731,19 +1738,20 @@ void set_delta_position(long xaxis, long yaxis, long zaxis) {
   @param deltaPosSteps Result array with tower coordinates.
   @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
 */
-byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
+inline byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 	long temp;
+	long opt = sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS]);
 
 	if ((temp = DELTA_DIAGONAL_ROD_STEPS_SQUARED
 		 - sq(DELTA_TOWER1_X_STEPS - cartesianPosSteps[X_AXIS])
-		 - sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS])) >= 0)
+		 - opt) >= 0)
 		deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
-		
+
 	if ((temp = DELTA_DIAGONAL_ROD_STEPS_SQUARED
 		 - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])
-		 - sq(DELTA_TOWER2_Y_STEPS - cartesianPosSteps[Y_AXIS])) >= 0)
+		 - opt) >= 0)
 		deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
@@ -1754,11 +1762,11 @@ byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 		deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
-	
+
 	return 1;
 }
 
-void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
+inline void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
   *dir = 0;
 	//Find direction
 	for(byte i=0; i < 4; i++) {
@@ -1775,7 +1783,7 @@ void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
 	}
 }
 
-byte calculate_distance(float axis_diff[], byte dir, float *distance) {
+inline byte calculate_distance(float axis_diff[], byte dir, float *distance) {
   // Calculate distance depending on direction
 	if(dir & 112) {
 		if(dir & 64) {
@@ -1797,12 +1805,9 @@ byte calculate_distance(float axis_diff[], byte dir, float *distance) {
   @param pathOptimize Run the path optimizer.
   @param delta_step_rate delta step rate in segments per second for the move.
 */
-void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate) {
+void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 #if min_software_endstop_z == true
-    if (printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0;
-#endif
-#if max_software_endstop_r == true
-// TODO - Implement radius checking
+    if (softEndstop && printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0;
 #endif
 	long difference[NUM_AXIS];
 	float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
@@ -1810,6 +1815,20 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
 	}
+#if max_software_endstop_r == true
+// TODO - Implement radius checking
+// I'm guessing I need the floats to prevent overflow. This is pretty horrible.
+//float a = difference[0] * difference[0] + difference[1] * difference[1];
+//float b = 2 * (difference[0] * printer_state.currentPositionSteps[0] + difference[1] * printer_state.currentPositionSteps[1]);
+//float c = printer_state.currentPositionSteps[0] * printer_state.currentPositionSteps[0] + printer_state.currentPositionSteps[1] * printer_state.currentPositionSteps[1] - r * r;
+//float disc = b * b - 4 * a * c;
+//if (disc >= 0) {
+//    float t = (-b + (float)sqrt(disc)) / (2 * a);
+//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[0] + difference[0] * t;
+//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[1] + difference[1] * t;
+//}
+#endif
+
 	float save_distance;
 	byte save_dir;
 	long save_delta[4];
@@ -1823,33 +1842,33 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 	}
 	// Compute number of seconds for move and hence number of segments needed
 	float seconds = 6000 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
-	int segment_count = max(1, int(delta_step_rate * seconds));
+	int segment_count = max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
 	// Now compute the number of lines needed
 	int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
 	// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
 	int segments_per_line = segment_count / num_lines;
-	
+
 	long start_position[4], fractional_steps[4];
 	for (byte i = 0; i < 4; i++) {
 		start_position[i] = printer_state.currentPositionSteps[i];
 	}
-		
+
 #ifdef DEBUG_SPLIT
-	out.println_float_P(PSTR("Seconds: "), seconds); 
+	out.println_float_P(PSTR("Seconds: "), seconds);
 	out.println_int_P(PSTR("Segments:"), segment_count);
 	out.println_int_P(PSTR("Num lines:"), num_lines);
 	out.println_int_P(PSTR("segments_per_line:"), segments_per_line);
 #endif
-	
-	printer_state.flag0 &= ~1; // Motor is enabled now 
+
+	printer_state.flag0 &= ~1; // Motor is enabled now
 	while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
 		gcode_read_serial();
 		check_periodical();
 	}
-	
+
 	// Insert dummy moves if necessary
 	byte newPath=check_new_move(pathOptimize);
-	
+
 	for (int line_number=1; line_number < num_lines + 1; line_number++) {
 		while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
 			gcode_read_serial();
@@ -1864,7 +1883,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 				p->delta[i] = save_delta[i];
 				fractional_steps[i] = difference[i];
 			}
-			p->distance = save_distance;			
+			p->distance = save_distance;
 		} else {
 			for (byte i=0; i < 4; i++) {
 				printer_state.destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
@@ -1872,18 +1891,18 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 				axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
 			}
 			calculate_dir_delta(fractional_steps, &p->dir, p->delta);
-			calculate_distance(axis_diff, p->dir, &p->distance);			
+			calculate_distance(axis_diff, p->dir, &p->distance);
 		}
-		
+
 		p->joinFlags = 0;
-		
+
 		// Only set fixed on last segment
 		if (line_number == num_lines && !pathOptimize)
 			p->joinFlags = FLAG_JOIN_END_FIXED;
 
-		if(check_endstops) 
-			p->flags = FLAG_CHECK_ENDSTOPS; 
-		else 
+		if(check_endstops)
+			p->flags = FLAG_CHECK_ENDSTOPS;
+		else
 			p->flags = 0;
 
 		p->numDeltaSegments = segments_per_line;
@@ -1891,8 +1910,8 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 	#if USE_OPS==1
 		p->opsReverseSteps=0;
 	#endif
-	
-		long max_delta_step = calculate_delta_segments(p);
+
+		long max_delta_step = calculate_delta_segments(p, softEndstop);
 
 	#ifdef DEBUG_SPLIT
 		out.println_long_P(PSTR("Max DS:"), max_delta_step);
@@ -1927,7 +1946,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rat
 inline unsigned int ComputeV(long timer,long accel) {
   unsigned int res;
   // 38 Ticks
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
      // Result LSB first: %A0, %B0, %A1
      "mul %B1,%A2 \n\t"
      "mov %A0,r1 \n\t"
@@ -1969,7 +1988,7 @@ inline unsigned int ComputeV(long timer,long accel) {
 inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
   unsigned long res;
   // 18 Ticks = 1.125 us
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
      // Result LSB first: %A0, %B0, %A1
      "clr r18 \n\t"
      "mul %B2,%B1 \n\t" // mul hig bytes
@@ -1995,7 +2014,7 @@ inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
 inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
   unsigned int res;
   // 18 Ticks = 1.125 us
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
      // Result LSB first: %A0, %B0, %A1
      "clr r18 \n\t"
      "mul %B2,%B1 \n\t" // mul hig bytes
@@ -2031,7 +2050,7 @@ long cur_errupd;
 // Current delta segment
 DeltaSegment *curd;
 // Current delta segment primary error increment
-long curd_errupd;
+long curd_errupd, stepsPerSegRemaining;
 inline long bresenham_step() {
 	if(cur == 0) {
 		sei();
@@ -2056,7 +2075,7 @@ inline long bresenham_step() {
 		}
 #endif
 		if(cur->flags & FLAG_WARMUP) {
-		  // This is a warmup move to initalize the path planner correctly. Just waste 
+		  // This is a warmup move to initalize the path planner correctly. Just waste
 		  // a bit of time to get the planning up to date.
 #if USE_OPS==1
 			if(cur->joinFlags & FLAG_JOIN_END_RETRACT) { // Make sure filament is pushed back
@@ -2103,26 +2122,26 @@ inline long bresenham_step() {
 		if (cur->numDeltaSegments) {
 			// If there are delta segments point to them here
 			curd = &segments[cur->deltaSegmentReadPos++];
-			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0; 
+			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
 			// Enable axis
 			//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
 			if(curd->dir & 16) enable_x();
 			if(curd->dir & 32) enable_y();
 			if(curd->dir & 64) enable_z();
-			
-			// Initialize bresenham for the first segment			
-			if (cur->halfstep) {			
+
+			// Initialize bresenham for the first segment
+			if (cur->halfstep) {
 				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment;
 				curd_errupd = cur->numPrimaryStepPerSegment = cur->numPrimaryStepPerSegment<<1;
 			} else {
 				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
 				curd_errupd = cur->numPrimaryStepPerSegment;
 			}
-			cur->primaryStepPerSegmentRemaining = cur->numPrimaryStepPerSegment;
+			stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
 #ifdef DEBUG_DELTA_TIMER
 			out.println_byte_P(PSTR("HS: "),cur->halfstep);
 			out.println_long_P(PSTR("Error: "),curd_errupd);
-#endif			
+#endif
 		} else curd=0;
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
@@ -2151,7 +2170,7 @@ inline long bresenham_step() {
 						cli();
 						printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
 						cur->joinFlags |= FLAG_JOIN_WAIT_EXTRUDER_DOWN;
-					} 
+					}
 				} /*else if(!printer_state.filamentRetracted) {
 #ifdef DEBUG_OPS
             out.println_P(PSTR("UpA"));
@@ -2279,8 +2298,8 @@ inline long bresenham_step() {
 					extruder_step();
 #endif
 					cur->error[3] += cur_errupd;
-				}		
-			} 
+				}
+			}
 			if (curd) {
 				// Take delta steps
 				if(curd->dir & 16) {
@@ -2313,20 +2332,20 @@ inline long bresenham_step() {
 					#endif
 					}
 				}
-				
+
 			#if STEPPER_HIGH_DELAY>0
 				delayMicroseconds(STEPPER_HIGH_DELAY);
 			#endif
 				WRITE(X_STEP_PIN,LOW);
 				WRITE(Y_STEP_PIN,LOW);
 				WRITE(Z_STEP_PIN,LOW);
-				cur->primaryStepPerSegmentRemaining--;
-				if (!cur->primaryStepPerSegmentRemaining) {
+				stepsPerSegRemaining--;
+				if (!stepsPerSegRemaining) {
 					cur->numDeltaSegments--;
 					if (cur->numDeltaSegments) {
 
 						// Get the next delta segment
-						curd = &segments[cur->deltaSegmentReadPos++]; 
+						curd = &segments[cur->deltaSegmentReadPos++];
 						if (cur->deltaSegmentReadPos > DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
 						delta_segment_count--;
 
@@ -2340,8 +2359,8 @@ inline long bresenham_step() {
 
 						// Reset the counter of the primary steps. This is initialized in the line
 						// generation so don't have to do this the first time.
-						cur->primaryStepPerSegmentRemaining = cur->numPrimaryStepPerSegment;
-						
+						stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
+
 						// Change direction if necessary
 						if(curd->dir & 1) {
 							WRITE(X_DIR_PIN,!INVERT_X_DIR);
@@ -2367,7 +2386,7 @@ inline long bresenham_step() {
 			}
 #if USE_OPS==0 && !defined(USE_ADVANCE)
 			extruder_unstep();
-#endif	
+#endif
 		} // for loop
 		if(do_odd) {
 			sei(); // Allow interrupts for other types, timer1 is still disabled
@@ -2454,14 +2473,14 @@ inline long bresenham_step() {
 					advance_target = cur->advanceEnd;
 				long h=mulu6xu16to32(cur->advanceL,v);
 				int tred = ((advance_target+h)>>16);
-				cli();  
+				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
 				printer_state.advance_executed = advance_target;
 #else
 				int tred=mulu6xu16shift16(cur->advanceL,v);
-				cli();  
+				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
@@ -2480,13 +2499,13 @@ inline long bresenham_step() {
 #ifdef ENABLE_QUADRATIC_ADVANCE
 				long h=mulu6xu16to32(cur->advanceL,v);
 				int tred = ((printer_state.advance_executed+h)>>16);
-				cli();  
+				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
 #else
 				int tred=mulu6xu16shift16(cur->advanceL,v);
-				cli();  
+				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
@@ -2538,16 +2557,16 @@ inline long bresenham_step() {
 #endif
 	} // stepsRemaining
 	long interval;
-	if(cur->halfstep) 
+	if(cur->halfstep)
 		interval = (printer_state.interval>>1);		// time to come back
-	else 
-		interval = printer_state.interval;  
+	else
+		interval = printer_state.interval;
 	if(do_even) {
 		if(cur->stepsRemaining<=0 || (cur->dir & 240)==0) { // line finished
 #ifdef DEBUG_STEPCOUNT
 			if(cur->totalStepsRemaining) {
 				out.println_long_P(PSTR("Missed steps:"), cur->totalStepsRemaining);
-				out.println_long_P(PSTR("Step/seg r:"), cur->primaryStepPerSegmentRemaining);
+				out.println_long_P(PSTR("Step/seg r:"), stepsPerSegRemaining);
 				out.println_int_P(PSTR("NDS:"), (int) cur->numDeltaSegments);
 				out.println_int_P(PSTR("HS:"), (int) cur->halfstep);
 			}
@@ -2586,11 +2605,11 @@ inline long bresenham_step() {
 			if(DISABLE_Y) disable_y();
 			if(DISABLE_Z) disable_z();
 			if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
-			interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0 
-		}  
+			interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0
+		}
 #ifdef DEBUG_FREE_MEMORY
 		check_mem();
-#endif  
+#endif
 	} // Do even
 	return interval;
 }
@@ -2619,7 +2638,7 @@ inline long bresenham_step() {
       }
 #endif
       if(cur->flags & FLAG_WARMUP) {
-          // This is a warmup move to initalize the path planner correctly. Just waste 
+          // This is a warmup move to initalize the path planner correctly. Just waste
           // a bit of time to get the planning up to date.
 #if USE_OPS==1
          if(cur->joinFlags & FLAG_JOIN_END_RETRACT) { // Make sure filament is pushed back
@@ -2699,7 +2718,7 @@ inline long bresenham_step() {
               cli();
               printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
               cur->joinFlags |= FLAG_JOIN_WAIT_EXTRUDER_DOWN;
-            } 
+            }
           } /*else if(!printer_state.filamentRetracted) {
 #ifdef DEBUG_OPS
             out.println_P(PSTR("UpA"));
@@ -2730,7 +2749,7 @@ inline long bresenham_step() {
         cur_errupd = cur->delta[cur->primaryAxis]<<1;
         //printer_state.interval = CPUDivU2(cur->vStart);
       } else
-        cur_errupd = cur->delta[cur->primaryAxis];      
+        cur_errupd = cur->delta[cur->primaryAxis];
       if(!(cur->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) {// should never happen, but with bad timings???
         out.println_int_P(PSTR("LATE "),(unsigned int)lines_count);
 		updateStepsParameter(cur/*,8*/);
@@ -2880,7 +2899,7 @@ inline long bresenham_step() {
 #endif
         cur->error[3] += cur_errupd;
       }
-    }    
+    }
     if(cur->dir & 16) {
       if((cur->error[0] -= cur->delta[0]) < 0) {
         WRITE(X_STEP_PIN,HIGH);
@@ -3036,14 +3055,14 @@ inline long bresenham_step() {
           advance_target = cur->advanceEnd;
         long h=mulu6xu16to32(cur->advanceL,v);
         int tred = ((advance_target+h)>>16);
-        cli();  
+        cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;
         sei();
         printer_state.advance_executed = advance_target;
 #else
         int tred=mulu6xu16shift16(cur->advanceL,v);
-        cli();  
+        cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;
         sei();
@@ -3062,13 +3081,13 @@ inline long bresenham_step() {
 #ifdef ENABLE_QUADRATIC_ADVANCE
         long h=mulu6xu16to32(cur->advanceL,v);
         int tred = ((printer_state.advance_executed+h)>>16);
-        cli();  
+        cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;
         sei();
 #else
         int tred=mulu6xu16shift16(cur->advanceL,v);
-        cli();  
+        cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;
         sei();
@@ -3121,7 +3140,7 @@ inline long bresenham_step() {
   } // stepsRemaining
   long interval;
   if(cur->halfstep) interval = (printer_state.interval>>1); // time to come back
-  else interval = printer_state.interval;  
+  else interval = printer_state.interval;
   if(do_even) {
     if(cur->stepsRemaining<=0 || (cur->dir & 240)==0) { // line finished
 #ifdef DEBUG_STEPCOUNT
@@ -3162,11 +3181,11 @@ inline long bresenham_step() {
        if(DISABLE_Y) disable_y();
        if(DISABLE_Z) disable_z();
      if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
-     interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0 
-   }  
+     interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0
+   }
 #ifdef DEBUG_FREE_MEMORY
     check_mem();
-#endif  
+#endif
   } // Do even
   return interval;
 }
@@ -3178,12 +3197,12 @@ void(* resetFunc) (void) = 0; //declare reset function @ address 0
 void kill(byte only_steppers)
 {
   if((printer_state.flag0 & 1) && only_steppers) return;
-  printer_state.flag0 |=1; 
+  printer_state.flag0 |=1;
   disable_x();
   disable_y();
   disable_z();
   extruder_disable();
-  if(!only_steppers) {  
+  if(!only_steppers) {
     extruder_set_temperature(0,0);
  #if NUM_EXTRUDER>1
     extruder_set_temperature(0,1);
@@ -3194,7 +3213,7 @@ void kill(byte only_steppers)
     heated_bed_set_temperature(0);
     UI_STATUS_UPD(UI_TEXT_KILLED);
     if(PS_ON_PIN > -1) {
-      //pinMode(PS_ON_PIN,INPUT);  
+      //pinMode(PS_ON_PIN,INPUT);
       pinMode(PS_ON_PIN,OUTPUT); //GND
       digitalWrite(PS_ON_PIN, HIGH);
     }
@@ -3215,8 +3234,8 @@ inline void setTimer(unsigned long delay)
   "cpi %B[delay],255 \n\t"
   "breq else%= \n\t" // delay <65280
   "sts stepperWait,r1 \n\t" // stepperWait = 0;
-  "sts stepperWait+1,r1 \n\t"	
-  "sts stepperWait+2,r1 \n\t"  
+  "sts stepperWait+1,r1 \n\t"
+  "sts stepperWait+2,r1 \n\t"
   "lds %C[delay],%[time] \n\t" // Read TCNT1
   "lds %D[delay],%[time]+1 \n\t"
   "ldi r18,100 \n\t" // Add 100 to TCNT1
@@ -3224,27 +3243,27 @@ inline void setTimer(unsigned long delay)
   "adc %D[delay],r1 \n\t"
   "cp %A[delay],%C[delay] \n\t" // delay<TCNT1+1
   "cpc %B[delay],%D[delay] \n\t"
-  "brcc exact%= \n\t"	   
+  "brcc exact%= \n\t"
   "sts %[ocr]+1,%D[delay] \n\t" //  OCR1A = TCNT1+100;
   "sts %[ocr],%C[delay] \n\t"
-  "rjmp end%= \n\t"  
+  "rjmp end%= \n\t"
   "exact%=: sts %[ocr]+1,%B[delay] \n\t" //  OCR1A = delay;
   "sts %[ocr],%A[delay] \n\t"
-  "rjmp end%= \n\t"  
+  "rjmp end%= \n\t"
   "else%=: subi	%B[delay], 0x80 \n\t" //} else { stepperWait = delay-32768;
   "sbci	%C[delay], 0x00 \n\t"
-  "sts stepperWait,%A[delay] \n\t"	
-  "sts stepperWait+1,%B[delay] \n\t"	
-  "sts stepperWait+2,%C[delay] \n\t"	
+  "sts stepperWait,%A[delay] \n\t"
+  "sts stepperWait+1,%B[delay] \n\t"
+  "sts stepperWait+2,%C[delay] \n\t"
   "ldi	%D[delay], 0x80 \n\t" //OCR1A = 32768;
   "sts	%[ocr]+1, %D[delay] \n\t"
   "sts	%[ocr], r1 \n\t"
-  "end%=: \n\t" 
+  "end%=: \n\t"
   :[delay]"=&d"(delay) // Output
   :"0"(delay),[ocr]"i" (_SFR_MEM_ADDR(OCR1A)),[time]"i"(_SFR_MEM_ADDR(TCNT1)) // Input
   :"r18" // Clobber
   );
-/* // Assembler above replaced this code 
+/* // Assembler above replaced this code
   if(delay<65280) {
     stepperWait = 0;
     unsigned int count = TCNT1+100;
@@ -3279,14 +3298,14 @@ ISR(TIMER1_COMPA_vect)
   "sts %[ocr],r22 \n\t"
   "sts stepperWait,r1 \n\t"
   "sts stepperWait+1,r1 \n\t"
-  "rjmp end1%= \n\t"  
+  "rjmp end1%= \n\t"
   "else%=: lds r22,stepperWait+1 \n\t" //} else { stepperWait = stepperWait-32768;
   "subi	r22, 0x80 \n\t"
   "sbci	r23, 0x00 \n\t"
   "sts stepperWait+1,r22 \n\t"	// ocr1a stays 32768
   "sts stepperWait+2,r23 \n\t"
-  "end1%=: ldi %[ex],1 \n\t"	
-  "end%=: \n\t" 
+  "end1%=: ldi %[ex],1 \n\t"
+  "end%=: \n\t"
   :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
   if(doExit) return;
   insideTimer1=1;
@@ -3297,7 +3316,7 @@ ISR(TIMER1_COMPA_vect)
     if(waitRelax==0) {
 #if USE_OPS==1
       // push filament in normal position if printings stops, so we have a defined starting position
-      if(printer_state.opsMode && printer_state.filamentRetracted) { 
+      if(printer_state.opsMode && printer_state.filamentRetracted) {
 #ifdef DEBUG_OPS
         out.println_P(PSTR("DownI"));
 #endif
@@ -3316,9 +3335,9 @@ ISR(TIMER1_COMPA_vect)
       }
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
-      if(!printer_state.extruderStepsNeeded) if(DISABLE_E) extruder_disable(); 
+      if(!printer_state.extruderStepsNeeded) if(DISABLE_E) extruder_disable();
 #else
-      if(DISABLE_E) extruder_disable(); 
+      if(DISABLE_E) extruder_disable();
 #endif
     } else waitRelax--;
     stepperWait = 0; // Importent becaus of optimization in asm at begin
@@ -3364,13 +3383,13 @@ ISR(EXTRUDER_TIMER_VECTOR)
       EXTRUDER_OCR = timer+extruder_speed; // wait at start extruder speed for optimized delay
     }
   }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
-    EXTRUDER_OCR = timer+150; // Little delay to accomodate to reversed direction     
+    EXTRUDER_OCR = timer+150; // Little delay to accomodate to reversed direction
     extruder_last_dir = (increasing ? 1 : -1);
-    extruder_set_direction(increasing ? 1 : 0);    
+    extruder_set_direction(increasing ? 1 : 0);
   } else {
     if(extruder_last_dir==0) {
       extruder_last_dir = (increasing ? 1 : -1);
-      extruder_set_direction(increasing ? 1 : 0);    
+      extruder_set_direction(increasing ? 1 : 0);
     }
     extruder_step();
     printer_state.extruderStepsNeeded-=extruder_last_dir;
@@ -3427,7 +3446,7 @@ ISR(PWM_TIMER_VECTOR)
 {
   static byte pwm_count = 0;
   static byte pwm_pos_set[4];
-  PWM_OCR += 128; 
+  PWM_OCR += 128;
   if(pwm_count==0) {
 #if EXT0_HEATER_PIN>-1
     if((pwm_pos_set[0] = pwm_pos[0])>0) WRITE(EXT0_HEATER_PIN,1);
@@ -3454,7 +3473,7 @@ ISR(PWM_TIMER_VECTOR)
 #if FAN_PIN>-1
     if(pwm_pos_set[3] == pwm_count) WRITE(FAN_PIN,0);
 #endif
-  sei(); 
+  sei();
   counter_periodical++; // Appxoimate a 25ms timer
   if(counter_periodical>=49) {
     counter_periodical=0;

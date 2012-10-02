@@ -37,7 +37,6 @@
 #include <avr/io.h>
 #include "pins.h"
 
-#define DEBUG_STEPCOUNT
 // ##########################################################################################
 // ##                                        IMPORTANT                                     ##
 // ##########################################################################################
@@ -618,8 +617,8 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND 100 // make delta curves from many straight lines
-#define DELTA_SEGMENTS_PER_SECOND_HOME 70 // make delta curves from many straight lines
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 100 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 20 // Less accurate setting for other moves
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */

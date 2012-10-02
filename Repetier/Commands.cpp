@@ -127,12 +127,13 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 			printer_state.currentPositionSteps[1] = 0;
 			printer_state.currentPositionSteps[2] = printer_state.rodSteps;
 			calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+			printer_state.maxDeltaPositionSteps = printer_state.currentDeltaPositionSteps[0];
 		} 
 		else 
 		{
 			if (xaxis) printer_state.destinationSteps[0] = 0;
 			if (yaxis) printer_state.destinationSteps[1] = 0;
-			split_delta_move(true,false,DELTA_SEGMENTS_PER_SECOND_HOME);
+			split_delta_move(true,false,false);
 		}
 		printer_state.countZSteps = 0;
 		UI_CLEAR_STATUS 
@@ -311,7 +312,7 @@ void process_command(GCode *com)
       case 1: // G1
         if(get_coordinates(com)) // For X Y Z E F
 #if DRIVE_SYSTEM == 3
-		  split_delta_move(ALWAYS_CHECK_ENDSTOPS,true,DELTA_SEGMENTS_PER_SECOND);
+		  split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
           queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif

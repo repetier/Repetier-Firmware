@@ -284,7 +284,7 @@ extern void queue_move(byte check_endstops,byte pathOptimize);
 extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
-extern void split_delta_move(byte check_endstops,byte pathOptimize, byte delta_step_rate);
+extern void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
 #endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
@@ -347,6 +347,7 @@ typedef struct { // RAM usage: 72 Byte
 #endif
 #if DRIVE_SYSTEM==3
   long currentDeltaPositionSteps[4];
+  long maxDeltaPositionSteps;
 #endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
@@ -405,13 +406,15 @@ extern PrinterState printer_state;
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
 #if DRIVE_SYSTEM==3
+// Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
+// MAX_DELTA_SEGMENTS_PER_LINE * 
 #define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
 typedef struct { 
-	byte dir;
-	int deltaSteps[3];
+	byte dir; 									///< Direction of delta movement.
+	int deltaSteps[3]; 							///< Number of steps in move.
 } DeltaSegment;
-extern DeltaSegment segments[];
-extern unsigned int delta_segment_write_pos; // Position where we write the next cached delta move
+extern DeltaSegment segments[]; 				// Delta segment cache
+extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
 extern volatile unsigned int  delta_segment_count; // Number of delta moves cached 0 = nothing in cache
 #endif
 typedef struct { // RAM usage: 24*4+15 = 111 Byte
@@ -429,23 +432,22 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
   float acceleration;             ///< Real 2.0*distanceÜacceleration mm²/s²
   float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
-  float startSpeed;               ///< Staring speed in mm/s
+  float startSpeed;               ///< Starting speed in mm/s
   float endSpeed;                 ///< Exit speed in mm/s
   float distance;
   //float startFactor;
   //float endFactor;
 #if DRIVE_SYSTEM==3
-  byte numDeltaSegments;		  		///< Number of delta segments left in line
+  byte numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
   int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
   long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
-  long primaryStepPerSegmentRemaining;	///< Counter for remaining primary steps in current delta segment
 #endif
-  unsigned long fullInterval;     ///< interval at full speed in ticks/step.
+  unsigned long fullInterval;     ///< Interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
   unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
   unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
   unsigned long accelerationPrim; ///< Acceleration along primary axis
-  unsigned long facceleration;    ///< accelerationPrim*262144/F_CPU
+  unsigned long facceleration;    ///< AccelerationPrim*262144/F_CPU
   unsigned int vMax;              ///< Maximum reached speed in steps/s.
   unsigned int vStart;            ///< Starting speed in steps/s.
   unsigned int vEnd;              ///< End speed in steps/s
