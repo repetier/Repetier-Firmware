@@ -19,58 +19,82 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
 #include "pins_arduino.h"
+#include "ui.h"
+#include "eeprom.h"
 
 Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {
- {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
-   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD
+ {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
+   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT0_ADVANCE_K
 #endif
    ,EXT0_ADVANCE_L
 #endif
+  ,{0,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,0,0,0,0,0,EXT0_HEAT_MANAGER
 #ifdef TEMP_PID
-  ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN,EXT0_PID_IGAIN,EXT0_PID_DGAIN,EXT0_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+  ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif 
+  }
  } 
 #if NUM_EXTRUDER>1
- ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
-   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD
+ ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
+   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT1_ADVANCE_K
 #endif
    ,EXT1_ADVANCE_L
 #endif
+ {1,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,0,0,0,0,0,EXT1_HEAT_MANAGER
 #ifdef TEMP_PID
-  ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN,EXT1_PID_IGAIN,EXT1_PID_DGAIN,EXT1_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+  ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
+ }
 #endif
 };
 
+#if HAVE_HEATED_BED
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+TemperatureController heatedBedController = {4,HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+#ifdef TEMP_PID
+,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+};
+#else
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#endif
+
+TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {&extruder[0].tempControl
+#if NUM_EXTRUDER>1
+,&extruder[1].tempControl
+#if NUM_EXTRUDER>2
+,&extruder[2].tempControl
+#endif
+#endif
+#if HAVE_HEATED_BED
+,&heatedBedController
+#endif
+};
 #ifdef USE_GENERIC_THERMISTORTABLE
 short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
 #endif
 
-#if HEATED_BED_SENSOR_TYPE!=0
-  int current_bed_raw = 0;
-  int target_bed_raw = 0;
-#endif
+//#if HEATED_BED_SENSOR_TYPE!=0
+//  int current_bed_raw = 0;
+//  int target_bed_raw = 0;
+//#endif
 
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
-byte counter_periodical=0;
+unsigned int counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
-byte heated_bed_output=0;
-int target_bed_celsius=0;
-#if HEATED_BED_HEATER_PIN > -1
-unsigned long last_bed_set = 0;       ///< Time of last temperature setting for heated bed. So we can limit settings to desired frequency.
-#endif
+//byte heated_bed_output=0;
+//int target_bed_celsius=0;
 
 #ifdef SUPPORT_MAX6675
 extern int read_max6675(byte ss_pin);
@@ -82,6 +106,16 @@ uint osAnalogInputBuildup[ANALOG_INPUTS];
 uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
 
+void initHeatedBed() {
+#if HAVE_HEATED_BED
+#ifdef TEMP_PID
+    if(heatedBedController.pidIGain) { // prevent division by zero
+       heatedBedController.tempIStateLimitMax = (float)heatedBedController.pidDriveMax*10.0f/heatedBedController.pidIGain;
+       heatedBedController.tempIStateLimitMin = (float)heatedBedController.pidDriveMin*10.0f/heatedBedController.pidIGain;
+    }
+#endif
+#endif
+}
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- initExtruder ------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
@@ -136,7 +170,7 @@ void initExtruder() {
       pinMode(act->enablePin,OUTPUT);
       if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
     }
-    act->lastTemperatureUpdate = millis();
+    act->tempControl.lastTemperatureUpdate = millis();
 #ifdef SUPPORT_MAX6675
     if(act->sensorType==101) {
       WRITE(SCK_PIN,0);
@@ -145,13 +179,14 @@ void initExtruder() {
       SET_OUTPUT(MOSI_PIN);
       WRITE(MISO_PIN,1);
       SET_INPUT(MISO_PIN);
-      digitalWrite(act->sensorPin,1);
-      pinMode(act->sensorPin,OUTPUT);
+      digitalWrite(act->tempControl.sensorPin,1);
+      pinMode(act->tempControl.sensorPin,OUTPUT);
     }
 #endif
   }
 #if HEATED_BED_HEATER_PIN>-1
-  pinMode(HEATED_BED_HEATER_PIN,OUTPUT);
+  SET_OUTPUT(HEATED_BED_HEATER_PIN);
+  initHeatedBed();
 #endif
   extruder_select(0);
 #if ANALOG_INPUTS>0
@@ -211,6 +246,7 @@ void extruder_select(byte ext_num) {
 #if USE_OPS==1 || defined(USE_ADVANCE)
    printer_state.minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
    printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   if(printer_state.maxExtruderSpeed>15) printer_state.maxExtruderSpeed = 15;
    if(printer_state.maxExtruderSpeed>=printer_state.minExtruderSpeed) {
      printer_state.maxExtruderSpeed = printer_state.minExtruderSpeed;
    } else {
@@ -222,9 +258,9 @@ void extruder_select(byte ext_num) {
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
 #endif
 #ifdef TEMP_PID
-    if(current_extruder->pidIGain) { // prevent division by zero
-       current_extruder->tempIStateLimitMax = (long)current_extruder->pidDriveMax*1000L/current_extruder->pidIGain;
-       current_extruder->tempIStateLimitMin = (long)current_extruder->pidDriveMin*1000L/current_extruder->pidIGain;
+    if(current_extruder->tempControl.pidIGain) { // prevent division by zero
+       current_extruder->tempControl.tempIStateLimitMax = (float)current_extruder->tempControl.pidDriveMax*10.0f/current_extruder->tempControl.pidIGain;
+       current_extruder->tempControl.tempIStateLimitMin = (float)current_extruder->tempControl.pidDriveMin*10.0f/current_extruder->tempControl.pidIGain;
     }
 #endif
 #if USE_OPS==1
@@ -242,44 +278,48 @@ void extruder_select(byte ext_num) {
 // ---------------------------------------------- extruder_set_temperature ------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-void extruder_set_temperature(int temp_celsius,byte extr) {
+void extruder_set_temperature(float temp_celsius,byte extr) {
 #ifdef MAXTEMP
-  if(temp_celsius>(MAXTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MAXTEMP<<CELSIUS_EXTRA_BITS);
+  if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
 #endif
   if(temp_celsius<0) temp_celsius=0;
-//#ifdef MINTEMP
-//  if(temp_celsius<(MINTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MINTEMP<<CELSIUS_EXTRA_BITS);
-//#endif
-  extruder[extr].targetTemperature = conv_temp_raw(extruder[extr].sensorType,temp_celsius);
-  extruder[extr].targetTemperatureC = temp_celsius;
-   out.print_int_P(PSTR("TargetExtr"),(int)extr);
-   out.println_int_P(PSTR(":"),temp_celsius>>CELSIUS_EXTRA_BITS);
+  tempController[extr]->targetTemperature = conv_temp_raw(tempController[extr]->sensorType,temp_celsius);
+  tempController[extr]->targetTemperatureC = temp_celsius;
+   OUT_P_FX("TargetExtr",extr,0);
+   OUT_P_FX_LN(":",temp_celsius,0);
 #if USE_OPS==1  
-  if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS)) { // Protect for cold filament
+  if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP)) { // Protect for cold filament
     printer_state.filamentRetracted = false;
     printmoveSeen = 0;
   }
 #endif
+  bool alloff = true;
+  for(byte i=0;i<NUM_EXTRUDER;i++)
+    if(tempController[i]->targetTemperatureC>15) alloff = false;
+  if(alloff)
+    epr_update_usage();
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- extruder_get_temperature ------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int extruder_get_temperature() {
-  return conv_raw_temp(current_extruder->sensorType,current_extruder->currentTemperature);
+float extruder_get_temperature() {
+  return current_extruder->tempControl.currentTemperatureC;
+  //return conv_raw_temp(current_extruder->tempControl.sensorType,current_extruder->tempControl.currentTemperature);
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- heated_bed_set_temperature ----------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-void heated_bed_set_temperature(int temp_celsius) {
-#if HEATED_BED_SENSOR_TYPE!=0  
-   if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
-   target_bed_celsius=temp_celsius;
-   target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
-   out.println_int_P(PSTR("TargetBed:"),target_bed_celsius>>CELSIUS_EXTRA_BITS);
+void heated_bed_set_temperature(float temp_celsius) {
+#ifdef HAVE_HEATED_BED
+   if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
+   if(temp_celsius<0) temp_celsius = 0;
+   heatedBedController.targetTemperatureC=temp_celsius;
+   heatedBedController.targetTemperature = conv_temp_raw(heatedBedController.sensorType,temp_celsius);
+   OUT_P_FX_LN("TargetBed:",heatedBedController.targetTemperatureC,0);
 #endif     
 }
 
@@ -287,9 +327,11 @@ void heated_bed_set_temperature(int temp_celsius) {
 // ---------------------------------------------- heated_bed_get_temperature ----------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int heated_bed_get_temperature() {
-#if HEATED_BED_SENSOR_TYPE!=0  
-   return conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw);
+float heated_bed_get_temperature() {
+#ifdef HAVE_HEATED_BED 
+   TemperatureController *c = tempController[NUM_TEMPERATURE_LOOPS-1];
+   return c->currentTemperatureC;
+   //return conv_raw_temp(c->sensorType,c->currentTemperature);
 #else
    return -1;
 #endif     
@@ -398,7 +440,8 @@ int read_raw_temperature(byte type,byte pin) {
 // ---------------------------------------------- conv_raw_temp -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int conv_raw_temp(byte type,int raw_temp) {
+float conv_raw_temp(byte type,int raw_temp) {
+  //OUT_P_I_LN("OC for raw ",raw_temp);
   switch(type) {
     case 1:
     case 2:
@@ -419,13 +462,16 @@ int conv_raw_temp(byte type,int raw_temp) {
       while(i<num) {
         newraw = pgm_read_word(&temptable[i++]);
         newtemp = pgm_read_word(&temptable[i++]);
-        if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+        if (newraw > raw_temp) {
+          //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
+          //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
+        }
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;}
+      return TEMP_INT_TO_FLOAT(newtemp);}
     case 50: // User defined PTC thermistor
     case 51:
     case 52:
@@ -441,12 +487,12 @@ int conv_raw_temp(byte type,int raw_temp) {
         newraw = pgm_read_word(&temptable[i++]);
         newtemp = pgm_read_word(&temptable[i++]);
         if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;
+      return TEMP_INT_TO_FLOAT(newtemp);
     }
     case 100: // AD595
       return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -466,12 +512,12 @@ int conv_raw_temp(byte type,int raw_temp) {
         newraw = temptable[i++];
         newtemp = temptable[i++];
         if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;
+      return TEMP_INT_TO_FLOAT(newtemp);
     }
 #endif
   }
@@ -481,7 +527,8 @@ int conv_raw_temp(byte type,int raw_temp) {
 // ---------------------------------------------- conv_temp_raw -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int conv_temp_raw(byte type,int temp) {
+int conv_temp_raw(byte type,float tempf) {
+  int temp = TEMP_FLOAT_TO_INT(tempf);
   switch(type) {
     case 1:
     case 2:
@@ -560,6 +607,140 @@ int conv_temp_raw(byte type,int temp) {
 }
 
 // ------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------- disableAllHeater --------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+byte autotuneIndex = 255;
+void disableAllHeater() {
+  for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+     TemperatureController *c = tempController[i];
+     c->targetTemperature = 0;
+     c->targetTemperatureC = 0;
+     pwm_pos[c->pwmIndex] = 0;
+  }
+  autotuneIndex = 255;
+}
+// ------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------ autotunePID -----------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+
+#ifdef TEMP_PID
+void autotunePID(float temp,int controllerId)
+{
+  TemperatureController *c = tempController[controllerId];
+  float currentTemp;
+  int cycles=0;
+  bool heating = true;
+
+  unsigned long temp_millis = millis();
+  unsigned long t1=temp_millis;
+  unsigned long t2=temp_millis;
+  long t_high;
+  long t_low;
+
+  long bias=c->pidMax>>1;
+  long d = c->pidMax>>1;
+  float Ku, Tu;
+  float Kp, Ki, Kd;
+  float maxTemp=20, minTemp=20;
+  
+  OUT_P_LN("PID Autotune start");
+  
+  disableAllHeater(); // switch off all heaters.
+  autotuneIndex = controllerId;
+  pwm_pos[c->pwmIndex] = c->pidMax;
+    
+  for(;;) {
+      c->currentTemperature = read_raw_temperature(c->sensorType,c->sensorPin);
+      currentTemp = c->currentTemperatureC = conv_raw_temp(c->sensorType,c->currentTemperature);
+      unsigned long time = millis();
+      maxTemp=max(maxTemp,currentTemp);
+      minTemp=min(minTemp,currentTemp);
+      if(heating == true && currentTemp > temp) { // switch heating -> off
+        if(time - t2 > 2500) {
+          heating=false;
+          pwm_pos[c->pwmIndex] = (bias - d);
+          t1=time;
+          t_high=t1 - t2;
+          maxTemp=temp;
+        }
+      }
+      if(heating == false && currentTemp < temp) {
+        if(time - t1 > 5000) {
+          heating=true;
+          t2=time;
+          t_low=t2 - t1; // half wave length
+          if(cycles > 0) {
+            bias += (d*(t_high - t_low))/(t_low + t_high);
+            bias = constrain(bias, 20 ,c->pidMax-20);
+            if(bias > c->pidMax/2) d = c->pidMax - 1 - bias;
+            else d = bias;
+
+            OUT_P_I(" bias: ",bias);
+            OUT_P_I(" d: ",d);
+            OUT_P_F(" min: ",minTemp);
+            OUT_P_F_LN(" max: ",maxTemp);
+            if(cycles > 2) {
+              // Parameter according Ziegler–Nichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+              Ku = (4.0*d)/(3.14159*(maxTemp-minTemp));
+              Tu = ((float)(t_low + t_high)/1000.0);
+              OUT_P_F(" Ku: ",Ku);
+              OUT_P_F_LN(" Tu: ",Tu);
+              Kp = 0.6*Ku;
+              Ki = 2*Kp/Tu;
+              Kd = Kp*Tu*0.125;
+              OUT_P_LN(" Classic PID");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              /*
+              Kp = 0.33*Ku;
+              Ki = Kp/Tu;
+              Kd = Kp*Tu/3;
+              OUT_P_LN(" Some overshoot");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              Kp = 0.2*Ku;
+              Ki = 2*Kp/Tu;
+              Kd = Kp*Tu/3;
+              OUT_P_LN(" No overshoot");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              */
+            }
+          }
+          pwm_pos[c->pwmIndex] = (bias + d);
+          cycles++;
+          minTemp=temp;
+        }
+    }
+    if(currentTemp > (temp + 20)) {
+      OUT_P_LN("PID Autotune failed! Temperature to high");
+      disableAllHeater();
+      return;
+    }
+    if(time - temp_millis > 1000) {
+      temp_millis = time;
+      print_temperatures();
+    }
+    if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L)) {
+      OUT_P_LN("PID Autotune failed! timeout");
+      disableAllHeater();
+      return;
+    }
+    if(cycles > 5) {
+      OUT_P_LN("PID Autotune finished ! Place the Kp, Ki and Kd constants in the configuration.h");
+      disableAllHeater();
+      return;
+    }
+    UI_MEDIUM;
+    UI_SLOW;
+  }
+}
+#endif
+
+// ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- write_monitor -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
@@ -570,95 +751,69 @@ disabled, the function is not called.
 */
 void write_monitor() {
     out.print_long_P(PSTR("MTEMP:"),millis());
-    if(manage_monitor<NUM_EXTRUDER) {
-      Extruder *e = &extruder[manage_monitor];
-      out.print_int_P(PSTR(" "),e->currentTemperatureC>>CELSIUS_EXTRA_BITS); 
-      out.print_int_P(PSTR(" "),e->targetTemperatureC>>CELSIUS_EXTRA_BITS);
-      out.println_int_P(PSTR(" "),(int)pwm_pos[e->id]);
-    }
-#if HEATED_BED_SENSOR_TYPE!=0
-    else {
-      out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw)>>CELSIUS_EXTRA_BITS); 
-      out.print_int_P(PSTR(" "),target_bed_celsius>>CELSIUS_EXTRA_BITS);
-      out.println_int_P(PSTR(" "),(int)heated_bed_output);
-    }
-#endif
+    TemperatureController *act = tempController[manage_monitor];
+    OUT_P_F(" ",act->currentTemperatureC); 
+    OUT_P_FX(" ",act->targetTemperatureC,0);
+    OUT_P_I_LN(" ",pwm_pos[act->pwmIndex]);
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- manage temperatures -----------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-/** Makes updates to temperatures and heater state every call. It is optimized for speed,
- so only small updates are done every time. Call it frequently, minimum 40 times per sensor
- is suggested.
- the critical flag indicates, that the time for checking temp. is limited, so long operations
- are forbidden in this call.*/
+/** Makes updates to temperatures and heater state every call. 
+
+Is called every 100ms.
+*/
 
 void manage_temperatures() {
-  byte manage_extruder = 0;  ///< Extruder number, we are looking at. 1+NUM_EXTRUDER is heated bed.
-  for(manage_extruder=0;manage_extruder<NUM_EXTRUDER;manage_extruder++) {
-    Extruder *act = &extruder[manage_extruder];
+  for(byte controller=0;controller<NUM_TEMPERATURE_LOOPS;controller++) {
+    if(controller == autotuneIndex) continue;
+    TemperatureController *act = tempController[controller];
     // Get Temperature
-       int oldTemp = act->currentTemperatureC;
-       act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
-       act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
-       byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+    //int oldTemp = act->currentTemperatureC;
+    act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
+    act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
+    byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 #ifdef TEMP_PID
-       act->tempArray[act->tempPointer++] = act->currentTemperatureC;
-       act->tempPointer &= 7;
-       if(act->heatManager==1) {
+    act->tempArray[act->tempPointer++] = act->currentTemperatureC;
+    act->tempPointer &= 3;
+    if(act->heatManager==1) {
          byte output;
-         int error = act->targetTemperatureC - act->currentTemperatureC;
-         if(act->targetTemperatureC<(20<<CELSIUS_EXTRA_BITS)) output = 0; // off is off, even if damping term wants a heat peak!
-         else if(error>(PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS)) 
+         float error = act->targetTemperatureC - act->currentTemperatureC;
+         if(act->targetTemperatureC<20.0f) output = 0; // off is off, even if damping term wants a heat peak!
+         else if(error>PID_CONTROL_RANGE) 
            output = act->pidMax;
-         else if(error<(-PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS))
+         else if(error<-PID_CONTROL_RANGE)
            output = 0;
          else {
-           long pidTerm = act->pidPGain * error; // *100
-           act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax); // *1*1000ms
-           pidTerm += act->pidIGain * act->tempIState/10; 
-           long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC); //*100
+           float pidTerm = act->pidPGain * error;
+           act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax);
+           pidTerm += act->pidIGain * act->tempIState*0.1; 
+           long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC)*3.333f;
            pidTerm += dgain;
 #if SCALE_PID_TO_MAX==1
-           pidTerm = (pidTerm*act->pidMax)>>8;
+           pidTerm = (pidTerm*act->pidMax)*0.0039062;
 #endif
-           output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;
-          /*if(counter_250ms==1) { // some debug infos
-            out.print_long_P(PSTR("PID:"),act->tempIState);
-            out.print_long_P(PSTR(" "),pidTerm);
-            out.print_long_P(PSTR(" "),act->pidPGain * error);
-            out.println_long_P(PSTR(" "),dgain);
-          } */
+           output = constrain((int)pidTerm, 0, act->pidMax);
          }
-         pwm_pos[act->id] = output;
-       }
+         pwm_pos[act->pwmIndex] = output;
+    } else
 #endif
-       if(act->heatManager == 0
-#ifndef TEMP_PID
-        || true
-#endif
-       ) {
-         pwm_pos[act->id] = (on?255:0);
-      }
+    if(act->heatManager == 2) { // Bang-bang with reduced change frequency to save relais life
+        unsigned long time = millis();
+        if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL) {
+          pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+          act->lastTemperatureUpdate = time;
+        }
+    } else { // Fast Bang-Bang fallback
+         pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+    }
 #if LED_PIN>-1
-      if(act == current_extruder)
-        digitalWrite(LED_PIN,on);
+    if(act == &current_extruder->tempControl)
+        WRITE(LED_PIN,on);
 #endif       
   }
-  // Now manage heated bed
-#if HEATED_BED_SENSOR_TYPE!=0
-  unsigned long time = millis();
-  current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
-#if HEATED_BED_HEATER_PIN > -1
-  if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
-     digitalWrite(HEATED_BED_HEATER_PIN,current_bed_raw >= target_bed_raw ? LOW : HIGH);
-     last_bed_set = time;
-  }
-#endif
-  heated_bed_output = current_bed_raw >= target_bed_raw ? 0 : 255;
-#endif
 }
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- read_max6675 ------------------------------------------------------

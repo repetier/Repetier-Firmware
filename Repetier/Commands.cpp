@@ -19,7 +19,6 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
 #include "Eeprom.h"
 #include "pins_arduino.h"
@@ -39,7 +38,7 @@ void check_periodical() {
   if(--counter_250ms==0) {
      if(manage_monitor<=1+NUM_EXTRUDER)
         write_monitor();
-     counter_250ms=10;
+     counter_250ms=5;
   }
   UI_SLOW; 
 }
@@ -58,35 +57,35 @@ void wait_until_end_of_move() {
   }
 }
 void printPosition() {
-  out.print_float_P(PSTR("X:"),printer_state.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
-  out.print_float_P(PSTR(" Y:"),printer_state.currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
-  out.print_float_P(PSTR(" Z:"),printer_state.currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
-  out.println_float_P(PSTR(" E:"),printer_state.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
+  OUT_P_F("X:",printer_state.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
+  OUT_P_F(" Y:",printer_state.currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
+  OUT_P_F(" Z:",printer_state.currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
+  OUT_P_F_LN(" E:",printer_state.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
 void print_temperatures() {
 #if HEATED_BED_SENSOR_TYPE==0 
-  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
+  OUT_P_F("T:",extruder_get_temperature())); 
 #else
-  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
-  out.print_int_P(PSTR(" B:"),((1<<(CELSIUS_EXTRA_BITS-1))+heated_bed_get_temperature())>>CELSIUS_EXTRA_BITS); 
+  OUT_P_F("T:",extruder_get_temperature()); 
+  OUT_P_F(" B:",heated_bed_get_temperature()); 
 #endif
 #ifdef TEMP_PID
-  out.print_int_P(PSTR(" @:"),(int)pwm_pos[current_extruder->id]);
+  OUT_P_I(" @:",(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
-  out.println();
+  OUT_LN;
 }
 void change_feedrate_multiply(int factor) {
   if(factor<25) factor=25;
   if(factor>500) factor=500;
   printer_state.feedrate *= (float)factor/(float)printer_state.feedrateMultiply;
   printer_state.feedrateMultiply = factor;
-  out.println_int_P(PSTR("SpeedMultiply:"),factor);
+  OUT_P_I_LN("SpeedMultiply:",factor);
 }
 void change_flowate_multiply(int factor) {
   if(factor<25) factor=25;
   if(factor>200) factor=200;
   printer_state.extrudeMultiply = factor;
-  out.println_int_P(PSTR("FlowMultiply:"),factor);
+  OUT_P_I_LN("FlowMultiply:",factor);
 }
 void set_fan_speed(int speed,bool wait) {  
 #if FAN_PIN>=0
@@ -101,7 +100,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   if(xaxis) {
     if ((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
-      steps = printer_state.xMaxSteps * X_HOME_DIR;         
+      steps = (printer_state.xMaxSteps-printer_state.xMinSteps) * X_HOME_DIR;         
       printer_state.currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
       printer_state.currentPositionSteps[0] = 0;
@@ -111,13 +110,13 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       if(ENDSTOP_X_BACK_ON_HOME > 0)
         move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
-      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? 0 : printer_state.xMaxSteps;
+      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps : printer_state.xMaxSteps;
     }
   }        
   if(yaxis) {
     if ((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
-      steps = printer_state.yMaxSteps * Y_HOME_DIR;         
+      steps = (printer_state.yMaxSteps-printer_state.yMinSteps) * Y_HOME_DIR;         
       printer_state.currentPositionSteps[1] = -steps;
       move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
       printer_state.currentPositionSteps[1] = 0;
@@ -127,13 +126,13 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       if(ENDSTOP_Y_BACK_ON_HOME > 0)
         move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
-      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? 0 : printer_state.yMaxSteps;
+      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer_state.yMinSteps : printer_state.yMaxSteps;
     }
   }        
   if(zaxis) {
     if ((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
-      steps = printer_state.zMaxSteps * Z_HOME_DIR;         
+      steps = (printer_state.zMaxSteps-printer_state.zMinSteps) * Z_HOME_DIR;         
       printer_state.currentPositionSteps[2] = -steps;
       move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
       printer_state.currentPositionSteps[2] = 0;
@@ -143,7 +142,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       if(ENDSTOP_Z_BACK_ON_HOME > 0)
         move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
 #endif
-      printer_state.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? 0 : printer_state.zMaxSteps;
+      printer_state.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer_state.zMinSteps : printer_state.zMaxSteps;
     }
   }
   UI_CLEAR_STATUS  
@@ -436,12 +435,12 @@ void process_command(GCode *com)
         if(GCODE_HAS_P(com))
           wait_until_end_of_move();
 #endif
-        if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS,current_extruder->id);
+        if (GCODE_HAS_S(com)) extruder_set_temperature(com->S,current_extruder->id);
         break;
       case 140: // M140 set bed temp
         previous_millis_cmd = millis();
         if(DEBUG_DRYRUN) break;
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
+        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
         break;
       case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         print_temperatures();
@@ -452,9 +451,13 @@ void process_command(GCode *com)
           if(DEBUG_DRYRUN) break;
           UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
           wait_until_end_of_move();
-          if (GCODE_HAS_S(com)) extruder_set_temperature(com->S<<CELSIUS_EXTRA_BITS,current_extruder->id);
-          if(abs(current_extruder->currentTemperatureC - current_extruder->targetTemperatureC)<(3<<CELSIUS_EXTRA_BITS)) break; // Already in range
-          bool dir = current_extruder->currentTemperatureC < current_extruder->targetTemperatureC;
+          Extruder *actExtruder = current_extruder;
+          if(GCODE_HAS_T(com) && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T]; 
+          if (GCODE_HAS_S(com)) extruder_set_temperature(com->S,actExtruder->id);
+#if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN>0
+          if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
+#endif
+          bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
           codenum = millis(); 
           unsigned long waituntil = 0;
           unsigned long cur_time;
@@ -466,9 +469,9 @@ void process_command(GCode *com)
             }
             check_periodical();
             gcode_read_serial();
-            if((waituntil==0 && (dir ? current_extruder->currentTemperatureC >= current_extruder->targetTemperatureC:current_extruder->currentTemperatureC <= current_extruder->targetTemperatureC))
+            if((waituntil==0 && (dir ? current_extruder->tempControl.currentTemperatureC >= current_extruder->tempControl.targetTemperatureC-0.5:current_extruder->tempControl.currentTemperatureC <= current_extruder->tempControl.targetTemperatureC+0.5))
 #ifdef TEMP_HYSTERESIS
-            || (waituntil!=0 && (abs(current_extruder->currentTemperatureC - current_extruder->targetTemperatureC)>>CELSIUS_EXTRA_BITS)>TEMP_HYSTERESIS)            
+            || (waituntil!=0 && (abs(current_extruder->tempControl.currentTemperatureC - current_extruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)            
 #endif
             ) {
               waituntil = cur_time+1000UL*(unsigned long)current_extruder->watchPeriod; // now wait for temp. to stabalize
@@ -482,10 +485,13 @@ void process_command(GCode *com)
         if(DEBUG_DRYRUN) break;
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
         wait_until_end_of_move();
-#if HEATED_BED_SENSOR_TYPE!=0
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S<<CELSIUS_EXTRA_BITS);
+#ifdef HEATED_HEATED_BED
+        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
+#if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
+        if(abs(heatedBedController->currentTemperatureC-heatedBed->targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
+#endif
         codenum = millis(); 
-        while(current_bed_raw < target_bed_raw) {
+        while(heatedBedController->currentTemperatureC+0.5<heatedBed->targetTemperatureC) {
           if( (millis()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
             print_temperatures();
             codenum = millis(); 
@@ -496,6 +502,17 @@ void process_command(GCode *com)
         UI_CLEAR_STATUS;
         previous_millis_cmd = millis();
         break;
+#ifdef TEMP_PID
+      case 303: {
+          int temp = 150;
+          int cont = 0;
+          if(GCODE_HAS_S(com)) temp = com->S;
+          if(GCODE_HAS_P(com)) cont = com->P;
+          if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
+          autotunePID(temp,cont);
+        }
+        break;
+#endif
       case 106: //M106 Fan On
         set_fan_speed(GCODE_HAS_S(com)?com->S:255,GCODE_HAS_P(com));
         break;
@@ -503,19 +520,19 @@ void process_command(GCode *com)
         set_fan_speed(0,GCODE_HAS_P(com));
         break;
       case 80: // M80 - ATX Power On
+#if PS_ON_PIN>-1
         wait_until_end_of_move();
         previous_millis_cmd = millis();
-        if(PS_ON_PIN > -1) {
-          pinMode(PS_ON_PIN,OUTPUT); //GND
-          digitalWrite(PS_ON_PIN, LOW);
-        }
+        SET_OUTPUT(PS_ON_PIN); //GND
+        WRITE(PS_ON_PIN, LOW);
+#endif
         break;
       case 81: // M81 - ATX Power Off
+#if PS_ON_PIN>-1
         wait_until_end_of_move();
-        if(PS_ON_PIN > -1) {
-          pinMode(PS_ON_PIN,OUTPUT); //GND
-          digitalWrite(PS_ON_PIN, HIGH);
-        }
+        SET_OUTPUT(PS_ON_PIN); //GND
+        WRITE(PS_ON_PIN, HIGH);
+#endif
         break;
       case 82:
         relative_mode_e = false;
@@ -556,7 +573,7 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
-        out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:1"));
+        out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:2"));
         break;
       case 114: // M114
         printPosition();
@@ -570,27 +587,27 @@ void process_command(GCode *com)
         wait_until_end_of_move();
       	#if (X_MIN_PIN > -1)
       	out.print_P(PSTR("x_min:"));
-        out.print_P((digitalRead(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (X_MAX_PIN > -1)
       	out.print_P(PSTR("x_max:"));
-        out.print_P((digitalRead(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MIN_PIN > -1)
       	out.print_P(PSTR("y_min:"));
-        out.print_P((digitalRead(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MAX_PIN > -1)
       	out.print_P(PSTR("y_max:"));
-        out.print_P((digitalRead(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MIN_PIN > -1)
       	out.print_P(PSTR("z_min:"));
-        out.print_P((digitalRead(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MAX_PIN > -1)
       	out.print_P(PSTR("z_max:"));
-        out.print_P((digitalRead(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P((READ(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
         out.println();
       	break;
@@ -613,8 +630,12 @@ void process_command(GCode *com)
         break;
       #endif
       case 203: // M203 Temperature monitor
-        if(GCODE_HAS_S(com)) manage_monitor = com->S;
-        if(manage_monitor==100) manage_monitor=NUM_EXTRUDER; // Set 100 to heated bed
+        if(GCODE_HAS_S(com)) {
+          if(com->S<NUM_EXTRUDER) manage_monitor = com->S;
+ #if HAVE_HEATED_BED
+          else manage_monitor=NUM_EXTRUDER; // Set 100 to heated bed
+ #endif
+        }
         break;
       case 205: // M205 Show EEPROM settings
         epr_output_settings();
@@ -699,6 +720,7 @@ void process_command(GCode *com)
           if(printer_state.opsMode==2)
             out.print_float_P(PSTR(", move after = "),printer_state.opsMoveAfter);
           out.println();
+          update_extruder_flags();
         }
 #ifdef DEBUG_OPS
        out.println_int_P(PSTR("Ret. steps:"),printer_state.opsRetractSteps);
@@ -718,9 +740,9 @@ void process_command(GCode *com)
         out.print_float_P(PSTR(" quadratic K:"),current_extruder->advanceK);
 #endif        
         out.println();
+        update_extruder_flags();
         break;
 #endif
-    case 210:
     case 908: // Control digital trimpot directly.
     {
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
@@ -730,9 +752,9 @@ void process_command(GCode *com)
 #endif
     }
     break;
-    case 211:
+    
     case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
-    {
+      {
       out.println_P(PSTR("Set Microstepping"));
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
         if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S); 
@@ -743,9 +765,11 @@ void process_command(GCode *com)
         if(GCODE_HAS_P(com)) microstep_mode(4,com->P); // Original B but is not supported here
         microstep_readings();
 #endif
-    }
-    break;
-
+      }
+      break;
+    case 400: // Test command to see if codes > 255 are send correct
+      out.println_P(PSTR("M400 successfully called"));
+      break;
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();

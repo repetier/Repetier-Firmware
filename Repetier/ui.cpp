@@ -17,10 +17,10 @@
 */
 
 #define UI_MAIN
+#include "Reptier.h"
 #include <avr/pgmspace.h>
 extern const int8_t encoder_table[16] PROGMEM ;
 #include "ui.h"
-#include "Reptier.h"
 #include <math.h>
 #include <stdlib.h>
 #include <inttypes.h>

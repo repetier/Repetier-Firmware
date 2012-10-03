@@ -1,8 +1,18 @@
 Version 0.73
+  IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Added motherboard type 71 for Gen7 1.4.1
   Added motherboard type 70 for MegaTronics
   Added RAMBO motherboard type 301
   Added support for Digipot/microstepping adjustment in firmware for RAMBO boards.
+  Min home position can now have negative coordinates.
+  New faster path planner.
+  Better compensation on succeeding small moves if host lags behinds.
+  New temperature management allowing PID for heated bed.
+  PID autotune (M303 S<Temp> P<Extruder/heater>)
+  Counter for printed filament/time online.
+  New EEPROM storage detecting version upgrades and has checksum for ram corruption detection.
+  More parameter configurable over EEPROM.
+  Repetier protocol version 2, allowing more data parameter.
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

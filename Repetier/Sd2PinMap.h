@@ -136,9 +136,15 @@ uint8_t const SCL_PIN = 18;
 
 // SPI port
 uint8_t const SS_PIN = 4;
+#ifndef MOSI_PIN
 uint8_t const MOSI_PIN = 5;
+#endif
+#ifndef MISO_PIN
 uint8_t const MISO_PIN = 6;
+#endif
+#ifndef SCK_PIN
 uint8_t const SCK_PIN = 7;
+#endif
 
 static const pin_map_t digitalPinMap[] = {
   {&DDRB, &PINB, &PORTB, 0},  // B0  0
@@ -184,9 +190,15 @@ uint8_t const SCL_PIN = 5;
 
 // SPI port
 uint8_t const SS_PIN = 0;
+#ifndef MOSI_PIN
 uint8_t const MOSI_PIN = 2;
+#endif
+#ifndef MISO_PIN
 uint8_t const MISO_PIN = 3;
+#endif
+#ifndef SCK_PIN
 uint8_t const SCK_PIN = 1;
+#endif
 
 static const pin_map_t digitalPinMap[] = {
   {&DDRB, &PINB, &PORTB, 0},  // B0  0
@@ -229,9 +241,15 @@ uint8_t const SS_PIN = 26;
 #else
 uint8_t const SS_PIN = 20;    
 #endif
+#ifndef MOSI_PIN
 uint8_t const MOSI_PIN = 22;
+#endif
+#ifndef MISO_PIN
 uint8_t const MISO_PIN = 23;
+#endif
+#ifndef SCK_PIN
 uint8_t const SCK_PIN = 21;
+#endif
 
 static const pin_map_t digitalPinMap[] = {
   {&DDRD, &PIND, &PORTD, 0},  // D0  0
@@ -291,9 +309,15 @@ uint8_t const SCL_PIN = 19;
 
 // SPI port
 uint8_t const SS_PIN = 10;
+#ifndef MOSI_PIN
 uint8_t const MOSI_PIN = 11;
+#endif
+#ifndef MISO_PIN
 uint8_t const MISO_PIN = 12;
+#endif
+#ifndef SCK_PIN
 uint8_t const SCK_PIN = 13;
+#endif
 
 static const pin_map_t digitalPinMap[] = {
   {&DDRD, &PIND, &PORTD, 0},  // D0  0

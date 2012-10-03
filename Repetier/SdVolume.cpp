@@ -17,7 +17,7 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "Configuration.h"
+#include "Reptier.h"
 #ifdef SDSUPPORT
 #include "SdFat.h"
 //------------------------------------------------------------------------------

@@ -349,11 +349,13 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(41); // Kill pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(41,UI_ACTION_RESET); 
 }
 inline void ui_check_slow_encoder() {
 #ifdef UI_HAS_I2C_KEYS
@@ -395,7 +397,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(3),UI_ACTION_BACK); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(4),UI_ACTION_MENU_QUICKSETTINGS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
+    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin
 /*
   // Button handling for the Adafruit RGB shild
     UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button

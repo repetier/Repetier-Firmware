@@ -21,12 +21,22 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
 #include "Eeprom.h"
 
 #if EEPROM_MODE!=0
 extern void epr_eeprom_to_data();
+
+byte epr_compute_checksum() {
+  int i;
+  byte checksum=0;
+  for(i=0;i<2048;i++) {
+    if(i==EEPROM_OFFSET+EPR_INTEGRITY_BYTE) continue;
+    checksum += eeprom_read_byte ((unsigned char *)(i));
+  }
+  return checksum;
+}
+
 inline byte epr_get_byte(uint pos) {
    return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
 }
@@ -55,35 +65,35 @@ inline void epr_set_float(uint pos,float value) {
   eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
 }
 void epr_out_float(uint pos,PGM_P text) {
-  out.print_P(PSTR("EPR:3 "));
-  out.print(pos);
-  out.print(' ');
-  out.print(epr_get_float(pos));
-  out.print(' ');
+  OUT_P("EPR:3 ");
+  OUT(pos);
+  OUT(' ');
+  OUT(epr_get_float(pos));
+  OUT(' ');
   out.println_P(text);  
 }
 void epr_out_long(uint pos,PGM_P text) {
-  out.print_P(PSTR("EPR:2 "));
-  out.print(pos);
-  out.print(' ');
-  out.print(epr_get_long(pos));
-  out.print(' ');
+  OUT_P("EPR:2 ");
+  OUT(pos);
+  OUT(' ');
+  OUT(epr_get_long(pos));
+  OUT(' ');
   out.println_P(text);  
 }
 void epr_out_int(uint pos,PGM_P text) {
-  out.print_P(PSTR("EPR:1 "));
-  out.print(pos);
-  out.print(' ');
-  out.print(epr_get_int(pos));
-  out.print(' ');
+  OUT_P("EPR:1 ");
+  OUT(pos);
+  OUT(' ');
+  OUT(epr_get_int(pos));
+  OUT(' ');
   out.println_P(text);  
 }
 void epr_out_byte(uint pos,PGM_P text) {
-  out.print_P(PSTR("EPR:0 "));
-  out.print(pos);
-  out.print(' ');
-  out.print((int)epr_get_byte(pos));
-  out.print(' ');
+  OUT_P("EPR:0 ");
+  OUT(pos);
+  OUT(' ');
+  OUT((int)epr_get_byte(pos));
+  OUT(' ');
   out.println_P(text);  
 }
 
@@ -102,13 +112,16 @@ void epr_update(GCode *com) {
       if(GCODE_HAS_X(com)) epr_set_float(com->P,com->X);
       break;
   }
+  byte newcheck = epr_compute_checksum();
+  if(newcheck!=epr_get_byte(EPR_INTEGRITY_BYTE))
+    epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
   epr_eeprom_to_data();
 }
 
 /** \brief Moves current settings to EEPROM.
 
 The values the are currently set are used to fill the eeprom.*/
-void epr_data_to_eeprom() {
+void epr_data_to_eeprom(byte corrupted) {
   epr_set_long(EPR_BAUDRATE,baudrate);
   epr_set_long(EPR_MAX_INACTIVE_TIME,max_inactive_time);
   epr_set_long(EPR_STEPPER_INACTIVE_TIME,stepper_inactive_time);
@@ -139,6 +152,23 @@ void epr_data_to_eeprom() {
   epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer_state.opsRetractDistance);
   epr_set_float(EPR_OPS_RETRACT_BACKSLASH,printer_state.opsRetractBackslash);
 #endif
+#if HAVE_HEATED_BED
+  epr_set_byte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
+#ifdef TEMP_PID
+  epr_set_byte(EPR_BED_DRIVE_MAX,heatedBedController.pidDriveMax);
+  epr_set_byte(EPR_BED_DRIVE_MIN,heatedBedController.pidDriveMin);
+  epr_set_float(EPR_BED_PID_PGAIN,heatedBedController.pidPGain);
+  epr_set_float(EPR_BED_PID_IGAIN,heatedBedController.pidIGain);
+  epr_set_float(EPR_BED_PID_DGAIN,heatedBedController.pidDGain);
+  epr_set_byte(EPR_BED_PID_MAX,heatedBedController.pidMax);
+#endif
+#endif
+  epr_set_float(EPR_X_HOME_OFFSET,printer_state.xMin);
+  epr_set_float(EPR_Y_HOME_OFFSET,printer_state.yMin);
+  epr_set_float(EPR_Z_HOME_OFFSET,printer_state.zMin);
+  epr_set_float(EPR_X_LENGTH,printer_state.xLength);
+  epr_set_float(EPR_Y_LENGTH,printer_state.yLength);
+  epr_set_float(EPR_Z_LENGTH,printer_state.zLength);
 
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
@@ -148,14 +178,14 @@ void epr_data_to_eeprom() {
     epr_set_float(o+EPR_EXTRUDER_MAX_FEEDRATE,e->maxFeedrate);
     epr_set_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,e->maxStartFeedrate);
     epr_set_float(o+EPR_EXTRUDER_MAX_ACCELERATION,e->maxAcceleration);
-    epr_set_byte(o+EPR_EXTRUDER_HEAT_MANAGER,e->heatManager);
+    epr_set_byte(o+EPR_EXTRUDER_HEAT_MANAGER,e->tempControl.heatManager);
 #ifdef TEMP_PID
-    epr_set_byte(o+EPR_EXTRUDER_DRIVE_MAX,e->pidDriveMax);
-    epr_set_byte(o+EPR_EXTRUDER_DRIVE_MIN,e->pidDriveMin);
-    epr_set_long(o+EPR_EXTRUDER_PID_PGAIN,e->pidPGain);
-    epr_set_long(o+EPR_EXTRUDER_PID_IGAIN,e->pidIGain);
-    epr_set_long(o+EPR_EXTRUDER_PID_DGAIN,e->pidDGain);
-    epr_set_byte(o+EPR_EXTRUDER_PID_MAX,e->pidMax);
+    epr_set_byte(o+EPR_EXTRUDER_DRIVE_MAX,e->tempControl.pidDriveMax);
+    epr_set_byte(o+EPR_EXTRUDER_DRIVE_MIN,e->tempControl.pidDriveMin);
+    epr_set_float(o+EPR_EXTRUDER_PID_PGAIN,e->tempControl.pidPGain);
+    epr_set_float(o+EPR_EXTRUDER_PID_IGAIN,e->tempControl.pidIGain);
+    epr_set_float(o+EPR_EXTRUDER_PID_DGAIN,e->tempControl.pidDGain);
+    epr_set_byte(o+EPR_EXTRUDER_PID_MAX,e->tempControl.pidMax);
 #endif
     epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
     epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
@@ -167,10 +197,18 @@ void epr_data_to_eeprom() {
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_L,e->advanceL);
 #endif
   }
+  if(corrupted) {
+    epr_set_long(EPR_PRINTING_TIME,0);
+    epr_set_float(EPR_PRINTING_DISTANCE,0);
+  }
+  // Save version and build checksum
+  epr_set_byte(EPR_VERSION,EEPROM_PROTOCOL_VERSION);
+  epr_set_byte(EPR_INTEGRITY_BYTE,epr_compute_checksum());
 }
 /** \brief Copy data from EEPROM to variables.
 */
 void epr_eeprom_to_data() {
+  byte version = epr_get_byte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
   baudrate = epr_get_long(EPR_BAUDRATE);
   max_inactive_time = epr_get_long(EPR_MAX_INACTIVE_TIME);
   stepper_inactive_time = epr_get_long(EPR_STEPPER_INACTIVE_TIME);
@@ -201,6 +239,23 @@ void epr_eeprom_to_data() {
   printer_state.opsRetractDistance = epr_get_float(EPR_OPS_RETRACT_DISTANCE);
   printer_state.opsRetractBackslash = epr_get_float(EPR_OPS_RETRACT_BACKSLASH);
 #endif
+#if HAVE_HEATED_BED
+  heatedBedController.heatManager= epr_get_byte(EPR_BED_HEAT_MANAGER);
+#ifdef TEMP_PID
+  heatedBedController.pidDriveMax = epr_get_byte(EPR_BED_DRIVE_MAX);
+  heatedBedController.pidDriveMin = epr_get_byte(EPR_BED_DRIVE_MIN);
+  heatedBedController.pidPGain = epr_get_float(EPR_BED_PID_PGAIN);
+  heatedBedController.pidIGain = epr_get_float(EPR_BED_PID_IGAIN);
+  heatedBedController.pidDGain = epr_get_float(EPR_BED_PID_DGAIN);
+  heatedBedController.pidMax = epr_get_byte(EPR_BED_PID_MAX);
+#endif
+#endif
+  printer_state.xMin = epr_get_float(EPR_X_HOME_OFFSET);
+  printer_state.yMin = epr_get_float(EPR_Y_HOME_OFFSET);
+  printer_state.zMin = epr_get_float(EPR_Z_HOME_OFFSET);
+  printer_state.xLength = epr_get_float(EPR_X_LENGTH);
+  printer_state.yLength = epr_get_float(EPR_Y_LENGTH);
+  printer_state.zLength = epr_get_float(EPR_Z_LENGTH);
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
@@ -209,14 +264,14 @@ void epr_eeprom_to_data() {
     e->maxFeedrate = epr_get_float(o+EPR_EXTRUDER_MAX_FEEDRATE);
     e->maxStartFeedrate = epr_get_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
     e->maxAcceleration = epr_get_float(o+EPR_EXTRUDER_MAX_ACCELERATION);
-    e->heatManager = epr_get_byte(o+EPR_EXTRUDER_HEAT_MANAGER);
+    e->tempControl.heatManager = epr_get_byte(o+EPR_EXTRUDER_HEAT_MANAGER);
 #ifdef TEMP_PID
-    e->pidDriveMax = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MAX);
-    e->pidDriveMin = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MIN);
-    e->pidPGain = epr_get_long(o+EPR_EXTRUDER_PID_PGAIN);
-    e->pidIGain = epr_get_long(o+EPR_EXTRUDER_PID_IGAIN);
-    e->pidDGain = epr_get_long(o+EPR_EXTRUDER_PID_DGAIN);
-    e->pidMax = epr_get_byte(o+EPR_EXTRUDER_PID_MAX);
+    e->tempControl.pidDriveMax = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MAX);
+    e->tempControl.pidDriveMin = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MIN);
+    e->tempControl.pidPGain = epr_get_float(o+EPR_EXTRUDER_PID_PGAIN);
+    e->tempControl.pidIGain = epr_get_float(o+EPR_EXTRUDER_PID_IGAIN);
+    e->tempControl.pidDGain = epr_get_float(o+EPR_EXTRUDER_PID_DGAIN);
+    e->tempControl.pidMax = epr_get_byte(o+EPR_EXTRUDER_PID_MAX);
 #endif
     e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
     e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
@@ -224,13 +279,17 @@ void epr_eeprom_to_data() {
  #ifdef USE_ADVANCE
  #ifdef ENABLE_QUADRATIC_ADVANCE
     e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
- #endif
+#endif
     e->advanceL = epr_get_float(o+EPR_EXTRUDER_ADVANCE_L);
  #endif
   }
+  if(version!=EEPROM_PROTOCOL_VERSION) {
+    OUT_P_LN("Protocol version changed, upgrading");
+    epr_data_to_eeprom(false); // Store new fields for changed version
+  }
   extruder_select(current_extruder->id);
   update_ramps_parameter();
-  
+  initHeatedBed();
 }
 #endif
 void epr_init_baudrate() {
@@ -242,15 +301,31 @@ void epr_init_baudrate() {
 }
 void epr_init() {
 #if EEPROM_MODE!=0
-  if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE)
+  byte check = epr_compute_checksum();
+  byte storedcheck = epr_get_byte(EPR_INTEGRITY_BYTE);
+  if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check) {
     epr_eeprom_to_data();
-  else {
-    epr_data_to_eeprom();
+  } else {
     epr_set_byte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
+    epr_data_to_eeprom(storedcheck==check);
   }
 #endif
 }
-
+/**
+*/
+void epr_update_usage() {
+#if EEPROM_MODE!=0
+  unsigned long seconds = (millis()-printer_state.msecondsPrinting);
+  seconds += epr_get_long(EPR_PRINTING_TIME);
+  epr_set_long(EPR_PRINTING_TIME,seconds);
+  epr_set_float(EPR_PRINTING_DISTANCE,epr_get_float(EPR_PRINTING_DISTANCE)+printer_state.filamentPrinted*0.001);
+  printer_state.filamentPrinted = 0;
+  printer_state.msecondsPrinting = millis();
+  byte newcheck = epr_compute_checksum();
+  if(newcheck!=epr_get_byte(EPR_INTEGRITY_BYTE))
+    epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+#endif
+}
 /** \brief Writes all eeprom settings to serial console.
 
 For each value stored, this function generates one line with syntax
@@ -266,8 +341,10 @@ With
 void epr_output_settings() {
 #if EEPROM_MODE!=0
   epr_out_long(EPR_BAUDRATE,PSTR("Baudrate"));
+  epr_out_float(EPR_PRINTING_DISTANCE,PSTR("Filament printed [m]"));
+  epr_out_long(EPR_PRINTING_TIME,PSTR("Printer active [s]"));
   epr_out_long(EPR_MAX_INACTIVE_TIME,PSTR("Max. inactive time [ms,0=off]"));
-  epr_out_long(EPR_STEPPER_INACTIVE_TIME,PSTR("Stop stepper afer inactivity [ms,0=off]"));
+  epr_out_long(EPR_STEPPER_INACTIVE_TIME,PSTR("Stop stepper after inactivity [ms,0=off]"));
 //#define EPR_ACCELERATION_TYPE 1
   epr_out_float(EPR_XAXIS_STEPS_PER_MM,PSTR("X-axis steps per mm"));
   epr_out_float(EPR_YAXIS_STEPS_PER_MM,PSTR("Y-axis steps per mm"));
@@ -280,6 +357,13 @@ void epr_output_settings() {
   epr_out_float(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/min]"));
   epr_out_float(EPR_MAX_JERK,PSTR("Max. jerk [mm/s]"));
   epr_out_float(EPR_MAX_ZJERK,PSTR("Max. Z-jerk [mm/s]"));
+  epr_out_float(EPR_X_HOME_OFFSET,PSTR("X home pos [mm]"));
+  epr_out_float(EPR_Y_HOME_OFFSET,PSTR("Y home pos [mm]"));
+  epr_out_float(EPR_Z_HOME_OFFSET,PSTR("Z home pos [mm]"));
+  epr_out_float(EPR_X_LENGTH,PSTR("X max length [mm]"));
+  epr_out_float(EPR_Y_LENGTH,PSTR("Y max length [mm]"));
+  epr_out_float(EPR_Z_LENGTH,PSTR("Z max length [mm]"));
+
 #ifdef RAMP_ACCELERATION
   //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
   //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
@@ -298,6 +382,17 @@ void epr_output_settings() {
   epr_out_float(EPR_OPS_RETRACT_DISTANCE,PSTR("OPS retraction length [mm]"));
   epr_out_float(EPR_OPS_RETRACT_BACKSLASH,PSTR("OPS retraction backslash [mm]"));
 #endif
+#if HAVE_HEATED_BED
+  epr_out_byte(EPR_BED_HEAT_MANAGER,PSTR("Bed Heat Manager [0-2]"));
+#ifdef TEMP_PID
+  epr_out_byte(EPR_BED_DRIVE_MAX,PSTR("Bed PID drive max"));
+  epr_out_byte(EPR_BED_DRIVE_MIN,PSTR("Bed PID drive min"));
+  epr_out_float(EPR_BED_PID_PGAIN,PSTR("Bed PID P-gain"));
+  epr_out_float(EPR_BED_PID_IGAIN,PSTR("Bed PID I-gain"));
+  epr_out_float(EPR_BED_PID_DGAIN,PSTR("Bed PID D-gain"));
+  epr_out_byte(EPR_BED_PID_MAX,PSTR("Bed PID max value [0-255]"));
+#endif
+#endif
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
@@ -310,9 +405,9 @@ void epr_output_settings() {
 #ifdef TEMP_PID
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MAX,PSTR("PID drive max"));
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MIN,PSTR("PID drive min"));
-    epr_out_long(o+EPR_EXTRUDER_PID_PGAIN,PSTR("PID P-gain [*0.01]"));
-    epr_out_long(o+EPR_EXTRUDER_PID_IGAIN,PSTR("PID I-gain [*0.001]"));
-    epr_out_long(o+EPR_EXTRUDER_PID_DGAIN,PSTR("PID D-gain [*0.01]"));
+    epr_out_float(o+EPR_EXTRUDER_PID_PGAIN,PSTR("PID P-gain"));
+    epr_out_float(o+EPR_EXTRUDER_PID_IGAIN,PSTR("PID I-gain"));
+    epr_out_float(o+EPR_EXTRUDER_PID_DGAIN,PSTR("PID D-gain"));
     epr_out_byte(o+EPR_EXTRUDER_PID_MAX,PSTR("PID max value [0-255]"));
 #endif
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
