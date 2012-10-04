@@ -36,7 +36,6 @@
 #define MOTHERBOARD 33
 #include <avr/io.h>
 #include "pins.h"
-
 // ##########################################################################################
 // ##                                        IMPORTANT                                     ##
 // ##########################################################################################
@@ -611,6 +610,7 @@ on this endstop.
 #define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 
 // Delta settings
+#if DRIVE_SYSTEM==3
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 250.0 // mm
@@ -639,6 +639,12 @@ on this endstop.
 /** \brief Enable counter to count steps for Z max calculations
 */
 #define STEP_COUNTER
+
+//** \brief Experimental calibration utility for delta printers
+*/
+#define SOFTWARE_LEVELING
+
+#endif
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.

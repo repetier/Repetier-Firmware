@@ -630,6 +630,14 @@ UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI
 #define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_show_measurement,&ui_menu_reset_measurement,&ui_menu_set_measured_origin,&ui_menu_home_all,&ui_menu_go_zpos,&ui_menu_go_zfast}
 UI_MENU(ui_menu_delta,UI_MENU_DELTA,6+UI_MENU_BACKCNT);
 
+// **** Bed leveling menu
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
+UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_ACTION_CALC_LEVEL);
+#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling}
+UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+UI_MENU_BACKCNT);
+
 // **** Extruder menu
 
 UI_MENU_CHANGEACTION(ui_menu_ext_temp0,UI_TEXT_EXTR0_TEMP,UI_ACTION_EXTRUDER0_TEMP);

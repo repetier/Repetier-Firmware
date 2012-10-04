@@ -160,6 +160,10 @@
 #define UI_TEXT_RESET_MEASUREMENT "Reset meas."
 #define UI_TEXT_SET_MEASURED_ORIGIN "Set meas. origin"
 #define UI_TEXT_DELTA			  "Delta Calib."
+#define UI_TEXT_SET_P1			  "Set P1"
+#define UI_TEXT_SET_P2			  "Set P2"
+#define UI_TEXT_SET_P3			  "Set P3"
+#define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
 // *************** german translation ****************
 
 #if UI_LANGUAGE==1

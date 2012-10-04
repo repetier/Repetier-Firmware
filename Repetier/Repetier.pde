@@ -1454,48 +1454,6 @@ END_INTERRUPT_PROTECTED
     check_mem();
 #endif
 }
-void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
-  printer_state.flag0 &= ~1; // Motor is enabled now
-  while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
-    gcode_read_serial();
-    check_periodical();
-  }
-  byte newPath=check_new_move(pathOptimize);
-  PrintLine *p = &lines[lines_write_pos];
-  float axis_diff[4]; // Axis movement in mm
-  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
-  else p->flags = 0;
-  p->joinFlags = 0;
-  if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
-  p->dir = 0;
-  //Find direction
-  for(byte i=0; i< 3; i++) {
-	p->delta[i] = 0;
-	axis_diff[i] = 0;
-  }
-  axis_diff[3] = e_diff*inv_axis_steps_per_unit[3];
-  if (e_diff >= 0) {
-	p->delta[3] = e_diff;
-	p->dir = 0x88;
-  } else {
-	p->delta[3] = -e_diff;
-	p->dir = 0x80;
-  }
-  if(printer_state.extrudeMultiply!=100) {
-    p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-  }
-  printer_state.currentPositionSteps[3] = printer_state.destinationSteps[3];
-
-#if USE_OPS==1
-  p->opsReverseSteps=0;
-#endif
-  p->numDeltaSegments = 0;
-  //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-  p->primaryAxis = 3;
-  p->stepsRemaining = p->delta[3];
-  p->distance = abs(axis_diff[3]);
-  calculate_move(p,axis_diff,check_endstops,pathOptimize);
-}
 #if DRIVE_SYSTEM != 3
 /**
   Put a move to the current destination coordinates into the movement cache.
@@ -1799,6 +1757,62 @@ inline byte calculate_distance(float axis_diff[], byte dir, float *distance) {
   return 1;
 }
 
+#ifdef SOFTWARE_LEVELING
+void calculate_plane(long factors[], long p1[], long p2[], long p3[]) {
+	factors[0] = p1[1] * (p2[2] - p3[2]) + p2[1] * (p3[2] - p1[2]) + p3[1] * (p1[2] - p2[2]);
+	factors[1] = p1[2] * (p2[0] - p3[0]) + p2[2] * (p3[0] - p1[0]) + p3[2] * (p1[0] - p2[0]);
+	factors[2] = p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1]);
+	factors[3] = p1[0] * ((p2[1] * p3[2]) - (p3[1] * p2[2])) + p2[0] * ((p3[1] * p1[2]) - (p1[1] * p3[2])) + p3[0] * ((p1[1] * p2[2]) - (p2[1] * p1[2]));
+}
+
+float calc_zoffset(long factors[], long pointX, long pointY) {
+	return (factors[3] - factors[0] * pointX - factors[1] * pointY) / (float) factors[2];
+}
+#endif
+
+inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
+  printer_state.flag0 &= ~1; // Motor is enabled now
+  while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
+    gcode_read_serial();
+    check_periodical();
+  }
+  byte newPath=check_new_move(pathOptimize);
+  PrintLine *p = &lines[lines_write_pos];
+  float axis_diff[4]; // Axis movement in mm
+  if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
+  else p->flags = 0;
+  p->joinFlags = 0;
+  if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
+  p->dir = 0;
+  //Find direction
+  for(byte i=0; i< 3; i++) {
+	p->delta[i] = 0;
+	axis_diff[i] = 0;
+  }
+  axis_diff[3] = e_diff*inv_axis_steps_per_unit[3];
+  if (e_diff >= 0) {
+	p->delta[3] = e_diff;
+	p->dir = 0x88;
+  } else {
+	p->delta[3] = -e_diff;
+	p->dir = 0x80;
+  }
+  if(printer_state.extrudeMultiply!=100) {
+    p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+  }
+  printer_state.currentPositionSteps[3] = printer_state.destinationSteps[3];
+
+#if USE_OPS==1
+  p->opsReverseSteps=0;
+#endif
+  p->numDeltaSegments = 0;
+  //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
+  p->primaryAxis = 3;
+  p->stepsRemaining = p->delta[3];
+  p->distance = abs(axis_diff[3]);
+  calculate_move(p,axis_diff,check_endstops,pathOptimize);
+}
+
 /**
   Split a line up into a series of lines with at most MAX_DELTA_SEGMENTS_PER_LINE delta segments.
   @param check_endstops Check endstops during the move.
@@ -1806,9 +1820,7 @@ inline byte calculate_distance(float axis_diff[], byte dir, float *distance) {
   @param delta_step_rate delta step rate in segments per second for the move.
 */
 void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
-#if min_software_endstop_z == true
     if (softEndstop && printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0;
-#endif
 	long difference[NUM_AXIS];
 	float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
 	for(byte i=0; i < NUM_AXIS; i++) {
@@ -1818,6 +1830,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 #if max_software_endstop_r == true
 // TODO - Implement radius checking
 // I'm guessing I need the floats to prevent overflow. This is pretty horrible.
+// The NaN checking in the delta calculation routine should be enough
 //float a = difference[0] * difference[0] + difference[1] * difference[1];
 //float b = 2 * (difference[0] * printer_state.currentPositionSteps[0] + difference[1] * printer_state.currentPositionSteps[1]);
 //float c = printer_state.currentPositionSteps[0] * printer_state.currentPositionSteps[0] + printer_state.currentPositionSteps[1] * printer_state.currentPositionSteps[1] - r * r;
@@ -1924,7 +1937,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 			// Virtual axis steps per segment
 			p->numPrimaryStepPerSegment = max_delta_step;
 		} else {
-			// Round up to get something divisible by segment count which is greater than E move
+			// Round up the E move to get something divisible by segment count which is greater than E move
 			p->numPrimaryStepPerSegment = (p->delta[3] + segment_count - 1) / segment_count;
 			p->stepsRemaining = p->numPrimaryStepPerSegment * segment_count;
 			axis_diff[4] = p->stepsRemaining * inv_axis_steps_per_unit[3];
@@ -2682,12 +2695,6 @@ inline long bresenham_step() {
           return(wait); // waste some time for path optimization to fill up
       } // End if WARMUP
       //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
-#if DRIVE_SYSTEM==3
-	  curd = cur->nextDeltaSegment;
-      if(curd->dir & 16) enable_x();
-      if(curd->dir & 32) enable_y();
-      if(curd->dir & 64) enable_z();
-#endif
       if(cur->dir & 16) enable_x();
       if(cur->dir & 32) enable_y();
       if(cur->dir & 64) enable_z();
@@ -2759,23 +2766,6 @@ inline long bresenham_step() {
       printer_state.timer = 0;
       cli();
       //Determine direction of movement,check if endstop was hit
-#if DRIVE_SYSTEM==3
-      if(curd->dir & 1) {
-        WRITE(X_DIR_PIN,!INVERT_X_DIR);
-      } else {
-        WRITE(X_DIR_PIN,INVERT_X_DIR);
-      }
-      if(curd->dir & 2) {
-        WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
-      } else {
-        WRITE(Y_DIR_PIN,INVERT_Y_DIR);
-      }
-      if(curd->dir & 4) {
-        WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
-      } else {
-        WRITE(Z_DIR_PIN,INVERT_Z_DIR);
-      }
-#else
       if(cur->dir & 1) {
         WRITE(X_DIR_PIN,!INVERT_X_DIR);
       } else {
@@ -2791,7 +2781,6 @@ inline long bresenham_step() {
       } else {
         WRITE(Z_DIR_PIN,INVERT_Z_DIR);
       }
-#endif
 #if USE_OPS==0 && !defined(USE_ADVANCE)
       if(cur->dir & 8) {
         extruder_set_direction(1);
@@ -2829,7 +2818,7 @@ inline long bresenham_step() {
 	if(cur->flags & FLAG_CHECK_ENDSTOPS) {
 #if X_MIN_PIN>-1
 		if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==0
 			cur->dir&=~16;
 #else
 			cur->dir&=~48;
@@ -2838,7 +2827,7 @@ inline long bresenham_step() {
 #endif
 #if Y_MIN_PIN>-1
 		if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==0
 			cur->dir&=~32;
 #else
 			cur->dir&=~48;
@@ -2847,7 +2836,7 @@ inline long bresenham_step() {
 #endif
 #if X_MAX_PIN>-1
 		if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==0
 			cur->dir&=~16;
 #else
 			cur->dir&=~48;
@@ -2856,26 +2845,20 @@ inline long bresenham_step() {
 #endif
 #if Y_MAX_PIN>-1
 		if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==0
 			cur->dir&=~32;
 #else
 			cur->dir&=~48;
 #endif
 		}
 #endif
-#if DRIVE_SYSTEM!=3
    }
-#endif
    // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
 #if Z_MIN_PIN>-1
    if((cur->dir & 68)==64) if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING) {cur->dir&=~64;}
 #endif
 #if Z_MAX_PIN>-1
    if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {cur->dir&=~64;}
-#endif
-#if DRIVE_SYSTEM==3
-	// Z axis treated the same as other axis on Delta
-	}
 #endif
   }
   byte max_loops = (printer_state.stepper_loops<=cur->stepsRemaining ? printer_state.stepper_loops : cur->stepsRemaining);
@@ -2904,18 +2887,6 @@ inline long bresenham_step() {
       if((cur->error[0] -= cur->delta[0]) < 0) {
         WRITE(X_STEP_PIN,HIGH);
         cur->error[0] += cur_errupd;
-#ifdef STEP_COUNTER
-		if (INVERT_X_DIR)
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[0]--;
-			else
-				printer_state.countPositionSteps[0]++;
-		else
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[0]++;
-			else
-				printer_state.countPositionSteps[0]--;
-#endif
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
 #endif
@@ -2925,18 +2896,6 @@ inline long bresenham_step() {
       if((cur->error[1] -= cur->delta[1]) < 0) {
         WRITE(Y_STEP_PIN,HIGH);
         cur->error[1] += cur_errupd;
-#ifdef STEP_COUNTER
-		if (INVERT_Y_DIR)
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[1]--;
-			else
-				printer_state.countPositionSteps[1]++;
-		else
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[1]++;
-			else
-				printer_state.countPositionSteps[1]--;
-#endif
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
 #endif
@@ -2946,18 +2905,6 @@ inline long bresenham_step() {
       if((cur->error[2] -= cur->delta[2]) < 0) {
         WRITE(Z_STEP_PIN,HIGH);
         cur->error[2] += cur_errupd;
-#ifdef STEP_COUNTER
-		if (INVERT_Z_DIR)
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[2]--;
-			else
-				printer_state.countPositionSteps[2]++;
-		else
-			if(cur->dir & 1)
-				printer_state.countPositionSteps[2]++;
-			else
-				printer_state.countPositionSteps[2]--;
-#endif
       }
     }
 #if STEPPER_HIGH_DELAY>0

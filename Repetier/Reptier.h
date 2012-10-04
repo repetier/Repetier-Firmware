@@ -285,6 +285,10 @@ extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
 extern void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
+#ifdef SOFTWARE_LEVELING
+extern void calculate_plane(long factors[], long p1[], long p2[], long p3[]);
+extern float calc_zoffset(long factors[], long pointX, long pointY);
+#endif
 #endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
@@ -342,12 +346,17 @@ typedef struct { // RAM usage: 72 Byte
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
+#if DRIVE_SYSTEM==3
 #ifdef STEP_COUNTER
   long countZSteps;					///< Count of steps from last position reset
 #endif
-#if DRIVE_SYSTEM==3
   long currentDeltaPositionSteps[4];
   long maxDeltaPositionSteps;
+#endif
+#ifdef SOFTWARE_LEVELING
+  long levelingP1[3];
+  long levelingP2[3];
+  long levelingP3[3];
 #endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
@@ -411,11 +420,11 @@ extern PrinterState printer_state;
 #define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
 typedef struct { 
 	byte dir; 									///< Direction of delta movement.
-	int deltaSteps[3]; 							///< Number of steps in move.
+	unsigned int deltaSteps[3]; 				///< Number of steps in move.
 } DeltaSegment;
-extern DeltaSegment segments[]; 				// Delta segment cache
+extern DeltaSegment segments[];					// Delta segment cache
 extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
-extern volatile unsigned int  delta_segment_count; // Number of delta moves cached 0 = nothing in cache
+extern volatile unsigned int delta_segment_count; // Number of delta moves cached 0 = nothing in cache
 #endif
 typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte primaryAxis;
@@ -511,4 +520,26 @@ extern int16_t n;
 
 #endif
 
+#if DRIVE_SYSTEM==3
+#define SIN_60 0.8660254037844386
+#define COS_60 0.5
+#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
+#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
+#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
+#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
+
+#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER3_X_STEPS 0.0
+#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
+
+#define NUM_AXIS 4
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+#define E_AXIS 3
+
+#endif
 

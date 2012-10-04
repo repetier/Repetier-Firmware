@@ -973,8 +973,10 @@ void UIDisplay::parse(char *txt,bool ram) {
         addFloat(fvalue,3,2);
         break;
       case 'y':
+#if DRIVE_SYSTEM==3
         if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentDeltaPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
         addFloat(fvalue,3,2);
+#endif
         break;
       case 'X': // Extruder related 
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
@@ -2009,7 +2011,37 @@ void UIDisplay::executeAction(int action) {
 #endif
 	}
 #endif
-      break;	
+	case UI_ACTION_SET_P1:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP1[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_SET_P2:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP2[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_SET_P3:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP3[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_CALC_LEVEL:
+#ifdef SOFTWARE_LEVELING
+		long factors[4];
+		calculate_plane(factors, printer_state.levelingP1, printer_state.levelingP2, printer_state.levelingP3);
+		out.println_P(PSTR("Leveling calc:"));
+		out.println_float_P(PSTR("Tower 1:"), calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
+		out.println_float_P(PSTR("Tower 2:"), calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
+		out.println_float_P(PSTR("Tower 3:"), calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
+#endif
+      break;
     case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED==true
     {
