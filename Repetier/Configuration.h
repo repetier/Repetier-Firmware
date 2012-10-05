@@ -80,11 +80,16 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define STEPS_PER_ROTATION 400
 
-/** \brief Micro stepping rate of stepper driver
+/** \brief Micro stepping rate of X, Y and Y tower stepper drivers
 */
 #define MICRO_STEPS 8
 
-#define MAX_DELTA_SEGMENTS_PER_LINE 20
+/** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
+Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
+will be allocated for the delta buffer. With defaults 7 * 16 * 30 = 3360 bytes. This leaves ~1K free RAM on an Arduino
+Mega.
+*/
+#define MAX_DELTA_SEGMENTS_PER_LINE 30
 
 // Calculations
 #define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / (BELT_PITCH * PULLEY_TEETH))
@@ -640,7 +645,7 @@ on this endstop.
 */
 #define STEP_COUNTER
 
-//** \brief Experimental calibration utility for delta printers
+/** \brief Experimental calibration utility for delta printers
 */
 #define SOFTWARE_LEVELING
 

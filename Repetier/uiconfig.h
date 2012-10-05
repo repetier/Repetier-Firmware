@@ -528,13 +528,13 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 #if UI_ROWS>=4
-// #if HAVE_HEATED_BED==true
-// UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
-// #else
-// UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
-// #endif
-UI_PAGE4(ui_page1,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
-UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
+ #if HAVE_HEATED_BED==true
+ UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
+ #else
+ UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+ #endif
+UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+//UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
@@ -635,8 +635,8 @@ UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
 UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_ACTION_CALC_LEVEL);
-#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling}
-UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+UI_MENU_BACKCNT);
+#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling,&ui_menu_go_xpos,&ui_menu_go_xfast,&ui_menu_go_ypos,&ui_menu_go_yfast,&ui_menu_go_zpos,&ui_menu_go_zfast}
+UI_MENU(ui_menu_level,UI_MENU_LEVEL,10+UI_MENU_BACKCNT);
 
 // **** Extruder menu
 
@@ -840,6 +840,14 @@ UI_MENU_ACTION2C(ui_menu_eeprom_loaded,UI_ACTION_DUMMY,UI_TEXT_EEPROM_LOADED);
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
+#ifdef SOFTWARE_LEVELING
+#define UI_MENU_SL_COND ,&ui_menu_conf_level
+#define UI_MENU_SL_CNT 1
+UI_MENU_SUBMENU(ui_menu_conf_level, UI_TEXT_LEVEL, ui_menu_level);
+#else
+#define UI_MENU_SL_COND
+#define UI_MENU_SL_CNT 0
+#endif
 #ifdef STEP_COUNTER
 #define UI_MENU_DELTA_COND ,&ui_menu_conf_delta
 #define UI_MENU_DELTA_CNT 1
@@ -848,8 +856,8 @@ UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_DELTA, ui_menu_delta);
 #define UI_MENU_DELTA_COND
 #define UI_MENU_DELTA_CNT 0
 #endif 
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND}
-UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+4);
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
 // Main menu
 UI_MENU_SUBMENU(ui_menu_main1,UI_TEXT_QUICK_SETTINGS,ui_menu_quick);
 UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);

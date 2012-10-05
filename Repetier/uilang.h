@@ -164,6 +164,7 @@
 #define UI_TEXT_SET_P2			  "Set P2"
 #define UI_TEXT_SET_P3			  "Set P3"
 #define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
+#define UI_TEXT_LEVEL			  "Level delta"
 // *************** german translation ****************
 
 #if UI_LANGUAGE==1
