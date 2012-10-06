@@ -102,15 +102,15 @@ void delta_move_to_top_endstops(float feedrate) {
 	for (byte i=0; i<3; i++)
 		printer_state.currentPositionSteps[i] = 0;
 	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
-	for (byte i=0; i<3; i++)
-		printer_state.currentPositionSteps[i] = 0;
-	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
-	for (byte i=0; i<3; i++)
-		printer_state.currentPositionSteps[i] = 0;
-	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-	move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
+	move_steps(0,0,printer_state.rodSteps*ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
+//	for (byte i=0; i<3; i++)
+//		printer_state.currentPositionSteps[i] = 0;
+//	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+//	move_steps(0,0,rodSteps*axis_steps_per_unit[2]*ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
+//	for (byte i=0; i<3; i++)
+//		printer_state.currentPositionSteps[i] = 0;
+//	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+//	move_steps(0,0,rodSteps*axis_steps_per_unit[2]*ENDSTOP_Z_BACK_MOVE,printer_state.currentPositionSteps[3],feedrate, true, true);
 }
 
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {

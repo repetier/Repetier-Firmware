@@ -2142,6 +2142,8 @@ inline long bresenham_step() {
 			if(curd->dir & 32) enable_y();
 			if(curd->dir & 64) enable_z();
 
+			// Copy across movement into main direction flags so that endstops function correctly
+			cur->dir |= curd->dir;
 			// Initialize bresenham for the first segment
 			if (cur->halfstep) {
 				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment;
@@ -2273,20 +2275,23 @@ inline long bresenham_step() {
 	}
 	cli();
 	if(do_even) {
-		if(cur->flags & FLAG_CHECK_ENDSTOPS & curd != NULL) {
+		if((cur->flags & FLAG_CHECK_ENDSTOPS) && (curd != 0)) {
 #if X_MAX_PIN>-1
 			if((curd->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
 				curd->dir&=~16;
+				cur->dir&=~16;
 			}
 #endif
 #if Y_MAX_PIN>-1
 			if((curd->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
 				curd->dir&=~32;
+				cur->dir&=~32;
 			}
 #endif
 #if Z_MAX_PIN>-1
 			if((curd->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {
 				curd->dir&=~64;
+				cur->dir&=~64;
 			}
 #endif
 		}
@@ -2359,7 +2364,7 @@ inline long bresenham_step() {
 
 						// Get the next delta segment
 						curd = &segments[cur->deltaSegmentReadPos++];
-						if (cur->deltaSegmentReadPos > DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
+						if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
 						delta_segment_count--;
 
 						// Switch on appropriate axis
@@ -2576,6 +2581,12 @@ inline long bresenham_step() {
 		interval = printer_state.interval;
 	if(do_even) {
 		if(cur->stepsRemaining<=0 || (cur->dir & 240)==0) { // line finished
+//			out.println_int_P(PSTR("Line finished: "), (int) cur->numDeltaSegments);
+//			out.println_int_P(PSTR("DSC: "), (int) delta_segment_count);
+//			out.println_P(PSTR("F"));
+
+			// Release remaining delta segments
+			delta_segment_count -= cur->numDeltaSegments;
 #ifdef DEBUG_STEPCOUNT
 			if(cur->totalStepsRemaining) {
 				out.println_long_P(PSTR("Missed steps:"), cur->totalStepsRemaining);

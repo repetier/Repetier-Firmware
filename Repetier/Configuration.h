@@ -513,9 +513,9 @@ one extruder with heated bed, write:
 use a mechanical endstop connected with gnd. Set value to false for no pullup
 on this endstop.
 */
-#define ENDSTOP_PULLUP_X_MIN true
-#define ENDSTOP_PULLUP_Y_MIN true
-#define ENDSTOP_PULLUP_Z_MIN true
+#define ENDSTOP_PULLUP_X_MIN false
+#define ENDSTOP_PULLUP_Y_MIN false
+#define ENDSTOP_PULLUP_Z_MIN false
 #define ENDSTOP_PULLUP_X_MAX true
 #define ENDSTOP_PULLUP_Y_MAX true
 #define ENDSTOP_PULLUP_Z_MAX true
@@ -622,8 +622,8 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 100 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 20 // Less accurate setting for other moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 200 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
