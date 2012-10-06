@@ -1,4 +1,4 @@
-Version 0.73
+Version 0.80 dev
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Added motherboard type 71 for Gen7 1.4.1
   Added motherboard type 70 for MegaTronics
@@ -12,6 +12,11 @@ Version 0.73
   Counter for printed filament/time online.
   New EEPROM storage detecting version upgrades and has checksum for ram corruption detection.
   More parameter configurable over EEPROM.
+  Up to 3 generic thermistor tables.
+  Generic thermistor tables are now evenly distributed over temperature, not analog values read.
+  Set stepper current with digipot (RAMBO board): M908 P<potid> S<value>
+  Set micro stepping (RAMBO board): M350 S<all> X<x-stepper> Y<y-stepper> Z<z-stepper> E<extruder 1> P<extruder 2>
+  Simplified configuration. All speeds are now mm/s.
   Repetier protocol version 2, allowing more data parameter.
 
 Version 0.72 02-09.2012

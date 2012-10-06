@@ -1490,22 +1490,22 @@ void UIDisplay::nextPreviousAction(char next) {
     INCREMENT_MIN_MAX(printer_state.maxZJerk,0.1,0.1,99.9);
     break;
   case UI_ACTION_HOMING_FEEDRATE_X:
-    INCREMENT_MIN_MAX(homing_feedrate[0],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[0],1,5,1000);
     break;
   case UI_ACTION_HOMING_FEEDRATE_Y:
-    INCREMENT_MIN_MAX(homing_feedrate[1],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[1],1,5,1000);
     break;
   case UI_ACTION_HOMING_FEEDRATE_Z:
-    INCREMENT_MIN_MAX(homing_feedrate[2],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[2],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_X:
-    INCREMENT_MIN_MAX(max_feedrate[0],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[0],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_Y:
-    INCREMENT_MIN_MAX(max_feedrate[1],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[1],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_Z:
-    INCREMENT_MIN_MAX(max_feedrate[2],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[2],1,1,1000);
     break;
   case UI_ACTION_STEPS_X:
     INCREMENT_MIN_MAX(axis_steps_per_unit[0],0.1,0,999);
@@ -1576,7 +1576,7 @@ void UIDisplay::nextPreviousAction(char next) {
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_EXTR_MAX_FEEDRATE:
-      INCREMENT_MIN_MAX(current_extruder->maxFeedrate,60,60,90000);
+      INCREMENT_MIN_MAX(current_extruder->maxFeedrate,1,1,999);
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_EXTR_START_FEEDRATE:

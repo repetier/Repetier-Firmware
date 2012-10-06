@@ -34,7 +34,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 #endif
    ,EXT0_ADVANCE_L
 #endif
-  ,{0,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,0,0,0,0,0,EXT0_HEAT_MANAGER
+  ,{0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
 #ifdef TEMP_PID
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif 
@@ -49,7 +49,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 #endif
    ,EXT1_ADVANCE_L
 #endif
- {1,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,0,0,0,0,0,EXT1_HEAT_MANAGER
+ {1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
 #ifdef TEMP_PID
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -60,7 +60,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 
 #if HAVE_HEATED_BED
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
-TemperatureController heatedBedController = {4,HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+TemperatureController heatedBedController = {4,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
 #ifdef TEMP_PID
 ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -80,8 +80,14 @@ TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {&extruder[0].tem
 ,&heatedBedController
 #endif
 };
-#ifdef USE_GENERIC_THERMISTORTABLE
-short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+short temptable_generic1[GENERIC_THERM_NUM_ENTRIES][2];
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+short temptable_generic2[GENERIC_THERM_NUM_ENTRIES][2];
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 #endif
 
 //#if HEATED_BED_SENSOR_TYPE!=0
@@ -116,6 +122,40 @@ void initHeatedBed() {
 #endif
 #endif
 }
+
+// ------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------- createGenericTable ---------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,short maxTemp,float beta,float r0,float t0,float r1,float r2) {
+  t0+=273.15f;
+  float rs,vs;
+  if(r1==0) {
+    rs = r2;
+    vs = GENERIC_THERM_VREF;
+  } else {  
+    vs =(float)(GENERIC_THERM_VREF*r1)/(r1+r2);
+    rs = (r2*r1)/(r1+r2);
+  }
+  float k = r0*exp(-beta/t0);
+  float delta = (maxTemp-minTemp)/(1.0f+GENERIC_THERM_NUM_ENTRIES);
+  for(byte i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
+    float t = minTemp+i*delta;
+    float r = exp(beta/(t+272.65))*k;
+    float v = 4092*r*vs/(rs+r);
+    int adc = (int)(v);
+    t *= 8;
+    if(adc>4095) adc=4095;
+    table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
+    table[i][1] = (int)t;
+#ifdef DEBUG_GENERIC
+    OUT_P_I("GenTemp: ",table[i][0]); 
+    OUT_P_I_LN(",",table[i][1]); 
+#endif
+  }
+}
+#endif
+
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- initExtruder ------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
@@ -129,29 +169,14 @@ for temperature reading.
 void initExtruder() {
   byte i;
   current_extruder = &extruder[0];
-#ifdef USE_GENERIC_THERMISTORTABLE
-#define GENERIC_THERM_T0K (GENERIC_THERM_T0+273.15f)
-#if GENERIC_THERM_R1==0
-#define GENERIC_VS GENERIC_THERM_VREF
-#define GENERIC_RS GENERIC_THERM_R2
-#else
-#define GENERIC_VS (float)(GENERIC_THERM_VREF*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
-#define GENERIC_RS (float)(GENERIC_THERM_R2*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+  createGenericTable(temptable_generic1,GENERIC_THERM1_MIN_TEMP,GENERIC_THERM1_MAX_TEMP,GENERIC_THERM1_BETA,GENERIC_THERM1_R0,GENERIC_THERM1_T0,GENERIC_THERM1_R1,GENERIC_THERM1_R2);
 #endif
-  float k = GENERIC_THERM_R0*exp(-GENERIC_THERM_BETA/GENERIC_THERM_T0K);
-  float delta = 4092.0f/GENERIC_THERM_NUM_ENTRIES;
-  for(i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
-    int adc = (int)(i*delta+1);
-    if(adc>4095) adc=4095;
-    temptable_generic[i][0] = (adc>>(ANALOG_REDUCE_BITS));
-    float v = (float)(adc*GENERIC_THERM_VADC)/(4096.0f);
-    float r = GENERIC_RS*v/(GENERIC_VS-v);
-    temptable_generic[i][1] = (int)(8.0f*(GENERIC_THERM_BETA/log(r/k)-273.15f+0.5f /* for correct rounding */));
-#ifdef DEBUG_GENERIC
-    out.print_int_P(PSTR("GenTemp: "),temptable_generic[i][0]); 
-    out.println_int_P(PSTR(","),temptable_generic[i][1]); 
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+  createGenericTable(temptable_generic2,GENERIC_THERM2_MIN_TEMP,GENERIC_THERM2_MAX_TEMP,GENERIC_THERM2_BETA,GENERIC_THERM2_R0,GENERIC_THERM2_T0,GENERIC_THERM2_R1,GENERIC_THERM2_R2);
 #endif
-  }
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+  createGenericTable(temptable_generic3,GENERIC_THERM3_MIN_TEMP,GENERIC_THERM3_MAX_TEMP,GENERIC_THERM3_BETA,GENERIC_THERM3_R0,GENERIC_THERM3_T0,GENERIC_THERM3_R1,GENERIC_THERM3_R2);
 #endif
   SET_OUTPUT(EXT0_DIR_PIN);
   SET_OUTPUT(EXT0_STEP_PIN);
@@ -245,7 +270,7 @@ void extruder_select(byte ext_num) {
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
 #if USE_OPS==1 || defined(USE_ADVANCE)
    printer_state.minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
-   printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
    if(printer_state.maxExtruderSpeed>15) printer_state.maxExtruderSpeed = 15;
    if(printer_state.maxExtruderSpeed>=printer_state.minExtruderSpeed) {
      printer_state.maxExtruderSpeed = printer_state.minExtruderSpeed;
@@ -352,14 +377,6 @@ const short temptable_1[NUMTEMPS_1][2] PROGMEM = {
 {0,4000},{92,2400},{105,2320},{121,2240},{140,2160},{162,2080},{189,2000},{222,1920},{261,1840},{308,1760},
 {365,1680},{434,1600},{519,1520},{621,1440},{744,1360},{891,1280},{1067,1200},{1272,1120},
 {1771,960},{2357,800},{2943,640},{3429,480},{3760,320},{3869,240},{3912,200},{3948,160},{4077,-160},{4094,-440}
-/* Old table for 100k unknown type 61 values
-{23*4,300*8},{25*4,295*8},{27*4,290*8},{28*4,285*8},{31*4,280*8},{33*4,275*8},{35*4,270*8},{38*4,265*8},{41*4,260*8},{44*4,255*8},
-{48*4,250*8},{52*4,245*8},{56*4,240*8},{61*4,235*8},{66*4,230*8},{71*4,225*8},{78*4,220*8},{84*4,215*8},{92*4,210*8},{100*4,205*8},
-{109*4,200*8},{120*4,195*8},{131*4,190*8},{143*4,185*8},{156*4,180*8},{171*4,175*8},{187*4,170*8},{205*4,165*8},{224*4,160*8},
-{245*4,155*8},{268*4,150*8},{293*4,145*8},{320*4,140*8},{348*4,135*8},{379*4,130*8},{411*4,125*8},{445*4,120*8},{480*4,115*8},
-{516*4,110*8},{553*4,105*8},{591*4,100*8},{628*4,95*8},{665*4,90*8},{702*4,85*8},{737*4,80*8},{770*4,75*8},{801*4,70*8},{830*4,65*8},
-{857*4,60*8},{881*4,55*8},{903*4,50*8},{922*4,45*8},{939*4,40*8},{954*4,35*8},{966*4,30*8},{977*4,25*8},{985*4,20*8},{993*4,15*8},
-{999*4,10*8},{1004*4,5*8},{1008*4,0*8} //safety*/
 };
 #define NUMTEMPS_2 21
 const short temptable_2[NUMTEMPS_2][2] PROGMEM = {
@@ -420,6 +437,8 @@ int read_raw_temperature(byte type,byte pin) {
     case 5:
     case 6:
     case 7:
+    case 97:
+    case 98:
     case 99:
       return (1023<<(2-ANALOG_REDUCE_BITS))-(osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result
     case 50: // User defined PTC table
@@ -500,10 +519,24 @@ float conv_raw_temp(byte type,int raw_temp) {
     case 101: // MAX6675
       return raw_temp /4;
 #endif
-#ifdef USE_GENERIC_THERMISTORTABLE
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+    case 97:
+    case 98:
     case 99: {
       byte i=2;
-      const short *temptable = (const short *)temptable_generic; 
+      const short *temptable;
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+      if(type == 97)
+         temptable = (const short *)temptable_generic1; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+      if(type == 98)
+         temptable = (const short *)temptable_generic2; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+      if(type == 99)
+         temptable = (const short *)temptable_generic3; 
+#endif
       short oldraw = temptable[0];
       short oldtemp = temptable[1];
       short newraw,newtemp;
@@ -584,10 +617,24 @@ int conv_temp_raw(byte type,float tempf) {
     case 101:  // defined HEATER_USES_MAX6675
       return temp * 4;
 #endif
-#ifdef USE_GENERIC_THERMISTORTABLE
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+    case 97:
+    case 98:
     case 99: {
       byte i=2;
-      const short *temptable = (const short *)temptable_generic;
+      const short *temptable;
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+      if(type == 97)
+         temptable = (const short *)temptable_generic1; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+      if(type == 98)
+         temptable = (const short *)temptable_generic2; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+      if(type == 99)
+         temptable = (const short *)temptable_generic3; 
+#endif
       short oldraw = temptable[0];
       short oldtemp = temptable[1];
       short newraw,newtemp;
@@ -809,6 +856,10 @@ void manage_temperatures() {
     } else { // Fast Bang-Bang fallback
          pwm_pos[act->pwmIndex] = (on ? 255 : 0);
     }
+#ifdef MAXTEMP
+    if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
+      pwm_pos[act->pwmIndex] = 0;
+#endif
 #if LED_PIN>-1
     if(act == &current_extruder->tempControl)
         WRITE(LED_PIN,on);

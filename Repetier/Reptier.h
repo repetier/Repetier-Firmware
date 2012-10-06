@@ -19,7 +19,68 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+#ifndef _REPETIER_H
+#define _REPETIER_H
+
+#include <avr/io.h>
+
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 10
+// Build median from 2^ANALOG_INPUT_SAMPLE samples
+#define ANALOG_INPUT_SAMPLE 5
+#define ANALOG_REF_AREF 0
+#define ANALOG_REF_AVCC _BV(REFS0)
+#define ANALOG_REF_INT_1_1 _BV(REFS1)
+#define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#define MICROSTEP16 HIGH,HIGH
+
 #include "Configuration.h"
+
+#define KOMMA
+#if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<100
+#define EXT0_ANALOG_INPUTS 1
+#define EXT0_SENSOR_INDEX 0
+#define EXT0_ANALOG_CHANNEL EXT0_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT0_ANALOG_INPUTS 0
+#define EXT0_SENSOR_INDEX EXT0_TEMPSENSOR_PIN
+#define EXT0_ANALOG_CHANNEL
+#endif
+#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<100
+#define EXT1_ANALOG_INPUTS 1
+#define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
+#define EXT1_ANALOG_CHANNEL KOMMA EXT1_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT1_ANALOG_INPUTS 0
+#define EXT1_SENSOR_INDEX EXT1_TEMPSENSOR_PIN
+#define EXT1_ANALOG_CHANNEL
+#endif
+#if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<100
+#define BED_ANALOG_INPUTS 1
+#define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
+#define BED_ANALOG_CHANNEL KOMMA  HEATED_BED_SENSOR_PIN
+#define KOMMA ,
+#else
+#define BED_ANALOG_INPUTS 0
+#define BED_SENSOR_INDEX HEATED_BED_SENSOR_PIN
+#define BED_ANALOG_CHANNEL
+#endif
+
+/** \brief number of analog input signals. Normally 1 for each temperature sensor */
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+BED_ANALOG_INPUTS)
+#if ANALOG_INPUTS>0
+/** Channels are the MUX-part of ADMUX register */
+#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL BED_ANALOG_CHANNEL}
+#endif
+#define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
 #if MOTHERBOARD==8 || MOTHERBOARD==9
 #define EXTERNALSERIAL
@@ -44,7 +105,7 @@
 #include "SdFat.h"
 extern void initsd();
 #endif
-#define REPETIER_VERSION "0.73"
+#define REPETIER_VERSION "0.80dev"
 
 #define uint uint16_t
 #define uint8 uint8_t
@@ -122,7 +183,7 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 //  byte stepPin; ///< Pin number for a step.
   byte enableOn;
 //  byte invertDir; ///< 1 if the direction of the extruder should be inverted.
-  float maxFeedrate;
+  float maxFeedrate;      ///< Maximum feedrate in mm/s.
   float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
   float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
   long extrudePosition;   ///< Current extruder position in steps.
@@ -518,7 +579,33 @@ extern bool sdmode;
 extern bool sdactive;
 extern bool savetosd;
 extern int16_t n;
-
 #endif
 
 
+// ##########################################################################################
+// ##                                  Debug configuration                                 ##
+// ##########################################################################################
+
+/** Uncomment, to see detailed data for every move. Only for debugging purposes! */
+//#define DEBUG_QUEUE_MOVE
+/** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
+to test your data througput or search for communication problems. */
+#define INCLUDE_DEBUG_COMMUNICATION
+/** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
+with a dry run, you can test the speed of path computations, which are still performed. */
+//#define INCLUDE_DEBUG_NO_MOVE
+/** Writes the free RAM to output, if it is less then at the last test. Should always return
+values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
+usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+//#define DEBUG_FREE_MEMORY
+//#define DEBUG_ADVANCE
+/** \brief print ops related debug info. */
+//#define DEBUG_OPS
+/** If enabled, writes the created generic table to serial port at startup. */
+#define DEBUG_GENERIC
+/** If enabled, steps to move and moved steps are compared. */
+//#define DEBUG_STEPCOUNT
+// Uncomment the following line to enable debugging. You can better control debugging below the following line
+//#define DEBUG
+
+#endif

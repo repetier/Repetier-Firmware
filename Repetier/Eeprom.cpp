@@ -349,12 +349,12 @@ void epr_output_settings() {
   epr_out_float(EPR_XAXIS_STEPS_PER_MM,PSTR("X-axis steps per mm"));
   epr_out_float(EPR_YAXIS_STEPS_PER_MM,PSTR("Y-axis steps per mm"));
   epr_out_float(EPR_ZAXIS_STEPS_PER_MM,PSTR("Z-axis steps per mm"));
-  epr_out_float(EPR_X_MAX_FEEDRATE,PSTR("X-axis max. feedrate [mm/min]"));
-  epr_out_float(EPR_Y_MAX_FEEDRATE,PSTR("Y-axis max. feedrate [mm/min]"));
-  epr_out_float(EPR_Z_MAX_FEEDRATE,PSTR("Z-axis max. feedrate [mm/min]"));
-  epr_out_float(EPR_X_HOMING_FEEDRATE,PSTR("X-axis homing feedrate [mm/min]"));
-  epr_out_float(EPR_Y_HOMING_FEEDRATE,PSTR("Y-axis homing feedrate [mm/min]"));
-  epr_out_float(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/min]"));
+  epr_out_float(EPR_X_MAX_FEEDRATE,PSTR("X-axis max. feedrate [mm/s]"));
+  epr_out_float(EPR_Y_MAX_FEEDRATE,PSTR("Y-axis max. feedrate [mm/s]"));
+  epr_out_float(EPR_Z_MAX_FEEDRATE,PSTR("Z-axis max. feedrate [mm/s]"));
+  epr_out_float(EPR_X_HOMING_FEEDRATE,PSTR("X-axis homing feedrate [mm/s]"));
+  epr_out_float(EPR_Y_HOMING_FEEDRATE,PSTR("Y-axis homing feedrate [mm/s]"));
+  epr_out_float(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/s]"));
   epr_out_float(EPR_MAX_JERK,PSTR("Max. jerk [mm/s]"));
   epr_out_float(EPR_MAX_ZJERK,PSTR("Max. Z-jerk [mm/s]"));
   epr_out_float(EPR_X_HOME_OFFSET,PSTR("X home pos [mm]"));
@@ -398,7 +398,7 @@ void epr_output_settings() {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
     Extruder *e = &extruder[i];
     epr_out_float(o+EPR_EXTRUDER_STEPS_PER_MM,PSTR("Extr. steps per mm"));
-    epr_out_float(o+EPR_EXTRUDER_MAX_FEEDRATE,PSTR("Extr. max. feedrate [mm/min]"));
+    epr_out_float(o+EPR_EXTRUDER_MAX_FEEDRATE,PSTR("Extr. max. feedrate [mm/s]"));
     epr_out_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,PSTR("Extr. start feedrate [mm/s]"));
     epr_out_float(o+EPR_EXTRUDER_MAX_ACCELERATION,PSTR("Extr. acceleration [mm/s^2]"));
     epr_out_byte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("Heat manager [0-1]"));

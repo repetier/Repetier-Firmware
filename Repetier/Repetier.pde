@@ -322,7 +322,6 @@ void update_extruder_flags() {
 #endif
   }
 #endif
-  OUT_P_I_LN("Flag:",printer_state.flag0);
 }
 
 void update_ramps_parameter() {
@@ -945,13 +944,13 @@ byte get_coordinates(GCode *com)
         printer_state.destinationSteps[3] = p;
   } else printer_state.destinationSteps[3] = printer_state.currentPositionSteps[3];
   if(GCODE_HAS_F(com)) {
-    if(com->F < 10)
-      printer_state.feedrate = 10;
+    if(com->F < 1)
+      printer_state.feedrate = 1;
     else
       if(unit_inches)
-        printer_state.feedrate = com->F*0.254f*(float)printer_state.feedrateMultiply;
+        printer_state.feedrate = com->F*0.0042333f*(float)printer_state.feedrateMultiply;  // Factor is 25.5/60/100
       else
-        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.01;
+        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.00016666666f;
   }
   return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unprductive moves
 }
@@ -1385,7 +1384,7 @@ p->delta[1] = deltay-deltax;
   else {
     return; // no steps to take, we are finished
   }    
-  float time_for_move = (float)(60*F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
+  float time_for_move = (float)(F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
     time_for_move += (3*(LOW_TICKS_PER_MOVE-time_for_move))/(lines_count+1); // Increase time if queue gets empty. Add more time if queue gets smaller.
     critical=true; 
@@ -1393,15 +1392,15 @@ p->delta[1] = deltay-deltax;
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-  axis_interval[0] = 60.0*abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+  axis_interval[0] = abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-  axis_interval[1] = 60.0*abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
+  axis_interval[1] = abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
   if(p->dir & 64) { // normally no move in z direction
-    axis_interval[2] = 60.0*abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
+    axis_interval[2] = abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
-  axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
+  axis_interval[3] = abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
   if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];  
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
   // new time at full speed = limitInterval*p->stepsRemaining [ticks]

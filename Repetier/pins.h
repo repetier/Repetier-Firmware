@@ -711,7 +711,7 @@
 #define Y_STEP_PIN         30
 #define Y_DIR_PIN          31
 #define Y_ENABLE_PIN       18
-#define Y_MIN_PIN           20
+#define Y_MIN_PIN           20 // Don't use this if you want to use SD card. Use 37 and put the endstop in the e-stop slot!!!
 #define Y_MAX_PIN          -1
 
 #define Z_STEP_PIN         32
