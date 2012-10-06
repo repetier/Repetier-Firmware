@@ -2132,32 +2132,6 @@ inline long bresenham_step() {
 			return(wait); // waste some time for path optimization to fill up
 		} // End if WARMUP
 		// Set up delta segments
-		if (cur->numDeltaSegments) {
-			// If there are delta segments point to them here
-			curd = &segments[cur->deltaSegmentReadPos++];
-			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
-			// Enable axis
-			//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
-			if(curd->dir & 16) enable_x();
-			if(curd->dir & 32) enable_y();
-			if(curd->dir & 64) enable_z();
-
-			// Copy across movement into main direction flags so that endstops function correctly
-			cur->dir |= curd->dir;
-			// Initialize bresenham for the first segment
-			if (cur->halfstep) {
-				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment;
-				curd_errupd = cur->numPrimaryStepPerSegment = cur->numPrimaryStepPerSegment<<1;
-			} else {
-				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
-				curd_errupd = cur->numPrimaryStepPerSegment;
-			}
-			stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
-#ifdef DEBUG_DELTA_TIMER
-			out.println_byte_P(PSTR("HS: "),cur->halfstep);
-			out.println_long_P(PSTR("Error: "),curd_errupd);
-#endif
-		} else curd=0;
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
 #if USE_OPS==1
@@ -2212,6 +2186,32 @@ inline long bresenham_step() {
 		} // End if opsMode
 #endif
 		sei(); // Allow interrupts
+		if (cur->numDeltaSegments) {
+			// If there are delta segments point to them here
+			curd = &segments[cur->deltaSegmentReadPos++];
+			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
+			// Enable axis
+			//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
+			if(curd->dir & 16) enable_x();
+			if(curd->dir & 32) enable_y();
+			if(curd->dir & 64) enable_z();
+
+			// Copy across movement into main direction flags so that endstops function correctly
+			cur->dir |= curd->dir;
+			// Initialize bresenham for the first segment
+			if (cur->halfstep) {
+				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment;
+				curd_errupd = cur->numPrimaryStepPerSegment = cur->numPrimaryStepPerSegment<<1;
+			} else {
+				cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
+				curd_errupd = cur->numPrimaryStepPerSegment;
+			}
+			stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
+#ifdef DEBUG_DELTA_TIMER
+			out.println_byte_P(PSTR("HS: "),cur->halfstep);
+			out.println_long_P(PSTR("Error: "),curd_errupd);
+#endif
+		} else curd=0;
 		cur_errupd = (cur->halfstep ? cur->stepsRemaining << 1 : cur->stepsRemaining);
 
 		if(!(cur->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) {// should never happen, but with bad timings???
