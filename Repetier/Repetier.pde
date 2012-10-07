@@ -1583,20 +1583,11 @@ p->delta[1] = deltay-deltax;
   @param p The line to examine.
 */
 inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
-	long difference[NUM_AXIS - 1];
-	for(byte i=0; i < NUM_AXIS - 1; i++) {
-		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
-	}
 
-	int fractional_steps[3];
-	long destination_steps[3], final_destination_steps[3], destination_delta_steps[3];
+	long destination_steps[3], destination_delta_steps[3];
 
 	for(byte i=0; i < NUM_AXIS - 1; i++) {
-		fractional_steps[i] = difference[i] / p->numDeltaSegments;
-//	out.println_int_P(PSTR("Dif:"), difference[i]);
-//	out.println_int_P(PSTR("Frac:"), fractional_steps[i]);
-		// Save final position
-		final_destination_steps[i] = printer_state.currentPositionSteps[i] + difference[i];
+		// Save current position
 		destination_steps[i] = printer_state.currentPositionSteps[i];
 	}
 
@@ -1607,15 +1598,9 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 #endif
 
 	long max_axis_move = 0;
-	for (int s = 0; s < p->numDeltaSegments; s++) {
-
-		// use the actual destination on the final step to avoid any error
-		if (s == p->numDeltaSegments - 1)
-			for(byte i=0; i < NUM_AXIS - 1; i++)
-				destination_steps[i] = final_destination_steps[i];
-		else
-			for(byte i=0; i < NUM_AXIS - 1; i++)
-				destination_steps[i] += fractional_steps[i];
+	for (int s = p->numDeltaSegments; s > 0; s--) {
+		for(byte i=0; i < NUM_AXIS - 1; i++)
+			destination_steps[i] += (printer_state.destinationSteps[i] - destination_steps[i]) / s;
 
 		// Wait for buffer here
 		while(delta_segment_count>=DELTA_CACHE_SIZE) { // wait for a free entry in movement cache
@@ -1853,13 +1838,31 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		queue_E_move(difference[3],check_endstops,pathOptimize);
 		return;
 	}
-	// Compute number of seconds for move and hence number of segments needed
-	float seconds = 6000 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
-	int segment_count = max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
-	// Now compute the number of lines needed
-	int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
-	// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
-	int segments_per_line = segment_count / num_lines;
+	
+	int segment_count;
+	int num_lines;
+	int segments_per_line;
+	
+	if (save_dir & 48) {
+		// Compute number of seconds for move and hence number of segments needed
+		float seconds = 6000 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
+#ifdef DEBUG_SPLIT
+		out.println_float_P(PSTR("Seconds: "), seconds);
+#endif
+		segment_count = max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
+		// Now compute the number of lines needed
+		num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
+		// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
+		segments_per_line = segment_count / num_lines;
+	} else {
+		unsigned long maxseg = 65535;
+#ifdef DEBUG_SPLIT
+		out.println_long_P(PSTR("Z delta: "), save_delta[2]);
+#endif
+		segment_count = (save_delta[2] + maxseg - 1) / maxseg;
+		num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
+		segments_per_line = segment_count / num_lines;
+	}
 
 	long start_position[4], fractional_steps[4];
 	for (byte i = 0; i < 4; i++) {
@@ -1867,7 +1870,6 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	}
 
 #ifdef DEBUG_SPLIT
-	out.println_float_P(PSTR("Seconds: "), seconds);
 	out.println_int_P(PSTR("Segments:"), segment_count);
 	out.println_int_P(PSTR("Num lines:"), num_lines);
 	out.println_int_P(PSTR("segments_per_line:"), segments_per_line);
