@@ -1855,11 +1855,12 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
 		segments_per_line = segment_count / num_lines;
 	} else {
-		unsigned long maxseg = 65535;
+		// Optimize pure Z axis move. Since a pure Z axis move is linear all we have to watch out for is unsigned integer overuns in
+		// the queued moves;
 #ifdef DEBUG_SPLIT
 		out.println_long_P(PSTR("Z delta: "), save_delta[2]);
 #endif
-		segment_count = (save_delta[2] + maxseg - 1) / maxseg;
+		segment_count = (save_delta[2] + (unsigned long)65534) / (unsigned long)65535;
 		num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
 		segments_per_line = segment_count / num_lines;
 	}
@@ -2192,11 +2193,10 @@ inline long bresenham_step() {
 			// If there are delta segments point to them here
 			curd = &segments[cur->deltaSegmentReadPos++];
 			if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
-			// Enable axis
-			//Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
-			if(curd->dir & 16) enable_x();
-			if(curd->dir & 32) enable_y();
-			if(curd->dir & 64) enable_z();
+			// Enable axis - All axis are enabled since they will most probably all be involved in a move
+			// Since segments could involve different axis this reduces load when switching segments and
+			// makes disabling easier.
+			enable_x();enable_y();enable_z();
 
 			// Copy across movement into main direction flags so that endstops function correctly
 			cur->dir |= curd->dir;
@@ -2368,11 +2368,6 @@ inline long bresenham_step() {
 						curd = &segments[cur->deltaSegmentReadPos++];
 						if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
 						delta_segment_count--;
-
-						// Switch on appropriate axis
-						if(curd->dir & 16) enable_x();
-						if(curd->dir & 32) enable_y();
-						if(curd->dir & 64) enable_z();
 
 						// Initialize bresenham for this segment (numPrimaryStepPerSegment is already correct for the half step setting)
 						cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
@@ -3328,43 +3323,43 @@ allowable speed for the extruder.
 ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-  static byte accdelay=10;
-  byte timer = EXTRUDER_OCR;
-  byte wait; // Time to wait until next interrupt
-  bool increasing = printer_state.extruderStepsNeeded>0;
-  if(printer_state.extruderStepsNeeded==0) {
-    if(extruder_speed<printer_state.minExtruderSpeed) {
-      extruder_speed++;
-      EXTRUDER_OCR = timer+extruder_speed;
-    } else {
-      extruder_last_dir = 0;
-      extruder_speed=printer_state.minExtruderSpeed;
-      accdelay =printer_state.extruderAccelerateDelay;
-      EXTRUDER_OCR = timer+extruder_speed; // wait at start extruder speed for optimized delay
-    }
-  }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
-    EXTRUDER_OCR = timer+150; // Little delay to accomodate to reversed direction
-    extruder_last_dir = (increasing ? 1 : -1);
-    extruder_set_direction(increasing ? 1 : 0);
-  } else {
-    if(extruder_last_dir==0) {
-      extruder_last_dir = (increasing ? 1 : -1);
-      extruder_set_direction(increasing ? 1 : 0);
-    }
-    extruder_step();
-    printer_state.extruderStepsNeeded-=extruder_last_dir;
-    if(extruder_speed>printer_state.maxExtruderSpeed) { // We can accelerate
-      if(--accdelay==0) {
-         accdelay = printer_state.extruderAccelerateDelay;
-         extruder_speed--;
-      }
+	static byte accdelay=10;
+	byte timer = EXTRUDER_OCR;
+	byte wait; // Time to wait until next interrupt
+	bool increasing = printer_state.extruderStepsNeeded>0;
+	if(printer_state.extruderStepsNeeded==0) {
+		if(extruder_speed<printer_state.minExtruderSpeed) {
+		  extruder_speed++;
+		  EXTRUDER_OCR = timer+extruder_speed;
+		} else {
+		  extruder_last_dir = 0;
+		  extruder_speed=printer_state.minExtruderSpeed;
+		  accdelay =printer_state.extruderAccelerateDelay;
+		  EXTRUDER_OCR = timer+extruder_speed; // wait at start extruder speed for optimized delay
+		}
+	} else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
+		EXTRUDER_OCR = timer+150; // Little delay to accomodate to reversed direction
+		extruder_last_dir = (increasing ? 1 : -1);
+		extruder_set_direction(increasing ? 1 : 0);
+	} else {
+		if(extruder_last_dir==0) {
+		  extruder_last_dir = (increasing ? 1 : -1);
+		  extruder_set_direction(increasing ? 1 : 0);
+		}
+		extruder_step();
+		printer_state.extruderStepsNeeded-=extruder_last_dir;
+		if(extruder_speed>printer_state.maxExtruderSpeed) { // We can accelerate
+		if(--accdelay==0) {
+			 accdelay = printer_state.extruderAccelerateDelay;
+			 extruder_speed--;
+		}
     }
 #if STEPPER_HIGH_DELAY>0
     delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
     EXTRUDER_OCR = timer+extruder_speed;
     extruder_unstep();
-  }
+}
 /*
   EXTRUDER_OCR += printer_state.timer0Interval; // time to come back
   // The stepper signals are in strategical positions for optimal timing. If you
