@@ -256,6 +256,8 @@
 
 #define SDPOWER            -1
 #define SDSS               53
+#define SDCARDDETECT 		49
+
 #define LED_PIN            13
 #define FAN_PIN            9
 #define PS_ON_PIN          12
@@ -792,7 +794,6 @@
 #define SDPOWER            -1
 #define SDSS               53
 #define LED_PIN            13
-
 
 #define FAN_PIN            7 // IO pin. Buffer needed
 #define PS_ON_PIN          12

@@ -277,6 +277,10 @@ void SerialOutput::println_byte_P(PGM_P ptr,byte value) {
   println((int)value);
 }
 
+void SerialOutput::print_char(char value) {
+  write(value);
+}
+
 void SerialOutput::println_float_P(PGM_P ptr,float value,uint8_t digits) {
   print_P(ptr);
   printFloat(value,digits);
@@ -471,6 +475,8 @@ void gcode_read_serial() {
   if(!sdmode || gcode_wpos!=0) { // not reading or incoming serial command
     return;
   }
+  out.println_P(PSTR("Print file"));
+
   while( filesize > sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
     int n = file.read();
@@ -498,7 +504,9 @@ void gcode_read_serial() {
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
         gcode_transbuffer[gcode_wpos]=0;
+        gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
+		  out.print_char(ch);
           gcode_wpos = 0;
           continue;
         }
@@ -506,13 +514,13 @@ void gcode_read_serial() {
         if(gcode_parse_ascii(act,(char *)gcode_transbuffer)) { // Success
           gcode_silent_insert();
         }
+
         gcode_wpos = 0;
-        gcode_comment = false;
         return;
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
         if(gcode_comment) gcode_wpos--;
-      }           
+      }
     }
   }
      sdmode = false;

@@ -943,7 +943,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT 0
+#define SDSUPPORT 0
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 

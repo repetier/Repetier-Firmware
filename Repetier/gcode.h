@@ -59,7 +59,7 @@ public:
   void println_int_P(PGM_P ptr,int value);
   void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
   void printFloat(double number, uint8_t digits=2); 
-
+  void print_char(char value);
 };
 
 extern SerialOutput out;
