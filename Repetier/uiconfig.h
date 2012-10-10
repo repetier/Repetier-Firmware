@@ -786,6 +786,8 @@ UI_MENU_CHANGEACTION(ui_menu_cext_start_feedrate,UI_TEXT_EXTR_START_FEED,UI_ACTI
 UI_MENU_CHANGEACTION(ui_menu_cext_max_feedrate,UI_TEXT_EXTR_MAX_FEED,UI_ACTION_EXTR_MAX_FEEDRATE);
 UI_MENU_CHANGEACTION(ui_menu_cext_acceleration,UI_TEXT_EXTR_ACCEL,UI_ACTION_EXTR_ACCELERATION);
 UI_MENU_CHANGEACTION(ui_menu_cext_watch_period,UI_TEXT_EXTR_WATCH,UI_ACTION_EXTR_WATCH_PERIOD);
+UI_MENU_CHANGEACTION(ui_menu_ext_wait_temp,UI_TEXT_EXTR_WAIT_RETRACT_TEMP,UI_ACTION_EXTR_WAIT_RETRACT_TEMP);
+UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,UI_TEXT_EXTR_WAIT_RETRACT_UNITS,UI_ACTION_EXTR_WAIT_RETRACT_UNITS);
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
 #ifdef USE_ADVANCE
@@ -821,8 +823,8 @@ UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
 #define UI_MENU_CONFEXTCOND 
 #define UI_MENU_CONFEXTCNT 0
 #endif
-#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period UI_MENU_ADVANCE UI_MENU_PIDCOND}
-UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,5+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
+#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period,&ui_menu_ext_wait_units,&ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}
+UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,7+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
 
 // **** Configuration menu
 UI_MENU_SUBMENU(ui_menu_conf_general,UI_TEXT_GENERAL,ui_menu_general);

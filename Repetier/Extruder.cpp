@@ -27,6 +27,7 @@ Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {
  {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
    EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD
+   ,EXT0_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT0_ADVANCE_K
@@ -40,6 +41,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 #if NUM_EXTRUDER>1
  ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
    EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD
+   ,EXT1_WAIT_RETRACT_TEMP,EXT1_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT1_ADVANCE_K
@@ -60,6 +62,7 @@ short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
 #if HEATED_BED_SENSOR_TYPE!=0
   int current_bed_raw = 0;
   int target_bed_raw = 0;
+  int safety_bed_raw = 0;
 #endif
 
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
@@ -282,6 +285,7 @@ void heated_bed_set_temperature(int temp_celsius) {
 #if HEATED_BED_SENSOR_TYPE!=0  
    if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
    target_bed_celsius=temp_celsius;
+   safety_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE, THERMISTOR_ERROR_THRESHOLD<<CELSIUS_EXTRA_BITS);
    target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
    out.println_int_P(PSTR("TargetBed:"),target_bed_celsius>>CELSIUS_EXTRA_BITS);
 #endif     
@@ -600,68 +604,73 @@ void write_monitor() {
  are forbidden in this call.*/
 
 void manage_temperatures() {
-  byte manage_extruder = 0;  ///< Extruder number, we are looking at. 1+NUM_EXTRUDER is heated bed.
-  for(manage_extruder=0;manage_extruder<NUM_EXTRUDER;manage_extruder++) {
-    Extruder *act = &extruder[manage_extruder];
-    // Get Temperature
-       int oldTemp = act->currentTemperatureC;
-       act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
-       act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
-       byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
-#ifdef TEMP_PID
-       act->tempArray[act->tempPointer++] = act->currentTemperatureC;
-       act->tempPointer &= 7;
-       if(act->heatManager==1) {
-         byte output;
-         int error = act->targetTemperatureC - act->currentTemperatureC;
-         if(act->targetTemperatureC<(20<<CELSIUS_EXTRA_BITS)) output = 0; // off is off, even if damping term wants a heat peak!
-         else if(error>(PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS)) 
-           output = act->pidMax;
-         else if(error<(-PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS))
-           output = 0;
-         else {
-           long pidTerm = act->pidPGain * error; // *100
-           act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax); // *1*1000ms
-           pidTerm += act->pidIGain * act->tempIState/10; 
-           long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC); //*100
-           pidTerm += dgain;
-#if SCALE_PID_TO_MAX==1
-           pidTerm = (pidTerm*act->pidMax)>>8;
+	byte manage_extruder = 0;  ///< Extruder number, we are looking at. 1+NUM_EXTRUDER is heated bed.
+	for(manage_extruder=0;manage_extruder<NUM_EXTRUDER;manage_extruder++) {
+		Extruder *act = &extruder[manage_extruder];
+		// Get Temperature
+		int oldTemp = act->currentTemperatureC;
+		act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
+		act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
+		byte on;
+		if (act->currentTemperatureC < THERMISTOR_ERROR_THRESHOLD) {
+			pwm_pos[act->id] = on = 0;
+		} else {
+			on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+			#ifdef TEMP_PID
+			act->tempArray[act->tempPointer++] = act->currentTemperatureC;
+			act->tempPointer &= 7;
+			if(act->heatManager==1) {
+				byte output;
+				int error = act->targetTemperatureC - act->currentTemperatureC;
+				if(act->targetTemperatureC<(20<<CELSIUS_EXTRA_BITS)) 
+					output = 0; // off is off, even if damping term wants a heat peak!
+				else if(error>(PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS)) 
+					output = act->pidMax;
+				else if(error<(-PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS))
+					output = 0;
+				else {
+					long pidTerm = act->pidPGain * error; // *100
+					act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax); // *1*1000ms
+					pidTerm += act->pidIGain * act->tempIState/10; 
+					long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC); //*100
+					pidTerm += dgain;
+					#if SCALE_PID_TO_MAX==1
+					pidTerm = (pidTerm*act->pidMax)>>8;
+					#endif
+					output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;
+					/*if(counter_250ms==1) { // some debug infos
+					out.print_long_P(PSTR("PID:"),act->tempIState);
+					out.print_long_P(PSTR(" "),pidTerm);
+					out.print_long_P(PSTR(" "),act->pidPGain * error);
+					out.println_long_P(PSTR(" "),dgain);
+					} */
+				}
+				pwm_pos[act->id] = output;
+			}
 #endif
-           output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;
-          /*if(counter_250ms==1) { // some debug infos
-            out.print_long_P(PSTR("PID:"),act->tempIState);
-            out.print_long_P(PSTR(" "),pidTerm);
-            out.print_long_P(PSTR(" "),act->pidPGain * error);
-            out.println_long_P(PSTR(" "),dgain);
-          } */
-         }
-         pwm_pos[act->id] = output;
-       }
-#endif
-       if(act->heatManager == 0
+			if(act->heatManager == 0
 #ifndef TEMP_PID
-        || true
+			|| true
 #endif
-       ) {
-         pwm_pos[act->id] = (on?255:0);
-      }
+			) {
+				pwm_pos[act->id] = (on?255:0);
+			}
 #if LED_PIN>-1
-      if(act == current_extruder)
-        digitalWrite(LED_PIN,on);
-#endif       
-  }
-  // Now manage heated bed
-#if HEATED_BED_SENSOR_TYPE!=0
-  unsigned long time = millis();
-  current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
-#if HEATED_BED_HEATER_PIN > -1
-  if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
-     digitalWrite(HEATED_BED_HEATER_PIN,current_bed_raw >= target_bed_raw ? LOW : HIGH);
-     last_bed_set = time;
-  }
+			if(act == current_extruder)	digitalWrite(LED_PIN,on);
 #endif
-  heated_bed_output = current_bed_raw >= target_bed_raw ? 0 : 255;
+		}
+	}
+// Now manage heated bed
+#if HEATED_BED_SENSOR_TYPE!=0
+	unsigned long time = millis();
+	current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
+#if HEATED_BED_HEATER_PIN > -1
+	if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
+		digitalWrite(HEATED_BED_HEATER_PIN, current_bed_raw <= safety_bed_raw || current_bed_raw >= target_bed_raw ? LOW : HIGH);
+		last_bed_set = time;
+	}
+#endif
+	heated_bed_output = current_bed_raw >= target_bed_raw ? 0 : 255;
 #endif
 }
 // ------------------------------------------------------------------------------------------------------------------

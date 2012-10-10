@@ -162,6 +162,8 @@
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
 #define UI_ACTION_KILL                  1097
 #define UI_ACTION_RESET                 1098
+#define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1099
+#define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1100
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

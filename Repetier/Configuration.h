@@ -206,6 +206,15 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT0_ADVANCE_K 0.0f
 #define EXT0_ADVANCE_L 0.0f
 
+/** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
+*/
+#define EXT0_WAIT_RETRACT_TEMP 		150
+/** \brief Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
+to 0 to disable.
+*/
+#define EXT0_WAIT_RETRACT_UNITS 	40
+
+
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 0
@@ -297,6 +306,8 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_ADVANCE_K 0.0f
 #define EXT1_ADVANCE_L 0.0f
 
+#define EXT1_WAIT_RETRACT_TEMP 	150
+#define EXT1_WAIT_RETRACT_UNITS	40
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power to long, you
@@ -399,6 +410,9 @@ for more details.
 #define GENERIC_THERM_VADC 5
 /** Number of entries in generated table. One entry takes 4 bytes. Higher number of entries increase computation time too. */
 #define GENERIC_THERM_NUM_ENTRIES 40
+
+//** Temperature under which the thermistor should be considered as NC or broken
+#define THERMISTOR_ERROR_THRESHOLD 0
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
@@ -860,6 +874,7 @@ For more informations, read the wiki.
 Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
 to activate the quadratic term. Only adds lots of computations and storage usage. */
 //#define ENABLE_QUADRATIC_ADVANCE
+
 
 // ##########################################################################################
 // ##                           Communication configuration                                ##

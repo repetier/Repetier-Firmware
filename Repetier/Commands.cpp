@@ -64,11 +64,22 @@ void printPosition() {
   out.println_float_P(PSTR(" E:"),printer_state.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
 void print_temperatures() {
+	int temp = ((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS;
 #if HEATED_BED_SENSOR_TYPE==0 
-  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
+	if (temp < THERMISTOR_ERROR_THRESHOLD)
+		out.print_P(PSTR(UI_TEXT_EXTR_THERM_ERROR));
+	else
+		out.print_int_P(PSTR("T:"),temp); 
 #else
-  out.print_int_P(PSTR("T:"),((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS); 
-  out.print_int_P(PSTR(" B:"),((1<<(CELSIUS_EXTRA_BITS-1))+heated_bed_get_temperature())>>CELSIUS_EXTRA_BITS); 
+	if (temp < THERMISTOR_ERROR_THRESHOLD)
+		out.print_P(PSTR(UI_TEXT_EXTR_THERM_ERROR));
+	else
+		out.print_int_P(PSTR("T:"),temp);
+	temp = ((1<<(CELSIUS_EXTRA_BITS-1))+heated_bed_get_temperature())>>CELSIUS_EXTRA_BITS;
+	if (temp < THERMISTOR_ERROR_THRESHOLD)
+		out.print_P(PSTR(UI_TEXT_BED_THERM_ERROR));
+	else	
+		out.print_int_P(PSTR(" B:"),temp); 
 #endif
 #ifdef TEMP_PID
   out.print_int_P(PSTR(" @:"),(int)pwm_pos[current_extruder->id]);
@@ -497,6 +508,7 @@ void process_command(GCode *com)
           bool dir = current_extruder->currentTemperatureC < current_extruder->targetTemperatureC;
           codenum = millis(); 
           unsigned long waituntil = 0;
+		  byte retracted = 0;
           unsigned long cur_time;
           do {
             cur_time = millis();
@@ -506,6 +518,10 @@ void process_command(GCode *com)
             }
             check_periodical();
             gcode_read_serial();
+			if (current_extruder->waitRetractUnits > 0 && !retracted && dir && current_extruder->currentTemperatureC > current_extruder->waitRetractTemperature<<CELSIUS_EXTRA_BITS) {
+				move_steps(0,0,0,-current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+				retracted = 1;
+			}
             if((waituntil==0 && (dir ? current_extruder->currentTemperatureC >= current_extruder->targetTemperatureC:current_extruder->currentTemperatureC <= current_extruder->targetTemperatureC))
 #ifdef TEMP_HYSTERESIS
             || (waituntil!=0 && (abs(current_extruder->currentTemperatureC - current_extruder->targetTemperatureC)>>CELSIUS_EXTRA_BITS)>TEMP_HYSTERESIS)            
@@ -514,6 +530,9 @@ void process_command(GCode *com)
               waituntil = cur_time+1000UL*(unsigned long)current_extruder->watchPeriod; // now wait for temp. to stabalize
             }
           } while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
+			if (retracted) {
+				move_steps(0,0,0,current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+			}
         }
         UI_CLEAR_STATUS;
         previous_millis_cmd = millis();

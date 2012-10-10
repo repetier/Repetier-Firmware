@@ -95,6 +95,8 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
   char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
   int watchPeriod; ///< Time in seconds, a M109 command will wait to stabalize temperature
+  int waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
+  int waitRetractUnits; ///< Units to retract the filament when waiting for heatup
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   float advanceK; ///< Koefficient for advance algorithm. 0 = off

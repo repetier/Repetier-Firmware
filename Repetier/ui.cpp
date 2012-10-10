@@ -989,6 +989,8 @@ void UIDisplay::parse(char *txt,bool ram) {
         else if(c2=='D') {addInt(current_extruder->pidMax,3);}
 #endif
         else if(c2=='w') {addInt(current_extruder->watchPeriod,4);}
+		else if(c2=='T') {addInt(current_extruder->waitRetractTemperature,4);}
+		else if(c2=='U') {addInt(current_extruder->waitRetractUnits,4);}
         else if(c2=='h') {addStringP(!current_extruder->heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));}
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
@@ -1595,6 +1597,12 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_EXTR_WATCH_PERIOD:
       INCREMENT_MIN_MAX(current_extruder->watchPeriod,1,0,999);
       break;
+  case UI_ACTION_EXTR_WAIT_RETRACT_TEMP:
+	  INCREMENT_MIN_MAX(current_extruder->waitRetractTemperature,1,100,UI_SET_MAX_EXTRUDER_TEMP);
+	  break;
+  case UI_ACTION_EXTR_WAIT_RETRACT_UNITS:
+	  INCREMENT_MIN_MAX(current_extruder->waitRetractUnits,1,0,9999);
+	  break;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   case UI_ACTION_ADVANCE_K:

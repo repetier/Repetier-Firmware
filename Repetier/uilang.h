@@ -63,6 +63,8 @@
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
 #define UI_TEXT_EXTR1_SELECT     "%X1 Select Extr.1"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 #define UI_TEXT_EXTR_ORIGIN      "Set Origin"
 #define UI_TEXT_PRINT_X          "Print X:%ax"
 #define UI_TEXT_PRINT_Y          "Print Y:%ay"
@@ -165,6 +167,8 @@
 #define UI_TEXT_SET_P3			  "Set P3"
 #define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
 #define UI_TEXT_LEVEL			  "Level delta"
+#define UI_TEXT_EXTR_THERM_ERROR  "T:Therm. Error"
+#define UI_TEXT_BED_THERM_ERROR	  " B:Therm. Error"
 // *************** german translation ****************
 
 #if UI_LANGUAGE==1
