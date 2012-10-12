@@ -412,7 +412,7 @@ for more details.
 #define GENERIC_THERM_NUM_ENTRIES 40
 
 /** Temperature under which the thermistor should be considered as NC or broken. Comment out line to completely remove this check.*/
-//#define THERMISTOR_ERROR_THRESHOLD 0
+#define THERMISTOR_ERROR_THRESHOLD 0
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675

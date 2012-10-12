@@ -1,8 +1,11 @@
 Repetier-Firmware - the fast and user friendly firmware
 by repetier  (repetierdev@googlemail.com)
 
-Alpha version with added delta move and homing calculations based on Johann Rocholl's Marlin firmware.
-Not yet tested on a live machine .... use (if you choose) with caution.
+Beta version with added delta move and homing calculations and several other features for delta printers.
+
+To set rod height on a delta printer use command M251 which will allow you to measure 
+the rod length or, if you have an LCD panel then you can select delta calibration in the
+configuration menu.
 
 Version 0.62  17.04.2012
 
