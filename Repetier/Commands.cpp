@@ -66,19 +66,25 @@ void printPosition() {
 void print_temperatures() {
 	int temp = ((1<<(CELSIUS_EXTRA_BITS-1))+extruder_get_temperature())>>CELSIUS_EXTRA_BITS;
 #if HEATED_BED_SENSOR_TYPE==0 
+#ifdef THERMISTOR_ERROR_THRESHOLD
 	if (temp < THERMISTOR_ERROR_THRESHOLD)
 		out.print_P(PSTR(UI_TEXT_EXTR_THERM_ERROR));
 	else
+#endif
 		out.print_int_P(PSTR("T:"),temp); 
 #else
+#ifdef THERMISTOR_ERROR_THRESHOLD
 	if (temp < THERMISTOR_ERROR_THRESHOLD)
 		out.print_P(PSTR(UI_TEXT_EXTR_THERM_ERROR));
 	else
+#endif
 		out.print_int_P(PSTR("T:"),temp);
 	temp = ((1<<(CELSIUS_EXTRA_BITS-1))+heated_bed_get_temperature())>>CELSIUS_EXTRA_BITS;
+#ifdef THERMISTOR_ERROR_THRESHOLD
 	if (temp < THERMISTOR_ERROR_THRESHOLD)
 		out.print_P(PSTR(UI_TEXT_BED_THERM_ERROR));
 	else	
+#endif
 		out.print_int_P(PSTR(" B:"),temp); 
 #endif
 #ifdef TEMP_PID

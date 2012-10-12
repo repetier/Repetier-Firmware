@@ -62,7 +62,9 @@ short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
 #if HEATED_BED_SENSOR_TYPE!=0
   int current_bed_raw = 0;
   int target_bed_raw = 0;
+#ifdef THERMISTOR_ERROR_THRESHOLD
   int safety_bed_raw = 0;
+#endif
 #endif
 
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
@@ -285,7 +287,9 @@ void heated_bed_set_temperature(int temp_celsius) {
 #if HEATED_BED_SENSOR_TYPE!=0  
    if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
    target_bed_celsius=temp_celsius;
+#ifdef THERMISTOR_ERROR_THRESHOLD
    safety_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE, THERMISTOR_ERROR_THRESHOLD<<CELSIUS_EXTRA_BITS);
+#endif
    target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
    out.println_int_P(PSTR("TargetBed:"),target_bed_celsius>>CELSIUS_EXTRA_BITS);
 #endif     
@@ -612,9 +616,11 @@ void manage_temperatures() {
 		act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
 		act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
 		byte on;
+#ifdef THERMISTOR_ERROR_THRESHOLD
 		if (act->currentTemperatureC < THERMISTOR_ERROR_THRESHOLD) {
 			pwm_pos[act->id] = on = 0;
 		} else {
+#endif
 			on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 			#ifdef TEMP_PID
 			act->tempArray[act->tempPointer++] = act->currentTemperatureC;
@@ -658,7 +664,9 @@ void manage_temperatures() {
 #if LED_PIN>-1
 			if(act == current_extruder)	digitalWrite(LED_PIN,on);
 #endif
+#ifdef THERMISTOR_ERROR_THRESHOLD
 		}
+#endif
 	}
 // Now manage heated bed
 #if HEATED_BED_SENSOR_TYPE!=0
@@ -666,7 +674,11 @@ void manage_temperatures() {
 	current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
 #if HEATED_BED_HEATER_PIN > -1
 	if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
+#ifdef THERMISTOR_ERROR_THRESHOLD
 		digitalWrite(HEATED_BED_HEATER_PIN, current_bed_raw <= safety_bed_raw || current_bed_raw >= target_bed_raw ? LOW : HIGH);
+#else
+		digitalWrite(HEATED_BED_HEATER_PIN, current_bed_raw >= target_bed_raw ? LOW : HIGH);
+#endif
 		last_bed_set = time;
 	}
 #endif

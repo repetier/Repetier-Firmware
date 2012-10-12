@@ -411,8 +411,8 @@ for more details.
 /** Number of entries in generated table. One entry takes 4 bytes. Higher number of entries increase computation time too. */
 #define GENERIC_THERM_NUM_ENTRIES 40
 
-//** Temperature under which the thermistor should be considered as NC or broken
-#define THERMISTOR_ERROR_THRESHOLD 0
+/** Temperature under which the thermistor should be considered as NC or broken. Comment out line to completely remove this check.*/
+//#define THERMISTOR_ERROR_THRESHOLD 0
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
