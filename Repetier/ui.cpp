@@ -1994,6 +1994,9 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_RESET:
       resetFunc();
       break;
+    case UI_ACTION_PAUSE:
+      OUT_P_LN("RequestPause:");
+      break;
   }
   refreshPage();
   if(!skipBeep)

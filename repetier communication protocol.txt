@@ -61,7 +61,8 @@ If version 2 is set, 2 more bytes with bitfields follow:
 I : Bit 0 : 32-Bit float
 J : Bit 1 : 32-Bit float
 Bit 2-15 reserved
-If Text bit is set in V2, the text length is send as byte 5
+If Text bit is set in V2, the text length is send as byte 5 Text follows at
+the end just before the checksum.
 
 
 A GCode line is transformed into a binary parameterization. 

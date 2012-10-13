@@ -41,7 +41,7 @@ typedef struct { // 52 bytes per command needed
    long P;
    float I;
    float J;   
-   char text[17];
+   char *text; //text[17];
 } GCode;
 
 #ifndef EXTERNALSERIAL
@@ -135,6 +135,7 @@ public:
   void println_long_P(PGM_P ptr,long value);
   void println_int_P(PGM_P ptr,int value);
   void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
+  void print_error_P(PGM_P ptr,bool newline);
   void printFloat(double number, uint8_t digits=2); 
 
 };
@@ -148,9 +149,10 @@ public:
 #define OUT_P_FX_LN(p,i,x) out.println_float_P(PSTR(p),(float)(i),x)
 #define OUT_P(p) out.print_P(PSTR(p))
 #define OUT_P_LN(p) out.println_P(PSTR(p))
+#define OUT_ERROR_P(p) out.print_error_P(PSTR(p),false)
+#define OUT_ERROR_P_LN(p) out.print_error_P(PSTR(p),true)
 #define OUT(v) out.print(v)
 #define OUT_LN out.println()
-
 extern SerialOutput out;
 /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
 extern GCode *gcode_next_command();

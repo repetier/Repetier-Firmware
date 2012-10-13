@@ -71,6 +71,7 @@ Custom M Codes
 - M28  - Start SD write (M28 filename.g)
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
+- M32 <dirname> create subdirectory
 - M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
 - M80  - Turn on power supply
 - M81  - Turn off power supply
@@ -106,10 +107,6 @@ Custom M Codes
 #include "ui.h"
 #include <util/delay.h>
 #include <SPI.h>
-
-#ifdef SDSUPPORT
-#include "SdFat.h"
-#endif
 
 #if UI_DISPLAY_TYPE==4
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
@@ -233,77 +230,6 @@ void send_mem() {
 }
 #endif
 
-#ifdef SDSUPPORT
-  Sd2Card card; // ~14 Byte
-  SdVolume volume;
-  SdFile root;
-  SdFile file;
-  uint32_t filesize = 0;
-  uint32_t sdpos = 0;
-  bool sdmode = false;
-  bool sdactive = false;
-  bool savetosd = false;
-  int16_t n;
-  
-  void initsd(){
-  sdactive = false;
-  #if SDSS >- 1
-    if(root.isOpen())
-        root.close();
-    if (!card.init(SPI_FULL_SPEED,SDSS)){
-        //if (!card.init(SPI_HALF_SPEED,SDSS))
-        OUT_P_LN("SD init fail");
-    }
-    else if (!volume.init(&card)) {
-          OUT_P_LN("volume.init failed");
-    } else if (!root.openRoot(&volume)) 
-       OUT_P_LN("openRoot failed");
-    else 
-       sdactive = true;
-  #endif
-  }
-  
-  inline void write_command(GCode *code){
-     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
-      byte buf[52];
-      byte p=2;
-      file.writeError = false;
-      int params = 128 | (code->params & ~1);
-      *(int*)buf = params;      
-      if(code->params & 2) {buf[p++] = code->M;}
-      if(code->params & 4) {buf[p++] = code->G;}
-      if(code->params & 8) {*(float*)&buf[p] = code->X;p+=4;}
-      if(code->params & 16) {*(float*)&buf[p] = code->Y;p+=4;}
-      if(code->params & 32) {*(float*)&buf[p] = code->Z;p+=4;}
-      if(code->params & 64) {*(float*)&buf[p] = code->E;p+=4;}
-      if(code->params & 256) {*(float*)&buf[p] = code->F;p+=4;}
-      if(code->params & 512) {buf[p++] = code->T;}
-      if(code->params & 1024) {*(long int*)&buf[p] = code->S;p+=4;}
-      if(code->params & 2048) {*(long int*)&buf[p] = code->P;p+=4;}
-      if(GCODE_HAS_STRING(code)) { // read 16 byte into string
-       char *sp = code->text;
-       for(byte i=0;i<16;++i) buf[p++] = *sp++;
-      }
-      byte *ptr = buf;
-      byte len = p;
-      while (len) {
-        byte tlen = len > 21 ? 21 : len;
-        len -= tlen;
-        do {
-          sum1 += *ptr++;
-          if(sum1>=255) sum1-=255;
-          sum2 += sum1;
-          if(sum2>=255) sum2-=255;
-        } while (--tlen);
-      }
-      buf[p++] = sum1;
-      buf[p++] = sum2;
-      file.write(buf,p);
-      if (file.writeError){
-          OUT_P_LN("error writing to file");
-      }
-  }
-#endif
 
 void update_extruder_flags() {
   printer_state.flag0 &= ~2;
@@ -495,12 +421,7 @@ void setup()
 
 #ifdef SDSUPPORT
 
-  //power to SD reader
-  #if SDPOWER > -1
-    pinMode(SDPOWER,OUTPUT); 
-    digitalWrite(SDPOWER,HIGH);
-  #endif
-  initsd();
+  sd.initsd();
 
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
@@ -531,19 +452,15 @@ void loop()
   UI_MEDIUM; // do check encoder
   if(code){
 #ifdef SDSUPPORT
-    if(savetosd){
+    if(sd.savetosd){
         if(!(GCODE_HAS_M(code) && code->M==29)) { // still writing to file
-            write_command(code);
+            sd.write_command(code);
         } else {
-            file.sync();
-            file.close();
-            savetosd = false;
-            out.println_P(PSTR("Done saving file."));
-            UI_CLEAR_STATUS;
+            sd.finishWrite();
         }
 #ifdef ECHO_ON_EXECUTE
         if(DEBUG_ECHO) {
-           out.print_P(PSTR("Echo:"));
+           OUT_P("Echo:");
            gcode_print_command(code);
            out.println();
         }
@@ -1348,11 +1265,11 @@ p->delta[1] = deltay-deltax;
     if(p->delta[i]) p->dir |= 16<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
-  printer_state.filamentPrinted+=axis_diff[3]; // count up printed filament
 #endif
   if(printer_state.extrudeMultiply!=100) {
     p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
   }
+  printer_state.filamentPrinted+=axis_diff[3]; // count up printed filament
   if(!(p->dir & 240)) {
     if(newPath) { // need to delete dummy elements, otherwise commands can get locked.
       lines_count = 0;

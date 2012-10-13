@@ -569,16 +569,56 @@ extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
 extern byte autotuneIndex;
 
 #ifdef SDSUPPORT
-extern Sd2Card card; // ~14 Byte
-extern SdVolume volume;
-extern SdFile root;
-extern SdFile file;
-extern uint32_t filesize;
-extern uint32_t sdpos;
-extern bool sdmode;
-extern bool sdactive;
-extern bool savetosd;
-extern int16_t n;
+
+#define SD_MAX_FOLDER_DEPTH 2
+
+#include "SdFat.h"
+
+enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
+class SDCard {
+public:
+  Sd2Card card; // ~14 Byte
+  SdVolume volume;
+  //SdFile root;
+  SdFile dir[SD_MAX_FOLDER_DEPTH+1];
+  SdFile file;
+  uint32_t filesize;
+  uint32_t sdpos;
+  char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+  char *shortname; // Pointer to start of filename itself
+  char *pathend; // File to char where pathname in fullname ends
+  bool sdmode;  // true if we are printing from sd card
+  bool sdactive;
+  int16_t n;
+  bool savetosd;
+  SDCard();
+  void initsd();
+  void write_command(GCode *code);
+  void selectFile(char *filename);
+  inline void mount() {
+    sdmode = false;
+    initsd();
+  }
+  inline void unmount() {
+    sdmode = false;
+    sdactive = false;
+  }
+  inline void startPrint() {if(sdactive) sdmode = true; }
+  inline void pausePrint() {sdmode = false;}
+  inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
+  void printStatus();
+  void ls();
+  void startWrite(char *filename);
+  void deleteFile(char *filename);
+  void finishWrite();
+  char *createFilename(char *buffer,const dir_t &p);
+  void makeDirectory(char *filename);
+private:
+  void lsRecursive(byte level);
+  SdFile *getDirectory(char* name);
+};
+
+extern SDCard sd;
 #endif
 
 

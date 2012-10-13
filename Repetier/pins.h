@@ -622,7 +622,7 @@
     #define SDSS          -1 // SCL pin of I2C header
     #define LED_PIN         -1    
        
-    #define FAN_PIN         31    
+    #define FAN_PIN         -1    
     #define PS_ON_PIN       15    
     //our pin for debugging.
     

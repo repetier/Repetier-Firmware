@@ -36,6 +36,7 @@ byte gcode_binary; ///< Flags the command as binary input.
 byte gcode_last_binary=0; ///< Was the last successful command in binary mode?
 byte gcode_comment=false; ///< Flags true if we are reading the comment part of a command.
 byte gcode_binary_size; ///< Expected size of the incoming binary command.
+bool gcode_wait_all_parsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
 long gcode_lastN=0; ///< Last line number received.
 long gcode_actN; ///< Line number of current command.
 char gcode_wait_resend=-1; ///< Waiting for line to be resend. -1 = no wait.
@@ -355,6 +356,9 @@ Gcode Letter to Bit and Datatype:
 - Ext : Bit 13 : There are 2 more bytes following with Bits, only for future versions
 - Int :Bit 14 : Marks it as internal command, 
 - Text : Bit 15 : 16 Byte ASCII String terminated with 0
+Second word if V2:
+- I : Bit 0 : 32-Bit float
+- J : Bit 1 : 32-Bit float
 
 */
 byte gcode_comp_binary_size(char *ptr) {// unsigned int bitfield) {
@@ -370,13 +374,15 @@ byte gcode_comp_binary_size(char *ptr) {// unsigned int bitfield) {
    if(bitfield & 1024) s+=4;
    if(bitfield & 2048) s+=4;
    if(bitfield & 4096) { // Version 2 or later
-     s+=2;
+     s+=2; // for bitfield 2
      unsigned int bitfield2 = *(int*)(ptr+2);
      if(bitfield & 2) s+=2;
      if(bitfield & 4) s+=2;
      if(bitfield2 & 1) s+= 4;
      if(bitfield2 & 2) s+= 4;
-     if(bitfield & 32768) s+=*((byte *)(ptr+4));
+     if(bitfield & 32768) s+=(byte)ptr[4]+1;
+     //OUT_P_I_LN("LenStr:",(int)ptr[4]);
+     //OUT_P_I_LN("LenBinV2:",s);
    } else {
      if(bitfield & 2) s+=1;
      if(bitfield & 4) s+=1;
@@ -482,18 +488,24 @@ void SerialOutput::println_float_P(PGM_P ptr,float value,uint8_t digits) {
   printFloat(value,digits);
   println();
 }
-
+void SerialOutput::print_error_P(PGM_P ptr,bool newline) {
+  OUT_P("error:");
+  print_P(ptr);
+  if(newline)
+    println();
+}
 /** \brief request resend of the expected line.
 */
 void gcode_resend() {
-  //Serial.flush();
+  RFSERIAL.flush();
   gcode_wpos=0;
   if(gcode_binary)
     gcode_wait_resend = 30;
   else
     gcode_wait_resend = 14;
-  out.println_long_P(PSTR("Resend:"),gcode_lastN+1);
-  out.println_P(PSTR("ok"));
+  OUT_LN;
+  OUT_P_L_LN("Resend:",gcode_lastN+1);
+  OUT_P_LN("ok");
 }
 void emergencyStop() {
 #if defined(KILL_METHOD) && KILL_METHOD==1
@@ -526,7 +538,7 @@ void gcode_checkinsert(GCode *act) {
   if(GCODE_HAS_M(act)) {
    if(act->M==110) { // Reset line number
      gcode_lastN = gcode_actN;
-     out.println_P(PSTR("ok"));
+     OUT_P_LN("ok");
      return;
    }
    if(act->M==112) { // Emergency kill - freeze printer
@@ -537,15 +549,15 @@ void gcode_checkinsert(GCode *act) {
     if((((gcode_lastN+1) & 0xffff)!=(gcode_actN&0xffff))) {
       if(gcode_wait_resend<0) { // after a resend, we have to skip the garbage in buffers, no message for this
         if(DEBUG_ERRORS) {
-           out.print_long_P(PSTR("Error: expected line "),gcode_lastN+1); 
-           out.println_long_P(PSTR(" got "),gcode_actN);
+           OUT_P_L("Error: expected line ",gcode_lastN+1); 
+           OUT_P_L_LN(" got ",gcode_actN);
         }
         gcode_resend(); // Line missing, force resend
       } else {
         --gcode_wait_resend;
         gcode_wpos = 0;
-        out.println_long_P(PSTR("skip "),gcode_actN);
-        out.println_P(PSTR("ok"));
+        OUT_P_L_LN("skip ",gcode_actN);
+        OUT_P_LN("ok");
       }
       return;
     }
@@ -554,15 +566,15 @@ void gcode_checkinsert(GCode *act) {
   gcode_windex = (gcode_windex+1) % GCODE_BUFFER_SIZE;
   gcode_buflen++;
 #ifdef ACK_WITH_LINENUMBER  
-  out.println_long_P(PSTR("ok "),gcode_actN);
+  OUT_P_L_LN("ok ",gcode_actN);
 #else
-  out.println_P(PSTR("ok"));
+  OUT_P_LN("ok");
 #endif
   gcode_last_binary = gcode_binary;
   gcode_wait_resend = -1; // everything is ok.
 #ifndef ECHO_ON_EXECUTE
   if(DEBUG_ECHO) {
-      out.print_P(PSTR("Echo:"));
+      OUT_P("Echo:");
       gcode_print_command(act);
       out.println();
   }
@@ -601,18 +613,19 @@ This function is the main function to read the commands from serial console or f
 It must be called frequently to empty the incoming buffer.
 */
 void gcode_read_serial() {
+  if(gcode_wait_all_parsed && gcode_buflen) return;
+  gcode_wait_all_parsed=false;
   GCode *act;
   unsigned long time = millis();
   if(gcode_buflen>=GCODE_BUFFER_SIZE) return; // all buffers full
   if(RFSERIAL.available()==0) {
     if((gcode_wait_resend>=0 || gcode_wpos>0) && time-gcode_lastdata>200) {
       gcode_resend(); // Something is wrong, a started line was not continued in the last second 
-       //  out.println_P(PSTR("Timeout"));   
       gcode_lastdata = time;
     }
 #ifdef WAITING_IDENTIFIER
     else if(gcode_buflen == 0 && time-gcode_lastdata>1000) { // Don't do it if buffer is not empty. It may be a slow executing command.
-      out.println_P(PSTR(WAITING_IDENTIFIER)); // Unblock communication in case the last ok was not received correct.
+      OUT_P_LN(WAITING_IDENTIFIER); // Unblock communication in case the last ok was not received correct.
       gcode_lastdata = time;
     }   
 #endif
@@ -644,10 +657,11 @@ void gcode_read_serial() {
         gcode_wpos = 0;
         return;
       }
-    } else {
+    } else { // Ascii command
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
         gcode_transbuffer[gcode_wpos]=0;
+        gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
           continue;
@@ -659,7 +673,6 @@ void gcode_read_serial() {
           gcode_resend();
         }
         gcode_wpos = 0;
-        gcode_comment = false;
         return;
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
@@ -668,15 +681,15 @@ void gcode_read_serial() {
     }
   }
   #ifdef SDSUPPORT
-  if(!sdmode || gcode_wpos!=0) { // not reading or incoming serial command
+  if(!sd.sdmode || gcode_wpos!=0) { // not reading or incoming serial command
     return;
   }
-  while( filesize > sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
+  while( sd.filesize > sd.sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
-    int n = file.read();
+    int n = sd.file.read();
     if(n==-1) break;
 
-    sdpos++; // = file.curPosition();
+    sd.sdpos++; // = file.curPosition();
     gcode_transbuffer[gcode_wpos++] = (byte)n;
   
     // first lets detect, if we got an old type ascii command
@@ -698,6 +711,7 @@ void gcode_read_serial() {
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
         gcode_transbuffer[gcode_wpos]=0;
+        gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
           continue;
@@ -707,7 +721,6 @@ void gcode_read_serial() {
           gcode_silent_insert();
         }
         gcode_wpos = 0;
-        gcode_comment = false;
         return;
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
@@ -715,9 +728,9 @@ void gcode_read_serial() {
       }           
     }
   }
-     sdmode = false;
-     out.println_P(PSTR("Done printing file"));
-     gcode_wpos = 0;
+  sd.sdmode = false;
+  OUT_P("Done printing file");
+  gcode_wpos = 0;
 #endif
 }
 
@@ -746,16 +759,22 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    sum2 -= *p;
    if(sum1 | sum2) {
       if(DEBUG_ERRORS) {
-        out.println_P(PSTR("Error:Binary cmd wrong checksum."));
+        OUT_P_LN("Error:Binary cmd wrong checksum.");
       }
      return false;
    }
    p = buffer;
    code->params = *(unsigned int *)p;p+=2;
+   byte textlen=16;
+   if(GCODE_IS_V2(code)) {
+     code->params2 = *(unsigned int *)p;p+=2;
+     if(GCODE_HAS_STRING(code)) 
+       textlen = *p++;
+   }
    if(code->params & 1) {gcode_actN=code->N=*(unsigned int *)p;p+=2;}
    if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
-     if(code->params & 2) {code->M=*(unsigned int *)p+=2;}
-     if(code->params & 4) {code->G=*(unsigned int *)p+=2;}
+     if(code->params & 2) {code->M=*(unsigned int *)p;p+=2;}
+     if(code->params & 4) {code->G=*(unsigned int *)p;p+=2;}
    } else {
      if(code->params & 2) {code->M=*p++;}
      if(code->params & 4) {code->G=*p++;}
@@ -769,10 +788,18 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    if(code->params & 512) {code->T=*p++;}
    if(code->params & 1024) {code->S=*(long int*)p;p+=4;}
    if(code->params & 2048) {code->P=*(long int*)p;p+=4;}
-   if(GCODE_HAS_STRING(code)) { // read 16 byte into string
-     char *sp = code->text;
-     for(i=0;i<16;++i) *sp++ = *p++;
-     *sp = 0; // make sure 0 is at end of string
+   if(GCODE_HAS_I(code)) {code->I=*(float *)p;p+=4;}
+   if(GCODE_HAS_J(code)) {code->J=*(float *)p;p+=4;}
+   if(GCODE_HAS_STRING(code)) { // set text pointer to string
+     code->text = (char*)p;
+     code->text[textlen] = 0; // Terminate string overwriting checksum
+     OUT_P_I_LN("Textlen:",textlen);
+     OUT_P_I_LN("Offset:",p-buffer);
+     out.println(code->text);
+     //char *sp = code->text;
+     //for(i=0;i<16;++i) *sp++ = *p++;
+     //*sp = 0; // make sure 0 is at end of string
+     gcode_wait_all_parsed=true; // Don't destroy string until executed
    }
    return true; 
 }
@@ -845,18 +872,22 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->params |= 4096; // Needs V2 for saving
   }
 
-  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 117)) {
+  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 32 || code->M == 117)) {
      // after M command we got a filename for sd card management
      char *sp = line;
      while(*sp!='M') sp++; // Search M command
      while(*sp!=' ') sp++; // search next whitespace
      while(*sp==' ') sp++; // skip leading whitespaces
-     char *wp = code->text;
+     //char *wp = code->text;
+     code->text = sp;
      while(*sp) {
-        if(*sp==' ' || *sp=='*') break; // end of filename reached
-        *wp++ = *sp++;
+        if(code->M != 117 && (*sp==' ' || *sp=='*')) break; // end of filename reached
+        sp++;
+        //*wp++ = *sp++;
      }
-     *wp = 0; // ensure ending 0 
+     //*wp = 0; // ensure ending 0 
+     *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
+     gcode_wait_all_parsed = true; // don't risk string be deleted
      code->params |= 32768;
   }
   if((pos = strchr(line,'*'))!=0) { // checksum

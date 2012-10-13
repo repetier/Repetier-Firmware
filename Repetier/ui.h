@@ -156,6 +156,7 @@
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
 #define UI_ACTION_KILL                  1097
 #define UI_ACTION_RESET                 1098
+#define UI_ACTION_PAUSE                 1099
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

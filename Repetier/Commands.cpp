@@ -315,96 +315,46 @@ void process_command(GCode *com)
 #ifdef SDSUPPORT
         
       case 20: // M20 - list SD card
-        out.println_P(PSTR("Begin file list"));
-#ifdef SD_EXTENDED_DIR
-        root.ls(LS_SIZE);
-#else
-        root.ls();
-#endif
-        out.println_P(PSTR("End file list"));
+        sd.ls();
         break;
       case 21: // M21 - init SD card
-        sdmode = false;
-        initsd();
+        sd.mount();
         break;
       case 22: //M22 - release SD card
-        sdmode = false;
-        sdactive = false;
+        sd.unmount();
         break;
       case 23: //M23 - Select file
-        if(sdactive){
-            sdmode = false;
-            file.close();
-            if (file.open(&root, com->text, O_READ)) {
-                out.print_P(PSTR("File opened:"));
-                out.print(com->text);
-                out.print_P(PSTR(" Size:"));
-                out.println(file.fileSize());
-                sdpos = 0;
-                filesize = file.fileSize();
-                out.println_P(PSTR("File selected"));
-            }
-            else{
-                out.println_P(PSTR("file.open failed"));
-            }
-        }
+        if(GCODE_HAS_STRING(com))
+          sd.selectFile(com->text);
         break;
       case 24: //M24 - Start SD print
-        if(sdactive){
-            sdmode = true;
-        }
+        sd.startPrint();
         break;
       case 25: //M25 - Pause SD print
-        if(sdmode){
-            sdmode = false;
-        }
+        sd.pausePrint();
         break;
       case 26: //M26 - Set SD index
-        if(sdactive && GCODE_HAS_S(com)){
-            sdpos = com->S;
-            file.seekSet(sdpos);
-        }
+        if(GCODE_HAS_S(com))
+            sd.setIndex(com->S);
         break;
       case 27: //M27 - Get SD status
-        if(sdactive){
-            out.print_P(PSTR("SD printing byte "));
-            out.print(sdpos);
-            out.print("/");
-            out.println(filesize);
-        }else{
-            out.println_P(PSTR("Not SD printing"));
-        }
+        sd.printStatus();
         break;
       case 28: //M28 - Start SD write
-        if(sdactive){
-            file.close();
-            sdmode = false;
-            if (!file.open(&root,com->text, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))  {
-              out.print_P(PSTR("open failed, File: "));
-              out.print(com->text);
-              out.print_P(PSTR("."));
-            } else {
-              UI_STATUS(UI_TEXT_UPLOADING);
-              savetosd = true;
-              out.print_P(PSTR("Writing to file: "));
-              out.println(com->text);
-            }
-        }
+        if(GCODE_HAS_STRING(com))
+          sd.startWrite(com->text);
         break;
       case 29: //M29 - Stop SD write
         //processed in write to file routine above
         //savetosd = false;
         break;
       case 30: // M30 filename - Delete file
-        if(sdactive){
-            sdmode = false;
-            file.close();
-            if(SdFile::remove(&root, com->text)) {
-              out.println_P(PSTR("File deleted"));
-            } else {
-              out.println_P(PSTR("Deletion failed"));
-            }
-        }
+        if(GCODE_HAS_STRING(com))
+          sd.deleteFile(com->text);
+        break;
+      case 32: // M32 directoryname
+        if(GCODE_HAS_STRING(com))
+          sd.makeDirectory(com->text);
         break;
 #endif
       case 42: //M42 -Change pin status via gcode

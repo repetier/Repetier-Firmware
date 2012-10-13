@@ -319,6 +319,7 @@ void epr_update_usage() {
   seconds += epr_get_long(EPR_PRINTING_TIME);
   epr_set_long(EPR_PRINTING_TIME,seconds);
   epr_set_float(EPR_PRINTING_DISTANCE,epr_get_float(EPR_PRINTING_DISTANCE)+printer_state.filamentPrinted*0.001);
+  OUT_P_F_LN("Adding filament:",printer_state.filamentPrinted);
   printer_state.filamentPrinted = 0;
   printer_state.msecondsPrinting = millis();
   byte newcheck = epr_compute_checksum();
