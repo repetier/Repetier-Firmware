@@ -101,9 +101,7 @@
 #include "gcode.h"
 #include "fastio.h"
 #ifdef SDSUPPORT
-#include "Sd2Card.h"
 #include "SdFat.h"
-extern void initsd();
 #endif
 #define REPETIER_VERSION "0.80dev"
 
@@ -227,7 +225,6 @@ extern void heated_bed_set_temperature(float temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
 extern void extruder_set_direction(byte steps);
 extern void extruder_disable();
-extern byte heated_bed_output;
 #ifdef TEMP_PID
 void autotunePID(float temp,int controllerId);
 #endif
@@ -577,10 +574,11 @@ extern byte autotuneIndex;
 enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
 class SDCard {
 public:
-  Sd2Card card; // ~14 Byte
-  SdVolume volume;
+  SdFat fat;
+  //Sd2Card card; // ~14 Byte
+  //SdVolume volume;
   //SdFile root;
-  SdFile dir[SD_MAX_FOLDER_DEPTH+1];
+  //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
   SdFile file;
   uint32_t filesize;
   uint32_t sdpos;
@@ -589,7 +587,7 @@ public:
   char *pathend; // File to char where pathname in fullname ends
   bool sdmode;  // true if we are printing from sd card
   bool sdactive;
-  int16_t n;
+  //int16_t n;
   bool savetosd;
   SDCard();
   void initsd();
@@ -613,9 +611,10 @@ public:
   void finishWrite();
   char *createFilename(char *buffer,const dir_t &p);
   void makeDirectory(char *filename);
+  bool showFilename(const uint8_t *name);
 private:
-  void lsRecursive(byte level);
-  SdFile *getDirectory(char* name);
+  void lsRecursive(SdBaseFile *parent,byte level);
+ // SdFile *getDirectory(char* name);
 };
 
 extern SDCard sd;
@@ -642,7 +641,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** \brief print ops related debug info. */
 //#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
-#define DEBUG_GENERIC
+//#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
 //#define DEBUG_STEPCOUNT
 // Uncomment the following line to enable debugging. You can better control debugging below the following line

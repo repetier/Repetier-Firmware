@@ -90,17 +90,10 @@ short temptable_generic2[GENERIC_THERM_NUM_ENTRIES][2];
 short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 #endif
 
-//#if HEATED_BED_SENSOR_TYPE!=0
-//  int current_bed_raw = 0;
-//  int target_bed_raw = 0;
-//#endif
-
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 unsigned int counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
-//byte heated_bed_output=0;
-//int target_bed_celsius=0;
 
 #ifdef SUPPORT_MAX6675
 extern int read_max6675(byte ss_pin);
@@ -138,11 +131,11 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
     rs = (r2*r1)/(r1+r2);
   }
   float k = r0*exp(-beta/t0);
-  float delta = (maxTemp-minTemp)/(1.0f+GENERIC_THERM_NUM_ENTRIES);
+  float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
   for(byte i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
     float t = minTemp+i*delta;
     float r = exp(beta/(t+272.65))*k;
-    float v = 4092*r*vs/(rs+r);
+    float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
     int adc = (int)(v);
     t *= 8;
     if(adc>4095) adc=4095;

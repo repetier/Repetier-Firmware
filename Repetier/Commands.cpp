@@ -24,9 +24,6 @@
 #include "pins_arduino.h"
 #include "ui.h"
 
-#ifdef SDSUPPORT
-#include "SdFat.h"
-#endif
 #include <SPI.h>
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42

@@ -793,12 +793,6 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    if(GCODE_HAS_STRING(code)) { // set text pointer to string
      code->text = (char*)p;
      code->text[textlen] = 0; // Terminate string overwriting checksum
-     OUT_P_I_LN("Textlen:",textlen);
-     OUT_P_I_LN("Offset:",p-buffer);
-     out.println(code->text);
-     //char *sp = code->text;
-     //for(i=0;i<16;++i) *sp++ = *p++;
-     //*sp = 0; // make sure 0 is at end of string
      gcode_wait_all_parsed=true; // Don't destroy string until executed
    }
    return true; 
