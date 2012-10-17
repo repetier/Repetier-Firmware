@@ -17,10 +17,10 @@
 */
 
 #define UI_MAIN
+#include "Reptier.h"
 #include <avr/pgmspace.h>
 extern const int8_t encoder_table[16] PROGMEM ;
 #include "ui.h"
-#include "Reptier.h"
 #include <math.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -897,15 +897,15 @@ void UIDisplay::parse(char *txt,bool ram) {
           break;
         }
         if(c2=='c') ivalue=extruder_get_temperature();
-        else if(c2>='0' && c2<='9') ivalue=extruder[c2-'0'].currentTemperatureC;
-        else if(c2=='b') ivalue=heated_bed_get_temperature();
-        addInt(ivalue>>CELSIUS_EXTRA_BITS,3);
+        else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
+        else if(c2=='b') fvalue=heated_bed_get_temperature();
+        addFloat(fvalue,3,1);
         break;
       case 'E': // Target extruder temperature
-        if(c2=='c') ivalue=current_extruder->targetTemperatureC;
-        else if(c2>='0' && c2<='9') ivalue=extruder[c2-'0'].targetTemperatureC;
-        else if(c2=='b') ivalue=target_bed_celsius;
-        addInt(((1<<(CELSIUS_EXTRA_BITS-1))+ivalue>>CELSIUS_EXTRA_BITS),3);
+        if(c2=='c') fvalue=current_extruder->tempControl.targetTemperatureC;
+        else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.targetTemperatureC;
+        else if(c2=='b') fvalue=heatedBedController.targetTemperatureC;
+        addFloat(fvalue,3,1);
         break;
   
       case 'f':
@@ -941,11 +941,11 @@ void UIDisplay::parse(char *txt,bool ram) {
       case 'o': 
         if(c2=='s') {
 #ifdef SDSUPPORT
-          if(sdactive && sdmode) {
+          if(sd.sdactive && sd.sdmode) {
             addStringP(PSTR( UI_TEXT_PRINT_POS));
             unsigned long percent;
-            if(filesize<20000000) percent=sdpos*100/filesize;
-            else percent = (sdpos>>8)*100/(filesize>>8);
+            if(sd.filesize<20000000) percent=sd.sdpos*100/sd.filesize;
+            else percent = (sd.sdpos>>8)*100/(sd.filesize>>8);
             addInt((int)percent,3);
             if(col<UI_COLS)
               printCols[col++]='%';              
@@ -961,7 +961,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
         // Extruder output level
         if(c2>='0' && c2<='9') ivalue=pwm_pos[c2-'0'];
-        else if(c2=='b') ivalue=heated_bed_output;
+        else if(c2=='b') ivalue=pwm_pos[heatedBedController.pwmIndex];
         else if(c2=='C') ivalue=pwm_pos[current_extruder->id];
         ivalue=(ivalue*100)/255;
         addInt(ivalue,3);
@@ -981,17 +981,17 @@ void UIDisplay::parse(char *txt,bool ram) {
       case 'X': // Extruder related 
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
 #ifdef TEMP_PID
-        else if(c2=='i') {addLong(current_extruder->pidIGain,4);}
-        else if(c2=='p') {addLong(current_extruder->pidPGain,4);}
-        else if(c2=='d') {addLong(current_extruder->pidDGain,4);}
-        else if(c2=='m') {addInt(current_extruder->pidDriveMin,3);}
-        else if(c2=='M') {addInt(current_extruder->pidDriveMax,3);}
-        else if(c2=='D') {addInt(current_extruder->pidMax,3);}
+        else if(c2=='i') {addFloat(current_extruder->tempControl.pidIGain,4,2);}
+        else if(c2=='p') {addFloat(current_extruder->tempControl.pidPGain,4,2);}
+        else if(c2=='d') {addFloat(current_extruder->tempControl.pidDGain,4,2);}
+        else if(c2=='m') {addInt(current_extruder->tempControl.pidDriveMin,3);}
+        else if(c2=='M') {addInt(current_extruder->tempControl.pidDriveMax,3);}
+        else if(c2=='D') {addInt(current_extruder->tempControl.pidMax,3);}
 #endif
         else if(c2=='w') {addInt(current_extruder->watchPeriod,4);}
 		else if(c2=='T') {addInt(current_extruder->waitRetractTemperature,4);}
 		else if(c2=='U') {addInt(current_extruder->waitRetractUnits,4);}
-        else if(c2=='h') {addStringP(!current_extruder->heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));}
+        else if(c2=='h') {addStringP(!current_extruder->tempControl.heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));}
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
         else if(c2=='a') {addFloat(current_extruder->advanceK,3,0);}
@@ -1076,14 +1076,15 @@ byte nFilesOnCard;
 void UIDisplay::updateSDFileCount() {
   dir_t* p;
   byte offset = menuTop[menuLevel];
-  root.rewind();
+  SdBaseFile *root = sd.fat.vwd();
+  root->rewind();
   nFilesOnCard = 0;
-  while ((p = root.readDirCache())) {
+  while ((p = root->readDirCache())) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
 
     // skip deleted entry and entries for . and  ..
-    if (p->name[0] == DIR_NAME_DELETED || p->name[0] == '.') continue;
+    if(!sd.showFilename(p->name)) continue;
 
     // only list subdirectories and files
     if (!DIR_IS_FILE(p)) continue;
@@ -1094,12 +1095,13 @@ void UIDisplay::updateSDFileCount() {
 void getSDFilenameAt(byte filePos,char *filename) {
   dir_t* p;
   byte c=0;
-  root.rewind();
-  while ((p = root.readDirCache())) {
+  SdBaseFile *root = sd.fat.vwd();
+  root->rewind();
+  while ((p = root->readDirCache())) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
     // skip deleted entry and entries for . and  ..
-    if (p->name[0] == DIR_NAME_DELETED || p->name[0] == '.') continue;
+    if(!sd.showFilename(p->name)) continue;
     // only list subdirectories and files
     if (!DIR_IS_FILE(p)) continue;
     if(filePos) {
@@ -1120,13 +1122,14 @@ void getSDFilenameAt(byte filePos,char *filename) {
 void UIDisplay::sdrefresh(byte &r) {
   dir_t* p;
   byte offset = menuTop[menuLevel];
-  root.rewind();
+  SdBaseFile *root = sd.fat.vwd();
+  root->rewind();
   byte skip = (offset>0?offset-1:0);
-  while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root.readDirCache())) {
+  while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->readDirCache())) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
     // skip deleted entry and entries for . and  ..
-    if (p->name[0] == DIR_NAME_DELETED || p->name[0] == '.') continue;
+    if(!sd.showFilename(p->name)) continue;
     // only list subdirectories and files
     if (!DIR_IS_FILE(p)) continue;
     if(skip>0) {skip--;continue;}
@@ -1260,35 +1263,35 @@ void UIDisplay::okAction() {
     getSDFilenameAt(filePos,filename);
     switch(pgm_read_word(&(ent->action))) {
       case UI_ACTION_SD_PRINT:
-        if(sdactive){
-            sdmode = false;
-            file.close();
-            if (file.open(&root, filename, O_READ)) {
-                out.print_P(PSTR("File opened:"));
+        if(sd.sdactive){
+            sd.sdmode = false;
+            sd.file.close();
+            if (sd.file.open(filename, O_READ)) {
+                OUT_P("File opened:");
                 out.print(filename);
-                out.print_P(PSTR(" Size:"));
-                out.println(file.fileSize());
-                sdpos = 0;
-                filesize = file.fileSize();
-                out.println_P(PSTR("File selected"));
-                sdmode = true; // Start print immediately
+                OUT_P(" Size:");
+                out.println(sd.file.fileSize());
+                sd.sdpos = 0;
+                sd.filesize = sd.file.fileSize();
+                OUT_P_LN("File selected");
+                sd.sdmode = true; // Start print immediately
                 menuLevel = 0;
                 BEEP_LONG;
             }
             else{
-                out.println_P(PSTR("file.open failed"));
+                OUT_P_LN("file.open failed");
             }
         }
         break;
       case UI_ACTION_SD_DELETE:
-       if(sdactive){
-            sdmode = false;
-            file.close();
-            if(SdFile::remove(&root,filename)) {
-              out.println_P(PSTR("File deleted"));
+       if(sd.sdactive){
+            sd.sdmode = false;
+            sd.file.close();
+            if(sd.fat.remove(filename)) {
+              OUT_P_LN("File deleted");
               BEEP_LONG
             } else {
-              out.println_P(PSTR("Deletion failed"));
+              OUT_P_LN("Deletion failed");
             }
         }
         break;
@@ -1389,36 +1392,36 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_HEATED_BED_TEMP:
 #if HAVE_HEATED_BED==true
     {
-       int tmp = target_bed_celsius>>CELSIUS_EXTRA_BITS;
+       int tmp = (int)heatedBedController.targetTemperatureC;
        if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
        tmp+=increment;
        if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
        if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-       heated_bed_set_temperature(tmp<<CELSIUS_EXTRA_BITS);
+       heated_bed_set_temperature(tmp);
     }
 #endif
     break;
   case UI_ACTION_EXTRUDER0_TEMP:
     {
-       int tmp = extruder[0].targetTemperatureC>>CELSIUS_EXTRA_BITS;
+       int tmp = (int)extruder[0].tempControl.targetTemperatureC;
        if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
        tmp+=increment;
        if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
        if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-       extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,0);
+       extruder_set_temperature(tmp,0);
     }
     break;
   case UI_ACTION_EXTRUDER1_TEMP:
  #if NUM_EXTRUDER>1
     {
-       int tmp = extruder[1].targetTemperatureC>>CELSIUS_EXTRA_BITS;
+       int tmp = (int)extruder[1].tempControl.targetTemperatureC;
        tmp+=increment;
        if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
        if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-       extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,1);
+       extruder_set_temperature(tmp,1);
     }
  #endif
     break;
@@ -1458,7 +1461,7 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_FLOWRATE_MULTIPLY:
     {
       INCREMENT_MIN_MAX(printer_state.extrudeMultiply,1,25,500);
-       out.println_int_P(PSTR("FlowrateMultiply:"),printer_state.extrudeMultiply);
+       OUT_P_I_LN("FlowrateMultiply:",printer_state.extrudeMultiply);
     }
     break;
   case UI_ACTION_STEPPER_INACTIVE:
@@ -1498,22 +1501,22 @@ void UIDisplay::nextPreviousAction(char next) {
     INCREMENT_MIN_MAX(printer_state.maxZJerk,0.1,0.1,99.9);
     break;
   case UI_ACTION_HOMING_FEEDRATE_X:
-    INCREMENT_MIN_MAX(homing_feedrate[0],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[0],1,5,1000);
     break;
   case UI_ACTION_HOMING_FEEDRATE_Y:
-    INCREMENT_MIN_MAX(homing_feedrate[1],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[1],1,5,1000);
     break;
   case UI_ACTION_HOMING_FEEDRATE_Z:
-    INCREMENT_MIN_MAX(homing_feedrate[2],60,60,30000);
+    INCREMENT_MIN_MAX(homing_feedrate[2],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_X:
-    INCREMENT_MIN_MAX(max_feedrate[0],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[0],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_Y:
-    INCREMENT_MIN_MAX(max_feedrate[1],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[1],1,1,1000);
     break;
   case UI_ACTION_MAX_FEEDRATE_Z:
-    INCREMENT_MIN_MAX(max_feedrate[2],60,60,30000);
+    INCREMENT_MIN_MAX(max_feedrate[2],1,1,1000);
     break;
   case UI_ACTION_STEPS_X:
     INCREMENT_MIN_MAX(axis_steps_per_unit[0],0.1,0,999);
@@ -1548,23 +1551,23 @@ void UIDisplay::nextPreviousAction(char next) {
     break;
 #ifdef TEMP_PID
   case UI_ACTION_PID_PGAIN:
-      INCREMENT_MIN_MAX(current_extruder->pidPGain,1,0,9999);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidPGain,0.1,0,200);
       break;
   case UI_ACTION_PID_IGAIN:
-      INCREMENT_MIN_MAX(current_extruder->pidIGain,1,0,9999);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidIGain,0.01,0,100);
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_PID_DGAIN:
-      INCREMENT_MIN_MAX(current_extruder->pidDGain,1,0,9999);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidDGain,0.1,0,200);
       break;
   case UI_ACTION_DRIVE_MIN:
-      INCREMENT_MIN_MAX(current_extruder->pidDriveMin,1,1,255);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidDriveMin,1,1,255);
       break;
   case UI_ACTION_DRIVE_MAX:
-      INCREMENT_MIN_MAX(current_extruder->pidDriveMax,1,1,255);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidDriveMax,1,1,255);
       break;
   case UI_ACTION_PID_MAX:
-      INCREMENT_MIN_MAX(current_extruder->pidMax,1,1,255);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.pidMax,1,1,255);
       break;
 #endif
   case UI_ACTION_X_OFFSET:
@@ -1584,7 +1587,7 @@ void UIDisplay::nextPreviousAction(char next) {
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_EXTR_MAX_FEEDRATE:
-      INCREMENT_MIN_MAX(current_extruder->maxFeedrate,60,60,90000);
+      INCREMENT_MIN_MAX(current_extruder->maxFeedrate,1,1,999);
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_EXTR_START_FEEDRATE:
@@ -1592,7 +1595,7 @@ void UIDisplay::nextPreviousAction(char next) {
       extruder_select(current_extruder->id);
       break;
   case UI_ACTION_EXTR_HEATMANAGER:
-      INCREMENT_MIN_MAX(current_extruder->heatManager,1,0,1);
+      INCREMENT_MIN_MAX(current_extruder->tempControl.heatManager,1,0,1);
       break;
   case UI_ACTION_EXTR_WATCH_PERIOD:
       INCREMENT_MIN_MAX(current_extruder->watchPeriod,1,0,999);
@@ -1698,7 +1701,7 @@ void UIDisplay::executeAction(int action) {
           extruder_set_temperature(0,1);
 #endif
 #if HAVE_HEATED_BED==true
-          target_bed_raw = 0;
+          heated_bed_set_temperature(0);
 #endif
       }
       break;
@@ -1706,22 +1709,22 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_PREHEAT_PLA:
       UI_STATUS(UI_TEXT_PREHEAT_PLA);
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA<<CELSIUS_EXTRA_BITS,0);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA<<CELSIUS_EXTRA_BITS,1);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA<<CELSIUS_EXTRA_BITS);
+      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
 #endif 
       break;
     case UI_ACTION_PREHEAT_ABS:
       UI_STATUS(UI_TEXT_PREHEAT_ABS);
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS<<CELSIUS_EXTRA_BITS,0);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS<<CELSIUS_EXTRA_BITS,1);
+      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS<<CELSIUS_EXTRA_BITS);
+      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif 
       break;
     case UI_ACTION_COOLDOWN:
@@ -1777,7 +1780,7 @@ void UIDisplay::executeAction(int action) {
       break;
 #if EEPROM_MODE!=0
     case UI_ACTION_STORE_EEPROM:
-      epr_data_to_eeprom();
+      epr_data_to_eeprom(false);
       pushMenu((void*)&ui_menu_eeprom_saved,false);
       BEEP_LONG;skipBeep = true;
       break;
@@ -1789,34 +1792,34 @@ void UIDisplay::executeAction(int action) {
 #endif
 #ifdef SDSUPPORT
     case UI_ACTION_SD_DELETE:
-      if(sdactive){
+      if(sd.sdactive){
         pushMenu((void*)&ui_menu_sd_fileselector,false);
       } else {
         UI_ERROR(UI_TEXT_NOSDCARD);
       }
       break;
     case UI_ACTION_SD_PRINT:
-      if(sdactive){
+      if(sd.sdactive){
         pushMenu((void*)&ui_menu_sd_fileselector,false);
       }
       break;
     case UI_ACTION_SD_PAUSE:
-      if(sdmode){
-          sdmode = false;
+      if(sd.sdmode){
+          sd.sdmode = false;
       }
       break;
     case UI_ACTION_SD_CONTINUE:
-      if(sdactive){
-          sdmode = true;
+      if(sd.sdactive){
+          sd.sdmode = true;
       }
       break;
     case UI_ACTION_SD_UNMOUNT:
-      sdmode = false;
-      sdactive = false;
+      sd.sdmode = false;
+      sd.sdactive = false;
       break;
     case UI_ACTION_SD_MOUNT:
-      sdmode = false;
-      initsd();
+      sd.sdmode = false;
+      sd.initsd();
       break;
     case UI_ACTION_MENU_SDCARD:
       pushMenu((void*)&ui_menu_sd,false);
@@ -1825,23 +1828,23 @@ void UIDisplay::executeAction(int action) {
 #if FAN_PIN>-1
     case UI_ACTION_FAN_OFF:
       set_fan_speed(0,false);
-      out.println_P(PSTR("Fanspeed:0"));
+      OUT_P_LN("Fanspeed:0");
       break;
     case UI_ACTION_FAN_25:
       set_fan_speed(64,false);
-      out.println_P(PSTR("Fanspeed:64"));
+      OUT_P_LN("Fanspeed:64");
       break;
     case UI_ACTION_FAN_50:
       set_fan_speed(128,false);
-      out.println_P(PSTR("Fanspeed:128"));
+      OUT_P_LN("Fanspeed:128");
       break;
     case UI_ACTION_FAN_75:
       set_fan_speed(192,false);
-      out.println_P(PSTR("Fanspeed:192"));
+      OUT_P_LN("Fanspeed:192");
       break;
     case UI_ACTION_FAN_FULL:
       set_fan_speed(255,false);
-      out.println_P(PSTR("Fanspeed:255"));
+      OUT_P_LN("Fanspeed:255");
       break;
 #endif
     case UI_ACTION_MENU_XPOS:
@@ -1939,24 +1942,6 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_Z_DOWN:
       move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
-    case UI_ACTION_Z_UP_MICRO:
-      move_steps(0,0,axis_steps_per_unit[2] * 0.1,0,homing_feedrate[2],false,true);
-      break;
-    case UI_ACTION_Z_DOWN_MICRO:
-      move_steps(0,0,-axis_steps_per_unit[2] * 0.1,0,homing_feedrate[2],false,true);
-      break;
-    case UI_ACTION_Z_UP_CENTI:
-      move_steps(0,0,axis_steps_per_unit[2] * 10,0,homing_feedrate[2],false,true);
-      break;
-    case UI_ACTION_Z_DOWN_CENTI:
-      move_steps(0,0,-axis_steps_per_unit[2] * 10,0,homing_feedrate[2],false,true);
-      break;
-    case UI_ACTION_Z_UP_DECI:
-      move_steps(0,0,axis_steps_per_unit[2] * 100,0,homing_feedrate[2],false,true);
-      break;
-    case UI_ACTION_Z_DOWN_DECI:
-      move_steps(0,0,-axis_steps_per_unit[2] * 100,0,homing_feedrate[2],false,true);
-      break;
     case UI_ACTION_EXTRUDER_UP:
       move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
@@ -1964,25 +1949,25 @@ void UIDisplay::executeAction(int action) {
       move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
     case UI_ACTION_EXTRUDER_TEMP_UP: {
-         int tmp = (current_extruder->targetTemperatureC>>CELSIUS_EXTRA_BITS)+1;
+         int tmp = (int)(current_extruder->tempControl.targetTemperatureC)+1;
          if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
          else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-         extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,current_extruder->id);
+         extruder_set_temperature(tmp,current_extruder->id);
       }
       break;
     case UI_ACTION_EXTRUDER_TEMP_DOWN: {
-         int tmp = (current_extruder->targetTemperatureC>>CELSIUS_EXTRA_BITS)-1;
+         int tmp = (int)(current_extruder->tempControl.targetTemperatureC)-1;
          if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-         extruder_set_temperature(tmp<<CELSIUS_EXTRA_BITS,current_extruder->id);
+         extruder_set_temperature(tmp,current_extruder->id);
       }
       break;
     case UI_ACTION_HEATED_BED_UP:
 #if HAVE_HEATED_BED==true
     {
-       int tmp = (target_bed_celsius>>CELSIUS_EXTRA_BITS)+1;
+       int tmp = (int)heatedBedController.targetTemperatureC+1;
        if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-       heated_bed_set_temperature(tmp<<CELSIUS_EXTRA_BITS);
+       heated_bed_set_temperature(tmp);
     }
 #endif
       break;
@@ -2053,19 +2038,19 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED==true
     {
-       int tmp = (target_bed_celsius>>CELSIUS_EXTRA_BITS)-1;
+       int tmp = (int)heatedBedController.targetTemperatureC-1;
        if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
-       heated_bed_set_temperature(tmp<<CELSIUS_EXTRA_BITS);
+       heated_bed_set_temperature(tmp);
     }
 #endif
       break;
     case UI_ACTION_FAN_UP:
       set_fan_speed(pwm_pos[3]+32,false);
-      out.println_int_P(PSTR("Fanspeed:"),(int)pwm_pos[3]);
+      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
       break;
     case UI_ACTION_FAN_DOWN:
       set_fan_speed(pwm_pos[3]-32,false);
-      out.println_int_P(PSTR("Fanspeed:"),(int)pwm_pos[3]);
+      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
       break;
     case UI_ACTION_KILL:
       cli(); // Don't allow interrupts to do their work
@@ -2089,6 +2074,9 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_RESET:
       resetFunc();
+      break;
+    case UI_ACTION_PAUSE:
+      OUT_P_LN("RequestPause:");
       break;
   }
   refreshPage();

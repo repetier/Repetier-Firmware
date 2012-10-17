@@ -56,12 +56,6 @@
 #define UI_ACTION_HEATED_BED_DOWN      111
 #define UI_ACTION_FAN_UP               112
 #define UI_ACTION_FAN_DOWN             113
-#define UI_ACTION_Z_UP_CENTI		   114
-#define UI_ACTION_Z_DOWN_CENTI         115
-#define UI_ACTION_Z_UP_DECI            116
-#define UI_ACTION_Z_DOWN_DECI          117
-#define UI_ACTION_Z_UP_MICRO           118
-#define UI_ACTION_Z_DOWN_MICRO         119
 
 #define UI_ACTION_DUMMY 10000
 #define UI_ACTION_BACK                  1000
@@ -162,8 +156,9 @@
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
 #define UI_ACTION_KILL                  1097
 #define UI_ACTION_RESET                 1098
-#define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1099
-#define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1100
+#define UI_ACTION_PAUSE                 1099
+#define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
+#define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

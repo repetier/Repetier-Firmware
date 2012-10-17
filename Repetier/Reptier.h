@@ -19,6 +19,79 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+#ifndef _REPETIER_H
+#define _REPETIER_H
+
+#include <avr/io.h>
+
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 10
+// Build median from 2^ANALOG_INPUT_SAMPLE samples
+#define ANALOG_INPUT_SAMPLE 5
+#define ANALOG_REF_AREF 0
+#define ANALOG_REF_AVCC _BV(REFS0)
+#define ANALOG_REF_INT_1_1 _BV(REFS1)
+#define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#define MICROSTEP16 HIGH,HIGH
+
+#include "Configuration.h"
+
+#define KOMMA
+#if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<100
+#define EXT0_ANALOG_INPUTS 1
+#define EXT0_SENSOR_INDEX 0
+#define EXT0_ANALOG_CHANNEL EXT0_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT0_ANALOG_INPUTS 0
+#define EXT0_SENSOR_INDEX EXT0_TEMPSENSOR_PIN
+#define EXT0_ANALOG_CHANNEL
+#endif
+#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<100
+#define EXT1_ANALOG_INPUTS 1
+#define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
+#define EXT1_ANALOG_CHANNEL KOMMA EXT1_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT1_ANALOG_INPUTS 0
+#define EXT1_SENSOR_INDEX EXT1_TEMPSENSOR_PIN
+#define EXT1_ANALOG_CHANNEL
+#endif
+#if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<100
+#define BED_ANALOG_INPUTS 1
+#define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
+#define BED_ANALOG_CHANNEL KOMMA  HEATED_BED_SENSOR_PIN
+#define KOMMA ,
+#else
+#define BED_ANALOG_INPUTS 0
+#define BED_SENSOR_INDEX HEATED_BED_SENSOR_PIN
+#define BED_ANALOG_CHANNEL
+#endif
+
+/** \brief number of analog input signals. Normally 1 for each temperature sensor */
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+BED_ANALOG_INPUTS)
+#if ANALOG_INPUTS>0
+/** Channels are the MUX-part of ADMUX register */
+#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL BED_ANALOG_CHANNEL}
+#endif
+#define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
+
+#if MOTHERBOARD==8 || MOTHERBOARD==9
+#define EXTERNALSERIAL
+#endif
+//#define EXTERNALSERIAL  // Force using arduino serial
+#ifndef EXTERNALSERIAL
+#define  HardwareSerial_h // Don't use standard serial console
+#endif
+#include <inttypes.h>
+#include "Stream.h"
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -28,11 +101,9 @@
 #include "gcode.h"
 #include "fastio.h"
 #ifdef SDSUPPORT
-#include "Sd2Card.h"
 #include "SdFat.h"
-extern void initsd();
 #endif
-#define REPETIER_VERSION "0.73"
+#define REPETIER_VERSION "0.80dev"
 
 #define uint uint16_t
 #define uint8 uint8_t
@@ -67,6 +138,34 @@ extern void initsd();
 #define PWM_OCIE OCIE0B
 //#endif
 
+/** TemperatureController manages one heater-temperature sensore loop. You can have up to
+4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
+
+*/
+typedef struct {
+  byte pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
+  byte sensorType; ///< Type of temperature sensor.
+  byte sensorPin; ///< Pin to read extruder temperature.
+  int currentTemperature; ///< Currenttemperature value read from sensor.
+  int targetTemperature; ///< Target temperature value in units of sensor.
+  float currentTemperatureC; ///< Current temperature in °C.
+  float targetTemperatureC; ///< Target temperature in °C.
+  unsigned long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
+  char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+#ifdef TEMP_PID
+  long tempIState; ///< Temp. var. for PID computation.
+  byte pidDriveMax; ///< Used for windup in PID calculation.
+  byte pidDriveMin; ///< Used for windup in PID calculation.
+  float pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
+  float pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
+  float pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
+  byte pidMax; ///< Maximum PWM value, the heater should be set.
+  float tempIStateLimitMax;
+  float tempIStateLimitMin;
+  byte tempPointer;
+  float tempArray[4];
+#endif
+} TemperatureController;
 /** \brief Data to drive one extruder.
 
 This structure contains all definitions for an extruder and all
@@ -77,23 +176,15 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   long xOffset;
   long yOffset;
   float stepsPerMM; ///< Steps per mm.
-  byte sensorType; ///< Type of temperature sensor.
-  byte sensorPin; ///< Pin to read extruder temperature.
   byte enablePin; ///< Pin to enable extruder stepper motor.
 //  byte directionPin; ///< Pin number to assign the direction.
 //  byte stepPin; ///< Pin number for a step.
   byte enableOn;
 //  byte invertDir; ///< 1 if the direction of the extruder should be inverted.
-  float maxFeedrate;
+  float maxFeedrate;      ///< Maximum feedrate in mm/s.
   float maxAcceleration; ///< Maximum acceleration in mm/s^2.
   float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
   long extrudePosition; ///< Current extruder position in steps.
-  int currentTemperature; ///< Currenttemperature value read from sensor.
-  int targetTemperature; ///< Target temperature value in units of sensor.
-  int currentTemperatureC; ///< Current temperature in °C.
-  int targetTemperatureC; ///< Target temperature in °C.
-  long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-  char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
   int watchPeriod; ///< Time in seconds, a M109 command will wait to stabalize temperature
   int waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
   int waitRetractUnits; ///< Units to retract the filament when waiting for heatup
@@ -103,20 +194,7 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #endif
   float advanceL;
 #endif
- // byte output; ///< Output value 0 = off, 255=MAX
-#ifdef TEMP_PID
-  long tempIState; ///< Temp. var. for PID computation.
-  byte pidDriveMax; ///< Used for windup in PID calculation.
-  byte pidDriveMin; ///< Used for windup in PID calculation.
-  long pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
-  long pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
-  long pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
-  byte pidMax; ///< Maximum PWM value, the heater should be set.
-  long tempIStateLimitMax;
-  long tempIStateLimitMin;
-  byte tempPointer;
-  int tempArray[8];
-#endif
+  TemperatureController tempControl;
 } Extruder;
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
@@ -124,12 +202,7 @@ extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-extern byte pwm_pos[4]; // 0-2 = Heater 0-2 of extruder, 3 = Fan
-extern int target_bed_celsius;
-#if HEATED_BED_SENSOR_TYPE!=0
-extern int current_bed_raw;
-extern int target_bed_raw;
-#endif
+extern byte pwm_pos[5]; // 0-2 = Heater 0-2 of extruder, 3 = Fan, 4 = Heated bed
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
@@ -142,18 +215,22 @@ extern Extruder *current_extruder;
 extern Extruder extruder[];
 // Initalize extruder and heated bed related pins
 extern void initExtruder();
+extern void initHeatedBed();
 extern void extruder_select(byte ext_num);
 // Set current extruder position
 //extern void extruder_set_position(float pos,bool relative);
 // set the temperature of current extruder
-extern void extruder_set_temperature(int temp_celsius,byte extr);
-extern int extruder_get_temperature();
+extern void extruder_set_temperature(float temp_celsius,byte extr);
+extern float extruder_get_temperature();
 // Set temperature of heated bed
-extern void heated_bed_set_temperature(int temp_celsius);
+extern void heated_bed_set_temperature(float temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
 extern void extruder_set_direction(byte steps);
 extern void extruder_disable();
-extern byte heated_bed_output;
+#ifdef TEMP_PID
+void autotunePID(float temp,int controllerId);
+#endif
+
 //#ifdef TEMP_PID
 //extern byte current_extruder_out;
 //#endif
@@ -256,12 +333,12 @@ extern void(* resetFunc) (void);
 // Read a temperature and return its value in °C
 // this high level method supports all known methods
 extern int read_raw_temperature(byte type,byte pin);
-extern int heated_bed_get_temperature();
+extern float heated_bed_get_temperature();
 // Convert a raw temperature value into °C
-extern int conv_raw_temp(byte type,int raw_temp);
+extern float conv_raw_temp(byte type,int raw_temp);
 // Converts a temperture temp in °C into a raw value
 // which can be compared with results of read_raw_temperature
-extern int conv_temp_raw(byte type,int temp);
+extern int conv_temp_raw(byte type,float temp);
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggels the heater power if necessary.
 extern void manage_temperatures();
@@ -274,6 +351,7 @@ void manage_inactivity(byte debug);
 
 extern void wait_until_end_of_move();
 extern void update_ramps_parameter();
+extern void update_extruder_flags();
 extern void finishNextSegment();
 extern void printPosition();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
@@ -320,12 +398,12 @@ extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;
 
 extern void setupTimerInterrupt();
-#if MOTHERBOARD==301
 extern void digipot_init();
 extern void microstep_init();
-#endif
+extern void print_temperatures();
+
 typedef struct { // RAM usage: 72 Byte
-  byte flag0; // 1 = stepper disabled
+  byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt
 #if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
@@ -372,11 +450,19 @@ typedef struct { // RAM usage: 72 Byte
 #endif
 #if DRIVE_SYSTEM==3
   long rodSteps;
-#else
+#endif
   long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-#endif
+  long xMinSteps;                   ///< For software endstops, limit of move in negative direction.
+  long yMinSteps;                   ///< For software endstops, limit of move in negative direction.
+  long zMinSteps;                   ///< For software endstops, limit of move in negative direction.
+  float xLength;
+  float xMin;
+  float yLength;
+  float yMin;
+  float zLength;
+  float zMin;
   float feedrate;                   ///< Last requested feedrate.
   int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
   unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
@@ -386,6 +472,8 @@ typedef struct { // RAM usage: 72 Byte
   long offsetY;                     ///< Y-offset for different extruder positions.
   unsigned int vMaxReached;       ///< MAximumu reached speed
   byte stepper_loops;
+  long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
+  float filamentPrinted;            ///< mm of filament printed since counting started
 } PrinterState;
 extern PrinterState printer_state;
 
@@ -439,11 +527,12 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   float speedX;                   ///< Speed in x direction at fullInterval in mm/s
   float speedY;                   ///< Speed in y direction at fullInterval in mm/s
   float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
+  float speedE;                   ///< Speed in E direction at fullInterval in mm/s
   float fullSpeed;                ///< Desired speed mm/s
   float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
   float acceleration;             ///< Real 2.0*distanceÜacceleration mm²/s²
   float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
-  float startSpeed;               ///< Starting speed in mm/s
+  float startSpeed;               ///< Staring speed in mm/s
   float endSpeed;                 ///< Exit speed in mm/s
   float distance;
   //float startFactor;
@@ -453,12 +542,12 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
   long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
 #endif
-  unsigned long fullInterval;     ///< Interval at full speed in ticks/step.
+  unsigned long fullInterval;     ///< interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
   unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
   unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
   unsigned long accelerationPrim; ///< Acceleration along primary axis
-  unsigned long facceleration;    ///< AccelerationPrim*262144/F_CPU
+  unsigned long facceleration;    ///< accelerationPrim*262144/F_CPU
   unsigned int vMax;              ///< Maximum reached speed in steps/s.
   unsigned int vStart;            ///< Starting speed in steps/s.
   unsigned int vEnd;              ///< End speed in steps/s
@@ -499,7 +588,7 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 extern long CPUDivU2(unsigned int divisor);
 
-extern byte counter_periodical;
+extern unsigned int counter_periodical;
 extern volatile byte execute_periodical;
 extern byte counter_250ms;
 extern void write_monitor();
@@ -508,19 +597,99 @@ extern void check_periodical();
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
-#ifdef SDSUPPORT
-extern Sd2Card card; // ~14 Byte
-extern SdVolume volume;
-extern SdFile root;
-extern SdFile file;
-extern uint32_t filesize;
-extern uint32_t sdpos;
-extern bool sdmode;
-extern bool sdactive;
-extern bool savetosd;
-extern int16_t n;
-
+#if HAVE_HEATED_BED
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+extern TemperatureController heatedBedController;
+#else
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif
+#define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
+#define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
+
+extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
+extern byte autotuneIndex;
+
+#ifdef SDSUPPORT
+
+#define SD_MAX_FOLDER_DEPTH 2
+
+#include "SdFat.h"
+
+enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
+class SDCard {
+public:
+  SdFat fat;
+  //Sd2Card card; // ~14 Byte
+  //SdVolume volume;
+  //SdFile root;
+  //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
+  SdFile file;
+  uint32_t filesize;
+  uint32_t sdpos;
+  char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+  char *shortname; // Pointer to start of filename itself
+  char *pathend; // File to char where pathname in fullname ends
+  bool sdmode;  // true if we are printing from sd card
+  bool sdactive;
+  //int16_t n;
+  bool savetosd;
+  SDCard();
+  void initsd();
+  void write_command(GCode *code);
+  void selectFile(char *filename);
+  inline void mount() {
+    sdmode = false;
+    initsd();
+  }
+  inline void unmount() {
+    sdmode = false;
+    sdactive = false;
+  }
+  inline void startPrint() {if(sdactive) sdmode = true; }
+  inline void pausePrint() {sdmode = false;}
+  inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
+  void printStatus();
+  void ls();
+  void startWrite(char *filename);
+  void deleteFile(char *filename);
+  void finishWrite();
+  char *createFilename(char *buffer,const dir_t &p);
+  void makeDirectory(char *filename);
+  bool showFilename(const uint8_t *name);
+private:
+  void lsRecursive(SdBaseFile *parent,byte level);
+ // SdFile *getDirectory(char* name);
+};
+
+extern SDCard sd;
+#endif
+
+
+// ##########################################################################################
+// ##                                  Debug configuration                                 ##
+// ##########################################################################################
+
+/** Uncomment, to see detailed data for every move. Only for debugging purposes! */
+//#define DEBUG_QUEUE_MOVE
+/** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
+to test your data througput or search for communication problems. */
+#define INCLUDE_DEBUG_COMMUNICATION
+/** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
+with a dry run, you can test the speed of path computations, which are still performed. */
+//#define INCLUDE_DEBUG_NO_MOVE
+/** Writes the free RAM to output, if it is less then at the last test. Should always return
+values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
+usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+//#define DEBUG_FREE_MEMORY
+//#define DEBUG_ADVANCE
+/** \brief print ops related debug info. */
+//#define DEBUG_OPS
+/** If enabled, writes the created generic table to serial port at startup. */
+//#define DEBUG_GENERIC
+/** If enabled, steps to move and moved steps are compared. */
+//#define DEBUG_STEPCOUNT
+// Uncomment the following line to enable debugging. You can better control debugging below the following line
+//#define DEBUG
 
 #if DRIVE_SYSTEM==3
 #define SIN_60 0.8660254037844386
@@ -544,4 +713,4 @@ extern int16_t n;
 #define E_AXIS 3
 
 #endif
-
+#endif

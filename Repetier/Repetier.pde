@@ -71,6 +71,7 @@ Custom M Codes
 - M28  - Start SD write (M28 filename.g)
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
+- M32 <dirname> create subdirectory
 - M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
 - M80  - Turn on power supply
 - M81  - Turn off power supply
@@ -99,7 +100,6 @@ Custom M Codes
 - M233 X<AdvanceK> - Set temporary advance K-value to X
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
 #include "Eeprom.h"
 #include "pins_arduino.h"
@@ -107,10 +107,6 @@ Custom M Codes
 #include "ui.h"
 #include <util/delay.h>
 #include <SPI.h>
-
-#ifdef SDSUPPORT
-#include "SdFat.h"
-#endif
 
 #if UI_DISPLAY_TYPE==4
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
@@ -133,6 +129,9 @@ Custom M Codes
 #ifdef ENDSTOPPULLUPS
 #error ENDSTOPPULLUPS is now replaced by individual pullup configuration!
 #endif
+#ifdef EXT0_PID_PGAIN
+#error The PID system has changed. Please use the new float number options!
+#endif
 // ####################################################################################
 // #          No configuration below this line - just some errorchecking              #
 // ####################################################################################
@@ -152,9 +151,6 @@ Custom M Codes
 #endif
 #if MOVE_CACHE_SIZE<4
 #error MOVE_CACHE_SIZE must be at least 5
-#endif
-#if OUTPUT_BUFFER_SIZE>250 || OUTPUT_BUFFER_SIZE<16
-#error OUTPUT_BUFFER_SIZE must be in range 16..250
 #endif
 
 #if DRIVE_SYSTEM==3
@@ -228,7 +224,7 @@ int maxadv=0;
 int maxadv2=0;
 float maxadvspeed=0;
 #endif
-byte pwm_pos[4] = {0,0,0,0}; // 0-2 = Heater 0-2 of extruder, 3 = Fan
+byte pwm_pos[5] = {0,0,0,0,0}; // 0-2 = Heater 0-2 of extruder, 3 = Fan, 4 = Heated bed
 
 #ifdef SIMULATE_FAN_PWM
 int fan_speed=0;
@@ -262,77 +258,25 @@ void send_mem() {
 }
 #endif
 
-#ifdef SDSUPPORT
-  Sd2Card card; // ~14 Byte
-  SdVolume volume;
-  SdFile root;
-  SdFile file;
-  uint32_t filesize = 0;
-  uint32_t sdpos = 0;
-  bool sdmode = false;
-  bool sdactive = false;
-  bool savetosd = false;
-  int16_t n;
 
-  void initsd(){
-  sdactive = false;
-  #if SDSS >- 1
-    if(root.isOpen())
-        root.close();
-    if (!card.init(SPI_FULL_SPEED,SDSS)){
-        //if (!card.init(SPI_HALF_SPEED,SDSS))
-          out.println_P(PSTR("SD init fail"));
+void update_extruder_flags() {
+  printer_state.flag0 &= ~2;
+#if USE_OPS==1
+  if(printer_state.opsMode!=0) {
+    printer_state.flag0 |= 2;
+      }
+#endif
+#if defined(USE_ADVANCE)
+  for(byte i=0;i<NUM_EXTRUDER;i++) {
+    if(extruder[i].advanceL!=0) {
+      printer_state.flag0 |= 2;
     }
-    else if (!volume.init(&card))
-          out.println_P(PSTR("volume.init failed"));
-    else if (!root.openRoot(&volume))
-          out.println_P(PSTR("openRoot failed"));
-    else
-            sdactive = true;
-  #endif
-  }
-
-  inline void write_command(GCode *code){
-     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
-      byte buf[52];
-      byte p=2;
-      file.writeError = false;
-      int params = 128 | (code->params & ~1);
-      *(int*)buf = params;
-      if(code->params & 2) {buf[p++] = code->M;}
-      if(code->params & 4) {buf[p++] = code->G;}
-      if(code->params & 8) {*(float*)&buf[p] = code->X;p+=4;}
-      if(code->params & 16) {*(float*)&buf[p] = code->Y;p+=4;}
-      if(code->params & 32) {*(float*)&buf[p] = code->Z;p+=4;}
-      if(code->params & 64) {*(float*)&buf[p] = code->E;p+=4;}
-      if(code->params & 256) {*(float*)&buf[p] = code->F;p+=4;}
-      if(code->params & 512) {buf[p++] = code->T;}
-      if(code->params & 1024) {*(long int*)&buf[p] = code->S;p+=4;}
-      if(code->params & 2048) {*(long int*)&buf[p] = code->P;p+=4;}
-      if(GCODE_HAS_STRING(code)) { // read 16 byte into string
-       char *sp = code->text;
-       for(byte i=0;i<16;++i) buf[p++] = *sp++;
-      }
-      byte *ptr = buf;
-      byte len = p;
-      while (len) {
-        byte tlen = len > 21 ? 21 : len;
-        len -= tlen;
-        do {
-          sum1 += *ptr++;
-          if(sum1>=255) sum1-=255;
-          sum2 += sum1;
-          if(sum2>=255) sum2-=255;
-        } while (--tlen);
-      }
-      buf[p++] = sum1;
-      buf[p++] = sum2;
-      file.write(buf,p);
-      if (file.writeError){
-          out.println_P(PSTR("error writing to file"));
-      }
+#ifdef ENABLE_QUADRATIC_ADVANCE
+    if(extruder[i].advanceK!=0) printer_state.flag0 |= 2;
+#endif
   }
 #endif
+}
 
 void update_ramps_parameter() {
 #if DRIVE_SYSTEM==3
@@ -343,9 +287,12 @@ void update_ramps_parameter() {
   calculate_delta(cart, delta);
   printer_state.maxDeltaPositionSteps = delta[0];
 #else
-  printer_state.xMaxSteps = axis_steps_per_unit[0]*X_MAX_LENGTH;
-  printer_state.yMaxSteps = axis_steps_per_unit[1]*Y_MAX_LENGTH;
-  printer_state.zMaxSteps = axis_steps_per_unit[2]*Z_MAX_LENGTH;
+  printer_state.xMaxSteps = (long)(axis_steps_per_unit[0]*(printer_state.xMin+printer_state.xLength));
+  printer_state.yMaxSteps = (long)(axis_steps_per_unit[1]*(printer_state.yMin+printer_state.yLength));
+  printer_state.zMaxSteps = (long)(axis_steps_per_unit[2]*(printer_state.zMin+printer_state.zLength));
+  printer_state.xMinSteps = (long)(axis_steps_per_unit[0]*printer_state.xMin);
+  printer_state.yMinSteps = (long)(axis_steps_per_unit[1]*printer_state.yMin);
+  printer_state.zMinSteps = (long)(axis_steps_per_unit[2]*printer_state.zMin);
 #endif
   for(byte i=0;i<4;i++) {
     inv_axis_steps_per_unit[i] = 1.0f/axis_steps_per_unit[i];
@@ -356,7 +303,9 @@ void update_ramps_parameter() {
     axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
 #endif
   }
+  update_extruder_flags();
 }
+
 /** \brief Setup of the hardware
 
 Sets the output and input pins in accordance to your configuration. Initializes the serial interface.
@@ -369,17 +318,17 @@ void setup()
      pinMode(PS_ON_PIN,OUTPUT); //GND
      digitalWrite(PS_ON_PIN, LOW);
   }
-
 #endif
+
   //Initialize Step Pins
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
   SET_OUTPUT(Z_STEP_PIN);
-#if MOTHERBOARD==301
+  
   // Additional setup for digipot/microstepping
   digipot_init();
   microstep_init();
-#endif
+
   //Initialize Dir Pins
 #if X_DIR_PIN>-1
   SET_OUTPUT(X_DIR_PIN);
@@ -479,16 +428,26 @@ void setup()
 #if DRIVE_SYSTEM==3
   calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 #endif
-  printer_state.offsetX = printer_state.offsetY = 0;
   printer_state.maxJerk = MAX_JERK;
   printer_state.maxZJerk = MAX_ZJERK;
   printer_state.interval = 5000;
   printer_state.stepper_loops = 1;
+  printer_state.msecondsPrinting = 0;
+  printer_state.filamentPrinted = 0;
   printer_state.flag0 = 1;
+#if DRIVE_SYSTEM != 3
+  printer_state.xLength = X_MAX_LENGTH;
+  printer_state.yLength = Y_MAX_LENGTH;
+  printer_state.zLength = Z_MAX_LENGTH;
+  printer_state.xMin = X_MIN_POS;
+  printer_state.yMin = Y_MIN_POS;
+  printer_state.zMin = Z_MIN_POS;
+#endif
   epr_init_baudrate();
-  Serial.begin(baudrate);
+  RFSERIAL.begin(baudrate);
   out.println_P(PSTR("start"));
   UI_INITIALIZE;
+  
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
   if(mcu & 1) out.println_P(PSTR("PowerUp"));
@@ -497,18 +456,14 @@ void setup()
   if(mcu & 8) out.println_P(PSTR("Watchdog Reset"));
   if(mcu & 32) out.println_P(PSTR("Software Reset"));
   MCUSR=0;
+  
   initExtruder();
   epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
 
 #ifdef SDSUPPORT
 
-  //power to SD reader
-  #if SDPOWER > -1
-    pinMode(SDPOWER,OUTPUT);
-    digitalWrite(SDPOWER,HIGH);
-  #endif
-  initsd();
+  sd.initsd();
 
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
@@ -539,19 +494,15 @@ void loop()
   UI_MEDIUM; // do check encoder
   if(code){
 #ifdef SDSUPPORT
-    if(savetosd){
+    if(sd.savetosd){
         if(!(GCODE_HAS_M(code) && code->M==29)) { // still writing to file
-            write_command(code);
+            sd.write_command(code);
         } else {
-            file.sync();
-            file.close();
-            savetosd = false;
-            out.println_P(PSTR("Done saving file."));
-            UI_CLEAR_STATUS;
+            sd.finishWrite();
         }
 #ifdef ECHO_ON_EXECUTE
         if(DEBUG_ECHO) {
-           out.print_P(PSTR("Echo:"));
+           OUT_P("Echo:");
            gcode_print_command(code);
            out.println();
         }
@@ -952,24 +903,16 @@ byte get_coordinates(GCode *com)
         printer_state.destinationSteps[3] = p;
   } else printer_state.destinationSteps[3] = printer_state.currentPositionSteps[3];
   if(GCODE_HAS_F(com)) {
-    if(com->F < 10)
-      printer_state.feedrate = 10;
+    if(com->F < 1)
+      printer_state.feedrate = 1;
     else
       if(unit_inches)
-        printer_state.feedrate = com->F*0.254f*(float)printer_state.feedrateMultiply;
+        printer_state.feedrate = com->F*0.0042333f*(float)printer_state.feedrateMultiply;  // Factor is 25.5/60/100
       else
-        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.01;
+        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.00016666666f;
   }
   return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unprductive moves
 }
-/*inline float computeJerk(PrintLine *p1,PrintLine *p2) {
-   float dx = p2->speedX*p2->-p1->speedX*p1->endFactor;
-   float dy = p2->speedY*p2->-p1->speedY*p1->endFactor;
-   if((p1->dir & 128)==0 && (p2->dir & 128)==0)
-     return sqrt(dx*dx+dy*dy);
-   float dz = (p2->speedZ*p2->-p1->speedZ*p1->endFactor)*printer_state.maxJerk/printer_state.maxZJerk;
-   return sqrt(dx*dx+dy*dy+dz*dz);
-}*/
 /**
 Computes the maximum junction speed
 */
@@ -994,11 +937,18 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
 }
 inline float safeSpeed(PrintLine *p) {
   float safe = printer_state.maxJerk*0.5;
-  // TODO - May not be relevant for delta
   if(p->dir & 64) {
     if(abs(p->speedZ)>printer_state.maxZJerk*0.5) {
       float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/abs(p->speedZ);
       if(safe2<safe) safe = safe2;
+    }
+  }
+  if(p->dir & 128) {
+    if(p->dir & 112) {
+      float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/abs(p->speedE);
+      if(safe2<safe) safe = safe2;
+    } else {
+      safe = 0.5*current_extruder->maxStartFeedrate; // This is a retraction move
     }
   }
   return (safe<p->fullSpeed?safe:p->fullSpeed);
@@ -1040,7 +990,7 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
     p->decelSteps = ((vmax2-U16SquaredToU32(p->vEnd))/(p->accelerationPrim<<1))+1;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceStart = (float)p->advanceFull**;
+    p->advanceStart = (float)p->advanceFull*p->startFactor*p->startFactor;
     p->advanceEnd = (float)p->advanceFull*endFactor*endFactor;
 #endif
 #endif
@@ -1125,6 +1075,12 @@ inline void backwardPlanner(byte p,byte last) {
       }
     }
 #endif
+    // Switch move-retraction or vice versa start always with save speeds! Keeps extruder from blocking
+    if((prev->dir & 240)==128 || (act->dir & 240)==128) {
+      prev->joinFlags |= FLAG_JOIN_END_FIXED;
+      act->joinFlags |= FLAG_JOIN_START_FIXED;
+      return;          
+    } 
     if(prev->joinFlags & FLAG_JOIN_END_FIXED) { // Nothing to update from here on
       act->joinFlags |= FLAG_JOIN_START_FIXED; // Wait only with safe speeds!
       return;
@@ -1193,7 +1149,7 @@ void updateTrapezoids(byte p) {
   PrintLine *firstLine;
   BEGIN_INTERRUPT_PROTECTED;
   first = lines_pos; // first non fixed segment
-  NEXT_PLANNER_INDEX(first);
+  NEXT_PLANNER_INDEX(first); // don't touch the line printing
   while(first!=p && (lines[p].joinFlags | FLAG_JOIN_END_FIXED)) {
     NEXT_PLANNER_INDEX(first);
   }
@@ -1289,27 +1245,27 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #else
   long axis_interval[4];
 #endif
-  float time_for_move = (float)(60*F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
+  float time_for_move = (float)(F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   bool critical=false;
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
-    time_for_move = LOW_TICKS_PER_MOVE;
+    time_for_move += (3*(LOW_TICKS_PER_MOVE-time_for_move))/(lines_count+1); // Increase time if queue gets empty. Add more time if queue gets smaller.
     critical=true;
   }
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-  axis_interval[0] = 60.0*abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+  axis_interval[0] = abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-  axis_interval[1] = 60.0*abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
+  axis_interval[1] = abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
   if(p->dir & 64) { // normally no move in z direction
-    axis_interval[2] = 60.0*abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
+    axis_interval[2] = abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
-  axis_interval[3] = 60.0*abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
+  axis_interval[3] = abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
   if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
   #if DRIVE_SYSTEM==3
-  axis_interval[4] = 60.0*abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
+  axis_interval[4] = abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
   #endif
 
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
@@ -1328,11 +1284,12 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     axis_interval[2] = time_for_move/p->delta[2];
     p->speedZ = axis_diff[2]*inv_time_s;
   } else p->speedZ = 0;
-  if(p->dir & 128)
+  if(p->dir & 128) {
     axis_interval[3] = time_for_move/p->delta[3];
+    p->speedE = axis_diff[3]*inv_time_s;
+  }
 #if DRIVE_SYSTEM==3
-  if(p->primaryAxis == 4)
-	axis_interval[4] = time_for_move/p->stepsRemaining;
+  axis_interval[4] = time_for_move/p->stepsRemaining;
 #endif
   p->fullSpeed = p->distance*inv_time_s;
 
@@ -1381,27 +1338,25 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #endif
     p->advanceL = 0;
   } else {
-    float speedE = axis_diff[3]*inv_time_s; // [mm/s]
-    float advlin = speedE*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
+    float advlin = p->speedE*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
     p->advanceL = (65536*advlin)/p->vMax; //advanceLscaled = (65536*vE*k2)/vMax
  #ifdef ENABLE_QUADRATIC_ADVANCE;
-    p->advanceFull = 65536*current_extruder->advanceK*speedE*speedE; // Steps*65536 at full speed
+    p->advanceFull = 65536*current_extruder->advanceK*p->speedE*p->speedE; // Steps*65536 at full speed
     long steps = (U16SquaredToU32(p->vMax))/(p->accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
     p->advanceRate = p->advanceFull/steps;
     if((p->advanceFull>>16)>maxadv) {
         maxadv = (p->advanceFull>>16);
-        maxadvspeed = speedE;
+        maxadvspeed = p->speedE;
     }
  #endif
     if(advlin>maxadv2) {
       maxadv2 = advlin;
-      maxadvspeed = speedE;
+      maxadvspeed = p->speedE;
     }
   }
 #endif
     UI_MEDIUM; // do check encoder
 
-	// Need to check if trampezoids during delta move can be calculated
     updateTrapezoids(lines_write_pos);
     // how much steps on primary axis do we need to reach target feedrate
     //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
@@ -1454,6 +1409,100 @@ END_INTERRUPT_PROTECTED
     check_mem();
 #endif
 }
+inline unsigned int ComputeV(long timer,long accel) {
+  unsigned int res;
+  // 38 Ticks
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+     // Result LSB first: %A0, %B0, %A1
+     "mul %B1,%A2 \n\t"
+     "mov %A0,r1 \n\t"
+     "mul %B1,%C2 \n\t"
+     "mov %B0,r0 \n\t"
+     "mov %A1,r1 \n\t"
+     "mul %B1,%B2 \n\t"
+     "add %A0,r0 \n\t"
+     "adc %B0,r1 \n\t"
+     "adc %A1,%D2 \n\t"
+     "mul %C1,%A2 \n\t"
+     "add %A0,r0 \n\t"
+     "adc %B0,r1 \n\t"
+     "adc %A1,%D2 \n\t"
+     "mul %C1,%B2 \n\t"
+     "add %B0,r0 \n\t"
+     "adc %A1,r1 \n\t"
+     "mul %D1,%A2 \n\t"
+     "add %B0,r0 \n\t"
+     "adc %A1,r1 \n\t"
+     "mul %C1,%C2 \n\t"
+     "add %A1,r0 \n\t"
+     "mul %D1,%B2 \n\t"
+     "add %A1,r0 \n\t"
+     "lsr %A1 \n\t"
+     "ror %B0 \n\t"
+     "ror %A0 \n\t"
+     "lsr %A1 \n\t"
+     "ror %B0 \n\t"
+     "ror %A0 \n\t"
+     "clr r1 \n\t"
+  :"=&r"(res),"=r"(timer),"=r"(accel)
+  :"1"(timer),"2"(accel)
+  : );
+  // unsigned int v = ((timer>>8)*cur->accel)>>10;
+  return res;
+}
+// Multiply two 16 bit values and return 32 bit result
+inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
+  unsigned long res;
+  // 18 Ticks = 1.125 us
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+     // Result LSB first: %A0, %B0, %A1
+     "clr r18 \n\t"
+     "mul %B2,%B1 \n\t" // mul hig bytes
+     "movw %C0,r0 \n\t"
+     "mul %A1,%A2 \n\t" // mul low bytes
+     "movw %A0,r0 \n\t"
+     "mul %A1,%B2 \n\t"
+     "add %B0,r0 \n\t"
+     "adc %C0,r1 \n\t"
+     "adc %D0,r18 \n\t"
+     "mul %B1,%A2 \n\t"
+     "add %B0,r0 \n\t"
+     "adc %C0,r1 \n\t"
+     "adc %D0,r18 \n\t"
+     "clr r1 \n\t"
+  :"=&r"(res),"=r"(a),"=r"(b)
+  :"1"(a),"2"(b)
+  :"r18" );
+  // return (long)a*b;
+  return res;
+}
+// Multiply two 16 bit values and return 32 bit result
+inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
+  unsigned int res;
+  // 18 Ticks = 1.125 us
+  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
+     // Result LSB first: %A0, %B0, %A1
+     "clr r18 \n\t"
+     "mul %B2,%B1 \n\t" // mul hig bytes
+     "movw %A0,r0 \n\t"
+     "mul %A1,%A2 \n\t" // mul low bytes
+     "mov r19,r1 \n\t"
+     "mul %A1,%B2 \n\t"
+     "add r19,r0 \n\t"
+     "adc %A0,r1 \n\t"
+     "adc %B0,r18 \n\t"
+     "mul %B1,%A2 \n\t"
+     "add r19,r0 \n\t"
+     "adc %A0,r1 \n\t"
+     "adc %B0,r18 \n\t"
+     "clr r1 \n\t"
+  :"=&r"(res),"=r"(a),"=r"(b)
+  :"1"(a),"2"(b)
+  :"r18","r19" );
+  // return ((long)a*b)>>16;
+  return res;
+}
+
 #if DRIVE_SYSTEM != 3
 /**
   Put a move to the current destination coordinates into the movement cache.
@@ -1958,110 +2007,15 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 }
 
 #endif
-
-inline unsigned int ComputeV(long timer,long accel) {
-  unsigned int res;
-  // 38 Ticks
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
-     // Result LSB first: %A0, %B0, %A1
-     "mul %B1,%A2 \n\t"
-     "mov %A0,r1 \n\t"
-     "mul %B1,%C2 \n\t"
-     "mov %B0,r0 \n\t"
-     "mov %A1,r1 \n\t"
-     "mul %B1,%B2 \n\t"
-     "add %A0,r0 \n\t"
-     "adc %B0,r1 \n\t"
-     "adc %A1,%D2 \n\t"
-     "mul %C1,%A2 \n\t"
-     "add %A0,r0 \n\t"
-     "adc %B0,r1 \n\t"
-     "adc %A1,%D2 \n\t"
-     "mul %C1,%B2 \n\t"
-     "add %B0,r0 \n\t"
-     "adc %A1,r1 \n\t"
-     "mul %D1,%A2 \n\t"
-     "add %B0,r0 \n\t"
-     "adc %A1,r1 \n\t"
-     "mul %C1,%C2 \n\t"
-     "add %A1,r0 \n\t"
-     "mul %D1,%B2 \n\t"
-     "add %A1,r0 \n\t"
-     "lsr %A1 \n\t"
-     "ror %B0 \n\t"
-     "ror %A0 \n\t"
-     "lsr %A1 \n\t"
-     "ror %B0 \n\t"
-     "ror %A0 \n\t"
-     "clr r1 \n\t"
-  :"=&r"(res),"=r"(timer),"=r"(accel)
-  :"1"(timer),"2"(accel)
-  : );
-  // unsigned int v = ((timer>>8)*cur->accel)>>10;
-  return res;
-}
-// Multiply two 16 bit values and return 32 bit result
-inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
-  unsigned long res;
-  // 18 Ticks = 1.125 us
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
-     // Result LSB first: %A0, %B0, %A1
-     "clr r18 \n\t"
-     "mul %B2,%B1 \n\t" // mul hig bytes
-     "movw %C0,r0 \n\t"
-     "mul %A1,%A2 \n\t" // mul low bytes
-     "movw %A0,r0 \n\t"
-     "mul %A1,%B2 \n\t"
-     "add %B0,r0 \n\t"
-     "adc %C0,r1 \n\t"
-     "adc %D0,r18 \n\t"
-     "mul %B1,%A2 \n\t"
-     "add %B0,r0 \n\t"
-     "adc %C0,r1 \n\t"
-     "adc %D0,r18 \n\t"
-     "clr r1 \n\t"
-  :"=&r"(res),"=r"(a),"=r"(b)
-  :"1"(a),"2"(b)
-  :"r18" );
-  // return (long)a*b;
-  return res;
-}
-// Multiply two 16 bit values and return 32 bit result
-inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
-  unsigned int res;
-  // 18 Ticks = 1.125 us
-  __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
-     // Result LSB first: %A0, %B0, %A1
-     "clr r18 \n\t"
-     "mul %B2,%B1 \n\t" // mul hig bytes
-     "movw %A0,r0 \n\t"
-     "mul %A1,%A2 \n\t" // mul low bytes
-     "mov r19,r1 \n\t"
-     "mul %A1,%B2 \n\t"
-     "add r19,r0 \n\t"
-     "adc %A0,r1 \n\t"
-     "adc %B0,r18 \n\t"
-     "mul %B1,%A2 \n\t"
-     "add r19,r0 \n\t"
-     "adc %A0,r1 \n\t"
-     "adc %B0,r18 \n\t"
-     "clr r1 \n\t"
-  :"=&r"(res),"=r"(a),"=r"(b)
-  :"1"(a),"2"(b)
-  :"r18","r19" );
-  // return ((long)a*b)>>16;
-  return res;
-}
-
 /**
   Moves the stepper motors one step. If the last step is reached, the next movement is started.
   The function must be called from a timer loop. It returns the time for the next call.
   This is a modified version that implements a bresenham 'multi-step' algorithm where the dominant
   cartesian axis steps may be less than the changing dominant delta axis.
 */
+#if DRIVE_SYSTEM==3
 int lastblk=-1;
 long cur_errupd;
-#if DRIVE_SYSTEM==3
 //#define DEBUG_DELTA_TIMER
 // Current delta segment
 DeltaSegment *curd;
@@ -2080,7 +2034,7 @@ inline long bresenham_step() {
 			return 2000;
 		}
 		lastblk = -1;
-#ifdef INCLUDE_DEBUG_NO_MOVE
+	#ifdef INCLUDE_DEBUG_NO_MOVE
 		if(DEBUG_NO_MOVES) { // simulate a move, but do nothing in reality
 			lines_pos++;
 			if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
@@ -2089,18 +2043,18 @@ inline long bresenham_step() {
 			--lines_count;
 			return 1000;
 		}
-#endif
+	#endif
 		if(cur->flags & FLAG_WARMUP) {
 		  // This is a warmup move to initalize the path planner correctly. Just waste
 		  // a bit of time to get the planning up to date.
-#if USE_OPS==1
+	#if USE_OPS==1
 			if(cur->joinFlags & FLAG_JOIN_END_RETRACT) { // Make sure filament is pushed back
 				if(printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 					//sei();
 					out.println_P(PSTR("DownW"));
 					cli();
-#endif
+		#endif
 					printer_state.filamentRetracted = false;
 					printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
 				}
@@ -2110,11 +2064,11 @@ inline long bresenham_step() {
 				}
 			} else if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
 				if(!printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 					//sei();
 					out.println_P(PSTR("UpW"));
 					cli();
-#endif
+		#endif
 					printer_state.filamentRetracted = true;
 					cli();
 					printer_state.extruderStepsNeeded-=printer_state.opsRetractSteps;
@@ -2125,7 +2079,7 @@ inline long bresenham_step() {
 					return 2000; // wait, work is done in other interrupt
 				}
 			}
-#endif
+	#endif
 			if(lines_count<=cur->primaryAxis) {cur=0;return 2000;}
 			lines_pos++;
 			if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
@@ -2137,13 +2091,13 @@ inline long bresenham_step() {
 		// Set up delta segments
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
-#if USE_OPS==1
+	#if USE_OPS==1
 		if(printer_state.opsMode) { // Enabled?
 			if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
 				if(!printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 					out.println_P(PSTR("Up"));
-#endif
+		#endif
 					printer_state.filamentRetracted = true;
 					cli();
 					printer_state.extruderStepsNeeded-=printer_state.opsRetractSteps;
@@ -2155,9 +2109,9 @@ inline long bresenham_step() {
 			else if((cur->joinFlags & FLAG_JOIN_NO_RETRACT)==0 && printmoveSeen) {
 				if((cur->dir & 136)==136) {
 					if(printer_state.filamentRetracted) { // Printmove and filament is still up!
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 						out.println_P(PSTR("DownA"));
-#endif
+		#endif
 						printer_state.filamentRetracted = false;
 						cli();
 						printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
@@ -2187,7 +2141,7 @@ inline long bresenham_step() {
 				}
 			}
 		} // End if opsMode
-#endif
+	#endif
 		sei(); // Allow interrupts
 		if (cur->numDeltaSegments) {
 			// If there are delta segments point to them here
@@ -2209,10 +2163,10 @@ inline long bresenham_step() {
 				curd_errupd = cur->numPrimaryStepPerSegment;
 			}
 			stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
-#ifdef DEBUG_DELTA_TIMER
+	#ifdef DEBUG_DELTA_TIMER
 			out.println_byte_P(PSTR("HS: "),cur->halfstep);
 			out.println_long_P(PSTR("Error: "),curd_errupd);
-#endif
+	#endif
 		} else curd=0;
 		cur_errupd = (cur->halfstep ? cur->stepsRemaining << 1 : cur->stepsRemaining);
 
@@ -2242,23 +2196,24 @@ inline long bresenham_step() {
 				WRITE(Z_DIR_PIN,INVERT_Z_DIR);
 			}
 		}
-#if USE_OPS==0 && !defined(USE_ADVANCE)
+	#if USE_OPS==1 || defined(USE_ADVANCE)
+      if((printer_state.flag0 & 2)==0) // Set direction if no advance/OPS enabled
+	#endif
 		if(cur->dir & 8) {
 			extruder_set_direction(1);
 		} else {
 			extruder_set_direction(0);
 		}
-#endif
-#ifdef USE_ADVANCE
+	#ifdef USE_ADVANCE
 		long h = mulu6xu16to32(cur->vStart,cur->advanceL);
 		int tred = ((
-#ifdef ENABLE_QUADRATIC_ADVANCE
+		#ifdef ENABLE_QUADRATIC_ADVANCE
 			(printer_state.advance_executed = cur->advanceStart)+
-#endif
+		#endif
 			h)>>16);
 		printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 		printer_state.advance_steps_set = tred;
-#endif
+	#endif
 		return printer_state.interval; // Wait an other 50% fro last step to make the 100% full
 	} // End cur=0
 	sei();
@@ -2278,45 +2233,49 @@ inline long bresenham_step() {
 	cli();
 	if(do_even) {
 		if((cur->flags & FLAG_CHECK_ENDSTOPS) && (curd != 0)) {
-#if X_MAX_PIN>-1
+	#if X_MAX_PIN>-1
 			if((curd->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
 				curd->dir&=~16;
 				cur->dir&=~16;
 			}
-#endif
-#if Y_MAX_PIN>-1
+	#endif
+	#if Y_MAX_PIN>-1
 			if((curd->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
 				curd->dir&=~32;
 				cur->dir&=~32;
 			}
-#endif
-#if Z_MAX_PIN>-1
+	#endif
+	#if Z_MAX_PIN>-1
 			if((curd->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {
 				curd->dir&=~64;
 				cur->dir&=~64;
 			}
-#endif
+	#endif
 		}
 	}
 	byte max_loops = (printer_state.stepper_loops<=cur->stepsRemaining ? printer_state.stepper_loops : cur->stepsRemaining);
 	if(cur->stepsRemaining>0) {
 		for(byte loop=0;loop<max_loops;loop++) {
 			if(loop>0)
-#if STEPPER_HIGH_DELAY>0
+	#if STEPPER_HIGH_DELAY>0
 				delayMicroseconds(STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY);
-#else
+	#else
 				delayMicroseconds(DOUBLE_STEP_DELAY);
-#endif
+	#endif
 			if(cur->dir & 128) {
 				if((cur->error[3] -= cur->delta[3]) < 0) {
-#if USE_OPS==1 || defined(USE_ADVANCE)
-					if(cur->dir & 8)
-						printer_state.extruderStepsNeeded++;
-					else
-						printer_state.extruderStepsNeeded--;
-#else
-					extruder_step();
-#endif
+	#if USE_OPS==1 || defined(USE_ADVANCE)
+					if((printer_state.flag0 & 2)) { // Use interrupt for movement
+						if(cur->dir & 8)
+							printer_state.extruderStepsNeeded++;
+						else
+							printer_state.extruderStepsNeeded--;
+					} else {
+	#endif
+						extruder_step();
+	#if USE_OPS==1 || defined(USE_ADVANCE)
+					}
+	#endif
 					cur->error[3] += cur_errupd;
 				}
 			}
@@ -2399,20 +2358,21 @@ inline long bresenham_step() {
 					}
 				}
 			}
-#if USE_OPS==0 && !defined(USE_ADVANCE)
+	#if USE_OPS==1 || defined(USE_ADVANCE)
+			if((printer_state.flag0 & 2)==0) // Use interrupt for movement
+	#endif
 			extruder_unstep();
-#endif
 		} // for loop
 		if(do_odd) {
 			sei(); // Allow interrupts for other types, timer1 is still disabled
-#ifdef RAMP_ACCELERATION
+	#ifdef RAMP_ACCELERATION
 		//If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
 			if (printer_state.stepNumber <= cur->accelSteps) { // we are accelerating
 				printer_state.vMaxReached = ComputeV(printer_state.timer,cur->facceleration)+cur->vStart;
 				if(printer_state.vMaxReached>cur->vMax) printer_state.vMaxReached = cur->vMax;
 				unsigned int v;
 				if(printer_state.vMaxReached>STEP_DOUBLER_FREQUENCY) {
- #if ALLOW_QUADSTEPPING
+		#if ALLOW_QUADSTEPPING
 					if(printer_state.vMaxReached>STEP_DOUBLER_FREQUENCY*2) {
 						printer_state.stepper_loops = 4;
 						v = printer_state.vMaxReached>>2;
@@ -2420,18 +2380,18 @@ inline long bresenham_step() {
 						printer_state.stepper_loops = 2;
 						v = printer_state.vMaxReached>>1;
 					}
- #else
+		#else
 					printer_state.stepper_loops = 2;
 					v = printer_state.vMaxReached>>1;
- #endif
+		#endif
 				} else {
 					printer_state.stepper_loops = 1;
 					v = printer_state.vMaxReached;
 				}
 				printer_state.interval = CPUDivU2(v);
 				printer_state.timer+=printer_state.interval;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+		#ifdef USE_ADVANCE
+			#ifdef ENABLE_QUADRATIC_ADVANCE
 				long advance_target =printer_state.advance_executed+cur->advanceRate;
 				for(byte loop=1;loop<max_loops;loop++) advance_target+=cur->advanceRate;
 				if(advance_target>cur->advanceFull)
@@ -2443,13 +2403,13 @@ inline long bresenham_step() {
 				printer_state.advance_steps_set = tred;
 				sei();
 				printer_state.advance_executed = advance_target;
-#else
+			#else
 				int tred = mulu6xu16shift16(printer_state.vMaxReached,cur->advanceL);
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
-#endif
-#endif
+			#endif
+		#endif
 			} else if (cur->stepsRemaining <= cur->decelSteps) { // time to slow down
 				if (!(cur->flags & FLAG_DECELERATING)) {
 					printer_state.timer = 0;
@@ -2463,7 +2423,7 @@ inline long bresenham_step() {
 					if (v<cur->vEnd) v = cur->vEnd; // extra steps at the end of desceleration due to rounding erros
 				}
 				if(v>STEP_DOUBLER_FREQUENCY) {
-#if ALLOW_QUADSTEPPING
+		#if ALLOW_QUADSTEPPING
 					if(v>STEP_DOUBLER_FREQUENCY*2) {
 						printer_state.stepper_loops = 4;
 						v = v>>2;
@@ -2471,17 +2431,17 @@ inline long bresenham_step() {
 						printer_state.stepper_loops = 2;
 						v = v>>1;
 					}
-#else
+		#else
 					printer_state.stepper_loops = 2;
 					v = v>>1;
-#endif
+		#endif
 				} else {
 					printer_state.stepper_loops = 1;
 				}
 				printer_state.interval = CPUDivU2(v);
 				printer_state.timer+=printer_state.interval;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+		#ifdef USE_ADVANCE
+			#ifdef ENABLE_QUADRATIC_ADVANCE
 				long advance_target =printer_state.advance_executed-cur->advanceRate;
 				for(byte loop=1;loop<max_loops;loop++) advance_target-=cur->advanceRate;
 				if(advance_target<cur->advanceEnd)
@@ -2493,42 +2453,42 @@ inline long bresenham_step() {
 				printer_state.advance_steps_set = tred;
 				sei();
 				printer_state.advance_executed = advance_target;
-#else
+			#else
 				int tred=mulu6xu16shift16(cur->advanceL,v);
 				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
-#endif
-#endif
+			#endif
+		#endif
 			} else {
 				// If we had acceleration, we need to use the latest vMaxReached and interval
 				// If we started full speed, we need to use cur->fullInterval and vMax
-#ifdef USE_ADVANCE
+		#ifdef USE_ADVANCE
 				unsigned int v;
 				if(!cur->accelSteps) {
 					v = cur->vMax;
 				} else {
 					v = printer_state.vMaxReached;
 				}
-#ifdef ENABLE_QUADRATIC_ADVANCE
+			#ifdef ENABLE_QUADRATIC_ADVANCE
 				long h=mulu6xu16to32(cur->advanceL,v);
 				int tred = ((printer_state.advance_executed+h)>>16);
 				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
-#else
+			#else
 				int tred=mulu6xu16shift16(cur->advanceL,v);
 				cli();
 				printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 				printer_state.advance_steps_set = tred;
 				sei();
-#endif
-#endif
+			#endif
+		#endif
 				if(!cur->accelSteps) {
 					if(cur->vMax>STEP_DOUBLER_FREQUENCY) {
-#if ALLOW_QUADSTEPPING
+		#if ALLOW_QUADSTEPPING
 						if(cur->vMax>STEP_DOUBLER_FREQUENCY*2) {
 							printer_state.stepper_loops = 4;
 							printer_state.interval = cur->fullInterval>>2;
@@ -2536,40 +2496,40 @@ inline long bresenham_step() {
 							printer_state.stepper_loops = 2;
 							printer_state.interval = cur->fullInterval>>1;
 						}
-#else
+		#else
 						printer_state.stepper_loops = 2;
 						printer_state.interval = cur->fullInterval>>1;
-#endif
+		#endif
 					} else {
 						printer_state.stepper_loops = 1;
 						printer_state.interval = cur->fullInterval;
 					}
 				}
 			}
-#else
+	#else
 			printer_state.interval = cur->fullInterval; // without RAMPS always use full speed
-#endif
+	#endif
 		} // do_odd
 		if(do_even) {
 			printer_state.stepNumber+=max_loops;
 			cur->stepsRemaining-=max_loops;
 		}
 
-#if USE_OPS==1
+	#if USE_OPS==1
 		if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 			out.println_long_P(PSTR("DownX"),cur->stepsRemaining);
-#endif
+		#endif
 			// Point for retraction reversal reached.
 			printer_state.filamentRetracted = false;
 			cli();
 			printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 			sei();
 			out.println_long_P(PSTR("N="),printer_state.extruderStepsNeeded);
-#endif
+		#endif
 		}
-#endif
+	#endif
 	} // stepsRemaining
 	long interval;
 	if(cur->halfstep)
@@ -2584,39 +2544,39 @@ inline long bresenham_step() {
 
 			// Release remaining delta segments
 			delta_segment_count -= cur->numDeltaSegments;
-#ifdef DEBUG_STEPCOUNT
+	#ifdef DEBUG_STEPCOUNT
 			if(cur->totalStepsRemaining) {
 				out.println_long_P(PSTR("Missed steps:"), cur->totalStepsRemaining);
 				out.println_long_P(PSTR("Step/seg r:"), stepsPerSegRemaining);
 				out.println_int_P(PSTR("NDS:"), (int) cur->numDeltaSegments);
 				out.println_int_P(PSTR("HS:"), (int) cur->halfstep);
 			}
-#endif
+	#endif
 
-#if USE_OPS==1
+	#if USE_OPS==1
 			if(cur->joinFlags & FLAG_JOIN_END_RETRACT) { // Make sure filament is pushed back
 				sei();
 				if(printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 					out.println_P(PSTR("Down"));
-#endif
+		#endif
 					printer_state.filamentRetracted = false;
 					cli();
 					printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
 				}
 				cli();
 				if(printer_state.extruderStepsNeeded) {
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
     //      sei();
     //      out.println_int_P(PSTR("W"),printer_state.extruderStepsNeeded);
-#endif
+		#endif
 					return 4000; // wait, work is done in other interrupt
 				}
-#ifdef DEBUG_OPS
+		#ifdef DEBUG_OPS
 				sei();
-#endif
+		#endif
 			}
-#endif
+	#endif
 			cli();
 			lines_pos++;
 			if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
@@ -2628,13 +2588,19 @@ inline long bresenham_step() {
 			if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
 			interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0
 		}
-#ifdef DEBUG_FREE_MEMORY
+	#ifdef DEBUG_FREE_MEMORY
 		check_mem();
-#endif
+	#endif
 	} // Do even
 	return interval;
 }
 #else
+/**
+  Moves the stepper motors one step. If the last step is reached, the next movement is started.
+  The function must be called from a timer loop. It returns the time for the next call.
+*/
+int lastblk=-1;
+long cur_errupd;
 inline long bresenham_step() {
   if(cur == 0) {
       sei();
@@ -2664,11 +2630,11 @@ inline long bresenham_step() {
 #if USE_OPS==1
          if(cur->joinFlags & FLAG_JOIN_END_RETRACT) { // Make sure filament is pushed back
             if(printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+	#ifdef DEBUG_OPS
               //sei();
               out.println_P(PSTR("DownW"));
               cli();
-#endif
+	#endif
               printer_state.filamentRetracted = false;
               printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
             }
@@ -2678,11 +2644,11 @@ inline long bresenham_step() {
             }
           } else if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
             if(!printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+	#ifdef DEBUG_OPS
               //sei();
               out.println_P(PSTR("UpW"));
               cli();
-#endif
+	#endif
               printer_state.filamentRetracted = true;
               cli();
               printer_state.extruderStepsNeeded-=printer_state.opsRetractSteps;
@@ -2712,9 +2678,9 @@ inline long bresenham_step() {
       if(printer_state.opsMode) { // Enabled?
         if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
          if(!printer_state.filamentRetracted) {
-#ifdef DEBUG_OPS
+	#ifdef DEBUG_OPS
             out.println_P(PSTR("Up"));
-#endif
+	#endif
             printer_state.filamentRetracted = true;
             cli();
             printer_state.extruderStepsNeeded-=printer_state.opsRetractSteps;
@@ -2726,9 +2692,9 @@ inline long bresenham_step() {
         else if((cur->joinFlags & FLAG_JOIN_NO_RETRACT)==0 && printmoveSeen) {
           if((cur->dir & 136)==136) {
             if(printer_state.filamentRetracted) { // Printmove and filament is still up!
-#ifdef DEBUG_OPS
+	#ifdef DEBUG_OPS
               out.println_P(PSTR("DownA"));
-#endif
+	#endif
               printer_state.filamentRetracted = false;
               cli();
               printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
@@ -2766,7 +2732,6 @@ inline long bresenham_step() {
       } else
         cur_errupd = cur->delta[cur->primaryAxis];
       if(!(cur->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED)) {// should never happen, but with bad timings???
-        out.println_int_P(PSTR("LATE "),(unsigned int)lines_count);
 		updateStepsParameter(cur/*,8*/);
       }
       printer_state.vMaxReached = cur->vStart;
@@ -2789,19 +2754,20 @@ inline long bresenham_step() {
       } else {
         WRITE(Z_DIR_PIN,INVERT_Z_DIR);
       }
-#if USE_OPS==0 && !defined(USE_ADVANCE)
+#if USE_OPS==1 || defined(USE_ADVANCE)
+      if((printer_state.flag0 & 2)==0) // Set direction if no advance/OPS enabled
+#endif
       if(cur->dir & 8) {
         extruder_set_direction(1);
       } else {
         extruder_set_direction(0);
       }
-#endif
 #ifdef USE_ADVANCE
      long h = mulu6xu16to32(cur->vStart,cur->advanceL);
      int tred = ((
-#ifdef ENABLE_QUADRATIC_ADVANCE
+	#ifdef ENABLE_QUADRATIC_ADVANCE
      (printer_state.advance_executed = cur->advanceStart)+
-#endif
+	#endif
      h)>>16);
      printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
      printer_state.advance_steps_set = tred;
@@ -2881,12 +2847,16 @@ inline long bresenham_step() {
      if(cur->dir & 128) {
       if((cur->error[3] -= cur->delta[3]) < 0) {
 #if USE_OPS==1 || defined(USE_ADVANCE)
+       if((printer_state.flag0 & 2)) { // Use interrupt for movement
         if(cur->dir & 8)
           printer_state.extruderStepsNeeded++;
         else
           printer_state.extruderStepsNeeded--;
-#else
+        } else {
+#endif
         extruder_step();
+#if USE_OPS==1 || defined(USE_ADVANCE)
+        }
 #endif
         cur->error[3] += cur_errupd;
       }
@@ -2918,12 +2888,14 @@ inline long bresenham_step() {
 #if STEPPER_HIGH_DELAY>0
     delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
-#if USE_OPS==0 && !defined(USE_ADVANCE)
-    extruder_unstep();
+#if USE_OPS==1 || defined(USE_ADVANCE)
+    if((printer_state.flag0 & 2)==0) // Use interrupt for movement
 #endif
+    extruder_unstep();
     WRITE(X_STEP_PIN,LOW);
     WRITE(Y_STEP_PIN,LOW);
     WRITE(Z_STEP_PIN,LOW);
+
   } // for loop
   if(do_odd) {
       sei(); // Allow interrupts for other types, timer1 is still disabled
@@ -3323,10 +3295,33 @@ allowable speed for the extruder.
 ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-	static byte accdelay=10;
+  if((printer_state.flag0 & 2)==0) return; // currently no need
 	byte timer = EXTRUDER_OCR;
-	byte wait; // Time to wait until next interrupt
 	bool increasing = printer_state.extruderStepsNeeded>0;
+  
+  if(printer_state.extruderStepsNeeded==0) {
+      extruder_last_dir = 0;
+  }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
+    EXTRUDER_OCR = timer+50; // Little delay to accomodate to reversed direction     
+    extruder_set_direction(increasing ? 1 : 0);    
+    extruder_last_dir = (increasing ? 1 : -1);
+    return;
+  } else {
+    if(extruder_last_dir==0) {
+      extruder_set_direction(increasing ? 1 : 0);    
+      extruder_last_dir = (increasing ? 1 : -1);
+    }
+    extruder_step();
+    printer_state.extruderStepsNeeded-=extruder_last_dir;
+#if STEPPER_HIGH_DELAY>0
+    delayMicroseconds(STEPPER_HIGH_DELAY);
+#endif    
+    extruder_unstep();
+  }
+  EXTRUDER_OCR = timer+printer_state.maxExtruderSpeed;
+  
+/* Version of 0.7 branch
+  static byte accdelay=10;
 	if(printer_state.extruderStepsNeeded==0) {
 		if(extruder_speed<printer_state.minExtruderSpeed) {
 		  extruder_speed++;
@@ -3360,6 +3355,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
     EXTRUDER_OCR = timer+extruder_speed;
     extruder_unstep();
 }
+  */
 /*
   EXTRUDER_OCR += printer_state.timer0Interval; // time to come back
   // The stepper signals are in strategical positions for optimal timing. If you
@@ -3395,13 +3391,13 @@ ISR(EXTRUDER_TIMER_VECTOR)
 }
 
 /**
-This timer is called 1953 timer per second. It is used to update pwm values for heater and some other frequent jobs.
+This timer is called 3906 timer per second. It is used to update pwm values for heater and some other frequent jobs.
 */
 ISR(PWM_TIMER_VECTOR)
 {
   static byte pwm_count = 0;
-  static byte pwm_pos_set[4];
-  PWM_OCR += 128;
+  static byte pwm_pos_set[5];
+  PWM_OCR += 64; 
   if(pwm_count==0) {
 #if EXT0_HEATER_PIN>-1
     if((pwm_pos_set[0] = pwm_pos[0])>0) WRITE(EXT0_HEATER_PIN,1);
@@ -3415,22 +3411,28 @@ ISR(PWM_TIMER_VECTOR)
 #if FAN_PIN>-1
     if((pwm_pos_set[3] = pwm_pos[3])>0) WRITE(FAN_PIN,1);
 #endif
+#if HEATED_BED_HEATER_PIN>-1
+    if((pwm_pos_set[4] = pwm_pos[4])>0) WRITE(HEATED_BED_HEATER_PIN,1);
+#endif
   }
 #if EXT0_HEATER_PIN>-1
-  if(pwm_pos_set[0] == pwm_count) WRITE(EXT0_HEATER_PIN,0);
+  if(pwm_pos_set[0] == pwm_count && pwm_pos_set[0]!=255) WRITE(EXT0_HEATER_PIN,0);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
-    if(pwm_pos_set[1] == pwm_count) WRITE(EXT1_HEATER_PIN,0);
+    if(pwm_pos_set[1] == pwm_count && pwm_pos_set[1]!=255) WRITE(EXT1_HEATER_PIN,0);
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
-    if(pwm_pos_set[2] == pwm_count) WRITE(EXT2_HEATER_PIN,0);
+    if(pwm_pos_set[2] == pwm_count && pwm_pos_set[2]!=255) WRITE(EXT2_HEATER_PIN,0);
 #endif
 #if FAN_PIN>-1
-    if(pwm_pos_set[3] == pwm_count) WRITE(FAN_PIN,0);
+    if(pwm_pos_set[3] == pwm_count && pwm_pos_set[3]!=255) WRITE(FAN_PIN,0);
+#endif
+#if HEATED_BED_HEATER_PIN>-1
+    if(pwm_pos_set[4] == pwm_count && pwm_pos_set[4]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
 #endif
   sei();
-  counter_periodical++; // Appxoimate a 25ms timer
-  if(counter_periodical>=49) {
+  counter_periodical++; // Appxoimate a 100ms timer
+  if(counter_periodical>=(int)(F_CPU/40960)) {
     counter_periodical=0;
     execute_periodical=1;
   }

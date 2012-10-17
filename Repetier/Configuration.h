@@ -19,6 +19,17 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+/* Some words on units:
+
+From 0.80 onwards the units used are unified for easier configuration, watch out when transfering from older configs!
+
+Speed is in mm/s
+Acceleration in mm/s^2
+Temperature is in degrees celsius
+
+*/
+
+
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
@@ -27,15 +38,18 @@
 // Gen6 = 5, 
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
-// Gen7 1.1 until 1.3.x = 7
+// Gen7 1.1 till 1.3.x        = 7
+// Teensylu (at90usb)         = 8 // requires Teensyduino
+// Printrboard (at90usb)      = 9 // requires Teensyduino
 // Gen6 1.4.1 an dlater = 71
 // Teensylu (at90usb) = 8 // requires Teensyduino
 // Printrboard (at90usb) = 9 // requires Teensyduino
 // MegaTronics = 70
 // Rambo = 301
 #define MOTHERBOARD 33
-#include <avr/io.h>
 #include "pins.h"
+
+
 // ##########################################################################################
 // ##                                        IMPORTANT                                     ##
 // ##########################################################################################
@@ -133,12 +147,14 @@ Mega.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 99 Generic thermistor table
+// 97 Generic thermistor table 1
+// 98 Generic thermistor table 2
+// 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
 #define EXT0_TEMPSENSOR_TYPE 1
-// Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
-#define EXT0_TEMPSENSOR_PIN 0
+// Analog input pin for reading temperatures or pin enabling SS for MAX6675
+#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // WHich pin enables the heater
 #define EXT0_HEATER_PIN HEATER_0_PIN
 #define EXT0_STEP_PIN E_STEP_PIN
@@ -152,13 +168,13 @@ Mega.
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 1500
+#define EXT0_MAX_FEEDRATE 12
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_START_FEEDRATE 18
+#define EXT0_MAX_START_FEEDRATE 10
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 6000
+#define EXT0_MAX_ACCELERATION 3000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -166,7 +182,7 @@ Mega.
 */
 #define EXT0_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
-#define EXT0_WATCHPERIOD 20
+#define EXT0_WATCHPERIOD 1
 
 /** \brief The maximum value, I-gain can contribute to the output. 
 
@@ -186,16 +202,17 @@ To prevent a long deviation from the target zone, this value limits the lower va
 A good start is 30 lower then the optimal value. You need to leave room for cooling.
  Overridden if EEPROM activated.
 */
-#define EXT0_PID_INTEGRAL_DRIVE_MIN 50
+#define EXT0_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain in 0,01 units.  Overridden if EEPROM activated. */
-#define EXT0_PID_PGAIN   500
+#define EXT0_PID_P   24
 /** I-gain in 0,001 units 
+
 WATCH OUT: This value was in 0,01 units in earlier versions!
  Overridden if EEPROM activated.
 */
-#define EXT0_PID_IGAIN   1
+#define EXT0_PID_I   0.88
 /** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
-#define EXT0_PID_DGAIN 3000
+#define EXT0_PID_D 200
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
@@ -232,12 +249,14 @@ to 0 to disable.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 99 Generic thermistor table
+// 97 Generic thermistor table 1
+// 98 Generic thermistor table 2
+// 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
 #define EXT1_TEMPSENSOR_TYPE 1
-// Position in analog input table below for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN 1
+// Analog input pin for reading temperatures or pin enabling SS for MAX6675
+#define EXT1_TEMPSENSOR_PIN -1
 // WHich pin enables the heater
 #define EXT1_HEATER_PIN -1
 #define EXT1_STEP_PIN E_STEP_PIN
@@ -249,15 +268,15 @@ to 0 to disable.
 #define EXT1_ENABLE_ON false
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
-// skeinforge use hiher values.
+// skeinforge use eiher values.
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_FEEDRATE 1500
+#define EXT1_MAX_FEEDRATE 50
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_START_FEEDRATE 18
+#define EXT1_MAX_START_FEEDRATE 12
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_ACCELERATION 6000
+#define EXT1_MAX_ACCELERATION 10000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -265,7 +284,7 @@ to 0 to disable.
 */
 #define EXT1_HEAT_MANAGER 1
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
-#define EXT1_WATCHPERIOD 20
+#define EXT1_WATCHPERIOD 1
 
 /** \brief The maximum value, I-gain can contribute to the output. 
 
@@ -285,17 +304,17 @@ To prevent a long deviation from the target zone, this value limits the lower va
 A good start is 30 lower then the optimal value. You need to leave room for cooling.
  Overridden if EEPROM activated.
 */
-#define EXT1_PID_INTEGRAL_DRIVE_MIN 50
+#define EXT1_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain in 0,01 units.  Overridden if EEPROM activated. */
-#define EXT1_PID_PGAIN   500
+#define EXT1_PID_P   24
 /** I-gain in 0,001 units 
 
 WATCH OUT: This value was in 0,01 units in earlier versions!
  Overridden if EEPROM activated.
 */
-#define EXT1_PID_IGAIN   1
+#define EXT1_PID_I   0.88
 /** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
-#define EXT1_PID_DGAIN 3000
+#define EXT1_PID_D 200
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT1_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
@@ -314,6 +333,9 @@ If you get much overshoot at the first temperature set, because the heater is go
 need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15.
 */
 #define PID_CONTROL_RANGE 15
+
+/** Slip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
+#define SKIP_M109_IF_WITHIN 2
 
 /** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR0 28
@@ -356,7 +378,7 @@ increasing adc values. For more informations, read
 http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html
 
 If you have a sprinter temperature table, you have to multiply the first value with 4 and the second with 8.
-This firmware works with increased precision, so the value read goes from 0 to 4095 and the temperature is 
+This firmware works with increased precision, so the value reads go from 0 to 4095 and the temperature is 
 temperature*8.
 
 If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7! 
@@ -391,77 +413,113 @@ The capacitor is for reducing noise from long thermistor cable. If you don't hav
 
 If you don't need the generic table, uncomment the following define.
 */
-//#define USE_GENERIC_THERMISTORTABLE
+#define USE_GENERIC_THERMISTORTABLE_1
 /** Reference resistance */
-#define GENERIC_THERM_R0 1042.7
+#define GENERIC_THERM1_R0 1042.7
 /** Temperature at reference resistance */
-#define GENERIC_THERM_T0 170
+#define GENERIC_THERM1_T0 170
 /** Beta value of thermistor
 
 You can use the beta from the datasheet or compute it yourself. See
 http://reprap.org/wiki/MeasuringThermistorBeta
 for more details.
 */
-#define GENERIC_THERM_BETA 4036
-#define GENERIC_THERM_R1 0
-#define GENERIC_THERM_R2 4700
-#define GENERIC_THERM_VREF 5
-/** Supply voltage to ADC, can be changed be setting ANALOG_REF below to different value. */
-#define GENERIC_THERM_VADC 5
-/** Number of entries in generated table. One entry takes 4 bytes. Higher number of entries increase computation time too. */
-#define GENERIC_THERM_NUM_ENTRIES 40
+#define GENERIC_THERM1_BETA 4036
+/** Start temperature for generated thermistor table */
+#define GENERIC_THERM1_MIN_TEMP -20
+/** End Temperature for generated thermistor table */
+#define GENERIC_THERM1_MAX_TEMP 300
+#define GENERIC_THERM1_R1 0
+#define GENERIC_THERM1_R2 4700
 
-/** Temperature under which the thermistor should be considered as NC or broken. Comment out line to completely remove this check.*/
-#define THERMISTOR_ERROR_THRESHOLD 0
+// The same for table 2 and 3 if needed
+
+//#define USE_GENERIC_THERMISTORTABLE_2
+#define GENERIC_THERM2_R0 1042.7
+#define GENERIC_THERM2_T0 170
+#define GENERIC_THERM2_BETA 4036
+#define GENERIC_THERM2_MIN_TEMP -20
+#define GENERIC_THERM2_MAX_TEMP 300
+#define GENERIC_THERM2_R1 0
+#define GENERIC_THERM2_R2 4700
+
+//#define USE_GENERIC_THERMISTORTABLE_3
+#define GENERIC_THERM3_R0 1042.7
+#define GENERIC_THERM3_T0 170
+#define GENERIC_THERM3_BETA 4036
+#define GENERIC_THERM3_MIN_TEMP -20
+#define GENERIC_THERM3_MAX_TEMP 300
+#define GENERIC_THERM3_R1 0
+#define GENERIC_THERM3_R2 4700
+
+/** Supply voltage to ADC, can be changed be setting ANALOG_REF below to different value. */
+#define GENERIC_THERM_VREF 5
+/** Number of entries in generated table. One entry takes 4 bytes. Higher number of entries increase computation time too.
+Value is used for all generic tables created. */
+#define GENERIC_THERM_NUM_ENTRIES 33
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
 
 // ############# Heated bed configuration ########################
 
-/** \brief Switches fast between config for heated bed and non heated bed. Default setting is autodetect
-assuming only 2 heater outputs are available. */
-#if HEATER_1_PIN>-1 && NUM_EXTRUDER==1
+/** \brief Set true if you have a heated bed conected to your board, false if not */
 #define HAVE_HEATED_BED true
-#else
-#define HAVE_HEATED_BED false
-#endif
-//#define HAVE_HEATED_BED false  // Override autodetected value
 
-#if HAVE_HEATED_BED==true
+#define HEATED_BED_MAX_TEMP 150
+/** Slip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
+#define SKIP_M190_IF_WITHIN 3
+
 // Select type of your heated bed. It's the same as for EXT0_TEMPSENSOR_TYPE
 // set to 0 if you don't have a heated bed
 #define HEATED_BED_SENSOR_TYPE 1
-/** Index of analog sensor to read temperature of heated bed. 
-THIS IS NOT A PIN NUMBER - IT'S A REFERENCE TO A TABLE WITH PIN NUMBERS!!!
-Look at ANALOG_INPUT_CHANNELS for the position 
-or to add the Arduino pin id there. */
-#define HEATED_BED_SENSOR_PIN 1
+/** Analog pin of analog sensor to read temperature of heated bed.  */
+#define HEATED_BED_SENSOR_PIN TEMP_1_PIN
 /** \brief Pin to enable heater for bed. */
 #define HEATED_BED_HEATER_PIN HEATER_1_PIN
 // How often the temperature of the heated bed is set (msec)
 #define HEATED_BED_SET_INTERVAL 5000
-#else
-#define HEATED_BED_SENSOR_TYPE 0
-#define HEATED_BED_SENSOR_PIN -1
-#define HEATED_BED_HEATER_PIN -1
-#endif
 
-// uncomment to use AREF for reference voltage
-// on a GEN6 you want AVCC
-#define USE_AVCC_FOR_TEMP
-// how many samples do we want per reading. 1 sample takes 1/125000 seconds.
-// more samples get more reliable values, but take more time.
-#define ANALOG_SUPERSAMPLE 10
-/** The number of analog sensors, we need to read out. These are the thermistors used for temperature
-reading of the extruder and heated bed. */
-#if HAVE_HEATED_BED==true
-#define NUM_ANALOG_SENSORS 2
-#else
-#define NUM_ANALOG_SENSORS 1
-#endif
-/** Number of digital temp. sensors like MAX6675 */
-#define NUM_DIGITAL_SENSORS 0
+/**
+Heat manager for heated bed:
+0 = Bang Bang, fast update
+1 = PID controlled
+2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relais driven beds to save life
+*/
+#define HEATED_BED_HEAT_MANAGER 2
+/** \brief The maximum value, I-gain can contribute to the output. 
+
+A good value is slightly higher then the output needed for your temperature.
+Values for starts:
+130 => PLA for temperatures from 170-180°C
+180 => ABS for temperatures around 240°C
+
+The precise values may differ for different nozzle/resistor combination. 
+ Overridden if EEPROM activated.
+*/
+#define HEATED_BED_PID_INTEGRAL_DRIVE_MAX 255
+/** \brief lower value for integral part
+
+The I state should converge to the exact heater output needed for the target temperature.
+To prevent a long deviation from the target zone, this value limits the lower value.
+A good start is 30 lower then the optimal value. You need to leave room for cooling.
+ Overridden if EEPROM activated.
+*/
+#define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
+/** P-gain in 0,01 units.  Overridden if EEPROM activated. */
+#define HEATED_BED_PID_PGAIN   500
+/** I-gain in 0,001 units 
+
+WATCH OUT: This value was in 0,01 units in earlier versions!
+ Overridden if EEPROM activated.
+*/
+#define HEATED_BED_PID_IGAIN   1
+/** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
+#define HEATED_BED_PID_DGAIN 3000
+// maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
+#define HEATED_BED_PID_MAX 255
+
+/** Include PID control for all heaters. */
 #define TEMP_PID true
 
 //// Experimental watchdog and minimal temp
@@ -476,49 +534,12 @@ reading of the extruder and heated bed. */
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define MAXTEMP 275
+#define MAXTEMP 210
 
-/**
-Normally you need a PWM controlable output, to define different fan speeds. If you
-don't have one, you can only turn your fan on or off.
-
-As a sulution, you can simulate PWM for your pin. This works for all pins, even non-PWM pins!
-If your fan is connected to a PWM output that is used by the firmware internally, you must
-activate PWM simulation.
-
-To active fan PWM simulation uncomment the next define.
-*/
-//#define SIMULATE_FAN_PWM
-
-/** \brief number of analog input signals. Normally 1 for each temperature sensor */
-#define ANALOG_INPUTS NUM_ANALOG_SENSORS
-#if ANALOG_INPUTS>0
-/** Channels are the MUX-part of ADMUX register 
-
-Put all the pin numbers for the analog sensors (temp. sensor for extruder and heated bed) in here.
-In the configs of the sensor, use the index in this array. For the typical combination of
-one extruder with heated bed, write:
-#define  ANALOG_INPUT_CHANNELS {TEMP_0_PIN,TEMP_1_PIN}
-*/
-#if HAVE_HEATED_BED==true
-#define  ANALOG_INPUT_CHANNELS {TEMP_0_PIN,TEMP_1_PIN}
-#else
-#define ANALOG_INPUT_CHANNELS {TEMP_0_PIN}
-#endif
-// Bits of the ADC converter
-#define ANALOG_INPUT_BITS 10
-// Build median from 2^ANALOG_INPUT_SAMPLE samples
-#define ANALOG_INPUT_SAMPLE 3
-#define ANALOG_REF_AREF 0
-#define ANALOG_REF_AVCC _BV(REFS0)
-#define ANALOG_REF_INT_1_1 _BV(REFS1)
-#define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
-/** \brief Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF */
+/** \brief Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V inernaly generated */
 #define ANALOG_REF ANALOG_REF_AVCC
-#define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
 
-#endif
 // ##########################################################################################
 // ##                            Endstop configuration                                     ##
 // ##########################################################################################
@@ -527,9 +548,9 @@ one extruder with heated bed, write:
 use a mechanical endstop connected with gnd. Set value to false for no pullup
 on this endstop.
 */
-#define ENDSTOP_PULLUP_X_MIN false
-#define ENDSTOP_PULLUP_Y_MIN false
-#define ENDSTOP_PULLUP_Z_MIN false
+#define ENDSTOP_PULLUP_X_MIN true
+#define ENDSTOP_PULLUP_Y_MIN true
+#define ENDSTOP_PULLUP_Z_MIN true
 #define ENDSTOP_PULLUP_X_MAX true
 #define ENDSTOP_PULLUP_Y_MAX true
 #define ENDSTOP_PULLUP_Z_MAX true
@@ -611,19 +632,18 @@ on this endstop.
 #define Y_MAX_LENGTH 100
 #define Z_MAX_LENGTH 400
 #endif
+
+// Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
+// of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
+#define X_MIN_POS -100
+#define Y_MIN_POS -100
+#define Z_MIN_POS 0
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
 
-// MS1 MS2 Stepper Driver Microstepping mode table
-#define MICROSTEP1 LOW,LOW
-#define MICROSTEP2 HIGH,LOW
-#define MICROSTEP4 LOW,HIGH
-#define MICROSTEP8 HIGH,HIGH
-#define MICROSTEP16 HIGH,HIGH
-
-// Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
-#define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
+// Microstep setting (Only functional when stepper driver microstep pins are connected to MCU. Currently only works for RAMBO boards
+#define MICROSTEP_MODES {8,8,8,8,8} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
@@ -682,9 +702,9 @@ on this endstop.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
     */
-#define MAX_FEEDRATE {15000, 15000, 15000}
+#define MAX_FEEDRATE {150, 150, 150}
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
-#define HOMING_FEEDRATE {5000,5000,5000}
+#define HOMING_FEEDRATE {80,80,30}
 
 /* If you have a backslash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
@@ -706,7 +726,7 @@ This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheape
 additional stepper interrupts with all it's overhead. As a result you can go as high as
 40000Hz.
 */
-#define STEP_DOUBLER_FREQUENCY 10000
+#define STEP_DOUBLER_FREQUENCY 12000
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping 
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
@@ -730,9 +750,9 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {6000,6000,6000} 
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1500,1500,1500} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {6000,6000,6000}
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {3000,3000,3000}
 #endif
 
 /** \brief Maximum allowable jerk.
@@ -893,18 +913,9 @@ to activate the quadratic term. Only adds lots of computations and storage usage
  Overridden if EEPROM activated.
 */
 //#define BAUDRATE 76800
+//#define BAUDRATE 76800
 #define BAUDRATE 57600
-//#define BAUDRATE 115200
-/** \brief Size in byte of the output buffer */
-#define OUTPUT_BUFFER_SIZE 64
-/** \brief Activates buffered output.
-
-The Arduino libraries have a buffered input for serial connections. Write operations are
-always unbuffered, which means the controller will wait with execution, until the data
-is send. To solve this handicap, all write operations have to use out insted of Serial.
-If you uncomment this, you still have to use out, but it will use no buffers, so you
-keep with your slow communication version.
-*/
+//#define BAUDRATE 250000
 
 /**
 Some boards like Gen7 have a power on pin, to enable the atx power supply. If this is defined,
@@ -918,9 +929,6 @@ the power will be turned on without the need to call M80 if initially started.
 */
 #define KILL_METHOD 1
 
-#if !defined(__AVR_AT90USB1286__) && !defined(__AVR_AT90USB1287__) // not needed for USB serial
-#define USE_BUFFERED_OUTPUT 
-#endif
 /** \brief Cache size for incoming commands.
 
 There should be no reason to increase this cache. Commands are nearly immediately send to
@@ -958,36 +966,9 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-#define SDSUPPORT 0
+#define SDSUPPORT
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
-// ##########################################################################################
-// ##                                  Debug configuration                                 ##
-// ##########################################################################################
-
-/** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
-/** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
-to test your data througput or search for communication problems. */
-#define INCLUDE_DEBUG_COMMUNICATION
-/** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
-with a dry run, you can test the speed of path computations, which are still performed. */
-//#define INCLUDE_DEBUG_NO_MOVE
-/** Writes the free RAM to output, if it is less then at the last test. Should always return
-values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
-//#define DEBUG_FREE_MEMORY
-//#define DEBUG_ADVANCE
-/** \brief print ops related debug info. */
-//#define DEBUG_OPS
-/** If enabled, writes the created generic table to serial port at startup. */
-//#define DEBUG_GENERIC
-/** If enabled, steps to move and moved steps are compared. */
-//#define DEBUG_STEPCOUNT
-// Uncomment the following line to enable debugging. You can better control debugging below the following line
-//#define DEBUG
-
 #endif
-
 

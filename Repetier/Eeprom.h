@@ -21,6 +21,9 @@
 
 #include <avr/eeprom.h>
 
+// Id to distinguish version changes 
+#define EEPROM_PROTOCOL_VERSION 1
+
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
 
@@ -53,11 +56,28 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_SPEED 95
 #define EPR_OPS_MOVE_AFTER 99
 #define EPR_OPS_MODE 103
-#define EPR_RODSTEPS 107
+#define EPR_INTEGRITY_BYTE        104   // Here the xored sum over eeprom is stored
+#define EPR_VERSION               105   // Version id for updates in EEPROM storage
+#define EPR_BED_HEAT_MANAGER      106
+#define EPR_BED_DRIVE_MAX         107
+#define EPR_BED_PID_PGAIN         108
+#define EPR_BED_PID_IGAIN         112
+#define EPR_BED_PID_DGAIN         116
+#define EPR_BED_PID_MAX           120
+#define EPR_BED_DRIVE_MIN         124
+#define EPR_PRINTING_TIME         125  // Time in seconds printing
+#define EPR_PRINTING_DISTANCE     129  // Filament length printed
+#define EPR_RODSTEPS 130
+#define EPR_X_HOME_OFFSET         133
+#define EPR_Y_HOME_OFFSET         137
+#define EPR_Z_HOME_OFFSET         141
+#define EPR_X_LENGTH              145
+#define EPR_Y_LENGTH              149
+#define EPR_Z_LENGTH              153
 
-#define EEPROM_EXTRUDER_OFFSET 150
+#define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
-#define EEPROM_EXTRUDER_LENGTH 60
+#define EEPROM_EXTRUDER_LENGTH 100
 // Extruder positions relative to extruder start
 #define EPR_EXTRUDER_STEPS_PER_MM 0
 #define EPR_EXTRUDER_MAX_FEEDRATE 4
@@ -89,6 +109,7 @@ extern inline void epr_set_byte(uint pos,byte value);
 extern inline void epr_set_int(uint pos,int value);
 extern inline void epr_set_long(uint pos,long value);
 extern inline void epr_set_float(uint pos,float value);
+extern void epr_data_to_eeprom(byte corrupted);
 #if DRIVE_SYSTEM==3
 extern void epr_set_rod_length();
 #endif
@@ -101,5 +122,6 @@ extern void epr_output_settings();
 extern void epr_update(GCode *com);
 extern void epr_init();
 extern void epr_init_baudrate();
+extern void epr_update_usage();
 #endif
 
