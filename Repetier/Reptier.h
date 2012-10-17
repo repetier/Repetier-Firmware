@@ -448,9 +448,6 @@ typedef struct { // RAM usage: 72 Byte
   float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
   int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
-#if DRIVE_SYSTEM==3
-  long rodSteps;
-#endif
   long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.

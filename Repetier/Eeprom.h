@@ -67,7 +67,6 @@ have problems with other modules using the eeprom */
 #define EPR_BED_DRIVE_MIN         124
 #define EPR_PRINTING_TIME         125  // Time in seconds printing
 #define EPR_PRINTING_DISTANCE     129  // Filament length printed
-#define EPR_RODSTEPS 130
 #define EPR_X_HOME_OFFSET         133
 #define EPR_Y_HOME_OFFSET         137
 #define EPR_Z_HOME_OFFSET         141

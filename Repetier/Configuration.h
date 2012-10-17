@@ -627,11 +627,10 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS false
 // maximum positions in mm - only fixed numbers!
-#if DRIVE_SYSTEM != 3 
-#define X_MAX_LENGTH 100
-#define Y_MAX_LENGTH 100
-#define Z_MAX_LENGTH 400
-#endif
+
+#define X_MAX_LENGTH 200
+#define Y_MAX_LENGTH 200
+#define Z_MAX_LENGTH 500
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.

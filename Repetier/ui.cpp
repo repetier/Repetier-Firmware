@@ -1991,8 +1991,8 @@ void UIDisplay::executeAction(int action) {
 	{
 		if (printer_state.countZSteps < 0)
 			printer_state.countZSteps = -printer_state.countZSteps;
-		rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-		printer_state.rodSteps = printer_state.countZSteps;
+		printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+		printer_state.zMaxSteps = printer_state.countZSteps;
 		for (byte i=0; i<3; i++) {
 			printer_state.currentPositionSteps[i] = 0;
 		}

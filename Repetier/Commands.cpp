@@ -111,11 +111,11 @@ void set_fan_speed(int speed,bool wait) {
 }
 #if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
-	long up_steps = printer_state.rodSteps;
+	long up_steps = printer_state.zMaxSteps;
 	for (byte i=0; i<3; i++)
 		printer_state.currentPositionSteps[i] = 0;
 	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-	move_steps(0,0,printer_state.rodSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
+	move_steps(0,0,printer_state.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
 }
 
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
@@ -130,7 +130,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 			delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);	
 			printer_state.currentPositionSteps[0] = 0;
 			printer_state.currentPositionSteps[1] = 0;
-			printer_state.currentPositionSteps[2] = printer_state.rodSteps;
+			printer_state.currentPositionSteps[2] = printer_state.zMaxSteps;
 			calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 			printer_state.maxDeltaPositionSteps = printer_state.currentDeltaPositionSteps[0];
 		} 
@@ -796,8 +796,9 @@ void process_command(GCode *com)
 				} else if (com->S = 2) {
 					if (printer_state.countZSteps < 0)
 						printer_state.countZSteps = -printer_state.countZSteps;
-					rodMaxLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-					printer_state.rodSteps = printer_state.countZSteps;
+					printer_state.zMin = 0;
+					printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+					printer_state.zMaxSteps = printer_state.countZSteps;
 					for (byte i=0; i<3; i++) {
 						printer_state.currentPositionSteps[i] = 0;
 					}

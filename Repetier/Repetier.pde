@@ -197,7 +197,6 @@ byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
   unsigned long axis_travel_steps_per_sqr_second[4];
 #endif
 #if DRIVE_SYSTEM==3
-float rodMaxLength = ROD_MAX_LENGTH;
 DeltaSegment segments[DELTA_CACHE_SIZE];
 unsigned int delta_segment_write_pos = 0; // Position where we write the next cached delta move
 volatile unsigned int  delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache
@@ -280,12 +279,17 @@ void update_extruder_flags() {
 
 void update_ramps_parameter() {
 #if DRIVE_SYSTEM==3
-  printer_state.rodSteps = axis_steps_per_unit[0]*rodMaxLength;
+  printer_state.zMaxSteps = axis_steps_per_unit[0]*(printer_state.zLength - printer_state.zMin);
   long cart[3], delta[3];
   cart[0] = cart[1] = 0;
-  cart[2] = printer_state.rodSteps;
+  cart[2] = printer_state.zMaxSteps;
   calculate_delta(cart, delta);
   printer_state.maxDeltaPositionSteps = delta[0];
+  printer_state.xMaxSteps = (long)(axis_steps_per_unit[0]*(printer_state.xMin+printer_state.xLength));
+  printer_state.yMaxSteps = (long)(axis_steps_per_unit[1]*(printer_state.yMin+printer_state.yLength));
+  printer_state.xMinSteps = (long)(axis_steps_per_unit[0]*printer_state.xMin);
+  printer_state.yMinSteps = (long)(axis_steps_per_unit[1]*printer_state.yMin);
+  printer_state.zMinSteps = 0;
 #else
   printer_state.xMaxSteps = (long)(axis_steps_per_unit[0]*(printer_state.xMin+printer_state.xLength));
   printer_state.yMaxSteps = (long)(axis_steps_per_unit[1]*(printer_state.yMin+printer_state.yLength));
@@ -435,14 +439,12 @@ void setup()
   printer_state.msecondsPrinting = 0;
   printer_state.filamentPrinted = 0;
   printer_state.flag0 = 1;
-#if DRIVE_SYSTEM != 3
   printer_state.xLength = X_MAX_LENGTH;
   printer_state.yLength = Y_MAX_LENGTH;
   printer_state.zLength = Z_MAX_LENGTH;
   printer_state.xMin = X_MIN_POS;
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
-#endif
   epr_init_baudrate();
   RFSERIAL.begin(baudrate);
   out.println_P(PSTR("start"));
