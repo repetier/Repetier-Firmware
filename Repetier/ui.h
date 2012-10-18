@@ -403,7 +403,7 @@ class UIDisplay {
     int8_t encoderLast;
     PGM_P statusText;
     UIDisplay();
-    void createChar(byte location,const byte PROGMEM charmap[]);
+    void createChar(byte location,const byte charmap[]);
     void initialize(); // Initialize display and keys
     void printRow(byte r,char *txt); // Print row on display
     void printRowP(byte r,PGM_P txt);

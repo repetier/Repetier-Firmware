@@ -358,6 +358,16 @@ const byte character_unselected[8] PROGMEM = {0,31,17,17,17,31,0,0};
 // ***** 31
 // .***. 14
 const byte character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
+// unselected - code 6
+// ..... 0
+// ***.. 28
+// ***** 31
+// *...* 17
+// *...* 17
+// ***** 31
+// ..... 0
+// ..... 0
+const byte character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
 const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,0};
 
 #define LCD_ENTRYMODE			0x04			/**< Set entrymode */
@@ -510,6 +520,7 @@ void initializeLCD() {
   uid.createChar(3,character_selected);
   uid.createChar(4,character_unselected);
   uid.createChar(5,character_temperature);
+  uid.createChar(6,character_folder);
   lcdStopWrite();
 }
 #endif
@@ -628,6 +639,7 @@ void initializeLCD() {
   uid.createChar(3,character_selected);
   uid.createChar(4,character_unselected);
   uid.createChar(5,character_temperature);
+  uid.createChar(6,character_folder);
 }
 // ----------- end direct LCD driver
 #endif
@@ -638,7 +650,7 @@ void initializeLCD() {
 
 LiquidCrystal lcd(UI_DISPLAY_RS_PIN, UI_DISPLAY_RW_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN);
 
-void UIDisplay::createChar(byte location,const byte PROGMEM charmap[]) {
+void UIDisplay::createChar(byte location,const byte charmap[]) {
   location &= 0x7; // we only have 8 locations 0-7
   byte data[8];
   for (int i=0; i<8; i++) {
