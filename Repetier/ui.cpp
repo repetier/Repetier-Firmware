@@ -868,8 +868,8 @@ UI_STRING(ui_unselected,UI_TEXT_NOSEL);
 UI_STRING(ui_action,UI_TEXT_STRING_ACTION);
 
 void UIDisplay::parse(char *txt,bool ram) {
-  int ivalue;
-  float fvalue;
+  int ivalue=0;
+  float fvalue=0;
   while(col<UI_COLS) {
     char c=(ram ? *(txt++) : pgm_read_byte(txt++));
     if(c==0) break; // finished
@@ -916,7 +916,9 @@ void UIDisplay::parse(char *txt,bool ram) {
       case 'E': // Target extruder temperature
         if(c2=='c') fvalue=current_extruder->tempControl.targetTemperatureC;
         else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.targetTemperatureC;
+#if HAVE_HEATED_BED
         else if(c2=='b') fvalue=heatedBedController.targetTemperatureC;
+#endif
         addFloat(fvalue,3,1);
         break;
   
@@ -973,7 +975,9 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
         // Extruder output level
         if(c2>='0' && c2<='9') ivalue=pwm_pos[c2-'0'];
+#if HAVE_HEATED_BED
         else if(c2=='b') ivalue=pwm_pos[heatedBedController.pwmIndex];
+#endif
         else if(c2=='C') ivalue=pwm_pos[current_extruder->id];
         ivalue=(ivalue*100)/255;
         addInt(ivalue,3);
@@ -983,6 +987,12 @@ void UIDisplay::parse(char *txt,bool ram) {
       case 'x':
         if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
         addFloat(fvalue,3,2);
+        break;
+      case 'y':
+#if DRIVE_SYSTEM==3
+        if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentDeltaPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+        addFloat(fvalue,3,2);
+#endif
         break;
       case 'X': // Extruder related 
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
@@ -995,6 +1005,8 @@ void UIDisplay::parse(char *txt,bool ram) {
         else if(c2=='D') {addInt(current_extruder->tempControl.pidMax,3);}
 #endif
         else if(c2=='w') {addInt(current_extruder->watchPeriod,4);}
+		else if(c2=='T') {addInt(current_extruder->waitRetractTemperature,4);}
+		else if(c2=='U') {addInt(current_extruder->waitRetractUnits,4);}
         else if(c2=='h') {addStringP(!current_extruder->tempControl.heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));}
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
@@ -1604,6 +1616,12 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_EXTR_WATCH_PERIOD:
       INCREMENT_MIN_MAX(current_extruder->watchPeriod,1,0,999);
       break;
+  case UI_ACTION_EXTR_WAIT_RETRACT_TEMP:
+	  INCREMENT_MIN_MAX(current_extruder->waitRetractTemperature,1,100,UI_SET_MAX_EXTRUDER_TEMP);
+	  break;
+  case UI_ACTION_EXTR_WAIT_RETRACT_UNITS:
+	  INCREMENT_MIN_MAX(current_extruder->waitRetractUnits,1,0,9999);
+	  break;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   case UI_ACTION_ADVANCE_K:
@@ -1967,6 +1985,70 @@ void UIDisplay::executeAction(int action) {
        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
        heated_bed_set_temperature(tmp);
     }
+#endif
+      break;
+	case UI_ACTION_SHOW_MEASUREMENT:
+#ifdef STEP_COUNTER
+	{
+		out.print_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+	}
+#endif
+      break;
+	case UI_ACTION_RESET_MEASUREMENT:
+#ifdef STEP_COUNTER
+	{
+		printer_state.countZSteps = 0;
+		out.println_P(PSTR("Measurement reset."));
+	}
+#endif
+      break;
+	case UI_ACTION_SET_MEASURED_ORIGIN:
+#ifdef STEP_COUNTER
+	{
+		if (printer_state.countZSteps < 0)
+			printer_state.countZSteps = -printer_state.countZSteps;
+		printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+		printer_state.zMaxSteps = printer_state.countZSteps;
+		for (byte i=0; i<3; i++) {
+			printer_state.currentPositionSteps[i] = 0;
+		}
+		calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+		out.println_P(PSTR("Measured origin set. Measurement reset."));
+#if EEPROM_MODE!=0
+		epr_set_rod_length();
+		out.println_P(PSTR("EEPROM updated"));
+#endif
+	}
+#endif
+	case UI_ACTION_SET_P1:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP1[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_SET_P2:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP2[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_SET_P3:
+#ifdef SOFTWARE_LEVELING
+		for (byte i=0; i<3; i++) {
+			printer_state.levelingP3[i] = printer_state.currentPositionSteps[i];
+		}
+#endif
+      break;
+	case UI_ACTION_CALC_LEVEL:
+#ifdef SOFTWARE_LEVELING
+		long factors[4];
+		calculate_plane(factors, printer_state.levelingP1, printer_state.levelingP2, printer_state.levelingP3);
+		out.println_P(PSTR("Leveling calc:"));
+		out.println_float_P(PSTR("Tower 1:"), calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
+		out.println_float_P(PSTR("Tower 2:"), calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
+		out.println_float_P(PSTR("Tower 3:"), calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
 #endif
       break;
     case UI_ACTION_HEATED_BED_DOWN:

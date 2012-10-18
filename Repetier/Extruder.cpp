@@ -28,6 +28,7 @@ Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {
  {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
    EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
+   ,EXT0_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT0_ADVANCE_K
@@ -43,6 +44,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 #if NUM_EXTRUDER>1
  ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
    EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
+   ,EXT1_WAIT_RETRACT_TEMP,EXT1_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT1_ADVANCE_K
@@ -289,7 +291,11 @@ void extruder_select(byte ext_num) {
    else
      printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
 #endif
+#if DRIVE_SYSTEM==3
+	split_delta_move(false,true, true);
+#else
    queue_move(false,true); // Move head of new extruder to old position using last feedrate
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------------------------
@@ -332,7 +338,7 @@ float extruder_get_temperature() {
 // ------------------------------------------------------------------------------------------------------------------
 
 void heated_bed_set_temperature(float temp_celsius) {
-#ifdef HAVE_HEATED_BED
+#if HAVE_HEATED_BED
    if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
    if(temp_celsius<0) temp_celsius = 0;
    heatedBedController.targetTemperatureC=temp_celsius;
@@ -346,7 +352,7 @@ void heated_bed_set_temperature(float temp_celsius) {
 // ------------------------------------------------------------------------------------------------------------------
 
 float heated_bed_get_temperature() {
-#ifdef HAVE_HEATED_BED 
+#if HAVE_HEATED_BED 
    TemperatureController *c = tempController[NUM_TEMPERATURE_LOOPS-1];
    return c->currentTemperatureC;
    //return conv_raw_temp(c->sensorType,c->currentTemperature);

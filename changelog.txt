@@ -4,6 +4,7 @@ Version 0.80 dev
   Added motherboard type 70 for MegaTronics
   Added RAMBO motherboard type 301
   Added support for Digipot/microstepping adjustment in firmware for RAMBO boards.
+  Added Rostock delta printer support. Code by Martin Croome
   Min home position can now have negative coordinates.
   New faster path planner.
   Better compensation on succeeding small moves if host lags behinds.

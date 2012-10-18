@@ -69,7 +69,7 @@ Select the language to use.
 #define BEEPER_TYPE 0
 
 #if BEEPER_TYPE==1
-#define BEEPER_PIN 42
+#define BEEPER_PIN 37
 #endif
 #if BEEPER_TYPE==2
 #define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin
@@ -96,10 +96,10 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0
+#define UI_DISPLAY_TYPE 3
 
 // This is line 2 of the status display at startup
-#define UI_VERSION_STRING2 "Orig. Mendel"
+#define UI_VERSION_STRING2 "Mendel"
 
 /** Number of columns per row
 
@@ -191,7 +191,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -519,12 +519,13 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 #if UI_ROWS>=4
-#if HAVE_HEATED_BED==true
-UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
-#else
-UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
-#endif
-UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+ #if HAVE_HEATED_BED==true
+   UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
+ #else
+   UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+ #endif
+  UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+//UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
@@ -612,6 +613,25 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast,UI_TEXT_Z_POS_FAST,ui_menu_zpos_fast);
 
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z,&ui_menu_go_xfast,&ui_menu_go_xpos,&ui_menu_go_yfast,&ui_menu_go_ypos,&ui_menu_go_zfast,&ui_menu_go_zpos,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,11+UI_MENU_BACKCNT);
+
+// **** Delta calibration menu
+#ifdef STEP_COUNTER
+UI_MENU_ACTIONCOMMAND(ui_menu_show_measurement,UI_TEXT_SHOW_MEASUREMENT,UI_ACTION_SHOW_MEASUREMENT);
+UI_MENU_ACTIONCOMMAND(ui_menu_reset_measurement,UI_TEXT_RESET_MEASUREMENT,UI_ACTION_RESET_MEASUREMENT);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);
+#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_show_measurement,&ui_menu_reset_measurement,&ui_menu_set_measured_origin,&ui_menu_home_all,&ui_menu_go_zpos,&ui_menu_go_zfast}
+UI_MENU(ui_menu_delta,UI_MENU_DELTA,6+UI_MENU_BACKCNT);
+#endif
+
+// **** Bed leveling menu
+#ifdef SOFTWARE_LEVELING
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
+UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
+UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_ACTION_CALC_LEVEL);
+#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling,&ui_menu_go_xpos,&ui_menu_go_xfast,&ui_menu_go_ypos,&ui_menu_go_yfast,&ui_menu_go_zpos,&ui_menu_go_zfast}
+UI_MENU(ui_menu_level,UI_MENU_LEVEL,10+UI_MENU_BACKCNT);
+#endif
 
 // **** Extruder menu
 
@@ -761,6 +781,8 @@ UI_MENU_CHANGEACTION(ui_menu_cext_start_feedrate,UI_TEXT_EXTR_START_FEED,UI_ACTI
 UI_MENU_CHANGEACTION(ui_menu_cext_max_feedrate,UI_TEXT_EXTR_MAX_FEED,UI_ACTION_EXTR_MAX_FEEDRATE);
 UI_MENU_CHANGEACTION(ui_menu_cext_acceleration,UI_TEXT_EXTR_ACCEL,UI_ACTION_EXTR_ACCELERATION);
 UI_MENU_CHANGEACTION(ui_menu_cext_watch_period,UI_TEXT_EXTR_WATCH,UI_ACTION_EXTR_WATCH_PERIOD);
+UI_MENU_CHANGEACTION(ui_menu_ext_wait_temp,UI_TEXT_EXTR_WAIT_RETRACT_TEMP,UI_ACTION_EXTR_WAIT_RETRACT_TEMP);
+UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,UI_TEXT_EXTR_WAIT_RETRACT_UNITS,UI_ACTION_EXTR_WAIT_RETRACT_UNITS);
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
 #ifdef USE_ADVANCE
@@ -796,8 +818,8 @@ UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
 #define UI_MENU_CONFEXTCOND 
 #define UI_MENU_CONFEXTCNT 0
 #endif
-#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period UI_MENU_ADVANCE UI_MENU_PIDCOND}
-UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,5+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
+#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period,&ui_menu_ext_wait_units,&ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}
+UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,7+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
 
 // **** Configuration menu
 UI_MENU_SUBMENU(ui_menu_conf_general,UI_TEXT_GENERAL,ui_menu_general);
@@ -815,8 +837,24 @@ UI_MENU_ACTION2C(ui_menu_eeprom_loaded,UI_ACTION_DUMMY,UI_TEXT_EEPROM_LOADED);
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND}
-UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+4);
+#ifdef SOFTWARE_LEVELING
+#define UI_MENU_SL_COND ,&ui_menu_conf_level
+#define UI_MENU_SL_CNT 1
+UI_MENU_SUBMENU(ui_menu_conf_level, UI_TEXT_LEVEL, ui_menu_level);
+#else
+#define UI_MENU_SL_COND
+#define UI_MENU_SL_CNT 0
+#endif
+#ifdef STEP_COUNTER
+#define UI_MENU_DELTA_COND ,&ui_menu_conf_delta
+#define UI_MENU_DELTA_CNT 1
+UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_DELTA, ui_menu_delta);
+#else
+#define UI_MENU_DELTA_COND
+#define UI_MENU_DELTA_CNT 0
+#endif 
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
 // Main menu
 UI_MENU_SUBMENU(ui_menu_main1,UI_TEXT_QUICK_SETTINGS,ui_menu_quick);
 UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);

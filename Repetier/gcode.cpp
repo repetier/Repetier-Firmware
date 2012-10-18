@@ -725,7 +725,7 @@ void gcode_read_serial() {
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
         if(gcode_comment) gcode_wpos--;
-      }           
+      }
     }
   }
   sd.sdmode = false;

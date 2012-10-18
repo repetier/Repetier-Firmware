@@ -67,7 +67,6 @@ have problems with other modules using the eeprom */
 #define EPR_BED_DRIVE_MIN         124
 #define EPR_PRINTING_TIME         125  // Time in seconds printing
 #define EPR_PRINTING_DISTANCE     129  // Filament length printed
-
 #define EPR_X_HOME_OFFSET         133
 #define EPR_Y_HOME_OFFSET         137
 #define EPR_Z_HOME_OFFSET         141
@@ -97,7 +96,8 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_ADVANCE_K          41
 #define EPR_EXTRUDER_DRIVE_MIN          45
 #define EPR_EXTRUDER_ADVANCE_L          46
-
+#define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
+#define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #if EEPROM_MODE!=0
 extern inline byte epr_get_byte(uint pos);
 extern inline int epr_get_int(uint pos);

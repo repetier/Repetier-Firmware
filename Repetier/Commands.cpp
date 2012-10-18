@@ -60,6 +60,7 @@ void printPosition() {
   OUT_P_F_LN(" E:",printer_state.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
 void print_temperatures() {
+	float temp = extruder_get_temperature();
 #if HEATED_BED_SENSOR_TYPE==0 
   OUT_P_F("T:",extruder_get_temperature())); 
 #else
@@ -92,6 +93,40 @@ void set_fan_speed(int speed,bool wait) {
   pwm_pos[3] = speed;
 #endif
 }
+#if DRIVE_SYSTEM==3
+void delta_move_to_top_endstops(float feedrate) {
+  long up_steps = printer_state.zMaxSteps;
+  for (byte i=0; i<3; i++)
+    printer_state.currentPositionSteps[i] = 0;
+  calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+  move_steps(0,0,printer_state.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
+}
+
+void home_axis(bool xaxis,bool yaxis,bool zaxis) {
+  long steps;
+  bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
+  if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1) {
+    UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+    // Homing Z axis means that you must home X and Y
+    if (homeallaxis || zaxis) {
+      delta_move_to_top_endstops(homing_feedrate[0]);	
+      move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+      delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);	
+      printer_state.currentPositionSteps[0] = 0;
+      printer_state.currentPositionSteps[1] = 0;
+      printer_state.currentPositionSteps[2] = printer_state.zMaxSteps;
+      calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+      printer_state.maxDeltaPositionSteps = printer_state.currentDeltaPositionSteps[0];
+    } else {
+      if (xaxis) printer_state.destinationSteps[0] = 0;
+      if (yaxis) printer_state.destinationSteps[1] = 0;
+      split_delta_move(true,false,false);
+    }
+    printer_state.countZSteps = 0;
+    UI_CLEAR_STATUS 
+  }
+}
+#else
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
   if(xaxis) {
@@ -144,7 +179,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   }
   UI_CLEAR_STATUS  
 }
-
+#endif
 
 // Digipot methods for controling current and microstepping
 
@@ -263,7 +298,11 @@ void process_command(GCode *com)
       case 0: // G0 -> G1
       case 1: // G1
         if(get_coordinates(com)) // For X Y Z E F
+#if DRIVE_SYSTEM == 3
+		  split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+#else
           queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+#endif
         break;
       case 4: // G4 dwell
         wait_until_end_of_move();
@@ -285,7 +324,7 @@ void process_command(GCode *com)
       case 28: {//G28 Home all Axis one at a time
           byte home_all_axis = (GCODE_HAS_NO_XYZ(com));
           home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
-        }
+		}
         break;
       case 90: // G90
         relative_mode = false;
@@ -407,6 +446,7 @@ void process_command(GCode *com)
           bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
           codenum = millis(); 
           unsigned long waituntil = 0;
+		  byte retracted = 0;
           unsigned long cur_time;
           do {
             cur_time = millis();
@@ -416,6 +456,10 @@ void process_command(GCode *com)
             }
             check_periodical();
             gcode_read_serial();
+			if (current_extruder->waitRetractUnits > 0 && !retracted && dir && current_extruder->tempControl.currentTemperatureC > current_extruder->waitRetractTemperature) {
+				move_steps(0,0,0,-current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+				retracted = 1;
+			}
             if((waituntil==0 && (dir ? current_extruder->tempControl.currentTemperatureC >= current_extruder->tempControl.targetTemperatureC-0.5:current_extruder->tempControl.currentTemperatureC <= current_extruder->tempControl.targetTemperatureC+0.5))
 #ifdef TEMP_HYSTERESIS
             || (waituntil!=0 && (abs(current_extruder->tempControl.currentTemperatureC - current_extruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)            
@@ -424,6 +468,9 @@ void process_command(GCode *com)
               waituntil = cur_time+1000UL*(unsigned long)current_extruder->watchPeriod; // now wait for temp. to stabalize
             }
           } while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
+			if (retracted) {
+				move_steps(0,0,0,current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+			}
         }
         UI_CLEAR_STATUS;
         previous_millis_cmd = millis();
@@ -520,7 +567,11 @@ void process_command(GCode *com)
         }   
         break;
       case 115: // M115
+#if DRIVE_SYSTEM==3
+        out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Rostock EXTRUDER_COUNT:1 REPETIER_PROTOCOL:2"));
+#else
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:2"));
+#endif
         break;
       case 114: // M114
         printPosition();
@@ -701,8 +752,8 @@ void process_command(GCode *com)
     break;
     
     case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
-      {
-      out.println_P(PSTR("Set Microstepping"));
+    {
+      OUT_P_LN("Set Microstepping");
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
         if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S); 
         if(GCODE_HAS_X(com)) microstep_mode(0,(uint8_t)com->X);
@@ -712,25 +763,52 @@ void process_command(GCode *com)
         if(GCODE_HAS_P(com)) microstep_mode(4,com->P); // Original B but is not supported here
         microstep_readings();
 #endif
-      }
-      break;
-    case 400: // Test command to see if codes > 255 are send correct
-      out.println_P(PSTR("M400 successfully called"));
-      break;
+    }
+    break;
+#ifdef STEP_COUNTER
+#if DRIVE_SYSTEM==3
+		case 251:
+			if(GCODE_HAS_S(com)) {
+				if (com->S == 0) {
+					printer_state.countZSteps = 0;
+					out.println_P(PSTR("Measurement reset."));
+				} else if (com->S == 1) {
+					OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+					OUT_P_L_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+				} else if (com->S = 2) {
+					if (printer_state.countZSteps < 0)
+						printer_state.countZSteps = -printer_state.countZSteps;
+					printer_state.zMin = 0;
+					printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+					printer_state.zMaxSteps = printer_state.countZSteps;
+					for (byte i=0; i<3; i++) {
+						printer_state.currentPositionSteps[i] = 0;
+					}
+					calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+					OUT_P_LN("Measured origin set. Measurement reset.");
+			#if EEPROM_MODE!=0
+					epr_data_to_eeprom(false);
+					OUT_P_LN("EEPROM updated");
+			#endif
+				}
+			}
+			break;
+#endif
+#endif
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();
     extruder_select(com->T);
   } else{
     if(DEBUG_ERRORS) {
-      out.print_P(PSTR("Unknown command:"));
+      OUT_P("Unknown command:");
       gcode_print_command(com);
       out.println();
     }
   }
 #ifdef ECHO_ON_EXECUTE
   if(DEBUG_ECHO) {
-      out.print_P(PSTR("Echo:"));
+      OUT_P("Echo:");
       gcode_print_command(com);
       out.println();
   }

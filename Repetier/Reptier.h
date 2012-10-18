@@ -186,6 +186,8 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
   long extrudePosition;   ///< Current extruder position in steps.
   int watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
+  int waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
+  int waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   float advanceK;         ///< Koefficient for advance algorithm. 0 = off
@@ -358,6 +360,16 @@ extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_move(byte check_endstops,byte pathOptimize);
+#if DRIVE_SYSTEM==3
+extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
+extern void set_delta_position(long xaxis, long yaxis, long zaxis);
+extern float rodMaxLength;
+extern void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
+#ifdef SOFTWARE_LEVELING
+extern void calculate_plane(long factors[], long p1[], long p2[], long p3[]);
+extern float calc_zoffset(long factors[], long pointX, long pointY);
+#endif
+#endif
 extern void linear_move(long steps_remaining[]);
 extern inline void disable_x();
 extern inline void disable_y();
@@ -414,6 +426,18 @@ typedef struct { // RAM usage: 72 Byte
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
+#if DRIVE_SYSTEM==3
+#ifdef STEP_COUNTER
+  long countZSteps;					///< Count of steps from last position reset
+#endif
+  long currentDeltaPositionSteps[4];
+  long maxDeltaPositionSteps;
+#endif
+#ifdef SOFTWARE_LEVELING
+  long levelingP1[3];
+  long levelingP2[3];
+  long levelingP3[3];
+#endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
   int opsPushbackSteps;             ///< Retract+extra distance for backslash
@@ -477,6 +501,18 @@ extern PrinterState printer_state;
 /** Wait for the extruder to finish it's down movement */
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
+#if DRIVE_SYSTEM==3
+// Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
+// MAX_DELTA_SEGMENTS_PER_LINE * 
+#define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
+typedef struct { 
+	byte dir; 									///< Direction of delta movement.
+	unsigned int deltaSteps[3]; 				///< Number of steps in move.
+} DeltaSegment;
+extern DeltaSegment segments[];					// Delta segment cache
+extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
+extern volatile unsigned int delta_segment_count; // Number of delta moves cached 0 = nothing in cache
+#endif
 typedef struct { // RAM usage: 24*4+15 = 111 Byte
   byte primaryAxis;
   volatile byte flags;
@@ -498,6 +534,11 @@ typedef struct { // RAM usage: 24*4+15 = 111 Byte
   float distance;
   //float startFactor;
   //float endFactor;
+#if DRIVE_SYSTEM==3
+  byte numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
+  int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
+  long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
+#endif
   unsigned long fullInterval;     ///< interval at full speed in ticks/step.
   unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
   unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -620,6 +661,49 @@ private:
 extern SDCard sd;
 #endif
 
+extern int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
+#ifdef USE_OPS
+extern byte printmoveSeen;
+#endif
+extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
+
+/** \brief Disable stepper motor for x direction. */
+inline void disable_x() {
+#if (X_ENABLE_PIN > -1)
+  WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
+#endif
+}
+/** \brief Disable stepper motor for y direction. */
+inline void disable_y() {
+#if (Y_ENABLE_PIN > -1)
+  WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+#endif
+}
+/** \brief Disable stepper motor for z direction. */
+inline void disable_z() {
+#if (Z_ENABLE_PIN > -1)
+ WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
+#endif
+}
+/** \brief Enable stepper motor for x direction. */
+inline void  enable_x() {
+#if (X_ENABLE_PIN > -1)
+ WRITE(X_ENABLE_PIN, X_ENABLE_ON);
+#endif
+}
+/** \brief Enable stepper motor for y direction. */
+inline void  enable_y() {
+#if (Y_ENABLE_PIN > -1)
+  WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
+#endif
+}
+/** \brief Enable stepper motor for z direction. */
+inline void  enable_z() {
+#if (Z_ENABLE_PIN > -1)
+ WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
+#endif
+}
+
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -647,4 +731,26 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 
+#if DRIVE_SYSTEM==3
+#define SIN_60 0.8660254037844386
+#define COS_60 0.5
+#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
+#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
+#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
+#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
+
+#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
+#define DELTA_TOWER3_X_STEPS 0.0
+#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
+
+#define NUM_AXIS 4
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+#define E_AXIS 3
+
+#endif
 #endif

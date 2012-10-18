@@ -190,6 +190,8 @@ void epr_data_to_eeprom(byte corrupted) {
     epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
     epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
     epr_set_int(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
+    epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,e->waitRetractTemperature);
+    epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,e->waitRetractUnits);
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
@@ -275,7 +277,9 @@ void epr_eeprom_to_data() {
 #endif
     e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
     e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
-    e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);    
+    e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);
+	e->waitRetractTemperature = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
+	e->waitRetractUnits = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
  #ifdef USE_ADVANCE
  #ifdef ENABLE_QUADRATIC_ADVANCE
     e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
@@ -327,6 +331,7 @@ void epr_update_usage() {
     epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
 }
+
 /** \brief Writes all eeprom settings to serial console.
 
 For each value stored, this function generates one line with syntax
@@ -414,6 +419,8 @@ void epr_output_settings() {
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
     epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
+    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("Temp. to retract when heating [C]"));
+    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("Units to retract when heating [mm]"));
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("Advance K [0=off]"));

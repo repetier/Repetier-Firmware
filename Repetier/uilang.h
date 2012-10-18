@@ -39,6 +39,7 @@
 #define UI_TEXT_EXTRUDER         "Extruder"
 #define UI_TEXT_SD_CARD          "SD Card"
 #define UI_TEXT_DEBUGGING        "Debugging"
+#define UI_TEXT_HOME_DELTA       "Home Delta"
 #define UI_TEXT_HOME_ALL         "Home All"
 #define UI_TEXT_HOME_X           "Home X"
 #define UI_TEXT_HOME_Y           "Home Y"
@@ -62,6 +63,8 @@
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
 #define UI_TEXT_EXTR1_SELECT     "%X1 Select Extr.1"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 #define UI_TEXT_EXTR_ORIGIN      "Set Origin"
 #define UI_TEXT_PRINT_X          "Print X:%ax"
 #define UI_TEXT_PRINT_Y          "Print Y:%ay"
@@ -155,6 +158,15 @@
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
+#define UI_TEXT_SHOW_MEASUREMENT  "Show meas."
+#define UI_TEXT_RESET_MEASUREMENT "Reset meas."
+#define UI_TEXT_SET_MEASURED_ORIGIN "Set meas. origin"
+#define UI_TEXT_DELTA			  "Delta Calib."
+#define UI_TEXT_SET_P1			  "Set P1"
+#define UI_TEXT_SET_P2			  "Set P2"
+#define UI_TEXT_SET_P3			  "Set P3"
+#define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
+#define UI_TEXT_LEVEL			  "Level delta"
 
 // *************** german translation ****************
 
@@ -294,6 +306,15 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 #define UI_TEXT_ADVANCE_L         "Advance lin:Xl%"
 #define UI_TEXT_ADVANCE_K         "Advance quad:Xa%"
+#define UI_TEXT_SHOW_MEASUREMENT  "Zeige Messung"
+#define UI_TEXT_RESET_MEASUREMENT "Reset Messung"
+#define UI_TEXT_SET_MEASURED_ORIGIN "Setze Ursprung Mess."
+#define UI_TEXT_DELTA			  "Delta Calib."
+#define UI_TEXT_SET_P1			  "Setze P1"
+#define UI_TEXT_SET_P2			  "Setze P2"
+#define UI_TEXT_SET_P3			  "Setze P3"
+#define UI_TEXT_CALCULATE_LEVELING "Berechne Leveling"
+#define UI_TEXT_LEVEL			  "Level delta"
 
 #endif
 
