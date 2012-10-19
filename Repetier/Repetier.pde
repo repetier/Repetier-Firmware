@@ -293,6 +293,13 @@ void update_ramps_parameter() {
   printer_state.xMinSteps = (long)(axis_steps_per_unit[0]*printer_state.xMin);
   printer_state.yMinSteps = (long)(axis_steps_per_unit[1]*printer_state.yMin);
   printer_state.zMinSteps = (long)(axis_steps_per_unit[2]*printer_state.zMin);
+  // For which directions do we need backlash compensation
+#if ENABLE_BACKLASH_COMPENSATION
+  printer_state.backlashDir &= 7;
+  if(printer_state.backlashX!=0) printer_state.backlashDir |= 8;
+  if(printer_state.backlashY!=0) printer_state.backlashDir |= 16;
+  if(printer_state.backlashZ!=0) printer_state.backlashDir |= 32;
+#endif
 #endif
   for(byte i=0;i<4;i++) {
     inv_axis_steps_per_unit[i] = 1.0f/axis_steps_per_unit[i];
@@ -411,7 +418,7 @@ void setup()
   printer_state.opsMode = OPS_MODE;
   printer_state.opsMinDistance = OPS_MIN_DISTANCE;
   printer_state.opsRetractDistance = OPS_RETRACT_DISTANCE;
-  printer_state.opsRetractBackslash = OPS_RETRACT_BACKSLASH;
+  printer_state.opsRetractBacklash = OPS_RETRACT_BACKLASH;
   printer_state.filamentRetracted = false;
 #endif
   printer_state.feedrate = 3000; ///< Current feedrate in mm/min.
@@ -441,6 +448,11 @@ void setup()
   printer_state.xMin = X_MIN_POS;
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
+  printer_state.backlashX = X_BACKLASH;
+  printer_state.backlashY = Y_BACKLASH;
+  printer_state.backlashZ = Z_BACKLASH;
+  printer_state.backlashDir = 0;
+  
   epr_init_baudrate();
   RFSERIAL.begin(baudrate);
   out.println_P(PSTR("start"));
@@ -829,25 +841,7 @@ byte get_coordinates(GCode *com)
       p = com->Z*axis_steps_per_unit[2];
     if(relative_mode) {
         printer_state.destinationSteps[2] = printer_state.currentPositionSteps[2]+p;
-#ifdef Z_BACKSLASH
-        if(p>0 && lastzdir!=1) {
-          lastzdir = 1;
-          printer_state.currentPositionSteps[2]-=Z_BACKSLASH*axis_steps_per_unit[2];
-        } else if(p<0 && lastzdir!=-1) {
-          lastzdir=-1;
-          printer_state.currentPositionSteps[2]+=Z_BACKSLASH*axis_steps_per_unit[2];
-        }
-#endif
     } else {
-#ifdef Z_BACKSLASH
-        if(p>printer_state.destinationSteps[2] && lastzdir!=1) {
-          lastzdir = 1;
-          printer_state.currentPositionSteps[2]-=Z_BACKSLASH*axis_steps_per_unit[2];
-        } else if(p<printer_state.destinationSteps[2] && lastzdir!=-1) {
-          lastzdir=-1;
-          printer_state.currentPositionSteps[2]+=Z_BACKSLASH*axis_steps_per_unit[2];
-        }
-#endif
         printer_state.destinationSteps[2] = p;
     }
   } else printer_state.destinationSteps[2] = printer_state.currentPositionSteps[2];

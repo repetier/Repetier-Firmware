@@ -63,8 +63,6 @@
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
 #define UI_TEXT_EXTR1_SELECT     "%X1 Select Extr.1"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
-#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 #define UI_TEXT_EXTR_ORIGIN      "Set Origin"
 #define UI_TEXT_PRINT_X          "Print X:%ax"
 #define UI_TEXT_PRINT_Y          "Print Y:%ay"
@@ -161,12 +159,14 @@
 #define UI_TEXT_SHOW_MEASUREMENT  "Show meas."
 #define UI_TEXT_RESET_MEASUREMENT "Reset meas."
 #define UI_TEXT_SET_MEASURED_ORIGIN "Set meas. origin"
-#define UI_TEXT_DELTA			  "Delta Calib."
-#define UI_TEXT_SET_P1			  "Set P1"
-#define UI_TEXT_SET_P2			  "Set P2"
-#define UI_TEXT_SET_P3			  "Set P3"
+#define UI_TEXT_DELTA             "Delta Calib."
+#define UI_TEXT_SET_P1            "Set P1"
+#define UI_TEXT_SET_P2            "Set P2"
+#define UI_TEXT_SET_P3	          "Set P3"
 #define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
-#define UI_TEXT_LEVEL			  "Level delta"
+#define UI_TEXT_LEVEL             "Level delta"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 
 // *************** german translation ****************
 
@@ -315,6 +315,8 @@
 #define UI_TEXT_SET_P3			  "Setze P3"
 #define UI_TEXT_CALCULATE_LEVELING "Berechne Leveling"
 #define UI_TEXT_LEVEL			  "Level delta"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 
 #endif
 
@@ -603,5 +605,7 @@
 #define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 
 #endif

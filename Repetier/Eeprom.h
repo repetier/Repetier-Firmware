@@ -52,7 +52,7 @@ have problems with other modules using the eeprom */
 #define EPR_MAX_INACTIVE_TIME      79
 #define EPR_STEPPER_INACTIVE_TIME  83
 #define EPR_OPS_RETRACT_DISTANCE   87
-#define EPR_OPS_RETRACT_BACKSLASH  91
+#define EPR_OPS_RETRACT_BACKLASH   91
 #define EPR_EXTRUDER_SPEED         95
 #define EPR_OPS_MOVE_AFTER         99
 #define EPR_OPS_MODE              103
@@ -73,6 +73,9 @@ have problems with other modules using the eeprom */
 #define EPR_X_LENGTH              145
 #define EPR_Y_LENGTH              149
 #define EPR_Z_LENGTH              153
+#define EPR_BACKLASH_X            157
+#define EPR_BACKLASH_Y            161
+#define EPR_BACKLASH_Z            165
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development

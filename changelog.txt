@@ -19,6 +19,7 @@ Version 0.80 dev
   Set micro stepping (RAMBO board): M350 S<all> X<x-stepper> Y<y-stepper> Z<z-stepper> E<extruder 1> P<extruder 2>
   Simplified configuration. All speeds are now mm/s.
   Repetier protocol version 2, allowing more data parameter.
+  Backlash compensation for all axis.
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

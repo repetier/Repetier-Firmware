@@ -329,6 +329,10 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	40
 
+/** If enabled you can select the distance your filament gets retracted during a
+M140 command, after a given temperature is reached. */
+#define RETRACT_DURING_HEATUP true
+
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power to long, you
 need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15.
@@ -611,7 +615,7 @@ on this endstop.
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
 #define ENDSTOP_X_BACK_ON_HOME 0.5
-#define ENDSTOP_Y_BACK_ON_HOME 0.5
+#define ENDSTOP_Y_BACK_ON_HOME 4
 #define ENDSTOP_Z_BACK_ON_HOME 0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
@@ -619,7 +623,7 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS false
 // maximum positions in mm - only fixed numbers!
-#define X_MAX_LENGTH 200
+#define X_MAX_LENGTH 190
 #define Y_MAX_LENGTH 200
 #define Z_MAX_LENGTH 100
 
@@ -699,7 +703,10 @@ on this endstop.
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
+#define ENABLE_BACKLASH_COMPENSATION true
 #define Z_BACKLASH 0
+#define X_BACKLASH 0
+#define Y_BACKLASH 0
 
 /** Comment this to disable ramp acceleration */
 #define RAMP_ACCELERATION 1
@@ -862,9 +869,7 @@ If you are using a bowden extruder, you may need some extra distance to push the
 original place. This is the value you enter here. Unit is mm.
  Overridden if EEPROM activated.
 */
-#define OPS_RETRACT_BACKSLASH 0.0
-
-
+#define OPS_RETRACT_BACKLASH 0.0
 
 /** \brief Enable advance algorithm.
 

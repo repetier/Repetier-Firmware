@@ -150,7 +150,13 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
   epr_set_float(EPR_OPS_MOVE_AFTER,printer_state.opsMoveAfter);
   epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer_state.opsRetractDistance);
-  epr_set_float(EPR_OPS_RETRACT_BACKSLASH,printer_state.opsRetractBackslash);
+  epr_set_float(EPR_OPS_RETRACT_BACKLASH,printer_state.opsRetractBacklash);
+#else
+  epr_set_float(EPR_OPS_MIN_DISTANCE,OPS_MIN_DISTANCE);
+  epr_set_byte(EPR_OPS_MODE,OPS_MODE);
+  epr_set_float(EPR_OPS_MOVE_AFTER,OPS_MOVE_AFTER);
+  epr_set_float(EPR_OPS_RETRACT_DISTANCE,OPS_RETRACT_DISTANCE);
+  epr_set_float(EPR_OPS_RETRACT_BACKLASH,OPS_RETRACT_BACKLASH);
 #endif
 #if HAVE_HEATED_BED
   epr_set_byte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
@@ -169,6 +175,15 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_float(EPR_X_LENGTH,printer_state.xLength);
   epr_set_float(EPR_Y_LENGTH,printer_state.yLength);
   epr_set_float(EPR_Z_LENGTH,printer_state.zLength);
+#if ENABLE_BACKLASH_COMPENSATION
+  epr_set_float(EPR_BACKLASH_X,printer_state.backlashX);
+  epr_set_float(EPR_BACKLASH_Y,printer_state.backlashY);
+  epr_set_float(EPR_BACKLASH_Z,printer_state.backlashZ);
+#else
+  epr_set_float(EPR_BACKLASH_X,0);
+  epr_set_float(EPR_BACKLASH_Y,0);
+  epr_set_float(EPR_BACKLASH_Z,0);
+#endif
 
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
@@ -190,8 +205,10 @@ void epr_data_to_eeprom(byte corrupted) {
     epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
     epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
     epr_set_int(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
+#if RETRACT_DURING_HEATUP
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,e->waitRetractTemperature);
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,e->waitRetractUnits);
+#endif
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
@@ -239,7 +256,7 @@ void epr_eeprom_to_data() {
   printer_state.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);
   printer_state.opsMinDistance = epr_get_float(EPR_OPS_MIN_DISTANCE);
   printer_state.opsRetractDistance = epr_get_float(EPR_OPS_RETRACT_DISTANCE);
-  printer_state.opsRetractBackslash = epr_get_float(EPR_OPS_RETRACT_BACKSLASH);
+  printer_state.opsRetractBacklash = epr_get_float(EPR_OPS_RETRACT_BACKLASH);
 #endif
 #if HAVE_HEATED_BED
   heatedBedController.heatManager= epr_get_byte(EPR_BED_HEAT_MANAGER);
@@ -258,6 +275,11 @@ void epr_eeprom_to_data() {
   printer_state.xLength = epr_get_float(EPR_X_LENGTH);
   printer_state.yLength = epr_get_float(EPR_Y_LENGTH);
   printer_state.zLength = epr_get_float(EPR_Z_LENGTH);
+#if ENABLE_BACKLASH_COMPENSATION
+  printer_state.backlashX = epr_get_float(EPR_BACKLASH_X);
+  printer_state.backlashY = epr_get_float(EPR_BACKLASH_Y);
+  printer_state.backlashZ = epr_get_float(EPR_BACKLASH_Z);
+#endif
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
@@ -278,8 +300,10 @@ void epr_eeprom_to_data() {
     e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
     e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
     e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);
-	e->waitRetractTemperature = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
-	e->waitRetractUnits = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
+#if RETRACT_DURING_HEATUP
+    e->waitRetractTemperature = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
+    e->waitRetractUnits = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
+#endif
  #ifdef USE_ADVANCE
  #ifdef ENABLE_QUADRATIC_ADVANCE
     e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
@@ -319,6 +343,7 @@ void epr_init() {
 */
 void epr_update_usage() {
 #if EEPROM_MODE!=0
+  if(printer_state.filamentPrinted==0) return; // No miles only enabled
   unsigned long seconds = (millis()-printer_state.msecondsPrinting);
   seconds += epr_get_long(EPR_PRINTING_TIME);
   epr_set_long(EPR_PRINTING_TIME,seconds);
@@ -369,6 +394,11 @@ void epr_output_settings() {
   epr_out_float(EPR_X_LENGTH,PSTR("X max length [mm]"));
   epr_out_float(EPR_Y_LENGTH,PSTR("Y max length [mm]"));
   epr_out_float(EPR_Z_LENGTH,PSTR("Z max length [mm]"));
+#if ENABLE_BACKLASH_COMPENSATION
+  epr_out_float(EPR_BACKLASH_X,PSTR("X backlash [mm]"));
+  epr_out_float(EPR_BACKLASH_Y,PSTR("Y backlash [mm]"));
+  epr_out_float(EPR_BACKLASH_Z,PSTR("Z backlash [mm]"));
+#endif
 
 #ifdef RAMP_ACCELERATION
   //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
@@ -386,7 +416,7 @@ void epr_output_settings() {
   epr_out_float(EPR_OPS_MOVE_AFTER,PSTR("OPS move after x% retract [%]"));
   epr_out_float(EPR_OPS_MIN_DISTANCE,PSTR("OPS min. distance for fil. retraction [mm]"));
   epr_out_float(EPR_OPS_RETRACT_DISTANCE,PSTR("OPS retraction length [mm]"));
-  epr_out_float(EPR_OPS_RETRACT_BACKSLASH,PSTR("OPS retraction backslash [mm]"));
+  epr_out_float(EPR_OPS_RETRACT_BACKLASH,PSTR("OPS retraction backlash [mm]"));
 #endif
 #if HAVE_HEATED_BED
   epr_out_byte(EPR_BED_HEAT_MANAGER,PSTR("Bed Heat Manager [0-2]"));

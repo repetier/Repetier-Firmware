@@ -105,6 +105,11 @@
 #endif
 #define REPETIER_VERSION "0.80dev"
 
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=0
+#undef ENABLE_BACKLASH_COMPENSATION
+#define ENABLE_BACKLASH_COMPENSATION false
+#endif
+
 #define uint uint16_t
 #define uint8 uint8_t
 #define int8 int8_t
@@ -221,7 +226,6 @@ extern void extruder_select(byte ext_num);
 //extern void extruder_set_position(float pos,bool relative);
 // set the temperature of current extruder
 extern void extruder_set_temperature(float temp_celsius,byte extr);
-extern float extruder_get_temperature();
 // Set temperature of heated bed
 extern void heated_bed_set_temperature(float temp_celsius);
 //extern long extruder_steps_to_position(float value,byte relative);
@@ -440,10 +444,10 @@ typedef struct { // RAM usage: 72 Byte
 #endif
 #if USE_OPS==1
   int opsRetractSteps;              ///< Retract filament this much steps
-  int opsPushbackSteps;             ///< Retract+extra distance for backslash
+  int opsPushbackSteps;             ///< Retract+extra distance for backsash
   float opsMinDistance;
   float opsRetractDistance;
-  float opsRetractBackslash;
+  float opsRetractBacklash;
   byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
   float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
   int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
@@ -471,6 +475,12 @@ typedef struct { // RAM usage: 72 Byte
   byte stepper_loops;
   long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
   float filamentPrinted;            ///< mm of filament printed since counting started
+#if ENABLE_BACKLASH_COMPENSATION
+  float backlashX;
+  float backlashY;
+  float backlashZ;
+  byte backlashDir;
+#endif
 } PrinterState;
 extern PrinterState printer_state;
 
@@ -703,7 +713,6 @@ inline void  enable_z() {
  WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 }
-
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##

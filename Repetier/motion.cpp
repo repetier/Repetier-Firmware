@@ -24,10 +24,6 @@
 #include "Reptier.h"
 #include "ui.h"
 
-#ifdef Z_BACKLASH
-char lastzdir=0;
-#endif
-
 // ##########################################################################
 // ###                         Path planner stuff                         ###
 // ##########################################################################
@@ -290,6 +286,9 @@ inline float safeSpeed(PrintLine *p) {
   return (safe<p->fullSpeed?safe:p->fullSpeed);
 }
 
+/**
+Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
+*/
 void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop) {
   float saved_feedrate = printer_state.feedrate;
   for(byte i=0; i < 4; i++) {
@@ -298,15 +297,6 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
   printer_state.destinationSteps[0]+=x;
   printer_state.destinationSteps[1]+=y;
   printer_state.destinationSteps[2]+=z;
-#ifdef Z_BACKLASH
-  if(z>0 && lastzdir!=1) {
-     lastzdir = 1;
-     printer_state.currentPositionSteps[2]-=Z_BACKLASH*axis_steps_per_unit[2];
-  } else if(z<0 && lastzdir!=-1) {
-     lastzdir=-1;
-     printer_state.currentPositionSteps[2]+=Z_BACKLASH*axis_steps_per_unit[2];
-  }
-#endif
   printer_state.destinationSteps[3]+=e;
   printer_state.feedrate = feedrate;
 #if DRIVE_SYSTEM==3
@@ -329,7 +319,7 @@ byte check_new_move(byte pathOptimize) {
     out.println_P(PSTR("New path"));
 #endif
     byte w = 3;
-	PrintLine *p = &lines[lines_write_pos];
+    PrintLine *p = &lines[lines_write_pos];
     while(w) {
       p->flags = FLAG_WARMUP;
       p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
@@ -344,7 +334,7 @@ END_INTERRUPT_PROTECTED
       p = &lines[lines_write_pos];
       w--;
     }
-	return 1;
+    return 1;
   }
   return 0;
 }
@@ -602,9 +592,51 @@ p->delta[1] = deltay-deltax;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
 #endif
+  byte primary_axis;
+#if ENABLE_BACKLASH_COMPENSATION
+  if(((p->dir & 7)^(printer_state.backlashDir & 7)) & (printer_state.backlashDir >> 3)) { // We need to compensate backlash, add a move
+    while(lines_count>=MOVE_CACHE_SIZE-1) { // wait for a second free entry in movement cache
+      gcode_read_serial();
+      check_periodical();
+    }
+    byte wpos2 = lines_write_pos+1;
+    if(wpos2>>=MOVE_CACHE_SIZE) wpos2 = 0;
+    PrintLine *p2 = &lines[wpos2];
+    memcpy(p2,p,sizeof(PrintLine)); // Move current data to p2
+    byte changed = (p->dir & 7)^(printer_state.backlashDir & 7);
+    float back_diff[4]; // Axis movement in mm
+    back_diff[4] = 0;
+    back_diff[0] = (changed & 1 ? (p->dir & 1 ? printer_state.backlashX : -printer_state.backlashX) : 0);
+    back_diff[1] = (changed & 2 ? (p->dir & 2 ? printer_state.backlashY : -printer_state.backlashY) : 0);
+    back_diff[2] = (changed & 4 ? (p->dir & 4 ? printer_state.backlashZ : -printer_state.backlashZ) : 0);
+    p->dir &=7; // x,y and z are already correct
+    for(byte i=0; i < 4; i++) {
+      p->delta[i] = abs(back_diff[i])*axis_steps_per_unit[i];
+      if(p->delta[i]) p->dir |= 16<<i;
+    }
+    //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
+    if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2]) primary_axis = 1;
+    else if (p->delta[0] > p->delta[2] ) primary_axis = 0;
+    else primary_axis = 2;
+    p->primaryAxis = primary_axis;
+    p->stepsRemaining = p->delta[primary_axis];
+    //Feedrate calc based on XYZ travel distance
+    // TODO - Simplify since Z will always move
+    if(p->dir & 64) {
+      p->distance = sqrt(back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1] + back_diff[2] * back_diff[2]);
+    } else {
+      p->distance = sqrt(back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1]);
+    }
+    printer_state.backlashDir = (printer_state.backlashDir & 56) | (p2->dir & 7);
+    calculate_move(p,back_diff,false,pathOptimize);    
+    p = p2; // use saved instance for the real move
+  } 
+#endif
   if(printer_state.extrudeMultiply!=100) {
     p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-  }
+    printer_state.filamentPrinted+=(axis_diff[3]*printer_state.extrudeMultiply)/100;
+  } else
+    printer_state.filamentPrinted+=axis_diff[3];
   if(!(p->dir & 240)) {
     if(newPath) { // need to delete dummy elements, otherwise commands can get locked.
       lines_count = 0;
@@ -618,7 +650,6 @@ p->delta[1] = deltay-deltax;
 #endif
 
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-  byte primary_axis;
   if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2] && p->delta[1] > p->delta[3]) primary_axis = 1;
   else if (p->delta[0] > p->delta[2] && p->delta[0] > p->delta[3]) primary_axis = 0;
   else if (p->delta[2] > p->delta[3]) primary_axis = 2;
@@ -879,6 +910,8 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
 	}
+  printer_state.filamentPrinted+=p->axis_diff[3];
+
 #if max_software_endstop_r == true
 // TODO - Implement radius checking
 // I'm guessing I need the floats to prevent overflow. This is pretty horrible.
