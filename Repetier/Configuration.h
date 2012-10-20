@@ -693,7 +693,7 @@ on this endstop.
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
-#define ENABLE_BACKLASH_COMPENSATION true
+#define ENABLE_BACKLASH_COMPENSATION false
 #define Z_BACKLASH 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0

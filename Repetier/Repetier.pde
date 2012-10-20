@@ -448,11 +448,12 @@ void setup()
   printer_state.xMin = X_MIN_POS;
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
+#if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashX = X_BACKLASH;
   printer_state.backlashY = Y_BACKLASH;
   printer_state.backlashZ = Z_BACKLASH;
   printer_state.backlashDir = 0;
-  
+#endif  
   epr_init_baudrate();
   RFSERIAL.begin(baudrate);
   out.println_P(PSTR("start"));
