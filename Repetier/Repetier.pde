@@ -299,6 +299,10 @@ void update_ramps_parameter() {
   if(printer_state.backlashX!=0) printer_state.backlashDir |= 8;
   if(printer_state.backlashY!=0) printer_state.backlashDir |= 16;
   if(printer_state.backlashZ!=0) printer_state.backlashDir |= 32;
+  /*if(printer_state.backlashDir & 56)
+    OUT_P_LN("Backlash compensation enabled");
+  else
+    OUT_P_LN("Backlash compensation disabled");*/
 #endif
 #endif
   for(byte i=0;i<4;i++) {
@@ -539,40 +543,8 @@ void loop()
   send_mem();
 #endif
 }
-void log_long_array(PGM_P ptr,long *arr) {
-  out.print_P(ptr);
-  for(byte i=0;i<4;i++) {
-    out.print(' ');
-    out.print(arr[i]);
-  }
-  out.println();
-}
-void log_float_array(PGM_P ptr,float *arr) {
-  out.print_P(ptr);
-  for(byte i=0;i<3;i++)
-    out.print_float_P(PSTR(" "),arr[i]);
-  out.println_float_P(PSTR(" "),arr[3]);
-}
-void log_printLine(PrintLine *p) {
-  out.println_int_P(PSTR("ID:"),(int)p);
-  log_long_array(PSTR("Delta"),p->delta);
-  //log_long_array(PSTR("Error"),p->error);
-  //out.println_int_P(PSTR("Prim:"),p->primaryAxis);
-  out.println_int_P(PSTR("Dir:"),p->dir);
-  out.println_int_P(PSTR("Flags:"),p->flags);
-  out.println_float_P(PSTR("fullSpeed:"),p->fullSpeed);
-  out.println_long_P(PSTR("vMax:"),p->vMax);
-  out.println_float_P(PSTR("Acceleration:"),p->acceleration);
-  out.println_long_P(PSTR("Acceleration Prim:"),p->accelerationPrim);
-  //out.println_long_P(PSTR("Acceleration Timer:"),p->facceleration);
-  out.println_long_P(PSTR("Remaining steps:"),p->stepsRemaining);
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
-  out.println_long_P(PSTR("advanceFull:"),p->advanceFull>>16);
-  out.println_long_P(PSTR("advanceRate:"),p->advanceRate);
-#endif
-#endif
-}
+
+
 /** \brief Optimized division
 
 Normally the C compiler will compute a long/long division, which takes ~670 Ticks.

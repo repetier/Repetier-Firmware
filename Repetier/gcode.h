@@ -80,7 +80,7 @@ struct ring_buffer
 };
 class RFHardwareSerial : public Stream
 {
-  private:
+  public:
     ring_buffer *_rx_buffer;
     ring_buffer *_tx_buffer;
     volatile uint8_t *_ubrrh;
@@ -115,6 +115,8 @@ class RFHardwareSerial : public Stream
 };
 extern RFHardwareSerial RFSerial; 
 #define RFSERIAL RFSerial
+extern ring_buffer tx_buffer;
+#define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}
 #else
 #define RFSERIAL Serial
 #endif

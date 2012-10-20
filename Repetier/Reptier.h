@@ -406,7 +406,7 @@ extern void digipot_init();
 extern void microstep_init();
 extern void print_temperatures();
 
-typedef struct { // RAM usage: 72 Byte
+typedef struct { 
   byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt
 #if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -523,7 +523,7 @@ extern DeltaSegment segments[];					// Delta segment cache
 extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
 extern volatile unsigned int delta_segment_count; // Number of delta moves cached 0 = nothing in cache
 #endif
-typedef struct { // RAM usage: 24*4+15 = 111 Byte
+typedef struct { // RAM usage: 24*4+15 = 113 Byte
   byte primaryAxis;
   volatile byte flags;
   byte joinFlags;

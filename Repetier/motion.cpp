@@ -338,7 +338,40 @@ END_INTERRUPT_PROTECTED
   }
   return 0;
 }
-
+void log_long_array(PGM_P ptr,long *arr) {
+  out.print_P(ptr);
+  for(byte i=0;i<4;i++) {
+    out.print(' ');
+    out.print(arr[i]);
+  }
+  out.println();
+}
+void log_float_array(PGM_P ptr,float *arr) {
+  out.print_P(ptr);
+  for(byte i=0;i<3;i++)
+    out.print_float_P(PSTR(" "),arr[i]);
+  out.println_float_P(PSTR(" "),arr[3]);
+}
+void log_printLine(PrintLine *p) {
+  out.println_int_P(PSTR("ID:"),(int)p);
+  log_long_array(PSTR("Delta"),p->delta);
+  //log_long_array(PSTR("Error"),p->error);
+  //out.println_int_P(PSTR("Prim:"),p->primaryAxis);
+  out.println_int_P(PSTR("Dir:"),p->dir);
+  out.println_int_P(PSTR("Flags:"),p->flags);
+  out.println_float_P(PSTR("fullSpeed:"),p->fullSpeed);
+  out.println_long_P(PSTR("vMax:"),p->vMax);
+  out.println_float_P(PSTR("Acceleration:"),p->acceleration);
+  out.println_long_P(PSTR("Acceleration Prim:"),p->accelerationPrim);
+  //out.println_long_P(PSTR("Acceleration Timer:"),p->facceleration);
+  out.println_long_P(PSTR("Remaining steps:"),p->stepsRemaining);
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+  out.println_long_P(PSTR("advanceFull:"),p->advanceFull>>16);
+  out.println_long_P(PSTR("advanceRate:"),p->advanceRate);
+#endif
+#endif
+}
 void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte pathOptimize)
 {
 #if DRIVE_SYSTEM==3
@@ -457,7 +490,6 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   }
 #endif
     UI_MEDIUM; // do check encoder
-
     updateTrapezoids(lines_write_pos);
     // how much steps on primary axis do we need to reach target feedrate
     //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
@@ -475,26 +507,26 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     p->halfstep = 0;
   else {
     p->halfstep = 1;
-	#if DRIVE_SYSTEM==3
-	// Error 0-2 are used for the towers and set up in the timer
-	p->error[3] = p->stepsRemaining;
-	#else
+#if DRIVE_SYSTEM==3
+    // Error 0-2 are used for the towers and set up in the timer
+    p->error[3] = p->stepsRemaining;
+#else
     p->error[0] = p->error[1] = p->error[2] = p->error[3] = p->delta[p->primaryAxis];
-	#endif
+#endif
   }
 #ifdef DEBUG_STEPCOUNT
 // Set in delta move calculation
 #if DRIVE_SYSTEM!=3
-  p->totalStepsRemaining = abs(p->delta[0])+abs(p->delta[1]);
+  p->totalStepsRemaining = p->delta[0]+p->delta[1];
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE
   if(DEBUG_ECHO) {
     log_printLine(p);
-      out.println_long_P(PSTR("limitInterval:"), limitInterval);
-      out.println_float_P(PSTR("Move distance on the XYZ space:"), p->distance);
-      out.println_float_P(PSTR("Commanded feedrate:"), printer_state.feedrate);
-      out.println_float_P(PSTR("Constant full speed move time:"), time_for_move);
+      OUT_P_L_LN("limitInterval:", limitInterval);
+      OUT_P_F_LN("Move distance on the XYZ space:", p->distance);
+      OUT_P_F_LN("Commanded feedrate:", printer_state.feedrate);
+      OUT_P_F_LN("Constant full speed move time:", time_for_move);
       //log_long_array(PSTR("axis_int"),(long*)axis_interval);
       //out.println_float_P(PSTR("Plateau repro:"),slowest_axis_plateau_time_repro);
   }
@@ -556,11 +588,10 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   for(byte i=0; i < 4; i++) {
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
       p->dir |= 1<<i;
-      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     } else {
-      axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
       p->delta[i] = -p->delta[i];
     }
+    axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     if(p->delta[i]) p->dir |= 16<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
@@ -593,39 +624,43 @@ p->delta[1] = deltay-deltax;
   }
 #endif
   byte primary_axis;
+  float xydist2;
+#if USE_OPS==1
+  p->opsReverseSteps=0;
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
-  if(((p->dir & 7)^(printer_state.backlashDir & 7)) & (printer_state.backlashDir >> 3)) { // We need to compensate backlash, add a move
+  if((p->dir & 112) && ((p->dir & 7)^(printer_state.backlashDir & 7)) & (printer_state.backlashDir >> 3)) { // We need to compensate backlash, add a move
     while(lines_count>=MOVE_CACHE_SIZE-1) { // wait for a second free entry in movement cache
       gcode_read_serial();
       check_periodical();
     }
     byte wpos2 = lines_write_pos+1;
-    if(wpos2>>=MOVE_CACHE_SIZE) wpos2 = 0;
+    if(wpos2>=MOVE_CACHE_SIZE) wpos2 = 0;
     PrintLine *p2 = &lines[wpos2];
     memcpy(p2,p,sizeof(PrintLine)); // Move current data to p2
     byte changed = (p->dir & 7)^(printer_state.backlashDir & 7);
     float back_diff[4]; // Axis movement in mm
-    back_diff[4] = 0;
+    back_diff[3] = 0;
     back_diff[0] = (changed & 1 ? (p->dir & 1 ? printer_state.backlashX : -printer_state.backlashX) : 0);
     back_diff[1] = (changed & 2 ? (p->dir & 2 ? printer_state.backlashY : -printer_state.backlashY) : 0);
     back_diff[2] = (changed & 4 ? (p->dir & 4 ? printer_state.backlashZ : -printer_state.backlashZ) : 0);
     p->dir &=7; // x,y and z are already correct
     for(byte i=0; i < 4; i++) {
-      p->delta[i] = abs(back_diff[i])*axis_steps_per_unit[i];
+      float f = back_diff[i]*axis_steps_per_unit[i];
+      p->delta[i] = abs((long)f);
       if(p->delta[i]) p->dir |= 16<<i;
     }
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-    if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2]) primary_axis = 1;
-    else if (p->delta[0] > p->delta[2] ) primary_axis = 0;
-    else primary_axis = 2;
-    p->primaryAxis = primary_axis;
-    p->stepsRemaining = p->delta[primary_axis];
+    if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2]) p->primaryAxis = 1;
+    else if (p->delta[0] > p->delta[2] ) p->primaryAxis = 0;
+    else p->primaryAxis = 2;
+    p->stepsRemaining = p->delta[p->primaryAxis];
     //Feedrate calc based on XYZ travel distance
-    // TODO - Simplify since Z will always move
+    xydist2 = back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1];
     if(p->dir & 64) {
-      p->distance = sqrt(back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1] + back_diff[2] * back_diff[2]);
+      p->distance = sqrt(xydist2 + back_diff[2] * back_diff[2]);
     } else {
-      p->distance = sqrt(back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1]);
+      p->distance = sqrt(xydist2);
     }
     printer_state.backlashDir = (printer_state.backlashDir & 56) | (p2->dir & 7);
     calculate_move(p,back_diff,false,pathOptimize);    
@@ -644,10 +679,6 @@ p->delta[1] = deltay-deltax;
     }
     return; // No move in command
   }
-	// TODO - Could be the same for all blocks
-#if USE_OPS==1
-  p->opsReverseSteps=0;
-#endif
 
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
   if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2] && p->delta[1] > p->delta[3]) primary_axis = 1;
@@ -659,10 +690,11 @@ p->delta[1] = deltay-deltax;
   //Feedrate calc based on XYZ travel distance
   // TODO - Simplify since Z will always move
   if(p->dir & 112) {
+    xydist2 = axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1];
     if(p->dir & 64) {
-      p->distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
+      p->distance = sqrt(xydist2 + axis_diff[2] * axis_diff[2]);
     } else {
-      p->distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
+      p->distance = sqrt(xydist2);
     }
   }  else if(p->dir & 128)
     p->distance = abs(axis_diff[3]);

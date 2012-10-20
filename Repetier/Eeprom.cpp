@@ -217,6 +217,9 @@ void epr_data_to_eeprom(byte corrupted) {
 #if RETRACT_DURING_HEATUP
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,e->waitRetractTemperature);
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,e->waitRetractUnits);
+#else
+    epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_TEMP);
+    epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,EXT0_WAIT_RETRACT_UNITS);
 #endif
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE

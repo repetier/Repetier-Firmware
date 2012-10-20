@@ -542,9 +542,9 @@ on this endstop.
 #define ENDSTOP_PULLUP_Z_MAX true
 
 //set to true to invert the logic of the endstops
-#define ENDSTOP_X_MIN_INVERTING false
-#define ENDSTOP_Y_MIN_INVERTING false
-#define ENDSTOP_Z_MIN_INVERTING false
+#define ENDSTOP_X_MIN_INVERTING true
+#define ENDSTOP_Y_MIN_INVERTING true
+#define ENDSTOP_Z_MIN_INVERTING true
 #define ENDSTOP_X_MAX_INVERTING false
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING false
@@ -693,7 +693,7 @@ on this endstop.
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
-#define ENABLE_BACKLASH_COMPENSATION false
+#define ENABLE_BACKLASH_COMPENSATION true
 #define Z_BACKLASH 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
