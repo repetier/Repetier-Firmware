@@ -1024,38 +1024,38 @@ void UIDisplay::parse(char *txt,bool ram) {
         break;
       case 's': // Endstop positions
         if(c2=='x') {
-        #if (X_MIN_PIN > -1)
+        #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
           addStringP((READ(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);
       	#endif
         }
         if(c2=='X')
-      	#if (X_MAX_PIN > -1)
+      	#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
           addStringP((READ(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);
       	#endif
         if(c2=='y')
-      	#if (Y_MIN_PIN > -1)
+      	#if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
           addStringP((READ(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);
       	#endif
         if(c2=='Y')
-      	#if (Y_MAX_PIN > -1)
+      	#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
           addStringP((READ(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);
       	#endif
         if(c2=='z')
-      	#if (Z_MIN_PIN > -1)
+      	#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
           addStringP((READ(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);
       	#endif
         if(c2=='Z')
-      	#if (Z_MAX_PIN > -1)
+      	#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
           addStringP((READ(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?ui_text_on:ui_text_off);
         #else
           addStringP(ui_text_na);

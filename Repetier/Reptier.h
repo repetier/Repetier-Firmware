@@ -100,7 +100,10 @@
 #endif
 #include "gcode.h"
 #include "fastio.h"
-#ifdef SDSUPPORT
+#ifndef SDSUPPORT
+#define SDSUPPORT false
+#endif
+#if SDSUPPORT
 #include "SdFat.h"
 #endif
 #define REPETIER_VERSION "0.80dev"
@@ -581,9 +584,6 @@ extern byte lines_pos; // Position for executing line movement
 extern volatile byte lines_count; // Number of lines cached 0 = nothing to do
 extern byte printmoveSeen;
 extern long baudrate;
-#ifdef SIMULATE_FAN_PWM
-extern int fan_speed;
-#endif
 #if OS_ANALOG_INPUTS>0
 // Get last result for pin x
 extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
@@ -616,7 +616,7 @@ extern TemperatureController heatedBedController;
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
 extern byte autotuneIndex;
 
-#ifdef SDSUPPORT
+#if SDSUPPORT
 
 #define SD_MAX_FOLDER_DEPTH 2
 
@@ -663,6 +663,7 @@ public:
   char *createFilename(char *buffer,const dir_t &p);
   void makeDirectory(char *filename);
   bool showFilename(const uint8_t *name);
+  void automount();
 private:
   void lsRecursive(SdBaseFile *parent,byte level);
  // SdFile *getDirectory(char* name);

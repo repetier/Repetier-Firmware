@@ -105,7 +105,7 @@ void delta_move_to_top_endstops(float feedrate) {
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
   bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
-  if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1) {
+  if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z) {
     UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
     // Homing Z axis means that you must home X and Y
     if (homeallaxis || zaxis) {
@@ -130,7 +130,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
   if(xaxis) {
-    if ((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
+    if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
       steps = (printer_state.xMaxSteps-printer_state.xMinSteps) * X_HOME_DIR;         
       printer_state.currentPositionSteps[0] = -steps;
@@ -146,7 +146,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     }
   }        
   if(yaxis) {
-    if ((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
+    if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
       steps = (printer_state.yMaxSteps-printer_state.yMinSteps) * Y_HOME_DIR;         
       printer_state.currentPositionSteps[1] = -steps;
@@ -162,7 +162,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     }
   }        
   if(zaxis) {
-    if ((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
+    if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
       steps = (printer_state.zMaxSteps-printer_state.zMinSteps) * Z_HOME_DIR;         
       printer_state.currentPositionSteps[2] = -steps;
@@ -589,27 +589,27 @@ void process_command(GCode *com)
         break;
       case 119: // M119
         wait_until_end_of_move();
-      	#if (X_MIN_PIN > -1)
+      	#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
       	out.print_P(PSTR("x_min:"));
         out.print_P((READ(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
-      	#if (X_MAX_PIN > -1)
+      	#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
       	out.print_P(PSTR("x_max:"));
         out.print_P((READ(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
-      	#if (Y_MIN_PIN > -1)
+      	#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
       	out.print_P(PSTR("y_min:"));
         out.print_P((READ(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
-      	#if (Y_MAX_PIN > -1)
+      	#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
       	out.print_P(PSTR("y_max:"));
         out.print_P((READ(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
-      	#if (Z_MIN_PIN > -1)
+      	#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
       	out.print_P(PSTR("z_min:"));
         out.print_P((READ(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif
-      	#if (Z_MAX_PIN > -1)
+      	#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
       	out.print_P(PSTR("z_max:"));
         out.print_P((READ(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?PSTR("H "):PSTR("L "));
       	#endif

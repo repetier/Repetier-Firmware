@@ -366,37 +366,37 @@ void setup()
 #endif
 
   //endstop pullups
-#if X_MIN_PIN>-1
+#if X_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_X
   SET_INPUT(X_MIN_PIN);
 #if ENDSTOP_PULLUP_X_MIN
   WRITE(X_MIN_PIN,HIGH);
 #endif
 #endif
-#if Y_MIN_PIN>-1
+#if Y_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Y
   SET_INPUT(Y_MIN_PIN);
 #if ENDSTOP_PULLUP_Y_MIN
   WRITE(Y_MIN_PIN,HIGH);
 #endif
 #endif
-#if Z_MIN_PIN>-1
+#if Z_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Z
   SET_INPUT(Z_MIN_PIN);
 #if ENDSTOP_PULLUP_Z_MIN
   WRITE(Z_MIN_PIN,HIGH);
 #endif
 #endif
-#if X_MAX_PIN>-1
+#if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
   SET_INPUT(X_MAX_PIN);
 #if ENDSTOP_PULLUP_X_MAX
   WRITE(X_MAX_PIN,HIGH);
 #endif
 #endif
-#if Y_MAX_PIN>-1
+#if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
   SET_INPUT(Y_MAX_PIN);
 #if ENDSTOP_PULLUP_Y_MAX
   WRITE(Y_MAX_PIN,HIGH);
 #endif
 #endif
-#if Z_MAX_PIN>-1
+#if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
   SET_INPUT(Z_MAX_PIN);
 #if ENDSTOP_PULLUP_Z_MAX
   WRITE(Z_MAX_PIN,HIGH);
@@ -476,7 +476,7 @@ void setup()
   epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
 
-#ifdef SDSUPPORT
+#if SDSUPPORT
 
   sd.initsd();
 
@@ -508,7 +508,7 @@ void loop()
   //UI_SLOW; // do longer timed user interface action
   UI_MEDIUM; // do check encoder
   if(code){
-#ifdef SDSUPPORT
+#if SDSUPPORT
     if(sd.savetosd){
         if(!(GCODE_HAS_M(code) && code->M==29)) { // still writing to file
             sd.write_command(code);
@@ -538,6 +538,9 @@ void loop()
     previous_millis_cmd = curtime;
   if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
   if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+  sd.automount();
+#endif
   //void finishNextSegment();
 #ifdef DEBUG_FREE_MEMORY
   send_mem();
@@ -1159,19 +1162,19 @@ inline long bresenham_step() {
 	cli();
 	if(do_even) {
 		if((cur->flags & FLAG_CHECK_ENDSTOPS) && (curd != 0)) {
-	#if X_MAX_PIN>-1
+	#if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
 			if((curd->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
 				curd->dir&=~16;
 				cur->dir&=~16;
 			}
 	#endif
-	#if Y_MAX_PIN>-1
+	#if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
 			if((curd->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
 				curd->dir&=~32;
 				cur->dir&=~32;
 			}
 	#endif
-	#if Z_MAX_PIN>-1
+	#if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
 			if((curd->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {
 				curd->dir&=~64;
 				cur->dir&=~64;
@@ -1719,7 +1722,7 @@ inline long bresenham_step() {
   cli();
   if(do_even) {
 	if(cur->flags & FLAG_CHECK_ENDSTOPS) {
-#if X_MIN_PIN>-1
+#if X_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_X
 		if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
 #if DRIVE_SYSTEM==0
 			cur->dir&=~16;
@@ -1728,7 +1731,7 @@ inline long bresenham_step() {
 #endif
 		}
 #endif
-#if Y_MIN_PIN>-1
+#if Y_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Y
 		if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {
 #if DRIVE_SYSTEM==0
 			cur->dir&=~32;
@@ -1737,7 +1740,7 @@ inline long bresenham_step() {
 #endif
 		}
 #endif
-#if X_MAX_PIN>-1
+#if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
 		if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
 #if DRIVE_SYSTEM==0
 			cur->dir&=~16;
@@ -1746,7 +1749,7 @@ inline long bresenham_step() {
 #endif
 		}
 #endif
-#if Y_MAX_PIN>-1
+#if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
 		if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
 #if DRIVE_SYSTEM==0
 			cur->dir&=~32;
@@ -1757,10 +1760,10 @@ inline long bresenham_step() {
 #endif
    }
    // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
-#if Z_MIN_PIN>-1
+#if Z_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Z
    if((cur->dir & 68)==64) if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING) {cur->dir&=~64;}
 #endif
-#if Z_MAX_PIN>-1
+#if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
    if((cur->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING) {cur->dir&=~64;}
 #endif
   }

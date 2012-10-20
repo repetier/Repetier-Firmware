@@ -35,7 +35,29 @@ SDCard::SDCard() {
   SET_OUTPUT(SDPOWER); 
   WRITE(SDPOWER,HIGH);
 #endif
-
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+  SET_INPUT(SDCARDDETECT);
+  WRITE(SDCARDDETECT,HIGH);
+#endif
+}
+void SDCard::automount() {
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+  if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED) {
+    if(sdactive) { // Card removed
+      sdactive = false;
+      savetosd = false;
+      sdmode = false;
+      UI_STATUS(UI_TEXT_SD_REMOVED);
+      OUT_P_LN(UI_TEXT_SD_REMOVED);
+    }
+  } else {
+    if(!sdactive) {
+      UI_STATUS(UI_TEXT_SD_INSERTED);
+      OUT_P_LN(UI_TEXT_SD_INSERTED);
+      initsd();
+    }
+  }
+#endif
 }
 void SDCard::initsd() {
   sdactive = false;

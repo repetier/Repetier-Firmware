@@ -167,6 +167,8 @@
 #define UI_TEXT_LEVEL             "Level delta"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
+#define UI_TEXT_SD_REMOVED       "SD Card removed"
+#define UI_TEXT_SD_INSERTED      "SD Card inserted"
 
 // *************** german translation ****************
 
@@ -317,6 +319,8 @@
 #define UI_TEXT_LEVEL			  "Level delta"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
+#define UI_TEXT_SD_REMOVED       "Karte entfernt"
+#define UI_TEXT_SD_INSERTED      "Karte eingelegt"
 
 #endif
 

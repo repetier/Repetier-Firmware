@@ -549,6 +549,15 @@ on this endstop.
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING false
 
+// Set the values true where you have a hardware endstop. The Pin numbe ris taken from pins.h.
+
+#define MIN_HARDWARE_ENDSTOP_X true
+#define MIN_HARDWARE_ENDSTOP_Y true
+#define MIN_HARDWARE_ENDSTOP_Z true
+#define MAX_HARDWARE_ENDSTOP_X false
+#define MAX_HARDWARE_ENDSTOP_Y false
+#define MAX_HARDWARE_ENDSTOP_Z false
+
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
 
@@ -944,8 +953,12 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
            taken from the EEPROM.
 */
 #define EEPROM_MODE 1
-/** Comment out (using // at the start of the line) to disable SD support: */
-#define SDSUPPORT
+/** Set to false to disable SD support: */
+#define SDSUPPORT true
+// Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
+#define SDCARDDETECT 49
+// Change to true if you get a inserted message on removal. 
+#define SDCARDDETECTINVERTED false
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
