@@ -911,7 +911,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='c') fvalue=current_extruder->tempControl.currentTemperatureC;
         else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
         else if(c2=='b') fvalue=heated_bed_get_temperature();
-        addFloat(fvalue,3,1);
+        addFloat(fvalue,3,UI_TEMP_PRECISION);
         break;
       case 'E': // Target extruder temperature
         if(c2=='c') fvalue=current_extruder->tempControl.targetTemperatureC;
@@ -919,7 +919,7 @@ void UIDisplay::parse(char *txt,bool ram) {
 #if HAVE_HEATED_BED
         else if(c2=='b') fvalue=heatedBedController.targetTemperatureC;
 #endif
-        addFloat(fvalue,3,1);
+        addFloat(fvalue,3,UI_TEMP_PRECISION);
         break;
   
       case 'f':

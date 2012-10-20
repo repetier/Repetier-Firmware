@@ -111,6 +111,13 @@ Rows of your display. 2 or 4
 */
 #define UI_ROWS 4
 
+// Define precision for temperatures. With small displays only integer values fit.
+#if UI_COLS>16
+#define UI_TEMP_PRECISION 1
+#else
+#define UI_TEMP_PRECISION 0
+#endif
+
 /* What type of chip is used for I2C communication
 0 : PCF8574 or PCF8574A or compatible chips.
 1 : MCP23017
