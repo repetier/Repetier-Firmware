@@ -66,7 +66,7 @@ Select the language to use.
 1 = Piezo connected to pin
 2 = Piezo connected to a pin over I2C 
 */
-#define BEEPER_TYPE 0
+#define BEEPER_TYPE 1
 
 #if BEEPER_TYPE==1
 #define BEEPER_PIN 37
@@ -96,16 +96,16 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_TYPE 1
 
 // This is line 2 of the status display at startup
-#define UI_VERSION_STRING2 "Mendel"
+#define UI_VERSION_STRING2 "iRapid Compact"
 
 /** Number of columns per row
 
 Typical values are 16 and 20
 */
-#define UI_COLS 16
+#define UI_COLS 20
 /**
 Rows of your display. 2 or 4
 */
@@ -160,16 +160,16 @@ Define the pin
 
 #else // Direct display connections
 #define UI_DISPLAY_RS_PIN 16
-#define UI_DISPLAY_RW_PIN 17
-#define UI_DISPLAY_ENABLE_PIN 31
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 17
 #define UI_DISPLAY_D0_PIN 23
-#define UI_DISPLAY_D1_PIN 29
-#define UI_DISPLAY_D2_PIN 25
-#define UI_DISPLAY_D3_PIN 27
+#define UI_DISPLAY_D1_PIN 25
+#define UI_DISPLAY_D2_PIN 27
+#define UI_DISPLAY_D3_PIN 29
 #define UI_DISPLAY_D4_PIN 23
-#define UI_DISPLAY_D5_PIN 29
-#define UI_DISPLAY_D6_PIN 25
-#define UI_DISPLAY_D7_PIN 27
+#define UI_DISPLAY_D5_PIN 25
+#define UI_DISPLAY_D6_PIN 27
+#define UI_DISPLAY_D7_PIN 29 
 #define UI_DELAYPERCHAR 320
 #endif
 
@@ -208,7 +208,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 1
+#define UI_HAS_BACK_KEY 0
 
 /* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.
 If you set it to true, next will go to previous menu instead of the next menu.
@@ -217,7 +217,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 #define UI_INVERT_MENU_DIRECTION false
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
-#define UI_HAS_I2C_KEYS
+//#define UI_HAS_I2C_KEYS
 
 // Do you have a I2C connected encoder? 
 #define UI_HAS_I2C_ENCODER 1
@@ -347,11 +347,17 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 #define UI_ENCODER_SPEED 1
 
 void ui_init_keys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(41); // Kill pin
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(41,UI_ACTION_RESET); 
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 }
@@ -731,7 +737,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_ops_off,UI_TEXT_OPS_OFF,UI_ACTION_OPS_OFF);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_classic,UI_TEXT_OPS_CLASSIC,UI_ACTION_OPS_CLASSIC);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_fast,UI_TEXT_OPS_FAST,UI_ACTION_OPS_FAST);
 UI_MENU_CHANGEACTION(ui_menu_ops_retract,UI_TEXT_OPS_RETRACT,UI_ACTION_OPS_RETRACTDISTANCE);
-UI_MENU_CHANGEACTION(ui_menu_ops_backslash,UI_TEXT_OPS_BACKSLASH,UI_ACTION_OPS_BACKSLASH);
+UI_MENU_CHANGEACTION(ui_menu_ops_backslash,UI_TEXT_OPS_BACKSLASH,UI_ACTION_OPS_BACKLASH);
 UI_MENU_CHANGEACTION(ui_menu_ops_mindist,UI_TEXT_OPS_MINDIST,UI_ACTION_OPS_MINDISTANCE);
 UI_MENU_CHANGEACTION(ui_menu_ops_moveafter,UI_TEXT_OPS_MOVE_AFTER,UI_ACTION_OPS_MOVE_AFTER);
 #define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backslash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}

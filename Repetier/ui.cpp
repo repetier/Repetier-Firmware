@@ -940,7 +940,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         else if(c2=='1') addStringP(printer_state.opsMode==1?ui_selected:ui_unselected);
         else if(c2=='2') addStringP(printer_state.opsMode==2?ui_selected:ui_unselected);
         else if(c2=='r') addFloat(printer_state.opsRetractDistance,2,1);  
-        else if(c2=='b') addFloat(printer_state.opsRetractBackslash,2,1);  
+        else if(c2=='b') addFloat(printer_state.opsRetractBacklash,2,1);  
         else if(c2=='d') addFloat(printer_state.opsMinDistance,2,1);  
         else if(c2=='a') {
           addFloat(printer_state.opsMoveAfter,3,0);  
@@ -1450,10 +1450,10 @@ void UIDisplay::nextPreviousAction(char next) {
     else if(printer_state.opsRetractDistance>10) printer_state.opsRetractDistance=10;
     extruder_select(current_extruder->id);
     break;
-  case UI_ACTION_OPS_BACKSLASH:
-    printer_state.opsRetractBackslash+=increment*0.1;
-    if(printer_state.opsRetractBackslash<-5) printer_state.opsRetractBackslash=-5;
-    else if(printer_state.opsRetractBackslash>5) printer_state.opsRetractBackslash=5;
+  case UI_ACTION_OPS_BACKLASH:
+    printer_state.opsRetractBacklash+=increment*0.1;
+    if(printer_state.opsRetractBacklash<-5) printer_state.opsRetractBacklash=-5;
+    else if(printer_state.opsRetractBacklash>5) printer_state.opsRetractBacklash=5;
     extruder_select(current_extruder->id);
     break;
   case UI_ACTION_OPS_MOVE_AFTER:

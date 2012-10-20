@@ -160,14 +160,23 @@ void epr_data_to_eeprom(byte corrupted) {
 #endif
 #if HAVE_HEATED_BED
   epr_set_byte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
-#ifdef TEMP_PID
+#else
+  epr_set_byte(EPR_BED_HEAT_MANAGER,HEATED_BED_HEAT_MANAGER);
+#endif
+#if defined(TEMP_PID) && HAVE_HEATED_BED
   epr_set_byte(EPR_BED_DRIVE_MAX,heatedBedController.pidDriveMax);
   epr_set_byte(EPR_BED_DRIVE_MIN,heatedBedController.pidDriveMin);
   epr_set_float(EPR_BED_PID_PGAIN,heatedBedController.pidPGain);
   epr_set_float(EPR_BED_PID_IGAIN,heatedBedController.pidIGain);
   epr_set_float(EPR_BED_PID_DGAIN,heatedBedController.pidDGain);
   epr_set_byte(EPR_BED_PID_MAX,heatedBedController.pidMax);
-#endif
+#else
+  epr_set_byte(EPR_BED_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MAX);
+  epr_set_byte(EPR_BED_DRIVE_MIN,HEATED_BED_PID_INTEGRAL_DRIVE_MIN);
+  epr_set_float(EPR_BED_PID_PGAIN,HEATED_BED_PID_PGAIN);
+  epr_set_float(EPR_BED_PID_IGAIN,HEATED_BED_PID_IGAIN);
+  epr_set_float(EPR_BED_PID_DGAIN,HEATED_BED_PID_DGAIN);
+  epr_set_byte(EPR_BED_PID_MAX,HEATED_BED_PID_MAX);
 #endif
   epr_set_float(EPR_X_HOME_OFFSET,printer_state.xMin);
   epr_set_float(EPR_Y_HOME_OFFSET,printer_state.yMin);
@@ -212,8 +221,13 @@ void epr_data_to_eeprom(byte corrupted) {
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
+#else
+    epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,0);
 #endif
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_L,e->advanceL);
+#else
+    epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,0);
+    epr_set_float(o+EPR_EXTRUDER_ADVANCE_L,0);
 #endif
   }
   if(corrupted) {

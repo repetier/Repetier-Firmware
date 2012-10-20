@@ -706,7 +706,7 @@ void process_command(GCode *com)
         if(GCODE_HAS_Y(com) && com->Y>=0)
           printer_state.opsRetractDistance = com->Y;
         if(GCODE_HAS_Z(com) && com->Z>=-printer_state.opsRetractDistance)
-          printer_state.opsRetractBackslash = com->Z;
+          printer_state.opsRetractBacklash = com->Z;
         if(GCODE_HAS_F(com) && com->F>=0 && com->F<=100)
           printer_state.opsMoveAfter = com->F;
         extruder_select(current_extruder->id);
@@ -720,7 +720,7 @@ void process_command(GCode *com)
         
           out.print_float_P(PSTR("min distance = "),printer_state.opsMinDistance);
           out.print_float_P(PSTR(", retract = "),printer_state.opsRetractDistance);
-          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractBackslash);
+          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractBacklash);
           if(printer_state.opsMode==2)
             out.print_float_P(PSTR(", move after = "),printer_state.opsMoveAfter);
           out.println();

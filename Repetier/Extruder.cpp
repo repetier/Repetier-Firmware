@@ -285,7 +285,7 @@ void extruder_select(byte ext_num) {
 #endif
 #if USE_OPS==1
    printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
-   printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBackslash)*current_extruder->stepsPerMM;
+   printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBacklash)*current_extruder->stepsPerMM;
    if(printer_state.opsMode<=1)
      printer_state.opsMoveAfterSteps = 0;
    else
@@ -693,7 +693,7 @@ void autotunePID(float temp,int controllerId)
       maxTemp=max(maxTemp,currentTemp);
       minTemp=min(minTemp,currentTemp);
       if(heating == true && currentTemp > temp) { // switch heating -> off
-        if(time - t2 > 2500) {
+        if(time - t2 > (controllerId<NUM_EXTRUDER ? 2500 : 1500)) {
           heating=false;
           pwm_pos[c->pwmIndex] = (bias - d);
           t1=time;
@@ -702,7 +702,7 @@ void autotunePID(float temp,int controllerId)
         }
       }
       if(heating == false && currentTemp < temp) {
-        if(time - t1 > 5000) {
+        if(time - t1 > (controllerId<NUM_EXTRUDER ? 5000 : 3000)) {
           heating=true;
           t2=time;
           t_low=t2 - t1; // half wave length
@@ -761,7 +761,7 @@ void autotunePID(float temp,int controllerId)
       temp_millis = time;
       print_temperatures();
     }
-    if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L)) {
+    if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L)) { // 20 Minutes
       OUT_P_LN("PID Autotune failed! timeout");
       disableAllHeater();
       return;

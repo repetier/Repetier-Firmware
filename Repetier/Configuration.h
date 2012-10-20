@@ -60,7 +60,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MegaTronics                = 70
 // Rambo                      = 301
 
-#define MOTHERBOARD 5
+#define MOTHERBOARD 33
 #include "pins.h"
 
 
@@ -119,11 +119,11 @@ Mega.
 
 #else
 /** \brief Number of steps for a 1mm move in x direction. Overridden if EEPROM activated. */
-#define XAXIS_STEPS_PER_MM 80
+#define XAXIS_STEPS_PER_MM 101.859
 /** \brief Number of steps for a 1mm move in y direction  Overridden if EEPROM activated.*/
-#define YAXIS_STEPS_PER_MM 80
+#define YAXIS_STEPS_PER_MM 101.859
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
-#define ZAXIS_STEPS_PER_MM 3360
+#define ZAXIS_STEPS_PER_MM 92.599
 #endif
 
 // ##########################################################################################
@@ -136,7 +136,7 @@ Mega.
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 385
+#define EXT0_STEPS_PER_MM 352.5
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -169,13 +169,13 @@ Mega.
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 25
+#define EXT0_MAX_FEEDRATE 12
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_START_FEEDRATE 18
+#define EXT0_MAX_START_FEEDRATE 10
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 3000
+#define EXT0_MAX_ACCELERATION 1000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -204,15 +204,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
  Overridden if EEPROM activated.
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 60
-/** P-gain in 0,01 units.  Overridden if EEPROM activated. */
-#define EXT0_PID_P   14
-/** I-gain in 0,001 units 
-
-WATCH OUT: This value was in 0,01 units in earlier versions!
- Overridden if EEPROM activated.
+/** P-gain.  Overridden if EEPROM activated. */
+#define EXT0_PID_P   24
+/** I-gain. Overridden if EEPROM activated.
 */
 #define EXT0_PID_I   0.88
-/** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
+/** Dgain.  Overridden if EEPROM activated.*/
 #define EXT0_PID_D 80
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
@@ -306,15 +303,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
  Overridden if EEPROM activated.
 */
 #define EXT1_PID_INTEGRAL_DRIVE_MIN 60
-/** P-gain in 0,01 units.  Overridden if EEPROM activated. */
+/** P-gain.  Overridden if EEPROM activated. */
 #define EXT1_PID_P   24
-/** I-gain in 0,001 units 
-
-WATCH OUT: This value was in 0,01 units in earlier versions!
- Overridden if EEPROM activated.
+/** I-gain.  Overridden if EEPROM activated.
 */
 #define EXT1_PID_I   0.88
-/** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
+/** Dgain.  Overridden if EEPROM activated.*/
 #define EXT1_PID_D 200
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT1_PID_MAX 255
@@ -460,9 +454,9 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED false
+#define HAVE_HEATED_BED true
 
-#define HEATED_BED_MAX_TEMP 150
+#define HEATED_BED_MAX_TEMP 90
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
 #define SKIP_M190_IF_WITHIN 3
 
@@ -482,7 +476,7 @@ Heat manager for heated bed:
 1 = PID controlled
 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relais driven beds to save life
 */
-#define HEATED_BED_HEAT_MANAGER 2
+#define HEATED_BED_HEAT_MANAGER 1
 /** \brief The maximum value, I-gain can contribute to the output. 
 
 A good value is slightly higher then the output needed for your temperature.
@@ -502,16 +496,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
  Overridden if EEPROM activated.
 */
 #define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
-/** P-gain in 0,01 units.  Overridden if EEPROM activated. */
-#define HEATED_BED_PID_PGAIN   500
-/** I-gain in 0,001 units 
-
-WATCH OUT: This value was in 0,01 units in earlier versions!
- Overridden if EEPROM activated.
-*/
-#define HEATED_BED_PID_IGAIN   1
-/** Dgain in 0,01 units.  Overridden if EEPROM activated.*/
-#define HEATED_BED_PID_DGAIN 3000
+/** P-gain.  Overridden if EEPROM activated. */
+#define HEATED_BED_PID_PGAIN   15
+/** I-gain  Overridden if EEPROM activated.*/
+#define HEATED_BED_PID_IGAIN   0.9
+/** Dgain.  Overridden if EEPROM activated.*/
+#define HEATED_BED_PID_DGAIN 40
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
 
@@ -574,12 +564,12 @@ on this endstop.
 // Disables axis when it's not being used.
 #define DISABLE_X false
 #define DISABLE_Y false
-#define DISABLE_Z true
+#define DISABLE_Z false
 #define DISABLE_E false
 
 // Inverting axis direction
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
+#define INVERT_Y_DIR false
 #define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
@@ -589,7 +579,7 @@ on this endstop.
 #define Z_HOME_DIR -1
 
 // Delta robot radius endstop
-#define max_software_endstop_r false
+#define max_software_endstop_r true
 
 //If true, axis won't move to coordinates less than zero.
 #define min_software_endstop_x false
@@ -615,7 +605,7 @@ on this endstop.
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
 #define ENDSTOP_X_BACK_ON_HOME 0.5
-#define ENDSTOP_Y_BACK_ON_HOME 4
+#define ENDSTOP_Y_BACK_ON_HOME 0.5
 #define ENDSTOP_Z_BACK_ON_HOME 0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
@@ -623,9 +613,9 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS false
 // maximum positions in mm - only fixed numbers!
-#define X_MAX_LENGTH 190
-#define Y_MAX_LENGTH 200
-#define Z_MAX_LENGTH 100
+#define X_MAX_LENGTH 98
+#define Y_MAX_LENGTH 100
+#define Z_MAX_LENGTH 120
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -832,7 +822,7 @@ set USE_OPS 0
 
 Caution: Don't enable anti-ooze in your slicer if you are using this. 
 */
-#define USE_OPS 0
+#define USE_OPS 1
 
 /** \brief Sets the ops operation mode
 
@@ -877,7 +867,7 @@ Without a correct adjusted advance algorithm, you get blobs at points, where acc
 effect increases with speed and acceleration difference. Using the advance method decreases this effect.
 For more informations, read the wiki.
 */
-//#define USE_ADVANCE
+#define USE_ADVANCE
 
 /** \brief enables quadratic component.
 
@@ -955,7 +945,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Comment out (using // at the start of the line) to disable SD support: */
-//#define SDSUPPORT
+#define SDSUPPORT
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 
