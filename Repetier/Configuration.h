@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -333,7 +333,7 @@ need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm h
 */
 #define PID_CONTROL_RANGE 15
 
-/** Slip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
+/** Skip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
 #define SKIP_M109_IF_WITHIN 2
 
 /** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
@@ -614,7 +614,7 @@ on this endstop.
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
 #define ENDSTOP_X_BACK_ON_HOME 0.5
-#define ENDSTOP_Y_BACK_ON_HOME 0.5
+#define ENDSTOP_Y_BACK_ON_HOME 3.5
 #define ENDSTOP_Z_BACK_ON_HOME 0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
@@ -622,8 +622,8 @@ on this endstop.
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS false
 // maximum positions in mm - only fixed numbers!
-#define X_MAX_LENGTH 98
-#define Y_MAX_LENGTH 100
+#define X_MAX_LENGTH 95
+#define Y_MAX_LENGTH 95
 #define Z_MAX_LENGTH 120
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side

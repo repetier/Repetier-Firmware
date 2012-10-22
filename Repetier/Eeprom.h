@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -102,10 +102,6 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #if EEPROM_MODE!=0
-extern inline byte epr_get_byte(uint pos);
-extern inline int epr_get_int(uint pos);
-extern inline long epr_get_long(uint pos);
-extern inline float epr_get_float(uint pos);
 
 extern inline void epr_set_byte(uint pos,byte value);
 extern inline void epr_set_int(uint pos,int value);
@@ -113,6 +109,21 @@ extern inline void epr_set_long(uint pos,long value);
 extern inline void epr_set_float(uint pos,float value);
 extern void epr_data_to_eeprom(byte corrupted);
 extern void epr_eeprom_to_data();
+
+inline byte epr_get_byte(uint pos) {
+   return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
+}
+inline int epr_get_int(uint pos) {
+  return eeprom_read_word((unsigned int *)(EEPROM_OFFSET+pos));
+}
+inline long epr_get_long(uint pos) {
+  return eeprom_read_dword((unsigned long*)(EEPROM_OFFSET+pos));
+}
+inline float epr_get_float(uint pos) {
+  float v;
+  eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
+  return v;
+}
 #endif
 
 extern void epr_output_settings();

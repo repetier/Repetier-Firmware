@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -303,6 +303,9 @@ void extruder_select(byte ext_num) {
 // ------------------------------------------------------------------------------------------------------------------
 
 void extruder_set_temperature(float temp_celsius,byte extr) {
+  bool alloffs = true;
+  for(byte i=0;i<NUM_EXTRUDER;i++)
+    if(tempController[i]->targetTemperatureC>15) alloffs = false;
 #ifdef MAXTEMP
   if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
 #endif
@@ -322,6 +325,8 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
     if(tempController[i]->targetTemperatureC>15) alloff = false;
   if(alloff)
     epr_update_usage();
+  if(alloffs && !alloff)
+    printer_state.msecondsPrinting = millis();
 }
 
 // ------------------------------------------------------------------------------------------------------------------

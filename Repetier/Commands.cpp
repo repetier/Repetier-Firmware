@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -485,13 +485,13 @@ void process_command(GCode *com)
         if(DEBUG_DRYRUN) break;
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
         wait_until_end_of_move();
-#ifdef HEATED_HEATED_BED
+#if HAVE_HEATED_BED
         if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
-        if(abs(heatedBedController->currentTemperatureC-heatedBed->targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
+        if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
 #endif
         codenum = millis(); 
-        while(heatedBedController->currentTemperatureC+0.5<heatedBed->targetTemperatureC) {
+        while(heatedBedController.currentTemperatureC+0.5<heatedBedController.targetTemperatureC) {
           if( (millis()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
             print_temperatures();
             codenum = millis(); 
@@ -572,12 +572,32 @@ void process_command(GCode *com)
 #endif
         }   
         break;
-      case 115: // M115
+      case 115: {// M115
 #if DRIVE_SYSTEM==3
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Rostock EXTRUDER_COUNT:1 REPETIER_PROTOCOL:2"));
 #else
         out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 REPETIER_PROTOCOL:2"));
 #endif
+#if EEPROM_MODE!=0
+        float dist = printer_state.filamentPrinted*0.001+epr_get_float(EPR_PRINTING_DISTANCE);
+        OUT_P_FX("Printed filament:",dist,2);
+        OUT_P_LN(" mm");
+        bool alloff = true;
+        for(byte i=0;i<NUM_EXTRUDER;i++)
+          if(tempController[i]->targetTemperatureC>15) alloff = false;
+
+        long seconds = (alloff ? 0 : (millis()-printer_state.msecondsPrinting)/1000)+epr_get_long(EPR_PRINTING_TIME);
+        long tmp = seconds/86400;
+        seconds-=tmp*86400;
+        OUT_P_L("Printing time:",tmp);
+        tmp=seconds/3600;
+        OUT_P_L(" days ",tmp);
+        seconds-=tmp*3600;
+        tmp = seconds/60;
+        OUT_P_L(" hours ",tmp);
+        OUT_P_LN(" min");
+#endif
+       }
         break;
       case 114: // M114
         printPosition();

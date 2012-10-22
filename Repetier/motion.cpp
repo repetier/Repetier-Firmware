@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -313,12 +313,12 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
 not act on the first two moves in the queue. The stepper timer will spot these moves and leave some time for
 processing.
 */
-byte check_new_move(byte pathOptimize) {
+byte check_new_move(byte pathOptimize, byte lines_to_wait) {
   if(lines_count==0 && waitRelax==0 && pathOptimize) { // First line after some time - warmup needed
 #ifdef DEBUG_OPS
     out.println_P(PSTR("New path"));
 #endif
-    byte w = 3;
+    byte w = lines_to_wait;
     PrintLine *p = &lines[lines_write_pos];
     while(w) {
       p->flags = FLAG_WARMUP;
@@ -556,7 +556,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     gcode_read_serial();
     check_periodical();
   }
-  byte newPath=check_new_move(pathOptimize);
+  byte newPath=check_new_move(pathOptimize,3);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -811,7 +811,7 @@ inline void set_delta_position(long xaxis, long yaxis, long zaxis) {
   @param deltaPosSteps Result array with tower coordinates.
   @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
 */
-inline byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
+byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 	long temp;
 	long opt = sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS]);
 
@@ -942,7 +942,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
 	}
-  printer_state.filamentPrinted+=p->axis_diff[3];
+  printer_state.filamentPrinted+=axis_diff[3];
 
 #if max_software_endstop_r == true
 // TODO - Implement radius checking
@@ -977,7 +977,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	
 	if (save_dir & 48) {
 		// Compute number of seconds for move and hence number of segments needed
-		float seconds = 6000 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
+		float seconds = 100 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
 #ifdef DEBUG_SPLIT
 		out.println_float_P(PSTR("Seconds: "), seconds);
 #endif
@@ -1015,7 +1015,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	}
 
 	// Insert dummy moves if necessary
-	byte newPath=check_new_move(pathOptimize);
+	byte newPath=check_new_move(pathOptimize, (num_lines > 1 ? 4 : 1));
 
 	for (int line_number=1; line_number < num_lines + 1; line_number++) {
 		while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache

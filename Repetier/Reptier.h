@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -476,7 +476,7 @@ typedef struct {
   long offsetY;                     ///< Y-offset for different extruder positions.
   unsigned int vMaxReached;         ///< MAximumu reached speed
   byte stepper_loops;
-  long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
+  unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
   float filamentPrinted;            ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION
   float backlashX;

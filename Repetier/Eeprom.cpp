@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -37,20 +37,7 @@ byte epr_compute_checksum() {
   return checksum;
 }
 
-inline byte epr_get_byte(uint pos) {
-   return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
-}
-inline int epr_get_int(uint pos) {
-  return eeprom_read_word((unsigned int *)(EEPROM_OFFSET+pos));
-}
-inline long epr_get_long(uint pos) {
-  return eeprom_read_dword((unsigned long*)(EEPROM_OFFSET+pos));
-}
-inline float epr_get_float(uint pos) {
-  float v;
-  eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
-  return v;
-}
+
 
 inline void epr_set_byte(uint pos,byte value) {
   eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
@@ -352,7 +339,7 @@ void epr_init() {
     epr_eeprom_to_data();
   } else {
     epr_set_byte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
-    epr_data_to_eeprom(storedcheck==check);
+    epr_data_to_eeprom(storedcheck!=check);
   }
 #endif
 }
@@ -361,7 +348,7 @@ void epr_init() {
 void epr_update_usage() {
 #if EEPROM_MODE!=0
   if(printer_state.filamentPrinted==0) return; // No miles only enabled
-  unsigned long seconds = (millis()-printer_state.msecondsPrinting);
+  unsigned long seconds = (millis()-printer_state.msecondsPrinting)/1000;
   seconds += epr_get_long(EPR_PRINTING_TIME);
   epr_set_long(EPR_PRINTING_TIME,seconds);
   epr_set_float(EPR_PRINTING_DISTANCE,epr_get_float(EPR_PRINTING_DISTANCE)+printer_state.filamentPrinted*0.001);
@@ -467,7 +454,7 @@ void epr_output_settings() {
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
     epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
     epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("Temp. to retract when heating [C]"));
-    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("Units to retract when heating [mm]"));
+    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("Distance to retract when heating [mm]"));
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("Advance K [0=off]"));

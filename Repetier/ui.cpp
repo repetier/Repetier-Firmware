@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -2019,7 +2019,7 @@ void UIDisplay::executeAction(int action) {
 		calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 		out.println_P(PSTR("Measured origin set. Measurement reset."));
 #if EEPROM_MODE!=0
-		epr_set_rod_length();
+		epr_data_to_eeprom(false);
 		out.println_P(PSTR("EEPROM updated"));
 #endif
 	}
