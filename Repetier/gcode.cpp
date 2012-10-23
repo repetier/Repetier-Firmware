@@ -770,7 +770,7 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
      code->params2 = *(unsigned int *)p;p+=2;
      if(GCODE_HAS_STRING(code)) 
        textlen = *p++;
-   }
+   } else code->params2 = 0;
    if(code->params & 1) {gcode_actN=code->N=*(unsigned int *)p;p+=2;}
    if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
      if(code->params & 2) {code->M=*(unsigned int *)p;p+=2;}

@@ -324,6 +324,34 @@ Interrupt routines to measure analog values and for the stepper timerloop are st
 */
 void setup()
 {
+#ifdef ANALYZER
+// Channel->pin assignments
+#if ANALYZER_CH0>=0
+pinMode(ANALYZER_CH0,OUTPUT);
+#endif
+#if ANALYZER_CH1>=0
+pinMode(ANALYZER_CH1,OUTPUT);
+#endif
+#if ANALYZER_CH2>=0
+pinMode(ANALYZER_CH2,OUTPUT);
+#endif
+#if ANALYZER_CH3>=0
+pinMode(ANALYZER_CH3,OUTPUT);
+#endif
+#if ANALYZER_CH4>=0
+pinMode(ANALYZER_CH4,OUTPUT);
+#endif
+#if ANALYZER_CH5>=0
+pinMode(ANALYZER_CH5,OUTPUT);
+#endif
+#if ANALYZER_CH6>=0
+pinMode(ANALYZER_CH6,OUTPUT);
+#endif
+#if ANALYZER_CH7>=0
+pinMode(ANALYZER_CH7,OUTPUT);
+#endif
+#endif
+
 #ifdef ENABLE_POWER_ON_STARTUP
   if(PS_ON_PIN > -1) {
      pinMode(PS_ON_PIN,OUTPUT); //GND
@@ -452,6 +480,7 @@ void setup()
   printer_state.xMin = X_MIN_POS;
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
+  printer_state.waslasthalfstepping = 0;
 #if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashX = X_BACKLASH;
   printer_state.backlashY = Y_BACKLASH;
@@ -1143,7 +1172,13 @@ inline long bresenham_step() {
 		printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
 		printer_state.advance_steps_set = tred;
 	#endif
-		return printer_state.interval; // Wait an other 50% fro last step to make the 100% full
+    if(printer_state.waslasthalfstepping && cur->halfstep==0) { // Switch halfstepping -> full stepping
+      printer_state.waslasthalfstepping = 0;
+      return printer_state.interval*3; // Wait an other 150% from last half step to make the 100% full
+    } else if(!printer_state.waslasthalfstepping && cur->halfstep) { // Switch full to half stepping
+      printer_state.waslasthalfstepping = 1;
+    } else 
+      return printer_state.interval; // Wait an other 50% from last step to make the 100% full
 	} // End cur=0
 	sei();
 
@@ -1527,12 +1562,15 @@ inline long bresenham_step() {
 /**
   Moves the stepper motors one step. If the last step is reached, the next movement is started.
   The function must be called from a timer loop. It returns the time for the next call.
+  
+  Normal non delta algorithm
 */
 int lastblk=-1;
 long cur_errupd;
 inline long bresenham_step() {
   if(cur == 0) {
       sei();
+      ANALYZER_ON(ANALYZER_CH0);
       cur = &lines[lines_pos];
       if(cur->flags & FLAG_BLOCKED) { // This step is in computation - shouldn't happen
         if(lastblk!=(int)cur) {
@@ -1553,6 +1591,7 @@ inline long bresenham_step() {
         return 1000;
       }
 #endif
+        ANALYZER_OFF(ANALYZER_CH0);
       if(cur->flags & FLAG_WARMUP) {
           // This is a warmup move to initalize the path planner correctly. Just waste
           // a bit of time to get the planning up to date.
@@ -1704,7 +1743,13 @@ inline long bresenham_step() {
      printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
      printer_state.advance_steps_set = tred;
 #endif
-    return printer_state.interval; // Wait an other 50% fro last step to make the 100% full
+    if(printer_state.waslasthalfstepping && cur->halfstep==0) { // Switch halfstepping -> full stepping
+      printer_state.waslasthalfstepping = 0;
+      return printer_state.interval*3; // Wait an other 150% from last half step to make the 100% full
+    } else if(!printer_state.waslasthalfstepping && cur->halfstep) { // Switch full to half stepping
+      printer_state.waslasthalfstepping = 1;
+    } else 
+      return printer_state.interval; // Wait an other 50% from last step to make the 100% full
   } // End cur=0
   sei();
   /* For halfstepping, we divide the actions into even and odd actions to split
@@ -1770,6 +1815,7 @@ inline long bresenham_step() {
   byte max_loops = (printer_state.stepper_loops<=cur->stepsRemaining ? printer_state.stepper_loops : cur->stepsRemaining);
   if(cur->stepsRemaining>0) {
    for(byte loop=0;loop<max_loops;loop++) {
+    ANALYZER_ON(ANALYZER_CH1);
     if(loop>0)
 #if STEPPER_HIGH_DELAY>0
       delayMicroseconds(STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY);
@@ -1795,6 +1841,7 @@ inline long bresenham_step() {
     }
     if(cur->dir & 16) {
       if((cur->error[0] -= cur->delta[0]) < 0) {
+        ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
         cur->error[0] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
@@ -1804,6 +1851,7 @@ inline long bresenham_step() {
     }
     if(cur->dir & 32) {
       if((cur->error[1] -= cur->delta[1]) < 0) {
+        ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
         cur->error[1] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
@@ -1827,7 +1875,9 @@ inline long bresenham_step() {
     WRITE(X_STEP_PIN,LOW);
     WRITE(Y_STEP_PIN,LOW);
     WRITE(Z_STEP_PIN,LOW);
-
+    ANALYZER_OFF(ANALYZER_CH1);
+    ANALYZER_OFF(ANALYZER_CH2);
+    ANALYZER_OFF(ANALYZER_CH3);
   } // for loop
   if(do_odd) {
       sei(); // Allow interrupts for other types, timer1 is still disabled

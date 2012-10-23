@@ -24,6 +24,27 @@
 
 #include <avr/io.h>
 
+// Uncomment if no analyzer is connected
+//#define ANALYZER
+// Channel->pin assignments
+#define ANALYZER_CH0 63 // New move
+#define ANALYZER_CH1 40 // Step loop
+#define ANALYZER_CH2 53 // X Step
+#define ANALYZER_CH3 65 // Y Step
+#define ANALYZER_CH4 59 // Serial out
+#define ANALYZER_CH5 64 // Step 0
+#define ANALYZER_CH6 58 // Step Signal
+#define ANALYZER_CH7 1 // Constant speed
+
+#ifdef ANALYZER
+#define ANALYZER_ON(a) {WRITE(a,HIGH);}
+#define ANALYZER_OFF(a) {WRITE(a,LOW);}
+#else
+#define ANALYZER_ON(a)
+#define ANALYZER_OFF(a)
+#endif
+
+
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 10
 // Build median from 2^ANALOG_INPUT_SAMPLE samples
@@ -478,6 +499,7 @@ typedef struct {
   byte stepper_loops;
   unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
   float filamentPrinted;            ///< mm of filament printed since counting started
+  byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
   float backlashX;
   float backlashY;
@@ -720,7 +742,7 @@ inline void  enable_z() {
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
+#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION
