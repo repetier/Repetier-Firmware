@@ -57,17 +57,20 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
     p2->joinFlags |= FLAG_JOIN_START_FIXED;
     return;
   }
-   // First we compute the normalized jerk for spped 1
-   float dx = p2->speedX*p2->invFullSpeed-p1->speedX*p1->invFullSpeed;
-   float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
+   // First we compute the normalized jerk for speed 1
+   //float dx = p2->speedX*p2->invFullSpeed-p1->speedX*p1->invFullSpeed;
+   //float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
+   float dx = p2->speedX-p1->speedX;
+   float dy = p2->speedY-p1->speedY;
    float normJerk;
    if((p1->dir & 128)==0 && (p2->dir & 128)==0)
      normJerk = sqrt(dx*dx+dy*dy);
    else {
-     float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
+   //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
+     float dz = (p2->speedZ-p1->speedZ)*printer_state.maxJerk/printer_state.maxZJerk;
      normJerk = sqrt(dx*dx+dy*dy+dz*dz);
    }
-   p1->maxJunctionSpeed = printer_state.maxJerk/normJerk;
+   p1->maxJunctionSpeed = p1->fullSpeed*printer_state.maxJerk/normJerk;
    if(p1->maxJunctionSpeed>p1->fullSpeed) p1->maxJunctionSpeed = p1->fullSpeed;
    if(p1->maxJunctionSpeed>p2->fullSpeed) p1->maxJunctionSpeed = p2->fullSpeed;
 }
