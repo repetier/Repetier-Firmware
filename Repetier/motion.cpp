@@ -51,6 +51,9 @@ inline unsigned long U16SquaredToU32(unsigned int val) {
 }
 /**
 Computes the maximum junction speed
+
+p1 = previous segment
+p2 = new segment
 */
 inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
   if(p1->flags & FLAG_WARMUP) {
@@ -62,17 +65,27 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
    //float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
    float dx = p2->speedX-p1->speedX;
    float dy = p2->speedY-p1->speedY;
-   float normJerk;
-   if((p1->dir & 128)==0 && (p2->dir & 128)==0)
-     normJerk = sqrt(dx*dx+dy*dy);
-   else {
+   float factor=1,tmp;
+   
+   float jerk = sqrt(dx*dx+dy*dy);
+   if(jerk>printer_state.maxJerk)
+     factor = printer_state.maxJerk/jerk;
+   if((p1->dir & 128) || (p2->dir & 128)) {
    //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
-     float dz = (p2->speedZ-p1->speedZ)*printer_state.maxJerk/printer_state.maxZJerk;
-     normJerk = sqrt(dx*dx+dy*dy+dz*dz);
+     float dz = fabs(p2->speedZ-p1->speedZ);
+     if(dz>printer_state.maxZJerk) {
+       tmp = printer_state.maxZJerk/dz;
+       if(tmp<factor) factor = tmp;
+     }
    }
-   p1->maxJunctionSpeed = p1->fullSpeed*printer_state.maxJerk/normJerk;
-   if(p1->maxJunctionSpeed>p1->fullSpeed) p1->maxJunctionSpeed = p1->fullSpeed;
+   float eJerk = fabs(p2->speedE-p1->speedE);
+   if(eJerk>current_extruder->maxStartFeedrate) {
+     tmp = current_extruder->maxStartFeedrate/eJerk;
+     if(tmp<factor) factor = tmp;
+   }
+   p1->maxJunctionSpeed = p1->fullSpeed*factor;
    if(p1->maxJunctionSpeed>p2->fullSpeed) p1->maxJunctionSpeed = p2->fullSpeed;
+   //if(DEBUG_ECHO) OUT_P_F_LN("JSPD:",p1->maxJunctionSpeed);
 }
 
 /** Update parameter used by updateTrapezoids
@@ -82,17 +95,17 @@ Computes the acceleration/decelleration steps and advanced parameter associated.
 void updateStepsParameter(PrintLine *p/*,byte caller*/) {
     if(p->flags & FLAG_WARMUP) return;
     if(p->joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED) return; // Already up to date, spare time
-    float startFactor = p->startSpeed*p->invFullSpeed;
-    float endFactor = p->endSpeed*p->invFullSpeed;
+    float startFactor = p->startSpeed * p->invFullSpeed;
+    float endFactor   = p->endSpeed   * p->invFullSpeed;
     p->vStart = p->vMax*startFactor; //starting speed
-    p->vEnd = p->vMax*endFactor;
+    p->vEnd   = p->vMax*endFactor;
     unsigned long vmax2 = U16SquaredToU32(p->vMax);
     p->accelSteps = ((vmax2-U16SquaredToU32(p->vStart))/(p->accelerationPrim<<1))+1; // Always add 1 for missing precision
-    p->decelSteps = ((vmax2-U16SquaredToU32(p->vEnd))/(p->accelerationPrim<<1))+1;
+    p->decelSteps = ((vmax2-U16SquaredToU32(p->vEnd))  /(p->accelerationPrim<<1))+1;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceStart = (float)p->advanceFull*p->startFactor*p->startFactor;
-    p->advanceEnd = (float)p->advanceFull*endFactor*endFactor;
+    p->advanceStart = (float)p->advanceFull*startFactor * startFactor;
+    p->advanceEnd   = (float)p->advanceFull*endFactor   * endFactor;
 #endif
 #endif
     if(p->accelSteps+p->decelSteps>=p->stepsRemaining) { // can't reach limit speed
@@ -110,7 +123,6 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
 #ifdef DEBUG_QUEUE_MOVE
     if(DEBUG_ECHO) {
       out.print_int_P(PSTR("ID:"),(int)p);
-    //  out.println_int_P(PSTR("/"),(int)caller);
       out.print_int_P(PSTR("vStart/End:"),p->vStart);
       out.println_int_P(PSTR("/"),p->vEnd);
       out.print_int_P(PSTR("accel/decel steps:"),p->accelSteps);
@@ -127,13 +139,20 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
 #endif
 }
 
-#define PREVIOUS_PLANNER_INDEX(p) p--;if(p==255) p = MOVE_CACHE_SIZE-1;
-#define NEXT_PLANNER_INDEX(idx) ++idx;if(idx==MOVE_CACHE_SIZE) idx=0;
+#define PREVIOUS_PLANNER_INDEX(p) {p--;if(p==255) p = MOVE_CACHE_SIZE-1;}
+#define NEXT_PLANNER_INDEX(idx) {++idx;if(idx==MOVE_CACHE_SIZE) idx=0;}
 
+/**
+Compute the maximum speed from the last entered move.
+
+p = last line inserted
+last = last element until we check
+*/
 inline void backwardPlanner(byte p,byte last) {
+  if(p==last) return;
   PrintLine *act = &lines[p],*prev;
-  float lastJunctionSpeed = act->startSpeed;
-  PREVIOUS_PLANNER_INDEX(last);
+  float lastJunctionSpeed = act->endSpeed; // Start always with safe speed
+  //PREVIOUS_PLANNER_INDEX(last); // Last element is already fixed in start speed
   while(p!=last) {
     PREVIOUS_PLANNER_INDEX(p);
     prev = &lines[p];
@@ -163,41 +182,46 @@ inline void backwardPlanner(byte p,byte last) {
     }
 #endif
     // Switch move-retraction or vice versa start always with save speeds! Keeps extruder from blocking
-    if((prev->dir & 240)==128 || (act->dir & 240)==128) {
+    if(((prev->dir & 240)==128) != ((act->dir & 240)==128)) { // switch move - extruder only move
       prev->joinFlags |= FLAG_JOIN_END_FIXED;
       act->joinFlags |= FLAG_JOIN_START_FIXED;
       return;          
     } 
-    if(prev->joinFlags & FLAG_JOIN_END_FIXED) { // Nothing to update from here on
+    if(prev->joinFlags & FLAG_JOIN_END_FIXED) { // Nothing to update from here on, happens when path optimize disabled
       act->joinFlags |= FLAG_JOIN_START_FIXED; // Wait only with safe speeds!
       return;
     }
     lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->acceleration); // acceleration is acceleration*distance*2! What can be reached if we try?
     if(lastJunctionSpeed>=prev->maxJunctionSpeed) { // Limit is reached
-        act->startSpeed = prev->endSpeed = prev->maxJunctionSpeed; // possibly unneeded???
-        //prev->joinFlags |= FLAG_JOIN_END_FIXED;
+      if(prev->endSpeed!=prev->maxJunctionSpeed) {
         prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
-        //act->joinFlags |= FLAG_JOIN_START_FIXED;
+        prev->endSpeed = prev->maxJunctionSpeed; // possibly unneeded???
+      }        
+      if(act->startSpeed!=prev->maxJunctionSpeed) {
+        act->startSpeed = prev->maxJunctionSpeed; // possibly unneeded???
         act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
-        return;     
+      }
+      lastJunctionSpeed = prev->maxJunctionSpeed;     
+    } else {
+      act->startSpeed = prev->endSpeed = lastJunctionSpeed;
+      prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
+      act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
     }
-    act->startSpeed = prev->endSpeed = lastJunctionSpeed;
-    prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
-    act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
     act = prev;
-    if(lines_count>=MOVE_CACHE_LOW) { // we have time for checks
-        UI_MEDIUM; // do check encoder
-        check_periodical(); // Temperature update
-    }
   } // while loop
+  if(lines_count>=MOVE_CACHE_LOW) { // we have time for checks
+      UI_MEDIUM; // do check encoder
+      check_periodical(); // Temperature update
+  }
 }
 
 inline void forwardPlanner(byte p) {
-  PrintLine *act = &lines[p],*next;
-  float leftspeed = act->startSpeed;
+  PrintLine *act,*next;
+  if(p==lines_write_pos) return;
   byte last = lines_write_pos;
-  NEXT_PLANNER_INDEX(last);
+  //NEXT_PLANNER_INDEX(last);
   next = &lines[p];
+  float leftspeed = next->startSpeed;
   while(p!=last) { // All except last segment, which has fixed end speed
     act = next;
     NEXT_PLANNER_INDEX(p);
@@ -207,18 +231,23 @@ inline void forwardPlanner(byte p) {
       continue; // Nothing to do here
     }
     float vmax_right = sqrt(leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
-    if(vmax_right>act->endSpeed) { // Could be higher next run
+    if(vmax_right>act->endSpeed) { // Could be higher next run?
       act->startSpeed = leftspeed;
-      leftspeed = vmax_right;
+      leftspeed       = act->endSpeed;
+      if(act->endSpeed==act->maxJunctionSpeed) {// Full speed reached, don't compute again!
+        act->joinFlags  |= FLAG_JOIN_END_FIXED;
+        next->joinFlags |= FLAG_JOIN_START_FIXED;
+      }
       act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
     } else { // We can accelerate full speed without reaching limit, which is as fast as possible. Fix it!
       act->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
       act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
       act->startSpeed = leftspeed;
-      act->endSpeed = next->startSpeed = leftspeed = vmax_right;
-      next->joinFlags |= FLAG_JOIN_START_FIXED;
+      act->endSpeed   = next->startSpeed = leftspeed = vmax_right;
+      next->joinFlags|= FLAG_JOIN_START_FIXED;
     }
   }
+  next->startSpeed = leftspeed; // This is the new segment, wgich is updated anyway, no extra flag needed.
 }
 
 /**
@@ -232,23 +261,30 @@ The first 2 entries in the queue are not checked. The first is the one that is a
 The method is called before lines_count is increased!
 */
 void updateTrapezoids(byte p) {
-  byte first;
+  byte first = p;
   PrintLine *firstLine;
+  PrintLine *act = &lines[p];
   BEGIN_INTERRUPT_PROTECTED; 
-  first = lines_pos; // first non fixed segment
-  NEXT_PLANNER_INDEX(first); // don't touch the line printing
-  while(first!=p && (lines[p].joinFlags | FLAG_JOIN_END_FIXED)) {
-    NEXT_PLANNER_INDEX(first);
+  byte maxfirst = lines_pos; // first non fixed segment
+  if(maxfirst!=p)
+    NEXT_PLANNER_INDEX(maxfirst); // don't touch the line printing
+  if(maxfirst!=p)
+    NEXT_PLANNER_INDEX(maxfirst); // don't touch the the next line, could come active
+  while(first!=maxfirst && !(lines[first].joinFlags & FLAG_JOIN_END_FIXED)) {
+    PREVIOUS_PLANNER_INDEX(first);
   }
+  if(first!=p && lines[first].joinFlags & FLAG_JOIN_END_FIXED)
+    NEXT_PLANNER_INDEX(first);
+  // First is now the new element or the first element with non fixed end speed.
+  // anyhow, the start speed of first is fixed
   firstLine = &lines[first];
   firstLine->flags |= FLAG_BLOCKED; // don't let printer touch this or following segments during update
   END_INTERRUPT_PROTECTED; 
-  PrintLine *act = &lines[p];
 
   byte previdx = p-1;
   if(previdx>=MOVE_CACHE_SIZE) previdx = MOVE_CACHE_SIZE-1;
-  if(lines_count)
-    computeMaxJunctionSpeed(&lines[previdx],act); // Set maximum junction speed
+  if(lines_count && (lines[previdx].flags & FLAG_WARMUP)==0)
+    computeMaxJunctionSpeed(&lines[previdx],act); // Set maximum junction speed if we have a real move before
   else
     act->joinFlags |= FLAG_JOIN_START_FIXED;
 
@@ -259,10 +295,12 @@ void updateTrapezoids(byte p) {
   // Update precomputed data
   do {
     updateStepsParameter(&lines[first]);
+    lines[first].flags &= ~FLAG_BLOCKED;  // Flying block to release next used segment as early as possible
     NEXT_PLANNER_INDEX(first);
+    lines[first].flags |= FLAG_BLOCKED;
   } while(first!=lines_write_pos);
   updateStepsParameter(act);
-  firstLine->flags &= ~FLAG_BLOCKED; // unblock for interrupt routine
+  act->flags &= ~FLAG_BLOCKED;
 }
 
 
@@ -273,14 +311,14 @@ void updateTrapezoids(byte p) {
 inline float safeSpeed(PrintLine *p) {
   float safe = printer_state.maxJerk*0.5;
   if(p->dir & 64) {
-    if(abs(p->speedZ)>printer_state.maxZJerk*0.5) {
-      float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/abs(p->speedZ);
+    if(fabs(p->speedZ)>printer_state.maxZJerk*0.5) {
+      float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/fabs(p->speedZ);
       if(safe2<safe) safe = safe2;
     }
   }
   if(p->dir & 128) {
     if(p->dir & 112) {
-      float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/abs(p->speedE);
+      float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/fabs(p->speedE);
       if(safe2<safe) safe = safe2;
     } else {
       safe = 0.5*current_extruder->maxStartFeedrate; // This is a retraction move
@@ -391,18 +429,18 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-  axis_interval[0] = abs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+  axis_interval[0] = fabs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
   if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-  axis_interval[1] = abs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
+  axis_interval[1] = fabs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
   if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
   if(p->dir & 64) { // normally no move in z direction
-    axis_interval[2] = abs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
+    axis_interval[2] = fabs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
     if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
   } else axis_interval[2] = 0;
-  axis_interval[3] = abs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
+  axis_interval[3] = fabs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
   if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
 #if DRIVE_SYSTEM==3
-  axis_interval[4] = abs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
+  axis_interval[4] = fabs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
 #endif
 
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
@@ -626,6 +664,7 @@ p->delta[1] = deltay-deltax;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
 #endif
+  if((p->dir & 240)==0) return; // No steps included
   byte primary_axis;
   float xydist2;
 #if USE_OPS==1
@@ -700,7 +739,7 @@ p->delta[1] = deltay-deltax;
       p->distance = sqrt(xydist2);
     }
   }  else if(p->dir & 128)
-    p->distance = abs(axis_diff[3]);
+    p->distance = fabs(axis_diff[3]);
   else {
     return; // no steps to take, we are finished
   }
@@ -868,7 +907,7 @@ inline byte calculate_distance(float axis_diff[], byte dir, float *distance) {
 			*distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
 		}
 	} else if(dir & 128)
-		*distance = abs(axis_diff[3]);
+		*distance = fabs(axis_diff[3]);
 	else {
 		return 0; // no steps to take, we are finished
 	}
@@ -927,7 +966,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
   p->primaryAxis = 3;
   p->stepsRemaining = p->delta[3];
-  p->distance = abs(axis_diff[3]);
+  p->distance = fabs(axis_diff[3]);
   calculate_move(p,axis_diff,check_endstops,pathOptimize);
 }
 

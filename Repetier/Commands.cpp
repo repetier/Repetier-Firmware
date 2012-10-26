@@ -767,6 +767,9 @@ void process_command(GCode *com)
         update_extruder_flags();
         break;
 #endif
+    case 400: // Finish all moves
+      wait_until_end_of_move();
+      break;
     case 908: // Control digital trimpot directly.
     {
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1

@@ -98,6 +98,9 @@ Custom M Codes
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> - Set temporary advance K-value to X
+- M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M400 - Wait until move buffers empty.
+- M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
 
 #include "Reptier.h"
@@ -869,7 +872,7 @@ byte get_coordinates(GCode *com)
       else
         printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.00016666666f;
   }
-  return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unprductive moves
+  return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unproductive moves
 }
 inline unsigned int ComputeV(long timer,long accel) {
   unsigned int res;
@@ -1591,6 +1594,10 @@ inline long bresenham_step() {
         return 1000;
       }
 #endif
+/*if(DEBUG_ECHO) {
+OUT_P_F("Ln:",cur->startSpeed);
+OUT_P_F_LN(":",cur->endSpeed);
+}*/
         ANALYZER_OFF(ANALYZER_CH0);
       if(cur->flags & FLAG_WARMUP) {
           // This is a warmup move to initalize the path planner correctly. Just waste
