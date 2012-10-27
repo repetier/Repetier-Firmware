@@ -216,8 +216,8 @@ unsigned long stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
 PrintLine lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *cur = 0;               ///< Current printing line
 byte lines_write_pos=0;           ///< Position where we write the next cached line move.
-byte lines_pos=0;                 ///< Position for executing line movement.
 volatile byte lines_count=0;      ///< Number of lines cached 0 = nothing to do.
+byte lines_pos=0;                 ///< Position for executing line movement.
 long baudrate = BAUDRATE;         ///< Communication speed rate.
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
@@ -574,9 +574,7 @@ void loop()
   sd.automount();
 #endif
   //void finishNextSegment();
-#ifdef DEBUG_FREE_MEMORY
-  send_mem();
-#endif
+  DEBUG_MEMORY;
 }
 
 
@@ -1555,9 +1553,7 @@ inline long bresenham_step() {
 			if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
 			interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0
 		}
-	#ifdef DEBUG_FREE_MEMORY
-		check_mem();
-	#endif
+	        DEBUG_MEMORY;
 	} // Do even
 	return interval;
 }
@@ -1586,18 +1582,13 @@ inline long bresenham_step() {
       lastblk = -1;
 #ifdef INCLUDE_DEBUG_NO_MOVE
       if(DEBUG_NO_MOVES) { // simulate a move, but do nothing in reality
-        lines_pos++;
-        if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
+        NEXT_PLANNER_INDEX(lines_pos);
         cur = 0;
         cli();
         --lines_count;
         return 1000;
       }
 #endif
-/*if(DEBUG_ECHO) {
-OUT_P_F("Ln:",cur->startSpeed);
-OUT_P_F_LN(":",cur->endSpeed);
-}*/
         ANALYZER_OFF(ANALYZER_CH0);
       if(cur->flags & FLAG_WARMUP) {
           // This is a warmup move to initalize the path planner correctly. Just waste
@@ -1607,7 +1598,7 @@ OUT_P_F_LN(":",cur->endSpeed);
             if(printer_state.filamentRetracted) {
 	#ifdef DEBUG_OPS
               //sei();
-              out.println_P(PSTR("DownW"));
+              OUT_P_LN("DownW");
               cli();
 	#endif
               printer_state.filamentRetracted = false;
@@ -1620,8 +1611,7 @@ OUT_P_F_LN(":",cur->endSpeed);
           } else if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
             if(!printer_state.filamentRetracted) {
 	#ifdef DEBUG_OPS
-              //sei();
-              out.println_P(PSTR("UpW"));
+              OUT_P_LN("UpW");
               cli();
 	#endif
               printer_state.filamentRetracted = true;
@@ -1639,13 +1629,18 @@ OUT_P_F_LN(":",cur->endSpeed);
             cur=0;
             return 2000;
           }
-          lines_pos++;
-          if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
+          NEXT_PLANNER_INDEX(lines_pos);
           long wait = cur->accelerationPrim;
           cur = 0;
+          cli();
           --lines_count;
           return(wait); // waste some time for path optimization to fill up
       } // End if WARMUP
+/*if(DEBUG_ECHO) {
+OUT_P_L_LN("MSteps:",cur->stepsRemaining);
+  //OUT_P_F("Ln:",cur->startSpeed);
+//OUT_P_F_LN(":",cur->endSpeed);
+}*/
       //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
       if(cur->dir & 16) enable_x();
       if(cur->dir & 32) enable_y();
@@ -1657,7 +1652,7 @@ OUT_P_F_LN(":",cur->endSpeed);
         if(cur->joinFlags & FLAG_JOIN_START_RETRACT) {
          if(!printer_state.filamentRetracted) {
 	#ifdef DEBUG_OPS
-            out.println_P(PSTR("Up"));
+            OUT_P_LN("Up");
 	#endif
             printer_state.filamentRetracted = true;
             cli();
@@ -1671,7 +1666,7 @@ OUT_P_F_LN(":",cur->endSpeed);
           if((cur->dir & 136)==136) {
             if(printer_state.filamentRetracted) { // Printmove and filament is still up!
 	#ifdef DEBUG_OPS
-              out.println_P(PSTR("DownA"));
+              OUT_P_LN("DownA");
 	#endif
               printer_state.filamentRetracted = false;
               cli();
@@ -2044,7 +2039,7 @@ OUT_P_F_LN(":",cur->endSpeed);
 #if USE_OPS==1
     if(printer_state.opsMode==2 && (cur->joinFlags & FLAG_JOIN_END_RETRACT) && printer_state.filamentRetracted && cur->stepsRemaining<=cur->opsReverseSteps) {
 #ifdef DEBUG_OPS
-      out.println_long_P(PSTR("DownX"),cur->stepsRemaining);
+      OUT_P_L_LN("DownX",cur->stepsRemaining);
 #endif
       // Point for retraction reversal reached.
       printer_state.filamentRetracted = false;
@@ -2052,7 +2047,7 @@ OUT_P_F_LN(":",cur->endSpeed);
       printer_state.extruderStepsNeeded+=printer_state.opsPushbackSteps;
 #ifdef DEBUG_OPS
       sei();
-      out.println_long_P(PSTR("N="),printer_state.extruderStepsNeeded);
+      OUT_P_L_LN("N=",printer_state.extruderStepsNeeded);
 #endif
   }
 #endif
@@ -2064,7 +2059,7 @@ OUT_P_F_LN(":",cur->endSpeed);
     if(cur->stepsRemaining<=0 || (cur->dir & 240)==0) { // line finished
 #ifdef DEBUG_STEPCOUNT
         if(cur->totalStepsRemaining)
-          out.println_long_P(PSTR("Missed steps:"),cur->totalStepsRemaining);
+          OUT_P_L_LN("Missed steps:",cur->totalStepsRemaining);
 #endif
 
 #if USE_OPS==1
@@ -2092,8 +2087,7 @@ OUT_P_F_LN(":",cur->endSpeed);
      }
 #endif
      cli();
-     lines_pos++;
-     if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
+     NEXT_PLANNER_INDEX(lines_pos);
      cur = 0;
      --lines_count;
        if(DISABLE_X) disable_x();
@@ -2102,9 +2096,7 @@ OUT_P_F_LN(":",cur->endSpeed);
      if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
      interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0
    }
-#ifdef DEBUG_FREE_MEMORY
-    check_mem();
-#endif
+   DEBUG_MEMORY;
   } // Do even
   return interval;
 }
@@ -2262,9 +2254,7 @@ ISR(TIMER1_COMPA_vect)
     stepperWait = 0; // Importent becaus of optimization in asm at begin
     OCR1A = 65500; // Wait for next move
   }
-#ifdef DEBUG_FREE_MEMORY
-  check_mem();
-#endif
+  DEBUG_MEMORY;
   insideTimer1=0;
 }
 

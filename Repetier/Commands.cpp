@@ -668,7 +668,7 @@ void process_command(GCode *com)
 #if EEPROM_MODE!=0
           epr_update(com);
 #else
-          out.println_P(PSTR("Error: No EEPROM support compiled."));
+          OUT_P_LN("Error: No EEPROM support compiled.");
 #endif
         break;
       case 207: // M207 X<XY jerk> Z<Z Jerk>
@@ -796,34 +796,46 @@ void process_command(GCode *com)
     break;
 #ifdef STEP_COUNTER
 #if DRIVE_SYSTEM==3
-		case 251:
-			if(GCODE_HAS_S(com)) {
-				if (com->S == 0) {
-					printer_state.countZSteps = 0;
-					out.println_P(PSTR("Measurement reset."));
-				} else if (com->S == 1) {
-					OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
-					OUT_P_L_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
-				} else if (com->S = 2) {
-					if (printer_state.countZSteps < 0)
-						printer_state.countZSteps = -printer_state.countZSteps;
-					printer_state.zMin = 0;
-					printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-					printer_state.zMaxSteps = printer_state.countZSteps;
-					for (byte i=0; i<3; i++) {
-						printer_state.currentPositionSteps[i] = 0;
-					}
-					calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-					OUT_P_LN("Measured origin set. Measurement reset.");
-			#if EEPROM_MODE!=0
-					epr_data_to_eeprom(false);
-					OUT_P_LN("EEPROM updated");
-			#endif
-				}
-			}
-			break;
+  case 251:
+    if(GCODE_HAS_S(com)) {
+      if (com->S == 0) {
+        printer_state.countZSteps = 0;
+	out.println_P(PSTR("Measurement reset."));
+      } else if (com->S == 1) {
+	OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+	OUT_P_L_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+      } else if (com->S = 2) {
+        if (printer_state.countZSteps < 0)
+	  printer_state.countZSteps = -printer_state.countZSteps;
+	printer_state.zMin = 0;
+	printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+	printer_state.zMaxSteps = printer_state.countZSteps;
+	for (byte i=0; i<3; i++) {
+	  printer_state.currentPositionSteps[i] = 0;
+	}
+	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+	OUT_P_LN("Measured origin set. Measurement reset.");
+	#if EEPROM_MODE!=0
+	  epr_data_to_eeprom(false);
+	  OUT_P_LN("EEPROM updated");
+	#endif
+      }
+    }
+    break;
 #endif
 #endif
+    case 401:
+      OUT_P_I_LN("Linespos:",lines_pos);
+      OUT_P_I_LN("Linescount:",lines_count);
+      OUT_P_L_LN("baud:",baudrate);
+      lines_count = 0;
+      break;
+    case 402:
+      extruder_select(current_extruder->id);
+      break;
+    case 403:
+      update_ramps_parameter();
+      break;
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();

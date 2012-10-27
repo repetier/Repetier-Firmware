@@ -247,11 +247,11 @@ void extruder_select(byte ext_num) {
    if(ext_num>=NUM_EXTRUDER)
      ext_num = 0;
    current_extruder->extrudePosition = printer_state.currentPositionSteps[3];
-   printer_state.destinationSteps[0] -= current_extruder->xOffset;
-   printer_state.destinationSteps[1] -= current_extruder->yOffset;
+   long dx = -current_extruder->xOffset;
+   long dy = -current_extruder->yOffset;
    current_extruder = &extruder[ext_num];
-   printer_state.destinationSteps[0] += current_extruder->xOffset;
-   printer_state.destinationSteps[1] += current_extruder->yOffset;
+   dx += current_extruder->xOffset;
+   dy += current_extruder->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
    // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
    printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
@@ -291,11 +291,11 @@ void extruder_select(byte ext_num) {
    else
      printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
 #endif
-#if DRIVE_SYSTEM==3
-	split_delta_move(false,true, true);
-#else
-   queue_move(false,true); // Move head of new extruder to old position using last feedrate
-#endif
+  if(dx || dy) {
+    float oldfeedrate = printer_state.feedrate;
+    move_steps(dx,dy,0,0,homing_feedrate[0],false,ALWAYS_CHECK_ENDSTOPS);
+    printer_state.feedrate = oldfeedrate;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------------------------

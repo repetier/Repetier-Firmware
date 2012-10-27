@@ -122,6 +122,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define BED_ANALOG_CHANNEL
 #endif
 
+#ifndef DEBUG_FREE_MEMORY
+#define DEBUG_MEMORY
+#else
+#define DEBUG_MEMORY check_mem();
+#endif
+
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
 #define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+BED_ANALOG_INPUTS)
 #if ANALOG_INPUTS>0
@@ -432,6 +438,9 @@ extern inline void disable_z();
 extern inline void enable_x();
 extern inline void enable_y();
 extern inline void enable_z();
+
+#define PREVIOUS_PLANNER_INDEX(p) {p--;if(p==255) p = MOVE_CACHE_SIZE-1;}
+#define NEXT_PLANNER_INDEX(idx) {++idx;if(idx==MOVE_CACHE_SIZE) idx=0;}
 
 extern void kill(byte only_steppers);
 

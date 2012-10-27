@@ -139,9 +139,6 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
 #endif
 }
 
-#define PREVIOUS_PLANNER_INDEX(p) {p--;if(p==255) p = MOVE_CACHE_SIZE-1;}
-#define NEXT_PLANNER_INDEX(idx) {++idx;if(idx==MOVE_CACHE_SIZE) idx=0;}
-
 /**
 Compute the maximum speed from the last entered move.
 
@@ -230,7 +227,7 @@ inline void forwardPlanner(byte p) {
       leftspeed = act->endSpeed;
       continue; // Nothing to do here
     }
-    float vmax_right = sqrt(leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
+    float vmax_right = sqrt(leftspeed*leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
     if(vmax_right>act->endSpeed) { // Could be higher next run?
       act->startSpeed = leftspeed;
       leftspeed       = act->endSpeed;
@@ -579,9 +576,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 BEGIN_INTERRUPT_PROTECTED
   lines_count++;
 END_INTERRUPT_PROTECTED
-#ifdef DEBUG_FREE_MEMORY
-    check_mem();
-#endif
+  DEBUG_MEMORY;
 }
 
 #if DRIVE_SYSTEM != 3
