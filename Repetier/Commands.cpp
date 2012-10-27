@@ -348,7 +348,7 @@ void process_command(GCode *com)
   else if(GCODE_HAS_M(com))  { // Process M Code
     
     switch( com->M ) {
-#ifdef SDSUPPORT
+#if SDSUPPORT
         
       case 20: // M20 - list SD card
         sd.ls();

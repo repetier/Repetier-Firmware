@@ -954,7 +954,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         break;
       case 'o': 
         if(c2=='s') {
-#ifdef SDSUPPORT
+#if SDSUPPORT
           if(sd.sdactive && sd.sdmode) {
             addStringP(PSTR( UI_TEXT_PRINT_POS));
             unsigned long percent;
@@ -1088,7 +1088,7 @@ void UIDisplay::setStatus(char *txt) {
 }
 
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
-#ifdef SDSUPPORT
+#if SDSUPPORT
 byte nFilesOnCard;
 
 void UIDisplay::updateSDFileCount() {
@@ -1210,7 +1210,7 @@ void UIDisplay::refreshPage() {
       printRow(r,(char*)printCols);
     }
   }
-#ifdef SDSUPPORT
+#if SDSUPPORT
     if(mtype==1) {
       sdrefresh(r);
     }
@@ -1228,7 +1228,7 @@ void UIDisplay::pushMenu(void *men,bool refresh) {
   menuLevel++;
   menu[menuLevel]=men;
   menuTop[menuLevel] = menuPos[menuLevel] = 0;
-#ifdef SDSUPPORT
+#if SDSUPPORT
   UIMenu *men2 = (UIMenu*)menu[menuLevel];
   if(pgm_read_byte(&(men2->menuType))==1) // Open files list
     updateSDFileCount();
@@ -1266,7 +1266,7 @@ void UIDisplay::okAction() {
       activeAction = action;
     return;
   }
-#ifdef SDSUPPORT
+#if SDSUPPORT
   if(mtype==1) {
     if(menuPos[menuLevel]==0) { // Selected back instead of file
       executeAction(UI_ACTION_BACK);
@@ -1363,7 +1363,7 @@ void UIDisplay::nextPreviousAction(char next) {
       menuTop[menuLevel]=menuPos[menuLevel]+1-UI_ROWS;
     return;
   }
-#ifdef SDSUPPORT
+#if SDSUPPORT
     if(mtype==1) { // SD listing
       if(next>0) {
         if(menuPos[menuLevel]<nFilesOnCard) menuPos[menuLevel]++;
@@ -1810,7 +1810,7 @@ void UIDisplay::executeAction(int action) {
       BEEP_LONG;skipBeep = true;
       break;
 #endif
-#ifdef SDSUPPORT
+#if SDSUPPORT
     case UI_ACTION_SD_DELETE:
       if(sd.sdactive){
         pushMenu((void*)&ui_menu_sd_fileselector,false);

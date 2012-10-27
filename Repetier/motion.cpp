@@ -558,7 +558,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #ifdef DEBUG_STEPCOUNT
 // Set in delta move calculation
 #if DRIVE_SYSTEM!=3
-  p->totalStepsRemaining = p->delta[0]+p->delta[1];
+  p->totalStepsRemaining = p->delta[0]+p->delta[1]+p->delta[2];
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE

@@ -22,7 +22,7 @@
 #include "Reptier.h"
 #include "ui.h"
 
-#ifdef SDSUPPORT
+#if SDSUPPORT
 
   SDCard sd;
 

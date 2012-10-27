@@ -1870,6 +1870,9 @@ OUT_P_F_LN(":",cur->endSpeed);
       if((cur->error[2] -= cur->delta[2]) < 0) {
         WRITE(Z_STEP_PIN,HIGH);
         cur->error[2] += cur_errupd;
+#ifdef DEBUG_STEPCOUNT
+        cur->totalStepsRemaining--;
+#endif
       }
     }
 #if STEPPER_HIGH_DELAY>0

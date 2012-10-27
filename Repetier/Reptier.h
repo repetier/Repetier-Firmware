@@ -24,6 +24,33 @@
 
 #include <avr/io.h>
 
+// ##########################################################################################
+// ##                                  Debug configuration                                 ##
+// ##########################################################################################
+
+/** Uncomment, to see detailed data for every move. Only for debugging purposes! */
+#define DEBUG_QUEUE_MOVE
+/** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
+to test your data througput or search for communication problems. */
+#define INCLUDE_DEBUG_COMMUNICATION
+/** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
+with a dry run, you can test the speed of path computations, which are still performed. */
+//#define INCLUDE_DEBUG_NO_MOVE
+/** Writes the free RAM to output, if it is less then at the last test. Should always return
+values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
+usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+#define DEBUG_FREE_MEMORY
+//#define DEBUG_ADVANCE
+/** \brief print ops related debug info. */
+//#define DEBUG_OPS
+/** If enabled, writes the created generic table to serial port at startup. */
+//#define DEBUG_GENERIC
+/** If enabled, steps to move and moved steps are compared. */
+#define DEBUG_STEPCOUNT
+// Uncomment the following line to enable debugging. You can better control debugging below the following line
+//#define DEBUG
+
+
 // Uncomment if no analyzer is connected
 //#define ANALYZER
 // Channel->pin assignments
@@ -429,6 +456,7 @@ extern void setupTimerInterrupt();
 extern void digipot_init();
 extern void microstep_init();
 extern void print_temperatures();
+extern void check_mem();
 
 typedef struct { 
   byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt
@@ -506,6 +534,9 @@ typedef struct {
   float backlashZ;
   byte backlashDir;
 #endif
+#ifdef DEBUG_STEPCOUNT
+  long totalStepsRemaining;
+#endif
 } PrinterState;
 extern PrinterState printer_state;
 
@@ -567,8 +598,6 @@ typedef struct { // RAM usage: 24*4+15 = 113 Byte
   float startSpeed;               ///< Staring speed in mm/s
   float endSpeed;                 ///< Exit speed in mm/s
   float distance;
-  //float startFactor;
-  //float endFactor;
 #if DRIVE_SYSTEM==3
   byte numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
   int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
@@ -737,31 +766,6 @@ inline void  enable_z() {
 #endif
 }
 
-// ##########################################################################################
-// ##                                  Debug configuration                                 ##
-// ##########################################################################################
-
-/** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
-/** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
-to test your data througput or search for communication problems. */
-#define INCLUDE_DEBUG_COMMUNICATION
-/** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
-with a dry run, you can test the speed of path computations, which are still performed. */
-//#define INCLUDE_DEBUG_NO_MOVE
-/** Writes the free RAM to output, if it is less then at the last test. Should always return
-values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
-//#define DEBUG_FREE_MEMORY
-//#define DEBUG_ADVANCE
-/** \brief print ops related debug info. */
-//#define DEBUG_OPS
-/** If enabled, writes the created generic table to serial port at startup. */
-//#define DEBUG_GENERIC
-/** If enabled, steps to move and moved steps are compared. */
-//#define DEBUG_STEPCOUNT
-// Uncomment the following line to enable debugging. You can better control debugging below the following line
-//#define DEBUG
 
 #if DRIVE_SYSTEM==3
 #define SIN_60 0.8660254037844386

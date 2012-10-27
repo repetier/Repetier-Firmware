@@ -680,7 +680,7 @@ void gcode_read_serial() {
       }           
     }
   }
-  #ifdef SDSUPPORT
+  #if SDSUPPORT
   if(!sd.sdmode || gcode_wpos!=0) { // not reading or incoming serial command
     return;
   }
