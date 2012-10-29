@@ -88,6 +88,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MICROSTEP8 HIGH,HIGH
 #define MICROSTEP16 HIGH,HIGH
 
+
+//Step to split a cirrcle in small Lines 
+#define MM_PER_ARC_SEGMENT 1
+//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
+#define N_ARC_CORRECTION 25
+
 #include "Configuration.h"
 
 #define KOMMA
@@ -278,6 +284,7 @@ extern Extruder extruder[];
 // Initalize extruder and heated bed related pins
 extern void initExtruder();
 extern void initHeatedBed();
+extern void updateTempControlVars(TemperatureController *tc);
 extern void extruder_select(byte ext_num);
 // Set current extruder position
 //extern void extruder_set_position(float pos,bool relative);
@@ -466,6 +473,9 @@ extern void digipot_init();
 extern void microstep_init();
 extern void print_temperatures();
 extern void check_mem();
+#if ARC_SUPPORT
+extern void mc_arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
+#endif
 
 typedef struct { 
   byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt

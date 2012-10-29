@@ -40,7 +40,8 @@ typedef struct { // 52 bytes per command needed
    long S;
    long P;
    float I;
-   float J;   
+   float J;
+   float R;   
    char *text; //text[17];
 } GCode;
 
@@ -185,6 +186,7 @@ extern void emergencyStop();
 #define GCODE_HAS_STRING(a) ((a->params & 32768)!=0)
 #define GCODE_HAS_I(a) ((a->params2 & 1)!=0)
 #define GCODE_HAS_J(a) ((a->params2 & 2)!=0)
+#define GCODE_HAS_R(a) ((a->params2 & 4)!=0)
 
 extern byte debug_level;
 #define DEBUG_ECHO ((debug_level & 1)!=0)

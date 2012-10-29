@@ -359,7 +359,7 @@ Gcode Letter to Bit and Datatype:
 Second word if V2:
 - I : Bit 0 : 32-Bit float
 - J : Bit 1 : 32-Bit float
-
+- R : Bit 2 : 32-Bit float
 */
 byte gcode_comp_binary_size(char *ptr) {// unsigned int bitfield) {
    byte s = 4; // include checksum and bitfield
@@ -380,6 +380,7 @@ byte gcode_comp_binary_size(char *ptr) {// unsigned int bitfield) {
      if(bitfield & 4) s+=2;
      if(bitfield2 & 1) s+= 4;
      if(bitfield2 & 2) s+= 4;
+     if(bitfield2 & 4) s+= 4;
      if(bitfield & 32768) s+=(byte)ptr[4]+1;
      //OUT_P_I_LN("LenStr:",(int)ptr[4]);
      //OUT_P_I_LN("LenBinV2:",s);
@@ -790,6 +791,7 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    if(code->params & 2048) {code->P=*(long int*)p;p+=4;}
    if(GCODE_HAS_I(code)) {code->I=*(float *)p;p+=4;}
    if(GCODE_HAS_J(code)) {code->J=*(float *)p;p+=4;}
+   if(GCODE_HAS_R(code)) {code->R=*(float *)p;p+=4;}
    if(GCODE_HAS_STRING(code)) { // set text pointer to string
      code->text = (char*)p;
      code->text[textlen] = 0; // Terminate string overwriting checksum
@@ -863,6 +865,11 @@ bool gcode_parse_ascii(GCode *code,char *line) {
   if((pos = strchr(line,'J'))!=0) { 
      code->J = gcode_value(++pos);
      code->params2 |= 2;
+     code->params |= 4096; // Needs V2 for saving
+  }
+  if((pos = strchr(line,'R'))!=0) { 
+     code->R = gcode_value(++pos);
+     code->params2 |= 4;
      code->params |= 4096; // Needs V2 for saving
   }
 
@@ -941,6 +948,9 @@ void gcode_print_command(GCode *code) {
   }
   if(GCODE_HAS_J(code)) {
     out.print_float_P(PSTR(" J"),code->J);
+  }
+  if(GCODE_HAS_R(code)) {
+    out.print_float_P(PSTR(" R"),code->R);
   }
   if(GCODE_HAS_STRING(code)) {
     out.print(' ');

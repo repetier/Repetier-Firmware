@@ -90,7 +90,7 @@ Custom M Codes
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 - M203 - Set temperture monitor to Sx
-- M204 - Set PID parameter X => Kp Y => Ki Z => Kd
+- M204 - Set PID parameter X => Kp Y => Ki Z => Kd S<extruder> Default is current extruder. NUM_EXTRUDER=Heated bed
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
@@ -456,7 +456,7 @@ pinMode(ANALYZER_CH7,OUTPUT);
   printer_state.opsRetractBacklash = OPS_RETRACT_BACKLASH;
   printer_state.filamentRetracted = false;
 #endif
-  printer_state.feedrate = 3000; ///< Current feedrate in mm/min.
+  printer_state.feedrate = 50; ///< Current feedrate in mm/min.
   printer_state.feedrateMultiply = 100;
   printer_state.extrudeMultiply = 100; // Is 10.24 * value here 100 percent)
 #ifdef USE_ADVANCE
@@ -1644,7 +1644,9 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
       //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
       if(cur->dir & 16) enable_x();
       if(cur->dir & 32) enable_y();
-      if(cur->dir & 64) enable_z();
+      if(cur->dir & 64) {
+        enable_z();
+      }
       if(cur->dir & 128) extruder_enable();
       cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
 #if USE_OPS==1
@@ -1943,6 +1945,9 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
           v=printer_state.vMaxReached-v;
           if (v<cur->vEnd) v = cur->vEnd; // extra steps at the end of desceleration due to rounding erros
         }
+#ifdef USE_ADVANCE
+        unsigned int v0 = v;
+#endif
         if(v>STEP_DOUBLER_FREQUENCY) {
 #if ALLOW_QUADSTEPPING
           if(v>STEP_DOUBLER_FREQUENCY*2) {
@@ -1967,7 +1972,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
         for(byte loop=1;loop<max_loops;loop++) advance_target-=cur->advanceRate;
         if(advance_target<cur->advanceEnd)
           advance_target = cur->advanceEnd;
-        long h=mulu6xu16to32(cur->advanceL,v);
+        long h=mulu6xu16to32(cur->advanceL,v0);
         int tred = ((advance_target+h)>>16);
         cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
@@ -1975,7 +1980,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
         sei();
         printer_state.advance_executed = advance_target;
 #else
-        int tred=mulu6xu16shift16(cur->advanceL,v);
+        int tred=mulu6xu16shift16(cur->advanceL,v0);
         cli();
         printer_state.extruderStepsNeeded+=tred-printer_state.advance_steps_set;
         printer_state.advance_steps_set = tred;

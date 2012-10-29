@@ -70,7 +70,7 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
    float jerk = sqrt(dx*dx+dy*dy);
    if(jerk>printer_state.maxJerk)
      factor = printer_state.maxJerk/jerk;
-   if((p1->dir & 128) || (p2->dir & 128)) {
+   if((p1->dir & 64) || (p2->dir & 64)) {
    //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
      float dz = fabs(p2->speedZ-p1->speedZ);
      if(dz>printer_state.maxZJerk) {
@@ -138,6 +138,19 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
     }
 #endif
 }
+void testnum(float x,char c) {
+if (isnan(x)) {
+    out.print(c);
+    OUT_P_LN("NAN");
+    return;
+  }
+
+  if (isinf(x)) {
+    out.print(c);
+     OUT_P_LN("INF");
+    return;
+  }
+}
 
 /**
 Compute the maximum speed from the last entered move.
@@ -179,7 +192,7 @@ inline void backwardPlanner(byte p,byte last) {
     }
 #endif
     // Switch move-retraction or vice versa start always with save speeds! Keeps extruder from blocking
-    if(((prev->dir & 240)==128) != ((act->dir & 240)==128)) { // switch move - extruder only move
+    if(((prev->dir & 240)!=128) && ((act->dir & 240)==128)) { // switch move - extruder only move
       prev->joinFlags |= FLAG_JOIN_END_FIXED;
       act->joinFlags |= FLAG_JOIN_START_FIXED;
       return;          
@@ -211,7 +224,6 @@ inline void backwardPlanner(byte p,byte last) {
       check_periodical(); // Temperature update
   }
 }
-
 inline void forwardPlanner(byte p) {
   PrintLine *act,*next;
   if(p==lines_write_pos) return;
@@ -219,15 +231,22 @@ inline void forwardPlanner(byte p) {
   //NEXT_PLANNER_INDEX(last);
   next = &lines[p];
   float leftspeed = next->startSpeed;
+   //   testnum(leftspeed,'E');
+
   while(p!=last) { // All except last segment, which has fixed end speed
     act = next;
     NEXT_PLANNER_INDEX(p);
     next = &lines[p];
     if(act->joinFlags & FLAG_JOIN_END_FIXED) {
       leftspeed = act->endSpeed;
+    //  testnum(leftspeed,'A');
       continue; // Nothing to do here
     }
+    //      testnum(leftspeed,'C');
+    //  testnum(act->acceleration,'D');
+
     float vmax_right = sqrt(leftspeed*leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
+   //   testnum(vmax_right,'B');
     if(vmax_right>act->endSpeed) { // Could be higher next run?
       act->startSpeed = leftspeed;
       leftspeed       = act->endSpeed;
@@ -267,11 +286,14 @@ void updateTrapezoids(byte p) {
     NEXT_PLANNER_INDEX(maxfirst); // don't touch the line printing
   if(maxfirst!=p)
     NEXT_PLANNER_INDEX(maxfirst); // don't touch the the next line, could come active
+  if(maxfirst!=p)
+    NEXT_PLANNER_INDEX(maxfirst); // don't touch the the next line, could come active
   while(first!=maxfirst && !(lines[first].joinFlags & FLAG_JOIN_END_FIXED)) {
     PREVIOUS_PLANNER_INDEX(first);
   }
-  if(first!=p && lines[first].joinFlags & FLAG_JOIN_END_FIXED)
+  if(first!=p && (lines[first].joinFlags & FLAG_JOIN_END_FIXED)) {
     NEXT_PLANNER_INDEX(first);
+  }
   // First is now the new element or the first element with non fixed end speed.
   // anyhow, the start speed of first is fixed
   firstLine = &lines[first];
@@ -420,7 +442,9 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   float time_for_move = (float)(F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   bool critical=false;
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
+    //OUT_P_I("L:",lines_count);
     time_for_move += (3*(LOW_TICKS_PER_MOVE-time_for_move))/(lines_count+1); // Increase time if queue gets empty. Add more time if queue gets smaller.
+    //OUT_P_F_LN("Slow ",time_for_move);
     critical=true;
   }
   UI_MEDIUM; // do check encoder
@@ -1128,3 +1152,137 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 
 #endif
 
+#if ARC_SUPPORT
+// Arc function taken from grbl
+// The arc is approximated by generating a huge number of tiny, linear segments. The length of each 
+// segment is configured in settings.mm_per_arc_segment.  
+void mc_arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise)
+{      
+  //   int acceleration_manager_was_enabled = plan_is_acceleration_manager_enabled();
+  //   plan_set_acceleration_manager_enabled(false); // disable acceleration management for the duration of the arc
+  float center_axis0 = position[0] + offset[0];
+  float center_axis1 = position[1] + offset[1];
+  float linear_travel = 0; //target[axis_linear] - position[axis_linear];
+  float extruder_travel = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
+  float r_axis0 = -offset[0];  // Radius vector from center to current location
+  float r_axis1 = -offset[1];
+  float rt_axis0 = target[0] - center_axis0;
+  float rt_axis1 = target[1] - center_axis1;
+  
+  // CCW angle between position and target from circle center. Only one atan2() trig computation required.
+  float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
+  if (angular_travel < 0) { angular_travel += 2*M_PI; }
+  if (isclockwise) { angular_travel -= 2*M_PI; }
+  
+  float millimeters_of_travel = hypot(angular_travel*radius, fabs(linear_travel));
+  if (millimeters_of_travel < 0.001) { return; }
+  uint16_t segments = floor(millimeters_of_travel/MM_PER_ARC_SEGMENT);
+  if(segments == 0) segments = 1;
+
+  /*  
+    // Multiply inverse feed_rate to compensate for the fact that this movement is approximated
+    // by a number of discrete segments. The inverse feed_rate should be correct for the sum of 
+    // all segments.
+    if (invert_feed_rate) { feed_rate *= segments; }
+  */
+  float theta_per_segment = angular_travel/segments;
+  float linear_per_segment = linear_travel/segments;
+  float extruder_per_segment = extruder_travel/segments;
+  
+  /* Vector rotation by transformation matrix: r is the original vector, r_T is the rotated vector,
+     and phi is the angle of rotation. Based on the solution approach by Jens Geisler.
+         r_T = [cos(phi) -sin(phi);
+                sin(phi)  cos(phi] * r ;
+     
+     For arc generation, the center of the circle is the axis of rotation and the radius vector is 
+     defined from the circle center to the initial position. Each line segment is formed by successive
+     vector rotations. This requires only two cos() and sin() computations to form the rotation
+     matrix for the duration of the entire arc. Error may accumulate from numerical round-off, since
+     all double numbers are single precision on the Arduino. (True double precision will not have
+     round off issues for CNC applications.) Single precision error can accumulate to be greater than
+     tool precision in some cases. Therefore, arc path correction is implemented. 
+
+     Small angle approximation may be used to reduce computation overhead further. This approximation
+     holds for everything, but very small circles and large mm_per_arc_segment values. In other words,
+     theta_per_segment would need to be greater than 0.1 rad and N_ARC_CORRECTION would need to be large
+     to cause an appreciable drift error. N_ARC_CORRECTION~=25 is more than small enough to correct for 
+     numerical drift error. N_ARC_CORRECTION may be on the order a hundred(s) before error becomes an
+     issue for CNC machines with the single precision Arduino calculations.
+     
+     This approximation also allows mc_arc to immediately insert a line segment into the planner 
+     without the initial overhead of computing cos() or sin(). By the time the arc needs to be applied
+     a correction, the planner should have caught up to the lag caused by the initial mc_arc overhead. 
+     This is important when there are successive arc motions. 
+  */
+  // Vector rotation matrix values
+  float cos_T = 1-0.5*theta_per_segment*theta_per_segment; // Small angle approximation
+  float sin_T = theta_per_segment;
+  
+  float arc_target[4];
+  float sin_Ti;
+  float cos_Ti;
+  float r_axisi;
+  uint16_t i;
+  int8_t count = 0;
+
+  // Initialize the linear axis
+  //arc_target[axis_linear] = position[axis_linear];
+  
+  // Initialize the extruder axis
+  arc_target[3] = printer_state.currentPositionSteps[3];
+
+  for (i = 1; i<segments; i++) 
+  { // Increment (segments-1)
+    
+    if((count & 4) == 0)
+    {
+       gcode_read_serial();
+       check_periodical();
+    }
+
+    if (count < N_ARC_CORRECTION)  //25 pieces
+    {
+      // Apply vector rotation matrix 
+      r_axisi = r_axis0*sin_T + r_axis1*cos_T;
+      r_axis0 = r_axis0*cos_T - r_axis1*sin_T;
+      r_axis1 = r_axisi;
+      count++;
+    }
+    else
+    {
+      // Arc correction to radius vector. Computed only every N_ARC_CORRECTION increments.
+      // Compute exact location by applying transformation matrix from initial radius vector(=-offset).
+      cos_Ti  = cos(i*theta_per_segment);
+      sin_Ti  = sin(i*theta_per_segment);
+      r_axis0 = -offset[0]*cos_Ti + offset[1]*sin_Ti;
+      r_axis1 = -offset[0]*sin_Ti - offset[1]*cos_Ti;
+      count = 0;
+    }
+
+    // Update arc_target location
+    arc_target[0] = center_axis0 + r_axis0;
+    arc_target[1] = center_axis1 + r_axis1;
+    //arc_target[axis_linear] += linear_per_segment;
+    arc_target[3] += extruder_per_segment;
+    
+    printer_state.destinationSteps[0] = arc_target[0]*axis_steps_per_unit[0];
+    printer_state.destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
+    printer_state.destinationSteps[3] = arc_target[3];
+#if DRIVE_SYSTEM == 3
+    split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+#else
+    queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+#endif
+  }
+  // Ensure last segment arrives at target location.
+    printer_state.destinationSteps[0] = target[0]*axis_steps_per_unit[0];
+    printer_state.destinationSteps[1] = target[1]*axis_steps_per_unit[1];
+    printer_state.destinationSteps[3] = target[3];
+#if DRIVE_SYSTEM == 3
+    split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+#else
+    queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+#endif
+  //   plan_set_acceleration_manager_enabled(acceleration_manager_was_enabled);
+}
+#endif

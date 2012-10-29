@@ -235,6 +235,14 @@ void initExtruder() {
 #endif
   
 }
+void updateTempControlVars(TemperatureController *tc) {
+#ifdef TEMP_PID
+    if(tc->pidIGain) { // prevent division by zero
+       tc->tempIStateLimitMax = (float)tc->pidDriveMax*10.0f/tc->pidIGain;
+       tc->tempIStateLimitMin = (float)tc->pidDriveMin*10.0f/tc->pidIGain;
+    }
+#endif
+}
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- extruder_select ---------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
@@ -277,12 +285,7 @@ void extruder_select(byte ext_num) {
    float fmax=((float)F_CPU/((float)printer_state.maxExtruderSpeed*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
 #endif
-#ifdef TEMP_PID
-    if(current_extruder->tempControl.pidIGain) { // prevent division by zero
-       current_extruder->tempControl.tempIStateLimitMax = (float)current_extruder->tempControl.pidDriveMax*10.0f/current_extruder->tempControl.pidIGain;
-       current_extruder->tempControl.tempIStateLimitMin = (float)current_extruder->tempControl.pidDriveMin*10.0f/current_extruder->tempControl.pidIGain;
-    }
-#endif
+   updateTempControlVars(&current_extruder->tempControl);
 #if USE_OPS==1
    printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
    printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBacklash)*current_extruder->stepsPerMM;
