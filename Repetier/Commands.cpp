@@ -903,14 +903,44 @@ void process_command(GCode *com)
       wait_until_end_of_move();
       break;
     case 908: // Control digital trimpot directly.
-    {
+      {
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
         uint8_t channel,current;
         if(GCODE_HAS_P(com) && GCODE_HAS_S(com)) 
           digitalPotWrite((uint8_t)com->P, (uint8_t)com->S);
 #endif
-    }
+      }
     break;
+    case 500:
+	{
+        #if EEPROM_MODE!=0
+	  epr_data_to_eeprom(false);
+          OUT_P_LN("Configuration stored to EEPROM.");
+        #else
+          OUT_P_LN("Error: No EEPROM support compiled.");
+        #endif
+	}
+	break;
+    case 501:
+	{
+	#if EEPROM_MODE!=0
+          epr_eeprom_to_data();
+          OUT_P_LN("Configuration loaded from EEPROM.");
+	#else
+          OUT_P_LN("Error: No EEPROM support compiled.");
+	#endif
+	}
+	break;
+    case 502:
+	{
+	#if EEPROM_MODE!=0
+          epr_eeprom_reset();
+          OUT_P_LN("Configuration reset to defaults.");
+	#else
+          OUT_P_LN("Error: No EEPROM support compiled.");
+	#endif
+	}
+	break;
     
     case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
     {
@@ -958,15 +988,9 @@ void process_command(GCode *com)
 #endif
     case 401:
       OUT_P_I_LN("Linespos:",lines_pos);
+      OUT_P_I_LN("Writepos:",lines_write_pos);
       OUT_P_I_LN("Linescount:",lines_count);
-      OUT_P_L_LN("baud:",baudrate);
-      lines_count = 0;
-      break;
-    case 402:
-      extruder_select(current_extruder->id);
-      break;
-    case 403:
-      update_ramps_parameter();
+      //lines_count = 0;
       break;
     }
   } else if(GCODE_HAS_T(com))  { // Process T code

@@ -60,16 +60,27 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
     p2->joinFlags |= FLAG_JOIN_START_FIXED;
     return;
   }
+#if DRIVE_SYSTEM==3
+  if (p1->moveID == p2->moveID) { // Avoid computing junction speed for split delta lines
+	p1->maxJunctionSpeed = p1->fullSpeed;
+	return;
+  }
+#endif
    // First we compute the normalized jerk for speed 1
    //float dx = p2->speedX*p2->invFullSpeed-p1->speedX*p1->invFullSpeed;
    //float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
    float dx = p2->speedX-p1->speedX;
    float dy = p2->speedY-p1->speedY;
    float factor=1,tmp;
-   
+#if (DRIVE_SYSTEM == 3) // No point computing Z Jerk separately for delta moves
+   float dz = p2->speedZ-p1->speedZ;
+   float jerk = sqrt(dx*dx+dy*dy+dz*dz);
+#else
    float jerk = sqrt(dx*dx+dy*dy);
+#endif
    if(jerk>printer_state.maxJerk)
      factor = printer_state.maxJerk/jerk;
+#if (DRIVE_SYSTEM!=3)
    if((p1->dir & 64) || (p2->dir & 64)) {
    //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
      float dz = fabs(p2->speedZ-p1->speedZ);
@@ -78,6 +89,7 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
        if(tmp<factor) factor = tmp;
      }
    }
+#endif
    float eJerk = fabs(p2->speedE-p1->speedE);
    if(eJerk>current_extruder->maxStartFeedrate) {
      tmp = current_extruder->maxStartFeedrate/eJerk;
@@ -284,10 +296,12 @@ void updateTrapezoids(byte p) {
   byte maxfirst = lines_pos; // first non fixed segment
   if(maxfirst!=p)
     NEXT_PLANNER_INDEX(maxfirst); // don't touch the line printing
-  if(maxfirst!=p)
-    NEXT_PLANNER_INDEX(maxfirst); // don't touch the the next line, could come active
-  if(maxfirst!=p)
-    NEXT_PLANNER_INDEX(maxfirst); // don't touch the the next line, could come active
+  // Now ignore enough segments to gain enough time for path planning
+  long timeleft = 0;
+  while(timeleft<700000 && maxfirst!=p) {
+    timeleft+=lines[maxfirst].timeInTicks;
+    NEXT_PLANNER_INDEX(maxfirst);
+  }
   while(first!=maxfirst && !(lines[first].joinFlags & FLAG_JOIN_END_FIXED)) {
     PREVIOUS_PLANNER_INDEX(first);
   }
@@ -329,12 +343,14 @@ void updateTrapezoids(byte p) {
 
 inline float safeSpeed(PrintLine *p) {
   float safe = printer_state.maxJerk*0.5;
+#if DRIVE_SYSTEM != 3
   if(p->dir & 64) {
     if(fabs(p->speedZ)>printer_state.maxZJerk*0.5) {
       float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/fabs(p->speedZ);
       if(safe2<safe) safe = safe2;
     }
   }
+#endif
   if(p->dir & 128) {
     if(p->dir & 112) {
       float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/fabs(p->speedE);
@@ -373,18 +389,18 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
 not act on the first two moves in the queue. The stepper timer will spot these moves and leave some time for
 processing.
 */
-byte check_new_move(byte pathOptimize, byte lines_to_wait) {
+byte check_new_move(byte pathOptimize, byte waitExtraLines) {
   if(lines_count==0 && waitRelax==0 && pathOptimize) { // First line after some time - warmup needed
 #ifdef DEBUG_OPS
     out.println_P(PSTR("New path"));
 #endif
-    byte w = lines_to_wait;
+    byte w = 3;
     PrintLine *p = &lines[lines_write_pos];
     while(w) {
       p->flags = FLAG_WARMUP;
       p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
       p->dir = 0;
-      p->primaryAxis = w;
+      p->primaryAxis = w+waitExtraLines;
       p->accelerationPrim = p->facceleration = 10000*(unsigned int)w;
       lines_write_pos++;
       if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
@@ -447,6 +463,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     //OUT_P_F_LN("Slow ",time_for_move);
     critical=true;
   }
+  p->timeInTicks = time_for_move;
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
@@ -594,9 +611,8 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   }
 #endif
   // Make result permanent
-  lines_write_pos++;
-  if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
-  waitRelax = 70;
+  NEXT_PLANNER_INDEX(lines_write_pos);
+  if (pathOptimize) waitRelax = 70;
 BEGIN_INTERRUPT_PROTECTED
   lines_count++;
 END_INTERRUPT_PROTECTED
@@ -616,7 +632,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     gcode_read_serial();
     check_periodical();
   }
-  byte newPath=check_new_move(pathOptimize,3);
+  byte newPath=check_new_move(pathOptimize,0);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -952,7 +968,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
     gcode_read_serial();
     check_periodical();
   }
-  byte newPath=check_new_move(pathOptimize);
+  byte newPath=check_new_move(pathOptimize,0);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -1076,7 +1092,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	}
 
 	// Insert dummy moves if necessary
-	byte newPath=check_new_move(pathOptimize, (num_lines > 1 ? 4 : 1));
+	byte newPath=check_new_move(pathOptimize, min(MOVE_CACHE_SIZE-3,num_lines));
 
 	for (int line_number=1; line_number < num_lines + 1; line_number++) {
 		while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache

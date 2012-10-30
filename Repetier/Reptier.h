@@ -601,6 +601,7 @@ extern volatile unsigned int delta_segment_count; // Number of delta moves cache
 typedef struct { // RAM usage: 24*4+15 = 113 Byte
   byte primaryAxis;
   volatile byte flags;
+  long timeInTicks;
   byte joinFlags;
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
   byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.

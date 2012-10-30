@@ -99,6 +99,9 @@ Custom M Codes
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> - Set temporary advance K-value to X
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M500 Store settings to EEPROM
+- M501 Load settings from EEPROM
+- M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
 - M400 - Wait until move buffers empty.
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
