@@ -62,8 +62,11 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
   }
 #if DRIVE_SYSTEM==3
   if (p1->moveID == p2->moveID) { // Avoid computing junction speed for split delta lines
-	p1->maxJunctionSpeed = p1->fullSpeed;
-	return;
+   if(p1->fullSpeed>p2->fullSpeed) 
+      p1->maxJunctionSpeed = p2->fullSpeed;
+   else
+      p1->maxJunctionSpeed = p1->fullSpeed;
+   return;
   }
 #endif
    // First we compute the normalized jerk for speed 1
@@ -313,7 +316,9 @@ void updateTrapezoids(byte p) {
   firstLine = &lines[first];
   firstLine->flags |= FLAG_BLOCKED; // don't let printer touch this or following segments during update
   END_INTERRUPT_PROTECTED; 
-
+  /*if(DEBUG_ECHO) {
+     OUT_P_I("J:",firstLine->joinFlags);OUT_P_I("X:",lines_pos);OUT_P_F("S:",lines[first].endSpeed);OUT_P_I("F:",first);OUT_P_I_LN(" P:",p);
+  }*/
   byte previdx = p-1;
   if(previdx>=MOVE_CACHE_SIZE) previdx = MOVE_CACHE_SIZE-1;
   if(lines_count && (lines[previdx].flags & FLAG_WARMUP)==0)
@@ -401,7 +406,7 @@ byte check_new_move(byte pathOptimize, byte waitExtraLines) {
       p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
       p->dir = 0;
       p->primaryAxis = w+waitExtraLines;
-      p->accelerationPrim = p->facceleration = 10000*(unsigned int)w;
+      p->timeInTicks = p->accelerationPrim = p->facceleration = 10000*(unsigned int)w;
       lines_write_pos++;
       if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
 BEGIN_INTERRUPT_PROTECTED
@@ -1092,7 +1097,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	}
 
 	// Insert dummy moves if necessary
-	byte newPath=check_new_move(pathOptimize, min(MOVE_CACHE_SIZE-3,num_lines));
+	byte newPath=check_new_move(pathOptimize, min(MOVE_CACHE_SIZE-3,num_lines-1));
 
 	for (int line_number=1; line_number < num_lines + 1; line_number++) {
 		while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
