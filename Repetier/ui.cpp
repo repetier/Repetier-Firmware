@@ -702,6 +702,11 @@ UIDisplay::UIDisplay() {
   activeAction = 0;
   statusMsg[0] = 0;
   ui_init_keys();
+#if SDSUPPORT
+    cwd[0]='/';cwd[1]=0;
+    folderLevel=0;
+#endif  
+  UI_STATUS(UI_TEXT_PRINTER_READY);
 }
 void UIDisplay::initialize() {
 #if UI_DISPLAY_TYPE>0
@@ -908,10 +913,12 @@ void UIDisplay::parse(char *txt,bool ram) {
           addStringP(relative_mode_e?ui_yes:ui_no);
           break;
         }
+        ivalue = UI_TEMP_PRECISION;
         if(c2=='c') fvalue=current_extruder->tempControl.currentTemperatureC;
         else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
         else if(c2=='b') fvalue=heated_bed_get_temperature();
-        addFloat(fvalue,3,UI_TEMP_PRECISION);
+        else if(c2=='B') {ivalue=0;fvalue=heated_bed_get_temperature();}
+        addFloat(fvalue,3,ivalue);
         break;
       case 'E': // Target extruder temperature
         if(c2=='c') fvalue=current_extruder->tempControl.targetTemperatureC;
@@ -919,7 +926,7 @@ void UIDisplay::parse(char *txt,bool ram) {
 #if HAVE_HEATED_BED
         else if(c2=='b') fvalue=heatedBedController.targetTemperatureC;
 #endif
-        addFloat(fvalue,3,UI_TEMP_PRECISION);
+        addFloat(fvalue,3,0 /*UI_TEMP_PRECISION*/);
         break;
   
       case 'f':
@@ -1100,12 +1107,11 @@ void UIDisplay::updateSDFileCount() {
   while ((p = root->readDirCache())) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
-
     // skip deleted entry and entries for . and  ..
-    if(!sd.showFilename(p->name)) continue;
-
+    if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     // only list subdirectories and files
-    if (!DIR_IS_FILE(p)) continue;
+    if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
+    if(folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     nFilesOnCard++;
     if(nFilesOnCard==254) return;
   }
@@ -1119,9 +1125,10 @@ void getSDFilenameAt(byte filePos,char *filename) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
     // skip deleted entry and entries for . and  ..
-    if(!sd.showFilename(p->name)) continue;
+    if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     // only list subdirectories and files
-    if (!DIR_IS_FILE(p)) continue;
+    if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
+    if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     if(filePos) {
       filePos--;
       continue;
@@ -1132,14 +1139,39 @@ void getSDFilenameAt(byte filePos,char *filename) {
         filename[c++]='.';
       filename[c++]=tolower(p->name[i]);
     }
+    if(DIR_IS_SUBDIR(p)) filename[c++]='/'; // Set marker for directory
     break;
   }
   filename[c]=0;
 }
-
+bool UIDisplay::isDirname(char *name) {
+  while(*name) name++;
+  name--;
+  return *name=='/';
+}
+void UIDisplay::goDir(char *name) {
+  char *p = cwd;
+  while(*p)p++;
+  if(name[0]=='.' && name[1]=='.') {
+    if(folderLevel==0) return;
+    p--;p--;
+    while(*p!='/') p--;
+    p++;
+    *p = 0;
+    folderLevel--;
+  } else {
+    if(folderLevel>=SD_MAX_FOLDER_DEPTH) return; 
+    while(*name) *p++ = *name++;
+    *p = 0;
+    folderLevel++;
+  }
+  sd.fat.chdir(cwd);
+  updateSDFileCount();
+}
 void UIDisplay::sdrefresh(byte &r) {
   dir_t* p;
   byte offset = menuTop[menuLevel];
+  sd.fat.chdir(cwd);
   SdBaseFile *root = sd.fat.vwd();
   root->rewind();
   byte skip = (offset>0?offset-1:0);
@@ -1147,9 +1179,10 @@ void UIDisplay::sdrefresh(byte &r) {
     // done if past last used entry
     if (p->name[0] == DIR_NAME_FREE) break;
     // skip deleted entry and entries for . and  ..
-    if(!sd.showFilename(p->name)) continue;
+    if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     // only list subdirectories and files
-    if (!DIR_IS_FILE(p)) continue;
+    if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
+    if(folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
     if(skip>0) {skip--;continue;}
     col=0;
     if(r+offset==menuPos[menuLevel])
@@ -1157,6 +1190,10 @@ void UIDisplay::sdrefresh(byte &r) {
     else
        printCols[col++]=' ';
     // print file name with possible blank fill
+    if(DIR_IS_SUBDIR(p))
+      printCols[col++] = 6; // Prepend folder symbol
+    else
+      printCols[col++] = ' ';
     for (byte i = 0; i < 11; i++) {
       if (p->name[i] == ' ')continue;
       if (i == 8)
@@ -1273,12 +1310,19 @@ void UIDisplay::okAction() {
       return;
     }
     byte filePos = menuPos[menuLevel]-1;
+    char filename[14];
+    getSDFilenameAt(filePos,filename);
+    if(isDirname(filename)) { // Directory change selected
+      goDir(filename);
+      menuTop[menuLevel]=0;
+      menuPos[menuLevel]=1;
+      refreshPage();
+      return;
+    }
     menuLevel--;
     men = (UIMenu*)menu[menuLevel];
     entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
-    char filename[13];
-    getSDFilenameAt(filePos,filename);
     switch(pgm_read_word(&(ent->action))) {
       case UI_ACTION_SD_PRINT:
         if(sd.sdactive){
@@ -2109,7 +2153,7 @@ void UIDisplay::executeAction(int action) {
 }
 void UIDisplay::mediumAction() {
 #if UI_HAS_I2C_ENCODER>0
-ui_check_slow_encoder();
+  ui_check_slow_encoder();
 #endif
 }
 void UIDisplay::slowAction() {

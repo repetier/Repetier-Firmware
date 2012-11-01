@@ -520,7 +520,7 @@ more then one information page.
 
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
-//#define UI_DISABLE_AUTO_PAGESWITCH
+#define UI_DISABLE_AUTO_PAGESWITCH
 
 /** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
@@ -533,19 +533,28 @@ for 2 row displays. You can add additional pages or change the default pages lik
 */
 #if UI_ROWS>=4
  #if HAVE_HEATED_BED==true
-   UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
+   UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2","Mul:%om Buf:%oB","%os");
+   //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
  #endif
   UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
 //UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
+ UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1,
+#if NUM_EXTRUDER>1
+UI_TEXT_PAGE_EXTRUDER2
+#else
+ ""
+#endif
+ ,UI_TEXT_PAGE_BED,"%os");
+
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1,&ui_page2}
+#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 2
+#define UI_NUM_PAGES 3
 #else
 #if HAVE_HEATED_BED==true
 UI_PAGE2(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED);

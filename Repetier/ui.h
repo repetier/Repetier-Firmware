@@ -405,8 +405,6 @@ class UIDisplay {
     void addStringP(PGM_P text);
     void okAction();
     void nextPreviousAction(char next);
-    void updateSDFileCount();
-    void sdrefresh(byte &r);
     char statusMsg[17];
     char encoderPos;
     int8_t encoderLast;
@@ -428,6 +426,14 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
+#if SDSUPPORT
+    void updateSDFileCount();
+    void sdrefresh(byte &r);
+    void goDir(char *name);
+    bool isDirname(char *name);
+    char cwd[SD_MAX_FOLDER_DEPTH*13+2];
+    byte folderLevel;
+#endif
 };
 extern UIDisplay uid;
 
