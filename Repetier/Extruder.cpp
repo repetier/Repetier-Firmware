@@ -326,9 +326,9 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
   bool alloff = true;
   for(byte i=0;i<NUM_EXTRUDER;i++)
     if(tempController[i]->targetTemperatureC>15) alloff = false;
-  if(alloff)
+  if(alloff && !alloffs) // All heaters are now switched off?
     epr_update_usage();
-  if(alloffs && !alloff)
+  if(alloffs && !alloff) // heaters are turned on, start measuring printing time
     printer_state.msecondsPrinting = millis();
 }
 

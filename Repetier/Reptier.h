@@ -24,6 +24,8 @@
 
 #include <avr/io.h>
 
+#define REPETIER_VERSION "0.80dev"
+
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
@@ -91,6 +93,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 //Step to split a cirrcle in small Lines 
 #define MM_PER_ARC_SEGMENT 1
+#define BIG_ARC_RADIUS 4
+#define MM_PER_ARC_SEGMENT_BIG 2.5
+
 //After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
@@ -166,7 +171,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if SDSUPPORT
 #include "SdFat.h"
 #endif
-#define REPETIER_VERSION "0.80dev"
 
 #if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=0
 #undef ENABLE_BACKLASH_COMPENSATION

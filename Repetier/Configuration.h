@@ -46,23 +46,20 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
-// MEGA/RAMPS up to 1.2       = 3,
+// MEGA/RAMPS up to 1.2       = 3
 // RAMPS 1.3/RAMPS 1.4        = 33
-// Gen6                       = 5, 
+// Gen6                       = 5 
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 till 1.3.x        = 7
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
-// Gen6 1.4.1 and later       = 71
-// Teensylu (at90usb)         = 8 // requires Teensyduino
-// Printrboard (at90usb)      = 9 // requires Teensyduino
+// Gen7 1.4.1 and later       = 71
 // MegaTronics                = 70
 // Rambo                      = 301
 
 #define MOTHERBOARD 33
 #include "pins.h"
-
 
 /* Define the type of axis movements needed for your printer. The typical case
 is a full cartesian system where x, y and z moves are handled by seperate motors.
@@ -789,7 +786,7 @@ Corner can be printed with full speed of 50 mm/s
 
 Overridden if EEPROM activated.
 */
-#define MAX_JERK 30.0
+#define MAX_JERK 20.0
 #define MAX_ZJERK 0.3
 
 /** \brief Number of moves we can cache in advance.

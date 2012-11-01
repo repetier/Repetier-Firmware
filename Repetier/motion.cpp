@@ -234,10 +234,6 @@ inline void backwardPlanner(byte p,byte last) {
     }
     act = prev;
   } // while loop
-  if(lines_count>=MOVE_CACHE_LOW) { // we have time for checks
-      UI_MEDIUM; // do check encoder
-      check_periodical(); // Temperature update
-  }
 }
 inline void forwardPlanner(byte p) {
   PrintLine *act,*next;
@@ -260,7 +256,7 @@ inline void forwardPlanner(byte p) {
     //      testnum(leftspeed,'C');
     //  testnum(act->acceleration,'D');
 
-    float vmax_right = sqrt(leftspeed*leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!
+    float vmax_right = sqrt(leftspeed*leftspeed+act->acceleration); // acceleration is 2*acceleration*distance!, 1000 Ticks
    //   testnum(vmax_right,'B');
     if(vmax_right>act->endSpeed) { // Could be higher next run?
       act->startSpeed = leftspeed;
@@ -301,7 +297,7 @@ void updateTrapezoids(byte p) {
     NEXT_PLANNER_INDEX(maxfirst); // don't touch the line printing
   // Now ignore enough segments to gain enough time for path planning
   long timeleft = 0;
-  while(timeleft<700000 && maxfirst!=p) {
+  while(timeleft<4500*MOVE_CACHE_SIZE && maxfirst!=p) {
     timeleft+=lines[maxfirst].timeInTicks;
     NEXT_PLANNER_INDEX(maxfirst);
   }
@@ -316,9 +312,6 @@ void updateTrapezoids(byte p) {
   firstLine = &lines[first];
   firstLine->flags |= FLAG_BLOCKED; // don't let printer touch this or following segments during update
   END_INTERRUPT_PROTECTED; 
-  /*if(DEBUG_ECHO) {
-     OUT_P_I("J:",firstLine->joinFlags);OUT_P_I("X:",lines_pos);OUT_P_F("S:",lines[first].endSpeed);OUT_P_I("F:",first);OUT_P_I_LN(" P:",p);
-  }*/
   byte previdx = p-1;
   if(previdx>=MOVE_CACHE_SIZE) previdx = MOVE_CACHE_SIZE-1;
   if(lines_count && (lines[previdx].flags & FLAG_WARMUP)==0)
@@ -686,10 +679,10 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   p->delta[1] = deltax-deltay;
 #endif
 #if DRIVE_SYSTEM==2
-p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
-p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
-p->delta[0] = deltay+deltax;
-p->delta[1] = deltay-deltax;
+  p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
+  p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
+  p->delta[0] = deltay+deltax;
+  p->delta[1] = deltay-deltax;
 #endif
   //Find direction
   for(byte i=0; i < 4; i++) {
@@ -772,7 +765,20 @@ p->delta[1] = deltay-deltax;
   //Feedrate calc based on XYZ travel distance
   // TODO - Simplify since Z will always move
   if(p->dir & 112) {
+#if DRIVE_SYSTEM==0
     xydist2 = axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1];
+#else
+    float dx,dy;
+#if DRIVE_SYSTEM==1
+    dx = 0.5*(axis_diff[0]+axis_diff[1]);
+    dy = axis_diff[0]-dx;
+#endif
+#if DRIVE_SYSTEM==2
+    dy = 0.5*(axis_diff[0]+axis_diff[1]);
+    dx = axis_diff[0]-dy;
+#endif
+    xydist2 = dx*dx+dy*dy;
+#endif
     if(p->dir & 64) {
       p->distance = sqrt(xydist2 + axis_diff[2] * axis_diff[2]);
     } else {
@@ -1189,17 +1195,19 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
   float r_axis1 = -offset[1];
   float rt_axis0 = target[0] - center_axis0;
   float rt_axis1 = target[1] - center_axis1;
+  long xtarget = printer_state.destinationSteps[0];
+  long ytarget = printer_state.destinationSteps[1];
+  long etarget = printer_state.destinationSteps[3];
   
   // CCW angle between position and target from circle center. Only one atan2() trig computation required.
   float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
   if (angular_travel < 0) { angular_travel += 2*M_PI; }
   if (isclockwise) { angular_travel -= 2*M_PI; }
   
-  float millimeters_of_travel = hypot(angular_travel*radius, fabs(linear_travel));
+  float millimeters_of_travel = fabs(angular_travel)*radius; //hypot(angular_travel*radius, fabs(linear_travel));
   if (millimeters_of_travel < 0.001) { return; }
-  uint16_t segments = floor(millimeters_of_travel/MM_PER_ARC_SEGMENT);
+  uint16_t segments = (radius>=BIG_ARC_RADIUS ? floor(millimeters_of_travel/MM_PER_ARC_SEGMENT_BIG) : floor(millimeters_of_travel/MM_PER_ARC_SEGMENT));
   if(segments == 0) segments = 1;
-
   /*  
     // Multiply inverse feed_rate to compensate for the fact that this movement is approximated
     // by a number of discrete segments. The inverse feed_rate should be correct for the sum of 
@@ -1259,6 +1267,7 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
     {
        gcode_read_serial();
        check_periodical();
+       UI_MEDIUM; // do check encoder
     }
 
     if (count < N_ARC_CORRECTION)  //25 pieces
@@ -1296,14 +1305,13 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
 #endif
   }
   // Ensure last segment arrives at target location.
-    printer_state.destinationSteps[0] = target[0]*axis_steps_per_unit[0];
-    printer_state.destinationSteps[1] = target[1]*axis_steps_per_unit[1];
-    printer_state.destinationSteps[3] = target[3];
+  printer_state.destinationSteps[0] = xtarget;
+  printer_state.destinationSteps[1] = ytarget;
+  printer_state.destinationSteps[3] = etarget;
 #if DRIVE_SYSTEM == 3
-    split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+  split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
-    queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+  queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
-  //   plan_set_acceleration_manager_enabled(acceleration_manager_was_enabled);
 }
 #endif
