@@ -93,13 +93,21 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 //Step to split a cirrcle in small Lines 
 #define MM_PER_ARC_SEGMENT 1
-#define BIG_ARC_RADIUS 4
-#define MM_PER_ARC_SEGMENT_BIG 2.5
+#define MM_PER_ARC_SEGMENT_BIG 3
 
 //After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
 #include "Configuration.h"
+#if MOTHERBOARD != 401
+#include <avr/io.h>
+#else
+#define PROGMEM
+#define PGM_P const char *
+#define PSTR(s) s
+#define pgm_read_byte_near(x) (*(char*)x)
+#define pgm_read_byte(x) (*(char*)x)
+#endif
 
 #define KOMMA
 #if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<100
@@ -147,7 +155,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #endif
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
-#if MOTHERBOARD==8 || MOTHERBOARD==9
+#if MOTHERBOARD==8 || MOTHERBOARD==9 || MOTHERBOARD==401
 #define EXTERNALSERIAL
 #endif
 //#define EXTERNALSERIAL  // Force using arduino serial
@@ -164,7 +172,20 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define COMPAT_PRE1
 #endif
 #include "gcode.h"
+#if MOTHERBOARD != 401
 #include "fastio.h"
+#else
+#define		READ(IO)				digitalRead(IO)
+#define		WRITE(IO, v)			digitalWrite(IO, v)
+#define		SET_INPUT(IO)			pinMode(IO, INPUT)
+#define		SET_OUTPUT(IO)		pinMode(IO, OUTPUT)
+#endif
+#ifndef SDSUPPORT
+#define SDSUPPORT false
+#endif
+#if SDSUPPORT
+#include "SdFat.h"
+#endif
 #ifndef SDSUPPORT
 #define SDSUPPORT false
 #endif
@@ -601,6 +622,7 @@ typedef struct {
 extern DeltaSegment segments[];					// Delta segment cache
 extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
 extern volatile unsigned int delta_segment_count; // Number of delta moves cached 0 = nothing in cache
+extern byte lastMoveID;
 #endif
 typedef struct { // RAM usage: 24*4+15 = 113 Byte
   byte primaryAxis;
@@ -624,6 +646,7 @@ typedef struct { // RAM usage: 24*4+15 = 113 Byte
   float distance;
 #if DRIVE_SYSTEM==3
   byte numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
+  byte moveID;							///< ID used to identify moves which are all part of the same line
   int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
   long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
 #endif

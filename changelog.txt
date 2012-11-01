@@ -20,6 +20,9 @@ Version 0.80 dev
   Simplified configuration. All speeds are now mm/s.
   Repetier protocol version 2, allowing more data parameter.
   Backlash compensation for all axis.
+  Support for arcs (G2/G3)
+  Reload/save/reset EEPROM settings (M500-M502)
+  Wait until buffer empty (M400).
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

@@ -206,6 +206,7 @@ byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
 DeltaSegment segments[DELTA_CACHE_SIZE];
 unsigned int delta_segment_write_pos = 0; // Position where we write the next cached delta move
 volatile unsigned int  delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache
+byte lastMoveID = 0; // Last move ID
 #endif
 PrinterState printer_state;
 byte relative_mode = false;  ///< Determines absolute (false) or relative Coordinates (true).
@@ -1042,7 +1043,7 @@ inline long bresenham_step() {
 				}
 			}
 	#endif
-			if(lines_count<=cur->primaryAxis) {cur=0;return 2000;}
+			if(lines_count<=cur->primaryAxis) {	cur=0;return 2000;}
 			lines_pos++;
 			if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
 			long wait = cur->accelerationPrim;
@@ -1050,7 +1051,6 @@ inline long bresenham_step() {
 			--lines_count;
 			return(wait); // waste some time for path optimization to fill up
 		} // End if WARMUP
-		// Set up delta segments
 		if(cur->dir & 128) extruder_enable();
 		cur->joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED; // don't touch this segment any more, just for safety
 	#if USE_OPS==1
@@ -1105,6 +1105,7 @@ inline long bresenham_step() {
 		} // End if opsMode
 	#endif
 		sei(); // Allow interrupts
+		// Set up delta segments
 		if (cur->numDeltaSegments) {
 			// If there are delta segments point to them here
 			curd = &segments[cur->deltaSegmentReadPos++];

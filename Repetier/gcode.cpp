@@ -409,6 +409,16 @@ SerialOutput::write(uint8_t value) {
 }
 void SerialOutput::printFloat(double number, uint8_t digits) 
 { 
+  if (isnan(number)) {
+	print_P(PSTR("NAN"));
+    return;
+  }
+
+  if (isinf(number)) {
+	print_P(PSTR("INF"));
+    return;
+  }
+  
   // Handle negative numbers
   if (number < 0.0)
   {

@@ -22,7 +22,9 @@
 #include "Reptier.h"
 #include "pins_arduino.h"
 #include "ui.h"
-#include "eeprom.h"
+#if EEPROM_MODE!=0
+#include "Eeprom.h"
+#endif
 
 Extruder *current_extruder;
 Extruder extruder[NUM_EXTRUDER] = {

@@ -398,7 +398,7 @@ byte check_new_move(byte pathOptimize, byte waitExtraLines) {
       p->flags = FLAG_WARMUP;
       p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
       p->dir = 0;
-      p->primaryAxis = w+waitExtraLines;
+      p->primaryAxis = w + waitExtraLines;
       p->timeInTicks = p->accelerationPrim = p->facceleration = 10000*(unsigned int)w;
       lines_write_pos++;
       if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
@@ -630,7 +630,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     gcode_read_serial();
     check_periodical();
   }
-  byte newPath=check_new_move(pathOptimize,0);
+  byte newPath=check_new_move(pathOptimize, 0);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -816,12 +816,14 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 #endif
 
 	long max_axis_move = 0;
+	unsigned int produced_segments = 0;
 	for (int s = p->numDeltaSegments; s > 0; s--) {
 		for(byte i=0; i < NUM_AXIS - 1; i++)
 			destination_steps[i] += (printer_state.destinationSteps[i] - destination_steps[i]) / s;
 
 		// Wait for buffer here
-		while(delta_segment_count>=DELTA_CACHE_SIZE) { // wait for a free entry in movement cache
+//		while(delta_segment_count>=DELTA_CACHE_SIZE) { // wait for a free entry in movement cache
+		while(delta_segment_count + produced_segments>=DELTA_CACHE_SIZE) { // wait for a free entry in movement cache
 			gcode_read_serial();
 			check_periodical();
 		}
@@ -839,7 +841,9 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 //				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
 //				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
 //#endif
-				if (delta >= 0) {
+				if (delta == 0) {
+					d->deltaSteps[i] = 0;
+				} else if (delta > 0) {
 					d->dir |= 17<<i;
 	#ifdef DEBUG_DELTA_OVERFLOW
 					if (delta > 65535)
@@ -871,10 +875,15 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 		}
 		// Move to the next segment
 		delta_segment_write_pos++; if (delta_segment_write_pos >= DELTA_CACHE_SIZE) delta_segment_write_pos=0;
-		BEGIN_INTERRUPT_PROTECTED
-		delta_segment_count++;
-		END_INTERRUPT_PROTECTED
+//		BEGIN_INTERRUPT_PROTECTED
+//		delta_segment_count++;
+//		END_INTERRUPT_PROTECTED
+		produced_segments++;
 	}
+	BEGIN_INTERRUPT_PROTECTED
+	delta_segment_count+=produced_segments;
+	END_INTERRUPT_PROTECTED
+
 	#ifdef DEBUG_STEPCOUNT
 //		out.println_long_P(PSTR("totalStepsRemaining:"), p->totalStepsRemaining);
 	#endif
@@ -979,7 +988,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
     gcode_read_serial();
     check_periodical();
   }
-  byte newPath=check_new_move(pathOptimize,0);
+  byte newPath=check_new_move(pathOptimize, 0);
   PrintLine *p = &lines[lines_write_pos];
   float axis_diff[4]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -1030,7 +1039,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
 	}
-  printer_state.filamentPrinted+=axis_diff[3];
+    printer_state.filamentPrinted+=axis_diff[3];
 
 #if max_software_endstop_r == true
 // TODO - Implement radius checking
@@ -1062,7 +1071,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	int segment_count;
 	int num_lines;
 	int segments_per_line;
-	
+
 	if (save_dir & 48) {
 		// Compute number of seconds for move and hence number of segments needed
 		float seconds = 100 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
@@ -1131,6 +1140,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		}
 
 		p->joinFlags = 0;
+		p->moveID = lastMoveID;
 
 		// Only set fixed on last segment
 		if (line_number == num_lines && !pathOptimize)
@@ -1153,6 +1163,11 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		out.println_long_P(PSTR("Max DS:"), max_delta_step);
 	#endif
 		long virtual_axis_move = max_delta_step * segments_per_line;
+		if (virtual_axis_move == 0 && p->delta[3] == 0) {
+			if (num_lines!=1)
+				OUT_P_LN("ERROR: No move in delta segment with > 1 segment. This should never happen and may cause a problem!");
+			return;  // Line too short in low precision area
+		}
 		p->primaryAxis = 4; // Virtual axis will lead bresenham step either way
 		if (virtual_axis_move > p->delta[3]) { // Is delta move or E axis leading
 			p->stepsRemaining = virtual_axis_move;
@@ -1175,6 +1190,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 			printer_state.currentPositionSteps[i] += fractional_steps[i];
 		}
 	}
+	lastMoveID++; // Will wrap at 255
 }
 
 #endif
@@ -1206,7 +1222,9 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
   
   float millimeters_of_travel = fabs(angular_travel)*radius; //hypot(angular_travel*radius, fabs(linear_travel));
   if (millimeters_of_travel < 0.001) { return; }
-  uint16_t segments = (radius>=BIG_ARC_RADIUS ? floor(millimeters_of_travel/MM_PER_ARC_SEGMENT_BIG) : floor(millimeters_of_travel/MM_PER_ARC_SEGMENT));
+  //uint16_t segments = (radius>=BIG_ARC_RADIUS ? floor(millimeters_of_travel/MM_PER_ARC_SEGMENT_BIG) : floor(millimeters_of_travel/MM_PER_ARC_SEGMENT));
+  // Increase segment size if printing faster then computation speed allows
+  uint16_t segments = (printer_state.feedrate>60 ? floor(millimeters_of_travel/min(MM_PER_ARC_SEGMENT_BIG,printer_state.feedrate*0.01666*MM_PER_ARC_SEGMENT)) : floor(millimeters_of_travel/MM_PER_ARC_SEGMENT));
   if(segments == 0) segments = 1;
   /*  
     // Multiply inverse feed_rate to compensate for the fact that this movement is approximated

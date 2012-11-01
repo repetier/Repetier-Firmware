@@ -20,7 +20,9 @@
 */
 
 #include "Reptier.h"
+#if EEPROM_MODE != 0
 #include "Eeprom.h"
+#endif
 #include "pins_arduino.h"
 #include "ui.h"
 
@@ -797,8 +799,13 @@ void process_command(GCode *com)
           updateTempControlVars(temp);
         }
         break;
+	  case 503:
       case 205: // M205 Show EEPROM settings
+#if EEPROM_MODE!=0
         epr_output_settings();
+#else
+         OUT_P_LN("Error: No EEPROM support compiled.");
+#endif
         break;
       case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
 #if EEPROM_MODE!=0

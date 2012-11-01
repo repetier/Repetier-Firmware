@@ -57,6 +57,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Gen7 1.4.1 and later       = 71
 // MegaTronics                = 70
 // Rambo                      = 301
+// Arduino Due				  = 401
 
 #define MOTHERBOARD 33
 #include "pins.h"
@@ -697,6 +698,7 @@ on this endstop.
 #define MAX_FEEDRATE_Y 200
 #define MAX_FEEDRATE_Z 40
 #define MAX_FEEDRATE {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}
+
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 80
 #define HOMING_FEEDRATE_Y 80
