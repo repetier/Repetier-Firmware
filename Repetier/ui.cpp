@@ -1409,7 +1409,7 @@ void UIDisplay::nextPreviousAction(char next) {
   }
 #if SDSUPPORT
     if(mtype==1) { // SD listing
-      if(next>0) {
+      if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0)) {
         if(menuPos[menuLevel]<nFilesOnCard) menuPos[menuLevel]++;
       } else if(menuPos[menuLevel]>0)
         menuPos[menuLevel]--;
