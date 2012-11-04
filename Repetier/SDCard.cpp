@@ -216,8 +216,7 @@ void SDCard::selectFile(char *filename) {
   if (file.open(fat.vwd(),filename, O_READ)) {
     OUT_P("File opened:");
     out.print(filename);
-    OUT_P(" Size:");
-    out.println(file.fileSize());
+    OUT_P_L_LN(" Size:",file.fileSize());
     sdpos = 0;
     filesize = file.fileSize();
     OUT_P_LN("File selected");

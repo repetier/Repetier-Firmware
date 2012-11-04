@@ -658,7 +658,7 @@ void gcode_read_serial() {
     if(gcode_binary) {
       if(gcode_wpos < 2 ) continue;
       if(gcode_wpos == 5) gcode_binary_size = gcode_comp_binary_size((char*)gcode_transbuffer);
-      else if(gcode_wpos==gcode_binary_size) {
+      if(gcode_wpos==gcode_binary_size) {
         act = &gcode_buffer[gcode_windex];
         if(gcode_parse_binary(act,gcode_transbuffer)) { // Success
           gcode_checkinsert(act);
@@ -698,8 +698,10 @@ void gcode_read_serial() {
   while( sd.filesize > sd.sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
     int n = sd.file.read();
-    if(n==-1) break;
-
+    if(n==-1) {
+      OUT_P_LN("SD read error");
+      break;
+    }
     sd.sdpos++; // = file.curPosition();
     gcode_transbuffer[gcode_wpos++] = (byte)n;
   
@@ -710,7 +712,7 @@ void gcode_read_serial() {
     if(gcode_binary) {
       if(gcode_wpos < 2 ) continue;
       if(gcode_wpos == 5) gcode_binary_size = gcode_comp_binary_size((char*)gcode_transbuffer);
-      else if(gcode_wpos==gcode_binary_size) {
+      if(gcode_wpos==gcode_binary_size) {
         act = &gcode_buffer[gcode_windex];
         if(gcode_parse_binary(act,gcode_transbuffer)) { // Success
           gcode_silent_insert();
@@ -740,7 +742,10 @@ void gcode_read_serial() {
     }
   }
   sd.sdmode = false;
-  OUT_P("Done printing file");
+  OUT_P_LN("Done printing file");
+  /*OUT_P_L("Printed bytes:",sd.sdpos);
+  OUT_P_L_LN(" of ",sd.filesize);
+  OUT_P_I_LN("WPOS:",gcode_wpos);*/
   gcode_wpos = 0;
 #endif
 }
