@@ -315,8 +315,10 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
   if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
 #endif
   if(temp_celsius<0) temp_celsius=0;
-  tempController[extr]->targetTemperature = conv_temp_raw(tempController[extr]->sensorType,temp_celsius);
-  tempController[extr]->targetTemperatureC = temp_celsius;
+  TemperatureController *tc = tempController[extr]; 
+  if(temp_celsius==tc->targetTemperatureC) return;
+  tc->targetTemperature = conv_temp_raw(tc->sensorType,temp_celsius);
+  tc->targetTemperatureC = temp_celsius;
    OUT_P_FX("TargetExtr",extr,0);
    OUT_P_FX_LN(":",temp_celsius,0);
 #if USE_OPS==1  
@@ -342,6 +344,7 @@ void heated_bed_set_temperature(float temp_celsius) {
 #if HAVE_HEATED_BED
    if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
    if(temp_celsius<0) temp_celsius = 0;
+   if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
    heatedBedController.targetTemperatureC=temp_celsius;
    heatedBedController.targetTemperature = conv_temp_raw(heatedBedController.sensorType,temp_celsius);
    OUT_P_FX_LN("TargetBed:",heatedBedController.targetTemperatureC,0);

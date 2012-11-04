@@ -2135,8 +2135,8 @@ void kill(byte only_steppers)
     UI_STATUS_UPD(UI_TEXT_KILLED);
     if(PS_ON_PIN > -1) {
       //pinMode(PS_ON_PIN,INPUT);
-      pinMode(PS_ON_PIN,OUTPUT); //GND
-      digitalWrite(PS_ON_PIN, HIGH);
+      SET_OUTPUT(PS_ON_PIN); //GND
+      WRITE(PS_ON_PIN, HIGH);
     }
   } else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
 }
