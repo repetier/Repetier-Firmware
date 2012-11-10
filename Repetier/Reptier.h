@@ -586,7 +586,7 @@ extern PrinterState printer_state;
 
 /** Marks the first step of a new move */
 #define FLAG_WARMUP 1
-#define FLAG_ACCELERATING 2
+#define FLAG_NOMINAL 2
 #define FLAG_DECELERATING 4
 #define FLAG_ACCELERATION_ENABLED 8
 #define FLAG_CHECK_ENDSTOPS 16

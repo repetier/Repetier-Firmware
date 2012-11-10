@@ -112,7 +112,7 @@ Mega.
 // Maximum travel length - For delta robot this is the maximum travel of the towers not cartesian
 // This is also the maximum Z value. I plan to add a measure mode to set this
 // This value will be overidden with the value in the EEPROM
-// Defined in mm
+// Defined in mmi
 #define ROD_MAX_LENGTH 600
 
 #else

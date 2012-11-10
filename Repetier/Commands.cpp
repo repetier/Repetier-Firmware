@@ -64,7 +64,7 @@ void printPosition() {
 void print_temperatures() {
 	float temp = current_extruder->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE==0 
-  OUT_P_F("T:",temp)); 
+  OUT_P_F("T:",temp); 
 #else
   OUT_P_F("T:",temp); 
   OUT_P_F(" B:",heated_bed_get_temperature()); 
@@ -705,7 +705,7 @@ void process_command(GCode *com)
 #if EEPROM_MODE!=0
         float dist = printer_state.filamentPrinted*0.001+epr_get_float(EPR_PRINTING_DISTANCE);
         OUT_P_FX("Printed filament:",dist,2);
-        OUT_P_LN(" mm");
+        OUT_P_LN(" m");
         bool alloff = true;
         for(byte i=0;i<NUM_EXTRUDER;i++)
           if(tempController[i]->targetTemperatureC>15) alloff = false;
@@ -791,7 +791,11 @@ void process_command(GCode *com)
           if(GCODE_HAS_S(com)) {
             if(com->S<0) break;
             if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl; 
+  #if HAVE_HEATED_BED
             else temp = &heatedBedController;            
+  #else
+			else break;
+  #endif
           }
           if(GCODE_HAS_X(com)) temp->pidPGain = com->X;
           if(GCODE_HAS_Y(com)) temp->pidIGain = com->Y;

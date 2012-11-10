@@ -98,6 +98,7 @@ Custom M Codes
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> - Set temporary advance K-value to X
+- M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M303 P<extruder/bed> S<drucktermeratur> Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M500 Store settings to EEPROM
@@ -335,35 +336,35 @@ void setup()
 #ifdef ANALYZER
 // Channel->pin assignments
 #if ANALYZER_CH0>=0
-pinMode(ANALYZER_CH0,OUTPUT);
+SET_OUTPUT(ANALYZER_CH0);
 #endif
 #if ANALYZER_CH1>=0
-pinMode(ANALYZER_CH1,OUTPUT);
+SET_OUTPUT(ANALYZER_CH1);
 #endif
 #if ANALYZER_CH2>=0
-pinMode(ANALYZER_CH2,OUTPUT);
+SET_OUTPUT(ANALYZER_CH2);
 #endif
 #if ANALYZER_CH3>=0
-pinMode(ANALYZER_CH3,OUTPUT);
+SET_OUTPUT(ANALYZER_CH3);
 #endif
 #if ANALYZER_CH4>=0
-pinMode(ANALYZER_CH4,OUTPUT);
+SET_OUTPUT(ANALYZER_CH4);
 #endif
 #if ANALYZER_CH5>=0
-pinMode(ANALYZER_CH5,OUTPUT);
+SET_OUTPUT(ANALYZER_CH5);
 #endif
 #if ANALYZER_CH6>=0
-pinMode(ANALYZER_CH6,OUTPUT);
+SET_OUTPUT(ANALYZER_CH6);
 #endif
 #if ANALYZER_CH7>=0
-pinMode(ANALYZER_CH7,OUTPUT);
+SET_OUTPUT(ANALYZER_CH7);
 #endif
 #endif
 
 #ifdef ENABLE_POWER_ON_STARTUP
   if(PS_ON_PIN > -1) {
-     pinMode(PS_ON_PIN,OUTPUT); //GND
-     digitalWrite(PS_ON_PIN, LOW);
+    SET_OUTPUT(PS_ON_PIN); //GND
+    WRITE(PS_ON_PIN, LOW);
   }
 #endif
 

@@ -525,7 +525,7 @@
 #if MOTHERBOARD == 7
 #define KNOWN_BOARD 1
 
-#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) 
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Gen7' selected from the 'Tools -> Boards' menu.
 #endif
 
@@ -585,7 +585,7 @@
 #if MOTHERBOARD == 71
 #define KNOWN_BOARD 1
 
-#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) 
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Gen7' selected from the 'Tools -> Boards' menu.
 #endif
 
