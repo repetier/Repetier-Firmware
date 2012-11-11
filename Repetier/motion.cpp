@@ -1207,9 +1207,9 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 			p->numPrimaryStepPerSegment = max_delta_step;
 		} else {
 			// Round up the E move to get something divisible by segment count which is greater than E move
-			p->numPrimaryStepPerSegment = (p->delta[3] + segment_count - 1) / segment_count;
-			p->stepsRemaining = p->numPrimaryStepPerSegment * segment_count;
-			axis_diff[4] = p->stepsRemaining * inv_axis_steps_per_unit[3];
+			p->numPrimaryStepPerSegment = (p->delta[3] + segments_per_line - 1) / segments_per_line;
+			p->stepsRemaining = p->numPrimaryStepPerSegment * segments_per_line;
+			axis_diff[4] = p->stepsRemaining * inv_axis_steps_per_unit[0];
 		}
 #ifdef DEBUG_SPLIT
 		out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
