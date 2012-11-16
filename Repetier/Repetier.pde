@@ -361,11 +361,9 @@ SET_OUTPUT(ANALYZER_CH7);
 #endif
 #endif
 
-#ifdef ENABLE_POWER_ON_STARTUP
-  if(PS_ON_PIN > -1) {
-    SET_OUTPUT(PS_ON_PIN); //GND
-    WRITE(PS_ON_PIN, LOW);
-  }
+#if defined(ENABLE_POWER_ON_STARTUP) && PS_ON_PIN>-1
+  SET_OUTPUT(PS_ON_PIN); //GND
+  WRITE(PS_ON_PIN, LOW);
 #endif
 
   //Initialize Step Pins
@@ -373,9 +371,6 @@ SET_OUTPUT(ANALYZER_CH7);
   SET_OUTPUT(Y_STEP_PIN);
   SET_OUTPUT(Z_STEP_PIN);
   
-  // Additional setup for digipot/microstepping
-  digipot_init();
-  microstep_init();
 
   //Initialize Dir Pins
 #if X_DIR_PIN>-1
@@ -455,6 +450,12 @@ SET_OUTPUT(ANALYZER_CH7);
   SET_OUTPUT(EXT2_HEATER_PIN);
   WRITE(EXT2_HEATER_PIN,LOW);
 #endif
+
+#if STEPPER_CURRENT_CONTROL!=CURRENT_CONTROL_MANUAL
+  current_control_init(); // Set current if it is firmware controlled
+#endif
+  microstep_init();
+
 #if USE_OPS==1
   printer_state.opsMode = OPS_MODE;
   printer_state.opsMinDistance = OPS_MIN_DISTANCE;
@@ -592,6 +593,7 @@ of a 24 bit and 16 bit dividend, which offen, but not always occur in updating t
 interval.
 */
 inline long Div4U2U(unsigned long a,unsigned int b) {
+#if CPU_ARCH==ARCH_AVR
   // r14/r15 remainder
   // r16 counter
   __asm__ __volatile__ (
@@ -670,6 +672,9 @@ inline long Div4U2U(unsigned long a,unsigned int b) {
   :"r14","r15","r16"
   );
  return a;
+#else
+  return a/b;
+#endif
 }
 
 const uint16_t fast_div_lut[17] PROGMEM = {0,F_CPU/4096,F_CPU/8192,F_CPU/12288,F_CPU/16384,F_CPU/20480,F_CPU/24576,F_CPU/28672,F_CPU/32768,F_CPU/36864
@@ -703,6 +708,7 @@ function uses lookup tables to find a fast approximation of the result.
 
 */
 long CPUDivU2(unsigned int divisor) {
+#if CPU_ARCH==ARCH_AVR
   long res;
   unsigned short table;
   if(divisor<8192) {
@@ -805,6 +811,9 @@ long CPUDivU2(unsigned int divisor) {
     unsigned short y0=	pgm_read_word_near(adr0);
     unsigned short gain = y0-pgm_read_word_near(adr0+2);
     return y0-(((long)gain*(divisor & 4095))>>12);*/
+#else
+  return F_CPU/divisor;
+#endif
   }
 }
 
@@ -879,6 +888,7 @@ byte get_coordinates(GCode *com)
   return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unproductive moves
 }
 inline unsigned int ComputeV(long timer,long accel) {
+#if CPU_ARCH==ARCH_AVR
   unsigned int res;
   // 38 Ticks
   __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
@@ -918,6 +928,9 @@ inline unsigned int ComputeV(long timer,long accel) {
   : );
   // unsigned int v = ((timer>>8)*cur->accel)>>10;
   return res;
+#else
+  return ((timer>>8)*accel)>>10;
+#endif
 }
 // Multiply two 16 bit values and return 32 bit result
 inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
@@ -947,6 +960,7 @@ inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b) {
 }
 // Multiply two 16 bit values and return 32 bit result
 inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
+#if CPU_ARCH==ARCH_AVR
   unsigned int res;
   // 18 Ticks = 1.125 us
   __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free  
@@ -968,8 +982,10 @@ inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
   :"=&r"(res),"=r"(a),"=r"(b)
   :"1"(a),"2"(b)
   :"r18","r19" );
-  // return ((long)a*b)>>16;
   return res;
+#else
+  return ((long)a*b)>>16;
+#endif
 }
 
 /**
@@ -2125,20 +2141,15 @@ void kill(byte only_steppers)
   disable_z();
   extruder_disable();
   if(!only_steppers) {
-    extruder_set_temperature(0,0);
- #if NUM_EXTRUDER>1
-    extruder_set_temperature(0,1);
- #endif
- #if NUM_EXTRUDER>2
-    extruder_set_temperature(0,2);
- #endif
+    for(byte i=0;i<NUM_EXTRUDER;i++)
+      extruder_set_temperature(0,i);
     heated_bed_set_temperature(0);
     UI_STATUS_UPD(UI_TEXT_KILLED);
-    if(PS_ON_PIN > -1) {
+#if defined(PS_ON_PIN) && PS_ON_PIN>-1
       //pinMode(PS_ON_PIN,INPUT);
       SET_OUTPUT(PS_ON_PIN); //GND
       WRITE(PS_ON_PIN, HIGH);
-    }
+#endif
   } else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
 }
 long stepperWait = 0;

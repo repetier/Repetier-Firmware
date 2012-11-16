@@ -54,12 +54,13 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Gen7 1.1 till 1.3.x        = 7
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
+// Foltyn 3D Master           = 12
 // Gen7 1.4.1 and later       = 71
 // MegaTronics                = 70
 // Rambo                      = 301
-// Arduino Due				  = 401
+// Arduino Due                = 401
 
-#define MOTHERBOARD 33
+#define MOTHERBOARD 12
 #include "pins.h"
 
 /* Define the type of axis movements needed for your printer. The typical case
@@ -68,7 +69,7 @@ is a full cartesian system where x, y and z moves are handled by seperate motors
 0 = full cartesian system, xyz have seperate motors.
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
-3 = Rostock Delta
+3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in 
 the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
@@ -78,9 +79,14 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // ##                               Calibration                                            ##
 // ##########################################################################################
 
-/** Preprocess movement for the Rostock Delta printer
+/** Drive settings for the Delta printers
 */
 #if DRIVE_SYSTEM==3
+/** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive
+*/
+#define DELTA_DRIVE_TYPE 0
+
+#if DELTA_DRIVE_TYPE == 0
 /** \brief Pitch in mm of drive belt. GT2 = 2mm
 */
 #define BELT_PITCH 2
@@ -88,6 +94,18 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /** \brief Number of teeth on X, Y and Z tower pulleys
 */
 #define PULLEY_TEETH 20
+#define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
+
+#elif DELTA_DRIVE_TYPE == 1
+
+/** \brief Filament pulley diameter in milimeters
+*/
+#define PULLEY_DIAMETER 10
+
+#define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
+
+#endif
+
 
 /** \brief Steps per rotation of stepper motor
 */
@@ -105,23 +123,19 @@ Mega.
 #define MAX_DELTA_SEGMENTS_PER_LINE 30
 
 // Calculations
-#define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / (BELT_PITCH * PULLEY_TEETH))
+#define AXIS_STEPS_PER_MM ((MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
-// Maximum travel length - For delta robot this is the maximum travel of the towers not cartesian
-// This is also the maximum Z value. I plan to add a measure mode to set this
-// This value will be overidden with the value in the EEPROM
-// Defined in mmi
-#define ROD_MAX_LENGTH 600
 
 #else
+/** Drive settings for printers with cartesian drive systems */
 /** \brief Number of steps for a 1mm move in x direction. Overridden if EEPROM activated. */
-#define XAXIS_STEPS_PER_MM 101.859
+#define XAXIS_STEPS_PER_MM 80
 /** \brief Number of steps for a 1mm move in y direction  Overridden if EEPROM activated.*/
-#define YAXIS_STEPS_PER_MM 101.859
+#define YAXIS_STEPS_PER_MM 80
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
-#define ZAXIS_STEPS_PER_MM 92.599
+#define ZAXIS_STEPS_PER_MM 3360
 #endif
 
 // ##########################################################################################
@@ -134,7 +148,7 @@ Mega.
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 352.5
+#define EXT0_STEPS_PER_MM 385
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -167,13 +181,13 @@ Mega.
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 12
+#define EXT0_MAX_FEEDRATE 30
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
 #define EXT0_MAX_START_FEEDRATE 10
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 1000
+#define EXT0_MAX_ACCELERATION 4000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -193,7 +207,7 @@ Values for starts:
 The precise values may differ for different nozzle/resistor combination. 
  Overridden if EEPROM activated.
 */
-#define EXT0_PID_INTEGRAL_DRIVE_MAX 130
+#define EXT0_PID_INTEGRAL_DRIVE_MAX 140
 /** \brief lower value for integral part
 
 The I state should converge to the exact heater output needed for the target temperature.
@@ -540,9 +554,9 @@ on this endstop.
 #define ENDSTOP_PULLUP_Z_MAX true
 
 //set to true to invert the logic of the endstops
-#define ENDSTOP_X_MIN_INVERTING true
-#define ENDSTOP_Y_MIN_INVERTING true
-#define ENDSTOP_Z_MIN_INVERTING true
+#define ENDSTOP_X_MIN_INVERTING false
+#define ENDSTOP_Y_MIN_INVERTING false
+#define ENDSTOP_Z_MIN_INVERTING false
 #define ENDSTOP_X_MAX_INVERTING false
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING false
@@ -571,12 +585,12 @@ on this endstop.
 // Disables axis when it's not being used.
 #define DISABLE_X false
 #define DISABLE_Y false
-#define DISABLE_Z false
+#define DISABLE_Z true
 #define DISABLE_E false
 
 // Inverting axis direction
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR false
+#define INVERT_Y_DIR true
 #define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
@@ -611,18 +625,22 @@ on this endstop.
 
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
-#define ENDSTOP_X_BACK_ON_HOME 0.5
-#define ENDSTOP_Y_BACK_ON_HOME 3.5
+#define ENDSTOP_X_BACK_ON_HOME 1
+#define ENDSTOP_Y_BACK_ON_HOME 1
 #define ENDSTOP_Z_BACK_ON_HOME 0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
 #define ALWAYS_CHECK_ENDSTOPS false
+
 // maximum positions in mm - only fixed numbers!
-#define X_MAX_LENGTH 95
-#define Y_MAX_LENGTH 95
-#define Z_MAX_LENGTH 120
+// For delta robot Z_MAX_LENGTH is maximum travel of the towers and should be set to the distance between the hotend
+// and the platform when the printer is at its home position.
+// If EEPROM is enabled these values will be overidden with the values in the EEPROM
+#define X_MAX_LENGTH 195
+#define Y_MAX_LENGTH 195
+#define Z_MAX_LENGTH 80
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -638,7 +656,8 @@ on this endstop.
 #define MICROSTEP_MODES {8,8,8,8,8} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
-#define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 
 // Delta settings
 #if DRIVE_SYSTEM==3
@@ -754,13 +773,13 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 */
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 1500
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 3000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}
 #endif
@@ -969,7 +988,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 /** Set to false to disable SD support: */
 #define SDSUPPORT true
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT 49
+#define SDCARDDETECT -1 //49
 // Change to true if you get a inserted message on removal. 
 #define SDCARDDETECTINVERTED false
 /** Show extended directory including file length. Don't use this with pronterface! */

@@ -372,7 +372,7 @@ void updateTrapezoids(byte p) {
 // ##########################################################################
 
 inline float safeSpeed(PrintLine *p) {
-  float safe = printer_state.maxJerk*0.5;
+  float safe = min(p->fullSpeed,printer_state.maxJerk*0.5);
 #if DRIVE_SYSTEM != 3
   if(p->dir & 64) {
     if(fabs(p->speedZ)>printer_state.maxZJerk*0.5) {

@@ -1,6 +1,28 @@
 #ifndef PINS_H
 #define PINS_H
 
+/*
+The board assignment defines the capabilities of the motherboard and the used pins.
+Each board definition follows the following scheme:
+
+CPU_ARCH
+  ARCH_AVR for AVR based boards
+  ARCH_ARM for all arm based boards
+
+STEPPER_CURRENT_CONTROL
+  CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
+  CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
+  CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
+
+*/
+
+#define ARCH_AVR 1
+#define ARCH_ARM 2
+
+#define CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
+#define CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
+#define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
+
 /****************************************************************************************
 * Arduino pin assignment
 *
@@ -324,15 +346,11 @@
 
 // SPI for Max6675 Thermocouple 
 
-#ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support  
-  #define SCK_PIN          52
-  #define MISO_PIN         50
-  #define MOSI_PIN         51
-  #define MAX6675_SS       53
-#else
-  #define MAX6675_SS       49
-#endif
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define MAX6675_SS       53
 
 
 #endif
@@ -750,6 +768,81 @@
 #endif
 
 /****************************************************************************************
+* 3D Master pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 12
+  #define KNOWN_BOARD 1
+
+  #if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+  #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+  #endif
+
+// Definition for current control
+#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_LTC2600
+#define LTC2600_CHANNELS {0x30,0x31,0x32,0x33,0x34}
+#define LTC2600_NUM_CHANNELS 5
+#define	LTC2600_CS_PIN		   92	// PIND.4, 47, DA_CS
+#define LTC2600_SCK_PIN		   93	// PIND.5, 48, DA_SCK
+#define LTC2600_SDI_PIN		   94	// PIND.6, 49, DA_SDI
+
+
+// digital pin mappings
+#define X_STEP_PIN         54	// PINF.0, 97, STP_DRV1
+#define X_DIR_PIN          55	// PINF.1, 96, DIR_DRV1
+#define X_ENABLE_PIN       38	// PIND.7, 50, ENA_DRV1
+#define X_MIN_PIN           3	// PINE.5,  7, OPTO1
+#define X_MAX_PIN          -1   // PINJ.0, 63, OPTO4 (would be "15", -1 = disabled)
+
+#define Y_STEP_PIN         60	// PINF.6, 91, STP_DRV2
+#define Y_DIR_PIN          61	// PINF.7, 90, DIR_DRV2
+#define Y_ENABLE_PIN       56	// PINF.2, 95, ENA_DRV2
+#define Y_MIN_PIN           2	// PINE.4,  6, OPTO2
+#define Y_MAX_PIN          -1   // PIND.3, 46, OPTO5 (would be "18", -1 = disabled
+
+#define Z_STEP_PIN         46	// PINL.3, 38, STP_DRV3
+#define Z_DIR_PIN          48	// PINL.1, 36, DIR_DRV3
+#define Z_ENABLE_PIN       62	// PINK.0, 89, ENA_DRV3
+#define Z_MIN_PIN          14	// PINJ.1, 64, OPTO3
+#define Z_MAX_PIN          -1   // PIND.2, 45, OPTO6 (would be "19", -1 = disabled)
+
+#define E_STEP_PIN         26	// PINA.4, 74, STP_DRV4
+#define E_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
+#define E_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
+
+#define E_1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
+#define E_1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
+#define E_1_ENABLE_PIN     30	// PINC.7, 60, ENA_DRV5
+
+#define SDPOWER            -1
+#define SDSS               53	// PINB.0, 19, SS
+#define LED_PIN            13	// PINB.7, 26, LED13
+#define FAN_PIN            25	// PINA.3, 75, OUT1
+#define PS_ON_PIN          -1
+#define KILL_PIN           -1
+
+#define HEATER_0_PIN       10	// PINB.4, 23, HZ1
+#define HEATER_1_PIN        9	// PINH.6, 18, HZ2
+#define HEATER_2_PIN	    8	// PINH.5, 17, HZ3
+
+// analog pin mappings
+#define TEMP_0_PIN         13   // PINK.5, 84, TH1
+#define TEMP_1_PIN         14   // PINK.6, 83, TH2
+#define TEMP_2_PIN         15   // PINK.7, 82, TH3
+
+#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E1_PINS E_1_STEP_PIN,E_1_DIR_PIN,E_1_ENABLE_PIN,
+
+// these pins are defined in the SD library if building with SD support  
+#define SCK_PIN          52	// PINB.1, 20, SCK
+#define MISO_PIN         50	// PINB.3, 22, MISO
+#define MOSI_PIN         51	// PINB.2, 21, MOSI
+#define MAX6675_SS       53	// PINB.0, 19, SS
+
+#endif // MOTHERBOARD == 12
+
+
+/****************************************************************************************
 * MegaTronics
 *
 ****************************************************************************************/
@@ -928,6 +1021,11 @@
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
 #define E1_PINS
 
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define MAX6675_SS       53
+
 #endif
 
 #if MOTHERBOARD == 401
@@ -936,6 +1034,7 @@
 #endif
 
 #define KNOWN_BOARD
+#define CPU_ARCH ARCH_ARM
 /*****************************************************************
 * Arduino Due Pin Assignments
 ******************************************************************/
@@ -1001,7 +1100,13 @@
 
 #endif
 
+#ifndef CPU_ARCH  // Set default architecture
+#define CPU_ARCH ARCH_AVR
+#endif
 
+#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
+#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_MANUAL
+#endif
 #if NUM_EXTRUDER==1
 #define E1_PINS
 #endif

@@ -183,10 +183,11 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 }
 #endif
 
+#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_DIGIPOT
 // Digipot methods for controling current and microstepping
 
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
-int digitalPotWrite(int address, int value) // From Arduino DigitalPotControl example
+int digitalPotWrite(int address, unsigned int value) // From Arduino DigitalPotControl example
 {
     digitalWrite(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
     SPI.transfer(address); //  send in the address and value via SPI:
@@ -195,25 +196,81 @@ int digitalPotWrite(int address, int value) // From Arduino DigitalPotControl ex
     //delay(10);
 }
 
-void digipot_current(uint8_t driver, int current)
+void set_current(uint8_t driver, unsigned int current)
 {
     const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
     digitalPotWrite(digipot_ch[driver], current);
 }
 #endif
 
-void digipot_init() //Initialize Digipot Motor Current
+void current_control_init() //Initialize Digipot Motor Current
 {
   #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
-    const uint8_t digipot_motor_current[] = DIGIPOT_MOTOR_CURRENT;
+    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
     
     SPI.begin(); 
     SET_OUTPUT(DIGIPOTSS_PIN);    
     for(int i=0;i<=4;i++) 
       //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
-      digipot_current(i,digipot_motor_current[i]);
+      set_current(i,digipot_motor_current[i]);
   #endif
 }
+#endif
+
+#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
+
+void set_current( byte channel, unsigned short level )
+{
+  const byte ltc_channels[] =  LTC2600_CHANNELS;
+  if(channel>LTC2600_NUM_CHANNELS) return;
+  byte address = ltc_channels[channel];
+  char i;
+	
+	
+  // NOTE: Do not increase the current endlessly. In case the engine reaches its current saturation, the engine and the driver can heat up and loss power.
+  // When the saturation is reached, more current causes more heating and more power loss.
+  // In case of engines with lower quality, the saturation current may be reached before the nominal current.
+
+  // configure the pins
+  WRITE( LTC2600_CS_PIN, HIGH );
+  SET_OUTPUT( LTC2600_CS_PIN );
+  WRITE( LTC2600_SCK_PIN, LOW );
+  SET_OUTPUT( LTC2600_SCK_PIN );
+  WRITE( LTC2600_SDI_PIN, LOW );
+  SET_OUTPUT( LTC2600_SDI_PIN );
+		
+  // enable the command interface of the LTC2600
+  WRITE( LTC2600_CS_PIN, LOW );
+
+  // transfer command and address
+  for( i=7; i>=0; i-- )	{
+    WRITE( LTC2600_SDI_PIN, address & (0x01 << i));
+    WRITE( LTC2600_SCK_PIN, 1 );
+    WRITE( LTC2600_SCK_PIN, 0 );
+  }
+	
+  // transfer the data word
+  for( i=15; i>=0; i-- )  {
+    WRITE( LTC2600_SDI_PIN, level & (0x01 << i));
+    WRITE( LTC2600_SCK_PIN, 1 );
+    WRITE( LTC2600_SCK_PIN, 0 );
+   }
+	
+  // disable the ommand interface of the LTC2600 -
+  // this carries out the specified command
+  WRITE( LTC2600_CS_PIN, HIGH );
+	
+} // setLTC2600
+
+void current_control_init() //Initialize LTC2600 Motor Current
+{
+  const unsigned int ltc_current[] =  MOTOR_CURRENT;
+  byte i;
+  for(i=0;i<LTC2600_NUM_CHANNELS;i++) {
+    set_current(i, ltc_current[i] );
+  }
+}
+#endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstep_ms(uint8_t driver, int8_t ms1, int8_t ms2)
@@ -541,7 +598,12 @@ void process_command(GCode *com)
         if(GCODE_HAS_P(com))
           wait_until_end_of_move();
 #endif
-        if (GCODE_HAS_S(com)) extruder_set_temperature(com->S,current_extruder->id);
+        if (GCODE_HAS_S(com)) {
+          if(GCODE_HAS_T(com))
+            extruder_set_temperature(com->S,com->T);
+          else
+            extruder_set_temperature(com->S,current_extruder->id);
+        }
         break;
       case 140: // M140 set bed temp
         previous_millis_cmd = millis();
@@ -918,11 +980,11 @@ void process_command(GCode *com)
       wait_until_end_of_move();
       break;
     case 908: // Control digital trimpot directly.
-      {
-#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
+      {        
+#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         uint8_t channel,current;
         if(GCODE_HAS_P(com) && GCODE_HAS_S(com)) 
-          digitalPotWrite((uint8_t)com->P, (uint8_t)com->S);
+          set_current((uint8_t)com->P, (unsigned int)com->S);
 #endif
       }
     break;

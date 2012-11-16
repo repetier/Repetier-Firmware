@@ -68,7 +68,7 @@ Select the language to use.
 */
 #define BEEPER_TYPE 1
 
-#if BEEPER_TYPE==1
+#if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
 #define BEEPER_PIN 37
 #endif
 #if BEEPER_TYPE==2
@@ -96,7 +96,7 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE 0
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "iRapid Compact"
@@ -198,7 +198,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 1
+#define UI_HAS_KEYS 0
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10

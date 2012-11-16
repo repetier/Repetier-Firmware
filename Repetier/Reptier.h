@@ -99,7 +99,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define N_ARC_CORRECTION 25
 
 #include "Configuration.h"
-#if MOTHERBOARD != 401
+#if CPU_ARCH==ARCH_AVR
 #include <avr/io.h>
 #else
 #define PROGMEM
@@ -155,7 +155,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #endif
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
-#if MOTHERBOARD==8 || MOTHERBOARD==9 || MOTHERBOARD==401
+#if MOTHERBOARD==8 || MOTHERBOARD==9 || CPU_ARCH!=ARCH_AVR
 #define EXTERNALSERIAL
 #endif
 //#define EXTERNALSERIAL  // Force using arduino serial
@@ -172,13 +172,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define COMPAT_PRE1
 #endif
 #include "gcode.h"
-#if MOTHERBOARD != 401
+#if CPU_ARCH==ARCH_AVR
 #include "fastio.h"
 #else
-#define		READ(IO)				digitalRead(IO)
-#define		WRITE(IO, v)			digitalWrite(IO, v)
-#define		SET_INPUT(IO)			pinMode(IO, INPUT)
-#define		SET_OUTPUT(IO)		pinMode(IO, OUTPUT)
+#define	READ(IO)  digitalRead(IO)
+#define	WRITE(IO, v)  digitalWrite(IO, v)
+#define	SET_INPUT(IO)  pinMode(IO, INPUT)
+#define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
 #ifndef SDSUPPORT
 #define SDSUPPORT false
@@ -494,7 +494,7 @@ extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;
 
 extern void setupTimerInterrupt();
-extern void digipot_init();
+extern void current_control_init();
 extern void microstep_init();
 extern void print_temperatures();
 extern void check_mem();

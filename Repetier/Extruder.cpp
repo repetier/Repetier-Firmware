@@ -53,7 +53,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 #endif
    ,EXT1_ADVANCE_L
 #endif
- {1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
+ ,{1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
 #ifdef TEMP_PID
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -330,8 +330,10 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
   bool alloff = true;
   for(byte i=0;i<NUM_EXTRUDER;i++)
     if(tempController[i]->targetTemperatureC>15) alloff = false;
+#if EEPROM_MODE != 0
   if(alloff && !alloffs) // All heaters are now switched off?
     epr_update_usage();
+#endif
   if(alloffs && !alloff) // heaters are turned on, start measuring printing time
     printer_state.msecondsPrinting = millis();
 }

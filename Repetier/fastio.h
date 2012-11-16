@@ -936,8 +936,11 @@ pins
 #define	OC5C				DIO44
 
 // change for your board
+#if MOTHERBOARD == 12
+#define	DEBUG_LED		DIO22
+#else
 #define	DEBUG_LED		DIO21
-
+#endif
 /*
 pins
 */
@@ -1361,6 +1364,79 @@ pins
 #define DIO69_DDR		DDRK
 #define DIO69_PWM		NULL
 
+#if MOTHERBOARD == 12
+#define DIO80_PIN		PINJ2
+#define DIO80_RPORT		PINJ
+#define DIO80_WPORT		PORTJ
+#define DIO80_DDR		DDRJ
+#define DIO80_PWM		NULL
+
+#define DIO81_PIN		PINJ4
+#define DIO81_RPORT		PINJ
+#define DIO81_WPORT		PORTJ
+#define DIO81_DDR		DDRJ
+#define DIO81_PWM		NULL
+
+#define DIO82_PIN		PINJ5
+#define DIO82_RPORT		PINJ
+#define DIO82_WPORT		PORTJ
+#define DIO82_DDR		DDRJ
+#define DIO82_PWM		NULL
+
+#define DIO83_PIN		PINJ6
+#define DIO83_RPORT		PINJ
+#define DIO83_WPORT		PORTJ
+#define DIO83_DDR		DDRJ
+#define DIO83_PWM		NULL
+
+#define DIO84_PIN		PINJ7
+#define DIO84_RPORT		PINJ
+#define DIO84_WPORT		PORTJ
+#define DIO84_DDR		DDRJ
+#define DIO84_PWM		NULL
+
+#define DIO85_PIN		PINH7
+#define DIO85_RPORT		PINH
+#define DIO85_WPORT		PORTH
+#define DIO85_DDR		DDRH
+#define DIO85_PWM		NULL
+
+#define DIO86_PIN		PINH2
+#define DIO86_RPORT		PINH
+#define DIO86_WPORT		PORTH
+#define DIO86_DDR		DDRH
+#define DIO86_PWM		NULL
+
+#define DIO90_PIN		PINE7
+#define DIO90_RPORT		PINE
+#define DIO90_WPORT		PORTE
+#define DIO90_DDR		DDRE
+#define DIO90_PWM		NULL
+
+#define DIO91_PIN		PINE2
+#define DIO91_RPORT		PINE
+#define DIO91_WPORT		PORTE
+#define DIO91_DDR		DDRE
+#define DIO91_PWM		NULL
+
+#define DIO92_PIN		PIND4
+#define DIO92_RPORT		PIND
+#define DIO92_WPORT		PORTD
+#define DIO92_DDR		DDRD
+#define DIO92_PWM		NULL
+
+#define DIO93_PIN		PIND5
+#define DIO93_RPORT		PIND
+#define DIO93_WPORT		PORTD
+#define DIO93_DDR		DDRD
+#define DIO93_PWM		NULL
+
+#define DIO94_PIN		PIND6
+#define DIO94_RPORT		PIND
+#define DIO94_WPORT		PORTD
+#define DIO94_DDR		DDRD
+#define DIO94_PWM		NULL
+#endif // MOTHERBOARD == 12
 
 
 #undef PA0
