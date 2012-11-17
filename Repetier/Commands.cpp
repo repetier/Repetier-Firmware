@@ -92,7 +92,7 @@ void set_fan_speed(int speed,bool wait) {
   speed = constrain(speed,0,255);
   if(wait)
     wait_until_end_of_move(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
-  pwm_pos[3] = speed;
+  pwm_pos[NUM_EXTRUDER+2] = speed;
 #endif
 }
 #if DRIVE_SYSTEM==3
@@ -821,10 +821,12 @@ void process_command(GCode *com)
       	#endif
         out.println();
       	break;
-      /*case 120: // Test beeper function
+#if BEEPER_TYPE>0
+      case 120: // Test beeper function
         if(GCODE_HAS_S(com) && GCODE_HAS_P(com))
           beep(com->S,com->P); // Beep test
-        break;*/
+        break;
+#endif
       #ifdef RAMP_ACCELERATION
       case 201: // M201
         if(GCODE_HAS_X(com)) axis_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
@@ -979,6 +981,22 @@ void process_command(GCode *com)
     case 400: // Finish all moves
       wait_until_end_of_move();
       break;
+#if FEATURE_MEMORY_POSITION
+    case 401: // Memory position
+      printer_state.memoryX = printer_state.currentPositionSteps[0];
+      printer_state.memoryY = printer_state.currentPositionSteps[1];
+      printer_state.memoryZ = printer_state.currentPositionSteps[2];
+      break;
+    case 402: // Go to stored position
+      {
+        bool all = !(GCODE_HAS_X(com) && GCODE_HAS_Y(com) && GCODE_HAS_Z(com));
+        move_steps((all || GCODE_HAS_X(com) ? printer_state.currentPositionSteps[0]-printer_state.memoryX : 0)
+        ,(all || GCODE_HAS_Y(com) ? printer_state.currentPositionSteps[1]-printer_state.memoryY : 0)
+        ,(all || GCODE_HAS_Z(com) ? printer_state.currentPositionSteps[2]-printer_state.memoryZ : 0)
+        ,0,(GCODE_HAS_F(com) ? com->F : printer_state.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
+      }
+      break;
+#endif
     case 908: // Control digital trimpot directly.
       {        
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
@@ -1063,12 +1081,6 @@ void process_command(GCode *com)
     break;
 #endif
 #endif
-    case 401:
-      OUT_P_I_LN("Linespos:",lines_pos);
-      OUT_P_I_LN("Writepos:",lines_write_pos);
-      OUT_P_I_LN("Linescount:",lines_count);
-      //lines_count = 0;
-      break;
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();

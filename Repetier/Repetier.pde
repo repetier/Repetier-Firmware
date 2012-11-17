@@ -101,10 +101,12 @@ Custom M Codes
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M303 P<extruder/bed> S<drucktermeratur> Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M400 - Wait until move buffers empty.
+- M401 - Store x, y and z position.
+- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
-- M400 - Wait until move buffers empty.
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
 
@@ -232,7 +234,7 @@ int maxadv=0;
 int maxadv2=0;
 float maxadvspeed=0;
 #endif
-byte pwm_pos[5] = {0,0,0,0,0}; // 0-2 = Heater 0-2 of extruder, 3 = Fan, 4 = Heated bed
+byte pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 
 int waitRelax=0; // Delay filament relax at the end of print, could be a simple timeout
 #ifdef USE_OPS
@@ -438,6 +440,10 @@ SET_OUTPUT(ANALYZER_CH7);
   SET_OUTPUT(FAN_PIN);
   WRITE(FAN_PIN,LOW);
 #endif
+#if FAN_BOARD_PIN>-1
+  SET_OUTPUT(FAN_BOARD_PIN);
+  WRITE(FAN_BOARD_PIN,LOW);
+#endif
 #if EXT0_HEATER_PIN>-1
   SET_OUTPUT(EXT0_HEATER_PIN);
   WRITE(EXT0_HEATER_PIN,LOW);
@@ -449,6 +455,18 @@ SET_OUTPUT(ANALYZER_CH7);
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
   SET_OUTPUT(EXT2_HEATER_PIN);
   WRITE(EXT2_HEATER_PIN,LOW);
+#endif
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1
+  SET_OUTPUT(EXT3_HEATER_PIN);
+  WRITE(EXT3_HEATER_PIN,LOW);
+#endif
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1
+  SET_OUTPUT(EXT4_HEATER_PIN);
+  WRITE(EXT4_HEATER_PIN,LOW);
+#endif
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1
+  SET_OUTPUT(EXT5_HEATER_PIN);
+  WRITE(EXT5_HEATER_PIN,LOW);
 #endif
 
 #if STEPPER_CURRENT_CONTROL!=CURRENT_CONTROL_MANUAL
@@ -463,9 +481,9 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.opsRetractBacklash = OPS_RETRACT_BACKLASH;
   printer_state.filamentRetracted = false;
 #endif
-  printer_state.feedrate = 50; ///< Current feedrate in mm/min.
+  printer_state.feedrate = 50; ///< Current feedrate in mm/s.
   printer_state.feedrateMultiply = 100;
-  printer_state.extrudeMultiply = 100; // Is 10.24 * value here 100 percent)
+  printer_state.extrudeMultiply = 100; 
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   printer_state.advance_executed = 0;
@@ -473,6 +491,7 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.advance_steps_set = 0;
   printer_state.advance_lin_set = 0;
 #endif
+  for(byte i=0;i<NUM_EXTRUDER+3;i++) pwm_pos[i]=0;
   printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
 #if DRIVE_SYSTEM==3
   calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
@@ -536,6 +555,21 @@ SET_OUTPUT(ANALYZER_CH7);
   TIMSK1 |= (1<<OCIE1A); // Enable interrupt
 }
 
+void defaultLoopActions() {
+  //check heater every n milliseconds
+  check_periodical();
+  UI_MEDIUM; // do check encoder
+  unsigned long curtime = millis();
+  if(lines_count)
+    previous_millis_cmd = curtime;
+  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
+  if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+  sd.automount();
+#endif
+  //void finishNextSegment();
+  DEBUG_MEMORY;
+}
 /**
   Main processing loop. It checks perodically for new commands, checks temperatures
   and executes new incoming commands.
@@ -569,19 +603,7 @@ void loop()
     process_command(code);
 #endif
   }
-  //check heater every n milliseconds
-  check_periodical();
-  UI_MEDIUM; // do check encoder
-  unsigned long curtime = millis();
-  if(lines_count)
-    previous_millis_cmd = curtime;
-  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
-  if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
-  sd.automount();
-#endif
-  //void finishNextSegment();
-  DEBUG_MEMORY;
+  defaultLoopActions();
 }
 
 
@@ -2388,7 +2410,7 @@ This timer is called 3906 timer per second. It is used to update pwm values for 
 ISR(PWM_TIMER_VECTOR)
 {
   static byte pwm_count = 0;
-  static byte pwm_pos_set[5];
+  static byte pwm_pos_set[NUM_EXTRUDER+3];
   PWM_OCR += 64; 
   if(pwm_count==0) {
 #if EXT0_HEATER_PIN>-1
@@ -2400,15 +2422,27 @@ ISR(PWM_TIMER_VECTOR)
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
     if((pwm_pos_set[2] = pwm_pos[2])>0) WRITE(EXT2_HEATER_PIN,1);
 #endif
-#if FAN_PIN>-1
-    if((pwm_pos_set[3] = pwm_pos[3])>0) WRITE(FAN_PIN,1);
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1
+    if((pwm_pos_set[3] = pwm_pos[3])>0) WRITE(EXT3_HEATER_PIN,1);
 #endif
-#if HEATED_BED_HEATER_PIN>-1
-    if((pwm_pos_set[4] = pwm_pos[4])>0) WRITE(HEATED_BED_HEATER_PIN,1);
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1
+    if((pwm_pos_set[4] = pwm_pos[4])>0) WRITE(EXT4_HEATER_PIN,1);
+#endif
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1
+    if((pwm_pos_set[5] = pwm_pos[5])>0) WRITE(EXT5_HEATER_PIN,1);
+#endif
+#if FAN_BOARD_PIN>-1
+    if((pwm_pos_set[NUM_EXTRUDER+1] = pwm_pos[NUM_EXTRUDER+1])>0) WRITE(FAN_BOARD_PIN,1);
+#endif
+#if FAN_PIN>-1
+    if((pwm_pos_set[NUM_EXTRUDER+2] = pwm_pos[NUM_EXTRUDER+2])>0) WRITE(FAN_PIN,1);
+#endif
+#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
+    if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,1);
 #endif
   }
 #if EXT0_HEATER_PIN>-1
-  if(pwm_pos_set[0] == pwm_count && pwm_pos_set[0]!=255) WRITE(EXT0_HEATER_PIN,0);
+    if(pwm_pos_set[0] == pwm_count && pwm_pos_set[0]!=255) WRITE(EXT0_HEATER_PIN,0);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
     if(pwm_pos_set[1] == pwm_count && pwm_pos_set[1]!=255) WRITE(EXT1_HEATER_PIN,0);
@@ -2416,11 +2450,23 @@ ISR(PWM_TIMER_VECTOR)
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
     if(pwm_pos_set[2] == pwm_count && pwm_pos_set[2]!=255) WRITE(EXT2_HEATER_PIN,0);
 #endif
-#if FAN_PIN>-1
-    if(pwm_pos_set[3] == pwm_count && pwm_pos_set[3]!=255) WRITE(FAN_PIN,0);
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1
+    if(pwm_pos_set[3] == pwm_count && pwm_pos_set[3]!=255) WRITE(EXT3_HEATER_PIN,0);
 #endif
-#if HEATED_BED_HEATER_PIN>-1
-    if(pwm_pos_set[4] == pwm_count && pwm_pos_set[4]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1
+    if(pwm_pos_set[4] == pwm_count && pwm_pos_set[4]!=255) WRITE(EXT4_HEATER_PIN,0);
+#endif
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1
+    if(pwm_pos_set[5] == pwm_count && pwm_pos_set[5]!=255) WRITE(EXT5_HEATER_PIN,0);
+#endif
+#if FAN_BOARD_PIN>-1
+    if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_BOARD_PIN,0);
+#endif
+#if FAN_PIN>-1
+    if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
+#endif
+#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
+    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count && pwm_pos_set[NUM_EXTRUDER]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
 #endif
   sei(); 
   counter_periodical++; // Appxoimate a 100ms timer

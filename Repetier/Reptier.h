@@ -288,6 +288,8 @@ typedef struct { // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
   float advanceL;
 #endif
   TemperatureController tempControl;
+  const char * PROGMEM selectCommands;
+  const char * PROGMEM deselectCommands;
 } Extruder;
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
@@ -295,7 +297,7 @@ extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-extern byte pwm_pos[5]; // 0-2 = Heater 0-2 of extruder, 3 = Fan, 4 = Heated bed
+extern byte pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
@@ -447,6 +449,7 @@ extern void update_ramps_parameter();
 extern void update_extruder_flags();
 extern void finishNextSegment();
 extern void printPosition();
+extern void defaultLoopActions();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
 extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
 extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
@@ -580,6 +583,11 @@ typedef struct {
 #endif
 #ifdef DEBUG_STEPCOUNT
   long totalStepsRemaining;
+#endif
+#if FEATURE_MEMORY_POSITION
+  long memoryX;
+  long memoryY;
+  long memoryZ;
 #endif
 } PrinterState;
 extern PrinterState printer_state;

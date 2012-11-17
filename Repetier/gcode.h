@@ -163,6 +163,7 @@ extern GCode *gcode_next_command();
 extern void gcode_command_finished();
 // check for new commands
 extern void gcode_read_serial();
+extern void gcode_execute_PString(PGM_P cmd);
 extern void gcode_print_command(GCode *code);
 extern byte gcode_comp_binary_size(char *ptr);
 extern bool gcode_parse_binary(GCode *code,byte *buffer);

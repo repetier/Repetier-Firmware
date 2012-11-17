@@ -66,7 +66,9 @@ Select the language to use.
 1 = Piezo connected to pin
 2 = Piezo connected to a pin over I2C 
 */
+#ifndef BEEPER_TYPE
 #define BEEPER_TYPE 1
+#endif
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
 #define BEEPER_PIN 37
@@ -96,10 +98,10 @@ What display type do you use?
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
-#define UI_DISPLAY_TYPE 0
+#define UI_DISPLAY_TYPE 1
 
 // This is line 2 of the status display at startup
-#define UI_VERSION_STRING2 "iRapid Compact"
+#define UI_VERSION_STRING2 "Mendel"
 
 /** Number of columns per row
 
@@ -166,18 +168,19 @@ Define the pin
 #define UI_DISPLAY_D7_PIN _BV(9)*/
 
 #else // Direct display connections
-#define UI_DISPLAY_RS_PIN 16
-#define UI_DISPLAY_RW_PIN -1
-#define UI_DISPLAY_ENABLE_PIN 17
-#define UI_DISPLAY_D0_PIN 23
-#define UI_DISPLAY_D1_PIN 25
-#define UI_DISPLAY_D2_PIN 27
-#define UI_DISPLAY_D3_PIN 29
-#define UI_DISPLAY_D4_PIN 23
-#define UI_DISPLAY_D5_PIN 25
-#define UI_DISPLAY_D6_PIN 27
-#define UI_DISPLAY_D7_PIN 29 
-#define UI_DELAYPERCHAR 320
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+
 #endif
 
 #if UI_ROWS==4
@@ -198,7 +201,7 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#define UI_HAS_KEYS 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -215,7 +218,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 0
+#define UI_HAS_BACK_KEY 1
 
 /* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.
 If you set it to true, next will go to previous menu instead of the next menu.
@@ -227,7 +230,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 //#define UI_HAS_I2C_KEYS
 
 // Do you have a I2C connected encoder? 
-#define UI_HAS_I2C_ENCODER 1
+#define UI_HAS_I2C_ENCODER 0
 
 // Under which address can the key status requested. This is the address of your PCF8574 where the keys are connected.
 // If you use a MCP23017 the address from display is used also for keys.
@@ -239,14 +242,14 @@ If you set it to true, next will go to previous menu instead of the next menu.
 
 // Values used for preheat
 #define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
-#define UI_SET_PRESET_EXTRUDER_TEMP_PLA 170
+#define UI_SET_PRESET_EXTRUDER_TEMP_PLA   170
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS 240
+#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
 // Extreme values 
-#define UI_SET_MIN_HEATED_BED_TEMP 55
+#define UI_SET_MIN_HEATED_BED_TEMP  55
 #define UI_SET_MAX_HEATED_BED_TEMP 120
-#define UI_SET_MIN_EXTRUDER_TEMP 160
-#define UI_SET_MAX_EXTRUDER_TEMP 270
+#define UI_SET_MIN_EXTRUDER_TEMP   160
+#define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_RETRACT_FEEDRATE 1000 // mm/min
 #define UI_SET_EXTRUDER_FEEDRATE 120 // mm/min
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
@@ -354,17 +357,24 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 #define UI_ENCODER_SPEED 1
 
 void ui_init_keys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(41); // Kill pin
+  //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(5);
+  UI_KEYS_INIT_BUTTON_LOW(6);
+  UI_KEYS_INIT_BUTTON_LOW(11);
+  UI_KEYS_INIT_BUTTON_LOW(42);
+
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
- UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(41,UI_ACTION_RESET); 
+ //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 }

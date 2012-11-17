@@ -786,6 +786,11 @@ STEPPER_CURRENT_CONTROL
 #define LTC2600_SCK_PIN		   93	// PIND.5, 48, DA_SCK
 #define LTC2600_SDI_PIN		   94	// PIND.6, 49, DA_SDI
 
+// On board beeper, so define values already here
+#define BEEPER_PIN 23
+#define BEEPER_TYPE 1
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
 
 // digital pin mappings
 #define X_STEP_PIN         54	// PINF.0, 97, STP_DRV1
@@ -810,14 +815,15 @@ STEPPER_CURRENT_CONTROL
 #define E_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
 #define E_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
 
-#define E_1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
-#define E_1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
-#define E_1_ENABLE_PIN     30	// PINC.7, 60, ENA_DRV5
+#define E1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
+#define E1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
+#define E1_ENABLE_PIN     30	// PINC.7, 60, ENA_DRV5
 
 #define SDPOWER            -1
 #define SDSS               53	// PINB.0, 19, SS
 #define LED_PIN            13	// PINB.7, 26, LED13
-#define FAN_PIN            25	// PINA.3, 75, OUT1
+#define FAN_PIN            25	// OUT1 PINA.3, 75, OUT1
+#define FAN_BOARD_PIN      27   // OUT2
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
@@ -831,7 +837,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_2_PIN         15   // PINK.7, 82, TH3
 
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
-#define E1_PINS E_1_STEP_PIN,E_1_DIR_PIN,E_1_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 // these pins are defined in the SD library if building with SD support  
 #define SCK_PIN          52	// PINB.1, 20, SCK
@@ -1107,6 +1113,11 @@ STEPPER_CURRENT_CONTROL
 #ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
 #define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_MANUAL
 #endif
+
+#ifndef FAN_BOARD_PIN
+#define FAN_BOARD_PIN -1
+#endif
+
 #if NUM_EXTRUDER==1
 #define E1_PINS
 #endif

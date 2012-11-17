@@ -143,7 +143,7 @@ Mega.
 // ##########################################################################################
 
 /** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 1
+#define NUM_EXTRUDER 2
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
@@ -241,10 +241,14 @@ to 0 to disable.
 */
 #define EXT0_WAIT_RETRACT_UNITS 	0
 
-
+/** You can run any gcode command son extruder deselect/select. Seperate multiple commands with a new line \n.
+That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
+The codes are only executed for multiple extruder when changing the extruder. */
+#define EXT0_SELECT_COMMANDS "M120 S5 P5\nM117 Extruder 1"
+#define EXT0_DESELECT_COMMANDS ""
 
 // =========================== Configuration for second extruder ========================
-#define EXT1_X_OFFSET 0
+#define EXT1_X_OFFSET 10
 #define EXT1_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT1_STEPS_PER_MM 373
@@ -264,23 +268,23 @@ to 0 to disable.
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT1_TEMPSENSOR_TYPE 1
+#define EXT1_TEMPSENSOR_TYPE 3
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
-#define EXT1_TEMPSENSOR_PIN -1
+#define EXT1_TEMPSENSOR_PIN TEMP_1_PIN 
 // WHich pin enables the heater
-#define EXT1_HEATER_PIN -1
-#define EXT1_STEP_PIN E_STEP_PIN
-#define EXT1_DIR_PIN E_DIR_PIN
+#define EXT1_HEATER_PIN HEATER_1_PIN 
+#define EXT1_STEP_PIN E1_STEP_PIN
+#define EXT1_DIR_PIN E1_DIR_PIN
 // set to 0/1 for normal / inverse direction
 #define EXT1_INVERSE false
-#define EXT1_ENABLE_PIN E_ENABLE_PIN
+#define EXT1_ENABLE_PIN E1_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT1_ENABLE_ON false
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use eiher values.
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_FEEDRATE 50
+#define EXT1_MAX_FEEDRATE 25
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
 #define EXT1_MAX_START_FEEDRATE 12
@@ -334,6 +338,8 @@ L is the linear factor and seems to be working better then the quadratic depende
 
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	40
+#define EXT1_SELECT_COMMANDS "M120 S5 P15\nM117 Extruder 2"
+#define EXT1_DESELECT_COMMANDS ""
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -466,7 +472,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED true
+#define HAVE_HEATED_BED false
 
 #define HEATED_BED_MAX_TEMP 90
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -986,14 +992,20 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 /** Set to false to disable SD support: */
+#ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT true
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1 //49
 // Change to true if you get a inserted message on removal. 
 #define SDCARDDETECTINVERTED false
+#endif
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT true
+
+/** You can store the current position with M401 and go back to it with M402. 
+   This works only if feature is set to true. */
+#define FEATURE_MEMORY_POSITION true
 #endif
 

@@ -27,8 +27,35 @@
 #endif
 
 Extruder *current_extruder;
+
+#if NUM_EXTRUDER>0
+prog_char ext0_select_cmd[] PROGMEM = EXT0_SELECT_COMMANDS;
+prog_char ext0_deselect_cmd[] PROGMEM = EXT0_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>1
+prog_char ext1_select_cmd[] PROGMEM = EXT1_SELECT_COMMANDS;
+prog_char ext1_deselect_cmd[] PROGMEM = EXT1_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>2
+prog_char ext2_select_cmd[] PROGMEM = EXT2_SELECT_COMMANDS;
+prog_char ext2_deselect_cmd[] PROGMEM = EXT2_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>3
+prog_char ext3_select_cmd[] PROGMEM = EXT3_SELECT_COMMANDS;
+prog_char ext3_deselect_cmd[] PROGMEM = EXT3_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>4
+prog_char ext4_select_cmd[] PROGMEM = EXT4_SELECT_COMMANDS;
+prog_char ext4_deselect_cmd[] PROGMEM = EXT4_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>5
+prog_char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
+prog_char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
+#endif
+
 Extruder extruder[NUM_EXTRUDER] = {
- {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
+#if NUM_EXTRUDER>0
+{0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
    EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
    ,EXT0_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
@@ -42,7 +69,9 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif 
   }
+  ,ext0_select_cmd,ext0_deselect_cmd
  } 
+#endif
 #if NUM_EXTRUDER>1
  ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
    EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
@@ -58,13 +87,86 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
+  ,ext1_select_cmd,ext1_deselect_cmd
+ }
+#endif
+#if NUM_EXTRUDER>2
+ ,{2,EXT2_X_OFFSET,EXT2_Y_OFFSET,EXT2_STEPS_PER_MM,EXT2_ENABLE_PIN,EXT2_ENABLE_ON,
+   EXT2_MAX_FEEDRATE,EXT2_MAX_ACCELERATION,EXT2_MAX_START_FEEDRATE,0,EXT2_WATCHPERIOD
+   ,EXT2_WAIT_RETRACT_TEMP,EXT2_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT2_ADVANCE_K
+#endif
+   ,EXT2_ADVANCE_L
+#endif
+ ,{2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext2_select_cmd,ext2_deselect_cmd
+ }
+#endif
+#if NUM_EXTRUDER>3
+ ,{3,EXT3_X_OFFSET,EXT3_Y_OFFSET,EXT3_STEPS_PER_MM,EXT3_ENABLE_PIN,EXT3_ENABLE_ON,
+   EXT3_MAX_FEEDRATE,EXT3_MAX_ACCELERATION,EXT3_MAX_START_FEEDRATE,0,EXT3_WATCHPERIOD
+   ,EXT3_WAIT_RETRACT_TEMP,EXT3_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT3_ADVANCE_K
+#endif
+   ,EXT3_ADVANCE_L
+#endif
+ ,{3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext3_select_cmd,ext3_deselect_cmd
+ }
+#endif
+#if NUM_EXTRUDER>4
+ ,{4,EXT4_X_OFFSET,EXT4_Y_OFFSET,EXT4_STEPS_PER_MM,EXT4_ENABLE_PIN,EXT4_ENABLE_ON,
+   EXT4_MAX_FEEDRATE,EXT4_MAX_ACCELERATION,EXT4_MAX_START_FEEDRATE,0,EXT4_WATCHPERIOD
+   ,EXT4_WAIT_RETRACT_TEMP,EXT4_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT4_ADVANCE_K
+#endif
+   ,EXT4_ADVANCE_L
+#endif
+ ,{4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext4_select_cmd,ext4_deselect_cmd
+ }
+#endif
+#if NUM_EXTRUDER>5
+ ,{5,EXT5_X_OFFSET,EXT5_Y_OFFSET,EXT5_STEPS_PER_MM,EXT5_ENABLE_PIN,EXT5_ENABLE_ON,
+   EXT5_MAX_FEEDRATE,EXT5_MAX_ACCELERATION,EXT5_MAX_START_FEEDRATE,0,EXT5_WATCHPERIOD
+   ,EXT5_WAIT_RETRACT_TEMP,EXT5_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT5_ADVANCE_K
+#endif
+   ,EXT5_ADVANCE_L
+#endif
+ ,{5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext5_select_cmd,ext5_deselect_cmd
  }
 #endif
 };
 
 #if HAVE_HEATED_BED
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
-TemperatureController heatedBedController = {4,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
 #ifdef TEMP_PID
 ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -73,12 +175,24 @@ TemperatureController heatedBedController = {4,HEATED_BED_SENSOR_TYPE,BED_SENSOR
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif
 
-TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {&extruder[0].tempControl
+TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {
+#if NUM_EXTRUDER>0
+  &extruder[0].tempControl
+#endif
 #if NUM_EXTRUDER>1
 ,&extruder[1].tempControl
+#endif
 #if NUM_EXTRUDER>2
 ,&extruder[2].tempControl
 #endif
+#if NUM_EXTRUDER>3
+,&extruder[3].tempControl
+#endif
+#if NUM_EXTRUDER>4
+,&extruder[4].tempControl
+#endif
+#if NUM_EXTRUDER>5
+,&extruder[5].tempControl
 #endif
 #if HAVE_HEATED_BED
 ,&heatedBedController
@@ -175,15 +289,29 @@ void initExtruder() {
 #ifdef USE_GENERIC_THERMISTORTABLE_3
   createGenericTable(temptable_generic3,GENERIC_THERM3_MIN_TEMP,GENERIC_THERM3_MAX_TEMP,GENERIC_THERM3_BETA,GENERIC_THERM3_R0,GENERIC_THERM3_T0,GENERIC_THERM3_R1,GENERIC_THERM3_R2);
 #endif
+#if defined(EXT0_STEP_PIN) && EXT0_STEP_PIN>-1
   SET_OUTPUT(EXT0_DIR_PIN);
   SET_OUTPUT(EXT0_STEP_PIN);
-#ifdef EXT1_STEP_PIN
+#endif
+#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN>-1
   SET_OUTPUT(EXT1_DIR_PIN);
   SET_OUTPUT(EXT1_STEP_PIN);
 #endif
-#ifdef EXT2_STEP_PIN
+#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN>-1
   SET_OUTPUT(EXT2_DIR_PIN);
   SET_OUTPUT(EXT2_STEP_PIN);
+#endif
+#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN>-1
+  SET_OUTPUT(EXT3_DIR_PIN);
+  SET_OUTPUT(EXT3_STEP_PIN);
+#endif
+#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN>-1
+  SET_OUTPUT(EXT4_DIR_PIN);
+  SET_OUTPUT(EXT4_STEP_PIN);
+#endif
+#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN>-1
+  SET_OUTPUT(EXT5_DIR_PIN);
+  SET_OUTPUT(EXT5_STEP_PIN);
 #endif
   
   for(i=0;i<NUM_EXTRUDER;++i) {
@@ -256,6 +384,13 @@ This function changes and initalizes a new extruder. This is also called, after 
 void extruder_select(byte ext_num) {
    if(ext_num>=NUM_EXTRUDER)
      ext_num = 0;
+#if NUM_EXTRUDER>1
+   bool executeSelect = false;
+   if(ext_num!=current_extruder->id) {
+    gcode_execute_PString(current_extruder->deselectCommands);
+    executeSelect = true;
+  }
+#endif
    current_extruder->extrudePosition = printer_state.currentPositionSteps[3];
    long dx = -current_extruder->xOffset;
    long dy = -current_extruder->yOffset;
@@ -298,9 +433,13 @@ void extruder_select(byte ext_num) {
 #endif
   if(dx || dy) {
     float oldfeedrate = printer_state.feedrate;
-    move_steps(dx,dy,0,0,homing_feedrate[0],false,ALWAYS_CHECK_ENDSTOPS);
+    move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
     printer_state.feedrate = oldfeedrate;
   }
+#if NUM_EXTRUDER>1
+  if(executeSelect) // Run only when changing
+    gcode_execute_PString(current_extruder->selectCommands);
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------------------------

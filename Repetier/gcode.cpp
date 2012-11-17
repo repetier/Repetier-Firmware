@@ -618,6 +618,44 @@ GCode *gcode_next_command() {
 void gcode_command_finished() {
   gcode_buflen--;
 }
+
+/** \brief Execute commands in progmem stored string. Multiple commands are seperated by \n */
+void gcode_execute_PString(PGM_P cmd) {
+  char buf[80];
+  byte buflen;
+  char c;
+  do {
+    // Wait for a free place in command buffer
+    while((gcode_wait_all_parsed && gcode_buflen) || (gcode_buflen>=GCODE_BUFFER_SIZE)) {
+      GCode *code = gcode_next_command();
+      if(code)
+        process_command(code);
+      defaultLoopActions();
+    }
+    gcode_wait_all_parsed=false;
+    // Scan next command from string
+    byte comment=0; 
+    buflen = 0;   
+    do {
+      c = pgm_read_byte(cmd++);
+      if(c == 0 || c == '\n') break;
+      if(c == ';') comment = 1;
+      if(comment) continue;
+      buf[buflen++] = c;
+    } while(buflen<79);
+    if(buflen==0) { // empty line ignore
+      continue;
+    }
+    buf[buflen]=0;
+    // Send command into command buffer
+    GCode *act;
+    gcode_comment = false;
+    act = &gcode_buffer[gcode_windex];
+    if(gcode_parse_ascii(act,(char *)buf)) { // Success
+      gcode_checkinsert(act);
+    }
+  } while(c);
+}
 /** \brief Read from serial console or sdcard.
 
 This function is the main function to read the commands from serial console or from sdcard.

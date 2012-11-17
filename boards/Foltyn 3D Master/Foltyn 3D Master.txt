@@ -1,12 +1,10 @@
 Board: Foltyn 3D Master
-Where to get it:
-http://nodna.de/Universal-3D-Motherboard
+Where to get it: http://nodna.de/Universal-3D-Motherboard
 
 Datasheet(german): http://nodna.de/media/Foltyn/3D_Master_Rev.1.0V.pdf
+Datasheet(english): coming soon
 
 Adding LCD:
-
-Use th
 
 #define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
 #define UI_DISPLAY_RW_PIN		-1
@@ -20,6 +18,15 @@ Use th
 #define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
 #define UI_DELAYPERCHAR		   320
+
+
+On board keys:
+
+Key 1: 4
+Key 2: 5
+Key 3: 6
+Key 4: 11
+Key 5: 42
 
 ---------------------------------------------------------------------
 ---                    Using special board functions              ---
