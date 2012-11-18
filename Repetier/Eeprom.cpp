@@ -51,12 +51,19 @@ inline void epr_set_long(uint pos,long value) {
 inline void epr_set_float(uint pos,float value) {
   eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
 }
+void epr_out_prefix(uint pos) {
+  if(pos<EEPROM_EXTRUDER_OFFSET) return;
+  int n = (pos-EEPROM_EXTRUDER_OFFSET)/EEPROM_EXTRUDER_LENGTH+1;
+  OUT_P_I("Extr.",n);
+  out.print(' ');
+}
 void epr_out_float(uint pos,PGM_P text) {
   OUT_P("EPR:3 ");
   OUT(pos);
   OUT(' ');
   OUT(epr_get_float(pos));
   OUT(' ');
+  epr_out_prefix(pos);
   out.println_P(text);  
 }
 void epr_out_long(uint pos,PGM_P text) {
@@ -65,6 +72,7 @@ void epr_out_long(uint pos,PGM_P text) {
   OUT(' ');
   OUT(epr_get_long(pos));
   OUT(' ');
+  epr_out_prefix(pos);
   out.println_P(text);  
 }
 void epr_out_int(uint pos,PGM_P text) {
@@ -73,6 +81,7 @@ void epr_out_int(uint pos,PGM_P text) {
   OUT(' ');
   OUT(epr_get_int(pos));
   OUT(' ');
+  epr_out_prefix(pos);
   out.println_P(text);  
 }
 void epr_out_byte(uint pos,PGM_P text) {
@@ -81,6 +90,7 @@ void epr_out_byte(uint pos,PGM_P text) {
   OUT(' ');
   OUT((int)epr_get_byte(pos));
   OUT(' ');
+  epr_out_prefix(pos);
   out.println_P(text);  
 }
 
@@ -314,8 +324,8 @@ void epr_data_to_eeprom(byte corrupted) {
     epr_set_float(o+EPR_EXTRUDER_PID_DGAIN,e->tempControl.pidDGain);
     epr_set_byte(o+EPR_EXTRUDER_PID_MAX,e->tempControl.pidMax);
 #endif
-    epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->yOffset);
-    epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->xOffset);
+    epr_set_long(o+EPR_EXTRUDER_X_OFFSET,e->xOffset);
+    epr_set_long(o+EPR_EXTRUDER_Y_OFFSET,e->yOffset);
     epr_set_int(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
 #if RETRACT_DURING_HEATUP
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,e->waitRetractTemperature);
@@ -417,8 +427,8 @@ void epr_eeprom_to_data() {
     e->tempControl.pidDGain = epr_get_float(o+EPR_EXTRUDER_PID_DGAIN);
     e->tempControl.pidMax = epr_get_byte(o+EPR_EXTRUDER_PID_MAX);
 #endif
-    e->yOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
-    e->xOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
+    e->xOffset = epr_get_long(o+EPR_EXTRUDER_X_OFFSET);
+    e->yOffset = epr_get_long(o+EPR_EXTRUDER_Y_OFFSET);
     e->watchPeriod = epr_get_int(o+EPR_EXTRUDER_WATCH_PERIOD);
 #if RETRACT_DURING_HEATUP
     e->waitRetractTemperature = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
@@ -553,11 +563,11 @@ void epr_output_settings() {
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
     Extruder *e = &extruder[i];
-    epr_out_float(o+EPR_EXTRUDER_STEPS_PER_MM,PSTR("Extr. steps per mm"));
-    epr_out_float(o+EPR_EXTRUDER_MAX_FEEDRATE,PSTR("Extr. max. feedrate [mm/s]"));
-    epr_out_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,PSTR("Extr. start feedrate [mm/s]"));
-    epr_out_float(o+EPR_EXTRUDER_MAX_ACCELERATION,PSTR("Extr. acceleration [mm/s^2]"));
-    epr_out_byte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("Heat manager [0-1]"));
+    epr_out_float(o+EPR_EXTRUDER_STEPS_PER_MM,PSTR("steps per mm"));
+    epr_out_float(o+EPR_EXTRUDER_MAX_FEEDRATE,PSTR("max. feedrate [mm/s]"));
+    epr_out_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,PSTR("start feedrate [mm/s]"));
+    epr_out_float(o+EPR_EXTRUDER_MAX_ACCELERATION,PSTR("acceleration [mm/s^2]"));
+    epr_out_byte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("heat manager [0-1]"));
 #ifdef TEMP_PID
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MAX,PSTR("PID drive max"));
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MIN,PSTR("PID drive min"));
@@ -568,14 +578,14 @@ void epr_output_settings() {
 #endif
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
-    epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("Temp. stabilize time [s]"));
-    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("Temp. for retraction when heating [C]"));
-    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("Distance to retract when heating [mm]"));
+    epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("temp. stabilize time [s]"));
+    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("temp. for retraction when heating [C]"));
+    epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("distance to retract when heating [mm]"));
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("Advance K [0=off]"));
+    epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("advance K [0=off]"));
 #endif
-    epr_out_float(o+EPR_EXTRUDER_ADVANCE_L,PSTR("Advance L [0=off]"));
+    epr_out_float(o+EPR_EXTRUDER_ADVANCE_L,PSTR("advance L [0=off]"));
 #endif    
   }
 #else

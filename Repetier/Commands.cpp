@@ -72,6 +72,18 @@ void print_temperatures() {
 #ifdef TEMP_PID
   OUT_P_I(" @:",(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
+#if NUM_EXTRUDER>1
+  for(byte i=0;i<NUM_EXTRUDER;i++) {
+    OUT_P(" T");
+    out.print((int)i);
+    OUT_P_F(":",extruder[i].tempControl.currentTemperatureC); 
+#ifdef TEMP_PID
+    OUT_P(" @");
+    out.print((int)i);
+  OUT_P_I(":",(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
+#endif
+  }
+#endif
   OUT_LN;
 }
 void change_feedrate_multiply(int factor) {
@@ -990,9 +1002,9 @@ void process_command(GCode *com)
     case 402: // Go to stored position
       {
         bool all = !(GCODE_HAS_X(com) && GCODE_HAS_Y(com) && GCODE_HAS_Z(com));
-        move_steps((all || GCODE_HAS_X(com) ? printer_state.currentPositionSteps[0]-printer_state.memoryX : 0)
-        ,(all || GCODE_HAS_Y(com) ? printer_state.currentPositionSteps[1]-printer_state.memoryY : 0)
-        ,(all || GCODE_HAS_Z(com) ? printer_state.currentPositionSteps[2]-printer_state.memoryZ : 0)
+        move_steps((all || GCODE_HAS_X(com) ? printer_state.memoryX-printer_state.currentPositionSteps[0] : 0)
+        ,(all || GCODE_HAS_Y(com) ? printer_state.memoryY-printer_state.currentPositionSteps[1] : 0)
+        ,(all || GCODE_HAS_Z(com) ? printer_state.memoryZ-printer_state.currentPositionSteps[2] : 0)
         ,0,(GCODE_HAS_F(com) ? com->F : printer_state.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
       }
       break;
