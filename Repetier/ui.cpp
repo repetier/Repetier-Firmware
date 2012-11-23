@@ -1233,16 +1233,16 @@ void UIDisplay::refreshPage() {
       col=0;
       if(entType>=2 && entType<=4) {
         if(r+offset==menuPos[menuLevel] && activeAction!=entAction)
-          printCols[col++]='>';
+          printCols[col++]=CHAR_SELECTOR;
         else if(activeAction==entAction)
-          printCols[col++]='*';
+          printCols[col++]=CHAR_SELECTED;
         else
           printCols[col++]=' ';
       }
       parse((char*)pgm_read_word(&(ent->text)),false);
       if(entType==2) { // Draw submenu marker at the right side
         while(col<UI_COLS) printCols[col++]=' ';
-        printCols[UI_COLS-1]=0x7e; // Arrow right
+        printCols[UI_COLS-1]=CHAR_RIGHT; // Arrow right
       }
       printRow(r,(char*)printCols);
     }

@@ -59,6 +59,19 @@ Select the language to use.
 2 = dutch
 */
 #define UI_LANGUAGE 1
+
+/** While the ascii chars are all the same, the driver have different charsets
+for special chars used in different countries. The charset allows to fix for 
+this problem. If characters look wrong, try a different charset. If nothing
+works, use the ascii charset 0 as fallback. Not the nicest for everything but working!
+
+0 = ASCII fallback
+1 = Default works on most displays. This has some japanese chars in charset
+2 = Alternative charset with more european chars
+
+*/
+#define UI_DISPLAY_CHARSET 2
+
 #include "uilang.h"
 
 /** Select type of beeper
@@ -85,8 +98,8 @@ and longer beeps for important actions.
 Parameter is is delay in microseconds and the secons is the number of repetitions.
 Values must be in range 1..255
 */
-#define BEEPER_SHORT_SEQUENCE 1,1
-#define BEEPER_LONG_SEQUENCE 5,5
+#define BEEPER_SHORT_SEQUENCE 2,2
+#define BEEPER_LONG_SEQUENCE 8,8
 
 /**
 What display type do you use?
@@ -99,6 +112,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
 #define UI_DISPLAY_TYPE 1
+
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Mendel"

@@ -256,7 +256,7 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
     float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
     int adc = (int)(v);
     t *= 8;
-    if(adc>4095) adc=4095;
+    if(adc>4092) adc=4092;
     table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
     table[i][1] = (int)t;
 #ifdef DEBUG_GENERIC

@@ -707,12 +707,14 @@ void process_command(GCode *com)
         }
         break;
 #endif
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
       case 106: //M106 Fan On
         set_fan_speed(GCODE_HAS_S(com)?com->S:255,GCODE_HAS_P(com));
         break;
       case 107: //M107 Fan Off
         set_fan_speed(0,GCODE_HAS_P(com));
         break;
+#endif
       case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
         wait_until_end_of_move();

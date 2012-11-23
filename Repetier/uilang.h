@@ -16,6 +16,51 @@
 
 */
 
+#if !defined(UI_DISPLAY_CHARSET) || UI_DISPLAY_CHARSET>2
+#define UI_DISPLAY_CHARSET 1
+#endif
+
+#if UI_DISPLAY_CHARSET==0 // ASCII fallback
+#define CHAR_RIGHT '-'
+#define CHAR_SELECTOR '>'
+#define CHAR_SELECTED '*'
+#define STR_auml "ae"
+#define STR_Auml "Ae"
+#define STR_uuml "ue"
+#define STR_Uuml "Ue"
+#define STR_ouml "oe"
+#define STR_Ouml "Oe"
+#define STR_szlig "ss"
+#endif
+
+#if UI_DISPLAY_CHARSET==1 // HD44870 charset with knji chars
+#define CHAR_RIGHT 0x7e
+#define CHAR_SELECTOR '>'
+#define CHAR_SELECTED '*'
+#define STR_auml "\xe1"
+#define STR_Auml "Ae"
+#define STR_uuml "\365"
+#define STR_Uuml "Ue"
+#define STR_ouml "\357"
+#define STR_Ouml "Oe"
+#define STR_szlig "\342"
+#endif
+
+#if UI_DISPLAY_CHARSET==2 // Western charset
+#define CHAR_RIGHT 0xbc
+#define CHAR_SELECTOR 0xf6
+#define CHAR_SELECTED '*'
+#define STR_auml "\204"
+#define STR_Auml "\216"
+#define STR_uuml "\201"
+#define STR_Uuml "\212"
+#define STR_ouml "\204"
+#define STR_Ouml "\211"
+#define STR_szlig "160"
+#endif
+
+
+
 // At first all terms in english are defined. After that the selected language
 // can overwrite the definition. That way new strings are at least in english
 // available.
@@ -187,7 +232,7 @@
 #define UI_TEXT_IDLE             "Leerlauf"
 #define UI_TEXT_NOSDCARD         "Keine SD Karte"
 #define UI_TEXT_ERROR            "**** FEHLER ****"
-#define UI_TEXT_BACK             "Zur\365ck \001"
+#define UI_TEXT_BACK             "Zur" STR_uuml "ck \001"
 #define UI_TEXT_QUICK_SETTINGS   "Schnelleinst."
 #define UI_TEXT_CONFIGURATION    "Konfiguration"
 #define UI_TEXT_POSITION         "Position"
@@ -200,7 +245,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Vorheizen PLA"
 #define UI_TEXT_PREHEAT_ABS      "Vorheizen ABS"
-#define UI_TEXT_COOLDOWN         "Abk\xf5hlen"
+#define UI_TEXT_COOLDOWN         "Abk" STR_uuml "hlen"
 #define UI_TEXT_SET_TO_ORIGIN    "Setze Nullpunkt"
 #define UI_TEXT_DISABLE_STEPPER  "Motoren Aussch."
 #define UI_TEXT_X_POSITION       "X Position"
@@ -215,8 +260,8 @@
 #define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E0\002C"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Aus"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Aus"
-#define UI_TEXT_EXTR0_SELECT     "W\xe1hle Extr. 0"
-#define UI_TEXT_EXTR1_SELECT     "W\xe1hle Extr. 1"
+#define UI_TEXT_EXTR0_SELECT     "W" STR_auml "hle Extr. 0"
+#define UI_TEXT_EXTR1_SELECT     "W" STR_auml "hle Extr. 1"
 #define UI_TEXT_EXTR_ORIGIN      "Setze Nullpunkt"
 #define UI_TEXT_PRINT_X          "Drucken X:%ax"
 #define UI_TEXT_PRINT_Y          "Drucken Y:%ay"
@@ -246,7 +291,7 @@
 #define UI_TEXT_CONTINUE_PRINT   "Druck Forts."
 #define UI_TEXT_UNMOUNT_CARD     "Unmount Karte"
 #define UI_TEXT_MOUNT_CARD       "Mount Karte"
-#define UI_TEXT_DELETE_FILE      "Datei l\xefschen"
+#define UI_TEXT_DELETE_FILE      "Datei l" STR_ouml "schen"
 #define UI_TEXT_FEED_MAX_X       "Max X:%fx"
 #define UI_TEXT_FEED_MAX_Y       "Max Y:%fy"
 #define UI_TEXT_FEED_MAX_Z       "Max Z:%fz"
@@ -266,12 +311,12 @@
 #define UI_TEXT_ACTION_XPOSITION_FAST2 "X:%x0 mm","Min:%sx Max:%sX"
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
-#define UI_TEXT_FANSPEED          "L\365fter"
-#define UI_TEXT_FAN_OFF           "L\365fter Aus"
-#define UI_TEXT_FAN_25            "L\365fter auf 25%%%"
-#define UI_TEXT_FAN_50            "L\365fter auf 50%%%"
-#define UI_TEXT_FAN_75            "L\365fter auf 75%%%"
-#define UI_TEXT_FAN_FULL          "L\365fter Voll"
+#define UI_TEXT_FANSPEED          "L" STR_uuml "fter"
+#define UI_TEXT_FAN_OFF           "L" STR_uuml "fter Aus"
+#define UI_TEXT_FAN_25            "L" STR_uuml "fter auf 25%%%"
+#define UI_TEXT_FAN_50            "L" STR_uuml "fter auf 50%%%"
+#define UI_TEXT_FAN_75            "L" STR_uuml "fter auf 75%%%"
+#define UI_TEXT_FAN_FULL          "L" STR_uuml "fter Voll"
 #define UI_TEXT_STEPPER_INACTIVE  "Motor Inaktiv"
 #define UI_TEXT_STEPPER_INACTIVE2 "Aus nach:%is","[s] 0=Aus"
 #define UI_TEXT_POWER_INACTIVE    "Max. Inaktiv"

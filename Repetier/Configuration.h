@@ -49,16 +49,17 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MEGA/RAMPS up to 1.2       = 3
 // RAMPS 1.3/RAMPS 1.4        = 33
 // Gen6                       = 5 
+// Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
 // Gen7 1.1 till 1.3.x        = 7
+// Gen7 1.4.1 and later       = 71
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Foltyn 3D Master           = 12
-// Gen7 1.4.1 and later       = 71
 // MegaTronics                = 70
 // Rambo                      = 301
-// Arduino Due                = 401
+// Arduino Due                = 401 // This is only experimental
 
 #define MOTHERBOARD 12
 #include "pins.h"
@@ -1007,5 +1008,10 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 /** You can store the current position with M401 and go back to it with M402. 
    This works only if feature is set to true. */
 #define FEATURE_MEMORY_POSITION true
+
+/** Should support for fan control be compiled in. If you enable this make sure 
+the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
+is also used for the heater if you have 2 extruders connected. */
+#define FEATURE_FAN_CONTROL true
 #endif
 

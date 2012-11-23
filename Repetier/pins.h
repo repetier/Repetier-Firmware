@@ -290,7 +290,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
 #define TEMP_1_PIN         14   // ANALOG NUMBERING
 #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
-#define E1_PINS E_1_STEP_PIN,E_1_DIR_PIN,E_1_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 
 #else // RAMPS_V_1_1 or RAMPS_V_1_2 as default
@@ -403,13 +403,13 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
-* Gen6 pin assignment
+* Gen6 pin assignment (5) and Gen6 deluxe assignment (51)
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 5
+#if MOTHERBOARD == 5 || MOTHERBOARD == 51
     #define KNOWN_BOARD 1
 
-#ifndef __AVR_ATmega644P__
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu.
 #endif
 
@@ -440,7 +440,13 @@ STEPPER_CURRENT_CONTROL
     #define E_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
     #define TEMP_0_PIN      5     //changed @ rkoeppl 20110410
     #define HEATER_0_PIN    14    //changed @ rkoeppl 20110410
-    #define HEATER_1_PIN    -1    //changed @ rkoeppl 20110410
+#if MOTHERBOARD == 5
+    #define HEATER_1_PIN  -1    //changed @ rkoeppl 20110410
+    #define TEMP_1_PIN    -1    //changed @ rkoeppl 20110410
+#else
+    #define HEATER_1_PIN   1    //changed @ rkoeppl 20110410
+    #define TEMP_1_PIN     0    //changed @ rkoeppl 20110410
+#endif
     
     
     #define SDPOWER          -1
