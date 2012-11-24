@@ -251,7 +251,7 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
   float k = r0*exp(-beta/t0);
   float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
   for(byte i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
-    float t = minTemp+i*delta;
+    float t = maxTemp-i*delta;
     float r = exp(beta/(t+272.65))*k;
     float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
     int adc = (int)(v);
@@ -685,11 +685,15 @@ float conv_raw_temp(byte type,int raw_temp) {
       short oldtemp = temptable[1];
       short newraw,newtemp;
       raw_temp = (1023<<(2-ANALOG_REDUCE_BITS))-raw_temp;
+      //OUT_P_I("Raw ",raw_temp);
       while(i<GENERIC_THERM_NUM_ENTRIES*2) {
         newraw = temptable[i++];
         newtemp = temptable[i++];
-        if (newraw > raw_temp)
+        if (newraw > raw_temp) {
+          //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
+          //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
           return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
+        }
         oldtemp = newtemp;
         oldraw = newraw;
       }

@@ -423,10 +423,20 @@ The capacitor is for reducing noise from long thermistor cable. If you don't hav
 If you don't need the generic table, uncomment the following define.
 */
 //#define USE_GENERIC_THERMISTORTABLE_1
+
+/* Some examples for different thermistors:
+
+EPCOS B57560G104+ : R0 = 100000  T0 = 25  Beta = 4036
+EPCOS 100K Thermistor (B57560G1104F) :  R0 = 100000  T0 = 25  Beta = 4092
+ATC Semitec 104GT-2 : R0 = 100000  T0 = 25  Beta = 4267
+Honeywell 100K Thermistor (135-104LAG-J01)  : R0 = 100000  T0 = 25  Beta = 3974
+
+*/
+
 /** Reference resistance */
-#define GENERIC_THERM1_R0 1042.7
+#define GENERIC_THERM1_R0 100000
 /** Temperature at reference resistance */
-#define GENERIC_THERM1_T0 170
+#define GENERIC_THERM1_T0 25
 /** Beta value of thermistor
 
 You can use the beta from the datasheet or compute it yourself. See
