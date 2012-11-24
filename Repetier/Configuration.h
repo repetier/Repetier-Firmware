@@ -355,12 +355,6 @@ need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm h
 /** Skip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
 #define SKIP_M109_IF_WITHIN 2
 
-/** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR0 28
-/** Number of entries in the user thermistortable 1. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR1 0
-/** Number of entries in the user thermistortable 2. Set to 0 to disable it. */
-#define NUM_TEMPS_USERTHERMISTOR2 0
 /** \brief Set PID scaling 
 
 PID values assume a usable range from 0-255. This can be further limited to EXT0_PID_MAX by to methods.
@@ -392,12 +386,18 @@ temperature*8.
 
 If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7! 
 */
+/** Number of entries in the user thermistortable 0. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR0 28
 #define USER_THERMISTORTABLE0  {\
   {1*4,864*8},{21*4,300*8},{25*4,290*8},{29*4,280*8},{33*4,270*8},{39*4,260*8},{46*4,250*8},{54*4,240*8},{64*4,230*8},{75*4,220*8},\
   {90*4,210*8},{107*4,200*8},{128*4,190*8},{154*4,180*8},{184*4,170*8},{221*4,160*8},{265*4,150*8},{316*4,140*8},{375*4,130*8},\
   {441*4,120*8},{513*4,110*8},{588*4,100*8},{734*4,80*8},{856*4,60*8},{938*4,40*8},{986*4,20*8},{1008*4,0*8},{1018*4,-20*8}	}
 
+/** Number of entries in the user thermistortable 1. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR1 0
 #define USER_THERMISTORTABLE1  {}  
+/** Number of entries in the user thermistortable 2. Set to 0 to disable it. */
+#define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2  {}  
 
 /** If defined, creates a thermistortable at startup.
@@ -674,7 +674,8 @@ on this endstop.
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 //#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
-#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+//#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+#define MOTOR_CURRENT {48713,48713,42713,42713,42713} // Values 0-65535 (3D Master 35713 = ~1A)
 
 // Delta settings
 #if DRIVE_SYSTEM==3

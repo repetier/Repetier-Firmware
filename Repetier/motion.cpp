@@ -70,8 +70,6 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
   }
 #endif
    // First we compute the normalized jerk for speed 1
-   //float dx = p2->speedX*p2->invFullSpeed-p1->speedX*p1->invFullSpeed;
-   //float dy = p2->speedY*p2->invFullSpeed-p1->speedY*p1->invFullSpeed;
    float dx = p2->speedX-p1->speedX;
    float dy = p2->speedY-p1->speedY;
    float factor=1,tmp;
@@ -81,6 +79,7 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
 #else
    float jerk = sqrt(dx*dx+dy*dy);
 #endif
+   //if(DEBUG_ECHO) {OUT_P_F_LN("Jerk:",jerk);OUT_P_F_LN("FS:",p1->fullSpeed);OUT_P_F_LN("MaxJerk:",printer_state.maxJerk);}
    if(jerk>printer_state.maxJerk)
      factor = printer_state.maxJerk/jerk;
 #if (DRIVE_SYSTEM!=3)
@@ -98,8 +97,9 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
      tmp = current_extruder->maxStartFeedrate/eJerk;
      if(tmp<factor) factor = tmp;
    }
-   p1->maxJunctionSpeed = p1->fullSpeed*factor;
+   p1->maxJunctionSpeed = p1->fullSpeed*factor;   
    if(p1->maxJunctionSpeed>p2->fullSpeed) p1->maxJunctionSpeed = p2->fullSpeed;
+   //if(DEBUG_ECHO) OUT_P_F_LN("Factor:",factor);
    //if(DEBUG_ECHO) OUT_P_F_LN("JSPD:",p1->maxJunctionSpeed);
 }
 
@@ -207,14 +207,14 @@ inline void backwardPlanner(byte p,byte last) {
       }
     }
 #endif
-	// Avoid speed calc once crusing in split delta move
-	#if DRIVE_SYSTEM==3
-	if (prev->moveID==act->moveID && lastJunctionSpeed==prev->maxJunctionSpeed) {
+    // Avoid speed calc once crusing in split delta move
+#if DRIVE_SYSTEM==3
+    if (prev->moveID==act->moveID && lastJunctionSpeed==prev->maxJunctionSpeed) {
       act->startSpeed = prev->endSpeed = lastJunctionSpeed;
       prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
       act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
-	}
-	#endif
+    }
+#endif
 
     // Switch move-retraction or vice versa start always with save speeds! Keeps extruder from blocking
     if(((prev->dir & 240)!=128) && ((act->dir & 240)==128)) { // switch move - extruder only move
@@ -227,27 +227,27 @@ inline void backwardPlanner(byte p,byte last) {
       return;
     }
 	
-	// Avoid speed calcs if we know we can accelerate within the line
-	if (act->flags & FLAG_NOMINAL)
-	  lastJunctionSpeed = act->fullSpeed;
-	else
-	  // If you accelerate from end of move to start what speed to you reach?
-    lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->acceleration); // acceleration is acceleration*distance*2! What can be reached if we try?
-	// If that speed is more that the maximum junction speed allowed then ...
-    if(lastJunctionSpeed>=prev->maxJunctionSpeed) { // Limit is reached
-	  // If the previous line's end speed has not been updated to maximum speed then do it now
+    // Avoid speed calcs if we know we can accelerate within the line
+    if (act->flags & FLAG_NOMINAL)
+      lastJunctionSpeed = act->fullSpeed;
+    else
+      // If you accelerate from end of move to start what speed to you reach?
+      lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->acceleration); // acceleration is acceleration*distance*2! What can be reached if we try?
+      // If that speed is more that the maximum junction speed allowed then ...
+      if(lastJunctionSpeed>=prev->maxJunctionSpeed) { // Limit is reached
+      // If the previous line's end speed has not been updated to maximum speed then do it now
       if(prev->endSpeed!=prev->maxJunctionSpeed) {
         prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
         prev->endSpeed = prev->maxJunctionSpeed; // possibly unneeded???
       }        
-	  // If actual line start speed has not been updated to maximum speed then do it now
+      // If actual line start speed has not been updated to maximum speed then do it now
       if(act->startSpeed!=prev->maxJunctionSpeed) {
         act->startSpeed = prev->maxJunctionSpeed; // possibly unneeded???
         act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
       }
       lastJunctionSpeed = prev->maxJunctionSpeed;     
     } else {
-	  // Block prev end and act start as calculated speed and recalculate plateau speeds (which could move the speed higher again)
+      // Block prev end and act start as calculated speed and recalculate plateau speeds (which could move the speed higher again)
       act->startSpeed = prev->endSpeed = lastJunctionSpeed;
       prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
       act->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
@@ -520,18 +520,22 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   if(p->dir & 16) {
     axis_interval[0] = time_for_move/p->delta[0];
     p->speedX = axis_diff[0]*inv_time_s;
+    if(!(p->dir & 1)) p->speedX = -p->speedX;
   } else p->speedX = 0;
   if(p->dir & 32) {
     axis_interval[1] = time_for_move/p->delta[1];
     p->speedY = axis_diff[1]*inv_time_s;
+    if(!(p->dir & 2)) p->speedY = -p->speedY;
   } else p->speedY = 0;
   if(p->dir & 64) {
     axis_interval[2] = time_for_move/p->delta[2];
     p->speedZ = axis_diff[2]*inv_time_s;
+    if(!(p->dir & 4)) p->speedZ = -p->speedZ;
   } else p->speedZ = 0;
   if(p->dir & 128) {
     axis_interval[3] = time_for_move/p->delta[3];
     p->speedE = axis_diff[3]*inv_time_s;
+    if(!(p->dir & 8)) p->speedE = -p->speedE;
   }
 #if DRIVE_SYSTEM==3
   axis_interval[4] = time_for_move/p->stepsRemaining;
@@ -573,7 +577,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     p->startSpeed = p->endSpeed = safeSpeed(p);
 	// Can accelerate to full speed within the line
 	if (sqrt(p->startSpeed*p->startSpeed+p->acceleration) >= p->fullSpeed)
-		p->flags |= FLAG_NOMINAL;
+	  p->flags |= FLAG_NOMINAL;
 
     p->vMax = F_CPU / p->fullInterval; // maximum steps per second, we can reach
    // if(p->vMax>46000)  // gets overflow in N computation
@@ -587,7 +591,7 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #endif
     p->advanceL = 0;
   } else {
-    float advlin = p->speedE*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
+    float advlin = fabs(p->speedE)*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
     p->advanceL = (65536*advlin)/p->vMax; //advanceLscaled = (65536*vE*k2)/vMax
  #ifdef ENABLE_QUADRATIC_ADVANCE;
     p->advanceFull = 65536*current_extruder->advanceK*p->speedE*p->speedE; // Steps*65536 at full speed
@@ -595,12 +599,12 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     p->advanceRate = p->advanceFull/steps;
     if((p->advanceFull>>16)>maxadv) {
         maxadv = (p->advanceFull>>16);
-        maxadvspeed = p->speedE;
+        maxadvspeed = fabs(p->speedE);
     }
  #endif
     if(advlin>maxadv2) {
       maxadv2 = advlin;
-      maxadvspeed = p->speedE;
+      maxadvspeed = fabs(p->speedE);
     }
   }
 #endif
