@@ -739,7 +739,13 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
 #endif
-  if((p->dir & 240)==0) return; // No steps included
+  if((p->dir & 240)==0) {
+    if(newPath) { // need to delete dummy elements, otherwise commands can get locked.
+      lines_count = 0;
+      lines_pos = lines_write_pos;
+    }
+    return; // No steps included
+  }
   byte primary_axis;
   float xydist2;
 #if USE_OPS==1
@@ -789,13 +795,6 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     printer_state.filamentPrinted+=(axis_diff[3]*printer_state.extrudeMultiply)/100;
   } else
     printer_state.filamentPrinted+=axis_diff[3];
-  if(!(p->dir & 240)) {
-    if(newPath) { // need to delete dummy elements, otherwise commands can get locked.
-      lines_count = 0;
-      lines_pos = lines_write_pos;
-    }
-    return; // No move in command
-  }
 
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
   if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2] && p->delta[1] > p->delta[3]) primary_axis = 1;

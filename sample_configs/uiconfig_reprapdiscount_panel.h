@@ -456,7 +456,7 @@ List of placeholder:
 %O1 : OPS mode = 1
 %O2 : OPS mode = 2
 %Or : OPS retract distance
-%Ob : OPS backslash distance
+%Ob : OPS backlash distance
 %Od : OPS min distance
 %Oa : OPS move after
 %ax : X acceleration during print moves
@@ -713,10 +713,10 @@ UI_MENU_ACTIONCOMMAND(ui_menu_ops_off,UI_TEXT_OPS_OFF,UI_ACTION_OPS_OFF);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_classic,UI_TEXT_OPS_CLASSIC,UI_ACTION_OPS_CLASSIC);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_fast,UI_TEXT_OPS_FAST,UI_ACTION_OPS_FAST);
 UI_MENU_CHANGEACTION(ui_menu_ops_retract,UI_TEXT_OPS_RETRACT,UI_ACTION_OPS_RETRACTDISTANCE);
-UI_MENU_CHANGEACTION(ui_menu_ops_backslash,UI_TEXT_OPS_BACKSLASH,UI_ACTION_OPS_BACKSLASH);
+UI_MENU_CHANGEACTION(ui_menu_ops_backlash,UI_TEXT_OPS_BACKLASH,UI_ACTION_OPS_BACKLASH);
 UI_MENU_CHANGEACTION(ui_menu_ops_mindist,UI_TEXT_OPS_MINDIST,UI_ACTION_OPS_MINDISTANCE);
 UI_MENU_CHANGEACTION(ui_menu_ops_moveafter,UI_TEXT_OPS_MOVE_AFTER,UI_ACTION_OPS_MOVE_AFTER);
-#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backslash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
+#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backlash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
 UI_MENU(ui_menu_ops,UI_MENU_OPS,7+UI_MENU_BACKCNT);
 UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTI_OOZE,ui_menu_ops);
 #define UI_MENU_ADDCONDOPS &ui_menu_ops_sub,

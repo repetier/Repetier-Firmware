@@ -91,14 +91,17 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MICROSTEP16 HIGH,HIGH
 
 
-//Step to split a cirrcle in small Lines 
-#define MM_PER_ARC_SEGMENT 1
-#define MM_PER_ARC_SEGMENT_BIG 3
-
-//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
-#define N_ARC_CORRECTION 25
 
 #include "Configuration.h"
+//Step to split a cirrcle in small Lines 
+#ifndef MM_PER_ARC_SEGMENT
+#define MM_PER_ARC_SEGMENT 1
+#define MM_PER_ARC_SEGMENT_BIG 3
+#else
+#define MM_PER_ARC_SEGMENT_BIG MM_PER_ARC_SEGMENT
+#endif
+//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
+#define N_ARC_CORRECTION 25
 #if CPU_ARCH==ARCH_AVR
 #include <avr/io.h>
 #else
@@ -120,9 +123,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT0_SENSOR_INDEX EXT0_TEMPSENSOR_PIN
 #define EXT0_ANALOG_CHANNEL
 #endif
+
 #if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<100
 #define EXT1_ANALOG_INPUTS 1
-#define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
+#define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS+1
 #define EXT1_ANALOG_CHANNEL KOMMA EXT1_TEMPSENSOR_PIN
 #define KOMMA ,
 #else
@@ -130,9 +134,54 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT1_SENSOR_INDEX EXT1_TEMPSENSOR_PIN
 #define EXT1_ANALOG_CHANNEL
 #endif
+
+#if NUM_EXTRUDER>2 && EXT2_TEMPSENSOR_TYPE<100
+#define EXT2_ANALOG_INPUTS 1
+#define EXT2_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+1
+#define EXT2_ANALOG_CHANNEL KOMMA EXT2_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT2_ANALOG_INPUTS 0
+#define EXT2_SENSOR_INDEX EXT2_TEMPSENSOR_PIN
+#define EXT2_ANALOG_CHANNEL
+#endif
+
+#if NUM_EXTRUDER>3 && EXT3_TEMPSENSOR_TYPE<100
+#define EXT3_ANALOG_INPUTS 1
+#define EXT3_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+1
+#define EXT3_ANALOG_CHANNEL KOMMA EXT3_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT3_ANALOG_INPUTS 0
+#define EXT3_SENSOR_INDEX EXT3_TEMPSENSOR_PIN
+#define EXT3_ANALOG_CHANNEL
+#endif
+
+#if NUM_EXTRUDER>4 && EXT4_TEMPSENSOR_TYPE<100
+#define EXT4_ANALOG_INPUTS 1
+#define EXT4_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+1
+#define EXT4_ANALOG_CHANNEL KOMMA EXT4_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT4_ANALOG_INPUTS 0
+#define EXT4_SENSOR_INDEX EXT4_TEMPSENSOR_PIN
+#define EXT4_ANALOG_CHANNEL
+#endif
+
+#if NUM_EXTRUDER>5 && EXT5_TEMPSENSOR_TYPE<100
+#define EXT5_ANALOG_INPUTS 1
+#define EXT5_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+1
+#define EXT5_ANALOG_CHANNEL KOMMA EXT5_TEMPSENSOR_PIN
+#define KOMMA ,
+#else
+#define EXT5_ANALOG_INPUTS 0
+#define EXT5_SENSOR_INDEX EXT5_TEMPSENSOR_PIN
+#define EXT5_ANALOG_CHANNEL
+#endif
+
 #if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<100
 #define BED_ANALOG_INPUTS 1
-#define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
+#define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+1
 #define BED_ANALOG_CHANNEL KOMMA  HEATED_BED_SENSOR_PIN
 #define KOMMA ,
 #else
@@ -148,7 +197,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #endif
 
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
-#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+BED_ANALOG_INPUTS)
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS)
 #if ANALOG_INPUTS>0
 /** Channels are the MUX-part of ADMUX register */
 #define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL BED_ANALOG_CHANNEL}
@@ -340,16 +389,33 @@ inline void extruder_step() {
 #else
   switch(current_extruder->id) {
   case 0:
+#if NUM_EXTRUDER>0
     WRITE(EXT0_STEP_PIN,HIGH);
+#endif
     break;
-#ifdef EXT1_STEP_PIN
+#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
   case 1:
     WRITE(EXT1_STEP_PIN,HIGH);
     break;
 #endif
-#ifdef EXT2_STEP_PIN
+#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER>2
   case 2:
     WRITE(EXT2_STEP_PIN,HIGH);
+    break;
+#endif
+#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER>3
+  case 3:
+    WRITE(EXT3_STEP_PIN,HIGH);
+    break;
+#endif
+#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER>4
+  case 4:
+    WRITE(EXT4_STEP_PIN,HIGH);
+    break;
+#endif
+#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER>5
+  case 5:
+    WRITE(EXT5_STEP_PIN,HIGH);
     break;
 #endif
   }
@@ -365,16 +431,33 @@ inline void extruder_unstep() {
 #else
   switch(current_extruder->id) {
   case 0:
+#if NUM_EXTRUDER>0
     WRITE(EXT0_STEP_PIN,LOW);
+#endif
     break;
-#ifdef EXT1_STEP_PIN
+#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
   case 1:
     WRITE(EXT1_STEP_PIN,LOW);
     break;
 #endif
-#ifdef EXT2_STEP_PIN
+#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER>2
   case 2:
     WRITE(EXT2_STEP_PIN,LOW);
+    break;
+#endif
+#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER>3
+  case 3:
+    WRITE(EXT3_STEP_PIN,LOW);
+    break;
+#endif
+#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER>4
+  case 4:
+    WRITE(EXT4_STEP_PIN,LOW);
+    break;
+#endif
+#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER>5
+  case 5:
+    WRITE(EXT5_STEP_PIN,LOW);
     break;
 #endif
   }
@@ -389,13 +472,15 @@ inline void extruder_set_direction(byte dir) {
     WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
 #else
   switch(current_extruder->id) {
+#if NUM_EXTRUDER>0
   case 0:
   if(dir)
     WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
   else
     WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
     break;
-#ifdef EXT1_DIR_PIN
+#endif
+#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
   case 1:
   if(dir)
     WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
@@ -403,12 +488,36 @@ inline void extruder_set_direction(byte dir) {
     WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
     break;
 #endif
-#ifdef EXT2_DIR_PIN
+#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER>2
   case 2:
   if(dir)
     WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
   else
     WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
+    break;
+#endif
+#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER>3
+  case 3:
+  if(dir)
+    WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
+  else
+    WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
+    break;
+#endif
+#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER>4
+  case 4:
+  if(dir)
+    WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
+  else
+    WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
+    break;
+#endif
+#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER>5
+  case 5:
+  if(dir)
+    WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
+  else
+    WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
     break;
 #endif
   }
@@ -844,4 +953,8 @@ inline void  enable_z() {
 #define E_AXIS 3
 
 #endif
+
+#define STR(s) #s
+#define XSTR(s) STR(s)
+
 #endif

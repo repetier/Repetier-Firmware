@@ -675,7 +675,7 @@ on this endstop.
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 //#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
-#define MOTOR_CURRENT {48713,48713,42713,42713,42713} // Values 0-65535 (3D Master 35713 = ~1A)
+#define MOTOR_CURRENT {48713,48713,42713,48713,42713} // Values 0-65535 (3D Master 35713 = ~1A)
 
 // Delta settings
 #if DRIVE_SYSTEM==3

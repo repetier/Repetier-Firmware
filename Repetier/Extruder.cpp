@@ -217,11 +217,13 @@ byte counter_250ms=25;
 extern int read_max6675(byte ss_pin);
 #endif
 
+#if ANALOG_INPUTS>0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
 uint8 osAnalogInputCounter[ANALOG_INPUTS];
 uint osAnalogInputBuildup[ANALOG_INPUTS];
 uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
+#endif
 
 void initHeatedBed() {
 #if HAVE_HEATED_BED
@@ -293,23 +295,23 @@ void initExtruder() {
   SET_OUTPUT(EXT0_DIR_PIN);
   SET_OUTPUT(EXT0_STEP_PIN);
 #endif
-#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN>-1
+#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN>-1 && NUM_EXTRUDER>1
   SET_OUTPUT(EXT1_DIR_PIN);
   SET_OUTPUT(EXT1_STEP_PIN);
 #endif
-#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN>-1
+#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN>-1 && NUM_EXTRUDER>2
   SET_OUTPUT(EXT2_DIR_PIN);
   SET_OUTPUT(EXT2_STEP_PIN);
 #endif
-#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN>-1
+#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN>-1 && NUM_EXTRUDER>3
   SET_OUTPUT(EXT3_DIR_PIN);
   SET_OUTPUT(EXT3_STEP_PIN);
 #endif
-#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN>-1
+#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN>-1 && NUM_EXTRUDER>4
   SET_OUTPUT(EXT4_DIR_PIN);
   SET_OUTPUT(EXT4_STEP_PIN);
 #endif
-#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN>-1
+#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN>-1 && NUM_EXTRUDER>5
   SET_OUTPUT(EXT5_DIR_PIN);
   SET_OUTPUT(EXT5_STEP_PIN);
 #endif
@@ -434,6 +436,8 @@ void extruder_select(byte ext_num) {
   if(dx || dy) {
     float oldfeedrate = printer_state.feedrate;
     move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+    printer_state.offsetX += dx;
+    printer_state.offsetY += dy;
     printer_state.feedrate = oldfeedrate;
   }
 #if NUM_EXTRUDER>1
@@ -574,6 +578,7 @@ const byte temptables_num[7] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMP
 
 int read_raw_temperature(byte type,byte pin) {
   switch(type) {
+#if ANALOG_INPUTS>0
     case 1:
     case 2:
     case 3:
@@ -591,6 +596,7 @@ int read_raw_temperature(byte type,byte pin) {
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result    
     case 100: // AD595
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
+#endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
       return read_max6675(pin);
