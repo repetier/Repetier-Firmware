@@ -992,7 +992,17 @@ void UIDisplay::parse(char *txt,bool ram) {
           printCols[col++]='%';
         break;
       case 'x':
-        if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+        if(c2>='0' && c2<='3') 
+#if NUM_EXTRUDER>0
+        if(c2=='0')
+          fvalue = (float)(printer_state.currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
+        else if(c2=='1')
+          fvalue = (float)(printer_state.currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
+        else
+          fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+#else 
+        fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+#endif
         addFloat(fvalue,3,2);
         break;
       case 'y':
@@ -1002,6 +1012,7 @@ void UIDisplay::parse(char *txt,bool ram) {
 #endif
         break;
       case 'X': // Extruder related 
+#if NUM_EXTRUDER>0
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
 #ifdef TEMP_PID
         else if(c2=='i') {addFloat(current_extruder->tempControl.pidIGain,4,2);}
@@ -1028,6 +1039,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         else if(c2=='f') {addFloat(current_extruder->maxStartFeedrate,5,0);}
         else if(c2=='F') {addFloat(current_extruder->maxFeedrate,5,0);}
         else if(c2=='A') {addFloat(current_extruder->maxAcceleration,5,0);}
+#endif
         break;
       case 's': // Endstop positions
         if(c2=='x') {

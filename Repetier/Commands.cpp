@@ -156,7 +156,15 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       if(ENDSTOP_X_BACK_ON_HOME > 0)
         move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
-      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps : printer_state.xMaxSteps;
+      long offX = 0;
+#if NUM_EXTRUDER>1
+      for(byte i=0;i<NUM_EXTRUDER;i++) offX = max(offX,extruder[i].xOffset);
+      // Reposition extruder that way, that all extruders can be selected at home pos.
+#endif
+      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps-offX : printer_state.xMaxSteps+offX;
+#if NUM_EXTRUDER>1
+      move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);      
+#endif
     }
   }        
   if(yaxis) {
@@ -172,7 +180,15 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       if(ENDSTOP_Y_BACK_ON_HOME > 0)
         move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
-      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer_state.yMinSteps : printer_state.yMaxSteps;
+      long offY = 0;
+#if NUM_EXTRUDER>1
+      for(byte i=0;i<NUM_EXTRUDER;i++) offY = max(offY,extruder[i].yOffset);
+      // Reposition extruder that way, that all extruders can be selected at home pos.
+#endif
+      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer_state.yMinSteps-offY : printer_state.yMaxSteps+offY;
+#if NUM_EXTRUDER>1
+      move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);      
+#endif
     }
   }        
   if(zaxis) {
@@ -651,24 +667,24 @@ void process_command(GCode *com)
               codenum = cur_time; 
             }
             check_periodical();
-            gcode_read_serial();
+            //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
-            if (current_extruder->waitRetractUnits > 0 && !retracted && dir && current_extruder->tempControl.currentTemperatureC > current_extruder->waitRetractTemperature) {
-                move_steps(0,0,0,-current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+            if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dir && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature) {
+                move_steps(0,0,0,-actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
         	retracted = 1;
             }
 #endif
-            if((waituntil==0 && (dir ? current_extruder->tempControl.currentTemperatureC >= current_extruder->tempControl.targetTemperatureC-0.5:current_extruder->tempControl.currentTemperatureC <= current_extruder->tempControl.targetTemperatureC+0.5))
+            if((waituntil==0 && (dir ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-0.5:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+0.5))
 #ifdef TEMP_HYSTERESIS
-            || (waituntil!=0 && (abs(current_extruder->tempControl.currentTemperatureC - current_extruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)            
+            || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)            
 #endif
             ) {
-              waituntil = cur_time+1000UL*(unsigned long)current_extruder->watchPeriod; // now wait for temp. to stabalize
+              waituntil = cur_time+1000UL*(unsigned long)actExtruder->watchPeriod; // now wait for temp. to stabalize
             }
           } while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
 #if RETRACT_DURING_HEATUP
-          if (retracted) {
-            move_steps(0,0,0,current_extruder->waitRetractUnits * axis_steps_per_unit[3],current_extruder->maxFeedrate,false,false);
+          if (retracted && actExtruder==current_extruder) {
+            move_steps(0,0,0,actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
           }
 #endif
         }

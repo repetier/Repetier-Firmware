@@ -394,11 +394,11 @@ void extruder_select(byte ext_num) {
   }
 #endif
    current_extruder->extrudePosition = printer_state.currentPositionSteps[3];
-   long dx = -current_extruder->xOffset;
-   long dy = -current_extruder->yOffset;
+   long dx = current_extruder->xOffset;
+   long dy = current_extruder->yOffset;
    current_extruder = &extruder[ext_num];
-   dx += current_extruder->xOffset;
-   dy += current_extruder->yOffset;
+   dx -= current_extruder->xOffset;
+   dy -= current_extruder->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
    // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
    printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
