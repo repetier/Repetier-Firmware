@@ -366,7 +366,7 @@ void microstep_init()
 /**
   \brief Execute the command stored in com.
 */
-void process_command(GCode *com)
+void process_command(GCode *com,byte bufferedCommand)
 {
   unsigned long codenum; //throw away variable
 #ifdef INCLUDE_DEBUG_COMMUNICATION
@@ -1114,10 +1114,7 @@ void process_command(GCode *com)
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();
-    byte t = com->T;
-    gcode_command_finished(com); // free command cache, so we can execute commands on extruder change
-    extruder_select(t);
-    return; // Must finish early to prevent double command finished action
+    extruder_select(com->T);
   } else{
     if(DEBUG_ERRORS) {
       OUT_P("Unknown command:");
@@ -1125,6 +1122,7 @@ void process_command(GCode *com)
       out.println();
     }
   }
-  gcode_command_finished(com); // free command cache
+  if(bufferedCommand)
+    gcode_command_finished(com); // free command cache
 }
 

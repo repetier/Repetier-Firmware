@@ -597,10 +597,10 @@ void loop()
 #endif
         gcode_command_finished(code);
     } else {
-        process_command(code);
+        process_command(code,true);
     }
 #else
-    process_command(code);
+    process_command(code,true);
 #endif
   }
   defaultLoopActions();

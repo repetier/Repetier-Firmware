@@ -549,7 +549,7 @@ extern void manage_temperatures();
 
 extern byte manage_monitor;
 
-void process_command(GCode *code);
+void process_command(GCode *code,byte bufferedCommand);
 
 void manage_inactivity(byte debug);
 

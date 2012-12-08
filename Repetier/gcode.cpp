@@ -632,15 +632,9 @@ void gcode_execute_PString(PGM_P cmd) {
   char buf[80];
   byte buflen;
   char c;
+  GCode code;
   do {
     // Wait for a free place in command buffer
-    while((gcode_wait_all_parsed && gcode_buflen) || (gcode_buflen>=GCODE_BUFFER_SIZE)) {
-      GCode *code = gcode_next_command();
-      if(code)
-        process_command(code);
-      defaultLoopActions();
-    }
-    gcode_wait_all_parsed=false;
     // Scan next command from string
     byte comment=0; 
     buflen = 0;   
@@ -656,19 +650,11 @@ void gcode_execute_PString(PGM_P cmd) {
     }
     buf[buflen]=0;
     // Send command into command buffer
-    GCode *act;
-    gcode_comment = false;
-    act = &gcode_buffer[gcode_windex];
-    if(gcode_parse_ascii(act,(char *)buf)) { // Success
-      gcode_checkinsert(act);
+    if(gcode_parse_ascii(&code,(char *)buf) && (code.params & 518)) { // Success
+      process_command(&code,false);
+      defaultLoopActions();
     }
   } while(c);
-  while(gcode_buflen) { // Clear buffer for all commands using buf, so no wrong memory usage occurs
-    GCode *code = gcode_next_command();
-    if(code)
-      process_command(code);
-    defaultLoopActions();
-  }
 }
 /** \brief Read from serial console or sdcard.
 
