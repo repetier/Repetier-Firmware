@@ -24,6 +24,10 @@
 
 #if SDSUPPORT
 
+#ifndef SD_ALLOW_LONG_NAMES
+#define SD_ALLOW_LONG_NAMES false
+#endif
+
   SDCard sd;
 
 SDCard::SDCard() {
@@ -143,11 +147,13 @@ char *SDCard::createFilename(char *buffer,const dir_t &p)
 }
 bool SDCard::showFilename(const uint8_t *name) {
   if (*name == DIR_NAME_DELETED || *name == '.') return false;
+#if !SD_ALLOW_LONG_NAMES
   byte i=11;
   while(i--) {
      if(*name=='~') return false;
      name++;
   }
+#endif
   return true; 
 }
 void  SDCard::lsRecursive(SdBaseFile *parent,byte level)

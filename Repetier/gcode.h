@@ -160,7 +160,7 @@ extern SerialOutput out;
 /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
 extern GCode *gcode_next_command();
 /** Frees the cache used by the last command fetched. */ 
-extern void gcode_command_finished();
+extern void gcode_command_finished(GCode *code);
 // check for new commands
 extern void gcode_read_serial();
 extern void gcode_execute_PString(PGM_P cmd);

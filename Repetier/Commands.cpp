@@ -372,7 +372,7 @@ void process_command(GCode *com)
 #ifdef INCLUDE_DEBUG_COMMUNICATION
   if(DEBUG_COMMUNICATION) {
     if(GCODE_HAS_G(com) || (GCODE_HAS_M(com) && com->M!=111)) {
-      gcode_command_finished(); // free command cache
+      gcode_command_finished(com); // free command cache
       previous_millis_cmd = millis();
       return;      
     }
@@ -1114,7 +1114,10 @@ void process_command(GCode *com)
     }
   } else if(GCODE_HAS_T(com))  { // Process T code
     wait_until_end_of_move();
-    extruder_select(com->T);
+    byte t = com->T;
+    gcode_command_finished(com); // free command cache, so we can execute commands on extruder change
+    extruder_select(t);
+    return; // Must finish early to prevent double command finished action
   } else{
     if(DEBUG_ERRORS) {
       OUT_P("Unknown command:");
@@ -1122,13 +1125,6 @@ void process_command(GCode *com)
       out.println();
     }
   }
-#ifdef ECHO_ON_EXECUTE
-  if(DEBUG_ECHO) {
-      OUT_P("Echo:");
-      gcode_print_command(com);
-      out.println();
-  }
-#endif
-  gcode_command_finished(); // free command cache
+  gcode_command_finished(com); // free command cache
 }
 

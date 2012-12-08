@@ -595,7 +595,7 @@ void loop()
            out.println();
         }
 #endif
-        gcode_command_finished();
+        gcode_command_finished(code);
     } else {
         process_command(code);
     }

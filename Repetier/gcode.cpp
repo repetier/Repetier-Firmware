@@ -615,7 +615,15 @@ GCode *gcode_next_command() {
 /** \brief Removes the last returned command from cache.
 
 */
-void gcode_command_finished() {
+void gcode_command_finished(GCode *code) {
+  if(!gcode_buflen) return; // Should not happen, but safety first
+#ifdef ECHO_ON_EXECUTE
+  if(DEBUG_ECHO) {
+      OUT_P("Echo:");
+      gcode_print_command(code);
+      out.println();
+  }
+#endif
   gcode_buflen--;
 }
 
@@ -655,6 +663,12 @@ void gcode_execute_PString(PGM_P cmd) {
       gcode_checkinsert(act);
     }
   } while(c);
+  while(gcode_buflen) { // Clear buffer for all commands using buf, so no wrong memory usage occurs
+    GCode *code = gcode_next_command();
+    if(code)
+      process_command(code);
+    defaultLoopActions();
+  }
 }
 /** \brief Read from serial console or sdcard.
 
@@ -873,59 +887,6 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->params |= 2;
      if(code->M>255) code->params |= 4096;
   }
-  if((pos = strchr(line,'G'))!=0) { // G command
-     code->G = gcode_value_long(++pos) & 0xffff;
-     code->params |= 4;
-     if(code->G>255) code->params |= 4096;
-  }
-  if((pos = strchr(line,'X'))!=0) { 
-     code->X = gcode_value(++pos);
-     code->params |= 8;
-  }
-  if((pos = strchr(line,'Y'))!=0) { 
-     code->Y = gcode_value(++pos);
-     code->params |= 16;
-  }
-  if((pos = strchr(line,'Z'))!=0) { 
-     code->Z = gcode_value(++pos);
-     code->params |= 32;
-  }
-  if((pos = strchr(line,'E'))!=0) { 
-     code->E = gcode_value(++pos);
-     code->params |= 64;
-  }
-  if((pos = strchr(line,'F'))!=0) { 
-     code->F = gcode_value(++pos);
-     code->params |= 256;
-  }
-  if((pos = strchr(line,'T'))!=0) { // M command
-     code->T = gcode_value_long(++pos) & 0xff;
-     code->params |= 512;
-  }
-  if((pos = strchr(line,'S'))!=0) { // M command
-     code->S = gcode_value_long(++pos);
-     code->params |= 1024;
-  }
-  if((pos = strchr(line,'P'))!=0) { // M command
-     code->P = gcode_value_long(++pos);
-     code->params |= 2048;
-  }
-  if((pos = strchr(line,'I'))!=0) { 
-     code->I = gcode_value(++pos);
-     code->params2 |= 1;
-     code->params |= 4096; // Needs V2 for saving
-  }
-  if((pos = strchr(line,'J'))!=0) { 
-     code->J = gcode_value(++pos);
-     code->params2 |= 2;
-     code->params |= 4096; // Needs V2 for saving
-  }
-  if((pos = strchr(line,'R'))!=0) { 
-     code->R = gcode_value(++pos);
-     code->params2 |= 4;
-     code->params |= 4096; // Needs V2 for saving
-  }
-
   if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 32 || code->M == 117)) {
      // after M command we got a filename for sd card management
      char *sp = line;
@@ -943,6 +904,59 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
      gcode_wait_all_parsed = true; // don't risk string be deleted
      code->params |= 32768;
+  } else {
+    if((pos = strchr(line,'G'))!=0) { // G command
+       code->G = gcode_value_long(++pos) & 0xffff;
+       code->params |= 4;
+       if(code->G>255) code->params |= 4096;
+    }
+    if((pos = strchr(line,'X'))!=0) { 
+       code->X = gcode_value(++pos);
+       code->params |= 8;
+    }
+    if((pos = strchr(line,'Y'))!=0) { 
+       code->Y = gcode_value(++pos);
+       code->params |= 16;
+    }
+    if((pos = strchr(line,'Z'))!=0) { 
+       code->Z = gcode_value(++pos);
+       code->params |= 32;
+    }
+    if((pos = strchr(line,'E'))!=0) { 
+       code->E = gcode_value(++pos);
+       code->params |= 64;
+    }
+    if((pos = strchr(line,'F'))!=0) { 
+       code->F = gcode_value(++pos);
+       code->params |= 256;
+    }
+    if((pos = strchr(line,'T'))!=0) { // M command
+       code->T = gcode_value_long(++pos) & 0xff;
+       code->params |= 512;
+    }
+    if((pos = strchr(line,'S'))!=0) { // M command
+       code->S = gcode_value_long(++pos);
+       code->params |= 1024;
+    }
+    if((pos = strchr(line,'P'))!=0) { // M command
+       code->P = gcode_value_long(++pos);
+       code->params |= 2048;
+    }
+    if((pos = strchr(line,'I'))!=0) { 
+       code->I = gcode_value(++pos);
+       code->params2 |= 1;
+       code->params |= 4096; // Needs V2 for saving
+    }
+    if((pos = strchr(line,'J'))!=0) { 
+       code->J = gcode_value(++pos);
+       code->params2 |= 2;
+       code->params |= 4096; // Needs V2 for saving
+    }
+    if((pos = strchr(line,'R'))!=0) { 
+       code->R = gcode_value(++pos);
+       code->params2 |= 4;
+       code->params |= 4096; // Needs V2 for saving
+    }
   }
   if((pos = strchr(line,'*'))!=0) { // checksum
     byte checksum_given = gcode_value_long(pos+1);
