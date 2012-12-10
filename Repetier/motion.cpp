@@ -1055,6 +1055,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   p->primaryAxis = 3;
   p->stepsRemaining = p->delta[3];
   p->distance = fabs(axis_diff[3]);
+  p->moveID = lastMoveID++;
   calculate_move(p,axis_diff,check_endstops,pathOptimize);
 }
 

@@ -936,10 +936,6 @@ void process_command(GCode *com,byte bufferedCommand)
         else
           change_flowate_multiply(100);
         break;
-      case 222: //M222 F_CPU / S
-       if(GCODE_HAS_S(com))
-         out.println_long_P(PSTR("F_CPU/x="),CPUDivU2(com->S));
-       break;
  #ifdef USE_ADVANCE
      case 223: // Extruder interrupt test
         if(GCODE_HAS_S(com))
