@@ -153,10 +153,10 @@ Custom M Codes
 #if X_STEP_PIN<0 || Y_STEP_PIN<0 || Z_STEP_PIN<0
 #error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN
 #endif
-#if EXT0_STEP_PIN<0
+#if EXT0_STEP_PIN<0 && NUM_EXTRUDER>0
 #error EXT0_STEP_PIN not set to a pin number.
 #endif
-#if EXT0_DIR_PIN<0
+#if EXT0_DIR_PIN<0 && NUM_EXTRUDER>0
 #error EXT0_DIR_PIN not set to a pin number.
 #endif
 #if MOVE_CACHE_SIZE<4
@@ -467,6 +467,11 @@ SET_OUTPUT(ANALYZER_CH7);
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1
   SET_OUTPUT(EXT5_HEATER_PIN);
   WRITE(EXT5_HEATER_PIN,LOW);
+#endif
+
+#ifdef XY_GANTRY
+  printer_state.motorX = 0;
+  printer_state.motorY = 0;
 #endif
 
 #if STEPPER_CURRENT_CONTROL!=CURRENT_CONTROL_MANUAL
@@ -1686,8 +1691,15 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 //OUT_P_F_LN(":",cur->endSpeed);
 }*/
       //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
+#ifdef XY_GANTRY
+      if(cur->dir & 48) {
+        enable_x();
+        enable_y();
+      }
+#else
       if(cur->dir & 16) enable_x();
       if(cur->dir & 32) enable_y();
+#endif
       if(cur->dir & 64) {
         enable_z();
       }
@@ -1758,6 +1770,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
       printer_state.timer = 0;
       cli();
       //Determine direction of movement,check if endstop was hit
+#if !defined(XY_GANTRY)
       if(cur->dir & 1) {
         WRITE(X_DIR_PIN,!INVERT_X_DIR);
       } else {
@@ -1768,6 +1781,38 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
       } else {
         WRITE(Y_DIR_PIN,INVERT_Y_DIR);
       }
+#else
+      long gdx = (cur->dir & 1 ? cur->delta[0] : -cur->delta[0]); // Compute signed difference in steps
+      long gdy = (cur->dir & 2 ? cur->delta[1] : -cur->delta[1]);
+#if DRIVE_SYSTEM==1
+      if(gdx+gdy>=0) {
+        WRITE(X_DIR_PIN,!INVERT_X_DIR);
+        ANALYZER_ON(ANALYZER_CH4);
+      } else {        
+        WRITE(X_DIR_PIN,INVERT_X_DIR);
+        ANALYZER_OFF(ANALYZER_CH4);
+      }
+      if(gdx>gdy) {
+        WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+        ANALYZER_ON(ANALYZER_CH5);
+      } else {
+        WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+        ANALYZER_OFF(ANALYZER_CH5);
+      }
+#endif
+#if DRIVE_SYSTEM==2
+      if(gdx+gdy>=0) {
+        WRITE(X_DIR_PIN,!INVERT_X_DIR);
+      } else {
+        WRITE(X_DIR_PIN,INVERT_X_DIR);
+      }
+      if(gdx<=gdy) {
+        WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+      } else {
+        WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+      }
+#endif
+#endif
       if(cur->dir & 4) {
         WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
       } else {
@@ -1887,10 +1932,34 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
         cur->error[3] += cur_errupd;
       }
     }
+#if defined(XY_GANTRY)
+#endif
     if(cur->dir & 16) {
       if((cur->error[0] -= cur->delta[0]) < 0) {
+        ANALYZER_ON(ANALYZER_CH6);
+#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
+#else
+#if DRIVE_SYSTEM==1
+        if(cur->dir & 1) {
+          printer_state.motorX++;
+          printer_state.motorY++;
+        } else {
+          printer_state.motorX--;
+          printer_state.motorY--;
+        }
+#endif
+#if DRIVE_SYSTEM==2
+        if(cur->dir & 1) {
+          printer_state.motorX++;
+          printer_state.motorY--;
+        } else {
+          printer_state.motorX--;
+          printer_state.motorY++;
+        }
+#endif
+#endif // XY_GANTRY
         cur->error[0] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
@@ -1899,14 +1968,58 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     }
     if(cur->dir & 32) {
       if((cur->error[1] -= cur->delta[1]) < 0) {
+        ANALYZER_ON(ANALYZER_CH7);
+#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
+#else
+#if DRIVE_SYSTEM==1
+        if(cur->dir & 2) {
+          printer_state.motorX++;
+          printer_state.motorY--;
+        } else {
+          printer_state.motorX--;
+          printer_state.motorY++;
+        }
+#endif
+#if DRIVE_SYSTEM==2
+        if(cur->dir & 2) {
+          printer_state.motorX++;
+          printer_state.motorY++;
+        } else {
+          printer_state.motorX--;
+          printer_state.motorY--;
+        }
+#endif
+#endif // XY_GANTRY
         cur->error[1] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
 #endif
       }
     }
+#if defined(XY_GANTRY)
+    if(printer_state.motorX <= -2) {
+      ANALYZER_ON(ANALYZER_CH2);
+      WRITE(X_STEP_PIN,HIGH);
+      printer_state.motorX += 2;
+    } else if(printer_state.motorX >= 2) {
+      ANALYZER_ON(ANALYZER_CH2);
+      WRITE(X_STEP_PIN,HIGH);
+      printer_state.motorX -= 2;
+    }
+    if(printer_state.motorY <= -2) {
+      ANALYZER_ON(ANALYZER_CH3);
+      WRITE(Y_STEP_PIN,HIGH);
+      printer_state.motorY += 2;
+    } else if(printer_state.motorY >= 2) {
+      ANALYZER_ON(ANALYZER_CH3);
+      WRITE(Y_STEP_PIN,HIGH);
+      printer_state.motorY -= 2;
+    }
+
+#endif
+
     if(cur->dir & 64) {
       if((cur->error[2] -= cur->delta[2]) < 0) {
         WRITE(Z_STEP_PIN,HIGH);
@@ -1929,6 +2042,8 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     ANALYZER_OFF(ANALYZER_CH1);
     ANALYZER_OFF(ANALYZER_CH2);
     ANALYZER_OFF(ANALYZER_CH3);
+    ANALYZER_OFF(ANALYZER_CH6);
+    ANALYZER_OFF(ANALYZER_CH7);
   } // for loop
   if(do_odd) {
       sei(); // Allow interrupts for other types, timer1 is still disabled
@@ -2139,8 +2254,15 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
      NEXT_PLANNER_INDEX(lines_pos);
      cur = 0;
      --lines_count;
+#ifdef XY_GANTRY
+       if(DISABLE_X && DISABLE_Y) {
+         disable_x();
+         disable_y();
+       }
+#else
        if(DISABLE_X) disable_x();
        if(DISABLE_Y) disable_y();
+#endif
        if(DISABLE_Z) disable_z();
      if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
      interval = printer_state.interval = interval>>1; // 50% of time to next call to do cur=0

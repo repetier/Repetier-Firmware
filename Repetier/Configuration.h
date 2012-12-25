@@ -58,6 +58,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Foltyn 3D Master           = 12
 // MegaTronics                = 70
+// RUMBA                      = 80  // Get it from reprapdiscount
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
@@ -131,9 +132,13 @@ Mega.
 
 #else
 /** Drive settings for printers with cartesian drive systems */
-/** \brief Number of steps for a 1mm move in x direction. Overridden if EEPROM activated. */
+/** \brief Number of steps for a 1mm move in x direction. 
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated. */
 #define XAXIS_STEPS_PER_MM 80
-/** \brief Number of steps for a 1mm move in y direction  Overridden if EEPROM activated.*/
+/** \brief Number of steps for a 1mm move in y direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated.*/
 #define YAXIS_STEPS_PER_MM 80
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
 #define ZAXIS_STEPS_PER_MM 3360

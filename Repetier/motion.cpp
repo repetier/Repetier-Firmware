@@ -700,17 +700,21 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
 #endif
   //Find direction
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
   for(byte i=0; i < 4; i++) {
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
       p->dir |= 1<<i;
     } else {
       p->delta[i] = -p->delta[i];
     }
+    if(i==3 && printer_state.extrudeMultiply!=100) {
+      p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+    }
     axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     if(p->delta[i]) p->dir |= 16<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
+  printer_state.filamentPrinted+=axis_diff[3];
 #else
   long deltax = printer_state.destinationSteps[0]-printer_state.currentPositionSteps[0];
   long deltay = printer_state.destinationSteps[1]-printer_state.currentPositionSteps[1];
@@ -790,11 +794,6 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     p = p2; // use saved instance for the real move
   } 
 #endif
-  if(printer_state.extrudeMultiply!=100) {
-    p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-    printer_state.filamentPrinted+=(axis_diff[3]*printer_state.extrudeMultiply)/100;
-  } else
-    printer_state.filamentPrinted+=axis_diff[3];
 
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
   if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2] && p->delta[1] > p->delta[3]) primary_axis = 1;
@@ -806,7 +805,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   //Feedrate calc based on XYZ travel distance
   // TODO - Simplify since Z will always move
   if(p->dir & 112) {
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
     xydist2 = axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1];
 #else
     float dx,dy;

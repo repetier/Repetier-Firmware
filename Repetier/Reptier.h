@@ -60,10 +60,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ANALYZER_CH1 40 // Step loop
 #define ANALYZER_CH2 53 // X Step
 #define ANALYZER_CH3 65 // Y Step
-#define ANALYZER_CH4 59 // Serial out
-#define ANALYZER_CH5 64 // Step 0
-#define ANALYZER_CH6 58 // Step Signal
-#define ANALYZER_CH7 1 // Constant speed
+#define ANALYZER_CH4 59 // X Direction
+#define ANALYZER_CH5 64 // Y Direction
+#define ANALYZER_CH6 58 // xsig 
+#define ANALYZER_CH7 57 // ysig
 
 #ifdef ANALYZER
 #define ANALYZER_ON(a) {WRITE(a,HIGH);}
@@ -90,9 +90,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MICROSTEP8 HIGH,HIGH
 #define MICROSTEP16 HIGH,HIGH
 
-
+#define NEW_XY_GANTRY
 
 #include "Configuration.h"
+#if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
+#define XY_GANTRY
+#endif
+
 //Step to split a cirrcle in small Lines 
 #ifndef MM_PER_ARC_SEGMENT
 #define MM_PER_ARC_SEGMENT 1
@@ -697,6 +701,10 @@ typedef struct {
   long memoryX;
   long memoryY;
   long memoryZ;
+#endif
+#ifdef XY_GANTRY
+  char motorX;
+  char motorY;
 #endif
 } PrinterState;
 extern PrinterState printer_state;
