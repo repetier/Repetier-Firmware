@@ -32,7 +32,7 @@
 #include "SdFat.h"
 extern void initsd();
 #endif
-#define REPETIER_VERSION "0.71"
+#define REPETIER_VERSION "0.73"
 
 #define uint uint16_t
 #define uint8 uint8_t
