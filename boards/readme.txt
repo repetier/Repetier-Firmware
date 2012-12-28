@@ -15,6 +15,9 @@ The input buffer length is 64 bytes with this version. Make sure to reduce
 the buffer length in Repetier-Host or you will get overflows with unwanted
 results!
 
+Arduino 1.0.3 changed the handling a bit to allows setting stop bits/parity/data-bits.
+If you mind losing this functionality, dont copy the files!
+
 Sanguino pre 1.0 version:
 -------------------------
 <Installpath>/hardware/Sanguino/cores/arduino
