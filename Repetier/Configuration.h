@@ -62,7 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
-#define MOTHERBOARD 12
+#define MOTHERBOARD 33
 #include "pins.h"
 
 /* Define the type of axis movements needed for your printer. The typical case
@@ -135,13 +135,13 @@ Mega.
 /** \brief Number of steps for a 1mm move in x direction. 
 For xy gantry use 2*belt moved!
 Overridden if EEPROM activated. */
-#define XAXIS_STEPS_PER_MM 80
+#define XAXIS_STEPS_PER_MM 101.859
 /** \brief Number of steps for a 1mm move in y direction.
 For xy gantry use 2*belt moved!
 Overridden if EEPROM activated.*/
-#define YAXIS_STEPS_PER_MM 80
+#define YAXIS_STEPS_PER_MM 101.859
 /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
-#define ZAXIS_STEPS_PER_MM 3360
+#define ZAXIS_STEPS_PER_MM 92.599
 #endif
 
 // ##########################################################################################
@@ -149,12 +149,12 @@ Overridden if EEPROM activated.*/
 // ##########################################################################################
 
 /** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 2
+#define NUM_EXTRUDER 1
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 385
+#define EXT0_STEPS_PER_MM 352.5
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -187,13 +187,13 @@ Overridden if EEPROM activated.*/
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use hiher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 30
+#define EXT0_MAX_FEEDRATE 12
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
 #define EXT0_MAX_START_FEEDRATE 10
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 4000
+#define EXT0_MAX_ACCELERATION 1000
 /** Type of heat manager for this extruder. 
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -213,7 +213,7 @@ Values for starts:
 The precise values may differ for different nozzle/resistor combination. 
  Overridden if EEPROM activated.
 */
-#define EXT0_PID_INTEGRAL_DRIVE_MAX 140
+#define EXT0_PID_INTEGRAL_DRIVE_MAX 130
 /** \brief lower value for integral part
 
 The I state should converge to the exact heater output needed for the target temperature.
@@ -254,7 +254,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_DESELECT_COMMANDS ""
 
 // =========================== Configuration for second extruder ========================
-#define EXT1_X_OFFSET 10
+#define EXT1_X_OFFSET 0
 #define EXT1_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT1_STEPS_PER_MM 373
@@ -274,7 +274,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT1_TEMPSENSOR_TYPE 3
+#define EXT1_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT1_TEMPSENSOR_PIN TEMP_1_PIN 
 // WHich pin enables the heater
@@ -290,7 +290,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use eiher values.
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_FEEDRATE 25
+#define EXT1_MAX_FEEDRATE 50
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
 #define EXT1_MAX_START_FEEDRATE 12
@@ -488,7 +488,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED false
+#define HAVE_HEATED_BED true
 
 #define HEATED_BED_MAX_TEMP 90
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -576,9 +576,9 @@ on this endstop.
 #define ENDSTOP_PULLUP_Z_MAX true
 
 //set to true to invert the logic of the endstops
-#define ENDSTOP_X_MIN_INVERTING false
-#define ENDSTOP_Y_MIN_INVERTING false
-#define ENDSTOP_Z_MIN_INVERTING false
+#define ENDSTOP_X_MIN_INVERTING true
+#define ENDSTOP_Y_MIN_INVERTING true
+#define ENDSTOP_Z_MIN_INVERTING true
 #define ENDSTOP_X_MAX_INVERTING false
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING false
@@ -607,12 +607,12 @@ on this endstop.
 // Disables axis when it's not being used.
 #define DISABLE_X false
 #define DISABLE_Y false
-#define DISABLE_Z true
+#define DISABLE_Z false
 #define DISABLE_E false
 
 // Inverting axis direction
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
+#define INVERT_Y_DIR false
 #define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
@@ -647,8 +647,8 @@ on this endstop.
 
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
-#define ENDSTOP_X_BACK_ON_HOME 1
-#define ENDSTOP_Y_BACK_ON_HOME 1
+#define ENDSTOP_X_BACK_ON_HOME 0.5
+#define ENDSTOP_Y_BACK_ON_HOME 3.5
 #define ENDSTOP_Z_BACK_ON_HOME 0
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
@@ -660,9 +660,9 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 195
-#define Y_MAX_LENGTH 195
-#define Z_MAX_LENGTH 80
+#define X_MAX_LENGTH 95
+#define Y_MAX_LENGTH 95
+#define Z_MAX_LENGTH 120
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -678,9 +678,8 @@ on this endstop.
 #define MICROSTEP_MODES {8,8,8,8,8} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
-//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
-#define MOTOR_CURRENT {48713,48713,42713,48713,42713} // Values 0-65535 (3D Master 35713 = ~1A)
 
 // Delta settings
 #if DRIVE_SYSTEM==3
@@ -796,13 +795,13 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 */
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 1500
 
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 3000
 
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}
 #endif
@@ -1011,10 +1010,10 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT true
-/** If set to false all files with longe rnames then 8.3 or having a tilde in the name will be hidden */
+/** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT -1 //49
+#define SDCARDDETECT 49
 // Change to true if you get a inserted message on removal. 
 #define SDCARDDETECTINVERTED false
 #endif
@@ -1031,5 +1030,87 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
 #define FEATURE_FAN_CONTROL true
+
+/** For displays and keys there are too many permutations to handle them all in once.
+For the most common available combinations you can set the controller type here, so
+you don't need to configure uicong.h at all. Controller settings > 1 disable usage
+of uiconfig.h
+
+0 = no display
+1 = Manual definition of display and keys parameter in uiconfig.h
+
+The following settings override uiconfig.h!
+2 = Smartcontroller on a RAMPS from reprapdiscount
+3 = Adafruit RGB controller
+4 = Foltyn 3DMaster with display attached
+*/
+#define FEATURE_CONTROLLER 2
+
+/**
+Select the language to use.
+0 = english
+1 = german
+2 = dutch
+*/
+#define UI_LANGUAGE 1
+
+// This is line 2 of the status display at startup
+#define UI_VERSION_STRING2 "Mendel"
+
+/** How many ms should a single page be shown, until it is switched to the next one.*/
+#define UI_PAGES_DURATION 4000
+
+/** Uncomment if you don't want automatic page switching. You can still switch the
+info pages with next/previous button/click-encoder */
+#define UI_DISABLE_AUTO_PAGESWITCH true
+
+/** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
+#define UI_AUTORETURN_TO_MENU_AFTER 30000
+
+#define FEATURE_UI_KEYS 0
+
+/* Normally cou want a next/previous actions with every click of your encoder.
+Unfotunately, the encoder have a different count of phase changes between clicks.
+Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
+*/
+#define UI_ENCODER_SPEED 1
+/** \brief bounce time of keys in milliseconds */
+#define UI_KEY_BOUNCETIME 10
+
+/** \brief First time in ms until repeat of action. */
+#define UI_KEY_FIRST_REPEAT 500
+/** \brief Reduction of repeat time until next execution. */
+#define UI_KEY_REDUCE_REPEAT 50
+/** \brief Lowest repeat time. */
+#define UI_KEY_MIN_REPEAT 50
+
+#define FEATURE_BEEPER true
+/**
+Beeper sound definitions for short beeps during key actions
+and longer beeps for important actions.
+Parameter is is delay in microseconds and the secons is the number of repetitions.
+Values must be in range 1..255
+*/
+#define BEEPER_SHORT_SEQUENCE 2,2
+#define BEEPER_LONG_SEQUENCE 8,8
+
+// ###############################################################################
+// ##                         Values for menu settings                          ##
+// ###############################################################################
+
+// Values used for preheat
+#define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
+#define UI_SET_PRESET_EXTRUDER_TEMP_PLA   170
+#define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
+#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
+// Extreme values 
+#define UI_SET_MIN_HEATED_BED_TEMP  55
+#define UI_SET_MAX_HEATED_BED_TEMP 120
+#define UI_SET_MIN_EXTRUDER_TEMP   160
+#define UI_SET_MAX_EXTRUDER_TEMP   270
+#define UI_SET_EXTRUDER_RETRACT_FEEDRATE 1000 // mm/min
+#define UI_SET_EXTRUDER_FEEDRATE 120 // mm/min
+#define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
+
 #endif
 

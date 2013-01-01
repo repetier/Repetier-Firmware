@@ -3,6 +3,7 @@ Version 0.80 dev
   Added motherboard type 71 for Gen7 1.4.1
   Added motherboard type 70 for MegaTronics
   Added RAMBO motherboard type 301
+  Added RUMBA motherboard support
   Added support for Digipot/microstepping adjustment in firmware for RAMBO boards.
   Added Rostock delta printer support. Code by Martin Croome
   Min home position can now have negative coordinates.
@@ -23,6 +24,8 @@ Version 0.80 dev
   Support for arcs (G2/G3)
   Reload/save/reset EEPROM settings (M500-M502)
   Wait until buffer empty (M400).
+  New handling of user interfaces making configuration easier.
+  New system for handling XY gantry.
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

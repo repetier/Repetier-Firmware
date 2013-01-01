@@ -216,7 +216,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define  HardwareSerial_h // Don't use standard serial console
 #endif
 #include <inttypes.h>
-#include "Stream.h"
+#include "Print.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"

@@ -79,7 +79,7 @@ struct ring_buffer
   volatile int head;
   volatile int tail;
 };
-class RFHardwareSerial : public Stream
+class RFHardwareSerial : public Print
 {
   public:
     ring_buffer *_rx_buffer;

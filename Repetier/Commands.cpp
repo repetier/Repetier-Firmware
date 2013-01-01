@@ -23,7 +23,7 @@
 #if EEPROM_MODE != 0
 #include "Eeprom.h"
 #endif
-#include "pins_arduino.h"2
+#include "pins_arduino.h"
 #include "ui.h"
 
 #include <SPI.h>

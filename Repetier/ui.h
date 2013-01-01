@@ -212,6 +212,7 @@ typedef struct {
   int numEntries;
   const UIMenuEntry * const * entries;
 } const UIMenu;
+extern const int8_t encoder_table[16] PROGMEM ;
 
 //#ifdef COMPILE_I2C_DRIVER
 
@@ -437,7 +438,178 @@ class UIDisplay {
 };
 extern UIDisplay uid;
 
+#if FEATURE_CONTROLLER==1
 #include "uiconfig.h"
+#endif
+#if FEATURE_CONTROLLER==0 // No controller at all
+#define UI_HAS_KEYS 0
+#define UI_DISPLAY_TYPE 0
+#ifdef UI_MAIN
+void ui_init_keys() {}
+void ui_check_keys(int &action) {}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif
+#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller
+#undef SDCARDDETECT
+#define SDCARDDETECT 49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED false
+#undef SDSUPPORT
+#define SDSUPPORT true
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define BEEPER_TYPE 1
+#define BEEPER_PIN 37
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_RS_PIN 16
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 17
+#define UI_DISPLAY_D0_PIN 23
+#define UI_DISPLAY_D1_PIN 25
+#define UI_DISPLAY_D2_PIN 27
+#define UI_DISPLAY_D3_PIN 29
+#define UI_DISPLAY_D4_PIN 23
+#define UI_DISPLAY_D5_PIN 25
+#define UI_DISPLAY_D6_PIN 27
+#define UI_DISPLAY_D7_PIN 29 
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {  
+  UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(41); // Kill pin
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(41,UI_ACTION_RESET); 
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 2
+
+#if FEATURE_CONTROLLER==3 // Adafruit RGB controller
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 16
+#define UI_ROWS 2
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 65504
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
+#define UI_DISPLAY_I2C_PULLUP 31
+#define UI_I2C_CLOCKSPEED 400000L
+#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)
+#define UI_INVERT_MENU_DIRECTION true
+#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_ENCODER 0
+#define UI_I2C_KEY_ADDRESS 0x40
+#ifdef UI_MAIN
+void ui_init_keys() {}
+void ui_check_keys(int &action) {}
+inline void ui_check_slow_encoder() {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+}
+void ui_check_slow_keys(int &action) {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GPIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
+  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
+  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
+  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button
+  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button
+}
+#endif
+#endif // Controller 3
+
+#if FEATURE_CONTROLLER==4 // Foltyn 3D Master
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 2
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {  
+  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(5);
+  UI_KEYS_INIT_BUTTON_LOW(6);
+  UI_KEYS_INIT_BUTTON_LOW(11);
+  UI_KEYS_INIT_BUTTON_LOW(42);
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 4
+
+
+#if FEATURE_CONTROLLER>0
+
+#if UI_ROWS==4
+#if UI_COLS==16
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
+#elif UI_COLS==20
+//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
+#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
+#else
+#error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
+#endif
+#else
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
+#endif
+#include "uilang.h"
+#include "uimenu.h"
+#endif
 
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION
 

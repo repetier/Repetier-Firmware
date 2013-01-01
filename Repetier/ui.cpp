@@ -53,6 +53,7 @@ long ui_autoreturn_time=0;
 
 void beep(byte duration,byte count)
 {
+#if FEATURE_BEEPER
 #if BEEPER_TYPE!=0
 #if BEEPER_TYPE==1
   SET_OUTPUT(BEEPER_PIN);
@@ -102,6 +103,7 @@ void beep(byte duration,byte count)
   i2c_stop();
 #endif
 #endif  
+#endif
 }
 
 //=============================================================
@@ -2239,7 +2241,7 @@ void UIDisplay::slowAction() {
   if(menuLevel==0 && time>4000) {
     if(time-lastSwitch>UI_PAGES_DURATION) {
       lastSwitch = time;
-#ifndef UI_DISABLE_AUTO_PAGESWITCH
+#if !defined(UI_DISABLE_AUTO_PAGESWITCH) || !UI_DISABLE_AUTO_PAGESWITCH
       menuPos[0]++;
       if(menuPos[0]>=UI_NUM_PAGES)
         menuPos[0]=0;
