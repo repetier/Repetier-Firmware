@@ -69,9 +69,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          17
 #define Z_MAX_PIN          16
 
-#define E_STEP_PIN         11
-#define E_DIR_PIN          12
-#define E_ENABLE_PIN       -1
+#define E0_STEP_PIN         11
+#define E0_DIR_PIN          12
+#define E0_ENABLE_PIN       -1
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -142,9 +142,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN           2
 #define Z_MAX_PIN           1
 
-#define E_STEP_PIN         12
-#define E_DIR_PIN          16
-#define E_ENABLE_PIN        3
+#define E0_STEP_PIN         12
+#define E0_DIR_PIN          16
+#define E0_ENABLE_PIN        3
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -158,7 +158,7 @@ STEPPER_CURRENT_CONTROL
 
 /*  Unused (1) (2) (3) 4 5 6 7 8 9 10 11 12 13 (14) (15) (16) 17 (18) (19) (20) (21) (22) (23) 24 (25) (26) (27) 28 (29) (30) (31)  */
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -194,9 +194,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN       30
 #define Z_MAX_PIN       31
 
-#define E_STEP_PIN      17
-#define E_DIR_PIN       16
-#define E_ENABLE_PIN    -1
+#define E0_STEP_PIN      17
+#define E0_DIR_PIN       16
+#define E0_ENABLE_PIN    -1
 
 #define SDPOWER          -1
 #define SDSS          4
@@ -220,7 +220,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_0_PIN      -1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -268,9 +268,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          18
 #define Z_MAX_PIN          19
 
-#define E_STEP_PIN         26
-#define E_DIR_PIN          28
-#define E_ENABLE_PIN       24
+#define E0_STEP_PIN         26
+#define E0_DIR_PIN          28
+#define E0_ENABLE_PIN       24
 
 #define E1_STEP_PIN         36
 #define E1_DIR_PIN          34
@@ -290,7 +290,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
 #define TEMP_1_PIN         14   // ANALOG NUMBERING
 #define TEMP_2_PIN         15
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 
@@ -314,9 +314,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          18
 #define Z_MAX_PIN          -1    //19
 
-#define E_STEP_PIN         32
-#define E_DIR_PIN          34
-#define E_ENABLE_PIN       30
+#define E0_STEP_PIN         32
+#define E0_DIR_PIN          34
+#define E0_ENABLE_PIN       30
 
 #define SDPOWER            48
 #define SDSS               53
@@ -326,7 +326,7 @@ STEPPER_CURRENT_CONTROL
 //#define SCL                21
 //#define SDA                20
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -385,9 +385,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          33
 #define Z_MAX_PIN          32
 
-#define E_STEP_PIN         23
-#define E_DIR_PIN          22
-#define E_ENABLE_PIN       24
+#define E0_STEP_PIN         23
+#define E0_DIR_PIN          22
+#define E0_ENABLE_PIN       24
 
 #define E1_STEP_PIN        26
 #define E1_DIR_PIN         25
@@ -419,19 +419,11 @@ STEPPER_CURRENT_CONTROL
 
 #define SDPOWER            -1
 #define SDSS               53
-#define SDCARDDETECT       49
-#define BEEPER_PIN         44
-#define LCD_PINS_RS        19 
-#define LCD_PINS_ENABLE    42
-#define LCD_PINS_D4        18
-#define LCD_PINS_D5        38 
-#define LCD_PINS_D6        41
-#define LCD_PINS_D7        40
-#define BTN_EN1            11
-#define BTN_EN2            12
-#define BTN_ENC            43
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 #define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
 
@@ -466,9 +458,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN           4
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         11
-#define E_DIR_PIN          12
-#define E_ENABLE_PIN       -1
+#define E0_STEP_PIN         11
+#define E0_DIR_PIN          12
+#define E0_ENABLE_PIN       -1
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -479,7 +471,7 @@ STEPPER_CURRENT_CONTROL
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -518,9 +510,9 @@ STEPPER_CURRENT_CONTROL
     #define Z_MAX_PIN       -1
     
     //extruder pins
-    #define E_STEP_PIN      4     //Edited @ EJE Electronics 20100715
-    #define E_DIR_PIN       2     //Edited @ EJE Electronics 20100715
-    #define E_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
+    #define E0_STEP_PIN      4     //Edited @ EJE Electronics 20100715
+    #define E0_DIR_PIN       2     //Edited @ EJE Electronics 20100715
+    #define E0_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
     #define TEMP_0_PIN      5     //changed @ rkoeppl 20110410
     #define HEATER_0_PIN    14    //changed @ rkoeppl 20110410
 #if MOTHERBOARD == 5
@@ -545,7 +537,7 @@ STEPPER_CURRENT_CONTROL
     //our RS485 pins
     #define TX_ENABLE_PIN	12
     #define RX_ENABLE_PIN	13
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
     
     #define SCL 16
@@ -582,8 +574,8 @@ STEPPER_CURRENT_CONTROL
     #define Z_MIN_PIN          20
     #define Z_MAX_PIN          -1
 
-    #define E_STEP_PIN         1
-    #define E_DIR_PIN          0
+    #define E0_STEP_PIN         1
+    #define E0_DIR_PIN          0
 
     #define LED_PIN            -1
 
@@ -600,7 +592,7 @@ STEPPER_CURRENT_CONTROL
       #define X_ENABLE_PIN       14
       #define Y_ENABLE_PIN       14
       #define Z_ENABLE_PIN       26
-      #define E_ENABLE_PIN       14
+      #define E0_ENABLE_PIN       14
 
     #else
 
@@ -608,7 +600,7 @@ STEPPER_CURRENT_CONTROL
       #define X_ENABLE_PIN       -1
       #define Y_ENABLE_PIN       -1
       #define Z_ENABLE_PIN       -1
-      #define E_ENABLE_PIN       -1
+      #define E0_ENABLE_PIN       -1
 
     #endif
 
@@ -616,7 +608,7 @@ STEPPER_CURRENT_CONTROL
     #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
     #define SDPOWER          -1
     #define SDSS          31
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
 
 #ifndef KNOWN_BOARD
@@ -658,9 +650,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MAX_PIN       -1
     
 //extruder pins
-#define E_STEP_PIN      28     
-#define E_DIR_PIN       27     
-#define E_ENABLE_PIN    24     
+#define E0_STEP_PIN      28     
+#define E0_DIR_PIN       27     
+#define E0_ENABLE_PIN    24     
 #define TEMP_0_PIN      1 
 #define TEMP_1_PIN      2    
 #define HEATER_0_PIN    4    
@@ -673,7 +665,7 @@ STEPPER_CURRENT_CONTROL
        
 #define FAN_PIN         31    
 #define PS_ON_PIN       15    
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
     //our pin for debugging.
@@ -718,9 +710,9 @@ STEPPER_CURRENT_CONTROL
     #define Z_MAX_PIN       -1
     
     //extruder pins
-    #define E_STEP_PIN      19     
-    #define E_DIR_PIN       18     
-    #define E_ENABLE_PIN    25     
+    #define E0_STEP_PIN      19     
+    #define E0_DIR_PIN       18     
+    #define E0_ENABLE_PIN    25     
     #define TEMP_0_PIN      0 
     #define TEMP_1_PIN      1    
     #define HEATER_0_PIN    4    
@@ -741,7 +733,7 @@ STEPPER_CURRENT_CONTROL
     #define TX_ENABLE_PIN	12
     #define RX_ENABLE_PIN	13
 
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
 
 #endif
@@ -772,9 +764,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          27
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         34
-#define E_DIR_PIN          35
-#define E_ENABLE_PIN       13
+#define E0_STEP_PIN         34
+#define E0_DIR_PIN          35
+#define E0_ENABLE_PIN       13
 
 #define TEMP_0_PIN          7 // Extruder - ANALOG PIN NUMBER!
 #define TEMP_1_PIN          6 // Bed - ANALOG PIN NUMBER! 
@@ -789,7 +781,7 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN          -1
 
 #define KILL_PIN           -1
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 #ifndef SDSUPPORT
@@ -829,9 +821,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          36
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         34
-#define E_DIR_PIN          35
-#define E_ENABLE_PIN       13
+#define E0_STEP_PIN         34
+#define E0_DIR_PIN          35
+#define E0_ENABLE_PIN       13
 #define TEMP_0_PIN          1 // Extruder - ANALOG PIN NUMBER!
 #define TEMP_1_PIN          0 // Bed - ANALOG PIN NUMBER! 
 #define HEATER_0_PIN       15 // Extruder
@@ -845,7 +837,7 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN          -1
 
 #define KILL_PIN           -1
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
@@ -900,9 +892,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          14	// PINJ.1, 64, OPTO3
 #define Z_MAX_PIN          -1   // PIND.2, 45, OPTO6 (would be "19", -1 = disabled)
 
-#define E_STEP_PIN         26	// PINA.4, 74, STP_DRV4
-#define E_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
-#define E_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
+#define E0_STEP_PIN         26	// PINA.4, 74, STP_DRV4
+#define E0_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
+#define E0_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
 
 #define E1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
 #define E1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
@@ -925,7 +917,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN         14   // PINK.6, 83, TH2
 #define TEMP_2_PIN         15   // PINK.7, 82, TH3
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 // these pins are defined in the SD library if building with SD support  
@@ -971,9 +963,9 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          18
 #define Z_MAX_PIN          19
 
-#define E_STEP_PIN         31
-#define E_DIR_PIN          32
-#define E_ENABLE_PIN       38
+#define E0_STEP_PIN         31
+#define E0_DIR_PIN          32
+#define E0_ENABLE_PIN       38
 
 #define E1_STEP_PIN        34
 #define E1_DIR_PIN         36
@@ -1038,7 +1030,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 #endif //ULTRA_LCD
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 #endif
@@ -1090,9 +1082,9 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_2_PIN   -1
 #define TEMP_2_PIN     -1
 
-#define E_STEP_PIN    34
-#define E_DIR_PIN     43
-#define E_ENABLE_PIN  26
+#define E0_STEP_PIN    34
+#define E0_DIR_PIN     43
+#define E0_ENABLE_PIN  26
 #define E0_MS1_PIN     65
 #define E0_MS2_PIN     66
 
@@ -1113,7 +1105,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN       -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
 #define E1_PINS
 
 #define SCK_PIN          52
@@ -1170,9 +1162,9 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_2_PIN   -1
 #define TEMP_2_PIN     -1
 
-#define E_STEP_PIN    34
-#define E_DIR_PIN     43
-#define E_ENABLE_PIN  26
+#define E0_STEP_PIN    34
+#define E0_DIR_PIN     43
+#define E0_ENABLE_PIN  26
 #define E0_MS1_PIN     65
 #define E0_MS2_PIN     66
 
@@ -1190,7 +1182,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN       -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
 #define E1_PINS
 
 #endif
