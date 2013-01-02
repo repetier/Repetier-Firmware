@@ -667,7 +667,7 @@ END_INTERRUPT_PROTECTED
   @param check_endstops Read endstop during move.
 */
 void queue_move(byte check_endstops,byte pathOptimize) {
-  printer_state.flag0 &= ~1; // Motor is enabled now
+  printer_state.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
     check_periodical();
@@ -1015,7 +1015,7 @@ float calc_zoffset(long factors[], long pointX, long pointY) {
 #endif
 
 inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
-  printer_state.flag0 &= ~1; // Motor is enabled now
+  printer_state.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
   while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
     gcode_read_serial();
     check_periodical();
@@ -1138,7 +1138,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	out.println_int_P(PSTR("segments_per_line:"), segments_per_line);
 #endif
 
-	printer_state.flag0 &= ~1; // Motor is enabled now
+	printer_state.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
 	while(lines_count>=MOVE_CACHE_SIZE) { // wait for a free entry in movement cache
 		gcode_read_serial();
 		check_periodical();

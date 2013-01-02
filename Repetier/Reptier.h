@@ -550,7 +550,7 @@ extern int conv_temp_raw(byte type,float temp);
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggels the heater power if necessary.
 extern void manage_temperatures();
-
+extern bool reportTempsensorError(); ///< Report defect sensors
 extern byte manage_monitor;
 
 void process_command(GCode *code,byte bufferedCommand);
@@ -618,8 +618,11 @@ extern void check_mem();
 extern void mc_arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
 
+#define PRINTER_FLAG0_STEPPER_DISABLED      1
+#define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
+#define PRINTER_FLAG0_TEMPSENSOR_DEFECT     4
 typedef struct { 
-  byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt
+  byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect 
 #if USE_OPS==1 || defined(USE_ADVANCE)
   volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.

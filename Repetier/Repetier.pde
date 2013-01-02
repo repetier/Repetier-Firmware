@@ -194,13 +194,13 @@ byte unit_inches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float axis_steps_per_unit[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEPS_PER_MM,1}; ///< Number of steps per mm needed.
 float inv_axis_steps_per_unit[4]; ///< Inverse of axis_steps_per_unit for faster conversion
-float max_feedrate[4] = MAX_FEEDRATE; ///< Maximum allowed feedrate.
-float homing_feedrate[3] = HOMING_FEEDRATE;
+float max_feedrate[4] = {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}; ///< Maximum allowed feedrate.
+float homing_feedrate[3] = {HOMING_FEEDRATE_X, HOMING_FEEDRATE_Y, HOMING_FEEDRATE_Z};
 byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
 #ifdef RAMP_ACCELERATION
 //  float max_start_speed_units_per_second[4] = MAX_START_SPEED_UNITS_PER_SECOND; ///< Speed we can use, without acceleration.
-  long max_acceleration_units_per_sq_second[4] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
-  long max_travel_acceleration_units_per_sq_second[4] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND; ///< X, Y, Z max acceleration in mm/s^2 for travel moves
+  long max_acceleration_units_per_sq_second[4] = {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
+  long max_travel_acceleration_units_per_sq_second[4] = {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z max acceleration in mm/s^2 for travel moves
   /** Acceleration in steps/s^3 in printing mode.*/
   unsigned long axis_steps_per_sqr_second[4];
   /** Acceleration in steps/s^2 in movement mode.*/
@@ -266,19 +266,19 @@ void send_mem() {
 
 
 void update_extruder_flags() {
-  printer_state.flag0 &= ~2;
+  printer_state.flag0 &= ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
 #if USE_OPS==1
   if(printer_state.opsMode!=0) {
-    printer_state.flag0 |= 2;
+    printer_state.flag0 |= PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
   }
 #endif
 #if defined(USE_ADVANCE)
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     if(extruder[i].advanceL!=0) {
-      printer_state.flag0 |= 2;
+      printer_state.flag0 |= PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    if(extruder[i].advanceK!=0) printer_state.flag0 |= 2;
+    if(extruder[i].advanceK!=0) printer_state.flag0 |= PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
 #endif
   }
 #endif
@@ -507,7 +507,7 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.stepper_loops = 1;
   printer_state.msecondsPrinting = 0;
   printer_state.filamentPrinted = 0;
-  printer_state.flag0 = 1;
+  printer_state.flag0 = PRINTER_FLAG0_STEPPER_DISABLED;
   printer_state.xLength = X_MAX_LENGTH;
   printer_state.yLength = Y_MAX_LENGTH;
   printer_state.zLength = Z_MAX_LENGTH;
@@ -1205,7 +1205,7 @@ inline long bresenham_step() {
 			}
 		}
 	#if USE_OPS==1 || defined(USE_ADVANCE)
-      if((printer_state.flag0 & 2)==0) // Set direction if no advance/OPS enabled
+      if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) // Set direction if no advance/OPS enabled
 	#endif
 		if(cur->dir & 8) {
 			extruder_set_direction(1);
@@ -1279,7 +1279,7 @@ inline long bresenham_step() {
 			if(cur->dir & 128) {
 				if((cur->error[3] -= cur->delta[3]) < 0) {
 	#if USE_OPS==1 || defined(USE_ADVANCE)
-					if((printer_state.flag0 & 2)) { // Use interrupt for movement
+					if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)) { // Use interrupt for movement
 						if(cur->dir & 8)
 							printer_state.extruderStepsNeeded++;
 						else
@@ -1373,7 +1373,7 @@ inline long bresenham_step() {
 				}
 			}
 	#if USE_OPS==1 || defined(USE_ADVANCE)
-			if((printer_state.flag0 & 2)==0) // Use interrupt for movement
+			if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) // Use interrupt for movement
 	#endif
 			extruder_unstep();
 		} // for loop
@@ -1819,7 +1819,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
         WRITE(Z_DIR_PIN,INVERT_Z_DIR);
       }
 #if USE_OPS==1 || defined(USE_ADVANCE)
-      if((printer_state.flag0 & 2)==0) // Set direction if no advance/OPS enabled
+      if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) // Set direction if no advance/OPS enabled
 #endif
         if(cur->dir & 8) {
           extruder_set_direction(1);
@@ -1918,7 +1918,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
      if(cur->dir & 128) {
       if((cur->error[3] -= cur->delta[3]) < 0) {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-       if((printer_state.flag0 & 2)) { // Use interrupt for movement
+       if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)) { // Use interrupt for movement
           if(cur->dir & 8)
             printer_state.extruderStepsNeeded++;
           else
@@ -2033,7 +2033,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
 #if USE_OPS==1 || defined(USE_ADVANCE)
-    if((printer_state.flag0 & 2)==0) // Use interrupt for movement
+    if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) // Use interrupt for movement
 #endif
       extruder_unstep();
     WRITE(X_STEP_PIN,LOW);
@@ -2278,8 +2278,8 @@ void(* resetFunc) (void) = 0; //declare reset function @ address 0
 */
 void kill(byte only_steppers)
 {
-  if((printer_state.flag0 & 1) && only_steppers) return;
-  printer_state.flag0 |=1;
+  if((printer_state.flag0 & PRINTER_FLAG0_STEPPER_DISABLED) && only_steppers) return;
+  printer_state.flag0 |=PRINTER_FLAG0_STEPPER_DISABLED;
   disable_x();
   disable_y();
   disable_z();
@@ -2443,7 +2443,7 @@ allowable speed for the extruder.
 ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if USE_OPS==1 || defined(USE_ADVANCE)
-  if((printer_state.flag0 & 2)==0) return; // currently no need
+  if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) return; // currently no need
   byte timer = EXTRUDER_OCR;
   bool increasing = printer_state.extruderStepsNeeded>0;
   

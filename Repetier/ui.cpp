@@ -915,6 +915,10 @@ void UIDisplay::parse(char *txt,bool ram) {
           addStringP(relative_mode_e?ui_yes:ui_no);
           break;
         }
+        if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) {
+          addStringP(PSTR("def"));
+          break;
+        }
         ivalue = UI_TEMP_PRECISION;
         if(c2=='c') fvalue=current_extruder->tempControl.currentTemperatureC;
         else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;

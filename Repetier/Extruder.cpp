@@ -959,6 +959,24 @@ void write_monitor() {
 }
 
 // ------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------- reportTempsensorError ----------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+
+bool reportTempsensorError() {
+  if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)) return false;
+  for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+     int temp = tempController[i]->currentTemperatureC;
+     if(i==NUM_EXTRUDER) OUT_P("heated bed");
+     else OUT_P_I("extruder ",i);  
+     if(temp<-10 || temp>400) {
+       OUT_P_LN(": temp sensor defect");
+     } else OUT_P_LN(": working");
+  }
+  OUT_P_LN("Printer set into dry run mode until restart!");
+  return true;
+}
+
+// ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- manage temperatures -----------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
@@ -975,6 +993,11 @@ void manage_temperatures() {
     //int oldTemp = act->currentTemperatureC;
     act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
     act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
+    if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<-10 || act->currentTemperature>400)) { // no temp sensor or short in sensor, disable heater
+        printer_state.flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+        reportTempsensorError();
+    }
+    if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
     byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 #ifdef TEMP_PID
     act->tempArray[act->tempPointer++] = act->currentTemperatureC;
@@ -1019,6 +1042,13 @@ void manage_temperatures() {
         WRITE(LED_PIN,on);
 #endif       
   }
+  if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) {
+    for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+       pwm_pos[tempController[i]->pwmIndex] = 0;
+    }
+    debug_level |= 8; // Go into dry mode
+  }
+
 }
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- read_max6675 ------------------------------------------------------

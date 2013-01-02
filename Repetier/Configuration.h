@@ -62,7 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
-#define MOTHERBOARD 80
+#define MOTHERBOARD 12
 #include "pins.h"
 
 /* Define the type of axis movements needed for your printer. The typical case
@@ -739,13 +739,11 @@ on this endstop.
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200
 #define MAX_FEEDRATE_Z 40
-#define MAX_FEEDRATE {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}
 
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 80
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 30
-#define HOMING_FEEDRATE {HOMING_FEEDRATE_X, HOMING_FEEDRATE_Y, HOMING_FEEDRATE_Z}
 
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
@@ -789,8 +787,6 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 
 //// Acceleration settings
 
-/** \brief Use RAMP acceleration for faster printing speed. */
-#ifdef RAMP_ACCELERATION
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! 
  Overridden if EEPROM activated.
 */
@@ -798,14 +794,10 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z} 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
-
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}
-#endif
 
 /** \brief Maximum allowable jerk.
 
@@ -1045,7 +1037,7 @@ The following settings override uiconfig.h!
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
 */
-#define FEATURE_CONTROLLER 2
+#define FEATURE_CONTROLLER 4
 
 /**
 Select the language to use.
@@ -1109,8 +1101,7 @@ Values must be in range 1..255
 #define UI_SET_MAX_HEATED_BED_TEMP 120
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
-#define UI_SET_EXTRUDER_RETRACT_FEEDRATE 1000 // mm/min
-#define UI_SET_EXTRUDER_FEEDRATE 120 // mm/min
+#define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
 #endif
