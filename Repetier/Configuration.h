@@ -62,7 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
-#define MOTHERBOARD 12
+#define MOTHERBOARD 5
 #include "pins.h"
 
 /* Define the type of axis movements needed for your printer. The typical case
@@ -149,7 +149,7 @@ Overridden if EEPROM activated.*/
 // ##########################################################################################
 
 /** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 2
+#define NUM_EXTRUDER 1
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
@@ -1002,7 +1002,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 #define EEPROM_MODE 1
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT true
+#define SDSUPPORT false
 /** If set to false all files with longe rnames then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
@@ -1037,7 +1037,7 @@ The following settings override uiconfig.h!
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
 */
-#define FEATURE_CONTROLLER 4
+#define FEATURE_CONTROLLER 0
 
 /**
 Select the language to use.
