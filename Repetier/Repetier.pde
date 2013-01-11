@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -20,12 +20,10 @@
 
     Main author: repetier
 
-Changelog:
-    v0.2 20.8.2011  - first public version
 */
 /**
 \mainpage Repetier-Firmware for Arduino based RepRaps
-<CENTER>Copyright &copy; 2011 by repetier
+<CENTER>Copyright &copy; 2011-2013 by repetier
 </CENTER>
 
 \section Intro Introduction
