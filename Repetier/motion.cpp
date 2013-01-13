@@ -708,7 +708,8 @@ void queue_move(byte check_endstops,byte pathOptimize) {
       p->delta[i] = -p->delta[i];
     }
     if(i==3 && printer_state.extrudeMultiply!=100) {
-      p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+      p->delta[3]=(long)((p->delta[3]*(float)printer_state.extrudeMultiply)*0.01f); 
+      //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
     }
     axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     if(p->delta[i]) p->dir |= 16<<i;
@@ -981,7 +982,7 @@ inline void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
 		if(delta[i]) *dir |= 16<<i;
 	}
 	if(printer_state.extrudeMultiply!=100) {
-		delta[3]=(delta[3]*printer_state.extrudeMultiply)/100;
+		delta[3]=(long)((delta[3]*(float)printer_state.extrudeMultiply)*0.01f);
 	}
 }
 
@@ -1042,7 +1043,8 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
 	p->dir = 0x80;
   }
   if(printer_state.extrudeMultiply!=100) {
-    p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+    //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+    p->delta[3]=(long)((p->delta[3]*(float)printer_state.extrudeMultiply)*0.01f);
   }
   printer_state.currentPositionSteps[3] = printer_state.destinationSteps[3];
 

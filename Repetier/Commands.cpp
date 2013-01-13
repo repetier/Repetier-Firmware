@@ -695,6 +695,7 @@ void process_command(GCode *com,byte bufferedCommand)
         previous_millis_cmd = millis();
         break;
       case 190: // M190 - Wait bed for heater to reach target.
+#if HAVE_HEATED_BED
         if(DEBUG_DRYRUN) break;
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
         wait_until_end_of_move();
@@ -711,6 +712,7 @@ void process_command(GCode *com,byte bufferedCommand)
           }
           check_periodical();
         }
+#endif
 #endif
         UI_CLEAR_STATUS;
         previous_millis_cmd = millis();

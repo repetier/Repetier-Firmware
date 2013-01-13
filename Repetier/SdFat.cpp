@@ -32,12 +32,23 @@ Print* SdFat::stdOut_ = &Serial;
 #else  // USE_SERIAL_FOR_STD_OUT
 class DefaultSerial : public Print {
  public:
+#ifdef COMPAT_PRE1
+  void write(uint8_t b);
+#else
   size_t write(uint8_t b);
+#endif
 };
-size_t DefaultSerial::write(uint8_t b) {
+#ifdef COMPAT_PRE1
+  void
+#else
+  size_t
+#endif
+DefaultSerial::write(uint8_t b) {
   while (((1 << UDRIE0) & UCSR0B) || !(UCSR0A & (1 << UDRE0))) {}
   UDR0 = b;
+#ifndef COMPAT_PRE1
   return 1;
+#endif
 }
 //------------------------------------------------------------------------------
 static DefaultSerial defaultStdOut;
@@ -1610,8 +1621,12 @@ bool SdBaseFile::printName(Print* pr) {
     DBG_FAIL_MACRO;
     goto fail;
   }
+#ifdef COMPAT_PRE1
+  pr->print(name);
+  return true;
+#else  
   return pr->print(name) > 0;
-
+#endif
  fail:
   return false;
 }
@@ -3646,9 +3661,16 @@ int16_t SdFile::write(const void* buf, uint16_t nbyte) {
  * Use getWriteError to check for errors.
  * \return 1 for success and 0 for failure.
  */
+#ifdef COMPAT_PRE1
+  void SdFile::write(uint8_t b) {
+    SdBaseFile::write(&b, 1);
+  }
+#else
 size_t SdFile::write(uint8_t b) {
   return SdBaseFile::write(&b, 1) == 1 ? 1 : 0;
 }
+#endif
+ 
 //------------------------------------------------------------------------------
 /** Write a string to a file. Used by the Arduino Print class.
  * \param[in] str Pointer to the string.

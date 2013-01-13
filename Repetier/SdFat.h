@@ -2060,7 +2060,11 @@ class SdFile : public SdBaseFile, public Print {
   bool getWriteError() {return SdBaseFile::getWriteError();}
   /** Set writeError to zero */
   void clearWriteError() {SdBaseFile::clearWriteError();}
+#ifdef COMPAT_PRE1
+  void write(uint8_t b);
+#else
   size_t write(uint8_t b);
+#endif
   int16_t write(const char* str);
   int16_t write(const void* buf, uint16_t nbyte);
   void write_P(PGM_P str);
