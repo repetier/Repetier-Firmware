@@ -28,7 +28,7 @@
 #define SD_ALLOW_LONG_NAMES false
 #endif
 
-  SDCard sd;
+SDCard sd;
 
 SDCard::SDCard() {
   sdmode = false;

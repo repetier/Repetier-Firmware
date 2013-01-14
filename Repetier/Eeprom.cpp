@@ -171,7 +171,9 @@ void epr_eeprom_reset() {
   printer_state.backlashY = Y_BACKLASH;
   printer_state.backlashZ = Z_BACKLASH;
 #endif
-  Extruder *e = &extruder[0];
+  Extruder *e;
+#if NUM_EXTRUDER>0
+  e = &extruder[0];
   e->stepsPerMM = EXT0_STEPS_PER_MM;
   e->maxFeedrate = EXT0_MAX_FEEDRATE;
   e->maxStartFeedrate = EXT0_MAX_START_FEEDRATE;
@@ -192,12 +194,14 @@ void epr_eeprom_reset() {
   e->waitRetractTemperature = EXT0_WAIT_RETRACT_TEMP;
   e->waitRetractUnits = EXT0_WAIT_RETRACT_UNITS;
 #endif
+  e->coolerSpeed = EXT0_EXTRUDER_COOLER_SPEED;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   e->advanceK = EXT0_ADVANCE_K;
 #endif
   e->advanceL = EXT0_ADVANCE_L;
 #endif
+#endif // NUM_EXTRUDER>0
 #if NUM_EXTRUDER>1
   e = &extruder[1];
   e->stepsPerMM = EXT1_STEPS_PER_MM;
@@ -220,13 +224,134 @@ void epr_eeprom_reset() {
   e->waitRetractTemperature = EXT1_WAIT_RETRACT_TEMP;
   e->waitRetractUnits = EXT1_WAIT_RETRACT_UNITS;
 #endif
+  e->coolerSpeed = EXT1_EXTRUDER_COOLER_SPEED;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
   e->advanceK = EXT1_ADVANCE_K;
 #endif
   e->advanceL = EXT1_ADVANCE_L;
 #endif
+#endif // NUM_EXTRUDER > 1
+#if NUM_EXTRUDER>2
+  e = &extruder[2];
+  e->stepsPerMM = EXT2_STEPS_PER_MM;
+  e->maxFeedrate = EXT2_MAX_FEEDRATE;
+  e->maxStartFeedrate = EXT2_MAX_START_FEEDRATE;
+  e->maxAcceleration = EXT2_MAX_ACCELERATION;
+  e->tempControl.heatManager = EXT2_HEAT_MANAGER;
+#ifdef TEMP_PID
+  e->tempControl.pidDriveMax = EXT2_PID_INTEGRAL_DRIVE_MAX;
+  e->tempControl.pidDriveMin = EXT2_PID_INTEGRAL_DRIVE_MIN;
+  e->tempControl.pidPGain = EXT2_PID_P;
+  e->tempControl.pidIGain = EXT2_PID_I;
+  e->tempControl.pidDGain = EXT2_PID_D;
+  e->tempControl.pidMax = EXT2_PID_MAX;
 #endif
+  e->yOffset = EXT2_Y_OFFSET;
+  e->xOffset = EXT2_X_OFFSET;
+  e->watchPeriod = EXT2_WATCHPERIOD;
+#if RETRACT_DURING_HEATUP
+  e->waitRetractTemperature = EXT2_WAIT_RETRACT_TEMP;
+  e->waitRetractUnits = EXT2_WAIT_RETRACT_UNITS;
+#endif
+  e->coolerSpeed = EXT2_EXTRUDER_COOLER_SPEED;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+  e->advanceK = EXT2_ADVANCE_K;
+#endif
+  e->advanceL = EXT2_ADVANCE_L;
+#endif
+#endif // NUM_EXTRUDER > 2
+#if NUM_EXTRUDER>3
+  e = &extruder[3];
+  e->stepsPerMM = EXT3_STEPS_PER_MM;
+  e->maxFeedrate = EXT3_MAX_FEEDRATE;
+  e->maxStartFeedrate = EXT3_MAX_START_FEEDRATE;
+  e->maxAcceleration = EXT3_MAX_ACCELERATION;
+  e->tempControl.heatManager = EXT3_HEAT_MANAGER;
+#ifdef TEMP_PID
+  e->tempControl.pidDriveMax = EXT3_PID_INTEGRAL_DRIVE_MAX;
+  e->tempControl.pidDriveMin = EXT3_PID_INTEGRAL_DRIVE_MIN;
+  e->tempControl.pidPGain = EXT3_PID_P;
+  e->tempControl.pidIGain = EXT3_PID_I;
+  e->tempControl.pidDGain = EXT3_PID_D;
+  e->tempControl.pidMax = EXT3_PID_MAX;
+#endif
+  e->yOffset = EXT3_Y_OFFSET;
+  e->xOffset = EXT3_X_OFFSET;
+  e->watchPeriod = EXT3_WATCHPERIOD;
+#if RETRACT_DURING_HEATUP
+  e->waitRetractTemperature = EXT3_WAIT_RETRACT_TEMP;
+  e->waitRetractUnits = EXT3_WAIT_RETRACT_UNITS;
+#endif
+  e->coolerSpeed = EXT3_EXTRUDER_COOLER_SPEED;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+  e->advanceK = EXT3_ADVANCE_K;
+#endif
+  e->advanceL = EXT3_ADVANCE_L;
+#endif
+#endif // NUM_EXTRUDER > 3
+#if NUM_EXTRUDER>4
+  e = &extruder[4];
+  e->stepsPerMM = EXT4_STEPS_PER_MM;
+  e->maxFeedrate = EXT4_MAX_FEEDRATE;
+  e->maxStartFeedrate = EXT4_MAX_START_FEEDRATE;
+  e->maxAcceleration = EXT4_MAX_ACCELERATION;
+  e->tempControl.heatManager = EXT4_HEAT_MANAGER;
+#ifdef TEMP_PID
+  e->tempControl.pidDriveMax = EXT4_PID_INTEGRAL_DRIVE_MAX;
+  e->tempControl.pidDriveMin = EXT4_PID_INTEGRAL_DRIVE_MIN;
+  e->tempControl.pidPGain = EXT4_PID_P;
+  e->tempControl.pidIGain = EXT4_PID_I;
+  e->tempControl.pidDGain = EXT4_PID_D;
+  e->tempControl.pidMax = EXT4_PID_MAX;
+#endif
+  e->yOffset = EXT4_Y_OFFSET;
+  e->xOffset = EXT4_X_OFFSET;
+  e->watchPeriod = EXT4_WATCHPERIOD;
+#if RETRACT_DURING_HEATUP
+  e->waitRetractTemperature = EXT4_WAIT_RETRACT_TEMP;
+  e->waitRetractUnits = EXT4_WAIT_RETRACT_UNITS;
+#endif
+  e->coolerSpeed = EXT4_EXTRUDER_COOLER_SPEED;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+  e->advanceK = EXT4_ADVANCE_K;
+#endif
+  e->advanceL = EXT4_ADVANCE_L;
+#endif
+#endif // NUM_EXTRUDER > 4
+#if NUM_EXTRUDER>5
+  e = &extruder[5];
+  e->stepsPerMM = EXT5_STEPS_PER_MM;
+  e->maxFeedrate = EXT5_MAX_FEEDRATE;
+  e->maxStartFeedrate = EXT5_MAX_START_FEEDRATE;
+  e->maxAcceleration = EXT5_MAX_ACCELERATION;
+  e->tempControl.heatManager = EXT5_HEAT_MANAGER;
+#ifdef TEMP_PID
+  e->tempControl.pidDriveMax = EXT5_PID_INTEGRAL_DRIVE_MAX;
+  e->tempControl.pidDriveMin = EXT5_PID_INTEGRAL_DRIVE_MIN;
+  e->tempControl.pidPGain = EXT5_PID_P;
+  e->tempControl.pidIGain = EXT5_PID_I;
+  e->tempControl.pidDGain = EXT5_PID_D;
+  e->tempControl.pidMax = EXT5_PID_MAX;
+#endif
+  e->yOffset = EXT5_Y_OFFSET;
+  e->xOffset = EXT5_X_OFFSET;
+  e->watchPeriod = EXT5_WATCHPERIOD;
+#if RETRACT_DURING_HEATUP
+  e->waitRetractTemperature = EXT5_WAIT_RETRACT_TEMP;
+  e->waitRetractUnits = EXT5_WAIT_RETRACT_UNITS;
+#endif
+  e->coolerSpeed = EXT5_EXTRUDER_COOLER_SPEED;
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+  e->advanceK = EXT5_ADVANCE_K;
+#endif
+  e->advanceL = EXT5_ADVANCE_L;
+#endif
+#endif // NUM_EXTRUDER > 5
   extruder_select(current_extruder->id);
   update_ramps_parameter();
   initHeatedBed();
@@ -334,6 +459,7 @@ void epr_data_to_eeprom(byte corrupted) {
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_TEMP);
     epr_set_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,EXT0_WAIT_RETRACT_UNITS);
 #endif
+    epr_set_byte(o+EPR_EXTRUDER_COOLER_SPEED,e->coolerSpeed);
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_set_float(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
@@ -440,6 +566,8 @@ void epr_eeprom_to_data() {
 #endif
     e->advanceL = epr_get_float(o+EPR_EXTRUDER_ADVANCE_L);
  #endif
+    if(version>1)
+      e->coolerSpeed = epr_get_byte(o+EPR_EXTRUDER_COOLER_SPEED);
   }
   if(version!=EEPROM_PROTOCOL_VERSION) {
     OUT_P_LN("Protocol version changed, upgrading");
@@ -579,8 +707,11 @@ void epr_output_settings() {
     epr_out_long(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
     epr_out_long(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
     epr_out_int(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("temp. stabilize time [s]"));
+#if RETRACT_DURING_HEATUP
     epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("temp. for retraction when heating [C]"));
     epr_out_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("distance to retract when heating [mm]"));
+#endif
+    epr_out_byte(o+EPR_EXTRUDER_COOLER_SPEED,PSTR("extruder cooler speed [0-255]"));
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("advance K [0=off]"));

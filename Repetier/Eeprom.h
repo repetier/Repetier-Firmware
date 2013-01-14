@@ -22,7 +22,7 @@
 #include <avr/eeprom.h>
 
 // Id to distinguish version changes 
-#define EEPROM_PROTOCOL_VERSION 1
+#define EEPROM_PROTOCOL_VERSION 2
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -101,6 +101,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_ADVANCE_L          46
 #define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
+#define EPR_EXTRUDER_COOLER_SPEED       54
 #if EEPROM_MODE!=0
 
 extern inline void epr_set_byte(uint pos,byte value);

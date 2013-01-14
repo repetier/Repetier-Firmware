@@ -256,6 +256,11 @@ That way you can execute some mechanical components needed for extruder selectio
 The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M120 S5 P5\nM117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
+/** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
+#define EXT0_EXTRUDER_COOLER_PIN -1
+/** PWM speed for the cooler fan. 0=off 255=full speed */
+#define EXT0_EXTRUDER_COOLER_SPEED 255
+
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 0
@@ -350,6 +355,10 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_WAIT_RETRACT_UNITS	40
 #define EXT1_SELECT_COMMANDS "M120 S5 P15\nM117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
+/** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
+#define EXT1_EXTRUDER_COOLER_PIN -1
+/** PWM speed for the cooler fan. 0=off 255=full speed */
+#define EXT1_EXTRUDER_COOLER_SPEED 255
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -1005,11 +1014,11 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 #define EEPROM_MODE 1
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT true
+#define SDSUPPORT false
 /** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT 49
+#define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal. 
 #define SDCARDDETECTINVERTED false
 #endif

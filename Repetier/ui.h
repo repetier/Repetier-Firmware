@@ -381,6 +381,15 @@ extern unsigned char i2c_read(unsigned char ack);
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
+#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin 
+#undef SDCARDDETECT
+#define SDCARDDETECT 49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED false
+#undef SDSUPPORT
+#define SDSUPPORT true
+#endif
+
 class UIDisplay {
   public:
     volatile byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
@@ -438,6 +447,7 @@ class UIDisplay {
 };
 extern UIDisplay uid;
 
+
 #if FEATURE_CONTROLLER==1
 #include "uiconfig.h"
 #endif
@@ -452,12 +462,6 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif
 #if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller
-#undef SDCARDDETECT
-#define SDCARDDETECT 49
-#undef SDCARDDETECTINVERTED
-#define SDCARDDETECTINVERTED false
-#undef SDSUPPORT
-#define SDSUPPORT true
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE 1

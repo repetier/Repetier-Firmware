@@ -69,7 +69,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif 
   }
-  ,ext0_select_cmd,ext0_deselect_cmd
+  ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
  } 
 #endif
 #if NUM_EXTRUDER>1
@@ -87,7 +87,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
-  ,ext1_select_cmd,ext1_deselect_cmd
+  ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
  }
 #endif
 #if NUM_EXTRUDER>2
@@ -105,7 +105,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
-  ,ext2_select_cmd,ext2_deselect_cmd
+  ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
  }
 #endif
 #if NUM_EXTRUDER>3
@@ -123,7 +123,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
-  ,ext3_select_cmd,ext3_deselect_cmd
+  ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
  }
 #endif
 #if NUM_EXTRUDER>4
@@ -141,7 +141,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
-  ,ext4_select_cmd,ext4_deselect_cmd
+  ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
  }
 #endif
 #if NUM_EXTRUDER>5
@@ -159,7 +159,7 @@ Extruder extruder[NUM_EXTRUDER] = {
   ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
-  ,ext5_select_cmd,ext5_deselect_cmd
+  ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
  }
 #endif
 };
@@ -462,6 +462,8 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
   if(temp_celsius==tc->targetTemperatureC) return;
   tc->targetTemperature = conv_temp_raw(tc->sensorType,temp_celsius);
   tc->targetTemperatureC = temp_celsius;
+  if(temp_celsius<50) extruder[extr].coolerPWM = 0;
+  else extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
    OUT_P_FX("TargetExtr",extr,0);
    OUT_P_FX_LN(":",temp_celsius,0);
 #if USE_OPS==1  
