@@ -1056,6 +1056,7 @@ Select the language to use.
 0 = english
 1 = german
 2 = dutch
+3 = brazilian portuguese
 */
 #define UI_LANGUAGE 1
 
