@@ -112,7 +112,7 @@ Rows of your display. 2 or 4
 */
 #define UI_DISPLAY_I2C_CHIPTYPE 0
 // 0x40 till 0x4e for PCF8574, 0x40 for the adafruid RGB shield, 0x40 - 0x4e for MCP23017
-// Official addresses have a value twice as high!
+// Official addresses have a value half as high!
 #define UI_DISPLAY_I2C_ADDRESS 0x4e
 // For MCP 23017 define which pins should be output
 #define UI_DISPLAY_I2C_OUTPUT_PINS 65504

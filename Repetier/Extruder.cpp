@@ -462,8 +462,7 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
   if(temp_celsius==tc->targetTemperatureC) return;
   tc->targetTemperature = conv_temp_raw(tc->sensorType,temp_celsius);
   tc->targetTemperatureC = temp_celsius;
-  if(temp_celsius<50) extruder[extr].coolerPWM = 0;
-  else extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+  if(temp_celsius>=50) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
    OUT_P_FX("TargetExtr",extr,0);
    OUT_P_FX_LN(":",temp_celsius,0);
 #if USE_OPS==1  
@@ -970,7 +969,7 @@ bool reportTempsensorError() {
      int temp = tempController[i]->currentTemperatureC;
      if(i==NUM_EXTRUDER) OUT_P("heated bed");
      else OUT_P_I("extruder ",i);  
-     if(temp<-10 || temp>400) {
+     if(temp<MIN_DEFECT_TEMPERATURE || temp>MAX_DEFECT_TEMPERATURE) {
        OUT_P_LN(": temp sensor defect");
      } else OUT_P_LN(": working");
   }
@@ -995,7 +994,10 @@ void manage_temperatures() {
     //int oldTemp = act->currentTemperatureC;
     act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
     act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
-    if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<-10 || act->currentTemperatureC>400)) { // no temp sensor or short in sensor, disable heater
+    if(controller<NUM_EXTRUDER && act->currentTemperatureC<50) {
+        extruder[controller].coolerPWM = 0;
+    }
+    if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE)) { // no temp sensor or short in sensor, disable heater
         printer_state.flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
         reportTempsensorError();
     }

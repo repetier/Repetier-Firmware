@@ -709,7 +709,7 @@ void gcode_read_serial() {
     } else { // Ascii command
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
-        gcode_transbuffer[gcode_wpos]=0;
+        gcode_transbuffer[gcode_wpos-1]=0;
         gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
@@ -761,7 +761,7 @@ void gcode_read_serial() {
     } else {
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
-        gcode_transbuffer[gcode_wpos]=0;
+        gcode_transbuffer[gcode_wpos-1]=0;
         gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
@@ -879,14 +879,11 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      while(*sp!='M') sp++; // Search M command
      while(*sp!=' ') sp++; // search next whitespace
      while(*sp==' ') sp++; // skip leading whitespaces
-     //char *wp = code->text;
      code->text = sp;
      while(*sp) {
         if(code->M != 117 && (*sp==' ' || *sp=='*')) break; // end of filename reached
         sp++;
-        //*wp++ = *sp++;
      }
-     //*wp = 0; // ensure ending 0 
      *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
      gcode_wait_all_parsed = true; // don't risk string be deleted
      code->params |= 32768;
@@ -1006,7 +1003,6 @@ void gcode_print_command(GCode *code) {
     out.print_float_P(PSTR(" R"),code->R);
   }
   if(GCODE_HAS_STRING(code)) {
-    out.print(' ');
     out.print(code->text);
   }  
 }
