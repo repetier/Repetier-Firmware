@@ -741,14 +741,14 @@ void process_command(GCode *com,byte bufferedCommand)
         wait_until_end_of_move();
         previous_millis_cmd = millis();
         SET_OUTPUT(PS_ON_PIN); //GND
-        WRITE(PS_ON_PIN, LOW);
+        WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
         break;
       case 81: // M81 - ATX Power Off
 #if PS_ON_PIN>-1
         wait_until_end_of_move();
         SET_OUTPUT(PS_ON_PIN); //GND
-        WRITE(PS_ON_PIN, HIGH);
+        WRITE(PS_ON_PIN,(POWER_INVERTING ? LOW : HIGH));
 #endif
         break;
       case 82:

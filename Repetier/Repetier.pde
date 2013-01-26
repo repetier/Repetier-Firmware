@@ -363,7 +363,7 @@ SET_OUTPUT(ANALYZER_CH7);
 
 #if defined(ENABLE_POWER_ON_STARTUP) && PS_ON_PIN>-1
   SET_OUTPUT(PS_ON_PIN); //GND
-  WRITE(PS_ON_PIN, LOW);
+  WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
 
   //Initialize Step Pins
@@ -2290,7 +2290,7 @@ void kill(byte only_steppers)
 #if defined(PS_ON_PIN) && PS_ON_PIN>-1
       //pinMode(PS_ON_PIN,INPUT);
       SET_OUTPUT(PS_ON_PIN); //GND
-      WRITE(PS_ON_PIN, HIGH);
+      WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
 #endif
   } else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
 }

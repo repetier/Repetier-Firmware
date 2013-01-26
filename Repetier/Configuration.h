@@ -62,7 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
-#define MOTHERBOARD 12
+#define MOTHERBOARD 33
 #include "pins.h"
 
 // Uncomment the following line if oyu are using arduino compatible firmware made for Arduino version earlier then 1.0
@@ -975,6 +975,11 @@ the power will be turned on without the need to call M80 if initially started.
 */
 #define ENABLE_POWER_ON_STARTUP
 
+/**
+If you use an ATX power supply you need the power pin to work non inverting. For some speacial
+boards you might need to make it inverting.
+*/
+#define POWER_INVERTING false
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait for ever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
@@ -1054,7 +1059,7 @@ The following settings override uiconfig.h!
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
 */
-#define FEATURE_CONTROLLER 4
+#define FEATURE_CONTROLLER 0
 
 /**
 Select the language to use.
@@ -1063,7 +1068,7 @@ Select the language to use.
 2 = dutch
 3 = brazilian portuguese
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup
 #define UI_VERSION_STRING2 "Mendel"
