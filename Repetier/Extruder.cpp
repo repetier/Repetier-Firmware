@@ -994,7 +994,7 @@ void manage_temperatures() {
     //int oldTemp = act->currentTemperatureC;
     act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
     act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
-    if(controller<NUM_EXTRUDER && act->currentTemperatureC<50) {
+    if(controller<NUM_EXTRUDER && act->currentTemperatureC<50 && act->targetTemperatureC<50) {
         extruder[controller].coolerPWM = 0;
     }
     if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE)) { // no temp sensor or short in sensor, disable heater
