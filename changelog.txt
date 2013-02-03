@@ -1,4 +1,4 @@
-Version 0.80 dev
+Version 0.81 dev
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Added motherboard type 71 for Gen7 1.4.1
   Added motherboard type 70 for MegaTronics
@@ -16,7 +16,8 @@ Version 0.80 dev
   More parameter configurable over EEPROM.
   Up to 3 generic thermistor tables.
   Generic thermistor tables are now evenly distributed over temperature, not analog values read.
-  Set stepper current with digipot (RAMBO board): M908 P<potid> S<value>
+  Set stepper current with digipot (RAMBO board): M908 P<potid> S<value 0..255>
+  Set stepper current for Foltyn 3D-Master board: M908 P<stepperid> S<value 0..65535>
   Set micro stepping (RAMBO board): M350 S<all> X<x-stepper> Y<y-stepper> Z<z-stepper> E<extruder 1> P<extruder 2>
   Simplified configuration. All speeds are now mm/s.
   Repetier protocol version 2, allowing more data parameter.
@@ -26,6 +27,12 @@ Version 0.80 dev
   Wait until buffer empty (M400).
   New handling of user interfaces making configuration easier.
   New system for handling XY gantry.
+  Added brazilian portuguese translation by rmoretti
+  Easy configuration of known board/display combinations.
+  Detect missing/shorted thermistors.
+  Supports up to 6 extruder (only tested till 2).
+  Custom g-codes on extruder switch possible.
+  Separate PWM signal to cool the extruder.
 
 Version 0.72 02-09.2012
   Fixed extrusion bug when advance or ops is compiled in.

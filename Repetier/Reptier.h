@@ -24,7 +24,7 @@
 
 #include <avr/io.h>
 
-#define REPETIER_VERSION "0.80"
+#define REPETIER_VERSION "0.81"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##

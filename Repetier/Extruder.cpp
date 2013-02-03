@@ -545,6 +545,13 @@ const short temptable_4[NUMTEMPS_4][2] PROGMEM = {
    {1*4, 430*8},{54*4, 137*8},{107*4, 107*8},{160*4, 91*8},{213*4, 80*8},{266*4, 71*8},{319*4, 64*8},{372*4, 57*8},{425*4, 51*8},
    {478*4, 46*8},{531*4, 41*8},{584*4, 35*8},{637*4, 30*8},{690*4, 25*8},{743*4, 20*8},{796*4, 14*8},{849*4, 7*8},{902*4, 0*8},
    {955*4, -11*8},{1008*4, -35*8}};
+   
+#define NUMTEMPS_8 34
+const short temptable_8[NUMTEMPS_8][2] PROGMEM = {
+   {0,8000},{89,2400},{101,2320},{116,2240},{133,2160},{153,2080},{178,2000},{207,1920},{242,1840},{284,1760},{336,1680},{398,1600},
+   {474,1520},{567,1440},{679,1360},{814,1280},{977,1200},{1171,1120},{1397,1040},{1655,960},{1940,880},{2246,800},{2558,720},
+   {2863,640},{3144,560},{3389,480},{3591,400},{3749,320},{3867,240},{3950,160},{4006,80},{4042,0},{4064,-80},{4077,-160}};
+
 #if NUM_TEMPS_USERTHERMISTOR0>0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -554,7 +561,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2>0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[7] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[8] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0>0
 ,(short int *)&temptable_5[0][0]
 #else
@@ -570,8 +577,9 @@ const short * const temptables[7] PROGMEM = {(short int *)&temptable_1[0][0],(sh
 #else
 ,0
 #endif
+,(short int *)&temptable_8[0][0]
 };
-const byte temptables_num[7] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2};
+const byte temptables_num[8] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8};
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- read_raw_temperature ----------------------------------------------
@@ -587,6 +595,7 @@ int read_raw_temperature(byte type,byte pin) {
     case 5:
     case 6:
     case 7:
+    case 8:
     case 97:
     case 98:
     case 99:
@@ -620,6 +629,7 @@ float conv_raw_temp(byte type,int raw_temp) {
     case 5: 
     case 6:
     case 7:
+    case 8:
     {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
@@ -725,6 +735,7 @@ int conv_temp_raw(byte type,float tempf) {
     case 5:
     case 6:
     case 7:
+    case 8:
     {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;

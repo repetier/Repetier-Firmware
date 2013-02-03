@@ -1,9 +1,9 @@
 If you are upgrading from an earlier version, make sure you followed the upgrade
 instructions for that version.
 
-Upgrade tp 0.80
+Upgrade to 0.80
 
-The eeprom storage uses now a checksum to help switching from other firmwares. This
+The EEPROM storage uses now a checksum to help switching from other firmwares. This
 will cause your eeprom to get overwritten with the first upload, so save you old values.
 
 The configuration has also made significant changes. Copy your values into the new
