@@ -25,20 +25,20 @@ Supported boards:
 The following boards are supported by setting the proper motherboard type.Other boards
 require a matching pin definition.
 
-MEGA/RAMPS up to 1.2       = 3
-RAMPS 1.3/RAMPS 1.4        = 33
-Gen6                       = 5 
-Gen6 deluxe                = 51
-Sanguinololu up to 1.1     = 6
-Sanguinololu 1.2 and above = 62
-Gen7 1.1 till 1.3.x        = 7
-Gen7 1.4.1 and later       = 71
-Teensylu (at90usb)         = 8 // requires Teensyduino
-Printrboard (at90usb)      = 9 // requires Teensyduino
-Foltyn 3D Master           = 12
-MegaTronics                = 70
-RUMBA                      = 80  // Get it from reprapdiscount
-Rambo                      = 301
+* MEGA/RAMPS up to 1.2       = 3
+* RAMPS 1.3/RAMPS 1.4        = 33
+* Gen6                       = 5 
+* Gen6 deluxe                = 51
+* Sanguinololu up to 1.1     = 6
+* Sanguinololu 1.2 and above = 62
+* Gen7 1.1 till 1.3.x        = 7
+* Gen7 1.4.1 and later       = 71
+* Teensylu (at90usb)         = 8 // requires Teensyduino
+* Printrboard (at90usb)      = 9 // requires Teensyduino
+* Foltyn 3D Master           = 12
+* MegaTronics                = 70
+* RUMBA                      = 80  // Get it from reprapdiscount
+* Rambo                      = 301
 
 ## Features
 
