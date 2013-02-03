@@ -1,6 +1,28 @@
 #ifndef PINS_H
 #define PINS_H
 
+/*
+The board assignment defines the capabilities of the motherboard and the used pins.
+Each board definition follows the following scheme:
+
+CPU_ARCH
+  ARCH_AVR for AVR based boards
+  ARCH_ARM for all arm based boards
+
+STEPPER_CURRENT_CONTROL
+  CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
+  CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
+  CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
+
+*/
+
+#define ARCH_AVR 1
+#define ARCH_ARM 2
+
+#define CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
+#define CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
+#define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
+
 /****************************************************************************************
 * Arduino pin assignment
 *
@@ -47,9 +69,9 @@
 #define Z_MIN_PIN          17
 #define Z_MAX_PIN          16
 
-#define E_STEP_PIN         11
-#define E_DIR_PIN          12
-#define E_ENABLE_PIN       -1
+#define E0_STEP_PIN         11
+#define E0_DIR_PIN          12
+#define E0_ENABLE_PIN       -1
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -120,9 +142,9 @@
 #define Z_MIN_PIN           2
 #define Z_MAX_PIN           1
 
-#define E_STEP_PIN         12
-#define E_DIR_PIN          16
-#define E_ENABLE_PIN        3
+#define E0_STEP_PIN         12
+#define E0_DIR_PIN          16
+#define E0_ENABLE_PIN        3
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -136,7 +158,7 @@
 
 /*  Unused (1) (2) (3) 4 5 6 7 8 9 10 11 12 13 (14) (15) (16) 17 (18) (19) (20) (21) (22) (23) 24 (25) (26) (27) 28 (29) (30) (31)  */
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -172,9 +194,9 @@
 #define Z_MIN_PIN       30
 #define Z_MAX_PIN       31
 
-#define E_STEP_PIN      17
-#define E_DIR_PIN       16
-#define E_ENABLE_PIN    -1
+#define E0_STEP_PIN      17
+#define E0_DIR_PIN       16
+#define E0_ENABLE_PIN    -1
 
 #define SDPOWER          -1
 #define SDSS          4
@@ -198,7 +220,7 @@
 #define TEMP_0_PIN      -1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -231,31 +253,33 @@
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
 #define X_ENABLE_PIN       38
-#define X_MIN_PIN           3
-#define X_MAX_PIN          -1   //2 //Max endstops default to disabled "-1", set to commented value to enable.
+#define X_MIN_PIN          3
+#define X_MAX_PIN          2
 
 #define Y_STEP_PIN         60
 #define Y_DIR_PIN          61
 #define Y_ENABLE_PIN       56
 #define Y_MIN_PIN          14
-#define Y_MAX_PIN          -1   //15
+#define Y_MAX_PIN          15
 
 #define Z_STEP_PIN         46
 #define Z_DIR_PIN          48
 #define Z_ENABLE_PIN       62
 #define Z_MIN_PIN          18
-#define Z_MAX_PIN          -1   //19
+#define Z_MAX_PIN          19
 
-#define E_STEP_PIN         26
-#define E_DIR_PIN          28
-#define E_ENABLE_PIN       24
+#define E0_STEP_PIN         26
+#define E0_DIR_PIN          28
+#define E0_ENABLE_PIN       24
 
-#define E_1_STEP_PIN         36
-#define E_1_DIR_PIN          34
-#define E_1_ENABLE_PIN       30
+#define E1_STEP_PIN         36
+#define E1_DIR_PIN          34
+#define E1_ENABLE_PIN       30
 
 #define SDPOWER            -1
 #define SDSS               53
+#define SDCARDDETECT 	    49
+
 #define LED_PIN            13
 #define FAN_PIN            9
 #define PS_ON_PIN          12
@@ -263,10 +287,12 @@
 
 #define HEATER_0_PIN       10
 #define HEATER_1_PIN       8
+#define HEATER_2_PIN       9
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
 #define TEMP_1_PIN         14   // ANALOG NUMBERING
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
-#define E1_PINS E_1_STEP_PIN,E_1_DIR_PIN,E_1_ENABLE_PIN,
+#define TEMP_2_PIN         15
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 
 #else // RAMPS_V_1_1 or RAMPS_V_1_2 as default
@@ -289,9 +315,9 @@
 #define Z_MIN_PIN          18
 #define Z_MAX_PIN          -1    //19
 
-#define E_STEP_PIN         32
-#define E_DIR_PIN          34
-#define E_ENABLE_PIN       30
+#define E0_STEP_PIN         32
+#define E0_DIR_PIN          34
+#define E0_ENABLE_PIN       30
 
 #define SDPOWER            48
 #define SDSS               53
@@ -301,7 +327,7 @@
 //#define SCL                21
 //#define SDA                20
 
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
@@ -322,18 +348,88 @@
 
 // SPI for Max6675 Thermocouple 
 
-#ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support  
-  #define SCK_PIN          52
-  #define MISO_PIN         50
-  #define MOSI_PIN         51
-  #define MAX6675_SS       53
-#else
-  #define MAX6675_SS       49
-#endif
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define MAX6675_SS       53
 
 
 #endif
+
+/****************************************************************************************
+* RUMBA pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 80
+#define KNOWN_BOARD 1
+
+#ifndef __AVR_ATmega2560__
+ #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+#endif
+
+#define X_STEP_PIN         17
+#define X_DIR_PIN          16
+#define X_ENABLE_PIN       48
+#define X_MIN_PIN          37
+#define X_MAX_PIN          36   //Max endstops default to disabled "-1"
+
+#define Y_STEP_PIN         54
+#define Y_DIR_PIN          47 
+#define Y_ENABLE_PIN       55
+#define Y_MIN_PIN          35
+#define Y_MAX_PIN          34 
+
+#define Z_STEP_PIN         57 
+#define Z_DIR_PIN          56
+#define Z_ENABLE_PIN       62 
+#define Z_MIN_PIN          33
+#define Z_MAX_PIN          32
+
+#define E0_STEP_PIN         23
+#define E0_DIR_PIN          22
+#define E0_ENABLE_PIN       24
+
+#define E1_STEP_PIN        26
+#define E1_DIR_PIN         25
+#define E1_ENABLE_PIN      27
+
+#define E2_STEP_PIN        29
+#define E2_DIR_PIN         28
+#define E2_ENABLE_PIN      39
+
+#define LED_PIN            13
+
+#define FAN_PIN            7 
+//additional FAN1 PIN (e.g. useful for electronics fan or light on/off) on PIN 8
+
+#define PS_ON_PIN          45
+#define KILL_PIN           46
+
+#define HEATER_0_PIN       2    // EXTRUDER 1
+#define HEATER_1_PIN       3    // EXTRUDER 2
+#define HEATER_2_PIN       6    // EXTRUDER 3
+//optional FAN1 can be used as 4th heater output: #define HEATER_3_PIN       8    // EXTRUDER 4
+#define HEATER_BED_PIN     9    // BED
+
+#define TEMP_0_PIN         15   // ANALOG NUMBERING
+#define TEMP_1_PIN         14   // ANALOG NUMBERING
+#define TEMP_2_PIN         13   // ANALOG NUMBERING
+//optional for extruder 4 or chamber: #define TEMP_2_PIN         12   // ANALOG NUMBERING
+#define TEMP_BED_PIN       11   // ANALOG NUMBERING
+
+#define SDPOWER            -1
+#define SDSS               53
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+
+#endif //MOTHERBOARD==80
+
 /****************************************************************************************
 * Duemilanove w/ ATMega328P pin assignment
 *
@@ -363,9 +459,9 @@
 #define Z_MIN_PIN           4
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         11
-#define E_DIR_PIN          12
-#define E_ENABLE_PIN       -1
+#define E0_STEP_PIN         11
+#define E0_DIR_PIN          12
+#define E0_ENABLE_PIN       -1
 
 #define SDPOWER          -1
 #define SDSS          -1
@@ -376,20 +472,20 @@
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 
 #endif
 
 /****************************************************************************************
-* Gen6 pin assignment
+* Gen6 pin assignment (5) and Gen6 deluxe assignment (51)
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 5
+#if MOTHERBOARD == 5 || MOTHERBOARD == 51
     #define KNOWN_BOARD 1
 
-#ifndef __AVR_ATmega644P__
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu.
 #endif
 
@@ -415,12 +511,18 @@
     #define Z_MAX_PIN       -1
     
     //extruder pins
-    #define E_STEP_PIN      4     //Edited @ EJE Electronics 20100715
-    #define E_DIR_PIN       2     //Edited @ EJE Electronics 20100715
-    #define E_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
+    #define E0_STEP_PIN      4     //Edited @ EJE Electronics 20100715
+    #define E0_DIR_PIN       2     //Edited @ EJE Electronics 20100715
+    #define E0_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
     #define TEMP_0_PIN      5     //changed @ rkoeppl 20110410
     #define HEATER_0_PIN    14    //changed @ rkoeppl 20110410
-    #define HEATER_1_PIN    -1    //changed @ rkoeppl 20110410
+#if MOTHERBOARD == 5
+    #define HEATER_1_PIN  -1    //changed @ rkoeppl 20110410
+    #define TEMP_1_PIN    -1    //changed @ rkoeppl 20110410
+#else
+    #define HEATER_1_PIN   1    //changed @ rkoeppl 20110410
+    #define TEMP_1_PIN     0    //changed @ rkoeppl 20110410
+#endif
     
     
     #define SDPOWER          -1
@@ -436,11 +538,15 @@
     //our RS485 pins
     #define TX_ENABLE_PIN	12
     #define RX_ENABLE_PIN	13
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
     
-    #define SCL 16
-    #define SDA 17
+    #define SCK_PIN          7
+    #define MISO_PIN         6
+    #define MOSI_PIN         5
+
+   // #define SCL 16
+   // #define SDA 17
 
 #endif
 /****************************************************************************************
@@ -473,8 +579,8 @@
     #define Z_MIN_PIN          20
     #define Z_MAX_PIN          -1
 
-    #define E_STEP_PIN         1
-    #define E_DIR_PIN          0
+    #define E0_STEP_PIN         1
+    #define E0_DIR_PIN          0
 
     #define LED_PIN            -1
 
@@ -491,7 +597,7 @@
       #define X_ENABLE_PIN       14
       #define Y_ENABLE_PIN       14
       #define Z_ENABLE_PIN       26
-      #define E_ENABLE_PIN       14
+      #define E0_ENABLE_PIN       14
 
     #else
 
@@ -499,7 +605,7 @@
       #define X_ENABLE_PIN       -1
       #define Y_ENABLE_PIN       -1
       #define Z_ENABLE_PIN       -1
-      #define E_ENABLE_PIN       -1
+      #define E0_ENABLE_PIN       -1
 
     #endif
 
@@ -507,7 +613,8 @@
     #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
     #define SDPOWER          -1
     #define SDSS          31
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+    
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
 
 #ifndef KNOWN_BOARD
@@ -523,7 +630,7 @@
 #if MOTHERBOARD == 7
 #define KNOWN_BOARD 1
 
-#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) 
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Gen7' selected from the 'Tools -> Boards' menu.
 #endif
 
@@ -549,9 +656,9 @@
 #define Z_MAX_PIN       -1
     
 //extruder pins
-#define E_STEP_PIN      28     
-#define E_DIR_PIN       27     
-#define E_ENABLE_PIN    24     
+#define E0_STEP_PIN      28     
+#define E0_DIR_PIN       27     
+#define E0_ENABLE_PIN    24     
 #define TEMP_0_PIN      1 
 #define TEMP_1_PIN      2    
 #define HEATER_0_PIN    4    
@@ -564,7 +671,7 @@
        
 #define FAN_PIN         31    
 #define PS_ON_PIN       15    
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
     //our pin for debugging.
@@ -575,6 +682,10 @@
     #define TX_ENABLE_PIN	12
     #define RX_ENABLE_PIN	13
 
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
+
 #endif
 /****************************************************************************************
 * Gen7 1.4.1 pin assignment
@@ -583,58 +694,63 @@
 #if MOTHERBOARD == 71
 #define KNOWN_BOARD 1
 
-#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) 
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
     #error Oops!  Make sure you have 'Gen7' selected from the 'Tools -> Boards' menu.
 #endif
 
 //x axis pins
-    #define X_STEP_PIN      29
-    #define X_DIR_PIN       28
-    #define X_ENABLE_PIN    25
-    #define X_MIN_PIN       0
-    #define X_MAX_PIN       -1
+  #define X_STEP_PIN      29
+  #define X_DIR_PIN       28
+  #define X_ENABLE_PIN    25
+  #define X_MIN_PIN       0
+  #define X_MAX_PIN       -1
     
-    //y axis pins
-    #define Y_STEP_PIN      27
-    #define Y_DIR_PIN       26
-    #define Y_ENABLE_PIN    25
-    #define Y_MIN_PIN       1
-    #define Y_MAX_PIN       -1
+  //y axis pins
+  #define Y_STEP_PIN      27
+  #define Y_DIR_PIN       26
+  #define Y_ENABLE_PIN    25
+  #define Y_MIN_PIN       1
+  #define Y_MAX_PIN       -1
     
-    //z axis pins
-    #define Z_STEP_PIN      23
-    #define Z_DIR_PIN       22
-    #define Z_ENABLE_PIN    25
-    #define Z_MIN_PIN       2
-    #define Z_MAX_PIN       -1
+  //z axis pins
+  #define Z_STEP_PIN      23
+  #define Z_DIR_PIN       22
+  #define Z_ENABLE_PIN    25
+  #define Z_MIN_PIN       2
+  #define Z_MAX_PIN       -1
     
-    //extruder pins
-    #define E_STEP_PIN      19     
-    #define E_DIR_PIN       18     
-    #define E_ENABLE_PIN    25     
-    #define TEMP_0_PIN      0 
-    #define TEMP_1_PIN      1    
-    #define HEATER_0_PIN    4    
-    #define HEATER_1_PIN    3    
+  //extruder pins
+  #define E0_STEP_PIN      19     
+  #define E0_DIR_PIN       18     
+  #define E0_ENABLE_PIN    25     
+  #define TEMP_0_PIN      0 
+  #define TEMP_1_PIN      1    
+  #define HEATER_0_PIN    4    
+  #define HEATER_1_PIN    3    
     
     
-    #define SDPOWER          -1
-    #define SDSS          -1 // SCL pin of I2C header
-    #define LED_PIN         -1    
+  #define SDPOWER          -1
+  #define SDSS            -1 
+  #define LED_PIN         -1    
        
-    #define FAN_PIN         -1    
-    #define PS_ON_PIN       15    
+  #define FAN_PIN         -1    
+  #define PS_ON_PIN       15    
     //our pin for debugging.
     
-    #define DEBUG_PIN        0
+  #define DEBUG_PIN        0
     
     //our RS485 pins
-    #define TX_ENABLE_PIN	12
-    #define RX_ENABLE_PIN	13
+  #define TX_ENABLE_PIN	12
+  #define RX_ENABLE_PIN	13
 
-    #define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
-    #define E1_PINS
+  #define SDPOWER          -1
+  #define SDSS          -1
 
+  #define SCK_PIN          7
+  #define MISO_PIN         6
+  #define MOSI_PIN         5
+  #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+  #define E1_PINS
 #endif
 
 /****************************************************************************************
@@ -663,9 +779,9 @@
 #define Z_MIN_PIN          27
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         34
-#define E_DIR_PIN          35
-#define E_ENABLE_PIN       13
+#define E0_STEP_PIN         34
+#define E0_DIR_PIN          35
+#define E0_ENABLE_PIN       13
 
 #define TEMP_0_PIN          7 // Extruder - ANALOG PIN NUMBER!
 #define TEMP_1_PIN          6 // Bed - ANALOG PIN NUMBER! 
@@ -680,7 +796,7 @@
 #define PS_ON_PIN          -1
 
 #define KILL_PIN           -1
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
 #ifndef SDSUPPORT
@@ -711,7 +827,7 @@
 #define Y_STEP_PIN         30
 #define Y_DIR_PIN          31
 #define Y_ENABLE_PIN       18
-#define Y_MIN_PIN           20
+#define Y_MIN_PIN           20 // Don't use this if you want to use SD card. Use 37 and put the endstop in the e-stop slot!!!
 #define Y_MAX_PIN          -1
 
 #define Z_STEP_PIN         32
@@ -720,9 +836,9 @@
 #define Z_MIN_PIN          36
 #define Z_MAX_PIN          -1
 
-#define E_STEP_PIN         34
-#define E_DIR_PIN          35
-#define E_ENABLE_PIN       13
+#define E0_STEP_PIN         34
+#define E0_DIR_PIN          35
+#define E0_ENABLE_PIN       13
 #define TEMP_0_PIN          1 // Extruder - ANALOG PIN NUMBER!
 #define TEMP_1_PIN          0 // Bed - ANALOG PIN NUMBER! 
 #define HEATER_0_PIN       15 // Extruder
@@ -736,7 +852,7 @@
 #define PS_ON_PIN          -1
 
 #define KILL_PIN           -1
-#define E0_PINS E_STEP_PIN,E_DIR_PIN,E_ENABLE_PIN,
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
@@ -747,12 +863,366 @@
 
 #endif
 
+/****************************************************************************************
+* 3D Master pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 12
+  #define KNOWN_BOARD 1
+
+  #if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+  #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+  #endif
+
+// Definition for current control
+#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_LTC2600
+#define LTC2600_CHANNELS {0x30,0x31,0x32,0x33,0x34}
+#define LTC2600_NUM_CHANNELS 5
+#define	LTC2600_CS_PIN		   92	// PIND.4, 47, DA_CS
+#define LTC2600_SCK_PIN		   93	// PIND.5, 48, DA_SCK
+#define LTC2600_SDI_PIN		   94	// PIND.6, 49, DA_SDI
+
+// On board beeper, so define values already here
+#define BEEPER_PIN 23
+#define BEEPER_TYPE 1
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
+
+// digital pin mappings
+#define X_STEP_PIN         54	// PINF.0, 97, STP_DRV1
+#define X_DIR_PIN          55	// PINF.1, 96, DIR_DRV1
+#define X_ENABLE_PIN       38	// PIND.7, 50, ENA_DRV1
+#define X_MIN_PIN           3	// PINE.5,  7, OPTO1
+#define X_MAX_PIN          -1   // PINJ.0, 63, OPTO4 (would be "15", -1 = disabled)
+
+#define Y_STEP_PIN         60	// PINF.6, 91, STP_DRV2
+#define Y_DIR_PIN          61	// PINF.7, 90, DIR_DRV2
+#define Y_ENABLE_PIN       56	// PINF.2, 95, ENA_DRV2
+#define Y_MIN_PIN           2	// PINE.4,  6, OPTO2
+#define Y_MAX_PIN          -1   // PIND.3, 46, OPTO5 (would be "18", -1 = disabled
+
+#define Z_STEP_PIN         46	// PINL.3, 38, STP_DRV3
+#define Z_DIR_PIN          48	// PINL.1, 36, DIR_DRV3
+#define Z_ENABLE_PIN       62	// PINK.0, 89, ENA_DRV3
+#define Z_MIN_PIN          14	// PINJ.1, 64, OPTO3
+#define Z_MAX_PIN          -1   // PIND.2, 45, OPTO6 (would be "19", -1 = disabled)
+
+#define E0_STEP_PIN         26	// PINA.4, 74, STP_DRV4
+#define E0_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
+#define E0_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
+
+#define E1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
+#define E1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
+#define E1_ENABLE_PIN     30	// PINC.7, 60, ENA_DRV5
+
+#define SDPOWER            -1
+#define SDSS               53	// PINB.0, 19, SS
+#define LED_PIN            13	// PINB.7, 26, LED13
+#define FAN_PIN            25	// OUT1 PINA.3, 75, OUT1
+#define FAN_BOARD_PIN      27   // OUT2
+#define PS_ON_PIN          -1
+#define KILL_PIN           -1
+
+#define HEATER_0_PIN       10	// PINB.4, 23, HZ1
+#define HEATER_1_PIN        9	// PINH.6, 18, HZ2
+#define HEATER_2_PIN	    8	// PINH.5, 17, HZ3
+
+// analog pin mappings
+#define TEMP_0_PIN         13   // PINK.5, 84, TH1
+#define TEMP_1_PIN         14   // PINK.6, 83, TH2
+#define TEMP_2_PIN         15   // PINK.7, 82, TH3
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+
+// these pins are defined in the SD library if building with SD support  
+#define SCK_PIN          52	// PINB.1, 20, SCK
+#define MISO_PIN         50	// PINB.3, 22, MISO
+#define MOSI_PIN         51	// PINB.2, 21, MOSI
+#define MAX6675_SS       53	// PINB.0, 19, SS
+
+#endif // MOTHERBOARD == 12
+
+
+/****************************************************************************************
+* MegaTronics
+*
+****************************************************************************************/
+#if MOTHERBOARD == 70
+#define KNOWN_BOARD 1
+
+//////////////////FIX THIS//////////////
+
+ #ifndef __AVR_ATmega2560__
+ #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+ #endif
+
+
+
+
+#define X_STEP_PIN         26
+#define X_DIR_PIN          28
+#define X_ENABLE_PIN       24
+#define X_MIN_PIN          41
+#define X_MAX_PIN          37   //2 //Max endstops default to disabled "-1", set to commented value to enable.
+
+#define Y_STEP_PIN         60 // A6
+#define Y_DIR_PIN          61 // A7
+#define Y_ENABLE_PIN       22
+#define Y_MIN_PIN          14
+#define Y_MAX_PIN          15   //15
+
+#define Z_STEP_PIN         54 // A0
+#define Z_DIR_PIN          55 // A1
+#define Z_ENABLE_PIN       56 // A2
+#define Z_MIN_PIN          18
+#define Z_MAX_PIN          19
+
+#define E0_STEP_PIN         31
+#define E0_DIR_PIN          32
+#define E0_ENABLE_PIN       38
+
+#define E1_STEP_PIN        34
+#define E1_DIR_PIN         36
+#define E1_ENABLE_PIN      30
+
+#define SDPOWER            -1
+#define SDSS               53
+#define LED_PIN            13
+
+
+#define FAN_PIN            7 // IO pin. Buffer needed
+#define PS_ON_PIN          12
+#define KILL_PIN           -1
+
+#define HEATER_0_PIN       9    // EXTRUDER 1
+#define HEATER_1_PIN       8    // EXTRUDER 2 (FAN On Sprinter)
+#define HEATER_2_PIN       -1  
+
+#if TEMP_SENSOR_0 == -1 
+#define TEMP_0_PIN         8   // ANALOG NUMBERING
+#else
+#define TEMP_0_PIN         13   // ANALOG NUMBERING
+
+#endif
+
+#define TEMP_1_PIN         15   // ANALOG NUMBERING
+#define TEMP_2_PIN         -1   // ANALOG NUMBERING
+#define HEATER_BED_PIN     10   // BED
+#define TEMP_BED_PIN       14   // ANALOG NUMBERING
+
+#define BEEPER 33			// Beeper on AUX-4
+
+
+#ifdef ULTRA_LCD
+
+  #ifdef NEWPANEL
+  //arduino pin which triggers an piezzo beeper
+    
+    #define LCD_PINS_RS 16 
+    #define LCD_PINS_ENABLE 17
+    #define LCD_PINS_D4 23
+    #define LCD_PINS_D5 25 
+    #define LCD_PINS_D6 27
+    #define LCD_PINS_D7 29
+    
+    //buttons are directly attached using AUX-2
+    #define BTN_EN1 37
+    #define BTN_EN2 35
+    #define BTN_ENC 43  //the click
+    
+    #define BLEN_C 2
+    #define BLEN_B 1
+    #define BLEN_A 0
+    
+    #define SDCARDDETECT -1		// Ramps does not use this port
+    
+      //encoder rotation values
+    #define encrot0 0
+    #define encrot1 2
+    #define encrot2 3
+    #define encrot3 1
+#endif
+#endif //ULTRA_LCD
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS
+
+#endif
+
+
+#if MOTHERBOARD == 301
+#define KNOWN_BOARD
+/*****************************************************************
+* Rambo Pin Assignments
+******************************************************************/
+
+#ifndef __AVR_ATmega2560__
+#error Oops!  Make sure you have 'Arduino Mega 2560' selected from the 'Tools -> Boards' menu.
+#endif
+
+#define X_STEP_PIN     37
+#define X_DIR_PIN      48
+#define X_MIN_PIN      12
+#define X_MAX_PIN      24
+#define X_ENABLE_PIN   29
+#define X_MS1_PIN      40
+#define X_MS2_PIN      41
+
+#define Y_STEP_PIN     36
+#define Y_DIR_PIN      49
+#define Y_MIN_PIN      11
+#define Y_MAX_PIN      23
+#define Y_ENABLE_PIN   28
+#define Y_MS1_PIN      69
+#define Y_MS2_PIN      39
+
+#define Z_STEP_PIN     35
+#define Z_DIR_PIN      47
+#define Z_MIN_PIN      10
+#define Z_MAX_PIN      30
+#define Z_ENABLE_PIN   27
+#define Z_MS1_PIN      68
+#define Z_MS2_PIN      67
+
+#define HEATER_BED_PIN 3
+#define TEMP_BED_PIN   2 
+
+#define HEATER_0_PIN   9
+#define TEMP_0_PIN     0
+
+#define HEATER_1_PIN   7
+#define TEMP_1_PIN     1
+
+#define HEATER_2_PIN   -1
+#define TEMP_2_PIN     -1
+
+#define E0_STEP_PIN    34
+#define E0_DIR_PIN     43
+#define E0_ENABLE_PIN  26
+#define E0_MS1_PIN     65
+#define E0_MS2_PIN     66
+
+#define E1_STEP_PIN    33
+#define E1_DIR_PIN     42
+#define E1_ENABLE_PIN  25
+#define E1_MS1_PIN     63
+#define E1_MS2_PIN     64
+
+#define DIGIPOTSS_PIN  38
+#define DIGIPOT_CHANNELS {4,5,3,0,1} // X Y Z E0 E1 digipot channels to stepper driver mapping
+
+#define SDPOWER        -1
+#define SDSS           53
+#define LED_PIN        13
+#define FAN_PIN        8
+#define PS_ON_PIN      4
+#define KILL_PIN       -1
+#define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
+#define E1_PINS
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define MAX6675_SS       53
+
+#endif
+
+#if MOTHERBOARD == 401
+#ifndef __SAM3X8E__
+#error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
+#endif
+
+#define KNOWN_BOARD
+#define CPU_ARCH ARCH_ARM
+/*****************************************************************
+* Arduino Due Pin Assignments
+******************************************************************/
+
+#define X_STEP_PIN     36
+#define X_DIR_PIN      48
+#define X_MIN_PIN      12
+#define X_MAX_PIN      19
+#define X_ENABLE_PIN   29
+#define X_MS1_PIN      40
+#define X_MS2_PIN      41
+
+#define Y_STEP_PIN     36
+#define Y_DIR_PIN      49
+#define Y_MIN_PIN      11
+#define Y_MAX_PIN      18
+#define Y_ENABLE_PIN   28
+#define Y_MS1_PIN      69
+#define Y_MS2_PIN      39
+
+#define Z_STEP_PIN     35
+#define Z_DIR_PIN      47
+#define Z_MIN_PIN      10
+#define Z_MAX_PIN      15
+#define Z_ENABLE_PIN   27
+#define Z_MS1_PIN      68
+#define Z_MS2_PIN      67
+
+#define HEATER_BED_PIN 3
+#define TEMP_BED_PIN   65 
+
+#define HEATER_0_PIN   9
+#define TEMP_0_PIN     63
+
+#define HEATER_1_PIN   7
+#define TEMP_1_PIN     64
+
+#define HEATER_2_PIN   -1
+#define TEMP_2_PIN     -1
+
+#define E0_STEP_PIN    34
+#define E0_DIR_PIN     43
+#define E0_ENABLE_PIN  26
+#define E0_MS1_PIN     65
+#define E0_MS2_PIN     66
+
+#define E1_STEP_PIN    33
+#define E1_DIR_PIN     42
+#define E1_ENABLE_PIN  25
+#define E1_MS1_PIN     63
+#define E1_MS2_PIN     64
+
+#define SDPOWER        -1
+#define SDSS           53
+#define LED_PIN        13
+#define FAN_PIN        8
+#define PS_ON_PIN      4
+#define KILL_PIN       -1
+#define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
+#define E1_PINS
+
+#endif
+
+#ifndef CPU_ARCH  // Set default architecture
+#define CPU_ARCH ARCH_AVR
+#endif
+
+#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
+#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_MANUAL
+#endif
+
+#ifndef FAN_BOARD_PIN
+#define FAN_BOARD_PIN -1
+#endif
+
 #if NUM_EXTRUDER==1
 #define E1_PINS
 #endif
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
-                        HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS  TEMP_0_PIN, TEMP_1_PIN,SDSS }
+#if NUM_EXTRUDER<3
+#define E2_PINS
 #endif
 
+#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
+                        HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
+#endif
 

@@ -1,0 +1,51 @@
+Board: Foltyn 3D Master
+Where to get it: http://nodna.de/Universal-3D-Motherboard
+
+Datasheet(german): http://nodna.de/media/Foltyn/3D_Master_Rev.1.0V.pdf
+Datasheet(english): coming soon
+
+Adding LCD:
+
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+
+
+On board keys:
+
+Key 1: 4
+Key 2: 5
+Key 3: 6
+Key 4: 11
+Key 5: 42
+
+---------------------------------------------------------------------
+---                    Using special board functions              ---
+---------------------------------------------------------------------
+
+The board offers some additional hardware not needed for every 3d printer,
+but which could be nice for printer improvements like a strain gauge, additional
+EEPROM or real time clock. Currently no functions requires this, so the required
+code is not included in the main firmware part. If you like to use the functions,
+copy use3DMaster.h and .cpp into the firmware folder and include the .h file.
+Then add the following code into Repetier.pde 
+
+#if MOTHERBOARD == 12
+#include <Wire.h>
+#include "use3DMaster.h"
+#endif // MOTHERBOARD == 12
+
+and at the end of the setup() function add this code:
+
+#if MOTHERBOARD == 12
+  init3DMaster();  
+#endif // MOTHERBOARD == 12

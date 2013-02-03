@@ -1,6 +1,6 @@
 *.o
 *.d
-
+Private/**
 .DS_Store
 
 *.db

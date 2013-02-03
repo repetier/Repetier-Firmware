@@ -1,6 +1,16 @@
 If you are upgrading from an earlier version, make sure you followed the upgrade
 instructions for that version.
 
+Upgrade to 0.80
+
+The EEPROM storage uses now a checksum to help switching from other firmwares. This
+will cause your eeprom to get overwritten with the first upload, so save you old values.
+
+The configuration has also made significant changes. Copy your values into the new
+Configuration.h file. Watch out for speeds - they are now all mm/sec!
+Also watch out for the PID values. They are now floating point and don't include
+multiplier values. Best is to do a M303 for autodetect new values.
+
 
 Upgrade to 0.70
 

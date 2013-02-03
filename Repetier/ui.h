@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -84,7 +84,7 @@
 #define UI_ACTION_HOME_Z                1024
 #define UI_ACTION_SELECT_EXTRUDER1      1025
 #define UI_ACTION_OPS_RETRACTDISTANCE   1026
-#define UI_ACTION_OPS_BACKSLASH         1027
+#define UI_ACTION_OPS_BACKLASH          1027
 #define UI_ACTION_OPS_MOVE_AFTER        1028
 #define UI_ACTION_OPS_MINDISTANCE       1029
 #define UI_ACTION_STORE_EEPROM          1030
@@ -156,6 +156,9 @@
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
 #define UI_ACTION_KILL                  1097
 #define UI_ACTION_RESET                 1098
+#define UI_ACTION_PAUSE                 1099
+#define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
+#define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -167,6 +170,13 @@
 #define UI_ACTION_MENU_QUICKSETTINGS    4007
 #define UI_ACTION_MENU_EXTRUDER         4008
 #define UI_ACTION_MENU_POSITIONS        4009
+#define UI_ACTION_SHOW_MEASUREMENT		4010
+#define UI_ACTION_RESET_MEASUREMENT		4011
+#define UI_ACTION_SET_MEASURED_ORIGIN	4012
+#define UI_ACTION_SET_P1				4013
+#define UI_ACTION_SET_P2				4014
+#define UI_ACTION_SET_P3				4015
+#define UI_ACTION_CALC_LEVEL			4016
 
 #define UI_ACTION_SHOW_USERMENU1        4101
 #define UI_ACTION_SHOW_USERMENU2        4102
@@ -202,6 +212,7 @@ typedef struct {
   int numEntries;
   const UIMenuEntry * const * entries;
 } const UIMenu;
+extern const int8_t encoder_table[16] PROGMEM ;
 
 //#ifdef COMPILE_I2C_DRIVER
 
@@ -370,6 +381,15 @@ extern unsigned char i2c_read(unsigned char ack);
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
+#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin 
+#undef SDCARDDETECT
+#define SDCARDDETECT 49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED false
+#undef SDSUPPORT
+#define SDSUPPORT true
+#endif
+
 class UIDisplay {
   public:
     volatile byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
@@ -395,14 +415,12 @@ class UIDisplay {
     void addStringP(PGM_P text);
     void okAction();
     void nextPreviousAction(char next);
-    void updateSDFileCount();
-    void sdrefresh(byte &r);
     char statusMsg[17];
     char encoderPos;
     int8_t encoderLast;
     PGM_P statusText;
     UIDisplay();
-    void createChar(byte location,const byte PROGMEM charmap[]);
+    void createChar(byte location,const byte charmap[]);
     void initialize(); // Initialize display and keys
     void printRow(byte r,char *txt); // Print row on display
     void printRowP(byte r,PGM_P txt);
@@ -418,10 +436,207 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
+#if SDSUPPORT
+    void updateSDFileCount();
+    void sdrefresh(byte &r);
+    void goDir(char *name);
+    bool isDirname(char *name);
+    char cwd[SD_MAX_FOLDER_DEPTH*13+2];
+    byte folderLevel;
+#endif
 };
 extern UIDisplay uid;
 
+
+#if FEATURE_CONTROLLER==1
 #include "uiconfig.h"
+#endif
+#if FEATURE_CONTROLLER==0 // No controller at all
+#define UI_HAS_KEYS 0
+#define UI_DISPLAY_TYPE 0
+#ifdef UI_MAIN
+void ui_init_keys() {}
+void ui_check_keys(int &action) {}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif
+#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define BEEPER_TYPE 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
+#define BEEPER_PIN             44
+#define UI_DISPLAY_RS_PIN      19
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D0_PIN      18
+#define UI_DISPLAY_D1_PIN      38
+#define UI_DISPLAY_D2_PIN      41
+#define UI_DISPLAY_D3_PIN      40
+#define UI_DISPLAY_D4_PIN      18
+#define UI_DISPLAY_D5_PIN      38
+#define UI_DISPLAY_D6_PIN      41
+#define UI_DISPLAY_D7_PIN      40
+#define UI_ENCODER_A           12
+#define UI_ENCODER_B           11
+#define UI_ENCODER_CLICK       43
+#define UI_RESET_PIN           46
+#else
+#define BEEPER_PIN             37
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      23
+#define UI_DISPLAY_D1_PIN      25
+#define UI_DISPLAY_D2_PIN      27
+#define UI_DISPLAY_D3_PIN      29
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_ENCODER_A           33
+#define UI_ENCODER_B           31
+#define UI_ENCODER_CLICK       35
+#define UI_RESET_PIN           41
+#endif
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {  
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET); 
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 2
+
+#if FEATURE_CONTROLLER==3 // Adafruit RGB controller
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 16
+#define UI_ROWS 2
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 65504
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
+#define UI_DISPLAY_I2C_PULLUP 31
+#define UI_I2C_CLOCKSPEED 400000L
+#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)
+#define UI_INVERT_MENU_DIRECTION true
+#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_ENCODER 0
+#define UI_I2C_KEY_ADDRESS 0x40
+#ifdef UI_MAIN
+void ui_init_keys() {}
+void ui_check_keys(int &action) {}
+inline void ui_check_slow_encoder() {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+}
+void ui_check_slow_keys(int &action) {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GPIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
+  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
+  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
+  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button
+  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button
+}
+#endif
+#endif // Controller 3
+
+#if FEATURE_CONTROLLER==4 // Foltyn 3D Master
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 2
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {  
+  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(5);
+  UI_KEYS_INIT_BUTTON_LOW(6);
+  UI_KEYS_INIT_BUTTON_LOW(11);
+  UI_KEYS_INIT_BUTTON_LOW(42);
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 4
+
+
+#if FEATURE_CONTROLLER>0
+
+#if UI_ROWS==4
+#if UI_COLS==16
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
+#elif UI_COLS==20
+//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
+#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
+#else
+#error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
+#endif
+#else
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
+#endif
+#include "uilang.h"
+#include "uimenu.h"
+#endif
 
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION
 
@@ -436,7 +651,13 @@ extern UIDisplay uid;
 #define COMPILE_I2C_DRIVER
 #endif
 
-
+#ifndef UI_TEMP_PRECISION
+#if UI_COLS>16
+#define UI_TEMP_PRECISION 1
+#else
+#define UI_TEMP_PRECISION 0
+#endif
+#endif
 
 #define UI_INITIALIZE uid.initialize();
 #define UI_FAST if(pwm_count & 4) {uid.fastAction();}

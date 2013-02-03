@@ -2,67 +2,63 @@ var NAVTREE =
 [
   [ "Repetier-Firmware", "index.html", [
     [ "Repetier-Firmware for Arduino based RepRaps", "index.html", null ],
-    [ "Related Pages", "pages.html", [
-      [ "Repetier-protocol", "_repetier-protocol.html", null ],
-      [ "SdFat Library", "_arduino.html", null ],
-      [ "Deprecated List", "deprecated.html", null ]
+    [ "Related Pages", "pages.html", "pages" ],
+    [ "Namespaces", null, [
+      [ "Namespace List", "namespaces.html", "namespaces" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", null ],
+        [ "Functions", "namespacemembers_func.html", null ]
+      ] ]
     ] ],
-    [ "Data Structures", "annotated.html", [
-      [ "biosParmBlock", "structbios_parm_block.html", null ],
-      [ "cache_t", "unioncache__t.html", null ],
-      [ "CID", "struct_c_i_d.html", null ],
-      [ "csd_t", "unioncsd__t.html", null ],
-      [ "CSDV1", "struct_c_s_d_v1.html", null ],
-      [ "CSDV2", "struct_c_s_d_v2.html", null ],
-      [ "directoryEntry", "structdirectory_entry.html", null ],
-      [ "Extruder", "struct_extruder.html", null ],
-      [ "fat32BootSector", "structfat32_boot_sector.html", null ],
-      [ "GCode", "struct_g_code.html", null ],
-      [ "masterBootRecord", "structmaster_boot_record.html", null ],
-      [ "partitionTable", "structpartition_table.html", null ],
-      [ "pin_map_t", "structpin__map__t.html", null ],
-      [ "PrinterState", "struct_printer_state.html", null ],
-      [ "PrintLine", "struct_print_line.html", null ],
-      [ "Sd2Card", "class_sd2_card.html", null ],
-      [ "SdFile", "class_sd_file.html", null ],
-      [ "SdVolume", "class_sd_volume.html", null ],
-      [ "SerialOutput", "class_serial_output.html", null ]
+    [ "Data Structures", null, [
+      [ "Data Structures", "annotated.html", "annotated" ],
+      [ "Data Structure Index", "classes.html", null ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
+      [ "Data Fields", "functions.html", [
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Related Functions", "functions_rela.html", null ]
+      ] ]
     ] ],
-    [ "Data Structure Index", "classes.html", null ],
-    [ "Data Fields", "functions.html", null ],
-    [ "File List", "files.html", [
-      [ "Repetier/Commands.cpp", "_commands_8cpp.html", null ],
-      [ "Repetier/Commands.d", "_commands_8d.html", null ],
-      [ "Repetier/Configuration.h", "_configuration_8h.html", null ],
-      [ "Repetier/Eeprom.cpp", "_eeprom_8cpp.html", null ],
-      [ "Repetier/Eeprom.d", "_eeprom_8d.html", null ],
-      [ "Repetier/Eeprom.h", "_eeprom_8h.html", null ],
-      [ "Repetier/Extruder.cpp", "_extruder_8cpp.html", null ],
-      [ "Repetier/Extruder.d", "_extruder_8d.html", null ],
-      [ "Repetier/fastio.h", "fastio_8h.html", null ],
-      [ "Repetier/FatStructs.h", "_fat_structs_8h.html", null ],
-      [ "Repetier/gcode.cpp", "gcode_8cpp.html", null ],
-      [ "Repetier/gcode.d", "gcode_8d.html", null ],
-      [ "Repetier/gcode.h", "gcode_8h.html", null ],
-      [ "Repetier/pins.h", "pins_8h.html", null ],
-      [ "Repetier/Repetier.pde", "_repetier_8pde.html", null ],
-      [ "Repetier/Reptier.h", "_reptier_8h.html", null ],
-      [ "Repetier/Sd2Card.cpp", "_sd2_card_8cpp.html", null ],
-      [ "Repetier/Sd2Card.d", "_sd2_card_8d.html", null ],
-      [ "Repetier/Sd2Card.h", "_sd2_card_8h.html", null ],
-      [ "Repetier/Sd2PinMap.h", "_sd2_pin_map_8h.html", null ],
-      [ "Repetier/SdFat.h", "_sd_fat_8h.html", null ],
-      [ "Repetier/SdFatmainpage.h", "_sd_fatmainpage_8h.html", null ],
-      [ "Repetier/SdFatUtil.h", "_sd_fat_util_8h.html", null ],
-      [ "Repetier/SdFile.cpp", "_sd_file_8cpp.html", null ],
-      [ "Repetier/SdFile.d", "_sd_file_8d.html", null ],
-      [ "Repetier/SdInfo.h", "_sd_info_8h.html", null ],
-      [ "Repetier/SdVolume.cpp", "_sd_volume_8cpp.html", null ],
-      [ "Repetier/SdVolume.d", "_sd_volume_8d.html", null ]
-    ] ],
-    [ "Globals", "globals.html", null ]
+    [ "Files", null, [
+      [ "File List", "files.html", "files" ],
+      [ "Globals", "globals.html", [
+        [ "All", "globals.html", "globals_dup" ],
+        [ "Functions", "globals_func.html", null ],
+        [ "Variables", "globals_vars.html", "globals_vars" ],
+        [ "Typedefs", "globals_type.html", null ],
+        [ "Defines", "globals_defs.html", "globals_defs" ]
+      ] ]
+    ] ]
   ] ]
 ];
+
+function getData(varName)
+{
+  var i = varName.lastIndexOf('/');
+  var n = i>=0 ? varName.substring(i+1) : varName;
+  return eval(n);
+}
+
+function stripPath(uri)
+{
+  return uri.substring(uri.lastIndexOf('/')+1);
+}
+
+function getScript(scriptName,func,show)
+{
+  var head = document.getElementsByTagName("head")[0]; 
+  var script = document.createElement('script');
+  script.id = scriptName;
+  script.type = 'text/javascript';
+  script.onload = func; 
+  script.src = scriptName+'.js'; 
+  script.onreadystatechange = function() {
+    if (script.readyState == 'complete') { func(); if (show) showRoot(); }
+  };
+  head.appendChild(script); 
+}
 
 function createIndent(o,domNode,node,level)
 {
@@ -71,6 +67,8 @@ function createIndent(o,domNode,node,level)
     createIndent(o,domNode,node.parentNode,level+1);
   }
   var imgNode = document.createElement("img");
+  imgNode.width = 16;
+  imgNode.height = 22;
   if (level==0 && node.childrenData)
   {
     node.plus_img = imgNode;
@@ -93,7 +91,7 @@ function createIndent(o,domNode,node,level)
       } 
       else 
       {
-        expandNode(o, node, false);
+        expandNode(o, node, false, false);
       }
     }
     node.expandToggle.appendChild(imgNode);
@@ -170,10 +168,36 @@ function newNode(o, po, text, link, childrenData, lastNode)
   var a = document.createElement("a");
   node.labelSpan.appendChild(a);
   node.label = document.createTextNode(text);
+  node.expanded = false;
   a.appendChild(node.label);
   if (link) 
   {
-    a.href = node.relpath+link;
+    a.className = stripPath(link.replace('#',':'));
+    if (link.indexOf('#')!=-1)
+    {
+      var aname = '#'+link.split('#')[1];
+      var srcPage = stripPath($(location).attr('pathname'));
+      var targetPage = stripPath(link.split('#')[0]);
+      a.href = srcPage!=targetPage ? node.relpath+link : '#';
+      a.onclick = function(){
+        $('.item').removeClass('selected');
+        $('.item').removeAttr('id');
+        $(a).parent().parent().addClass('selected');
+        $(a).parent().parent().attr('id','selected');
+        var anchor = $(aname);
+        $("#doc-content").animate({
+          scrollTop: anchor.position().top +
+          $('#doc-content').scrollTop() -
+          $('#doc-content').offset().top
+        },500,function(){
+          window.location.replace(aname);
+        });
+      };
+    }
+    else
+    {
+      a.href = node.relpath+link;
+    }
   } 
   else 
   {
@@ -182,7 +206,6 @@ function newNode(o, po, text, link, childrenData, lastNode)
       a.className = "nolink";
       a.href = "javascript:void(0)";
       a.onclick = node.expandToggle.onclick;
-      node.expanded = false;
     }
   }
 
@@ -207,34 +230,128 @@ function showRoot()
   var headerHeight = $("#top").height();
   var footerHeight = $("#nav-path").height();
   var windowHeight = $(window).height() - headerHeight - footerHeight;
-  navtree.scrollTo('#selected',0,{offset:-windowHeight/2});
+  (function (){ // retry until we can scroll to the selected item
+    try {
+      navtree.scrollTo('#selected',0,{offset:-windowHeight/2});
+    } catch (err) {
+      setTimeout(arguments.callee, 0);
+    }
+  })();
 }
 
-function expandNode(o, node, imm)
+function expandNode(o, node, imm, showRoot)
 {
   if (node.childrenData && !node.expanded) 
   {
-    if (!node.childrenVisited) 
+    if (typeof(node.childrenData)==='string')
     {
-      getNode(o, node);
-    }
-    if (imm)
-    {
-      $(node.getChildrenUL()).show();
-    } 
-    else 
-    {
-      $(node.getChildrenUL()).slideDown("fast",showRoot);
-    }
-    if (node.isLast)
-    {
-      node.plus_img.src = node.relpath+"ftv2mlastnode.png";
+      var varName    = node.childrenData;
+      getScript(node.relpath+varName,function(){
+        node.childrenData = getData(varName);
+        expandNode(o, node, imm, showRoot);
+      }, showRoot);
     }
     else
     {
-      node.plus_img.src = node.relpath+"ftv2mnode.png";
+      if (!node.childrenVisited) 
+      {
+        getNode(o, node);
+      }
+      if (imm)
+      {
+        $(node.getChildrenUL()).show();
+      } 
+      else 
+      {
+        $(node.getChildrenUL()).slideDown("fast");
+      }
+      if (node.isLast)
+      {
+        node.plus_img.src = node.relpath+"ftv2mlastnode.png";
+      }
+      else
+      {
+        node.plus_img.src = node.relpath+"ftv2mnode.png";
+      }
+      node.expanded = true;
     }
-    node.expanded = true;
+  }
+}
+
+function showNode(o, node, index)
+{
+  if (node.childrenData && !node.expanded) 
+  {
+    if (typeof(node.childrenData)==='string')
+    {
+      var varName    = node.childrenData;
+      getScript(node.relpath+varName,function(){
+        node.childrenData = getData(varName);
+        showNode(o,node,index);
+      },true);
+    }
+    else
+    {
+      if (!node.childrenVisited) 
+      {
+        getNode(o, node);
+      }
+      $(node.getChildrenUL()).show();
+      if (node.isLast)
+      {
+        node.plus_img.src = node.relpath+"ftv2mlastnode.png";
+      }
+      else
+      {
+        node.plus_img.src = node.relpath+"ftv2mnode.png";
+      }
+      node.expanded = true;
+      var n = node.children[o.breadcrumbs[index]];
+      if (index+1<o.breadcrumbs.length)
+      {
+        showNode(o,n,index+1);
+      }
+      else
+      {
+        if (typeof(n.childrenData)==='string')
+        {
+          var varName = n.childrenData;
+          getScript(n.relpath+varName,function(){
+            n.childrenData = getData(varName);
+            node.expanded=false;
+            showNode(o,node,index); // retry with child node expanded
+          },true);
+        }
+        else
+        {
+          if (o.toroot=="index.html" || n.childrenData)
+          {
+            expandNode(o, n, true, true);
+          }
+          var a;
+          if ($(location).attr('hash'))
+          {
+            var link=stripPath($(location).attr('pathname'))+':'+
+                     $(location).attr('hash').substring(1);
+            a=$('.item a[class*=\""'+link+'"\"]');
+          }
+          if (a && a.length)
+          {
+            a.parent().parent().addClass('selected');
+            a.parent().parent().attr('id','selected');
+            var anchor = $($(location).attr('hash'));
+            var targetDiv = anchor.next();
+            $(targetDiv).children('.memproto,.memdoc').
+                     effect("highlight", {}, 1500);
+          }
+          else
+          {
+            $(n.itemDiv).addClass('selected');
+            $(n.itemDiv).attr('id','selected');
+          }
+        }
+      }
+    }
   }
 }
 
@@ -246,31 +363,8 @@ function getNode(o, po)
   {
     var nodeData = po.childrenData[i];
     po.children[i] = newNode(o, po, nodeData[0], nodeData[1], nodeData[2],
-        i==l);
+      i==l);
   }
-}
-
-function findNavTreePage(url, data)
-{
-  var nodes = data;
-  var result = null;
-  for (var i in nodes) 
-  {
-    var d = nodes[i];
-    if (d[1] == url) 
-    {
-      return new Array(i);
-    }
-    else if (d[2] != null) // array of children
-    {
-      result = findNavTreePage(url, d[2]);
-      if (result != null) 
-      {
-        return (new Array(i).concat(result));
-      }
-    }
-  }
-  return null;
 }
 
 function initNavTree(toroot,relpath)
@@ -286,26 +380,53 @@ function initNavTree(toroot,relpath)
   o.node.li.appendChild(o.node.childrenUL);
   o.node.depth = 0;
   o.node.relpath = relpath;
+  o.node.expanded = false;
+  o.node.isLast = true;
+  o.node.plus_img = document.createElement("img");
+  o.node.plus_img.src = relpath+"ftv2pnode.png";
+  o.node.plus_img.width = 16;
+  o.node.plus_img.height = 22;
 
-  getNode(o, o.node);
-
-  o.breadcrumbs = findNavTreePage(toroot, NAVTREE);
-  if (o.breadcrumbs == null)
-  {
-    o.breadcrumbs = findNavTreePage("index.html",NAVTREE);
-  }
-  if (o.breadcrumbs != null && o.breadcrumbs.length>0)
-  {
-    var p = o.node;
-    for (var i in o.breadcrumbs) 
-    {
-      var j = o.breadcrumbs[i];
-      p = p.children[j];
-      expandNode(o,p,true);
+  getScript(relpath+"navtreeindex",function(){
+    var navTreeIndex = eval('NAVTREEINDEX');
+    if (navTreeIndex) {
+      o.breadcrumbs = navTreeIndex[toroot];
+      if (o.breadcrumbs==null) o.breadcrumbs = navTreeIndex["index.html"];
+      o.breadcrumbs.unshift(0);
+      showNode(o, o.node, 0);
     }
-    p.itemDiv.className = p.itemDiv.className + " selected";
-    p.itemDiv.id = "selected";
-    $(window).load(showRoot);
-  }
+  },true);
+
+  $(window).bind('hashchange', function(){
+     if (window.location.hash && window.location.hash.length>1){
+       var anchor = $(window.location.hash);
+       var targetDiv = anchor.next();
+       $(targetDiv).children('.memproto,.memdoc').effect("highlight",{},1500);
+       var docContent = $('#doc-content');
+       if (docContent && anchor && anchor[0] && anchor[0].ownerDocument){
+         docContent.scrollTop(anchor.position().top+docContent.scrollTop()-docContent.offset().top);
+       }
+       var a;
+       if ($(location).attr('hash')){
+         var link=stripPath($(location).attr('pathname'))+':'+
+                  $(location).attr('hash').substring(1);
+         a=$('.item a[class*=\""'+link+'"\"]');
+       }
+       if (a && a.length){
+         $('.item').removeClass('selected');
+         $('.item').removeAttr('id');
+         a.parent().parent().addClass('selected');
+         a.parent().parent().attr('id','selected');
+         var anchor = $($(location).attr('hash'));
+         var targetDiv = anchor.next();
+         showRoot();
+       }
+     } else {
+       var docContent = $('#doc-content');
+       if (docContent){ docContent.scrollTop(0); }
+     }
+  })
+
+  $(window).load(showRoot);
 }
 

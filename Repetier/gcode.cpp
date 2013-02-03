@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -21,8 +21,10 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
+
+#define bit_clear(x,y) x&= ~(1<<y) //cbi(x,y) 
+#define bit_set(x,y)   x|= (1<<y)//sbi(x,y) 
 
 #define MAX_CMD_SIZE 96
 GCode gcode_buffer[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
@@ -34,18 +36,279 @@ byte gcode_binary; ///< Flags the command as binary input.
 byte gcode_last_binary=0; ///< Was the last successful command in binary mode?
 byte gcode_comment=false; ///< Flags true if we are reading the comment part of a command.
 byte gcode_binary_size; ///< Expected size of the incoming binary command.
+bool gcode_wait_all_parsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
 long gcode_lastN=0; ///< Last line number received.
 long gcode_actN; ///< Line number of current command.
 char gcode_wait_resend=-1; ///< Waiting for line to be resend. -1 = no wait.
 volatile byte gcode_buflen=0; ///< Number of commands stored in gcode_buffer
 unsigned long gcode_lastdata=0; ///< Time, when we got the last data packet. Used to detect missing bytes.
-#ifndef COMPAT_PRE1
-#undef USE_BUFFERED_OUTPUT
-#endif
-#ifdef USE_BUFFERED_OUTPUT 
-byte out_buffer[OUTPUT_BUFFER_SIZE+4]; ///< Buffer for serial write operations.
-#endif
 SerialOutput out; ///< Instance used for serail write operations.
+
+#ifndef EXTERNALSERIAL
+// Implement serial communication for one stream only!
+/*
+  HardwareSerial.h - Hardware serial library for Wiring
+  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+  Modified 28 September 2010 by Mark Sproul
+  
+  Modified to use only 1 queue with fixed length by Repetier
+*/
+
+ring_buffer rx_buffer = { { 0 }, 0, 0};
+ring_buffer tx_buffer = { { 0 }, 0, 0};
+
+inline void rf_store_char(unsigned char c, ring_buffer *buffer)
+{
+  int i = (unsigned int)(buffer->head + 1) & SERIAL_BUFFER_MASK;
+
+  // if we should be storing the received character into the location
+  // just before the tail (meaning that the head would advance to the
+  // current location of the tail), we're about to overflow the buffer
+  // and so we don't write the character or advance the head.
+  if (i != buffer->tail) {
+    buffer->buffer[buffer->head] = c;
+    buffer->head = i;
+  }
+}
+#if !defined(USART0_RX_vect) && defined(USART1_RX_vect)
+// do nothing - on the 32u4 the first USART is USART1
+#else
+#if !defined(USART_RX_vect) && !defined(SIG_USART0_RECV) && \
+    !defined(SIG_UART0_RECV) && !defined(USART0_RX_vect) && \
+	!defined(SIG_UART_RECV)
+  #error "Don't know what the Data Received vector is called for the first UART"
+#else
+  void rfSerialEvent() __attribute__((weak));
+  void rfSerialEvent() {}
+  #define serialEvent_implemented
+#if defined(USART_RX_vect)
+  SIGNAL(USART_RX_vect)
+#elif defined(SIG_USART0_RECV)
+  SIGNAL(SIG_USART0_RECV)
+#elif defined(SIG_UART0_RECV)
+  SIGNAL(SIG_UART0_RECV)
+#elif defined(USART0_RX_vect)
+  SIGNAL(USART0_RX_vect)
+#elif defined(SIG_UART_RECV)
+  SIGNAL(SIG_UART_RECV)
+#endif
+  {
+  #if defined(UDR0)
+    unsigned char c  =  UDR0;
+  #elif defined(UDR)
+    unsigned char c  =  UDR;
+  #else
+    #error UDR not defined
+  #endif
+    rf_store_char(c, &rx_buffer);
+  }
+#endif
+#endif
+
+#if !defined(USART0_UDRE_vect) && defined(USART1_UDRE_vect)
+// do nothing - on the 32u4 the first USART is USART1
+#else
+#if !defined(UART0_UDRE_vect) && !defined(UART_UDRE_vect) && !defined(USART0_UDRE_vect) && !defined(USART_UDRE_vect)
+  #error "Don't know what the Data Register Empty vector is called for the first UART"
+#else
+#if defined(UART0_UDRE_vect)
+ISR(UART0_UDRE_vect)
+#elif defined(UART_UDRE_vect)
+ISR(UART_UDRE_vect)
+#elif defined(USART0_UDRE_vect)
+ISR(USART0_UDRE_vect)
+#elif defined(USART_UDRE_vect)
+ISR(USART_UDRE_vect)
+#endif
+{
+  if (tx_buffer.head == tx_buffer.tail) {
+	// Buffer empty, so disable interrupts
+#if defined(UCSR0B)
+    bit_clear(UCSR0B, UDRIE0);
+#else
+    bit_clear(UCSRB, UDRIE);
+#endif
+  }
+  else {
+    // There is more data in the output buffer. Send the next byte
+    unsigned char c = tx_buffer.buffer[tx_buffer.tail];
+    tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_BUFFER_MASK;
+	
+  #if defined(UDR0)
+    UDR0 = c;
+  #elif defined(UDR)
+    UDR = c;
+  #else
+    #error UDR not defined
+  #endif
+  }
+}
+#endif
+#endif
+
+
+// Constructors ////////////////////////////////////////////////////////////////
+
+RFHardwareSerial::RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
+  volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
+  volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
+  volatile uint8_t *udr,
+  uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
+{
+  _rx_buffer = rx_buffer;
+  _tx_buffer = tx_buffer;
+  _ubrrh = ubrrh;
+  _ubrrl = ubrrl;
+  _ucsra = ucsra;
+  _ucsrb = ucsrb;
+  _udr = udr;
+  _rxen = rxen;
+  _txen = txen;
+  _rxcie = rxcie;
+  _udrie = udrie;
+  _u2x = u2x;
+}
+
+// Public Methods //////////////////////////////////////////////////////////////
+
+void RFHardwareSerial::begin(unsigned long baud)
+{
+  uint16_t baud_setting;
+  bool use_u2x = true;
+
+#if F_CPU == 16000000UL
+  // hardcoded exception for compatibility with the bootloader shipped
+  // with the Duemilanove and previous boards and the firmware on the 8U2
+  // on the Uno and Mega 2560.
+  if (baud == 57600) {
+    use_u2x = false;
+  }
+#endif
+
+try_again:
+  
+  if (use_u2x) {
+    *_ucsra = 1 << _u2x;
+    baud_setting = (F_CPU / 4 / baud - 1) / 2;
+  } else {
+    *_ucsra = 0;
+    baud_setting = (F_CPU / 8 / baud - 1) / 2;
+  }
+  
+  if ((baud_setting > 4095) && use_u2x)
+  {
+    use_u2x = false;
+    goto try_again;
+  }
+
+  // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
+  *_ubrrh = baud_setting >> 8;
+  *_ubrrl = baud_setting;
+
+  bit_set(*_ucsrb, _rxen);
+  bit_set(*_ucsrb, _txen);
+  bit_set(*_ucsrb, _rxcie);
+  bit_clear(*_ucsrb, _udrie);
+}
+
+void RFHardwareSerial::end()
+{
+  // wait for transmission of outgoing data
+  while (_tx_buffer->head != _tx_buffer->tail)
+    ;
+
+  bit_clear(*_ucsrb, _rxen);
+  bit_clear(*_ucsrb, _txen);
+  bit_clear(*_ucsrb, _rxcie);  
+  bit_clear(*_ucsrb, _udrie);
+  
+  // clear any received data
+  _rx_buffer->head = _rx_buffer->tail;
+}
+
+int RFHardwareSerial::available(void)
+{
+  return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) & SERIAL_BUFFER_MASK;
+}
+
+int RFHardwareSerial::peek(void)
+{
+  if (_rx_buffer->head == _rx_buffer->tail) {
+    return -1;
+  } else {
+    return _rx_buffer->buffer[_rx_buffer->tail];
+  }
+}
+
+int RFHardwareSerial::read(void)
+{
+  // if the head isn't ahead of the tail, we don't have any characters
+  if (_rx_buffer->head == _rx_buffer->tail) {
+    return -1;
+  } else {
+    unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
+    _rx_buffer->tail = (unsigned int)(_rx_buffer->tail + 1) & SERIAL_BUFFER_MASK;
+    return c;
+  }
+}
+
+void RFHardwareSerial::flush()
+{
+  while (_tx_buffer->head != _tx_buffer->tail)
+    ;
+}
+#ifdef COMPAT_PRE1
+  void 
+#else
+  size_t 
+#endif
+RFHardwareSerial::write(uint8_t c)
+{
+  int i = (_tx_buffer->head + 1) & SERIAL_BUFFER_MASK;
+	
+  // If the output buffer is full, there's nothing for it other than to 
+  // wait for the interrupt handler to empty it a bit
+  // ???: return 0 here instead?
+  while (i == _tx_buffer->tail)
+    ;
+	
+  _tx_buffer->buffer[_tx_buffer->head] = c;
+  _tx_buffer->head = i;
+	
+  bit_set(*_ucsrb, _udrie);
+#ifndef COMPAT_PRE1 
+  return 1;
+#endif
+}
+
+// Preinstantiate Objects //////////////////////////////////////////////////////
+
+#if defined(UBRRH) && defined(UBRRL)
+  RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRIE, U2X);
+#elif defined(UBRR0H) && defined(UBRR0L)
+  RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
+#elif defined(USBCON)
+  // do nothing - Serial object and buffers are initialized in CDC code
+#else
+  #error no serial port defined  (port 0)
+#endif
+
+#endif
 
 /** \page Repetier-protocol
 
@@ -89,12 +352,19 @@ Gcode Letter to Bit and Datatype:
 - T : Bit 9 :  8 Bit Integer
 - S : Bit 10 : 32 Bit Value
 - P : Bit 11 : 32 Bit Integer
+- V2 : Bit 12 : Version 2 command for additional commands/sizes
+- Ext : Bit 13 : There are 2 more bytes following with Bits, only for future versions
+- Int :Bit 14 : Marks it as internal command, 
+- Text : Bit 15 : 16 Byte ASCII String terminated with 0
+Second word if V2:
+- I : Bit 0 : 32-Bit float
+- J : Bit 1 : 32-Bit float
+- R : Bit 2 : 32-Bit float
 */
-byte gcode_comp_binary_size(unsigned int bitfield) {
+byte gcode_comp_binary_size(char *ptr) {// unsigned int bitfield) {
    byte s = 4; // include checksum and bitfield
+   unsigned int bitfield = *(int*)ptr;
    if(bitfield & 1) s+=2;
-   if(bitfield & 2) s+=1;
-   if(bitfield & 4) s+=1;
    if(bitfield & 8) s+=4;
    if(bitfield & 16) s+=4;
    if(bitfield & 32) s+=4;
@@ -103,84 +373,27 @@ byte gcode_comp_binary_size(unsigned int bitfield) {
    if(bitfield & 512) s+=1;
    if(bitfield & 1024) s+=4;
    if(bitfield & 2048) s+=4;
-   if(bitfield & 32768) s+=16;
+   if(bitfield & 4096) { // Version 2 or later
+     s+=2; // for bitfield 2
+     unsigned int bitfield2 = *(int*)(ptr+2);
+     if(bitfield & 2) s+=2;
+     if(bitfield & 4) s+=2;
+     if(bitfield2 & 1) s+= 4;
+     if(bitfield2 & 2) s+= 4;
+     if(bitfield2 & 4) s+= 4;
+     if(bitfield & 32768) s+=(byte)ptr[4]+1;
+     //OUT_P_I_LN("LenStr:",(int)ptr[4]);
+     //OUT_P_I_LN("LenBinV2:",s);
+   } else {
+     if(bitfield & 2) s+=1;
+     if(bitfield & 4) s+=1;
+     if(bitfield & 32768) s+=16;
+   }
    return s;
 }
 
 extern "C" void __cxa_pure_virtual() { }
 
-#ifdef USE_BUFFERED_OUTPUT 
-/* Initialisiert ein uint8 array zur Verwendung als fifo Buffer.
-   buffer muss dazu bufferSize+4 Byte groß sein. */
-void osFifoInit(uint8 *buffer,uint8 bufferSize) {
-  buffer[0] = bufferSize;
-  buffer[1] = buffer[2] = buffer[3] = 0;
-}
-/** \brief put byte in fofo buffer.
-
-The function returns 0 if it was not successfull, because the buffer was full.
-*/
-uint8 osFifoPutByte(uint8 *buffer,uint8 value) {
-  BEGIN_INTERRUPT_PROTECTED
-  volatile uint8 *count = &buffer[1];
-  if (*count >= buffer[0]) {
-    ESCAPE_INTERRUPT_PROTECTED
-	return 0;
-  }
-  buffer[4+buffer[3]++] = value;
-  if(buffer[3]==buffer[0]) buffer[3] = 0;
-  (*count)++;
-  END_INTERRUPT_PROTECTED
-  return 1;
-}
-
-int osFifoGetByte(uint8 *buffer) {
-  uint8 val;
-  BEGIN_INTERRUPT_PROTECTED
-  volatile uint8 *count = &buffer[1];
-  if(*count==0) {
-    ESCAPE_INTERRUPT_PROTECTED
-    return -1; // Buffer empty
-  }
-  val = buffer[4+buffer[2]++];
-  (*count)--;
-  if(buffer[2]==buffer[0]) buffer[2] = 0;
-  END_INTERRUPT_PROTECTED
-  return val;
-}
-
-uint8 osFifoGetWaitByte(uint8 *buffer) {
-  int val;
-  do {
-    val = osFifoGetByte(buffer);
-  } while(val==-1);
-  return (uint8)val;
-}
-uint8 osFifoEmpty(uint8 *buffer) {
-  volatile uint8 *count = &buffer[1];
-  return (*count!=0?0:1);
-}
-uint8 osFifoFull(uint8 *buffer) {
-  volatile uint8 *count = &buffer[1];
-  return (*count==buffer[0]?1:0);
-}
-SerialOutput::SerialOutput() {
-  osFifoInit(out_buffer,OUTPUT_BUFFER_SIZE);
-}
-void SerialOutput::write(uint8_t value) {
-  while(!osFifoPutByte(out_buffer,value)) {} // Loop until buffer has free space
-  UCSR0B |= (1 << UDRIE0);
-}
-/**
-  Write next byte in ouput buffer or disable output interrupt.
-*/
-ISR (USART0_UDRE_vect) {
-    if (osFifoEmpty(out_buffer))
-        UCSR0B &= ~(1 << UDRIE0);
-    else
-       UDR0 = osFifoGetByte(out_buffer);
-}
-#else
 SerialOutput::SerialOutput() {
 }
 #ifdef COMPAT_PRE1
@@ -189,14 +402,23 @@ void
 size_t
 #endif
 SerialOutput::write(uint8_t value) {
-  Serial.write(value);
+  RFSERIAL.write(value);
 #ifndef COMPAT_PRE1
   return 1;
 #endif
 }
-#endif
 void SerialOutput::printFloat(double number, uint8_t digits) 
 { 
+  if (isnan(number)) {
+	print_P(PSTR("NAN"));
+    return;
+  }
+
+  if (isinf(number)) {
+	print_P(PSTR("INF"));
+    return;
+  }
+  
   // Handle negative numbers
   if (number < 0.0)
   {
@@ -277,18 +499,24 @@ void SerialOutput::println_float_P(PGM_P ptr,float value,uint8_t digits) {
   printFloat(value,digits);
   println();
 }
-
+void SerialOutput::print_error_P(PGM_P ptr,bool newline) {
+  OUT_P("error:");
+  print_P(ptr);
+  if(newline)
+    println();
+}
 /** \brief request resend of the expected line.
 */
 void gcode_resend() {
-  //Serial.flush();
+  RFSERIAL.flush();
   gcode_wpos=0;
   if(gcode_binary)
     gcode_wait_resend = 30;
   else
     gcode_wait_resend = 14;
-  out.println_long_P(PSTR("Resend:"),gcode_lastN+1);
-  out.println_P(PSTR("ok"));
+  OUT_LN;
+  OUT_P_L_LN("Resend:",gcode_lastN+1);
+  OUT_P_LN("ok");
 }
 void emergencyStop() {
 #if defined(KILL_METHOD) && KILL_METHOD==1
@@ -321,7 +549,7 @@ void gcode_checkinsert(GCode *act) {
   if(GCODE_HAS_M(act)) {
    if(act->M==110) { // Reset line number
      gcode_lastN = gcode_actN;
-     out.println_P(PSTR("ok"));
+     OUT_P_LN("ok");
      return;
    }
    if(act->M==112) { // Emergency kill - freeze printer
@@ -332,15 +560,15 @@ void gcode_checkinsert(GCode *act) {
     if((((gcode_lastN+1) & 0xffff)!=(gcode_actN&0xffff))) {
       if(gcode_wait_resend<0) { // after a resend, we have to skip the garbage in buffers, no message for this
         if(DEBUG_ERRORS) {
-           out.print_long_P(PSTR("Error: expected line "),gcode_lastN+1); 
-           out.println_long_P(PSTR(" got "),gcode_actN);
+           OUT_P_L("Error: expected line ",gcode_lastN+1); 
+           OUT_P_L_LN(" got ",gcode_actN);
         }
         gcode_resend(); // Line missing, force resend
       } else {
         --gcode_wait_resend;
         gcode_wpos = 0;
-        out.println_long_P(PSTR("skip "),gcode_actN);
-        out.println_P(PSTR("ok"));
+        OUT_P_L_LN("skip ",gcode_actN);
+        OUT_P_LN("ok");
       }
       return;
     }
@@ -349,15 +577,15 @@ void gcode_checkinsert(GCode *act) {
   gcode_windex = (gcode_windex+1) % GCODE_BUFFER_SIZE;
   gcode_buflen++;
 #ifdef ACK_WITH_LINENUMBER  
-  out.println_long_P(PSTR("ok "),gcode_actN);
+  OUT_P_L_LN("ok ",gcode_actN);
 #else
-  out.println_P(PSTR("ok"));
+  OUT_P_LN("ok");
 #endif
   gcode_last_binary = gcode_binary;
   gcode_wait_resend = -1; // everything is ok.
 #ifndef ECHO_ON_EXECUTE
   if(DEBUG_ECHO) {
-      out.print_P(PSTR("Echo:"));
+      OUT_P("Echo:");
       gcode_print_command(act);
       out.println();
   }
@@ -387,8 +615,46 @@ GCode *gcode_next_command() {
 /** \brief Removes the last returned command from cache.
 
 */
-void gcode_command_finished() {
+void gcode_command_finished(GCode *code) {
+  if(!gcode_buflen) return; // Should not happen, but safety first
+#ifdef ECHO_ON_EXECUTE
+  if(DEBUG_ECHO) {
+      OUT_P("Echo:");
+      gcode_print_command(code);
+      out.println();
+  }
+#endif
   gcode_buflen--;
+}
+
+/** \brief Execute commands in progmem stored string. Multiple commands are seperated by \n */
+void gcode_execute_PString(PGM_P cmd) {
+  char buf[80];
+  byte buflen;
+  char c;
+  GCode code;
+  do {
+    // Wait for a free place in command buffer
+    // Scan next command from string
+    byte comment=0; 
+    buflen = 0;   
+    do {
+      c = pgm_read_byte(cmd++);
+      if(c == 0 || c == '\n') break;
+      if(c == ';') comment = 1;
+      if(comment) continue;
+      buf[buflen++] = c;
+    } while(buflen<79);
+    if(buflen==0) { // empty line ignore
+      continue;
+    }
+    buf[buflen]=0;
+    // Send command into command buffer
+    if(gcode_parse_ascii(&code,(char *)buf) && (code.params & 518)) { // Success
+      process_command(&code,false);
+      defaultLoopActions();
+    }
+  } while(c);
 }
 /** \brief Read from serial console or sdcard.
 
@@ -396,25 +662,26 @@ This function is the main function to read the commands from serial console or f
 It must be called frequently to empty the incoming buffer.
 */
 void gcode_read_serial() {
+  if(gcode_wait_all_parsed && gcode_buflen) return;
+  gcode_wait_all_parsed=false;
   GCode *act;
   unsigned long time = millis();
   if(gcode_buflen>=GCODE_BUFFER_SIZE) return; // all buffers full
-  if(Serial.available()==0) {
+  if(RFSERIAL.available()==0) {
     if((gcode_wait_resend>=0 || gcode_wpos>0) && time-gcode_lastdata>200) {
       gcode_resend(); // Something is wrong, a started line was not continued in the last second 
-       //  out.println_P(PSTR("Timeout"));   
       gcode_lastdata = time;
     }
 #ifdef WAITING_IDENTIFIER
     else if(gcode_buflen == 0 && time-gcode_lastdata>1000) { // Don't do it if buffer is not empty. It may be a slow executing command.
-      out.println_P(PSTR(WAITING_IDENTIFIER)); // Unblock communication in case the last ok was not received correct.
+      OUT_P_LN(WAITING_IDENTIFIER); // Unblock communication in case the last ok was not received correct.
       gcode_lastdata = time;
     }   
 #endif
   }
-  while( Serial.available() > 0 && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
+  while(RFSERIAL.available() > 0 && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
-    gcode_transbuffer[gcode_wpos++] = Serial.read();
+    gcode_transbuffer[gcode_wpos++] = RFSERIAL.read();
     // first lets detect, if we got an old type ascii command
     if(gcode_wpos==1) {
       if(gcode_wait_resend>=0 && gcode_last_binary) {
@@ -428,8 +695,8 @@ void gcode_read_serial() {
     }
     if(gcode_binary) {
       if(gcode_wpos < 2 ) continue;
-      if(gcode_wpos == 2) gcode_binary_size = gcode_comp_binary_size(*(unsigned int*)gcode_transbuffer);
-      else if(gcode_wpos==gcode_binary_size) {
+      if(gcode_wpos == 5) gcode_binary_size = gcode_comp_binary_size((char*)gcode_transbuffer);
+      if(gcode_wpos==gcode_binary_size) {
         act = &gcode_buffer[gcode_windex];
         if(gcode_parse_binary(act,gcode_transbuffer)) { // Success
           gcode_checkinsert(act);
@@ -439,10 +706,11 @@ void gcode_read_serial() {
         gcode_wpos = 0;
         return;
       }
-    } else {
+    } else { // Ascii command
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
-        gcode_transbuffer[gcode_wpos]=0;
+        gcode_transbuffer[gcode_wpos-1]=0;
+        gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
           continue;
@@ -454,7 +722,6 @@ void gcode_read_serial() {
           gcode_resend();
         }
         gcode_wpos = 0;
-        gcode_comment = false;
         return;
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
@@ -462,16 +729,18 @@ void gcode_read_serial() {
       }           
     }
   }
-  #ifdef SDSUPPORT
-  if(!sdmode || gcode_wpos!=0) { // not reading or incoming serial command
+  #if SDSUPPORT
+  if(!sd.sdmode || gcode_wpos!=0) { // not reading or incoming serial command
     return;
   }
-  while( filesize > sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
+  while( sd.filesize > sd.sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
     gcode_lastdata = millis();
-    int n = file.read();
-    if(n==-1) break;
-
-    sdpos++; // = file.curPosition();
+    int n = sd.file.read();
+    if(n==-1) {
+      OUT_P_LN("SD read error");
+      break;
+    }
+    sd.sdpos++; // = file.curPosition();
     gcode_transbuffer[gcode_wpos++] = (byte)n;
   
     // first lets detect, if we got an old type ascii command
@@ -480,8 +749,8 @@ void gcode_read_serial() {
     }
     if(gcode_binary) {
       if(gcode_wpos < 2 ) continue;
-      if(gcode_wpos == 2) gcode_binary_size = gcode_comp_binary_size(*(unsigned int*)gcode_transbuffer);
-      else if(gcode_wpos==gcode_binary_size) {
+      if(gcode_wpos == 5) gcode_binary_size = gcode_comp_binary_size((char*)gcode_transbuffer);
+      if(gcode_wpos==gcode_binary_size) {
         act = &gcode_buffer[gcode_windex];
         if(gcode_parse_binary(act,gcode_transbuffer)) { // Success
           gcode_silent_insert();
@@ -492,7 +761,8 @@ void gcode_read_serial() {
     } else {
       char ch = gcode_transbuffer[gcode_wpos-1];
       if(ch == '\n' || ch == '\r' || ch == ':' || gcode_wpos >= (MAX_CMD_SIZE - 1) ) {// complete line read
-        gcode_transbuffer[gcode_wpos]=0;
+        gcode_transbuffer[gcode_wpos-1]=0;
+        gcode_comment = false;
         if(gcode_wpos==1) { // empty line ignore
           gcode_wpos = 0;
           continue;
@@ -502,17 +772,19 @@ void gcode_read_serial() {
           gcode_silent_insert();
         }
         gcode_wpos = 0;
-        gcode_comment = false;
         return;
       } else {
         if(ch == ';') gcode_comment = true; // ignore new data until lineend
         if(gcode_comment) gcode_wpos--;
-      }           
+      }
     }
   }
-     sdmode = false;
-     out.println_P(PSTR("Done printing file"));
-     gcode_wpos = 0;
+  sd.sdmode = false;
+  OUT_P_LN("Done printing file");
+  /*OUT_P_L("Printed bytes:",sd.sdpos);
+  OUT_P_L_LN(" of ",sd.filesize);
+  OUT_P_I_LN("WPOS:",gcode_wpos);*/
+  gcode_wpos = 0;
 #endif
 }
 
@@ -541,15 +813,26 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    sum2 -= *p;
    if(sum1 | sum2) {
       if(DEBUG_ERRORS) {
-        out.println_P(PSTR("Error:Binary cmd wrong checksum."));
+        OUT_P_LN("Error:Binary cmd wrong checksum.");
       }
      return false;
    }
    p = buffer;
    code->params = *(unsigned int *)p;p+=2;
+   byte textlen=16;
+   if(GCODE_IS_V2(code)) {
+     code->params2 = *(unsigned int *)p;p+=2;
+     if(GCODE_HAS_STRING(code)) 
+       textlen = *p++;
+   } else code->params2 = 0;
    if(code->params & 1) {gcode_actN=code->N=*(unsigned int *)p;p+=2;}
-   if(code->params & 2) {code->M=*p++;}
-   if(code->params & 4) {code->G=*p++;}
+   if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
+     if(code->params & 2) {code->M=*(unsigned int *)p;p+=2;}
+     if(code->params & 4) {code->G=*(unsigned int *)p;p+=2;}
+   } else {
+     if(code->params & 2) {code->M=*p++;}
+     if(code->params & 4) {code->G=*p++;}
+   }
    //if(code->params & 8) {memcpy(&code->X,p,4);p+=4;}
    if(code->params & 8) {code->X=*(float *)p;p+=4;}
    if(code->params & 16) {code->Y=*(float *)p;p+=4;}
@@ -559,10 +842,13 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    if(code->params & 512) {code->T=*p++;}
    if(code->params & 1024) {code->S=*(long int*)p;p+=4;}
    if(code->params & 2048) {code->P=*(long int*)p;p+=4;}
-   if(GCODE_HAS_STRING(code)) { // read 16 byte into string
-     char *sp = code->text;
-     for(i=0;i<16;++i) *sp++ = *p++;
-     *sp = 0; // make sure 0 is at end of string
+   if(GCODE_HAS_I(code)) {code->I=*(float *)p;p+=4;}
+   if(GCODE_HAS_J(code)) {code->J=*(float *)p;p+=4;}
+   if(GCODE_HAS_R(code)) {code->R=*(float *)p;p+=4;}
+   if(GCODE_HAS_STRING(code)) { // set text pointer to string
+     code->text = (char*)p;
+     code->text[textlen] = 0; // Terminate string overwriting checksum
+     gcode_wait_all_parsed=true; // Don't destroy string until executed
    }
    return true; 
 }
@@ -576,64 +862,84 @@ bool gcode_parse_ascii(GCode *code,char *line) {
   bool has_checksum = false;
   char *pos;
   code->params = 0;
+  code->params2 = 0;
   if((pos = strchr(line,'N'))!=0) { // Line number detected
      gcode_actN = gcode_value_long(++pos);
      code->params |=1;
      code->N = gcode_actN & 0xffff;
   }
   if((pos = strchr(line,'M'))!=0) { // M command
-     code->M = gcode_value_long(++pos) & 0xff;
+     code->M = gcode_value_long(++pos) & 0xffff;
      code->params |= 2;
+     if(code->M>255) code->params |= 4096;
   }
-  if((pos = strchr(line,'G'))!=0) { // G command
-     code->G = gcode_value_long(++pos) & 0xff;
-     code->params |= 4;
-  }
-  if((pos = strchr(line,'X'))!=0) { 
-     code->X = gcode_value(++pos);
-     code->params |= 8;
-  }
-  if((pos = strchr(line,'Y'))!=0) { 
-     code->Y = gcode_value(++pos);
-     code->params |= 16;
-  }
-  if((pos = strchr(line,'Z'))!=0) { 
-     code->Z = gcode_value(++pos);
-     code->params |= 32;
-  }
-  if((pos = strchr(line,'E'))!=0) { 
-     code->E = gcode_value(++pos);
-     code->params |= 64;
-  }
-  if((pos = strchr(line,'F'))!=0) { 
-     code->F = gcode_value(++pos);
-     code->params |= 256;
-  }
-  if((pos = strchr(line,'T'))!=0) { // M command
-     code->T = gcode_value_long(++pos) & 0xff;
-     code->params |= 512;
-  }
-  if((pos = strchr(line,'S'))!=0) { // M command
-     code->S = gcode_value_long(++pos);
-     code->params |= 1024;
-  }
-  if((pos = strchr(line,'P'))!=0) { // M command
-     code->P = gcode_value_long(++pos);
-     code->params |= 2048;
-  }
-  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 117)) {
+  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 32 || code->M == 117)) {
      // after M command we got a filename for sd card management
      char *sp = line;
      while(*sp!='M') sp++; // Search M command
      while(*sp!=' ') sp++; // search next whitespace
      while(*sp==' ') sp++; // skip leading whitespaces
-     char *wp = code->text;
+     code->text = sp;
      while(*sp) {
-        if(*sp==' ' || *sp=='*') break; // end of filename reached
-        *wp++ = *sp++;
+        if(code->M != 117 && (*sp==' ' || *sp=='*')) break; // end of filename reached
+        sp++;
      }
-     *wp = 0; // ensure ending 0 
+     *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
+     gcode_wait_all_parsed = true; // don't risk string be deleted
      code->params |= 32768;
+  } else {
+    if((pos = strchr(line,'G'))!=0) { // G command
+       code->G = gcode_value_long(++pos) & 0xffff;
+       code->params |= 4;
+       if(code->G>255) code->params |= 4096;
+    }
+    if((pos = strchr(line,'X'))!=0) { 
+       code->X = gcode_value(++pos);
+       code->params |= 8;
+    }
+    if((pos = strchr(line,'Y'))!=0) { 
+       code->Y = gcode_value(++pos);
+       code->params |= 16;
+    }
+    if((pos = strchr(line,'Z'))!=0) { 
+       code->Z = gcode_value(++pos);
+       code->params |= 32;
+    }
+    if((pos = strchr(line,'E'))!=0) { 
+       code->E = gcode_value(++pos);
+       code->params |= 64;
+    }
+    if((pos = strchr(line,'F'))!=0) { 
+       code->F = gcode_value(++pos);
+       code->params |= 256;
+    }
+    if((pos = strchr(line,'T'))!=0) { // M command
+       code->T = gcode_value_long(++pos) & 0xff;
+       code->params |= 512;
+    }
+    if((pos = strchr(line,'S'))!=0) { // M command
+       code->S = gcode_value_long(++pos);
+       code->params |= 1024;
+    }
+    if((pos = strchr(line,'P'))!=0) { // M command
+       code->P = gcode_value_long(++pos);
+       code->params |= 2048;
+    }
+    if((pos = strchr(line,'I'))!=0) { 
+       code->I = gcode_value(++pos);
+       code->params2 |= 1;
+       code->params |= 4096; // Needs V2 for saving
+    }
+    if((pos = strchr(line,'J'))!=0) { 
+       code->J = gcode_value(++pos);
+       code->params2 |= 2;
+       code->params |= 4096; // Needs V2 for saving
+    }
+    if((pos = strchr(line,'R'))!=0) { 
+       code->R = gcode_value(++pos);
+       code->params2 |= 4;
+       code->params |= 4096; // Needs V2 for saving
+    }
   }
   if((pos = strchr(line,'*'))!=0) { // checksum
     byte checksum_given = gcode_value_long(pos+1);
@@ -687,8 +993,16 @@ void gcode_print_command(GCode *code) {
   if(GCODE_HAS_P(code)) {
     out.print_long_P(PSTR(" P"),code->P);
   }
+  if(GCODE_HAS_I(code)) {
+    out.print_float_P(PSTR(" I"),code->I);
+  }
+  if(GCODE_HAS_J(code)) {
+    out.print_float_P(PSTR(" J"),code->J);
+  }
+  if(GCODE_HAS_R(code)) {
+    out.print_float_P(PSTR(" R"),code->R);
+  }
   if(GCODE_HAS_STRING(code)) {
-    out.print(' ');
     out.print(code->text);
   }  
 }

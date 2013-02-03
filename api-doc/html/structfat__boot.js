@@ -1,0 +1,26 @@
+var structfat__boot =
+[
+    [ "bootCode", "structfat__boot.html#a3a3b1f80267552c92749bd86827821a2", null ],
+    [ "bootSectorSig0", "structfat__boot.html#abdaf2cc75b74800944ede557442ca5bd", null ],
+    [ "bootSectorSig1", "structfat__boot.html#a44983e94ecddbdcb7ab691e493a13d94", null ],
+    [ "bootSignature", "structfat__boot.html#acc4a4e4c22b630d12c1b2c2b8c7eb366", null ],
+    [ "bytesPerSector", "structfat__boot.html#adb2ddeae74baf681103d21d724814a63", null ],
+    [ "driveNumber", "structfat__boot.html#aa7c65fdb4f759fca094105d1c870bcb2", null ],
+    [ "fatCount", "structfat__boot.html#a624e9eb125b4fc8aeaebcccf79e17aa8", null ],
+    [ "fileSystemType", "structfat__boot.html#adf80bb044ef7c8ac6d371268aa338e23", null ],
+    [ "headCount", "structfat__boot.html#a57cb7e16b9969fa87c9f1ca43a87d217", null ],
+    [ "hidddenSectors", "structfat__boot.html#a454fd6cc3f063c86b7fe65c367da7cdd", null ],
+    [ "jump", "structfat__boot.html#a61b95cffdd449d10352cfd0288b23287", null ],
+    [ "mediaType", "structfat__boot.html#ab88738f9cb91c882cb91d5e83a19a73f", null ],
+    [ "oemId", "structfat__boot.html#adff248465625d1fa3583bfcf2838620d", null ],
+    [ "reserved1", "structfat__boot.html#a2a2556147677ece60b8aadf4a0d608ed", null ],
+    [ "reservedSectorCount", "structfat__boot.html#a16c854faf567331bbbfb383e6c8df6f5", null ],
+    [ "rootDirEntryCount", "structfat__boot.html#aabe25e54b9c06a9a7393fc6c475d9fa1", null ],
+    [ "sectorsPerCluster", "structfat__boot.html#a3ce07376c286acd8393a18a32d7ca4c0", null ],
+    [ "sectorsPerFat16", "structfat__boot.html#abf85d1c57b01c8901a0cdcd0ac1babc2", null ],
+    [ "sectorsPerTrack", "structfat__boot.html#a42886f9109ee1759d5972e871f0689a8", null ],
+    [ "totalSectors16", "structfat__boot.html#ad717f5b9af13f8ec9d0d6d1337174dfa", null ],
+    [ "totalSectors32", "structfat__boot.html#a64d5902f9e900ecc745b1c0b325d875f", null ],
+    [ "volumeLabel", "structfat__boot.html#a253960050a38d2bfb2f57e86769aca62", null ],
+    [ "volumeSerialNumber", "structfat__boot.html#a7c9ffcee12051cefe1724e8024af25f8", null ]
+];

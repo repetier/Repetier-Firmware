@@ -6,7 +6,7 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Repetier-Firmware is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -19,68 +19,255 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "Configuration.h"
 #include "Reptier.h"
 #include "pins_arduino.h"
+#include "ui.h"
+#if EEPROM_MODE!=0
+#include "Eeprom.h"
+#endif
 
 Extruder *current_extruder;
+
+#if NUM_EXTRUDER>0
+prog_char ext0_select_cmd[] PROGMEM = EXT0_SELECT_COMMANDS;
+prog_char ext0_deselect_cmd[] PROGMEM = EXT0_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>1
+prog_char ext1_select_cmd[] PROGMEM = EXT1_SELECT_COMMANDS;
+prog_char ext1_deselect_cmd[] PROGMEM = EXT1_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>2
+prog_char ext2_select_cmd[] PROGMEM = EXT2_SELECT_COMMANDS;
+prog_char ext2_deselect_cmd[] PROGMEM = EXT2_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>3
+prog_char ext3_select_cmd[] PROGMEM = EXT3_SELECT_COMMANDS;
+prog_char ext3_deselect_cmd[] PROGMEM = EXT3_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>4
+prog_char ext4_select_cmd[] PROGMEM = EXT4_SELECT_COMMANDS;
+prog_char ext4_deselect_cmd[] PROGMEM = EXT4_DESELECT_COMMANDS;
+#endif
+#if NUM_EXTRUDER>5
+prog_char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
+prog_char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
+#endif
+
 Extruder extruder[NUM_EXTRUDER] = {
- {0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_TEMPSENSOR_TYPE,EXT0_TEMPSENSOR_PIN,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
-   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT0_HEAT_MANAGER,EXT0_WATCHPERIOD
+#if NUM_EXTRUDER>0
+{0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
+   EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
+   ,EXT0_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT0_ADVANCE_K
 #endif
    ,EXT0_ADVANCE_L
 #endif
+  ,{0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
 #ifdef TEMP_PID
-  ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN,EXT0_PID_IGAIN,EXT0_PID_DGAIN,EXT0_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+  ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif 
+  }
+  ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
  } 
+#endif
 #if NUM_EXTRUDER>1
- ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_TEMPSENSOR_TYPE,EXT1_TEMPSENSOR_PIN,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
-   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,0,0,0,0,0,EXT1_HEAT_MANAGER,EXT1_WATCHPERIOD
+ ,{1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
+   EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
+   ,EXT1_WAIT_RETRACT_TEMP,EXT1_WAIT_RETRACT_UNITS
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
    ,EXT1_ADVANCE_K
 #endif
    ,EXT1_ADVANCE_L
 #endif
+ ,{1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
 #ifdef TEMP_PID
-  ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN,EXT1_PID_IGAIN,EXT1_PID_DGAIN,EXT1_PID_MAX,0,0,0,0,0,0,0,0,0,0,0
+  ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
  } 
+  ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
+ }
+#endif
+#if NUM_EXTRUDER>2
+ ,{2,EXT2_X_OFFSET,EXT2_Y_OFFSET,EXT2_STEPS_PER_MM,EXT2_ENABLE_PIN,EXT2_ENABLE_ON,
+   EXT2_MAX_FEEDRATE,EXT2_MAX_ACCELERATION,EXT2_MAX_START_FEEDRATE,0,EXT2_WATCHPERIOD
+   ,EXT2_WAIT_RETRACT_TEMP,EXT2_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT2_ADVANCE_K
+#endif
+   ,EXT2_ADVANCE_L
+#endif
+ ,{2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
+ }
+#endif
+#if NUM_EXTRUDER>3
+ ,{3,EXT3_X_OFFSET,EXT3_Y_OFFSET,EXT3_STEPS_PER_MM,EXT3_ENABLE_PIN,EXT3_ENABLE_ON,
+   EXT3_MAX_FEEDRATE,EXT3_MAX_ACCELERATION,EXT3_MAX_START_FEEDRATE,0,EXT3_WATCHPERIOD
+   ,EXT3_WAIT_RETRACT_TEMP,EXT3_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT3_ADVANCE_K
+#endif
+   ,EXT3_ADVANCE_L
+#endif
+ ,{3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
+ }
+#endif
+#if NUM_EXTRUDER>4
+ ,{4,EXT4_X_OFFSET,EXT4_Y_OFFSET,EXT4_STEPS_PER_MM,EXT4_ENABLE_PIN,EXT4_ENABLE_ON,
+   EXT4_MAX_FEEDRATE,EXT4_MAX_ACCELERATION,EXT4_MAX_START_FEEDRATE,0,EXT4_WATCHPERIOD
+   ,EXT4_WAIT_RETRACT_TEMP,EXT4_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT4_ADVANCE_K
+#endif
+   ,EXT4_ADVANCE_L
+#endif
+ ,{4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
+ }
+#endif
+#if NUM_EXTRUDER>5
+ ,{5,EXT5_X_OFFSET,EXT5_Y_OFFSET,EXT5_STEPS_PER_MM,EXT5_ENABLE_PIN,EXT5_ENABLE_ON,
+   EXT5_MAX_FEEDRATE,EXT5_MAX_ACCELERATION,EXT5_MAX_START_FEEDRATE,0,EXT5_WATCHPERIOD
+   ,EXT5_WAIT_RETRACT_TEMP,EXT5_WAIT_RETRACT_UNITS
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
+   ,EXT5_ADVANCE_K
+#endif
+   ,EXT5_ADVANCE_L
+#endif
+ ,{5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
+#ifdef TEMP_PID
+  ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+ } 
+  ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
+ }
 #endif
 };
 
-#ifdef USE_GENERIC_THERMISTORTABLE
-short temptable_generic[GENERIC_THERM_NUM_ENTRIES][2];
+#if HAVE_HEATED_BED
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+#ifdef TEMP_PID
+,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
+#endif
+};
+#else
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif
 
-#if HEATED_BED_SENSOR_TYPE!=0
-  int current_bed_raw = 0;
-  int target_bed_raw = 0;
+TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] = {
+#if NUM_EXTRUDER>0
+  &extruder[0].tempControl
+#endif
+#if NUM_EXTRUDER>1
+,&extruder[1].tempControl
+#endif
+#if NUM_EXTRUDER>2
+,&extruder[2].tempControl
+#endif
+#if NUM_EXTRUDER>3
+,&extruder[3].tempControl
+#endif
+#if NUM_EXTRUDER>4
+,&extruder[4].tempControl
+#endif
+#if NUM_EXTRUDER>5
+,&extruder[5].tempControl
+#endif
+#if HAVE_HEATED_BED
+,&heatedBedController
+#endif
+};
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+short temptable_generic1[GENERIC_THERM_NUM_ENTRIES][2];
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+short temptable_generic2[GENERIC_THERM_NUM_ENTRIES][2];
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 #endif
 
 byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
-byte counter_periodical=0;
+unsigned int counter_periodical=0;
 volatile byte execute_periodical=0;
 byte counter_250ms=25;
-byte heated_bed_output=0;
-int target_bed_celsius=0;
-#if HEATED_BED_HEATER_PIN > -1
-unsigned long last_bed_set = 0;       ///< Time of last temperature setting for heated bed. So we can limit settings to desired frequency.
-#endif
 
 #ifdef SUPPORT_MAX6675
 extern int read_max6675(byte ss_pin);
 #endif
 
+#if ANALOG_INPUTS>0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
 uint8 osAnalogInputCounter[ANALOG_INPUTS];
 uint osAnalogInputBuildup[ANALOG_INPUTS];
 uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
+#endif
+
+void initHeatedBed() {
+#if HAVE_HEATED_BED
+#ifdef TEMP_PID
+    if(heatedBedController.pidIGain) { // prevent division by zero
+       heatedBedController.tempIStateLimitMax = (float)heatedBedController.pidDriveMax*10.0f/heatedBedController.pidIGain;
+       heatedBedController.tempIStateLimitMin = (float)heatedBedController.pidDriveMin*10.0f/heatedBedController.pidIGain;
+    }
+#endif
+#endif
+}
+
+// ------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------- createGenericTable ---------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,short maxTemp,float beta,float r0,float t0,float r1,float r2) {
+  t0+=273.15f;
+  float rs,vs;
+  if(r1==0) {
+    rs = r2;
+    vs = GENERIC_THERM_VREF;
+  } else {  
+    vs =(float)(GENERIC_THERM_VREF*r1)/(r1+r2);
+    rs = (r2*r1)/(r1+r2);
+  }
+  float k = r0*exp(-beta/t0);
+  float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
+  for(byte i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
+    float t = maxTemp-i*delta;
+    float r = exp(beta/(t+272.65))*k;
+    float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
+    int adc = (int)(v);
+    t *= 8;
+    if(adc>4092) adc=4092;
+    table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
+    table[i][1] = (int)t;
+#ifdef DEBUG_GENERIC
+    OUT_P_I("GenTemp: ",table[i][0]); 
+    OUT_P_I_LN(",",table[i][1]); 
+#endif
+  }
+}
+#endif
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- initExtruder ------------------------------------------------------
@@ -95,39 +282,38 @@ for temperature reading.
 void initExtruder() {
   byte i;
   current_extruder = &extruder[0];
-#ifdef USE_GENERIC_THERMISTORTABLE
-#define GENERIC_THERM_T0K (GENERIC_THERM_T0+273.15f)
-#if GENERIC_THERM_R1==0
-#define GENERIC_VS GENERIC_THERM_VREF
-#define GENERIC_RS GENERIC_THERM_R2
-#else
-#define GENERIC_VS (float)(GENERIC_THERM_VREF*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
-#define GENERIC_RS (float)(GENERIC_THERM_R2*GENERIC_THERM_R1)/(GENERIC_THERM_R1+GENERIC_THERM_R2)
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+  createGenericTable(temptable_generic1,GENERIC_THERM1_MIN_TEMP,GENERIC_THERM1_MAX_TEMP,GENERIC_THERM1_BETA,GENERIC_THERM1_R0,GENERIC_THERM1_T0,GENERIC_THERM1_R1,GENERIC_THERM1_R2);
 #endif
-  float k = GENERIC_THERM_R0*exp(-GENERIC_THERM_BETA/GENERIC_THERM_T0K);
-  float delta = 4092.0f/GENERIC_THERM_NUM_ENTRIES;
-  for(i=0;i<GENERIC_THERM_NUM_ENTRIES;i++) {
-    int adc = (int)(i*delta+1);
-    if(adc>4095) adc=4095;
-    temptable_generic[i][0] = (adc>>(ANALOG_REDUCE_BITS));
-    float v = (float)(adc*GENERIC_THERM_VADC)/(4096.0f);
-    float r = GENERIC_RS*v/(GENERIC_VS-v);
-    temptable_generic[i][1] = (int)(8.0f*(GENERIC_THERM_BETA/log(r/k)-273.15f+0.5f /* for correct rounding */));
-#ifdef DEBUG_GENERIC
-    out.print_int_P(PSTR("GenTemp: "),temptable_generic[i][0]); 
-    out.println_int_P(PSTR(","),temptable_generic[i][1]); 
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+  createGenericTable(temptable_generic2,GENERIC_THERM2_MIN_TEMP,GENERIC_THERM2_MAX_TEMP,GENERIC_THERM2_BETA,GENERIC_THERM2_R0,GENERIC_THERM2_T0,GENERIC_THERM2_R1,GENERIC_THERM2_R2);
 #endif
-  }
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+  createGenericTable(temptable_generic3,GENERIC_THERM3_MIN_TEMP,GENERIC_THERM3_MAX_TEMP,GENERIC_THERM3_BETA,GENERIC_THERM3_R0,GENERIC_THERM3_T0,GENERIC_THERM3_R1,GENERIC_THERM3_R2);
 #endif
+#if defined(EXT0_STEP_PIN) && EXT0_STEP_PIN>-1
   SET_OUTPUT(EXT0_DIR_PIN);
   SET_OUTPUT(EXT0_STEP_PIN);
-#ifdef EXT1_STEP_PIN
+#endif
+#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN>-1 && NUM_EXTRUDER>1
   SET_OUTPUT(EXT1_DIR_PIN);
   SET_OUTPUT(EXT1_STEP_PIN);
 #endif
-#ifdef EXT2_STEP_PIN
+#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN>-1 && NUM_EXTRUDER>2
   SET_OUTPUT(EXT2_DIR_PIN);
   SET_OUTPUT(EXT2_STEP_PIN);
+#endif
+#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN>-1 && NUM_EXTRUDER>3
+  SET_OUTPUT(EXT3_DIR_PIN);
+  SET_OUTPUT(EXT3_STEP_PIN);
+#endif
+#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN>-1 && NUM_EXTRUDER>4
+  SET_OUTPUT(EXT4_DIR_PIN);
+  SET_OUTPUT(EXT4_STEP_PIN);
+#endif
+#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN>-1 && NUM_EXTRUDER>5
+  SET_OUTPUT(EXT5_DIR_PIN);
+  SET_OUTPUT(EXT5_STEP_PIN);
 #endif
   
   for(i=0;i<NUM_EXTRUDER;++i) {
@@ -136,7 +322,7 @@ void initExtruder() {
       pinMode(act->enablePin,OUTPUT);
       if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
     }
-    act->lastTemperatureUpdate = millis();
+    act->tempControl.lastTemperatureUpdate = millis();
 #ifdef SUPPORT_MAX6675
     if(act->sensorType==101) {
       WRITE(SCK_PIN,0);
@@ -145,13 +331,14 @@ void initExtruder() {
       SET_OUTPUT(MOSI_PIN);
       WRITE(MISO_PIN,1);
       SET_INPUT(MISO_PIN);
-      digitalWrite(act->sensorPin,1);
-      pinMode(act->sensorPin,OUTPUT);
+      digitalWrite(act->tempControl.sensorPin,1);
+      pinMode(act->tempControl.sensorPin,OUTPUT);
     }
 #endif
   }
 #if HEATED_BED_HEATER_PIN>-1
-  pinMode(HEATED_BED_HEATER_PIN,OUTPUT);
+  SET_OUTPUT(HEATED_BED_HEATER_PIN);
+  initHeatedBed();
 #endif
   extruder_select(0);
 #if ANALOG_INPUTS>0
@@ -180,6 +367,14 @@ void initExtruder() {
 #endif
   
 }
+void updateTempControlVars(TemperatureController *tc) {
+#ifdef TEMP_PID
+    if(tc->pidIGain) { // prevent division by zero
+       tc->tempIStateLimitMax = (float)tc->pidDriveMax*10.0f/tc->pidIGain;
+       tc->tempIStateLimitMin = (float)tc->pidDriveMin*10.0f/tc->pidIGain;
+    }
+#endif
+}
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- extruder_select ---------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
@@ -191,12 +386,19 @@ This function changes and initalizes a new extruder. This is also called, after 
 void extruder_select(byte ext_num) {
    if(ext_num>=NUM_EXTRUDER)
      ext_num = 0;
+#if NUM_EXTRUDER>1
+   bool executeSelect = false;
+   if(ext_num!=current_extruder->id) {
+    gcode_execute_PString(current_extruder->deselectCommands);
+    executeSelect = true;
+  }
+#endif
    current_extruder->extrudePosition = printer_state.currentPositionSteps[3];
-   printer_state.destinationSteps[0] -= current_extruder->xOffset;
-   printer_state.destinationSteps[1] -= current_extruder->yOffset;
+   long dx = current_extruder->xOffset;
+   long dy = current_extruder->yOffset;
    current_extruder = &extruder[ext_num];
-   printer_state.destinationSteps[0] += current_extruder->xOffset;
-   printer_state.destinationSteps[1] += current_extruder->yOffset;
+   dx -= current_extruder->xOffset;
+   dy -= current_extruder->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
    // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
    printer_state.currentPositionSteps[3] = current_extruder->extrudePosition;
@@ -210,7 +412,8 @@ void extruder_select(byte ext_num) {
    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
 #if USE_OPS==1 || defined(USE_ADVANCE)
    printer_state.minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
-   printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*0.0166666*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   printer_state.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+   if(printer_state.maxExtruderSpeed>15) printer_state.maxExtruderSpeed = 15;
    if(printer_state.maxExtruderSpeed>=printer_state.minExtruderSpeed) {
      printer_state.maxExtruderSpeed = printer_state.minExtruderSpeed;
    } else {
@@ -221,65 +424,76 @@ void extruder_select(byte ext_num) {
    float fmax=((float)F_CPU/((float)printer_state.maxExtruderSpeed*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
 #endif
-#ifdef TEMP_PID
-    if(current_extruder->pidIGain) { // prevent division by zero
-       current_extruder->tempIStateLimitMax = (long)current_extruder->pidDriveMax*1000L/current_extruder->pidIGain;
-       current_extruder->tempIStateLimitMin = (long)current_extruder->pidDriveMin*1000L/current_extruder->pidIGain;
-    }
-#endif
+   updateTempControlVars(&current_extruder->tempControl);
 #if USE_OPS==1
    printer_state.opsRetractSteps = printer_state.opsRetractDistance*current_extruder->stepsPerMM;
-   printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBackslash)*current_extruder->stepsPerMM;
+   printer_state.opsPushbackSteps = (printer_state.opsRetractDistance+printer_state.opsRetractBacklash)*current_extruder->stepsPerMM;
    if(printer_state.opsMode<=1)
      printer_state.opsMoveAfterSteps = 0;
    else
      printer_state.opsMoveAfterSteps = (int)(-(float)printer_state.opsRetractSteps*(100.0-printer_state.opsMoveAfter)*0.01);
 #endif
-   queue_move(false,true); // Move head of new extruder to old position using last feedrate
+  if(dx || dy) {
+    float oldfeedrate = printer_state.feedrate;
+    move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+    printer_state.offsetX += dx;
+    printer_state.offsetY += dy;
+    printer_state.feedrate = oldfeedrate;
+  }
+#if NUM_EXTRUDER>1
+  if(executeSelect) // Run only when changing
+    gcode_execute_PString(current_extruder->selectCommands);
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- extruder_set_temperature ------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-void extruder_set_temperature(int temp_celsius,byte extr) {
+void extruder_set_temperature(float temp_celsius,byte extr) {
+  bool alloffs = true;
+  for(byte i=0;i<NUM_EXTRUDER;i++)
+    if(tempController[i]->targetTemperatureC>15) alloffs = false;
 #ifdef MAXTEMP
-  if(temp_celsius>(MAXTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MAXTEMP<<CELSIUS_EXTRA_BITS);
+  if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
 #endif
   if(temp_celsius<0) temp_celsius=0;
-//#ifdef MINTEMP
-//  if(temp_celsius<(MINTEMP<<CELSIUS_EXTRA_BITS)) temp_celsius = (MINTEMP<<CELSIUS_EXTRA_BITS);
-//#endif
-  extruder[extr].targetTemperature = conv_temp_raw(extruder[extr].sensorType,temp_celsius);
-  extruder[extr].targetTemperatureC = temp_celsius;
-   out.print_int_P(PSTR("TargetExtr"),(int)extr);
-   out.println_int_P(PSTR(":"),temp_celsius>>CELSIUS_EXTRA_BITS);
+  TemperatureController *tc = tempController[extr]; 
+  if(temp_celsius==tc->targetTemperatureC) return;
+  tc->targetTemperature = conv_temp_raw(tc->sensorType,temp_celsius);
+  tc->targetTemperatureC = temp_celsius;
+  if(temp_celsius>=50) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+   OUT_P_FX("TargetExtr",extr,0);
+   OUT_P_FX_LN(":",temp_celsius,0);
 #if USE_OPS==1  
-  if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP<<CELSIUS_EXTRA_BITS)) { // Protect for cold filament
+  if(extr==current_extruder->id && temp_celsius<(MIN_EXTRUDER_TEMP)) { // Protect for cold filament
     printer_state.filamentRetracted = false;
     printmoveSeen = 0;
   }
 #endif
-}
-
-// ------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------- extruder_get_temperature ------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------
-
-int extruder_get_temperature() {
-  return conv_raw_temp(current_extruder->sensorType,current_extruder->currentTemperature);
+  bool alloff = true;
+  for(byte i=0;i<NUM_EXTRUDER;i++)
+    if(tempController[i]->targetTemperatureC>15) alloff = false;
+#if EEPROM_MODE != 0
+  if(alloff && !alloffs) // All heaters are now switched off?
+    epr_update_usage();
+#endif
+  if(alloffs && !alloff) // heaters are turned on, start measuring printing time
+    printer_state.msecondsPrinting = millis();
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- heated_bed_set_temperature ----------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-void heated_bed_set_temperature(int temp_celsius) {
-#if HEATED_BED_SENSOR_TYPE!=0  
-   if(temp_celsius>(150<<CELSIUS_EXTRA_BITS)) temp_celsius = 150<<CELSIUS_EXTRA_BITS;
-   target_bed_celsius=temp_celsius;
-   target_bed_raw = conv_temp_raw(HEATED_BED_SENSOR_TYPE,temp_celsius);
-   out.println_int_P(PSTR("TargetBed:"),target_bed_celsius>>CELSIUS_EXTRA_BITS);
+void heated_bed_set_temperature(float temp_celsius) {
+#if HAVE_HEATED_BED
+   if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
+   if(temp_celsius<0) temp_celsius = 0;
+   if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
+   heatedBedController.targetTemperatureC=temp_celsius;
+   heatedBedController.targetTemperature = conv_temp_raw(heatedBedController.sensorType,temp_celsius);
+   OUT_P_FX_LN("TargetBed:",heatedBedController.targetTemperatureC,0);
 #endif     
 }
 
@@ -287,9 +501,11 @@ void heated_bed_set_temperature(int temp_celsius) {
 // ---------------------------------------------- heated_bed_get_temperature ----------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int heated_bed_get_temperature() {
-#if HEATED_BED_SENSOR_TYPE!=0  
-   return conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw);
+float heated_bed_get_temperature() {
+#if HAVE_HEATED_BED 
+   TemperatureController *c = tempController[NUM_TEMPERATURE_LOOPS-1];
+   return c->currentTemperatureC;
+   //return conv_raw_temp(c->sensorType,c->currentTemperature);
 #else
    return -1;
 #endif     
@@ -310,14 +526,6 @@ const short temptable_1[NUMTEMPS_1][2] PROGMEM = {
 {0,4000},{92,2400},{105,2320},{121,2240},{140,2160},{162,2080},{189,2000},{222,1920},{261,1840},{308,1760},
 {365,1680},{434,1600},{519,1520},{621,1440},{744,1360},{891,1280},{1067,1200},{1272,1120},
 {1771,960},{2357,800},{2943,640},{3429,480},{3760,320},{3869,240},{3912,200},{3948,160},{4077,-160},{4094,-440}
-/* Old table for 100k unknown type 61 values
-{23*4,300*8},{25*4,295*8},{27*4,290*8},{28*4,285*8},{31*4,280*8},{33*4,275*8},{35*4,270*8},{38*4,265*8},{41*4,260*8},{44*4,255*8},
-{48*4,250*8},{52*4,245*8},{56*4,240*8},{61*4,235*8},{66*4,230*8},{71*4,225*8},{78*4,220*8},{84*4,215*8},{92*4,210*8},{100*4,205*8},
-{109*4,200*8},{120*4,195*8},{131*4,190*8},{143*4,185*8},{156*4,180*8},{171*4,175*8},{187*4,170*8},{205*4,165*8},{224*4,160*8},
-{245*4,155*8},{268*4,150*8},{293*4,145*8},{320*4,140*8},{348*4,135*8},{379*4,130*8},{411*4,125*8},{445*4,120*8},{480*4,115*8},
-{516*4,110*8},{553*4,105*8},{591*4,100*8},{628*4,95*8},{665*4,90*8},{702*4,85*8},{737*4,80*8},{770*4,75*8},{801*4,70*8},{830*4,65*8},
-{857*4,60*8},{881*4,55*8},{903*4,50*8},{922*4,45*8},{939*4,40*8},{954*4,35*8},{966*4,30*8},{977*4,25*8},{985*4,20*8},{993*4,15*8},
-{999*4,10*8},{1004*4,5*8},{1008*4,0*8} //safety*/
 };
 #define NUMTEMPS_2 21
 const short temptable_2[NUMTEMPS_2][2] PROGMEM = {
@@ -337,6 +545,13 @@ const short temptable_4[NUMTEMPS_4][2] PROGMEM = {
    {1*4, 430*8},{54*4, 137*8},{107*4, 107*8},{160*4, 91*8},{213*4, 80*8},{266*4, 71*8},{319*4, 64*8},{372*4, 57*8},{425*4, 51*8},
    {478*4, 46*8},{531*4, 41*8},{584*4, 35*8},{637*4, 30*8},{690*4, 25*8},{743*4, 20*8},{796*4, 14*8},{849*4, 7*8},{902*4, 0*8},
    {955*4, -11*8},{1008*4, -35*8}};
+   
+#define NUMTEMPS_8 34
+const short temptable_8[NUMTEMPS_8][2] PROGMEM = {
+   {0,8000},{89,2400},{101,2320},{116,2240},{133,2160},{153,2080},{178,2000},{207,1920},{242,1840},{284,1760},{336,1680},{398,1600},
+   {474,1520},{567,1440},{679,1360},{814,1280},{977,1200},{1171,1120},{1397,1040},{1655,960},{1940,880},{2246,800},{2558,720},
+   {2863,640},{3144,560},{3389,480},{3591,400},{3749,320},{3867,240},{3950,160},{4006,80},{4042,0},{4064,-80},{4077,-160}};
+
 #if NUM_TEMPS_USERTHERMISTOR0>0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -346,7 +561,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2>0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[7] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[8] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0>0
 ,(short int *)&temptable_5[0][0]
 #else
@@ -362,8 +577,9 @@ const short * const temptables[7] PROGMEM = {(short int *)&temptable_1[0][0],(sh
 #else
 ,0
 #endif
+,(short int *)&temptable_8[0][0]
 };
-const byte temptables_num[7] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2};
+const byte temptables_num[8] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8};
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- read_raw_temperature ----------------------------------------------
@@ -371,6 +587,7 @@ const byte temptables_num[7] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMP
 
 int read_raw_temperature(byte type,byte pin) {
   switch(type) {
+#if ANALOG_INPUTS>0
     case 1:
     case 2:
     case 3:
@@ -378,6 +595,9 @@ int read_raw_temperature(byte type,byte pin) {
     case 5:
     case 6:
     case 7:
+    case 8:
+    case 97:
+    case 98:
     case 99:
       return (1023<<(2-ANALOG_REDUCE_BITS))-(osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result
     case 50: // User defined PTC table
@@ -386,6 +606,7 @@ int read_raw_temperature(byte type,byte pin) {
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result    
     case 100: // AD595
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
+#endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
       return read_max6675(pin);
@@ -398,7 +619,8 @@ int read_raw_temperature(byte type,byte pin) {
 // ---------------------------------------------- conv_raw_temp -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int conv_raw_temp(byte type,int raw_temp) {
+float conv_raw_temp(byte type,int raw_temp) {
+  //OUT_P_I_LN("OC for raw ",raw_temp);
   switch(type) {
     case 1:
     case 2:
@@ -407,6 +629,7 @@ int conv_raw_temp(byte type,int raw_temp) {
     case 5: 
     case 6:
     case 7:
+    case 8:
     {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
@@ -419,13 +642,16 @@ int conv_raw_temp(byte type,int raw_temp) {
       while(i<num) {
         newraw = pgm_read_word(&temptable[i++]);
         newtemp = pgm_read_word(&temptable[i++]);
-        if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+        if (newraw > raw_temp) {
+          //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
+          //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
+        }
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;}
+      return TEMP_INT_TO_FLOAT(newtemp);}
     case 50: // User defined PTC thermistor
     case 51:
     case 52:
@@ -441,12 +667,12 @@ int conv_raw_temp(byte type,int raw_temp) {
         newraw = pgm_read_word(&temptable[i++]);
         newtemp = pgm_read_word(&temptable[i++]);
         if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;
+      return TEMP_INT_TO_FLOAT(newtemp);
     }
     case 100: // AD595
       return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -454,24 +680,42 @@ int conv_raw_temp(byte type,int raw_temp) {
     case 101: // MAX6675
       return raw_temp /4;
 #endif
-#ifdef USE_GENERIC_THERMISTORTABLE
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+    case 97:
+    case 98:
     case 99: {
       byte i=2;
-      const short *temptable = (const short *)temptable_generic; 
+      const short *temptable;
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+      if(type == 97)
+         temptable = (const short *)temptable_generic1; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+      if(type == 98)
+         temptable = (const short *)temptable_generic2; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+      if(type == 99)
+         temptable = (const short *)temptable_generic3; 
+#endif
       short oldraw = temptable[0];
       short oldtemp = temptable[1];
       short newraw,newtemp;
       raw_temp = (1023<<(2-ANALOG_REDUCE_BITS))-raw_temp;
+      //OUT_P_I("Raw ",raw_temp);
       while(i<GENERIC_THERM_NUM_ENTRIES*2) {
         newraw = temptable[i++];
         newtemp = temptable[i++];
-        if (newraw > raw_temp)
-          return oldtemp + (long)(raw_temp-oldraw)*(long)(newtemp-oldtemp)/(newraw-oldraw);
+        if (newraw > raw_temp) {
+          //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
+          //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
+          return TEMP_INT_TO_FLOAT(oldtemp + (float)(raw_temp-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
+        }
         oldtemp = newtemp;
         oldraw = newraw;
       }
       // Overflow: Set to last value in the table
-      return newtemp;
+      return TEMP_INT_TO_FLOAT(newtemp);
     }
 #endif
   }
@@ -481,7 +725,8 @@ int conv_raw_temp(byte type,int raw_temp) {
 // ---------------------------------------------- conv_temp_raw -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-int conv_temp_raw(byte type,int temp) {
+int conv_temp_raw(byte type,float tempf) {
+  int temp = TEMP_FLOAT_TO_INT(tempf);
   switch(type) {
     case 1:
     case 2:
@@ -490,6 +735,7 @@ int conv_temp_raw(byte type,int temp) {
     case 5:
     case 6:
     case 7:
+    case 8:
     {
       type--;
       byte num = pgm_read_byte(&temptables_num[type])<<1;
@@ -537,10 +783,24 @@ int conv_temp_raw(byte type,int temp) {
     case 101:  // defined HEATER_USES_MAX6675
       return temp * 4;
 #endif
-#ifdef USE_GENERIC_THERMISTORTABLE
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+    case 97:
+    case 98:
     case 99: {
       byte i=2;
-      const short *temptable = (const short *)temptable_generic;
+      const short *temptable;
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+      if(type == 97)
+         temptable = (const short *)temptable_generic1; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+      if(type == 98)
+         temptable = (const short *)temptable_generic2; 
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+      if(type == 99)
+         temptable = (const short *)temptable_generic3; 
+#endif
       short oldraw = temptable[0];
       short oldtemp = temptable[1];
       short newraw,newtemp;
@@ -560,6 +820,140 @@ int conv_temp_raw(byte type,int temp) {
 }
 
 // ------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------- disableAllHeater --------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+byte autotuneIndex = 255;
+void disableAllHeater() {
+  for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+     TemperatureController *c = tempController[i];
+     c->targetTemperature = 0;
+     c->targetTemperatureC = 0;
+     pwm_pos[c->pwmIndex] = 0;
+  }
+  autotuneIndex = 255;
+}
+// ------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------ autotunePID -----------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+
+#ifdef TEMP_PID
+void autotunePID(float temp,int controllerId)
+{
+  TemperatureController *c = tempController[controllerId];
+  float currentTemp;
+  int cycles=0;
+  bool heating = true;
+
+  unsigned long temp_millis = millis();
+  unsigned long t1=temp_millis;
+  unsigned long t2=temp_millis;
+  long t_high;
+  long t_low;
+
+  long bias=c->pidMax>>1;
+  long d = c->pidMax>>1;
+  float Ku, Tu;
+  float Kp, Ki, Kd;
+  float maxTemp=20, minTemp=20;
+  
+  OUT_P_LN("PID Autotune start");
+  
+  disableAllHeater(); // switch off all heaters.
+  autotuneIndex = controllerId;
+  pwm_pos[c->pwmIndex] = c->pidMax;
+    
+  for(;;) {
+      c->currentTemperature = read_raw_temperature(c->sensorType,c->sensorPin);
+      currentTemp = c->currentTemperatureC = conv_raw_temp(c->sensorType,c->currentTemperature);
+      unsigned long time = millis();
+      maxTemp=max(maxTemp,currentTemp);
+      minTemp=min(minTemp,currentTemp);
+      if(heating == true && currentTemp > temp) { // switch heating -> off
+        if(time - t2 > (controllerId<NUM_EXTRUDER ? 2500 : 1500)) {
+          heating=false;
+          pwm_pos[c->pwmIndex] = (bias - d);
+          t1=time;
+          t_high=t1 - t2;
+          maxTemp=temp;
+        }
+      }
+      if(heating == false && currentTemp < temp) {
+        if(time - t1 > (controllerId<NUM_EXTRUDER ? 5000 : 3000)) {
+          heating=true;
+          t2=time;
+          t_low=t2 - t1; // half wave length
+          if(cycles > 0) {
+            bias += (d*(t_high - t_low))/(t_low + t_high);
+            bias = constrain(bias, 20 ,c->pidMax-20);
+            if(bias > c->pidMax/2) d = c->pidMax - 1 - bias;
+            else d = bias;
+
+            OUT_P_I(" bias: ",bias);
+            OUT_P_I(" d: ",d);
+            OUT_P_F(" min: ",minTemp);
+            OUT_P_F_LN(" max: ",maxTemp);
+            if(cycles > 2) {
+              // Parameter according Ziegler–Nichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+              Ku = (4.0*d)/(3.14159*(maxTemp-minTemp));
+              Tu = ((float)(t_low + t_high)/1000.0);
+              OUT_P_F(" Ku: ",Ku);
+              OUT_P_F_LN(" Tu: ",Tu);
+              Kp = 0.6*Ku;
+              Ki = 2*Kp/Tu;
+              Kd = Kp*Tu*0.125;
+              OUT_P_LN(" Classic PID");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              /*
+              Kp = 0.33*Ku;
+              Ki = Kp/Tu;
+              Kd = Kp*Tu/3;
+              OUT_P_LN(" Some overshoot");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              Kp = 0.2*Ku;
+              Ki = 2*Kp/Tu;
+              Kd = Kp*Tu/3;
+              OUT_P_LN(" No overshoot");
+              OUT_P_F_LN(" Kp: ",Kp);
+              OUT_P_F_LN(" Ki: ",Ki);
+              OUT_P_F_LN(" Kd: ",Kd);
+              */
+            }
+          }
+          pwm_pos[c->pwmIndex] = (bias + d);
+          cycles++;
+          minTemp=temp;
+        }
+    }
+    if(currentTemp > (temp + 20)) {
+      OUT_P_LN("PID Autotune failed! Temperature to high");
+      disableAllHeater();
+      return;
+    }
+    if(time - temp_millis > 1000) {
+      temp_millis = time;
+      print_temperatures();
+    }
+    if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L)) { // 20 Minutes
+      OUT_P_LN("PID Autotune failed! timeout");
+      disableAllHeater();
+      return;
+    }
+    if(cycles > 5) {
+      OUT_P_LN("PID Autotune finished ! Place the Kp, Ki and Kd constants in the configuration.h");
+      disableAllHeater();
+      return;
+    }
+    UI_MEDIUM;
+    UI_SLOW;
+  }
+}
+#endif
+
+// ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- write_monitor -----------------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
@@ -570,95 +964,106 @@ disabled, the function is not called.
 */
 void write_monitor() {
     out.print_long_P(PSTR("MTEMP:"),millis());
-    if(manage_monitor<NUM_EXTRUDER) {
-      Extruder *e = &extruder[manage_monitor];
-      out.print_int_P(PSTR(" "),e->currentTemperatureC>>CELSIUS_EXTRA_BITS); 
-      out.print_int_P(PSTR(" "),e->targetTemperatureC>>CELSIUS_EXTRA_BITS);
-      out.println_int_P(PSTR(" "),(int)pwm_pos[e->id]);
-    }
-#if HEATED_BED_SENSOR_TYPE!=0
-    else {
-      out.print_int_P(PSTR(" "),conv_raw_temp(HEATED_BED_SENSOR_TYPE,current_bed_raw)>>CELSIUS_EXTRA_BITS); 
-      out.print_int_P(PSTR(" "),target_bed_celsius>>CELSIUS_EXTRA_BITS);
-      out.println_int_P(PSTR(" "),(int)heated_bed_output);
-    }
-#endif
+    TemperatureController *act = tempController[manage_monitor];
+    OUT_P_F(" ",act->currentTemperatureC); 
+    OUT_P_FX(" ",act->targetTemperatureC,0);
+    OUT_P_I_LN(" ",pwm_pos[act->pwmIndex]);
+}
+
+// ------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------- reportTempsensorError ----------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+
+bool reportTempsensorError() {
+  if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)) return false;
+  for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+     int temp = tempController[i]->currentTemperatureC;
+     if(i==NUM_EXTRUDER) OUT_P("heated bed");
+     else OUT_P_I("extruder ",i);  
+     if(temp<MIN_DEFECT_TEMPERATURE || temp>MAX_DEFECT_TEMPERATURE) {
+       OUT_P_LN(": temp sensor defect");
+     } else OUT_P_LN(": working");
+  }
+  OUT_P_LN("Printer set into dry run mode until restart!");
+  return true;
 }
 
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- manage temperatures -----------------------------------------------
 // ------------------------------------------------------------------------------------------------------------------
 
-/** Makes updates to temperatures and heater state every call. It is optimized for speed,
- so only small updates are done every time. Call it frequently, minimum 40 times per sensor
- is suggested.
- the critical flag indicates, that the time for checking temp. is limited, so long operations
- are forbidden in this call.*/
+/** Makes updates to temperatures and heater state every call. 
+
+Is called every 100ms.
+*/
 
 void manage_temperatures() {
-  byte manage_extruder = 0;  ///< Extruder number, we are looking at. 1+NUM_EXTRUDER is heated bed.
-  for(manage_extruder=0;manage_extruder<NUM_EXTRUDER;manage_extruder++) {
-    Extruder *act = &extruder[manage_extruder];
+  for(byte controller=0;controller<NUM_TEMPERATURE_LOOPS;controller++) {
+    if(controller == autotuneIndex) continue;
+    TemperatureController *act = tempController[controller];
     // Get Temperature
-       int oldTemp = act->currentTemperatureC;
-       act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
-       act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
-       byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+    //int oldTemp = act->currentTemperatureC;
+    act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
+    act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
+    if(controller<NUM_EXTRUDER && act->currentTemperatureC<50 && act->targetTemperatureC<50) {
+        extruder[controller].coolerPWM = 0;
+    }
+    if(!(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE)) { // no temp sensor or short in sensor, disable heater
+        printer_state.flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+        reportTempsensorError();
+    }
+    if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
+    byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 #ifdef TEMP_PID
-       act->tempArray[act->tempPointer++] = act->currentTemperatureC;
-       act->tempPointer &= 7;
-       if(act->heatManager==1) {
+    act->tempArray[act->tempPointer++] = act->currentTemperatureC;
+    act->tempPointer &= 3;
+    if(act->heatManager==1) {
          byte output;
-         int error = act->targetTemperatureC - act->currentTemperatureC;
-         if(act->targetTemperatureC<(20<<CELSIUS_EXTRA_BITS)) output = 0; // off is off, even if damping term wants a heat peak!
-         else if(error>(PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS)) 
+         float error = act->targetTemperatureC - act->currentTemperatureC;
+         if(act->targetTemperatureC<20.0f) output = 0; // off is off, even if damping term wants a heat peak!
+         else if(error>PID_CONTROL_RANGE) 
            output = act->pidMax;
-         else if(error<(-PID_CONTROL_RANGE<<CELSIUS_EXTRA_BITS))
+         else if(error<-PID_CONTROL_RANGE)
            output = 0;
          else {
-           long pidTerm = act->pidPGain * error; // *100
-           act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax); // *1*1000ms
-           pidTerm += act->pidIGain * act->tempIState/10; 
-           long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC); //*100
+           float pidTerm = act->pidPGain * error;
+           act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax);
+           pidTerm += act->pidIGain * act->tempIState*0.1; 
+           long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC)*3.333f;
            pidTerm += dgain;
 #if SCALE_PID_TO_MAX==1
-           pidTerm = (pidTerm*act->pidMax)>>8;
+           pidTerm = (pidTerm*act->pidMax)*0.0039062;
 #endif
-           output = constrain(pidTerm/100, 0, act->pidMax) & 0xff;
-          /*if(counter_250ms==1) { // some debug infos
-            out.print_long_P(PSTR("PID:"),act->tempIState);
-            out.print_long_P(PSTR(" "),pidTerm);
-            out.print_long_P(PSTR(" "),act->pidPGain * error);
-            out.println_long_P(PSTR(" "),dgain);
-          } */
+           output = constrain((int)pidTerm, 0, act->pidMax);
          }
-         pwm_pos[act->id] = output;
-       }
+         pwm_pos[act->pwmIndex] = output;
+    } else
 #endif
-       if(act->heatManager == 0
-#ifndef TEMP_PID
-        || true
+    if(act->heatManager == 2) { // Bang-bang with reduced change frequency to save relais life
+        unsigned long time = millis();
+        if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL) {
+          pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+          act->lastTemperatureUpdate = time;
+        }
+    } else { // Fast Bang-Bang fallback
+         pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+    }
+#ifdef MAXTEMP
+    if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
+      pwm_pos[act->pwmIndex] = 0;
 #endif
-       ) {
-         pwm_pos[act->id] = (on?255:0);
-      }
 #if LED_PIN>-1
-      if(act == current_extruder)
-        digitalWrite(LED_PIN,on);
+    if(act == &current_extruder->tempControl)
+        WRITE(LED_PIN,on);
 #endif       
   }
-  // Now manage heated bed
-#if HEATED_BED_SENSOR_TYPE!=0
-  unsigned long time = millis();
-  current_bed_raw = read_raw_temperature(HEATED_BED_SENSOR_TYPE,HEATED_BED_SENSOR_PIN);
-#if HEATED_BED_HEATER_PIN > -1
-  if (time - last_bed_set > HEATED_BED_SET_INTERVAL) {
-     digitalWrite(HEATED_BED_HEATER_PIN,current_bed_raw >= target_bed_raw ? LOW : HIGH);
-     last_bed_set = time;
+  if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) {
+    for(byte i=0;i<NUM_TEMPERATURE_LOOPS;i++) {
+       pwm_pos[tempController[i]->pwmIndex] = 0;
+    }
+    debug_level |= 8; // Go into dry mode
   }
-#endif
-  heated_bed_output = current_bed_raw >= target_bed_raw ? 0 : 255;
-#endif
+
 }
 // ------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------- read_max6675 ------------------------------------------------------

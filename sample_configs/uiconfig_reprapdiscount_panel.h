@@ -349,11 +349,13 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(35); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(41); // Kill pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 }
 void ui_check_keys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(41,UI_ACTION_RESET); 
 }
 inline void ui_check_slow_encoder() {
 #ifdef UI_HAS_I2C_KEYS
@@ -395,7 +397,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(3),UI_ACTION_BACK); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(4),UI_ACTION_MENU_QUICKSETTINGS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
+    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin
 /*
   // Button handling for the Adafruit RGB shild
     UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
@@ -454,7 +456,7 @@ List of placeholder:
 %O1 : OPS mode = 1
 %O2 : OPS mode = 2
 %Or : OPS retract distance
-%Ob : OPS backslash distance
+%Ob : OPS backlash distance
 %Od : OPS min distance
 %Oa : OPS move after
 %ax : X acceleration during print moves
@@ -711,10 +713,10 @@ UI_MENU_ACTIONCOMMAND(ui_menu_ops_off,UI_TEXT_OPS_OFF,UI_ACTION_OPS_OFF);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_classic,UI_TEXT_OPS_CLASSIC,UI_ACTION_OPS_CLASSIC);
 UI_MENU_ACTIONCOMMAND(ui_menu_ops_fast,UI_TEXT_OPS_FAST,UI_ACTION_OPS_FAST);
 UI_MENU_CHANGEACTION(ui_menu_ops_retract,UI_TEXT_OPS_RETRACT,UI_ACTION_OPS_RETRACTDISTANCE);
-UI_MENU_CHANGEACTION(ui_menu_ops_backslash,UI_TEXT_OPS_BACKSLASH,UI_ACTION_OPS_BACKSLASH);
+UI_MENU_CHANGEACTION(ui_menu_ops_backlash,UI_TEXT_OPS_BACKLASH,UI_ACTION_OPS_BACKLASH);
 UI_MENU_CHANGEACTION(ui_menu_ops_mindist,UI_TEXT_OPS_MINDIST,UI_ACTION_OPS_MINDISTANCE);
 UI_MENU_CHANGEACTION(ui_menu_ops_moveafter,UI_TEXT_OPS_MOVE_AFTER,UI_ACTION_OPS_MOVE_AFTER);
-#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backslash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
+#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backlash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
 UI_MENU(ui_menu_ops,UI_MENU_OPS,7+UI_MENU_BACKCNT);
 UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTI_OOZE,ui_menu_ops);
 #define UI_MENU_ADDCONDOPS &ui_menu_ops_sub,
