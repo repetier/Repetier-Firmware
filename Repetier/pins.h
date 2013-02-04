@@ -999,26 +999,23 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_1_PIN       8    // EXTRUDER 2 (FAN On Sprinter)
 #define HEATER_2_PIN       -1  
 
-#if TEMP_SENSOR_0 == -1 
-#define TEMP_0_PIN         8   // ANALOG NUMBERING
-#else
+//#define TEMP_0_PIN         8   // ANALOG NUMBERING
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
-
-#endif
 
 #define TEMP_1_PIN         15   // ANALOG NUMBERING
 #define TEMP_2_PIN         -1   // ANALOG NUMBERING
 #define HEATER_BED_PIN     10   // BED
 #define TEMP_BED_PIN       14   // ANALOG NUMBERING
 
-#define BEEPER 33			// Beeper on AUX-4
+#define BEEPER_PIN 33			// Beeper on AUX-4
+#define BEEPER_TYPE 1
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
 
 
 #ifdef ULTRA_LCD
 
   #ifdef NEWPANEL
-  //arduino pin which triggers an piezzo beeper
-    
     #define LCD_PINS_RS 16 
     #define LCD_PINS_ENABLE 17
     #define LCD_PINS_D4 23
@@ -1035,15 +1032,12 @@ STEPPER_CURRENT_CONTROL
     #define BLEN_B 1
     #define BLEN_A 0
     
-    #define SDCARDDETECT -1		// Ramps does not use this port
-    
-      //encoder rotation values
-    #define encrot0 0
-    #define encrot1 2
-    #define encrot2 3
-    #define encrot3 1
 #endif
 #endif //ULTRA_LCD
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
