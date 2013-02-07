@@ -10,7 +10,7 @@ To set rod height on a delta printer use command M251 which will allow you to me
 the rod length or, if you have an LCD panel then you can select delta calibration in the
 configuration menu.
 
-Version 0.81  03.01.2013
+Version 0.81  03.02.2013
 
 ## Introduction
 
