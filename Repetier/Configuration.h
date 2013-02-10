@@ -45,6 +45,9 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
+/** Number of extruders. Maximum 2 extruder. */
+#define NUM_EXTRUDER 1
+
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // MEGA/RAMPS up to 1.2       = 3
 // RAMPS 1.3/RAMPS 1.4        = 33
@@ -57,7 +60,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Foltyn 3D Master           = 12
-// MegaTronics                = 70
+// MegaTronics 1.0            = 70
+// ;egatronics 2.0            = 701
 // RUMBA                      = 80  // Get it from reprapdiscount
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
@@ -146,8 +150,6 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // ##                           Extruder configuration                                     ##
 // ##########################################################################################
 
-/** Number of extruders. Maximum 2 extruder. */
-#define NUM_EXTRUDER 1
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0

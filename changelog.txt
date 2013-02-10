@@ -1,4 +1,7 @@
-Version 0.81 dev
+Version 0.82
+  Cooler fan always on if temp>50°C
+
+Version 0.81 03-02-2013
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Added motherboard type 71 for Gen7 1.4.1
   Added motherboard type 70 for MegaTronics
@@ -34,7 +37,7 @@ Version 0.81 dev
   Custom g-codes on extruder switch possible.
   Separate PWM signal to cool the extruder.
 
-Version 0.72 02-09.2012
+Version 0.72 02-09-2012
   Fixed extrusion bug when advance or ops is compiled in.
   Kill command now resets AVR by default. set KILL_METHOD 0 for old style.
   Simulating multiple extruders with 1 extruder now works. Compile with use and T0/T1 as 
