@@ -67,6 +67,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Arduino Due                = 401 // This is only experimental
 
 #define MOTHERBOARD 33
+
 #include "pins.h"
 
 // Uncomment the following line if oyu are using arduino compatible firmware made for Arduino version earlier then 1.0
