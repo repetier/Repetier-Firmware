@@ -1033,6 +1033,9 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
    This works only if feature is set to true. */
 #define FEATURE_MEMORY_POSITION true
 
+/** If a checksum is send, all future comamnds must also contain a checksum. Increases reliability especially for binary protocol. */
+#define FEATURE_CHECKSUM_FORCED true
+
 /** Should support for fan control be compiled in. If you enable this make sure 
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */

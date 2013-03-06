@@ -23,6 +23,10 @@
 
 #include "Reptier.h"
 
+#ifndef FEATURE_CHECKSUM_FORCED
+#define FEATURE_CHECKSUM_FORCED true
+#endif
+
 #define bit_clear(x,y) x&= ~(1<<y) //cbi(x,y) 
 #define bit_set(x,y)   x|= (1<<y)//sbi(x,y) 
 
@@ -88,24 +92,21 @@ inline void rf_store_char(unsigned char c, ring_buffer *buffer)
 #if !defined(USART0_RX_vect) && defined(USART1_RX_vect)
 // do nothing - on the 32u4 the first USART is USART1
 #else
-#if !defined(USART_RX_vect) && !defined(SIG_USART0_RECV) && \
-    !defined(SIG_UART0_RECV) && !defined(USART0_RX_vect) && \
-	!defined(SIG_UART_RECV)
-  #error "Don't know what the Data Received vector is called for the first UART"
-#else
   void rfSerialEvent() __attribute__((weak));
   void rfSerialEvent() {}
   #define serialEvent_implemented
 #if defined(USART_RX_vect)
   SIGNAL(USART_RX_vect)
+#elif defined(USART0_RX_vect)
+  SIGNAL(USART0_RX_vect)
 #elif defined(SIG_USART0_RECV)
   SIGNAL(SIG_USART0_RECV)
 #elif defined(SIG_UART0_RECV)
   SIGNAL(SIG_UART0_RECV)
-#elif defined(USART0_RX_vect)
-  SIGNAL(USART0_RX_vect)
 #elif defined(SIG_UART_RECV)
   SIGNAL(SIG_UART_RECV)
+#else
+  #error "Don't know what the Data Received vector is called for the first UART"
 #endif
   {
   #if defined(UDR0)
@@ -117,7 +118,6 @@ inline void rf_store_char(unsigned char c, ring_buffer *buffer)
   #endif
     rf_store_char(c, &rx_buffer);
   }
-#endif
 #endif
 
 #if !defined(USART0_UDRE_vect) && defined(USART1_UDRE_vect)
@@ -945,13 +945,25 @@ bool gcode_parse_ascii(GCode *code,char *line) {
     byte checksum_given = gcode_value_long(pos+1);
     byte checksum = 0;
     while(line!=pos) checksum ^= *line++;
+#if FEATURE_CHECKSUM_FORCED
+    printer_state.flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
+#endif
     if(checksum!=checksum_given) {
       if(DEBUG_ERRORS) {
         out.println_int_P(PSTR("Error: Wrong checksum "),(int)checksum);
       }
       return false; // mismatch
     }
+  } 
+#if FEATURE_CHECKSUM_FORCED
+  else {
+    if(GCODE_HAS_M(code) && code->M == 117) return true;
+      if(DEBUG_ERRORS) {
+        OUT_P("Error: Missing checksum ");
+      }
+    return false;
   }
+#endif
   return true;
 }
 

@@ -634,6 +634,8 @@ extern void mc_arc(float *position, float *target, float *offset, float radius, 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT     4
+#define PRINTER_FLAG0_FORCE_CHECKSUM        8
+
 typedef struct { 
   byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect 
 #if USE_OPS==1 || defined(USE_ADVANCE)

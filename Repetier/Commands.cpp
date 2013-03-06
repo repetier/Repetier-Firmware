@@ -618,6 +618,7 @@ void process_command(GCode *com,byte bufferedCommand)
         }
         break;
       case 104: // M104
+#if NUM_EXTRUDER>0
         if(reportTempsensorError()) break;
         previous_millis_cmd = millis();
         if(DEBUG_DRYRUN) break;
@@ -633,6 +634,7 @@ void process_command(GCode *com,byte bufferedCommand)
           else
             extruder_set_temperature(com->S,current_extruder->id);
         }
+#endif
         break;
       case 140: // M140 set bed temp
         if(reportTempsensorError()) break;
@@ -645,6 +647,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 109: // M109 - Wait for extruder heater to reach target.
         {
+#if NUM_EXTRUDER>0
           if(reportTempsensorError()) break;
           previous_millis_cmd = millis();
           if(DEBUG_DRYRUN) break;
@@ -692,6 +695,7 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
         }
         UI_CLEAR_STATUS;
+#endif
         previous_millis_cmd = millis();
         break;
       case 190: // M190 - Wait bed for heater to reach target.
