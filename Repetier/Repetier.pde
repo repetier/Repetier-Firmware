@@ -482,6 +482,7 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.opsMinDistance = OPS_MIN_DISTANCE;
   printer_state.opsRetractDistance = OPS_RETRACT_DISTANCE;
   printer_state.opsRetractBacklash = OPS_RETRACT_BACKLASH;
+  printer_state.opsMoveAfter = OPS_MOVE_AFTER;
   printer_state.filamentRetracted = false;
 #endif
   printer_state.feedrate = 50; ///< Current feedrate in mm/s.
@@ -519,6 +520,9 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.backlashZ = Z_BACKLASH;
   printer_state.backlashDir = 0;
 #endif  
+#if USE_OPS==1 || defined(USE_ADVANCE)
+  printer_state.extruderStepsNeeded = 0;
+#endif
   epr_init_baudrate();
   RFSERIAL.begin(baudrate);
   out.println_P(PSTR("start"));

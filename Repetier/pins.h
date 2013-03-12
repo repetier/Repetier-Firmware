@@ -227,6 +227,63 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
+* Gen3 PLUS for RepRap Motherboard V1.2
+*
+****************************************************************************************/
+#if MOTHERBOARD == 21
+    #define KNOWN_BOARD 1
+
+    #ifndef __AVR_ATmega644P__
+    #error Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu.
+    #endif
+
+    //x axis pins
+    #define X_STEP_PIN      15
+    #define X_DIR_PIN       18
+    #define X_ENABLE_PIN    19
+    #define X_MIN_PIN       20
+    #define X_MAX_PIN       -1
+
+    //y axis pins
+    #define Y_STEP_PIN      23
+    #define Y_DIR_PIN       22
+    #define Y_ENABLE_PIN    24
+    #define Y_MIN_PIN       25
+    #define Y_MAX_PIN       -1
+
+    //z axis pins
+    #define Z_STEP_PIN      27
+    #define Z_DIR_PIN       28
+    #define Z_ENABLE_PIN    29
+    #define Z_MIN_PIN       30
+    #define Z_MAX_PIN       -1
+
+    #define E0_DIR_PIN       21
+    #define E0_STEP_PIN  17
+    #define E0_ENABLE_PIN  13
+
+    //heaters
+    #define HEATER_0_PIN  12    // hot end heater
+    #define HEATER_1_PIN   16    // heated bed heater
+
+    //pin for debugging.
+    #define DEBUG_PIN        -1
+    //SD card pin
+    #define SDSS      4
+    #define SDPOWER          -1
+    #define FAN_PIN          -1
+    #define TEMP_0_PIN        0
+    #define TEMP_1_PIN        5
+    #define LED_PIN          -1
+
+    //pin for controlling the PSU.
+    #define PS_ON_PIN       14
+    #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+    #define E1_PINS
+#endif
+    //----------end Gen3 PLUS for RepRap Motherboard V1.2--------------
+
+/****************************************************************************************
 * Arduino Mega pin assignment
 *
 ****************************************************************************************/
