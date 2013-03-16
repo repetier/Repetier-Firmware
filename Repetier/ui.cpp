@@ -137,7 +137,7 @@ inline void i2c_init(void)
   TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */ 
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
-  uid.outputMask |= BEEPER_PIN
+  uid.outputMask |= BEEPER_PIN;
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
