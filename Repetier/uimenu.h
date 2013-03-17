@@ -97,6 +97,7 @@ List of placeholder:
 %Xw : Extruder watch period in seconds
 %Xh : Extruder heat manager (BangBang/PID)
 %Xa : Advance K value
+%Xl : Advance L value
 %Xx : x offset in steps
 %Xy : y offset in steps
 %Xf : Extruder max. start feedrate
