@@ -99,7 +99,8 @@ inline void rf_store_char(unsigned char c, ring_buffer *buffer)
   SIGNAL(USART_RX_vect)
 #elif defined(USART0_RX_vect)
   SIGNAL(USART0_RX_vect)
-#elif defined(SIG_USART0_RECV)
+#else
+#if defined(SIG_USART0_RECV)
   SIGNAL(SIG_USART0_RECV)
 #elif defined(SIG_UART0_RECV)
   SIGNAL(SIG_UART0_RECV)
@@ -107,6 +108,7 @@ inline void rf_store_char(unsigned char c, ring_buffer *buffer)
   SIGNAL(SIG_UART_RECV)
 #else
   #error "Don't know what the Data Received vector is called for the first UART"
+#endif
 #endif
   {
   #if defined(UDR0)
@@ -237,7 +239,7 @@ void RFHardwareSerial::end()
   bit_clear(*_ucsrb, _rxcie);  
   bit_clear(*_ucsrb, _udrie);
   
-  // clear any received data
+  // clear a  ny received data
   _rx_buffer->head = _rx_buffer->tail;
 }
 

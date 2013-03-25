@@ -758,21 +758,21 @@ STEPPER_CURRENT_CONTROL
 #define X_DIR_PIN       18
 #define X_ENABLE_PIN    24
 #define X_MIN_PIN       7
-#define X_MAX_PIN       -1
+#define X_MAX_PIN       6
     
 //y axis pins
 #define Y_STEP_PIN      23
 #define Y_DIR_PIN       22
 #define Y_ENABLE_PIN    24
 #define Y_MIN_PIN       5
-#define Y_MAX_PIN       -1
+#define Y_MAX_PIN       2
     
 //z axis pins
 #define Z_STEP_PIN      26
 #define Z_DIR_PIN       25
 #define Z_ENABLE_PIN    24
 #define Z_MIN_PIN       1
-#define Z_MAX_PIN       -1
+#define Z_MAX_PIN       0
     
 //extruder pins
 #define E0_STEP_PIN      28     
@@ -802,6 +802,7 @@ STEPPER_CURRENT_CONTROL
     #define RX_ENABLE_PIN	13
 
 #define SCK_PIN          7
+#define SDSSORIG         4
 #define MISO_PIN         6
 #define MOSI_PIN         5
 
@@ -864,6 +865,7 @@ STEPPER_CURRENT_CONTROL
 
   #define SDPOWER          -1
   #define SDSS          -1
+  #define SDSSORIG         4  // Needs to set this to output to enable SPI even if other SS is used!
 
   #define SCK_PIN          7
   #define MISO_PIN         6
@@ -1218,8 +1220,8 @@ STEPPER_CURRENT_CONTROL
  #define KILL_PIN           -1
  
  #define HEATER_0_PIN       9    // EXTRUDER 1
- #define HEATER_1_PIN       8    // EXTRUDER 2 
- #define HEATER_2_PIN       10   // Heated bed  
+ #define HEATER_1_PIN       8    // Heated bed 
+ #define HEATER_2_PIN       10   // EXTRUDER 2  
  
  #define TEMP_0_PIN         13   // Thermistor 0 ANALOG NUMBERING   
  #define TEMP_1_PIN         15   // Thermistor 1 ANALOG NUMBERING   
@@ -1411,6 +1413,10 @@ STEPPER_CURRENT_CONTROL
 
 #ifndef CPU_ARCH  // Set default architecture
 #define CPU_ARCH ARCH_AVR
+#endif
+
+#ifndef SDSSORIG
+#define SDSSORIG -1
 #endif
 
 #ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.

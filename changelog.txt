@@ -1,6 +1,10 @@
-Version 0.82
-  Cooler fan always on if temp>50°C
-
+Version 0.82 in development
+  Support extruder cooler to cool nozzle at the top down.
+  Extruder cooler fan always on if temp>50°C
+  Added italian translation for ui
+  Minimum speed based on acceleration enforced.
+  Compiles with newer AVR compiler.
+  
 Version 0.81 03-02-2013
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!
   Added motherboard type 71 for Gen7 1.4.1

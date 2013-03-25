@@ -49,32 +49,43 @@ inline unsigned long U16SquaredToU32(unsigned int val) {
    );
   return res;
 }
-/**
-Computes the maximum junction speed
 
-p1 = previous segment
-p2 = new segment
-*/
-inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
-  if(p1->flags & FLAG_WARMUP) {
-    p2->joinFlags |= FLAG_JOIN_START_FIXED;
+inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
+  if(previous->flags & FLAG_WARMUP) {
+    current->joinFlags |= FLAG_JOIN_START_FIXED;
     return;
   }
+#ifdef USE_ADVANCE
+    if(printer_state.isAdvanceActivated()) {
+        if((previous->dir & 128)!=(current->dir & 128) && ((previous->dir & 48) || (current->dir & 48))) {
+            previous->joinFlags |= FLAG_JOIN_END_FIXED;
+            current->joinFlags |= FLAG_JOIN_START_FIXED;
+            previous->maxJunctionSpeed = min(previous->endSpeed,current->startSpeed);
+            previous->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
+            current->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
+            previous->endSpeed = current->startSpeed = previous->maxJunctionSpeed;
+            OUT_P_F_LN("advj=",previous->maxJunctionSpeed);
+            OUT_P_I("P:",previous);
+            OUT_P_I_LN("C:",current);
+            return;
+        }
+    }
+#endif // USE_ADVANCE
 #if DRIVE_SYSTEM==3
-  if (p1->moveID == p2->moveID) { // Avoid computing junction speed for split delta lines
-   if(p1->fullSpeed>p2->fullSpeed) 
-      p1->maxJunctionSpeed = p2->fullSpeed;
+  if (previous->moveID == current->moveID) { // Avoid computing junction speed for split delta lines
+   if(previous->fullSpeed>current->fullSpeed)
+      previous->maxJunctionSpeed = current->fullSpeed;
    else
-      p1->maxJunctionSpeed = p1->fullSpeed;
+      previous->maxJunctionSpeed = previous->fullSpeed;
    return;
   }
 #endif
    // First we compute the normalized jerk for speed 1
-   float dx = p2->speedX-p1->speedX;
-   float dy = p2->speedY-p1->speedY;
+   float dx = current->speedX-previous->speedX;
+   float dy = current->speedY-previous->speedY;
    float factor=1,tmp;
 #if (DRIVE_SYSTEM == 3) // No point computing Z Jerk separately for delta moves
-   float dz = p2->speedZ-p1->speedZ;
+   float dz = current->speedZ-previous->speedZ;
    float jerk = sqrt(dx*dx+dy*dy+dz*dz);
 #else
    float jerk = sqrt(dx*dx+dy*dy);
@@ -83,22 +94,22 @@ inline void computeMaxJunctionSpeed(PrintLine *p1,PrintLine *p2) {
    if(jerk>printer_state.maxJerk)
      factor = printer_state.maxJerk/jerk;
 #if (DRIVE_SYSTEM!=3)
-   if((p1->dir & 64) || (p2->dir & 64)) {
+   if((previous->dir & 64) || (current->dir & 64)) {
    //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
-     float dz = fabs(p2->speedZ-p1->speedZ);
+     float dz = fabs(current->speedZ-previous->speedZ);
      if(dz>printer_state.maxZJerk) {
        tmp = printer_state.maxZJerk/dz;
        if(tmp<factor) factor = tmp;
      }
    }
 #endif
-   float eJerk = fabs(p2->speedE-p1->speedE);
+   float eJerk = fabs(current->speedE-previous->speedE);
    if(eJerk>current_extruder->maxStartFeedrate) {
      tmp = current_extruder->maxStartFeedrate/eJerk;
      if(tmp<factor) factor = tmp;
    }
-   p1->maxJunctionSpeed = p1->fullSpeed*factor;   
-   if(p1->maxJunctionSpeed>p2->fullSpeed) p1->maxJunctionSpeed = p2->fullSpeed;
+   previous->maxJunctionSpeed = previous->fullSpeed*factor;
+   if(previous->maxJunctionSpeed>current->fullSpeed) previous->maxJunctionSpeed = current->fullSpeed;
    //if(DEBUG_ECHO) OUT_P_F_LN("Factor:",factor);
    //if(DEBUG_ECHO) OUT_P_F_LN("JSPD:",p1->maxJunctionSpeed);
 }
@@ -372,7 +383,13 @@ void updateTrapezoids(byte p) {
 // ##########################################################################
 
 inline float safeSpeed(PrintLine *p) {
-  float safe = min(p->fullSpeed,printer_state.maxJerk*0.5);
+    float safe;
+    #ifdef USE_ADVANCE
+    if((p->dir & 128) && printer_state.isAdvanceActivated()) {
+        safe = min(p->fullSpeed,printer_state.minimumSpeed);
+    } else
+    #endif
+    safe = min(p->fullSpeed,max(printer_state.minimumSpeed,printer_state.maxJerk*0.5));
 #if DRIVE_SYSTEM != 3
   if(p->dir & 64) {
     if(fabs(p->speedZ)>printer_state.maxZJerk*0.5) {

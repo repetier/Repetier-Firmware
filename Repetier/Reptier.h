@@ -682,6 +682,7 @@ typedef struct {
   float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
   int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
+  float minimumSpeed;               ///< lowest allowed speed to keep integration error small
   long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
   long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -724,6 +725,7 @@ typedef struct {
   char motorX;
   char motorY;
 #endif
+  inline byte isAdvanceActivated() {return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;}
 } PrinterState;
 extern PrinterState printer_state;
 

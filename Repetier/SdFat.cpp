@@ -2560,6 +2560,9 @@ static void spiBegin() {
   pinMode(SCK_PIN, OUTPUT);
   // SS must be in output mode even it is not chip select
   pinMode(SDSS, OUTPUT);
+#if SDSSORIG >- 1
+  pinMode(SDSSORIG, OUTPUT);
+#endif
   // set SS high - may be chip select for another SPI device
 #if SET_SPI_SS_HIGH
   digitalWrite(SDSS, HIGH);

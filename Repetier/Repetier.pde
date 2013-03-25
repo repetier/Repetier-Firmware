@@ -323,6 +323,8 @@ void update_ramps_parameter() {
     axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
 #endif
   }
+  float accel = max(max_acceleration_units_per_sq_second[0],max_travel_acceleration_units_per_sq_second[0]);
+  printer_state.minimumSpeed = accel*sqrt(2.0f/(axis_steps_per_unit[0]*accel));
   update_extruder_flags();
 }
 

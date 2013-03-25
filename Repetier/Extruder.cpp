@@ -29,28 +29,28 @@
 Extruder *current_extruder;
 
 #if NUM_EXTRUDER>0
-prog_char ext0_select_cmd[] PROGMEM = EXT0_SELECT_COMMANDS;
-prog_char ext0_deselect_cmd[] PROGMEM = EXT0_DESELECT_COMMANDS;
+const char ext0_select_cmd[] PROGMEM = EXT0_SELECT_COMMANDS;
+const char ext0_deselect_cmd[] PROGMEM = EXT0_DESELECT_COMMANDS;
 #endif
 #if NUM_EXTRUDER>1
-prog_char ext1_select_cmd[] PROGMEM = EXT1_SELECT_COMMANDS;
-prog_char ext1_deselect_cmd[] PROGMEM = EXT1_DESELECT_COMMANDS;
+const char ext1_select_cmd[] PROGMEM = EXT1_SELECT_COMMANDS;
+const char ext1_deselect_cmd[] PROGMEM = EXT1_DESELECT_COMMANDS;
 #endif
 #if NUM_EXTRUDER>2
-prog_char ext2_select_cmd[] PROGMEM = EXT2_SELECT_COMMANDS;
-prog_char ext2_deselect_cmd[] PROGMEM = EXT2_DESELECT_COMMANDS;
+const char ext2_select_cmd[] PROGMEM = EXT2_SELECT_COMMANDS;
+const char ext2_deselect_cmd[] PROGMEM = EXT2_DESELECT_COMMANDS;
 #endif
 #if NUM_EXTRUDER>3
-prog_char ext3_select_cmd[] PROGMEM = EXT3_SELECT_COMMANDS;
-prog_char ext3_deselect_cmd[] PROGMEM = EXT3_DESELECT_COMMANDS;
+const char ext3_select_cmd[] PROGMEM = EXT3_SELECT_COMMANDS;
+const char ext3_deselect_cmd[] PROGMEM = EXT3_DESELECT_COMMANDS;
 #endif
 #if NUM_EXTRUDER>4
-prog_char ext4_select_cmd[] PROGMEM = EXT4_SELECT_COMMANDS;
-prog_char ext4_deselect_cmd[] PROGMEM = EXT4_DESELECT_COMMANDS;
+const char ext4_select_cmd[] PROGMEM = EXT4_SELECT_COMMANDS;
+const char ext4_deselect_cmd[] PROGMEM = EXT4_DESELECT_COMMANDS;
 #endif
 #if NUM_EXTRUDER>5
-prog_char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
-prog_char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
+const char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
+const char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
 #endif
 
 Extruder extruder[NUM_EXTRUDER] = {
@@ -675,7 +675,8 @@ float conv_raw_temp(byte type,int raw_temp) {
       return TEMP_INT_TO_FLOAT(newtemp);
     }
     case 100: // AD595
-      return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
+      //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
+      return ((float)raw_temp * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
       return raw_temp /4;
