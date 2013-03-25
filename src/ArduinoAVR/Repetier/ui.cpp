@@ -61,7 +61,7 @@ void beep(byte duration,byte count)
 #if BEEPER_TYPE==2
   i2c_start_wait(BEEPER_ADDRESS+I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-  i2c_write( 0x14); // Start at port a  
+  i2c_write( 0x14); // Start at port a
 #endif
 #endif
   for(byte i=0;i<count;i++){
@@ -90,7 +90,7 @@ void beep(byte duration,byte count)
     i2c_write((BEEPER_PIN) | uid.outputMask);
 #else
     i2c_write(255);
-#endif    
+#endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     i2c_write( uid.outputMask);
@@ -102,7 +102,7 @@ void beep(byte duration,byte count)
 #if BEEPER_TYPE==2
   i2c_stop();
 #endif
-#endif  
+#endif
 #endif
 }
 
@@ -116,7 +116,7 @@ void beep(byte duration,byte count)
 * Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
 * File:     $Id: twimaster.c,v 1.3 2005/07/02 11:14:21 Peter Exp $
 * Software: AVR-GCC 3.4.3 / avr-libc 1.2.3
-* Target:   any AVR device with hardware TWI 
+* Target:   any AVR device with hardware TWI
 * Usage:    API compatible with I2C Software Library i2cmaster.h
 **************************************************************************/
 #include <inttypes.h>
@@ -134,7 +134,7 @@ inline void i2c_init(void)
   /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
   uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
   TWSR = 0;                         /* no prescaler */
-  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */ 
+  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
   uid.outputMask |= BEEPER_PIN;
@@ -152,18 +152,18 @@ inline void i2c_init(void)
   i2c_stop();
   // Set pullups according to  UI_DISPLAY_I2C_PULLUP
   i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  i2c_write(0x0C); // GPPUA 
-  i2c_write(UI_DISPLAY_I2C_PULLUP & 255);	
+  i2c_write(0x0C); // GPPUA
+  i2c_write(UI_DISPLAY_I2C_PULLUP & 255);
 //  i2c_stop();
 //  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-//  i2c_write(0x0D); // GPPUB 
-  i2c_write(UI_DISPLAY_I2C_PULLUP >> 8);	
+//  i2c_write(0x0D); // GPPUB
+  i2c_write(UI_DISPLAY_I2C_PULLUP >> 8);
   i2c_stop();
 #endif
 }/* i2c_init */
 
 
-/*************************************************************************	
+/*************************************************************************
   Issues a start condition and sends address and transfer direction.
   return 0 = device accessible, 1= failed to access device
 *************************************************************************/
@@ -200,7 +200,7 @@ unsigned char i2c_start(unsigned char address)
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
  If device is busy, use ack polling to wait until device is ready
- 
+
  Input:   address and transfer direction of I2C device
 *************************************************************************/
 void i2c_start_wait(unsigned char address)
@@ -210,31 +210,31 @@ void i2c_start_wait(unsigned char address)
     {
 	    // send START condition
 	    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-    
+
     	// wait until transmission completed
     	while(!(TWCR & (1<<TWINT)));
-    
+
     	// check value of TWI Status Register. Mask prescaler bits.
     	twst = TW_STATUS & 0xF8;
     	if ( (twst != TW_START) && (twst != TW_REP_START)) continue;
-    
+
     	// send device address
     	TWDR = address;
     	TWCR = (1<<TWINT) | (1<<TWEN);
-    
+
     	// wail until transmission completed
     	while(!(TWCR & (1<<TWINT)));
-    
+
     	// check value of TWI Status Register. Mask prescaler bits.
     	twst = TW_STATUS & 0xF8;
-    	if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) ) 
-    	{    	    
+    	if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) )
+    	{
     	    /* device busy, send stop condition to terminate write operation */
 	        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
-	        
+
 	        // wait until stop condition is executed and bus released
 	        while(TWCR & (1<<TWSTO));
-	        
+
     	    continue;
     	}
     	//if( twst != TW_MT_SLA_ACK) return 1;
@@ -250,7 +250,7 @@ void i2c_start_wait(unsigned char address)
 void i2c_stop(void)
 {
   /* send stop condition */
-  TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);	
+  TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
   // wait until stop condition is executed and bus released
   while(TWCR & (1<<TWSTO));
 }/* i2c_stop */
@@ -258,13 +258,13 @@ void i2c_stop(void)
 
 /*************************************************************************
   Send one byte to I2C device
-  
+
   Input:    byte to be transfered
-  Return:   0 write successful 
+  Return:   0 write successful
             1 write failed
 *************************************************************************/
 unsigned char i2c_write( unsigned char data )
-{	
+{
   uint8_t   twst;
   // send data to the previously addressed device
   TWDR = data;
@@ -279,25 +279,25 @@ unsigned char i2c_write( unsigned char data )
 
 
 /*************************************************************************
- Read one byte from the I2C device, request more data from device 
+ Read one byte from the I2C device, request more data from device
  Return:  byte read from I2C device
 *************************************************************************/
 unsigned char i2c_readAck(void)
 {
   TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-  while(!(TWCR & (1<<TWINT)));    
+  while(!(TWCR & (1<<TWINT)));
     return TWDR;
 }/* i2c_readAck */
 
 /*************************************************************************
- Read one byte from the I2C device, read is followed by a stop condition 
- 
+ Read one byte from the I2C device, read is followed by a stop condition
+
  Return:  byte read from I2C device
 *************************************************************************/
 unsigned char i2c_readNak(void)
 {
 	TWCR = (1<<TWINT) | (1<<TWEN);
-	while(!(TWCR & (1<<TWINT)));	
+	while(!(TWCR & (1<<TWINT)));
     return TWDR;
 }/* i2c_readNak */
 
@@ -435,7 +435,7 @@ static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 inline void lcdStartWrite() {
   i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-  i2c_write( 0x14); // Start at port a  
+  i2c_write( 0x14); // Start at port a
 #endif
 }
 inline void lcdStopWrite() {
@@ -466,17 +466,17 @@ void lcdWriteByte(byte c,byte rs) {
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
   byte value = (c >> 4) | mod;
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-  i2c_write(value);  
+  i2c_write(value);
   value = (c & 15) | mod;
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-  i2c_write(value);  
+  i2c_write(value);
 #else
   byte value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-  i2c_write(value);  
+  i2c_write(value);
   value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
   i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-  i2c_write(value);  
+  i2c_write(value);
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
@@ -484,17 +484,17 @@ void lcdWriteByte(byte c,byte rs) {
   unsigned int value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
   unsigned int value2 = (value) | UI_DISPLAY_ENABLE_PIN;
   i2c_write(value2 & 255);i2c_write(value2 >>8);
-  i2c_write(value & 255);i2c_write(value>>8);  
+  i2c_write(value & 255);i2c_write(value>>8);
   value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
   value2 = (value) | UI_DISPLAY_ENABLE_PIN;
   i2c_write(value2 & 255);i2c_write(value2 >>8);
-  i2c_write(value & 255);i2c_write(value>>8);  
+  i2c_write(value & 255);i2c_write(value>>8);
 #endif
 }
 void initializeLCD() {
   delay(135);
   lcdStartWrite();
-  i2c_write(uid.outputMask & 255);  
+  i2c_write(uid.outputMask & 255);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
   i2c_write(uid.outputMask >> 16);
 #endif
@@ -502,16 +502,16 @@ void initializeLCD() {
   lcdWriteNibble(0x03);
   delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
   // second try
-  lcdWriteNibble(0x03);      
-  delayMicroseconds(150); // wait 
+  lcdWriteNibble(0x03);
+  delayMicroseconds(150); // wait
   // third go!
-  lcdWriteNibble(0x03); 
+  lcdWriteNibble(0x03);
   delayMicroseconds(150);
   // finally, set to 4-bit interface
-  lcdWriteNibble(0x02); 
+  lcdWriteNibble(0x02);
   delayMicroseconds(150);
   // finally, set # lines, font size, etc.
-  lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);  	
+  lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
   lcdCommand(LCD_CLEAR);					//-	Clear Screen
   delay(2); // clear is slow operation
   lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
@@ -606,11 +606,11 @@ void initializeLCD() {
   // Now we pull both RS and R/W low to begin commands
   WRITE(UI_DISPLAY_RS_PIN, LOW);
   WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-	
+
   //put the LCD into 4 bit mode
   // this is according to the hitachi HD44780 datasheet
   // figure 24, pg 46
-		
+
   // we start in 8bit mode, try to set 4 bit mode
   // at this point we are in 8 bit mode but of course in this
   // interface 4 pins are dangling unconnected and the values
@@ -620,17 +620,17 @@ void initializeLCD() {
   lcdWriteNibble(0x03);
   delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
   // second try
-  lcdWriteNibble(0x03);      
-  delayMicroseconds(150); // wait 
+  lcdWriteNibble(0x03);
+  delayMicroseconds(150); // wait
   // third go!
-  lcdWriteNibble(0x03); 
+  lcdWriteNibble(0x03);
   delayMicroseconds(150);
   // finally, set to 4-bit interface
-  lcdWriteNibble(0x02); 
+  lcdWriteNibble(0x02);
   delayMicroseconds(150);
   // finally, set # lines, font size, etc.
-  lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);  
-	
+  lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+
   lcdCommand(LCD_CLEAR);					//-	Clear Screen
   delay(2); // clear is slow operation
   lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
@@ -660,7 +660,7 @@ void UIDisplay::createChar(byte location,const byte charmap[]) {
   }
   lcd.createChar(location, data);
 }
-void UIDisplay::printRow(byte r,char *txt) {    
+void UIDisplay::printRow(byte r,char *txt) {
  byte col=0;
  // Set row
  if(r >= UI_ROWS) return;
@@ -673,7 +673,7 @@ void UIDisplay::printRow(byte r,char *txt) {
  }
  while(col<UI_COLS) {
    lcd.write(' ');
-  col++; 
+  col++;
  }
 #if UI_HAS_KEYS==1
  mediumAction();
@@ -686,7 +686,7 @@ void initializeLCD() {
   uid.createChar(1,character_back);
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
-  uid.createChar(4,character_unselected);  
+  uid.createChar(4,character_unselected);
 }
 // ------------------ End LiquidCrystal library as LCD driver
 #endif
@@ -707,7 +707,7 @@ UIDisplay::UIDisplay() {
 #if SDSUPPORT
     cwd[0]='/';cwd[1]=0;
     folderLevel=0;
-#endif  
+#endif
   UI_STATUS(UI_TEXT_PRINTER_READY);
 }
 void UIDisplay::initialize() {
@@ -731,7 +731,7 @@ void UIDisplay::createChar(byte location,const byte PROGMEM charmap[]) {
     lcdPutChar(pgm_read_byte(&(charmap[i])));
   }
 }
-void UIDisplay::printRow(byte r,char *txt) {    
+void UIDisplay::printRow(byte r,char *txt) {
  byte col=0;
  // Set row
  if(r >= UI_ROWS) return;
@@ -747,7 +747,7 @@ void UIDisplay::printRow(byte r,char *txt) {
  }
  while(col<UI_COLS) {
    lcdPutChar(' ');
-  col++; 
+  col++;
  }
 #if UI_DISPLAY_TYPE==3
   lcdStopWrite();
@@ -758,7 +758,7 @@ void UIDisplay::printRow(byte r,char *txt) {
 }
 #endif
 
-void UIDisplay::printRowP(byte r,PGM_P txt) {    
+void UIDisplay::printRowP(byte r,PGM_P txt) {
  if(r >= UI_ROWS) return;
  col=0;
  addStringP(txt);
@@ -824,8 +824,8 @@ void UIDisplay::addLong(long value,char digits) {
   }
 }
 const float roundingTable[] PROGMEM = {0.5,0.05,0.005,0.0005};
-void UIDisplay::addFloat(float number, char fixdigits,byte digits) 
-{ 
+void UIDisplay::addFloat(float number, char fixdigits,byte digits)
+{
   // Handle negative numbers
   if (number < 0.0)
   {
@@ -853,8 +853,8 @@ void UIDisplay::addFloat(float number, char fixdigits,byte digits)
     remainder *= 10.0;
     byte toPrint = byte(remainder);
     printCols[col++] = '0'+toPrint;
-    remainder -= toPrint; 
-  } 
+    remainder -= toPrint;
+  }
 }
 void UIDisplay::addStringP(PGM_P text) {
   while(col<UI_COLS) {
@@ -899,8 +899,8 @@ void UIDisplay::parse(char *txt,bool ram) {
       else if(c2=='X') addFloat(max_travel_acceleration_units_per_sq_second[0],5,0);
       else if(c2=='Y') addFloat(max_travel_acceleration_units_per_sq_second[1],5,0);
       else if(c2=='Z') addFloat(max_travel_acceleration_units_per_sq_second[2],5,0);
-      else if(c2=='j') addFloat(printer_state.maxJerk,3,1);
-      else if(c2=='J') addFloat(printer_state.maxZJerk,3,1);
+      else if(c2=='j') addFloat(printer.maxJerk,3,1);
+      else if(c2=='J') addFloat(printer.maxZJerk,3,1);
       break;
 
     case 'd':
@@ -915,7 +915,7 @@ void UIDisplay::parse(char *txt,bool ram) {
           addStringP(relative_mode_e?ui_yes:ui_no);
           break;
         }
-        if(printer_state.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) {
+        if(printer.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) {
           addStringP(PSTR("def"));
           break;
         }
@@ -934,7 +934,7 @@ void UIDisplay::parse(char *txt,bool ram) {
 #endif
         addFloat(fvalue,3,0 /*UI_TEMP_PRECISION*/);
         break;
-  
+
       case 'f':
         if(c2=='x') addFloat(max_feedrate[0],5,0);
         else if(c2=='y') addFloat(max_feedrate[1],5,0);
@@ -949,14 +949,14 @@ void UIDisplay::parse(char *txt,bool ram) {
         break;
       case 'O': // ops related stuff
  #if USE_OPS==1
-        if(c2=='0') addStringP(printer_state.opsMode==0?ui_selected:ui_unselected);
-        else if(c2=='1') addStringP(printer_state.opsMode==1?ui_selected:ui_unselected);
-        else if(c2=='2') addStringP(printer_state.opsMode==2?ui_selected:ui_unselected);
-        else if(c2=='r') addFloat(printer_state.opsRetractDistance,2,1);  
-        else if(c2=='b') addFloat(printer_state.opsRetractBacklash,2,1);  
-        else if(c2=='d') addFloat(printer_state.opsMinDistance,2,1);  
+        if(c2=='0') addStringP(printer.opsMode==0?ui_selected:ui_unselected);
+        else if(c2=='1') addStringP(printer.opsMode==1?ui_selected:ui_unselected);
+        else if(c2=='2') addStringP(printer.opsMode==2?ui_selected:ui_unselected);
+        else if(c2=='r') addFloat(printer.opsRetractDistance,2,1);
+        else if(c2=='b') addFloat(printer.opsRetractBacklash,2,1);
+        else if(c2=='d') addFloat(printer.opsMinDistance,2,1);
         else if(c2=='a') {
-          addFloat(printer_state.opsMoveAfter,3,0);  
+          addFloat(printer.opsMoveAfter,3,0);
           if(col<UI_COLS)
             printCols[col++]='%';
         }
@@ -965,7 +965,7 @@ void UIDisplay::parse(char *txt,bool ram) {
       case 'l':
         if(c2=='a') addInt(lastAction,4);
         break;
-      case 'o': 
+      case 'o':
         if(c2=='s') {
 #if SDSUPPORT
           if(sd.sdactive && sd.sdmode) {
@@ -975,7 +975,7 @@ void UIDisplay::parse(char *txt,bool ram) {
             else percent = (sd.sdpos>>8)*100/(sd.filesize>>8);
             addInt((int)percent,3);
             if(col<UI_COLS)
-              printCols[col++]='%';              
+              printCols[col++]='%';
           } else
 #endif
           parse(statusMsg,true);
@@ -984,8 +984,8 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2=='c') {addLong(baudrate,6);break;}
         if(c2=='e') {if(errorMsg!=0)addStringP((char PROGMEM *)errorMsg);break;}
         if(c2=='B') {addInt((int)lines_count,2);break;}
-        if(c2=='f') {addInt(printer_state.extrudeMultiply,3);break;}
-        if(c2=='m') {addInt(printer_state.feedrateMultiply,3);break;}
+        if(c2=='f') {addInt(printer.extrudeMultiply,3);break;}
+        if(c2=='m') {addInt(printer.feedrateMultiply,3);break;}
         // Extruder output level
         if(c2>='0' && c2<='9') ivalue=pwm_pos[c2-'0'];
 #if HAVE_HEATED_BED
@@ -998,26 +998,26 @@ void UIDisplay::parse(char *txt,bool ram) {
           printCols[col++]='%';
         break;
       case 'x':
-        if(c2>='0' && c2<='3') 
+        if(c2>='0' && c2<='3')
 #if NUM_EXTRUDER>0
         if(c2=='0')
-          fvalue = (float)(printer_state.currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)(printer.currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
         else if(c2=='1')
-          fvalue = (float)(printer_state.currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)(printer.currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
         else
-          fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
-#else 
-        fvalue = (float)printer_state.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)printer.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+#else
+        fvalue = (float)printer.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
 #endif
         addFloat(fvalue,3,2);
         break;
       case 'y':
 #if DRIVE_SYSTEM==3
-        if(c2>='0' && c2<='3') fvalue = (float)printer_state.currentDeltaPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+        if(c2>='0' && c2<='3') fvalue = (float)printer.currentDeltaPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
         addFloat(fvalue,3,2);
 #endif
         break;
-      case 'X': // Extruder related 
+      case 'X': // Extruder related
 #if NUM_EXTRUDER>0
         if(c2>='0' && c2<='9') {addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);}
 #ifdef TEMP_PID
@@ -1091,7 +1091,7 @@ void UIDisplay::parse(char *txt,bool ram) {
       if(c2=='y') addFloat(axis_steps_per_unit[1],3,1);
       if(c2=='z') addFloat(axis_steps_per_unit[2],3,1);
       if(c2=='e') addFloat(current_extruder->stepsPerMM,3,1);
-      break;  
+      break;
     }
   }
   printCols[col] = 0;
@@ -1178,7 +1178,7 @@ void UIDisplay::goDir(char *name) {
     *p = 0;
     folderLevel--;
   } else {
-    if(folderLevel>=SD_MAX_FOLDER_DEPTH) return; 
+    if(folderLevel>=SD_MAX_FOLDER_DEPTH) return;
     while(*name) *p++ = *name++;
     *p = 0;
     folderLevel++;
@@ -1317,7 +1317,7 @@ void UIDisplay::okAction() {
     if(activeAction) { // finish action
       finishAction(action);
       activeAction = 0;
-    } else 
+    } else
       activeAction = action;
     return;
   }
@@ -1386,14 +1386,14 @@ void UIDisplay::okAction() {
   if(entType==3) {
     executeAction(action);
     return;
-  }  
+  }
   executeAction(UI_ACTION_BACK);
 #endif
 }
 #define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
 void UIDisplay::nextPreviousAction(char next) {
 #if UI_HAS_KEYS==1
-  if(menuLevel==0) { 
+  if(menuLevel==0) {
     lastSwitch = millis();
     if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0)) {
       menuPos[0]++;
@@ -1507,41 +1507,41 @@ void UIDisplay::nextPreviousAction(char next) {
     break;
 #if USE_OPS==1
   case UI_ACTION_OPS_RETRACTDISTANCE:
-    printer_state.opsRetractDistance+=increment*0.1;
-    if(printer_state.opsRetractDistance<0) printer_state.opsRetractDistance=0;
-    else if(printer_state.opsRetractDistance>10) printer_state.opsRetractDistance=10;
+    printer.opsRetractDistance+=increment*0.1;
+    if(printer.opsRetractDistance<0) printer.opsRetractDistance=0;
+    else if(printer.opsRetractDistance>10) printer.opsRetractDistance=10;
     extruder_select(current_extruder->id);
     break;
   case UI_ACTION_OPS_BACKLASH:
-    printer_state.opsRetractBacklash+=increment*0.1;
-    if(printer_state.opsRetractBacklash<-5) printer_state.opsRetractBacklash=-5;
-    else if(printer_state.opsRetractBacklash>5) printer_state.opsRetractBacklash=5;
+    printer.opsRetractBacklash+=increment*0.1;
+    if(printer.opsRetractBacklash<-5) printer.opsRetractBacklash=-5;
+    else if(printer.opsRetractBacklash>5) printer.opsRetractBacklash=5;
     extruder_select(current_extruder->id);
     break;
   case UI_ACTION_OPS_MOVE_AFTER:
-    printer_state.opsMoveAfter+=increment;
-    if(printer_state.opsMoveAfter<0) printer_state.opsMoveAfter=0;
-    else if(printer_state.opsMoveAfter>10) printer_state.opsMoveAfter=100;
+    printer.opsMoveAfter+=increment;
+    if(printer.opsMoveAfter<0) printer.opsMoveAfter=0;
+    else if(printer.opsMoveAfter>10) printer.opsMoveAfter=100;
     extruder_select(current_extruder->id);
     break;
   case UI_ACTION_OPS_MINDISTANCE:
-    printer_state.opsMinDistance+=increment;
-    if(printer_state.opsMinDistance<0) printer_state.opsMinDistance=0;
-    else if(printer_state.opsMinDistance>10) printer_state.opsMinDistance=10;
+    printer.opsMinDistance+=increment;
+    if(printer.opsMinDistance<0) printer.opsMinDistance=0;
+    else if(printer.opsMinDistance>10) printer.opsMinDistance=10;
     extruder_select(current_extruder->id);
     break;
 #endif
   case UI_ACTION_FEEDRATE_MULTIPLY:
     {
-      int fr = printer_state.feedrateMultiply;
+      int fr = printer.feedrateMultiply;
       INCREMENT_MIN_MAX(fr,1,25,500);
       change_feedrate_multiply(fr);
     }
     break;
   case UI_ACTION_FLOWRATE_MULTIPLY:
     {
-      INCREMENT_MIN_MAX(printer_state.extrudeMultiply,1,25,500);
-       OUT_P_I_LN("FlowrateMultiply:",printer_state.extrudeMultiply);
+      INCREMENT_MIN_MAX(printer.extrudeMultiply,1,25,500);
+       OUT_P_I_LN("FlowrateMultiply:",printer.extrudeMultiply);
     }
     break;
   case UI_ACTION_STEPPER_INACTIVE:
@@ -1575,10 +1575,10 @@ void UIDisplay::nextPreviousAction(char next) {
     update_ramps_parameter();
     break;
   case UI_ACTION_MAX_JERK:
-    INCREMENT_MIN_MAX(printer_state.maxJerk,0.1,1,99.9);
+    INCREMENT_MIN_MAX(printer.maxJerk,0.1,1,99.9);
     break;
   case UI_ACTION_MAX_ZJERK:
-    INCREMENT_MIN_MAX(printer_state.maxZJerk,0.1,0.1,99.9);
+    INCREMENT_MIN_MAX(printer.maxZJerk,0.1,0.1,99.9);
     break;
   case UI_ACTION_HOMING_FEEDRATE_X:
     INCREMENT_MIN_MAX(homing_feedrate[0],1,5,1000);
@@ -1762,9 +1762,9 @@ void UIDisplay::executeAction(int action) {
       printPosition();
       break;
     case UI_ACTION_SET_ORIGIN:
-      printer_state.currentPositionSteps[0] = -printer_state.offsetX;
-      printer_state.currentPositionSteps[1] = -printer_state.offsetY;
-      printer_state.currentPositionSteps[2] = 0;
+      printer.currentPositionSteps[0] = -printer.offsetX;
+      printer.currentPositionSteps[1] = -printer.offsetY;
+      printer.currentPositionSteps[2] = 0;
       break;
     case UI_ACTION_DEBUG_ECHO:
       if(DEBUG_ECHO) debug_level-=1;else debug_level+=1;
@@ -1797,7 +1797,7 @@ void UIDisplay::executeAction(int action) {
 #endif
 #if HAVE_HEATED_BED==true
       heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
-#endif 
+#endif
       break;
     case UI_ACTION_PREHEAT_ABS:
       UI_STATUS(UI_TEXT_PREHEAT_ABS);
@@ -1807,7 +1807,7 @@ void UIDisplay::executeAction(int action) {
 #endif
 #if HAVE_HEATED_BED==true
       heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
-#endif 
+#endif
       break;
     case UI_ACTION_COOLDOWN:
       UI_STATUS(UI_TEXT_COOLDOWN);
@@ -1817,12 +1817,12 @@ void UIDisplay::executeAction(int action) {
 #endif
 #if HAVE_HEATED_BED==true
       heated_bed_set_temperature(0);
-#endif 
+#endif
       break;
     case UI_ACTION_HEATED_BED_OFF:
 #if HAVE_HEATED_BED==true
       heated_bed_set_temperature(0);
-#endif 
+#endif
       break;
     case UI_ACTION_EXTRUDER0_OFF:
       extruder_set_temperature(0,0);
@@ -1834,20 +1834,20 @@ void UIDisplay::executeAction(int action) {
       break;
 #if USE_OPS==1
     case UI_ACTION_OPS_OFF:
-      printer_state.opsMode=0;
+      printer.opsMode=0;
       break;
     case UI_ACTION_OPS_CLASSIC:
-      printer_state.opsMode=1;
+      printer.opsMode=1;
       break;
     case UI_ACTION_OPS_FAST:
-      printer_state.opsMode=2;
+      printer.opsMode=2;
       break;
  #endif
     case UI_ACTION_DISABLE_STEPPER:
       kill(true);
       break;
     case UI_ACTION_RESET_EXTRUDER:
-      printer_state.currentPositionSteps[3] = 0;
+      printer.currentPositionSteps[3] = 0;
       break;
     case UI_ACTION_EXTRUDER_RELATIVE:
       relative_mode_e=!relative_mode_e;
@@ -2056,14 +2056,14 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SHOW_MEASUREMENT:
 #ifdef STEP_COUNTER
 	{
-		out.print_float_P(PSTR("Measure/delta ="),printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+		out.print_float_P(PSTR("Measure/delta ="),printer.countZSteps * inv_axis_steps_per_unit[2]);
 	}
 #endif
       break;
 	case UI_ACTION_RESET_MEASUREMENT:
 #ifdef STEP_COUNTER
 	{
-		printer_state.countZSteps = 0;
+		printer.countZSteps = 0;
 		out.println_P(PSTR("Measurement reset."));
 	}
 #endif
@@ -2071,14 +2071,14 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SET_MEASURED_ORIGIN:
 #ifdef STEP_COUNTER
 	{
-		if (printer_state.countZSteps < 0)
-			printer_state.countZSteps = -printer_state.countZSteps;
-		printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-		printer_state.zMaxSteps = printer_state.countZSteps;
+		if (printer.countZSteps < 0)
+			printer.countZSteps = -printer.countZSteps;
+		printer.zLength = inv_axis_steps_per_unit[2] * printer.countZSteps;
+		printer.zMaxSteps = printer.countZSteps;
 		for (byte i=0; i<3; i++) {
-			printer_state.currentPositionSteps[i] = 0;
+			printer.currentPositionSteps[i] = 0;
 		}
-		calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+		calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
 		out.println_P(PSTR("Measured origin set. Measurement reset."));
 #if EEPROM_MODE!=0
 		epr_data_to_eeprom(false);
@@ -2089,28 +2089,28 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SET_P1:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer_state.levelingP1[i] = printer_state.currentPositionSteps[i];
+			printer.levelingP1[i] = printer.currentPositionSteps[i];
 		}
 #endif
       break;
 	case UI_ACTION_SET_P2:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer_state.levelingP2[i] = printer_state.currentPositionSteps[i];
+			printer.levelingP2[i] = printer.currentPositionSteps[i];
 		}
 #endif
       break;
 	case UI_ACTION_SET_P3:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer_state.levelingP3[i] = printer_state.currentPositionSteps[i];
+			printer.levelingP3[i] = printer.currentPositionSteps[i];
 		}
 #endif
       break;
 	case UI_ACTION_CALC_LEVEL:
 #ifdef SOFTWARE_LEVELING
 		long factors[4];
-		calculate_plane(factors, printer_state.levelingP1, printer_state.levelingP2, printer_state.levelingP3);
+		calculate_plane(factors, printer.levelingP1, printer.levelingP2, printer.levelingP3);
 		out.println_P(PSTR("Leveling calc:"));
 		out.println_float_P(PSTR("Tower 1:"), calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
 		out.println_float_P(PSTR("Tower 2:"), calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
@@ -2196,7 +2196,7 @@ void UIDisplay::slowAction() {
   }
   cli();
   if((flags & 4)==0) {
-    flags |= 4; 
+    flags |= 4;
     // Reset click encoder
     cli();
     char epos = encoderPos;
@@ -2227,7 +2227,7 @@ void UIDisplay::slowAction() {
         executeAction(lastAction);
         repeatDuration -=UI_KEY_REDUCE_REPEAT;
         if(repeatDuration<UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
-        nextRepeat = time+repeatDuration;      
+        nextRepeat = time+repeatDuration;
       }
     }
     cli();

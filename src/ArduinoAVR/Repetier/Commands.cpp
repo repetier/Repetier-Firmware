@@ -39,7 +39,7 @@ void check_periodical() {
         write_monitor();
      counter_250ms=5;
   }
-  UI_SLOW; 
+  UI_SLOW;
 }
 
 /** \brief Waits until movement cache is empty.
@@ -51,23 +51,23 @@ void check_periodical() {
 void wait_until_end_of_move() {
   while(lines_count) {
     gcode_read_serial();
-    check_periodical(); 
+    check_periodical();
     UI_MEDIUM;
   }
 }
 void printPosition() {
-  OUT_P_F("X:",printer_state.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
-  OUT_P_F(" Y:",printer_state.currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
-  OUT_P_F(" Z:",printer_state.currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
-  OUT_P_F_LN(" E:",printer_state.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
+  OUT_P_F("X:",printer.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
+  OUT_P_F(" Y:",printer.currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
+  OUT_P_F(" Z:",printer.currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
+  OUT_P_F_LN(" E:",printer.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
 void print_temperatures() {
 	float temp = current_extruder->tempControl.currentTemperatureC;
-#if HEATED_BED_SENSOR_TYPE==0 
-  OUT_P_F("T:",temp); 
+#if HEATED_BED_SENSOR_TYPE==0
+  OUT_P_F("T:",temp);
 #else
-  OUT_P_F("T:",temp); 
-  OUT_P_F(" B:",heated_bed_get_temperature()); 
+  OUT_P_F("T:",temp);
+  OUT_P_F(" B:",heated_bed_get_temperature());
 #endif
 #ifdef TEMP_PID
   OUT_P_I(" @:",(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
@@ -76,7 +76,7 @@ void print_temperatures() {
   for(byte i=0;i<NUM_EXTRUDER;i++) {
     OUT_P(" T");
     out.print((int)i);
-    OUT_P_F(":",extruder[i].tempControl.currentTemperatureC); 
+    OUT_P_F(":",extruder[i].tempControl.currentTemperatureC);
 #ifdef TEMP_PID
     OUT_P(" @");
     out.print((int)i);
@@ -89,17 +89,17 @@ void print_temperatures() {
 void change_feedrate_multiply(int factor) {
   if(factor<25) factor=25;
   if(factor>500) factor=500;
-  printer_state.feedrate *= (float)factor/(float)printer_state.feedrateMultiply;
-  printer_state.feedrateMultiply = factor;
+  printer.feedrate *= (float)factor/(float)printer.feedrateMultiply;
+  printer.feedrateMultiply = factor;
   OUT_P_I_LN("SpeedMultiply:",factor);
 }
 void change_flowate_multiply(int factor) {
   if(factor<25) factor=25;
   if(factor>200) factor=200;
-  printer_state.extrudeMultiply = factor;
+  printer.extrudeMultiply = factor;
   OUT_P_I_LN("FlowMultiply:",factor);
 }
-void set_fan_speed(int speed,bool wait) {  
+void set_fan_speed(int speed,bool wait) {
 #if FAN_PIN>=0
   speed = constrain(speed,0,255);
   if(wait)
@@ -109,11 +109,11 @@ void set_fan_speed(int speed,bool wait) {
 }
 #if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
-  long up_steps = printer_state.zMaxSteps;
+  long up_steps = printer.zMaxSteps;
   for (byte i=0; i<3; i++)
-    printer_state.currentPositionSteps[i] = 0;
-  calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-  move_steps(0,0,printer_state.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
+    printer.currentPositionSteps[i] = 0;
+  calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+  move_steps(0,0,printer.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
 }
 
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
@@ -123,21 +123,21 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
     // Homing Z axis means that you must home X and Y
     if (homeallaxis || zaxis) {
-      delta_move_to_top_endstops(homing_feedrate[0]);	
+      delta_move_to_top_endstops(homing_feedrate[0]);
       move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-      delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);	
-      printer_state.currentPositionSteps[0] = 0;
-      printer_state.currentPositionSteps[1] = 0;
-      printer_state.currentPositionSteps[2] = printer_state.zMaxSteps;
-      calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-      printer_state.maxDeltaPositionSteps = printer_state.currentDeltaPositionSteps[0];
+      delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);
+      printer.currentPositionSteps[0] = 0;
+      printer.currentPositionSteps[1] = 0;
+      printer.currentPositionSteps[2] = printer.zMaxSteps;
+      calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+      printer.maxDeltaPositionSteps = printer.currentDeltaPositionSteps[0];
     } else {
-      if (xaxis) printer_state.destinationSteps[0] = 0;
-      if (yaxis) printer_state.destinationSteps[1] = 0;
+      if (xaxis) printer.destinationSteps[0] = 0;
+      if (yaxis) printer.destinationSteps[1] = 0;
       split_delta_move(true,false,false);
     }
-    printer_state.countZSteps = 0;
-    UI_CLEAR_STATUS 
+    printer.countZSteps = 0;
+    UI_CLEAR_STATUS
   }
 }
 #else
@@ -146,10 +146,10 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   if(xaxis) {
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
-      steps = (printer_state.xMaxSteps-printer_state.xMinSteps) * X_HOME_DIR;         
-      printer_state.currentPositionSteps[0] = -steps;
+      steps = (printer.xMaxSteps-printer.xMinSteps) * X_HOME_DIR;
+      printer.currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
-      printer_state.currentPositionSteps[0] = 0;
+      printer.currentPositionSteps[0] = 0;
       move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_X_BACK_ON_HOME)
@@ -161,19 +161,19 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       for(byte i=0;i<NUM_EXTRUDER;i++) offX = max(offX,extruder[i].xOffset);
       // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
-      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps-offX : printer_state.xMaxSteps+offX;
+      printer.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer.xMinSteps-offX : printer.xMaxSteps+offX;
 #if NUM_EXTRUDER>1
-      move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);      
+      move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
     }
-  }        
+  }
   if(yaxis) {
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
-      steps = (printer_state.yMaxSteps-printer_state.yMinSteps) * Y_HOME_DIR;         
-      printer_state.currentPositionSteps[1] = -steps;
+      steps = (printer.yMaxSteps-printer.yMinSteps) * Y_HOME_DIR;
+      printer.currentPositionSteps[1] = -steps;
       move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
-      printer_state.currentPositionSteps[1] = 0;
+      printer.currentPositionSteps[1] = 0;
       move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
@@ -185,29 +185,29 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       for(byte i=0;i<NUM_EXTRUDER;i++) offY = max(offY,extruder[i].yOffset);
       // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
-      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer_state.yMinSteps-offY : printer_state.yMaxSteps+offY;
+      printer.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer.yMinSteps-offY : printer.yMaxSteps+offY;
 #if NUM_EXTRUDER>1
-      move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);      
+      move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
     }
-  }        
+  }
   if(zaxis) {
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
-      steps = (printer_state.zMaxSteps-printer_state.zMinSteps) * Z_HOME_DIR;         
-      printer_state.currentPositionSteps[2] = -steps;
+      steps = (printer.zMaxSteps-printer.zMinSteps) * Z_HOME_DIR;
+      printer.currentPositionSteps[2] = -steps;
       move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
-      printer_state.currentPositionSteps[2] = 0;
+      printer.currentPositionSteps[2] = 0;
       move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
       if(ENDSTOP_Z_BACK_ON_HOME > 0)
         move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
 #endif
-      printer_state.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer_state.zMinSteps : printer_state.zMaxSteps;
+      printer.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer.zMinSteps : printer.zMaxSteps;
     }
   }
-  UI_CLEAR_STATUS  
+  UI_CLEAR_STATUS
 }
 #endif
 
@@ -235,10 +235,10 @@ void current_control_init() //Initialize Digipot Motor Current
 {
   #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-    
-    SPI.begin(); 
-    SET_OUTPUT(DIGIPOTSS_PIN);    
-    for(int i=0;i<=4;i++) 
+
+    SPI.begin();
+    SET_OUTPUT(DIGIPOTSS_PIN);
+    for(int i=0;i<=4;i++)
       //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
       set_current(i,digipot_motor_current[i]);
   #endif
@@ -253,8 +253,8 @@ void set_current( byte channel, unsigned short level )
   if(channel>LTC2600_NUM_CHANNELS) return;
   byte address = ltc_channels[channel];
   char i;
-	
-	
+
+
   // NOTE: Do not increase the current endlessly. In case the engine reaches its current saturation, the engine and the driver can heat up and loss power.
   // When the saturation is reached, more current causes more heating and more power loss.
   // In case of engines with lower quality, the saturation current may be reached before the nominal current.
@@ -266,7 +266,7 @@ void set_current( byte channel, unsigned short level )
   SET_OUTPUT( LTC2600_SCK_PIN );
   WRITE( LTC2600_SDI_PIN, LOW );
   SET_OUTPUT( LTC2600_SDI_PIN );
-		
+
   // enable the command interface of the LTC2600
   WRITE( LTC2600_CS_PIN, LOW );
 
@@ -276,18 +276,18 @@ void set_current( byte channel, unsigned short level )
     WRITE( LTC2600_SCK_PIN, 1 );
     WRITE( LTC2600_SCK_PIN, 0 );
   }
-	
+
   // transfer the data word
   for( i=15; i>=0; i-- )  {
     WRITE( LTC2600_SDI_PIN, level & (0x01 << i));
     WRITE( LTC2600_SCK_PIN, 1 );
     WRITE( LTC2600_SCK_PIN, 0 );
    }
-	
+
   // disable the ommand interface of the LTC2600 -
   // this carries out the specified command
   WRITE( LTC2600_CS_PIN, HIGH );
-	
+
 } // setLTC2600
 
 void current_control_init() //Initialize LTC2600 Motor Current
@@ -374,7 +374,7 @@ void process_command(GCode *com,byte bufferedCommand)
     if(GCODE_HAS_G(com) || (GCODE_HAS_M(com) && com->M!=111)) {
       gcode_command_finished(com); // free command cache
       previous_millis_cmd = millis();
-      return;      
+      return;
     }
   }
 #endif
@@ -401,24 +401,24 @@ void process_command(GCode *com,byte bufferedCommand)
           offset[0]*=25.4;
           offset[1]*=25.4;
         }
-        float position[2] = {printer_state.currentPositionSteps[0]*inv_axis_steps_per_unit[0],printer_state.currentPositionSteps[1]*inv_axis_steps_per_unit[1]};
-        float target[2] = {printer_state.destinationSteps[0]*inv_axis_steps_per_unit[0],printer_state.destinationSteps[1]*inv_axis_steps_per_unit[1]};    
+        float position[2] = {printer.currentPositionSteps[0]*inv_axis_steps_per_unit[0],printer.currentPositionSteps[1]*inv_axis_steps_per_unit[1]};
+        float target[2] = {printer.destinationSteps[0]*inv_axis_steps_per_unit[0],printer.destinationSteps[1]*inv_axis_steps_per_unit[1]};
         float r;
         if (GCODE_HAS_R(com)) {
-        /* 
+        /*
           We need to calculate the center of the circle that has the designated radius and passes
           through both the current position and the target position. This method calculates the following
-          set of equations where [x,y] is the vector from current to target position, d == magnitude of 
+          set of equations where [x,y] is the vector from current to target position, d == magnitude of
           that vector, h == hypotenuse of the triangle formed by the radius of the circle, the distance to
-          the center of the travel vector. A vector perpendicular to the travel vector [-y,x] is scaled to the 
-          length of h [-y/d*h, x/d*h] and added to the center of the travel vector [x/2,y/2] to form the new point 
+          the center of the travel vector. A vector perpendicular to the travel vector [-y,x] is scaled to the
+          length of h [-y/d*h, x/d*h] and added to the center of the travel vector [x/2,y/2] to form the new point
           [i,j] at [x/2-y/d*h, y/2+x/d*h] which will be the center of our arc.
-          
+
           d^2 == x^2 + y^2
           h^2 == r^2 - (d/2)^2
           i == x/2 - y/d*h
           j == y/2 + x/d*h
-          
+
                                                                O <- [i,j]
                                                             -  |
                                                   r      -     |
@@ -427,71 +427,71 @@ void process_command(GCode *com,byte bufferedCommand)
                                                 -              |
                                   [0,0] ->  C -----------------+--------------- T  <- [x,y]
                                             | <------ d/2 ---->|
-                    
+
           C - Current position
           T - Target position
           O - center of circle that pass through both C and T
           d - distance from C to T
           r - designated radius
           h - distance from center of CT to O
-          
+
           Expanding the equations:
 
           d -> sqrt(x^2 + y^2)
           h -> sqrt(4 * r^2 - x^2 - y^2)/2
-          i -> (x - (y * sqrt(4 * r^2 - x^2 - y^2)) / sqrt(x^2 + y^2)) / 2 
+          i -> (x - (y * sqrt(4 * r^2 - x^2 - y^2)) / sqrt(x^2 + y^2)) / 2
           j -> (y + (x * sqrt(4 * r^2 - x^2 - y^2)) / sqrt(x^2 + y^2)) / 2
-         
+
           Which can be written:
-          
+
           i -> (x - (y * sqrt(4 * r^2 - x^2 - y^2))/sqrt(x^2 + y^2))/2
           j -> (y + (x * sqrt(4 * r^2 - x^2 - y^2))/sqrt(x^2 + y^2))/2
-          
+
           Which we for size and speed reasons optimize to:
 
           h_x2_div_d = sqrt(4 * r^2 - x^2 - y^2)/sqrt(x^2 + y^2)
           i = (x - (y * h_x2_div_d))/2
           j = (y + (x * h_x2_div_d))/2
-          
+
         */
         r = com->R;
         if(unit_inches) r*=25.4;
         // Calculate the change in position along each selected axis
         double x = target[0]-position[0];
         double y = target[1]-position[1];
-        
+
         double h_x2_div_d = -sqrt(4 * r*r - x*x - y*y)/hypot(x,y); // == -(h * 2 / d)
         // If r is smaller than d, the arc is now traversing the complex plane beyond the reach of any
         // real CNC, and thus - for practical reasons - we will terminate promptly:
         if(isnan(h_x2_div_d)) { OUT_P_LN("error: Invalid arc"); break; }
         // Invert the sign of h_x2_div_d if the circle is counter clockwise (see sketch below)
         if (com->G==3) { h_x2_div_d = -h_x2_div_d; }
-        
+
         /* The counter clockwise circle lies to the left of the target direction. When offset is positive,
            the left hand circle will be generated - when it is negative the right hand circle is generated.
-           
-           
+
+
                                                          T  <-- Target position
-                                                         
-                                                         ^ 
+
+                                                         ^
               Clockwise circles with this center         |          Clockwise circles with this center will have
               will have > 180 deg of angular travel      |          < 180 deg of angular travel, which is a good thing!
-                                               \         |          /   
+                                               \         |          /
   center of arc when h_x2_div_d is positive ->  x <----- | -----> x <- center of arc when h_x2_div_d is negative
                                                          |
                                                          |
-                                                         
-                                                         C  <-- Current position                                 */
-                
 
-        // Negative R is g-code-alese for "I want a circle with more than 180 degrees of travel" (go figure!), 
-        // even though it is advised against ever generating such circles in a single line of g-code. By 
+                                                         C  <-- Current position                                 */
+
+
+        // Negative R is g-code-alese for "I want a circle with more than 180 degrees of travel" (go figure!),
+        // even though it is advised against ever generating such circles in a single line of g-code. By
         // inverting the sign of h_x2_div_d the center of the circles is placed on the opposite side of the line of
         // travel and thus we get the unadvisably long arcs as prescribed.
-        if (r < 0) { 
-            h_x2_div_d = -h_x2_div_d; 
+        if (r < 0) {
+            h_x2_div_d = -h_x2_div_d;
             r = -r; // Finished with r. Set to positive for mc_arc
-        }        
+        }
         // Complete the operation by calculating the actual center of the arc
         offset[0] = 0.5*(x-(y*h_x2_div_d));
         offset[1] = 0.5*(y+(x*h_x2_div_d));
@@ -499,13 +499,13 @@ void process_command(GCode *com,byte bufferedCommand)
       } else { // Offset mode specific computations
         r = hypot(offset[0], offset[1]); // Compute arc radius for mc_arc
       }
-      
+
       // Set clockwise/counter-clockwise sign for mc_arc computations
       uint8_t isclockwise = com->G == 2;
 
       // Trace the arc
       mc_arc(position, target, offset,r, isclockwise);
-        
+
       break;
       }
 #endif
@@ -538,23 +538,23 @@ void process_command(GCode *com,byte bufferedCommand)
         relative_mode = true;
         break;
       case 92: // G92
-        if(GCODE_HAS_X(com)) printer_state.currentPositionSteps[0] = com->X*axis_steps_per_unit[0]*(unit_inches?25.4:1.0)-printer_state.offsetX;
-        if(GCODE_HAS_Y(com)) printer_state.currentPositionSteps[1] = com->Y*axis_steps_per_unit[1]*(unit_inches?25.4:1.0)-printer_state.offsetY;
-        if(GCODE_HAS_Z(com)) printer_state.currentPositionSteps[2] = com->Z*axis_steps_per_unit[2]*(unit_inches?25.4:1.0);
+        if(GCODE_HAS_X(com)) printer.currentPositionSteps[0] = com->X*axis_steps_per_unit[0]*(unit_inches?25.4:1.0)-printer.offsetX;
+        if(GCODE_HAS_Y(com)) printer.currentPositionSteps[1] = com->Y*axis_steps_per_unit[1]*(unit_inches?25.4:1.0)-printer.offsetY;
+        if(GCODE_HAS_Z(com)) printer.currentPositionSteps[2] = com->Z*axis_steps_per_unit[2]*(unit_inches?25.4:1.0);
         if(GCODE_HAS_E(com)) {
-          printer_state.currentPositionSteps[3] = com->E*axis_steps_per_unit[3]*(unit_inches?25.4:1.0);
+          printer.currentPositionSteps[3] = com->E*axis_steps_per_unit[3]*(unit_inches?25.4:1.0);
         }
         break;
-        
+
     }
-    previous_millis_cmd = millis();      
+    previous_millis_cmd = millis();
   }
 
   else if(GCODE_HAS_M(com))  { // Process M Code
-    
+
     switch( com->M ) {
 #if SDSUPPORT
-        
+
       case 20: // M20 - list SD card
         sd.ls();
         break;
@@ -608,7 +608,7 @@ void process_command(GCode *com,byte bufferedCommand)
                 break;
               }
           }
-          if (pin_number > -1) {              
+          if (pin_number > -1) {
             pinMode(pin_number, OUTPUT);
             digitalWrite(pin_number, com->S);
             analogWrite(pin_number, com->S);
@@ -654,13 +654,13 @@ void process_command(GCode *com,byte bufferedCommand)
           UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
           wait_until_end_of_move();
           Extruder *actExtruder = current_extruder;
-          if(GCODE_HAS_T(com) && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T]; 
+          if(GCODE_HAS_T(com) && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
           if (GCODE_HAS_S(com)) extruder_set_temperature(com->S,actExtruder->id);
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN>0
           if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
           bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
-          codenum = millis(); 
+          codenum = millis();
           unsigned long waituntil = 0;
 #if RETRACT_DURING_HEATUP
           byte retracted = 0;
@@ -670,7 +670,7 @@ void process_command(GCode *com,byte bufferedCommand)
             cur_time = millis();
             if( (cur_time - codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
               print_temperatures();
-              codenum = cur_time; 
+              codenum = cur_time;
             }
             check_periodical();
             //gcode_read_serial();
@@ -682,7 +682,7 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
             if((waituntil==0 && (dir ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-0.5:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+0.5))
 #ifdef TEMP_HYSTERESIS
-            || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)            
+            || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
 #endif
             ) {
               waituntil = cur_time+1000UL*(unsigned long)actExtruder->watchPeriod; // now wait for temp. to stabalize
@@ -708,11 +708,11 @@ void process_command(GCode *com,byte bufferedCommand)
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
         if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
 #endif
-        codenum = millis(); 
+        codenum = millis();
         while(heatedBedController.currentTemperatureC+0.5<heatedBedController.targetTemperatureC) {
           if( (millis()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
             print_temperatures();
-            codenum = millis(); 
+            codenum = millis();
           }
           check_periodical();
         }
@@ -732,7 +732,7 @@ void process_command(GCode *com,byte bufferedCommand)
         noTone(BEEPER_PIN);
       }
       break;
-#endif        
+#endif
 #ifdef TEMP_PID
       case 303: {
           int temp = 150;
@@ -775,7 +775,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 84:
         if(GCODE_HAS_S(com)){ stepper_inactive_time = com->S * 1000; }
-        else{             
+        else{
           wait_until_end_of_move();
           kill(true);
         }
@@ -784,14 +784,14 @@ void process_command(GCode *com,byte bufferedCommand)
         if(GCODE_HAS_S(com))
           max_inactive_time = (long)com->S * 1000;
         else
-          max_inactive_time = 0; 
+          max_inactive_time = 0;
         break;
       case 92: // M92
         if(GCODE_HAS_X(com)) axis_steps_per_unit[0] = com->X;
         if(GCODE_HAS_Y(com)) axis_steps_per_unit[1] = com->Y;
         if(GCODE_HAS_Z(com)) axis_steps_per_unit[2] = com->Z;
         if(GCODE_HAS_E(com)) current_extruder->stepsPerMM = com->E;
-        update_ramps_parameter();        
+        update_ramps_parameter();
         break;
       case 111:
         if(GCODE_HAS_S(com)) debug_level = com->S;
@@ -803,7 +803,7 @@ void process_command(GCode *com,byte bufferedCommand)
 #if HEATED_BED_TYPE!=0
           target_bed_raw = 0;
 #endif
-        }   
+        }
         break;
       case 115: {// M115
 #if DRIVE_SYSTEM==3
@@ -816,14 +816,14 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
 #endif
 #if EEPROM_MODE!=0
-        float dist = printer_state.filamentPrinted*0.001+epr_get_float(EPR_PRINTING_DISTANCE);
+        float dist = printer.filamentPrinted*0.001+epr_get_float(EPR_PRINTING_DISTANCE);
         OUT_P_FX("Printed filament:",dist,2);
         OUT_P_LN(" m");
         bool alloff = true;
         for(byte i=0;i<NUM_EXTRUDER;i++)
           if(tempController[i]->targetTemperatureC>15) alloff = false;
 
-        long seconds = (alloff ? 0 : (millis()-printer_state.msecondsPrinting)/1000)+epr_get_long(EPR_PRINTING_TIME);
+        long seconds = (alloff ? 0 : (millis()-printer.msecondsPrinting)/1000)+epr_get_long(EPR_PRINTING_TIME);
         long tmp = seconds/86400;
         seconds-=tmp*86400;
         OUT_P_L("Printing time:",tmp);
@@ -841,7 +841,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 117: // M117 message to lcd
         if(GCODE_HAS_STRING(com)) {
-          UI_STATUS_UPD_RAM(com->text); 
+          UI_STATUS_UPD_RAM(com->text);
         }
         break;
       case 119: // M119
@@ -905,9 +905,9 @@ void process_command(GCode *com,byte bufferedCommand)
           TemperatureController *temp = &current_extruder->tempControl;
           if(GCODE_HAS_S(com)) {
             if(com->S<0) break;
-            if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl; 
+            if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
   #if HAVE_HEATED_BED
-            else temp = &heatedBedController;            
+            else temp = &heatedBedController;
   #else
 			else break;
   #endif
@@ -935,20 +935,20 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 207: // M207 X<XY jerk> Z<Z Jerk>
         if(GCODE_HAS_X(com))
-          printer_state.maxJerk = com->X;
+          printer.maxJerk = com->X;
         if(GCODE_HAS_Z(com))
-          printer_state.maxZJerk = com->Z;
+          printer.maxZJerk = com->Z;
         if(GCODE_HAS_E(com)) {
           current_extruder->maxStartFeedrate = com->E;
           extruder_select(current_extruder->id);
         }
-        out.print_float_P(PSTR("Jerk:"),printer_state.maxJerk);
-        out.println_float_P(PSTR(" ZJerk:"),printer_state.maxZJerk);
+        out.print_float_P(PSTR("Jerk:"),printer.maxJerk);
+        out.println_float_P(PSTR(" ZJerk:"),printer.maxZJerk);
         break;
       case 220: // M220 S<Feedrate multiplier in percent>
         if(GCODE_HAS_S(com))
           change_feedrate_multiply(com->S);
-        else          
+        else
           change_feedrate_multiply(100);
         break;
       case 221: // M221 S<Extrusion flow multiplier in percent>
@@ -960,14 +960,14 @@ void process_command(GCode *com,byte bufferedCommand)
  #ifdef USE_ADVANCE
      case 223: // Extruder interrupt test
         if(GCODE_HAS_S(com))
-          printer_state.extruderStepsNeeded+=com->S;
+          printer.extruderStepsNeeded+=com->S;
           break;
      case 232:
        out.print_int_P(PSTR(" linear steps:"),maxadv2);
  #ifdef ENABLE_QUADRATIC_ADVANCE
        out.print_int_P(PSTR(" quadratic steps:"),maxadv);
  #endif
-       out.println_float_P(PSTR(", speed="),maxadvspeed); 
+       out.println_float_P(PSTR(", speed="),maxadvspeed);
 #ifdef ENABLE_QUADRATIC_ADVANCE
        maxadv=0;
 #endif
@@ -978,49 +978,49 @@ void process_command(GCode *com,byte bufferedCommand)
 #if USE_OPS==1
       case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
         if(GCODE_HAS_S(com) && com->S>=0 && com->S<3)
-          printer_state.opsMode = com->S;
+          printer.opsMode = com->S;
         if(GCODE_HAS_X(com) && com->X>=0)
-          printer_state.opsMinDistance = com->X;
+          printer.opsMinDistance = com->X;
         if(GCODE_HAS_Y(com) && com->Y>=0)
-          printer_state.opsRetractDistance = com->Y;
-        if(GCODE_HAS_Z(com) && com->Z>=-printer_state.opsRetractDistance)
-          printer_state.opsRetractBacklash = com->Z;
+          printer.opsRetractDistance = com->Y;
+        if(GCODE_HAS_Z(com) && com->Z>=-printer.opsRetractDistance)
+          printer.opsRetractBacklash = com->Z;
         if(GCODE_HAS_F(com) && com->F>=0 && com->F<=100)
-          printer_state.opsMoveAfter = com->F;
+          printer.opsMoveAfter = com->F;
         extruder_select(current_extruder->id);
-        if(printer_state.opsMode==0) {
+        if(printer.opsMode==0) {
           out.println_P(PSTR("OPS disabled"));
         } else {
-          if(printer_state.opsMode==1) 
+          if(printer.opsMode==1)
             out.print_P(PSTR("OPS classic mode:"));
           else
             out.print_P(PSTR("OPS fast mode:"));
-        
-          out.print_float_P(PSTR("min distance = "),printer_state.opsMinDistance);
-          out.print_float_P(PSTR(", retract = "),printer_state.opsRetractDistance);
-          out.print_float_P(PSTR(", backslash = "),printer_state.opsRetractBacklash);
-          if(printer_state.opsMode==2)
-            out.print_float_P(PSTR(", move after = "),printer_state.opsMoveAfter);
+
+          out.print_float_P(PSTR("min distance = "),printer.opsMinDistance);
+          out.print_float_P(PSTR(", retract = "),printer.opsRetractDistance);
+          out.print_float_P(PSTR(", backslash = "),printer.opsRetractBacklash);
+          if(printer.opsMode==2)
+            out.print_float_P(PSTR(", move after = "),printer.opsMoveAfter);
           out.println();
           update_extruder_flags();
         }
 #ifdef DEBUG_OPS
-       out.println_int_P(PSTR("Ret. steps:"),printer_state.opsRetractSteps);
-       out.println_int_P(PSTR("PushBack Steps:"),printer_state.opsPushbackSteps);
-       out.println_int_P(PSTR("Move after steps:"),printer_state.opsMoveAfterSteps);
+       out.println_int_P(PSTR("Ret. steps:"),printer.opsRetractSteps);
+       out.println_int_P(PSTR("PushBack Steps:"),printer.opsPushbackSteps);
+       out.println_int_P(PSTR("Move after steps:"),printer.opsMoveAfterSteps);
 #endif
         break;
 #endif
 #ifdef USE_ADVANCE
       case 233:
-        if(GCODE_HAS_Y(com)) 
+        if(GCODE_HAS_Y(com))
           current_extruder->advanceL = com->Y;
         out.print_float_P(PSTR("linear L:"),current_extruder->advanceL);
 #ifdef ENABLE_QUADRATIC_ADVANCE
-        if(GCODE_HAS_X(com)) 
+        if(GCODE_HAS_X(com))
           current_extruder->advanceK = com->X;
         out.print_float_P(PSTR(" quadratic K:"),current_extruder->advanceK);
-#endif        
+#endif
         out.println();
         update_extruder_flags();
         break;
@@ -1030,25 +1030,25 @@ void process_command(GCode *com,byte bufferedCommand)
       break;
 #if FEATURE_MEMORY_POSITION
     case 401: // Memory position
-      printer_state.memoryX = printer_state.currentPositionSteps[0];
-      printer_state.memoryY = printer_state.currentPositionSteps[1];
-      printer_state.memoryZ = printer_state.currentPositionSteps[2];
+      printer.memoryX = printer.currentPositionSteps[0];
+      printer.memoryY = printer.currentPositionSteps[1];
+      printer.memoryZ = printer.currentPositionSteps[2];
       break;
     case 402: // Go to stored position
       {
         bool all = !(GCODE_HAS_X(com) && GCODE_HAS_Y(com) && GCODE_HAS_Z(com));
-        move_steps((all || GCODE_HAS_X(com) ? printer_state.memoryX-printer_state.currentPositionSteps[0] : 0)
-        ,(all || GCODE_HAS_Y(com) ? printer_state.memoryY-printer_state.currentPositionSteps[1] : 0)
-        ,(all || GCODE_HAS_Z(com) ? printer_state.memoryZ-printer_state.currentPositionSteps[2] : 0)
-        ,0,(GCODE_HAS_F(com) ? com->F : printer_state.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
+        move_steps((all || GCODE_HAS_X(com) ? printer.memoryX-printer.currentPositionSteps[0] : 0)
+        ,(all || GCODE_HAS_Y(com) ? printer.memoryY-printer.currentPositionSteps[1] : 0)
+        ,(all || GCODE_HAS_Z(com) ? printer.memoryZ-printer.currentPositionSteps[2] : 0)
+        ,0,(GCODE_HAS_F(com) ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
       }
       break;
 #endif
     case 908: // Control digital trimpot directly.
-      {        
+      {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         uint8_t channel,current;
-        if(GCODE_HAS_P(com) && GCODE_HAS_S(com)) 
+        if(GCODE_HAS_P(com) && GCODE_HAS_S(com))
           set_current((uint8_t)com->P, (unsigned int)com->S);
 #endif
       }
@@ -1083,12 +1083,12 @@ void process_command(GCode *com,byte bufferedCommand)
 	#endif
 	}
 	break;
-    
+
     case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
     {
       OUT_P_LN("Set Microstepping");
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
-        if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S); 
+        if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S);
         if(GCODE_HAS_X(com)) microstep_mode(0,(uint8_t)com->X);
         if(GCODE_HAS_Y(com)) microstep_mode(1,(uint8_t)com->Y);
         if(GCODE_HAS_Z(com)) microstep_mode(2,(uint8_t)com->Z);
@@ -1103,21 +1103,21 @@ void process_command(GCode *com,byte bufferedCommand)
   case 251:
     if(GCODE_HAS_S(com)) {
       if (com->S == 0) {
-        printer_state.countZSteps = 0;
+        printer.countZSteps = 0;
 	out.println_P(PSTR("Measurement reset."));
       } else if (com->S == 1) {
-	OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
-	OUT_P_L_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+	OUT_P_L_LN("Measure/delta (Steps) =",printer.countZSteps * inv_axis_steps_per_unit[2]);
+	OUT_P_L_LN("Measure/delta =",printer.countZSteps * inv_axis_steps_per_unit[2]);
       } else if (com->S = 2) {
-        if (printer_state.countZSteps < 0)
-	  printer_state.countZSteps = -printer_state.countZSteps;
-	printer_state.zMin = 0;
-	printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-	printer_state.zMaxSteps = printer_state.countZSteps;
+        if (printer.countZSteps < 0)
+	  printer.countZSteps = -printer.countZSteps;
+	printer.zMin = 0;
+	printer.zLength = inv_axis_steps_per_unit[2] * printer.countZSteps;
+	printer.zMaxSteps = printer.countZSteps;
 	for (byte i=0; i<3; i++) {
-	  printer_state.currentPositionSteps[i] = 0;
+	  printer.currentPositionSteps[i] = 0;
 	}
-	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+	calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
 	OUT_P_LN("Measured origin set. Measurement reset.");
 	#if EEPROM_MODE!=0
 	  epr_data_to_eeprom(false);

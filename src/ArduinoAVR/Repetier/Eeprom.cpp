@@ -64,7 +64,7 @@ void epr_out_float(uint pos,PGM_P text) {
   OUT(epr_get_float(pos));
   OUT(' ');
   epr_out_prefix(pos);
-  out.println_P(text);  
+  out.println_P(text);
 }
 void epr_out_long(uint pos,PGM_P text) {
   OUT_P("EPR:2 ");
@@ -73,7 +73,7 @@ void epr_out_long(uint pos,PGM_P text) {
   OUT(epr_get_long(pos));
   OUT(' ');
   epr_out_prefix(pos);
-  out.println_P(text);  
+  out.println_P(text);
 }
 void epr_out_int(uint pos,PGM_P text) {
   OUT_P("EPR:1 ");
@@ -82,7 +82,7 @@ void epr_out_int(uint pos,PGM_P text) {
   OUT(epr_get_int(pos));
   OUT(' ');
   epr_out_prefix(pos);
-  out.println_P(text);  
+  out.println_P(text);
 }
 void epr_out_byte(uint pos,PGM_P text) {
   OUT_P("EPR:0 ");
@@ -91,7 +91,7 @@ void epr_out_byte(uint pos,PGM_P text) {
   OUT((int)epr_get_byte(pos));
   OUT(' ');
   epr_out_prefix(pos);
-  out.println_P(text);  
+  out.println_P(text);
 }
 
 void epr_update(GCode *com) {
@@ -123,7 +123,7 @@ void epr_eeprom_reset() {
   max_inactive_time = MAX_INACTIVE_TIME*1000L;
   stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
   axis_steps_per_unit[0] = XAXIS_STEPS_PER_MM;
-  axis_steps_per_unit[1] = YAXIS_STEPS_PER_MM; 
+  axis_steps_per_unit[1] = YAXIS_STEPS_PER_MM;
   axis_steps_per_unit[2] = ZAXIS_STEPS_PER_MM;
   axis_steps_per_unit[3] = 1;
   max_feedrate[0] = MAX_FEEDRATE_X;
@@ -132,8 +132,8 @@ void epr_eeprom_reset() {
   homing_feedrate[0] = HOMING_FEEDRATE_X;
   homing_feedrate[1] = HOMING_FEEDRATE_Y;
   homing_feedrate[2] = HOMING_FEEDRATE_Z;
-  printer_state.maxJerk = MAX_JERK;
-  printer_state.maxZJerk = MAX_ZJERK;
+  printer.maxJerk = MAX_JERK;
+  printer.maxZJerk = MAX_ZJERK;
 #ifdef RAMP_ACCELERATION
   max_acceleration_units_per_sq_second[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
   max_acceleration_units_per_sq_second[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
@@ -143,11 +143,11 @@ void epr_eeprom_reset() {
   max_travel_acceleration_units_per_sq_second[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
 #if USE_OPS==1
-  printer_state.opsMode = OPS_MODE;
-  printer_state.opsMinDistance = OPS_MIN_DISTANCE;
-  printer_state.opsRetractDistance = OPS_RETRACT_DISTANCE;
-  printer_state.opsRetractBacklash = OPS_RETRACT_BACKLASH;
-  printer_state.opsMoveAfter = OPS_MOVE_AFTER;
+  printer.opsMode = OPS_MODE;
+  printer.opsMinDistance = OPS_MIN_DISTANCE;
+  printer.opsRetractDistance = OPS_RETRACT_DISTANCE;
+  printer.opsRetractBacklash = OPS_RETRACT_BACKLASH;
+  printer.opsMoveAfter = OPS_MOVE_AFTER;
 #endif
 #if HAVE_HEATED_BED
   heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
@@ -160,16 +160,16 @@ void epr_eeprom_reset() {
   heatedBedController.pidMax = HEATED_BED_PID_MAX;
 #endif
 #endif
-  printer_state.xLength = X_MAX_LENGTH;
-  printer_state.yLength = Y_MAX_LENGTH;
-  printer_state.zLength = Z_MAX_LENGTH;
-  printer_state.xMin = X_MIN_POS;
-  printer_state.yMin = Y_MIN_POS;
-  printer_state.zMin = Z_MIN_POS;
+  printer.xLength = X_MAX_LENGTH;
+  printer.yLength = Y_MAX_LENGTH;
+  printer.zLength = Z_MAX_LENGTH;
+  printer.xMin = X_MIN_POS;
+  printer.yMin = Y_MIN_POS;
+  printer.zMin = Z_MIN_POS;
 #if ENABLE_BACKLASH_COMPENSATION
-  printer_state.backlashX = X_BACKLASH;
-  printer_state.backlashY = Y_BACKLASH;
-  printer_state.backlashZ = Z_BACKLASH;
+  printer.backlashX = X_BACKLASH;
+  printer.backlashY = Y_BACKLASH;
+  printer.backlashZ = Z_BACKLASH;
 #endif
   Extruder *e;
 #if NUM_EXTRUDER>0
@@ -373,8 +373,8 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_float(EPR_X_HOMING_FEEDRATE,homing_feedrate[0]);
   epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[1]);
   epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[2]);
-  epr_set_float(EPR_MAX_JERK,printer_state.maxJerk);
-  epr_set_float(EPR_MAX_ZJERK,printer_state.maxZJerk);
+  epr_set_float(EPR_MAX_JERK,printer.maxJerk);
+  epr_set_float(EPR_MAX_ZJERK,printer.maxZJerk);
 #ifdef RAMP_ACCELERATION
   epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[0]);
   epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[1]);
@@ -384,11 +384,11 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
 #endif
 #if USE_OPS==1
-  epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
-  epr_set_byte(EPR_OPS_MODE,printer_state.opsMode);
-  epr_set_float(EPR_OPS_MOVE_AFTER,printer_state.opsMoveAfter);
-  epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer_state.opsRetractDistance);
-  epr_set_float(EPR_OPS_RETRACT_BACKLASH,printer_state.opsRetractBacklash);
+  epr_set_float(EPR_OPS_MIN_DISTANCE,printer.opsMinDistance);
+  epr_set_byte(EPR_OPS_MODE,printer.opsMode);
+  epr_set_float(EPR_OPS_MOVE_AFTER,printer.opsMoveAfter);
+  epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer.opsRetractDistance);
+  epr_set_float(EPR_OPS_RETRACT_BACKLASH,printer.opsRetractBacklash);
 #else
   epr_set_float(EPR_OPS_MIN_DISTANCE,OPS_MIN_DISTANCE);
   epr_set_byte(EPR_OPS_MODE,OPS_MODE);
@@ -416,16 +416,16 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_float(EPR_BED_PID_DGAIN,HEATED_BED_PID_DGAIN);
   epr_set_byte(EPR_BED_PID_MAX,HEATED_BED_PID_MAX);
 #endif
-  epr_set_float(EPR_X_HOME_OFFSET,printer_state.xMin);
-  epr_set_float(EPR_Y_HOME_OFFSET,printer_state.yMin);
-  epr_set_float(EPR_Z_HOME_OFFSET,printer_state.zMin);
-  epr_set_float(EPR_X_LENGTH,printer_state.xLength);
-  epr_set_float(EPR_Y_LENGTH,printer_state.yLength);
-  epr_set_float(EPR_Z_LENGTH,printer_state.zLength);
+  epr_set_float(EPR_X_HOME_OFFSET,printer.xMin);
+  epr_set_float(EPR_Y_HOME_OFFSET,printer.yMin);
+  epr_set_float(EPR_Z_HOME_OFFSET,printer.zMin);
+  epr_set_float(EPR_X_LENGTH,printer.xLength);
+  epr_set_float(EPR_Y_LENGTH,printer.yLength);
+  epr_set_float(EPR_Z_LENGTH,printer.zLength);
 #if ENABLE_BACKLASH_COMPENSATION
-  epr_set_float(EPR_BACKLASH_X,printer_state.backlashX);
-  epr_set_float(EPR_BACKLASH_Y,printer_state.backlashY);
-  epr_set_float(EPR_BACKLASH_Z,printer_state.backlashZ);
+  epr_set_float(EPR_BACKLASH_X,printer.backlashX);
+  epr_set_float(EPR_BACKLASH_Y,printer.backlashY);
+  epr_set_float(EPR_BACKLASH_Z,printer.backlashZ);
 #else
   epr_set_float(EPR_BACKLASH_X,0);
   epr_set_float(EPR_BACKLASH_Y,0);
@@ -497,8 +497,8 @@ void epr_eeprom_to_data() {
   homing_feedrate[0] = epr_get_float(EPR_X_HOMING_FEEDRATE);
   homing_feedrate[1] = epr_get_float(EPR_Y_HOMING_FEEDRATE);
   homing_feedrate[2] = epr_get_float(EPR_Z_HOMING_FEEDRATE);
-  printer_state.maxJerk = epr_get_float(EPR_MAX_JERK);
-  printer_state.maxZJerk = epr_get_float(EPR_MAX_ZJERK);
+  printer.maxJerk = epr_get_float(EPR_MAX_JERK);
+  printer.maxZJerk = epr_get_float(EPR_MAX_ZJERK);
 #ifdef RAMP_ACCELERATION
   max_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_ACCEL);
   max_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_ACCEL);
@@ -508,11 +508,11 @@ void epr_eeprom_to_data() {
   max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
 #if USE_OPS==1
-  printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
-  printer_state.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);
-  printer_state.opsMinDistance = epr_get_float(EPR_OPS_MIN_DISTANCE);
-  printer_state.opsRetractDistance = epr_get_float(EPR_OPS_RETRACT_DISTANCE);
-  printer_state.opsRetractBacklash = epr_get_float(EPR_OPS_RETRACT_BACKLASH);
+  printer.opsMode = epr_get_byte(EPR_OPS_MODE);
+  printer.opsMoveAfter = epr_get_float(EPR_OPS_MOVE_AFTER);
+  printer.opsMinDistance = epr_get_float(EPR_OPS_MIN_DISTANCE);
+  printer.opsRetractDistance = epr_get_float(EPR_OPS_RETRACT_DISTANCE);
+  printer.opsRetractBacklash = epr_get_float(EPR_OPS_RETRACT_BACKLASH);
 #endif
 #if HAVE_HEATED_BED
   heatedBedController.heatManager= epr_get_byte(EPR_BED_HEAT_MANAGER);
@@ -525,16 +525,16 @@ void epr_eeprom_to_data() {
   heatedBedController.pidMax = epr_get_byte(EPR_BED_PID_MAX);
 #endif
 #endif
-  printer_state.xMin = epr_get_float(EPR_X_HOME_OFFSET);
-  printer_state.yMin = epr_get_float(EPR_Y_HOME_OFFSET);
-  printer_state.zMin = epr_get_float(EPR_Z_HOME_OFFSET);
-  printer_state.xLength = epr_get_float(EPR_X_LENGTH);
-  printer_state.yLength = epr_get_float(EPR_Y_LENGTH);
-  printer_state.zLength = epr_get_float(EPR_Z_LENGTH);
+  printer.xMin = epr_get_float(EPR_X_HOME_OFFSET);
+  printer.yMin = epr_get_float(EPR_Y_HOME_OFFSET);
+  printer.zMin = epr_get_float(EPR_Z_HOME_OFFSET);
+  printer.xLength = epr_get_float(EPR_X_LENGTH);
+  printer.yLength = epr_get_float(EPR_Y_LENGTH);
+  printer.zLength = epr_get_float(EPR_Z_LENGTH);
 #if ENABLE_BACKLASH_COMPENSATION
-  printer_state.backlashX = epr_get_float(EPR_BACKLASH_X);
-  printer_state.backlashY = epr_get_float(EPR_BACKLASH_Y);
-  printer_state.backlashZ = epr_get_float(EPR_BACKLASH_Z);
+  printer.backlashX = epr_get_float(EPR_BACKLASH_X);
+  printer.backlashY = epr_get_float(EPR_BACKLASH_Y);
+  printer.backlashZ = epr_get_float(EPR_BACKLASH_Z);
 #endif
   // now the extruder
   for(byte i=0;i<NUM_EXTRUDER;i++) {
@@ -581,7 +581,7 @@ void epr_eeprom_to_data() {
 void epr_init_baudrate() {
 #if EEPROM_MODE!=0
   if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE) {
-    baudrate = epr_get_long(EPR_BAUDRATE);    
+    baudrate = epr_get_long(EPR_BAUDRATE);
   }
 #endif
 }
@@ -601,14 +601,14 @@ void epr_init() {
 */
 void epr_update_usage() {
 #if EEPROM_MODE!=0
-  if(printer_state.filamentPrinted==0) return; // No miles only enabled
-  unsigned long seconds = (millis()-printer_state.msecondsPrinting)/1000;
+  if(printer.filamentPrinted==0) return; // No miles only enabled
+  unsigned long seconds = (millis()-printer.msecondsPrinting)/1000;
   seconds += epr_get_long(EPR_PRINTING_TIME);
   epr_set_long(EPR_PRINTING_TIME,seconds);
-  epr_set_float(EPR_PRINTING_DISTANCE,epr_get_float(EPR_PRINTING_DISTANCE)+printer_state.filamentPrinted*0.001);
-  OUT_P_F_LN("Adding filament:",printer_state.filamentPrinted);
-  printer_state.filamentPrinted = 0;
-  printer_state.msecondsPrinting = millis();
+  epr_set_float(EPR_PRINTING_DISTANCE,epr_get_float(EPR_PRINTING_DISTANCE)+printer.filamentPrinted*0.001);
+  OUT_P_F_LN("Adding filament:",printer.filamentPrinted);
+  printer.filamentPrinted = 0;
+  printer.msecondsPrinting = millis();
   byte newcheck = epr_compute_checksum();
   if(newcheck!=epr_get_byte(EPR_INTEGRITY_BYTE))
     epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
@@ -717,7 +717,7 @@ void epr_output_settings() {
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_K,PSTR("advance K [0=off]"));
 #endif
     epr_out_float(o+EPR_EXTRUDER_ADVANCE_L,PSTR("advance L [0=off]"));
-#endif    
+#endif
   }
 #else
   out.println_P(PSTR("No EEPROM support compiled."));

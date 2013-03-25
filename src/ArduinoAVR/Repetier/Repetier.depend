@@ -1,0 +1,304 @@
+# depslib dependency file v1.0
+1364235847 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.cpp
+	"Reptier.h"
+	"Eeprom.h"
+	"pins_arduino.h"
+	"ui.h"
+	<SPI.h>
+
+1364237981 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\reptier.h
+	<avr/io.h>
+	"Configuration.h"
+	<avr/io.h>
+	"HAL.h"
+	"ui.h"
+	"SdFat.h"
+	"SdFat.h"
+	"Printer.h"
+	"motion.h"
+	"SdFat.h"
+
+1364235069 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+	"pins.h"
+
+1364235069 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\print.h
+	<inttypes.h>
+	<stdio.h>
+	"WString.h"
+	"Printable.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wstring.h
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<avr/pgmspace.h>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\printable.h
+	<new.h>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\new.h
+	<stdlib.h>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\arduino.h
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<avr/pgmspace.h>
+	<avr/io.h>
+	<avr/interrupt.h>
+	"binary.h"
+	"WCharacter.h"
+	"WString.h"
+	"HardwareSerial.h"
+	"pins_arduino.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\binary.h
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wcharacter.h
+	<ctype.h>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\hardwareserial.h
+	<inttypes.h>
+	"Stream.h"
+	"USBAPI.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\stream.h
+	<inttypes.h>
+	"Print.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\usbapi.h
+
+1355115038 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\variants\mega\pins_arduino.h
+	<avr/pgmspace.h>
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.h
+	<avr/pgmspace.h>
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\fastio.h
+	<avr/io.h>
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.h
+	"Arduino.h"
+	"WProgram.h"
+	<avr/pgmspace.h>
+	"gcode.h"
+	"uilang.h"
+	"Configuration.h"
+	<avr/pgmspace.h>
+	"fastio.h"
+	<avr/io.h>
+	"uiconfig.h"
+	"uilang.h"
+	"uimenu.h"
+
+1364235069 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uilang.h
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
+
+1364235069 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.h
+	<stdint.h>
+
+1359904932 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.h
+	<avr/eeprom.h>
+
+1332662994 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\cdc.cpp
+	<CDC.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\cdc.cpp
+	"Platform.h"
+	"USBAPI.h"
+	<avr/wdt.h>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\platform.h
+	<inttypes.h>
+	<avr/pgmspace.h>
+	<avr/eeprom.h>
+	<avr/interrupt.h>
+	<util/delay.h>
+	"Arduino.h"
+	"USBDesc.h"
+	"USBCore.h"
+	"USBAPI.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\usbdesc.h
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\usbcore.h
+
+1332663011 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\main.cpp
+	<main.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\main.cpp
+	<Arduino.h>
+
+1332662988 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\new.cpp
+	<new.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\new.cpp
+	<new.h>
+
+1340284424 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\print.cpp
+	<Print.cpp>
+
+1360679599 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\print.cpp
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<math.h>
+	"Arduino.h"
+	"Print.h"
+
+1340284430 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\stream.cpp
+	<Stream.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\stream.cpp
+	"Arduino.h"
+	"Stream.h"
+
+1361769424 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\usbcore.cpp
+	<HID.cpp>
+	<USBCore.cpp>
+
+1360679683 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\hid.cpp
+	"Platform.h"
+	"USBAPI.h"
+	"USBDesc.h"
+
+1360679726 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\usbcore.cpp
+	"Platform.h"
+	"USBAPI.h"
+	"USBDesc.h"
+
+1332662973 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\winterrupts.c
+	<WInterrupts.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\winterrupts.c
+	<inttypes.h>
+	<avr/io.h>
+	<avr/interrupt.h>
+	<avr/pgmspace.h>
+	<stdio.h>
+	"wiring_private.h"
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_private.h
+	<avr/io.h>
+	<avr/interrupt.h>
+	<stdio.h>
+	<stdarg.h>
+	"Arduino.h"
+
+1332663194 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wiring.c
+	<wiring.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring.c
+	"wiring_private.h"
+
+1332663217 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wiring_analog.c
+	<wiring_analog.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_analog.c
+	"wiring_private.h"
+	"pins_arduino.h"
+
+1332663235 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wiring_digital.c
+	<wiring_digital.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_digital.c
+	"wiring_private.h"
+	"pins_arduino.h"
+
+1332663341 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wiring_pulse.c
+	<wiring_pulse.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_pulse.c
+	"wiring_private.h"
+	"pins_arduino.h"
+
+1332663353 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wiring_shift.c
+	<wiring_shift.c>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_shift.c
+	"wiring_private.h"
+
+1335544237 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wmath.cpp
+	<WMath.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wmath.cpp
+	"stdlib.h"
+
+1332662963 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\wstring.cpp
+	<WString.cpp>
+
+1355115034 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wstring.cpp
+	"WString.h"
+
+1364235848 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
+	"Reptier.h"
+	"Eeprom.h"
+
+1364235848 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+	"Reptier.h"
+	"pins_arduino.h"
+	"ui.h"
+	"Eeprom.h"
+
+1364235848 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
+	"Reptier.h"
+
+1364237411 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.cpp
+	"Reptier.h"
+	"ui.h"
+
+1364235847 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
+	"Reptier.h"
+	"Eeprom.h"
+	"pins_arduino.h"
+	"fastio.h"
+	"ui.h"
+	<util/delay.h>
+	<SPI.h>
+
+1359904932 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
+	"Reptier.h"
+	"ui.h"
+
+1364235069 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.cpp
+	"Reptier.h"
+	"Arduino.h"
+	"WProgram.h"
+	<SoftSPI.h>
+
+1364235848 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
+	"Reptier.h"
+	<avr/pgmspace.h>
+	"ui.h"
+	<math.h>
+	<stdlib.h>
+	<inttypes.h>
+	<avr/io.h>
+	<avr/interrupt.h>
+	<compat/twi.h>
+	"Eeprom.h"
+	<ctype.h>
+	<inttypes.h>
+	<compat/twi.h>
+	<LiquidCrystal.h>
+
+1364237366 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.h
+
+1364237303 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.h
+	<inttypes.h>
+	"Print.h"
+	"Arduino.h"
+	"WProgram.h"
+	"gcode.h"
+	"fastio.h"
+
+1364236253 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+	"HAL.h"
+
+1364240307 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.h
+
