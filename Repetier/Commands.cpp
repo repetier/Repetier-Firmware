@@ -721,6 +721,18 @@ void process_command(GCode *com,byte bufferedCommand)
         UI_CLEAR_STATUS;
         previous_millis_cmd = millis();
         break;
+#ifdef BEEPER_PIN
+      case 300: {
+        int beepS = 1;
+        int beepP = 1000;
+        if(GCODE_HAS_S(com)) beepS = com->S;
+        if(GCODE_HAS_P(com)) beepP = com->P;
+        tone(BEEPER_PIN, beepS);
+        delay(beepP);
+        noTone(BEEPER_PIN);
+      }
+      break;
+#endif        
 #ifdef TEMP_PID
       case 303: {
           int temp = 150;
