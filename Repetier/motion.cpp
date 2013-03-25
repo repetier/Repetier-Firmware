@@ -64,9 +64,6 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
             previous->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
             current->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
             previous->endSpeed = current->startSpeed = previous->maxJunctionSpeed;
-            OUT_P_F_LN("advj=",previous->maxJunctionSpeed);
-            OUT_P_I("P:",previous);
-            OUT_P_I_LN("C:",current);
             return;
         }
     }
