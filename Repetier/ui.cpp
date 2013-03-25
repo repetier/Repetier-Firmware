@@ -1521,7 +1521,7 @@ void UIDisplay::nextPreviousAction(char next) {
   case UI_ACTION_OPS_MOVE_AFTER:
     printer_state.opsMoveAfter+=increment;
     if(printer_state.opsMoveAfter<0) printer_state.opsMoveAfter=0;
-    else if(printer_state.opsMoveAfter>10) printer_state.opsMoveAfter=100;
+    else if(printer_state.opsMoveAfter>100) printer_state.opsMoveAfter=100;
     extruder_select(current_extruder->id);
     break;
   case UI_ACTION_OPS_MINDISTANCE:
