@@ -629,7 +629,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_I2C_CHIPTYPE 1
 #define UI_DISPLAY_I2C_ADDRESS 0x40
 #define UI_DISPLAY_I2C_OUTPUT_PINS 0xFFE0
-#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x00 // bits that are high always
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x01C0 // bits that are high always
 #define UI_DISPLAY_I2C_PULLUP 0x001F
 #define UI_I2C_CLOCKSPEED 100000L // Note with very long cables make this much smaller, for 2ft cables I found 80000 worked ok
 
@@ -651,12 +651,12 @@ void ui_check_slow_keys(int &action) {}
 #define UI_FAN_LED        _BV(8)
 
 // RAMPS
-//#define UI_ENCODER_A      16 // pins the click encoder are connected to
-//#define UI_ENCODER_B      17 
+#define UI_ENCODER_A      16 // pins the click encoder are connected to
+#define UI_ENCODER_B      17 
 
 // Azteeg
-#define UI_ENCODER_A      7 // pins the click encoder are connected to
-#define UI_ENCODER_B      22 
+//#define UI_ENCODER_A      7 // pins the click encoder are connected to
+//#define UI_ENCODER_B      22 
 
 #define UI_INVERT_MENU_DIRECTION true
 #define UI_HAS_I2C_KEYS
