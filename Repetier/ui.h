@@ -648,9 +648,9 @@ void ui_check_slow_keys(int &action) {}
 #define BEEPER_PIN        _BV(5)
 #define BEEPER_TYPE       2
 #define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin
-#define UI_HEATBED_LED    _BV(6)
+#define UI_HEATBED_LED    _BV(8)
 #define UI_HOTEND_LED     _BV(7)
-#define UI_FAN_LED        _BV(8)
+#define UI_FAN_LED        _BV(6)
 
 // RAMPS
 #define UI_ENCODER_A      16 // pins the click encoder are connected to
