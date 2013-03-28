@@ -629,7 +629,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_I2C_CHIPTYPE 1
 #define UI_DISPLAY_I2C_ADDRESS 0x40
 #define UI_DISPLAY_I2C_OUTPUT_PINS 0xFFE0
-#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x01C0 // bits that are high always
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x01C0 // bits that are high always, for now the 3 viki leds
 #define UI_DISPLAY_I2C_PULLUP 0x001F
 #define UI_I2C_CLOCKSPEED 100000L // Note with very long cables make this much smaller, for 2ft cables I found 80000 worked ok
 
@@ -646,6 +646,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D7_PIN _BV(9)
 
 #define BEEPER_PIN        _BV(5)
+#define BEEPER_TYPE       2
+#define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin
 #define UI_HEATBED_LED    _BV(6)
 #define UI_HOTEND_LED     _BV(7)
 #define UI_FAN_LED        _BV(8)
