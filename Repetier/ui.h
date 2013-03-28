@@ -651,12 +651,12 @@ void ui_check_slow_keys(int &action) {}
 #define UI_FAN_LED        _BV(8)
 
 // RAMPS
-#define UI_ENCODER_A      16 // pins the click encoder are connected to
-#define UI_ENCODER_B      17 
+//#define UI_ENCODER_A      16 // pins the click encoder are connected to
+//#define UI_ENCODER_B      17 
 
 // Azteeg
-//#define UI_ENCODER_A      7 // pins the click encoder are connected to
-//#define UI_ENCODER_B      22 
+#define UI_ENCODER_A      7 // pins the click encoder are connected to
+#define UI_ENCODER_B      22 
 
 #define UI_INVERT_MENU_DIRECTION true
 #define UI_HAS_I2C_KEYS
