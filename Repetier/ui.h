@@ -672,6 +672,7 @@ void ui_check_keys(int &action) {
 	UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
 }
 inline void ui_check_slow_encoder() { }// not used in Viki
+
 void ui_check_slow_keys(int &action) {
   i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
   i2c_write(0x12); // GPIOA

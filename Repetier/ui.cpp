@@ -2182,7 +2182,58 @@ void UIDisplay::slowAction() {
   cli();
   if((flags & 9)==0) {
     flags|=8;
-    sei();
+	sei();
+	
+#if FEATURE_CONTROLLER==5 // Viki Lcd
+	// check temps and set appropriate leds
+	static int ledstatus= 0; // all off
+	static bool hotend_on= false;
+	int led= 0;
+	if(!hotend_on && tempController[0]->targetTemperatureC > 0) {
+	  // turn on led
+		led |= UI_HOTEND_LED;
+		hotend_on= true;
+	}else if(hotend_on && tempController[0]->targetTemperatureC == 0) {
+	  // turn off led
+		led &= ~UI_HOTEND_LED;
+		hotend_on= false;
+	}  
+#if HAVE_HEATED_BED
+	static bool heatbed_on= false;
+	if(!heatbed_on && heatedBedController.targetTemperatureC > 0) {
+		// turn on led
+		led |= UI_HEATBED_LED;
+		heatbed_on= true;
+	}else if(heatbed_on && heatedBedController.targetTemperatureC == 0) {
+		// turn off led
+		led &= ~UI_HEATBED_LED;
+		heatbed_on= false;
+	}
+#endif
+#if FAN_PIN>=0
+	static bool fan_on= false;
+	if(!fan_on && pwm_pos[NUM_EXTRUDER+2] > 0){
+		// turn on led
+		led |= UI_FAN_LED;
+		fan_on= true;
+	}else if(fan_on && pwm_pos[NUM_EXTRUDER+2] == 0) {
+		// turn off led
+		led &= ~UI_FAN_LED;
+		fan_on= false;
+	}
+#endif
+	
+	// update the leds
+	if(led != ledstatus) {
+		i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+		i2c_write(0x12); // GPIOA
+		i2c_write(~led&(UI_HEATBED_LED|UI_HOTEND_LED|UI_FAN_LED)&0xFF); // GPIOA
+		i2c_write(~led&(UI_HEATBED_LED|UI_HOTEND_LED|UI_FAN_LED)>>8); // GPIOB
+		i2c_stop();
+		ledstatus= led;
+	}
+#endif // FEATURE_CONTROLLER==5
+	
     int nextAction = 0;
     ui_check_slow_keys(nextAction);
     if(lastButtonAction!=nextAction) {
