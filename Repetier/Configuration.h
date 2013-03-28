@@ -580,12 +580,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 use a mechanical endstop connected with gnd. Set value to false for no pullup
 on this endstop.
 */
-#define ENDSTOP_PULLUP_X_MIN false
-#define ENDSTOP_PULLUP_Y_MIN false
-#define ENDSTOP_PULLUP_Z_MIN false
+#define ENDSTOP_PULLUP_X_MIN true
+#define ENDSTOP_PULLUP_Y_MIN true
+#define ENDSTOP_PULLUP_Z_MIN true
 #define ENDSTOP_PULLUP_X_MAX true
 #define ENDSTOP_PULLUP_Y_MAX true
-#define ENDSTOP_PULLUP_Z_MAX false
+#define ENDSTOP_PULLUP_Z_MAX true
 
 //set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING true
@@ -599,7 +599,7 @@ on this endstop.
 
 #define MIN_HARDWARE_ENDSTOP_X true
 #define MIN_HARDWARE_ENDSTOP_Y true
-#define MIN_HARDWARE_ENDSTOP_Z true
+#define MIN_HARDWARE_ENDSTOP_Z false
 #define MAX_HARDWARE_ENDSTOP_X false
 #define MAX_HARDWARE_ENDSTOP_Y false
 #define MAX_HARDWARE_ENDSTOP_Z true
@@ -623,15 +623,15 @@ on this endstop.
 #define DISABLE_E false
 
 // Inverting axis direction
-#define INVERT_X_DIR true
-#define INVERT_Y_DIR true
-#define INVERT_Z_DIR true
+#define INVERT_X_DIR false
+#define INVERT_Y_DIR false
+#define INVERT_Z_DIR false
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
+#define Z_HOME_DIR 1
 
 // Delta robot radius endstop
 #define max_software_endstop_r true
@@ -960,7 +960,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
  Overridden if EEPROM activated.
 */
 //#define BAUDRATE 76800
-#define BAUDRATE 115200
+#define BAUDRATE 230400
 //#define BAUDRATE 250000
 
 /**
@@ -1015,7 +1015,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, as they are 
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 123
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT false
@@ -1055,8 +1055,9 @@ The following settings override uiconfig.h!
 2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
+5 = Viki Lcd Panel
 */
-#define FEATURE_CONTROLLER 0
+#define FEATURE_CONTROLLER 5
 
 /**
 Select the language to use.
@@ -1066,10 +1067,10 @@ Select the language to use.
 3 = brazilian portuguese
 4 = italian
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_VERSION_STRING2 "Ordbot"
+#define UI_VERSION_STRING2 "ZenBot"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

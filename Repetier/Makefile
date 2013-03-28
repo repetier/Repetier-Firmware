@@ -33,15 +33,15 @@
 # $Id$
 
 TARGET = $(notdir $(CURDIR))
-INSTALL_DIR = D:/arduino/arduino-0022
-UPLOAD_RATE = 38400
-AVRDUDE_PROGRAMMER = stk500v1
-PORT = COM10
-#MCU = atmega2560
+INSTALL_DIR = /opt/arduino
+UPLOAD_RATE = 115200
+AVRDUDE_PROGRAMMER = arduino
+PORT = /dev/ramps
+MCU = atmega2560
 #For "old" Arduino Mega
 #MCU = atmega1280
 #For Sanguinololu
-MCU = atmega644p 
+#MCU = atmega644p 
 F_CPU = 16000000
 
 
