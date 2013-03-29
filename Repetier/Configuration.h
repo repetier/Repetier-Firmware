@@ -1018,11 +1018,11 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 #define EEPROM_MODE 123
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT false
+#define SDSUPPORT true
 /** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT -1
+//#define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal. 
 #define SDCARDDETECTINVERTED false
 #endif
