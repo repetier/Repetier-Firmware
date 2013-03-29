@@ -713,10 +713,17 @@ UIDisplay::UIDisplay() {
 void UIDisplay::initialize() {
 #if UI_DISPLAY_TYPE>0
   initializeLCD();
+#if 1
+  // I don't know why but after power up the lcd does not come up
+  // but if I reinitialize i2c and the lcd again here it works.
+  delay(10);
+  i2c_init();
+  initializeLCD();
+#endif
   uid.printRowP(0,versionString);
   uid.printRowP(1,versionString2);
 #endif
-#if BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS)
+#if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
   // Make sure the beeper is off
   i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
   i2c_write(255); // Disable beeper, enable read for other pins.
