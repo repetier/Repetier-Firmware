@@ -713,10 +713,17 @@ UIDisplay::UIDisplay() {
 void UIDisplay::initialize() {
 #if UI_DISPLAY_TYPE>0
   initializeLCD();
+#if 1
+  // I don't know why but after power up the lcd does not come up
+  // but if I reinitialize i2c and the lcd again here it works.
+  delay(10);
+  i2c_init();
+  initializeLCD();
+#endif
   uid.printRowP(0,versionString);
   uid.printRowP(1,versionString2);
 #endif
-#if BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS)
+#if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
   // Make sure the beeper is off
   i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
   i2c_write(255); // Disable beeper, enable read for other pins.
@@ -2182,7 +2189,25 @@ void UIDisplay::slowAction() {
   cli();
   if((flags & 9)==0) {
     flags|=8;
-    sei();
+	sei();
+	
+#if FEATURE_CONTROLLER==5 // Viki Lcd
+	{
+	// check temps and set appropriate leds
+	int led= 0;
+	led |= (tempController[0]->targetTemperatureC > 0 ? UI_HOTEND_LED : 0);
+#if HAVE_HEATED_BED
+	led |= (heatedBedController.targetTemperatureC > 0 ? UI_HEATBED_LED : 0);
+#endif
+#if FAN_PIN>=0
+	led |= (pwm_pos[NUM_EXTRUDER+2] > 0 ? UI_FAN_LED : 0);
+#endif
+	
+	// update the leds
+	uid.outputMask= ~led&(UI_HEATBED_LED|UI_HOTEND_LED|UI_FAN_LED);
+	}
+#endif // FEATURE_CONTROLLER==5
+	
     int nextAction = 0;
     ui_check_slow_keys(nextAction);
     if(lastButtonAction!=nextAction) {

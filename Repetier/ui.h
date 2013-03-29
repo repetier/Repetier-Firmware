@@ -619,6 +619,75 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 4
 
+#if FEATURE_CONTROLLER==5 // Viki Lcd
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 0xFFE0
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x01C0 // bits that are high always, for now the 3 viki leds
+#define UI_DISPLAY_I2C_PULLUP 0x001F
+#define UI_I2C_CLOCKSPEED 100000L // Note with very long cables make this much smaller, for 2ft cables I found 80000 worked ok
+
+#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)
+
+#define BEEPER_PIN        _BV(5)
+#define BEEPER_TYPE       2
+#define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin
+#define UI_HEATBED_LED    _BV(6)
+#define UI_HOTEND_LED     _BV(7)
+#define UI_FAN_LED        _BV(8)
+
+// RAMPS
+#define UI_ENCODER_A      16 // pins the click encoder are connected to
+#define UI_ENCODER_B      17 
+
+// Azteeg
+//#define UI_ENCODER_A      7 // pins the click encoder are connected to
+//#define UI_ENCODER_B      22 
+
+#define UI_INVERT_MENU_DIRECTION true
+#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_ENCODER 0
+#define UI_I2C_KEY_ADDRESS 0x40
+#ifdef UI_MAIN
+void ui_init_keys() {
+	UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
+}
+void ui_check_keys(int &action) {
+	UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
+}
+inline void ui_check_slow_encoder() { }// not used in Viki
+void ui_check_slow_keys(int &action) {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GPIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
+  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
+  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
+  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button
+  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button
+}
+#endif
+#endif // Controller 5
 
 #if FEATURE_CONTROLLER>0
 
