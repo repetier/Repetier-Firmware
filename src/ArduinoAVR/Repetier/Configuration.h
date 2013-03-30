@@ -64,7 +64,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Foltyn 3D Master           = 12
 // MegaTronics 1.0            = 70
-// ;egatronics 2.0            = 701
+// Megatronics 2.0            = 701
 // RUMBA                      = 80  // Get it from reprapdiscount
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
