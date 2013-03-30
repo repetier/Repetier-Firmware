@@ -19,8 +19,6 @@
 #ifndef _EEPROM_H
 #define _EEPROM_H
 
-
-
 // Id to distinguish version changes
 #define EEPROM_PROTOCOL_VERSION 2
 
@@ -102,19 +100,26 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #define EPR_EXTRUDER_COOLER_SPEED       54
+
+class EEPROM
+{
 #if EEPROM_MODE!=0
-
-
-extern void epr_data_to_eeprom(byte corrupted);
-extern void epr_eeprom_to_data();
-extern void epr_eeprom_reset();
-
+    static byte computeChecksum();
+    static void writeExtruderPrefix(uint pos);
+    static void writeFloat(uint pos,PGM_P text);
+    static void writeLong(uint pos,PGM_P text);
+    static void writeInt(uint pos,PGM_P text);
+    static void writeByte(uint pos,PGM_P text);
 #endif
+public:
 
-extern void epr_output_settings();
-extern void epr_update(GCode *com);
-extern void epr_init();
-extern void epr_init_baudrate();
-extern void epr_update_usage();
+    static void init();
+    static void initBaudrate();
+    static void storeDataIntoEEPROM(byte corrupted);
+    static void readDataFromEEPROM();
+    static void restoreEEPROMSettingsFromConfiguration();
+    static void writeSettings();
+    static void update(GCode *com);
+    static void updatePrinterUsage();
+};
 #endif
-

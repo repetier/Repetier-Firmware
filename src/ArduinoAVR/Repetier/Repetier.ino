@@ -521,7 +521,7 @@ void setup()
 #if defined(USE_ADVANCE)
     printer.extruderStepsNeeded = 0;
 #endif
-    epr_init_baudrate();
+    EEPROM::initBaudrate();
     RFSERIAL.begin(baudrate);
     out.println_P(PSTR("start"));
     UI_INITIALIZE;
@@ -536,7 +536,7 @@ void setup()
     MCUSR=0;
 
     Extruder::initExtruder();
-    epr_init(); // Read settings from eeprom if wanted
+    EEPROM::init(); // Read settings from eeprom if wanted
     update_ramps_parameter();
 
 #if SDSUPPORT

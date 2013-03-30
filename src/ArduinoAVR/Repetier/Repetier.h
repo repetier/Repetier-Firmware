@@ -429,5 +429,6 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 #define STR(s) #s
 #define XSTR(s) STR(s)
 #include "Commands.h"
+#include "Eeprom.h"
 
 #endif

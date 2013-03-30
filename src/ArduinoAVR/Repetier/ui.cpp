@@ -1870,12 +1870,12 @@ void UIDisplay::executeAction(int action) {
       break;
 #if EEPROM_MODE!=0
     case UI_ACTION_STORE_EEPROM:
-      epr_data_to_eeprom(false);
+      EEPROM::storeDataIntoEEPROM(false);
       pushMenu((void*)&ui_menu_eeprom_saved,false);
       BEEP_LONG;skipBeep = true;
       break;
     case UI_ACTION_LOAD_EEPROM:
-      epr_eeprom_to_data();
+      EEPROM::readDataFromEEPROM();
       pushMenu((void*)&ui_menu_eeprom_loaded,false);
       BEEP_LONG;skipBeep = true;
       break;
@@ -2084,7 +2084,7 @@ void UIDisplay::executeAction(int action) {
 		calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
 		out.println_P(PSTR("Measured origin set. Measurement reset."));
 #if EEPROM_MODE!=0
-		epr_data_to_eeprom(false);
+		EEPROM::storeDataIntoEEPROM(false);
 		out.println_P(PSTR("EEPROM updated"));
 #endif
 	}

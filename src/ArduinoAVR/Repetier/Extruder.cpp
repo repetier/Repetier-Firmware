@@ -381,7 +381,7 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
 #if EEPROM_MODE != 0
     if(alloff && !alloffs) // All heaters are now switched off?
-        epr_update_usage();
+        EEPROM::updatePrinterUsage();
 #endif
     if(alloffs && !alloff) // heaters are turned on, start measuring printing time
         printer.msecondsPrinting = HAL::timeInMilliseconds();
