@@ -87,7 +87,7 @@ is a full cartesian system where x, y and z moves are handled by seperate motors
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in
 the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
-#define DRIVE_SYSTEM 0
+#define DRIVE_SYSTEM 3
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -941,7 +941,7 @@ For more informations, read the wiki.
 
 Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
 to activate the quadratic term. Only adds lots of computations and storage usage. */
-//#define ENABLE_QUADRATIC_ADVANCE
+#define ENABLE_QUADRATIC_ADVANCE
 
 
 // ##########################################################################################

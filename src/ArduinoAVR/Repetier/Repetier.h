@@ -278,22 +278,14 @@ extern float maxadvspeed;
 
 #include "Extruder.h"
 extern void(* resetFunc) (void);
-void process_command(GCode *code,byte bufferedCommand);
 
 void manage_inactivity(byte debug);
 
-extern void wait_until_end_of_move();
 extern void update_ramps_parameter();
 extern void update_extruder_flags();
 extern void finishNextSegment();
-extern void printPosition();
 extern void defaultLoopActions();
-extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
-extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
-extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 extern byte setDestinationStepsFromGCode(GCode *com);
-extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
-extern void queue_move(byte check_endstops,byte pathOptimize);
 #if DRIVE_SYSTEM==3
 extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
@@ -331,11 +323,7 @@ extern unsigned long stepper_inactive_time;
 extern void setupTimerInterrupt();
 extern void current_control_init();
 extern void microstep_init();
-extern void print_temperatures();
 extern void check_mem();
-#if ARC_SUPPORT
-extern void mc_arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
-#endif
 
 #include "Printer.h"
 #include "motion.h"
@@ -347,28 +335,14 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 
 #include "HAL.h"
 
-#define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 
 extern unsigned int counter_periodical;
 extern volatile byte execute_periodical;
 extern byte counter_250ms;
 extern void write_monitor();
 extern void check_periodical();
-#define CELSIUS_EXTRA_BITS 3
-#define ANALOG_REDUCE_BITS 0
-#define ANALOG_REDUCE_FACTOR 1
 
-#if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
-extern TemperatureController heatedBedController;
-#else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
-#endif
-#define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
-#define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
-extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
-extern byte autotuneIndex;
 
 #if SDSUPPORT
 
@@ -426,9 +400,6 @@ extern SDCard sd;
 #endif
 
 extern int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
-#ifdef USE_OPS
-extern byte printmoveSeen;
-#endif
 extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 
 
@@ -457,5 +428,6 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 
 #define STR(s) #s
 #define XSTR(s) STR(s)
+#include "Commands.h"
 
 #endif

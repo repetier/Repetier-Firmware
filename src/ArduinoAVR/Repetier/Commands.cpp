@@ -48,20 +48,20 @@ void check_periodical() {
   waits, until the steppers are stopped. In the meanwhile it buffers incoming
   commands and manages temperatures.
 */
-void wait_until_end_of_move() {
-  while(lines_count) {
+void Commands::waitUntilEndOfAllMoves() {
+  while(PrintLine::hasLines()) {
     gcode_read_serial();
     check_periodical();
     UI_MEDIUM;
   }
 }
-void printPosition() {
+void Commands::printCurrentPosition() {
   OUT_P_F("X:",Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
   OUT_P_F(" Y:",Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
   OUT_P_F(" Z:",Printer::currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
   OUT_P_F_LN(" E:",Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
-void print_temperatures() {
+void Commands::printTemperatures() {
 	float temp = current_extruder->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE==0
   OUT_P_F("T:",temp);
@@ -86,24 +86,26 @@ void print_temperatures() {
 #endif
   OUT_LN;
 }
-void change_feedrate_multiply(int factor) {
+void Commands::changeFeedrateMultiply(int factor) {
   if(factor<25) factor=25;
   if(factor>500) factor=500;
   printer.feedrate *= (float)factor/(float)printer.feedrateMultiply;
   printer.feedrateMultiply = factor;
   OUT_P_I_LN("SpeedMultiply:",factor);
 }
-void change_flowate_multiply(int factor) {
+void Commands::changeFlowateMultiply(int factor) {
   if(factor<25) factor=25;
   if(factor>200) factor=200;
   printer.extrudeMultiply = factor;
   OUT_P_I_LN("FlowMultiply:",factor);
 }
-void set_fan_speed(int speed,bool wait) {
+void Commands::setFanSpeed(int speed,bool wait) {
 #if FAN_PIN>=0
   speed = constrain(speed,0,255);
   if(wait)
-    wait_until_end_of_move(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
+    Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
+  if(speed!=pwm_pos[NUM_EXTRUDER+2])
+      OUT_P_I_LN("Fanspeed:",speed);
   pwm_pos[NUM_EXTRUDER+2] = speed;
 #endif
 }
@@ -113,24 +115,35 @@ void delta_move_to_top_endstops(float feedrate) {
   for (byte i=0; i<3; i++)
     Printer::currentPositionSteps[i] = 0;
   calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
-  move_steps(0,0,printer.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
+  PrintLine::move_steps(0,0,printer.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
 }
-
-void home_axis(bool xaxis,bool yaxis,bool zaxis) {
-  long steps;
-  bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
-  if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z) {
-    UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
-    // Homing Z axis means that you must home X and Y
-    if (homeallaxis || zaxis) {
+void Commands::homeXAxis() {
+    Printer::destinationSteps[0] = 0;
+    split_delta_move(true,false,false);
+}
+void Commands::homeYAxis() {
+    Printer::destinationSteps[1] = 0;
+    split_delta_move(true,false,false);
+}
+void Commands::homeZAxis() {
       delta_move_to_top_endstops(homing_feedrate[0]);
-      move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+      PrintLine::move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
       delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);
       Printer::currentPositionSteps[0] = 0;
       Printer::currentPositionSteps[1] = 0;
       Printer::currentPositionSteps[2] = printer.zMaxSteps;
       calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
       printer.maxDeltaPositionSteps = printer.currentDeltaPositionSteps[0];
+}
+
+void Commands::homeAxis(bool xaxis,bool yaxis,bool zaxis) {
+  long steps;
+  bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
+  if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z) {
+    UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+    // Homing Z axis means that you must home X and Y
+    if (homeallaxis || zaxis) {
+            homeZAxis();
     } else {
       if (xaxis) Printer::destinationSteps[0] = 0;
       if (yaxis) Printer::destinationSteps[1] = 0;
@@ -141,20 +154,18 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   }
 }
 #else
-void home_axis(bool xaxis,bool yaxis,bool zaxis) {
-  long steps;
-  if(xaxis) {
+void Commands::homeXAxis() {
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
       steps = (printer.xMaxSteps-printer.xMinSteps) * X_HOME_DIR;
       Printer::currentPositionSteps[0] = -steps;
-      move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
+      PrintLine::move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
       Printer::currentPositionSteps[0] = 0;
-      move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
-      move_steps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
+      PrintLine::move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
+      PrintLine::move_steps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_X_BACK_ON_HOME)
       if(ENDSTOP_X_BACK_ON_HOME > 0)
-        move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
+        PrintLine::move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
       long offX = 0;
 #if NUM_EXTRUDER>1
@@ -163,22 +174,22 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 #endif
       Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer.xMinSteps-offX : printer.xMaxSteps+offX;
 #if NUM_EXTRUDER>1
-      move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
+      PrintLine::move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
     }
-  }
-  if(yaxis) {
+}
+void Commands::homeYAxis() {
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
       steps = (printer.yMaxSteps-printer.yMinSteps) * Y_HOME_DIR;
       Printer::currentPositionSteps[1] = -steps;
-      move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
+      PrintLine::move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
       Printer::currentPositionSteps[1] = 0;
-      move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
-      move_steps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
+      PrintLine::move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
+      PrintLine::move_steps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
       if(ENDSTOP_Y_BACK_ON_HOME > 0)
-        move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
+        PrintLine::move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
       long offY = 0;
 #if NUM_EXTRUDER>1
@@ -187,25 +198,36 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 #endif
       Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer.yMinSteps-offY : printer.yMaxSteps+offY;
 #if NUM_EXTRUDER>1
-      move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
+      PrintLine::move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
     }
-  }
-  if(zaxis) {
+}
+void Commands::homeZAxis() {
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
       steps = (printer.zMaxSteps-printer.zMinSteps) * Z_HOME_DIR;
       Printer::currentPositionSteps[2] = -steps;
-      move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
+      PrintLine::move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
       Printer::currentPositionSteps[2] = 0;
-      move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
-      move_steps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
+      PrintLine::move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
+      PrintLine::move_steps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
       if(ENDSTOP_Z_BACK_ON_HOME > 0)
-        move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
+        PrintLine::move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
 #endif
       Printer::currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer.zMinSteps : printer.zMaxSteps;
     }
+}
+void Commands::homeAxis(bool xaxis,bool yaxis,bool zaxis) {
+  long steps;
+  if(xaxis) {
+    homeXAxis();
+  }
+  if(yaxis) {
+    homeYAxis();
+  }
+  if(zaxis) {
+    homeZAxis();
   }
   UI_CLEAR_STATUS
 }
@@ -366,14 +388,14 @@ void microstep_init()
 /**
   \brief Execute the command stored in com.
 */
-void process_command(GCode *com,byte bufferedCommand)
+void Commands::executeGCode(GCode *com,byte bufferedCommand)
 {
   unsigned long codenum; //throw away variable
 #ifdef INCLUDE_DEBUG_COMMUNICATION
   if(DEBUG_COMMUNICATION) {
     if(com->hasG() || (com->hasM() && com->M!=111)) {
       gcode_command_finished(com); // free command cache
-      previous_millis_cmd = millis();
+      previous_millis_cmd = HAL::timeInMilliseconds();
       return;
     }
   }
@@ -386,9 +408,9 @@ void process_command(GCode *com,byte bufferedCommand)
       case 1: // G1
         if(setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if DRIVE_SYSTEM == 3
-          split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+          PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
-          queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+          PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
         break;
 #if ARC_SUPPORT
@@ -497,25 +519,25 @@ void process_command(GCode *com,byte bufferedCommand)
         offset[1] = 0.5*(y+(x*h_x2_div_d));
 
       } else { // Offset mode specific computations
-        r = hypot(offset[0], offset[1]); // Compute arc radius for mc_arc
+        r = hypot(offset[0], offset[1]); // Compute arc radius for arc
       }
 
-      // Set clockwise/counter-clockwise sign for mc_arc computations
+      // Set clockwise/counter-clockwise sign for arc computations
       uint8_t isclockwise = com->G == 2;
 
       // Trace the arc
-      mc_arc(position, target, offset,r, isclockwise);
+      PrintLine::arc(position, target, offset,r, isclockwise);
 
       break;
       }
 #endif
       case 4: // G4 dwell
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
         codenum = 0;
         if(com->hasP()) codenum = com->P; // milliseconds to wait
         if(com->hasS()) codenum = com->S * 1000; // seconds to wait
-        codenum += millis();  // keep track of when we started waiting
-        while((unsigned long)(codenum-millis())  < 2000000000 ){
+        codenum += HAL::timeInMilliseconds();  // keep track of when we started waiting
+        while((unsigned long)(codenum-HAL::timeInMilliseconds())  < 2000000000 ){
           gcode_read_serial();
           check_periodical();
         }
@@ -528,7 +550,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 28: {//G28 Home all Axis one at a time
           byte home_all_axis = (com->hasNoXYZ());
-          home_axis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
+          homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
 		}
         break;
       case 90: // G90
@@ -547,7 +569,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
 
     }
-    previous_millis_cmd = millis();
+    previous_millis_cmd = HAL::timeInMilliseconds();
   }
 
   else if(com->hasM())  { // Process M Code
@@ -620,13 +642,13 @@ void process_command(GCode *com,byte bufferedCommand)
       case 104: // M104
 #if NUM_EXTRUDER>0
         if(reportTempsensorError()) break;
-        previous_millis_cmd = millis();
+        previous_millis_cmd = HAL::timeInMilliseconds();
         if(DEBUG_DRYRUN) break;
 #ifdef EXACT_TEMPERATURE_TIMING
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
 #else
         if(com->hasP())
-          wait_until_end_of_move();
+          Commands::waitUntilEndOfAllMoves();
 #endif
         if (com->hasS()) {
           if(com->hasT())
@@ -638,21 +660,21 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
       case 140: // M140 set bed temp
         if(reportTempsensorError()) break;
-        previous_millis_cmd = millis();
+        previous_millis_cmd = HAL::timeInMilliseconds();
         if(DEBUG_DRYRUN) break;
         if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
         break;
       case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
-        print_temperatures();
+        printTemperatures();
         break;
       case 109: // M109 - Wait for extruder heater to reach target.
         {
 #if NUM_EXTRUDER>0
           if(reportTempsensorError()) break;
-          previous_millis_cmd = millis();
+          previous_millis_cmd = HAL::timeInMilliseconds();
           if(DEBUG_DRYRUN) break;
           UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
-          wait_until_end_of_move();
+          Commands::waitUntilEndOfAllMoves();
           Extruder *actExtruder = current_extruder;
           if(com->hasT() && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
           if (com->hasS()) Extruder::setTemperatureForExtruder(com->S,actExtruder->id);
@@ -660,23 +682,23 @@ void process_command(GCode *com,byte bufferedCommand)
           if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
           bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
-          codenum = millis();
+          codenum = HAL::timeInMilliseconds();
           unsigned long waituntil = 0;
 #if RETRACT_DURING_HEATUP
           byte retracted = 0;
 #endif
           unsigned long cur_time;
           do {
-            cur_time = millis();
+            cur_time = HAL::timeInMilliseconds();
             if( (cur_time - codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
-              print_temperatures();
+              printTemperatures();
               codenum = cur_time;
             }
             check_periodical();
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
             if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dir && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature) {
-                move_steps(0,0,0,-actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
+                PrintLine::move_steps(0,0,0,-actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
         	retracted = 1;
             }
 #endif
@@ -690,36 +712,36 @@ void process_command(GCode *com,byte bufferedCommand)
           } while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
 #if RETRACT_DURING_HEATUP
           if (retracted && actExtruder==current_extruder) {
-            move_steps(0,0,0,actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
+            PrintLine::move_steps(0,0,0,actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
           }
 #endif
         }
         UI_CLEAR_STATUS;
 #endif
-        previous_millis_cmd = millis();
+        previous_millis_cmd = HAL::timeInMilliseconds();
         break;
       case 190: // M190 - Wait bed for heater to reach target.
 #if HAVE_HEATED_BED
         if(DEBUG_DRYRUN) break;
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
         if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
         if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
 #endif
-        codenum = millis();
+        codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC+0.5<heatedBedController.targetTemperatureC) {
-          if( (millis()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
-            print_temperatures();
-            codenum = millis();
+          if( (HAL::timeInMilliseconds()-codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
+            printTemperatures();
+            codenum = HAL::timeInMilliseconds();
           }
           check_periodical();
         }
 #endif
 #endif
         UI_CLEAR_STATUS;
-        previous_millis_cmd = millis();
+        previous_millis_cmd = HAL::timeInMilliseconds();
         break;
 #ifdef BEEPER_PIN
       case 300: {
@@ -746,23 +768,23 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
       case 106: //M106 Fan On
-        set_fan_speed(com->hasS()?com->S:255,com->hasP());
+        setFanSpeed(com->hasS()?com->S:255,com->hasP());
         break;
       case 107: //M107 Fan Off
-        set_fan_speed(0,com->hasP());
+        setFanSpeed(0,com->hasP());
         break;
 #endif
       case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
-        wait_until_end_of_move();
-        previous_millis_cmd = millis();
+        Commands::waitUntilEndOfAllMoves();
+        previous_millis_cmd = HAL::timeInMilliseconds();
         SET_OUTPUT(PS_ON_PIN); //GND
         WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
         break;
       case 81: // M81 - ATX Power Off
 #if PS_ON_PIN>-1
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
         SET_OUTPUT(PS_ON_PIN); //GND
         WRITE(PS_ON_PIN,(POWER_INVERTING ? LOW : HIGH));
 #endif
@@ -776,7 +798,7 @@ void process_command(GCode *com,byte bufferedCommand)
       case 84:
         if(com->hasS()){ stepper_inactive_time = com->S * 1000; }
         else{
-          wait_until_end_of_move();
+          Commands::waitUntilEndOfAllMoves();
           kill(true);
         }
         break;
@@ -823,7 +845,7 @@ void process_command(GCode *com,byte bufferedCommand)
         for(byte i=0;i<NUM_EXTRUDER;i++)
           if(tempController[i]->targetTemperatureC>15) alloff = false;
 
-        long seconds = (alloff ? 0 : (millis()-printer.msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
+        long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-printer.msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
         long tmp = seconds/86400;
         seconds-=tmp*86400;
         OUT_P_L("Printing time:",tmp);
@@ -837,7 +859,7 @@ void process_command(GCode *com,byte bufferedCommand)
        }
         break;
       case 114: // M114
-        printPosition();
+        printCurrentPosition();
         break;
       case 117: // M117 message to lcd
         if(com->hasString()) {
@@ -845,30 +867,30 @@ void process_command(GCode *com,byte bufferedCommand)
         }
         break;
       case 119: // M119
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
       	#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
       	out.print_P(PSTR("x_min:"));
-        out.print_P((READ(X_MIN_PIN)^ENDSTOP_X_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isXMinEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
       	#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
       	out.print_P(PSTR("x_max:"));
-        out.print_P((READ(X_MAX_PIN)^ENDSTOP_X_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isXMaxEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
       	out.print_P(PSTR("y_min:"));
-        out.print_P((READ(Y_MIN_PIN)^ENDSTOP_Y_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isYMinEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
       	out.print_P(PSTR("y_max:"));
-        out.print_P((READ(Y_MAX_PIN)^ENDSTOP_Y_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isYMaxEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
       	out.print_P(PSTR("z_min:"));
-        out.print_P((READ(Z_MIN_PIN)^ENDSTOP_Z_MIN_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isZMinEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
       	#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
       	out.print_P(PSTR("z_max:"));
-        out.print_P((READ(Z_MAX_PIN)^ENDSTOP_Z_MAX_INVERTING)?PSTR("H "):PSTR("L "));
+        out.print_P(Printer::isZMaxEndstopHit()?PSTR("H "):PSTR("L "));
       	#endif
         out.println();
       	break;
@@ -946,16 +968,10 @@ void process_command(GCode *com,byte bufferedCommand)
         out.println_float_P(PSTR(" ZJerk:"),printer.maxZJerk);
         break;
       case 220: // M220 S<Feedrate multiplier in percent>
-        if(com->hasS())
-          change_feedrate_multiply(com->S);
-        else
-          change_feedrate_multiply(100);
+        changeFeedrateMultiply(com->getS(100));
         break;
       case 221: // M221 S<Extrusion flow multiplier in percent>
-        if(com->hasS())
-          change_flowate_multiply(com->S);
-        else
-          change_flowate_multiply(100);
+        changeFlowateMultiply(com->getS(100));
         break;
  #ifdef USE_ADVANCE
      case 223: // Extruder interrupt test
@@ -1026,7 +1042,7 @@ void process_command(GCode *com,byte bufferedCommand)
         break;
 #endif
     case 400: // Finish all moves
-      wait_until_end_of_move();
+      Commands::waitUntilEndOfAllMoves();
       break;
 #if FEATURE_MEMORY_POSITION
     case 401: // Memory position
@@ -1037,7 +1053,7 @@ void process_command(GCode *com,byte bufferedCommand)
     case 402: // Go to stored position
       {
         bool all = !(com->hasX() && com->hasY() && com->hasZ());
-        move_steps((all || com->hasX() ? printer.memoryX-Printer::currentPositionSteps[0] : 0)
+        PrintLine::move_steps((all || com->hasX() ? printer.memoryX-Printer::currentPositionSteps[0] : 0)
         ,(all || com->hasY() ? printer.memoryY-Printer::currentPositionSteps[1] : 0)
         ,(all || com->hasZ() ? printer.memoryZ-Printer::currentPositionSteps[2] : 0)
         ,0,(com->hasF() ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
@@ -1130,7 +1146,7 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
     }
   } else if(com->hasT())  { // Process T code
-    wait_until_end_of_move();
+    Commands::waitUntilEndOfAllMoves();
     Extruder::selectExtruderById(com->T);
   } else{
     if(DEBUG_ERRORS) {

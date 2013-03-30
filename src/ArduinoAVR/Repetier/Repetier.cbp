@@ -664,10 +664,7 @@
 		</Unit>
 		<Unit filename="cores/Print.cpp" />
 		<Unit filename="cores/Stream.cpp" />
-		<Unit filename="cores/Tone.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
+		<Unit filename="cores/Tone.cpp" />
 		<Unit filename="cores/USBCore.cpp" />
 		<Unit filename="cores/WInterrupts.c">
 			<Option compilerVar="CC" />

@@ -1,6 +1,8 @@
 #ifndef EXTRUDER_H_INCLUDED
 #define EXTRUDER_H_INCLUDED
 
+#define CELSIUS_EXTRA_BITS 3
+
 //#ifdef TEMP_PID
 //extern byte current_extruder_out;
 //#endif
@@ -254,8 +256,19 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     static void setTemperatureForExtruder(float temp_celsius,byte extr);
 };
 
+#if HAVE_HEATED_BED
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+extern TemperatureController heatedBedController;
+#else
+#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#endif
+#define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
+#define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
+
 extern Extruder *current_extruder;
 extern Extruder extruder[];
+extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
+extern byte autotuneIndex;
 
 
 #endif // EXTRUDER_H_INCLUDED

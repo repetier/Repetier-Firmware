@@ -53,6 +53,9 @@
 #define ESCAPE_INTERRUPT_PROTECTED SREG=sreg;
 
 #define EEPROM_OFFSET               0
+#define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_REDUCE_BITS 0
+#define ANALOG_REDUCE_FACTOR 1
 
 class HAL
 {
@@ -129,7 +132,7 @@ public:
 #endif
     }
 // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned long mulu6xu16to32(unsigned int a,unsigned int b)
+    static inline unsigned long mulu16xu16to32(unsigned int a,unsigned int b)
     {
         unsigned long res;
         // 18 Ticks = 1.125 us
@@ -232,6 +235,9 @@ public:
     static inline void forbidInterrupts()
     {
         cli();
+    }
+    static inline unsigned long timeInMilliseconds() {
+        return millis();
     }
 protected:
 private:

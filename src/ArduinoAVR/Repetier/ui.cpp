@@ -517,7 +517,7 @@ void initializeLCD() {
   delay(2); // clear is slow operation
   lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
   lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
-  uid.lastSwitch = uid.lastRefresh = millis();
+  uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
   uid.createChar(1,character_back);
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
@@ -636,7 +636,7 @@ void initializeLCD() {
   delay(2); // clear is slow operation
   lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
   lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
-  uid.lastSwitch = uid.lastRefresh = millis();
+  uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
   uid.createChar(1,character_back);
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
@@ -683,7 +683,7 @@ void UIDisplay::printRow(byte r,char *txt) {
 
 void initializeLCD() {
   lcd.begin(UI_COLS,UI_ROWS);
-  uid.lastSwitch = uid.lastRefresh = millis();
+  uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
   uid.createChar(1,character_back);
   uid.createChar(2,character_degree);
   uid.createChar(3,character_selected);
@@ -991,7 +991,7 @@ void UIDisplay::parse(char *txt,bool ram) {
         }
         if(c2=='c') {addLong(baudrate,6);break;}
         if(c2=='e') {if(errorMsg!=0)addStringP((char PROGMEM *)errorMsg);break;}
-        if(c2=='B') {addInt((int)lines_count,2);break;}
+        if(c2=='B') {addInt((int)PrintLine::lines_count,2);break;}
         if(c2=='f') {addInt(printer.extrudeMultiply,3);break;}
         if(c2=='m') {addInt(printer.feedrateMultiply,3);break;}
         // Extruder output level
@@ -1402,7 +1402,7 @@ void UIDisplay::okAction() {
 void UIDisplay::nextPreviousAction(char next) {
 #if UI_HAS_KEYS==1
   if(menuLevel==0) {
-    lastSwitch = millis();
+    lastSwitch = HAL::timeInMilliseconds();
     if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0)) {
       menuPos[0]++;
       if(menuPos[0]>=UI_NUM_PAGES)
@@ -1450,32 +1450,32 @@ void UIDisplay::nextPreviousAction(char next) {
   char increment = next;
   switch(action) {
   case UI_ACTION_XPOSITION:
-    move_steps(increment,0,0,0,homing_feedrate[0],true,true);
-    printPosition();
+    PrintLine::move_steps(increment,0,0,0,homing_feedrate[0],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_YPOSITION:
-    move_steps(0,increment,0,0,homing_feedrate[1],true,true);
-    printPosition();
+    PrintLine::move_steps(0,increment,0,0,homing_feedrate[1],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_ZPOSITION:
-    move_steps(0,0,increment,0,homing_feedrate[2],true,true);
-    printPosition();
+    PrintLine::move_steps(0,0,increment,0,homing_feedrate[2],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_XPOSITION_FAST:
-    move_steps(axis_steps_per_unit[0]*increment,0,0,0,homing_feedrate[0],true,true);
-    printPosition();
+    PrintLine::move_steps(axis_steps_per_unit[0]*increment,0,0,0,homing_feedrate[0],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_YPOSITION_FAST:
-    move_steps(0,axis_steps_per_unit[1]*increment,0,0,homing_feedrate[1],true,true);
-    printPosition();
+    PrintLine::move_steps(0,axis_steps_per_unit[1]*increment,0,0,homing_feedrate[1],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_ZPOSITION_FAST:
-    move_steps(0,0,axis_steps_per_unit[2]*increment,0,homing_feedrate[2],true,true);
-    printPosition();
+    PrintLine::move_steps(0,0,axis_steps_per_unit[2]*increment,0,homing_feedrate[2],true,true);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_EPOSITION:
-    move_steps(0,0,0,axis_steps_per_unit[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
-    printPosition();
+    PrintLine::move_steps(0,0,0,axis_steps_per_unit[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
+    Commands::printCurrentPosition();
     break;
   case UI_ACTION_HEATED_BED_TEMP:
 #if HAVE_HEATED_BED==true
@@ -1543,7 +1543,7 @@ void UIDisplay::nextPreviousAction(char next) {
     {
       int fr = printer.feedrateMultiply;
       INCREMENT_MIN_MAX(fr,1,25,500);
-      change_feedrate_multiply(fr);
+      Commands::changeFeedrateMultiply(fr);
     }
     break;
   case UI_ACTION_FLOWRATE_MULTIPLY:
@@ -1708,7 +1708,7 @@ void UIDisplay::nextPreviousAction(char next) {
 #endif
   }
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-    ui_autoreturn_time=millis()+UI_AUTORETURN_TO_MENU_AFTER;
+    ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
 }
@@ -1754,20 +1754,20 @@ void UIDisplay::executeAction(int action) {
       emergencyStop();
       break;
     case UI_ACTION_HOME_ALL:
-      home_axis(true,true,true);
-      printPosition();
+      Commands::homeAxis(true,true,true);
+      Commands::printCurrentPosition();
       break;
     case UI_ACTION_HOME_X:
-      home_axis(true,false,false);
-      printPosition();
+      Commands::homeAxis(true,false,false);
+      Commands::printCurrentPosition();
       break;
     case UI_ACTION_HOME_Y:
-      home_axis(false,true,false);
-      printPosition();
+      Commands::homeAxis(false,true,false);
+    Commands::printCurrentPosition();
       break;
     case UI_ACTION_HOME_Z:
-      home_axis(false,false,true);
-      printPosition();
+      Commands::homeAxis(false,false,true);
+    Commands::printCurrentPosition();
       break;
     case UI_ACTION_SET_ORIGIN:
       Printer::currentPositionSteps[0] = -printer.offsetX;
@@ -1917,24 +1917,19 @@ void UIDisplay::executeAction(int action) {
 #endif
 #if FAN_PIN>-1
     case UI_ACTION_FAN_OFF:
-      set_fan_speed(0,false);
-      OUT_P_LN("Fanspeed:0");
+      Commands::setFanSpeed(0,false);
       break;
     case UI_ACTION_FAN_25:
-      set_fan_speed(64,false);
-      OUT_P_LN("Fanspeed:64");
+      Commands::setFanSpeed(64,false);
       break;
     case UI_ACTION_FAN_50:
-      set_fan_speed(128,false);
-      OUT_P_LN("Fanspeed:128");
+      Commands::setFanSpeed(128,false);
       break;
     case UI_ACTION_FAN_75:
-      set_fan_speed(192,false);
-      OUT_P_LN("Fanspeed:192");
+      Commands::setFanSpeed(192,false);
       break;
     case UI_ACTION_FAN_FULL:
-      set_fan_speed(255,false);
-      OUT_P_LN("Fanspeed:255");
+      Commands::setFanSpeed(255,false);
       break;
 #endif
     case UI_ACTION_MENU_XPOS:
@@ -2015,28 +2010,28 @@ void UIDisplay::executeAction(int action) {
       break;
 #endif
     case UI_ACTION_X_UP:
-      move_steps(axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
+      PrintLine::move_steps(axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
       break;
     case UI_ACTION_X_DOWN:
-      move_steps(-axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
+      PrintLine::move_steps(-axis_steps_per_unit[0],0,0,0,homing_feedrate[0],false,true);
       break;
     case UI_ACTION_Y_UP:
-      move_steps(0,axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
+      PrintLine::move_steps(0,axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
       break;
     case UI_ACTION_Y_DOWN:
-      move_steps(0,-axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
+      PrintLine::move_steps(0,-axis_steps_per_unit[1],0,0,homing_feedrate[1],false,true);
       break;
     case UI_ACTION_Z_UP:
-      move_steps(0,0,axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
+      PrintLine::move_steps(0,0,axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
     case UI_ACTION_Z_DOWN:
-      move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
+      PrintLine::move_steps(0,0,-axis_steps_per_unit[2],0,homing_feedrate[2],false,true);
       break;
     case UI_ACTION_EXTRUDER_UP:
-      move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
+      PrintLine::move_steps(0,0,0,axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
     case UI_ACTION_EXTRUDER_DOWN:
-      move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
+      PrintLine::move_steps(0,0,0,-axis_steps_per_unit[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
       break;
     case UI_ACTION_EXTRUDER_TEMP_UP: {
          int tmp = (int)(current_extruder->tempControl.targetTemperatureC)+1;
@@ -2135,12 +2130,10 @@ void UIDisplay::executeAction(int action) {
 #endif
       break;
     case UI_ACTION_FAN_UP:
-      set_fan_speed(pwm_pos[3]+32,false);
-      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
+      Commands::setFanSpeed(pwm_pos[3]+32,false);
       break;
     case UI_ACTION_FAN_DOWN:
-      set_fan_speed(pwm_pos[3]-32,false);
-      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
+      Commands::setFanSpeed(pwm_pos[3]-32,false);
       break;
     case UI_ACTION_KILL:
       HAL::forbidInterrupts(); // Don't allow interrupts to do their work
@@ -2173,7 +2166,7 @@ void UIDisplay::executeAction(int action) {
   if(!skipBeep)
     BEEP_SHORT
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-    ui_autoreturn_time=millis()+UI_AUTORETURN_TO_MENU_AFTER;
+    ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
 }
@@ -2183,7 +2176,7 @@ void UIDisplay::mediumAction() {
 #endif
 }
 void UIDisplay::slowAction() {
-  unsigned long time = millis();
+  unsigned long time = HAL::timeInMilliseconds();
   byte refresh=0;
 #if UI_HAS_KEYS==1
   // Update key buffer
@@ -2298,7 +2291,7 @@ void UIDisplay::fastAction() {
     int nextAction = 0;
     ui_check_keys(nextAction);
     if(lastButtonAction!=nextAction) {
-      lastButtonStart = millis();
+      lastButtonStart = HAL::timeInMilliseconds();
       lastButtonAction = nextAction;
       HAL::forbidInterrupts();
       flags|=1;

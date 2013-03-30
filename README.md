@@ -5,6 +5,9 @@
 This development version is under heavy code change. Im reorganizing and refactoring
 this code. Planned achievements for this release:
 
+* Works with CodeBlocks for Arduino http://www.arduinodev.com/codeblocks/#download
+  which can replace the ArduinoIDE with a much better one on windows systems. Load the
+  Repetier.cdb project file for this.
 * Better readable code.
 * Separation of logic and hardware access to allow different processor architectures
   by changing the hardware related files.

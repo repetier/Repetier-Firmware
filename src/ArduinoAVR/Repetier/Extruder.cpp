@@ -102,7 +102,7 @@ void Extruder::manageTemperatures()
 #endif
             if(act->heatManager == 2)   // Bang-bang with reduced change frequency to save relais life
             {
-                unsigned long time = millis();
+                unsigned long time = HAL::timeInMilliseconds();
                 if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
@@ -230,7 +230,7 @@ void Extruder::initExtruder()
             pinMode(act->enablePin,OUTPUT);
             if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
         }
-        act->tempControl.lastTemperatureUpdate = millis();
+        act->tempControl.lastTemperatureUpdate = HAL::timeInMilliseconds();
 #ifdef SUPPORT_MAX6675
         if(act->sensorType==101)
         {
@@ -350,7 +350,7 @@ void Extruder::selectExtruderById(byte extruderId)
     if(dx || dy)
     {
         float oldfeedrate = printer.feedrate;
-        move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+        PrintLine::move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
         printer.offsetX += dx;
         printer.offsetY += dy;
         printer.feedrate = oldfeedrate;
@@ -384,7 +384,7 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
         epr_update_usage();
 #endif
     if(alloffs && !alloff) // heaters are turned on, start measuring printing time
-        printer.msecondsPrinting = millis();
+        printer.msecondsPrinting = HAL::timeInMilliseconds();
 }
 
 void Extruder::setHeatedBedTemperature(float temp_celsius)
@@ -787,7 +787,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     int cycles=0;
     bool heating = true;
 
-    unsigned long temp_millis = millis();
+    unsigned long temp_millis = HAL::timeInMilliseconds();
     unsigned long t1=temp_millis;
     unsigned long t2=temp_millis;
     long t_high;
@@ -809,7 +809,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     {
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
-        unsigned long time = millis();
+        unsigned long time = HAL::timeInMilliseconds();
         maxTemp=max(maxTemp,currentTemp);
         minTemp=min(minTemp,currentTemp);
         if(heating == true && currentTemp > temp)   // switch heating -> off
@@ -887,7 +887,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
         if(time - temp_millis > 1000)
         {
             temp_millis = time;
-            print_temperatures();
+            Commands::printTemperatures();
         }
         if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L))   // 20 Minutes
         {
@@ -914,7 +914,7 @@ disabled, the function is not called.
 */
 void write_monitor()
 {
-    out.print_long_P(PSTR("MTEMP:"),millis());
+    out.print_long_P(PSTR("MTEMP:"),HAL::timeInMilliseconds());
     TemperatureController *act = tempController[manage_monitor];
     OUT_P_F(" ",act->currentTemperatureC);
     OUT_P_FX(" ",act->targetTemperatureC,0);

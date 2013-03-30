@@ -590,13 +590,13 @@ void epr_init() {
 void epr_update_usage() {
 #if EEPROM_MODE!=0
   if(printer.filamentPrinted==0) return; // No miles only enabled
-  unsigned long seconds = (millis()-printer.msecondsPrinting)/1000;
+  unsigned long seconds = (HAL::timeInMilliseconds()-printer.msecondsPrinting)/1000;
   seconds += HAL::epr_get_long(EPR_PRINTING_TIME);
   HAL::epr_set_long(EPR_PRINTING_TIME,seconds);
   HAL::epr_set_float(EPR_PRINTING_DISTANCE,HAL::epr_get_float(EPR_PRINTING_DISTANCE)+printer.filamentPrinted*0.001);
   OUT_P_F_LN("Adding filament:",printer.filamentPrinted);
   printer.filamentPrinted = 0;
-  printer.msecondsPrinting = millis();
+  printer.msecondsPrinting = HAL::timeInMilliseconds();
   byte newcheck = epr_compute_checksum();
   if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
     HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);

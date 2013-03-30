@@ -112,6 +112,14 @@ typedef struct   // 52 bytes per command needed
     {
         return ((params2 & 4)!=0);
     }
+    inline long getS(long def) {
+        if(hasS()) return S;
+        return def;
+    }
+    inline long getP(long def) {
+        if(hasP()) return P;
+        return def;
+    }
 } GCode;
 
 #ifndef EXTERNALSERIAL

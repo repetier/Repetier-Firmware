@@ -347,9 +347,9 @@ ISR(TIMER1_COMPA_vect)
     if(doExit) return;
     insideTimer1=1;
     OCR1A=61000;
-    if(lines_count)
+    if(PrintLine::hasLines())
     {
-        setTimer(bresenham_step());
+        setTimer(PrintLine::bresenhamStep());
     }
     else
     {
@@ -528,4 +528,59 @@ ISR(PWM_TIMER_VECTOR)
 
     UI_FAST; // Short timed user interface action
     pwm_count++;
+}
+#if defined(USE_ADVANCE)
+byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
+char extruder_last_dir = 0;
+byte extruder_speed = 0;
+#endif
+
+/** \brief Timer routine for extruder stepper.
+
+Several methods need to move the extruder. To get a optima result,
+all methods update the printer_state.extruderStepsNeeded with the
+number of additional steps needed. During this interrupt, one step
+is executed. This will keep the extruder moving, until the total
+wanted movement is achieved. This will be done with the maximum
+allowable speed for the extruder.
+*/
+ISR(EXTRUDER_TIMER_VECTOR)
+{
+#if defined(USE_ADVANCE)
+    if(!printer.isAdvanceActivated()) return; // currently no need
+    byte timer = EXTRUDER_OCR;
+    bool increasing = printer.extruderStepsNeeded>0;
+
+    // Require at least 2 steps in one direction before going to action
+    if(abs(printer.extruderStepsNeeded)<2)
+    {
+        EXTRUDER_OCR = timer+printer.maxExtruderSpeed;
+        ANALYZER_OFF(ANALYZER_CH2);
+        extruder_last_dir = 0;
+        return;
+    }
+
+    /*  if(printer_state.extruderStepsNeeded==0) {
+          extruder_last_dir = 0;
+      }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
+        EXTRUDER_OCR = timer+50; // Little delay to accomodate to reversed direction
+        extruder_set_direction(increasing ? 1 : 0);
+        extruder_last_dir = (increasing ? 1 : -1);
+        return;
+      } else*/
+    {
+        if(extruder_last_dir==0)
+        {
+            Extruder::setDirection(increasing ? 1 : 0);
+            extruder_last_dir = (increasing ? 1 : -1);
+        }
+        Extruder::step();
+        printer.extruderStepsNeeded-=extruder_last_dir;
+#if STEPPER_HIGH_DELAY>0
+        HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
+#endif
+        Extruder::unstep();
+    }
+    EXTRUDER_OCR = timer+printer.maxExtruderSpeed;
+#endif
 }

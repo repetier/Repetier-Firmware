@@ -652,7 +652,7 @@ void gcode_execute_PString(PGM_P cmd) {
     buf[buflen]=0;
     // Send command into command buffer
     if(gcode_parse_ascii(&code,(char *)buf) && (code.params & 518)) { // Success
-      process_command(&code,false);
+      Commands::executeGCode(&code,false);
       defaultLoopActions();
     }
   } while(c);
@@ -666,7 +666,7 @@ void gcode_read_serial() {
   if(gcode_wait_all_parsed && gcode_buflen) return;
   gcode_wait_all_parsed=false;
   GCode *act;
-  unsigned long time = millis();
+  unsigned long time = HAL::timeInMilliseconds();
   if(gcode_buflen>=GCODE_BUFFER_SIZE) return; // all buffers full
   if(RFSERIAL.available()==0) {
     if((gcode_wait_resend>=0 || gcode_wpos>0) && time-gcode_lastdata>200) {
@@ -681,7 +681,7 @@ void gcode_read_serial() {
 #endif
   }
   while(RFSERIAL.available() > 0 && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
-    gcode_lastdata = millis();
+    gcode_lastdata = HAL::timeInMilliseconds();
     gcode_transbuffer[gcode_wpos++] = RFSERIAL.read();
     // first lets detect, if we got an old type ascii command
     if(gcode_wpos==1) {
@@ -735,7 +735,7 @@ void gcode_read_serial() {
     return;
   }
   while( sd.filesize > sd.sdpos && gcode_wpos < MAX_CMD_SIZE) {  // consume data until no data or buffer full
-    gcode_lastdata = millis();
+    gcode_lastdata = HAL::timeInMilliseconds();
     int n = sd.file.read();
     if(n==-1) {
       OUT_P_LN("SD read error");

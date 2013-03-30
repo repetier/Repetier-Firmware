@@ -2884,7 +2884,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
   errorCode_ = type_ = 0;
   chipSelectPin_ = chipSelectPin;
   // 16-bit init start time allows over a minute
-  uint16_t t0 = (uint16_t)millis();
+  uint16_t t0 = (uint16_t)HAL::timeInMilliseconds();
   uint32_t arg;
 
   pinMode(chipSelectPin_, OUTPUT);
@@ -2902,7 +2902,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
 
   // command to go idle in SPI mode
   while (cardCommand(CMD0, 0) != R1_IDLE_STATE) {
-    if (((uint16_t)millis() - t0) > SD_INIT_TIMEOUT) {
+    if (((uint16_t)HAL::timeInMilliseconds() - t0) > SD_INIT_TIMEOUT) {
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
@@ -2930,7 +2930,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
 
   while (cardAcmd(ACMD41, arg) != R1_READY_STATE) {
     // check for timeout
-    if (((uint16_t)millis() - t0) > SD_INIT_TIMEOUT) {
+    if (((uint16_t)HAL::timeInMilliseconds() - t0) > SD_INIT_TIMEOUT) {
       error(SD_CARD_ERROR_ACMD41);
       goto fail;
     }
@@ -2996,9 +2996,9 @@ bool Sd2Card::readData(uint8_t *dst) {
 bool Sd2Card::readData(uint8_t* dst, uint16_t count) {
   uint16_t crc;
   // wait for start block token
-  uint16_t t0 = millis();
+  uint16_t t0 = HAL::timeInMilliseconds();
   while ((status_ = spiRec()) == 0XFF) {
-    if (((uint16_t)millis() - t0) > SD_READ_TIMEOUT) {
+    if (((uint16_t)HAL::timeInMilliseconds() - t0) > SD_READ_TIMEOUT) {
       error(SD_CARD_ERROR_READ_TIMEOUT);
       goto fail;
     }
@@ -3106,9 +3106,9 @@ bool Sd2Card::setSckRate(uint8_t sckRateID) {
 //------------------------------------------------------------------------------
 // wait for card to go not busy
 bool Sd2Card::waitNotBusy(uint16_t timeoutMillis) {
-  uint16_t t0 = millis();
+  uint16_t t0 = HAL::timeInMilliseconds();
   while (spiRec() != 0XFF) {
-    if (((uint16_t)millis() - t0) >= timeoutMillis) goto fail;
+    if (((uint16_t)HAL::timeInMilliseconds() - t0) >= timeoutMillis) goto fail;
   }
   return true;
 

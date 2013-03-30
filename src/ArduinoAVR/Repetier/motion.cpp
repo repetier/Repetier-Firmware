@@ -27,6 +27,13 @@
 long Printer::interval;
 long Printer::currentPositionSteps[4];
 long Printer::destinationSteps[4];
+byte Printer::flag0 = 0;
+
+PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
+PrintLine *PrintLine::cur = 0;               ///< Current printing line
+byte PrintLine::lines_write_pos=0;           ///< Position where we write the next cached line move.
+volatile byte PrintLine::lines_count=0;      ///< Number of lines cached 0 = nothing to do.
+byte PrintLine::lines_pos=0;                 ///< Position for executing line movement.
 
 // ##########################################################################
 // ###                         Path planner stuff                         ###
@@ -106,50 +113,49 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current)
 
 Computes the acceleration/decelleration steps and advanced parameter associated.
 */
-void updateStepsParameter(PrintLine *p/*,byte caller*/)
+void PrintLine::updateStepsParameter()
 {
-    if(p->isWarmUp()) return;
-    if(p->areParameterUpToDate()) return;
-    float startFactor = p->startSpeed * p->invFullSpeed;
-    float endFactor   = p->endSpeed   * p->invFullSpeed;
-    p->vStart = p->vMax*startFactor; //starting speed
-    p->vEnd   = p->vMax*endFactor;
-    unsigned long vmax2 = HAL::U16SquaredToU32(p->vMax);
-    p->accelSteps = ((vmax2-HAL::U16SquaredToU32(p->vStart))/(p->accelerationPrim<<1))+1; // Always add 1 for missing precision
-    p->decelSteps = ((vmax2-HAL::U16SquaredToU32(p->vEnd))  /(p->accelerationPrim<<1))+1;
+    if(isWarmUp() || areParameterUpToDate()) return;
+    float startFactor = startSpeed * invFullSpeed;
+    float endFactor   = endSpeed   * invFullSpeed;
+    vStart = vMax*startFactor; //starting speed
+    vEnd   = vMax*endFactor;
+    unsigned long vmax2 = HAL::U16SquaredToU32(vMax);
+    accelSteps = ((vmax2-HAL::U16SquaredToU32(vStart))/(accelerationPrim<<1))+1; // Always add 1 for missing precision
+    decelSteps = ((vmax2-HAL::U16SquaredToU32(vEnd))  /(accelerationPrim<<1))+1;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceStart = (float)p->advanceFull*startFactor * startFactor;
-    p->advanceEnd   = (float)p->advanceFull*endFactor   * endFactor;
+    advanceStart = (float)advanceFull*startFactor * startFactor;
+    advanceEnd   = (float)advanceFull*endFactor   * endFactor;
 #endif
 #endif
-    if(p->accelSteps+p->decelSteps>=p->stepsRemaining)   // can't reach limit speed
+    if(accelSteps+decelSteps>=stepsRemaining)   // can't reach limit speed
     {
-        unsigned int red = (p->accelSteps+p->decelSteps+2-p->stepsRemaining)>>1;
-        if(red<p->accelSteps)
-            p->accelSteps-=red;
+        unsigned int red = (accelSteps+decelSteps+2-stepsRemaining)>>1;
+        if(red<accelSteps)
+            accelSteps-=red;
         else
-            p->accelSteps = 0;
-        if(red<p->decelSteps)
+            accelSteps = 0;
+        if(red<decelSteps)
         {
-            p->decelSteps-=red;
+            decelSteps-=red;
         }
         else
-            p->decelSteps = 0;
+            decelSteps = 0;
     }
-    p->setParameterUpToDate();
+    setParameterUpToDate();
 #ifdef DEBUG_QUEUE_MOVE
     if(DEBUG_ECHO)
     {
-        out.print_int_P(PSTR("ID:"),(int)p);
-        out.print_int_P(PSTR("vStart/End:"),p->vStart);
-        out.println_int_P(PSTR("/"),p->vEnd);
-        out.print_int_P(PSTR("accel/decel steps:"),p->accelSteps);
-        out.println_int_P(PSTR("/"),p->decelSteps);
-        out.print_float_P(PSTR("st./end speed:"),p->startSpeed);
-        out.println_float_P(PSTR("/"),p->endSpeed);
-        out.println_int_P(PSTR("flags:"),p->flags);
-        out.println_int_P(PSTR("joinFlags:"),p->joinFlags);
+        out.print_int_P(PSTR("ID:"),(int)this);
+        out.print_int_P(PSTR("vStart/End:"),vStart);
+        out.println_int_P(PSTR("/"),vEnd);
+        out.print_int_P(PSTR("accel/decel steps:"),accelSteps);
+        out.println_int_P(PSTR("/"),decelSteps);
+        out.print_float_P(PSTR("st./end speed:"),startSpeed);
+        out.println_float_P(PSTR("/"),endSpeed);
+        out.println_int_P(PSTR("flags:"),flags);
+        out.println_int_P(PSTR("joinFlags:"),joinFlags);
     }
 #endif
 }
@@ -177,7 +183,7 @@ The backwards planner traverses the moves from last to first looking at decelera
 p = last line inserted
 last = last element until we check
 */
-inline void backwardPlanner(byte p,byte last)
+inline void PrintLine::backwardPlanner(byte p,byte last)
 {
     if(p==last) return;
     PrintLine *act = &lines[p],*prev;
@@ -244,7 +250,7 @@ inline void backwardPlanner(byte p,byte last)
     } // while loop
 }
 
-inline void forwardPlanner(byte p)
+void PrintLine::forwardPlanner(byte p)
 {
     PrintLine *act,*next;
     if(p==lines_write_pos) return;
@@ -315,7 +321,7 @@ The first 2 entries in the queue are not checked. The first is the one that is a
 
 The method is called before lines_count is increased!
 */
-void updateTrapezoids(byte p)
+void PrintLine::updateTrapezoids(byte p)
 {
     byte first = p;
     PrintLine *firstLine;
@@ -358,13 +364,13 @@ void updateTrapezoids(byte p)
     // Update precomputed data
     do
     {
-        updateStepsParameter(&lines[first]);
+        lines[first].updateStepsParameter();
         lines[first].unblock();  // Flying block to release next used segment as early as possible
         NEXT_PLANNER_INDEX(first);
         lines[first].block();
     }
     while(first!=lines_write_pos);
-    updateStepsParameter(act);
+        act->updateStepsParameter();
     act->unblock();
 }
 
@@ -373,32 +379,32 @@ void updateTrapezoids(byte p)
 // ###                         Motion computations                        ###
 // ##########################################################################
 
-inline float safeSpeed(PrintLine *p)
+inline float PrintLine::safeSpeed()
 {
     float safe;
 #ifdef USE_ADVANCE
-    if((p->dir & 128) && printer.isAdvanceActivated())
+    if(isEMove() && printer.isAdvanceActivated())
     {
-        safe = min(p->fullSpeed,printer.minimumSpeed);
+        safe = min(fullSpeed,printer.minimumSpeed);
     }
     else
 #endif
-        safe = min(p->fullSpeed,max(printer.minimumSpeed,printer.maxJerk*0.5));
+        safe = min(fullSpeed,max(printer.minimumSpeed,printer.maxJerk*0.5));
 #if DRIVE_SYSTEM != 3
-    if(p->dir & 64)
+    if(isZMove())
     {
-        if(fabs(p->speedZ)>printer.maxZJerk*0.5)
+        if(fabs(speedZ)>printer.maxZJerk*0.5)
         {
-            float safe2 = printer.maxZJerk*0.5*p->fullSpeed/fabs(p->speedZ);
+            float safe2 = printer.maxZJerk*0.5*fullSpeed/fabs(speedZ);
             if(safe2<safe) safe = safe2;
         }
     }
 #endif
-    if(p->dir & 128)
+    if(isEMove())
     {
-        if(p->dir & 112)
+        if(dir & 112)
         {
-            float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/fabs(p->speedE);
+            float safe2 = 0.5*current_extruder->maxStartFeedrate*fullSpeed/fabs(speedE);
             if(safe2<safe) safe = safe2;
         }
         else
@@ -406,13 +412,13 @@ inline float safeSpeed(PrintLine *p)
             safe = 0.5*current_extruder->maxStartFeedrate; // This is a retraction move
         }
     }
-    return (safe<p->fullSpeed?safe:p->fullSpeed);
+    return (safe<fullSpeed?safe:fullSpeed);
 }
 
 /**
 Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
 */
-void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop)
+void PrintLine::move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop)
 {
     float saved_feedrate = printer.feedrate;
     for(byte i=0; i < 4; i++)
@@ -431,14 +437,14 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
 #endif
     printer.feedrate = saved_feedrate;
     if(waitEnd)
-        wait_until_end_of_move();
+        Commands::waitUntilEndOfAllMoves();
 }
 
 /** Check if move is new. If it is insert some dummy moves to allow the path optimizer to work since it does
 not act on the first two moves in the queue. The stepper timer will spot these moves and leave some time for
 processing.
 */
-byte check_new_move(byte pathOptimize, byte waitExtraLines)
+byte PrintLine::check_new_move(byte pathOptimize, byte waitExtraLines)
 {
     if(lines_count==0 && waitRelax==0 && pathOptimize)   // First line after some time - warmup needed
     {
@@ -450,7 +456,8 @@ byte check_new_move(byte pathOptimize, byte waitExtraLines)
             p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
             p->dir = 0;
             p->primaryAxis = w + waitExtraLines;
-            p->timeInTicks = p->accelerationPrim = p->facceleration = 10000*(unsigned int)w;
+            p->timeInTicks = p->facceleration = 10000*(unsigned int)w;
+            p->setWaitTicks(p->timeInTicks);
             lines_write_pos++;
             if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
             BEGIN_INTERRUPT_PROTECTED
@@ -503,14 +510,14 @@ void log_printLine(PrintLine *p)
 }
 
 
-void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte pathOptimize)
+void PrintLine::calculate_move(float axis_diff[],byte check_endstops,byte pathOptimize)
 {
 #if DRIVE_SYSTEM==3
     long axis_interval[5];
 #else
     long axis_interval[4];
 #endif
-    float time_for_move = (float)(F_CPU)*p->distance / printer.feedrate; // time is in ticks
+    float time_for_move = (float)(F_CPU)*distance / printer.feedrate; // time is in ticks
     bool critical=false;
     if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE)   // Limit speed to keep cache full.
     {
@@ -519,65 +526,65 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
         //OUT_P_F_LN("Slow ",time_for_move);
         critical=true;
     }
-    p->timeInTicks = time_for_move;
+    timeInTicks = time_for_move;
     UI_MEDIUM; // do check encoder
     // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
-    long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-    axis_interval[0] = fabs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+    long limitInterval = time_for_move/stepsRemaining; // until not violated by other constraints it is your target speed
+    axis_interval[0] = fabs(axis_diff[0])*F_CPU/(max_feedrate[0]*stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
     if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-    axis_interval[1] = fabs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
+    axis_interval[1] = fabs(axis_diff[1])*F_CPU/(max_feedrate[1]*stepsRemaining);
     if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
-    if(p->dir & 64)   // normally no move in z direction
+    if(isZMove())   // normally no move in z direction
     {
-        axis_interval[2] = fabs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
+        axis_interval[2] = fabs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*stepsRemaining); // must prevent overflow!
         if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
     }
     else axis_interval[2] = 0;
-    axis_interval[3] = fabs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
+    axis_interval[3] = fabs(axis_diff[3])*F_CPU/(max_feedrate[3]*stepsRemaining);
     if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
 #if DRIVE_SYSTEM==3
-    axis_interval[4] = fabs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
+    axis_interval[4] = fabs(axis_diff[4])*F_CPU/(max_feedrate[0]*stepsRemaining);
 #endif
 
-    p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
+    fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
     // new time at full speed = limitInterval*p->stepsRemaining [ticks]
-    time_for_move = (float)limitInterval*(float)p->stepsRemaining; // for large z-distance this overflows with long computation
+    time_for_move = (float)limitInterval*(float)stepsRemaining; // for large z-distance this overflows with long computation
     float inv_time_s = (float)F_CPU/time_for_move;
-    if(p->dir & 16)
+    if(isXMove())
     {
-        axis_interval[0] = time_for_move/p->delta[0];
-        p->speedX = axis_diff[0]*inv_time_s;
-        if(!(p->dir & 1)) p->speedX = -p->speedX;
+        axis_interval[0] = time_for_move/delta[0];
+        speedX = axis_diff[0]*inv_time_s;
+        if(!(dir & 1)) speedX = -speedX;
     }
-    else p->speedX = 0;
-    if(p->dir & 32)
+    else speedX = 0;
+    if(isYMove())
     {
-        axis_interval[1] = time_for_move/p->delta[1];
-        p->speedY = axis_diff[1]*inv_time_s;
-        if(!(p->dir & 2)) p->speedY = -p->speedY;
+        axis_interval[1] = time_for_move/delta[1];
+        speedY = axis_diff[1]*inv_time_s;
+        if(!(dir & 2)) speedY = -speedY;
     }
-    else p->speedY = 0;
-    if(p->dir & 64)
+    else speedY = 0;
+    if(isZMove())
     {
-        axis_interval[2] = time_for_move/p->delta[2];
-        p->speedZ = axis_diff[2]*inv_time_s;
-        if(!(p->dir & 4)) p->speedZ = -p->speedZ;
+        axis_interval[2] = time_for_move/delta[2];
+        speedZ = axis_diff[2]*inv_time_s;
+        if(!(dir & 4)) speedZ = -speedZ;
     }
-    else p->speedZ = 0;
-    if(p->dir & 128)
+    else speedZ = 0;
+    if(isEMove())
     {
-        axis_interval[3] = time_for_move/p->delta[3];
-        p->speedE = axis_diff[3]*inv_time_s;
-        if(!(p->dir & 8)) p->speedE = -p->speedE;
+        axis_interval[3] = time_for_move/delta[3];
+        speedE = axis_diff[3]*inv_time_s;
+        if(!(dir & 8)) speedE = -speedE;
     }
 #if DRIVE_SYSTEM==3
-    axis_interval[4] = time_for_move/p->stepsRemaining;
+    axis_interval[4] = time_for_move/stepsRemaining;
 #endif
-    p->fullSpeed = p->distance*inv_time_s;
+    fullSpeed = distance*inv_time_s;
 
 
     //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
-    byte is_print_move = (p->dir & 136)==136; // are we printing
+    byte is_print_move = isEPositiveMove(); // are we printing
     //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
 #ifdef RAMP_ACCELERATION
 
@@ -588,9 +595,9 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     {
         // Errors for delta move are initialized in timer
 #if DRIVE_SYSTEM!=3
-        p->error[i] = p->delta[p->primaryAxis] >> 1;
+        error[i] = delta[primaryAxis] >> 1;
 #endif
-        if(p->dir & (16<<i))
+        if(dir & (16<<i))
         {
             // v = a * t => t = v/a = F_CPU/(c*a) => 1/t = c*a/F_CPU
             slowest_axis_plateau_time_repro = min(slowest_axis_plateau_time_repro,
@@ -599,49 +606,49 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     }
     // Errors for delta move are initialized in timer (except extruder)
 #if DRIVE_SYSTEM==3
-    p->error[3] = p->stepsRemaining >> 1;
+    error[3] = stepsRemaining >> 1;
 #endif
-    p->invFullSpeed = 1.0/p->fullSpeed;
-    p->accelerationPrim = slowest_axis_plateau_time_repro / axis_interval[p->primaryAxis]; // a = v/t = F_CPU/(c*t): Steps/s^2
+    invFullSpeed = 1.0/fullSpeed;
+    accelerationPrim = slowest_axis_plateau_time_repro / axis_interval[primaryAxis]; // a = v/t = F_CPU/(c*t): Steps/s^2
     //Now we can calculate the new primary axis acceleration, so that the slowest axis max acceleration is not violated
-    p->facceleration = 262144.0*(float)p->accelerationPrim/F_CPU; // will overflow without float!
-    p->acceleration = 2.0*p->distance*slowest_axis_plateau_time_repro*p->fullSpeed/((float)F_CPU); // mm^2/s^2
-    p->startSpeed = p->endSpeed = safeSpeed(p);
+    facceleration = 262144.0*(float)accelerationPrim/F_CPU; // will overflow without float!
+    acceleration = 2.0*distance*slowest_axis_plateau_time_repro*fullSpeed/((float)F_CPU); // mm^2/s^2
+    startSpeed = endSpeed = safeSpeed();
     // Can accelerate to full speed within the line
-    if (sqrt(p->startSpeed*p->startSpeed+p->acceleration) >= p->fullSpeed)
-        p->flags |= FLAG_NOMINAL;
+    if (sqrt(startSpeed*startSpeed+acceleration) >= fullSpeed)
+        flags |= FLAG_NOMINAL;
 
-    p->vMax = F_CPU / p->fullInterval; // maximum steps per second, we can reach
+    vMax = F_CPU / fullInterval; // maximum steps per second, we can reach
     // if(p->vMax>46000)  // gets overflow in N computation
     //   p->vMax = 46000;
     //p->plateauN = (p->vMax*p->vMax/p->accelerationPrim)>>1;
 #ifdef USE_ADVANCE
-    if((p->dir & 112)==0 || (p->dir & 128)==0 || (p->dir & 8)==0)
+    if((dir & 112)==0 || (dir & 128)==0 || (dir & 8)==0)
     {
 #ifdef ENABLE_QUADRATIC_ADVANCE
-        p->advanceRate = 0; // No head move or E move only or sucking filament back
-        p->advanceFull = 0;
+        advanceRate = 0; // No head move or E move only or sucking filament back
+        advanceFull = 0;
 #endif
-        p->advanceL = 0;
+        advanceL = 0;
     }
     else
     {
-        float advlin = fabs(p->speedE)*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
-        p->advanceL = (65536*advlin)/p->vMax; //advanceLscaled = (65536*vE*k2)/vMax
+        float advlin = fabs(speedE)*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
+        advanceL = (65536*advlin)/vMax; //advanceLscaled = (65536*vE*k2)/vMax
 #ifdef ENABLE_QUADRATIC_ADVANCE;
-        p->advanceFull = 65536*current_extruder->advanceK*p->speedE*p->speedE; // Steps*65536 at full speed
-        long steps = (HAL::U16SquaredToU32(p->vMax))/(p->accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
-        p->advanceRate = p->advanceFull/steps;
-        if((p->advanceFull>>16)>maxadv)
+        advanceFull = 65536*current_extruder->advanceK*speedE*speedE; // Steps*65536 at full speed
+        long steps = (HAL::U16SquaredToU32(vMax))/(accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
+        advanceRate = advanceFull/steps;
+        if((advanceFull>>16)>maxadv)
         {
-            maxadv = (p->advanceFull>>16);
-            maxadvspeed = fabs(p->speedE);
+            maxadv = (advanceFull>>16);
+            maxadvspeed = fabs(speedE);
         }
 #endif
         if(advlin>maxadv2)
         {
             maxadv2 = advlin;
-            maxadvspeed = fabs(p->speedE);
+            maxadvspeed = fabs(speedE);
         }
     }
 #endif
@@ -652,37 +659,37 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #else
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    p->advanceRate = 0; // No advance for constant speeds
-    p->advanceFull = 0;
+    advanceRate = 0; // No advance for constant speeds
+    advanceFull = 0;
 #endif
 #endif
 #endif
 
     // Correct integers for fixed point math used in bresenham_step
-    if(p->fullInterval<MAX_HALFSTEP_INTERVAL || critical)
-        p->halfstep = 0;
+    if(fullInterval<MAX_HALFSTEP_INTERVAL || critical)
+        halfstep = 0;
     else
     {
-        p->halfstep = 1;
+        halfstep = 1;
 #if DRIVE_SYSTEM==3
         // Error 0-2 are used for the towers and set up in the timer
-        p->error[3] = p->stepsRemaining;
+        error[3] = stepsRemaining;
 #else
-        p->error[0] = p->error[1] = p->error[2] = p->error[3] = p->delta[p->primaryAxis];
+        error[0] = error[1] = error[2] = error[3] = delta[primaryAxis];
 #endif
     }
 #ifdef DEBUG_STEPCOUNT
 // Set in delta move calculation
 #if DRIVE_SYSTEM!=3
-    p->totalStepsRemaining = p->delta[0]+p->delta[1]+p->delta[2];
+    totalStepsRemaining = delta[0]+delta[1]+delta[2];
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE
     if(DEBUG_ECHO)
     {
-        log_printLine(p);
+        log_printLine(this);
         OUT_P_L_LN("limitInterval:", limitInterval);
-        OUT_P_F_LN("Move distance on the XYZ space:", p->distance);
+        OUT_P_F_LN("Move distance on the XYZ space:", distance);
         OUT_P_F_LN("Commanded feedrate:", printer.feedrate);
         OUT_P_F_LN("Constant full speed move time:", time_for_move);
         //log_long_array(PSTR("axis_int"),(long*)axis_interval);
@@ -705,9 +712,9 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   wait communication and temperature control is enabled.
   @param check_endstops Read endstop during move.
 */
-void queue_move(byte check_endstops,byte pathOptimize)
+void PrintLine::queue_move(byte check_endstops,byte pathOptimize)
 {
-    printer.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
+    Printer::unsetAllSteppersDisabled();
     while(lines_count>=MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
         gcode_read_serial();
@@ -846,7 +853,7 @@ void queue_move(byte check_endstops,byte pathOptimize)
             p->distance = sqrt(xydist2);
         }
         printer.backlashDir = (printer.backlashDir & 56) | (p2->dir & 7);
-        calculate_move(p,back_diff,false,pathOptimize);
+        p->calculate_move(back_diff,false,pathOptimize);
         p = p2; // use saved instance for the real move
     }
 #endif
@@ -891,7 +898,7 @@ void queue_move(byte check_endstops,byte pathOptimize)
     {
         return; // no steps to take, we are finished
     }
-    calculate_move(p,axis_diff,check_endstops,pathOptimize);
+    p->calculate_move(axis_diff,check_endstops,pathOptimize);
 }
 #endif
 
@@ -1108,7 +1115,7 @@ float calc_zoffset(long factors[], long pointX, long pointY)
 }
 #endif
 
-inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
+inline void PrintLine::queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
 {
     printer.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
     while(lines_count>=MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
@@ -1154,7 +1161,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
     p->stepsRemaining = p->delta[3];
     p->distance = fabs(axis_diff[3]);
     p->moveID = lastMoveID++;
-    calculate_move(p,axis_diff,check_endstops,pathOptimize);
+    p->calculate_move(axis_diff,check_endstops,pathOptimize);
 }
 
 /**
@@ -1163,7 +1170,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
   @param pathOptimize Run the path optimizer.
   @param delta_step_rate delta step rate in segments per second for the move.
 */
-void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
+void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
 {
     if (softEndstop && Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0;
     long difference[NUM_AXIS];
@@ -1333,7 +1340,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
         out.println_long_P(PSTR("Virtual axis step:"), p->stepsRemaining);
 #endif
 
-        calculate_move(p,axis_diff,check_endstops,pathOptimize);
+        p->calculate_move(axis_diff,check_endstops,pathOptimize);
         for (byte i=0; i < 4; i++)
         {
             Printer::currentPositionSteps[i] += fractional_steps[i];
@@ -1348,7 +1355,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
 // Arc function taken from grbl
 // The arc is approximated by generating a huge number of tiny, linear segments. The length of each
 // segment is configured in settings.mm_per_arc_segment.
-void mc_arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise)
+void PrintLine::arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise)
 {
     //   int acceleration_manager_was_enabled = plan_is_acceleration_manager_enabled();
     //   plan_set_acceleration_manager_enabled(false); // disable acceleration management for the duration of the arc
@@ -1476,9 +1483,9 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
         Printer::destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
         Printer::destinationSteps[3] = arc_target[3];
 #if DRIVE_SYSTEM == 3
-        split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+        PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
-        queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+        PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
     }
     // Ensure last segment arrives at target location.
@@ -1486,9 +1493,9 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
     Printer::destinationSteps[1] = ytarget;
     Printer::destinationSteps[3] = etarget;
 #if DRIVE_SYSTEM == 3
-    split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+    PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
-    queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+    PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
 }
 #endif
