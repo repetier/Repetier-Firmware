@@ -17,7 +17,7 @@
 */
 
 #define UI_MAIN
-#include "Reptier.h"
+#include "Repetier.h"
 #include <avr/pgmspace.h>
 extern const int8_t encoder_table[16] PROGMEM ;
 #include "ui.h"
@@ -140,6 +140,7 @@ inline void i2c_init(void)
   uid.outputMask |= BEEPER_PIN;
 #endif
 #endif
+  //delay(200);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
   // set direction of pins
   i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
@@ -492,7 +493,7 @@ void lcdWriteByte(byte c,byte rs) {
 #endif
 }
 void initializeLCD() {
-  delay(135);
+  delay(235);
   lcdStartWrite();
   i2c_write(uid.outputMask & 255);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
@@ -592,7 +593,7 @@ void initializeLCD() {
   // according to datasheet, we need at least 40ms after power rises above 2.7V
   // before sending commands. Arduino can turn on way before 4.5V.
   // is this delay long enough for all cases??
-  delay(135);
+  delay(235);
   SET_OUTPUT(UI_DISPLAY_D4_PIN);
   SET_OUTPUT(UI_DISPLAY_D5_PIN);
   SET_OUTPUT(UI_DISPLAY_D6_PIN);
@@ -713,10 +714,17 @@ UIDisplay::UIDisplay() {
 void UIDisplay::initialize() {
 #if UI_DISPLAY_TYPE>0
   initializeLCD();
+#if UI_DISPLAY_TYPE==3
+  // I don't know why but after power up the lcd does not come up
+  // but if I reinitialize i2c and the lcd again here it works.
+  delay(10);
+  i2c_init();
+  initializeLCD();
+#endif
   uid.printRowP(0,versionString);
   uid.printRowP(1,versionString2);
 #endif
-#if BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS)
+#if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
   // Make sure the beeper is off
   i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
   i2c_write(255); // Disable beeper, enable read for other pins.
@@ -922,8 +930,8 @@ void UIDisplay::parse(char *txt,bool ram) {
         ivalue = UI_TEMP_PRECISION;
         if(c2=='c') fvalue=current_extruder->tempControl.currentTemperatureC;
         else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
-        else if(c2=='b') fvalue=heated_bed_get_temperature();
-        else if(c2=='B') {ivalue=0;fvalue=heated_bed_get_temperature();}
+        else if(c2=='b') fvalue=Extruder::getHeatedBedTemperature();
+        else if(c2=='B') {ivalue=0;fvalue=Extruder::getHeatedBedTemperature();}
         addFloat(fvalue,3,ivalue);
         break;
       case 'E': // Target extruder temperature
@@ -1001,13 +1009,13 @@ void UIDisplay::parse(char *txt,bool ram) {
         if(c2>='0' && c2<='3')
 #if NUM_EXTRUDER>0
         if(c2=='0')
-          fvalue = (float)(printer.currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)(Printer::currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
         else if(c2=='1')
-          fvalue = (float)(printer.currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)(Printer::currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
         else
-          fvalue = (float)printer.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+          fvalue = (float)Printer::currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
 #else
-        fvalue = (float)printer.currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
+        fvalue = (float)Printer::currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
 #endif
         addFloat(fvalue,3,2);
         break;
@@ -1478,7 +1486,7 @@ void UIDisplay::nextPreviousAction(char next) {
        if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
        if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-       heated_bed_set_temperature(tmp);
+       Extruder::setHeatedBedTemperature(tmp);
     }
 #endif
     break;
@@ -1490,7 +1498,7 @@ void UIDisplay::nextPreviousAction(char next) {
        if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
        if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-       extruder_set_temperature(tmp,0);
+       Extruder::setTemperatureForExtruder(tmp,0);
     }
     break;
   case UI_ACTION_EXTRUDER1_TEMP:
@@ -1501,7 +1509,7 @@ void UIDisplay::nextPreviousAction(char next) {
        if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
        if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
        else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-       extruder_set_temperature(tmp,1);
+       Extruder::setTemperatureForExtruder(tmp,1);
     }
  #endif
     break;
@@ -1510,25 +1518,25 @@ void UIDisplay::nextPreviousAction(char next) {
     printer.opsRetractDistance+=increment*0.1;
     if(printer.opsRetractDistance<0) printer.opsRetractDistance=0;
     else if(printer.opsRetractDistance>10) printer.opsRetractDistance=10;
-    extruder_select(current_extruder->id);
+    Extruder::selectExtruderById(current_extruder->id);
     break;
   case UI_ACTION_OPS_BACKLASH:
     printer.opsRetractBacklash+=increment*0.1;
     if(printer.opsRetractBacklash<-5) printer.opsRetractBacklash=-5;
     else if(printer.opsRetractBacklash>5) printer.opsRetractBacklash=5;
-    extruder_select(current_extruder->id);
+    Extruder::selectExtruderById(current_extruder->id);
     break;
   case UI_ACTION_OPS_MOVE_AFTER:
     printer.opsMoveAfter+=increment;
     if(printer.opsMoveAfter<0) printer.opsMoveAfter=0;
     else if(printer.opsMoveAfter>10) printer.opsMoveAfter=100;
-    extruder_select(current_extruder->id);
+    Extruder::selectExtruderById(current_extruder->id);
     break;
   case UI_ACTION_OPS_MINDISTANCE:
     printer.opsMinDistance+=increment;
     if(printer.opsMinDistance<0) printer.opsMinDistance=0;
     else if(printer.opsMinDistance>10) printer.opsMinDistance=10;
-    extruder_select(current_extruder->id);
+    Extruder::selectExtruderById(current_extruder->id);
     break;
 #endif
   case UI_ACTION_FEEDRATE_MULTIPLY:
@@ -1635,7 +1643,7 @@ void UIDisplay::nextPreviousAction(char next) {
       break;
   case UI_ACTION_PID_IGAIN:
       INCREMENT_MIN_MAX(current_extruder->tempControl.pidIGain,0.01,0,100);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_PID_DGAIN:
       INCREMENT_MIN_MAX(current_extruder->tempControl.pidDGain,0.1,0,200);
@@ -1652,27 +1660,27 @@ void UIDisplay::nextPreviousAction(char next) {
 #endif
   case UI_ACTION_X_OFFSET:
       INCREMENT_MIN_MAX(current_extruder->xOffset,1,-99999,99999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_Y_OFFSET:
       INCREMENT_MIN_MAX(current_extruder->yOffset,1,-99999,99999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_EXTR_STEPS:
       INCREMENT_MIN_MAX(current_extruder->stepsPerMM,1,1,9999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_EXTR_ACCELERATION:
       INCREMENT_MIN_MAX(current_extruder->maxAcceleration,10,10,99999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_EXTR_MAX_FEEDRATE:
       INCREMENT_MIN_MAX(current_extruder->maxFeedrate,1,1,999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_EXTR_START_FEEDRATE:
       INCREMENT_MIN_MAX(current_extruder->maxStartFeedrate,1,1,999);
-      extruder_select(current_extruder->id);
+      Extruder::selectExtruderById(current_extruder->id);
       break;
   case UI_ACTION_EXTR_HEATMANAGER:
       INCREMENT_MIN_MAX(current_extruder->tempControl.heatManager,1,0,1);
@@ -1762,9 +1770,9 @@ void UIDisplay::executeAction(int action) {
       printPosition();
       break;
     case UI_ACTION_SET_ORIGIN:
-      printer.currentPositionSteps[0] = -printer.offsetX;
-      printer.currentPositionSteps[1] = -printer.offsetY;
-      printer.currentPositionSteps[2] = 0;
+      Printer::currentPositionSteps[0] = -printer.offsetX;
+      Printer::currentPositionSteps[1] = -printer.offsetY;
+      Printer::currentPositionSteps[2] = 0;
       break;
     case UI_ACTION_DEBUG_ECHO:
       if(DEBUG_ECHO) debug_level-=1;else debug_level+=1;
@@ -1778,12 +1786,12 @@ void UIDisplay::executeAction(int action) {
     case UI_ACTION_DEBUG_DRYRUN:
       if(DEBUG_DRYRUN) debug_level-=8;else debug_level+=8;
       if(DEBUG_DRYRUN) { // simulate movements without printing
-          extruder_set_temperature(0,0);
+          Extruder::setTemperatureForExtruder(0,0);
 #if NUM_EXTRUDER>1
-          extruder_set_temperature(0,1);
+          Extruder::setTemperatureForExtruder(0,1);
 #endif
 #if HAVE_HEATED_BED==true
-          heated_bed_set_temperature(0);
+          Extruder::setHeatedBedTemperature(0);
 #endif
       }
       break;
@@ -1791,45 +1799,45 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_PREHEAT_PLA:
       UI_STATUS(UI_TEXT_PREHEAT_PLA);
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
+      Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
+      Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
+      Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
 #endif
       break;
     case UI_ACTION_PREHEAT_ABS:
       UI_STATUS(UI_TEXT_PREHEAT_ABS);
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
+      Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
+      Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
+      Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif
       break;
     case UI_ACTION_COOLDOWN:
       UI_STATUS(UI_TEXT_COOLDOWN);
-      extruder_set_temperature(0,0);
+      Extruder::setTemperatureForExtruder(0,0);
 #if NUM_EXTRUDER>1
-      extruder_set_temperature(0,1);
+      Extruder::setTemperatureForExtruder(0,1);
 #endif
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(0);
+      Extruder::setHeatedBedTemperature(0);
 #endif
       break;
     case UI_ACTION_HEATED_BED_OFF:
 #if HAVE_HEATED_BED==true
-      heated_bed_set_temperature(0);
+      Extruder::setHeatedBedTemperature(0);
 #endif
       break;
     case UI_ACTION_EXTRUDER0_OFF:
-      extruder_set_temperature(0,0);
+      Extruder::setTemperatureForExtruder(0,0);
       break;
     case UI_ACTION_EXTRUDER1_OFF:
  #if NUM_EXTRUDER>1
-      extruder_set_temperature(0,1);
+      Extruder::setTemperatureForExtruder(0,1);
  #endif
       break;
 #if USE_OPS==1
@@ -1847,17 +1855,17 @@ void UIDisplay::executeAction(int action) {
       kill(true);
       break;
     case UI_ACTION_RESET_EXTRUDER:
-      printer.currentPositionSteps[3] = 0;
+      Printer::currentPositionSteps[3] = 0;
       break;
     case UI_ACTION_EXTRUDER_RELATIVE:
       relative_mode_e=!relative_mode_e;
       break;
     case UI_ACTION_SELECT_EXTRUDER0:
-      extruder_select(0);
+      Extruder::selectExtruderById(0);
       break;
     case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER>1
-      extruder_select(1);
+      Extruder::selectExtruderById(1);
 #endif
       break;
 #if EEPROM_MODE!=0
@@ -2034,13 +2042,13 @@ void UIDisplay::executeAction(int action) {
          int tmp = (int)(current_extruder->tempControl.targetTemperatureC)+1;
          if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
          else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-         extruder_set_temperature(tmp,current_extruder->id);
+         Extruder::setTemperatureForExtruder(tmp,current_extruder->id);
       }
       break;
     case UI_ACTION_EXTRUDER_TEMP_DOWN: {
          int tmp = (int)(current_extruder->tempControl.targetTemperatureC)-1;
          if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-         extruder_set_temperature(tmp,current_extruder->id);
+         Extruder::setTemperatureForExtruder(tmp,current_extruder->id);
       }
       break;
     case UI_ACTION_HEATED_BED_UP:
@@ -2049,7 +2057,7 @@ void UIDisplay::executeAction(int action) {
        int tmp = (int)heatedBedController.targetTemperatureC+1;
        if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
        else if(tmp>UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
-       heated_bed_set_temperature(tmp);
+       Extruder::setHeatedBedTemperature(tmp);
     }
 #endif
       break;
@@ -2076,9 +2084,9 @@ void UIDisplay::executeAction(int action) {
 		printer.zLength = inv_axis_steps_per_unit[2] * printer.countZSteps;
 		printer.zMaxSteps = printer.countZSteps;
 		for (byte i=0; i<3; i++) {
-			printer.currentPositionSteps[i] = 0;
+			Printer::currentPositionSteps[i] = 0;
 		}
-		calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+		calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
 		out.println_P(PSTR("Measured origin set. Measurement reset."));
 #if EEPROM_MODE!=0
 		epr_data_to_eeprom(false);
@@ -2089,21 +2097,21 @@ void UIDisplay::executeAction(int action) {
 	case UI_ACTION_SET_P1:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer.levelingP1[i] = printer.currentPositionSteps[i];
+			printer.levelingP1[i] = Printer::currentPositionSteps[i];
 		}
 #endif
       break;
 	case UI_ACTION_SET_P2:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer.levelingP2[i] = printer.currentPositionSteps[i];
+			printer.levelingP2[i] = Printer::currentPositionSteps[i];
 		}
 #endif
       break;
 	case UI_ACTION_SET_P3:
 #ifdef SOFTWARE_LEVELING
 		for (byte i=0; i<3; i++) {
-			printer.levelingP3[i] = printer.currentPositionSteps[i];
+			printer.levelingP3[i] = Printer::currentPositionSteps[i];
 		}
 #endif
       break;
@@ -2122,7 +2130,7 @@ void UIDisplay::executeAction(int action) {
     {
        int tmp = (int)heatedBedController.targetTemperatureC-1;
        if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
-       heated_bed_set_temperature(tmp);
+       Extruder::setHeatedBedTemperature(tmp);
     }
 #endif
       break;
@@ -2135,9 +2143,9 @@ void UIDisplay::executeAction(int action) {
       OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
       break;
     case UI_ACTION_KILL:
-      cli(); // Don't allow interrupts to do their work
+      HAL::forbidInterrupts(); // Don't allow interrupts to do their work
       kill(false);
-      manage_temperatures();
+      Extruder::manageTemperatures();
       pwm_pos[0] = pwm_pos[1] = pwm_pos[2] = pwm_pos[3]=0;
 #if EXT0_HEATER_PIN>-1
      WRITE(EXT0_HEATER_PIN,0);
@@ -2179,29 +2187,46 @@ void UIDisplay::slowAction() {
   byte refresh=0;
 #if UI_HAS_KEYS==1
   // Update key buffer
-  cli();
+  HAL::forbidInterrupts();
   if((flags & 9)==0) {
     flags|=8;
-    sei();
+    HAL::allowInterrupts();
+#if FEATURE_CONTROLLER==5
+    {
+      // check temps and set appropriate leds
+      int led= 0;
+#if NUM_EXTRUDER>0
+      led |= (tempController[current_extruder->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
+#endif
+#if HAVE_HEATED_BED
+      led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
+#endif
+#if FAN_PIN>=0
+      led |= (pwm_pos[NUM_EXTRUDER+2] > 0 ? UI_I2C_FAN_LED : 0);
+#endif
+      // update the leds
+      uid.outputMask= ~led&(UI_I2C_HEATBED_LED|UI_I2C_HOTEND_LED|UI_I2C_FAN_LED);
+    }
+#endif
     int nextAction = 0;
     ui_check_slow_keys(nextAction);
     if(lastButtonAction!=nextAction) {
       lastButtonStart = time;
       lastButtonAction = nextAction;
-      cli();
+      HAL::forbidInterrupts();
       flags|=2; // Mark slow action
     }
-    cli();
+    HAL::forbidInterrupts();
     flags-=8;
   }
-  cli();
+  HAL::forbidInterrupts();
   if((flags & 4)==0) {
     flags |= 4;
     // Reset click encoder
-    cli();
+    HAL::forbidInterrupts();
     char epos = encoderPos;
     encoderPos=0;
-    sei();
+    HAL::allowInterrupts();
     if(epos) {
       nextPreviousAction(epos);
       BEEP_SHORT
@@ -2214,7 +2239,7 @@ void UIDisplay::slowAction() {
           statusMsg[0] = 0;
         }
         lastAction = 0;
-        cli();
+        HAL::forbidInterrupts();
         flags &= ~3;
       } else if(time-lastButtonStart>UI_KEY_BOUNCETIME) { // New key pressed
         lastAction = lastButtonAction;
@@ -2230,10 +2255,10 @@ void UIDisplay::slowAction() {
         nextRepeat = time+repeatDuration;
       }
     }
-    cli();
+    HAL::forbidInterrupts();
     flags -=4;
   }
-  sei();
+  HAL::allowInterrupts();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     if(menuLevel>0 && ui_autoreturn_time<time) {
@@ -2266,22 +2291,22 @@ void UIDisplay::slowAction() {
 void UIDisplay::fastAction() {
 #if UI_HAS_KEYS==1
   // Check keys
-  cli();
+  HAL::forbidInterrupts();
   if((flags & 10)==0) {
     flags |= 8;
-    sei();
+    HAL::allowInterrupts();
     int nextAction = 0;
     ui_check_keys(nextAction);
     if(lastButtonAction!=nextAction) {
       lastButtonStart = millis();
       lastButtonAction = nextAction;
-      cli();
+      HAL::forbidInterrupts();
       flags|=1;
     }
-    cli();
+    HAL::forbidInterrupts();
     flags-=8;
   }
-  sei();
+  HAL::allowInterrupts();
 #endif
 }
 

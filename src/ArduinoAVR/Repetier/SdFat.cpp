@@ -17,7 +17,7 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
- #include "Reptier.h"
+ #include "Repetier.h"
 #if SDSUPPORT
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -1624,7 +1624,7 @@ bool SdBaseFile::printName(Print* pr) {
 #ifdef COMPAT_PRE1
   pr->print(name);
   return true;
-#else  
+#else
   return pr->print(name) > 0;
 #endif
  fail:
@@ -3673,7 +3673,7 @@ size_t SdFile::write(uint8_t b) {
   return SdBaseFile::write(&b, 1) == 1 ? 1 : 0;
 }
 #endif
- 
+
 //------------------------------------------------------------------------------
 /** Write a string to a file. Used by the Arduino Print class.
  * \param[in] str Pointer to the string.
@@ -3758,7 +3758,7 @@ void SdFatUtil::SerialPrintln_P(PGM_P str) {
   println_P(SdFat::stdOut(), str);
 }
 
-// ============== 
+// ==============
 
 #endif  // SDSUPPORT
 

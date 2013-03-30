@@ -21,8 +21,12 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "Reptier.h"
+#include "Repetier.h"
 #include "ui.h"
+
+long Printer::interval;
+long Printer::currentPositionSteps[4];
+long Printer::destinationSteps[4];
 
 // ##########################################################################
 // ###                         Path planner stuff                         ###
@@ -144,10 +148,6 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/)
         out.println_int_P(PSTR("/"),p->decelSteps);
         out.print_float_P(PSTR("st./end speed:"),p->startSpeed);
         out.println_float_P(PSTR("/"),p->endSpeed);
-#if USE_OPS==1
-        if(!(p->dir & 128) && printer.opsMode==2)
-            out.println_long_P(PSTR("Reverse at:"),p->opsReverseSteps);
-#endif
         out.println_int_P(PSTR("flags:"),p->flags);
         out.println_int_P(PSTR("joinFlags:"),p->joinFlags);
     }
@@ -187,38 +187,6 @@ inline void backwardPlanner(byte p,byte last)
     {
         PREVIOUS_PLANNER_INDEX(p);
         prev = &lines[p];
-#if USE_OPS==1
-        // Retraction points are fixed points where the extruder movement stops anyway. Finish the computation for the move and exit.
-        if(printer.opsMode && printmoveSeen)
-        {
-            if(prev->isExtruderForwardMove() && !act->isExtruderForwardMove())
-            {
-                if((act->dir & 64)!=0 || act->distance>printer.opsMinDistance)   // Switch printing - travel
-                {
-                    act->joinFlags |= FLAG_JOIN_START_RETRACT | FLAG_JOIN_START_FIXED; // enable retract for this point
-                    prev->setEndSpeedFixed(true);
-                    return;
-                }
-                else
-                {
-                    act->joinFlags |= FLAG_JOIN_NO_RETRACT;
-                }
-            }
-            else if(!prev->isExtruderForwardMove() && act->isExtruderForwardMove())    // Switch travel - print
-            {
-                prev->joinFlags |= FLAG_JOIN_END_RETRACT | FLAG_JOIN_END_FIXED; // reverse retract for this point
-                if(printer.opsMode==2)
-                {
-                    prev->opsReverseSteps = ((long)printer.opsPushbackSteps*(long)printer.maxExtruderSpeed*TIMER0_PRESCALE)/prev->fullInterval;
-                    long ponr = prev->stepsRemaining/(1.0+0.01*printer.opsMoveAfter);
-                    if(prev->opsReverseSteps>ponr)
-                        prev->opsReverseSteps = ponr;
-                }
-                act->setStartSpeedFixed(true);
-                return;
-            }
-        }
-#endif
         // Avoid speed calc once crusing in split delta move
 #if DRIVE_SYSTEM==3
         if (prev->moveID==act->moveID && lastJunctionSpeed==prev->maxJunctionSpeed)
@@ -449,12 +417,12 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
     float saved_feedrate = printer.feedrate;
     for(byte i=0; i < 4; i++)
     {
-        printer.destinationSteps[i] = printer.currentPositionSteps[i];
+        Printer::destinationSteps[i] = Printer::currentPositionSteps[i];
     }
-    printer.destinationSteps[0]+=x;
-    printer.destinationSteps[1]+=y;
-    printer.destinationSteps[2]+=z;
-    printer.destinationSteps[3]+=e;
+    Printer::destinationSteps[0]+=x;
+    Printer::destinationSteps[1]+=y;
+    Printer::destinationSteps[2]+=z;
+    Printer::destinationSteps[3]+=e;
     printer.feedrate = feedrate;
 #if DRIVE_SYSTEM==3
     split_delta_move(check_endstop,false,false);
@@ -474,9 +442,6 @@ byte check_new_move(byte pathOptimize, byte waitExtraLines)
 {
     if(lines_count==0 && waitRelax==0 && pathOptimize)   // First line after some time - warmup needed
     {
-#ifdef DEBUG_OPS
-        out.println_P(PSTR("New path"));
-#endif
         byte w = 3;
         PrintLine *p = &lines[lines_write_pos];
         while(w)
@@ -613,9 +578,6 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 
     //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
     byte is_print_move = (p->dir & 136)==136; // are we printing
-#if USE_OPS==1
-    if(is_print_move) printmoveSeen = 1;
-#endif
     //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
 #ifdef RAMP_ACCELERATION
 
@@ -757,32 +719,32 @@ void queue_move(byte check_endstops,byte pathOptimize)
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
     else p->flags = 0;
     p->joinFlags = 0;
-    if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
+    if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
 #if min_software_endstop_x == true
-    if (printer.destinationSteps[0] < 0) printer.destinationSteps[0] = 0.0;
+    if (Printer::destinationSteps[0] < 0) Printer::destinationSteps[0] = 0.0;
 #endif
 #if min_software_endstop_y == true
-    if (printer.destinationSteps[1] < 0) printer.destinationSteps[1] = 0.0;
+    if (Printer::destinationSteps[1] < 0) Printer::destinationSteps[1] = 0.0;
 #endif
 #if min_software_endstop_z == true
-    if (printer.destinationSteps[2] < 0) printer.destinationSteps[2] = 0.0;
+    if (Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0.0;
 #endif
 
 #if max_software_endstop_x == true
-    if (printer.destinationSteps[0] > printer.xMaxSteps) printer.destinationSteps[0] = printer.xMaxSteps;
+    if (Printer::destinationSteps[0] > printer.xMaxSteps) Printer::destinationSteps[0] = printer.xMaxSteps;
 #endif
 #if max_software_endstop_y == true
-    if (printer.destinationSteps[1] > printer.yMaxSteps) printer.destinationSteps[1] = printer.yMaxSteps;
+    if (Printer::destinationSteps[1] > printer.yMaxSteps) Printer::destinationSteps[1] = printer.yMaxSteps;
 #endif
 #if max_software_endstop_z == true
-    if (printer.destinationSteps[2] > printer.zMaxSteps) printer.destinationSteps[2] = printer.zMaxSteps;
+    if (Printer::destinationSteps[2] > printer.zMaxSteps) Printer::destinationSteps[2] = printer.zMaxSteps;
 #endif
     //Find direction
 #if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
     for(byte i=0; i < 4; i++)
     {
-        if((p->delta[i]=printer.destinationSteps[i]-printer.currentPositionSteps[i])>=0)
+        if((p->delta[i]=Printer::destinationSteps[i]-Printer::currentPositionSteps[i])>=0)
         {
             p->dir |= 1<<i;
         }
@@ -797,21 +759,21 @@ void queue_move(byte check_endstops,byte pathOptimize)
         }
         axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
         if(p->delta[i]) p->dir |= 16<<i;
-        printer.currentPositionSteps[i] = printer.destinationSteps[i];
+        Printer::currentPositionSteps[i] = Printer::destinationSteps[i];
     }
     printer.filamentPrinted+=axis_diff[3];
 #else
-    long deltax = printer.destinationSteps[0]-printer.currentPositionSteps[0];
-    long deltay = printer.destinationSteps[1]-printer.currentPositionSteps[1];
+    long deltax = Printer::destinationSteps[0]-Printer::currentPositionSteps[0];
+    long deltay = Printer::destinationSteps[1]-Printer::currentPositionSteps[1];
 #if DRIVE_SYSTEM==1
-    p->delta[2] = printer.destinationSteps[2]-printer.currentPositionSteps[2];
-    p->delta[3] = printer.destinationSteps[3]-printer.currentPositionSteps[3];
+    p->delta[2] = Printer::destinationSteps[2]-Printer::currentPositionSteps[2];
+    p->delta[3] = Printer::destinationSteps[3]-Printer::currentPositionSteps[3];
     p->delta[0] = deltax+deltay;
     p->delta[1] = deltax-deltay;
 #endif
 #if DRIVE_SYSTEM==2
-    p->delta[2] = printer.destinationSteps[2]-printer.currentPositionSteps[2];
-    p->delta[3] = printer.destinationSteps[3]-printer.currentPositionSteps[3];
+    p->delta[2] = Printer::destinationSteps[2]-Printer::currentPositionSteps[2];
+    p->delta[3] = Printer::destinationSteps[3]-Printer::currentPositionSteps[3];
     p->delta[0] = deltay+deltax;
     p->delta[1] = deltay-deltax;
 #endif
@@ -829,7 +791,7 @@ void queue_move(byte check_endstops,byte pathOptimize)
             p->delta[i] = -p->delta[i];
         }
         if(p->delta[i]) p->dir |= 16<<i;
-        printer.currentPositionSteps[i] = printer.destinationSteps[i];
+        Printer::currentPositionSteps[i] = Printer::destinationSteps[i];
     }
 #endif
     if((p->dir & 240)==0)
@@ -843,9 +805,6 @@ void queue_move(byte check_endstops,byte pathOptimize)
     }
     byte primary_axis;
     float xydist2;
-#if USE_OPS==1
-    p->opsReverseSteps=0;
-#endif
 #if ENABLE_BACKLASH_COMPENSATION
     if((p->dir & 112) && ((p->dir & 7)^(printer.backlashDir & 7)) & (printer.backlashDir >> 3))   // We need to compensate backlash, add a move
     {
@@ -951,7 +910,7 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop)
     for(byte i=0; i < NUM_AXIS - 1; i++)
     {
         // Save current position
-        destination_steps[i] = printer.currentPositionSteps[i];
+        destination_steps[i] = Printer::currentPositionSteps[i];
     }
 
 //	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
@@ -965,7 +924,7 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop)
     for (int s = p->numDeltaSegments; s > 0; s--)
     {
         for(byte i=0; i < NUM_AXIS - 1; i++)
-            destination_steps[i] += (printer.destinationSteps[i] - destination_steps[i]) / s;
+            destination_steps[i] += (Printer::destinationSteps[i] - destination_steps[i]) / s;
 
         // Wait for buffer here
         while(delta_segment_count + produced_segments>=DELTA_CACHE_SIZE)   // wait for a free entry in movement cache
@@ -1187,11 +1146,8 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
         //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
         p->delta[3]=(long)((p->delta[3]*(float)printer.extrudeMultiply)*0.01f);
     }
-    printer.currentPositionSteps[3] = printer.destinationSteps[3];
+    Printer::currentPositionSteps[3] = Printer::destinationSteps[3];
 
-#if USE_OPS==1
-    p->opsReverseSteps=0;
-#endif
     p->numDeltaSegments = 0;
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
     p->primaryAxis = 3;
@@ -1209,12 +1165,12 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize)
 */
 void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
 {
-    if (softEndstop && printer.destinationSteps[2] < 0) printer.destinationSteps[2] = 0;
+    if (softEndstop && Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0;
     long difference[NUM_AXIS];
     float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
     for(byte i=0; i < NUM_AXIS; i++)
     {
-        difference[i] = printer.destinationSteps[i] - printer.currentPositionSteps[i];
+        difference[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
         axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
     }
     printer.filamentPrinted+=axis_diff[3];
@@ -1279,7 +1235,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
     long start_position[4], fractional_steps[4];
     for (byte i = 0; i < 4; i++)
     {
-        start_position[i] = printer.currentPositionSteps[i];
+        start_position[i] = Printer::currentPositionSteps[i];
     }
 
 #ifdef DEBUG_SPLIT
@@ -1323,8 +1279,8 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
         {
             for (byte i=0; i < 4; i++)
             {
-                printer.destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
-                fractional_steps[i] = printer.destinationSteps[i] - printer.currentPositionSteps[i];
+                Printer::destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
+                fractional_steps[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
                 axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
             }
             calculate_dir_delta(fractional_steps, &p->dir, p->delta);
@@ -1344,10 +1300,6 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
             p->flags = 0;
 
         p->numDeltaSegments = segments_per_line;
-
-#if USE_OPS==1
-        p->opsReverseSteps=0;
-#endif
 
         long max_delta_step = calculate_delta_segments(p, softEndstop);
 
@@ -1384,7 +1336,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
         calculate_move(p,axis_diff,check_endstops,pathOptimize);
         for (byte i=0; i < 4; i++)
         {
-            printer.currentPositionSteps[i] += fractional_steps[i];
+            Printer::currentPositionSteps[i] += fractional_steps[i];
         }
     }
     lastMoveID++; // Will wrap at 255
@@ -1403,14 +1355,14 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
     float center_axis0 = position[0] + offset[0];
     float center_axis1 = position[1] + offset[1];
     float linear_travel = 0; //target[axis_linear] - position[axis_linear];
-    float extruder_travel = printer.destinationSteps[3]-printer.currentPositionSteps[3];
+    float extruder_travel = Printer::destinationSteps[3]-Printer::currentPositionSteps[3];
     float r_axis0 = -offset[0];  // Radius vector from center to current location
     float r_axis1 = -offset[1];
     float rt_axis0 = target[0] - center_axis0;
     float rt_axis1 = target[1] - center_axis1;
-    long xtarget = printer.destinationSteps[0];
-    long ytarget = printer.destinationSteps[1];
-    long etarget = printer.destinationSteps[3];
+    long xtarget = Printer::destinationSteps[0];
+    long ytarget = Printer::destinationSteps[1];
+    long etarget = Printer::destinationSteps[3];
 
     // CCW angle between position and target from circle center. Only one atan2() trig computation required.
     float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
@@ -1482,7 +1434,7 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
     //arc_target[axis_linear] = position[axis_linear];
 
     // Initialize the extruder axis
-    arc_target[3] = printer.currentPositionSteps[3];
+    arc_target[3] = Printer::currentPositionSteps[3];
 
     for (i = 1; i<segments; i++)
     {
@@ -1520,9 +1472,9 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
         //arc_target[axis_linear] += linear_per_segment;
         arc_target[3] += extruder_per_segment;
 
-        printer.destinationSteps[0] = arc_target[0]*axis_steps_per_unit[0];
-        printer.destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
-        printer.destinationSteps[3] = arc_target[3];
+        Printer::destinationSteps[0] = arc_target[0]*axis_steps_per_unit[0];
+        Printer::destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
+        Printer::destinationSteps[3] = arc_target[3];
 #if DRIVE_SYSTEM == 3
         split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
@@ -1530,9 +1482,9 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
 #endif
     }
     // Ensure last segment arrives at target location.
-    printer.destinationSteps[0] = xtarget;
-    printer.destinationSteps[1] = ytarget;
-    printer.destinationSteps[3] = etarget;
+    Printer::destinationSteps[0] = xtarget;
+    Printer::destinationSteps[1] = ytarget;
+    Printer::destinationSteps[3] = etarget;
 #if DRIVE_SYSTEM == 3
     split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else

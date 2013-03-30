@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "Reptier.h"
+#include "Repetier.h"
 
 #ifndef FEATURE_CHECKSUM_FORCED
 #define FEATURE_CHECKSUM_FORCED true
@@ -523,9 +523,9 @@ void emergencyStop() {
 #if defined(KILL_METHOD) && KILL_METHOD==1
   resetFunc();
 #else
-     cli(); // Don't allow interrupts to do their work
+     HAL::forbidInterrupts(); // Don't allow interrupts to do their work
      kill(false);
-     manage_temperatures();
+     Extruder::manageTemperatures();
      pwm_pos[0] = pwm_pos[1] = pwm_pos[2] = pwm_pos[3]=0;
 #if EXT0_HEATER_PIN>-1
     WRITE(EXT0_HEATER_PIN,0);
@@ -547,7 +547,7 @@ void emergencyStop() {
   If not, a resend and ok is send.
 */
 void gcode_checkinsert(GCode *act) {
-  if(GCODE_HAS_M(act)) {
+  if(act->hasM()) {
    if(act->M==110) { // Reset line number
      gcode_lastN = gcode_actN;
      OUT_P_LN("ok");
@@ -557,7 +557,7 @@ void gcode_checkinsert(GCode *act) {
      emergencyStop();
    }
   }
-  if(GCODE_HAS_N(act)) {
+  if(act->hasN()) {
     if((((gcode_lastN+1) & 0xffff)!=(gcode_actN&0xffff))) {
       if(gcode_wait_resend<0) { // after a resend, we have to skip the garbage in buffers, no message for this
         if(DEBUG_ERRORS) {
@@ -821,13 +821,13 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    p = buffer;
    code->params = *(unsigned int *)p;p+=2;
    byte textlen=16;
-   if(GCODE_IS_V2(code)) {
+   if(code->isV2()) {
      code->params2 = *(unsigned int *)p;p+=2;
-     if(GCODE_HAS_STRING(code))
+     if(code->hasString())
        textlen = *p++;
    } else code->params2 = 0;
    if(code->params & 1) {gcode_actN=code->N=*(unsigned int *)p;p+=2;}
-   if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
+   if(code->isV2()) { // Read G,M as 16 bit value
      if(code->params & 2) {code->M=*(unsigned int *)p;p+=2;}
      if(code->params & 4) {code->G=*(unsigned int *)p;p+=2;}
    } else {
@@ -843,10 +843,10 @@ bool gcode_parse_binary(GCode *code,byte *buffer) {
    if(code->params & 512) {code->T=*p++;}
    if(code->params & 1024) {code->S=*(long int*)p;p+=4;}
    if(code->params & 2048) {code->P=*(long int*)p;p+=4;}
-   if(GCODE_HAS_I(code)) {code->I=*(float *)p;p+=4;}
-   if(GCODE_HAS_J(code)) {code->J=*(float *)p;p+=4;}
-   if(GCODE_HAS_R(code)) {code->R=*(float *)p;p+=4;}
-   if(GCODE_HAS_STRING(code)) { // set text pointer to string
+   if(code->hasI()) {code->I=*(float *)p;p+=4;}
+   if(code->hasJ()) {code->J=*(float *)p;p+=4;}
+   if(code->hasR()) {code->R=*(float *)p;p+=4;}
+   if(code->hasString()) { // set text pointer to string
      code->text = (char*)p;
      code->text[textlen] = 0; // Terminate string overwriting checksum
      gcode_wait_all_parsed=true; // Don't destroy string until executed
@@ -874,7 +874,7 @@ bool gcode_parse_ascii(GCode *code,char *line) {
      code->params |= 2;
      if(code->M>255) code->params |= 4096;
   }
-  if(GCODE_HAS_M(code) && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 32 || code->M == 117)) {
+  if(code->hasM() && (code->M == 23 || code->M == 28 || code->M == 29 || code->M == 30 || code->M == 32 || code->M == 117)) {
      // after M command we got a filename for sd card management
      char *sp = line;
      while(*sp!='M') sp++; // Search M command
@@ -958,7 +958,7 @@ bool gcode_parse_ascii(GCode *code,char *line) {
   }
 #if FEATURE_CHECKSUM_FORCED
   else {
-    if(GCODE_HAS_M(code) && code->M == 117) return true;
+    if(code->hasM() && code->M == 117) return true;
       if(DEBUG_ERRORS) {
         OUT_P("Error: Missing checksum ");
       }
@@ -970,52 +970,52 @@ bool gcode_parse_ascii(GCode *code,char *line) {
 
 /** \brief Print command on serial console */
 void gcode_print_command(GCode *code) {
-  if(GCODE_HAS_M(code)) {
+  if(code->hasM()) {
     out.print('M');
     out.print((int)code->M);
     out.print(' ');
   }
-  if(GCODE_HAS_G(code)) {
+  if(code->hasG()) {
     out.print('G');
     out.print((int)code->G);
     out.print(' ');
   }
-  if(GCODE_HAS_T(code)) {
+  if(code->hasT()) {
     out.print('T');
     out.print((int)code->T);
     out.print(' ');
   }
-  if(GCODE_HAS_X(code)) {
+  if(code->hasX()) {
     out.print_float_P(PSTR(" X"),code->X);
   }
-  if(GCODE_HAS_Y(code)) {
+  if(code->hasY()) {
     out.print_float_P(PSTR(" Y"),code->Y);
   }
-  if(GCODE_HAS_Z(code)) {
+  if(code->hasZ()) {
     out.print_float_P(PSTR(" Z"),code->Z);
   }
-  if(GCODE_HAS_E(code)) {
+  if(code->hasE()) {
     out.print_float_P(PSTR(" E"),code->E,4);
   }
-  if(GCODE_HAS_F(code)) {
+  if(code->hasF()) {
     out.print_float_P(PSTR(" F"),code->F);
   }
-  if(GCODE_HAS_S(code)) {
+  if(code->hasS()) {
     out.print_long_P(PSTR(" S"),code->S);
   }
-  if(GCODE_HAS_P(code)) {
+  if(code->hasP()) {
     out.print_long_P(PSTR(" P"),code->P);
   }
-  if(GCODE_HAS_I(code)) {
+  if(code->hasI()) {
     out.print_float_P(PSTR(" I"),code->I);
   }
-  if(GCODE_HAS_J(code)) {
+  if(code->hasJ()) {
     out.print_float_P(PSTR(" J"),code->J);
   }
-  if(GCODE_HAS_R(code)) {
+  if(code->hasR()) {
     out.print_float_P(PSTR(" R"),code->R);
   }
-  if(GCODE_HAS_STRING(code)) {
+  if(code->hasString()) {
     out.print(code->text);
   }
 }

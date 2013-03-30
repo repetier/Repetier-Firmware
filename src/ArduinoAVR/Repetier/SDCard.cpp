@@ -19,7 +19,7 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "Reptier.h"
+#include "Repetier.h"
 #include "ui.h"
 
 #if SDSUPPORT
@@ -36,7 +36,7 @@ SDCard::SDCard() {
   savetosd = false;
     //power to SD reader
 #if SDPOWER > -1
-  SET_OUTPUT(SDPOWER); 
+  SET_OUTPUT(SDPOWER);
   WRITE(SDPOWER,HIGH);
 #endif
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1
@@ -76,7 +76,7 @@ void SDCard::initsd() {
     sdactive = true;
   #endif
 }
-  
+
 void SDCard::write_command(GCode *code) {
      unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
       byte buf[100];
@@ -84,9 +84,9 @@ void SDCard::write_command(GCode *code) {
       file.writeError = false;
       int params = 128 | (code->params & ~1);
       *(int*)buf = params;
-      if(GCODE_IS_V2(code)) { // Read G,M as 16 bit value
+      if(code->isV2()) { // Read G,M as 16 bit value
         *(int*)&buf[p] = code->params2;p+=2;
-        if(GCODE_HAS_STRING(code))
+        if(code->hasString())
           buf[p++] = strlen(code->text);
         if(code->params & 2) {*(int*)&buf[p] = code->M;p+=2;}
         if(code->params & 4) {*(int*)&buf[p]= code->G;p+=2;}
@@ -104,9 +104,9 @@ void SDCard::write_command(GCode *code) {
       if(code->params & 2048) {*(long int*)&buf[p] = code->P;p+=4;}
       if(code->params2 & 1) {*(float*)&buf[p] = code->I;p+=4;}
       if(code->params2 & 2) {*(float*)&buf[p] = code->J;p+=4;}
-      if(GCODE_HAS_STRING(code)) { // read 16 byte into string
+      if(code->hasString()) { // read 16 byte into string
         char *sp = code->text;
-        if(GCODE_IS_V2(code)) {
+        if(code->isV2()) {
           byte i = strlen(code->text);
           for(;i;i--) buf[p++] = *sp++;
         } else {
@@ -135,10 +135,10 @@ void SDCard::write_command(GCode *code) {
 char *SDCard::createFilename(char *buffer,const dir_t &p)
 {
   char *pos = buffer,*src = (char*)p.name;
-  for (byte i = 0; i < 11; i++,src++) 
-  {   
+  for (byte i = 0; i < 11; i++,src++)
+  {
     if (*src == ' ') continue;
-    if (i == 8) 
+    if (i == 8)
       *pos++ = '.';
     *pos++ = *src;
   }
@@ -154,7 +154,7 @@ bool SDCard::showFilename(const uint8_t *name) {
      name++;
   }
 #endif
-  return true; 
+  return true;
 }
 void  SDCard::lsRecursive(SdBaseFile *parent,byte level)
 {
@@ -280,7 +280,7 @@ void SDCard::makeDirectory(char *filename) {
   sdmode = false;
   file.close();
   if(fat.mkdir(filename)) {
-    OUT_P_LN("Directory created");    
+    OUT_P_LN("Directory created");
   } else {
     OUT_P_LN("Creation failed");
   }

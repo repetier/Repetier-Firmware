@@ -1,5 +1,18 @@
 # Repetier-Firmware - the fast and user friendly firmware
 
+## Important notice of this development version
+
+This development version is under heavy code change. Im reorganizing and refactoring
+this code. Planned achievements for this release:
+
+* Better readable code.
+* Separation of logic and hardware access to allow different processor architectures
+  by changing the hardware related files.
+* z-leveling support.
+* Modified OPS handling.
+
+## Documentation
+
 by repetier  (repetierdev@gmail.com)
 
 For documentation please visit [http://www.repetier.com/documentation/repetier-firmware/](http://www.repetier.com/documentation/repetier-firmware/)
@@ -27,16 +40,19 @@ require a matching pin definition.
 
 * MEGA/RAMPS up to 1.2       = 3
 * RAMPS 1.3/RAMPS 1.4        = 33
+* Azteeg X3                  = 34
 * Gen6                       = 5 
 * Gen6 deluxe                = 51
 * Sanguinololu up to 1.1     = 6
 * Sanguinololu 1.2 and above = 62
+* Melzi board                = 63
 * Gen7 1.1 till 1.3.x        = 7
 * Gen7 1.4.1 and later       = 71
 * Teensylu (at90usb)         = 8 // requires Teensyduino
 * Printrboard (at90usb)      = 9 // requires Teensyduino
 * Foltyn 3D Master           = 12
 * MegaTronics                = 70
+* Megatronics 2.0            = 701
 * RUMBA                      = 80  // Get it from reprapdiscount
 * Rambo                      = 301
 

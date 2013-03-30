@@ -386,7 +386,7 @@ UI_MENU_CHANGEACTION(ui_menu_feedrate_homex,UI_TEXT_FEED_HOME_X,UI_ACTION_HOMING
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homey,UI_TEXT_FEED_HOME_Y,UI_ACTION_HOMING_FEEDRATE_Y);
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homez,UI_TEXT_FEED_HOME_Z,UI_ACTION_HOMING_FEEDRATE_Z);
 #define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez}
-UI_MENU(ui_menu_feedrate,UI_MENU_ACCEL,6+UI_MENU_BACKCNT);
+UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,6+UI_MENU_BACKCNT);
 
 // **** General configuration settings
 

@@ -19,30 +19,99 @@
 #define _GCODE_H
 
 #include <avr/pgmspace.h>
-// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734 
-//#ifdef PROGMEM 
-//#undef PROGMEM 
-//#define PROGMEM __attribute__((section(".progmem.data"))) 
+// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
+//#ifdef PROGMEM
+//#undef PROGMEM
+//#define PROGMEM __attribute__((section(".progmem.data")))
 //#endif
 
-typedef struct { // 52 bytes per command needed
-   unsigned int params;
-   unsigned int params2;
-   unsigned int N; // Line number
-   unsigned int M;
-   unsigned int G;
-   float X;
-   float Y;
-   float Z;
-   float E;
-   float F;
-   byte T;
-   long S;
-   long P;
-   float I;
-   float J;
-   float R;   
-   char *text; //text[17];
+typedef struct   // 52 bytes per command needed
+{
+    unsigned int params;
+    unsigned int params2;
+    unsigned int N; // Line number
+    unsigned int M;
+    unsigned int G;
+    float X;
+    float Y;
+    float Z;
+    float E;
+    float F;
+    byte T;
+    long S;
+    long P;
+    float I;
+    float J;
+    float R;
+    char *text; //text[17];
+    inline bool hasM()
+    {
+        return ((params & 2)!=0);
+    }
+    inline bool hasN()
+    {
+        return ((params & 1)!=0);
+    }
+    inline bool hasG()
+    {
+        return ((params & 4)!=0);
+    }
+    inline bool hasX()
+    {
+        return ((params & 8)!=0);
+    }
+    inline bool hasY()
+    {
+        return ((params & 16)!=0);
+    }
+    inline bool hasZ()
+    {
+        return ((params & 32)!=0);
+    }
+    inline bool hasNoXYZ()
+    {
+        return ((params & 56)==0);
+    }
+    inline bool hasE()
+    {
+        return ((params & 64)!=0);
+    }
+    inline bool hasF()
+    {
+        return ((params & 256)!=0);
+    }
+    inline bool hasT()
+    {
+        return ((params & 512)!=0);
+    }
+    inline bool hasS()
+    {
+        return ((params & 1024)!=0);
+    }
+    inline bool hasP()
+    {
+        return ((params & 2048)!=0);
+    }
+    inline bool isV2()
+    {
+        return ((params & 4096)!=0);
+    }
+    inline bool hasString()
+    {
+        return ((params & 32768)!=0);
+    }
+    inline bool hasI()
+    {
+        return ((params2 & 1)!=0);
+    }
+    inline bool hasJ()
+    {
+        return ((params2 & 2)!=0);
+    }
+    inline bool hasR()
+    {
+        return ((params2 & 4)!=0);
+    }
 } GCode;
 
 #ifndef EXTERNALSERIAL
@@ -66,7 +135,7 @@ typedef struct { // 52 bytes per command needed
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
   Modified 28 September 2010 by Mark Sproul
-  
+
   Modified to use only 1 queue with fixed length by Repetier
 */
 
@@ -75,13 +144,13 @@ typedef struct { // 52 bytes per command needed
 
 struct ring_buffer
 {
-  unsigned char buffer[SERIAL_BUFFER_SIZE];
-  volatile int head;
-  volatile int tail;
+    unsigned char buffer[SERIAL_BUFFER_SIZE];
+    volatile int head;
+    volatile int tail;
 };
 class RFHardwareSerial : public Print
 {
-  public:
+public:
     ring_buffer *_rx_buffer;
     ring_buffer *_tx_buffer;
     volatile uint8_t *_ubrrh;
@@ -94,12 +163,12 @@ class RFHardwareSerial : public Print
     uint8_t _rxcie;
     uint8_t _udrie;
     uint8_t _u2x;
-  public:
+public:
     RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
-      volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-      volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-      volatile uint8_t *udr,
-      uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
+                     volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
+                     volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
+                     volatile uint8_t *udr,
+                     uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
     void begin(unsigned long);
     void end();
     virtual int available(void);
@@ -114,7 +183,7 @@ class RFHardwareSerial : public Print
     using Print::write; // pull in write(str) and write(buf, size) from Print
     operator bool();
 };
-extern RFHardwareSerial RFSerial; 
+extern RFHardwareSerial RFSerial;
 #define RFSERIAL RFSerial
 extern ring_buffer tx_buffer;
 #define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}
@@ -122,24 +191,25 @@ extern ring_buffer tx_buffer;
 #define RFSERIAL Serial
 #endif
 
-class SerialOutput : public Print {
+class SerialOutput : public Print
+{
 public:
-  SerialOutput();
+    SerialOutput();
 #ifdef COMPAT_PRE1
-  void write(uint8_t);
+    void write(uint8_t);
 #else
-  size_t write(uint8_t);
+    size_t write(uint8_t);
 #endif
-  void print_P(PGM_P ptr);
-  void println_P(PGM_P ptr);
-  void print_long_P(PGM_P ptr,long value);
-  void print_int_P(PGM_P ptr,int value);
-  void print_float_P(PGM_P ptr,float value,uint8_t digits = 2);
-  void println_long_P(PGM_P ptr,long value);
-  void println_int_P(PGM_P ptr,int value);
-  void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
-  void print_error_P(PGM_P ptr,bool newline);
-  void printFloat(double number, uint8_t digits=2); 
+    void print_P(PGM_P ptr);
+    void println_P(PGM_P ptr);
+    void print_long_P(PGM_P ptr,long value);
+    void print_int_P(PGM_P ptr,int value);
+    void print_float_P(PGM_P ptr,float value,uint8_t digits = 2);
+    void println_long_P(PGM_P ptr,long value);
+    void println_int_P(PGM_P ptr,int value);
+    void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
+    void print_error_P(PGM_P ptr,bool newline);
+    void printFloat(double number, uint8_t digits=2);
 
 };
 #define OUT_P_I(p,i) out.print_int_P(PSTR(p),(int)(i))
@@ -159,7 +229,7 @@ public:
 extern SerialOutput out;
 /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
 extern GCode *gcode_next_command();
-/** Frees the cache used by the last command fetched. */ 
+/** Frees the cache used by the last command fetched. */
 extern void gcode_command_finished(GCode *code);
 // check for new commands
 extern void gcode_read_serial();
@@ -170,24 +240,6 @@ extern bool gcode_parse_binary(GCode *code,byte *buffer);
 extern bool gcode_parse_ascii(GCode *code,char *line);
 extern void emergencyStop();
 
-// Helper macros to detect, if parameter is stored in GCode struct
-#define GCODE_HAS_N(a) ((a->params & 1)!=0)
-#define GCODE_HAS_M(a) ((a->params & 2)!=0)
-#define GCODE_HAS_G(a) ((a->params & 4)!=0)
-#define GCODE_HAS_X(a) ((a->params & 8)!=0)
-#define GCODE_HAS_Y(a) ((a->params & 16)!=0)
-#define GCODE_HAS_Z(a) ((a->params & 32)!=0)
-#define GCODE_HAS_NO_XYZ(a) ((a->params & 56)==0)
-#define GCODE_HAS_E(a) ((a->params & 64)!=0)
-#define GCODE_HAS_F(a) ((a->params & 256)!=0)
-#define GCODE_HAS_T(a) ((a->params & 512)!=0)
-#define GCODE_HAS_S(a) ((a->params & 1024)!=0)
-#define GCODE_HAS_P(a) ((a->params & 2048)!=0)
-#define GCODE_IS_V2(a) ((a->params & 4096)!=0)
-#define GCODE_HAS_STRING(a) ((a->params & 32768)!=0)
-#define GCODE_HAS_I(a) ((a->params2 & 1)!=0)
-#define GCODE_HAS_J(a) ((a->params2 & 2)!=0)
-#define GCODE_HAS_R(a) ((a->params2 & 4)!=0)
 
 extern byte debug_level;
 #define DEBUG_ECHO ((debug_level & 1)!=0)

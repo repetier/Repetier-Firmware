@@ -19,15 +19,15 @@
 #ifndef _EEPROM_H
 #define _EEPROM_H
 
-#include <avr/eeprom.h>
 
-// Id to distinguish version changes 
+
+// Id to distinguish version changes
 #define EEPROM_PROTOCOL_VERSION 2
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
 
-#define EEPROM_OFFSET               0
+
 #define EPR_MAGIC_BYTE              0
 #define EPR_ACCELERATION_TYPE       1
 #define EPR_XAXIS_STEPS_PER_MM      3
@@ -104,28 +104,11 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_COOLER_SPEED       54
 #if EEPROM_MODE!=0
 
-extern inline void epr_set_byte(uint pos,byte value);
-extern inline void epr_set_int(uint pos,int value);
-extern inline void epr_set_long(uint pos,long value);
-extern inline void epr_set_float(uint pos,float value);
+
 extern void epr_data_to_eeprom(byte corrupted);
 extern void epr_eeprom_to_data();
 extern void epr_eeprom_reset();
 
-inline byte epr_get_byte(uint pos) {
-   return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
-}
-inline int epr_get_int(uint pos) {
-  return eeprom_read_word((unsigned int *)(EEPROM_OFFSET+pos));
-}
-inline long epr_get_long(uint pos) {
-  return eeprom_read_dword((unsigned long*)(EEPROM_OFFSET+pos));
-}
-inline float epr_get_float(uint pos) {
-  float v;
-  eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
-  return v;
-}
 #endif
 
 extern void epr_output_settings();

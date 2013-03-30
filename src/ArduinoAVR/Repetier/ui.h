@@ -197,7 +197,7 @@
 #include "fastio.h"
 
 typedef struct {
-  const char *text; // Menu text 
+  const char *text; // Menu text
   unsigned char menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
   unsigned int action;
 } const UIMenuEntry;
@@ -216,8 +216,8 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 //#ifdef COMPILE_I2C_DRIVER
 
-/************************************************************************* 
-* Title:    C include file for the I2C master interface 
+/*************************************************************************
+* Title:    C include file for the I2C master interface
 *           (i2cmaster.S or twimaster.c)
 * Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
 * File:     $Id: i2cmaster.h,v 1.10 2005/03/06 22:39:57 Peter Exp $
@@ -237,24 +237,24 @@ extern const int8_t encoder_table[16] PROGMEM ;
 /** defines the data direction (writing to I2C device) in i2c_start(),i2c_rep_start() */
 #define I2C_WRITE   0
 
-/** 
- @brief Terminates the data transfer and releases the I2C bus 
+/**
+ @brief Terminates the data transfer and releases the I2C bus
  @param void
  @return none
  */
 extern void i2c_stop(void);
-/** 
- @brief Issues a start condition and sends address and transfer direction 
-  
+/**
+ @brief Issues a start condition and sends address and transfer direction
+
  @param    addr address and transfer direction of I2C device
- @retval   0   device accessible 
- @retval   1   failed to access device 
+ @retval   0   device accessible
+ @retval   1   failed to access device
  */
 extern unsigned char i2c_start(unsigned char addr);
 /**
- @brief Issues a start condition and sends address and transfer direction 
-   
- If device is busy, use ack polling to wait until device ready 
+ @brief Issues a start condition and sends address and transfer direction
+
+ If device is busy, use ack polling to wait until device ready
  @param    addr address and transfer direction of I2C device
  @return   none
  */
@@ -267,26 +267,26 @@ extern void i2c_start_wait(unsigned char addr);
  */
 extern unsigned char i2c_write(unsigned char data);
 /**
- @brief    read one byte from the I2C device, request more data from device 
+ @brief    read one byte from the I2C device, request more data from device
  @return   byte read from I2C device
  */
 extern unsigned char i2c_readAck(void);
 /**
- @brief    read one byte from the I2C device, read is followed by a stop condition 
+ @brief    read one byte from the I2C device, read is followed by a stop condition
  @return   byte read from I2C device
  */
 extern unsigned char i2c_readNak(void);
-/** 
+/**
  @brief    read one byte from the I2C device
- 
+
  Implemented as a macro, which calls either i2c_readAck or i2c_readNak
- 
+
  @param    ack 1 send ack, request more data from device<br>
-               0 send nak, read is followed by a stop condition 
+               0 send nak, read is followed by a stop condition
  @return   byte read from I2C device
  */
 extern unsigned char i2c_read(unsigned char ack);
-#define i2c_read(ack)  (ack) ? i2c_readAck() : i2c_readNak(); 
+#define i2c_read(ack)  (ack) ? i2c_readAck() : i2c_readNak();
 /**@}*/
 
 
@@ -381,7 +381,7 @@ extern unsigned char i2c_read(unsigned char ack);
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
-#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin 
+#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -436,14 +436,14 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
-#if SDSUPPORT
+//#if SDSUPPORT
     void updateSDFileCount();
     void sdrefresh(byte &r);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*13+2];
     byte folderLevel;
-#endif
+//#endif
 };
 extern UIDisplay uid;
 
@@ -507,7 +507,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
-void ui_init_keys() {  
+void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
@@ -515,7 +515,7 @@ void ui_init_keys() {
 void ui_check_keys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET); 
+ UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
@@ -600,7 +600,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_DELAYPERCHAR		   320
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
-void ui_init_keys() {  
+void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(5);
   UI_KEYS_INIT_BUTTON_LOW(6);
@@ -618,6 +618,83 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 4
+#if FEATURE_CONTROLLER==5 // Viki Lcd
+
+// You need to change these 3 button according to the positions
+// where you put them into your board!
+#define UI_ENCODER_A      7 // pins the click encoder are connected to
+#define UI_ENCODER_B      22
+#define UI_RESET_PIN      32 // single button for reset
+
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 0xFFE0
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0x01C0 // bits that are high always, for now the 3 viki leds
+#define UI_DISPLAY_I2C_PULLUP 0x001F
+#define UI_I2C_CLOCKSPEED 100000L // Note with very long cables make this much smaller, for 2ft cables I found 80000 worked ok
+
+#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)
+
+#define SDSUPPORT true
+#define SDCARDDETECT 15  // Set to -1 if you have not connected that pin
+#define SDCARDDETECTINVERTED false
+
+#if !defined(BEEPER_PIN) || BEEPER_PIN<0
+#define BEEPER_PIN        _BV(5)
+#define BEEPER_TYPE       2
+#define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin
+#endif
+#define UI_I2C_HEATBED_LED    _BV(8)
+#define UI_I2C_HOTEND_LED     _BV(7)
+#define UI_I2C_FAN_LED        _BV(6)
+
+#define UI_INVERT_MENU_DIRECTION false
+#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_ENCODER 0
+#define UI_I2C_KEY_ADDRESS 0x40
+#ifdef UI_MAIN
+void ui_init_keys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+}
+void ui_check_keys(int &action) {
+  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
+  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
+}
+inline void ui_check_slow_encoder() { }// not used in Viki
+void ui_check_slow_keys(int &action) {
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  i2c_write(0x12); // GPIOA
+  i2c_stop();
+  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = i2c_readAck();
+  keymask = keymask + (i2c_readNak()<<8);
+  i2c_stop();
+  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_MENU_SDCARD);        // Up button
+  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_MENU_QUICKSETTINGS); // down button
+  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK);              // left button
+  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_MENU_POSITIONS);     // right button
+  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_OK);                 //Select button
+
+}
+#endif
+#endif // Controller 5
 
 
 #if FEATURE_CONTROLLER>0

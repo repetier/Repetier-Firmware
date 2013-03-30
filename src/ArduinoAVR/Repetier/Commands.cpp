@@ -19,21 +19,21 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "Reptier.h"
+#include "Repetier.h"
 #if EEPROM_MODE != 0
 #include "Eeprom.h"
 #endif
 #include "pins_arduino.h"
 #include "ui.h"
 
-#include <SPI.h>
+//#include <SPI.h>
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
 void check_periodical() {
   if(!execute_periodical) return;
   execute_periodical=0;
-  manage_temperatures();
+  Extruder::manageTemperatures();
   if(--counter_250ms==0) {
      if(manage_monitor<=1+NUM_EXTRUDER)
         write_monitor();
@@ -56,10 +56,10 @@ void wait_until_end_of_move() {
   }
 }
 void printPosition() {
-  OUT_P_F("X:",printer.currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
-  OUT_P_F(" Y:",printer.currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
-  OUT_P_F(" Z:",printer.currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
-  OUT_P_F_LN(" E:",printer.currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
+  OUT_P_F("X:",Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
+  OUT_P_F(" Y:",Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
+  OUT_P_F(" Z:",Printer::currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
+  OUT_P_F_LN(" E:",Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
 }
 void print_temperatures() {
 	float temp = current_extruder->tempControl.currentTemperatureC;
@@ -67,7 +67,7 @@ void print_temperatures() {
   OUT_P_F("T:",temp);
 #else
   OUT_P_F("T:",temp);
-  OUT_P_F(" B:",heated_bed_get_temperature());
+  OUT_P_F(" B:",Extruder::getHeatedBedTemperature());
 #endif
 #ifdef TEMP_PID
   OUT_P_I(" @:",(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
@@ -111,8 +111,8 @@ void set_fan_speed(int speed,bool wait) {
 void delta_move_to_top_endstops(float feedrate) {
   long up_steps = printer.zMaxSteps;
   for (byte i=0; i<3; i++)
-    printer.currentPositionSteps[i] = 0;
-  calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+    Printer::currentPositionSteps[i] = 0;
+  calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
   move_steps(0,0,printer.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
 }
 
@@ -126,14 +126,14 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       delta_move_to_top_endstops(homing_feedrate[0]);
       move_steps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
       delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);
-      printer.currentPositionSteps[0] = 0;
-      printer.currentPositionSteps[1] = 0;
-      printer.currentPositionSteps[2] = printer.zMaxSteps;
-      calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+      Printer::currentPositionSteps[0] = 0;
+      Printer::currentPositionSteps[1] = 0;
+      Printer::currentPositionSteps[2] = printer.zMaxSteps;
+      calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
       printer.maxDeltaPositionSteps = printer.currentDeltaPositionSteps[0];
     } else {
-      if (xaxis) printer.destinationSteps[0] = 0;
-      if (yaxis) printer.destinationSteps[1] = 0;
+      if (xaxis) Printer::destinationSteps[0] = 0;
+      if (yaxis) Printer::destinationSteps[1] = 0;
       split_delta_move(true,false,false);
     }
     printer.countZSteps = 0;
@@ -147,9 +147,9 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
       steps = (printer.xMaxSteps-printer.xMinSteps) * X_HOME_DIR;
-      printer.currentPositionSteps[0] = -steps;
+      Printer::currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
-      printer.currentPositionSteps[0] = 0;
+      Printer::currentPositionSteps[0] = 0;
       move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_X_BACK_ON_HOME)
@@ -161,7 +161,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       for(byte i=0;i<NUM_EXTRUDER;i++) offX = max(offX,extruder[i].xOffset);
       // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
-      printer.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer.xMinSteps-offX : printer.xMaxSteps+offX;
+      Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer.xMinSteps-offX : printer.xMaxSteps+offX;
 #if NUM_EXTRUDER>1
       move_steps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
 #endif
@@ -171,9 +171,9 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Y);
       steps = (printer.yMaxSteps-printer.yMinSteps) * Y_HOME_DIR;
-      printer.currentPositionSteps[1] = -steps;
+      Printer::currentPositionSteps[1] = -steps;
       move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
-      printer.currentPositionSteps[1] = 0;
+      Printer::currentPositionSteps[1] = 0;
       move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
@@ -185,7 +185,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       for(byte i=0;i<NUM_EXTRUDER;i++) offY = max(offY,extruder[i].yOffset);
       // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
-      printer.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer.yMinSteps-offY : printer.yMaxSteps+offY;
+      Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer.yMinSteps-offY : printer.yMaxSteps+offY;
 #if NUM_EXTRUDER>1
       move_steps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
 #endif
@@ -195,16 +195,16 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_Z);
       steps = (printer.zMaxSteps-printer.zMinSteps) * Z_HOME_DIR;
-      printer.currentPositionSteps[2] = -steps;
+      Printer::currentPositionSteps[2] = -steps;
       move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
-      printer.currentPositionSteps[2] = 0;
+      Printer::currentPositionSteps[2] = 0;
       move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
       if(ENDSTOP_Z_BACK_ON_HOME > 0)
         move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
 #endif
-      printer.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer.zMinSteps : printer.zMaxSteps;
+      Printer::currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer.zMinSteps : printer.zMaxSteps;
     }
   }
   UI_CLEAR_STATUS
@@ -371,20 +371,20 @@ void process_command(GCode *com,byte bufferedCommand)
   unsigned long codenum; //throw away variable
 #ifdef INCLUDE_DEBUG_COMMUNICATION
   if(DEBUG_COMMUNICATION) {
-    if(GCODE_HAS_G(com) || (GCODE_HAS_M(com) && com->M!=111)) {
+    if(com->hasG() || (com->hasM() && com->M!=111)) {
       gcode_command_finished(com); // free command cache
       previous_millis_cmd = millis();
       return;
     }
   }
 #endif
-  if(GCODE_HAS_G(com))
+  if(com->hasG())
   {
     switch(com->G)
     {
       case 0: // G0 -> G1
       case 1: // G1
-        if(get_coordinates(com)) // For X Y Z E F
+        if(setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if DRIVE_SYSTEM == 3
           split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
@@ -395,16 +395,16 @@ void process_command(GCode *com,byte bufferedCommand)
       case 2: // CW Arc
       case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
       {
-        if(!get_coordinates(com)) break; // For X Y Z E F
-        float offset[2] = {(GCODE_HAS_I(com)?com->I:0),(GCODE_HAS_J(com)?com->J:0)};
+        if(!setDestinationStepsFromGCode(com)) break; // For X Y Z E F
+        float offset[2] = {(com->hasI()?com->I:0),(com->hasJ()?com->J:0)};
         if(unit_inches) {
           offset[0]*=25.4;
           offset[1]*=25.4;
         }
-        float position[2] = {printer.currentPositionSteps[0]*inv_axis_steps_per_unit[0],printer.currentPositionSteps[1]*inv_axis_steps_per_unit[1]};
-        float target[2] = {printer.destinationSteps[0]*inv_axis_steps_per_unit[0],printer.destinationSteps[1]*inv_axis_steps_per_unit[1]};
+        float position[2] = {Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0],Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[1]};
+        float target[2] = {Printer::destinationSteps[0]*inv_axis_steps_per_unit[0],Printer::destinationSteps[1]*inv_axis_steps_per_unit[1]};
         float r;
-        if (GCODE_HAS_R(com)) {
+        if (com->hasR()) {
         /*
           We need to calculate the center of the circle that has the designated radius and passes
           through both the current position and the target position. This method calculates the following
@@ -512,8 +512,8 @@ void process_command(GCode *com,byte bufferedCommand)
       case 4: // G4 dwell
         wait_until_end_of_move();
         codenum = 0;
-        if(GCODE_HAS_P(com)) codenum = com->P; // milliseconds to wait
-        if(GCODE_HAS_S(com)) codenum = (long)com->S * 1000; // seconds to wait
+        if(com->hasP()) codenum = com->P; // milliseconds to wait
+        if(com->hasS()) codenum = com->S * 1000; // seconds to wait
         codenum += millis();  // keep track of when we started waiting
         while((unsigned long)(codenum-millis())  < 2000000000 ){
           gcode_read_serial();
@@ -527,8 +527,8 @@ void process_command(GCode *com,byte bufferedCommand)
         unit_inches = 0;
         break;
       case 28: {//G28 Home all Axis one at a time
-          byte home_all_axis = (GCODE_HAS_NO_XYZ(com));
-          home_axis(home_all_axis || GCODE_HAS_X(com),home_all_axis || GCODE_HAS_Y(com),home_all_axis || GCODE_HAS_Z(com));
+          byte home_all_axis = (com->hasNoXYZ());
+          home_axis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
 		}
         break;
       case 90: // G90
@@ -538,11 +538,11 @@ void process_command(GCode *com,byte bufferedCommand)
         relative_mode = true;
         break;
       case 92: // G92
-        if(GCODE_HAS_X(com)) printer.currentPositionSteps[0] = com->X*axis_steps_per_unit[0]*(unit_inches?25.4:1.0)-printer.offsetX;
-        if(GCODE_HAS_Y(com)) printer.currentPositionSteps[1] = com->Y*axis_steps_per_unit[1]*(unit_inches?25.4:1.0)-printer.offsetY;
-        if(GCODE_HAS_Z(com)) printer.currentPositionSteps[2] = com->Z*axis_steps_per_unit[2]*(unit_inches?25.4:1.0);
-        if(GCODE_HAS_E(com)) {
-          printer.currentPositionSteps[3] = com->E*axis_steps_per_unit[3]*(unit_inches?25.4:1.0);
+        if(com->hasX()) Printer::currentPositionSteps[0] = com->X*axis_steps_per_unit[0]*(unit_inches?25.4:1.0)-printer.offsetX;
+        if(com->hasY()) Printer::currentPositionSteps[1] = com->Y*axis_steps_per_unit[1]*(unit_inches?25.4:1.0)-printer.offsetY;
+        if(com->hasZ()) Printer::currentPositionSteps[2] = com->Z*axis_steps_per_unit[2]*(unit_inches?25.4:1.0);
+        if(com->hasE()) {
+          Printer::currentPositionSteps[3] = com->E*axis_steps_per_unit[3]*(unit_inches?25.4:1.0);
         }
         break;
 
@@ -550,7 +550,7 @@ void process_command(GCode *com,byte bufferedCommand)
     previous_millis_cmd = millis();
   }
 
-  else if(GCODE_HAS_M(com))  { // Process M Code
+  else if(com->hasM())  { // Process M Code
 
     switch( com->M ) {
 #if SDSUPPORT
@@ -565,7 +565,7 @@ void process_command(GCode *com,byte bufferedCommand)
         sd.unmount();
         break;
       case 23: //M23 - Select file
-        if(GCODE_HAS_STRING(com))
+        if(com->hasString())
           sd.selectFile(com->text);
         break;
       case 24: //M24 - Start SD print
@@ -575,14 +575,14 @@ void process_command(GCode *com,byte bufferedCommand)
         sd.pausePrint();
         break;
       case 26: //M26 - Set SD index
-        if(GCODE_HAS_S(com))
+        if(com->hasS())
             sd.setIndex(com->S);
         break;
       case 27: //M27 - Get SD status
         sd.printStatus();
         break;
       case 28: //M28 - Start SD write
-        if(GCODE_HAS_STRING(com))
+        if(com->hasString())
           sd.startWrite(com->text);
         break;
       case 29: //M29 - Stop SD write
@@ -590,16 +590,16 @@ void process_command(GCode *com,byte bufferedCommand)
         //savetosd = false;
         break;
       case 30: // M30 filename - Delete file
-        if(GCODE_HAS_STRING(com))
+        if(com->hasString())
           sd.deleteFile(com->text);
         break;
       case 32: // M32 directoryname
-        if(GCODE_HAS_STRING(com))
+        if(com->hasString())
           sd.makeDirectory(com->text);
         break;
 #endif
       case 42: //M42 -Change pin status via gcode
-        if (GCODE_HAS_S(com) && GCODE_HAS_P(com) && com->S>=0 && com->S<=255) {
+        if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255) {
           int pin_number = com->P;
           for(byte i = 0; i < (byte)sizeof(sensitive_pins); i++) {
               if (pgm_read_byte(&sensitive_pins[i]) == pin_number)
@@ -625,14 +625,14 @@ void process_command(GCode *com,byte bufferedCommand)
 #ifdef EXACT_TEMPERATURE_TIMING
         wait_until_end_of_move();
 #else
-        if(GCODE_HAS_P(com))
+        if(com->hasP())
           wait_until_end_of_move();
 #endif
-        if (GCODE_HAS_S(com)) {
-          if(GCODE_HAS_T(com))
-            extruder_set_temperature(com->S,com->T);
+        if (com->hasS()) {
+          if(com->hasT())
+            Extruder::setTemperatureForExtruder(com->S,com->T);
           else
-            extruder_set_temperature(com->S,current_extruder->id);
+            Extruder::setTemperatureForExtruder(com->S,current_extruder->id);
         }
 #endif
         break;
@@ -640,7 +640,7 @@ void process_command(GCode *com,byte bufferedCommand)
         if(reportTempsensorError()) break;
         previous_millis_cmd = millis();
         if(DEBUG_DRYRUN) break;
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
+        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
         break;
       case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         print_temperatures();
@@ -654,8 +654,8 @@ void process_command(GCode *com,byte bufferedCommand)
           UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
           wait_until_end_of_move();
           Extruder *actExtruder = current_extruder;
-          if(GCODE_HAS_T(com) && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
-          if (GCODE_HAS_S(com)) extruder_set_temperature(com->S,actExtruder->id);
+          if(com->hasT() && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
+          if (com->hasS()) Extruder::setTemperatureForExtruder(com->S,actExtruder->id);
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN>0
           if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
@@ -704,7 +704,7 @@ void process_command(GCode *com,byte bufferedCommand)
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
         wait_until_end_of_move();
 #if HAVE_HEATED_BED
-        if (GCODE_HAS_S(com)) heated_bed_set_temperature(com->S);
+        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
         if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
 #endif
@@ -725,31 +725,31 @@ void process_command(GCode *com,byte bufferedCommand)
       case 300: {
         int beepS = 1;
         int beepP = 1000;
-        if(GCODE_HAS_S(com)) beepS = com->S;
-        if(GCODE_HAS_P(com)) beepP = com->P;
+        if(com->hasS()) beepS = com->S;
+        if(com->hasP()) beepP = com->P;
         tone(BEEPER_PIN, beepS);
         delay(beepP);
         noTone(BEEPER_PIN);
       }
       break;
 #endif
-#ifdef TEMP_PID
       case 303: {
+#if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS>0
           int temp = 150;
           int cont = 0;
-          if(GCODE_HAS_S(com)) temp = com->S;
-          if(GCODE_HAS_P(com)) cont = com->P;
+          if(com->hasS()) temp = com->S;
+          if(com->hasP()) cont = com->P;
           if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
-          autotunePID(temp,cont);
+          tempController[cont]->autotunePID(temp,cont);
+#endif
         }
         break;
-#endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
       case 106: //M106 Fan On
-        set_fan_speed(GCODE_HAS_S(com)?com->S:255,GCODE_HAS_P(com));
+        set_fan_speed(com->hasS()?com->S:255,com->hasP());
         break;
       case 107: //M107 Fan Off
-        set_fan_speed(0,GCODE_HAS_P(com));
+        set_fan_speed(0,com->hasP());
         break;
 #endif
       case 80: // M80 - ATX Power On
@@ -774,31 +774,31 @@ void process_command(GCode *com,byte bufferedCommand)
         relative_mode_e = true;
         break;
       case 84:
-        if(GCODE_HAS_S(com)){ stepper_inactive_time = com->S * 1000; }
+        if(com->hasS()){ stepper_inactive_time = com->S * 1000; }
         else{
           wait_until_end_of_move();
           kill(true);
         }
         break;
       case 85: // M85
-        if(GCODE_HAS_S(com))
+        if(com->hasS())
           max_inactive_time = (long)com->S * 1000;
         else
           max_inactive_time = 0;
         break;
       case 92: // M92
-        if(GCODE_HAS_X(com)) axis_steps_per_unit[0] = com->X;
-        if(GCODE_HAS_Y(com)) axis_steps_per_unit[1] = com->Y;
-        if(GCODE_HAS_Z(com)) axis_steps_per_unit[2] = com->Z;
-        if(GCODE_HAS_E(com)) current_extruder->stepsPerMM = com->E;
+        if(com->hasX()) axis_steps_per_unit[0] = com->X;
+        if(com->hasY()) axis_steps_per_unit[1] = com->Y;
+        if(com->hasZ()) axis_steps_per_unit[2] = com->Z;
+        if(com->hasE()) current_extruder->stepsPerMM = com->E;
         update_ramps_parameter();
         break;
       case 111:
-        if(GCODE_HAS_S(com)) debug_level = com->S;
+        if(com->hasS()) debug_level = com->S;
         if(DEBUG_DRYRUN) { // simulate movements without printing
-          extruder_set_temperature(0,0);
+          Extruder::setTemperatureForExtruder(0,0);
 #if NUM_EXTRUDER>1
-          extruder_set_temperature(0,1);
+          Extruder::setTemperatureForExtruder(0,1);
 #endif
 #if HEATED_BED_TYPE!=0
           target_bed_raw = 0;
@@ -816,14 +816,14 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
 #endif
 #if EEPROM_MODE!=0
-        float dist = printer.filamentPrinted*0.001+epr_get_float(EPR_PRINTING_DISTANCE);
+        float dist = printer.filamentPrinted*0.001+HAL::epr_get_float(EPR_PRINTING_DISTANCE);
         OUT_P_FX("Printed filament:",dist,2);
         OUT_P_LN(" m");
         bool alloff = true;
         for(byte i=0;i<NUM_EXTRUDER;i++)
           if(tempController[i]->targetTemperatureC>15) alloff = false;
 
-        long seconds = (alloff ? 0 : (millis()-printer.msecondsPrinting)/1000)+epr_get_long(EPR_PRINTING_TIME);
+        long seconds = (alloff ? 0 : (millis()-printer.msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
         long tmp = seconds/86400;
         seconds-=tmp*86400;
         OUT_P_L("Printing time:",tmp);
@@ -840,7 +840,7 @@ void process_command(GCode *com,byte bufferedCommand)
         printPosition();
         break;
       case 117: // M117 message to lcd
-        if(GCODE_HAS_STRING(com)) {
+        if(com->hasString()) {
           UI_STATUS_UPD_RAM(com->text);
         }
         break;
@@ -874,26 +874,26 @@ void process_command(GCode *com,byte bufferedCommand)
       	break;
 #if BEEPER_TYPE>0
       case 120: // Test beeper function
-        if(GCODE_HAS_S(com) && GCODE_HAS_P(com))
+        if(com->hasS() && com->hasP())
           beep(com->S,com->P); // Beep test
         break;
 #endif
       #ifdef RAMP_ACCELERATION
       case 201: // M201
-        if(GCODE_HAS_X(com)) axis_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-        if(GCODE_HAS_Y(com)) axis_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-        if(GCODE_HAS_Z(com)) axis_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-        if(GCODE_HAS_E(com)) axis_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+        if(com->hasX()) axis_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
+        if(com->hasY()) axis_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
+        if(com->hasZ()) axis_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
+        if(com->hasE()) axis_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
         break;
       case 202: // M202
-        if(GCODE_HAS_X(com)) axis_travel_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-        if(GCODE_HAS_Y(com)) axis_travel_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-        if(GCODE_HAS_Z(com)) axis_travel_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-        if(GCODE_HAS_E(com)) axis_travel_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+        if(com->hasX()) axis_travel_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
+        if(com->hasY()) axis_travel_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
+        if(com->hasZ()) axis_travel_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
+        if(com->hasE()) axis_travel_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
         break;
       #endif
       case 203: // M203 Temperature monitor
-        if(GCODE_HAS_S(com)) {
+        if(com->hasS()) {
           if(com->S<NUM_EXTRUDER) manage_monitor = com->S;
  #if HAVE_HEATED_BED
           else manage_monitor=NUM_EXTRUDER; // Set 100 to heated bed
@@ -903,7 +903,7 @@ void process_command(GCode *com,byte bufferedCommand)
       case 204:
         {
           TemperatureController *temp = &current_extruder->tempControl;
-          if(GCODE_HAS_S(com)) {
+          if(com->hasS()) {
             if(com->S<0) break;
             if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
   #if HAVE_HEATED_BED
@@ -912,10 +912,10 @@ void process_command(GCode *com,byte bufferedCommand)
 			else break;
   #endif
           }
-          if(GCODE_HAS_X(com)) temp->pidPGain = com->X;
-          if(GCODE_HAS_Y(com)) temp->pidIGain = com->Y;
-          if(GCODE_HAS_Z(com)) temp->pidDGain = com->Z;
-          updateTempControlVars(temp);
+          if(com->hasX()) temp->pidPGain = com->X;
+          if(com->hasY()) temp->pidIGain = com->Y;
+          if(com->hasZ()) temp->pidDGain = com->Z;
+          temp->updateTempControlVars();
         }
         break;
 	  case 503:
@@ -934,32 +934,32 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
         break;
       case 207: // M207 X<XY jerk> Z<Z Jerk>
-        if(GCODE_HAS_X(com))
+        if(com->hasX())
           printer.maxJerk = com->X;
-        if(GCODE_HAS_Z(com))
+        if(com->hasZ())
           printer.maxZJerk = com->Z;
-        if(GCODE_HAS_E(com)) {
+        if(com->hasE()) {
           current_extruder->maxStartFeedrate = com->E;
-          extruder_select(current_extruder->id);
+          Extruder::selectExtruderById(current_extruder->id);
         }
         out.print_float_P(PSTR("Jerk:"),printer.maxJerk);
         out.println_float_P(PSTR(" ZJerk:"),printer.maxZJerk);
         break;
       case 220: // M220 S<Feedrate multiplier in percent>
-        if(GCODE_HAS_S(com))
+        if(com->hasS())
           change_feedrate_multiply(com->S);
         else
           change_feedrate_multiply(100);
         break;
       case 221: // M221 S<Extrusion flow multiplier in percent>
-        if(GCODE_HAS_S(com))
+        if(com->hasS())
           change_flowate_multiply(com->S);
         else
           change_flowate_multiply(100);
         break;
  #ifdef USE_ADVANCE
      case 223: // Extruder interrupt test
-        if(GCODE_HAS_S(com))
+        if(com->hasS())
           printer.extruderStepsNeeded+=com->S;
           break;
      case 232:
@@ -977,17 +977,17 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
 #if USE_OPS==1
       case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
-        if(GCODE_HAS_S(com) && com->S>=0 && com->S<3)
+        if(com->hasS() && com->S>=0 && com->S<3)
           printer.opsMode = com->S;
-        if(GCODE_HAS_X(com) && com->X>=0)
+        if(com->hasX() && com->X>=0)
           printer.opsMinDistance = com->X;
-        if(GCODE_HAS_Y(com) && com->Y>=0)
+        if(com->hasY() && com->Y>=0)
           printer.opsRetractDistance = com->Y;
-        if(GCODE_HAS_Z(com) && com->Z>=-printer.opsRetractDistance)
+        if(com->hasZ() && com->Z>=-printer.opsRetractDistance)
           printer.opsRetractBacklash = com->Z;
-        if(GCODE_HAS_F(com) && com->F>=0 && com->F<=100)
+        if(com->hasF() && com->F>=0 && com->F<=100)
           printer.opsMoveAfter = com->F;
-        extruder_select(current_extruder->id);
+        Extruder::selectExtruderById(current_extruder->id);
         if(printer.opsMode==0) {
           out.println_P(PSTR("OPS disabled"));
         } else {
@@ -1013,11 +1013,11 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
 #ifdef USE_ADVANCE
       case 233:
-        if(GCODE_HAS_Y(com))
+        if(com->hasY())
           current_extruder->advanceL = com->Y;
         out.print_float_P(PSTR("linear L:"),current_extruder->advanceL);
 #ifdef ENABLE_QUADRATIC_ADVANCE
-        if(GCODE_HAS_X(com))
+        if(com->hasX())
           current_extruder->advanceK = com->X;
         out.print_float_P(PSTR(" quadratic K:"),current_extruder->advanceK);
 #endif
@@ -1030,17 +1030,17 @@ void process_command(GCode *com,byte bufferedCommand)
       break;
 #if FEATURE_MEMORY_POSITION
     case 401: // Memory position
-      printer.memoryX = printer.currentPositionSteps[0];
-      printer.memoryY = printer.currentPositionSteps[1];
-      printer.memoryZ = printer.currentPositionSteps[2];
+      printer.memoryX = Printer::currentPositionSteps[0];
+      printer.memoryY = Printer::currentPositionSteps[1];
+      printer.memoryZ = Printer::currentPositionSteps[2];
       break;
     case 402: // Go to stored position
       {
-        bool all = !(GCODE_HAS_X(com) && GCODE_HAS_Y(com) && GCODE_HAS_Z(com));
-        move_steps((all || GCODE_HAS_X(com) ? printer.memoryX-printer.currentPositionSteps[0] : 0)
-        ,(all || GCODE_HAS_Y(com) ? printer.memoryY-printer.currentPositionSteps[1] : 0)
-        ,(all || GCODE_HAS_Z(com) ? printer.memoryZ-printer.currentPositionSteps[2] : 0)
-        ,0,(GCODE_HAS_F(com) ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
+        bool all = !(com->hasX() && com->hasY() && com->hasZ());
+        move_steps((all || com->hasX() ? printer.memoryX-Printer::currentPositionSteps[0] : 0)
+        ,(all || com->hasY() ? printer.memoryY-Printer::currentPositionSteps[1] : 0)
+        ,(all || com->hasZ() ? printer.memoryZ-Printer::currentPositionSteps[2] : 0)
+        ,0,(com->hasF() ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
       }
       break;
 #endif
@@ -1048,7 +1048,7 @@ void process_command(GCode *com,byte bufferedCommand)
       {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         uint8_t channel,current;
-        if(GCODE_HAS_P(com) && GCODE_HAS_S(com))
+        if(com->hasP() && com->hasS())
           set_current((uint8_t)com->P, (unsigned int)com->S);
 #endif
       }
@@ -1088,12 +1088,12 @@ void process_command(GCode *com,byte bufferedCommand)
     {
       OUT_P_LN("Set Microstepping");
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
-        if(GCODE_HAS_S(com)) for(int i=0;i<=4;i++) microstep_mode(i,com->S);
-        if(GCODE_HAS_X(com)) microstep_mode(0,(uint8_t)com->X);
-        if(GCODE_HAS_Y(com)) microstep_mode(1,(uint8_t)com->Y);
-        if(GCODE_HAS_Z(com)) microstep_mode(2,(uint8_t)com->Z);
-        if(GCODE_HAS_E(com)) microstep_mode(3,(uint8_t)com->E);
-        if(GCODE_HAS_P(com)) microstep_mode(4,com->P); // Original B but is not supported here
+        if(com->hasS()) for(int i=0;i<=4;i++) microstep_mode(i,com->S);
+        if(com->hasX()) microstep_mode(0,(uint8_t)com->X);
+        if(com->hasY()) microstep_mode(1,(uint8_t)com->Y);
+        if(com->hasZ()) microstep_mode(2,(uint8_t)com->Z);
+        if(com->hasE()) microstep_mode(3,(uint8_t)com->E);
+        if(com->hasP()) microstep_mode(4,com->P); // Original B but is not supported here
         microstep_readings();
 #endif
     }
@@ -1101,7 +1101,7 @@ void process_command(GCode *com,byte bufferedCommand)
 #ifdef STEP_COUNTER
 #if DRIVE_SYSTEM==3
   case 251:
-    if(GCODE_HAS_S(com)) {
+    if(com->hasS()) {
       if (com->S == 0) {
         printer.countZSteps = 0;
 	out.println_P(PSTR("Measurement reset."));
@@ -1115,9 +1115,9 @@ void process_command(GCode *com,byte bufferedCommand)
 	printer.zLength = inv_axis_steps_per_unit[2] * printer.countZSteps;
 	printer.zMaxSteps = printer.countZSteps;
 	for (byte i=0; i<3; i++) {
-	  printer.currentPositionSteps[i] = 0;
+	  Printer::currentPositionSteps[i] = 0;
 	}
-	calculate_delta(printer.currentPositionSteps, printer.currentDeltaPositionSteps);
+	calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
 	OUT_P_LN("Measured origin set. Measurement reset.");
 	#if EEPROM_MODE!=0
 	  epr_data_to_eeprom(false);
@@ -1129,9 +1129,9 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
 #endif
     }
-  } else if(GCODE_HAS_T(com))  { // Process T code
+  } else if(com->hasT())  { // Process T code
     wait_until_end_of_move();
-    extruder_select(com->T);
+    Extruder::selectExtruderById(com->T);
   } else{
     if(DEBUG_ERRORS) {
       OUT_P("Unknown command:");
