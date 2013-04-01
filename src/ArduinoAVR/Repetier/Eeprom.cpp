@@ -43,48 +43,44 @@ void EEPROM::writeExtruderPrefix(uint pos)
 {
     if(pos<EEPROM_EXTRUDER_OFFSET) return;
     int n = (pos-EEPROM_EXTRUDER_OFFSET)/EEPROM_EXTRUDER_LENGTH+1;
-    OUT_P_I("Extr.",n);
-    out.print(' ');
+    Com::printF(Com::tExtrDot,n);
+    Com::print(' ');
 }
 void EEPROM::writeFloat(uint pos,PGM_P text)
 {
-    OUT_P("EPR:3 ");
-    OUT(pos);
-    OUT(' ');
-    OUT(HAL::epr_get_float(pos));
-    OUT(' ');
+    Com::printF(Com::tEPR3,(int)pos);
+    Com::print(' ');
+    Com::printFloat(HAL::epr_get_float(pos),3);
+    Com::print(' ');
     writeExtruderPrefix(pos);
-    out.println_P(text);
+    Com::printFLN(text);
 }
 void EEPROM::writeLong(uint pos,PGM_P text)
 {
-    OUT_P("EPR:2 ");
-    OUT(pos);
-    OUT(' ');
-    OUT(HAL::epr_get_long(pos));
-    OUT(' ');
+    Com::printF(Com::tEPR2,(int)pos);
+    Com::print(' ');
+    Com::print(HAL::epr_get_long(pos));
+    Com::print(' ');
     writeExtruderPrefix(pos);
-    out.println_P(text);
+    Com::printFLN(text);
 }
 void EEPROM::writeInt(uint pos,PGM_P text)
 {
-    OUT_P("EPR:1 ");
-    OUT(pos);
-    OUT(' ');
-    OUT(HAL::epr_get_int(pos));
-    OUT(' ');
+    Com::printF(Com::tEPR1,(int)pos);
+    Com::print(' ');
+    Com::print(HAL::epr_get_int(pos));
+    Com::print(' ');
     writeExtruderPrefix(pos);
-    out.println_P(text);
+    Com::printFLN(text);
 }
 void EEPROM::writeByte(uint pos,PGM_P text)
 {
-    OUT_P("EPR:0 ");
-    OUT(pos);
-    OUT(' ');
-    OUT((int)HAL::epr_get_byte(pos));
-    OUT(' ');
+    Com::printF(Com::tEPR0,(int)pos);
+    Com::print(' ');
+    Com::print((int)HAL::epr_get_byte(pos));
+    Com::print(' ');
     writeExtruderPrefix(pos);
-    out.println_P(text);
+    Com::printFLN(text);
 }
 #endif
 
@@ -111,7 +107,7 @@ void EEPROM::update(GCode *com)
         HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
     readDataFromEEPROM();
 #else
-    OUT_P_LN("Error: No EEPROM support compiled.");
+    Com::printErrorF(tNoEEPROMSupport);
 #endif
 }
 
@@ -355,11 +351,11 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
 #endif // NUM_EXTRUDER > 5
     Extruder::selectExtruderById(current_extruder->id);
-    update_ramps_parameter();
+    Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
-    OUT_P_LN("Configuration reset to defaults.");
+    Com::printInfoF(Com::tEPRConfigResetDefaults);
 #else
-    OUT_P_LN("Error: No EEPROM support compiled.");
+    Com::printErrorF(tNoEEPROMSupport);
 #endif
 }
 /** \brief Moves current settings to EEPROM.
@@ -585,11 +581,11 @@ void EEPROM::readDataFromEEPROM()
     }
     if(version!=EEPROM_PROTOCOL_VERSION)
     {
-        OUT_P_LN("Protocol version changed, upgrading");
+        Com::printInfoFLN(Com::tEPRProtocolChanged);
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Extruder::selectExtruderById(current_extruder->id);
-    update_ramps_parameter();
+    Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
 #endif
 }
@@ -653,62 +649,62 @@ With
 void EEPROM::writeSettings()
 {
 #if EEPROM_MODE!=0
-    writeLong(EPR_BAUDRATE,PSTR("Baudrate"));
-    writeFloat(EPR_PRINTING_DISTANCE,PSTR("Filament printed [m]"));
-    writeLong(EPR_PRINTING_TIME,PSTR("Printer active [s]"));
-    writeLong(EPR_MAX_INACTIVE_TIME,PSTR("Max. inactive time [ms,0=off]"));
-    writeLong(EPR_STEPPER_INACTIVE_TIME,PSTR("Stop stepper after inactivity [ms,0=off]"));
+    writeLong(EPR_BAUDRATE,Com::tEPRBaudrate);
+    writeFloat(EPR_PRINTING_DISTANCE,Com::tEPRFilamentPrinted);
+    writeLong(EPR_PRINTING_TIME,Com::tEPRPrinterActive);
+    writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
+    writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
-    writeFloat(EPR_XAXIS_STEPS_PER_MM,PSTR("X-axis steps per mm"));
-    writeFloat(EPR_YAXIS_STEPS_PER_MM,PSTR("Y-axis steps per mm"));
-    writeFloat(EPR_ZAXIS_STEPS_PER_MM,PSTR("Z-axis steps per mm"));
-    writeFloat(EPR_X_MAX_FEEDRATE,PSTR("X-axis max. feedrate [mm/s]"));
-    writeFloat(EPR_Y_MAX_FEEDRATE,PSTR("Y-axis max. feedrate [mm/s]"));
-    writeFloat(EPR_Z_MAX_FEEDRATE,PSTR("Z-axis max. feedrate [mm/s]"));
-    writeFloat(EPR_X_HOMING_FEEDRATE,PSTR("X-axis homing feedrate [mm/s]"));
-    writeFloat(EPR_Y_HOMING_FEEDRATE,PSTR("Y-axis homing feedrate [mm/s]"));
-    writeFloat(EPR_Z_HOMING_FEEDRATE,PSTR("Z-axis homing feedrate [mm/s]"));
-    writeFloat(EPR_MAX_JERK,PSTR("Max. jerk [mm/s]"));
-    writeFloat(EPR_MAX_ZJERK,PSTR("Max. Z-jerk [mm/s]"));
-    writeFloat(EPR_X_HOME_OFFSET,PSTR("X home pos [mm]"));
-    writeFloat(EPR_Y_HOME_OFFSET,PSTR("Y home pos [mm]"));
-    writeFloat(EPR_Z_HOME_OFFSET,PSTR("Z home pos [mm]"));
-    writeFloat(EPR_X_LENGTH,PSTR("X max length [mm]"));
-    writeFloat(EPR_Y_LENGTH,PSTR("Y max length [mm]"));
-    writeFloat(EPR_Z_LENGTH,PSTR("Z max length [mm]"));
+    writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM);
+    writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM);
+    writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM);
+    writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
+    writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
+    writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
+    writeFloat(EPR_X_HOMING_FEEDRATE,Com::tEPRXHomingFeedrate);
+    writeFloat(EPR_Y_HOMING_FEEDRATE,Com::tEPRYHomingFeedrate);
+    writeFloat(EPR_Z_HOMING_FEEDRATE,Com::tEPRZHomingFeedrate);
+    writeFloat(EPR_MAX_JERK,Com::tEPRMaxJerk);
+    writeFloat(EPR_MAX_ZJERK,Com::tEPRMaxZJerk);
+    writeFloat(EPR_X_HOME_OFFSET,Com::tEPRXHomePos);
+    writeFloat(EPR_Y_HOME_OFFSET,Com::tEPRYHomePos);
+    writeFloat(EPR_Z_HOME_OFFSET,Com::tEPRZHomePos);
+    writeFloat(EPR_X_LENGTH,Com::tEPRXMaxLength);
+    writeFloat(EPR_Y_LENGTH,Com::tEPRYMaxLength);
+    writeFloat(EPR_Z_LENGTH,Com::tEPRZMaxLength);
 #if ENABLE_BACKLASH_COMPENSATION
-    writeFloat(EPR_BACKLASH_X,PSTR("X backlash [mm]"));
-    writeFloat(EPR_BACKLASH_Y,PSTR("Y backlash [mm]"));
-    writeFloat(EPR_BACKLASH_Z,PSTR("Z backlash [mm]"));
+    writeFloat(EPR_BACKLASH_X,Com::tEPRXBacklash);
+    writeFloat(EPR_BACKLASH_Y,Com::tEPRYBacklash);
+    writeFloat(EPR_BACKLASH_Z,Com::tEPRZBacklash);
 #endif
 
 #ifdef RAMP_ACCELERATION
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
-    writeFloat(EPR_X_MAX_ACCEL,PSTR("X-axis acceleration [mm/s^2]"));
-    writeFloat(EPR_Y_MAX_ACCEL,PSTR("Y-axis acceleration [mm/s^2]"));
-    writeFloat(EPR_Z_MAX_ACCEL,PSTR("Z-axis acceleration [mm/s^2]"));
-    writeFloat(EPR_X_MAX_TRAVEL_ACCEL,PSTR("X-axis travel acceleration [mm/s^2]"));
-    writeFloat(EPR_Y_MAX_TRAVEL_ACCEL,PSTR("Y-axis travel acceleration [mm/s^2]"));
-    writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,PSTR("Z-axis travel acceleration [mm/s^2]"));
+    writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
+    writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
+    writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
+    writeFloat(EPR_X_MAX_TRAVEL_ACCEL,Com::tEPRXTravelAcceleration);
+    writeFloat(EPR_Y_MAX_TRAVEL_ACCEL,Com::tEPRYTravelAcceleration);
+    writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
 #endif
 #if USE_OPS==1
-    writeByte(EPR_OPS_MODE,PSTR("OPS operation mode [0=Off,1=Classic,2=Fast]"));
-    writeFloat(EPR_OPS_MOVE_AFTER,PSTR("OPS move after x% retract [%]"));
-    writeFloat(EPR_OPS_MIN_DISTANCE,PSTR("OPS min. distance for fil. retraction [mm]"));
-    writeFloat(EPR_OPS_RETRACT_DISTANCE,PSTR("OPS retraction length [mm]"));
-    writeFloat(EPR_OPS_RETRACT_BACKLASH,PSTR("OPS retraction backlash [mm]"));
+    writeByte(EPR_OPS_MODE,Com::tEPROPSMode);
+    writeFloat(EPR_OPS_MOVE_AFTER,Com::tEPROPSMoveAfter);
+    writeFloat(EPR_OPS_MIN_DISTANCE,Com::tEPROPSMinDistance);
+    writeFloat(EPR_OPS_RETRACT_DISTANCE,Com::tEPROPSRetractionLength);
+    writeFloat(EPR_OPS_RETRACT_BACKLASH,Com::tEPROPSRetractionBacklash);
 #endif
 #if HAVE_HEATED_BED
-    writeByte(EPR_BED_HEAT_MANAGER,PSTR("Bed Heat Manager [0-2]"));
+    writeByte(EPR_BED_HEAT_MANAGER,Com::tEPRBedHeatManager);
 #ifdef TEMP_PID
-    writeByte(EPR_BED_DRIVE_MAX,PSTR("Bed PID drive max"));
-    writeByte(EPR_BED_DRIVE_MIN,PSTR("Bed PID drive min"));
-    writeFloat(EPR_BED_PID_PGAIN,PSTR("Bed PID P-gain"));
-    writeFloat(EPR_BED_PID_IGAIN,PSTR("Bed PID I-gain"));
-    writeFloat(EPR_BED_PID_DGAIN,PSTR("Bed PID D-gain"));
-    writeByte(EPR_BED_PID_MAX,PSTR("Bed PID max value [0-255]"));
+    writeByte(EPR_BED_DRIVE_MAX,Com::tEPRBedPIDDriveMax);
+    writeByte(EPR_BED_DRIVE_MIN,Com::tEPRBedPIDDriveMin);
+    writeFloat(EPR_BED_PID_PGAIN,Com::tEPRBedPGain);
+    writeFloat(EPR_BED_PID_IGAIN,Com::tEPRBedIGain);
+    writeFloat(EPR_BED_PID_DGAIN,Com::tEPRBedDGain);
+    writeByte(EPR_BED_PID_MAX,Com::tEPRBedPISMaxValue);
 #endif
 #endif
     // now the extruder
@@ -716,36 +712,36 @@ void EEPROM::writeSettings()
     {
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
-        writeFloat(o+EPR_EXTRUDER_STEPS_PER_MM,PSTR("steps per mm"));
-        writeFloat(o+EPR_EXTRUDER_MAX_FEEDRATE,PSTR("max. feedrate [mm/s]"));
-        writeFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,PSTR("start feedrate [mm/s]"));
-        writeFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,PSTR("acceleration [mm/s^2]"));
-        writeByte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("heat manager [0-1]"));
+        writeFloat(o+EPR_EXTRUDER_STEPS_PER_MM,Com::tEPRStepsPerMM);
+        writeFloat(o+EPR_EXTRUDER_MAX_FEEDRATE,Com::tEPRMaxFeedrate);
+        writeFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,Com::tEPRStartFeedrate);
+        writeFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,Com::tEPRAcceleration);
+        writeByte(o+EPR_EXTRUDER_HEAT_MANAGER,Com::tEPRHeatManager);
 #ifdef TEMP_PID
-        writeByte(o+EPR_EXTRUDER_DRIVE_MAX,PSTR("PID drive max"));
-        writeByte(o+EPR_EXTRUDER_DRIVE_MIN,PSTR("PID drive min"));
-        writeFloat(o+EPR_EXTRUDER_PID_PGAIN,PSTR("PID P-gain"));
-        writeFloat(o+EPR_EXTRUDER_PID_IGAIN,PSTR("PID I-gain"));
-        writeFloat(o+EPR_EXTRUDER_PID_DGAIN,PSTR("PID D-gain"));
-        writeByte(o+EPR_EXTRUDER_PID_MAX,PSTR("PID max value [0-255]"));
+        writeByte(o+EPR_EXTRUDER_DRIVE_MAX,Com::tEPRDriveMax);
+        writeByte(o+EPR_EXTRUDER_DRIVE_MIN,Com::tEPRDriveMin);
+        writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain);
+        writeFloat(o+EPR_EXTRUDER_PID_IGAIN,Com::tEPRIGain);
+        writeFloat(o+EPR_EXTRUDER_PID_DGAIN,Com::tEPRDGain);
+        writeByte(o+EPR_EXTRUDER_PID_MAX,Com::tEPRPIDMaxValue);
 #endif
-        writeLong(o+EPR_EXTRUDER_X_OFFSET,PSTR("X-offset [steps]"));
-        writeLong(o+EPR_EXTRUDER_Y_OFFSET,PSTR("Y-offset [steps]"));
-        writeInt(o+EPR_EXTRUDER_WATCH_PERIOD,PSTR("temp. stabilize time [s]"));
+        writeLong(o+EPR_EXTRUDER_X_OFFSET,Com::tEPRXOffset);
+        writeLong(o+EPR_EXTRUDER_Y_OFFSET,Com::tEPRYOffset);
+        writeInt(o+EPR_EXTRUDER_WATCH_PERIOD,Com::tEPRStabilizeTime);
 #if RETRACT_DURING_HEATUP
-        writeInt(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,PSTR("temp. for retraction when heating [C]"));
-        writeInt(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,PSTR("distance to retract when heating [mm]"));
+        writeInt(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,Com::tEPRRetractionWhenHeating);
+        writeInt(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,Com::tEPRDistanceRetractHeating);
 #endif
-        writeByte(o+EPR_EXTRUDER_COOLER_SPEED,PSTR("extruder cooler speed [0-255]"));
+        writeByte(o+EPR_EXTRUDER_COOLER_SPEED,Com::tEPRExtruderCoolerSpeed);
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-        writeFloat(o+EPR_EXTRUDER_ADVANCE_K,PSTR("advance K [0=off]"));
+        writeFloat(o+EPR_EXTRUDER_ADVANCE_K,Com::tEPRAdvanceK);
 #endif
-        writeFloat(o+EPR_EXTRUDER_ADVANCE_L,PSTR("advance L [0=off]"));
+        writeFloat(o+EPR_EXTRUDER_ADVANCE_L,Com::tEPRAdvanceL);
 #endif
     }
 #else
-    OUT_P_LN("Error: No EEPROM support compiled.");
+    Com::printErrorF(tNoEEPROMSupport);
 #endif
 }
 

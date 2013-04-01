@@ -38,6 +38,7 @@ public:
     static void changeFeedrateMultiply(int factorInPercent);
     static void changeFlowateMultiply(int factorInPercent);
     static void reportPrinterUsage();
+    static void emergencyStop();
 };
 
 #endif // COMMANDS_H_INCLUDED

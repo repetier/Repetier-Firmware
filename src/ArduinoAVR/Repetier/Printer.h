@@ -31,6 +31,7 @@
 class Printer
 {
 public:
+    static byte debugLevel;
     static byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
 #if USE_OPS==1 || defined(USE_ADVANCE)
     volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -77,12 +78,12 @@ public:
     int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
     float minimumSpeed;               ///< lowest allowed speed to keep integration error small
-    long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    long xMinSteps;                   ///< For software endstops, limit of move in negative direction.
-    long yMinSteps;                   ///< For software endstops, limit of move in negative direction.
-    long zMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static long xMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static long yMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static long zMinSteps;                   ///< For software endstops, limit of move in negative direction.
     float xLength;
     float xMin;
     float yLength;
@@ -119,6 +120,12 @@ public:
     char motorX;
     char motorY;
 #endif
+    static inline bool debugEcho() {return ((debugLevel & 1)!=0);}
+    static inline bool debugInfo() {return ((debugLevel & 2)!=0);}
+    static inline bool debugErrors() {return ((debugLevel & 4)!=0);}
+    static inline bool debugDryrun() {return ((debugLevel & 8)!=0);}
+    static inline bool debugCommunication() {return ((debugLevel & 16)!=0);}
+#define DEBUG_NO_MOVES ((debug_level & 32)!=0)
 
     /** \brief Disable stepper motor for x direction. */
     static inline void disableXStepper()
@@ -275,6 +282,13 @@ public:
             ANALYZER_OFF(ANALYZER_CH6);
             ANALYZER_OFF(ANALYZER_CH7);
     }
+    static void constrainDestinationCoords();
+    static void updateDerivedParameter();
+    static void kill(byte only_steppers);
+    static void updateAdvanceFlags();
+    static void setup();
+    static void defaultLoopActions();
+    static byte setDestinationStepsFromGCode(GCode *com);
 };
 extern Printer printer;
 

@@ -128,7 +128,7 @@ void Extruder::manageTemperatures()
         {
             pwm_pos[tempController[i]->pwmIndex] = 0;
         }
-        debug_level |= 8; // Go into dry mode
+        Printer::debugLevel |= 8; // Go into dry mode
     }
 
 }
@@ -350,7 +350,7 @@ void Extruder::selectExtruderById(byte extruderId)
     if(dx || dy)
     {
         float oldfeedrate = printer.feedrate;
-        PrintLine::move_steps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+        PrintLine::moveRelativeDistanceInSteps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
         printer.offsetX += dx;
         printer.offsetY += dy;
         printer.feedrate = oldfeedrate;

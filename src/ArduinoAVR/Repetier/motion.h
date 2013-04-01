@@ -68,7 +68,7 @@ extern byte lastMoveID;
 
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
-    public:
+public:
     static PrintLine lines[];
     static PrintLine *cur;
     static byte lines_write_pos; // Position where we write the next cached line move
@@ -144,7 +144,8 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     {
         joinFlags = (newState ? joinFlags | FLAG_JOIN_START_FIXED : joinFlags & ~FLAG_JOIN_START_FIXED);
     }
-    inline bool fixStartAndEndSpeed() {
+    inline bool fixStartAndEndSpeed()
+    {
         joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
     }
     inline bool isEndSpeedFixed()
@@ -243,7 +244,8 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     {
         return (dir & 32);
     }
-    inline bool isXOrYMove() {
+    inline bool isXOrYMove()
+    {
         return dir & 48;
     }
     inline bool isZMove()
@@ -371,27 +373,50 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     void updateStepsParameter();
     inline float safeSpeed();
     void calculate_move(float axis_diff[],byte check_endstops,byte pathOptimize);
-    inline long getWaitTicks() {return timeInTicks;}
-    inline void setWaitTicks(long wait) {timeInTicks = wait;}
+    inline long getWaitTicks()
+    {
+        return timeInTicks;
+    }
+    inline void setWaitTicks(long wait)
+    {
+        timeInTicks = wait;
+    }
 
-    static inline bool hasLines() {return lines_count;}
-    static inline void setCurrentLine() {
+    static inline bool hasLines()
+    {
+        return lines_count;
+    }
+    static inline void setCurrentLine()
+    {
         cur = &lines[lines_pos];
     }
-    static inline void popLineForbidInterrupt() {
+    static inline void popLineForbidInterrupt()
+    {
         lines_pos++;
         if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
         cur = 0;
         HAL::forbidInterrupts();
         --lines_count;
     }
+    static inline void pushLine()
+    {
+        lines_write_pos++;
+        if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
+        BEGIN_INTERRUPT_PROTECTED
+        lines_count++;
+        END_INTERRUPT_PROTECTED
+    }
+    static PrintLine *getNextWriteLine()
+    {
+        &lines[lines_write_pos];
+    }
     static long bresenhamStep();
     static inline void forwardPlanner(byte p);
     static inline void backwardPlanner(byte p,byte last);
     static void updateTrapezoids(byte p);
-    static byte check_new_move(byte pathOptimize, byte waitExtraLines);
+    static byte insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines);
     static void queue_move(byte check_endstops,byte pathOptimize);
-    static void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
+    static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
     static void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);

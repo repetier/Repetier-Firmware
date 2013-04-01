@@ -22,12 +22,6 @@
 */
 
 #include "Repetier.h"
-#include "ui.h"
-
-long Printer::interval;
-long Printer::currentPositionSteps[4];
-long Printer::destinationSteps[4];
-byte Printer::flag0 = 0;
 
 PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
@@ -82,7 +76,7 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current)
 #else
     float jerk = sqrt(dx*dx+dy*dy);
 #endif
-    //if(DEBUG_ECHO) {OUT_P_F_LN("Jerk:",jerk);OUT_P_F_LN("FS:",p1->fullSpeed);OUT_P_F_LN("MaxJerk:",printer_state.maxJerk);}
+    //if(Printer::debugEcho()) {OUT_P_F_LN("Jerk:",jerk);OUT_P_F_LN("FS:",p1->fullSpeed);OUT_P_F_LN("MaxJerk:",printer_state.maxJerk);}
     if(jerk>printer.maxJerk)
         factor = printer.maxJerk/jerk;
 #if (DRIVE_SYSTEM!=3)
@@ -105,8 +99,8 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current)
     }
     previous->maxJunctionSpeed = previous->fullSpeed*factor;
     if(previous->maxJunctionSpeed>current->fullSpeed) previous->maxJunctionSpeed = current->fullSpeed;
-    //if(DEBUG_ECHO) OUT_P_F_LN("Factor:",factor);
-    //if(DEBUG_ECHO) OUT_P_F_LN("JSPD:",p1->maxJunctionSpeed);
+    //if(Printer::debugEcho()) OUT_P_F_LN("Factor:",factor);
+    //if(Printer::debugEcho()) OUT_P_F_LN("JSPD:",p1->maxJunctionSpeed);
 }
 
 /** Update parameter used by updateTrapezoids
@@ -145,7 +139,7 @@ void PrintLine::updateStepsParameter()
     }
     setParameterUpToDate();
 #ifdef DEBUG_QUEUE_MOVE
-    if(DEBUG_ECHO)
+    if(Printer::debugEcho())
     {
         out.print_int_P(PSTR("ID:"),(int)this);
         out.print_int_P(PSTR("vStart/End:"),vStart);
@@ -418,17 +412,13 @@ inline float PrintLine::safeSpeed()
 /**
 Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
 */
-void PrintLine::move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop)
+void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop)
 {
     float saved_feedrate = printer.feedrate;
-    for(byte i=0; i < 4; i++)
-    {
-        Printer::destinationSteps[i] = Printer::currentPositionSteps[i];
-    }
-    Printer::destinationSteps[0]+=x;
-    Printer::destinationSteps[1]+=y;
-    Printer::destinationSteps[2]+=z;
-    Printer::destinationSteps[3]+=e;
+    Printer::destinationSteps[0] = Printer::currentPositionSteps[0] + x;
+    Printer::destinationSteps[1] = Printer::currentPositionSteps[1] + y;
+    Printer::destinationSteps[2] = Printer::currentPositionSteps[2] + z;
+    Printer::destinationSteps[3] = Printer::currentPositionSteps[3] + e;
     printer.feedrate = feedrate;
 #if DRIVE_SYSTEM==3
     split_delta_move(check_endstop,false,false);
@@ -444,12 +434,12 @@ void PrintLine::move_steps(long x,long y,long z,long e,float feedrate,bool waitE
 not act on the first two moves in the queue. The stepper timer will spot these moves and leave some time for
 processing.
 */
-byte PrintLine::check_new_move(byte pathOptimize, byte waitExtraLines)
+byte PrintLine::insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines)
 {
     if(lines_count==0 && waitRelax==0 && pathOptimize)   // First line after some time - warmup needed
     {
         byte w = 3;
-        PrintLine *p = &lines[lines_write_pos];
+        PrintLine *p = getNextWriteLine();
         while(w)
         {
             p->flags = FLAG_WARMUP;
@@ -458,12 +448,8 @@ byte PrintLine::check_new_move(byte pathOptimize, byte waitExtraLines)
             p->primaryAxis = w + waitExtraLines;
             p->timeInTicks = p->facceleration = 10000*(unsigned int)w;
             p->setWaitTicks(p->timeInTicks);
-            lines_write_pos++;
-            if(lines_write_pos>=MOVE_CACHE_SIZE) lines_write_pos = 0;
-            BEGIN_INTERRUPT_PROTECTED
-            lines_count++;
-            END_INTERRUPT_PROTECTED
-            p = &lines[lines_write_pos];
+            pushLine();
+            p = getNextWriteLine();
             w--;
         }
         return 1;
@@ -685,7 +671,7 @@ void PrintLine::calculate_move(float axis_diff[],byte check_endstops,byte pathOp
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE
-    if(DEBUG_ECHO)
+    if(Printer::debugEcho())
     {
         log_printLine(this);
         OUT_P_L_LN("limitInterval:", limitInterval);
@@ -717,10 +703,10 @@ void PrintLine::queue_move(byte check_endstops,byte pathOptimize)
     Printer::unsetAllSteppersDisabled();
     while(lines_count>=MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
-        gcode_read_serial();
+        GCode::readFromSerial();
         check_periodical();
     }
-    byte newPath=check_new_move(pathOptimize, 0);
+    byte newPath=insertWaitMovesIfNeeded(pathOptimize, 0);
     PrintLine *p = &lines[lines_write_pos];
     float axis_diff[4]; // Axis movement in mm
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -728,25 +714,7 @@ void PrintLine::queue_move(byte check_endstops,byte pathOptimize)
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
-#if min_software_endstop_x == true
-    if (Printer::destinationSteps[0] < 0) Printer::destinationSteps[0] = 0.0;
-#endif
-#if min_software_endstop_y == true
-    if (Printer::destinationSteps[1] < 0) Printer::destinationSteps[1] = 0.0;
-#endif
-#if min_software_endstop_z == true
-    if (Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0.0;
-#endif
-
-#if max_software_endstop_x == true
-    if (Printer::destinationSteps[0] > printer.xMaxSteps) Printer::destinationSteps[0] = printer.xMaxSteps;
-#endif
-#if max_software_endstop_y == true
-    if (Printer::destinationSteps[1] > printer.yMaxSteps) Printer::destinationSteps[1] = printer.yMaxSteps;
-#endif
-#if max_software_endstop_z == true
-    if (Printer::destinationSteps[2] > printer.zMaxSteps) Printer::destinationSteps[2] = printer.zMaxSteps;
-#endif
+    Printer::constrainDestinationCoords();
     //Find direction
 #if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
     for(byte i=0; i < 4; i++)
@@ -817,7 +785,7 @@ void PrintLine::queue_move(byte check_endstops,byte pathOptimize)
     {
         while(lines_count>=MOVE_CACHE_SIZE-1)   // wait for a second free entry in movement cache
         {
-            gcode_read_serial();
+            GCode::readFromSerial();
             check_periodical();
         }
         byte wpos2 = lines_write_pos+1;
@@ -1449,7 +1417,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
 
         if((count & 4) == 0)
         {
-            gcode_read_serial();
+            GCode::readFromSerial();
             check_periodical();
             UI_MEDIUM; // do check encoder
         }

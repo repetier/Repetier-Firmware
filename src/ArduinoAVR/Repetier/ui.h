@@ -618,6 +618,8 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 4
+
+
 #if FEATURE_CONTROLLER==5 // Viki Lcd
 
 // You need to change these 3 button according to the positions
@@ -625,6 +627,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_A      7 // pins the click encoder are connected to
 #define UI_ENCODER_B      22
 #define UI_RESET_PIN      32 // single button for reset
+//#define SDCARDDETECT      15 // Set to -1 if you have not connected that pin
+//#define SDSS              31 // Chip select pin
+
+//#define SDSUPPORT true
+//#define SDCARDDETECTINVERTED false
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
@@ -651,11 +658,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D6_PIN _BV(10)
 #define UI_DISPLAY_D7_PIN _BV(9)
 
-#define SDSUPPORT true
-#define SDCARDDETECT 15  // Set to -1 if you have not connected that pin
-#define SDCARDDETECTINVERTED false
 
-#if !defined(BEEPER_PIN) || BEEPER_PIN<0
+#if true || !defined(BEEPER_PIN) || BEEPER_PIN<0
 #define BEEPER_PIN        _BV(5)
 #define BEEPER_TYPE       2
 #define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin

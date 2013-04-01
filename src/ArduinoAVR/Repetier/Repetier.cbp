@@ -560,6 +560,9 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="Commands.h" />
+		<Unit filename="Communication.cpp" />
+		<Unit filename="Communication.h" />
 		<Unit filename="Configuration.h">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />
@@ -608,6 +611,7 @@
 		</Unit>
 		<Unit filename="HAL.cpp" />
 		<Unit filename="HAL.h" />
+		<Unit filename="Printer.cpp" />
 		<Unit filename="Printer.h" />
 		<Unit filename="Repetier.h">
 			<Option target="Simulator - Debug" />

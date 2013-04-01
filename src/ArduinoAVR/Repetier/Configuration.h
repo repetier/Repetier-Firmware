@@ -69,7 +69,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
 
-#define MOTHERBOARD 34
+#define MOTHERBOARD 33
 
 #include "pins.h"
 
@@ -1058,7 +1058,7 @@ The following settings override uiconfig.h!
 4 = Foltyn 3DMaster with display attached
 5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!!
 */
-#define FEATURE_CONTROLLER 5
+#define FEATURE_CONTROLLER 2
 
 /**
 Select the language to use.

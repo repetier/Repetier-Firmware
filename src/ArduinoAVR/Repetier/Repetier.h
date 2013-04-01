@@ -281,11 +281,7 @@ extern void(* resetFunc) (void);
 
 void manage_inactivity(byte debug);
 
-extern void update_ramps_parameter();
-extern void update_extruder_flags();
 extern void finishNextSegment();
-extern void defaultLoopActions();
-extern byte setDestinationStepsFromGCode(GCode *com);
 #if DRIVE_SYSTEM==3
 extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
@@ -301,7 +297,6 @@ extern void linear_move(long steps_remaining[]);
 #define PREVIOUS_PLANNER_INDEX(p) {p--;if(p==255) p = MOVE_CACHE_SIZE-1;}
 #define NEXT_PLANNER_INDEX(idx) {++idx;if(idx==MOVE_CACHE_SIZE) idx=0;}
 
-extern void kill(byte only_steppers);
 
 extern float axis_steps_per_unit[];
 extern float inv_axis_steps_per_unit[];
@@ -430,5 +425,6 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 #define XSTR(s) STR(s)
 #include "Commands.h"
 #include "Eeprom.h"
+#include "Communication.h"
 
 #endif
