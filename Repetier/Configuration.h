@@ -1056,7 +1056,7 @@ The following settings override uiconfig.h!
 2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
-5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!!
+5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
 */
 #define FEATURE_CONTROLLER 0
 
