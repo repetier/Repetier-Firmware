@@ -290,6 +290,10 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 33
   #define MOTHERBOARD 3
   #define RAMPS_V_1_3
+#elif MOTHERBOARD == 34
+  #define MOTHERBOARD 3
+  #define RAMPS_V_1_3
+  #define AZTEEG_X3
 #endif
 #if MOTHERBOARD == 3
   #define KNOWN_BOARD 1
@@ -411,6 +415,16 @@ STEPPER_CURRENT_CONTROL
 #define MOSI_PIN         51
 #define MAX6675_SS       53
 
+#ifdef AZTEEG_X3
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
+#define SDCARDDETECT -1
+#define FAN_PIN           4
+#define FAN2_PIN          5
+#define LIGHT_PIN         6
+#define BEEPER_PIN        33  // Activate beeper on extension shield
+#define BEEPER_TYPE        1
+#endif
 
 #endif
 

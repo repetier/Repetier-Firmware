@@ -5,3 +5,11 @@ Private/**
 
 *.db
 Private/*
+
+*.elf
+
+*.hex
+
+*.lss
+
+*.map

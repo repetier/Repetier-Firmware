@@ -1509,14 +1509,14 @@ inline long bresenham_step() {
 		#if ALLOW_QUADSTEPPING
 						if(cur->vMax>STEP_DOUBLER_FREQUENCY*2) {
 							printer_state.stepper_loops = 4;
-							printer_state.interval = cur->fullInterval>>2;
+							printer_state.interval = cur->fullInterval<<2;
 						} else {
 							printer_state.stepper_loops = 2;
-							printer_state.interval = cur->fullInterval>>1;
+							printer_state.interval = cur->fullInterval<<1;
 						}
 		#else
 						printer_state.stepper_loops = 2;
-						printer_state.interval = cur->fullInterval>>1;
+						printer_state.interval = cur->fullInterval<<1;
 		#endif
 					} else {
 						printer_state.stepper_loops = 1;
@@ -2182,14 +2182,14 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #if ALLOW_QUADSTEPPING
             if(cur->vMax>STEP_DOUBLER_FREQUENCY*2) {
               printer_state.stepper_loops = 4;
-              printer_state.interval = cur->fullInterval>>2;
+              printer_state.interval = cur->fullInterval<<2;
             } else {
               printer_state.stepper_loops = 2;
-              printer_state.interval = cur->fullInterval>>1;
+              printer_state.interval = cur->fullInterval<<1;
             }
 #else
             printer_state.stepper_loops = 2;
-            printer_state.interval = cur->fullInterval>>1;
+            printer_state.interval = cur->fullInterval<<1;
 #endif
           } else {
             printer_state.stepper_loops = 1;

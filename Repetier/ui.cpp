@@ -713,6 +713,13 @@ UIDisplay::UIDisplay() {
 void UIDisplay::initialize() {
 #if UI_DISPLAY_TYPE>0
   initializeLCD();
+#if UI_DISPLAY_TYPE==3
+    // I don't know why but after power up the lcd does not come up
+    // but if I reinitialize i2c and the lcd again here it works.
+    delay(10);
+    i2c_init();
+    initializeLCD();
+#endif
   uid.printRowP(0,versionString);
   uid.printRowP(1,versionString2);
 #endif
@@ -2182,6 +2189,23 @@ void UIDisplay::slowAction() {
   cli();
   if((flags & 9)==0) {
     flags|=8;
+#if FEATURE_CONTROLLER==5
+        {
+            // check temps and set appropriate leds
+            int led= 0;
+#if NUM_EXTRUDER>0
+            led |= (tempController[current_extruder->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
+#endif
+#if HAVE_HEATED_BED
+            led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
+#endif
+#if FAN_PIN>=0
+            led |= (pwm_pos[NUM_EXTRUDER+2] > 0 ? UI_I2C_FAN_LED : 0);
+#endif
+            // update the leds
+            uid.outputMask= ~led&(UI_I2C_HEATBED_LED|UI_I2C_HOTEND_LED|UI_I2C_FAN_LED);
+        }
+#endif
     sei();
     int nextAction = 0;
     ui_check_slow_keys(nextAction);
