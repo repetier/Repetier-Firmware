@@ -66,7 +66,6 @@
 #include "WProgram.h"
 #define COMPAT_PRE1
 #endif
-#include "gcode.h"
 #if CPU_ARCH==ARCH_AVR
 #include "fastio.h"
 #else
@@ -85,9 +84,15 @@
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
+#define MAX_RAM 32767
 
 #define bit_clear(x,y) x&= ~(1<<y) //cbi(x,y)
 #define bit_set(x,y)   x|= (1<<y)//sbi(x,y)
+
+typedef unsigned int speed_t;
+typedef unsigned long ticks_t;
+typedef unsigned long millis_t;
+
 
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
@@ -338,7 +343,7 @@ public:
     static long CPUDivU2(unsigned int divisor);
     static inline void delayMicroseconds(unsigned int delayUs)
     {
-        delayMicroseconds(delayUs);
+        ::delayMicroseconds(delayUs);
     }
 
     static inline void epr_set_byte(unsigned int pos,byte value)
@@ -389,6 +394,9 @@ public:
     static inline char readFlashByte(PGM_P ptr) {
         return pgm_read_byte(ptr);
     }
+    static inline void serialSetBaudrate(long baud) {
+        RFSERIAL.begin(baud);
+    }
     static inline bool serialByteAvailable() {
         return RFSERIAL.available();
     }
@@ -401,6 +409,10 @@ public:
     static inline void serialFlush() {
         RFSERIAL.flush();
     }
+    static void setupTimer();
+    static void showStartReason();
+    static int getFreeRam();
+    static void resetHardware();
 protected:
 private:
 };

@@ -810,8 +810,8 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
         unsigned long time = HAL::timeInMilliseconds();
-        maxTemp=max(maxTemp,currentTemp);
-        minTemp=min(minTemp,currentTemp);
+        maxTemp=RMath::max(maxTemp,currentTemp);
+        minTemp=RMath::min(minTemp,currentTemp);
         if(heating == true && currentTemp > temp)   // switch heating -> off
         {
             if(time - t2 > (controllerId<NUM_EXTRUDER ? 2500 : 1500))

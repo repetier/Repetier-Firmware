@@ -33,6 +33,7 @@ class Printer
 public:
     static byte debugLevel;
     static byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
+    static byte stepsPerTimerCall;
 #if USE_OPS==1 || defined(USE_ADVANCE)
     volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
@@ -40,7 +41,7 @@ public:
     byte maxExtruderSpeed;            ///< Timer delay for end extruder speed
     byte extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
-    static long interval;                    ///< Last step duration in ticks.
+    static unsigned long interval;    ///< Last step duration in ticks.
 #if USE_OPS==1
     bool filamentRetracted;           ///< Is the extruder filament retracted
 #endif
@@ -98,7 +99,6 @@ public:
     long offsetX;                     ///< X-offset for different extruder positions.
     long offsetY;                     ///< Y-offset for different extruder positions.
     unsigned int vMaxReached;         ///< MAximumu reached speed
-    byte stepper_loops;
     unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     float filamentPrinted;            ///< mm of filament printed since counting started
     byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
@@ -120,11 +120,26 @@ public:
     char motorX;
     char motorY;
 #endif
-    static inline bool debugEcho() {return ((debugLevel & 1)!=0);}
-    static inline bool debugInfo() {return ((debugLevel & 2)!=0);}
-    static inline bool debugErrors() {return ((debugLevel & 4)!=0);}
-    static inline bool debugDryrun() {return ((debugLevel & 8)!=0);}
-    static inline bool debugCommunication() {return ((debugLevel & 16)!=0);}
+    static inline bool debugEcho()
+    {
+        return ((debugLevel & 1)!=0);
+    }
+    static inline bool debugInfo()
+    {
+        return ((debugLevel & 2)!=0);
+    }
+    static inline bool debugErrors()
+    {
+        return ((debugLevel & 4)!=0);
+    }
+    static inline bool debugDryrun()
+    {
+        return ((debugLevel & 8)!=0);
+    }
+    static inline bool debugCommunication()
+    {
+        return ((debugLevel & 16)!=0);
+    }
 #define DEBUG_NO_MOVES ((debug_level & 32)!=0)
 
     /** \brief Disable stepper motor for x direction. */
@@ -169,8 +184,36 @@ public:
         WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
-
-
+    static inline void setXDirection(bool positive) {
+           if(positive)
+        {
+            WRITE(X_DIR_PIN,!INVERT_X_DIR);
+        }
+        else
+        {
+            WRITE(X_DIR_PIN,INVERT_X_DIR);
+        }
+    }
+    static inline void setYDirection(bool positive) {
+        if(positive)
+        {
+            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+        }
+        else
+        {
+            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+        }
+    }
+    static inline void setZDirection(bool positive) {
+        if(positive)
+        {
+            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+        }
+        else
+        {
+            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+        }
+    }
     inline byte isAdvanceActivated()
     {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
@@ -272,15 +315,56 @@ public:
         }
 #endif
     }
-    static inline void endXYZSteps() {
-            WRITE(X_STEP_PIN,LOW);
-            WRITE(Y_STEP_PIN,LOW);
-            WRITE(Z_STEP_PIN,LOW);
-            ANALYZER_OFF(ANALYZER_CH1);
-            ANALYZER_OFF(ANALYZER_CH2);
-            ANALYZER_OFF(ANALYZER_CH3);
-            ANALYZER_OFF(ANALYZER_CH6);
-            ANALYZER_OFF(ANALYZER_CH7);
+    static inline void endXYZSteps()
+    {
+        WRITE(X_STEP_PIN,LOW);
+        WRITE(Y_STEP_PIN,LOW);
+        WRITE(Z_STEP_PIN,LOW);
+        ANALYZER_OFF(ANALYZER_CH1);
+        ANALYZER_OFF(ANALYZER_CH2);
+        ANALYZER_OFF(ANALYZER_CH3);
+        ANALYZER_OFF(ANALYZER_CH6);
+        ANALYZER_OFF(ANALYZER_CH7);
+    }
+    static inline unsigned int updateStepsPerTimerCall(unsigned int vbase)
+    {
+        if(vbase>STEP_DOUBLER_FREQUENCY)
+        {
+#if ALLOW_QUADSTEPPING
+            if(vbase>STEP_DOUBLER_FREQUENCY*2)
+            {
+                Printer::stepsPerTimerCall = 4;
+                return vbase>>2;
+            }
+            else
+            {
+                Printer::stepsPerTimerCall = 2;
+                return vbase>>1;
+            }
+#else
+            Printer::stepsPerTimerCall = 2;
+            return vbase>>1;
+#endif
+        }
+        else
+        {
+            Printer::stepsPerTimerCall = 1;
+        }
+        return vbase;
+    }
+    static inline void disableAllowedStepper()
+    {
+#ifdef XY_GANTRY
+        if(DISABLE_X && DISABLE_Y)
+        {
+            disableXStepper();
+            disableYStepper();
+        }
+#else
+        if(DISABLE_X) disableXStepper();
+        if(DISABLE_Y) disableYStepper();
+#endif
+        if(DISABLE_Z) disableZStepper();
     }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();

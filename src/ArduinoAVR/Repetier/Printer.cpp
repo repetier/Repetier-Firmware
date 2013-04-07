@@ -50,11 +50,12 @@ long Printer::zMaxSteps;
 long Printer::xMinSteps;
 long Printer::yMinSteps;
 long Printer::zMinSteps;
-long Printer::interval;
+unsigned long Printer::interval;
 long Printer::currentPositionSteps[4];
 long Printer::destinationSteps[4];
 byte Printer::flag0 = 0;
 byte Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
+byte Printer::stepsPerTimerCall = 1;
 
 void Printer::constrainDestinationCoords() {
 #if min_software_endstop_x == true
@@ -104,10 +105,6 @@ void Printer::updateDerivedParameter()
     if(printer.backlashX!=0) printer.backlashDir |= 8;
     if(printer.backlashY!=0) printer.backlashDir |= 16;
     if(printer.backlashZ!=0) printer.backlashDir |= 32;
-    /*if(printer_state.backlashDir & 56)
-      OUT_P_LN("Backlash compensation enabled");
-    else
-      OUT_P_LN("Backlash compensation disabled");*/
 #endif
 #endif
     for(byte i=0; i<4; i++)
@@ -120,7 +117,7 @@ void Printer::updateDerivedParameter()
         axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
 #endif
     }
-    float accel = max(max_acceleration_units_per_sq_second[0],max_travel_acceleration_units_per_sq_second[0]);
+    float accel = RMath::max(max_acceleration_units_per_sq_second[0],max_travel_acceleration_units_per_sq_second[0]);
     printer.minimumSpeed = accel*sqrt(2.0f/(axis_steps_per_unit[0]*accel));
     Printer::updateAdvanceFlags();
 }
@@ -202,13 +199,9 @@ byte Printer::setDestinationStepsFromGCode(GCode *com)
     {
         p = convertToMM(com->Z*axis_steps_per_unit[2]);
         if(relative_mode)
-        {
             destinationSteps[2] = currentPositionSteps[2]+p;
-        }
         else
-        {
             destinationSteps[2] = p;
-        }
     }
     else destinationSteps[2] = currentPositionSteps[2];
     if(com->hasE() && !Printer::debugDryrun())
@@ -270,7 +263,6 @@ void Printer::setup() {
     SET_OUTPUT(X_STEP_PIN);
     SET_OUTPUT(Y_STEP_PIN);
     SET_OUTPUT(Z_STEP_PIN);
-
 
     //Initialize Dir Pins
 #if X_DIR_PIN>-1
@@ -403,7 +395,7 @@ void Printer::setup() {
     printer.maxJerk = MAX_JERK;
     printer.maxZJerk = MAX_ZJERK;
     Printer::interval = 5000;
-    printer.stepper_loops = 1;
+    Printer::stepsPerTimerCall = 1;
     printer.msecondsPrinting = 0;
     printer.filamentPrinted = 0;
     printer.flag0 = PRINTER_FLAG0_STEPPER_DISABLED;
@@ -424,65 +416,34 @@ void Printer::setup() {
     printer.extruderStepsNeeded = 0;
 #endif
     EEPROM::initBaudrate();
-    RFSERIAL.begin(baudrate);
-    out.println_P(PSTR("start"));
+    HAL::serialSetBaudrate(baudrate);
+    Com::printFLN(Com::tStart);
     UI_INITIALIZE;
-
-    // Check startup - does nothing if bootloader sets MCUSR to 0
-    byte mcu = MCUSR;
-    if(mcu & 1) out.println_P(PSTR("PowerUp"));
-    if(mcu & 2) out.println_P(PSTR("External Reset"));
-    if(mcu & 4) out.println_P(PSTR("Brown out Reset"));
-    if(mcu & 8) out.println_P(PSTR("Watchdog Reset"));
-    if(mcu & 32) out.println_P(PSTR("Software Reset"));
-    MCUSR=0;
-
+    HAL::showStartReason();
     Extruder::initExtruder();
-    out.println_P(PSTR("ext"));
-    delay(300);
     EEPROM::init(); // Read settings from eeprom if wanted
-    out.println_P(PSTR("epr"));
-    delay(300);
     Printer::updateDerivedParameter();
 
 #if SDSUPPORT
-    out.println_P(PSTR("der"));
-
     sd.initsd();
-    out.println_P(PSTR("ser"));
 
 #endif
-#if defined(USE_ADVANCE)
-    EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
-    EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
-#endif
-    PWM_TCCR = 0;  // Setup PWM interrupt
-    PWM_OCR = 64;
-    PWM_TIMSK |= (1<<PWM_OCIE);
-
-    TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
-    TCCR1C = 0;
-    TIMSK1 = 0;
-    TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
-    OCR1A=65500; //start off with a slow frequency.
-    TIMSK1 |= (1<<OCIE1A); // Enable interrupt
-    out.println_P(PSTR("setup finished"));
-
+    Commands::checkFreeMemory();
+    Commands::writeLowestFreeRAM();
+    HAL::setupTimer();
 }
 
 void Printer::defaultLoopActions()
 {
     //check heater every n milliseconds
-    check_periodical();
+    Commands::checkForPeriodicalActions();
     UI_MEDIUM; // do check encoder
     unsigned long curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
         previous_millis_cmd = curtime;
     if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) Printer::kill(false);
     if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time )
-    {
         Printer::kill(true);
-    }
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
     sd.automount();
 #endif
@@ -490,3 +451,4 @@ void Printer::defaultLoopActions()
     DEBUG_MEMORY;
 
 }
+

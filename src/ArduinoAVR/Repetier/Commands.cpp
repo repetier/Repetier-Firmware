@@ -24,8 +24,44 @@
 //#include <SPI.h>
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
+int Commands::lowestRAMValue=MAX_RAM;
+int Commands::lowestRAMValueSend=MAX_RAM;
 
-void check_periodical()
+void Commands::commandLoop()
+{
+    while(true)
+    {
+        GCode::readFromSerial();
+        GCode *code = GCode::peekCurrentCommand();
+        //UI_SLOW; // do longer timed user interface action
+        UI_MEDIUM; // do check encoder
+        if(code)
+        {
+#if SDSUPPORT
+            if(sd.savetosd)
+            {
+                if(!(code->hasM() && code->M==29))   // still writing to file
+                {
+                    sd.write_command(code);
+                }
+                else
+                {
+                    sd.finishWrite();
+                }
+#ifdef ECHO_ON_EXECUTE
+                code->echoCommand();
+#endif
+            }
+            else
+#endif
+                Commands::executeGCode(code);
+            code->popCurrentCommand();
+        }
+        Printer::defaultLoopActions();
+    }
+}
+
+void Commands::checkForPeriodicalActions()
 {
     if(!execute_periodical) return;
     execute_periodical=0;
@@ -50,7 +86,7 @@ void Commands::waitUntilEndOfAllMoves()
     while(PrintLine::hasLines())
     {
         GCode::readFromSerial();
-        check_periodical();
+        Commands::checkForPeriodicalActions();
         UI_MEDIUM;
     }
 }
@@ -468,7 +504,7 @@ void microstep_init()
 /**
   \brief Execute the command stored in com.
 */
-void Commands::executeGCode(GCode *com,byte bufferedCommand)
+void Commands::executeGCode(GCode *com)
 {
     unsigned long codenum; //throw away variable
 #ifdef INCLUDE_DEBUG_COMMUNICATION
@@ -476,7 +512,6 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
     {
         if(com->hasG() || (com->hasM() && com->M!=111))
         {
-            com->commandFinished(); // free command cache
             previous_millis_cmd = HAL::timeInMilliseconds();
             return;
         }
@@ -634,7 +669,7 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
             while((unsigned long)(codenum-HAL::timeInMilliseconds())  < 2000000000 )
             {
                 GCode::readFromSerial();
-                check_periodical();
+                Commands::checkForPeriodicalActions();
             }
             break;
         case 20: // Units to inches
@@ -799,7 +834,7 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
                     printTemperatures();
                     codenum = cur_time;
                 }
-                check_periodical();
+                Commands::checkForPeriodicalActions();
                 //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
                 if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dir && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
@@ -847,7 +882,7 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
                     printTemperatures();
                     codenum = HAL::timeInMilliseconds();
                 }
-                check_periodical();
+                Commands::checkForPeriodicalActions();
             }
 #endif
 #endif
@@ -1152,9 +1187,9 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
         {
             bool all = !(com->hasX() && com->hasY() && com->hasZ());
             PrintLine::moveRelativeDistanceInSteps((all || com->hasX() ? printer.memoryX-Printer::currentPositionSteps[0] : 0)
-                                  ,(all || com->hasY() ? printer.memoryY-Printer::currentPositionSteps[1] : 0)
-                                  ,(all || com->hasZ() ? printer.memoryZ-Printer::currentPositionSteps[2] : 0)
-                                  ,0,(com->hasF() ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
+                                                   ,(all || com->hasY() ? printer.memoryY-Printer::currentPositionSteps[1] : 0)
+                                                   ,(all || com->hasZ() ? printer.memoryZ-Printer::currentPositionSteps[2] : 0)
+                                                   ,0,(com->hasF() ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
         }
         break;
 #endif
@@ -1189,7 +1224,7 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
         break;
         case 502:
             EEPROM::restoreEEPROMSettingsFromConfiguration();
-        break;
+            break;
 
         case 350: // Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
         {
@@ -1253,23 +1288,21 @@ void Commands::executeGCode(GCode *com,byte bufferedCommand)
     {
         if(Printer::debugErrors())
         {
-            OUT_P("Unknown command:");
+            Com::printF(Com::tUnknownCommand);
             com->printCommand();
-            out.println();
         }
     }
-    if(bufferedCommand)
-        com->commandFinished(); // free command cache
 }
-void Commands::emergencyStop() {
+void Commands::emergencyStop()
+{
 #if defined(KILL_METHOD) && KILL_METHOD==1
-  resetFunc();
+    HAL::resetHardware();
 #else
-     HAL::forbidInterrupts(); // Don't allow interrupts to do their work
-     kill(false);
-     Extruder::manageTemperatures();
-     for(byte i=0;i<NUM_EXTRUDER+3;i++)
-     pwm_pos[i] = 0;
+    HAL::forbidInterrupts(); // Don't allow interrupts to do their work
+    kill(false);
+    Extruder::manageTemperatures();
+    for(byte i=0; i<NUM_EXTRUDER+3; i++)
+        pwm_pos[i] = 0;
 #if EXT0_HEATER_PIN>-1
     WRITE(EXT0_HEATER_PIN,0);
 #endif
@@ -1282,7 +1315,23 @@ void Commands::emergencyStop() {
 #if FAN_PIN>-1
     WRITE(FAN_PIN,0);
 #endif
-     while(1) {}
+    while(1) {}
 #endif
 }
 
+void Commands::checkFreeMemory() {
+    int newfree = HAL::getFreeRam();
+    if(newfree<lowestRAMValue)
+    {
+        lowestRAMValue = newfree;
+    }
+}
+void Commands::writeLowestFreeRAM()
+{
+    if(lowestRAMValueSend>lowestRAMValue)
+    {
+        lowestRAMValueSend = lowestRAMValue;
+        Com::printFLN(Com::tFreeRAM,lowestRAMValue);
+    }
+
+}

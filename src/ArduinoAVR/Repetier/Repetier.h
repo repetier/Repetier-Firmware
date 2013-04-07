@@ -29,7 +29,7 @@
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
+#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION
@@ -87,8 +87,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MICROSTEP4 LOW,HIGH
 #define MICROSTEP8 HIGH,HIGH
 #define MICROSTEP16 HIGH,HIGH
-
-#define NEW_XY_GANTRY
 
 #include "Configuration.h"
 #if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
@@ -193,7 +191,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #ifndef DEBUG_FREE_MEMORY
 #define DEBUG_MEMORY
 #else
-#define DEBUG_MEMORY check_mem();
+#define DEBUG_MEMORY Commands::checkFreeMemory();
 #endif
 
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
@@ -204,6 +202,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #endif
 
 #include "HAL.h"
+#include "gcode.h"
 
 #define SD_MAX_FOLDER_DEPTH 2
 
@@ -260,6 +259,44 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define PWM_OCIE OCIE0B
 //#endif
 
+#undef min
+#undef max
+
+class RMath {
+public:
+    static inline float min(float a,float b) {
+        if(a<b) return a;
+        return b;
+    }
+    static inline float max(float a,float b) {
+        if(a<b) return b;
+        return a;
+    }
+    static inline long min(long a,long b) {
+        if(a<b) return a;
+        return b;
+    }
+    static inline long max(long a,long b) {
+        if(a<b) return b;
+        return a;
+    }
+    static inline int min(int a,int b) {
+        if(a<b) return a;
+        return b;
+    }
+    static inline int max(int a,int b) {
+        if(a<b) return b;
+        return a;
+    }
+    static inline unsigned int min(unsigned int a,unsigned int b) {
+        if(a<b) return a;
+        return b;
+    }
+    static inline unsigned int max(unsigned int a,unsigned int b) {
+        if(a<b) return b;
+        return a;
+    }
+};
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
 extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
@@ -277,7 +314,6 @@ extern float maxadvspeed;
 
 
 #include "Extruder.h"
-extern void(* resetFunc) (void);
 
 void manage_inactivity(byte debug);
 
@@ -294,8 +330,6 @@ extern float calc_zoffset(long factors[], long pointX, long pointY);
 #endif
 extern void linear_move(long steps_remaining[]);
 
-#define PREVIOUS_PLANNER_INDEX(p) {p--;if(p==255) p = MOVE_CACHE_SIZE-1;}
-#define NEXT_PLANNER_INDEX(idx) {++idx;if(idx==MOVE_CACHE_SIZE) idx=0;}
 
 
 extern float axis_steps_per_unit[];
@@ -335,7 +369,6 @@ extern unsigned int counter_periodical;
 extern volatile byte execute_periodical;
 extern byte counter_250ms;
 extern void write_monitor();
-extern void check_periodical();
 
 
 

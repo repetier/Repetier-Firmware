@@ -2382,7 +2382,7 @@ void UIDisplay::executeAction(int action)
 
             break;
         case UI_ACTION_RESET:
-            resetFunc();
+            HAL::resetHardware();
             break;
         case UI_ACTION_PAUSE:
             OUT_P_LN("RequestPause:");

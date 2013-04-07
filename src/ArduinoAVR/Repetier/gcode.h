@@ -19,11 +19,12 @@
 #define _GCODE_H
 
 #define MAX_CMD_SIZE 96
+class SDCard;
 class GCode   // 52 bytes per command needed
 {
-public:
     unsigned int params;
     unsigned int params2;
+public:
     unsigned int N; // Line number
     unsigned int M;
     unsigned int G;
@@ -121,17 +122,20 @@ public:
     void printCommand();
     bool parseBinary(byte *buffer);
     bool parseAscii(char *line);
-    void commandFinished();
+    void popCurrentCommand();
+    void echoCommand();
     /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
-    static GCode *nextCommand();
+    static GCode *peekCurrentCommand();
     /** Frees the cache used by the last command fetched. */
     static void readFromSerial();
-    static void silentInsert();
+    static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static byte computeBinarySize(char *ptr);
+
+    friend class SDCard;
 private:
-    void checkinsert();
-    static void resend();
+    void checkAndPushCommand();
+    static void requestResend();
     inline float gcode_value(char *s)
     {
         return (strtod(s, NULL));
@@ -155,8 +159,7 @@ private:
     static long actLineNumber; ///< Line number of current command.
     static char waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
     static volatile byte bufferLength; ///< Number of commands stored in gcode_buffer
-    static unsigned long timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing bytes.
-
+    static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing bytes.
 };
 
 

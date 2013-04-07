@@ -252,6 +252,51 @@ long HAL::CPUDivU2(unsigned int divisor)
     }
 }
 
+void HAL::setupTimer() {
+#if defined(USE_ADVANCE)
+    EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
+    EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
+#endif
+    PWM_TCCR = 0;  // Setup PWM interrupt
+    PWM_OCR = 64;
+    PWM_TIMSK |= (1<<PWM_OCIE);
+
+    TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
+    TCCR1C = 0;
+    TIMSK1 = 0;
+    TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
+    OCR1A=65500; //start off with a slow frequency.
+    TIMSK1 |= (1<<OCIE1A); // Enable interrupt
+}
+
+void HAL::showStartReason() {
+    // Check startup - does nothing if bootloader sets MCUSR to 0
+    byte mcu = MCUSR;
+    if(mcu & 1) Com::printInfoFLN(Com::tPowerUp);
+    if(mcu & 2) Com::printInfoFLN(Com::tExternalReset);
+    if(mcu & 4) Com::printInfoFLN(Com::tBrownOut);
+    if(mcu & 8) Com::printInfoFLN(Com::tWatchdog);
+    if(mcu & 32) Com::printInfoFLN(Com::tSoftwareReset);
+    MCUSR=0;
+}
+int HAL::getFreeRam() {
+    int freeram = 0;
+    BEGIN_INTERRUPT_PROTECTED
+    uint8_t * heapptr, * stackptr;
+    heapptr = (uint8_t *)malloc(4);          // get heap pointer
+    free(heapptr);      // free up the memory again (sets heapptr to 0)
+    stackptr =  (uint8_t *)(SP);           // save value of stack pointer
+    freeram = (int)stackptr-(int)heapptr;
+    END_INTERRUPT_PROTECTED
+    return freeram;
+}
+
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+void HAL::resetHardware() {
+    resetFunc();
+}
+
 // ================== Interrupt handling ======================
 
 /** \brief Sets the timer 1 compare value to delay ticks.

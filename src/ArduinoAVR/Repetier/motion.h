@@ -17,7 +17,7 @@
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
-
+#
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
@@ -68,18 +68,14 @@ extern byte lastMoveID;
 
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
-public:
-    static PrintLine lines[];
-    static PrintLine *cur;
-    static byte lines_write_pos; // Position where we write the next cached line move
     static byte lines_pos; // Position for executing line movement
-    static volatile byte lines_count; // Number of lines cached 0 = nothing to do
-
+    static PrintLine lines[];
+    static byte lines_write_pos; // Position where we write the next cached line move
     byte primaryAxis;
     volatile byte flags;
     long timeInTicks;
     byte joinFlags;
-    byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
+    byte halfstep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
     byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
     long delta[4];                  ///< Steps we want to move.
     long error[4];                  ///< Error calculation for Bresenham algorithm
@@ -100,15 +96,15 @@ public:
     int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
     long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
 #endif
-    unsigned long fullInterval;     ///< interval at full speed in ticks/step.
-    unsigned long stepsRemaining;   ///< Remaining steps, until move is finished
+    ticks_t fullInterval;     ///< interval at full speed in ticks/step.
+    long stepsRemaining;            ///< Remaining steps, until move is finished
     unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
     unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
     unsigned long accelerationPrim; ///< Acceleration along primary axis
     unsigned long facceleration;    ///< accelerationPrim*262144/F_CPU
-    unsigned int vMax;              ///< Maximum reached speed in steps/s.
-    unsigned int vStart;            ///< Starting speed in steps/s.
-    unsigned int vEnd;              ///< End speed in steps/s
+    speed_t vMax;              ///< Maximum reached speed in steps/s.
+    speed_t vStart;            ///< Starting speed in steps/s.
+    speed_t vEnd;              ///< End speed in steps/s
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     long advanceRate;               ///< Advance steps at full speed
@@ -124,6 +120,9 @@ public:
 #ifdef DEBUG_STEPCOUNT
     long totalStepsRemaining;
 #endif
+public:
+    static PrintLine *cur;
+    static volatile byte lines_count; // Number of lines cached 0 = nothing to do
     inline bool areParameterUpToDate()
     {
         return joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED;
@@ -160,6 +159,12 @@ public:
     {
         return flags & FLAG_WARMUP;
     }
+    inline byte getWaitForXLinesFilled() {
+        return primaryAxis;
+    }
+    inline void setWaitForXLinesFilled(byte b) {
+        primaryAxis = b;
+    }
     inline bool isExtruderForwardMove()
     {
         return (dir & 136)==136;
@@ -176,9 +181,26 @@ public:
     {
         return flags & FLAG_BLOCKED;
     }
-    inline bool checkEndstops()
+    inline bool isCheckEndstops()
     {
         return flags & FLAG_CHECK_ENDSTOPS;
+    }
+    inline void checkEndstops() {
+        if(isCheckEndstops()) {
+           if(isXNegativeMove() && Printer::isXMinEndstopHit())
+                setXMoveFinished();
+            if(isYNegativeMove() && Printer::isYMinEndstopHit())
+                setYMoveFinished();
+            if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+                setXMoveFinished();
+            if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+                setYMoveFinished();
+        }
+        // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
+        if(isZNegativeMove() && Printer::isZMinEndstopHit())
+            setZMoveFinished();
+        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+            setZMoveFinished();
     }
     inline void setXMoveFinished()
     {
@@ -256,8 +278,15 @@ public:
     {
         return (dir & 128);
     }
+    inline bool isNoMove() {
+        return (dir & 240)==0;
+    }
+    inline bool isXYZMove() {
+        return dir & 112;
+    }
     inline void updateAdvanceSteps(unsigned int v,byte max_loops,bool accelerate)
     {
+        if(!printer.isAdvanceActivated()) return;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
         long advance_target =printer.advance_executed+advanceRate;
@@ -296,6 +325,9 @@ public:
     inline bool moveAccelerating()
     {
         return printer.stepNumber <= accelSteps;
+    }
+    inline bool isFullsteping() {
+        return halfstep == 4;
     }
     inline bool startXStep()
     {
@@ -372,7 +404,8 @@ public:
     }
     void updateStepsParameter();
     inline float safeSpeed();
-    void calculate_move(float axis_diff[],byte check_endstops,byte pathOptimize);
+    void calculate_move(float axis_diff[],byte pathOptimize);
+    void logLine();
     inline long getWaitTicks()
     {
         return timeInTicks;
@@ -390,7 +423,7 @@ public:
     {
         cur = &lines[lines_pos];
     }
-    static inline void popLineForbidInterrupt()
+    static inline void removeCurrentLineForbidInterrupt()
     {
         lines_pos++;
         if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
@@ -408,9 +441,11 @@ public:
     }
     static PrintLine *getNextWriteLine()
     {
-        &lines[lines_write_pos];
+        return &lines[lines_write_pos];
     }
+    static inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current);
     static long bresenhamStep();
+    static void waitForXFreeLines(byte b=1);
     static inline void forwardPlanner(byte p);
     static inline void backwardPlanner(byte p,byte last);
     static void updateTrapezoids(byte p);
@@ -422,6 +457,12 @@ public:
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
     static inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize);
+    static inline void previousPlannerIndex(byte &p) {
+        p = (p ? p-1 : MOVE_CACHE_SIZE-1);
+    }
+    static inline void nextPlannerIndex(byte& p) {
+        p = (p==MOVE_CACHE_SIZE-1?0:p+1);
+    }
 };
 
 
