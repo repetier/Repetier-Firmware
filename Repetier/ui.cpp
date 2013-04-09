@@ -2149,10 +2149,10 @@ void UIDisplay::executeAction(int action) {
 #if EXT0_HEATER_PIN>-1
      WRITE(EXT0_HEATER_PIN,0);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
      WRITE(EXT1_HEATER_PIN,0);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
      WRITE(EXT2_HEATER_PIN,0);
 #endif
 #if FAN_PIN>-1
