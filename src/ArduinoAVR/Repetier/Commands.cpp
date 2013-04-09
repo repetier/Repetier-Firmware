@@ -21,8 +21,6 @@
 
 #include "Repetier.h"
 
-//#include <SPI.h>
-
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue=MAX_RAM;
 int Commands::lowestRAMValueSend=MAX_RAM;
@@ -92,37 +90,35 @@ void Commands::waitUntilEndOfAllMoves()
 }
 void Commands::printCurrentPosition()
 {
-    OUT_P_F("X:",Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1));
-    OUT_P_F(" Y:",Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1));
-    OUT_P_F(" Z:",Printer::currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1));
-    OUT_P_F_LN(" E:",Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1));
+    Com::printF(Com::tXColon,Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0]*(unit_inches?0.03937:1),2);
+    Com::printF(Com::tSpaceYColon,Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[1]*(unit_inches?0.03937:1),2);
+    Com::printF(Com::tSpaceZColon,Printer::currentPositionSteps[2]*inv_axis_steps_per_unit[2]*(unit_inches?0.03937:1),2);
+    Com::printF(Com::tSpaceEColon,Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1),2);
 }
 void Commands::printTemperatures()
 {
     float temp = current_extruder->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE==0
-    OUT_P_F("T:",temp);
+    Com::printF(Com::tTColon,temp);
 #else
-    OUT_P_F("T:",temp);
-    OUT_P_F(" B:",Extruder::getHeatedBedTemperature());
+    Com::printF(Com::tColon,temp);
+    Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
 #endif
 #ifdef TEMP_PID
-    OUT_P_I(" @:",(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
+    Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[current_extruder->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
 #if NUM_EXTRUDER>1
     for(byte i=0; i<NUM_EXTRUDER; i++)
     {
-        OUT_P(" T");
-        out.print((int)i);
-        OUT_P_F(":",extruder[i].tempControl.currentTemperatureC);
+        Com::printF(Com::tSpaceT,(int)i);
+        Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
 #ifdef TEMP_PID
-        OUT_P(" @");
-        out.print((int)i);
-        OUT_P_I(":",(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
+        Com::printF(Com::tSpaceAt,(int)i);
+        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
     }
 #endif
-    OUT_LN;
+    Com::println();
 }
 void Commands::changeFeedrateMultiply(int factor)
 {
@@ -130,14 +126,14 @@ void Commands::changeFeedrateMultiply(int factor)
     if(factor>500) factor=500;
     printer.feedrate *= (float)factor/(float)printer.feedrateMultiply;
     printer.feedrateMultiply = factor;
-    OUT_P_I_LN("SpeedMultiply:",factor);
+    Com::printFLN(Com::tSpeedMultiply,factor);
 }
 void Commands::changeFlowateMultiply(int factor)
 {
     if(factor<25) factor=25;
     if(factor>200) factor=200;
     printer.extrudeMultiply = factor;
-    OUT_P_I_LN("FlowMultiply:",factor);
+    Com::printFLN(Com::tFlowMultiply,factor);
 }
 void Commands::setFanSpeed(int speed,bool wait)
 {
@@ -146,7 +142,7 @@ void Commands::setFanSpeed(int speed,bool wait)
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed!=pwm_pos[NUM_EXTRUDER+2])
-        OUT_P_I_LN("Fanspeed:",speed);
+        Com::printFLN(Com::tFanspeed,speed);
     pwm_pos[NUM_EXTRUDER+2] = speed;
 #endif
 }
@@ -298,8 +294,8 @@ void Commands::reportPrinterUsage()
 {
 #if EEPROM_MODE!=0
     float dist = printer.filamentPrinted*0.001+HAL::epr_get_float(EPR_PRINTING_DISTANCE);
-    OUT_P_FX("Printed filament:",dist,2);
-    OUT_P_LN(" m");
+    Com::printF(Com::tPrintedFilament,dist,2);
+    Com::printF(Com::tSpacem);
     bool alloff = true;
     for(byte i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
@@ -307,13 +303,13 @@ void Commands::reportPrinterUsage()
     long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-printer.msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
     long tmp = seconds/86400;
     seconds-=tmp*86400;
-    OUT_P_L("Printing time:",tmp);
+    Com::printF(Com::tPrintingTime,tmp);
     tmp=seconds/3600;
-    OUT_P_L(" days ",tmp);
+    Com::printF(Com::tSpaceDaysSpace,tmp);
     seconds-=tmp*3600;
     tmp = seconds/60;
-    OUT_P_L(" hours ",tmp);
-    OUT_P_LN(" min");
+    Com::printF(Com::tSpaceHoursSpace,tmp);
+    Com::printFLN(Com::tSpaceMin);
 #endif
 }
 #if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_DIGIPOT
@@ -472,17 +468,17 @@ void microstep_mode(uint8_t driver, uint8_t stepping_mode)
 }
 void microstep_readings()
 {
-    out.println_P(PSTR("MS1,MS2 Pins"));
-    out.print_int_P(PSTR("X: "), READ(X_MS1_PIN));
-    out.println_int_P(PSTR(","),READ(X_MS2_PIN));
-    out.print_int_P(PSTR("Y: "), READ(Y_MS1_PIN));
-    out.println_int_P(PSTR(","),READ(Y_MS2_PIN));
-    out.print_int_P(PSTR("Z: "), READ(Z_MS1_PIN));
-    out.println_int_P(PSTR(","),READ(Z_MS2_PIN));
-    out.print_int_P(PSTR("E0: "), READ(E0_MS1_PIN));
-    out.println_int_P(PSTR(","),READ(E0_MS2_PIN));
-    out.print_int_P(PSTR("E1: "), READ(E1_MS1_PIN));
-    out.println_int_P(PSTR(","),READ(E1_MS2_PIN));
+    Com::printFLN(Com::tMS1MS2Pins);
+    Com::printF(Com::tXColon,READ(X_MS1_PIN));
+    Com::printFLN(Com::tComma,READ(X_MS2_PIN));
+    Com::printF(Com::tYColon,READ(Y_MS1_PIN));
+    Com::printFLN(Com::tComma,READ(Y_MS2_PIN));
+    Com::printF(Com::tZColon,READ(Z_MS1_PIN));
+    Com::printFLN(Com::tComma,READ(Z_MS2_PIN));
+    Com::printF(Com::tE0Colon,READ(E0_MS1_PIN));
+    Com::printFLN(Com::tComma,READ(E0_MS2_PIN));
+    Com::printF(Com::tE1Colon,READ(E1_MS1_PIN));
+    Com::printFLN((Com::tComma,READ(E1_MS2_PIN));
 }
 #endif
 
@@ -606,7 +602,7 @@ void Commands::executeGCode(GCode *com)
                 // real CNC, and thus - for practical reasons - we will terminate promptly:
                 if(isnan(h_x2_div_d))
                 {
-                    OUT_P_LN("error: Invalid arc");
+                    Com::printErrorFLN(Com::tInvalidArc);
                     break;
                 }
                 // Invert the sign of h_x2_div_d if the circle is counter clockwise (see sketch below)
@@ -1206,7 +1202,7 @@ void Commands::executeGCode(GCode *com)
         {
 #if EEPROM_MODE!=0
             EEPROM::storeDataIntoEEPROM(false);
-            OUT_P_LN("Configuration stored to EEPROM.");
+            Com::printInfoF(Com::tConfigStoredEEPROM);
 #else
             Com::printErrorF(tNoEEPROMSupport);
 #endif
@@ -1216,7 +1212,7 @@ void Commands::executeGCode(GCode *com)
         {
 #if EEPROM_MODE!=0
             EEPROM::readDataFromEEPROM();
-            OUT_P_LN("Configuration loaded from EEPROM.");
+            Com::printInfoF(Com::tConfigLoadedEEPROM);
 #else
             Com::printErrorF(tNoEEPROMSupport);
 #endif
@@ -1306,10 +1302,10 @@ void Commands::emergencyStop()
 #if EXT0_HEATER_PIN>-1
     WRITE(EXT0_HEATER_PIN,0);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
     WRITE(EXT1_HEATER_PIN,0);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
     WRITE(EXT2_HEATER_PIN,0);
 #endif
 #if FAN_PIN>-1

@@ -1,9 +1,12 @@
-Version 0.82 in development
+Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
   Extruder cooler fan always on if temp>50°C
   Added italian translation for ui
   Minimum speed based on acceleration enforced.
   Compiles with newer AVR compiler.
+  Added Azteeg X3 support.
+  Added Viki LCD support.
+  Fixed a bug causing lost steps with high speeds.
   
 Version 0.81 03-02-2013
   IMPORTANT: Read upgrade_instructions.txt for upgrading older versions!!!

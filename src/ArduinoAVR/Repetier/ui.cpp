@@ -909,11 +909,11 @@ void UIDisplay::addFloat(float number, char fixdigits,byte digits)
         remainder -= toPrint;
     }
 }
-void UIDisplay::addStringP(PGM_P text)
+void UIDisplay::addStringP(FSTRINGPARAM(text))
 {
     while(col<UI_COLS)
     {
-        byte c = pgm_read_byte(text++);
+        byte c = HAL::readFlashByte(text++);
         if(c==0) return;
         printCols[col++]=c;
     }
@@ -2369,10 +2369,10 @@ void UIDisplay::executeAction(int action)
 #if EXT0_HEATER_PIN>-1
             WRITE(EXT0_HEATER_PIN,0);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
             WRITE(EXT1_HEATER_PIN,0);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
             WRITE(EXT2_HEATER_PIN,0);
 #endif
 #if FAN_PIN>-1
