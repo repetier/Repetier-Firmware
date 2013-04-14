@@ -23,66 +23,6 @@
 
 #include "Repetier.h"
 
-#if EEPROM_MODE!=0
-
-byte EEPROM::computeChecksum()
-{
-    int i;
-    byte checksum=0;
-    for(i=0; i<2048; i++)
-    {
-        if(i==EEPROM_OFFSET+EPR_INTEGRITY_BYTE) continue;
-        checksum += eeprom_read_byte ((unsigned char *)(i));
-    }
-    return checksum;
-}
-
-
-
-void EEPROM::writeExtruderPrefix(uint pos)
-{
-    if(pos<EEPROM_EXTRUDER_OFFSET) return;
-    int n = (pos-EEPROM_EXTRUDER_OFFSET)/EEPROM_EXTRUDER_LENGTH+1;
-    Com::printF(Com::tExtrDot,n);
-    Com::print(' ');
-}
-void EEPROM::writeFloat(uint pos,PGM_P text)
-{
-    Com::printF(Com::tEPR3,(int)pos);
-    Com::print(' ');
-    Com::printFloat(HAL::epr_get_float(pos),3);
-    Com::print(' ');
-    writeExtruderPrefix(pos);
-    Com::printFLN(text);
-}
-void EEPROM::writeLong(uint pos,PGM_P text)
-{
-    Com::printF(Com::tEPR2,(int)pos);
-    Com::print(' ');
-    Com::print(HAL::epr_get_long(pos));
-    Com::print(' ');
-    writeExtruderPrefix(pos);
-    Com::printFLN(text);
-}
-void EEPROM::writeInt(uint pos,PGM_P text)
-{
-    Com::printF(Com::tEPR1,(int)pos);
-    Com::print(' ');
-    Com::print(HAL::epr_get_int(pos));
-    Com::print(' ');
-    writeExtruderPrefix(pos);
-    Com::printFLN(text);
-}
-void EEPROM::writeByte(uint pos,PGM_P text)
-{
-    Com::printF(Com::tEPR0,(int)pos);
-    Com::print(' ');
-    Com::print((int)HAL::epr_get_byte(pos));
-    Com::print(' ');
-    writeExtruderPrefix(pos);
-    Com::printFLN(text);
-}
-#endif
 
 void EEPROM::update(GCode *com)
 {
@@ -111,8 +51,6 @@ void EEPROM::update(GCode *com)
 #endif
 }
 
-/** \brief Copy data from EEPROM to variables.
-*/
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 #if EEPROM_MODE!=0
@@ -358,9 +296,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Com::printErrorF(tNoEEPROMSupport);
 #endif
 }
-/** \brief Moves current settings to EEPROM.
 
-The values the are currently set are used to fill the eeprom.*/
 void EEPROM::storeDataIntoEEPROM(byte corrupted)
 {
 #if EEPROM_MODE!=0
@@ -487,8 +423,7 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_byte(EPR_INTEGRITY_BYTE,computeChecksum());
 #endif
 }
-/** \brief Copy data from EEPROM to variables.
-*/
+
 void EEPROM::readDataFromEEPROM()
 {
 #if EEPROM_MODE!=0
@@ -599,6 +534,7 @@ void EEPROM::initBaudrate()
     }
 #endif
 }
+
 void EEPROM::init()
 {
 #if EEPROM_MODE!=0
@@ -615,8 +551,7 @@ void EEPROM::init()
     }
 #endif
 }
-/**
-*/
+
 void EEPROM::updatePrinterUsage()
 {
 #if EEPROM_MODE!=0
@@ -744,4 +679,67 @@ void EEPROM::writeSettings()
     Com::printErrorF(tNoEEPROMSupport);
 #endif
 }
+
+#if EEPROM_MODE!=0
+
+byte EEPROM::computeChecksum()
+{
+    unsigned int i;
+    byte checksum=0;
+    for(i=0; i<2048; i++)
+    {
+        if(i==EEPROM_OFFSET+EPR_INTEGRITY_BYTE) continue;
+        checksum += HAL::epr_get_byte(i);
+    }
+    return checksum;
+}
+
+void EEPROM::writeExtruderPrefix(uint pos)
+{
+    if(pos<EEPROM_EXTRUDER_OFFSET) return;
+    int n = (pos-EEPROM_EXTRUDER_OFFSET)/EEPROM_EXTRUDER_LENGTH+1;
+    Com::printF(Com::tExtrDot,n);
+    Com::print(' ');
+}
+
+void EEPROM::writeFloat(uint pos,PGM_P text)
+{
+    Com::printF(Com::tEPR3,(int)pos);
+    Com::print(' ');
+    Com::printFloat(HAL::epr_get_float(pos),3);
+    Com::print(' ');
+    writeExtruderPrefix(pos);
+    Com::printFLN(text);
+}
+
+void EEPROM::writeLong(uint pos,PGM_P text)
+{
+    Com::printF(Com::tEPR2,(int)pos);
+    Com::print(' ');
+    Com::print(HAL::epr_get_long(pos));
+    Com::print(' ');
+    writeExtruderPrefix(pos);
+    Com::printFLN(text);
+}
+
+void EEPROM::writeInt(uint pos,PGM_P text)
+{
+    Com::printF(Com::tEPR1,(int)pos);
+    Com::print(' ');
+    Com::print(HAL::epr_get_int(pos));
+    Com::print(' ');
+    writeExtruderPrefix(pos);
+    Com::printFLN(text);
+}
+
+void EEPROM::writeByte(uint pos,PGM_P text)
+{
+    Com::printF(Com::tEPR0,(int)pos);
+    Com::print(' ');
+    Com::print((int)HAL::epr_get_byte(pos));
+    Com::print(' ');
+    writeExtruderPrefix(pos);
+    Com::printFLN(text);
+}
+#endif
 

@@ -192,11 +192,6 @@ void SerialOutput::printFloat(double number, uint8_t digits)
     }
 }
 
-/**
-  Print a string stored in program memory on serial console.
-
-  Example: serial_print_pgm(PSTR("Dummy string"));
-*/
 void SerialOutput::print_P(FSTRINGPARAM(ptr))
 {
     char c;
@@ -204,11 +199,6 @@ void SerialOutput::print_P(FSTRINGPARAM(ptr))
         write(c);
 }
 
-/**
-  Print a string stored in program memory on serial console.
-
-  Example: out.println_P(PSTR("Dummy string"));
-*/
 void SerialOutput::println_P(PGM_P ptr)
 {
     print_P(ptr);
@@ -254,6 +244,7 @@ void SerialOutput::print_error_P(PGM_P ptr,bool newline)
     if(newline)
         println();
 }
+
 void GCode::requestResend()
 {
     HAL::serialFlush();
@@ -385,7 +376,7 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
         }
         buf[buflen]=0;
         // Send command into command buffer
-        if(code.parseAscii((char *)buf) && (code.params & 518))   // Success
+        if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
         {
             Commands::executeGCode(&code);
             Printer::defaultLoopActions();
@@ -451,7 +442,7 @@ void GCode::readFromSerial()
             if(commandsReceivingWritePosition==binaryCommandSize)
             {
                 act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving))   // Success
+                if(act->parseBinary(commandReceiving,true))   // Success
                 {
                     act->checkAndPushCommand();
                 }
@@ -476,7 +467,7 @@ void GCode::readFromSerial()
                     continue;
                 }
                 act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseAscii((char *)commandReceiving))   // Success
+                if(act->parseAscii((char *)commandReceiving,true))   // Success
                 {
                     act->checkAndPushCommand();
                 }
@@ -523,7 +514,7 @@ void GCode::readFromSerial()
             if(commandsReceivingWritePosition==binaryCommandSize)
             {
                 act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving))   // Success
+                if(act->parseBinary(commandReceiving,false))   // Success
                 {
                     pushCommand();
                 }
@@ -544,7 +535,7 @@ void GCode::readFromSerial()
                     continue;
                 }
                 act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseAscii((char *)commandReceiving))   // Success
+                if(act->parseAscii((char *)commandReceiving,false))   // Success
                 {
                     pushCommand();
                 }
@@ -568,7 +559,7 @@ void GCode::readFromSerial()
   Converts a binary bytefield containing one GCode line into a GCode structure.
   Returns true if checksum was correct.
 */
-bool GCode::parseBinary(byte *buffer)
+bool GCode::parseBinary(byte *buffer,bool fromSerial)
 {
     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
@@ -707,7 +698,7 @@ bool GCode::parseBinary(byte *buffer)
 /**
   Converts a ascii GCode line into a GCode structure.
 */
-bool GCode::parseAscii(char *line)
+bool GCode::parseAscii(char *line,bool fromSerial)
 {
     bool has_checksum = false;
     char *pos;
@@ -829,7 +820,8 @@ bool GCode::parseAscii(char *line)
 #if FEATURE_CHECKSUM_FORCED
     else
     {
-        if(hasM() && M == 117) return true;
+        if(!fromSerial) return true;
+        if(hasM() && (M == 110 || hasString()) return true;
         if(Printer::debugErrors())
         {
             Com::printErrorFLN(Com::tMissingChecksum);

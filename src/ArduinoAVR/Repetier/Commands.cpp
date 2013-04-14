@@ -767,8 +767,8 @@ void Commands::executeGCode(GCode *com)
                     pinMode(pin_number, OUTPUT);
                     digitalWrite(pin_number, com->S);
                     analogWrite(pin_number, com->S);
-                    out.print_int_P(PSTR("Set output "),pin_number);
-                    out.println_int_P(PSTR(" to "),(int)com->S);
+                    Com::printF(Com::tSetOutputSpace,pin_number);
+                    Com::printFLN(Com::tSpaceToSpace,(int)com->S);
                 }
             }
             break;
@@ -977,15 +977,7 @@ void Commands::executeGCode(GCode *com)
             }
             break;
         case 115:
-#if DRIVE_SYSTEM==3
-            out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2"));
-#else
-#if DRIVE_SYSTEM==0
-            out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2"));
-#else
-            out.println_P(PSTR("FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2"));
-#endif
-#endif
+            Com::printFLN(Com::tFirmware);
             reportPrinterUsage();
             break;
         case 114: // M114
@@ -1000,30 +992,30 @@ void Commands::executeGCode(GCode *com)
         case 119: // M119
             Commands::waitUntilEndOfAllMoves();
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-            out.print_P(PSTR("x_min:"));
-            out.print_P(Printer::isXMinEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tXMinColon);
+            Com::printF(Printer::isXMinEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-            out.print_P(PSTR("x_max:"));
-            out.print_P(Printer::isXMaxEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tXMaxColon);
+            Com::printF(Printer::isXMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
-            out.print_P(PSTR("y_min:"));
-            out.print_P(Printer::isYMinEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tYMinColon);
+            Com::printF(Printer::isYMinEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-            out.print_P(PSTR("y_max:"));
-            out.print_P(Printer::isYMaxEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tYMaxColon);
+            Com::printF(Printer::isYMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-            out.print_P(PSTR("z_min:"));
-            out.print_P(Printer::isZMinEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tZMinColon);
+            Com::printF(Printer::isZMinEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-            out.print_P(PSTR("z_max:"));
-            out.print_P(Printer::isZMaxEndstopHit()?PSTR("H "):PSTR("L "));
+            Com::printF(Com::tZMaxColon);
+            Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
 #endif
-            out.println();
+            Com::println();
             break;
 #if BEEPER_TYPE>0
         case 120: // Test beeper function
@@ -1090,8 +1082,8 @@ void Commands::executeGCode(GCode *com)
                 current_extruder->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(current_extruder->id);
             }
-            out.print_float_P(PSTR("Jerk:"),printer.maxJerk);
-            out.println_float_P(PSTR(" ZJerk:"),printer.maxZJerk);
+            Com::printF(Com::tJerkColon,printer.maxJerk);
+            Com::printFLN(Com::tZJerkColon,printer.maxZJerk);
             break;
         case 220: // M220 S<Feedrate multiplier in percent>
             changeFeedrateMultiply(com->getS(100));
@@ -1105,11 +1097,11 @@ void Commands::executeGCode(GCode *com)
                 printer.extruderStepsNeeded+=com->S;
             break;
         case 232:
-            out.print_int_P(PSTR(" linear steps:"),maxadv2);
+            Com::printF(Com::tLinearStepsColon,maxadv2);
 #ifdef ENABLE_QUADRATIC_ADVANCE
-            out.print_int_P(PSTR(" quadratic steps:"),maxadv);
+            Com::printF(Com::tQuadraticStepsColon,maxadv);
 #endif
-            out.println_float_P(PSTR(", speed="),maxadvspeed);
+            Com::printFLN(Com::tCommaSpeedEqual,maxadvspeed);
 #ifdef ENABLE_QUADRATIC_ADVANCE
             maxadv=0;
 #endif
@@ -1132,27 +1124,27 @@ void Commands::executeGCode(GCode *com)
             Extruder::selectExtruderById(current_extruder->id);
             if(printer.opsMode==0)
             {
-                out.println_P(PSTR("OPS disabled"));
+                Com::printFLN(Com::tOPSDisabled);
             }
             else
             {
                 if(printer.opsMode==1)
-                    out.print_P(PSTR("OPS classic mode:"));
+                    Com::printFLN(Com::tOPSClassicMode);
                 else
-                    out.print_P(PSTR("OPS fast mode:"));
+                    Com::printFLN(Com::tOPSFastMode);
 
-                out.print_float_P(PSTR("min distance = "),printer.opsMinDistance);
-                out.print_float_P(PSTR(", retract = "),printer.opsRetractDistance);
-                out.print_float_P(PSTR(", backslash = "),printer.opsRetractBacklash);
+                Com::printF(Com::tMinDistance,printer.opsMinDistance);
+                Com::printF(Com::tRetractEqual,printer.opsRetractDistance);
+                Com::printF(Com::tBacklashEqual,printer.opsRetractBacklash);
                 if(printer.opsMode==2)
-                    out.print_float_P(PSTR(", move after = "),printer.opsMoveAfter);
-                out.println();
+                    Com::printF(Com::tMoveAfter,printer.opsMoveAfter);
+                Com::println();
                 Printer::updateAdvanceFlags();
             }
 #ifdef DEBUG_OPS
-            out.println_int_P(PSTR("Ret. steps:"),printer.opsRetractSteps);
-            out.println_int_P(PSTR("PushBack Steps:"),printer.opsPushbackSteps);
-            out.println_int_P(PSTR("Move after steps:"),printer.opsMoveAfterSteps);
+            Com::printFLN(Com::tRetrSteps,printer.opsRetractSteps);
+            Com::printFLN(Com::tPushBackSteps,printer.opsPushbackSteps);
+            Com::printFLN(Com::tMoveAfterSteps,printer.opsMoveAfterSteps);
 #endif
             break;
 #endif
@@ -1160,13 +1152,13 @@ void Commands::executeGCode(GCode *com)
         case 233:
             if(com->hasY())
                 current_extruder->advanceL = com->Y;
-            out.print_float_P(PSTR("linear L:"),current_extruder->advanceL);
+            Com::printF(Com::tLinearLColon,current_extruder->advanceL);
 #ifdef ENABLE_QUADRATIC_ADVANCE
             if(com->hasX())
                 current_extruder->advanceK = com->X;
-            out.print_float_P(PSTR(" quadratic K:"),current_extruder->advanceK);
+            Com::printF(Com::tQuadraticKColon,current_extruder->advanceK);
 #endif
-            out.println();
+            Com::println();
             Printer::updateAdvanceFlags();
             break;
 #endif
@@ -1244,12 +1236,12 @@ void Commands::executeGCode(GCode *com)
                 if (com->S == 0)
                 {
                     printer.countZSteps = 0;
-                    out.println_P(PSTR("Measurement reset."));
+                    Com::printFLN(Com::tMeasurementReset);
                 }
                 else if (com->S == 1)
                 {
-                    OUT_P_L_LN("Measure/delta (Steps) =",printer.countZSteps * inv_axis_steps_per_unit[2]);
-                    OUT_P_L_LN("Measure/delta =",printer.countZSteps * inv_axis_steps_per_unit[2]);
+                    Com::printFLN(Com::tMeasureDeltaSteps,printer.countZSteps * inv_axis_steps_per_unit[2]);
+                    Com::printFLN(Com::tMeasureDelta,printer.countZSteps * inv_axis_steps_per_unit[2]);
                 }
                 else if (com->S = 2)
                 {
@@ -1263,10 +1255,10 @@ void Commands::executeGCode(GCode *com)
                         Printer::currentPositionSteps[i] = 0;
                     }
                     calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
-                    OUT_P_LN("Measured origin set. Measurement reset.");
+                    Com::printFLN(Com::tMeasureOriginReset);
 #if EEPROM_MODE!=0
                     EEPROM::storeDataIntoEEPROM(false);
-                    OUT_P_LN("EEPROM updated");
+                    Com::printFLN(Com::tEEPROMUpdated);
 #endif
                 }
             }

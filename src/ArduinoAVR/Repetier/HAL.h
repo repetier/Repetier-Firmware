@@ -193,20 +193,20 @@ public:
     void printFloat(double number, uint8_t digits=2);
 
 };
-#define OUT_P_I(p,i) out.print_int_P(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) out.println_int_P(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) out.print_long_P(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) out.println_long_P(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) out.print_float_P(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) out.println_float_P(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) out.print_float_P(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) out.println_float_P(PSTR(p),(float)(i),x)
-#define OUT_P(p) out.print_P(PSTR(p))
-#define OUT_P_LN(p) out.println_P(PSTR(p))
-#define OUT_ERROR_P(p) out.print_error_P(PSTR(p),false)
-#define OUT_ERROR_P_LN(p) out.print_error_P(PSTR(p),true)
-#define OUT(v) out.print(v)
-#define OUT_LN out.println()
+#define OUT_P_I(p,i) Com::printF(PSTR(p),(int)(i))
+#define OUT_P_I_LN(p,i) Com::printFLN(PSTR(p),(int)(i))
+#define OUT_P_L(p,i) Com::printF(PSTR(p),(long)(i))
+#define OUT_P_L_LN(p,i) Com::printFLN(PSTR(p),(long)(i))
+#define OUT_P_F(p,i) Com::printF(PSTR(p),(float)(i))
+#define OUT_P_F_LN(p,i) Com::printFLN(PSTR(p),(float)(i))
+#define OUT_P_FX(p,i,x) Com::printF(PSTR(p),(float)(i),x)
+#define OUT_P_FX_LN(p,i,x) Com::printFLN(PSTR(p),(float)(i),x)
+#define OUT_P(p) Com::printF(PSTR(p))
+#define OUT_P_LN(p) Com::printFLN(PSTR(p))
+#define OUT_ERROR_P(p) Com::printErrorF(PSTR(p))
+#define OUT_ERROR_P_LN(p) {Com::printErrorF(PSTR(p));Com::println();}
+#define OUT(v) Com::print(v)
+#define OUT_LN Com::println()
 extern SerialOutput out;
 
 class HAL

@@ -1,5 +1,35 @@
+/*
+    This file is part of Repetier-Firmware.
+
+    Repetier-Firmware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Repetier-Firmware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+
+    This firmware is a nearly complete rewrite of the sprinter firmware
+    by kliment (https://github.com/kliment/Sprinter)
+    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+*/
+
 #include "Repetier.h"
 
+#if DRIVE_SYSTEM==3
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+#else
+#if DRIVE_SYSTEM==0
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+#else
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+#endif
+#endif
 FSTRINGVALUE(Com::tOk,"ok")
 FSTRINGVALUE(Com::tNAN,"NAN")
 FSTRINGVALUE(Com::tINF,"INF")
@@ -45,6 +75,7 @@ FSTRINGVALUE(Com::tSpaceAtColon," @:")
 FSTRINGVALUE(Com::tSpaceT," T")
 FSTRINGVALUE(Com::tSpaceAt," @")
 FSTRINGVALUE(Com::tColon,":")
+FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpeedMultiply,"SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply,"FlowMultiply:")
 FSTRINGVALUE(Com::tFanspeed,"Fanspeed:")
@@ -56,11 +87,47 @@ FSTRINGVALUE(Com::tSpaceHoursSpace," hours ")
 FSTRINGVALUE(Com::tSpaceMin," min")
 FSTRINGVALUE(Com::tInvalidArc,"Invalid arc")
 FSTRINGVALUE(Com::tComma,",")
+FSTRINGVALUE(Com::tSpace," ")
 FSTRINGVALUE(Com::tYColon,"Y:")
 FSTRINGVALUE(Com::tZColon,"Z:")
 FSTRINGVALUE(Com::tE0Colon,"E0:")
 FSTRINGVALUE(Com::tE1Colon,"E1:")
 FSTRINGVALUE(Com::tMS1MS2Pins,"MS1,MS2 Pins")
+FSTRINGVALUE(Com::tSetOutputSpace,"Set output ")
+FSTRINGVALUE(Com::tSpaceToSpace," to ")
+FSTRINGVALUE(Com::tHSpace,"H ")
+FSTRINGVALUE(Com::tLSpace,"L ")
+FSTRINGVALUE(Com::tXMinColon,"x_min:")
+FSTRINGVALUE(Com::tXMaxColon,"x_max:")
+FSTRINGVALUE(Com::tYMinColon,"y_min:")
+FSTRINGVALUE(Com::tYMaxColon,"y_max:")
+FSTRINGVALUE(Com::tZMinColon,"z_min:")
+FSTRINGVALUE(Com::tZMaxColon,"z_max:")
+FSTRINGVALUE(Com::tJerkColon,"Jerk:")
+FSTRINGVALUE(Com::tZJerkColon," ZJerk:")
+FSTRINGVALUE(Com::tLinearStepsColon," linear steps:")
+FSTRINGVALUE(Com::tQuadraticStepsColon," quadratic steps:")
+FSTRINGVALUE(Com::tCommaSpeedEqual,", speed=")
+
+FSTRINGVALUE(Com::tOPSDisabled,"OPS disabled")
+FSTRINGVALUE(Com::tOPSClassicMode,"OPS classic mode:")
+FSTRINGVALUE(Com::tOPSFastMode,"OPS fast mode:")
+FSTRINGVALUE(Com::tMinDistance,"min distance = ")
+FSTRINGVALUE(Com::tRetractEqual,", retract = ")
+FSTRINGVALUE(Com::tBacklashEqual,", backlash = ")
+FSTRINGVALUE(Com::tMoveAfter,", move after = ")
+FSTRINGVALUE(Com::tRetrSteps,"Ret. steps:")
+FSTRINGVALUE(Com::tPushBackSteps,"PushBack Steps:")
+FSTRINGVALUE(Com::tMoveAfterSteps,"Move after steps:")
+FSTRINGVALUE(Com::tLinearLColon,"linear L:")
+FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
+#if DRIVE_SYSTEM==3
+FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
+FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
+FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
+FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
+FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
+#endif // DRIVE_SYSTEM
 //FSTRINGVALUE(Com::,"")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
@@ -141,7 +208,27 @@ FSTRINGVALUE(Com::tEPRAdvanceK,"advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL,"advance L [0=off]")
 
 #endif
-
+#if SDSUPPORT
+FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
+FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
+FSTRINGVALUE(Com::tSDInitFail,"SD init fail")
+FSTRINGVALUE(Com::tErrorWritingToFile,"error writing to file")
+FSTRINGVALUE(Com::tBeginFileList,"Begin file list")
+FSTRINGVALUE(Com::tEndFileList,"End file list")
+FSTRINGVALUE(Com::tFileOpened,"File opened:")
+FSTRINGVALUE(Com::tSpaceSizeColon," Size:")
+FSTRINGVALUE(Com::tFileSelected,"File selected")
+FSTRINGVALUE(Com::tFileOpenFailed,"file.open failed")
+FSTRINGVALUE(Com::tSDPrintingByte,"SD printing byte ")
+FSTRINGVALUE(Com::tNotSDPrinting,"Not SD printing")
+FSTRINGVALUE(Com::tOpenFailedFile,"open failed, File: ")
+FSTRINGVALUE(Com::tWritingToFile,"Writing to file: ")
+FSTRINGVALUE(Com::tDoneSavingFile,"Done saving file.")
+FSTRINGVALUE(Com::tFileDeleted,"File deleted")
+FSTRINGVALUE(Com::tDeletionFailed,"Deletion failed")
+FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
+FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
+#endif // SDSUPPORT
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
@@ -172,12 +259,22 @@ void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);
     println();
 }
+void Com::printFLN(FSTRINGPARAM(text),char *msg) {
+    printF(text);
+    print(msg);
+    println();
+}
 
 void Com::printF(FSTRINGPARAM(ptr)) {
   char c;
   while ((c=HAL::readFlashByte(ptr++)) != 0)
      HAL::serialWriteByte(c);
 }
+void Com::printF(FSTRINGPARAM(text),char *msg) {
+    printF(text);
+    print(msg);
+}
+
 void Com::printF(FSTRINGPARAM(text),int value) {
     printF(text);
     print(value);
@@ -194,6 +291,11 @@ void Com::printFLN(FSTRINGPARAM(text),int value) {
 void Com::printFLN(FSTRINGPARAM(text),long value) {
     printF(text);
     print(value);
+    println();
+}
+void Com::printFLN(FSTRINGPARAM(text),float value,byte digits) {
+    printF(text);
+    printFloat(value,digits);
     println();
 }
 void Com::printF(FSTRINGPARAM(text),float value,byte digits) {

@@ -1,9 +1,31 @@
+/*
+    This file is part of Repetier-Firmware.
+
+    Repetier-Firmware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Repetier-Firmware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+
+    This firmware is a nearly complete rewrite of the sprinter firmware
+    by kliment (https://github.com/kliment/Sprinter)
+    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+*/
+
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 
 class Com
 {
     public:
+FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)
 FSTRINGVAR(tNAN)
 FSTRINGVAR(tINF)
@@ -41,6 +63,7 @@ FSTRINGVAR(tSoftwareReset)
 FSTRINGVAR(tUnknownCommand)
 FSTRINGVAR(tFreeRAM)
 FSTRINGVAR(tXColon)
+FSTRINGVAR(tSlash)
 FSTRINGVAR(tSpaceYColon)
 FSTRINGVAR(tSpaceZColon)
 FSTRINGVAR(tSpaceEColon)
@@ -61,11 +84,47 @@ FSTRINGVAR(tSpaceHoursSpace)
 FSTRINGVAR(tSpaceMin)
 FSTRINGVAR(tInvalidArc)
 FSTRINGVAR(tComma)
+FSTRINGVAR(tSpace)
 FSTRINGVAR(tYColon)
 FSTRINGVAR(tZColon)
 FSTRINGVAR(tE0Colon)
 FSTRINGVAR(tE1Colon)
 FSTRINGVAR(tMS1MS2Pins)
+FSTRINGVAR(tSetOutputSpace)
+FSTRINGVAR(tSpaceToSpace)
+FSTRINGVAR(tHSpace)
+FSTRINGVAR(tLSpace)
+FSTRINGVAR(tXMinColon)
+FSTRINGVAR(tXMaxColon)
+FSTRINGVAR(tYMinColon)
+FSTRINGVAR(tYMaxColon)
+FSTRINGVAR(tZMinColon)
+FSTRINGVAR(tZMaxColon)
+FSTRINGVAR(tJerkColon)
+FSTRINGVAR(tZJerkColon)
+FSTRINGVAR(tLinearStepsColon)
+FSTRINGVAR(tQuadraticStepsColon)
+FSTRINGVAR(tCommaSpeedEqual)
+FSTRINGVAR(tOPSDisabled)
+FSTRINGVAR(tOPSClassicMode)
+FSTRINGVAR(tOPSFastMode)
+FSTRINGVAR(tMinDistance)
+FSTRINGVAR(tRetractEqual)
+FSTRINGVAR(tBacklashEqual)
+FSTRINGVAR(tMoveAfter)
+FSTRINGVAR(tRetrSteps)
+FSTRINGVAR(tPushBackSteps)
+FSTRINGVAR(tMoveAfterSteps)
+FSTRINGVAR(tLinearLColon)
+FSTRINGVAR(tQuadraticKColon)
+
+#if DRIVE_SYSTEM==3
+FSTRINGVAR(tMeasurementReset)
+FSTRINGVAR(tMeasureDeltaSteps)
+FSTRINGVAR(tMeasureDelta)
+FSTRINGVAR(tMeasureOriginReset)
+FSTRINGVAR(tEEPROMUpdated)
+#endif // DRIVE_SYSTEM
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)
@@ -146,6 +205,27 @@ FSTRINGVAR(tEPRExtruderCoolerSpeed)
 FSTRINGVAR(tEPRAdvanceK)
 FSTRINGVAR(tEPRAdvanceL)
 #endif
+#if SDSUPPORT
+FSTRINGVAR(tSDRemoved)
+FSTRINGVAR(tSDInserted)
+FSTRINGVAR(tSDInitFail)
+FSTRINGVAR(tErrorWritingToFile)
+FSTRINGVAR(tBeginFileList)
+FSTRINGVAR(tEndFileList)
+FSTRINGVAR(tFileOpened)
+FSTRINGVAR(tSpaceSizeColon)
+FSTRINGVAR(tFileSelected)
+FSTRINGVAR(tFileOpenFailed)
+FSTRINGVAR(tSDPrintingByte)
+FSTRINGVAR(tNotSDPrinting)
+FSTRINGVAR(tOpenFailedFile)
+FSTRINGVAR(tWritingToFile)
+FSTRINGVAR(tDoneSavingFile)
+FSTRINGVAR(tFileDeleted)
+FSTRINGVAR(tDeletionFailed)
+FSTRINGVAR(tDirectoryCreated)
+FSTRINGVAR(tCreationFailed)
+#endif // SDSUPPORT
 
 
 
@@ -159,10 +239,13 @@ static void printErrorFLN(FSTRINGPARAM(text));
 static void printFLN(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text),int value);
+static void printF(FSTRINGPARAM(text),char *msg);
 static void printF(FSTRINGPARAM(text),long value);
 static void printF(FSTRINGPARAM(text),float value,byte digits=2);
 static void printFLN(FSTRINGPARAM(text),int value);
 static void printFLN(FSTRINGPARAM(text),long value);
+static void printFLN(FSTRINGPARAM(text),char *msg);
+static void printFLN(FSTRINGPARAM(text),float value,byte digits=2);
 static void print(long value);
 static inline void print(int value) {print((long)value);}
 static void print(const char *text);

@@ -1750,7 +1750,7 @@ void UIDisplay::nextPreviousAction(char next)
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(printer.extrudeMultiply,1,25,500);
-        OUT_P_I_LN("FlowrateMultiply:",printer.extrudeMultiply);
+        Com::printFLN(Com::tFlowMultiply,(int)printer.extrudeMultiply);
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:

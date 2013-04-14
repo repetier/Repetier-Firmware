@@ -120,8 +120,8 @@ public:
     }
 
     void printCommand();
-    bool parseBinary(byte *buffer);
-    bool parseAscii(char *line);
+    bool parseBinary(byte *buffer,bool fromSerial);
+    bool parseAscii(char *line,bool fromSerial);
     void popCurrentCommand();
     void echoCommand();
     /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
