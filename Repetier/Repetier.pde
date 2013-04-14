@@ -1040,7 +1040,7 @@ inline long bresenham_step() {
 		if(cur->flags & FLAG_BLOCKED) { // This step is in computation - shouldn't happen
 			if(lastblk!=(int)cur) {
 				lastblk = (int)cur;
-				out.println_int_P(PSTR("BLK "),(unsigned int)lines_count);
+				//out.println_int_P(PSTR("BLK "),(unsigned int)lines_count);
 			}
 			cur = 0;
 			return 2000;

@@ -661,7 +661,7 @@ void gcode_execute_PString(PGM_P cmd) {
     }
     buf[buflen]=0;
     // Send command into command buffer
-    if(gcode_parse_ascii(&code,(char *)buf) && (code.params & 518)) { // Success
+    if(gcode_parse_ascii(&code,(char *)buf,false) && (code.params & 518)) { // Success
       process_command(&code,false);
       defaultLoopActions();
     }
@@ -727,7 +727,7 @@ void gcode_read_serial() {
           continue;
         }
         act = &gcode_buffer[gcode_windex];
-        if(gcode_parse_ascii(act,(char *)gcode_transbuffer)) { // Success
+        if(gcode_parse_ascii(act,(char *)gcode_transbuffer,true)) { // Success
           gcode_checkinsert(act);
         } else {
           gcode_resend();
@@ -779,7 +779,7 @@ void gcode_read_serial() {
           continue;
         }
         act = &gcode_buffer[gcode_windex];
-        if(gcode_parse_ascii(act,(char *)gcode_transbuffer)) { // Success
+        if(gcode_parse_ascii(act,(char *)gcode_transbuffer,false)) { // Success
           gcode_silent_insert();
         }
         gcode_wpos = 0;
@@ -869,7 +869,7 @@ inline long gcode_value_long(char *s) { return (strtol(s, NULL, 10)); }
 /**
   Converts a ascii GCode line into a GCode structure.
 */
-bool gcode_parse_ascii(GCode *code,char *line) {
+bool gcode_parse_ascii(GCode *code,char *line,bool fromSerial) {
   bool has_checksum = false;
   char *pos;
   code->params = 0;
@@ -968,9 +968,10 @@ bool gcode_parse_ascii(GCode *code,char *line) {
   } 
 #if FEATURE_CHECKSUM_FORCED
   else {
-    if(GCODE_HAS_M(code) && code->M == 117) return true;
+    if(!fromSerial) return true;
+    if((GCODE_HAS_M(code) && code->M == 110) || GCODE_HAS_STRING(code)) return true;
       if(DEBUG_ERRORS) {
-        OUT_P("Error: Missing checksum ");
+        OUT_P_LN("Error: Missing checksum ");
       }
     return false;
   }

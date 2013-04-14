@@ -167,7 +167,7 @@ extern void gcode_execute_PString(PGM_P cmd);
 extern void gcode_print_command(GCode *code);
 extern byte gcode_comp_binary_size(char *ptr);
 extern bool gcode_parse_binary(GCode *code,byte *buffer);
-extern bool gcode_parse_ascii(GCode *code,char *line);
+extern bool gcode_parse_ascii(GCode *code,char *line,bool fromSerial);
 extern void emergencyStop();
 
 // Helper macros to detect, if parameter is stored in GCode struct

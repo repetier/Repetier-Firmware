@@ -684,6 +684,9 @@ STEPPER_CURRENT_CONTROL
     #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
     #define SDPOWER          -1
     #define SDSS          31
+    #define SCK_PIN          7
+    #define MISO_PIN         6
+    #define MOSI_PIN         5
     
     #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
