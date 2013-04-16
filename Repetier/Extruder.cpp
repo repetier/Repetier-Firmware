@@ -488,7 +488,12 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
 
 void heated_bed_set_temperature(float temp_celsius) {
 #if HAVE_HEATED_BED
-   if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
+   if(temp_celsius>HEATED_BED_MAX_TEMP){
+     temp_celsius = HEATED_BED_MAX_TEMP;
+     out.println_int_P(PSTR("Target temperature exceeds HEATED_BED_MAX_TEMP="), HEATED_BED_MAX_TEMP);
+     out.println_P(PSTR("If you need a higher temperature, you'll have to change your firmware configuration."));
+   }
+
    if(temp_celsius<0) temp_celsius = 0;
    if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
    heatedBedController.targetTemperatureC=temp_celsius;
