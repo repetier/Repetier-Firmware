@@ -937,6 +937,9 @@ inline void disable_z() {
 #if (Z_ENABLE_PIN > -1)
  WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
+#if defined(Z2_ENABLE_PIN) && Z2_ENABLE_PIN>-1
+ WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+#endif
 }
 /** \brief Enable stepper motor for x direction. */
 inline void  enable_x() {
@@ -954,6 +957,9 @@ inline void  enable_y() {
 inline void  enable_z() {
 #if (Z_ENABLE_PIN > -1)
  WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
+#endif
+#if defined(Z2_ENABLE_PIN) && Z2_ENABLE_PIN>-1
+ WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 }
 
