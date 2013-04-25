@@ -185,6 +185,12 @@ public:
     {
         return flags & FLAG_CHECK_ENDSTOPS;
     }
+    inline bool isNominalMove() {
+        return flags & FLAG_NOMINAL;
+    }
+    inline bool setNominalMove() {
+        flags |= FLAG_NOMINAL;
+    }
     inline void checkEndstops() {
         if(isCheckEndstops()) {
            if(isXNegativeMove() && Printer::isXMinEndstopHit())
@@ -278,11 +284,28 @@ public:
     {
         return (dir & 128);
     }
+    inline bool isEOnlyMove()
+    {
+        return (dir & 240)==128;
+    }
     inline bool isNoMove() {
         return (dir & 240)==0;
     }
     inline bool isXYZMove() {
         return dir & 112;
+    }
+    inline bool isMoveOfAxis(byte axis) {
+        return (dir & (16<<axis));
+    }
+    inline bool setMoveOfAxis(byte axis) {
+        dir |= 16<<axis;
+    }
+    inline bool setPositiveDirectionForAxis(byte axis) {
+        dir |= 1<<axis;
+    }
+    inline static void resetPathPlanner() {
+        lines_count = 0;
+        lines_pos = lines_write_pos;
     }
     inline void updateAdvanceSteps(unsigned int v,byte max_loops,bool accelerate)
     {
@@ -448,7 +471,7 @@ public:
     static void waitForXFreeLines(byte b=1);
     static inline void forwardPlanner(byte p);
     static inline void backwardPlanner(byte p,byte last);
-    static void updateTrapezoids(byte p);
+    static void updateTrapezoids();
     static byte insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines);
     static void queue_move(byte check_endstops,byte pathOptimize);
     static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);

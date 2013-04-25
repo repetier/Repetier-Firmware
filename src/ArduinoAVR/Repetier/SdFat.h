@@ -19,14 +19,14 @@
  */
 /* Arduino SdFat Library
  * Copyright (C) 2012 by William Greiman
- *  
+ *
  * This file is part of the Arduino SdFat Library
- *  
- * This Library is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * This Library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This Library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -110,7 +110,7 @@ limited RAM.
 \section Hardware Hardware Configuration
 
 %SdFat was developed using an
-<A HREF = "http://www.adafruit.com/"> Adafruit Industries</A> 
+<A HREF = "http://www.adafruit.com/"> Adafruit Industries</A>
 <A HREF = "http://www.ladyada.net/make/waveshield/"> Wave Shield</A>.
 
 The hardware interface to the SD card should not use a resistor based level
@@ -124,7 +124,7 @@ uses a 74AHC125N.  Gravitech sells SD and MicroSD Card Adapters based on the
 74LCX245.
 
 If you are using a resistor based level shifter and are having problems try
-setting the SPI bus frequency to 4 MHz.  This can be done by using 
+setting the SPI bus frequency to 4 MHz.  This can be done by using
 card.init(SPI_HALF_SPEED) to initialize the SD card.
 
 \section comment Bugs and Comments
@@ -241,9 +241,9 @@ http://www.sdcard.org/developers/tech/sdcard/pls/Simplified_Physical_Layer_Spec.
 The ATmega328 datasheet:
 
 http://www.atmel.com/dyn/resources/prod_documents/doc8161.pdf
- 
 
- */  
+
+ */
 #ifndef SdFat_h
 #define SdFat_h
 /**
@@ -766,7 +766,7 @@ class Sd2Card {
   /**
    * Read a card's CID register. The CID contains card identification
    * information such as Manufacturer ID, Product name, Product serial
-   * number and Manufacturing date. 
+   * number and Manufacturing date.
    *
    * \param[out] cid pointer to area for returned data.
    *
@@ -1265,29 +1265,29 @@ uint32_t const FAT32MASK = 0X0FFFFFFF;
  * \brief FAT short directory entry
  *
  * Short means short 8.3 name, not the entry size.
- *  
- * Date Format. A FAT directory entry date stamp is a 16-bit field that is 
+ *
+ * Date Format. A FAT directory entry date stamp is a 16-bit field that is
  * basically a date relative to the MS-DOS epoch of 01/01/1980. Here is the
- * format (bit 0 is the LSB of the 16-bit word, bit 15 is the MSB of the 
+ * format (bit 0 is the LSB of the 16-bit word, bit 15 is the MSB of the
  * 16-bit word):
- *   
- * Bits 9-15: Count of years from 1980, valid value range 0-127 
+ *
+ * Bits 9-15: Count of years from 1980, valid value range 0-127
  * inclusive (1980-2107).
- *   
+ *
  * Bits 5-8: Month of year, 1 = January, valid value range 1-12 inclusive.
  *
  * Bits 0-4: Day of month, valid value range 1-31 inclusive.
  *
  * Time Format. A FAT directory entry time stamp is a 16-bit field that has
- * a granularity of 2 seconds. Here is the format (bit 0 is the LSB of the 
+ * a granularity of 2 seconds. Here is the format (bit 0 is the LSB of the
  * 16-bit word, bit 15 is the MSB of the 16-bit word).
- *   
+ *
  * Bits 11-15: Hours, valid value range 0-23 inclusive.
- * 
+ *
  * Bits 5-10: Minutes, valid value range 0-59 inclusive.
- *      
+ *
  * Bits 0-4: 2-second count, valid value range 0-29 inclusive (0 - 58 seconds).
- *   
+ *
  * The valid time range is from Midnight 00:00:00 to 23:59:58.
  */
 struct directoryEntry {
@@ -1826,7 +1826,7 @@ class SdBaseFile {
   bool isRoot() const {
     return type_ == FAT_FILE_TYPE_ROOT_FIXED || type_ == FAT_FILE_TYPE_ROOT32;
   }
-  void ls(Print* pr, uint8_t flags = 0, uint8_t indent = 0);
+  void ls(uint8_t flags = 0, uint8_t indent = 0);
   void ls(uint8_t flags = 0);
   bool mkdir(SdBaseFile* dir, const char* path, bool pFlag = true);
   // alias for backward compactability
@@ -1839,14 +1839,11 @@ class SdBaseFile {
   bool openNext(SdBaseFile* dirFile, uint8_t oflag);
   bool openRoot(SdVolume* vol);
   int peek();
-  bool printCreateDateTime(Print* pr);
+  bool printCreateDateTime();
   static void printFatDate(uint16_t fatDate);
-  static void printFatDate(Print* pr, uint16_t fatDate);
   static void printFatTime(uint16_t fatTime);
-  static void printFatTime(Print* pr, uint16_t fatTime);
-  bool printModifyDateTime(Print* pr);
+  bool printModifyDateTime();
   bool printName();
-  bool printName(Print* pr);
   int16_t read();
   int16_t read(void* buf, uint16_t nbyte);
   int8_t readDir(dir_t* dir);
@@ -1918,7 +1915,7 @@ class SdBaseFile {
   bool addCluster();
   bool addDirCluster();
   dir_t* cacheDirEntry(uint8_t action);
-  int8_t lsPrintNext(Print *pr, uint8_t flags, uint8_t indent);
+  int8_t lsPrintNext(uint8_t flags, uint8_t indent);
   static bool make83Name(const char* str, uint8_t* name, const char** ptr);
   bool mkdir(SdBaseFile* parent, const uint8_t dname[11]);
   bool open(SdBaseFile* dirFile, const uint8_t dname[11], uint8_t oflag);
@@ -1927,8 +1924,6 @@ class SdBaseFile {
 //------------------------------------------------------------------------------
 // to be deleted
   static void printDirName(const dir_t& dir,
-    uint8_t width, bool printSlash);
-  static void printDirName(Print* pr, const dir_t& dir,
     uint8_t width, bool printSlash);
 //------------------------------------------------------------------------------
 // Deprecated functions  - suppress cpplint warnings with NOLINT comment
@@ -2052,7 +2047,7 @@ class SdBaseFile {
  * \class SdFile
  * \brief SdBaseFile with Print.
  */
-class SdFile : public SdBaseFile, public Print {
+class SdFile : public SdBaseFile {
  public:
   SdFile() {}
   SdFile(const char* name, uint8_t oflag);
@@ -2067,8 +2062,8 @@ class SdFile : public SdBaseFile, public Print {
 #endif
   int16_t write(const char* str);
   int16_t write(const void* buf, uint16_t nbyte);
-  void write_P(PGM_P str);
-  void writeln_P(PGM_P str);
+  void write_P(FSTRINGPARAM(str));
+  void writeln_P(FSTRINGPARAM(str));
 };
 /** Store and print a string in flash memory.*/
 #define PgmPrint(x) SerialPrint_P(PSTR(x))
@@ -2077,10 +2072,10 @@ class SdFile : public SdBaseFile, public Print {
 
 namespace SdFatUtil {
   int FreeRam();
-  void print_P(Print* pr, PGM_P str);
-  void println_P(Print* pr, PGM_P str);
-  void SerialPrint_P(PGM_P str);
-  void SerialPrintln_P(PGM_P str);
+  //void print_P(FSTRINGPARAM(str));
+  //void println_P(FSTRINGPARAM(str));
+  void SerialPrint_P(FSTRINGPARAM(str));
+  void SerialPrintln_P(FSTRINGPARAM(str));
 }
 
 using namespace SdFatUtil;  // NOLINT
@@ -2116,22 +2111,21 @@ class SdFat {
   bool chdir(const char* path, bool set_cwd = false);
   void chvol();
   void errorHalt();
-  void errorHalt_P(PGM_P msg);
+  void errorHalt_P(FSTRINGPARAM(msg));
   void errorHalt(char const *msg);
   void errorPrint();
-  void errorPrint_P(PGM_P msg);
+  void errorPrint_P(FSTRINGPARAM(msg));
   void errorPrint(char const *msg);
   bool exists(const char* name);
   bool init(uint8_t sckRateID = SPI_FULL_SPEED,
     uint8_t chipSelectPin = SD_CHIP_SELECT_PIN);
   void initErrorHalt();
   void initErrorHalt(char const *msg);
-  void initErrorHalt_P(PGM_P msg);
+  void initErrorHalt_P(FSTRINGPARAM(msg));
   void initErrorPrint();
   void initErrorPrint(char const *msg);
-  void initErrorPrint_P(PGM_P msg);
+  void initErrorPrint_P(FSTRINGPARAM(msg));
   void ls(uint8_t flags = 0);
-  void ls(Print* pr, uint8_t flags = 0);
   bool mkdir(const char* path, bool pFlag = true);
   bool remove(const char* path);
   bool rename(const char *oldPath, const char *newPath);
@@ -2143,18 +2137,10 @@ class SdFat {
   SdBaseFile* vwd() {return &vwd_;}
   //----------------------------------------------------------------------------
   // static functions for stdOut
-  /**
-   *  Set stdOut Print stream for messages.
-   * \param[in] stream The new Print stream.
-   */
-  static void setStdOut(Print* stream) {stdOut_ = stream;}
-  /** \return Print stream for messages. */
-  static Print* stdOut() {return stdOut_;}
 
  private:
   Sd2Card card_;
   SdVolume vol_;
   SdBaseFile vwd_;
-  static Print* stdOut_;
 };
 #endif  // SdFat_h

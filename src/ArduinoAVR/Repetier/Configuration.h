@@ -757,6 +757,8 @@ on this endstop.
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 3
 
+/** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. */
+#define HOMING_ORDER HOME_ORDER_YXZ
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
 #define ENABLE_BACKLASH_COMPENSATION true

@@ -1536,20 +1536,18 @@ void UIDisplay::okAction()
                 sd.file.close();
                 if (sd.file.open(filename, O_READ))
                 {
-                    OUT_P("File opened:");
-                    out.print(filename);
-                    OUT_P(" Size:");
-                    out.println(sd.file.fileSize());
+                    Com::printF(Com::tFileOpened,filename);
+                    Com::printFLN(Com::tSpaceSizeColon,sd.file.fileSize());
                     sd.sdpos = 0;
                     sd.filesize = sd.file.fileSize();
-                    OUT_P_LN("File selected");
+                    Com::printFLN(Com::tFileSelected);
                     sd.sdmode = true; // Start print immediately
                     menuLevel = 0;
                     BEEP_LONG;
                 }
                 else
                 {
-                    OUT_P_LN("file.open failed");
+                    Com::printFLN(Com::tFileOpenFailed);
                 }
             }
             break;
@@ -1560,12 +1558,12 @@ void UIDisplay::okAction()
                 sd.file.close();
                 if(sd.fat.remove(filename))
                 {
-                    OUT_P_LN("File deleted");
+                    Com::printFLN(Com::tFileDeleted);
                     BEEP_LONG
                 }
                 else
                 {
-                    OUT_P_LN("Deletion failed");
+                    Com::printFLN(Com::tDeletionFailed);
                 }
             }
             break;
@@ -2340,10 +2338,10 @@ void UIDisplay::executeAction(int action)
 #ifdef SOFTWARE_LEVELING
             long factors[4];
             calculate_plane(factors, printer.levelingP1, printer.levelingP2, printer.levelingP3);
-            out.println_P(PSTR("Leveling calc:"));
-            out.println_float_P(PSTR("Tower 1:"), calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
-            out.println_float_P(PSTR("Tower 2:"), calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
-            out.println_float_P(PSTR("Tower 3:"), calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
+            Com::printFLN(Com::tLevelingCalc);
+            Com::printFLN(Com::tTower1, calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
+            Com::printFLN(Com::tTower2, calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
+            Com::printFLN(Com::tTower3), calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:

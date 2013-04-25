@@ -83,7 +83,6 @@ void SDCard::initsd()
         Com::printFLN(Com::tSDInitFail);
         return;
     }
-    fat.setStdOut(&out);
     sdactive = true;
 #endif
 }
@@ -102,12 +101,12 @@ void SDCard::write_command(GCode *code)
         p+=2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
-        if(code->params & 2)
+        if(code->hasM())
         {
             *(int*)&buf[p] = code->M;
             p+=2;
         }
-        if(code->params & 4)
+        if(code->hasG())
         {
             *(int*)&buf[p]= code->G;
             p+=2;
@@ -115,60 +114,60 @@ void SDCard::write_command(GCode *code)
     }
     else
     {
-        if(code->params & 2)
+        if(code->hasM())
         {
             buf[p++] = (byte)code->M;
         }
-        if(code->params & 4)
+        if(code->hasG())
         {
             buf[p++] = (byte)code->G;
         }
     }
-    if(code->params & 8)
+    if(code->hasX())
     {
         *(float*)&buf[p] = code->X;
         p+=4;
     }
-    if(code->params & 16)
+    if(code->hasY())
     {
         *(float*)&buf[p] = code->Y;
         p+=4;
     }
-    if(code->params & 32)
+    if(code->hasZ())
     {
         *(float*)&buf[p] = code->Z;
         p+=4;
     }
-    if(code->params & 64)
+    if(code->hasE())
     {
         *(float*)&buf[p] = code->E;
         p+=4;
     }
-    if(code->params & 256)
+    if(code->hasF())
     {
         *(float*)&buf[p] = code->F;
         p+=4;
     }
-    if(code->params & 512)
+    if(code->hasT())
     {
         buf[p++] = code->T;
     }
-    if(code->params & 1024)
+    if(code->hasS())
     {
         *(long int*)&buf[p] = code->S;
         p+=4;
     }
-    if(code->params & 2048)
+    if(code->hasP())
     {
         *(long int*)&buf[p] = code->P;
         p+=4;
     }
-    if(code->params2 & 1)
+    if(code->hasI())
     {
         *(float*)&buf[p] = code->I;
         p+=4;
     }
-    if(code->params2 & 2)
+    if(code->hasJ())
     {
         *(float*)&buf[p] = code->J;
         p+=4;
@@ -311,7 +310,7 @@ void SDCard::selectFile(char *filename)
     if (file.open(fat.vwd(),filename, O_READ))
     {
         Com::printF(Com::tFileOpened,filename);
-        Com::printFLN(Com::tSpaceSizeColon,(long)file.fileSize());
+        Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
         sdpos = 0;
         filesize = file.fileSize();
         Com::printFLN(Com::tFileSelected);
@@ -326,8 +325,8 @@ void SDCard::printStatus()
 {
     if(sdactive)
     {
-        Com::printF(Com::tSDPrintingByte,(long)sdpos);
-        Com::printFLN(Com::tSlash,(long)filesize);
+        Com::printF(Com::tSDPrintingByte,sdpos);
+        Com::printFLN(Com::tSlash,filesize);
     }
     else
     {

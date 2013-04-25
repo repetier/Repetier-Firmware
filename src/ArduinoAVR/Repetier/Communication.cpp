@@ -31,6 +31,7 @@ FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWAR
 #endif
 #endif
 FSTRINGVALUE(Com::tOk,"ok")
+FSTRINGVALUE(Com::tNewline,"\r\n")
 FSTRINGVALUE(Com::tNAN,"NAN")
 FSTRINGVALUE(Com::tINF,"INF")
 FSTRINGVALUE(Com::tError,"Error:")
@@ -127,7 +128,61 @@ FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
 FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
 FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
+FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
+FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
+FSTRINGVALUE(Com::tTower1,"Tower 1:")
+FSTRINGVALUE(Com::tTower2,"Tower 2:")
+FSTRINGVALUE(Com::tTower3,"Tower 3:")
 #endif // DRIVE_SYSTEM
+#ifdef DEBUG_GENERIC
+FSTRINGVALUE(Com::tGenTemp,"GenTemp:")
+#endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
+FSTRINGVALUE(Com::tTargetExtr,"TargetExtr")
+FSTRINGVALUE(Com::tTargetBedColon,"TargetBed:")
+FSTRINGVALUE(Com::tPIDAutotuneStart,"PID Autotune start")
+FSTRINGVALUE(Com::tAPIDBias," bias: ")
+FSTRINGVALUE(Com::tAPIDD," d: ")
+FSTRINGVALUE(Com::tAPIDMin," min: ")
+FSTRINGVALUE(Com::tAPIDMax," max: ")
+FSTRINGVALUE(Com::tAPIDKu," Ku: ")
+FSTRINGVALUE(Com::tAPIDTu," Tu: ")
+FSTRINGVALUE(Com::tAPIDClassic," Classic PID")
+FSTRINGVALUE(Com::tAPIDKp," Kp: ")
+FSTRINGVALUE(Com::tAPIDKi," Ki: ")
+FSTRINGVALUE(Com::tAPIDKd," Kd: ")
+FSTRINGVALUE(Com::tAPIDFailedHigh,"PID Autotune failed! Temperature to high")
+FSTRINGVALUE(Com::tAPIDFailedTimeout,"PID Autotune failed! timeout")
+FSTRINGVALUE(Com::tAPIDFinished,"PID Autotune finished ! Place the Kp, Ki and Kd constants in the Configuration.h or EEPROM")
+FSTRINGVALUE(Com::tMTEMPColon,"MTEMP:")
+FSTRINGVALUE(Com::tHeatedBed,"heated bed")
+FSTRINGVALUE(Com::tExtruderSpace,"extruder ")
+FSTRINGVALUE(Com::tTempSensorDefect,": temp sensor defect")
+FSTRINGVALUE(Com::tTempSensorWorking,": working")
+FSTRINGVALUE(Com::tDryModeUntilRestart,"Printer set into dry run mode until restart!")
+#ifdef DEBUG_QUEUE_MOVE
+FSTRINGVALUE(Com::tDBGId,"ID:")
+FSTRINGVALUE(Com::tDBGVStartEnd,"vStart/End:")
+FSTRINGVALUE(Com::tDBAccelSteps,"accel/decel steps:")
+FSTRINGVALUE(Com::tDBGStartEndSpeed,"st./end speed:")
+FSTRINGVALUE(Com::tDBGFlags,"Flags:")
+FSTRINGVALUE(Com::tDBGJoinFlags,"joinFlags:")
+FSTRINGVALUE(Com::tDBGDelta,"Delta")
+FSTRINGVALUE(Com::tDBGDir,"Dir:")
+FSTRINGVALUE(Com::tDBGFullSpeed,"fullSpeed:")
+FSTRINGVALUE(Com::tDBGVMax,"vMax:")
+FSTRINGVALUE(Com::tDBGAcceleration,"Acceleration:")
+FSTRINGVALUE(Com::tDBGAccelerationPrim,"Acceleration Prim:")
+FSTRINGVALUE(Com::tDBGRemainingSteps,"Remaining steps:")
+FSTRINGVALUE(Com::tDBGAdvanceFull,"advanceFull:")
+FSTRINGVALUE(Com::tDBGAdvanceRate,"advanceRate:")
+FSTRINGVALUE(Com::tDBGLimitInterval,"LimitInterval:")
+FSTRINGVALUE(Com::tDBGMoveDistance,"Move distance on the XYZ space:")
+FSTRINGVALUE(Com::tDBGCommandedFeedrate,"Commanded feedrate:")
+FSTRINGVALUE(Com::tDBGConstFullSpeedMoveTime,"Constant full speed move time:")
+#endif // DEBUG_QUEUE_MOVEFSTRINGVALUE(Com::,"")
+#ifdef DEBUG_DELTA_OVERFLOW
+FSTRINGVALUE(Com::tDBGDeltaOverflow,"Delta overflow:")
+#endif // DEBUG_DELTA_OVERFLOW
 //FSTRINGVALUE(Com::,"")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
@@ -228,6 +283,7 @@ FSTRINGVALUE(Com::tFileDeleted,"File deleted")
 FSTRINGVALUE(Com::tDeletionFailed,"Deletion failed")
 FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
 FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
+FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
@@ -259,7 +315,7 @@ void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);
     println();
 }
-void Com::printFLN(FSTRINGPARAM(text),char *msg) {
+void Com::printFLN(FSTRINGPARAM(text),const char *msg) {
     printF(text);
     print(msg);
     println();
@@ -270,7 +326,7 @@ void Com::printF(FSTRINGPARAM(ptr)) {
   while ((c=HAL::readFlashByte(ptr++)) != 0)
      HAL::serialWriteByte(c);
 }
-void Com::printF(FSTRINGPARAM(text),char *msg) {
+void Com::printF(FSTRINGPARAM(text),const char *msg) {
     printF(text);
     print(msg);
 }
@@ -283,6 +339,10 @@ void Com::printF(FSTRINGPARAM(text),long value) {
     printF(text);
     print(value);
 }
+void Com::printF(FSTRINGPARAM(text),unsigned long value) {
+    printF(text);
+    printNumber(value);
+}
 void Com::printFLN(FSTRINGPARAM(text),int value) {
     printF(text);
     print(value);
@@ -291,6 +351,11 @@ void Com::printFLN(FSTRINGPARAM(text),int value) {
 void Com::printFLN(FSTRINGPARAM(text),long value) {
     printF(text);
     print(value);
+    println();
+}
+void Com::printFLN(FSTRINGPARAM(text),unsigned long value) {
+    printF(text);
+    printNumber(value);
     println();
 }
 void Com::printFLN(FSTRINGPARAM(text),float value,byte digits) {

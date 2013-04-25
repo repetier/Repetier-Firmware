@@ -171,8 +171,8 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
         table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
         table[i][1] = (int)t;
 #ifdef DEBUG_GENERIC
-        OUT_P_I("GenTemp: ",table[i][0]);
-        OUT_P_I_LN(",",table[i][1]);
+        Com::printF(Com::tGenTemp,table[i][0]);
+        Com::printFLN(Com::tComma,table[i][1]);
 #endif
     }
 }
@@ -374,8 +374,8 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
     if(temp_celsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temp_celsius);
     if(temp_celsius>=50) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
-    OUT_P_FX("TargetExtr",extr,0);
-    OUT_P_FX_LN(":",temp_celsius,0);
+    Com::printF(Com::tTargetExtr,extr,0);
+    Com::printFLN(Com::tColon,temp_celsius,0);
     bool alloff = true;
     for(byte i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
@@ -394,7 +394,7 @@ void Extruder::setHeatedBedTemperature(float temp_celsius)
     if(temp_celsius<0) temp_celsius = 0;
     if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temp_celsius);
-    OUT_P_FX_LN("TargetBed:",heatedBedController.targetTemperatureC,0);
+    Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
 #endif
 }
 
@@ -403,14 +403,11 @@ float Extruder::getHeatedBedTemperature()
 #if HAVE_HEATED_BED
     TemperatureController *c = tempController[NUM_TEMPERATURE_LOOPS-1];
     return c->currentTemperatureC;
-    //return conv_raw_temp(c->sensorType,c->currentTemperature);
 #else
     return -1;
 #endif
 }
 
-
-/** \brief Disable stepper motor of current extruder. */
 void Extruder::disableCurrentExtruderMotor()
 {
     if(current_extruder->enablePin > -1)
@@ -644,10 +641,6 @@ void TemperatureController::updateCurrentTemperature()
     }
 }
 
-// ------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------- conv_temp_raw -----------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------
-
 void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
@@ -764,9 +757,6 @@ void TemperatureController::setTargetTemperature(float target)
     }
 }
 
-// ------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------- disableAllHeater --------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------
 byte autotuneIndex = 255;
 void Extruder::disableAllHeater()
 {
@@ -799,7 +789,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     float Kp, Ki, Kd;
     float maxTemp=20, minTemp=20;
 
-    OUT_P_LN("PID Autotune start");
+    Com::printInfoFLN(Com::tPIDAutotuneStart);
 
     Extruder::disableAllHeater(); // switch off all heaters.
     autotuneIndex = controllerId;
@@ -837,24 +827,24 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
                     if(bias > pidMax/2) d = pidMax - 1 - bias;
                     else d = bias;
 
-                    OUT_P_I(" bias: ",bias);
-                    OUT_P_I(" d: ",d);
-                    OUT_P_F(" min: ",minTemp);
-                    OUT_P_F_LN(" max: ",maxTemp);
+                    Com::printF(Com::tAPIDBias,bias);
+                    Com::printF(Com::tAPIDD,d);
+                    Com::printF(Com::tAPIDMin,minTemp);
+                    Com::printFLN(Com::tAPIDMax,maxTemp);
                     if(cycles > 2)
                     {
                         // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
                         Ku = (4.0*d)/(3.14159*(maxTemp-minTemp));
                         Tu = ((float)(t_low + t_high)/1000.0);
-                        OUT_P_F(" Ku: ",Ku);
-                        OUT_P_F_LN(" Tu: ",Tu);
+                        Com::printF(Com::tAPIDKu,Ku);
+                        Com::printFLN(Com::tAPIDTu,Tu);
                         Kp = 0.6*Ku;
                         Ki = 2*Kp/Tu;
                         Kd = Kp*Tu*0.125;
-                        OUT_P_LN(" Classic PID");
-                        OUT_P_F_LN(" Kp: ",Kp);
-                        OUT_P_F_LN(" Ki: ",Ki);
-                        OUT_P_F_LN(" Kd: ",Kd);
+                        Com::printFLN(Com::tAPIDClassic);
+                        Com::printFLN(Com::tAPIDKp,Kp);
+                        Com::printFLN(Com::tAPIDKi,Ki);
+                        Com::printFLN(Com::tAPIDKd,Kd);
                         /*
                         Kp = 0.33*Ku;
                         Ki = Kp/Tu;
@@ -880,7 +870,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
         }
         if(currentTemp > (temp + 20))
         {
-            OUT_P_LN("PID Autotune failed! Temperature to high");
+            Com::printErrorFLN(Com::tAPIDFailedHigh);
             Extruder::disableAllHeater();
             return;
         }
@@ -891,13 +881,13 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
         }
         if(((time - t1) + (time - t2)) > (10L*60L*1000L*2L))   // 20 Minutes
         {
-            OUT_P_LN("PID Autotune failed! timeout");
+            Com::printErrorFLN(Com::tAPIDFailedTimeout);
             Extruder::disableAllHeater();
             return;
         }
         if(cycles > 5)
         {
-            OUT_P_LN("PID Autotune finished ! Place the Kp, Ki and Kd constants in the configuration.h");
+            Com::printInfoFLN(Com::tAPIDFinished);
             Extruder::disableAllHeater();
             return;
         }
@@ -914,28 +904,28 @@ disabled, the function is not called.
 */
 void write_monitor()
 {
-    out.print_long_P(PSTR("MTEMP:"),HAL::timeInMilliseconds());
+    Com::printF(Com::tMTEMPColon,(long)HAL::timeInMilliseconds());
     TemperatureController *act = tempController[manage_monitor];
-    OUT_P_F(" ",act->currentTemperatureC);
-    OUT_P_FX(" ",act->targetTemperatureC,0);
-    OUT_P_I_LN(" ",pwm_pos[act->pwmIndex]);
+    Com::printF(Com::tSpace,act->currentTemperatureC);
+    Com::printF(Com::tSpace,act->targetTemperatureC,0);
+    Com::printFLN(Com::tSpace,pwm_pos[act->pwmIndex]);
 }
 
 bool reportTempsensorError()
 {
-    if(!(printer.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)) return false;
+    if(!Printer::isAnyTempsensorDefect()) return false;
     for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
     {
         int temp = tempController[i]->currentTemperatureC;
-        if(i==NUM_EXTRUDER) OUT_P("heated bed");
-        else OUT_P_I("extruder ",i);
+        if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
+        else Com::printF(Com::tExtruderSpace,i);
         if(temp<MIN_DEFECT_TEMPERATURE || temp>MAX_DEFECT_TEMPERATURE)
         {
-            OUT_P_LN(": temp sensor defect");
+            Com::printFLN(Com::tTempSensorDefect);
         }
-        else OUT_P_LN(": working");
+        else Com::printFLN(Com::tTempSensorWorking);
     }
-    OUT_P_LN("Printer set into dry run mode until restart!");
+    Com::printErrorFLN(Com::tDryModeUntilRestart);
     return true;
 }
 

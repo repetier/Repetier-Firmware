@@ -286,6 +286,9 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
     }
+    static inline bool isAnyTempsensorDefect() {
+        return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
+    }
     inline void executeXYGantrySteps()
     {
 #if defined(XY_GANTRY)

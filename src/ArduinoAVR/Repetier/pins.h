@@ -691,6 +691,9 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
 #define SDPOWER          -1
 #define SDSS          31
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
 #define HEATER_2_PIN   -1
 #define TEMP_2_PIN     -1
 
@@ -759,6 +762,11 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_2_PIN         -1
 #define SDPOWER            -1
 #define SDSS               31
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
@@ -1251,12 +1259,12 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       9    // EXTRUDER 1
-#define HEATER_1_PIN       8    // Heated bed
-#define HEATER_2_PIN       10   // EXTRUDER 2
+#define HEATER_2_PIN       8    // Heated bed
+#define HEATER_1_PIN       10   // EXTRUDER 2
 
 #define TEMP_0_PIN         13   // Thermistor 0 ANALOG NUMBERING
-#define TEMP_1_PIN         15   // Thermistor 1 ANALOG NUMBERING
-#define TEMP_2_PIN         14   // Thermistor 2 for heated bed ANALOG NUMBERING
+#define TEMP_2_PIN         15   // Thermistor 1 ANALOG NUMBERING
+#define TEMP_1_PIN         14   // Thermistor 2 for heated bed ANALOG NUMBERING
 #define TEMP_3_PIN         8    // Thermocouple 0
 #define TEMP_4_PIN         4    // Thermocouple 1
 

@@ -27,42 +27,13 @@
 #endif
 //#include <SdFat.h>
 //------------------------------------------------------------------------------
-#if USE_SERIAL_FOR_STD_OUT || !defined(UDR0)
-Print* SdFat::stdOut_ = &Serial;
-#else  // USE_SERIAL_FOR_STD_OUT
-class DefaultSerial : public Print {
- public:
-#ifdef COMPAT_PRE1
-  void write(uint8_t b);
-#else
-  size_t write(uint8_t b);
-#endif
-};
-#ifdef COMPAT_PRE1
-  void
-#else
-  size_t
-#endif
-DefaultSerial::write(uint8_t b) {
-  while (((1 << UDRIE0) & UCSR0B) || !(UCSR0A & (1 << UDRE0))) {}
-  UDR0 = b;
-#ifndef COMPAT_PRE1
-  return 1;
-#endif
+//------------------------------------------------------------------------------
+static void pstrPrint(FSTRINGPARAM(str)) {
+    Com::printF(str);
 }
 //------------------------------------------------------------------------------
-static DefaultSerial defaultStdOut;
-
-Print* SdFat::stdOut_ = &defaultStdOut;
-#endif  // USE_SERIAL_FOR_STD_OUT
-//------------------------------------------------------------------------------
-static void pstrPrint(PGM_P str) {
-  for (uint8_t c; (c = pgm_read_byte(str)); str++) SdFat::stdOut()->write(c);
-}
-//------------------------------------------------------------------------------
-static void pstrPrintln(PGM_P str) {
-  pstrPrint(str);
-  SdFat::stdOut()->println();
+static void pstrPrintln(FSTRINGPARAM(str)) {
+  Com::printFLN(str);
 }
 //------------------------------------------------------------------------------
 /** Change a volume's working directory to root
@@ -147,7 +118,7 @@ void SdFat::errorHalt(char const* msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::errorHalt_P(PGM_P msg) {
+void SdFat::errorHalt_P(FSTRINGPARAM(msg)) {
   errorPrint_P(msg);
   while (1);
 }
@@ -155,8 +126,7 @@ void SdFat::errorHalt_P(PGM_P msg) {
 /** %Print any SD error code. */
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
-  pstrPrint(PSTR("SD errorCode: 0X"));
-  stdOut_->println(card_.errorCode(), HEX);
+  Com::printFLN(Com::tSDErrorCode,card_.errorCode());
 }
 //------------------------------------------------------------------------------
 /** %Print msg, any SD error code.
@@ -164,8 +134,7 @@ void SdFat::errorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::errorPrint(char const* msg) {
-  pstrPrint(PSTR("error: "));
-  stdOut_->println(msg);
+  Com::printFLN(Com::tError,msg);
   errorPrint();
 }
 //------------------------------------------------------------------------------
@@ -173,9 +142,9 @@ void SdFat::errorPrint(char const* msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::errorPrint_P(PGM_P msg) {
-  pstrPrint(PSTR("error: "));
-  pstrPrintln(msg);
+void SdFat::errorPrint_P(FSTRINGPARAM(msg)) {
+  Com::printF(Com::tError);
+  Com::printFLN(msg);
   errorPrint();
 }
 //------------------------------------------------------------------------------
@@ -216,7 +185,8 @@ void SdFat::initErrorHalt() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorHalt(char const *msg) {
-  stdOut_->println(msg);
+  Com::print(msg);
+  Com::println();
   initErrorHalt();
 }
 //------------------------------------------------------------------------------
@@ -224,7 +194,7 @@ void SdFat::initErrorHalt(char const *msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::initErrorHalt_P(PGM_P msg) {
+void SdFat::initErrorHalt_P(FSTRINGPARAM(msg)) {
   pstrPrintln(msg);
   initErrorHalt();
 }
@@ -251,7 +221,8 @@ void SdFat::initErrorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorPrint(char const *msg) {
-  stdOut_->println(msg);
+  Com::print(msg);
+  Com::println();
   initErrorPrint();
 }
 //------------------------------------------------------------------------------
@@ -259,39 +230,9 @@ void SdFat::initErrorPrint(char const *msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::initErrorPrint_P(PGM_P msg) {
+void SdFat::initErrorPrint_P(FSTRINGPARAM(msg)) {
   pstrPrintln(msg);
   initErrorHalt();
-}
-//------------------------------------------------------------------------------
-/** List the directory contents of the volume working directory to stdOut.
- *
- * \param[in] flags The inclusive OR of
- *
- * LS_DATE - %Print file modification date
- *
- * LS_SIZE - %Print file size.
- *
- * LS_R - Recursive list of subdirectories.
- */
-void SdFat::ls(uint8_t flags) {
-  vwd_.ls(stdOut_, flags);
-}
-//------------------------------------------------------------------------------
-/** List the directory contents of the volume working directory.
- *
- * \param[in] pr Print stream for list.
- *
- * \param[in] flags The inclusive OR of
- *
- * LS_DATE - %Print file modification date
- *
- * LS_SIZE - %Print file size.
- *
- * LS_R - Recursive list of subdirectories.
- */
-void SdFat::ls(Print* pr, uint8_t flags) {
-  vwd_.ls(pr, flags);
 }
 //------------------------------------------------------------------------------
 /** Make a subdirectory in the volume working directory.
@@ -703,7 +644,7 @@ void SdBaseFile::getpos(fpos_t* pos) {
  * LS_R - Recursive list of subdirectories.
  */
 void SdBaseFile::ls(uint8_t flags) {
-  ls(SdFat::stdOut(), flags, 0);
+  ls(flags, 0);
 }
 //------------------------------------------------------------------------------
 /** List directory contents.
@@ -721,14 +662,14 @@ void SdBaseFile::ls(uint8_t flags) {
  * \param[in] indent Amount of space before file name. Used for recursive
  * list to indicate subdirectory level.
  */
-void SdBaseFile::ls(Print* pr, uint8_t flags, uint8_t indent) {
+void SdBaseFile::ls(uint8_t flags, uint8_t indent) {
   rewind();
   int8_t status;
-  while ((status = lsPrintNext(pr, flags, indent))) {
+  while ((status = lsPrintNext(flags, indent))) {
     if (status > 1 && (flags & LS_R)) {
       uint16_t index = curPosition()/32 - 1;
       SdBaseFile s;
-      if (s.open(this, index, O_READ)) s.ls(pr, flags, indent + 2);
+      if (s.open(this, index, O_READ)) s.ls(flags, indent + 2);
       seekSet(32 * (index + 1));
     }
   }
@@ -736,7 +677,7 @@ void SdBaseFile::ls(Print* pr, uint8_t flags, uint8_t indent) {
 //------------------------------------------------------------------------------
 // saves 32 bytes on stack for ls recursion
 // return 0 - EOF, 1 - normal file, or 2 - directory
-int8_t SdBaseFile::lsPrintNext(Print *pr, uint8_t flags, uint8_t indent) {
+int8_t SdBaseFile::lsPrintNext(uint8_t flags, uint8_t indent) {
   dir_t dir;
   uint8_t w = 0;
 
@@ -749,38 +690,38 @@ int8_t SdBaseFile::lsPrintNext(Print *pr, uint8_t flags, uint8_t indent) {
       && DIR_IS_FILE_OR_SUBDIR(&dir)) break;
   }
   // indent for dir level
-  for (uint8_t i = 0; i < indent; i++) pr->write(' ');
+  for (uint8_t i = 0; i < indent; i++) Com::print(' ');
 
   // print name
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
     if (i == 8) {
-      pr->write('.');
+      Com::print('.');
       w++;
     }
-    pr->write(dir.name[i]);
+    Com::print(dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir)) {
-    pr->write('/');
+    Com::print('/');
     w++;
   }
   if (flags & (LS_DATE | LS_SIZE)) {
-    while (w++ < 14) pr->write(' ');
+    while (w++ < 14) Com::print(' ');
   }
   // print modify date/time if requested
   if (flags & LS_DATE) {
-    pr->write(' ');
-    printFatDate(pr, dir.lastWriteDate);
-    pr->write(' ');
-    printFatTime(pr, dir.lastWriteTime);
+    Com::print(' ');
+    printFatDate(dir.lastWriteDate);
+    Com::print(' ');
+    printFatTime(dir.lastWriteTime);
   }
   // print size if requested
   if (!DIR_IS_SUBDIR(&dir) && (flags & LS_SIZE)) {
-    pr->write(' ');
-    pr->print(dir.fileSize);
+    Com::print(' ');
+    Com::print(dir.fileSize);
   }
-  pr->println();
+  Com::println();
   return DIR_IS_FILE(&dir) ? 1 : 2;
 }
 //------------------------------------------------------------------------------
@@ -806,9 +747,11 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
 #define FLASH_ILLEGAL_CHARS
 #ifdef FLASH_ILLEGAL_CHARS
       // store chars in flash
-      PGM_P p = PSTR("|<>^+=?/[];,*\"\\");
+      FSTRINGVALUE(p2,"|<>^+=?/[];,*\"\\");
+      FSTRINGPARAM(p);
+      p = p2;
       uint8_t b;
-      while ((b = pgm_read_byte(p++))) if (b == c) {
+      while ((b = HAL::readFlashByte(p++))) if (b == c) {
         DBG_FAIL_MACRO;
         goto fail;
       }
@@ -1469,49 +1412,38 @@ int SdBaseFile::peek() {
   return c;
 }
 //------------------------------------------------------------------------------
-/** %Print the name field of a directory entry in 8.3 format to stdOut.
- *
- * \param[in] dir The directory structure containing the name.
- * \param[in] width Blank fill name if length is less than \a width.
- * \param[in] printSlash Print '/' after directory names if true.
- */
-void SdBaseFile::printDirName(const dir_t& dir,
-  uint8_t width, bool printSlash) {
-  printDirName(SdFat::stdOut(), dir, width, printSlash);
-}
-//------------------------------------------------------------------------------
 /** %Print the name field of a directory entry in 8.3 format.
  * \param[in] pr Print stream for output.
  * \param[in] dir The directory structure containing the name.
  * \param[in] width Blank fill name if length is less than \a width.
  * \param[in] printSlash Print '/' after directory names if true.
  */
-void SdBaseFile::printDirName(Print* pr, const dir_t& dir,
+void SdBaseFile::printDirName(const dir_t& dir,
   uint8_t width, bool printSlash) {
   uint8_t w = 0;
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
     if (i == 8) {
-      pr->write('.');
+      Com::print('.');
       w++;
     }
-    pr->write(dir.name[i]);
+    Com::print(dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir) && printSlash) {
-    pr->write('/');
+    Com::print('/');
     w++;
   }
   while (w < width) {
-    pr->write(' ');
+    Com::print(' ');
     w++;
   }
 }
 //------------------------------------------------------------------------------
 // print uint8_t with width 2
-static void print2u(Print* pr, uint8_t v) {
-  if (v < 10) pr->write('0');
-  pr->print(v, DEC);
+static void print2u(uint8_t v) {
+  if (v < 10) Com::print('0');
+  Com::print(v);
 }
 //------------------------------------------------------------------------------
 /** Print a file's creation date and time
@@ -1521,30 +1453,21 @@ static void print2u(Print* pr, uint8_t v) {
  * \return The value one, true, is returned for success and
  * the value zero, false, is returned for failure.
  */
-bool SdBaseFile::printCreateDateTime(Print* pr) {
+bool SdBaseFile::printCreateDateTime() {
   dir_t dir;
   if (!dirEntry(&dir)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  printFatDate(pr, dir.creationDate);
-  pr->write(' ');
-  printFatTime(pr, dir.creationTime);
+  printFatDate(dir.creationDate);
+  Com::print(' ');
+  printFatTime(dir.creationTime);
   return true;
 
  fail:
   return false;
 }
-//------------------------------------------------------------------------------
-/** %Print a directory date field to stdOut.
- *
- *  Format is yyyy-mm-dd.
- *
- * \param[in] fatDate The date field from a directory entry.
- */
-void SdBaseFile::printFatDate(uint16_t fatDate) {
-  printFatDate(SdFat::stdOut(), fatDate);
-}
+
 //------------------------------------------------------------------------------
 /** %Print a directory date field.
  *
@@ -1553,23 +1476,14 @@ void SdBaseFile::printFatDate(uint16_t fatDate) {
  * \param[in] pr Print stream for output.
  * \param[in] fatDate The date field from a directory entry.
  */
-void SdBaseFile::printFatDate(Print* pr, uint16_t fatDate) {
-  pr->print(FAT_YEAR(fatDate));
-  pr->write('-');
-  print2u(pr, FAT_MONTH(fatDate));
-  pr->write('-');
-  print2u(pr, FAT_DAY(fatDate));
+void SdBaseFile::printFatDate(uint16_t fatDate) {
+  Com::print((int)FAT_YEAR(fatDate));
+  Com::print('-');
+  print2u(FAT_MONTH(fatDate));
+  Com::print('-');
+  print2u(FAT_DAY(fatDate));
 }
-//------------------------------------------------------------------------------
-/** %Print a directory time field to stdOut.
- *
- * Format is hh:mm:ss.
- *
- * \param[in] fatTime The time field from a directory entry.
- */
-void SdBaseFile::printFatTime(uint16_t fatTime) {
-  printFatTime(SdFat::stdOut(), fatTime);
-}
+
 //------------------------------------------------------------------------------
 /** %Print a directory time field.
  *
@@ -1578,12 +1492,12 @@ void SdBaseFile::printFatTime(uint16_t fatTime) {
  * \param[in] pr Print stream for output.
  * \param[in] fatTime The time field from a directory entry.
  */
-void SdBaseFile::printFatTime(Print* pr, uint16_t fatTime) {
-  print2u(pr, FAT_HOUR(fatTime));
-  pr->write(':');
-  print2u(pr, FAT_MINUTE(fatTime));
-  pr->write(':');
-  print2u(pr, FAT_SECOND(fatTime));
+void SdBaseFile::printFatTime( uint16_t fatTime) {
+  print2u(FAT_HOUR(fatTime));
+  Com::print(':');
+  print2u(FAT_MINUTE(fatTime));
+  Com::print(':');
+  print2u(FAT_SECOND(fatTime));
 }
 //------------------------------------------------------------------------------
 /** Print a file's modify date and time
@@ -1593,15 +1507,15 @@ void SdBaseFile::printFatTime(Print* pr, uint16_t fatTime) {
  * \return The value one, true, is returned for success and
  * the value zero, false, is returned for failure.
  */
-bool SdBaseFile::printModifyDateTime(Print* pr) {
+bool SdBaseFile::printModifyDateTime() {
   dir_t dir;
   if (!dirEntry(&dir)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  printFatDate(pr, dir.lastWriteDate);
-  pr->write(' ');
-  printFatTime(pr, dir.lastWriteTime);
+  printFatDate(dir.lastWriteDate);
+  Com::print(' ');
+  printFatTime(dir.lastWriteTime);
   return true;
 
  fail:
@@ -1615,29 +1529,16 @@ bool SdBaseFile::printModifyDateTime(Print* pr) {
  * \return The value one, true, is returned for success and
  * the value zero, false, is returned for failure.
  */
-bool SdBaseFile::printName(Print* pr) {
+bool SdBaseFile::printName() {
   char name[13];
   if (!getFilename(name)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-#ifdef COMPAT_PRE1
-  pr->print(name);
+  Com::print(name);
   return true;
-#else
-  return pr->print(name) > 0;
-#endif
  fail:
   return false;
-}
-//------------------------------------------------------------------------------
-/** Print a file's name to stdOut
- *
- * \return The value one, true, is returned for success and
- * the value zero, false, is returned for failure.
- */
-bool SdBaseFile::printName() {
-  return printName(SdFat::stdOut());
 }
 //------------------------------------------------------------------------------
 /** Read the next byte from a file.
@@ -3688,17 +3589,17 @@ int16_t SdFile::write(const char* str) {
  * \param[in] str Pointer to the PROGMEM string.
  * Use getWriteError to check for errors.
  */
-void SdFile::write_P(PGM_P str) {
-  for (uint8_t c; (c = pgm_read_byte(str)); str++) write(c);
+void SdFile::write_P(FSTRINGPARAM(str)) {
+  for (uint8_t c; (c = HAL::readFlashByte(str)); str++) write(c);
 }
 //------------------------------------------------------------------------------
 /** Write a PROGMEM string followed by CR/LF to a file.
  * \param[in] str Pointer to the PROGMEM string.
  * Use getWriteError to check for errors.
  */
-void SdFile::writeln_P(PGM_P str) {
+void SdFile::writeln_P(FSTRINGPARAM(str)) {
   write_P(str);
-  write_P(PSTR("\r\n"));
+  write_P(Com::tNewline);
 }
 
 // ================ SdFatUtil.cpp ===================
@@ -3723,39 +3624,22 @@ int SdFatUtil::FreeRam() {
   return free_memory;
 }
 //------------------------------------------------------------------------------
-/** %Print a string in flash memory.
- *
- * \param[in] pr Print object for output.
- * \param[in] str Pointer to string stored in flash memory.
- */
-void SdFatUtil::print_P(Print* pr, PGM_P str) {
-  for (uint8_t c; (c = pgm_read_byte(str)); str++) pr->write(c);
-}
-//------------------------------------------------------------------------------
-/** %Print a string in flash memory followed by a CR/LF.
- *
- * \param[in] pr Print object for output.
- * \param[in] str Pointer to string stored in flash memory.
- */
-void SdFatUtil::println_P(Print* pr, PGM_P str) {
-  print_P(pr, str);
-  pr->println();
-}
+
 //------------------------------------------------------------------------------
 /** %Print a string in flash memory to Serial.
  *
  * \param[in] str Pointer to string stored in flash memory.
  */
-void SdFatUtil::SerialPrint_P(PGM_P str) {
-  print_P(SdFat::stdOut(), str);
+void SdFatUtil::SerialPrint_P(FSTRINGPARAM(str)) {
+  Com::printF(str);
 }
 //------------------------------------------------------------------------------
 /** %Print a string in flash memory to Serial followed by a CR/LF.
  *
  * \param[in] str Pointer to string stored in flash memory.
  */
-void SdFatUtil::SerialPrintln_P(PGM_P str) {
-  println_P(SdFat::stdOut(), str);
+void SdFatUtil::SerialPrintln_P(FSTRINGPARAM(str)) {
+  Com::printFLN(str);
 }
 
 // ==============

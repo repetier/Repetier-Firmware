@@ -27,6 +27,7 @@ class Com
     public:
 FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)
+FSTRINGVAR(tNewline)
 FSTRINGVAR(tNAN)
 FSTRINGVAR(tINF)
 FSTRINGVAR(tError)
@@ -124,7 +125,61 @@ FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
 FSTRINGVAR(tMeasureOriginReset)
 FSTRINGVAR(tEEPROMUpdated)
+FSTRINGVAR(tInvalidDeltaCoordinate)
+FSTRINGVAR(tLevelingCalc)
+FSTRINGVAR(tTower1)
+FSTRINGVAR(tTower2)
+FSTRINGVAR(tTower3)
 #endif // DRIVE_SYSTEM
+#ifdef DEBUG_GENERIC
+FSTRINGVAR(tGenTemp)
+#endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
+FSTRINGVAR(tTargetExtr)
+FSTRINGVAR(tTargetBedColon)
+FSTRINGVAR(tPIDAutotuneStart)
+FSTRINGVAR(tAPIDBias)
+FSTRINGVAR(tAPIDD)
+FSTRINGVAR(tAPIDMin)
+FSTRINGVAR(tAPIDMax)
+FSTRINGVAR(tAPIDKu)
+FSTRINGVAR(tAPIDTu)
+FSTRINGVAR(tAPIDClassic)
+FSTRINGVAR(tAPIDKp)
+FSTRINGVAR(tAPIDKi)
+FSTRINGVAR(tAPIDKd)
+FSTRINGVAR(tAPIDFailedHigh)
+FSTRINGVAR(tAPIDFailedTimeout)
+FSTRINGVAR(tAPIDFinished)
+FSTRINGVAR(tMTEMPColon)
+FSTRINGVAR(tHeatedBed)
+FSTRINGVAR(tExtruderSpace)
+FSTRINGVAR(tTempSensorDefect)
+FSTRINGVAR(tTempSensorWorking)
+FSTRINGVAR(tDryModeUntilRestart)
+#ifdef DEBUG_QUEUE_MOVE
+FSTRINGVAR(tDBGId)
+FSTRINGVAR(tDBGVStartEnd)
+FSTRINGVAR(tDBAccelSteps)
+FSTRINGVAR(tDBGStartEndSpeed)
+FSTRINGVAR(tDBGFlags)
+FSTRINGVAR(tDBGJoinFlags)
+FSTRINGVAR(tDBGDelta)
+FSTRINGVAR(tDBGDir)
+FSTRINGVAR(tDBGFullSpeed)
+FSTRINGVAR(tDBGVMax)
+FSTRINGVAR(tDBGAcceleration)
+FSTRINGVAR(tDBGAccelerationPrim)
+FSTRINGVAR(tDBGRemainingSteps)
+FSTRINGVAR(tDBGAdvanceFull)
+FSTRINGVAR(tDBGAdvanceRate)
+FSTRINGVAR(tDBGLimitInterval)
+FSTRINGVAR(tDBGMoveDistance)
+FSTRINGVAR(tDBGCommandedFeedrate)
+FSTRINGVAR(tDBGConstFullSpeedMoveTime)
+#endif // DEBUG_QUEUE_MOVEFSTRINGVALUE(Com::,"")
+#ifdef DEBUG_DELTA_OVERFLOW
+FSTRINGVAR(tDBGDeltaOverflow)
+#endif // DEBUG_DELTA_OVERFLOW
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)
@@ -225,6 +280,7 @@ FSTRINGVAR(tFileDeleted)
 FSTRINGVAR(tDeletionFailed)
 FSTRINGVAR(tDirectoryCreated)
 FSTRINGVAR(tCreationFailed)
+FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
 
 
@@ -239,14 +295,17 @@ static void printErrorFLN(FSTRINGPARAM(text));
 static void printFLN(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text),int value);
-static void printF(FSTRINGPARAM(text),char *msg);
+static void printF(FSTRINGPARAM(text),const char *msg);
 static void printF(FSTRINGPARAM(text),long value);
+static void printF(FSTRINGPARAM(text),unsigned long value);
 static void printF(FSTRINGPARAM(text),float value,byte digits=2);
 static void printFLN(FSTRINGPARAM(text),int value);
 static void printFLN(FSTRINGPARAM(text),long value);
-static void printFLN(FSTRINGPARAM(text),char *msg);
+static void printFLN(FSTRINGPARAM(text),unsigned long value);
+static void printFLN(FSTRINGPARAM(text),const char *msg);
 static void printFLN(FSTRINGPARAM(text),float value,byte digits=2);
 static void print(long value);
+static inline void print(unsigned long value) {printNumber(value);}
 static inline void print(int value) {print((long)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}

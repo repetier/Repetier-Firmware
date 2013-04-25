@@ -88,6 +88,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MICROSTEP8 HIGH,HIGH
 #define MICROSTEP16 HIGH,HIGH
 
+#define HOME_ORDER_XYZ 1
+#define HOME_ORDER_XZY 2
+#define HOME_ORDER_YXZ 3
+#define HOME_ORDER_YZX 4
+#define HOME_ORDER_ZXY 5
+#define HOME_ORDER_ZYX 6
+
 #include "Configuration.h"
 #if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
 #define XY_GANTRY

@@ -101,7 +101,7 @@ void Commands::printTemperatures()
 #if HEATED_BED_SENSOR_TYPE==0
     Com::printF(Com::tTColon,temp);
 #else
-    Com::printF(Com::tColon,temp);
+    Com::printF(Com::tTColon,temp);
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
 #endif
 #ifdef TEMP_PID
@@ -275,18 +275,34 @@ void Commands::homeZAxis()
 }
 void Commands::homeAxis(bool xaxis,bool yaxis,bool zaxis)
 {
-    if(xaxis)
-    {
-        homeXAxis();
-    }
-    if(yaxis)
-    {
-        homeYAxis();
-    }
-    if(zaxis)
-    {
-        homeZAxis();
-    }
+#if !defined(HOMING_ORDER)
+#define HOMING_ORDER HOME_ORDER_XYZ
+#endif
+#if HOMING_ORDER==HOME_ORDER_XYZ
+    if(xaxis) homeXAxis();
+    if(yaxis) homeYAxis();
+    if(zaxis) homeZAxis();
+#elif HOMING_ORDER==HOME_ORDER_XZY
+    if(xaxis) homeXAxis();
+    if(zaxis) homeZAxis();
+    if(yaxis) homeYAxis();
+#elif HOMING_ORDER==HOME_ORDER_YXZ
+    if(yaxis) homeYAxis();
+    if(xaxis) homeXAxis();
+    if(zaxis) homeZAxis();
+#elif HOMING_ORDER==HOME_ORDER_YZX
+    if(yaxis) homeYAxis();
+    if(zaxis) homeZAxis();
+    if(xaxis) homeXAxis();
+#elif HOMING_ORDER==HOME_ORDER_ZXY
+    if(zaxis) homeZAxis();
+    if(xaxis) homeXAxis();
+    if(yaxis) homeYAxis();
+#elif HOMING_ORDER==HOME_ORDER_ZYX
+    if(zaxis) homeZAxis();
+    if(yaxis) homeYAxis();
+    if(xaxis) homeXAxis();
+#endif
     UI_CLEAR_STATUS
 }
 #endif
@@ -816,19 +832,19 @@ void Commands::executeGCode(GCode *com)
             if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
             bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
-            codenum = HAL::timeInMilliseconds();
-            unsigned long waituntil = 0;
+            millis_t printedTime = HAL::timeInMilliseconds();
+            millis_t waituntil = 0;
 #if RETRACT_DURING_HEATUP
             byte retracted = 0;
 #endif
-            unsigned long cur_time;
+            millis_t cur_time;
             do
             {
                 cur_time = HAL::timeInMilliseconds();
-                if( (cur_time - codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
+                if( (cur_time - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
                 {
                     printTemperatures();
-                    codenum = cur_time;
+                    printedTime = cur_time;
                 }
                 Commands::checkForPeriodicalActions();
                 //gcode_read_serial();
@@ -839,7 +855,7 @@ void Commands::executeGCode(GCode *com)
                     retracted = 1;
                 }
 #endif
-                if((waituntil==0 && (dir ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-0.5:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+0.5))
+                if((waituntil==0 && (dir ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-1:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
 #ifdef TEMP_HYSTERESIS
                         || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
 #endif

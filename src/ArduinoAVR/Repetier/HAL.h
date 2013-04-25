@@ -172,27 +172,6 @@ extern ring_buffer tx_buffer;
 #define RFSERIAL Serial
 #endif
 
-class SerialOutput : public Print
-{
-public:
-    SerialOutput();
-#ifdef COMPAT_PRE1
-    void write(uint8_t);
-#else
-    size_t write(uint8_t);
-#endif
-    void print_P(PGM_P ptr);
-    void println_P(PGM_P ptr);
-    void print_long_P(PGM_P ptr,long value);
-    void print_int_P(PGM_P ptr,int value);
-    void print_float_P(PGM_P ptr,float value,uint8_t digits = 2);
-    void println_long_P(PGM_P ptr,long value);
-    void println_int_P(PGM_P ptr,int value);
-    void println_float_P(PGM_P ptr,float value,uint8_t digits = 2);
-    void print_error_P(PGM_P ptr,bool newline);
-    void printFloat(double number, uint8_t digits=2);
-
-};
 #define OUT_P_I(p,i) Com::printF(PSTR(p),(int)(i))
 #define OUT_P_I_LN(p,i) Com::printFLN(PSTR(p),(int)(i))
 #define OUT_P_L(p,i) Com::printF(PSTR(p),(long)(i))
@@ -207,7 +186,6 @@ public:
 #define OUT_ERROR_P_LN(p) {Com::printErrorF(PSTR(p));Com::println();}
 #define OUT(v) Com::print(v)
 #define OUT_LN Com::println()
-extern SerialOutput out;
 
 class HAL
 {

@@ -630,8 +630,6 @@ ISR(EXTRUDER_TIMER_VECTOR)
 #endif
 }
 
-SerialOutput out; ///< Instance used for serail write operations.
-
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
 /*
