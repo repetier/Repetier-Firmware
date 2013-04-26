@@ -85,7 +85,7 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     float speedE;                   ///< Speed in E direction at fullInterval in mm/s
     float fullSpeed;                ///< Desired speed mm/s
     float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
-    float acceleration;             ///< Real 2.0*distanceÜacceleration mm²/s²
+    float accelerationDistance2;             ///< Real 2.0*distanceÜacceleration mm²/s²
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
     float startSpeed;               ///< Staring speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
@@ -349,7 +349,7 @@ public:
     {
         return printer.stepNumber <= accelSteps;
     }
-    inline bool isFullsteping() {
+    inline bool isFullstepping() {
         return halfstep == 4;
     }
     inline bool startXStep()
@@ -475,17 +475,26 @@ public:
     static byte insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines);
     static void queue_move(byte check_endstops,byte pathOptimize);
     static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
-    static void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
-    static inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize);
     static inline void previousPlannerIndex(byte &p) {
         p = (p ? p-1 : MOVE_CACHE_SIZE-1);
     }
     static inline void nextPlannerIndex(byte& p) {
         p = (p==MOVE_CACHE_SIZE-1?0:p+1);
     }
+#if DRIVE_SYSTEM==3
+    static void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
+    static inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize);
+    inline long calculate_delta_segments(byte softEndstop);
+    static inline void calculate_dir_delta(long difference[], byte *dir, long delta[]);
+    static inline byte calculate_distance(float axis_diff[], byte dir, float *distance);
+#ifdef SOFTWARE_LEVELING
+    static void calculate_plane(long factors[], long p1[], long p2[], long p3[]);
+    static float calc_zoffset(long factors[], long pointX, long pointY);
+#endif
+#endif
 };
 
 

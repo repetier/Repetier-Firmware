@@ -2279,7 +2279,7 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_SHOW_MEASUREMENT:
 #ifdef STEP_COUNTER
         {
-            out.print_float_P(PSTR("Measure/delta ="),printer.countZSteps * inv_axis_steps_per_unit[2]);
+            Com::printFLN(Com::tDBGDeltaMeasurerDelta,printer.countZSteps * inv_axis_steps_per_unit[2]);
         }
 #endif
         break;
@@ -2287,7 +2287,7 @@ void UIDisplay::executeAction(int action)
 #ifdef STEP_COUNTER
         {
             printer.countZSteps = 0;
-            out.println_P(PSTR("Measurement reset."));
+            Com::printFLN(Com::tDBGDeltaMeasurementReset);
         }
 #endif
         break;
@@ -2303,10 +2303,10 @@ void UIDisplay::executeAction(int action)
                 Printer::currentPositionSteps[i] = 0;
             }
             calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
-            out.println_P(PSTR("Measured origin set. Measurement reset."));
+            Com::printFLN(Com::tDBGDeltaMeasuredOriginSet);
 #if EEPROM_MODE!=0
             EEPROM::storeDataIntoEEPROM(false);
-            out.println_P(PSTR("EEPROM updated"));
+            Com::printFLN(Com::tEEPROMUpdated);
 #endif
         }
 #endif
@@ -2337,11 +2337,11 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_CALC_LEVEL:
 #ifdef SOFTWARE_LEVELING
             long factors[4];
-            calculate_plane(factors, printer.levelingP1, printer.levelingP2, printer.levelingP3);
+            PrintLine::calculate_plane(factors, printer.levelingP1, printer.levelingP2, printer.levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
-            Com::printFLN(Com::tTower2, calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
-            Com::printFLN(Com::tTower3), calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
+            Com::printFLN(Com::tTower1, PrintLine::calc_zoffset(factors, DELTA_TOWER1_X_STEPS, DELTA_TOWER1_Y_STEPS) * inv_axis_steps_per_unit[0]);
+            Com::printFLN(Com::tTower2, PrintLine::calc_zoffset(factors, DELTA_TOWER2_X_STEPS, DELTA_TOWER2_Y_STEPS) * inv_axis_steps_per_unit[1]);
+            Com::printFLN(Com::tTower3, PrintLine::calc_zoffset(factors, DELTA_TOWER3_X_STEPS, DELTA_TOWER3_Y_STEPS) * inv_axis_steps_per_unit[2]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:

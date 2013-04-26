@@ -35,6 +35,7 @@ unsigned long axis_steps_per_sqr_second[4];
 unsigned long axis_travel_steps_per_sqr_second[4];
 #endif
 #if DRIVE_SYSTEM==3
+long Printer::currentDeltaPositionSteps[4];
 DeltaSegment segments[DELTA_CACHE_SIZE];
 unsigned int delta_segment_write_pos = 0; // Position where we write the next cached delta move
 volatile unsigned int  delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache

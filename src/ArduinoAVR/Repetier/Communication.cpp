@@ -133,6 +133,7 @@ FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
 FSTRINGVALUE(Com::tTower1,"Tower 1:")
 FSTRINGVALUE(Com::tTower2,"Tower 2:")
 FSTRINGVALUE(Com::tTower3,"Tower 3:")
+FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
 FSTRINGVALUE(Com::tGenTemp,"GenTemp:")
@@ -183,6 +184,21 @@ FSTRINGVALUE(Com::tDBGConstFullSpeedMoveTime,"Constant full speed move time:")
 #ifdef DEBUG_DELTA_OVERFLOW
 FSTRINGVALUE(Com::tDBGDeltaOverflow,"Delta overflow:")
 #endif // DEBUG_DELTA_OVERFLOW
+#ifdef DEBUG_SPLIT
+FSTRINGVALUE(Com::tDBGDeltaSeconds,"Seconds:")
+FSTRINGVALUE(Com::tDBGDeltaZDelta,"Z delta:")
+FSTRINGVALUE(Com::tDBGDeltaSegments,"Segments:")
+FSTRINGVALUE(Com::tDBGDeltaNumLines,"Num lines:")
+FSTRINGVALUE(Com::tDBGDeltaSegmentsPerLine,"segments_per_line:")
+FSTRINGVALUE(Com::tDBGDeltaMaxDS,"Max DS:")
+FSTRINGVALUE(Com::tDBGDeltaStepsPerSegment,"Steps Per Segment:")
+FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps,"Virtual axis steps:")
+#endif
+#ifdef STEP_COUNTER
+FSTRINGVALUE(Com::tDBGDeltaMeasurerDelta,"Measure/delta =")
+FSTRINGVALUE(Com::tDBGDeltaMeasurementReset,"Measurement reset.")
+FSTRINGVALUE(Com::tDBGDeltaMeasuredOriginSet,"Measured origin set. Measurement reset.")
+#endif // STEP_COUNTER
 //FSTRINGVALUE(Com::,"")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)

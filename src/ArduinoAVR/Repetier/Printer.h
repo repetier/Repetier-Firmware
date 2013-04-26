@@ -60,7 +60,7 @@ public:
 #ifdef STEP_COUNTER
     long countZSteps;					///< Count of steps from last position reset
 #endif
-    long currentDeltaPositionSteps[4];
+    static long currentDeltaPositionSteps[4];
     long maxDeltaPositionSteps;
 #endif
 #ifdef SOFTWARE_LEVELING
@@ -376,6 +376,15 @@ public:
     static void setup();
     static void defaultLoopActions();
     static byte setDestinationStepsFromGCode(GCode *com);
+#if DRIVE_SYSTEM==3
+    static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
+{
+    currentDeltaPositionSteps[0] = xaxis;
+    currentDeltaPositionSteps[1] = yaxis;
+    currentDeltaPositionSteps[2] = zaxis;
+}
+
+#endif
 };
 extern Printer printer;
 

@@ -47,6 +47,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
 //#define DEBUG_STEPCOUNT
+
+#define DEBUG_DELTA_OVERFLOW
+
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 

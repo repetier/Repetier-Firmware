@@ -130,6 +130,7 @@ FSTRINGVAR(tLevelingCalc)
 FSTRINGVAR(tTower1)
 FSTRINGVAR(tTower2)
 FSTRINGVAR(tTower3)
+FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
 FSTRINGVAR(tGenTemp)
@@ -180,6 +181,21 @@ FSTRINGVAR(tDBGConstFullSpeedMoveTime)
 #ifdef DEBUG_DELTA_OVERFLOW
 FSTRINGVAR(tDBGDeltaOverflow)
 #endif // DEBUG_DELTA_OVERFLOW
+#ifdef DEBUG_SPLIT
+FSTRINGVAR(tDBGDeltaSeconds)
+FSTRINGVAR(tDBGDeltaZDelta)
+FSTRINGVAR(tDBGDeltaSegments)
+FSTRINGVAR(tDBGDeltaNumLines)
+FSTRINGVAR(tDBGDeltaSegmentsPerLine)
+FSTRINGVAR(tDBGDeltaMaxDS)
+FSTRINGVAR(tDBGDeltaStepsPerSegment)
+FSTRINGVAR(tDBGDeltaVirtualAxisSteps)
+#endif
+#ifdef STEP_COUNTER
+FSTRINGVAR(tDBGDeltaMeasurerDelta)
+FSTRINGVAR(tDBGDeltaMeasurementReset)
+FSTRINGVAR(tDBGDeltaMeasuredOriginSet)
+#endif // STEP_COUNTER
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)
