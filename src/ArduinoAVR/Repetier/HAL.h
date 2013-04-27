@@ -89,6 +89,12 @@
 #define bit_clear(x,y) x&= ~(1<<y) //cbi(x,y)
 #define bit_set(x,y)   x|= (1<<y)//sbi(x,y)
 
+/** defines the data direction (reading from I2C device) in i2cStart(),i2cRepStart() */
+#define I2C_READ    1
+/** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
+#define I2C_WRITE   0
+
+
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
@@ -318,12 +324,33 @@ public:
         return ((long)a*b)>>16;
 #endif
     }
+    static inline void digitalWrite(byte pin,byte value)
+    {
+        ::digitalWrite(pin,value);
+    }
+    static inline byte digitalRead(byte pin)
+    {
+        return ::digitalRead(pin);
+    }
+    static inline void pinMode(byte pin,byte mode)
+    {
+        ::pinMode(pin,mode);
+    }
     static long CPUDivU2(unsigned int divisor);
     static inline void delayMicroseconds(unsigned int delayUs)
     {
         ::delayMicroseconds(delayUs);
     }
-
+    static inline void delayMilliseconds(unsigned int delayMs)
+    {
+        ::delay(delayMs);
+    }
+    static inline void tone(byte pin,int duration) {
+        ::tone(pin,duration);
+    }
+    static inline void noTone(byte pin) {
+        ::noTone(pin);
+    }
     static inline void epr_set_byte(unsigned int pos,byte value)
     {
         eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
@@ -366,31 +393,95 @@ public:
     {
         cli();
     }
-    static inline unsigned long timeInMilliseconds() {
+    static inline unsigned long timeInMilliseconds()
+    {
         return millis();
     }
-    static inline char readFlashByte(PGM_P ptr) {
+    static inline char readFlashByte(PGM_P ptr)
+    {
         return pgm_read_byte(ptr);
     }
-    static inline void serialSetBaudrate(long baud) {
+    static inline void serialSetBaudrate(long baud)
+    {
         RFSERIAL.begin(baud);
     }
-    static inline bool serialByteAvailable() {
+    static inline bool serialByteAvailable()
+    {
         return RFSERIAL.available();
     }
-    static inline byte serialReadByte() {
+    static inline byte serialReadByte()
+    {
         return RFSERIAL.read();
     }
-    static inline void serialWriteByte(char b) {
+    static inline void serialWriteByte(char b)
+    {
         RFSERIAL.write(b);
     }
-    static inline void serialFlush() {
+    static inline void serialFlush()
+    {
         RFSERIAL.flush();
     }
     static void setupTimer();
     static void showStartReason();
     static int getFreeRam();
     static void resetHardware();
+
+    // SPI related functions
+
+    static inline void spiInit(byte spiRate)
+    {
+        // See avr processor documentation
+        SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
+        SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
+
+    }
+    static inline byte spiReceive()
+    {
+        SPDR = 0XFF;
+        while (!(SPSR & (1 << SPIF)));
+        return SPDR;
+    }
+    static inline void spiReadBlock(byte*buf,uint16_t nbyte)
+    {
+        if (nbyte-- == 0) return;
+        SPDR = 0XFF;
+        for (uint16_t i = 0; i < nbyte; i++)
+        {
+            while (!(SPSR & (1 << SPIF)));
+            buf[i] = SPDR;
+            SPDR = 0XFF;
+        }
+        while (!(SPSR & (1 << SPIF)));
+        buf[nbyte] = SPDR;
+    }
+    static inline void spiSend(byte b)
+    {
+        SPDR = b;
+        while (!(SPSR & (1 << SPIF)));
+    }
+    static inline __attribute__((always_inline))
+    void spiSendBlock(uint8_t token, const uint8_t* buf)
+    {
+        SPDR = token;
+        for (uint16_t i = 0; i < 512; i += 2)
+        {
+            while (!(SPSR & (1 << SPIF)));
+            SPDR = buf[i];
+            while (!(SPSR & (1 << SPIF)));
+            SPDR = buf[i + 1];
+        }
+        while (!(SPSR & (1 << SPIF)));
+    }
+
+    // I2C Support
+
+    static void i2cInit(unsigned long clockSpeedHz);
+    static unsigned char i2cStart(unsigned char address);
+    static void i2cStartWait(unsigned char address);
+    static void i2cStop(void);
+    static unsigned char i2cWrite( unsigned char data );
+    static unsigned char i2cReadAck(void);
+    static unsigned char i2cReadNak(void);
 protected:
 private:
 };

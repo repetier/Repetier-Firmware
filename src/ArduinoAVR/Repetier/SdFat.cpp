@@ -2456,17 +2456,17 @@ void (*SdBaseFile::oldDateTime_)(uint16_t& date, uint16_t& time) = 0;  // NOLINT
  * initialize SPI pins
  */
 static void spiBegin() {
-  pinMode(MISO_PIN, INPUT);
-  pinMode(MOSI_PIN, OUTPUT);
-  pinMode(SCK_PIN, OUTPUT);
+  SET_INPUT(MISO_PIN);
+  SET_OUTPUT(MOSI_PIN);
+  SET_OUTPUT(SCK_PIN);
   // SS must be in output mode even it is not chip select
-  pinMode(SDSS, OUTPUT);
+  SET_OUTPUT(SDSS);
 #if SDSSORIG >- 1
-  pinMode(SDSSORIG, OUTPUT);
+  SET_OUTPUT(SDSSORIG);
 #endif
   // set SS high - may be chip select for another SPI device
 #if SET_SPI_SS_HIGH
-  digitalWrite(SDSS, HIGH);
+  WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
 }
 //------------------------------------------------------------------------------
@@ -2475,49 +2475,29 @@ static void spiBegin() {
  * Set SCK rate to F_CPU/pow(2, 1 + spiRate) for spiRate [0,6]
  */
 static void spiInit(uint8_t spiRate) {
-  // See avr processor documentation
-  SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
-  SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
+    HAL::spiInit(spiRate);
 }
 //------------------------------------------------------------------------------
 /** SPI receive a byte */
 static uint8_t spiRec() {
-  SPDR = 0XFF;
-  while (!(SPSR & (1 << SPIF)));
-  return SPDR;
+    return HAL::spiReceive();
 }
 //------------------------------------------------------------------------------
 /** SPI read data - only one call so force inline */
 static inline __attribute__((always_inline))
   void spiRead(uint8_t* buf, uint16_t nbyte) {
-  if (nbyte-- == 0) return;
-  SPDR = 0XFF;
-  for (uint16_t i = 0; i < nbyte; i++) {
-    while (!(SPSR & (1 << SPIF)));
-    buf[i] = SPDR;
-    SPDR = 0XFF;
-  }
-  while (!(SPSR & (1 << SPIF)));
-  buf[nbyte] = SPDR;
+HAL::spiReadBlock(buf,nbyte);
 }
 //------------------------------------------------------------------------------
 /** SPI send a byte */
 static void spiSend(uint8_t b) {
-  SPDR = b;
-  while (!(SPSR & (1 << SPIF)));
+    HAL::spiSend(b);
 }
 //------------------------------------------------------------------------------
 /** SPI send block - only one call so force inline */
 static inline __attribute__((always_inline))
   void spiSendBlock(uint8_t token, const uint8_t* buf) {
-  SPDR = token;
-  for (uint16_t i = 0; i < 512; i += 2) {
-    while (!(SPSR & (1 << SPIF)));
-    SPDR = buf[i];
-    while (!(SPSR & (1 << SPIF)));
-    SPDR = buf[i + 1];
-  }
-  while (!(SPSR & (1 << SPIF)));
+      HAL::spiSendBlock(token,buf);
 }
 //------------------------------------------------------------------------------
 #else  // SOFTWARE_SPI
@@ -2701,7 +2681,7 @@ uint32_t Sd2Card::cardSize() {
 }
 //------------------------------------------------------------------------------
 void Sd2Card::chipSelectHigh() {
-  digitalWrite(chipSelectPin_, HIGH);
+  HAL::digitalWrite(chipSelectPin_, HIGH);
   // insure MISO goes high impedance
   spiSend(0XFF);
 }
@@ -2710,7 +2690,7 @@ void Sd2Card::chipSelectLow() {
 #ifndef SOFTWARE_SPI
   spiInit(spiRate_);
 #endif  // SOFTWARE_SPI
-  digitalWrite(chipSelectPin_, LOW);
+  HAL::digitalWrite(chipSelectPin_, LOW);
 }
 //------------------------------------------------------------------------------
 /** Erase a range of blocks.
@@ -2788,8 +2768,8 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
   uint16_t t0 = (uint16_t)HAL::timeInMilliseconds();
   uint32_t arg;
 
-  pinMode(chipSelectPin_, OUTPUT);
-  digitalWrite(chipSelectPin_, HIGH);
+  HAL::pinMode(chipSelectPin_, OUTPUT);
+  HAL::digitalWrite(chipSelectPin_, HIGH);
   spiBegin();
 
 #ifndef SOFTWARE_SPI

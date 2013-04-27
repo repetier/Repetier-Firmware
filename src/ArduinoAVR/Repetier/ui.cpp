@@ -59,9 +59,9 @@ void beep(byte duration,byte count)
     SET_OUTPUT(BEEPER_PIN);
 #endif
 #if BEEPER_TYPE==2
-    i2c_start_wait(BEEPER_ADDRESS+I2C_WRITE);
+    HAL::i2cStartWait(BEEPER_ADDRESS+I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    i2c_write( 0x14); // Start at port a
+    HAL::i2cWrite( 0x14); // Start at port a
 #endif
 #endif
     for(byte i=0; i<count; i++)
@@ -71,240 +71,41 @@ void beep(byte duration,byte count)
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
-        i2c_write(uid.outputMask & ~BEEPER_PIN);
+        HAL::i2cWrite(uid.outputMask & ~BEEPER_PIN);
 #else
-        i2c_write(~BEEPER_PIN);
+        HAL::i2cWrite(~BEEPER_PIN);
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-        i2c_write((BEEPER_PIN) | uid.outputMask);
-        i2c_write(((BEEPER_PIN) | uid.outputMask)>>8);
+        HAL::i2cWrite((BEEPER_PIN) | uid.outputMask);
+        HAL::i2cWrite(((BEEPER_PIN) | uid.outputMask)>>8);
 #endif
 #endif
-        delay(duration);
+        HAL::delayMilliseconds(duration);
 #if BEEPER_TYPE==1
         WRITE(BEEPER_PIN,LOW);
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
-        i2c_write((BEEPER_PIN) | uid.outputMask);
+        HAL::i2cWrite((BEEPER_PIN) | uid.outputMask);
 #else
-        i2c_write(255);
+        HAL::i2cWrite(255);
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-        i2c_write( uid.outputMask);
-        i2c_write(uid.outputMask>>8);
+        HAL::i2cWrite( uid.outputMask);
+        HAL::i2cWrite(uid.outputMask>>8);
 #endif
 #endif
-        delay(duration);
+        HAL::delayMilliseconds(duration);
     }
 #if BEEPER_TYPE==2
-    i2c_stop();
+    HAL::i2cStop();
 #endif
 #endif
 #endif
 }
-
-//=============================================================
-//                          I2C driver
-//=============================================================
-
-#ifdef COMPILE_I2C_DRIVER
-/*************************************************************************
-* Title:    I2C master library using hardware TWI interface
-* Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
-* File:     $Id: twimaster.c,v 1.3 2005/07/02 11:14:21 Peter Exp $
-* Software: AVR-GCC 3.4.3 / avr-libc 1.2.3
-* Target:   any AVR device with hardware TWI
-* Usage:    API compatible with I2C Software Library i2cmaster.h
-**************************************************************************/
-#include <inttypes.h>
-#include <compat/twi.h>
-
-/* I2C clock in Hz */
-#define SCL_CLOCK  UI_I2C_CLOCKSPEED
-
-
-/*************************************************************************
- Initialization of the I2C bus interface. Need to be called only once
-*************************************************************************/
-inline void i2c_init(void)
-{
-    /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
-    uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
-    TWSR = 0;                         /* no prescaler */
-    TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
-#if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
-#if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
-    uid.outputMask |= BEEPER_PIN;
-#endif
-#endif
-    //delay(200);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
-    // set direction of pins
-    i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-    i2c_write(0); // IODIRA
-    i2c_write(~(UI_DISPLAY_I2C_OUTPUT_PINS & 255));
-//  i2c_stop();
-//  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-//  i2c_write(1); // IODIRB
-    i2c_write(~(UI_DISPLAY_I2C_OUTPUT_PINS >> 8));
-    i2c_stop();
-    // Set pullups according to  UI_DISPLAY_I2C_PULLUP
-    i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-    i2c_write(0x0C); // GPPUA
-    i2c_write(UI_DISPLAY_I2C_PULLUP & 255);
-//  i2c_stop();
-//  i2c_start(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-//  i2c_write(0x0D); // GPPUB
-    i2c_write(UI_DISPLAY_I2C_PULLUP >> 8);
-    i2c_stop();
-#endif
-}/* i2c_init */
-
-
-/*************************************************************************
-  Issues a start condition and sends address and transfer direction.
-  return 0 = device accessible, 1= failed to access device
-*************************************************************************/
-unsigned char i2c_start(unsigned char address)
-{
-    uint8_t   twst;
-
-    // send START condition
-    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-
-    // wait until transmission completed
-    while(!(TWCR & (1<<TWINT)));
-
-    // check value of TWI Status Register. Mask prescaler bits.
-    twst = TW_STATUS & 0xF8;
-    if ( (twst != TW_START) && (twst != TW_REP_START)) return 1;
-
-    // send device address
-    TWDR = address;
-    TWCR = (1<<TWINT) | (1<<TWEN);
-
-    // wail until transmission completed and ACK/NACK has been received
-    while(!(TWCR & (1<<TWINT)));
-
-    // check value of TWI Status Register. Mask prescaler bits.
-    twst = TW_STATUS & 0xF8;
-    if ( (twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK) ) return 1;
-
-    return 0;
-
-}/* i2c_start */
-
-
-/*************************************************************************
- Issues a start condition and sends address and transfer direction.
- If device is busy, use ack polling to wait until device is ready
-
- Input:   address and transfer direction of I2C device
-*************************************************************************/
-void i2c_start_wait(unsigned char address)
-{
-    uint8_t   twst;
-    while ( 1 )
-    {
-        // send START condition
-        TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-
-        // wait until transmission completed
-        while(!(TWCR & (1<<TWINT)));
-
-        // check value of TWI Status Register. Mask prescaler bits.
-        twst = TW_STATUS & 0xF8;
-        if ( (twst != TW_START) && (twst != TW_REP_START)) continue;
-
-        // send device address
-        TWDR = address;
-        TWCR = (1<<TWINT) | (1<<TWEN);
-
-        // wail until transmission completed
-        while(!(TWCR & (1<<TWINT)));
-
-        // check value of TWI Status Register. Mask prescaler bits.
-        twst = TW_STATUS & 0xF8;
-        if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) )
-        {
-            /* device busy, send stop condition to terminate write operation */
-            TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
-
-            // wait until stop condition is executed and bus released
-            while(TWCR & (1<<TWSTO));
-
-            continue;
-        }
-        //if( twst != TW_MT_SLA_ACK) return 1;
-        break;
-    }
-
-}/* i2c_start_wait */
-
-
-/*************************************************************************
- Terminates the data transfer and releases the I2C bus
-*************************************************************************/
-void i2c_stop(void)
-{
-    /* send stop condition */
-    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
-    // wait until stop condition is executed and bus released
-    while(TWCR & (1<<TWSTO));
-}/* i2c_stop */
-
-
-/*************************************************************************
-  Send one byte to I2C device
-
-  Input:    byte to be transfered
-  Return:   0 write successful
-            1 write failed
-*************************************************************************/
-unsigned char i2c_write( unsigned char data )
-{
-    uint8_t   twst;
-    // send data to the previously addressed device
-    TWDR = data;
-    TWCR = (1<<TWINT) | (1<<TWEN);
-    // wait until transmission completed
-    while(!(TWCR & (1<<TWINT)));
-    // check value of TWI Status Register. Mask prescaler bits
-    twst = TW_STATUS & 0xF8;
-    if( twst != TW_MT_DATA_ACK) return 1;
-    return 0;
-}/* i2c_write */
-
-
-/*************************************************************************
- Read one byte from the I2C device, request more data from device
- Return:  byte read from I2C device
-*************************************************************************/
-unsigned char i2c_readAck(void)
-{
-    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-    while(!(TWCR & (1<<TWINT)));
-    return TWDR;
-}/* i2c_readAck */
-
-/*************************************************************************
- Read one byte from the I2C device, read is followed by a stop condition
-
- Return:  byte read from I2C device
-*************************************************************************/
-unsigned char i2c_readNak(void)
-{
-    TWCR = (1<<TWINT) | (1<<TWEN);
-    while(!(TWCR & (1<<TWINT)));
-    return TWDR;
-}/* i2c_readNak */
-
-#endif
-
 
 #if UI_DISPLAY_TYPE!=0
 UIDisplay uid;
@@ -436,35 +237,35 @@ static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 // ============= I2C LCD Display driver ================
 inline void lcdStartWrite()
 {
-    i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+    HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    i2c_write( 0x14); // Start at port a
+    HAL::i2cWrite( 0x14); // Start at port a
 #endif
 }
 inline void lcdStopWrite()
 {
-    i2c_stop();
+    HAL::i2cStop();
 }
 void lcdWriteNibble(byte value)
 {
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     value|=uid.outputMask;
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
-    i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(value);
+    HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(value);
 #else
     byte v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0);
-    i2c_write((v) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(v);
+    HAL::i2cWrite((v) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(v);
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     unsigned int v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0) | uid.outputMask;
     unsigned int v2 = v | UI_DISPLAY_ENABLE_PIN;
-    i2c_write(v2 & 255);
-    i2c_write(v2 >> 8);
-    i2c_write(v & 255);
-    i2c_write(v >> 8);
+    HAL::i2cWrite(v2 & 255);
+    HAL::i2cWrite(v2 >> 8);
+    HAL::i2cWrite(v & 255);
+    HAL::i2cWrite(v >> 8);
 #endif
 }
 void lcdWriteByte(byte c,byte rs)
@@ -473,60 +274,60 @@ void lcdWriteByte(byte c,byte rs)
     byte mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
     byte value = (c >> 4) | mod;
-    i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(value);
+    HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(value);
     value = (c & 15) | mod;
-    i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(value);
+    HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(value);
 #else
     byte value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
-    i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(value);
+    HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(value);
     value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
-    i2c_write((value) | UI_DISPLAY_ENABLE_PIN);
-    i2c_write(value);
+    HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
+    HAL::i2cWrite(value);
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     unsigned int mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
     unsigned int value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
     unsigned int value2 = (value) | UI_DISPLAY_ENABLE_PIN;
-    i2c_write(value2 & 255);
-    i2c_write(value2 >>8);
-    i2c_write(value & 255);
-    i2c_write(value>>8);
+    HAL::i2cWrite(value2 & 255);
+    HAL::i2cWrite(value2 >>8);
+    HAL::i2cWrite(value & 255);
+    HAL::i2cWrite(value>>8);
     value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
     value2 = (value) | UI_DISPLAY_ENABLE_PIN;
-    i2c_write(value2 & 255);
-    i2c_write(value2 >>8);
-    i2c_write(value & 255);
-    i2c_write(value>>8);
+    HAL::i2cWrite(value2 & 255);
+    HAL::i2cWrite(value2 >>8);
+    HAL::i2cWrite(value & 255);
+    HAL::i2cWrite(value>>8);
 #endif
 }
 void initializeLCD()
 {
-    delay(235);
+    HAL::delayMilliseconds(235);
     lcdStartWrite();
-    i2c_write(uid.outputMask & 255);
+    HAL::i2cWrite(uid.outputMask & 255);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    i2c_write(uid.outputMask >> 16);
+    HAL::i2cWrite(uid.outputMask >> 16);
 #endif
-    delayMicroseconds(10);
+    HAL::delayMicroseconds(10);
     lcdWriteNibble(0x03);
-    delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    delayMicroseconds(150); // wait
+    HAL::delayMicroseconds(150); // wait
     // third go!
     lcdWriteNibble(0x03);
-    delayMicroseconds(150);
+    HAL::delayMicroseconds(150);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    delayMicroseconds(150);
+    HAL::delayMicroseconds(150);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
     lcdCommand(LCD_CLEAR);					//-	Clear Screen
-    delay(2); // clear is slow operation
+    HAL::delayMilliseconds(2); // clear is slow operation
     lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
     lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
@@ -555,7 +356,7 @@ void lcdWriteNibble(byte value)
 void lcdWriteByte(byte c,byte rs)
 {
 #if UI_DISPLAY_RW_PIN<0
-    delayMicroseconds(UI_DELAYPERCHAR);
+   HAL::delayMicroseconds(UI_DELAYPERCHAR);
 #else
     SET_INPUT(UI_DISPLAY_D4_PIN);
     SET_INPUT(UI_DISPLAY_D5_PIN);
@@ -610,7 +411,7 @@ void initializeLCD()
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    delay(235);
+    HAL::delayMilliseconds(235);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
@@ -634,23 +435,23 @@ void initializeLCD()
     // interface 4 pins are dangling unconnected and the values
     // on them don't matter for these instructions.
     WRITE(UI_DISPLAY_RS_PIN, LOW);
-    delayMicroseconds(10);
+    HAL::delayMicroseconds(10);
     lcdWriteNibble(0x03);
-    delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    delayMicroseconds(150); // wait
+    HAL::delayMicroseconds(150); // wait
     // third go!
     lcdWriteNibble(0x03);
-    delayMicroseconds(150);
+    HAL::delayMicroseconds(150);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    delayMicroseconds(150);
+    HAL::delayMicroseconds(150);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
 
     lcdCommand(LCD_CLEAR);					//-	Clear Screen
-    delay(2); // clear is slow operation
+    HAL::delayMilliseconds(2); // clear is slow operation
     lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
     lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
@@ -719,7 +520,28 @@ char printCols[UI_COLS+1];
 UIDisplay::UIDisplay()
 {
 #ifdef COMPILE_I2C_DRIVER
-    i2c_init();
+    uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
+#if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
+#if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
+    uid.outputMask |= BEEPER_PIN;
+#endif
+#endif
+    HAL::i2cInit(UI_I2C_CLOCKSPEED);
+#if UI_DISPLAY_I2C_CHIPTYPE==1
+    // set direction of pins
+    HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+    HAL::i2cWrite(0); // IODIRA
+    HAL::i2cWrite(~(UI_DISPLAY_I2C_OUTPUT_PINS & 255));
+    HAL::i2cWrite(~(UI_DISPLAY_I2C_OUTPUT_PINS >> 8));
+    HAL::i2cStop();
+    // Set pullups according to  UI_DISPLAY_I2C_PULLUP
+    HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+    HAL::i2cWrite(0x0C); // GPPUA
+    HAL::i2cWrite(UI_DISPLAY_I2C_PULLUP & 255);
+    HAL::i2cWrite(UI_DISPLAY_I2C_PULLUP >> 8);
+    HAL::i2cStop();
+#endif
+
 #endif
     flags = 0;
     menuLevel = 0;
@@ -743,8 +565,8 @@ void UIDisplay::initialize()
 #if UI_DISPLAY_TYPE==3
     // I don't know why but after power up the lcd does not come up
     // but if I reinitialize i2c and the lcd again here it works.
-    delay(10);
-    i2c_init();
+    HAL::delayMilliseconds(10);
+    HAL::i2cInit(UI_I2C_CLOCKSPEED);
     initializeLCD();
 #endif
     uid.printRowP(0,versionString);
@@ -752,9 +574,9 @@ void UIDisplay::initialize()
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
     // Make sure the beeper is off
-    i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
-    i2c_write(255); // Disable beeper, enable read for other pins.
-    i2c_stop();
+    HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
+    HAL::i2cWrite(255); // Disable beeper, enable read for other pins.
+    HAL::i2cStop();
 #endif
 }
 #if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2 || UI_DISPLAY_TYPE==3
@@ -775,7 +597,7 @@ void UIDisplay::printRow(byte r,char *txt)
 #if UI_DISPLAY_TYPE==3
     lcdStartWrite();
 #endif
-    lcdWriteByte(128 + pgm_read_byte(&LCDLineOffsets[r]),0); // Position cursor
+    lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
     char c;
     while(col<UI_COLS && (c=*txt) != 0x00)
     {

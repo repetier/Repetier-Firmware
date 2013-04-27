@@ -28,7 +28,7 @@ of the firmware at the same time. You have to disable some features to gain the
 ram needed. What should work:
 - No sd card - the sd card code is quite large.
 - No keys attached - The longest part is the menu handling.
-- EEPROM_MODE 0 and USE_OPS 0. 
+- EEPROM_MODE 0 and USE_OPS 0.
 
 Currently supported hardware:
 
@@ -54,7 +54,7 @@ Currently supported hardware:
 
 
 /** While the ascii chars are all the same, the driver have different charsets
-for special chars used in different countries. The charset allows to fix for 
+for special chars used in different countries. The charset allows to fix for
 this problem. If characters look wrong, try a different charset. If nothing
 works, use the ascii charset 0 as fallback. Not the nicest for everything but working!
 
@@ -68,7 +68,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 /** Select type of beeper
 0 = none
 1 = Piezo connected to pin
-2 = Piezo connected to a pin over I2C 
+2 = Piezo connected to a pin over I2C
 */
 #ifndef BEEPER_TYPE
 #define BEEPER_TYPE 1
@@ -90,7 +90,7 @@ What display type do you use?
 1 = LCD Display with 4 bit data bus
 2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
 3 = LCD Display with I2C connection, 4 bit mode
-4 = Use the slower LiquiedCrystal library bundled with arduino. 
+4 = Use the slower LiquiedCrystal library bundled with arduino.
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 */
@@ -117,7 +117,7 @@ Rows of your display. 2 or 4
 // For MCP 23017 define which pins should be output
 #define UI_DISPLAY_I2C_OUTPUT_PINS 65504
 // Set the output mask that is or'd over the output data. This is needed to activate
-// a backlight switched over the I2C. 
+// a backlight switched over the I2C.
 // The adafruit RGB shields enables a light if the bit is not set. Bits 6-8 are used for backlight.
 #define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
 // For MCP which inputs are with pullup. 31 = pins 0-4 for adafruid rgb shield buttons
@@ -195,7 +195,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
 
-// Do you have a I2C connected encoder? 
+// Do you have a I2C connected encoder?
 #define UI_HAS_I2C_ENCODER 0
 
 // Under which address can the key status requested. This is the address of your PCF8574 where the keys are connected.
@@ -224,11 +224,11 @@ at the beginning of ui.h It's best to use the symbol name, in case the value cha
 1. Simple push button connected to gnd if closed on a free arduino pin
     init -> UI_KEYS_INIT_BUTTON_LOW(pinNumber);
     detect -> UI_KEYS_BUTTON_LOW(pinNumber,action);
-    
+
 2. Simple push button connected to 5v if closed on a free arduino pin
     init -> UI_KEYS_INIT_BUTTON_HIGH(pinNumber);
     detect -> UI_KEYS_BUTTON_HIGH(pinNumber,action);
-    
+
 3. Click encoder, A/B connected to gnd if closed.
     init -> UI_KEYS_INIT_CLICKENCODER_LOW(pinA,pinB);
     detect -> UI_KEYS_CLICKENCODER_LOW(pinA,pinB);
@@ -237,7 +237,7 @@ at the beginning of ui.h It's best to use the symbol name, in case the value cha
     toggle the _REV with non _REV and toggle pins.
     If the direction is wrong, toggle _REV with non _REV version.
     For the push button of the encoder use 1.
-    
+
 4. Click encoder, A/B connected to 5V if closed.
     init -> UI_KEYS_INIT_CLICKENCODER_HIGH(pinA,pinB);
     detect -> UI_KEYS_CLICKENCODER_HIGH(pinA,pinB);
@@ -246,12 +246,12 @@ at the beginning of ui.h It's best to use the symbol name, in case the value cha
     toggle the _REV with non _REV and toggle pins.
     If the direction is wrong, toggle _REV with non _REV version.
     For the push button of the encoder use 2.
-    
+
 5. Maxtrix keyboard with 1-4 rows and 1-4 columns.
     init -> UI_KEYS_INIT_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);
     detect -> UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);
     In addition you have to set UI_MATRIX_ACTIONS to match your desired actions.
-    
+
 ------- Keys connected via I2C -------------
 
 All keys and the buzzer if present must be on a connected to a single PCF8574 chip!
@@ -274,7 +274,7 @@ Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin
 
 -------- Some notes on actions -------------
 
-There are three kinds of actions. 
+There are three kinds of actions.
 
 Type 1: Immediate actions - these are execute and forget actions like home/pre-heat
 Type 2: Parameter change action - these change the mode for next/previous keys. They are valid
@@ -284,7 +284,7 @@ Type 3: Show menu action. These actions have a _MENU_ in their name. If they are
         to a key, you might not want this pushing behaviour. In this case add UI_ACTION_TOPMENU to the
         action, like UI_ACTION_TOPMENU+UI_ACTION_MENU_XPOSFAST. That will show the menu as top-menu
         closing all othe submenus that were open.
-        
+
    ####################################################################### */
 
 // Use these codes for key detect. The main menu will show the pressed action in the lcd display.
@@ -329,18 +329,18 @@ void ui_check_keys(int &action) {
 inline void ui_check_slow_encoder() {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
-  i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_READ);
-  byte keymask = i2c_readNak(); // Read current key mask
+  HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
+  byte keymask = HAL::i2cReadNak(); // Read current key mask
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-    i2c_write(0x12); // GIOA
-    i2c_stop();
-    i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-    unsigned int keymask = i2c_readAck();
-    keymask = keymask + (i2c_readNak()<<8);
+    HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+    HAL::i2cWrite(0x12); // GIOA
+    HAL::i2cStop();
+    HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+    unsigned int keymask = HAL::i2cReadAck();
+    keymask = keymask + (HAL::i2cReadNak()<<8);
 #endif
-  i2c_stop();
+  HAL::i2cStop();
   // Add I2C click encoder tests here, all other i2c tests and a copy of the encoder test belog in ui_check_slow_keys
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
@@ -348,25 +348,25 @@ inline void ui_check_slow_encoder() {
 void ui_check_slow_keys(int &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
-    i2c_start_wait(UI_I2C_KEY_ADDRESS+I2C_READ);
-    byte keymask = i2c_readNak(); // Read current key mask
+    HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
+    byte keymask = HAL::i2cReadNak(); // Read current key mask
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-    i2c_write(0x12); // GPIOA
-    i2c_stop();
-    i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-    unsigned int keymask = i2c_readAck();
-    keymask = keymask + (i2c_readNak()<<8);
+    HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+    HAL::i2cWrite(0x12); // GPIOA
+    HAL::i2cStop();
+    HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+    unsigned int keymask = HAL::i2cReadAck();
+    keymask = keymask + (HAL::i2cReadNak()<<8);
 #endif
-    i2c_stop();
+    HAL::i2cStop();
     // Add I2C key tests here
     UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
-    UI_KEYS_I2C_BUTTON_LOW(_BV(1),UI_ACTION_OK); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(3),UI_ACTION_BACK); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(4),UI_ACTION_MENU_QUICKSETTINGS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
-    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
+    UI_KEYS_I2C_BUTTON_LOW(_BV(1),UI_ACTION_OK); // push button, connects gnd to pin
+    UI_KEYS_I2C_BUTTON_LOW(_BV(3),UI_ACTION_BACK); // push button, connects gnd to pin
+    UI_KEYS_I2C_BUTTON_LOW(_BV(4),UI_ACTION_MENU_QUICKSETTINGS+UI_ACTION_TOPMENU); // push button, connects gnd to pin
+    UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER+UI_ACTION_TOPMENU); // push button, connects gnd to pin
+    UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin
 /*
   // Button handling for the Adafruit RGB shild
     UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button

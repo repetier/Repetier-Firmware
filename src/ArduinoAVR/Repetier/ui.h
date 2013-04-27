@@ -226,68 +226,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 * Usage:    see Doxygen manual
 **************************************************************************/
 
-#if (__GNUC__ * 100 + __GNUC_MINOR__) < 304
-#error "This library requires AVR-GCC 3.4 or later, update to newer AVR-GCC compiler !"
-#endif
 
-#include <avr/io.h>
-
-/** defines the data direction (reading from I2C device) in i2c_start(),i2c_rep_start() */
-#define I2C_READ    1
-/** defines the data direction (writing to I2C device) in i2c_start(),i2c_rep_start() */
-#define I2C_WRITE   0
-
-/**
- @brief Terminates the data transfer and releases the I2C bus
- @param void
- @return none
- */
-extern void i2c_stop(void);
-/**
- @brief Issues a start condition and sends address and transfer direction
-
- @param    addr address and transfer direction of I2C device
- @retval   0   device accessible
- @retval   1   failed to access device
- */
-extern unsigned char i2c_start(unsigned char addr);
-/**
- @brief Issues a start condition and sends address and transfer direction
-
- If device is busy, use ack polling to wait until device ready
- @param    addr address and transfer direction of I2C device
- @return   none
- */
-extern void i2c_start_wait(unsigned char addr);
-/**
- @brief Send one byte to I2C device
- @param    data  byte to be transfered
- @retval   0 write successful
- @retval   1 write failed
- */
-extern unsigned char i2c_write(unsigned char data);
-/**
- @brief    read one byte from the I2C device, request more data from device
- @return   byte read from I2C device
- */
-extern unsigned char i2c_readAck(void);
-/**
- @brief    read one byte from the I2C device, read is followed by a stop condition
- @return   byte read from I2C device
- */
-extern unsigned char i2c_readNak(void);
-/**
- @brief    read one byte from the I2C device
-
- Implemented as a macro, which calls either i2c_readAck or i2c_readNak
-
- @param    ack 1 send ack, request more data from device<br>
-               0 send nak, read is followed by a stop condition
- @return   byte read from I2C device
- */
-extern unsigned char i2c_read(unsigned char ack);
-#define i2c_read(ack)  (ack) ? i2c_readAck() : i2c_readNak();
-/**@}*/
 
 
 
@@ -554,22 +493,22 @@ void ui_check_slow_keys(int &action) {}
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  i2c_write(0x12); // GIOA
-  i2c_stop();
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = i2c_readAck();
-  keymask = keymask + (i2c_readNak()<<8);
-  i2c_stop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  HAL::i2cWrite(0x12); // GIOA
+  HAL::i2cStop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = HAL::i2cEeadAck();
+  keymask = keymask + (HAL::i2cReadNak()<<8);
+  HAL::i2cStop();
 }
 void ui_check_slow_keys(int &action) {
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  i2c_write(0x12); // GPIOA
-  i2c_stop();
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = i2c_readAck();
-  keymask = keymask + (i2c_readNak()<<8);
-  i2c_stop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  HAL::i2cWrite(0x12); // GPIOA
+  HAL::i2cStop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = HAL::i2cReadAck();
+  keymask = keymask + (HAL::i2cReadNak()<<8);
+  HAL::i2cStop();
   UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
   UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
   UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
@@ -683,13 +622,13 @@ void ui_check_keys(int &action) {
 }
 inline void ui_check_slow_encoder() { }// not used in Viki
 void ui_check_slow_keys(int &action) {
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  i2c_write(0x12); // GPIOA
-  i2c_stop();
-  i2c_start_wait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = i2c_readAck();
-  keymask = keymask + (i2c_readNak()<<8);
-  i2c_stop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+  HAL::i2cWrite(0x12); // GPIOA
+  HAL::i2cStop();
+  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+  unsigned int keymask = HAL::i2cReadAck();
+  keymask = keymask + (HAL::i2cReadNak()<<8);
+  HAL::i2cStop();
   UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_MENU_SDCARD);        // Up button
   UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_MENU_QUICKSETTINGS); // down button
   UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK);              // left button

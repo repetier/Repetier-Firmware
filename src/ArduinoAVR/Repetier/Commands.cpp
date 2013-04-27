@@ -908,9 +908,9 @@ void Commands::executeGCode(GCode *com)
             int beepP = 1000;
             if(com->hasS()) beepS = com->S;
             if(com->hasP()) beepP = com->P;
-            tone(BEEPER_PIN, beepS);
-            delay(beepP);
-            noTone(BEEPER_PIN);
+            HAL::tone(BEEPER_PIN, beepS);
+            HAL::delayMilliseconds(beepP);
+            HAL::noTone(BEEPER_PIN);
         }
         break;
 #endif
