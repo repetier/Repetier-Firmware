@@ -880,16 +880,18 @@ void process_command(GCode *com,byte bufferedCommand)
 #endif
       #ifdef RAMP_ACCELERATION
       case 201: // M201
-        if(GCODE_HAS_X(com)) axis_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-        if(GCODE_HAS_Y(com)) axis_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-        if(GCODE_HAS_Z(com)) axis_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-        if(GCODE_HAS_E(com)) axis_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+        if(GCODE_HAS_X(com)) max_acceleration_units_per_sq_second[0] = com->X;
+        if(GCODE_HAS_Y(com)) max_acceleration_units_per_sq_second[1] = com->Y;
+        if(GCODE_HAS_Z(com)) max_acceleration_units_per_sq_second[2] = com->Z;
+        if(GCODE_HAS_E(com)) max_acceleration_units_per_sq_second[3] = com->E;
+        update_ramps_parameter();
         break;
       case 202: // M202
-        if(GCODE_HAS_X(com)) axis_travel_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-        if(GCODE_HAS_Y(com)) axis_travel_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-        if(GCODE_HAS_Z(com)) axis_travel_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-        if(GCODE_HAS_E(com)) axis_travel_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+        if(GCODE_HAS_X(com)) max_travel_acceleration_units_per_sq_second[0] = com->X;
+        if(GCODE_HAS_Y(com)) max_travel_acceleration_units_per_sq_second[1] = com->Y;
+        if(GCODE_HAS_Z(com)) max_travel_acceleration_units_per_sq_second[2] = com->Z;
+        if(GCODE_HAS_E(com)) max_travel_acceleration_units_per_sq_second[3] = com->E;
+        update_ramps_parameter();
         break;
       #endif
       case 203: // M203 Temperature monitor

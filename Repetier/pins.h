@@ -753,6 +753,11 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_2_PIN         -1
 #define SDPOWER            -1
 #define SDSS               31
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
