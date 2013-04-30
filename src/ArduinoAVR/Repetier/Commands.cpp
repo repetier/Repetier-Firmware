@@ -1041,16 +1041,18 @@ void Commands::executeGCode(GCode *com)
 #endif
 #ifdef RAMP_ACCELERATION
         case 201: // M201
-            if(com->hasX()) axis_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-            if(com->hasY()) axis_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-            if(com->hasZ()) axis_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-            if(com->hasE()) axis_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+            if(com->hasX()) max_acceleration_units_per_sq_second[0] = com->X;
+            if(com->hasY()) max_acceleration_units_per_sq_second[1] = com->Y;
+            if(com->hasZ()) max_acceleration_units_per_sq_second[2] = com->Z;
+            if(com->hasE()) max_acceleration_units_per_sq_second[3] = com->E;
+            Printer::updateDerivedParameter();
             break;
         case 202: // M202
-            if(com->hasX()) axis_travel_steps_per_sqr_second[0] = com->X * axis_steps_per_unit[0];
-            if(com->hasY()) axis_travel_steps_per_sqr_second[1] = com->Y * axis_steps_per_unit[1];
-            if(com->hasZ()) axis_travel_steps_per_sqr_second[2] = com->Z * axis_steps_per_unit[2];
-            if(com->hasE()) axis_travel_steps_per_sqr_second[3] = com->E * axis_steps_per_unit[3];
+            if(com->hasX()) max_travel_acceleration_units_per_sq_second[0] = com->X;
+            if(com->hasY()) max_travel_acceleration_units_per_sq_second[1] = com->Y;
+            if(com->hasZ()) max_travel_acceleration_units_per_sq_second[2] = com->Z;
+            if(com->hasE()) max_travel_acceleration_units_per_sq_second[3] = com->E;
+            Printer::updateDerivedParameter();
             break;
 #endif
         case 203: // M203 Temperature monitor

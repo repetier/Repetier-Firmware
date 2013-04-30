@@ -301,8 +301,6 @@ void PrintLine::calculate_move(float axis_diff[],byte pathOptimize)
     axis_interval[4] = time_for_move/stepsRemaining;
 #endif
     fullSpeed = distance*inv_time_s;
-
-
     //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
     byte is_print_move = isEPositiveMove(); // are we printing
     //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
@@ -1076,7 +1074,7 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
     for(byte i=0; i < NUM_AXIS; i++)
     {
         difference[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
-        axis_diff[i] = difference[i] * inv_axis_steps_per_unit[i];
+        axis_diff[i] = fabs(difference[i] * inv_axis_steps_per_unit[i]);
     }
     printer.filamentPrinted+=axis_diff[3];
 
@@ -1149,12 +1147,8 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
     Com::printFLN(Com::tDBGDeltaSegmentsPerLine, segments_per_line);
 #endif
 
-    printer.flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
-    while(lines_count>=MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
-    {
-        GCode::readFromSerial();
-        Commands::checkForPeriodicalActions();
-    }
+    printer.unsetAllSteppersDisabled(); // Motor is enabled now
+    waitFoxXFreeLines(1);
 
     // Insert dummy moves if necessary
     // Nead to leave at least one slot open for the first split move
@@ -1182,7 +1176,7 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
             {
                 Printer::destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
                 fractional_steps[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
-                axis_diff[i] = fractional_steps[i]*inv_axis_steps_per_unit[i];
+                axis_diff[i] = fabs(fractional_steps[i]*inv_axis_steps_per_unit[i]);
             }
             calculate_dir_delta(fractional_steps, &p->dir, p->delta);
             calculate_distance(axis_diff, p->dir, &p->distance);
@@ -1193,7 +1187,7 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
 
         // Only set fixed on last segment
         if (line_number == num_lines && !pathOptimize)
-            p->joinFlags = FLAG_JOIN_END_FIXED;
+            p->setEndSpeedFixed(true);
 
         if(check_endstops)
             p->flags = FLAG_CHECK_ENDSTOPS;
@@ -2108,10 +2102,6 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         interval = Printer::interval = interval>>1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
-    if(interval<100 || interval>10000000)
-    {
-        OUT_P_L_LN("interv=",interval);
-    }
     return interval;
 }
 #endif

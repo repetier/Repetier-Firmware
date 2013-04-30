@@ -15,7 +15,7 @@
 	"HAL.h"
 	"SdFat.h"
 
-1367049766 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1367152636 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
 1366824989 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
@@ -285,9 +285,10 @@
 	"WProgram.h"
 	"fastio.h"
 
-1367048649 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+1367050073 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
 	"Repetier.h"
 	<compat/twi.h>
+	<avr/io.h>
 
 1366986151 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.h
 
@@ -700,11 +701,11 @@
 
 1365933841 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.h
 
-1366983903 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
+1367052228 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
 1366985997 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
 
-1366986004 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
+1367051701 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
 	"Repetier.h"
 
