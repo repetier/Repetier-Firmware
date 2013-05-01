@@ -609,6 +609,8 @@ int read_raw_temperature(byte type,byte pin) {
     case 51:
     case 52:
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result    
+    case 60: // AD8495 (Delivers 5mV/°C)
+      return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
     case 100: // AD595
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
 #endif
@@ -679,6 +681,8 @@ float conv_raw_temp(byte type,int raw_temp) {
       // Overflow: Set to last value in the table
       return TEMP_INT_TO_FLOAT(newtemp);
     }
+    case 60: // AD8495 (Delivers 5mV/°C vs the AD595's 10mV)
+      return ((float)raw_temp * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
     case 100: // AD595
       //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
       return ((float)raw_temp * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -783,6 +787,8 @@ int conv_temp_raw(byte type,float tempf) {
       // Overflow: Set to last value in the table
       return newraw;
     }
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+      return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
     case 100: // HEATER_USES_AD595
       return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
 #ifdef SUPPORT_MAX6675
