@@ -99,6 +99,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZYX 6
 
 #include "Configuration.h"
+
+#ifdef FEATURE_Z_PROBE
+#define MANUAL_CONTROL true
+#endif
+
 #if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
 #define XY_GANTRY
 #endif
@@ -113,14 +118,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
-#define KOMMA
 #if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<101
 #define EXT0_ANALOG_INPUTS 1
 #define EXT0_SENSOR_INDEX 0
 #define EXT0_ANALOG_CHANNEL EXT0_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define ACCOMMA0 ,
 #else
+#define ACCOMMA0
 #define EXT0_ANALOG_INPUTS 0
 #define EXT0_SENSOR_INDEX EXT0_TEMPSENSOR_PIN
 #define EXT0_ANALOG_CHANNEL
@@ -129,10 +133,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<101
 #define EXT1_ANALOG_INPUTS 1
 #define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
-#define EXT1_ANALOG_CHANNEL KOMMA EXT1_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define EXT1_ANALOG_CHANNEL ACCOMMA0 EXT1_TEMPSENSOR_PIN
+#define ACCOMMA1 ,
 #else
+#define ACCOMMA1 ACCOMMA0
 #define EXT1_ANALOG_INPUTS 0
 #define EXT1_SENSOR_INDEX EXT1_TEMPSENSOR_PIN
 #define EXT1_ANALOG_CHANNEL
@@ -141,10 +145,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if NUM_EXTRUDER>2 && EXT2_TEMPSENSOR_TYPE<101
 #define EXT2_ANALOG_INPUTS 1
 #define EXT2_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
-#define EXT2_ANALOG_CHANNEL KOMMA EXT2_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define EXT2_ANALOG_CHANNEL ACCOMMA1 EXT2_TEMPSENSOR_PIN
+#define ACCOMMA2 ,
 #else
+#define ACCOMMA2 ACCOMMA1
 #define EXT2_ANALOG_INPUTS 0
 #define EXT2_SENSOR_INDEX EXT2_TEMPSENSOR_PIN
 #define EXT2_ANALOG_CHANNEL
@@ -153,10 +157,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if NUM_EXTRUDER>3 && EXT3_TEMPSENSOR_TYPE<101
 #define EXT3_ANALOG_INPUTS 1
 #define EXT3_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS
-#define EXT3_ANALOG_CHANNEL KOMMA EXT3_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define EXT3_ANALOG_CHANNEL ACCOMMA2 EXT3_TEMPSENSOR_PIN
+#define ACCOMMA3 ,
 #else
+#define ACCOMMA3 ACCOMMA2
 #define EXT3_ANALOG_INPUTS 0
 #define EXT3_SENSOR_INDEX EXT3_TEMPSENSOR_PIN
 #define EXT3_ANALOG_CHANNEL
@@ -165,10 +169,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if NUM_EXTRUDER>4 && EXT4_TEMPSENSOR_TYPE<101
 #define EXT4_ANALOG_INPUTS 1
 #define EXT4_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS
-#define EXT4_ANALOG_CHANNEL KOMMA EXT4_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define EXT4_ANALOG_CHANNEL ACCOMMA3 EXT4_TEMPSENSOR_PIN
+#define ACCOMMA4 ,
 #else
+#define ACCOMMA4 ACCOMMA3
 #define EXT4_ANALOG_INPUTS 0
 #define EXT4_SENSOR_INDEX EXT4_TEMPSENSOR_PIN
 #define EXT4_ANALOG_CHANNEL
@@ -177,10 +181,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if NUM_EXTRUDER>5 && EXT5_TEMPSENSOR_TYPE<101
 #define EXT5_ANALOG_INPUTS 1
 #define EXT5_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS
-#define EXT5_ANALOG_CHANNEL KOMMA EXT5_TEMPSENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#define EXT5_ANALOG_CHANNEL ACCOMMA4 EXT5_TEMPSENSOR_PIN
+#define ACCOMMA5 ,
 #else
+#define ACCOMMA5 ACCOMMA4
 #define EXT5_ANALOG_INPUTS 0
 #define EXT5_SENSOR_INDEX EXT5_TEMPSENSOR_PIN
 #define EXT5_ANALOG_CHANNEL
@@ -189,7 +193,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<101
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
-#define BED_ANALOG_CHANNEL KOMMA  HEATED_BED_SENSOR_PIN
+#define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
 #undef KOMMA
 #define KOMMA ,
 #else
@@ -241,6 +245,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define int8 int8_t
 #define uint32 uint32_t
 #define int32 int32_t
+
+#define IGNORE_COORDINATE 99999
 
 /*#if MOTHERBOARD==6 || MOTHERBOARD==62 || MOTHERBOARD==7
 #if MOTHERBOARD!=7

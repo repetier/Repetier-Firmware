@@ -910,16 +910,14 @@ void UIDisplay::parse(char *txt,bool ram)
             break;
         case 'x':
             if(c2>='0' && c2<='3')
-#if NUM_EXTRUDER>0
                 if(c2=='0')
-                    fvalue = (float)(Printer::currentPositionSteps[c2-'0']+current_extruder->xOffset)*inv_axis_steps_per_unit[c2-'0'];
+                    fvalue = Printer::realXPosition();
                 else if(c2=='1')
-                    fvalue = (float)(Printer::currentPositionSteps[c2-'0']+current_extruder->yOffset)*inv_axis_steps_per_unit[c2-'0'];
+                    fvalue = Printer::realYPosition();
+                else if(c2=='2')
+                    fvalue = Printer::realZPosition();
                 else
-                    fvalue = (float)Printer::currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
-#else
-                fvalue = (float)Printer::currentPositionSteps[c2-'0']*inv_axis_steps_per_unit[c2-'0'];
-#endif
+                    fvalue = (float)Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3];
             addFloat(fvalue,3,2);
             break;
         case 'y':

@@ -1,11 +1,14 @@
 Version 0.90alpha
   Switch heater 1/heater2 and sensore 1/2 for Megatronics 2.0.
+  Switch temp sensore 0/1 for Gen1.5
   Optimized path planner.
+  Fixed shock on z-level switches.
   Changed serial handling.
   Moved hardware dependend code into HAL.[h|cpp]
   Compatible with Code::Blocks for Arduino.
   Definition of homing order axis.
-  
+  Added z-probing.
+  Added auto leveling of heated bed.
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.

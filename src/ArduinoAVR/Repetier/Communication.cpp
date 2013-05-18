@@ -67,6 +67,7 @@ FSTRINGVALUE(Com::tSoftwareReset,"Software Reset")
 FSTRINGVALUE(Com::tUnknownCommand,"Unknown command:")
 FSTRINGVALUE(Com::tFreeRAM,"Free RAM:")
 FSTRINGVALUE(Com::tXColon,"X:")
+FSTRINGVALUE(Com::tSpaceXColon," X:")
 FSTRINGVALUE(Com::tSpaceYColon," Y:")
 FSTRINGVALUE(Com::tSpaceZColon," Z:")
 FSTRINGVALUE(Com::tSpaceEColon," E:")
@@ -199,6 +200,26 @@ FSTRINGVALUE(Com::tDBGDeltaMeasurerDelta,"Measure/delta =")
 FSTRINGVALUE(Com::tDBGDeltaMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tDBGDeltaMeasuredOriginSet,"Measured origin set. Measurement reset.")
 #endif // STEP_COUNTER
+#ifdef DEBUG_STEPCOUNT
+FSTRINGVALUE(Com::tDBGMissedSteps,"Missed steps:")
+#endif // DEBUG_STEPCOUNT
+#if FEATURE_Z_PROBE
+FSTRINGVALUE(Com::tZProbe,"Z-probe:")
+FSTRINGVALUE(Com::tZProbeAverage,"Z-probe average height:")
+FSTRINGVALUE(Com::tZProbeZReset,"Reset Z height")
+FSTRINGVALUE(Com::tZProbeState,"Z-probe state:")
+FSTRINGVALUE(Com::tZProbeFailed,"Z-probe failed")
+FSTRINGVALUE(Com::tZProbeStartScript,Z_PROBE_START_SCRIPT)
+FSTRINGVALUE(Com::tZProbeEndScript,Z_PROBE_FINISHED_SCRIPT)
+FSTRINGVALUE(Com::tHitZProbe,"Hit z-probe")
+FSTRINGVALUE(Com::tAutolevelReset,"Autolevel matrix reset")
+#endif
+FSTRINGVALUE(Com::tAutolevelEnabled,"Autoleveling enabled")
+FSTRINGVALUE(Com::tAutolevelDisabled,"Autoleveling disabled")
+#if MAX_HARDWARE_ENDSTOP_Z
+FSTRINGVALUE(Com::tZProbeMax,"Z-probe max:")
+FSTRINGVALUE(Com::tZProbePrinterHeight,"Printer height:")
+#endif // MAX_HARDWARE_ENDSTOP_Z
 //FSTRINGVALUE(Com::,"")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
@@ -206,6 +227,22 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #if EEPROM_MODE==0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
+#if FEATURE_Z_PROBE
+FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height")
+FSTRINGVALUE(Com::tZProbeOffsetX,"Z-probe offset x")
+FSTRINGVALUE(Com::tZProbeOffsetY,"Z-probe offset y")
+FSTRINGVALUE(Com::tZProbeSpeed,"Z-probe speed")
+FSTRINGVALUE(Com::tZProbeSpeedXY,"Z-probe x-y-speed")
+FSTRINGVALUE(Com::tZProbeX1,"Z-probe X1")
+FSTRINGVALUE(Com::tZProbeY1,"Z-probe Y1")
+FSTRINGVALUE(Com::tZProbeX2,"Z-probe X2")
+FSTRINGVALUE(Com::tZProbeY2,"Z-probe Y2")
+FSTRINGVALUE(Com::tZProbeX3,"Z-probe X3")
+FSTRINGVALUE(Com::tZProbeY3,"Z-probe Y3")
+#endif
+#if FEATURE_AUTOLEVEL
+FSTRINGVALUE(Com::tAutolevelActive,"Autolevel active (1/0)")
+#endif
 FSTRINGVALUE(Com::tConfigStoredEEPROM,"Configuration stored to EEPROM.")
 FSTRINGVALUE(Com::tConfigLoadedEEPROM,"Configuration loaded from EEPROM.")
 FSTRINGVALUE(Com::tEPRConfigResetDefaults,"Configuration reset to defaults.")
@@ -409,6 +446,19 @@ void Com::printNumber(unsigned long n) {
 
   print(str);
 }
+void Com::printArrayFLN(FSTRINGPARAM(text),float *arr,byte n,byte digits) {
+    printF(text);
+    for(byte i=0; i<n; i++)
+        printF(Com::tSpace,arr[i],digits);
+    println();
+}
+void Com::printArrayFLN(FSTRINGPARAM(text),long *arr,byte n) {
+    printF(text);
+    for(byte i=0; i<n; i++)
+        printF(Com::tSpace,arr[i]);
+    println();
+}
+
 void Com::printFloat(float number, uint8_t digits)
 {
   if (isnan(number)) {

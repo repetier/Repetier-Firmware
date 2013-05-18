@@ -27,6 +27,9 @@
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT     4
 #define PRINTER_FLAG0_FORCE_CHECKSUM        8
+#define PRINTER_FLAG0_MANUAL_MOVE_MODE      16
+#define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
+#define PRINTER_FLAG0_ZPROBEING             64
 
 class Printer
 {
@@ -47,6 +50,7 @@ public:
 #endif
     unsigned long timer;              ///< used for acceleration/deceleration timing
     unsigned long stepNumber;         ///< Step number in current move.
+    static long coordinateOffset[3];
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     long advance_executed;             ///< Executed advance steps
@@ -55,6 +59,7 @@ public:
     unsigned int advance_lin_set;
 #endif
     static long currentPositionSteps[4];     ///< Position in steps from origin.
+    static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
 #if DRIVE_SYSTEM==3
 #ifdef STEP_COUNTER
@@ -62,6 +67,9 @@ public:
 #endif
     static long currentDeltaPositionSteps[4];
     long maxDeltaPositionSteps;
+#endif
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+    static long stepsRemainingAtZHit;
 #endif
 #ifdef SOFTWARE_LEVELING
     long levelingP1[3];
@@ -77,6 +85,9 @@ public:
     byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
     float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
     int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
+#endif
+#if FEATURE_AUTOLEVEL
+    static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
     float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -289,6 +300,29 @@ public:
     static inline bool isAnyTempsensorDefect() {
         return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
     }
+    static inline bool isManualMoveMode() {
+        return (flag0 & PRINTER_FLAG0_MANUAL_MOVE_MODE);
+    }
+    static inline void setManualMoveMode(bool on) {
+        flag0 = (on ? flag0 | PRINTER_FLAG0_MANUAL_MOVE_MODE : flag0 & ~PRINTER_FLAG0_MANUAL_MOVE_MODE);
+    }
+    static inline bool isAutolevelActive() {
+        return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE)!=0;
+    }
+    static void setAutolevelActive(bool on);
+    static inline void setZProbingActive(bool on) {
+        flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING : flag0 & ~PRINTER_FLAG0_ZPROBEING);
+    }
+    static inline bool isZProbingActive() {
+        return (flag0 & PRINTER_FLAG0_ZPROBEING);
+    }
+    static inline bool isZProbeHit() {
+#if FEATURE_Z_PROBE
+        return (Z_PROBE_ON_HIGH ? READ(Z_PROBE_PIN) : !READ(Z_PROBE_PIN));
+#else
+        return false;
+#endif
+    }
     inline void executeXYGantrySteps()
     {
 #if defined(XY_GANTRY)
@@ -371,11 +405,17 @@ public:
     }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();
+    static void updateCurrentPosition();
     static void kill(byte only_steppers);
     static void updateAdvanceFlags();
     static void setup();
     static void defaultLoopActions();
     static byte setDestinationStepsFromGCode(GCode *com);
+    static void realPosition(float &xp,float &yp,float &zp);
+    static float realXPosition();
+    static float realYPosition();
+    static float realZPosition();
+    static void moveTo(float x,float y,float z,float e,float f);
 #if DRIVE_SYSTEM==3
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
 {
@@ -383,7 +423,19 @@ public:
     currentDeltaPositionSteps[1] = yaxis;
     currentDeltaPositionSteps[2] = zaxis;
 }
-
+#endif
+#if MAX_HARDWARE_ENDSTOP_Z
+    static float runZMaxProbe();
+#endif
+#if FEATURE_Z_PROBE
+    static float runZProbe(bool first,bool last);
+    static void waitForZProbeStart();
+#if FEATURE_AUTOLEVEL
+    static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
+    static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
+    static void resetTransformationMatrix(bool silent);
+    static void buildTransformationMatrix(float h1,float h2,float h3);
+#endif
 #endif
 };
 extern Printer printer;

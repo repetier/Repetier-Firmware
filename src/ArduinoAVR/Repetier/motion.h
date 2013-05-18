@@ -159,10 +159,12 @@ public:
     {
         return flags & FLAG_WARMUP;
     }
-    inline byte getWaitForXLinesFilled() {
+    inline byte getWaitForXLinesFilled()
+    {
         return primaryAxis;
     }
-    inline void setWaitForXLinesFilled(byte b) {
+    inline void setWaitForXLinesFilled(byte b)
+    {
         primaryAxis = b;
     }
     inline bool isExtruderForwardMove()
@@ -185,15 +187,19 @@ public:
     {
         return flags & FLAG_CHECK_ENDSTOPS;
     }
-    inline bool isNominalMove() {
+    inline bool isNominalMove()
+    {
         return flags & FLAG_NOMINAL;
     }
-    inline bool setNominalMove() {
+    inline bool setNominalMove()
+    {
         flags |= FLAG_NOMINAL;
     }
-    inline void checkEndstops() {
-        if(isCheckEndstops()) {
-           if(isXNegativeMove() && Printer::isXMinEndstopHit())
+    inline void checkEndstops()
+    {
+        if(isCheckEndstops())
+        {
+            if(isXNegativeMove() && Printer::isXMinEndstopHit())
                 setXMoveFinished();
             if(isYNegativeMove() && Printer::isYMinEndstopHit())
                 setYMoveFinished();
@@ -206,7 +212,24 @@ public:
         if(isZNegativeMove() && Printer::isZMinEndstopHit())
             setZMoveFinished();
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+        {
+#if MAX_HARDWARE_ENDSTOP_Z
+            Printer::stepsRemainingAtZHit = stepsRemaining;
+#endif
             setZMoveFinished();
+        }
+        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+            setZMoveFinished();
+#if FEATURE_Z_PROBE
+        if(Printer::isZProbingActive())
+        {
+            if(isZNegativeMove() && Printer::isZProbeHit())
+            {
+                setZMoveFinished();
+                Printer::stepsRemainingAtZHit = stepsRemaining;
+            }
+        }
+#endif
     }
     inline void setXMoveFinished()
     {
@@ -288,22 +311,28 @@ public:
     {
         return (dir & 240)==128;
     }
-    inline bool isNoMove() {
+    inline bool isNoMove()
+    {
         return (dir & 240)==0;
     }
-    inline bool isXYZMove() {
+    inline bool isXYZMove()
+    {
         return dir & 112;
     }
-    inline bool isMoveOfAxis(byte axis) {
+    inline bool isMoveOfAxis(byte axis)
+    {
         return (dir & (16<<axis));
     }
-    inline bool setMoveOfAxis(byte axis) {
+    inline bool setMoveOfAxis(byte axis)
+    {
         dir |= 16<<axis;
     }
-    inline bool setPositiveDirectionForAxis(byte axis) {
+    inline bool setPositiveDirectionForAxis(byte axis)
+    {
         dir |= 1<<axis;
     }
-    inline static void resetPathPlanner() {
+    inline static void resetPathPlanner()
+    {
         lines_count = 0;
         lines_pos = lines_write_pos;
     }
@@ -349,7 +378,8 @@ public:
     {
         return printer.stepNumber <= accelSteps;
     }
-    inline bool isFullstepping() {
+    inline bool isFullstepping()
+    {
         return halfstep == 4;
     }
     inline bool startXStep()
@@ -478,10 +508,12 @@ public:
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
-    static inline void previousPlannerIndex(byte &p) {
+    static inline void previousPlannerIndex(byte &p)
+    {
         p = (p ? p-1 : MOVE_CACHE_SIZE-1);
     }
-    static inline void nextPlannerIndex(byte& p) {
+    static inline void nextPlannerIndex(byte& p)
+    {
         p = (p==MOVE_CACHE_SIZE-1?0:p+1);
     }
 #if DRIVE_SYSTEM==3

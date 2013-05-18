@@ -288,6 +288,11 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->advanceL = EXT5_ADVANCE_L;
 #endif
 #endif // NUM_EXTRUDER > 5
+#if FEATURE_AUTOLEVEL
+    Printer::setAutolevelActive(false);
+    Printer::resetTransformationMatrix(true);
+#endif
+    initalizeUncached();
     Extruder::selectExtruderById(current_extruder->id);
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
@@ -295,6 +300,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #else
     Com::printErrorF(tNoEEPROMSupport);
 #endif
+
 }
 
 void EEPROM::storeDataIntoEEPROM(byte corrupted)
@@ -371,7 +377,11 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_float(EPR_BACKLASH_Y,0);
     HAL::epr_set_float(EPR_BACKLASH_Z,0);
 #endif
-
+#if FEATURE_AUTOLEVEL
+    HAL::epr_set_byte(EPR_AUTOLEVEL_ACTIVE,Printer::isAutolevelActive());
+    for(byte i=0; i<9; i++)
+        HAL::epr_set_float(EPR_AUTOLEVEL_MATRIX+((int)i)<<2,Printer::autolevelTransformation[i]);
+#endif
     // now the extruder
     for(byte i=0; i<NUM_EXTRUDER; i++)
     {
@@ -417,11 +427,26 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     {
         HAL::epr_set_long(EPR_PRINTING_TIME,0);
         HAL::epr_set_float(EPR_PRINTING_DISTANCE,0);
+        initalizeUncached();
     }
     // Save version and build checksum
     HAL::epr_set_byte(EPR_VERSION,EEPROM_PROTOCOL_VERSION);
     HAL::epr_set_byte(EPR_INTEGRITY_BYTE,computeChecksum());
 #endif
+}
+void EEPROM::initalizeUncached()
+{
+    HAL::epr_set_float(EPR_Z_PROBE_HEIGHT,Z_PROBE_HEIGHT);
+    HAL::epr_set_float(EPR_Z_PROBE_SPEED,Z_PROBE_SPEED);
+    HAL::epr_set_float(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
+    HAL::epr_set_float(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
+    HAL::epr_set_float(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
+    HAL::epr_set_float(EPR_Z_PROBE_X1,Z_PROBE_X1);
+    HAL::epr_set_float(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
+    HAL::epr_set_float(EPR_Z_PROBE_X2,Z_PROBE_X2);
+    HAL::epr_set_float(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
+    HAL::epr_set_float(EPR_Z_PROBE_X3,Z_PROBE_X3);
+    HAL::epr_set_float(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
 }
 
 void EEPROM::readDataFromEEPROM()
@@ -480,6 +505,15 @@ void EEPROM::readDataFromEEPROM()
     printer.backlashY = HAL::epr_get_float(EPR_BACKLASH_Y);
     printer.backlashZ = HAL::epr_get_float(EPR_BACKLASH_Z);
 #endif
+#if FEATURE_AUTOLEVEL
+    if(version>2)
+    {
+        for(byte i=0; i<9; i++)
+            Printer::autolevelTransformation[i] = HAL::epr_get_float(EPR_AUTOLEVEL_MATRIX+((int)i)<<2);
+        Printer::setAutolevelActive(HAL::epr_get_byte(EPR_AUTOLEVEL_ACTIVE));
+        Com::printArrayFLN(Com::tInfo,Printer::autolevelTransformation,9,6);
+    }
+#endif
     // now the extruder
     for(byte i=0; i<NUM_EXTRUDER; i++)
     {
@@ -517,6 +551,20 @@ void EEPROM::readDataFromEEPROM()
     if(version!=EEPROM_PROTOCOL_VERSION)
     {
         Com::printInfoFLN(Com::tEPRProtocolChanged);
+        if(version<3)
+        {
+            HAL::epr_set_float(EPR_Z_PROBE_HEIGHT,Z_PROBE_HEIGHT);
+            HAL::epr_set_float(EPR_Z_PROBE_SPEED,Z_PROBE_SPEED);
+            HAL::epr_set_float(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
+            HAL::epr_set_float(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
+            HAL::epr_set_float(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
+            HAL::epr_set_float(EPR_Z_PROBE_X1,Z_PROBE_X1);
+            HAL::epr_set_float(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
+            HAL::epr_set_float(EPR_Z_PROBE_X2,Z_PROBE_X2);
+            HAL::epr_set_float(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
+            HAL::epr_set_float(EPR_Z_PROBE_X3,Z_PROBE_X3);
+            HAL::epr_set_float(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Extruder::selectExtruderById(current_extruder->id);
@@ -631,6 +679,22 @@ void EEPROM::writeSettings()
     writeFloat(EPR_OPS_RETRACT_DISTANCE,Com::tEPROPSRetractionLength);
     writeFloat(EPR_OPS_RETRACT_BACKLASH,Com::tEPROPSRetractionBacklash);
 #endif
+#if FEATURE_Z_PROBE
+    writeFloat(EPR_Z_PROBE_HEIGHT,Com::tZProbeHeight);
+    writeFloat(EPR_Z_PROBE_SPEED,Com::tZProbeSpeed);
+    writeFloat(EPR_Z_PROBE_XY_SPEED,Com::tZProbeSpeedXY);
+    writeFloat(EPR_Z_PROBE_X_OFFSET,Com::tZProbeOffsetX);
+    writeFloat(EPR_Z_PROBE_Y_OFFSET,Com::tZProbeOffsetY);
+    writeFloat(EPR_Z_PROBE_X1,Com::tZProbeX1);
+    writeFloat(EPR_Z_PROBE_Y1,Com::tZProbeY1);
+    writeFloat(EPR_Z_PROBE_X2,Com::tZProbeX2);
+    writeFloat(EPR_Z_PROBE_Y2,Com::tZProbeY2);
+    writeFloat(EPR_Z_PROBE_X3,Com::tZProbeX3);
+    writeFloat(EPR_Z_PROBE_Y3,Com::tZProbeY3);
+#endif
+#if FEATURE_AUTOLEVEL
+    writeByte(EPR_AUTOLEVEL_ACTIVE,Com::tAutolevelActive);
+#endif
 #if HAVE_HEATED_BED
     writeByte(EPR_BED_HEAT_MANAGER,Com::tEPRBedHeatManager);
 #ifdef TEMP_PID
@@ -696,7 +760,7 @@ byte EEPROM::computeChecksum()
 
 void EEPROM::writeExtruderPrefix(uint pos)
 {
-    if(pos<EEPROM_EXTRUDER_OFFSET) return;
+    if(pos<EEPROM_EXTRUDER_OFFSET || pos>=800) return;
     int n = (pos-EEPROM_EXTRUDER_OFFSET)/EEPROM_EXTRUDER_LENGTH+1;
     Com::printF(Com::tExtrDot,n);
     Com::print(' ');

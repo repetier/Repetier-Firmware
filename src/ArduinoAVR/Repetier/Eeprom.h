@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 2
+#define EEPROM_PROTOCOL_VERSION 3
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -75,6 +75,20 @@ have problems with other modules using the eeprom */
 #define EPR_BACKLASH_Y            161
 #define EPR_BACKLASH_Z            165
 
+#define EPR_Z_PROBE_X_OFFSET      800
+#define EPR_Z_PROBE_Y_OFFSET      804
+#define EPR_Z_PROBE_HEIGHT        808
+#define EPR_Z_PROBE_SPEED         812
+#define EPR_Z_PROBE_X1            816
+#define EPR_Z_PROBE_Y1            820
+#define EPR_Z_PROBE_X2            824
+#define EPR_Z_PROBE_Y2            828
+#define EPR_Z_PROBE_X3            832
+#define EPR_Z_PROBE_Y3            836
+#define EPR_Z_PROBE_XY_SPEED      840
+#define EPR_AUTOLEVEL_MATRIX      844
+#define EPR_AUTOLEVEL_ACTIVE      880
+
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
 #define EEPROM_EXTRUDER_LENGTH 100
@@ -115,11 +129,90 @@ public:
 
     static void init();
     static void initBaudrate();
-    static void storeDataIntoEEPROM(byte corrupted);
+    static void storeDataIntoEEPROM(byte corrupted=0);
     static void readDataFromEEPROM();
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
+
+    static inline float zProbeSpeed() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_SPEED);
+#else
+        return Z_PROBE_SPEED;
+#endif
+    }
+    static inline float zProbeXYSpeed() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_XY_SPEED);
+#else
+        return Z_PROBE_XY_SPEED;
+#endif
+    }
+    static inline float zProbeXOffset() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_X_OFFSET);
+#else
+        return Z_PROBE_X_OFFSET;
+#endif
+    }
+    static inline float zProbeYOffset() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_Y_OFFSET);
+#else
+        return Z_PROBE_Y_OFFSET;
+#endif
+    }
+    static inline float zProbeHeight() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_HEIGHT);
+#else
+        return Z_PROBE_HEIGHT;
+#endif
+    }
+    static inline float zProbeX1() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_X1);
+#else
+        return Z_PROBE_X1;
+#endif
+    }
+    static inline float zProbeY1() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_Y1);
+#else
+        return Z_PROBE_Y1;
+#endif
+    }
+    static inline float zProbeX2() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_X2);
+#else
+        return Z_PROBE_X2;
+#endif
+    }
+    static inline float zProbeY2() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_Y2);
+#else
+        return Z_PROBE_Y2;
+#endif
+    }
+    static inline float zProbeX3() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_X3);
+#else
+        return Z_PROBE_X3;
+#endif
+    }
+    static inline float zProbeY3() {
+#if FEATURE_Z_PROBE
+        return HAL::epr_get_float(EPR_Z_PROBE_Y3);
+#else
+        return Z_PROBE_Y3;
+#endif
+    }
+    static void initalizeUncached();
 };
 #endif

@@ -452,7 +452,36 @@ const short temptable_8[NUMTEMPS_8][2] PROGMEM =
     {422,1520},{511,1440},{621,1360},{755,1280},{918,1200},{1114,1120},{1344,1040},{1608,960},{1902,880},{2216,800},{2539,720},
     {2851,640},{3137,560},{3385,480},{3588,400},{3746,320},{3863,240},{3945,160},{4002,80},{4038,0},{4061,-80},{4075,-160}
 };
-
+#define NUMTEMPS_9 67 // 100k Honeywell 135-104LAG-J01
+const short temptable_9[NUMTEMPS_9][2] PROGMEM = {
+   {1*4, 941*8},{19*4, 362*8},{37*4, 299*8}, //top rating 300C
+   {55*4, 266*8},{73*4, 245*8},{91*4, 229*8},{109*4, 216*8},{127*4, 206*8},{145*4, 197*8},{163*4, 190*8},{181*4, 183*8},{199*4, 177*8},
+   {217*4, 171*8},{235*4, 166*8},{253*4, 162*8},{271*4, 157*8},{289*4, 153*8},{307*4, 149*8},{325*4, 146*8},{343*4, 142*8},{361*4, 139*8},
+   {379*4, 135*8},{397*4, 132*8},{415*4, 129*8},{433*4, 126*8},{451*4, 123*8},{469*4, 121*8},{487*4, 118*8},{505*4, 115*8},{523*4, 112*8},
+   {541*4, 110*8},{559*4, 107*8},{577*4, 105*8},{595*4, 102*8},{613*4, 99*8},{631*4, 97*8},{649*4, 94*8},{667*4, 92*8},{685*4, 89*8},
+   {703*4, 86*8},{721*4, 84*8},{739*4, 81*8},{757*4, 78*8},{775*4, 75*8},{793*4, 72*8},{811*4, 69*8},{829*4, 66*8},{847*4, 62*8},
+   {865*4, 59*8},{883*4, 55*8},{901*4, 51*8},{919*4, 46*8},{937*4, 41*8},
+   {955*4, 35*8},{973*4, 27*8},{991*4, 17*8},{1009*4, 1*8},{1023*4, 0}  //to allow internal 0 degrees C
+};
+#define NUMTEMPS_10 20 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
+const short temptable_10[NUMTEMPS_10][2] PROGMEM = {
+   {1*4, 704*8},{54*4, 216*8},{107*4, 175*8},{160*4, 152*8},{213*4, 137*8},{266*4, 125*8},{319*4, 115*8},{372*4, 106*8},{425*4, 99*8},
+   {478*4, 91*8},{531*4, 85*8},{584*4, 78*8},{637*4, 71*8},{690*4, 65*8},{743*4, 58*8},{796*4, 50*8},{849*4, 42*8},{902*4, 31*8},
+   {955*4, 17*8},{1008*4, 0}
+};
+#define NUMTEMPS_11 31 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
+const short temptable_11[NUMTEMPS_11][2] PROGMEM = {
+	{1*4, 936*8},{36*4, 300*8},{71*4, 246*8},{106*4, 218*8},{141*4, 199*8},{176*4, 185*8},{211*4, 173*8},{246*4, 163*8},{281*4, 155*8},
+	{316*4, 147*8},{351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},
+	{631*4, 97*8},{666*4, 92*8},{701*4, 87*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},
+	{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0}
+};
+#define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pullup)
+const short temptable_12[NUMTEMPS_12][2] PROGMEM = {
+   {1*4, 929*8},{36*4, 299*8},{71*4, 246*8},{106*4, 217*8},{141*4, 198*8},{176*4, 184*8},{211*4, 173*8},{246*4, 163*8},{281*4, 154*8},{316*4, 147*8},
+   {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
+   {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
+};
 #if NUM_TEMPS_USERTHERMISTOR0>0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -462,7 +491,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2>0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[8] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0>0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -479,8 +508,13 @@ const short * const temptables[8] PROGMEM = {(short int *)&temptable_1[0][0],(sh
         ,0
 #endif
         ,(short int *)&temptable_8[0][0]
+        ,(short int *)&temptable_9[0][0]
+        ,(short int *)&temptable_10[0][0]
+        ,(short int *)&temptable_11[0][0]
+        ,(short int *)&temptable_12[0][0]
                                             };
-const byte temptables_num[8] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8};
+const byte temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+    NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12};
 
 
 void TemperatureController::updateCurrentTemperature()
@@ -498,6 +532,10 @@ void TemperatureController::updateCurrentTemperature()
     case 6:
     case 7:
     case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
     case 97:
     case 98:
     case 99:
@@ -506,8 +544,7 @@ void TemperatureController::updateCurrentTemperature()
     case 50: // User defined PTC table
     case 51:
     case 52:
-        currentTemperature = (osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result
-        break;
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
     case 100: // AD595
         currentTemperature = (osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS));
         break;
@@ -532,6 +569,10 @@ void TemperatureController::updateCurrentTemperature()
     case 6:
     case 7:
     case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
     {
         type--;
         byte num = pgm_read_byte(&temptables_num[type])<<1;
@@ -586,6 +627,8 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
         break;
     }
+    case 60: // AD8495 (Delivers 5mV/°C vs the AD595's 10mV)
+        currentTemperatureC = ((float)currentTemperature * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
         currentTemperatureC = ((float)currentTemperature * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -656,6 +699,10 @@ void TemperatureController::setTargetTemperature(float target)
     case 6:
     case 7:
     case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
     {
         type--;
         byte num = pgm_read_byte(&temptables_num[type])<<1;
@@ -707,6 +754,9 @@ void TemperatureController::setTargetTemperature(float target)
         targetTemperature = newraw;
         break;
     }
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+        targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
+        break;
     case 100: // HEATER_USES_AD595
         targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
         break;
@@ -939,16 +989,16 @@ int read_max6675(byte ss_pin)
     PRR0 &= ~(1<<PRSPI);
 #endif
     SPCR = (1<<MSTR) | (1<<SPE) | (1<<SPR0);
-    digitalWrite(ss_pin, 0);  // enable TT_MAX6675
-    delay(1);    // ensure 100ns delay - a bit extra is fine
+    HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
+    HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
     SPDR = 0;   // read MSB
     while ((SPSR & (1<<SPIF)) == 0);
     max6675_temp = SPDR;
     max6675_temp <<= 8;
     SPDR = 0; // read LSB
     while ((SPSR & (1<<SPIF)) == 0);
-    max6675_temp |= SPDR;
-    digitalWrite(ss_pin, 1);  // disable TT_MAX6675
+    HAL::max6675_temp |= SPDR;
+    HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
     return max6675_temp & 4 ? 2000 : max6675_temp >> 3; // thermocouple open?
 }
 #endif

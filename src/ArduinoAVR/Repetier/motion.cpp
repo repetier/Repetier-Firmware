@@ -468,6 +468,16 @@ void PrintLine::updateTrapezoids()
     byte previousIndex = lines_write_pos;
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
+#if DRIVE_SYSTEM!=3
+    if((previous->primaryAxis==2 && act->primaryAxis!=2) || (previous->primaryAxis!=2 && act->primaryAxis==2)) {
+        previous->setEndSpeedFixed(true);
+        act->setStartSpeedFixed(true);
+        act->updateStepsParameter();
+        firstLine->unblock();
+        return;
+    }
+#endif // DRIVE_SYSTEM
+
     computeMaxJunctionSpeed(previous,act); // Set maximum junction speed if we have a real move before
     if(previous->isEOnlyMove() != act->isEOnlyMove())
     {
@@ -532,8 +542,8 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
 #endif
     if(jerk>printer.maxJerk)
         factor = printer.maxJerk/jerk;
-#if (DRIVE_SYSTEM!=3)
-    if((previous->dir | current->dir) & 64)
+#if DRIVE_SYSTEM!=3
+    if((previous->dir & current->dir) & 64)
     {
         float dz = fabs(current->speedZ-previous->speedZ);
         if(dz>printer.maxZJerk)
@@ -726,7 +736,9 @@ inline float PrintLine::safeSpeed()
 #if DRIVE_SYSTEM != 3
     if(isZMove())
     {
-        if(fabs(speedZ)>printer.maxZJerk*0.5)
+        if(primaryAxis==2)
+            safe = printer.maxZJerk*0.5*fullSpeed/fabs(speedZ);
+        else if(fabs(speedZ)>printer.maxZJerk*0.5)
             safe = RMath::min(safe,printer.maxZJerk*0.5*fullSpeed/fabs(speedZ));
     }
 #endif
@@ -764,28 +776,11 @@ byte PrintLine::insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines)
     }
     return 0;
 }
-void log_long_array(FSTRINGPARAM(ptr),long *arr)
-{
-    Com::printF(ptr);
-    for(byte i=0; i<4; i++)
-    {
-        Com::print(' ');
-        Com::print(arr[i]);
-    }
-    Com::println();
-}
-void log_float_array(FSTRINGPARAM(ptr),float *arr)
-{
-    Com::printF(ptr);
-    for(byte i=0; i<3; i++)
-        Com::printF(Com::tSpace,arr[i]);
-    Com::printFLN(Com::tSpace,arr[3]);
-}
 void PrintLine::logLine()
 {
 #ifdef DEBUG_QUEUE_MOVE
     Com::printFLN(Com::tDBGId,(int)this);
-    log_long_array(Com::tDBGDelta,delta);
+    Com::printArrayFLN(Com::tDBGDelta,delta);
     Com::printFLN(Com::tDBGDir,dir);
     Com::printFLN(Com::tDBGFlags,flags);
     Com::printFLN(Com::tDBGFullSpeed,fullSpeed);
@@ -2092,8 +2087,8 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #ifdef DEBUG_STEPCOUNT
         if(cur->totalStepsRemaining)
         {
-            OUT_P_L("Missed steps:",cur->totalStepsRemaining);
-            OUT_P_L_LN(",",cur->stepsRemaining);
+            Com::printF(Com::tDBGMissedSteps,cur->totalStepsRemaining);
+            Com::printFLN(Com::tComma,cur->stepsRemaining);
         }
 #endif
         removeCurrentLineForbidInterrupt();

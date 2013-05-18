@@ -65,6 +65,7 @@ FSTRINGVAR(tUnknownCommand)
 FSTRINGVAR(tFreeRAM)
 FSTRINGVAR(tXColon)
 FSTRINGVAR(tSlash)
+FSTRINGVAR(tSpaceXColon)
 FSTRINGVAR(tSpaceYColon)
 FSTRINGVAR(tSpaceZColon)
 FSTRINGVAR(tSpaceEColon)
@@ -196,14 +197,50 @@ FSTRINGVAR(tDBGDeltaMeasurerDelta)
 FSTRINGVAR(tDBGDeltaMeasurementReset)
 FSTRINGVAR(tDBGDeltaMeasuredOriginSet)
 #endif // STEP_COUNTER
+#ifdef DEBUG_STEPCOUNT
+FSTRINGVAR(tDBGMissedSteps)
+#endif
+#if FEATURE_Z_PROBE
+FSTRINGVAR(tZProbe)
+FSTRINGVAR(tZProbeState)
+FSTRINGVAR(tZProbeFailed)
+FSTRINGVAR(tZProbeStartScript)
+FSTRINGVAR(tZProbeEndScript)
+FSTRINGVAR(tHitZProbe)
+FSTRINGVAR(tZProbeAverage)
+FSTRINGVAR(tZProbeZReset)
+FSTRINGVAR(tAutolevelReset)
+#endif
+FSTRINGVAR(tAutolevelEnabled)
+FSTRINGVAR(tAutolevelDisabled)
+#if MAX_HARDWARE_ENDSTOP_Z
+FSTRINGVAR(tZProbeMax)
+FSTRINGVAR(tZProbePrinterHeight)
+#endif
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)
 #endif // WAITING_IDENTIFIER
 
 #if EEPROM_MODE==0
-FSTRINGVAR(tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
+FSTRINGVAR(tNoEEPROMSupport)
 #else
+#if FEATURE_Z_PROBE
+FSTRINGVAR(tZProbeHeight)
+FSTRINGVAR(tZProbeOffsetX)
+FSTRINGVAR(tZProbeOffsetY)
+FSTRINGVAR(tZProbeSpeed)
+FSTRINGVAR(tZProbeSpeedXY)
+FSTRINGVAR(tZProbeX1)
+FSTRINGVAR(tZProbeY1)
+FSTRINGVAR(tZProbeX2)
+FSTRINGVAR(tZProbeY2)
+FSTRINGVAR(tZProbeX3)
+FSTRINGVAR(tZProbeY3)
+#endif
+#if FEATURE_AUTOLEVEL
+FSTRINGVAR(tAutolevelActive)
+#endif
 FSTRINGVAR(tConfigStoredEEPROM)
 FSTRINGVAR(tConfigLoadedEEPROM)
 FSTRINGVAR(tEPRConfigResetDefaults)
@@ -320,6 +357,8 @@ static void printFLN(FSTRINGPARAM(text),long value);
 static void printFLN(FSTRINGPARAM(text),unsigned long value);
 static void printFLN(FSTRINGPARAM(text),const char *msg);
 static void printFLN(FSTRINGPARAM(text),float value,byte digits=2);
+static void printArrayFLN(FSTRINGPARAM(text),float *arr,byte n=4,byte digits=2);
+static void printArrayFLN(FSTRINGPARAM(text),long *arr,byte n=4);
 static void print(long value);
 static inline void print(unsigned long value) {printNumber(value);}
 static inline void print(int value) {print((long)value);}

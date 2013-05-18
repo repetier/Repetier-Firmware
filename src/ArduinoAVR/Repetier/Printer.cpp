@@ -53,10 +53,56 @@ long Printer::yMinSteps;
 long Printer::zMinSteps;
 unsigned long Printer::interval;
 long Printer::currentPositionSteps[4];
+float Printer::currentPosition[3];
 long Printer::destinationSteps[4];
+long Printer::coordinateOffset[3] = {0,0,0};
 byte Printer::flag0 = 0;
 byte Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 byte Printer::stepsPerTimerCall = 1;
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+long Printer::stepsRemainingAtZHit;
+#endif
+#if FEATURE_AUTOLEVEL
+float Printer::autolevelTransformation[9]; ///< Transformation matrix
+#endif
+
+void Printer::realPosition(float &xp,float &yp,float &zp) {
+    long x = currentPositionSteps[0]-printer.offsetX+coordinateOffset[0];
+    xp = (float)x*inv_axis_steps_per_unit[0];
+    long y = currentPositionSteps[1]-printer.offsetY+coordinateOffset[1];
+    yp = (float)y*inv_axis_steps_per_unit[1];
+    long z = currentPositionSteps[2]+coordinateOffset[2];
+    zp = (float)z*inv_axis_steps_per_unit[2];
+#if FEATURE_Z_PROBE
+    if(isZProbingActive())
+        xp+=EEPROM::zProbeXOffset();
+#endif // FEATURE_Z_PROBE
+#if FEATURE_Z_PROBE
+    if(isZProbingActive())
+        yp+=EEPROM::zProbeYOffset();
+#endif // FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
+    if(isAutolevelActive())
+        transformFromPrinter(xp,yp,zp,xp,yp,zp);
+#endif // FEATURE_AUTOLEVEL
+}
+float Printer::realXPosition() {
+    float x,y,z;
+    realPosition(x,y,z);
+    return x;
+}
+
+float Printer::realYPosition() {
+    float x,y,z;
+    realPosition(x,y,z);
+    return y;
+}
+
+float Printer::realZPosition() {
+    float x,y,z;
+    realPosition(x,y,z);
+    return z;
+}
 
 void Printer::constrainDestinationCoords() {
 #if min_software_endstop_x == true
@@ -163,6 +209,32 @@ void Printer::updateAdvanceFlags() {
 #endif
 
 }
+void Printer::moveTo(float x,float y,float z,float e,float f) {
+    if(x!=IGNORE_COORDINATE)
+    destinationSteps[0] = x*axis_steps_per_unit[0];
+    if(y!=IGNORE_COORDINATE)
+    destinationSteps[1] = y*axis_steps_per_unit[1];
+    if(z!=IGNORE_COORDINATE)
+    destinationSteps[2] = z*axis_steps_per_unit[2];
+    if(e!=IGNORE_COORDINATE)
+    destinationSteps[3] = e*axis_steps_per_unit[3];
+    if(f!=IGNORE_COORDINATE)
+    printer.feedrate = f;
+#if DRIVE_SYSTEM == 3
+                PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+#else
+                PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+#endif
+}
+void Printer::updateCurrentPosition() {
+    for(byte i=0;i<3;i++)
+        currentPosition[i] = (float)currentPositionSteps[i]*inv_axis_steps_per_unit[i];
+#if FEATURE_AUTOLEVEL
+    transformFromPrinter(currentPosition[0],currentPosition[1],currentPosition[2],currentPosition[0],currentPosition[1],currentPosition[2]);
+#endif // FEATURE_AUTOLEVEL
+    //Com::printArrayFLN(Com::tP,currentPosition,3,4);
+}
+
 /**
   \brief Sets the destination coordinates to values stored in com.
 
@@ -178,33 +250,32 @@ byte Printer::setDestinationStepsFromGCode(GCode *com)
     {
         UI_STATUS(UI_TEXT_PRINTING);
     }
-    if(com->hasX())
-    {
-        p = convertToMM(com->X*axis_steps_per_unit[0]);
-        if(relative_mode)
-            destinationSteps[0] = currentPositionSteps[0]+p;
-        else
-            destinationSteps[0] = p+printer.offsetX;
+    float x,y,z;
+    if(!relative_mode) {
+        if(!com->hasX()) x = currentPosition[0]; else currentPosition[0] = x = convertToMM(com->X);
+        if(!com->hasY()) y = currentPosition[1]; else currentPosition[1] = y = convertToMM(com->Y);
+        if(!com->hasZ()) z = currentPosition[2]; else currentPosition[2] = z = convertToMM(com->Z);
+    } else {
+        if(com->hasX()) currentPosition[0] += (x = convertToMM(com->X)); else x = 0;
+        if(com->hasY()) currentPosition[1] += (y = convertToMM(com->Y)); else y = 0;
+        if(com->hasZ()) currentPosition[2] += (z = convertToMM(com->Z)); else z = 0;
     }
-    else destinationSteps[0] = currentPositionSteps[0];
-    if(com->hasY())
-    {
-        p = convertToMM(com->Y*axis_steps_per_unit[1]);
-        if(relative_mode)
-            destinationSteps[1] = currentPositionSteps[1]+p;
-        else
-            destinationSteps[1] = p+printer.offsetY;
+#if FEATURE_AUTOLEVEL
+    if(isAutolevelActive())
+        transformToPrinter(x,y,z,x,y,z);
+#endif // FEATURE_AUTOLEVEL
+    long xSteps = x*axis_steps_per_unit[0];
+    long ySteps = y*axis_steps_per_unit[1];
+    long zSteps = z*axis_steps_per_unit[2];
+    if(relative_mode) {
+        destinationSteps[0] = currentPositionSteps[0]+xSteps;
+        destinationSteps[1] = currentPositionSteps[1]+ySteps;
+        destinationSteps[2] = currentPositionSteps[2]+zSteps;
+    } else {
+        destinationSteps[0] = xSteps+coordinateOffset[0]+printer.offsetX;
+        destinationSteps[1] = ySteps+coordinateOffset[1]+printer.offsetY;
+        destinationSteps[2] = zSteps+coordinateOffset[2];
     }
-    else destinationSteps[1] = currentPositionSteps[1];
-    if(com->hasZ())
-    {
-        p = convertToMM(com->Z*axis_steps_per_unit[2]);
-        if(relative_mode)
-            destinationSteps[2] = currentPositionSteps[2]+p;
-        else
-            destinationSteps[2] = p;
-    }
-    else destinationSteps[2] = currentPositionSteps[2];
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E*axis_steps_per_unit[3]);
@@ -294,39 +365,45 @@ void Printer::setup() {
 #if X_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_X
     SET_INPUT(X_MIN_PIN);
 #if ENDSTOP_PULLUP_X_MIN
-    WRITE(X_MIN_PIN,HIGH);
+    PULLUP(X_MIN_PIN,HIGH);
 #endif
 #endif
 #if Y_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Y
     SET_INPUT(Y_MIN_PIN);
 #if ENDSTOP_PULLUP_Y_MIN
-    WRITE(Y_MIN_PIN,HIGH);
+    PULLUP(Y_MIN_PIN,HIGH);
 #endif
 #endif
 #if Z_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Z
     SET_INPUT(Z_MIN_PIN);
 #if ENDSTOP_PULLUP_Z_MIN
-    WRITE(Z_MIN_PIN,HIGH);
+    PULLUP(Z_MIN_PIN,HIGH);
 #endif
 #endif
 #if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
     SET_INPUT(X_MAX_PIN);
 #if ENDSTOP_PULLUP_X_MAX
-    WRITE(X_MAX_PIN,HIGH);
+    PULLUP(X_MAX_PIN,HIGH);
 #endif
 #endif
 #if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
     SET_INPUT(Y_MAX_PIN);
 #if ENDSTOP_PULLUP_Y_MAX
-    WRITE(Y_MAX_PIN,HIGH);
+    PULLUP(Y_MAX_PIN,HIGH);
 #endif
 #endif
 #if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
     SET_INPUT(Z_MAX_PIN);
 #if ENDSTOP_PULLUP_Z_MAX
-    WRITE(Z_MAX_PIN,HIGH);
+    PULLUP(Z_MAX_PIN,HIGH);
 #endif
 #endif
+#if FEATURE_Z_PROBE && Z_PROBE_PIN>-1
+    SET_INPUT(Z_PROBE_PIN);
+#if Z_PROBE_PULLUP
+    PULLUP(Z_PROBE_PIN,HIGH);
+#endif
+#endif // FEATURE_FEATURE_Z_PROBE
 #if FAN_PIN>-1
     SET_OUTPUT(FAN_PIN);
     WRITE(FAN_PIN,LOW);
@@ -369,7 +446,9 @@ void Printer::setup() {
     current_control_init(); // Set current if it is firmware controlled
 #endif
     microstep_init();
-
+#if FEATURE_AUTOLEVEL
+    Printer::resetTransformationMatrix(true);
+#endif // FEATURE_AUTOLEVEL
 #if USE_OPS==1
     printer.opsMode = OPS_MODE;
     printer.opsMinDistance = OPS_MIN_DISTANCE;
@@ -453,3 +532,139 @@ void Printer::defaultLoopActions()
 
 }
 
+void Printer::setAutolevelActive(bool on) {
+#if FEATURE_AUTOLEVEL
+    if(on == isAutolevelActive()) return;
+    flag0 = (on ? flag0 | PRINTER_FLAG0_AUTOLEVEL_ACTIVE : flag0 & ~PRINTER_FLAG0_AUTOLEVEL_ACTIVE);
+    if(on) {
+        Com::printInfoFLN(Com::tAutolevelEnabled);
+    } else {
+        Com::printInfoFLN(Com::tAutolevelDisabled);
+    }
+    Printer::updateCurrentPosition();
+#endif // FEATURE_AUTOLEVEL    if(isAutolevelActive()==on) return;
+}
+#if MAX_HARDWARE_ENDSTOP_Z
+float Printer::runZMaxProbe() {
+    Commands::waitUntilEndOfAllMoves();
+    long probeDepth = 2*(printer.zMaxSteps-printer.zMinSteps);
+    stepsRemainingAtZHit = -1;
+    setZProbingActive(true);
+    PrintLine::moveRelativeDistanceInSteps(0,0,probeDepth,0,Z_PROBE_SPEED,true,true);
+    if(stepsRemainingAtZHit<0) {
+        Com::printErrorFLN(Com::tZProbeFailed);
+        return -1;
+    }
+    setZProbingActive(false);
+    currentPositionSteps[2] -= stepsRemainingAtZHit;
+    probeDepth -= stepsRemainingAtZHit;
+    float distance = (float)probeDepth*inv_axis_steps_per_unit[2];
+    Com::printF(Com::tZProbeMax,distance);
+    Com::printF(Com::tSpaceXColon,realXPosition());
+    Com::printFLN(Com::tSpaceYColon,realYPosition());
+    PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,Z_PROBE_SPEED,true,true);
+    return distance;
+}
+#endif
+
+#if FEATURE_Z_PROBE
+float Printer::runZProbe(bool first,bool last) {
+    if(first)
+        GCode::executeFString(Com::tZProbeStartScript);
+    Commands::waitUntilEndOfAllMoves();
+    long probeDepth = 2*(printer.zMaxSteps-printer.zMinSteps);
+    stepsRemainingAtZHit = -1;
+    long offx = axis_steps_per_unit[0]*EEPROM::zProbeXOffset();
+    long offy = axis_steps_per_unit[0]*EEPROM::zProbeYOffset();
+    PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
+    waitForZProbeStart();
+    setZProbingActive(true);
+    PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,Z_PROBE_SPEED,true,true);
+    if(stepsRemainingAtZHit<0) {
+        Com::printErrorFLN(Com::tZProbeFailed);
+        return -1;
+    }
+    setZProbingActive(false);
+    currentPositionSteps[2] += stepsRemainingAtZHit;
+    probeDepth -= stepsRemainingAtZHit;
+    float distance = (float)probeDepth*inv_axis_steps_per_unit[2]+EEPROM::zProbeHeight();
+    Com::printF(Com::tZProbe,distance);
+    Com::printF(Com::tSpaceXColon,realXPosition());
+    Com::printFLN(Com::tSpaceYColon,realYPosition());
+    PrintLine::moveRelativeDistanceInSteps(0,0,probeDepth,0,Z_PROBE_SPEED,true,true);
+    PrintLine::moveRelativeDistanceInSteps(offx,offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
+    if(last)
+        GCode::executeFString(Com::tZProbeEndScript);
+    return distance;
+}
+void Printer::waitForZProbeStart() {
+#if Z_PROBE_WAIT_BEFORE_TEST
+    if(isZProbeHit()) return;
+#if UI_DISPLAY_TYPE!=0
+    uid.setStatusP(Com::tHitZProbe);
+    uid.refreshPage();
+#endif
+    while(!isZProbeHit()) {
+
+    }
+    HAL::delayMilliseconds(30);
+    while(isZProbeHit()) {}
+    HAL::delayMilliseconds(30);
+    UI_CLEAR_STATUS;
+#endif
+}
+#if FEATURE_AUTOLEVEL
+void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
+    transX = x*autolevelTransformation[0]+y*autolevelTransformation[3]+z*autolevelTransformation[6];
+    transY = x*autolevelTransformation[1]+y*autolevelTransformation[4]+z*autolevelTransformation[7];
+    transZ = x*autolevelTransformation[2]+y*autolevelTransformation[5]+z*autolevelTransformation[8];
+}
+
+void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
+    transX = x*autolevelTransformation[0]+y*autolevelTransformation[1]+z*autolevelTransformation[2];
+    transY = x*autolevelTransformation[3]+y*autolevelTransformation[4]+z*autolevelTransformation[5];
+    transZ = x*autolevelTransformation[6]+y*autolevelTransformation[7]+z*autolevelTransformation[8];
+}
+
+void Printer::resetTransformationMatrix(bool silent) {
+    autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
+    autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] =
+    autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
+    if(!silent)
+        Com::printInfoFLN(Com::tAutolevelReset);
+}
+
+void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
+    float ax = EEPROM::zProbeX2()-EEPROM::zProbeX1();
+    float ay = EEPROM::zProbeY2()-EEPROM::zProbeY1();
+    float az = h1-h2;
+    float bx = EEPROM::zProbeX3()-EEPROM::zProbeX1();
+    float by = EEPROM::zProbeY3()-EEPROM::zProbeY1();
+    float bz = h1-h3;
+    // First z direction
+    autolevelTransformation[6] = ay*bz-az*by;
+    autolevelTransformation[7] = az*bx-ax*bz;
+    autolevelTransformation[8] = ax*by-ay*bx;
+    float len = sqrt(autolevelTransformation[6]*autolevelTransformation[6]+autolevelTransformation[7]*autolevelTransformation[7]+autolevelTransformation[8]*autolevelTransformation[8]);
+    if(autolevelTransformation[8]<0) len = -len;
+    autolevelTransformation[6] /= len;
+    autolevelTransformation[7] /= len;
+    autolevelTransformation[8] /= len;
+    autolevelTransformation[3] = 0;
+    autolevelTransformation[4] = autolevelTransformation[8];
+    autolevelTransformation[5] = -autolevelTransformation[7];
+    // cross(y,z)
+    autolevelTransformation[0] = autolevelTransformation[4]*autolevelTransformation[8]-autolevelTransformation[5]*autolevelTransformation[7];
+    autolevelTransformation[1] = autolevelTransformation[5]*autolevelTransformation[6]-autolevelTransformation[3]*autolevelTransformation[8];
+    autolevelTransformation[2] = autolevelTransformation[3]*autolevelTransformation[7]-autolevelTransformation[4]*autolevelTransformation[6];
+    len = sqrt(autolevelTransformation[0]*autolevelTransformation[0]+autolevelTransformation[2]*autolevelTransformation[2]);
+    autolevelTransformation[0] /= len;
+    autolevelTransformation[2] /= len;
+    len = sqrt(autolevelTransformation[4]*autolevelTransformation[4]+autolevelTransformation[5]*autolevelTransformation[5]);
+    autolevelTransformation[4] /= len;
+    autolevelTransformation[5] /= len;
+    //Com::printArrayFLN(Com::tInfo,autolevelTransformation,9,5);
+}
+#endif
+
+#endif
