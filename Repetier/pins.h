@@ -865,8 +865,8 @@ STEPPER_CURRENT_CONTROL
   #define E0_STEP_PIN      19     
   #define E0_DIR_PIN       18     
   #define E0_ENABLE_PIN    25     
-  #define TEMP_0_PIN      0 
-  #define TEMP_1_PIN      1    
+  #define TEMP_0_PIN      1 
+  #define TEMP_1_PIN      0    
   #define HEATER_0_PIN    4    
   #define HEATER_1_PIN    3    
     
