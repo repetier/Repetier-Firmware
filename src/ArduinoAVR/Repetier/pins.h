@@ -483,16 +483,16 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN           46
 
 #define HEATER_0_PIN       2    // EXTRUDER 1
-#define HEATER_1_PIN       3    // EXTRUDER 2
-#define HEATER_2_PIN       6    // EXTRUDER 3
+#define HEATER_2_PIN       3    // EXTRUDER 2
+#define HEATER_3_PIN       6    // EXTRUDER 3
 //optional FAN1 can be used as 4th heater output: #define HEATER_3_PIN       8    // EXTRUDER 4
-#define HEATER_BED_PIN     9    // BED
+#define HEATER_1_PIN     9    // BED
 
 #define TEMP_0_PIN         15   // ANALOG NUMBERING
-#define TEMP_1_PIN         14   // ANALOG NUMBERING
-#define TEMP_2_PIN         13   // ANALOG NUMBERING
+#define TEMP_2_PIN         14   // ANALOG NUMBERING
+#define TEMP_3_PIN         13   // ANALOG NUMBERING
 //optional for extruder 4 or chamber: #define TEMP_2_PIN         12   // ANALOG NUMBERING
-#define TEMP_BED_PIN       11   // ANALOG NUMBERING
+#define TEMP_1_PIN       11   // ANALOG NUMBERING
 
 #define SDPOWER            -1
 #define SDSS               53

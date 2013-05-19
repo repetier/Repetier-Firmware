@@ -9,6 +9,8 @@ Version 0.90alpha
   Definition of homing order axis.
   Added z-probing.
   Added auto leveling of heated bed.
+  Fixed pin assignment for RUMBA
+  Added ui support for 3. etxruder
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.

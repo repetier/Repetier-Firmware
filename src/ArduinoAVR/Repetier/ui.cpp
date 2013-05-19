@@ -1820,6 +1820,9 @@ void UIDisplay::executeAction(int action)
 #if NUM_EXTRUDER>1
                 Extruder::setTemperatureForExtruder(0,1);
 #endif
+#if NUM_EXTRUDER>2
+                Extruder::setTemperatureForExtruder(0,2);
+#endif
 #if HAVE_HEATED_BED==true
                 Extruder::setHeatedBedTemperature(0);
 #endif
@@ -1833,6 +1836,9 @@ void UIDisplay::executeAction(int action)
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
 #endif
+#if NUM_EXTRUDER>2
+            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
+#endif
 #if HAVE_HEATED_BED==true
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
 #endif
@@ -1843,6 +1849,9 @@ void UIDisplay::executeAction(int action)
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
 #endif
+#if NUM_EXTRUDER>2
+            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
+#endif
 #if HAVE_HEATED_BED==true
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif
@@ -1852,6 +1861,9 @@ void UIDisplay::executeAction(int action)
             Extruder::setTemperatureForExtruder(0,0);
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(0,1);
+#endif
+#if NUM_EXTRUDER>2
+            Extruder::setTemperatureForExtruder(0,2);
 #endif
 #if HAVE_HEATED_BED==true
             Extruder::setHeatedBedTemperature(0);
@@ -1868,6 +1880,11 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_EXTRUDER1_OFF:
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(0,1);
+#endif
+            break;
+        case UI_ACTION_EXTRUDER2_OFF:
+#if NUM_EXTRUDER>2
+            Extruder::setTemperatureForExtruder(0,2);
 #endif
             break;
 #if USE_OPS==1
@@ -1896,6 +1913,11 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER>1
             Extruder::selectExtruderById(1);
+#endif
+            break;
+        case UI_ACTION_SELECT_EXTRUDER2:
+#if NUM_EXTRUDER>2
+            Extruder::selectExtruderById(2);
 #endif
             break;
 #if EEPROM_MODE!=0
