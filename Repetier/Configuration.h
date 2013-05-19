@@ -171,6 +171,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/°C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -280,6 +281,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/°C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -538,7 +540,7 @@ To prevent a long deviation from the target zone, this value limits the lower va
 A good start is 30 lower then the optimal value. You need to leave room for cooling.
  Overridden if EEPROM activated.
 */
-#define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 255
+#define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
 /** P-gain.  Overridden if EEPROM activated. */
 #define HEATED_BED_PID_PGAIN   196
 /** I-gain  Overridden if EEPROM activated.*/

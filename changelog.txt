@@ -1,3 +1,7 @@
+Version 0.83 17-03-2013
+	Switch thermistor pins 0/1 for gen1.4 and 1.5
+	Fixed hash start after z height changes. Could cause lost steps depending on settings!
+	
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
   Extruder cooler fan always on if temp>50°C
