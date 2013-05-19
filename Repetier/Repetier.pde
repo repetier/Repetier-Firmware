@@ -194,7 +194,7 @@ float axis_steps_per_unit[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEP
 float inv_axis_steps_per_unit[4]; ///< Inverse of axis_steps_per_unit for faster conversion
 float max_feedrate[4] = {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}; ///< Maximum allowed feedrate.
 float homing_feedrate[3] = {HOMING_FEEDRATE_X, HOMING_FEEDRATE_Y, HOMING_FEEDRATE_Z};
-byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
+// byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN}; // Never referenced in code so Z2 not added
 #ifdef RAMP_ACCELERATION
 //  float max_start_speed_units_per_second[4] = MAX_START_SPEED_UNITS_PER_SECOND; ///< Speed we can use, without acceleration.
   long max_acceleration_units_per_sq_second[4] = {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
@@ -372,6 +372,9 @@ SET_OUTPUT(ANALYZER_CH7);
   SET_OUTPUT(X_STEP_PIN);
   SET_OUTPUT(Y_STEP_PIN);
   SET_OUTPUT(Z_STEP_PIN);
+#if defined(Z2_STEP_PIN) && Z2_STEP_PIN>-1
+  SET_OUTPUT(Z2_STEP_PIN);
+#endif
   
 
   //Initialize Dir Pins
@@ -384,6 +387,9 @@ SET_OUTPUT(ANALYZER_CH7);
 #if Z_DIR_PIN>-1
   SET_OUTPUT(Z_DIR_PIN);
 #endif
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+  SET_OUTPUT(Z2_DIR_PIN);
+#endif  
 
   //Steppers default to disabled.
 #if X_ENABLE_PIN > -1
@@ -397,6 +403,10 @@ SET_OUTPUT(ANALYZER_CH7);
 #if Z_ENABLE_PIN > -1
   if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
   SET_OUTPUT(Z_ENABLE_PIN);
+#endif
+#if defined(Z2_ENABLE_PIN) && Z2_ENABLE_PIN>-1
+  if(!Z_ENABLE_ON) WRITE(Z2_ENABLE_PIN,HIGH);
+  SET_OUTPUT(Z2_ENABLE_PIN);
 #endif
 
   //endstop pullups
@@ -1204,8 +1214,14 @@ inline long bresenham_step() {
 			}
 			if(curd->dir & 4) {
 				WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+                                WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+#endif
 			} else {
 				WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+				WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+#endif
 			}
 		}
 	#if USE_OPS==1 || defined(USE_ADVANCE)
@@ -1322,6 +1338,9 @@ inline long bresenham_step() {
 				if(curd->dir & 64) {
 					if((cur->error[2] -= curd->deltaSteps[2]) < 0) {
 						WRITE(Z_STEP_PIN,HIGH);
+                                              #if defined(Z2_STEP_PIN) && Z2_STEP_PIN>-1
+                                                WRITE(Z2_STEP_PIN,HIGH);
+                                              #endif
 						printer_state.countZSteps += ( cur->dir & 4 ? 1 : -1 );
 						cur->error[2] += curd_errupd;
 					#ifdef DEBUG_STEPCOUNT
@@ -1336,6 +1355,9 @@ inline long bresenham_step() {
 				WRITE(X_STEP_PIN,LOW);
 				WRITE(Y_STEP_PIN,LOW);
 				WRITE(Z_STEP_PIN,LOW);
+                              #if defined(Z2_STEP_PIN) && Z2_STEP_PIN>-1
+                                WRITE(Z2_STEP_PIN,LOW);
+                              #endif
 				stepsPerSegRemaining--;
 				if (!stepsPerSegRemaining) {
 					cur->numDeltaSegments--;
@@ -1366,8 +1388,14 @@ inline long bresenham_step() {
 						}
 						if(curd->dir & 4) {
 							WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+							WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+#endif
 						} else {
 							WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+							WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+#endif
 						}
 					} else {
 						// Release the last segment
@@ -1820,8 +1848,14 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #endif
       if(cur->dir & 4) {
         WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+        WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+#endif        
       } else {
         WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+#if defined(Z2_DIR_PIN) && Z2_DIR_PIN>-1
+        WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+#endif        
       }
 #if USE_OPS==1 || defined(USE_ADVANCE)
       if((printer_state.flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT)==0) // Set direction if no advance/OPS enabled
@@ -2028,6 +2062,9 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     if(cur->dir & 64) {
       if((cur->error[2] -= cur->delta[2]) < 0) {
         WRITE(Z_STEP_PIN,HIGH);
+#if defined(Z2_STEP_PIN) && Z2_STEP_PIN>-1
+        WRITE(Z2_STEP_PIN,HIGH);
+#endif
         cur->error[2] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
         cur->totalStepsRemaining--;
@@ -2044,6 +2081,9 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     WRITE(X_STEP_PIN,LOW);
     WRITE(Y_STEP_PIN,LOW);
     WRITE(Z_STEP_PIN,LOW);
+#if defined(Z2_STEP_PIN) && Z2_STEP_PIN>-1
+    WRITE(Z2_STEP_PIN,LOW);
+#endif
     ANALYZER_OFF(ANALYZER_CH1);
     ANALYZER_OFF(ANALYZER_CH2);
     ANALYZER_OFF(ANALYZER_CH3);
