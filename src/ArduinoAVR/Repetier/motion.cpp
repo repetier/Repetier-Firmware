@@ -1481,42 +1481,14 @@ long PrintLine::bresenhamStep() // Version for delta printer
         //Determine direction of movement
         if (curd)
         {
-            if(curd->dir & 1)
-            {
-                WRITE(X_DIR_PIN,!INVERT_X_DIR);
-            }
-            else
-            {
-                WRITE(X_DIR_PIN,INVERT_X_DIR);
-            }
-            if(curd->dir & 2)
-            {
-                WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
-            }
-            else
-            {
-                WRITE(Y_DIR_PIN,INVERT_Y_DIR);
-            }
-            if(curd->dir & 4)
-            {
-                WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
-            }
-            else
-            {
-                WRITE(Z_DIR_PIN,INVERT_Z_DIR);
-            }
+            Printer::setXDirection(curd->dir & 1);
+            Printer::setYDirection(curd->dir & 2);
+            Printer::setZDirection(curd->dir & 4);
         }
 #if defined(USE_ADVANCE)
         if(!printer.isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
-            if(cur->isEPositiveMove())
-            {
-                Extruder::setDirection(1);
-            }
-            else
-            {
-                Extruder::setDirection(0);
-            }
+        Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
         long h = HAL::mulu16xu16to32(cur->vStart,cur->advanceL);
         int tred = ((
@@ -1628,7 +1600,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 {
                     if((cur->error[2] -= curd->deltaSteps[2]) < 0)
                     {
-                        WRITE(Z_STEP_PIN,HIGH);
+                        cur->startZStep();
                         printer.countZSteps += ( cur->dir & 4 ? 1 : -1 );
                         cur->error[2] += curd_errupd;
 #ifdef DEBUG_STEPCOUNT
@@ -1995,7 +1967,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             {
                 if((cur->error[2] -= cur->delta[2]) < 0)
                 {
-                    WRITE(Z_STEP_PIN,HIGH);
+                    cur->startZStep();
                     cur->error[2] += cur_errupd;
 #ifdef DEBUG_STEPCOUNT
                     cur->totalStepsRemaining--;

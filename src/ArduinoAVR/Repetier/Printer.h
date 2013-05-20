@@ -107,9 +107,9 @@ public:
     unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     float maxJerk;                    ///< Maximum allowed jerk in mm/s
     float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
-    long offsetX;                     ///< X-offset for different extruder positions.
-    long offsetY;                     ///< Y-offset for different extruder positions.
-    unsigned int vMaxReached;         ///< MAximumu reached speed
+    float offsetX;                     ///< X-offset for different extruder positions.
+    float offsetY;                     ///< Y-offset for different extruder positions.
+    unsigned int vMaxReached;         ///< Maximumu reached speed
     unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     float filamentPrinted;            ///< mm of filament printed since counting started
     byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
@@ -159,12 +159,18 @@ public:
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
 #endif
+#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+        WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
+#endif
     }
     /** \brief Disable stepper motor for y direction. */
     static inline void disableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
         WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+#endif
+#if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
+        WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
 #endif
     }
     /** \brief Disable stepper motor for z direction. */
@@ -173,12 +179,18 @@ public:
 #if (Z_ENABLE_PIN > -1)
         WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
+#if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
+        WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+#endif
     }
     /** \brief Enable stepper motor for x direction. */
     static inline void  enableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
+#endif
+#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+        WRITE(X2_ENABLE_PIN,X_ENABLE_ON);
 #endif
     }
     /** \brief Enable stepper motor for y direction. */
@@ -187,6 +199,9 @@ public:
 #if (Y_ENABLE_PIN > -1)
         WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
+#if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
+        WRITE(Y2_ENABLE_PIN,Y_ENABLE_ON);
+#endif
     }
     /** \brief Enable stepper motor for z direction. */
     static inline void  enableZStepper()
@@ -194,35 +209,59 @@ public:
 #if (Z_ENABLE_PIN > -1)
         WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
+#if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
+        WRITE(Z2_ENABLE_PIN,Z_ENABLE_ON);
+#endif
     }
-    static inline void setXDirection(bool positive) {
-           if(positive)
+    static inline void setXDirection(bool positive)
+    {
+        if(positive)
         {
             WRITE(X_DIR_PIN,!INVERT_X_DIR);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_DIR_PIN,!INVERT_X_DIR);
+#endif
         }
         else
         {
             WRITE(X_DIR_PIN,INVERT_X_DIR);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_DIR_PIN,INVERT_X_DIR);
+#endif
         }
     }
-    static inline void setYDirection(bool positive) {
+    static inline void setYDirection(bool positive)
+    {
         if(positive)
         {
             WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+#if FEATURE_TWO_YSTEPPER
+            WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
+#endif
         }
         else
         {
             WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+#if FEATURE_TWO_YSTEPPER
+            WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
+#endif
         }
     }
-    static inline void setZDirection(bool positive) {
+    static inline void setZDirection(bool positive)
+    {
         if(positive)
         {
             WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+#if FEATURE_TWO_ZSTEPPER
+            WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+#endif
         }
         else
         {
             WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+#if FEATURE_TWO_ZSTEPPER
+            WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+#endif
         }
     }
     inline byte isAdvanceActivated()
@@ -297,26 +336,33 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
     }
-    static inline bool isAnyTempsensorDefect() {
+    static inline bool isAnyTempsensorDefect()
+    {
         return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
     }
-    static inline bool isManualMoveMode() {
+    static inline bool isManualMoveMode()
+    {
         return (flag0 & PRINTER_FLAG0_MANUAL_MOVE_MODE);
     }
-    static inline void setManualMoveMode(bool on) {
+    static inline void setManualMoveMode(bool on)
+    {
         flag0 = (on ? flag0 | PRINTER_FLAG0_MANUAL_MOVE_MODE : flag0 & ~PRINTER_FLAG0_MANUAL_MOVE_MODE);
     }
-    static inline bool isAutolevelActive() {
+    static inline bool isAutolevelActive()
+    {
         return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE)!=0;
     }
     static void setAutolevelActive(bool on);
-    static inline void setZProbingActive(bool on) {
+    static inline void setZProbingActive(bool on)
+    {
         flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING : flag0 & ~PRINTER_FLAG0_ZPROBEING);
     }
-    static inline bool isZProbingActive() {
+    static inline bool isZProbingActive()
+    {
         return (flag0 & PRINTER_FLAG0_ZPROBEING);
     }
-    static inline bool isZProbeHit() {
+    static inline bool isZProbeHit()
+    {
 #if FEATURE_Z_PROBE
         return (Z_PROBE_ON_HIGH ? READ(Z_PROBE_PIN) : !READ(Z_PROBE_PIN));
 #else
@@ -330,24 +376,36 @@ public:
         {
             ANALYZER_ON(ANALYZER_CH2);
             WRITE(X_STEP_PIN,HIGH);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_STEP_PIN,HIGH);
+#endif
             motorX += 2;
         }
         else if(motorX >= 2)
         {
             ANALYZER_ON(ANALYZER_CH2);
             WRITE(X_STEP_PIN,HIGH);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_STEP_PIN,HIGH);
+#endif
             motorX -= 2;
         }
         if(motorY <= -2)
         {
             ANALYZER_ON(ANALYZER_CH3);
             WRITE(Y_STEP_PIN,HIGH);
+#if FEATURE_TWO_YSTEPPER
+            WRITE(Y2_STEP_PIN,HIGH);
+#endif
             motorY += 2;
         }
         else if(motorY >= 2)
         {
             ANALYZER_ON(ANALYZER_CH3);
             WRITE(Y_STEP_PIN,HIGH);
+#if FEATURE_TWO_YSTEPPER
+            WRITE(Y2_STEP_PIN,HIGH);
+#endif
             motorY -= 2;
         }
 #endif
@@ -357,6 +415,15 @@ public:
         WRITE(X_STEP_PIN,LOW);
         WRITE(Y_STEP_PIN,LOW);
         WRITE(Z_STEP_PIN,LOW);
+#if FEATURE_TWO_XSTEPPER
+        WRITE(X2_STEP_PIN,LOW);
+#endif
+#if FEATURE_TWO_YSTEPPER
+        WRITE(Y2_STEP_PIN,LOW);
+#endif
+#if FEATURE_TWO_ZSTEPPER
+        WRITE(Z2_STEP_PIN,LOW);
+#endif
         ANALYZER_OFF(ANALYZER_CH1);
         ANALYZER_OFF(ANALYZER_CH2);
         ANALYZER_OFF(ANALYZER_CH3);
@@ -403,6 +470,26 @@ public:
 #endif
         if(DISABLE_Z) disableZStepper();
     }
+    static inline float realXPosition()
+    {
+        return currentPosition[0];
+    }
+
+    static inline float realYPosition()
+    {
+        return currentPosition[1];
+    }
+
+    static inline float realZPosition()
+    {
+        return currentPosition[2];
+    }
+    static inline void realPosition(float &xp,float &yp,float &zp)
+    {
+        xp = currentPosition[0];
+        yp = currentPosition[1];
+        zp = currentPosition[2];
+    }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();
     static void updateCurrentPosition();
@@ -411,18 +498,15 @@ public:
     static void setup();
     static void defaultLoopActions();
     static byte setDestinationStepsFromGCode(GCode *com);
-    static void realPosition(float &xp,float &yp,float &zp);
-    static float realXPosition();
-    static float realYPosition();
-    static float realZPosition();
     static void moveTo(float x,float y,float z,float e,float f);
+    static void moveToReal(float x,float y,float z,float e,float f);
 #if DRIVE_SYSTEM==3
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
-{
-    currentDeltaPositionSteps[0] = xaxis;
-    currentDeltaPositionSteps[1] = yaxis;
-    currentDeltaPositionSteps[2] = zaxis;
-}
+    {
+        currentDeltaPositionSteps[0] = xaxis;
+        currentDeltaPositionSteps[1] = yaxis;
+        currentDeltaPositionSteps[2] = zaxis;
+    }
 #endif
 #if MAX_HARDWARE_ENDSTOP_Z
     static float runZMaxProbe();

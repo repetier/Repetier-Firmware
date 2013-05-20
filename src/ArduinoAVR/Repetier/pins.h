@@ -1450,6 +1450,73 @@ STEPPER_CURRENT_CONTROL
 
 #endif
 
+
+/****************************************************************************************
+* Sanguish Beta pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 501
+#define KNOWN_BOARD
+
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
+#error Oops! Make sure you have 'Your MCU/Bootloader' selected from the 'Tools -> Boards' menu.
+#endif
+
+//x axis pins
+#define X_STEP_PIN 28
+#define X_DIR_PIN 27
+#define X_ENABLE_PIN 29
+#define X_MIN_PIN 2
+#define X_MAX_PIN -1
+
+//y axis pins
+#define Y_STEP_PIN 25
+#define Y_DIR_PIN 24
+#define Y_ENABLE_PIN 26
+#define Y_MIN_PIN 5
+#define Y_MAX_PIN -1
+
+//z axis pins
+#define Z_STEP_PIN 22
+#define Z_DIR_PIN 21
+#define Z_ENABLE_PIN 23
+#define Z_MIN_PIN 1
+#define Z_MAX_PIN -1
+
+//extruder pins
+#define E0_STEP_PIN 19
+#define E0_DIR_PIN 18
+#define E0_ENABLE_PIN 20
+#define TEMP_0_PIN 1
+#define TEMP_1_PIN 0
+#define HEATER_0_PIN 3
+#define HEATER_1_PIN 4
+
+
+#define SDPOWER -1
+#define SDSS -1
+#define LED_PIN -1
+
+#define FAN_PIN -1
+#define PS_ON_PIN 0
+//our pin for debugging.
+
+#define DEBUG_PIN -1
+
+//our RS485 pins
+#define TX_ENABLE_PIN	12
+#define RX_ENABLE_PIN	13
+
+#define SDPOWER -1
+#define SDSS -1
+
+#define SCK_PIN 7
+#define MISO_PIN 6
+#define MOSI_PIN 5
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS
+#endif
+
 #ifndef CPU_ARCH  // Set default architecture
 #define CPU_ARCH ARCH_AVR
 #endif

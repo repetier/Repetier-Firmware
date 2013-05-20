@@ -68,6 +68,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // RUMBA                      = 80  // Get it from reprapdiscount
 // Rambo                      = 301
 // Arduino Due                = 401 // This is only experimental
+// Sanguish Beta              = 501
 
 #define MOTHERBOARD 33
 
@@ -442,7 +443,7 @@ VREF ---- R2 ---+--- Termistor ---+-- GND
 If you don't have R1, set it to 0.
 The capacitor is for reducing noise from long thermistor cable. If you don't have have one, it's OK.
 
-If you don't need the generic table, uncomment the following define.
+If you need the generic table, uncomment the following define.
 */
 //#define USE_GENERIC_THERMISTORTABLE_1
 
@@ -1025,6 +1026,31 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 */
 #define EEPROM_MODE 1
 
+
+/**************** duplicate motor driver ***************
+
+If you have an unused extruder stepper free, you could use it to drive the second z motor
+instead of driving both with one stepper. The same works for the other axis if needed.
+*/
+
+#define FEATURE_TWO_XSTEPPER false
+#define X2_STEP_PIN   E1_STEP_PIN
+#define X2_DIR_PIN    E1_DIR_PIN
+#define X2_ENABLE_PIN E1_ENABLE_PIN
+
+#define FEATURE_TWO_YSTEPPER false
+#define Y2_STEP_PIN   E1_STEP_PIN
+#define Y2_DIR_PIN    E1_DIR_PIN
+#define Y2_ENABLE_PIN E1_ENABLE_PIN
+
+#define FEATURE_TWO_ZSTEPPER false
+#define Z2_STEP_PIN   E1_STEP_PIN
+#define Z2_DIR_PIN    E1_DIR_PIN
+#define Z2_ENABLE_PIN E1_ENABLE_PIN
+
+
+
+
 /* Z-Probing */
 
 #define FEATURE_Z_PROBE true
@@ -1040,10 +1066,10 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
 /** The height is the difference between activated probe position and nozzle height. */
-#define Z_PROBE_HEIGHT 39.57
+#define Z_PROBE_HEIGHT 39.91
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
-#define Z_PROBE_START_SCRIPT "M300 S8000 P400"
-#define Z_PROBE_FINISHED_SCRIPT "M300 S12000 P400"
+#define Z_PROBE_START_SCRIPT ""
+#define Z_PROBE_FINISHED_SCRIPT ""
 
 /* Autoleveling allows it to z-probe 3 points to compute the inclination and compensates the error for the print.
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.

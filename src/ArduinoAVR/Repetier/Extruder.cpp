@@ -351,8 +351,8 @@ void Extruder::selectExtruderById(byte extruderId)
     {
         float oldfeedrate = printer.feedrate;
         PrintLine::moveRelativeDistanceInSteps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
-        printer.offsetX += dx;
-        printer.offsetY += dy;
+        printer.offsetX += dx*inv_axis_steps_per_unit[0];
+        printer.offsetY += dy*inv_axis_steps_per_unit[1];
         printer.feedrate = oldfeedrate;
     }
 #if NUM_EXTRUDER>1

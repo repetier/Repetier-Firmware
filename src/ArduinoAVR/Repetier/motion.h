@@ -388,6 +388,9 @@ public:
 #if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
+#if FEATURE_TWO_XSTEPPER
+        WRITE(X2_STEP_PIN,HIGH);
+#endif
 #else
 #if DRIVE_SYSTEM==1
         if(isXPositiveMove())
@@ -425,6 +428,9 @@ public:
 #if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
+#if FEATURE_TWO_YSTEPPER
+        WRITE(Y2_STEP_PIN,HIGH);
+#endif
 #else
 #if DRIVE_SYSTEM==1
         if(isYPositiveMove())
@@ -453,6 +459,12 @@ public:
 #endif // XY_GANTRY
 #ifdef DEBUG_STEPCOUNT
         totalStepsRemaining--;
+#endif
+    }
+    inline void startZStep() {
+        WRITE(Z_STEP_PIN,HIGH);
+#if FEATURE_TWO_ZSTEPPER
+        WRITE(Z2_STEP_PIN,HIGH);
 #endif
     }
     void updateStepsParameter();

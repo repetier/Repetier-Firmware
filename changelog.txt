@@ -1,4 +1,4 @@
-Version 0.90alpha
+Version 0.90alpha in development use only if you know what you are doing, config may change heavily!
   Switch heater 1/heater2 and sensore 1/2 for Megatronics 2.0.
   Switch temp sensore 0/1 for Gen1.5
   Optimized path planner.
@@ -11,6 +11,7 @@ Version 0.90alpha
   Added auto leveling of heated bed.
   Fixed pin assignment for RUMBA
   Added ui support for 3. etxruder
+  Mirror stepper driver signals if wanted for two x,y,z drivers with same signals.
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
