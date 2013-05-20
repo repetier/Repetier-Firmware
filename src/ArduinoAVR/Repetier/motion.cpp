@@ -1245,13 +1245,14 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     float center_axis0 = position[0] + offset[0];
     float center_axis1 = position[1] + offset[1];
     float linear_travel = 0; //target[axis_linear] - position[axis_linear];
-    float extruder_travel = Printer::destinationSteps[3]-Printer::currentPositionSteps[3];
+    float extruder_travel = (Printer::destinationSteps[3]-Printer::currentPositionSteps[3])*inv_axis_steps_per_unit[3];
     float r_axis0 = -offset[0];  // Radius vector from center to current location
     float r_axis1 = -offset[1];
     float rt_axis0 = target[0] - center_axis0;
     float rt_axis1 = target[1] - center_axis1;
     long xtarget = Printer::destinationSteps[0];
     long ytarget = Printer::destinationSteps[1];
+    long ztarget = Printer::destinationSteps[2];
     long etarget = Printer::destinationSteps[3];
 
     // CCW angle between position and target from circle center. Only one atan2() trig computation required.
@@ -1324,7 +1325,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     //arc_target[axis_linear] = position[axis_linear];
 
     // Initialize the extruder axis
-    arc_target[3] = Printer::currentPositionSteps[3];
+    arc_target[3] = Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3];
 
     for (i = 1; i<segments; i++)
     {
@@ -1361,19 +1362,12 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
         arc_target[1] = center_axis1 + r_axis1;
         //arc_target[axis_linear] += linear_per_segment;
         arc_target[3] += extruder_per_segment;
-
-        Printer::destinationSteps[0] = arc_target[0]*axis_steps_per_unit[0];
-        Printer::destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
-        Printer::destinationSteps[3] = arc_target[3];
-#if DRIVE_SYSTEM == 3
-        PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
-#else
-        PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
-#endif
+        Printer::moveToReal(arc_target[0],arc_target[1],IGNORE_COORDINATE,arc_target[3],IGNORE_COORDINATE);
     }
     // Ensure last segment arrives at target location.
     Printer::destinationSteps[0] = xtarget;
     Printer::destinationSteps[1] = ytarget;
+    Printer::destinationSteps[2] = ztarget;
     Printer::destinationSteps[3] = etarget;
 #if DRIVE_SYSTEM == 3
     PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);

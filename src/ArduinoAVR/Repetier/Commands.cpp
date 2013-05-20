@@ -592,16 +592,11 @@ void Commands::executeGCode(GCode *com)
         case 2: // CW Arc
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
         {
-            if(!Printer::setDestinationStepsFromGCode(com)) break; // For X Y Z E F
-            float offset[2] = {(com->hasI()?com->I:0),(com->hasJ()?com->J:0)};
-            if(unit_inches)
-            {
-                offset[0]*=25.4;
-                offset[1]*=25.4;
-            }
             float position[3];
             Printer::realPosition(position[0],position[1],position[2]);
-            float target[2] = {Printer::destinationSteps[0]*inv_axis_steps_per_unit[0],Printer::destinationSteps[1]*inv_axis_steps_per_unit[1]};
+            if(!Printer::setDestinationStepsFromGCode(com)) break; // For X Y Z E F
+            float offset[2] = {Printer::convertToMM(com->hasI()?com->I:0),Printer::convertToMM(com->hasJ()?com->J:0)};
+            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[3]*inv_axis_steps_per_unit[3]};
             float r;
             if (com->hasR())
             {
@@ -654,8 +649,7 @@ void Commands::executeGCode(GCode *com)
                   j = (y + (x * h_x2_div_d))/2
 
                 */
-                r = com->R;
-                if(unit_inches) r*=25.4;
+                r = Printer::convertToMM(com->R);
                 // Calculate the change in position along each selected axis
                 double x = target[0]-position[0];
                 double y = target[1]-position[1];
@@ -709,10 +703,8 @@ void Commands::executeGCode(GCode *com)
             {
                 r = hypot(offset[0], offset[1]); // Compute arc radius for arc
             }
-
             // Set clockwise/counter-clockwise sign for arc computations
             uint8_t isclockwise = com->G == 2;
-
             // Trace the arc
             PrintLine::arc(position, target, offset,r, isclockwise);
 
