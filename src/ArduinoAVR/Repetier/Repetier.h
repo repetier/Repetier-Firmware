@@ -348,19 +348,6 @@ extern void linear_move(long steps_remaining[]);
 
 
 
-extern float axis_steps_per_unit[];
-extern float inv_axis_steps_per_unit[];
-extern float max_feedrate[];
-extern float homing_feedrate[];
-extern float max_start_speed_units_per_second[];
-extern long max_acceleration_units_per_sq_second[];
-extern long max_travel_acceleration_units_per_sq_second[];
-extern unsigned long axis_steps_per_sqr_second[];
-extern unsigned long axis_travel_steps_per_sqr_second[];
-extern byte relative_mode;    ///< Determines absolute (false) or relative Coordinates (true).
-extern byte relative_mode_e;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
-
-extern byte unit_inches;
 extern unsigned long previous_millis_cmd;
 extern unsigned long max_inactive_time;
 extern unsigned long stepper_inactive_time;

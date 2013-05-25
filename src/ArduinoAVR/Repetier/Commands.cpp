@@ -92,10 +92,10 @@ void Commands::printCurrentPosition()
 {
     float x,y,z;
     Printer::realPosition(x,y,z);
-    Com::printF(Com::tXColon,x*(unit_inches?0.03937:1),2);
-    Com::printF(Com::tSpaceYColon,y*(unit_inches?0.03937:1),2);
-    Com::printF(Com::tSpaceZColon,z*(unit_inches?0.03937:1),2);
-    Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[3]*inv_axis_steps_per_unit[3]*(unit_inches?0.03937:1),2);
+    Com::printF(Com::tXColon,x*(Printer::unitIsInches?0.03937:1),2);
+    Com::printF(Com::tSpaceYColon,y*(Printer::unitIsInches?0.03937:1),2);
+    Com::printF(Com::tSpaceZColon,z*(Printer::unitIsInches?0.03937:1),2);
+    Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3]*(Printer::unitIsInches?0.03937:1),2);
 }
 void Commands::printTemperatures()
 {
@@ -126,15 +126,15 @@ void Commands::changeFeedrateMultiply(int factor)
 {
     if(factor<25) factor=25;
     if(factor>500) factor=500;
-    printer.feedrate *= (float)factor/(float)printer.feedrateMultiply;
-    printer.feedrateMultiply = factor;
+    Printer::feedrate *= (float)factor/(float)Printer::feedrateMultiply;
+    Printer::feedrateMultiply = factor;
     Com::printFLN(Com::tSpeedMultiply,factor);
 }
 void Commands::changeFlowateMultiply(int factor)
 {
     if(factor<25) factor=25;
     if(factor>200) factor=200;
-    printer.extrudeMultiply = factor;
+    Printer::extrudeMultiply = factor;
     Com::printFLN(Com::tFlowMultiply,factor);
 }
 void Commands::setFanSpeed(int speed,bool wait)
@@ -148,221 +148,17 @@ void Commands::setFanSpeed(int speed,bool wait)
     pwm_pos[NUM_EXTRUDER+2] = speed;
 #endif
 }
-#if DRIVE_SYSTEM==3
-void delta_move_to_top_endstops(float feedrate)
-{
-    long up_steps = printer.zMaxSteps;
-    for (byte i=0; i<3; i++)
-        Printer::currentPositionSteps[i] = 0;
-    calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
-    PrintLine::moveRelativeDistanceInSteps(0,0,printer.zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
-}
-void Commands::homeXAxis()
-{
-    Printer::destinationSteps[0] = 0;
-    split_delta_move(true,false,false);
-}
-void Commands::homeYAxis()
-{
-    Printer::destinationSteps[1] = 0;
-    split_delta_move(true,false,false);
-}
-void Commands::homeZAxis()
-{
-    delta_move_to_top_endstops(homing_feedrate[0]);
-    PrintLine::moveRelativeDistanceInSteps(0,0,axis_steps_per_unit[0]*-ENDSTOP_Z_BACK_MOVE,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-    delta_move_to_top_endstops(homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR);
-    Printer::currentPositionSteps[0] = 0;
-    Printer::currentPositionSteps[1] = 0;
-    Printer::currentPositionSteps[2] = printer.zMaxSteps;
-    Printer::coordinateOffset[0] = 0;
-    Printer::coordinateOffset[1] = 0;
-    Printer::coordinateOffset[2] = 0;
-    calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
-    printer.maxDeltaPositionSteps = printer.currentDeltaPositionSteps[0];
-}
-
-void Commands::homeAxis(bool xaxis,bool yaxis,bool zaxis)
-{
-    long steps;
-    bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
-    if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z)
-    {
-        UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
-        // Homing Z axis means that you must home X and Y
-        if (homeallaxis || zaxis)
-        {
-            homeZAxis();
-        }
-        else
-        {
-            if (xaxis) Printer::destinationSteps[0] = 0;
-            if (yaxis) Printer::destinationSteps[1] = 0;
-            split_delta_move(true,false,false);
-        }
-        printer.countZSteps = 0;
-        UI_CLEAR_STATUS
-    }
-}
-#else
-void Commands::homeXAxis()
-{
-    long steps;
-    if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1))
-    {
-        UI_STATUS_UPD(UI_TEXT_HOME_X);
-        steps = (printer.xMaxSteps-printer.xMinSteps) * X_HOME_DIR;
-        Printer::currentPositionSteps[0] = -steps;
-        PrintLine::moveRelativeDistanceInSteps(2*steps,0,0,0,homing_feedrate[0],true,true);
-        Printer::currentPositionSteps[0] = 0;
-        PrintLine::moveRelativeDistanceInSteps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
-        PrintLine::moveRelativeDistanceInSteps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
-#if defined(ENDSTOP_X_BACK_ON_HOME)
-        if(ENDSTOP_X_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
-#endif
-        long offX = 0;
-#if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offX = max(offX,extruder[i].xOffset);
-        // Reposition extruder that way, that all extruders can be selected at home pos.
-#endif
-        Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer.xMinSteps-offX : printer.xMaxSteps+offX;
-#if NUM_EXTRUDER>1
-        PrintLine::moveRelativeDistanceInSteps((current_extruder->xOffset-offX) * X_HOME_DIR,0,0,0,homing_feedrate[0],true,false);
-#endif
-    }
-}
-void Commands::homeYAxis()
-{
-    long steps;
-    if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
-    {
-        UI_STATUS_UPD(UI_TEXT_HOME_Y);
-        steps = (printer.yMaxSteps-printer.yMinSteps) * Y_HOME_DIR;
-        Printer::currentPositionSteps[1] = -steps;
-        PrintLine::moveRelativeDistanceInSteps(0,2*steps,0,0,homing_feedrate[1],true,true);
-        Printer::currentPositionSteps[1] = 0;
-        PrintLine::moveRelativeDistanceInSteps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
-        PrintLine::moveRelativeDistanceInSteps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
-#if defined(ENDSTOP_Y_BACK_ON_HOME)
-        if(ENDSTOP_Y_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
-#endif
-        long offY = 0;
-#if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offY = max(offY,extruder[i].yOffset);
-        // Reposition extruder that way, that all extruders can be selected at home pos.
-#endif
-        Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer.yMinSteps-offY : printer.yMaxSteps+offY;
-#if NUM_EXTRUDER>1
-        PrintLine::moveRelativeDistanceInSteps(0,(current_extruder->yOffset-offY) * Y_HOME_DIR,0,0,homing_feedrate[1],true,false);
-#endif
-    }
-}
-void Commands::homeZAxis()
-{
-    long steps;
-    if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1))
-    {
-        UI_STATUS_UPD(UI_TEXT_HOME_Z);
-        steps = (printer.zMaxSteps-printer.zMinSteps) * Z_HOME_DIR;
-        Printer::currentPositionSteps[2] = -steps;
-        PrintLine::moveRelativeDistanceInSteps(0,0,2*steps,0,homing_feedrate[2],true,true);
-        Printer::currentPositionSteps[2] = 0;
-        PrintLine::moveRelativeDistanceInSteps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
-        PrintLine::moveRelativeDistanceInSteps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
-#if defined(ENDSTOP_Z_BACK_ON_HOME)
-        if(ENDSTOP_Z_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homing_feedrate[2],true,false);
-#endif
-        Printer::currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer.zMinSteps : printer.zMaxSteps;
-    }
-}
-void Commands::homeAxis(bool xaxis,bool yaxis,bool zaxis)
-{
-    float startX,startY,startZ;
-    float coordX,coordY,coordZ;
-#if FEATURE_AUTOLEVEL
-    if(Printer::isAutolevelActive())
-        Printer::transformFromPrinter(Printer::coordinateOffset[0]*inv_axis_steps_per_unit[0],Printer::coordinateOffset[1]*inv_axis_steps_per_unit[1],
-                                      Printer::coordinateOffset[2]*inv_axis_steps_per_unit[2],coordX,coordY,coordZ);
-    else
-#endif
-    {
-        coordX = Printer::coordinateOffset[0]*inv_axis_steps_per_unit[0];
-        coordY = Printer::coordinateOffset[1]*inv_axis_steps_per_unit[1];
-        coordZ = Printer::coordinateOffset[2]*inv_axis_steps_per_unit[2];
-    }
-    Printer::realPosition(startX,startY,startZ);
-#if !defined(HOMING_ORDER)
-#define HOMING_ORDER HOME_ORDER_XYZ
-#endif
-#if HOMING_ORDER==HOME_ORDER_XYZ
-    if(xaxis) homeXAxis();
-    if(yaxis) homeYAxis();
-    if(zaxis) homeZAxis();
-#elif HOMING_ORDER==HOME_ORDER_XZY
-    if(xaxis) homeXAxis();
-    if(zaxis) homeZAxis();
-    if(yaxis) homeYAxis();
-#elif HOMING_ORDER==HOME_ORDER_YXZ
-    if(yaxis) homeYAxis();
-    if(xaxis) homeXAxis();
-    if(zaxis) homeZAxis();
-#elif HOMING_ORDER==HOME_ORDER_YZX
-    if(yaxis) homeYAxis();
-    if(zaxis) homeZAxis();
-    if(xaxis) homeXAxis();
-#elif HOMING_ORDER==HOME_ORDER_ZXY
-    if(zaxis) homeZAxis();
-    if(xaxis) homeXAxis();
-    if(yaxis) homeYAxis();
-#elif HOMING_ORDER==HOME_ORDER_ZYX
-    if(zaxis) homeZAxis();
-    if(yaxis) homeYAxis();
-    if(xaxis) homeXAxis();
-#endif
-    if(xaxis)
-    {
-        coordX = 0;
-        if(X_HOME_DIR<0) startX = printer.xMin;
-        else startX = printer.xMin+printer.xLength;
-    }
-    if(yaxis)
-    {
-        coordY = 0;
-        if(Y_HOME_DIR<0) startY = printer.yMin;
-        else startY = printer.yMin+printer.yLength;
-    }
-    if(zaxis)
-    {
-        coordZ = 0;
-        if(Z_HOME_DIR<0) startZ = printer.zMin;
-        else startZ = printer.zMin+printer.zLength;
-    }
-#if FEATURE_AUTOLEVEL
-    if(Printer::isAutolevelActive())
-        Printer::transformToPrinter(coordX,coordY,coordZ,coordX,coordY,coordZ);
-#endif
-    Printer::coordinateOffset[0] = (long)(coordX*axis_steps_per_unit[0]);
-    Printer::coordinateOffset[1] = (long)(coordY*axis_steps_per_unit[1]);
-    Printer::coordinateOffset[2] = (long)(coordZ*axis_steps_per_unit[2]);
-    Printer::updateCurrentPosition();
-    Printer::moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homing_feedrate[0]);
-    UI_CLEAR_STATUS
-}
-#endif
 void Commands::reportPrinterUsage()
 {
 #if EEPROM_MODE!=0
-    float dist = printer.filamentPrinted*0.001+HAL::epr_get_float(EPR_PRINTING_DISTANCE);
+    float dist = Printer::filamentPrinted*0.001+HAL::epr_get_float(EPR_PRINTING_DISTANCE);
     Com::printF(Com::tPrintedFilament,dist,2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
     for(byte i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
 
-    long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-printer.msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
+    long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
     long tmp = seconds/86400;
     seconds-=tmp*86400;
     Com::printF(Com::tPrintingTime,tmp);
@@ -596,7 +392,7 @@ void Commands::executeGCode(GCode *com)
             Printer::realPosition(position[0],position[1],position[2]);
             if(!Printer::setDestinationStepsFromGCode(com)) break; // For X Y Z E F
             float offset[2] = {Printer::convertToMM(com->hasI()?com->I:0),Printer::convertToMM(com->hasJ()?com->J:0)};
-            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[3]*inv_axis_steps_per_unit[3]};
+            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[3]*Printer::invAxisStepsPerMM[3]};
             float r;
             if (com->hasR())
             {
@@ -724,15 +520,15 @@ void Commands::executeGCode(GCode *com)
             }
             break;
         case 20: // Units to inches
-            unit_inches = 1;
+            Printer::unitIsInches = 1;
             break;
         case 21: // Units to mm
-            unit_inches = 0;
+            Printer::unitIsInches = 0;
             break;
         case 28:  //G28 Home all Axis one at a time
         {
             byte home_all_axis = (com->hasNoXYZ());
-            homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
+            Printer::homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
             Printer::updateCurrentPosition();
         }
         break;
@@ -741,7 +537,7 @@ void Commands::executeGCode(GCode *com)
         {
             bool oldAutolevel = Printer::isAutolevelActive();
             Printer::setAutolevelActive(false);
-            float sum = 0,last,oldFeedrate = printer.feedrate;
+            float sum = 0,last,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             sum = Printer::runZProbe(true,false);
             if(sum<0) break;
@@ -757,14 +553,14 @@ void Commands::executeGCode(GCode *com)
             Com::printFLN(Com::tZProbeAverage,sum);
             if(com->hasS() && com->S)
             {
-                Printer::currentPositionSteps[2] = sum*axis_steps_per_unit[2];
+                Printer::currentPositionSteps[2] = sum*Printer::axisStepsPerMM[2];
                 Com::printInfoFLN(Com::tZProbeZReset);
 #if MAX_HARDWARE_ENDSTOP_Z
-                printer.zLength = Printer::runZMaxProbe()+sum-ENDSTOP_Z_BACK_ON_HOME;
-                Com::printFLN(Com::tZProbePrinterHeight,printer.zLength);
+                Printer::zLength = Printer::runZMaxProbe()+sum-ENDSTOP_Z_BACK_ON_HOME;
+                Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
             }
-            printer.feedrate = oldFeedrate;
+            Printer::feedrate = oldFeedrate;
             Printer::setAutolevelActive(oldAutolevel);
             printCurrentPosition();
             if(com->hasS() && com->S == 2)
@@ -789,7 +585,7 @@ void Commands::executeGCode(GCode *com)
         {
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false);
-            float h1,h2,h3,oldFeedrate = printer.feedrate;
+            float h1,h2,h3,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false);
             if(h1<0) break;
@@ -802,35 +598,35 @@ void Commands::executeGCode(GCode *com)
             Printer::buildTransformationMatrix(h1,h2,h3);
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
             float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
-                       (float)Printer::currentPositionSteps[1]*inv_axis_steps_per_unit[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
-                               Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*inv_axis_steps_per_unit[0])/
+                       (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
+                               Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*Printer::invAxisStepsPerMM[0])/
                       (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
             Com::printFLN(Com::tInfo,z);
-            long zBottom = Printer::currentPositionSteps[2] = (h3+z)*axis_steps_per_unit[2];
-            printer.zMin = 0;
+            long zBottom = Printer::currentPositionSteps[2] = (h3+z)*Printer::axisStepsPerMM[2];
+            Printer::zMin = 0;
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
-                printer.zLength = Printer::runZMaxProbe()+zBottom*inv_axis_steps_per_unit[2]-ENDSTOP_Z_BACK_ON_HOME;
-                Com::printFLN(Com::tZProbePrinterHeight,printer.zLength);
+                Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
+                Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
-                printer.feedrate = oldFeedrate;
+                Printer::feedrate = oldFeedrate;
                 Printer::setAutolevelActive(true);
                 if(com->S == 2)
                     EEPROM::storeDataIntoEEPROM();
             }
             Printer::setAutolevelActive(true);
-            printer.updateDerivedParameter();
+            Printer::updateDerivedParameter();
             Printer::updateCurrentPosition();
             printCurrentPosition();
         }
         break;
 #endif
         case 90: // G90
-            relative_mode = false;
+            Printer::relativeCoordinateMode = false;
             break;
         case 91: // G91
-            relative_mode = true;
+            Printer::relativeCoordinateMode = true;
             break;
         case 92: // G92
         {
@@ -844,12 +640,12 @@ void Commands::executeGCode(GCode *com)
             if(Printer::isAutolevelActive())
                 Printer::transformToPrinter(xOff,yOff,zOff,xOff,yOff,zOff);
 #endif // FEATURE_AUTOLEVEL
-            Printer::coordinateOffset[0] += xOff*axis_steps_per_unit[0];
-            Printer::coordinateOffset[1] += yOff*axis_steps_per_unit[1];
-            Printer::coordinateOffset[2] += zOff*axis_steps_per_unit[2];
+            Printer::coordinateOffset[0] += xOff*Printer::axisStepsPerMM[0];
+            Printer::coordinateOffset[1] += yOff*Printer::axisStepsPerMM[1];
+            Printer::coordinateOffset[2] += zOff*Printer::axisStepsPerMM[2];
             if(com->hasE())
             {
-                Printer::currentPositionSteps[3] = Printer::convertToMM(com->E)*axis_steps_per_unit[3];
+                Printer::currentPositionSteps[3] = Printer::convertToMM(com->E)*Printer::axisStepsPerMM[3];
             }
         }
         break;
@@ -993,7 +789,7 @@ void Commands::executeGCode(GCode *com)
 #if RETRACT_DURING_HEATUP
                 if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dir && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
                 {
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[3],actExtruder->maxFeedrate,false,false);
                     retracted = 1;
                 }
 #endif
@@ -1010,7 +806,7 @@ void Commands::executeGCode(GCode *com)
 #if RETRACT_DURING_HEATUP
             if (retracted && actExtruder==current_extruder)
             {
-                PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * axis_steps_per_unit[3],actExtruder->maxFeedrate,false,false);
+                PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[3],actExtruder->maxFeedrate,false,false);
             }
 #endif
         }
@@ -1092,10 +888,10 @@ void Commands::executeGCode(GCode *com)
 #endif
             break;
         case 82:
-            relative_mode_e = false;
+            Printer::relativeExtruderCoordinateMode = false;
             break;
         case 83:
-            relative_mode_e = true;
+            Printer::relativeExtruderCoordinateMode = true;
             break;
         case 84:
             if(com->hasS())
@@ -1115,9 +911,9 @@ void Commands::executeGCode(GCode *com)
                 max_inactive_time = 0;
             break;
         case 92: // M92
-            if(com->hasX()) axis_steps_per_unit[0] = com->X;
-            if(com->hasY()) axis_steps_per_unit[1] = com->Y;
-            if(com->hasZ()) axis_steps_per_unit[2] = com->Z;
+            if(com->hasX()) Printer::axisStepsPerMM[0] = com->X;
+            if(com->hasY()) Printer::axisStepsPerMM[1] = com->Y;
+            if(com->hasZ()) Printer::axisStepsPerMM[2] = com->Z;
             if(com->hasE()) current_extruder->stepsPerMM = com->E;
             Printer::updateDerivedParameter();
             break;
@@ -1183,17 +979,17 @@ void Commands::executeGCode(GCode *com)
 #endif
 #ifdef RAMP_ACCELERATION
         case 201: // M201
-            if(com->hasX()) max_acceleration_units_per_sq_second[0] = com->X;
-            if(com->hasY()) max_acceleration_units_per_sq_second[1] = com->Y;
-            if(com->hasZ()) max_acceleration_units_per_sq_second[2] = com->Z;
-            if(com->hasE()) max_acceleration_units_per_sq_second[3] = com->E;
+            if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[0] = com->X;
+            if(com->hasY()) Printer::maxAccelerationMMPerSquareSecond[1] = com->Y;
+            if(com->hasZ()) Printer::maxAccelerationMMPerSquareSecond[2] = com->Z;
+            if(com->hasE()) Printer::maxAccelerationMMPerSquareSecond[3] = com->E;
             Printer::updateDerivedParameter();
             break;
         case 202: // M202
-            if(com->hasX()) max_travel_acceleration_units_per_sq_second[0] = com->X;
-            if(com->hasY()) max_travel_acceleration_units_per_sq_second[1] = com->Y;
-            if(com->hasZ()) max_travel_acceleration_units_per_sq_second[2] = com->Z;
-            if(com->hasE()) max_travel_acceleration_units_per_sq_second[3] = com->E;
+            if(com->hasX()) Printer::maxTravelAccelerationMMPerSquareSecond[0] = com->X;
+            if(com->hasY()) Printer::maxTravelAccelerationMMPerSquareSecond[1] = com->Y;
+            if(com->hasZ()) Printer::maxTravelAccelerationMMPerSquareSecond[2] = com->Z;
+            if(com->hasE()) Printer::maxTravelAccelerationMMPerSquareSecond[3] = com->E;
             Printer::updateDerivedParameter();
             break;
 #endif
@@ -1234,16 +1030,16 @@ void Commands::executeGCode(GCode *com)
             break;
         case 207: // M207 X<XY jerk> Z<Z Jerk>
             if(com->hasX())
-                printer.maxJerk = com->X;
+                Printer::maxJerk = com->X;
             if(com->hasZ())
-                printer.maxZJerk = com->Z;
+                Printer::maxZJerk = com->Z;
             if(com->hasE())
             {
                 current_extruder->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(current_extruder->id);
             }
-            Com::printF(Com::tJerkColon,printer.maxJerk);
-            Com::printFLN(Com::tZJerkColon,printer.maxZJerk);
+            Com::printF(Com::tJerkColon,Printer::maxJerk);
+            Com::printFLN(Com::tZJerkColon,Printer::maxZJerk);
             break;
         case 220: // M220 S<Feedrate multiplier in percent>
             changeFeedrateMultiply(com->getS(100));
@@ -1254,7 +1050,7 @@ void Commands::executeGCode(GCode *com)
 #ifdef USE_ADVANCE
         case 223: // Extruder interrupt test
             if(com->hasS())
-                printer.extruderStepsNeeded+=com->S;
+                Printer::extruderStepsNeeded+=com->S;
             break;
         case 232:
             Com::printF(Com::tLinearStepsColon,maxadv2);
@@ -1272,39 +1068,39 @@ void Commands::executeGCode(GCode *com)
 #if USE_OPS==1
         case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
             if(com->hasS() && com->S>=0 && com->S<3)
-                printer.opsMode = com->S;
+                Printer::opsMode = com->S;
             if(com->hasX() && com->X>=0)
-                printer.opsMinDistance = com->X;
+                Printer::opsMinDistance = com->X;
             if(com->hasY() && com->Y>=0)
-                printer.opsRetractDistance = com->Y;
-            if(com->hasZ() && com->Z>=-printer.opsRetractDistance)
-                printer.opsRetractBacklash = com->Z;
+                Printer::opsRetractDistance = com->Y;
+            if(com->hasZ() && com->Z>=-Printer::opsRetractDistance)
+                Printer::opsRetractBacklash = com->Z;
             if(com->hasF() && com->F>=0 && com->F<=100)
-                printer.opsMoveAfter = com->F;
+                Printer::opsMoveAfter = com->F;
             Extruder::selectExtruderById(current_extruder->id);
-            if(printer.opsMode==0)
+            if(Printer::opsMode==0)
             {
                 Com::printFLN(Com::tOPSDisabled);
             }
             else
             {
-                if(printer.opsMode==1)
+                if(Printer::opsMode==1)
                     Com::printFLN(Com::tOPSClassicMode);
                 else
                     Com::printFLN(Com::tOPSFastMode);
 
-                Com::printF(Com::tMinDistance,printer.opsMinDistance);
-                Com::printF(Com::tRetractEqual,printer.opsRetractDistance);
-                Com::printF(Com::tBacklashEqual,printer.opsRetractBacklash);
-                if(printer.opsMode==2)
-                    Com::printF(Com::tMoveAfter,printer.opsMoveAfter);
+                Com::printF(Com::tMinDistance,Printer::opsMinDistance);
+                Com::printF(Com::tRetractEqual,Printer::opsRetractDistance);
+                Com::printF(Com::tBacklashEqual,Printer::opsRetractBacklash);
+                if(Printer::opsMode==2)
+                    Com::printF(Com::tMoveAfter,Printer::opsMoveAfter);
                 Com::println();
                 Printer::updateAdvanceFlags();
             }
 #ifdef DEBUG_OPS
-            Com::printFLN(Com::tRetrSteps,printer.opsRetractSteps);
-            Com::printFLN(Com::tPushBackSteps,printer.opsPushbackSteps);
-            Com::printFLN(Com::tMoveAfterSteps,printer.opsMoveAfterSteps);
+            Com::printFLN(Com::tRetrSteps,Printer::opsRetractSteps);
+            Com::printFLN(Com::tPushBackSteps,Printer::opsPushbackSteps);
+            Com::printFLN(Com::tMoveAfterSteps,Printer::opsMoveAfterSteps);
 #endif
             break;
 #endif
@@ -1327,17 +1123,17 @@ void Commands::executeGCode(GCode *com)
             break;
 #if FEATURE_MEMORY_POSITION
         case 401: // Memory position
-            printer.memoryX = Printer::currentPositionSteps[0];
-            printer.memoryY = Printer::currentPositionSteps[1];
-            printer.memoryZ = Printer::currentPositionSteps[2];
+            Printer::memoryX = Printer::currentPositionSteps[0];
+            Printer::memoryY = Printer::currentPositionSteps[1];
+            Printer::memoryZ = Printer::currentPositionSteps[2];
             break;
         case 402: // Go to stored position
         {
             bool all = !(com->hasX() && com->hasY() && com->hasZ());
-            PrintLine::moveRelativeDistanceInSteps((all || com->hasX() ? printer.memoryX-Printer::currentPositionSteps[0] : 0)
-                                                   ,(all || com->hasY() ? printer.memoryY-Printer::currentPositionSteps[1] : 0)
-                                                   ,(all || com->hasZ() ? printer.memoryZ-Printer::currentPositionSteps[2] : 0)
-                                                   ,0,(com->hasF() ? com->F : printer.feedrate),false,ALWAYS_CHECK_ENDSTOPS);
+            PrintLine::moveRelativeDistanceInSteps((all || com->hasX() ? Printer::memoryX-Printer::currentPositionSteps[0] : 0)
+                                                   ,(all || com->hasY() ? Printer::memoryY-Printer::currentPositionSteps[1] : 0)
+                                                   ,(all || com->hasZ() ? Printer::memoryZ-Printer::currentPositionSteps[2] : 0)
+                                                   ,0,(com->hasF() ? com->F : Printer::feedrate),false,ALWAYS_CHECK_ENDSTOPS);
         }
         break;
 #endif
@@ -1413,6 +1209,15 @@ void Commands::executeGCode(GCode *com)
             }
             break;
 #endif // FEATURE_AUTOLEVEL
+#if FEATURE_SERVO
+        case 340:
+            if(com->hasP() && com->P<4 && com->P>=0) {
+                int s = 0;
+                if(com->hasS())
+                    s = com->S;
+                HAL::servoMicroseconds(com->P,s);
+            }
+#endif // FEATURE_SERVO
 #ifdef STEP_COUNTER
 #if DRIVE_SYSTEM==3
         case 251:
@@ -1420,26 +1225,26 @@ void Commands::executeGCode(GCode *com)
             {
                 if (com->S == 0)
                 {
-                    printer.countZSteps = 0;
+                    Printer::countZSteps = 0;
                     Com::printFLN(Com::tMeasurementReset);
                 }
                 else if (com->S == 1)
                 {
-                    Com::printFLN(Com::tMeasureDeltaSteps,printer.countZSteps);
-                    Com::printFLN(Com::tMeasureDelta,printer.countZSteps * inv_axis_steps_per_unit[2]);
+                    Com::printFLN(Com::tMeasureDeltaSteps,Printer::countZSteps);
+                    Com::printFLN(Com::tMeasureDelta,Printer::countZSteps * Printer::invAxisStepsPerMM[2]);
                 }
                 else if (com->S = 2)
                 {
-                    if (printer.countZSteps < 0)
-                        printer.countZSteps = -printer.countZSteps;
-                    printer.zMin = 0;
-                    printer.zLength = inv_axis_steps_per_unit[2] * printer.countZSteps;
-                    printer.zMaxSteps = printer.countZSteps;
+                    if (Printer::countZSteps < 0)
+                        Printer::countZSteps = -Printer::countZSteps;
+                    Printer::zMin = 0;
+                    Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
+                    Printer::zMaxSteps = Printer::countZSteps;
                     for (byte i=0; i<3; i++)
                     {
                         Printer::currentPositionSteps[i] = 0;
                     }
-                    calculate_delta(Printer::currentPositionSteps, printer.currentDeltaPositionSteps);
+                    calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
                     Com::printFLN(Com::tMeasureOriginReset);
 #if EEPROM_MODE!=0
                     EEPROM::storeDataIntoEEPROM(false);

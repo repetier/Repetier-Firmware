@@ -690,7 +690,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         byte checksum = 0;
         while(line!=pos) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
-        printer.flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
+        Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
 #endif
         if(checksum!=checksum_given)
         {

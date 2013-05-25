@@ -338,25 +338,25 @@ public:
     }
     inline void updateAdvanceSteps(unsigned int v,byte max_loops,bool accelerate)
     {
-        if(!printer.isAdvanceActivated()) return;
+        if(!Printer::isAdvanceActivated()) return;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-        long advance_target =printer.advance_executed+advanceRate;
+        long advance_target =Printer::advance_executed+advanceRate;
         for(byte loop=1; loop<max_loops; loop++) advance_target=(accelerate ? advance_target+advanceRate : advance_target-advanceRate);
         if(advance_target>advanceFull)
             advance_target = advanceFull;
         HAL::forbidInterrupts();
         long h = HAL::mulu16xu16to32(v,advanceL);
         int tred = ((advance_target+h)>>16);
-        printer.extruderStepsNeeded+=tred-printer.advance_steps_set;
-        printer.advance_steps_set = tred;
+        Printer::extruderStepsNeeded+=tred-Printer::advance_steps_set;
+        Printer::advance_steps_set = tred;
         HAL::allowInterrupts();
-        printer.advance_executed = advance_target;
+        Printer::advance_executed = advance_target;
 #else
         int tred = HAL::mulu6xu16shift16(v,advanceL);
         HAL::forbidInterrupts();
-        printer.extruderStepsNeeded+=tred-printer.advance_steps_set;
-        printer.advance_steps_set = tred;
+        Printer::extruderStepsNeeded+=tred-Printer::advance_steps_set;
+        Printer::advance_steps_set = tred;
         HAL::allowInterrupts();
 #endif
 #endif
@@ -367,7 +367,7 @@ public:
         {
             if (!(flags & FLAG_DECELERATING))
             {
-                printer.timer = 0;
+                Printer::timer = 0;
                 flags |= FLAG_DECELERATING;
             }
             return true;
@@ -376,7 +376,7 @@ public:
     }
     inline bool moveAccelerating()
     {
-        return printer.stepNumber <= accelSteps;
+        return Printer::stepNumber <= accelSteps;
     }
     inline bool isFullstepping()
     {
@@ -395,25 +395,25 @@ public:
 #if DRIVE_SYSTEM==1
         if(isXPositiveMove())
         {
-            printer.motorX++;
-            printer.motorY++;
+            Printer::motorX++;
+            Printer::motorY++;
         }
         else
         {
-            printer.motorX--;
-            printer.motorY--;
+            Printer::motorX--;
+            Printer::motorY--;
         }
 #endif
 #if DRIVE_SYSTEM==2
         if(isXPositiveMove())
         {
-            printer.motorX++;
-            printer.motorY--;
+            Printer::motorX++;
+            Printer::motorY--;
         }
         else
         {
-            printer.motorX--;
-            printer.motorY++;
+            Printer::motorX--;
+            Printer::motorY++;
         }
 #endif
 #endif
@@ -435,25 +435,25 @@ public:
 #if DRIVE_SYSTEM==1
         if(isYPositiveMove())
         {
-            printer.motorX++;
-            printer.motorY--;
+            Printer::motorX++;
+            Printer::motorY--;
         }
         else
         {
-            printer.motorX--;
-            printer.motorY++;
+            Printer::motorX--;
+            Printer::motorY++;
         }
 #endif
 #if DRIVE_SYSTEM==2
         if(isYPositiveMove())
         {
-            printer.motorX++;
-            printer.motorY++;
+            Printer::motorX++;
+            Printer::motorY++;
         }
         else
         {
-            printer.motorX--;
-            printer.motorY--;
+            Printer::motorX--;
+            Printer::motorY--;
         }
 #endif
 #endif // XY_GANTRY

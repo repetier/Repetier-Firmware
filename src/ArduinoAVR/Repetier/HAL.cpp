@@ -268,6 +268,34 @@ void HAL::setupTimer() {
     TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
     OCR1A=65500; //start off with a slow frequency.
     TIMSK1 |= (1<<OCIE1A); // Enable interrupt
+#if FEATURE_SERVO
+#if SERVO0_PIN>-1
+    SET_OUTPUT(SERVO0_PIN);
+    WRITE(SERVO0_PIN,LOW);
+#endif
+#if SERVO1_PIN>-1
+    SET_OUTPUT(SERVO1_PIN);
+    WRITE(SERVO1_PIN,LOW);
+#endif
+#if SERVO2_PIN>-1
+    SET_OUTPUT(SERVO2_PIN);
+    WRITE(SERVO2_PIN,LOW);
+#endif
+#if SERVO3_PIN>-1
+    SET_OUTPUT(SERVO3_PIN);
+    WRITE(SERVO3_PIN,LOW);
+#endif
+    TCCR3A = 0;             // normal counting mode
+    TCCR3B = _BV(CS31);     // set prescaler of 8
+    TCNT3 = 0;              // clear the timer count
+#if defined(__AVR_ATmega128__)
+    TIFR |= _BV(OCF3A);     // clear any pending interrupts;
+	ETIMSK |= _BV(OCIE3A);  // enable the output compare interrupt
+#else
+    TIFR3 = _BV(OCF3A);     // clear any pending interrupts;
+    TIMSK3 =  _BV(OCIE3A) ; // enable the output compare interrupt
+#endif
+#endif
 }
 
 void HAL::showStartReason() {
@@ -461,6 +489,89 @@ unsigned char HAL::i2cReadNak(void)
     return TWDR;
 }
 
+#if FEATURE_SERVO
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) ||defined(__AVR_ATmega1281__)||defined(__AVR_ATmega2561__)
+#define SERVO2500US F_CPU/3200
+#define SERVO5000US F_CPU/1600
+unsigned int HAL::servoTimings[4] = {0,0,0,0};
+static byte servoIndex = 0;
+void HAL::servoMicroseconds(byte servo,int ms) {
+    if(ms<500) ms = 0;
+    if(ms>2500) ms = 2500;
+    servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
+}
+SIGNAL (TIMER3_COMPA_vect)
+{
+  switch(servoIndex) {
+  case 0:
+      TCNT3 = 0;
+      if(HAL::servoTimings[0]) {
+#if SERVO0_PIN>-1
+        WRITE(SERVO0_PIN,HIGH);
+#endif
+        OCR3A = HAL::servoTimings[0];
+      } else OCR3A = SERVO2500US;
+    break;
+  case 1:
+#if SERVO0_PIN>-1
+      WRITE(SERVO0_PIN,LOW);
+#endif
+      OCR3A = SERVO5000US;
+    break;
+  case 2:
+      TCNT3 = 0;
+      if(HAL::servoTimings[1]) {
+#if SERVO1_PIN>-1
+        WRITE(SERVO1_PIN,HIGH);
+#endif
+        OCR3A = HAL::servoTimings[1];
+      } else OCR3A = SERVO2500US;
+    break;
+  case 3:
+#if SERVO1_PIN>-1
+      WRITE(SERVO1_PIN,LOW);
+#endif
+      OCR3A = SERVO5000US;
+    break;
+  case 4:
+      TCNT3 = 0;
+      if(HAL::servoTimings[2]) {
+#if SERVO2_PIN>-1
+        WRITE(SERVO2_PIN,HIGH);
+#endif
+        OCR3A = HAL::servoTimings[2];
+      } else OCR3A = SERVO2500US;
+    break;
+  case 5:
+#if SERVO2_PIN>-1
+      WRITE(SERVO2_PIN,LOW);
+#endif
+      OCR3A = SERVO5000US;
+    break;
+  case 6:
+      TCNT3 = 0;
+      if(HAL::servoTimings[3]) {
+#if SERVO3_PIN>-1
+        WRITE(SERVO3_PIN,HIGH);
+#endif
+        OCR3A = HAL::servoTimings[3];
+      } else OCR3A = SERVO2500US;
+    break;
+  case 7:
+#if SERVO3_PIN>-1
+      WRITE(SERVO3_PIN,LOW);
+#endif
+      OCR3A = SERVO5000US;
+    break;
+  }
+  servoIndex++;
+  if(servoIndex>7)
+    servoIndex = 0;
+}
+#else
+#error No servo support for your board, please diable FEATURE_SERVO
+#endif
+#endif
 
 // ================== Interrupt handling ======================
 
@@ -566,17 +677,17 @@ ISR(TIMER1_COMPA_vect)
         if(waitRelax==0)
         {
 #ifdef USE_ADVANCE
-            if(printer.advance_steps_set)
+            if(Printer::advance_steps_set)
             {
-                printer.extruderStepsNeeded-=printer.advance_steps_set;
+                Printer::extruderStepsNeeded-=Printer::advance_steps_set;
 #ifdef ENABLE_QUADRATIC_ADVANCE
-                printer.advance_executed = 0;
+                Printer::advance_executed = 0;
 #endif
-                printer.advance_steps_set = 0;
+                Printer::advance_steps_set = 0;
             }
 #endif
 #if defined(USE_ADVANCE)
-            if(!printer.extruderStepsNeeded) if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
+            if(!Printer::extruderStepsNeeded) if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
 #else
             if(DISABLE_E) extruder_disable();
 #endif
@@ -757,14 +868,14 @@ allowable speed for the extruder.
 ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if defined(USE_ADVANCE)
-    if(!printer.isAdvanceActivated()) return; // currently no need
+    if(!Printer::isAdvanceActivated()) return; // currently no need
     byte timer = EXTRUDER_OCR;
-    bool increasing = printer.extruderStepsNeeded>0;
+    bool increasing = Printer::extruderStepsNeeded>0;
 
     // Require at least 2 steps in one direction before going to action
-    if(abs(printer.extruderStepsNeeded)<2)
+    if(abs(Printer::extruderStepsNeeded)<2)
     {
-        EXTRUDER_OCR = timer+printer.maxExtruderSpeed;
+        EXTRUDER_OCR = timer+Printer::maxExtruderSpeed;
         ANALYZER_OFF(ANALYZER_CH2);
         extruder_last_dir = 0;
         return;
@@ -785,13 +896,13 @@ ISR(EXTRUDER_TIMER_VECTOR)
             extruder_last_dir = (increasing ? 1 : -1);
         }
         Extruder::step();
-        printer.extruderStepsNeeded-=extruder_last_dir;
+        Printer::extruderStepsNeeded-=extruder_last_dir;
 #if STEPPER_HIGH_DELAY>0
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
         Extruder::unstep();
     }
-    EXTRUDER_OCR = timer+printer.maxExtruderSpeed;
+    EXTRUDER_OCR = timer+Printer::maxExtruderSpeed;
 #endif
 }
 

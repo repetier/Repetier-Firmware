@@ -810,14 +810,14 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high!
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define maxAccelerationMMPerSquareSecond_X 1500
+#define maxAccelerationMMPerSquareSecond_Y 1500
+#define maxAccelerationMMPerSquareSecond_Z 100
 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define maxTravelAccelerationMMPerSquareSecond_X 3000
+#define maxTravelAccelerationMMPerSquareSecond_Y 3000
+#define maxTravelAccelerationMMPerSquareSecond_Z 100
 
 /** \brief Maximum allowable jerk.
 
@@ -1049,7 +1049,23 @@ instead of driving both with one stepper. The same works for the other axis if n
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
 
 
+/* Servos
 
+If you need to control servos, enable this feature. You can control up to 4 servos.
+Control the servos with
+M340 P<servoId> S<pulseInMS>
+servoID = 0..3
+Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
+
+WARNING: Servos can draw a considerable amount of current. Make sure your system can handle this or you may risk your hardware!
+*/
+
+#define FEATURE_SERVO false
+// Servo pins on a RAMPS board are 11,6,5,4
+#define SERVO0_PIN 11
+#define SERVO1_PIN 6
+#define SERVO2_PIN 5
+#define SERVO3_PIN 4
 
 /* Z-Probing */
 

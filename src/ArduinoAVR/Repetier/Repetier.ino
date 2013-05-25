@@ -78,7 +78,7 @@ Custom M Codes
 - M84  - Disable steppers until next move,
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-- M92  - Set axis_steps_per_unit - same syntax as G92
+- M92  - Set axisStepsPerMM - same syntax as G92
 - M112 - Emergency kill
 - M115- Capabilities string
 - M117 <message> - Write message in status row on lcd
@@ -99,6 +99,7 @@ Custom M Codes
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M303 P<extruder/bed> S<drucktermeratur> Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed.
+- M340 P<servoId> S<pulseInMS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.

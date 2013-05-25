@@ -65,12 +65,12 @@ void Extruder::manageTemperatures()
             else
                 extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
-        if(!(printer.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
+        if(!(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
-            printer.flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+            Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
             reportTempsensorError();
         }
-        if(printer.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
+        if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
         byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 #ifdef TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
@@ -122,7 +122,7 @@ void Extruder::manageTemperatures()
             WRITE(LED_PIN,on);
 #endif
     }
-    if(printer.flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
+    if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
     {
         for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
         {
@@ -315,45 +315,45 @@ void Extruder::selectExtruderById(byte extruderId)
     Printer::currentPositionSteps[3] = current_extruder->extrudePosition;
 #endif
     Printer::destinationSteps[3] = Printer::currentPositionSteps[3];
-    axis_steps_per_unit[3] = current_extruder->stepsPerMM;
-    inv_axis_steps_per_unit[3] = 1.0f/axis_steps_per_unit[3];
-    max_feedrate[3] = current_extruder->maxFeedrate;
+    Printer::axisStepsPerMM[3] = current_extruder->stepsPerMM;
+    Printer::invAxisStepsPerMM[3] = 1.0f/Printer::axisStepsPerMM[3];
+    Printer::maxFeedrate[3] = current_extruder->maxFeedrate;
 //   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
-    max_acceleration_units_per_sq_second[3] = max_travel_acceleration_units_per_sq_second[3] = current_extruder->maxAcceleration;
-    axis_travel_steps_per_sqr_second[3] = axis_steps_per_sqr_second[3] = max_acceleration_units_per_sq_second[3] * axis_steps_per_unit[3];
+    Printer::maxAccelerationMMPerSquareSecond[3] = Printer::maxTravelAccelerationMMPerSquareSecond[3] = current_extruder->maxAcceleration;
+    Printer::maxTravelAccelerationStepsPerSquareSecond[3] = Printer::maxPrintAccelerationStepsPerSquareSecond[3] = Printer::maxAccelerationMMPerSquareSecond[3] * Printer::axisStepsPerMM[3];
 #if defined(USE_ADVANCE)
-    printer.minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
-    printer.maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
-    if(printer.maxExtruderSpeed>15) printer.maxExtruderSpeed = 15;
-    if(printer.maxExtruderSpeed>=printer.minExtruderSpeed)
+    Printer::minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
+    Printer::maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+    if(Printer::maxExtruderSpeed>15) Printer::maxExtruderSpeed = 15;
+    if(Printer::maxExtruderSpeed>=Printer::minExtruderSpeed)
     {
-        printer.maxExtruderSpeed = printer.minExtruderSpeed;
+        Printer::maxExtruderSpeed = Printer::minExtruderSpeed;
     }
     else
     {
         float maxdist = current_extruder->maxFeedrate*current_extruder->maxFeedrate*0.00013888/current_extruder->maxAcceleration;
         maxdist-= current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.5/current_extruder->maxAcceleration;
-        printer.extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(printer.minExtruderSpeed-printer.maxExtruderSpeed)),1,255);
+        Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
-    float fmax=((float)F_CPU/((float)printer.maxExtruderSpeed*TIMER0_PRESCALE*axis_steps_per_unit[3]))*60.0; // Limit feedrate to interrupt speed
-    if(fmax<max_feedrate[3]) max_feedrate[3] = fmax;
+    float fmax=((float)F_CPU/((float)Printer::maxExtruderSpeed*TIMER0_PRESCALE*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
+    if(fmax<Printer::maxFeedrate[3]) Printer::maxFeedrate[3] = fmax;
 #endif
     current_extruder->tempControl.updateTempControlVars();
 #if USE_OPS==1
-    printer.opsRetractSteps = printer.opsRetractDistance*current_extruder->stepsPerMM;
-    printer.opsPushbackSteps = (printer.opsRetractDistance+printer.opsRetractBacklash)*current_extruder->stepsPerMM;
-    if(printer.opsMode<=1)
-        printer.opsMoveAfterSteps = 0;
+    Printer::opsRetractSteps = Printer::opsRetractDistance*current_extruder->stepsPerMM;
+    Printer::opsPushbackSteps = (Printer::opsRetractDistance+Printer::opsRetractBacklash)*current_extruder->stepsPerMM;
+    if(Printer::opsMode<=1)
+        Printer::opsMoveAfterSteps = 0;
     else
-        printer.opsMoveAfterSteps = (int)(-(float)printer.opsRetractSteps*(100.0-printer.opsMoveAfter)*0.01);
+        Printer::opsMoveAfterSteps = (int)(-(float)Printer::opsRetractSteps*(100.0-Printer::opsMoveAfter)*0.01);
 #endif
     if(dx || dy)
     {
-        float oldfeedrate = printer.feedrate;
-        PrintLine::moveRelativeDistanceInSteps(dx,dy,0,0,homing_feedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
-        printer.offsetX += dx*inv_axis_steps_per_unit[0];
-        printer.offsetY += dy*inv_axis_steps_per_unit[1];
-        printer.feedrate = oldfeedrate;
+        float oldfeedrate = Printer::feedrate;
+        PrintLine::moveRelativeDistanceInSteps(dx,dy,0,0,Printer::homingFeedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+        Printer::offsetX += dx*Printer::invAxisStepsPerMM[0];
+        Printer::offsetY += dy*Printer::invAxisStepsPerMM[1];
+        Printer::feedrate = oldfeedrate;
     }
 #if NUM_EXTRUDER>1
     if(executeSelect) // Run only when changing
@@ -384,7 +384,7 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
         EEPROM::updatePrinterUsage();
 #endif
     if(alloffs && !alloff) // heaters are turned on, start measuring printing time
-        printer.msecondsPrinting = HAL::timeInMilliseconds();
+        Printer::msecondsPrinting = HAL::timeInMilliseconds();
 }
 
 void Extruder::setHeatedBedTemperature(float temp_celsius)

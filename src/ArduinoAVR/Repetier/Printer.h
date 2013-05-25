@@ -34,102 +34,117 @@
 class Printer
 {
 public:
+    static float axisStepsPerMM[];
+    static float invAxisStepsPerMM[];
+    static float maxFeedrate[];
+    static float homingFeedrate[];
+    static float max_start_speed_units_per_second[];
+    static long maxAccelerationMMPerSquareSecond[];
+    static long maxTravelAccelerationMMPerSquareSecond[];
+    static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
+    static unsigned long maxTravelAccelerationStepsPerSquareSecond[];
+    static byte relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
+    static byte relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
+
+    static byte unitIsInches;
+
     static byte debugLevel;
     static byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
     static byte stepsPerTimerCall;
 #if USE_OPS==1 || defined(USE_ADVANCE)
-    volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+    volatile static int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
-    byte minExtruderSpeed;            ///< Timer delay for start extruder speed
-    byte maxExtruderSpeed;            ///< Timer delay for end extruder speed
-    byte extruderAccelerateDelay;     ///< delay between 2 speec increases
+    static byte minExtruderSpeed;            ///< Timer delay for start extruder speed
+    static byte maxExtruderSpeed;            ///< Timer delay for end extruder speed
+    static byte extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
     static unsigned long interval;    ///< Last step duration in ticks.
 #if USE_OPS==1
-    bool filamentRetracted;           ///< Is the extruder filament retracted
+    static bool filamentRetracted;           ///< Is the extruder filament retracted
 #endif
-    unsigned long timer;              ///< used for acceleration/deceleration timing
-    unsigned long stepNumber;         ///< Step number in current move.
+    static unsigned long timer;              ///< used for acceleration/deceleration timing
+    static unsigned long stepNumber;         ///< Step number in current move.
     static long coordinateOffset[3];
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    long advance_executed;             ///< Executed advance steps
+    static long advance_executed;             ///< Executed advance steps
 #endif
-    int advance_steps_set;
-    unsigned int advance_lin_set;
+    static int advance_steps_set;
+    static unsigned int advance_lin_set;
 #endif
     static long currentPositionSteps[4];     ///< Position in steps from origin.
     static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
 #if DRIVE_SYSTEM==3
 #ifdef STEP_COUNTER
-    long countZSteps;					///< Count of steps from last position reset
+    static long countZSteps;					///< Count of steps from last position reset
 #endif
     static long currentDeltaPositionSteps[4];
-    long maxDeltaPositionSteps;
+    static long maxDeltaPositionSteps;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
     static long stepsRemainingAtZHit;
 #endif
 #ifdef SOFTWARE_LEVELING
-    long levelingP1[3];
-    long levelingP2[3];
-    long levelingP3[3];
+    static long levelingP1[3];
+    static long levelingP2[3];
+    static long levelingP3[3];
 #endif
 #if USE_OPS==1
-    int opsRetractSteps;              ///< Retract filament this much steps
-    int opsPushbackSteps;             ///< Retract+extra distance for backsash
-    float opsMinDistance;
-    float opsRetractDistance;
-    float opsRetractBacklash;
-    byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
-    float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
-    int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
+    static int opsRetractSteps;              ///< Retract filament this much steps
+    static int opsPushbackSteps;             ///< Retract+extra distance for backsash
+    static float opsMinDistance;
+    static float opsRetractDistance;
+    static float opsRetractBacklash;
+    static byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
+    static float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
+    static int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
-    float minimumSpeed;               ///< lowest allowed speed to keep integration error small
+    static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static long xMinSteps;                   ///< For software endstops, limit of move in negative direction.
     static long yMinSteps;                   ///< For software endstops, limit of move in negative direction.
     static long zMinSteps;                   ///< For software endstops, limit of move in negative direction.
-    float xLength;
-    float xMin;
-    float yLength;
-    float yMin;
-    float zLength;
-    float zMin;
-    float feedrate;                   ///< Last requested feedrate.
-    int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
-    unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
-    float maxJerk;                    ///< Maximum allowed jerk in mm/s
-    float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
-    float offsetX;                     ///< X-offset for different extruder positions.
-    float offsetY;                     ///< Y-offset for different extruder positions.
-    unsigned int vMaxReached;         ///< Maximumu reached speed
-    unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
-    float filamentPrinted;            ///< mm of filament printed since counting started
-    byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
+    static float xLength;
+    static float xMin;
+    static float yLength;
+    static float yMin;
+    static float zLength;
+    static float zMin;
+    static float feedrate;                   ///< Last requested feedrate.
+    static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
+    static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
+    static float maxJerk;                    ///< Maximum allowed jerk in mm/s
+    static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
+    static float offsetX;                     ///< X-offset for different extruder positions.
+    static float offsetY;                     ///< Y-offset for different extruder positions.
+    static unsigned int vMaxReached;         ///< Maximumu reached speed
+    static unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
+    static float filamentPrinted;            ///< mm of filament printed since counting started
+    static byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
-    float backlashX;
-    float backlashY;
-    float backlashZ;
-    byte backlashDir;
+    static float backlashX;
+    static float backlashY;
+    static float backlashZ;
+    static byte backlashDir;
 #endif
 #ifdef DEBUG_STEPCOUNT
-    long totalStepsRemaining;
+    static long totalStepsRemaining;
 #endif
 #if FEATURE_MEMORY_POSITION
-    long memoryX;
-    long memoryY;
-    long memoryZ;
+    static long memoryX;
+    static long memoryY;
+    static long memoryZ;
+    static long memoryE;
 #endif
 #ifdef XY_GANTRY
-    char motorX;
-    char motorY;
+    static char motorX;
+    static char motorY;
 #endif
     static inline bool debugEcho()
     {
@@ -264,17 +279,17 @@ public:
 #endif
         }
     }
-    inline byte isAdvanceActivated()
+    static inline byte isAdvanceActivated()
     {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
-    inline void setAdvanceActivated(byte b)
+    static inline void setAdvanceActivated(byte b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
     static inline float convertToMM(float x)
     {
-        return (unit_inches ? x*25.4 : x);
+        return (unitIsInches ? x*25.4 : x);
     }
     static inline bool isXMinEndstopHit()
     {
@@ -369,7 +384,7 @@ public:
         return false;
 #endif
     }
-    inline void executeXYGantrySteps()
+    static inline void executeXYGantrySteps()
     {
 #if defined(XY_GANTRY)
         if(motorX <= -2)
@@ -500,6 +515,7 @@ public:
     static byte setDestinationStepsFromGCode(GCode *com);
     static void moveTo(float x,float y,float z,float e,float f);
     static void moveToReal(float x,float y,float z,float e,float f);
+    static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
 #if DRIVE_SYSTEM==3
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
@@ -521,8 +537,10 @@ public:
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
 #endif
+private:
+    static void homeXAxis();
+    static void homeYAxis();
+    static void homeZAxis();
 };
-extern Printer printer;
-
 
 #endif // PRINTER_H_INCLUDED

@@ -58,32 +58,32 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     baudrate = BAUDRATE;
     max_inactive_time = MAX_INACTIVE_TIME*1000L;
     stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
-    axis_steps_per_unit[0] = XAXIS_STEPS_PER_MM;
-    axis_steps_per_unit[1] = YAXIS_STEPS_PER_MM;
-    axis_steps_per_unit[2] = ZAXIS_STEPS_PER_MM;
-    axis_steps_per_unit[3] = 1;
-    max_feedrate[0] = MAX_FEEDRATE_X;
-    max_feedrate[1] = MAX_FEEDRATE_Y;
-    max_feedrate[2] = MAX_FEEDRATE_Z;
-    homing_feedrate[0] = HOMING_FEEDRATE_X;
-    homing_feedrate[1] = HOMING_FEEDRATE_Y;
-    homing_feedrate[2] = HOMING_FEEDRATE_Z;
-    printer.maxJerk = MAX_JERK;
-    printer.maxZJerk = MAX_ZJERK;
+    Printer::axisStepsPerMM[0] = XAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[1] = YAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[2] = ZAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[3] = 1;
+    Printer::maxFeedrate[0] = MAX_FEEDRATE_X;
+    Printer::maxFeedrate[1] = MAX_FEEDRATE_Y;
+    Printer::maxFeedrate[2] = MAX_FEEDRATE_Z;
+    Printer::homingFeedrate[0] = HOMING_FEEDRATE_X;
+    Printer::homingFeedrate[1] = HOMING_FEEDRATE_Y;
+    Printer::homingFeedrate[2] = HOMING_FEEDRATE_Z;
+    Printer::maxJerk = MAX_JERK;
+    Printer::maxZJerk = MAX_ZJERK;
 #ifdef RAMP_ACCELERATION
-    max_acceleration_units_per_sq_second[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    max_acceleration_units_per_sq_second[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    max_acceleration_units_per_sq_second[2] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-    max_travel_acceleration_units_per_sq_second[0] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    max_travel_acceleration_units_per_sq_second[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    max_travel_acceleration_units_per_sq_second[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    Printer::maxAccelerationMMPerSquareSecond[0] = maxAccelerationMMPerSquareSecond_X;
+    Printer::maxAccelerationMMPerSquareSecond[1] = maxAccelerationMMPerSquareSecond_Y;
+    Printer::maxAccelerationMMPerSquareSecond[2] = maxAccelerationMMPerSquareSecond_Z;
+    Printer::maxTravelAccelerationMMPerSquareSecond[0] = maxTravelAccelerationMMPerSquareSecond_X;
+    Printer::maxTravelAccelerationMMPerSquareSecond[1] = maxTravelAccelerationMMPerSquareSecond_Y;
+    Printer::maxTravelAccelerationMMPerSquareSecond[2] = maxTravelAccelerationMMPerSquareSecond_Z;
 #endif
 #if USE_OPS==1
-    printer.opsMode = OPS_MODE;
-    printer.opsMinDistance = OPS_MIN_DISTANCE;
-    printer.opsRetractDistance = OPS_RETRACT_DISTANCE;
-    printer.opsRetractBacklash = OPS_RETRACT_BACKLASH;
-    printer.opsMoveAfter = OPS_MOVE_AFTER;
+    Printer::opsMode = OPS_MODE;
+    Printer::opsMinDistance = OPS_MIN_DISTANCE;
+    Printer::opsRetractDistance = OPS_RETRACT_DISTANCE;
+    Printer::opsRetractBacklash = OPS_RETRACT_BACKLASH;
+    Printer::opsMoveAfter = OPS_MOVE_AFTER;
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
@@ -96,16 +96,16 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     heatedBedController.pidMax = HEATED_BED_PID_MAX;
 #endif
 #endif
-    printer.xLength = X_MAX_LENGTH;
-    printer.yLength = Y_MAX_LENGTH;
-    printer.zLength = Z_MAX_LENGTH;
-    printer.xMin = X_MIN_POS;
-    printer.yMin = Y_MIN_POS;
-    printer.zMin = Z_MIN_POS;
+    Printer::xLength = X_MAX_LENGTH;
+    Printer::yLength = Y_MAX_LENGTH;
+    Printer::zLength = Z_MAX_LENGTH;
+    Printer::xMin = X_MIN_POS;
+    Printer::yMin = Y_MIN_POS;
+    Printer::zMin = Z_MIN_POS;
 #if ENABLE_BACKLASH_COMPENSATION
-    printer.backlashX = X_BACKLASH;
-    printer.backlashY = Y_BACKLASH;
-    printer.backlashZ = Z_BACKLASH;
+    Printer::backlashX = X_BACKLASH;
+    Printer::backlashY = Y_BACKLASH;
+    Printer::backlashZ = Z_BACKLASH;
 #endif
     Extruder *e;
 #if NUM_EXTRUDER>0
@@ -310,31 +310,31 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_long(EPR_MAX_INACTIVE_TIME,max_inactive_time);
     HAL::epr_set_long(EPR_STEPPER_INACTIVE_TIME,stepper_inactive_time);
 //#define EPR_ACCELERATION_TYPE 1
-    HAL::epr_set_float(EPR_XAXIS_STEPS_PER_MM,axis_steps_per_unit[0]);
-    HAL::epr_set_float(EPR_YAXIS_STEPS_PER_MM,axis_steps_per_unit[1]);
-    HAL::epr_set_float(EPR_ZAXIS_STEPS_PER_MM,axis_steps_per_unit[2]);
-    HAL::epr_set_float(EPR_X_MAX_FEEDRATE,max_feedrate[0]);
-    HAL::epr_set_float(EPR_Y_MAX_FEEDRATE,max_feedrate[1]);
-    HAL::epr_set_float(EPR_Z_MAX_FEEDRATE,max_feedrate[2]);
-    HAL::epr_set_float(EPR_X_HOMING_FEEDRATE,homing_feedrate[0]);
-    HAL::epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[1]);
-    HAL::epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[2]);
-    HAL::epr_set_float(EPR_MAX_JERK,printer.maxJerk);
-    HAL::epr_set_float(EPR_MAX_ZJERK,printer.maxZJerk);
+    HAL::epr_set_float(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[0]);
+    HAL::epr_set_float(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[1]);
+    HAL::epr_set_float(EPR_ZAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[2]);
+    HAL::epr_set_float(EPR_X_MAX_FEEDRATE,Printer::maxFeedrate[0]);
+    HAL::epr_set_float(EPR_Y_MAX_FEEDRATE,Printer::maxFeedrate[1]);
+    HAL::epr_set_float(EPR_Z_MAX_FEEDRATE,Printer::maxFeedrate[2]);
+    HAL::epr_set_float(EPR_X_HOMING_FEEDRATE,Printer::homingFeedrate[0]);
+    HAL::epr_set_float(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[1]);
+    HAL::epr_set_float(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[2]);
+    HAL::epr_set_float(EPR_MAX_JERK,Printer::maxJerk);
+    HAL::epr_set_float(EPR_MAX_ZJERK,Printer::maxZJerk);
 #ifdef RAMP_ACCELERATION
-    HAL::epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[0]);
-    HAL::epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[1]);
-    HAL::epr_set_float(EPR_Z_MAX_ACCEL,max_acceleration_units_per_sq_second[2]);
-    HAL::epr_set_float(EPR_X_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[0]);
-    HAL::epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
-    HAL::epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
+    HAL::epr_set_float(EPR_X_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[0]);
+    HAL::epr_set_float(EPR_Y_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[1]);
+    HAL::epr_set_float(EPR_Z_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[2]);
+    HAL::epr_set_float(EPR_X_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[0]);
+    HAL::epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[1]);
+    HAL::epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[2]);
 #endif
 #if USE_OPS==1
-    HAL::epr_set_float(EPR_OPS_MIN_DISTANCE,printer.opsMinDistance);
-    HAL::epr_set_byte(EPR_OPS_MODE,printer.opsMode);
-    HAL::epr_set_float(EPR_OPS_MOVE_AFTER,printer.opsMoveAfter);
-    HAL::epr_set_float(EPR_OPS_RETRACT_DISTANCE,printer.opsRetractDistance);
-    HAL::epr_set_float(EPR_OPS_RETRACT_BACKLASH,printer.opsRetractBacklash);
+    HAL::epr_set_float(EPR_OPS_MIN_DISTANCE,Printer::opsMinDistance);
+    HAL::epr_set_byte(EPR_OPS_MODE,Printer::opsMode);
+    HAL::epr_set_float(EPR_OPS_MOVE_AFTER,Printer::opsMoveAfter);
+    HAL::epr_set_float(EPR_OPS_RETRACT_DISTANCE,Printer::opsRetractDistance);
+    HAL::epr_set_float(EPR_OPS_RETRACT_BACKLASH,Printer::opsRetractBacklash);
 #else
     HAL::epr_set_float(EPR_OPS_MIN_DISTANCE,OPS_MIN_DISTANCE);
     HAL::epr_set_byte(EPR_OPS_MODE,OPS_MODE);
@@ -362,16 +362,16 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_float(EPR_BED_PID_DGAIN,HEATED_BED_PID_DGAIN);
     HAL::epr_set_byte(EPR_BED_PID_MAX,HEATED_BED_PID_MAX);
 #endif
-    HAL::epr_set_float(EPR_X_HOME_OFFSET,printer.xMin);
-    HAL::epr_set_float(EPR_Y_HOME_OFFSET,printer.yMin);
-    HAL::epr_set_float(EPR_Z_HOME_OFFSET,printer.zMin);
-    HAL::epr_set_float(EPR_X_LENGTH,printer.xLength);
-    HAL::epr_set_float(EPR_Y_LENGTH,printer.yLength);
-    HAL::epr_set_float(EPR_Z_LENGTH,printer.zLength);
+    HAL::epr_set_float(EPR_X_HOME_OFFSET,Printer::xMin);
+    HAL::epr_set_float(EPR_Y_HOME_OFFSET,Printer::yMin);
+    HAL::epr_set_float(EPR_Z_HOME_OFFSET,Printer::zMin);
+    HAL::epr_set_float(EPR_X_LENGTH,Printer::xLength);
+    HAL::epr_set_float(EPR_Y_LENGTH,Printer::yLength);
+    HAL::epr_set_float(EPR_Z_LENGTH,Printer::zLength);
 #if ENABLE_BACKLASH_COMPENSATION
-    HAL::epr_set_float(EPR_BACKLASH_X,printer.backlashX);
-    HAL::epr_set_float(EPR_BACKLASH_Y,printer.backlashY);
-    HAL::epr_set_float(EPR_BACKLASH_Z,printer.backlashZ);
+    HAL::epr_set_float(EPR_BACKLASH_X,Printer::backlashX);
+    HAL::epr_set_float(EPR_BACKLASH_Y,Printer::backlashY);
+    HAL::epr_set_float(EPR_BACKLASH_Z,Printer::backlashZ);
 #else
     HAL::epr_set_float(EPR_BACKLASH_X,0);
     HAL::epr_set_float(EPR_BACKLASH_Y,0);
@@ -457,31 +457,31 @@ void EEPROM::readDataFromEEPROM()
     max_inactive_time = HAL::epr_get_long(EPR_MAX_INACTIVE_TIME);
     stepper_inactive_time = HAL::epr_get_long(EPR_STEPPER_INACTIVE_TIME);
 //#define EPR_ACCELERATION_TYPE 1
-    axis_steps_per_unit[0] = HAL::epr_get_float(EPR_XAXIS_STEPS_PER_MM);
-    axis_steps_per_unit[1] = HAL::epr_get_float(EPR_YAXIS_STEPS_PER_MM);
-    axis_steps_per_unit[2] = HAL::epr_get_float(EPR_ZAXIS_STEPS_PER_MM);
-    max_feedrate[0] = HAL::epr_get_float(EPR_X_MAX_FEEDRATE);
-    max_feedrate[1] = HAL::epr_get_float(EPR_Y_MAX_FEEDRATE);
-    max_feedrate[2] = HAL::epr_get_float(EPR_Z_MAX_FEEDRATE);
-    homing_feedrate[0] = HAL::epr_get_float(EPR_X_HOMING_FEEDRATE);
-    homing_feedrate[1] = HAL::epr_get_float(EPR_Y_HOMING_FEEDRATE);
-    homing_feedrate[2] = HAL::epr_get_float(EPR_Z_HOMING_FEEDRATE);
-    printer.maxJerk = HAL::epr_get_float(EPR_MAX_JERK);
-    printer.maxZJerk = HAL::epr_get_float(EPR_MAX_ZJERK);
+    Printer::axisStepsPerMM[0] = HAL::epr_get_float(EPR_XAXIS_STEPS_PER_MM);
+    Printer::axisStepsPerMM[1] = HAL::epr_get_float(EPR_YAXIS_STEPS_PER_MM);
+    Printer::axisStepsPerMM[2] = HAL::epr_get_float(EPR_ZAXIS_STEPS_PER_MM);
+    Printer::maxFeedrate[0] = HAL::epr_get_float(EPR_X_MAX_FEEDRATE);
+    Printer::maxFeedrate[1] = HAL::epr_get_float(EPR_Y_MAX_FEEDRATE);
+    Printer::maxFeedrate[2] = HAL::epr_get_float(EPR_Z_MAX_FEEDRATE);
+    Printer::homingFeedrate[0] = HAL::epr_get_float(EPR_X_HOMING_FEEDRATE);
+    Printer::homingFeedrate[1] = HAL::epr_get_float(EPR_Y_HOMING_FEEDRATE);
+    Printer::homingFeedrate[2] = HAL::epr_get_float(EPR_Z_HOMING_FEEDRATE);
+    Printer::maxJerk = HAL::epr_get_float(EPR_MAX_JERK);
+    Printer::maxZJerk = HAL::epr_get_float(EPR_MAX_ZJERK);
 #ifdef RAMP_ACCELERATION
-    max_acceleration_units_per_sq_second[0] = HAL::epr_get_float(EPR_X_MAX_ACCEL);
-    max_acceleration_units_per_sq_second[1] = HAL::epr_get_float(EPR_Y_MAX_ACCEL);
-    max_acceleration_units_per_sq_second[2] = HAL::epr_get_float(EPR_Z_MAX_ACCEL);
-    max_travel_acceleration_units_per_sq_second[0] = HAL::epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
-    max_travel_acceleration_units_per_sq_second[1] = HAL::epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
-    max_travel_acceleration_units_per_sq_second[2] = HAL::epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
+    Printer::maxAccelerationMMPerSquareSecond[0] = HAL::epr_get_float(EPR_X_MAX_ACCEL);
+    Printer::maxAccelerationMMPerSquareSecond[1] = HAL::epr_get_float(EPR_Y_MAX_ACCEL);
+    Printer::maxAccelerationMMPerSquareSecond[2] = HAL::epr_get_float(EPR_Z_MAX_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[0] = HAL::epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[1] = HAL::epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[2] = HAL::epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
 #if USE_OPS==1
-    printer.opsMode = HAL::epr_get_byte(EPR_OPS_MODE);
-    printer.opsMoveAfter = HAL::epr_get_float(EPR_OPS_MOVE_AFTER);
-    printer.opsMinDistance = HAL::epr_get_float(EPR_OPS_MIN_DISTANCE);
-    printer.opsRetractDistance = HAL::epr_get_float(EPR_OPS_RETRACT_DISTANCE);
-    printer.opsRetractBacklash = HAL::epr_get_float(EPR_OPS_RETRACT_BACKLASH);
+    Printer::opsMode = HAL::epr_get_byte(EPR_OPS_MODE);
+    Printer::opsMoveAfter = HAL::epr_get_float(EPR_OPS_MOVE_AFTER);
+    Printer::opsMinDistance = HAL::epr_get_float(EPR_OPS_MIN_DISTANCE);
+    Printer::opsRetractDistance = HAL::epr_get_float(EPR_OPS_RETRACT_DISTANCE);
+    Printer::opsRetractBacklash = HAL::epr_get_float(EPR_OPS_RETRACT_BACKLASH);
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HAL::epr_get_byte(EPR_BED_HEAT_MANAGER);
@@ -494,16 +494,16 @@ void EEPROM::readDataFromEEPROM()
     heatedBedController.pidMax = HAL::epr_get_byte(EPR_BED_PID_MAX);
 #endif
 #endif
-    printer.xMin = HAL::epr_get_float(EPR_X_HOME_OFFSET);
-    printer.yMin = HAL::epr_get_float(EPR_Y_HOME_OFFSET);
-    printer.zMin = HAL::epr_get_float(EPR_Z_HOME_OFFSET);
-    printer.xLength = HAL::epr_get_float(EPR_X_LENGTH);
-    printer.yLength = HAL::epr_get_float(EPR_Y_LENGTH);
-    printer.zLength = HAL::epr_get_float(EPR_Z_LENGTH);
+    Printer::xMin = HAL::epr_get_float(EPR_X_HOME_OFFSET);
+    Printer::yMin = HAL::epr_get_float(EPR_Y_HOME_OFFSET);
+    Printer::zMin = HAL::epr_get_float(EPR_Z_HOME_OFFSET);
+    Printer::xLength = HAL::epr_get_float(EPR_X_LENGTH);
+    Printer::yLength = HAL::epr_get_float(EPR_Y_LENGTH);
+    Printer::zLength = HAL::epr_get_float(EPR_Z_LENGTH);
 #if ENABLE_BACKLASH_COMPENSATION
-    printer.backlashX = HAL::epr_get_float(EPR_BACKLASH_X);
-    printer.backlashY = HAL::epr_get_float(EPR_BACKLASH_Y);
-    printer.backlashZ = HAL::epr_get_float(EPR_BACKLASH_Z);
+    Printer::backlashX = HAL::epr_get_float(EPR_BACKLASH_X);
+    Printer::backlashY = HAL::epr_get_float(EPR_BACKLASH_Y);
+    Printer::backlashZ = HAL::epr_get_float(EPR_BACKLASH_Z);
 #endif
 #if FEATURE_AUTOLEVEL
     if(version>2)
@@ -603,13 +603,13 @@ void EEPROM::init()
 void EEPROM::updatePrinterUsage()
 {
 #if EEPROM_MODE!=0
-    if(printer.filamentPrinted==0) return; // No miles only enabled
-    unsigned long seconds = (HAL::timeInMilliseconds()-printer.msecondsPrinting)/1000;
+    if(Printer::filamentPrinted==0) return; // No miles only enabled
+    unsigned long seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
     seconds += HAL::epr_get_long(EPR_PRINTING_TIME);
     HAL::epr_set_long(EPR_PRINTING_TIME,seconds);
-    HAL::epr_set_float(EPR_PRINTING_DISTANCE,HAL::epr_get_float(EPR_PRINTING_DISTANCE)+printer.filamentPrinted*0.001);
-    printer.filamentPrinted = 0;
-    printer.msecondsPrinting = HAL::timeInMilliseconds();
+    HAL::epr_set_float(EPR_PRINTING_DISTANCE,HAL::epr_get_float(EPR_PRINTING_DISTANCE)+Printer::filamentPrinted*0.001);
+    Printer::filamentPrinted = 0;
+    Printer::msecondsPrinting = HAL::timeInMilliseconds();
     byte newcheck = computeChecksum();
     if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
         HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);

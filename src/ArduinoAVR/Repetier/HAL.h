@@ -482,6 +482,10 @@ public:
     static unsigned char i2cWrite( unsigned char data );
     static unsigned char i2cReadAck(void);
     static unsigned char i2cReadNak(void);
+#if FEATURE_SERVO
+    static unsigned int servoTimings[4];
+    static void servoMicroseconds(byte servo,int ms);
+#endif
 protected:
 private:
 };

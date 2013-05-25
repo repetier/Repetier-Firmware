@@ -12,6 +12,7 @@ Version 0.90alpha in development use only if you know what you are doing, config
   Fixed pin assignment for RUMBA
   Added ui support for 3. etxruder
   Mirror stepper driver signals if wanted for two x,y,z drivers with same signals.
+  Support for servo control through M340 command.
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
