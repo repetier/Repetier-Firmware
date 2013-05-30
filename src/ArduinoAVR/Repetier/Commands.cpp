@@ -336,7 +336,7 @@ void microstep_readings()
     Com::printF(Com::tE0Colon,READ(E0_MS1_PIN));
     Com::printFLN(Com::tComma,READ(E0_MS2_PIN));
     Com::printF(Com::tE1Colon,READ(E1_MS1_PIN));
-    Com::printFLN((Com::tComma,READ(E1_MS2_PIN));
+    Com::printFLN(Com::tComma,READ(E1_MS2_PIN));
 }
 #endif
 

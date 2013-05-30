@@ -1587,16 +1587,16 @@ class SdVolume {
 
 //------------------------------------------------------------------------------
 /**
- * \struct fpos_t
+ * \struct sd_fpos_t
  * \brief internal type for istream
  * do not use in user apps
  */
-struct fpos_t {
+struct sd_fpos_t {
   /** stream position */
   uint32_t position;
   /** cluster for position */
   uint32_t cluster;
-  fpos_t() : position(0), cluster(0) {}
+  sd_fpos_t() : position(0), cluster(0) {}
 };
 
 // use the gnu style oflag in open()
@@ -1756,11 +1756,11 @@ class SdBaseFile {
   /** get position for streams
    * \param[out] pos struct to receive position
    */
-  void getpos(fpos_t* pos);
+  void getpos(sd_fpos_t* pos);
   /** set position for streams
    * \param[out] pos struct with value for new position
    */
-  void setpos(fpos_t* pos);
+  void setpos(sd_fpos_t* pos);
   //----------------------------------------------------------------------------
   bool close();
   bool contiguousRange(uint32_t* bgnBlock, uint32_t* endBlock);

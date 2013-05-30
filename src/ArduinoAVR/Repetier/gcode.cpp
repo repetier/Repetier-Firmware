@@ -297,7 +297,7 @@ void GCode::readFromSerial()
     }
     while(HAL::serialByteAvailable() && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
-        timeOfLastDataPacket = HAL::timeInMilliseconds();
+        timeOfLastDataPacket = time; //HAL::timeInMilliseconds();
         commandReceiving[commandsReceivingWritePosition++] = HAL::serialReadByte();
         // first lets detect, if we got an old type ascii command
         if(commandsReceivingWritePosition==1)
@@ -327,13 +327,9 @@ void GCode::readFromSerial()
             {
                 act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseBinary(commandReceiving,true))   // Success
-                {
                     act->checkAndPushCommand();
-                }
                 else
-                {
                     requestResend();
-                }
                 commandsReceivingWritePosition = 0;
                 return;
             }
@@ -352,13 +348,9 @@ void GCode::readFromSerial()
                 }
                 act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseAscii((char *)commandReceiving,true))   // Success
-                {
                     act->checkAndPushCommand();
-                }
                 else
-                {
                     requestResend();
-                }
                 commandsReceivingWritePosition = 0;
                 return;
             }
@@ -371,9 +363,7 @@ void GCode::readFromSerial()
     }
 #if SDSUPPORT
     if(!sd.sdmode || commandsReceivingWritePosition!=0)   // not reading or incoming serial command
-    {
         return;
-    }
     while( sd.filesize > sd.sdpos && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
         timeOfLastDataPacket = HAL::timeInMilliseconds();
@@ -381,6 +371,7 @@ void GCode::readFromSerial()
         if(n==-1)
         {
             Com::printFLN(Com::tSDReadError);
+            sd.sdmode = false;
             break;
         }
         sd.sdpos++; // = file.curPosition();
@@ -399,9 +390,7 @@ void GCode::readFromSerial()
             {
                 act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseBinary(commandReceiving,false))   // Success
-                {
                     pushCommand();
-                }
                 commandsReceivingWritePosition = 0;
                 return;
             }
@@ -420,9 +409,7 @@ void GCode::readFromSerial()
                 }
                 act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseAscii((char *)commandReceiving,false))   // Success
-                {
                     pushCommand();
-                }
                 commandsReceivingWritePosition = 0;
                 return;
             }

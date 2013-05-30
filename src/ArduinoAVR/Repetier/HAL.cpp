@@ -247,10 +247,10 @@ long HAL::CPUDivU2(unsigned int divisor)
         unsigned short y0=	pgm_read_word_near(adr0);
         unsigned short gain = y0-pgm_read_word_near(adr0+2);
         return y0-(((long)gain*(divisor & 4095))>>12);*/
+    }
 #else
     return F_CPU/divisor;
 #endif
-    }
 }
 
 void HAL::setupTimer() {

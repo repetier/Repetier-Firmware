@@ -1053,7 +1053,7 @@ instead of driving both with one stepper. The same works for the other axis if n
 
 If you need to control servos, enable this feature. You can control up to 4 servos.
 Control the servos with
-M340 P<servoId> S<pulseInMS>
+M340 P<servoId> S<pulseInUS>
 servoID = 0..3
 Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 
