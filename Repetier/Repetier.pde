@@ -571,8 +571,8 @@ void defaultLoopActions() {
   unsigned long curtime = millis();
   if(lines_count)
     previous_millis_cmd = curtime;
-  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
-  if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
+  if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  (max_inactive_time*1000) ) kill(false);
+  if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  (stepper_inactive_time*1000) ) { kill(true); }
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
   sd.automount();
 #endif
