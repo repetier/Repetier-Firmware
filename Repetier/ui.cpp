@@ -1798,6 +1798,12 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_PREHEAT_PLA:
       UI_STATUS(UI_TEXT_PREHEAT_PLA);
+      #if PS_ON_PIN>-1
+      wait_until_end_of_move();
+      previous_millis_cmd = millis();
+      SET_OUTPUT(PS_ON_PIN); //GND
+      WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
+      #endif
       extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
 #if NUM_EXTRUDER>1
       extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
@@ -1808,6 +1814,12 @@ void UIDisplay::executeAction(int action) {
       break;
     case UI_ACTION_PREHEAT_ABS:
       UI_STATUS(UI_TEXT_PREHEAT_ABS);
+      #if PS_ON_PIN>-1
+      wait_until_end_of_move();
+      previous_millis_cmd = millis();
+      SET_OUTPUT(PS_ON_PIN); //GND
+      WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
+      #endif
       extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
 #if NUM_EXTRUDER>1
       extruder_set_temperature(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
