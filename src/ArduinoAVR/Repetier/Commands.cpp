@@ -640,13 +640,14 @@ void Commands::executeGCode(GCode *com)
             if(Printer::isAutolevelActive())
                 Printer::transformToPrinter(xOff,yOff,zOff,xOff,yOff,zOff);
 #endif // FEATURE_AUTOLEVEL
-            Printer::coordinateOffset[0] += xOff*Printer::axisStepsPerMM[0];
-            Printer::coordinateOffset[1] += yOff*Printer::axisStepsPerMM[1];
-            Printer::coordinateOffset[2] += zOff*Printer::axisStepsPerMM[2];
+            Printer::coordinateOffset[0] -= xOff*Printer::axisStepsPerMM[0];
+            Printer::coordinateOffset[1] -= yOff*Printer::axisStepsPerMM[1];
+            Printer::coordinateOffset[2] -= zOff*Printer::axisStepsPerMM[2];
             if(com->hasE())
             {
                 Printer::currentPositionSteps[3] = Printer::convertToMM(com->E)*Printer::axisStepsPerMM[3];
             }
+            Printer::updateCurrentPosition();
         }
         break;
 

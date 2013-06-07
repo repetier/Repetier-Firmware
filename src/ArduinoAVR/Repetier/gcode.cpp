@@ -153,6 +153,7 @@ void GCode::checkAndPushCommand()
         {
             lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
+            waitingForResend = -1;
             return;
         }
         if(M==112)   // Emergency kill - freeze printer

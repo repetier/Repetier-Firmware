@@ -286,11 +286,11 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
     if(isAutolevelActive())
         transformToPrinter(x+Printer::offsetX,y+Printer::offsetY,z,x,y,z);
     else
+#endif // FEATURE_AUTOLEVEL
     {
         x+= Printer::offsetX;
         y+= Printer::offsetY;
     }
-#endif // FEATURE_AUTOLEVEL
     if(x!=IGNORE_COORDINATE)
         destinationSteps[0] = x*axisStepsPerMM[0]+coordinateOffset[0];
     if(y!=IGNORE_COORDINATE)
