@@ -2134,12 +2134,12 @@ void UIDisplay::executeAction(int action) {
 #endif
       break;
     case UI_ACTION_FAN_UP:
-      set_fan_speed(pwm_pos[3]+32,false);
-      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
+      set_fan_speed(get_fan_speed()+32,false);
+      OUT_P_I_LN("Fanspeed:",get_fan_speed());
       break;
     case UI_ACTION_FAN_DOWN:
-      set_fan_speed(pwm_pos[3]-32,false);
-      OUT_P_I_LN("Fanspeed:",(int)pwm_pos[3]);
+      set_fan_speed(get_fan_speed()-32,false);
+      OUT_P_I_LN("Fanspeed:",get_fan_speed());
       break;
     case UI_ACTION_KILL:
       cli(); // Don't allow interrupts to do their work
@@ -2200,7 +2200,7 @@ void UIDisplay::slowAction() {
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
 #if FAN_PIN>=0
-            led |= (pwm_pos[NUM_EXTRUDER+2] > 0 ? UI_I2C_FAN_LED : 0);
+            led |= (get_fan_speed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds
             uid.outputMask= ~led&(UI_I2C_HEATBED_LED|UI_I2C_HOTEND_LED|UI_I2C_FAN_LED);
