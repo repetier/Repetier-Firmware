@@ -362,7 +362,7 @@ void Com::printErrorF(FSTRINGPARAM(text)) {
 }
 void Com::printErrorFLN(FSTRINGPARAM(text)) {
     printF(tError);
-    printF(text);
+    printFLN(text);
 }
 void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);

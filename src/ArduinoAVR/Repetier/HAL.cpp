@@ -932,7 +932,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
 */
 
 ring_buffer rx_buffer = { { 0 }, 0, 0};
-ring_buffer tx_buffer = { { 0 }, 0, 0};
+ring_buffer_tx tx_buffer = { { 0 }, 0, 0};
 
 inline void rf_store_char(unsigned char c, ring_buffer *buffer)
 {
@@ -1007,7 +1007,7 @@ ISR(USART_UDRE_vect)
   else {
     // There is more data in the output buffer. Send the next byte
     unsigned char c = tx_buffer.buffer[tx_buffer.tail];
-    tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_BUFFER_MASK;
+    tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
 
   #if defined(UDR0)
     UDR0 = c;
@@ -1024,7 +1024,7 @@ ISR(USART_UDRE_vect)
 
 // Constructors ////////////////////////////////////////////////////////////////
 
-RFHardwareSerial::RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
+RFHardwareSerial::RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer_tx *tx_buffer,
   volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
   volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
   volatile uint8_t *udr,
@@ -1139,11 +1139,10 @@ void RFHardwareSerial::flush()
 #endif
 RFHardwareSerial::write(uint8_t c)
 {
-  int i = (_tx_buffer->head + 1) & SERIAL_BUFFER_MASK;
+  int i = (_tx_buffer->head + 1) & SERIAL_TX_BUFFER_MASK;
 
   // If the output buffer is full, there's nothing for it other than to
   // wait for the interrupt handler to empty it a bit
-  // ???: return 0 here instead?
   while (i == _tx_buffer->tail)
     ;
 

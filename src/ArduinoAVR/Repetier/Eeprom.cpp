@@ -47,7 +47,7 @@ void EEPROM::update(GCode *com)
         HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
     readDataFromEEPROM();
 #else
-    Com::printErrorF(tNoEEPROMSupport);
+    Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
 }
 
@@ -298,7 +298,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Extruder::initHeatedBed();
     Com::printInfoF(Com::tEPRConfigResetDefaults);
 #else
-    Com::printErrorF(tNoEEPROMSupport);
+    Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
 
 }
@@ -740,7 +740,7 @@ void EEPROM::writeSettings()
 #endif
     }
 #else
-    Com::printErrorF(tNoEEPROMSupport);
+    Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
 }
 

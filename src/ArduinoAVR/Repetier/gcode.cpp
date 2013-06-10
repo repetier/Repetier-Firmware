@@ -151,6 +151,7 @@ void GCode::checkAndPushCommand()
     {
         if(M==110)   // Reset line number
         {
+    Com::printFLN(Com::tComma,(long)N);
             lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
             waitingForResend = -1;
@@ -276,11 +277,11 @@ It must be called frequently to empty the incoming buffer.
 */
 void GCode::readFromSerial()
 {
+    if(bufferLength>=GCODE_BUFFER_SIZE) return; // all buffers full
     if(waitUntilAllCommandsAreParsed && bufferLength) return;
     waitUntilAllCommandsAreParsed=false;
     GCode *act;
     millis_t time = HAL::timeInMilliseconds();
-    if(bufferLength>=GCODE_BUFFER_SIZE) return; // all buffers full
     if(!HAL::serialByteAvailable())
     {
         if((waitingForResend>=0 || commandsReceivingWritePosition>0) && time-timeOfLastDataPacket>200)

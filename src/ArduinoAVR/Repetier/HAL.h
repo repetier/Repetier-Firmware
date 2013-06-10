@@ -127,10 +127,18 @@ typedef unsigned long millis_t;
 
 #define SERIAL_BUFFER_SIZE 128
 #define SERIAL_BUFFER_MASK 127
+#define SERIAL_TX_BUFFER_SIZE 64
+#define SERIAL_TX_BUFFER_MASK 63
 
 struct ring_buffer
 {
     unsigned char buffer[SERIAL_BUFFER_SIZE];
+    volatile int head;
+    volatile int tail;
+};
+struct ring_buffer_tx
+{
+    unsigned char buffer[SERIAL_TX_BUFFER_SIZE];
     volatile int head;
     volatile int tail;
 };
@@ -139,7 +147,7 @@ class RFHardwareSerial : public Print
 {
 public:
     ring_buffer *_rx_buffer;
-    ring_buffer *_tx_buffer;
+    ring_buffer_tx *_tx_buffer;
     volatile uint8_t *_ubrrh;
     volatile uint8_t *_ubrrl;
     volatile uint8_t *_ucsra;
@@ -151,7 +159,7 @@ public:
     uint8_t _udrie;
     uint8_t _u2x;
 public:
-    RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer *tx_buffer,
+    RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer_tx *tx_buffer,
                      volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
                      volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
                      volatile uint8_t *udr,
@@ -172,7 +180,7 @@ public:
 };
 extern RFHardwareSerial RFSerial;
 #define RFSERIAL RFSerial
-extern ring_buffer tx_buffer;
+//extern ring_buffer tx_buffer;
 #define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}
 #else
 #define RFSERIAL Serial
@@ -407,7 +415,7 @@ public:
     }
     static inline bool serialByteAvailable()
     {
-        return RFSERIAL.available();
+        return RFSERIAL.available()>0;
     }
     static inline byte serialReadByte()
     {

@@ -770,7 +770,7 @@ void Commands::executeGCode(GCode *com)
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN>0
             if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
-            bool dir = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
+            bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
             millis_t printedTime = HAL::timeInMilliseconds();
             millis_t waituntil = 0;
 #if RETRACT_DURING_HEATUP
@@ -788,22 +788,22 @@ void Commands::executeGCode(GCode *com)
                 Commands::checkForPeriodicalActions();
                 //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
-                if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dir && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
+                if (actExtruder==current_extruder && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
                 {
                     PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[3],actExtruder->maxFeedrate,false,false);
                     retracted = 1;
                 }
 #endif
-                if((waituntil==0 && (dir ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-1:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
+                if((waituntil==0 && (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-1:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
 #ifdef TEMP_HYSTERESIS
                         || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
 #endif
                   )
                 {
-                    waituntil = cur_time+1000UL*(unsigned long)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                    waituntil = cur_time+1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
                 }
             }
-            while(waituntil==0 || (waituntil!=0 && (unsigned long)(waituntil-cur_time)<2000000000UL));
+            while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-cur_time)<2000000000UL));
 #if RETRACT_DURING_HEATUP
             if (retracted && actExtruder==current_extruder)
             {
@@ -1153,7 +1153,7 @@ void Commands::executeGCode(GCode *com)
             EEPROM::storeDataIntoEEPROM(false);
             Com::printInfoF(Com::tConfigStoredEEPROM);
 #else
-            Com::printErrorF(tNoEEPROMSupport);
+            Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
         }
         break;
@@ -1163,7 +1163,7 @@ void Commands::executeGCode(GCode *com)
             EEPROM::readDataFromEEPROM();
             Com::printInfoF(Com::tConfigLoadedEEPROM);
 #else
-            Com::printErrorF(tNoEEPROMSupport);
+            Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
         }
         break;
