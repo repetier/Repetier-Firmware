@@ -157,7 +157,7 @@ private:
     static bool waitUntilAllCommandsAreParsed; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
     static long lastLineNumber; ///< Last line number received.
     static long actLineNumber; ///< Line number of current command.
-    static char waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
+    static signed char waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
     static volatile byte bufferLength; ///< Number of commands stored in gcode_buffer
     static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing bytes.
 };

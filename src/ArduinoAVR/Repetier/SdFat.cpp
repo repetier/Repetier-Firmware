@@ -726,6 +726,7 @@ int8_t SdBaseFile::lsPrintNext(uint8_t flags, uint8_t indent) {
 }
 //------------------------------------------------------------------------------
 // format directory name field from a 8.3 name string
+FSTRINGVALUE(illegalFileChars,"|<>^+=?/[];,*\"\\");
 bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
   uint8_t c;
   uint8_t n = 7;  // max index for part before dot
@@ -747,13 +748,14 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
 #define FLASH_ILLEGAL_CHARS
 #ifdef FLASH_ILLEGAL_CHARS
       // store chars in flash
-      FSTRINGVALUE(p2,"|<>^+=?/[];,*\"\\");
       FSTRINGPARAM(p);
-      p = p2;
+      p = illegalFileChars;
       uint8_t b;
-      while ((b = HAL::readFlashByte(p++))) if (b == c) {
+      while ((b = HAL::readFlashByte(p++))) {
+            if (b == c) {
         DBG_FAIL_MACRO;
         goto fail;
+      }
       }
 #else  // FLASH_ILLEGAL_CHARS
       // store chars in RAM
@@ -976,6 +978,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag) {
   SdBaseFile dir1, dir2;
   SdBaseFile *parent = dirFile;
   SdBaseFile *sub = &dir1;
+     //   Com::printFLN(Com::tGot,path);
 
   if (!dirFile) {
     DBG_FAIL_MACRO;
@@ -1003,6 +1006,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag) {
     }
     while (*path == '/') path++;
     if (!*path) break;
+
     if (!sub->open(parent, dname, O_READ)) {
       DBG_FAIL_MACRO;
       goto fail;

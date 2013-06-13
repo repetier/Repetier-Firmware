@@ -39,7 +39,7 @@ byte GCode::binaryCommandSize; ///< Expected size of the incoming binary command
 bool GCode::waitUntilAllCommandsAreParsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
 long GCode::lastLineNumber=0; ///< Last line number received.
 long GCode::actLineNumber; ///< Line number of current command.
-char GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
+signed char GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
 volatile byte GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
 millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing bytes.
 
