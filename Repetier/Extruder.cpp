@@ -1018,7 +1018,7 @@ void manage_temperatures() {
     act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
     act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
     if(controller<NUM_EXTRUDER) {
-       if(act->currentTemperatureC<50 && act->targetTemperatureC<50)
+       if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
          extruder[controller].coolerPWM = 0;
        else
          extruder[controller].coolerPWM = extruder[controller].coolerSpeed;

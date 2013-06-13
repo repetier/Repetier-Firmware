@@ -154,6 +154,8 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // ##                           Extruder configuration                                     ##
 // ##########################################################################################
 
+// for each extruder, fan will stay on until extruder temperature is below this value 
+#define EXTRUDER_FAN_COOL_TEMP 50
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
