@@ -516,6 +516,9 @@ public:
     static void moveTo(float x,float y,float z,float e,float f);
     static void moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+    static inline int getFanSpeed() {
+        return (int)pwm_pos[NUM_EXTRUDER+2];
+    }
 #if DRIVE_SYSTEM==3
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {

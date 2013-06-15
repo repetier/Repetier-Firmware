@@ -2196,10 +2196,10 @@ void UIDisplay::executeAction(int action)
 #endif
         break;
         case UI_ACTION_FAN_UP:
-            Commands::setFanSpeed(pwm_pos[3]+32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed()+32,false);
             break;
         case UI_ACTION_FAN_DOWN:
-            Commands::setFanSpeed(pwm_pos[3]-32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed()-32,false);
             break;
         case UI_ACTION_KILL:
             HAL::forbidInterrupts(); // Don't allow interrupts to do their work
@@ -2264,7 +2264,7 @@ void UIDisplay::slowAction()
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
 #if FAN_PIN>=0
-            led |= (pwm_pos[NUM_EXTRUDER+2] > 0 ? UI_I2C_FAN_LED : 0);
+            led |= (Printer::getFanSpeed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds
             uid.outputMask= ~led&(UI_I2C_HEATBED_LED|UI_I2C_HOTEND_LED|UI_I2C_FAN_LED);

@@ -60,7 +60,7 @@ void Extruder::manageTemperatures()
         act->updateCurrentTemperature();
         if(controller<NUM_EXTRUDER)
         {
-            if(act->currentTemperatureC<50 && act->targetTemperatureC<50)
+            if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                 extruder[controller].coolerPWM = 0;
             else
                 extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
@@ -373,7 +373,7 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
     TemperatureController *tc = tempController[extr];
     if(temp_celsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temp_celsius);
-    if(temp_celsius>=50) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+    if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temp_celsius,0);
     bool alloff = true;

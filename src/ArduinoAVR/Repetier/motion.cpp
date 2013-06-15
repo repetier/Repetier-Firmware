@@ -85,6 +85,8 @@
 #define Z_AXIS 2
 #define E_AXIS 3
 
+volatile unsigned int delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache
+
 #endif
 
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
@@ -1103,21 +1105,16 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
     }
 
     int segment_count;
-    int num_lines;
-    int segments_per_line;
 
     if (save_dir & 48)
     {
         // Compute number of seconds for move and hence number of segments needed
-        float seconds = 100 * save_distance / (Printer::feedrate * Printer::feedrateMultiply);
+        //float seconds = 100 * save_distance / (Printer::feedrate * Printer::feedrateMultiply); multiply in feedrate included
+        float seconds = save_distance / Printer::feedrate;
 #ifdef DEBUG_SPLIT
         Com::printFLN(Com::tDBGDeltaSeconds, seconds);
 #endif
         segment_count = RMath::max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
-        // Now compute the number of lines needed
-        num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
-        // There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
-        segments_per_line = segment_count / num_lines;
     }
     else
     {
@@ -1127,9 +1124,11 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
         Com::printFLN(Com::tDBGDeltaZDelta, save_delta[2]);
 #endif
         segment_count = (save_delta[2] + (unsigned long)65534) / (unsigned long)65535;
-        num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
-        segments_per_line = segment_count / num_lines;
     }
+    // Now compute the number of lines needed
+    int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
+    // There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
+    int segments_per_line = segment_count / num_lines;
 
     long start_position[4], fractional_steps[4];
     for (byte i = 0; i < 4; i++)
@@ -1425,7 +1424,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
         } // End if WARMUP
         if(cur->isEMove()) Extruder::enable();
         cur->fixStartAndEndSpeed();
-        HAL::allowInterrupts(); // Allow interrupts
         // Set up delta segments
         if (cur->numDeltaSegments)
         {
@@ -1606,11 +1604,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     cur->numDeltaSegments--;
                     if (cur->numDeltaSegments)
                     {
-
                         // Get the next delta segment
                         curd = &segments[cur->deltaSegmentReadPos++];
                         if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
-                        delta_segment_count--;
 
                         // Initialize bresenham for this segment (numPrimaryStepPerSegment is already correct for the half step setting)
                         cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
@@ -1620,37 +1616,13 @@ long PrintLine::bresenhamStep() // Version for delta printer
                         stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
 
                         // Change direction if necessary
-                        if(curd->dir & 1)
-                        {
-                            WRITE(X_DIR_PIN,!INVERT_X_DIR);
-                        }
-                        else
-                        {
-                            WRITE(X_DIR_PIN,INVERT_X_DIR);
-                        }
-                        if(curd->dir & 2)
-                        {
-                            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
-                        }
-                        else
-                        {
-                            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
-                        }
-                        if(curd->dir & 4)
-                        {
-                            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
-                        }
-                        else
-                        {
-                            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
-                        }
+                        Printer::setXDirection(curd->dir & 1);
+                        Printer::setYDirection(curd->dir & 2);
+                        Printer::setZDirection(curd->dir & 4);
                     }
                     else
-                    {
-                        // Release the last segment
-                        delta_segment_count--;
-                        curd=0;
-                    }
+                        curd=0;// Release the last segment
+                    delta_segment_count--;
                 }
             }
 #if defined(USE_ADVANCE)
@@ -1762,7 +1734,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
 //			out.println_P(PSTR("F"));
 
         // Release remaining delta segments
-        delta_segment_count -= cur->numDeltaSegments;
 #ifdef DEBUG_STEPCOUNT
         if(cur->totalStepsRemaining)
         {
@@ -1773,6 +1744,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         }
 #endif
         removeCurrentLineForbidInterrupt();
+        delta_segment_count -= cur->numDeltaSegments;
         Printer::disableAllowedStepper();
         if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval>>1; // 50% of time to next call to do cur=0
