@@ -1133,7 +1133,8 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 
 	if (save_dir & 48) {
 		// Compute number of seconds for move and hence number of segments needed
-		float seconds = 100 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
+		//float seconds = 100 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
+		float seconds = save_distance / printer_state.feedrate;
 #ifdef DEBUG_SPLIT
 		out.println_float_P(PSTR("Seconds: "), seconds);
 #endif

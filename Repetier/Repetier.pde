@@ -1560,8 +1560,6 @@ inline long bresenham_step() {
 //			out.println_int_P(PSTR("DSC: "), (int) delta_segment_count);
 //			out.println_P(PSTR("F"));
 
-			// Release remaining delta segments
-			delta_segment_count -= cur->numDeltaSegments;
 	#ifdef DEBUG_STEPCOUNT
 			if(cur->totalStepsRemaining) {
 				out.println_long_P(PSTR("Missed steps:"), cur->totalStepsRemaining);
@@ -1596,6 +1594,8 @@ inline long bresenham_step() {
 			}
 	#endif
 			cli();
+			// Release remaining delta segments
+			delta_segment_count -= cur->numDeltaSegments;
 			lines_pos++;
 			if(lines_pos>=MOVE_CACHE_SIZE) lines_pos=0;
 			cur = 0;
