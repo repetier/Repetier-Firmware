@@ -71,12 +71,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::maxJerk = MAX_JERK;
     Printer::maxZJerk = MAX_ZJERK;
 #ifdef RAMP_ACCELERATION
-    Printer::maxAccelerationMMPerSquareSecond[0] = maxAccelerationMMPerSquareSecond_X;
-    Printer::maxAccelerationMMPerSquareSecond[1] = maxAccelerationMMPerSquareSecond_Y;
-    Printer::maxAccelerationMMPerSquareSecond[2] = maxAccelerationMMPerSquareSecond_Z;
-    Printer::maxTravelAccelerationMMPerSquareSecond[0] = maxTravelAccelerationMMPerSquareSecond_X;
-    Printer::maxTravelAccelerationMMPerSquareSecond[1] = maxTravelAccelerationMMPerSquareSecond_Y;
-    Printer::maxTravelAccelerationMMPerSquareSecond[2] = maxTravelAccelerationMMPerSquareSecond_Z;
+    Printer::maxAccelerationMMPerSquareSecond[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    Printer::maxAccelerationMMPerSquareSecond[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    Printer::maxAccelerationMMPerSquareSecond[2] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    Printer::maxTravelAccelerationMMPerSquareSecond[0] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    Printer::maxTravelAccelerationMMPerSquareSecond[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    Printer::maxTravelAccelerationMMPerSquareSecond[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
 #if USE_OPS==1
     Printer::opsMode = OPS_MODE;
@@ -293,7 +293,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::resetTransformationMatrix(true);
 #endif
     initalizeUncached();
-    Extruder::selectExtruderById(current_extruder->id);
+    Extruder::selectExtruderById(Extruder::current->id);
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
     Com::printInfoF(Com::tEPRConfigResetDefaults);
@@ -567,7 +567,7 @@ void EEPROM::readDataFromEEPROM()
         }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
-    Extruder::selectExtruderById(current_extruder->id);
+    Extruder::selectExtruderById(Extruder::current->id);
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
 #endif

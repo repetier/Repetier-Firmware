@@ -151,7 +151,7 @@ void GCode::checkAndPushCommand()
     {
         if(M==110)   // Reset line number
         {
-    Com::printFLN(Com::tComma,(long)N);
+            Com::printFLN(Com::tComma,(long)N);
             lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
             waitingForResend = -1;
@@ -695,10 +695,10 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     {
         if(!fromSerial) return true;
         if(hasM() && (M == 110 || hasString()) return true;
-        if(Printer::debugErrors())
+                if(Printer::debugErrors())
         {
             Com::printErrorFLN(Com::tMissingChecksum);
-        }
+            }
         return false;
     }
 #endif

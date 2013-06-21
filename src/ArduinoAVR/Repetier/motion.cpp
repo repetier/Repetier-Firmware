@@ -354,10 +354,10 @@ void PrintLine::calculate_move(float axis_diff[],byte pathOptimize)
     }
     else
     {
-        float advlin = fabs(speedE)*current_extruder->advanceL*0.001*Printer::axisStepsPerMM[3];
+        float advlin = fabs(speedE)*Extruder::current->advanceL*0.001*Printer::axisStepsPerMM[3];
         advanceL = (65536*advlin)/vMax; //advanceLscaled = (65536*vE*k2)/vMax
 #ifdef ENABLE_QUADRATIC_ADVANCE;
-        advanceFull = 65536*current_extruder->advanceK*speedE*speedE; // Steps*65536 at full speed
+        advanceFull = 65536*Extruder::current->advanceK*speedE*speedE; // Steps*65536 at full speed
         long steps = (HAL::U16SquaredToU32(vMax))/(accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
         advanceRate = advanceFull/steps;
         if((advanceFull>>16)>maxadv)
@@ -554,8 +554,8 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
     }
 #endif
     float eJerk = fabs(current->speedE-previous->speedE);
-    if(eJerk>current_extruder->maxStartFeedrate)
-        factor = RMath::min(factor,current_extruder->maxStartFeedrate/eJerk);
+    if(eJerk>Extruder::current->maxStartFeedrate)
+        factor = RMath::min(factor,Extruder::current->maxStartFeedrate/eJerk);
     previous->maxJunctionSpeed = RMath::min(previous->fullSpeed*factor,current->fullSpeed);
 }
 
@@ -748,9 +748,9 @@ inline float PrintLine::safeSpeed()
     if(isEMove())
     {
         if(isXYZMove())
-            safe = RMath::min(safe,0.5*current_extruder->maxStartFeedrate*fullSpeed/fabs(speedE));
+            safe = RMath::min(safe,0.5*Extruder::current->maxStartFeedrate*fullSpeed/fabs(speedE));
         else
-            safe = 0.5*current_extruder->maxStartFeedrate; // This is a retraction move
+            safe = 0.5*Extruder::current->maxStartFeedrate; // This is a retraction move
     }
     return RMath::min(safe,fullSpeed);
 }
@@ -1744,7 +1744,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         }
 #endif
         removeCurrentLineForbidInterrupt();
-        delta_segment_count -= cur->numDeltaSegments;
+        delta_segment_count -= cur->numDeltaSegments; // should always be zero
         Printer::disableAllowedStepper();
         if(lines_count==0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval>>1; // 50% of time to next call to do cur=0

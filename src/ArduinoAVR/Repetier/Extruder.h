@@ -57,6 +57,7 @@ current state variables, like current temperature, feeder position etc.
 class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 {
     public:
+    static Extruder *current;
     byte id;
     long xOffset;
     long yOffset;
@@ -93,7 +94,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if NUM_EXTRUDER==1
         WRITE(EXT0_STEP_PIN,HIGH);
 #else
-        switch(current_extruder->id)
+        switch(Extruder::current->id)
         {
         case 0:
 #if NUM_EXTRUDER>0
@@ -137,7 +138,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if NUM_EXTRUDER==1
         WRITE(EXT0_STEP_PIN,LOW);
 #else
-        switch(current_extruder->id)
+        switch(Extruder::current->id)
         {
         case 0:
 #if NUM_EXTRUDER>0
@@ -181,7 +182,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         else
             WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
 #else
-        switch(current_extruder->id)
+        switch(Extruder::current->id)
         {
 #if NUM_EXTRUDER>0
         case 0:
@@ -241,8 +242,8 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON );
 #endif
 #else
-        if(current_extruder->enablePin > -1)
-            digitalWrite(current_extruder->enablePin,current_extruder->enableOn);
+        if(Extruder::current->enablePin > -1)
+            digitalWrite(Extruder::current->enablePin,Extruder::current->enableOn);
 #endif
     }
     static void manageTemperatures();
@@ -265,7 +266,7 @@ extern TemperatureController heatedBedController;
 #define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
-extern Extruder *current_extruder;
+//extern Extruder *Extruder::current;
 extern Extruder extruder[];
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
 extern byte autotuneIndex;

@@ -803,7 +803,7 @@ void UIDisplay::parse(char *txt,bool ram)
                 break;
             }
             ivalue = UI_TEMP_PRECISION;
-            if(c2=='c') fvalue=current_extruder->tempControl.currentTemperatureC;
+            if(c2=='c') fvalue=Extruder::current->tempControl.currentTemperatureC;
             else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
             else if(c2=='b') fvalue=Extruder::getHeatedBedTemperature();
             else if(c2=='B')
@@ -814,7 +814,7 @@ void UIDisplay::parse(char *txt,bool ram)
             addFloat(fvalue,3,ivalue);
             break;
         case 'E': // Target extruder temperature
-            if(c2=='c') fvalue=current_extruder->tempControl.targetTemperatureC;
+            if(c2=='c') fvalue=Extruder::current->tempControl.targetTemperatureC;
             else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.targetTemperatureC;
 #if HAVE_HEATED_BED
             else if(c2=='b') fvalue=heatedBedController.targetTemperatureC;
@@ -902,7 +902,7 @@ void UIDisplay::parse(char *txt,bool ram)
 #if HAVE_HEATED_BED
             else if(c2=='b') ivalue=pwm_pos[heatedBedController.pwmIndex];
 #endif
-            else if(c2=='C') ivalue=pwm_pos[current_extruder->id];
+            else if(c2=='C') ivalue=pwm_pos[Extruder::current->id];
             ivalue=(ivalue*100)/255;
             addInt(ivalue,3);
             if(col<UI_COLS)
@@ -930,83 +930,83 @@ void UIDisplay::parse(char *txt,bool ram)
 #if NUM_EXTRUDER>0
             if(c2>='0' && c2<='9')
             {
-                addStringP(current_extruder->id==c2-'0'?ui_selected:ui_unselected);
+                addStringP(Extruder::current->id==c2-'0'?ui_selected:ui_unselected);
             }
 #ifdef TEMP_PID
             else if(c2=='i')
             {
-                addFloat(current_extruder->tempControl.pidIGain,4,2);
+                addFloat(Extruder::current->tempControl.pidIGain,4,2);
             }
             else if(c2=='p')
             {
-                addFloat(current_extruder->tempControl.pidPGain,4,2);
+                addFloat(Extruder::current->tempControl.pidPGain,4,2);
             }
             else if(c2=='d')
             {
-                addFloat(current_extruder->tempControl.pidDGain,4,2);
+                addFloat(Extruder::current->tempControl.pidDGain,4,2);
             }
             else if(c2=='m')
             {
-                addInt(current_extruder->tempControl.pidDriveMin,3);
+                addInt(Extruder::current->tempControl.pidDriveMin,3);
             }
             else if(c2=='M')
             {
-                addInt(current_extruder->tempControl.pidDriveMax,3);
+                addInt(Extruder::current->tempControl.pidDriveMax,3);
             }
             else if(c2=='D')
             {
-                addInt(current_extruder->tempControl.pidMax,3);
+                addInt(Extruder::current->tempControl.pidMax,3);
             }
 #endif
             else if(c2=='w')
             {
-                addInt(current_extruder->watchPeriod,4);
+                addInt(Extruder::current->watchPeriod,4);
             }
 #if RETRACT_DURING_HEATUP
             else if(c2=='T')
             {
-                addInt(current_extruder->waitRetractTemperature,4);
+                addInt(Extruder::current->waitRetractTemperature,4);
             }
             else if(c2=='U')
             {
-                addInt(current_extruder->waitRetractUnits,2);
+                addInt(Extruder::current->waitRetractUnits,2);
             }
 #endif
             else if(c2=='h')
             {
-                addStringP(!current_extruder->tempControl.heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));
+                addStringP(!Extruder::current->tempControl.heatManager?PSTR(UI_TEXT_STRING_HM_BANGBANG):PSTR(UI_TEXT_STRING_HM_PID));
             }
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
             else if(c2=='a')
             {
-                addFloat(current_extruder->advanceK,3,0);
+                addFloat(Extruder::current->advanceK,3,0);
             }
 #endif
             else if(c2=='l')
             {
-                addFloat(current_extruder->advanceL,3,0);
+                addFloat(Extruder::current->advanceL,3,0);
             }
 #endif
             else if(c2=='x')
             {
-                addFloat(current_extruder->xOffset,4,2);
+                addFloat(Extruder::current->xOffset,4,2);
             }
             else if(c2=='y')
             {
-                addFloat(current_extruder->yOffset,4,2);
+                addFloat(Extruder::current->yOffset,4,2);
             }
             else if(c2=='f')
             {
-                addFloat(current_extruder->maxStartFeedrate,5,0);
+                addFloat(Extruder::current->maxStartFeedrate,5,0);
             }
             else if(c2=='F')
             {
-                addFloat(current_extruder->maxFeedrate,5,0);
+                addFloat(Extruder::current->maxFeedrate,5,0);
             }
             else if(c2=='A')
             {
-                addFloat(current_extruder->maxAcceleration,5,0);
+                addFloat(Extruder::current->maxAcceleration,5,0);
             }
 #endif
             break;
@@ -1054,7 +1054,7 @@ void UIDisplay::parse(char *txt,bool ram)
             if(c2=='x') addFloat(Printer::axisStepsPerMM[0],3,1);
             if(c2=='y') addFloat(Printer::axisStepsPerMM[1],3,1);
             if(c2=='z') addFloat(Printer::axisStepsPerMM[2],3,1);
-            if(c2=='e') addFloat(current_extruder->stepsPerMM,3,1);
+            if(c2=='e') addFloat(Extruder::current->stepsPerMM,3,1);
             break;
         }
     }
@@ -1537,25 +1537,25 @@ void UIDisplay::nextPreviousAction(char next)
         Printer::opsRetractDistance+=increment*0.1;
         if(Printer::opsRetractDistance<0) Printer::opsRetractDistance=0;
         else if(Printer::opsRetractDistance>10) Printer::opsRetractDistance=10;
-        Extruder::selectExtruderById(current_extruder->id);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_OPS_BACKLASH:
         Printer::opsRetractBacklash+=increment*0.1;
         if(Printer::opsRetractBacklash<-5) Printer::opsRetractBacklash=-5;
         else if(Printer::opsRetractBacklash>5) Printer::opsRetractBacklash=5;
-        Extruder::selectExtruderById(current_extruder->id);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_OPS_MOVE_AFTER:
         Printer::opsMoveAfter+=increment;
         if(Printer::opsMoveAfter<0) Printer::opsMoveAfter=0;
         else if(Printer::opsMoveAfter>10) Printer::opsMoveAfter=100;
-        Extruder::selectExtruderById(current_extruder->id);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_OPS_MINDISTANCE:
         Printer::opsMinDistance+=increment;
         if(Printer::opsMinDistance<0) Printer::opsMinDistance=0;
         else if(Printer::opsMinDistance>10) Printer::opsMinDistance=10;
-        Extruder::selectExtruderById(current_extruder->id);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
 #endif
     case UI_ACTION_FEEDRATE_MULTIPLY:
@@ -1660,71 +1660,71 @@ void UIDisplay::nextPreviousAction(char next)
     break;
 #ifdef TEMP_PID
     case UI_ACTION_PID_PGAIN:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidPGain,0.1,0,200);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidPGain,0.1,0,200);
         break;
     case UI_ACTION_PID_IGAIN:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidIGain,0.01,0,100);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidIGain,0.01,0,100);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_PID_DGAIN:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidDGain,0.1,0,200);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDGain,0.1,0,200);
         break;
     case UI_ACTION_DRIVE_MIN:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidDriveMin,1,1,255);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDriveMin,1,1,255);
         break;
     case UI_ACTION_DRIVE_MAX:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidDriveMax,1,1,255);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidDriveMax,1,1,255);
         break;
     case UI_ACTION_PID_MAX:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.pidMax,1,1,255);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.pidMax,1,1,255);
         break;
 #endif
     case UI_ACTION_X_OFFSET:
-        INCREMENT_MIN_MAX(current_extruder->xOffset,1,-99999,99999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->xOffset,1,-99999,99999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_Y_OFFSET:
-        INCREMENT_MIN_MAX(current_extruder->yOffset,1,-99999,99999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->yOffset,1,-99999,99999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_STEPS:
-        INCREMENT_MIN_MAX(current_extruder->stepsPerMM,1,1,9999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->stepsPerMM,1,1,9999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_ACCELERATION:
-        INCREMENT_MIN_MAX(current_extruder->maxAcceleration,10,10,99999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->maxAcceleration,10,10,99999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_MAX_FEEDRATE:
-        INCREMENT_MIN_MAX(current_extruder->maxFeedrate,1,1,999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->maxFeedrate,1,1,999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_START_FEEDRATE:
-        INCREMENT_MIN_MAX(current_extruder->maxStartFeedrate,1,1,999);
-        Extruder::selectExtruderById(current_extruder->id);
+        INCREMENT_MIN_MAX(Extruder::current->maxStartFeedrate,1,1,999);
+        Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_HEATMANAGER:
-        INCREMENT_MIN_MAX(current_extruder->tempControl.heatManager,1,0,1);
+        INCREMENT_MIN_MAX(Extruder::current->tempControl.heatManager,1,0,1);
         break;
     case UI_ACTION_EXTR_WATCH_PERIOD:
-        INCREMENT_MIN_MAX(current_extruder->watchPeriod,1,0,999);
+        INCREMENT_MIN_MAX(Extruder::current->watchPeriod,1,0,999);
         break;
 #if RETRACT_DURING_HEATUP
     case UI_ACTION_EXTR_WAIT_RETRACT_TEMP:
-        INCREMENT_MIN_MAX(current_extruder->waitRetractTemperature,1,100,UI_SET_MAX_EXTRUDER_TEMP);
+        INCREMENT_MIN_MAX(Extruder::current->waitRetractTemperature,1,100,UI_SET_MAX_EXTRUDER_TEMP);
         break;
     case UI_ACTION_EXTR_WAIT_RETRACT_UNITS:
-        INCREMENT_MIN_MAX(current_extruder->waitRetractUnits,1,0,99);
+        INCREMENT_MIN_MAX(Extruder::current->waitRetractUnits,1,0,99);
         break;
 #endif
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     case UI_ACTION_ADVANCE_K:
-        INCREMENT_MIN_MAX(current_extruder->advanceK,1,0,200);
+        INCREMENT_MIN_MAX(Extruder::current->advanceK,1,0,200);
         break;
 #endif
     case UI_ACTION_ADVANCE_L:
-        INCREMENT_MIN_MAX(current_extruder->advanceL,1,0,600);
+        INCREMENT_MIN_MAX(Extruder::current->advanceL,1,0,600);
         break;
 #endif
     }
@@ -2095,17 +2095,17 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
         {
-            int tmp = (int)(current_extruder->tempControl.targetTemperatureC)+1;
+            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC)+1;
             if(tmp==1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
             else if(tmp>UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-            Extruder::setTemperatureForExtruder(tmp,current_extruder->id);
+            Extruder::setTemperatureForExtruder(tmp,Extruder::current->id);
         }
         break;
         case UI_ACTION_EXTRUDER_TEMP_DOWN:
         {
-            int tmp = (int)(current_extruder->tempControl.targetTemperatureC)-1;
+            int tmp = (int)(Extruder::current->tempControl.targetTemperatureC)-1;
             if(tmp<UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-            Extruder::setTemperatureForExtruder(tmp,current_extruder->id);
+            Extruder::setTemperatureForExtruder(tmp,Extruder::current->id);
         }
         break;
         case UI_ACTION_HEATED_BED_UP:
@@ -2258,7 +2258,7 @@ void UIDisplay::slowAction()
             // check temps and set appropriate leds
             int led= 0;
 #if NUM_EXTRUDER>0
-            led |= (tempController[current_extruder->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
+            led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
 #if HAVE_HEATED_BED
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);

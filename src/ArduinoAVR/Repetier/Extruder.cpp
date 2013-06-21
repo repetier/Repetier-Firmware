@@ -118,7 +118,7 @@ void Extruder::manageTemperatures()
             pwm_pos[act->pwmIndex] = 0;
 #endif
 #if LED_PIN>-1
-        if(act == &current_extruder->tempControl)
+        if(act == &Extruder::current->tempControl)
             WRITE(LED_PIN,on);
 #endif
     }
@@ -187,7 +187,7 @@ for temperature reading.
 void Extruder::initExtruder()
 {
     byte i;
-    current_extruder = &extruder[0];
+    Extruder::current = &extruder[0];
 #ifdef USE_GENERIC_THERMISTORTABLE_1
     createGenericTable(temptable_generic1,GENERIC_THERM1_MIN_TEMP,GENERIC_THERM1_MAX_TEMP,GENERIC_THERM1_BETA,GENERIC_THERM1_R0,GENERIC_THERM1_T0,GENERIC_THERM1_R1,GENERIC_THERM1_R2);
 #endif
@@ -298,32 +298,32 @@ void Extruder::selectExtruderById(byte extruderId)
         extruderId = 0;
 #if NUM_EXTRUDER>1
     bool executeSelect = false;
-    if(extruderId!=current_extruder->id)
+    if(extruderId!=Extruder::current->id)
     {
-        gcode_execute_PString(current_extruder->deselectCommands);
+        GCode::executeFString(Extruder::current->deselectCommands);
         executeSelect = true;
     }
 #endif
-    current_extruder->extrudePosition = Printer::currentPositionSteps[3];
-    long dx = current_extruder->xOffset;
-    long dy = current_extruder->yOffset;
-    current_extruder = &extruder[extruderId];
-    dx -= current_extruder->xOffset;
-    dy -= current_extruder->yOffset;
+    Extruder::current->extrudePosition = Printer::currentPositionSteps[3];
+    long dx = Extruder::current->xOffset;
+    long dy = Extruder::current->yOffset;
+    Extruder::current = &extruder[extruderId];
+    dx -= Extruder::current->xOffset;
+    dy -= Extruder::current->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
-    Printer::currentPositionSteps[3] = current_extruder->extrudePosition;
+    Printer::currentPositionSteps[3] = Extruder::current->extrudePosition;
 #endif
     Printer::destinationSteps[3] = Printer::currentPositionSteps[3];
-    Printer::axisStepsPerMM[3] = current_extruder->stepsPerMM;
+    Printer::axisStepsPerMM[3] = Extruder::current->stepsPerMM;
     Printer::invAxisStepsPerMM[3] = 1.0f/Printer::axisStepsPerMM[3];
-    Printer::maxFeedrate[3] = current_extruder->maxFeedrate;
-//   max_start_speed_units_per_second[3] = current_extruder->maxStartFeedrate;
-    Printer::maxAccelerationMMPerSquareSecond[3] = Printer::maxTravelAccelerationMMPerSquareSecond[3] = current_extruder->maxAcceleration;
+    Printer::maxFeedrate[3] = Extruder::current->maxFeedrate;
+//   max_start_speed_units_per_second[3] = Extruder::current->maxStartFeedrate;
+    Printer::maxAccelerationMMPerSquareSecond[3] = Printer::maxTravelAccelerationMMPerSquareSecond[3] = Extruder::current->maxAcceleration;
     Printer::maxTravelAccelerationStepsPerSquareSecond[3] = Printer::maxPrintAccelerationStepsPerSquareSecond[3] = Printer::maxAccelerationMMPerSquareSecond[3] * Printer::axisStepsPerMM[3];
 #if defined(USE_ADVANCE)
-    Printer::minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxStartFeedrate*current_extruder->stepsPerMM));
-    Printer::maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*current_extruder->maxFeedrate*current_extruder->stepsPerMM));
+    Printer::minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
+    Printer::maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
     if(Printer::maxExtruderSpeed>15) Printer::maxExtruderSpeed = 15;
     if(Printer::maxExtruderSpeed>=Printer::minExtruderSpeed)
     {
@@ -331,17 +331,17 @@ void Extruder::selectExtruderById(byte extruderId)
     }
     else
     {
-        float maxdist = current_extruder->maxFeedrate*current_extruder->maxFeedrate*0.00013888/current_extruder->maxAcceleration;
-        maxdist-= current_extruder->maxStartFeedrate*current_extruder->maxStartFeedrate*0.5/current_extruder->maxAcceleration;
-        Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*current_extruder->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
+        float maxdist = Extruder::current->maxFeedrate*Extruder::current->maxFeedrate*0.00013888/Extruder::current->maxAcceleration;
+        maxdist-= Extruder::current->maxStartFeedrate*Extruder::current->maxStartFeedrate*0.5/Extruder::current->maxAcceleration;
+        Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
     float fmax=((float)F_CPU/((float)Printer::maxExtruderSpeed*TIMER0_PRESCALE*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
     if(fmax<Printer::maxFeedrate[3]) Printer::maxFeedrate[3] = fmax;
 #endif
-    current_extruder->tempControl.updateTempControlVars();
+    Extruder::current->tempControl.updateTempControlVars();
 #if USE_OPS==1
-    Printer::opsRetractSteps = Printer::opsRetractDistance*current_extruder->stepsPerMM;
-    Printer::opsPushbackSteps = (Printer::opsRetractDistance+Printer::opsRetractBacklash)*current_extruder->stepsPerMM;
+    Printer::opsRetractSteps = Printer::opsRetractDistance*Extruder::current->stepsPerMM;
+    Printer::opsPushbackSteps = (Printer::opsRetractDistance+Printer::opsRetractBacklash)*Extruder::current->stepsPerMM;
     if(Printer::opsMode<=1)
         Printer::opsMoveAfterSteps = 0;
     else
@@ -357,7 +357,7 @@ void Extruder::selectExtruderById(byte extruderId)
     }
 #if NUM_EXTRUDER>1
     if(executeSelect) // Run only when changing
-        gcode_execute_PString(current_extruder->selectCommands);
+        GCode::executeFString(Extruder::current->selectCommands);
 #endif
 }
 
@@ -410,8 +410,8 @@ float Extruder::getHeatedBedTemperature()
 
 void Extruder::disableCurrentExtruderMotor()
 {
-    if(current_extruder->enablePin > -1)
-        digitalWrite(current_extruder->enablePin,!current_extruder->enableOn);
+    if(Extruder::current->enablePin > -1)
+        digitalWrite(Extruder::current->enablePin,!Extruder::current->enableOn);
 }
 #define NUMTEMPS_1 28
 // Epcos B57560G0107F000
@@ -1003,7 +1003,7 @@ int read_max6675(byte ss_pin)
 }
 #endif
 
-Extruder *current_extruder;
+Extruder *Extruder::current;
 
 #if NUM_EXTRUDER>0
 const char ext0_select_cmd[] PROGMEM = EXT0_SELECT_COMMANDS;
