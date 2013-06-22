@@ -1277,7 +1277,8 @@ void Commands::emergencyStop()
 #if defined(KILL_METHOD) && KILL_METHOD==1
     HAL::resetHardware();
 #else
-    HAL::forbidInterrupts(); // Don't allow interrupts to do their work
+    BEGIN_INTERRUPT_PROTECTED
+    //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
     kill(false);
     Extruder::manageTemperatures();
     for(byte i=0; i<NUM_EXTRUDER+3; i++)
@@ -1295,6 +1296,7 @@ void Commands::emergencyStop()
     WRITE(FAN_PIN,0);
 #endif
     while(1) {}
+    END_INTERRUPT_PROTECTED
 #endif
 }
 
