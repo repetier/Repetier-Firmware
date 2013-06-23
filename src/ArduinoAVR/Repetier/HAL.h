@@ -438,6 +438,10 @@ public:
 
     static inline void spiInit(byte spiRate)
     {
+        WRITE(SS,HIGH);
+        SET_OUTPUT(SS);
+        SET_OUTPUT(SCK);
+        SET_OUTPUT(MOSI_PIN);
         // See avr processor documentation
         SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
         SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;

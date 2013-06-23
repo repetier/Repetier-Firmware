@@ -72,10 +72,10 @@
 #define	TXD					DIO1
 
 // SPI
-#define	SCK					DIO13
+#define	SCK					13
 #define	MISO				DIO12
 #define	MOSI				DIO11
-#define	SS					DIO10
+#define	SS					10
 
 // TWI (I2C)
 #define	SCL					AIO5
@@ -412,10 +412,10 @@ pins
 #define	TXD1				DIO11
 
 // SPI
-#define	SCK					DIO7
+#define	SCK					7
 #define	MISO				DIO6
 #define	MOSI				DIO5
-#define	SS					DIO4
+#define	SS					4
 
 // TWI (I2C)
 #define	SCL					DIO16
@@ -910,10 +910,10 @@ pins
 #define	TXD					DIO1
 
 // SPI
-#define	SCK					DIO52
+#define	SCK					52
 #define	MISO				DIO50
 #define	MOSI				DIO51
-#define	SS					DIO53
+#define	SS					53
 
 // TWI (I2C)
 #define	SCL					DIO21
@@ -1983,10 +1983,10 @@ pins
 
 #if defined (__AVR_AT90USB1287__)  || defined (__AVR_AT90USB1286__)
 // SPI
-#define	SCK					DIO9
+#define	SCK					9
 #define	MISO				DIO11
 #define	MOSI				DIO10
-#define	SS					DIO8
+#define	SS					8
 
 #if MOTHERBOARD!=8 && MOTHERBOARD!=9
 // change for your board

@@ -176,10 +176,10 @@ void Commands::reportPrinterUsage()
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 int digitalPotWrite(int address, unsigned int value) // From Arduino DigitalPotControl example
 {
-    digitalWrite(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
-    SPI.transfer(address); //  send in the address and value via SPI:
-    SPI.transfer(value);
-    digitalWrite(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
+    WRITE(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
+    HAL::spiSend(address); //  send in the address and value via SPI:
+    HAL::spiSend(value);
+    WRITE(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
     //delay(10);
 }
 
@@ -195,7 +195,7 @@ void current_control_init() //Initialize Digipot Motor Current
 #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
 
-    SPI.begin();
+    HAL::spiInit(0); //SPI.begin();
     SET_OUTPUT(DIGIPOTSS_PIN);
     for(int i=0; i<=4; i++)
         //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
