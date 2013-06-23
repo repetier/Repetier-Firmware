@@ -20,6 +20,7 @@
 */
 
 #include "Repetier.h"
+#include "SPI.h"
 
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue=MAX_RAM;
