@@ -19,13 +19,6 @@
 #ifndef _ui_h
 #define _ui_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#define COMPAT_PRE1
-#endif
-#include <avr/pgmspace.h>
 #include "gcode.h"
 
 // ----------------------------------------------------------------------------
@@ -688,7 +681,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
-#define UI_ERROR(msg) {uid.errorMsg=PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
+#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
 #define UI_CLEAR_STATUS {uid.statusMsg[0]=0;}
 #else
 #define UI_INITIALIZE {}

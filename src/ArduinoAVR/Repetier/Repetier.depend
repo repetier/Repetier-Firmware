@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1371912638 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.cpp
+1372082321 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.cpp
 	"Repetier.h"
 
 1364243178 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\reptier.h
@@ -15,7 +15,7 @@
 	"HAL.h"
 	"SdFat.h"
 
-1371968846 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1372055298 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
 1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
@@ -72,13 +72,10 @@
 
 1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.h
 
-1371970495 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\fastio.h
+1371970577 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\fastio.h
 	<avr/io.h>
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.h
-	"Arduino.h"
-	"WProgram.h"
-	<avr/pgmspace.h>
+1372055633 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.h
 	"gcode.h"
 	"uilang.h"
 	"Configuration.h"
@@ -86,16 +83,16 @@
 	"uilang.h"
 	"uimenu.h"
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uilang.h
+1372058756 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uilang.h
 
 1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
+1372059135 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
 
 1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.h
 	<stdint.h>
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.h
+1372004906 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.h
 
 1371312008 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\cdc.cpp
 	<CDC.cpp>
@@ -228,19 +225,19 @@
 1362990550 c:\users\littwin\documents\arduino\codeblocks\arduino\hardware\arduino\cores\arduino\wstring.cpp
 	"WString.h"
 
-1371832721 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
+1372058909 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
 	"Repetier.h"
 
-1371832775 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+1372055298 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
 	"Repetier.h"
 	"pins_arduino.h"
 	"ui.h"
 	"Eeprom.h"
 
-1371574419 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
+1372074178 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
 	"Repetier.h"
 
-1371832721 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.cpp
+1372077232 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.cpp
 	"Repetier.h"
 
 1371312008 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
@@ -257,23 +254,19 @@
 	"WProgram.h"
 	<SoftSPI.h>
 
-1371832721 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
+1372057440 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
-	<avr/pgmspace.h>
 	"ui.h"
 	<math.h>
 	<stdlib.h>
 	<inttypes.h>
-	<avr/io.h>
-	<avr/interrupt.h>
-	<compat/twi.h>
 	"Eeprom.h"
 	<ctype.h>
 	<LiquidCrystal.h>
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.h
+1372057532 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.h
 
-1371969601 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.h
+1372082356 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.h
 	<avr/pgmspace.h>
 	<avr/io.h>
 	<avr/io.h>
@@ -284,12 +277,12 @@
 	"WProgram.h"
 	"fastio.h"
 
-1371312008 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+1372071288 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
 	"Repetier.h"
 	<compat/twi.h>
 	<avr/io.h>
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.h
+1372066252 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.h
 
 1361428610 c:\users\littwin\documents\arduino\codeblocks\ardusim\arduino\cores\cdc.cpp
 	"Platform.h"
@@ -671,7 +664,7 @@
 	<stdint.h>
 	<avr/wdt.h>
 
-1371918740 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.h
+1372065634 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.h
 	"Configuration.h"
 	"HAL.h"
 	"gcode.h"
@@ -700,11 +693,11 @@
 
 1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.h
 
-1371832721 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
+1372077548 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
-1371312008 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
+1372057074 y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
 
-1371312008 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
+1372057063 source:y:\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
 	"Repetier.h"
 

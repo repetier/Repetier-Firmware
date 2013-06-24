@@ -151,7 +151,6 @@ void GCode::checkAndPushCommand()
     {
         if(M==110)   // Reset line number
         {
-            Com::printFLN(Com::tComma,(long)N);
             lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
             waitingForResend = -1;

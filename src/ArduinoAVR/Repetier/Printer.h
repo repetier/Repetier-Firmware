@@ -30,6 +30,7 @@
 #define PRINTER_FLAG0_MANUAL_MOVE_MODE      16
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
 #define PRINTER_FLAG0_ZPROBEING             64
+#define PRINTER_FLAG0_LARGE_MACHINE         128
 
 class Printer
 {
@@ -81,6 +82,11 @@ public:
 #endif
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
+    static long deltaDiagonalStepsSquared;
+    static float deltaDiagonalStepsSquaredF;
+    static long deltaSin60RadiusSteps;
+    static long deltaMinusCos60RadiusSteps;
+    static long deltaRadiusSteps;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
     static long stepsRemainingAtZHit;
@@ -120,7 +126,9 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
+#if DRIVE_SYSTEM!=3
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
+#endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
     static unsigned int vMaxReached;         ///< Maximumu reached speed
@@ -278,6 +286,14 @@ public:
             WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
 #endif
         }
+    }
+    static inline byte isLargeMachine()
+    {
+        return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
+    }
+    static inline void setLargeMachine(byte b)
+    {
+        flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
     }
     static inline byte isAdvanceActivated()
     {

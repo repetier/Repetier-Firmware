@@ -13,99 +13,67 @@ HAL::~HAL()
     //dtor
 }
 
+uint16_t HAL::integerSqrt(long a) {
+// http://www.mikrocontroller.net/articles/AVR_Arithmetik#32_Bit_.2F_32_Bit
+//-----------------------------------------------------------
+// Fast and short 32 bits AVR sqrt routine, avr-gcc ABI compliant
+// R25:R24 = SQRT (R25:R24:R23:R22) rounded to the
+// nearest integer (0.5 rounds up)
+// Destroys R18-R19,R22-R23,R26-R27
+// Cycles incl call & ret = 265-310
+// Stack incl call = 2-3
+//-----------------------------------------------------------
 
-/** \brief Optimized division
+uint16_t b;
 
-Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
-This version is optimized for a 16 bit dividend and recognises the special cases
-of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the
-interval.
-*/
-inline long Div4U2U(unsigned long a,unsigned int b)
-{
-#if CPU_ARCH==ARCH_AVR
-    // r14/r15 remainder
-    // r16 counter
-    __asm__ __volatile__ (
-        "clr r14 \n\t"
-        "sub r15,r15 \n\t"
-        "tst %D0 \n\t"
-        "brne do32%= \n\t"
-        "tst %C0 \n\t"
-        "breq donot24%= \n\t"
-        "rjmp do24%= \n\t"
-        "donot24%=:" "ldi r16,17 \n\t" // 16 Bit divide
-        "d16u_1%=:" "rol %A0 \n\t"
-        "rol %B0 \n\t"
-        "dec r16 \n\t"
-        "brne	d16u_2%= \n\t"
-        "rjmp end%= \n\t"
-        "d16u_2%=:" "rol r14 \n\t"
-        "rol r15 \n\t"
-        "sub r14,%A2 \n\t"
-        "sbc r15,%B2 \n\t"
-        "brcc	d16u_3%= \n\t"
-        "add r14,%A2 \n\t"
-        "adc r15,%B2 \n\t"
-        "clc \n\t"
-        "rjmp d16u_1%= \n\t"
-        "d16u_3%=:" "sec \n\t"
-        "rjmp d16u_1%= \n\t"
-        "do32%=:" // divide full 32 bit
-        "rjmp do32B%= \n\t"
-        "do24%=:" // divide 24 bit
-
-        "ldi r16,25 \n\t" // 24 Bit divide
-        "d24u_1%=:" "rol %A0 \n\t"
-        "rol %B0 \n\t"
-        "rol %C0 \n\t"
-        "dec r16 \n\t"
-        "brne	d24u_2%= \n\t"
-        "rjmp end%= \n\t"
-        "d24u_2%=:" "rol r14 \n\t"
-        "rol r15 \n\t"
-        "sub r14,%A2 \n\t"
-        "sbc r15,%B2 \n\t"
-        "brcc	d24u_3%= \n\t"
-        "add r14,%A2 \n\t"
-        "adc r15,%B2 \n\t"
-        "clc \n\t"
-        "rjmp d24u_1%= \n\t"
-        "d24u_3%=:" "sec \n\t"
-        "rjmp d24u_1%= \n\t"
-
-        "do32B%=:" // divide full 32 bit
-
-        "ldi r16,33 \n\t" // 32 Bit divide
-        "d32u_1%=:" "rol %A0 \n\t"
-        "rol %B0 \n\t"
-        "rol %C0 \n\t"
-        "rol %D0 \n\t"
-        "dec r16 \n\t"
-        "brne	d32u_2%= \n\t"
-        "rjmp end%= \n\t"
-        "d32u_2%=:" "rol r14 \n\t"
-        "rol r15 \n\t"
-        "sub r14,%A2 \n\t"
-        "sbc r15,%B2 \n\t"
-        "brcc	d32u_3%= \n\t"
-        "add r14,%A2 \n\t"
-        "adc r15,%B2 \n\t"
-        "clc \n\t"
-        "rjmp d32u_1%= \n\t"
-        "d32u_3%=:" "sec \n\t"
-        "rjmp d32u_1%= \n\t"
-
-        "end%=:" // end
-        :"=&r"(a)
-        :"0"(a),"r"(b)
-        :"r14","r15","r16"
-    );
-    return a;
-#else
-    return a/b;
-#endif
+__asm__ __volatile__ (
+    "ldi   R19, 0xc0 \n\t"
+    "clr   R18 \n\t"        // rotation mask in R19:R18
+    "ldi   R27, 0x40 \n\t"
+    "sub   R26, R26 \n\t"   // developing sqrt in R27:R26, C=0
+"1:  brcs  2f \n\t"           // C --> Bit is always 1
+    "cp    %C1, R26 \n\t"
+    "cpc   %D1, R27 \n\t"     // Does test value fit?
+    "brcs  3f \n\t"           // C --> nope, bit is 0
+"2:  sub   %C1, R26 \n\t"
+    "sbc   %D1, R27 \n\t"     // Adjust argument for next bit
+    "or    R26, R18 \n\t"
+    "or    R27, R19 \n\t"     // Set bit to 1
+"3:  lsr   R19 \n\t"
+    "ror   R18 \n\t"          // Shift right mask, C --> end loop
+    "eor   R27, R19 \n\t"
+    "eor   R26, R18 \n\t"     // Shift right only test bit in result
+    "rol   %A1 \n\t"          // Bit 0 only set if end of loop
+    "rol   %B1 \n\t"
+    "rol   %C1 \n\t"
+    "rol   %D1 \n\t"          // Shift left remaining argument (C used at 1:)
+    "sbrs  %A1, 0 \n\t"       // Skip if 15 bits developed
+    "rjmp  1b \n\t"           // Develop 15 bits of the sqrt
+    "brcs  4f \n\t"           // C--> Last bits always 1
+    "cp    R26, %C1 \n\t"
+    "cpc   R27, %D1 \n\t"     // Test for last bit 1
+    "brcc  5f \n\t"           // NC --> bit is 0
+"4:  sbc   %B1, R19 \n\t"     // Subtract C (any value from 1 to 0x7f will do)
+    "sbc   %C1, R26 \n\t"
+    "sbc   %D1, R27 \n\t"     // Update argument for test
+    "inc   R26 \n\t"          // Last bit is 1
+"5:  lsl   %B1 \n\t"          // Only bit 7 matters
+    "rol   %C1 \n\t"
+    "rol   %D1 \n\t"          // Remainder * 2 + C
+    "brcs  6f \n\t"           // C --> Always round up
+    "cp    R26, %C1 \n\t"
+    "cpc   R27, %D1 \n\t"     // C decides rounding
+"6:  adc   R26, R19 \n\t"
+    "adc   R27, R19 \n\t"     // Round up if C (R19=0)
+    "mov   %B0, R27 \n\t"     // return in R25:R24 for avr-gcc ABI compliance
+    "mov   %A0, R26 \n\t"
+        :"=r"(b)
+        :"r"(a)
+        :"r18","r19","r27","r26" );
+    return b;
 }
+
+
 
 const uint16_t fast_div_lut[17] PROGMEM = {0,F_CPU/4096,F_CPU/8192,F_CPU/12288,F_CPU/16384,F_CPU/20480,F_CPU/24576,F_CPU/28672,F_CPU/32768,F_CPU/36864
         ,F_CPU/40960,F_CPU/45056,F_CPU/49152,F_CPU/53248,F_CPU/57344,F_CPU/61440,F_CPU/65536
@@ -324,6 +292,34 @@ void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 void HAL::resetHardware() {
     resetFunc();
+}
+
+void HAL::analogStart() {
+#if ANALOG_INPUTS>0
+    ADMUX = ANALOG_REF; // refernce voltage
+    for(byte i=0; i<ANALOG_INPUTS; i++)
+    {
+        osAnalogInputCounter[i] = 0;
+        osAnalogInputBuildup[i] = 0;
+        osAnalogInputValues[i] = 0;
+    }
+    ADCSRA = _BV(ADEN)|_BV(ADSC)|ANALOG_PRESCALER;
+    //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
+    while (ADCSRA & _BV(ADSC) ) {} // wait for conversion
+    /* ADCW must be read once, otherwise the next result is wrong. */
+    uint dummyADCResult;
+    dummyADCResult = ADCW;
+    // Enable interrupt driven conversion loop
+    byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+#if defined(ADCSRB) && defined(MUX5)
+    if(channel & 8)  // Reading channel 0-7 or 8-15?
+        ADCSRB |= _BV(MUX5);
+    else
+        ADCSRB &= ~_BV(MUX5);
+#endif
+    ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
+    ADCSRA |= _BV(ADSC); // start conversion without interrupt!
+#endif
 }
 
 /*************************************************************************

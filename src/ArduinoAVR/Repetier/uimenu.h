@@ -373,6 +373,7 @@ UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTI_OOZE,ui_menu_ops);
 #endif
 
 // **** Acceleration settings
+#if DRIVE_SYSTEM!=3
 UI_MENU_CHANGEACTION(ui_menu_accel_printx,UI_TEXT_PRINT_X,UI_ACTION_PRINT_ACCEL_X);
 UI_MENU_CHANGEACTION(ui_menu_accel_printy,UI_TEXT_PRINT_Y,UI_ACTION_PRINT_ACCEL_Y);
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,UI_TEXT_PRINT_Z,UI_ACTION_PRINT_ACCEL_Z);
@@ -393,6 +394,19 @@ UI_MENU_CHANGEACTION(ui_menu_feedrate_homey,UI_TEXT_FEED_HOME_Y,UI_ACTION_HOMING
 UI_MENU_CHANGEACTION(ui_menu_feedrate_homez,UI_TEXT_FEED_HOME_Z,UI_ACTION_HOMING_FEEDRATE_Z);
 #define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez}
 UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,6+UI_MENU_BACKCNT);
+#else
+UI_MENU_CHANGEACTION(ui_menu_accel_printz,UI_TEXT_PRINT_Z_DELTA,UI_ACTION_PRINT_ACCEL_Z);
+UI_MENU_CHANGEACTION(ui_menu_accel_travelz,UI_TEXT_MOVE_Z_DELTA,UI_ACTION_MOVE_ACCEL_Z);
+UI_MENU_CHANGEACTION(ui_menu_accel_jerk,UI_TEXT_JERK,UI_ACTION_MAX_JERK);
+#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &ui_menu_accel_printz,&ui_menu_accel_travelz,&ui_menu_accel_jerk}
+UI_MENU(ui_menu_accel,UI_MENU_ACCEL,3+UI_MENU_BACKCNT);
+
+// **** Feedrates
+UI_MENU_CHANGEACTION(ui_menu_feedrate_maxz,UI_TEXT_FEED_MAX_Z_DELTA,UI_ACTION_MAX_FEEDRATE_Z);
+UI_MENU_CHANGEACTION(ui_menu_feedrate_homez,UI_TEXT_FEED_HOME_Z_DELTA,UI_ACTION_HOMING_FEEDRATE_Z);
+#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxz,&ui_menu_feedrate_homez}
+UI_MENU(ui_menu_feedrate,UI_MENU_FEEDRATE,2+UI_MENU_BACKCNT);
+#endif
 
 // **** General configuration settings
 

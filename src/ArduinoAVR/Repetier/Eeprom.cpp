@@ -69,7 +69,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::homingFeedrate[1] = HOMING_FEEDRATE_Y;
     Printer::homingFeedrate[2] = HOMING_FEEDRATE_Z;
     Printer::maxJerk = MAX_JERK;
+#if DRIVE_SYSTEM!=3
     Printer::maxZJerk = MAX_ZJERK;
+#endif
 #ifdef RAMP_ACCELERATION
     Printer::maxAccelerationMMPerSquareSecond[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
     Printer::maxAccelerationMMPerSquareSecond[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
@@ -320,7 +322,9 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_float(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[1]);
     HAL::epr_set_float(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[2]);
     HAL::epr_set_float(EPR_MAX_JERK,Printer::maxJerk);
+#if DRIVE_SYSTEM!=3
     HAL::epr_set_float(EPR_MAX_ZJERK,Printer::maxZJerk);
+#endif
 #ifdef RAMP_ACCELERATION
     HAL::epr_set_float(EPR_X_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[0]);
     HAL::epr_set_float(EPR_Y_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[1]);
@@ -447,6 +451,12 @@ void EEPROM::initalizeUncached()
     HAL::epr_set_float(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::epr_set_float(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::epr_set_float(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+#if DRIVE_SYSTEM==3
+    HAL::epr_set_float(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
+    HAL::epr_set_float(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
+    HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
+    HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
+#endif
 }
 
 void EEPROM::readDataFromEEPROM()
@@ -467,7 +477,9 @@ void EEPROM::readDataFromEEPROM()
     Printer::homingFeedrate[1] = HAL::epr_get_float(EPR_Y_HOMING_FEEDRATE);
     Printer::homingFeedrate[2] = HAL::epr_get_float(EPR_Z_HOMING_FEEDRATE);
     Printer::maxJerk = HAL::epr_get_float(EPR_MAX_JERK);
+#if DRIVE_SYSTEM!=3
     Printer::maxZJerk = HAL::epr_get_float(EPR_MAX_ZJERK);
+#endif
 #ifdef RAMP_ACCELERATION
     Printer::maxAccelerationMMPerSquareSecond[0] = HAL::epr_get_float(EPR_X_MAX_ACCEL);
     Printer::maxAccelerationMMPerSquareSecond[1] = HAL::epr_get_float(EPR_Y_MAX_ACCEL);
@@ -565,6 +577,15 @@ void EEPROM::readDataFromEEPROM()
             HAL::epr_set_float(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::epr_set_float(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
         }
+        if(version<4)
+        {
+#if DRIVE_SYSTEM==3
+            HAL::epr_set_float(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
+            HAL::epr_set_float(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
+            HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
+            HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
+#endif
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Extruder::selectExtruderById(Extruder::current->id);
@@ -595,6 +616,7 @@ void EEPROM::init()
     else
     {
         HAL::epr_set_byte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
+        initalizeUncached();
         storeDataIntoEEPROM(storedcheck!=check);
     }
 #endif
@@ -638,17 +660,25 @@ void EEPROM::writeSettings()
     writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
+#if DRIVE_SYSTEM!=3
     writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM);
     writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM);
+#endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM);
+#if DRIVE_SYSTEM!=3
     writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
+#endif
     writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
+#if DRIVE_SYSTEM!=3
     writeFloat(EPR_X_HOMING_FEEDRATE,Com::tEPRXHomingFeedrate);
     writeFloat(EPR_Y_HOMING_FEEDRATE,Com::tEPRYHomingFeedrate);
+#endif
     writeFloat(EPR_Z_HOMING_FEEDRATE,Com::tEPRZHomingFeedrate);
     writeFloat(EPR_MAX_JERK,Com::tEPRMaxJerk);
+#if DRIVE_SYSTEM!=3
     writeFloat(EPR_MAX_ZJERK,Com::tEPRMaxZJerk);
+#endif
     writeFloat(EPR_X_HOME_OFFSET,Com::tEPRXHomePos);
     writeFloat(EPR_Y_HOME_OFFSET,Com::tEPRYHomePos);
     writeFloat(EPR_Z_HOME_OFFSET,Com::tEPRZHomePos);
@@ -665,6 +695,14 @@ void EEPROM::writeSettings()
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
+#if DRIVE_SYSTEM==3
+    writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
+    writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
+    writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
+    writeFloat(EPR_DELTA_HORIZONTAL_RADIUS,Com::tEPRHorizontalRadius);
+    writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,Com::tEPRSegmentsPerSecondTravel);
+    writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,Com::tEPRSegmentsPerSecondPrint);
+#else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
     writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
@@ -672,6 +710,8 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Y_MAX_TRAVEL_ACCEL,Com::tEPRYTravelAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
 #endif
+#endif
+/*
 #if USE_OPS==1
     writeByte(EPR_OPS_MODE,Com::tEPROPSMode);
     writeFloat(EPR_OPS_MOVE_AFTER,Com::tEPROPSMoveAfter);
@@ -679,6 +719,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_OPS_RETRACT_DISTANCE,Com::tEPROPSRetractionLength);
     writeFloat(EPR_OPS_RETRACT_BACKLASH,Com::tEPROPSRetractionBacklash);
 #endif
+*/
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT,Com::tZProbeHeight);
     writeFloat(EPR_Z_PROBE_SPEED,Com::tZProbeSpeed);

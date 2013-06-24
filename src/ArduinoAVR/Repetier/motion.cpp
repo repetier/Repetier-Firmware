@@ -65,25 +65,6 @@
 #endif
 
 #if DRIVE_SYSTEM==3
-#define SIN_60 0.8660254037844386
-#define COS_60 0.5
-#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
-#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
-#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
-#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
-
-#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER3_X_STEPS 0.0
-#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
-
-#define NUM_AXIS 4
-#define X_AXIS 0
-#define Y_AXIS 1
-#define Z_AXIS 2
-#define E_AXIS 3
 
 volatile unsigned int delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache
 
@@ -104,7 +85,7 @@ int maxadv2=0;
 float maxadvspeed=0;
 #endif
 byte pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
-int waitRelax=0; // Delay filament relax at the end of print, could be a simple timeout
+volatile int waitRelax=0; // Delay filament relax at the end of print, could be a simple timeout
 
 PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
@@ -124,7 +105,7 @@ void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float fe
     Printer::destinationSteps[3] = Printer::currentPositionSteps[3] + e;
     Printer::feedrate = feedrate;
 #if DRIVE_SYSTEM==3
-    split_delta_move(check_endstop,false,false);
+    queueDeltaMove(check_endstop,false,false);
 #else
     queue_move(check_endstop,false);
 #endif
@@ -472,7 +453,8 @@ void PrintLine::updateTrapezoids()
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
 #if DRIVE_SYSTEM!=3
-    if((previous->primaryAxis==2 && act->primaryAxis!=2) || (previous->primaryAxis!=2 && act->primaryAxis==2)) {
+    if((previous->primaryAxis==2 && act->primaryAxis!=2) || (previous->primaryAxis!=2 && act->primaryAxis==2))
+    {
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
@@ -811,12 +793,82 @@ void PrintLine::waitForXFreeLines(byte b)
 
 
 #if DRIVE_SYSTEM==3
+
+/**
+  Calculate the delta tower position from a cartesian position
+  @param cartesianPosSteps Array containing cartesian coordinates.
+  @param deltaPosSteps Result array with tower coordinates.
+  @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
+*/
+byte transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[])
+{
+    if(Printer::isLargeMachine())
+    {
+
+    }
+    else
+    {
+        long temp = Printer::deltaMinusCos60RadiusSteps- cartesianPosSteps[Y_AXIS];
+        long opt = Printer::deltaDiagonalStepsSquared - temp*temp;
+        long temp2 = -Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
+#ifdef FAST_INTEGER_SQRT
+            deltaPosSteps[X_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+#else
+            deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+#endif
+        else
+            return 0;
+
+        temp2 = Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
+#ifdef FAST_INTEGER_SQRT
+            deltaPosSteps[Y_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+#else
+            deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+#endif
+        else
+            return 0;
+
+        temp2 = Printer::deltaRadiusSteps - cartesianPosSteps[Y_AXIS];
+        if ((temp = Printer::deltaDiagonalStepsSquared
+                    - cartesianPosSteps[X_AXIS]*cartesianPosSteps[X_AXIS]
+                    - temp2*temp2) >= 0)
+#ifdef FAST_INTEGER_SQRT
+            deltaPosSteps[Z_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+#else
+            deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+#endif
+        else
+            return 0;
+    }
+    return 1;
+}
+
+void PrintLine::calculateDirectionAndDelta(long difference[], byte *dir, long delta[])
+{
+    *dir = 0;
+    //Find direction
+    for(byte i=0; i < 4; i++)
+    {
+        if(difference[i]>=0)
+        {
+            delta[i] = difference[i];
+            *dir |= 1<<i;
+        }
+        else
+        {
+            delta[i] = -difference[i];
+        }
+        if(delta[i]) *dir |= 16<<i;
+    }
+}
 /**
   Calculate and cache the delta robot positions of the cartesian move in a line.
   @return The largest delta axis move in a single segment
   @param p The line to examine.
 */
-inline long PrintLine::calculate_delta_segments(byte softEndstop)
+inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
 {
 
     long destination_steps[3], destination_delta_steps[3];
@@ -833,12 +885,17 @@ inline long PrintLine::calculate_delta_segments(byte softEndstop)
     totalStepsRemaining=0;
 #endif
 
-    long max_axis_move = 0;
+    uint16_t max_axis_move = 0;
     unsigned int produced_segments = 0;
     for (int s = numDeltaSegments; s > 0; s--)
     {
-        for(byte i=0; i < NUM_AXIS - 1; i++)
-            destination_steps[i] += (Printer::destinationSteps[i] - destination_steps[i]) / s;
+        for(byte i=0; i < NUM_AXIS - 1; i++) {
+            long diff = Printer::destinationSteps[i] - destination_steps[i];
+            if(diff<0)
+                destination_steps[i] -= HAL::Div4U2U(-diff, s);
+            else
+                destination_steps[i] += HAL::Div4U2U(diff, s);
+        }
 
         // Wait for buffer here
         while(delta_segment_count + produced_segments>=DELTA_CACHE_SIZE)   // wait for a free entry in movement cache
@@ -850,7 +907,7 @@ inline long PrintLine::calculate_delta_segments(byte softEndstop)
         DeltaSegment *d = &segments[delta_segment_write_pos];
 
         // Verify that delta calc has a solution
-        if (calculate_delta(destination_steps, destination_delta_steps))
+        if (transformCartesianStepsToDeltaSteps(destination_steps, destination_delta_steps))
         {
             d->dir = 0;
             for(byte i=0; i < NUM_AXIS - 1; i++)
@@ -862,11 +919,11 @@ inline long PrintLine::calculate_delta_segments(byte softEndstop)
 //				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
 //				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
 //#endif
-                if (delta == 0)
+               /* if (delta == 0)
                 {
                     d->deltaSteps[i] = 0;
                 }
-                else if (delta > 0)
+                else*/ if (delta > 0)
                 {
                     d->dir |= 17<<i;
 #ifdef DEBUG_DELTA_OVERFLOW
@@ -894,7 +951,7 @@ inline long PrintLine::calculate_delta_segments(byte softEndstop)
         }
         else
         {
-            // Illegal position - idnore move
+            // Illegal position - ignore move
             Com::printWarningFLN(Com::tInvalidDeltaCoordinate);
             d->dir = 0;
             for(byte i=0; i < NUM_AXIS - 1; i++)
@@ -917,81 +974,34 @@ inline long PrintLine::calculate_delta_segments(byte softEndstop)
     return max_axis_move;
 }
 
-/**
-  Calculate the delta tower position from a cartesian position
-  @param cartesianPosSteps Array containing cartesian coordinates.
-  @param deltaPosSteps Result array with tower coordinates.
-  @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
-*/
-byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[])
-{
-    long temp;
-    long opt = DELTA_DIAGONAL_ROD_STEPS_SQUARED - sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS]);
 
-    if ((temp = opt - sq(DELTA_TOWER1_X_STEPS - cartesianPosSteps[X_AXIS])) >= 0)
-        deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-    else
-        return 0;
 
-    if ((temp = opt - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])) >= 0)
-        deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-    else
-        return 0;
-
-    if ((temp = DELTA_DIAGONAL_ROD_STEPS_SQUARED
-                - sq(DELTA_TOWER3_X_STEPS - cartesianPosSteps[X_AXIS])
-                - sq(DELTA_TOWER3_Y_STEPS - cartesianPosSteps[Y_AXIS])) >= 0)
-        deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-    else
-        return 0;
-
-    return 1;
-}
-
-void PrintLine::calculate_dir_delta(long difference[], byte *dir, long delta[])
-{
-    *dir = 0;
-    //Find direction
-    for(byte i=0; i < 4; i++)
-    {
-        if(difference[i]>=0)
-        {
-            delta[i] = difference[i];
-            *dir |= 1<<i;
-        }
-        else
-        {
-            delta[i] = -difference[i];
-        }
-        if(delta[i]) *dir |= 16<<i;
-    }
-    if(Printer::extrudeMultiply!=100)
-    {
-        delta[3]=(long)((delta[3]*(float)Printer::extrudeMultiply)*0.01f);
-    }
-}
-
-byte PrintLine::calculate_distance(float axis_diff[], byte dir, float *distance)
+byte PrintLine::calculateDistance(float axis_diff[], byte dir, float *distance)
 {
     // Calculate distance depending on direction
     if(dir & 112)
     {
-        if(dir & 64)
-        {
-            *distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
-        }
+        if(dir & 16)
+            *distance = axis_diff[0] * axis_diff[0];
         else
-        {
-            *distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
-        }
+            *distance = 0;
+        if(dir & 32)
+            *distance += axis_diff[1] * axis_diff[1];
+        if(dir & 64)
+            *distance += axis_diff[2] * axis_diff[2];
+        *distance = sqrt(*distance);
+        return 1;
     }
-    else if(dir & 128)
-        *distance = fabs(axis_diff[3]);
     else
     {
-        return 0; // no steps to take, we are finished
+        if(dir & 128)
+        {
+            *distance = fabs(axis_diff[3]);
+            return 1;
+        }
+        *distance = 0;
+        return 0;
     }
-    return 1;
 }
 
 #ifdef SOFTWARE_LEVELING
@@ -1064,15 +1074,17 @@ inline void PrintLine::queue_E_move(long e_diff,byte check_endstops,byte pathOpt
   @param pathOptimize Run the path optimizer.
   @param delta_step_rate delta step rate in segments per second for the move.
 */
-void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop)
+void PrintLine::queueDeltaMove(byte check_endstops,byte pathOptimize, byte softEndstop)
 {
     if (softEndstop && Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0;
     long difference[NUM_AXIS];
     float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
-    for(byte i=0; i < NUM_AXIS; i++)
+    for(byte axis=0; axis < NUM_AXIS; axis++)
     {
-        difference[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
-        axis_diff[i] = fabs(difference[i] * Printer::invAxisStepsPerMM[i]);
+        difference[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
+        if(axis==3 && Printer::extrudeMultiply!=100)
+            difference[3]=(long)((difference[3]*(float)Printer::extrudeMultiply)*0.01f);
+        axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
     }
     Printer::filamentPrinted+=axis_diff[3];
 
@@ -1091,14 +1103,14 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
 // }
 #endif
 
-    float save_distance;
-    byte save_dir;
-    long save_delta[4];
-    calculate_dir_delta(difference, &save_dir, save_delta);
-    if (!calculate_distance(axis_diff, save_dir, &save_distance))
+    float cartesianDistance;
+    byte cartesianDir;
+    long cartesianDeltaSteps[4];
+    calculateDirectionAndDelta(difference, &cartesianDir, cartesianDeltaSteps);
+    if (!calculateDistance(axis_diff, cartesianDir, &cartesianDistance))
         return;
 
-    if (!(save_dir & 112))
+    if (!(cartesianDir & 112))
     {
         queue_E_move(difference[3],check_endstops,pathOptimize);
         return;
@@ -1106,24 +1118,24 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
 
     int segment_count;
 
-    if (save_dir & 48)
+    if (cartesianDir & 48)
     {
         // Compute number of seconds for move and hence number of segments needed
-        //float seconds = 100 * save_distance / (Printer::feedrate * Printer::feedrateMultiply); multiply in feedrate included
-        float seconds = save_distance / Printer::feedrate;
+        //float seconds = 100 * cartesianDistance / (Printer::feedrate * Printer::feedrateMultiply); multiply in feedrate included
+        float seconds = cartesianDistance / Printer::feedrate;
 #ifdef DEBUG_SPLIT
         Com::printFLN(Com::tDBGDeltaSeconds, seconds);
 #endif
-        segment_count = RMath::max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
+        segment_count = RMath::max(1, int(float((cartesianDir & 136)==136 ? EEPROM::deltaSegmentsPerSecondPrint() : EEPROM::deltaSegmentsPerSecondMove()) * seconds));
     }
     else
     {
         // Optimize pure Z axis move. Since a pure Z axis move is linear all we have to watch out for is unsigned integer overuns in
         // the queued moves;
 #ifdef DEBUG_SPLIT
-        Com::printFLN(Com::tDBGDeltaZDelta, save_delta[2]);
+        Com::printFLN(Com::tDBGDeltaZDelta, cartesianDeltaSteps[2]);
 #endif
-        segment_count = (save_delta[2] + (unsigned long)65534) / (unsigned long)65535;
+        segment_count = (cartesianDeltaSteps[2] + (unsigned long)65534) / (unsigned long)65535;
     }
     // Now compute the number of lines needed
     int num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
@@ -1131,9 +1143,11 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
     int segments_per_line = segment_count / num_lines;
 
     long start_position[4], fractional_steps[4];
-    for (byte i = 0; i < 4; i++)
+    if(num_lines>1)
     {
-        start_position[i] = Printer::currentPositionSteps[i];
+        for (byte i = 0; i < 4; i++)
+            start_position[i] = Printer::currentPositionSteps[i];
+        cartesianDistance /= num_lines;
     }
 
 #ifdef DEBUG_SPLIT
@@ -1152,29 +1166,30 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
     for (int line_number=1; line_number < num_lines + 1; line_number++)
     {
         waitForXFreeLines(1);
-        PrintLine *p = &lines[lines_write_pos];
+        PrintLine *p = getNextWriteLine();
         // Downside a comparison per loop. Upside one less distance calculation and simpler code.
         if (num_lines == 1)
         {
             p->numDeltaSegments = segment_count;
-            p->dir = save_dir;
+            p->dir = cartesianDir;
             for (byte i=0; i < 4; i++)
             {
-                p->delta[i] = save_delta[i];
+                p->delta[i] = cartesianDeltaSteps[i];
                 fractional_steps[i] = difference[i];
             }
-            p->distance = save_distance;
+            p->distance = cartesianDistance;
         }
         else
         {
             for (byte i=0; i < 4; i++)
             {
-                Printer::destinationSteps[i] = start_position[i] + (difference[i] * line_number / num_lines);
+                Printer::destinationSteps[i] = start_position[i] + (difference[i] * line_number) / num_lines;
                 fractional_steps[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
                 axis_diff[i] = fabs(fractional_steps[i]*Printer::invAxisStepsPerMM[i]);
+                p->delta[i] = labs(fractional_steps[i]);
             }
-            calculate_dir_delta(fractional_steps, &p->dir, p->delta);
-            calculate_distance(axis_diff, p->dir, &p->distance);
+            p->dir = cartesianDir;
+            p->distance = cartesianDistance;
         }
 
         p->joinFlags = 0;
@@ -1191,7 +1206,7 @@ void PrintLine::split_delta_move(byte check_endstops,byte pathOptimize, byte sof
 
         p->numDeltaSegments = segments_per_line;
 
-        long max_delta_step = p->calculate_delta_segments(softEndstop);
+        long max_delta_step = p->calculateDeltaSubSegments(softEndstop);
 
 #ifdef DEBUG_SPLIT
         Com::printFLN(Com::tDBGDeltaMaxDS, max_delta_step);
@@ -1473,7 +1488,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #if defined(USE_ADVANCE)
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
-        Extruder::setDirection(cur->isEPositiveMove());
+            Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
         long h = HAL::mulu16xu16to32(cur->vStart,cur->advanceL);
         int tred = ((

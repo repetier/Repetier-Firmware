@@ -250,31 +250,7 @@ void Extruder::initExtruder()
     Extruder::initHeatedBed();
 #endif
     Extruder::selectExtruderById(0);
-#if ANALOG_INPUTS>0
-    ADMUX = ANALOG_REF; // refernce voltage
-    for(i=0; i<ANALOG_INPUTS; i++)
-    {
-        osAnalogInputCounter[i] = 0;
-        osAnalogInputBuildup[i] = 0;
-        osAnalogInputValues[i] = 0;
-    }
-    ADCSRA = _BV(ADEN)|_BV(ADSC)|ANALOG_PRESCALER;
-    //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
-    while (ADCSRA & _BV(ADSC) ) {} // wait for conversion
-    /* ADCW must be read once, otherwise the next result is wrong. */
-    uint dummyADCResult;
-    dummyADCResult = ADCW;
-    // Enable interrupt driven conversion loop
-    byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
-#if defined(ADCSRB) && defined(MUX5)
-    if(channel & 8)  // Reading channel 0-7 or 8-15?
-        ADCSRB |= _BV(MUX5);
-    else
-        ADCSRB &= ~_BV(MUX5);
-#endif
-    ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
-    ADCSRA |= _BV(ADSC); // start conversion without interrupt!
-#endif
+    HAL::analogStart();
 
 }
 void TemperatureController::updateTempControlVars()
@@ -544,7 +520,7 @@ void TemperatureController::updateCurrentTemperature()
     case 50: // User defined PTC table
     case 51:
     case 52:
-    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/Â°C)
     case 100: // AD595
         currentTemperature = (osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS));
         break;
@@ -627,7 +603,7 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
         break;
     }
-    case 60: // AD8495 (Delivers 5mV/°C vs the AD595's 10mV)
+    case 60: // AD8495 (Delivers 5mV/Â°C vs the AD595's 10mV)
         currentTemperatureC = ((float)currentTemperature * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -754,7 +730,7 @@ void TemperatureController::setTargetTemperature(float target)
         targetTemperature = newraw;
         break;
     }
-    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/Â°C)
         targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
         break;
     case 100: // HEATER_USES_AD595
@@ -883,7 +859,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
                     Com::printFLN(Com::tAPIDMax,maxTemp);
                     if(cycles > 2)
                     {
-                        // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+                        // Parameter according ZieglerÂ¡Â§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
                         Ku = (4.0*d)/(3.14159*(maxTemp-minTemp));
                         Tu = ((float)(t_low + t_high)/1000.0);
                         Com::printF(Com::tAPIDKu,Ku);

@@ -99,6 +99,7 @@ typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
 
+#define FAST_INTEGER_SQRT
 
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
@@ -207,6 +208,99 @@ public:
     HAL();
     virtual ~HAL();
     // return val'val
+    static uint16_t integerSqrt(long a);
+    /** \brief Optimized division
+
+    Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
+    This version is optimized for a 16 bit dividend and recognises the special cases
+    of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the
+    interval.
+    */
+    static inline long Div4U2U(unsigned long a,unsigned int b)
+    {
+#if CPU_ARCH==ARCH_AVR
+        // r14/r15 remainder
+        // r16 counter
+        __asm__ __volatile__ (
+            "clr r14 \n\t"
+            "sub r15,r15 \n\t"
+            "tst %D0 \n\t"
+            "brne do32%= \n\t"
+            "tst %C0 \n\t"
+            "breq donot24%= \n\t"
+            "rjmp do24%= \n\t"
+            "donot24%=:" "ldi r16,17 \n\t" // 16 Bit divide
+            "d16u_1%=:" "rol %A0 \n\t"
+            "rol %B0 \n\t"
+            "dec r16 \n\t"
+            "brne	d16u_2%= \n\t"
+            "rjmp end%= \n\t"
+            "d16u_2%=:" "rol r14 \n\t"
+            "rol r15 \n\t"
+            "sub r14,%A2 \n\t"
+            "sbc r15,%B2 \n\t"
+            "brcc	d16u_3%= \n\t"
+            "add r14,%A2 \n\t"
+            "adc r15,%B2 \n\t"
+            "clc \n\t"
+            "rjmp d16u_1%= \n\t"
+            "d16u_3%=:" "sec \n\t"
+            "rjmp d16u_1%= \n\t"
+            "do32%=:" // divide full 32 bit
+            "rjmp do32B%= \n\t"
+            "do24%=:" // divide 24 bit
+
+            "ldi r16,25 \n\t" // 24 Bit divide
+            "d24u_1%=:" "rol %A0 \n\t"
+            "rol %B0 \n\t"
+            "rol %C0 \n\t"
+            "dec r16 \n\t"
+            "brne	d24u_2%= \n\t"
+            "rjmp end%= \n\t"
+            "d24u_2%=:" "rol r14 \n\t"
+            "rol r15 \n\t"
+            "sub r14,%A2 \n\t"
+            "sbc r15,%B2 \n\t"
+            "brcc	d24u_3%= \n\t"
+            "add r14,%A2 \n\t"
+            "adc r15,%B2 \n\t"
+            "clc \n\t"
+            "rjmp d24u_1%= \n\t"
+            "d24u_3%=:" "sec \n\t"
+            "rjmp d24u_1%= \n\t"
+
+            "do32B%=:" // divide full 32 bit
+
+            "ldi r16,33 \n\t" // 32 Bit divide
+            "d32u_1%=:" "rol %A0 \n\t"
+            "rol %B0 \n\t"
+            "rol %C0 \n\t"
+            "rol %D0 \n\t"
+            "dec r16 \n\t"
+            "brne	d32u_2%= \n\t"
+            "rjmp end%= \n\t"
+            "d32u_2%=:" "rol r14 \n\t"
+            "rol r15 \n\t"
+            "sub r14,%A2 \n\t"
+            "sbc r15,%B2 \n\t"
+            "brcc	d32u_3%= \n\t"
+            "add r14,%A2 \n\t"
+            "adc r15,%B2 \n\t"
+            "clc \n\t"
+            "rjmp d32u_1%= \n\t"
+            "d32u_3%=:" "sec \n\t"
+            "rjmp d32u_1%= \n\t"
+
+            "end%=:" // end
+            :"=&r"(a)
+            :"0"(a),"r"(b)
+            :"r14","r15","r16"
+        );
+        return a;
+#else
+        return a/b;
+#endif
+    }
     static inline unsigned long U16SquaredToU32(unsigned int val)
     {
         long res;
@@ -353,10 +447,12 @@ public:
     {
         ::delay(delayMs);
     }
-    static inline void tone(byte pin,int duration) {
+    static inline void tone(byte pin,int duration)
+    {
         ::tone(pin,duration);
     }
-    static inline void noTone(byte pin) {
+    static inline void noTone(byte pin)
+    {
         ::noTone(pin);
     }
     static inline void epr_set_byte(unsigned int pos,byte value)
@@ -498,6 +594,7 @@ public:
     static unsigned int servoTimings[4];
     static void servoMicroseconds(byte servo,int ms);
 #endif
+    static void analogStart();
 protected:
 private:
 };

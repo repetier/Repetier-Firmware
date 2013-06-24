@@ -77,6 +77,11 @@ volatile  int Printer::extruderStepsNeeded; ///< This many extruder steps are st
  long Printer::countZSteps;					///< Count of steps from last position reset
 #endif
 long Printer::maxDeltaPositionSteps;
+long Printer::deltaDiagonalStepsSquared;
+float Printer::deltaDiagonalStepsSquaredF;
+long Printer::deltaSin60RadiusSteps;
+long Printer::deltaMinusCos60RadiusSteps;
+long Printer::deltaRadiusSteps;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
  long Printer::stepsRemainingAtZHit;
@@ -113,7 +118,9 @@ long Printer::maxDeltaPositionSteps;
  int Printer::feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
  unsigned int Printer::extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
  float Printer::maxJerk;                    ///< Maximum allowed jerk in mm/s
+#if DRIVE_SYSTEM!=3
  float Printer::maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
+#endif
  float Printer::offsetX;                     ///< X-offset for different extruder positions.
  float Printer::offsetY;                     ///< Y-offset for different extruder positions.
  unsigned int Printer::vMaxReached;         ///< Maximumu reached speed
@@ -167,30 +174,46 @@ void Printer::constrainDestinationCoords()
 void Printer::updateDerivedParameter()
 {
 #if DRIVE_SYSTEM==3
-    Printer::zMaxSteps = axisStepsPerMM[0]*(Printer::zLength - Printer::zMin);
+    axisStepsPerMM[0] = axisStepsPerMM[1] = axisStepsPerMM[2];
+    maxAccelerationMMPerSquareSecond[0] = maxAccelerationMMPerSquareSecond[1] = maxAccelerationMMPerSquareSecond[2];
+    maxTravelAccelerationMMPerSquareSecond[0] = maxTravelAccelerationMMPerSquareSecond[1] = maxTravelAccelerationMMPerSquareSecond[2];
+    zMaxSteps = axisStepsPerMM[2]*(zLength - zMin);
+    deltaSin60RadiusSteps = long(EEPROM::deltaHorizontalRadius()*SIN_60*axisStepsPerMM[2]);
+    deltaMinusCos60RadiusSteps = long(-EEPROM::deltaHorizontalRadius()*COS_60*axisStepsPerMM[2]);
+    deltaRadiusSteps = long(EEPROM::deltaHorizontalRadius()*axisStepsPerMM[2]);
+    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[2]);
+    if(deltaDiagonalStepsSquared>46000) {
+        setLargeMachine(true);
+        deltaDiagonalStepsSquaredF = float(deltaDiagonalStepsSquared)*float(deltaDiagonalStepsSquared);
+    } else
+      deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
+    Com::printF(Com::tInfo,deltaSin60RadiusSteps);
+    Com::printF(Com::tComma,deltaMinusCos60RadiusSteps);
+    Com::printF(Com::tComma,deltaRadiusSteps);
+    Com::printFLN(Com::tComma,deltaDiagonalStepsSquared);
     long cart[3], delta[3];
     cart[0] = cart[1] = 0;
-    cart[2] = Printer::zMaxSteps;
-    calculate_delta(cart, delta);
-    Printer::maxDeltaPositionSteps = delta[0];
-    Printer::xMaxSteps = (long)(axisStepsPerMM[0]*(Printer::xMin+Printer::xLength));
-    Printer::yMaxSteps = (long)(axisStepsPerMM[1]*(Printer::yMin+Printer::yLength));
-    Printer::xMinSteps = (long)(axisStepsPerMM[0]*Printer::xMin);
-    Printer::yMinSteps = (long)(axisStepsPerMM[1]*Printer::yMin);
-    Printer::zMinSteps = 0;
+    cart[2] = zMaxSteps;
+    transformCartesianStepsToDeltaSteps(cart, delta);
+    maxDeltaPositionSteps = delta[0];
+    xMaxSteps = (long)(axisStepsPerMM[2]*(xMin+xLength));
+    yMaxSteps = (long)(axisStepsPerMM[2]*(yMin+yLength));
+    xMinSteps = (long)(axisStepsPerMM[2]*xMin);
+    yMinSteps = (long)(axisStepsPerMM[2]*yMin);
+    zMinSteps = 0;
 #else
-    Printer::xMaxSteps = (long)(axisStepsPerMM[0]*(Printer::xMin+Printer::xLength));
-    Printer::yMaxSteps = (long)(axisStepsPerMM[1]*(Printer::yMin+Printer::yLength));
-    Printer::zMaxSteps = (long)(axisStepsPerMM[2]*(Printer::zMin+Printer::zLength));
-    Printer::xMinSteps = (long)(axisStepsPerMM[0]*Printer::xMin);
-    Printer::yMinSteps = (long)(axisStepsPerMM[1]*Printer::yMin);
-    Printer::zMinSteps = (long)(axisStepsPerMM[2]*Printer::zMin);
+    xMaxSteps = (long)(axisStepsPerMM[0]*(xMin+xLength));
+    yMaxSteps = (long)(axisStepsPerMM[1]*(yMin+yLength));
+    zMaxSteps = (long)(axisStepsPerMM[2]*(zMin+zLength));
+    xMinSteps = (long)(axisStepsPerMM[0]*xMin);
+    yMinSteps = (long)(axisStepsPerMM[1]*yMin);
+    zMinSteps = (long)(axisStepsPerMM[2]*zMin);
     // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
-    Printer::backlashDir &= 7;
-    if(Printer::backlashX!=0) Printer::backlashDir |= 8;
-    if(Printer::backlashY!=0) Printer::backlashDir |= 16;
-    if(Printer::backlashZ!=0) Printer::backlashDir |= 32;
+    backlashDir &= 7;
+    if(backlashX!=0) backlashDir |= 8;
+    if(backlashY!=0) backlashDir |= 16;
+    if(backlashZ!=0) backlashDir |= 32;
 #endif
 #endif
     for(byte i=0; i<4; i++)
@@ -262,7 +285,7 @@ void Printer::moveTo(float x,float y,float z,float e,float f)
     if(f!=IGNORE_COORDINATE)
         Printer::feedrate = f;
 #if DRIVE_SYSTEM == 3
-    PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+    PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
     PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
@@ -301,7 +324,7 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
     if(f!=IGNORE_COORDINATE)
         Printer::feedrate = f;
 #if DRIVE_SYSTEM == 3
-    PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+    PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
     PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
@@ -626,10 +649,12 @@ void Printer::setup()
     for(byte i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
     Printer::currentPositionSteps[0] = Printer::currentPositionSteps[1] = Printer::currentPositionSteps[2] = Printer::currentPositionSteps[3] = 0;
 #if DRIVE_SYSTEM==3
-    calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
     Printer::maxJerk = MAX_JERK;
+#if DRIVE_SYSTEM!=3
     Printer::maxZJerk = MAX_ZJERK;
+#endif
     Printer::interval = 5000;
     Printer::stepsPerTimerCall = 1;
     Printer::msecondsPrinting = 0;
@@ -694,7 +719,7 @@ void delta_move_to_top_endstops(float feedrate)
     long up_steps = Printer::zMaxSteps;
     for (byte i=0; i<3; i++)
         Printer::currentPositionSteps[i] = 0;
-    calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
     PrintLine::moveRelativeDistanceInSteps(0,0,Printer::zMaxSteps*ENDSTOP_Z_BACK_MOVE,0,feedrate, true, true);
 }
 void Printer::homeXAxis()
@@ -718,7 +743,7 @@ void Printer::homeZAxis()
     Printer::coordinateOffset[0] = 0;
     Printer::coordinateOffset[1] = 0;
     Printer::coordinateOffset[2] = 0;
-    calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
     Printer::maxDeltaPositionSteps = Printer::currentDeltaPositionSteps[0];
 }
 
@@ -738,7 +763,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis)
         {
             if (xaxis) Printer::destinationSteps[0] = 0;
             if (yaxis) Printer::destinationSteps[1] = 0;
-            PrintLine::split_delta_move(true,false,false);
+            PrintLine::queueDeltaMove(true,false,false);
         }
         Printer::countZSteps = 0;
         UI_CLEAR_STATUS

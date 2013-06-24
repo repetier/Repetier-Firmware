@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 3
+#define EEPROM_PROTOCOL_VERSION 4
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -88,6 +88,10 @@ have problems with other modules using the eeprom */
 #define EPR_Z_PROBE_XY_SPEED      840
 #define EPR_AUTOLEVEL_MATRIX      844
 #define EPR_AUTOLEVEL_ACTIVE      880
+#define EPR_DELTA_DIAGONAL_ROD_LENGTH 881
+#define EPR_DELTA_HORIZONTAL_RADIUS 885
+#define EPR_DELTA_SEGMENTS_PER_SECOND_PRINT 889
+#define EPR_DELTA_SEGMENTS_PER_SECOND_MOVE 891
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -213,6 +217,36 @@ public:
         return Z_PROBE_Y3;
 #endif
     }
+#if DRIVE_SYSTEM==3
+    static inline float deltaDiagonalRodLength() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_float(EPR_DELTA_DIAGONAL_ROD_LENGTH);
+#else
+        return DELTA_DIAGONAL_ROD;
+#endif
+    }
+    static inline float deltaHorizontalRadius() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_float(EPR_DELTA_HORIZONTAL_RADIUS);
+#else
+        return DELTA_RADIUS;
+#endif
+    }
+    static inline int deltaSegmentsPerSecondPrint() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
+#else
+        return DELTA_SEGMENTS_PER_SECOND_PRINT;
+#endif
+    }
+    static inline int deltaSegmentsPerSecondMove() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
+#else
+        return DELTA_SEGMENTS_PER_SECOND_MOVE;
+#endif
+    }
+#endif
     static void initalizeUncached();
 };
 #endif

@@ -58,7 +58,7 @@
 typedef struct
 {
     byte dir; 									///< Direction of delta movement.
-    unsigned int deltaSteps[3]; 				///< Number of steps in move.
+    uint16_t deltaSteps[3];   				    ///< Number of steps in move.
 } DeltaSegment;
 extern DeltaSegment segments[];					// Delta segment cache
 extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
@@ -529,11 +529,11 @@ public:
         p = (p==MOVE_CACHE_SIZE-1?0:p+1);
     }
 #if DRIVE_SYSTEM==3
-    static void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
+    static void queueDeltaMove(byte check_endstops,byte pathOptimize, byte softEndstop);
     static inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize);
-    inline long calculate_delta_segments(byte softEndstop);
-    static inline void calculate_dir_delta(long difference[], byte *dir, long delta[]);
-    static inline byte calculate_distance(float axis_diff[], byte dir, float *distance);
+    inline uint16_t calculateDeltaSubSegments(byte softEndstop);
+    static inline void calculateDirectionAndDelta(long difference[], byte *dir, long delta[]);
+    static inline byte calculateDistance(float axis_diff[], byte dir, float *distance);
 #ifdef SOFTWARE_LEVELING
     static void calculate_plane(long factors[], long p1[], long p2[], long p3[]);
     static float calc_zoffset(long factors[], long pointX, long pointY);

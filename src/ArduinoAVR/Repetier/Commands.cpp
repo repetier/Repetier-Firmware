@@ -379,7 +379,7 @@ void Commands::executeGCode(GCode *com)
         case 1: // G1
             if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if DRIVE_SYSTEM == 3
-                PrintLine::split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
+                PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
                 PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
@@ -1032,15 +1032,19 @@ void Commands::executeGCode(GCode *com)
         case 207: // M207 X<XY jerk> Z<Z Jerk>
             if(com->hasX())
                 Printer::maxJerk = com->X;
-            if(com->hasZ())
-                Printer::maxZJerk = com->Z;
             if(com->hasE())
             {
                 Extruder::current->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(Extruder::current->id);
             }
+#if DRIVE_SYSTEM!=3
+            if(com->hasZ())
+                Printer::maxZJerk = com->Z;
             Com::printF(Com::tJerkColon,Printer::maxJerk);
             Com::printFLN(Com::tZJerkColon,Printer::maxZJerk);
+#else
+            Com::printFLN(Com::tJerkColon,Printer::maxJerk);
+#endif
             break;
         case 220: // M220 S<Feedrate multiplier in percent>
             changeFeedrateMultiply(com->getS(100));
@@ -1209,6 +1213,10 @@ void Commands::executeGCode(GCode *com)
                 EEPROM::storeDataIntoEEPROM();
             }
             break;
+        case 700: // test new square root function
+            if(com->hasS())
+                Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
+            break;
 #endif // FEATURE_AUTOLEVEL
 #if FEATURE_SERVO
         case 340:
@@ -1245,7 +1253,7 @@ void Commands::executeGCode(GCode *com)
                     {
                         Printer::currentPositionSteps[i] = 0;
                     }
-                    calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+                    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
                     Com::printFLN(Com::tMeasureOriginReset);
 #if EEPROM_MODE!=0
                     EEPROM::storeDataIntoEEPROM(false);
