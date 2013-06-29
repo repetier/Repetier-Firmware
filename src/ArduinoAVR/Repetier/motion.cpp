@@ -804,7 +804,28 @@ byte transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPos
 {
     if(Printer::isLargeMachine())
     {
+        float temp = Printer::deltaMinusCos60RadiusSteps- cartesianPosSteps[Y_AXIS];
+        float opt = Printer::deltaDiagonalStepsSquaredF - temp*temp;
+        float temp2 = -Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
+            deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+        else
+            return 0;
 
+        temp2 = Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
+            deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+        else
+            return 0;
+
+        temp2 = Printer::deltaRadiusSteps - cartesianPosSteps[Y_AXIS];
+        if ((temp = Printer::deltaDiagonalStepsSquaredF
+                    - cartesianPosSteps[X_AXIS]*cartesianPosSteps[X_AXIS]
+                    - temp2*temp2) >= 0)
+            deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+        else
+            return 0;
+        return 1;
     }
     else
     {
@@ -889,7 +910,8 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
     unsigned int produced_segments = 0;
     for (int s = numDeltaSegments; s > 0; s--)
     {
-        for(byte i=0; i < NUM_AXIS - 1; i++) {
+        for(byte i=0; i < NUM_AXIS - 1; i++)
+        {
             long diff = Printer::destinationSteps[i] - destination_steps[i];
             if(diff<0)
                 destination_steps[i] -= HAL::Div4U2U(-diff, s);
@@ -919,11 +941,11 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
 //				out.println_long_P(PSTR("dest:"), destination_delta_steps[i]);
 //				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
 //#endif
-               /* if (delta == 0)
-                {
-                    d->deltaSteps[i] = 0;
-                }
-                else*/ if (delta > 0)
+                /* if (delta == 0)
+                 {
+                     d->deltaSteps[i] = 0;
+                 }
+                 else*/ if (delta > 0)
                 {
                     d->dir |= 17<<i;
 #ifdef DEBUG_DELTA_OVERFLOW
@@ -1502,7 +1524,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         if(Printer::waslasthalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {
             Printer::waslasthalfstepping = 0;
-            return Printer::interval*3; // Wait an other 150% from last half step to make the 100% full
+            return Printer::interval+Printer::interval+Printer::interval; // Wait an other 150% from last half step to make the 100% full
         }
         else if(!Printer::waslasthalfstepping && !cur->isFullstepping())     // Switch full to half stepping
         {
@@ -1874,7 +1896,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         if(Printer::waslasthalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {
             Printer::waslasthalfstepping = 0;
-            return Printer::interval*3; // Wait an other 150% from last half step to make the 100% full
+            return Printer::interval+Printer::interval+Printer::interval; // Wait an other 150% from last half step to make the 100% full
         }
         else if(!Printer::waslasthalfstepping && !cur->isFullstepping())     // Switch full to half stepping
         {

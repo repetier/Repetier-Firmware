@@ -74,7 +74,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #include "pins.h"
 
-#define FAN_PIN   4
+// Override pin definions from pins.h
+//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 
 // Uncomment the following line if oyu are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
@@ -137,7 +138,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #else
     // *******************************************************
-    // *** These parameter are for all othe rprinter types ***
+    // *** These parameter are for all other printer types ***
     // *******************************************************
 
     /** Drive settings for printers with cartesian drive systems */
