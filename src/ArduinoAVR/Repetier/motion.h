@@ -55,10 +55,113 @@
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
 // MAX_DELTA_SEGMENTS_PER_LINE *
 #define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
+
+class PrintLine;
 typedef struct
 {
     byte dir; 									///< Direction of delta movement.
     uint16_t deltaSteps[3];   				    ///< Number of steps in move.
+    inline void checkEndstops(PrintLine *cur,bool checkall);
+    inline void setXMoveFinished()
+    {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+        dir&=~16;
+#else
+        dir&=~48;
+#endif
+    }
+    inline void setYMoveFinished()
+    {
+#if DRIVE_SYSTEM==0 || DRIVE_SYSTEM==3
+        dir&=~32;
+#else
+        dir&=~48;
+#endif
+    }
+    inline void setZMoveFinished()
+    {
+        dir&=~64;
+    }
+    inline void setXYMoveFinished()
+    {
+        dir&=~48;
+    }
+    inline bool isXPositiveMove()
+    {
+        return (dir & 17)==17;
+    }
+    inline bool isXNegativeMove()
+    {
+        return (dir & 17)==16;
+    }
+    inline bool isYPositiveMove()
+    {
+        return (dir & 34)==34;
+    }
+    inline bool isYNegativeMove()
+    {
+        return (dir & 34)==32;
+    }
+    inline bool isZPositiveMove()
+    {
+        return (dir & 68)==68;
+    }
+    inline bool isZNegativeMove()
+    {
+        return (dir & 68)==64;
+    }
+    inline bool isEPositiveMove()
+    {
+        return (dir & 136)==136;
+    }
+    inline bool isENegativeMove()
+    {
+        return (dir & 136)==128;
+    }
+    inline bool isXMove()
+    {
+        return (dir & 16);
+    }
+    inline bool isYMove()
+    {
+        return (dir & 32);
+    }
+    inline bool isXOrYMove()
+    {
+        return dir & 48;
+    }
+    inline bool isZMove()
+    {
+        return (dir & 64);
+    }
+    inline bool isEMove()
+    {
+        return (dir & 128);
+    }
+    inline bool isEOnlyMove()
+    {
+        return (dir & 240)==128;
+    }
+    inline bool isNoMove()
+    {
+        return (dir & 240)==0;
+    }
+    inline bool isXYZMove()
+    {
+        return dir & 112;
+    }
+    inline bool isMoveOfAxis(byte axis)
+    {
+        return (dir & (16<<axis));
+    }
+    inline bool setMoveOfAxis(byte axis)
+    {
+        dir |= 16<<axis;
+    }
+    inline bool setPositiveDirectionForAxis(byte axis)
+    {
+        dir |= 1<<axis;
+    }
 } DeltaSegment;
 extern DeltaSegment segments[];					// Delta segment cache
 extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
@@ -97,7 +200,6 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
-    long stepsRemaining;            ///< Remaining steps, until move is finished
     unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
     unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
     unsigned long accelerationPrim; ///< Acceleration along primary axis
@@ -121,6 +223,7 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     long totalStepsRemaining;
 #endif
 public:
+    long stepsRemaining;            ///< Remaining steps, until move is finished
     static PrintLine *cur;
     static volatile byte lines_count; // Number of lines cached 0 = nothing to do
     inline bool areParameterUpToDate()

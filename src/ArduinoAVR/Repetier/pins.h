@@ -1301,7 +1301,7 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 301
 #define KNOWN_BOARD
 /*****************************************************************
-* Rambo Pin Assignments
+* RAMBo Pin Assignments
 ******************************************************************/
 
 #ifndef __AVR_ATmega2560__

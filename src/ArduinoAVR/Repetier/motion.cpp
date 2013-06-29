@@ -793,6 +793,40 @@ void PrintLine::waitForXFreeLines(byte b)
 
 
 #if DRIVE_SYSTEM==3
+void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
+{
+    if(checkall)
+    {
+        if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+        {
+            setXMoveFinished();
+            cur->setYMoveFinished();
+        }
+        if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+        {
+            setYMoveFinished();
+            cur->setYMoveFinished();
+        }
+        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+        {
+#if MAX_HARDWARE_ENDSTOP_Z
+            Printer::stepsRemainingAtZHit = cur->stepsRemaining;
+#endif
+            setZMoveFinished();
+            cur->setZMoveFinished();
+        }
+    }
+#if FEATURE_Z_PROBE
+    if(Printer::isZProbingActive())
+    {
+        if(isZNegativeMove() && Printer::isZProbeHit())
+        {
+            cur->setZMoveFinished();
+            Printer::stepsRemainingAtZHit = cur->stepsRemaining;
+        }
+    }
+#endif
+}
 
 /**
   Calculate the delta tower position from a cartesian position
@@ -1503,9 +1537,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
         //Determine direction of movement
         if (curd)
         {
-            Printer::setXDirection(curd->dir & 1);
-            Printer::setYDirection(curd->dir & 2);
-            Printer::setZDirection(curd->dir & 4);
+            Printer::setXDirection(curd->isXPositiveMove());
+            Printer::setYDirection(curd->isYPositiveMove());
+            Printer::setZDirection(curd->isZPositiveMove());
         }
 #if defined(USE_ADVANCE)
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
@@ -1543,6 +1577,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
     HAL::forbidInterrupts();
     if(do_even)
     {
+        if(curd!=NULL)
+            curd->checkEndstops(cur,(cur->isCheckEndstops()));
         if(cur->isCheckEndstops() && (curd != 0))
         {
 #if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X

@@ -1438,7 +1438,7 @@ pins
 #define DIO94_DDR		DDRD
 #define DIO94_PWM		NULL
 #else // MOTHERBOARD == 12
-#else
+
 //added below DIO definitions for RAMBo support for LCD's etc...
 
 #define DIO70_PIN       PING4
