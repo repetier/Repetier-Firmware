@@ -42,6 +42,10 @@ Implemented Codes
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
+- G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
+- G30 - Single z-probe at current position
+- G31 - Write signal of probe sensor
+- G32 S<0..2> - Autolevel print bed. S = 1 measure zLength, S = 2 Measue and store new zLength
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to cordinates given
@@ -99,6 +103,9 @@ Custom M Codes
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M303 P<extruder/bed> S<drucktermeratur> Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed.
+- M320 - Activate autolevel
+- M321 - Deactivate autolevel
+- M322 - Reset autolevel matrix
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M400 - Wait until move buffers empty.

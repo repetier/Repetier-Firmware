@@ -1795,9 +1795,7 @@ void UIDisplay::executeAction(int action)
             Commands::printCurrentPosition();
             break;
         case UI_ACTION_SET_ORIGIN:
-            Printer::currentPositionSteps[0] = -Printer::offsetX;
-            Printer::currentPositionSteps[1] = -Printer::offsetY;
-            Printer::currentPositionSteps[2] = 0;
+            Printer::setOrigin(0,0,0);
             break;
         case UI_ACTION_DEBUG_ECHO:
             if(Printer::debugEcho()) Printer::debugLevel-=1;

@@ -381,7 +381,7 @@ void Commands::executeGCode(GCode *com)
 #if DRIVE_SYSTEM == 3
                 PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
-                PrintLine::queue_move(ALWAYS_CHECK_ENDSTOPS,true);
+                PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
             break;
 #if ARC_SUPPORT
@@ -585,6 +585,10 @@ void Commands::executeGCode(GCode *com)
         {
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false);
+#if DERIVE_SYSTEM==3
+            Printer::homeAxis(true,true,true);
+            PrintLine::moveRelativeDistanceInSteps(0,0,-axisStepsPerMM[0]*(Printer::zLength-50.0-EEPROM::zProbeHeight()),0,Printer::homingFeedrate[0], true, false);
+#endif
             float h1,h2,h3,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false);
@@ -596,6 +600,29 @@ void Commands::executeGCode(GCode *com)
             h3 = Printer::runZProbe(false,true);
             if(h3<0) break;
             Printer::buildTransformationMatrix(h1,h2,h3);
+#if DRIVE_SYSTEM==3
+            // Compute z height at the tower positions
+            float ox,oy,ozx,ozy,ozz,oz;
+            Printer::transformToPrinter(-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozx);
+            Printer::transformToPrinter(Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozy);
+            Printer::transformToPrinter(0, Printer::deltaRadiusSteps,0,ox,oy,ozz);
+            Printer::transformToPrinter(0, 0,0,ox,oy,oz); // z = 0, rotation point
+            ox = RMath::min(ozx,RMath::min(ozy,ozz));
+            oy = RMath::max(ozx,RMath::max(ozy,ozz));
+            Printer::autolevelTransformation[0] = ox-ozx;
+            Printer::autolevelTransformation[1] = ox-ozy;
+            Printer::autolevelTransformation[2] = ox-ozz;
+            Printer::homeAxis(true,true,true);
+            if(com->hasS() && com->S)
+            {
+                Printer::zLength = Printer::zLength-50.0-EEPROM::zProbeHeight()+ox*Printer::invAxisStepsPerMM[2];
+                Printer::setAutolevelActive(true);
+                if(com->S == 2)
+                    EEPROM::storeDataIntoEEPROM();
+            }
+            Printer::setAutolevelActive(true);
+            Printer::updateDerivedParameter();
+#else
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
             float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
                        (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
@@ -610,7 +637,6 @@ void Commands::executeGCode(GCode *com)
                 Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
-                Printer::feedrate = oldFeedrate;
                 Printer::setAutolevelActive(true);
                 if(com->S == 2)
                     EEPROM::storeDataIntoEEPROM();
@@ -619,6 +645,8 @@ void Commands::executeGCode(GCode *com)
             Printer::updateDerivedParameter();
             Printer::updateCurrentPosition();
             printCurrentPosition();
+#endif
+            Printer::feedrate = oldFeedrate;
         }
         break;
 #endif
@@ -636,18 +664,11 @@ void Commands::executeGCode(GCode *com)
             if(com->hasX()) xOff = Printer::convertToMM(com->X)-xPos;
             if(com->hasY()) yOff = Printer::convertToMM(com->Y)-yPos;
             if(com->hasZ()) zOff = Printer::convertToMM(com->Z)-zPos;
-#if FEATURE_AUTOLEVEL
-            if(Printer::isAutolevelActive())
-                Printer::transformToPrinter(xOff,yOff,zOff,xOff,yOff,zOff);
-#endif // FEATURE_AUTOLEVEL
-            Printer::coordinateOffset[0] -= xOff*Printer::axisStepsPerMM[0];
-            Printer::coordinateOffset[1] -= yOff*Printer::axisStepsPerMM[1];
-            Printer::coordinateOffset[2] -= zOff*Printer::axisStepsPerMM[2];
+            Printer::setOrigin(xOff,yOff,zOff);
             if(com->hasE())
             {
                 Printer::currentPositionSteps[3] = Printer::convertToMM(com->E)*Printer::axisStepsPerMM[3];
             }
-            Printer::updateCurrentPosition();
         }
         break;
 

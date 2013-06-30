@@ -107,7 +107,7 @@ void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float fe
 #if DRIVE_SYSTEM==3
     queueDeltaMove(check_endstop,false,false);
 #else
-    queue_move(check_endstop,false);
+    queueCartesianMove(check_endstop,false);
 #endif
     Printer::feedrate = saved_feedrate;
     Printer::updateCurrentPosition();
@@ -122,7 +122,7 @@ void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float fe
   wait communication and temperature control is enabled.
   @param check_endstops Read endstop during move.
 */
-void PrintLine::queue_move(byte check_endstops,byte pathOptimize)
+void PrintLine::queueCartesianMove(byte check_endstops,byte pathOptimize)
 {
     Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
@@ -800,7 +800,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         if(isXPositiveMove() && Printer::isXMaxEndstopHit())
         {
             setXMoveFinished();
-            cur->setYMoveFinished();
+            cur->setXMoveFinished();
         }
         if(isYPositiveMove() && Printer::isYMaxEndstopHit())
         {
@@ -821,6 +821,8 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     {
         if(isZNegativeMove() && Printer::isZProbeHit())
         {
+            cur->setXMoveFinished();
+            cur->setYMoveFinished();
             cur->setZMoveFinished();
             Printer::stepsRemainingAtZHit = cur->stepsRemaining;
         }
@@ -928,11 +930,9 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
 
     long destination_steps[3], destination_delta_steps[3];
 
+    // Save current position
     for(byte i=0; i < NUM_AXIS - 1; i++)
-    {
-        // Save current position
         destination_steps[i] = Printer::currentPositionSteps[i];
-    }
 
 //	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
     deltaSegmentReadPos = delta_segment_write_pos;
@@ -944,6 +944,8 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
     unsigned int produced_segments = 0;
     for (int s = numDeltaSegments; s > 0; s--)
     {
+        DeltaSegment *d = &segments[delta_segment_write_pos++];
+        if (delta_segment_write_pos >= DELTA_CACHE_SIZE) delta_segment_write_pos=0;
         for(byte i=0; i < NUM_AXIS - 1; i++)
         {
             long diff = Printer::destinationSteps[i] - destination_steps[i];
@@ -959,8 +961,6 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions();
         }
-
-        DeltaSegment *d = &segments[delta_segment_write_pos];
 
         // Verify that delta calc has a solution
         if (transformCartesianStepsToDeltaSteps(destination_steps, destination_delta_steps))
@@ -1010,14 +1010,8 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
             // Illegal position - ignore move
             Com::printWarningFLN(Com::tInvalidDeltaCoordinate);
             d->dir = 0;
-            for(byte i=0; i < NUM_AXIS - 1; i++)
-            {
-                d->deltaSteps[i]=0;
-            }
+            d->deltaSteps[0]=d->deltaSteps[1]=d->deltaSteps[2]=0;
         }
-        // Move to the next segment
-        delta_segment_write_pos++;
-        if (delta_segment_write_pos >= DELTA_CACHE_SIZE) delta_segment_write_pos=0;
         produced_segments++;
     }
     BEGIN_INTERRUPT_PROTECTED

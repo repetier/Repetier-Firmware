@@ -618,7 +618,7 @@ public:
     static inline void backwardPlanner(byte p,byte last);
     static void updateTrapezoids();
     static byte insertWaitMovesIfNeeded(byte pathOptimize, byte waitExtraLines);
-    static void queue_move(byte check_endstops,byte pathOptimize);
+    static void queueCartesianMove(byte check_endstops,byte pathOptimize);
     static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);

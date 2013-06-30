@@ -161,8 +161,8 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
 
-#define EXT0_X_OFFSET 0
-#define EXT0_Y_OFFSET 0
+#define EXT0_X_OFFSET 901
+#define EXT0_Y_OFFSET 520
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT0_STEPS_PER_MM 319.8 //DT_PERFORMANCE
 // What type of sensor is used?
@@ -271,8 +271,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 
 
 // =========================== Configuration for second extruder ========================
-#define EXT1_X_OFFSET 10
-#define EXT1_Y_OFFSET 0
+#define EXT1_X_OFFSET -901
+#define EXT1_Y_OFFSET -520
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT1_STEPS_PER_MM 319.8
 // What type of sensor is used?
@@ -668,9 +668,9 @@ on this endstop.
 
 // When you have several endstops in one circuit you need to disable it after homing by moving a
 // small amount back. This is also the case with H-belt systems.
-#define ENDSTOP_X_BACK_ON_HOME 0 //DT_PERFORMANCE
-#define ENDSTOP_Y_BACK_ON_HOME 0 //DT_PERFORMANCE
-#define ENDSTOP_Z_BACK_ON_HOME 0 //DT_PERFORMANCE
+#define ENDSTOP_X_BACK_ON_HOME 20 //DT_PERFORMANCE
+#define ENDSTOP_Y_BACK_ON_HOME 20 //DT_PERFORMANCE
+#define ENDSTOP_Z_BACK_ON_HOME 20 //DT_PERFORMANCE
 
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
@@ -738,7 +738,7 @@ on this endstop.
 
 /** \brief Experimental calibration utility for delta printers
 */
-#define SOFTWARE_LEVELING
+//#define SOFTWARE_LEVELING
 
 #endif
 
@@ -1078,13 +1078,13 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define Z_PROBE_PIN 63
 #define Z_PROBE_PULLUP true
 #define Z_PROBE_ON_HIGH true
-#define Z_PROBE_X_OFFSET 0
-#define Z_PROBE_Y_OFFSET 0
+#define Z_PROBE_X_OFFSET -11.2625
+#define Z_PROBE_Y_OFFSET -6.5
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST true
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 2
+#define Z_PROBE_SPEED 5
 #define Z_PROBE_XY_SPEED 150
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91
@@ -1097,12 +1097,12 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
    The same 3 points are used for the G29 command.
 */
 #define FEATURE_AUTOLEVEL true
-#define Z_PROBE_X1 100
-#define Z_PROBE_Y1 20
-#define Z_PROBE_X2 160
-#define Z_PROBE_Y2 170
-#define Z_PROBE_X3 20
-#define Z_PROBE_Y3 170
+#define Z_PROBE_X1 -69.28
+#define Z_PROBE_Y1 -40
+#define Z_PROBE_X2 69.28
+#define Z_PROBE_Y2 -40
+#define Z_PROBE_X3 0
+#define Z_PROBE_Y3 80
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h

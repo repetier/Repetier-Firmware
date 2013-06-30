@@ -532,6 +532,7 @@ public:
     static void moveTo(float x,float y,float z,float e,float f);
     static void moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+    static void setOrigin(float xOff,float yOff,float zOff);
     static inline int getFanSpeed() {
         return (int)pwm_pos[NUM_EXTRUDER+2];
     }
