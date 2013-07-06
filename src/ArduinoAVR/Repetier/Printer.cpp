@@ -279,9 +279,9 @@ void Printer::updateAdvanceFlags()
 void Printer::moveTo(float x,float y,float z,float e,float f)
 {
     if(x!=IGNORE_COORDINATE)
-        destinationSteps[0] = x*axisStepsPerMM[0];
+        destinationSteps[0] = (x+Printer::offsetX)*axisStepsPerMM[0];
     if(y!=IGNORE_COORDINATE)
-        destinationSteps[1] = y*axisStepsPerMM[1];
+        destinationSteps[1] = (y+Printer::offsetY)*axisStepsPerMM[1];
     if(z!=IGNORE_COORDINATE)
         destinationSteps[2] = z*axisStepsPerMM[2];
     if(e!=IGNORE_COORDINATE)
@@ -632,6 +632,9 @@ void Printer::setup()
     WRITE(EXT5_HEATER_PIN,LOW);
 #endif
 
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 #ifdef XY_GANTRY
     Printer::motorX = 0;
     Printer::motorY = 0;
@@ -664,9 +667,6 @@ void Printer::setup()
 #endif
     for(byte i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
     Printer::currentPositionSteps[0] = Printer::currentPositionSteps[1] = Printer::currentPositionSteps[2] = Printer::currentPositionSteps[3] = 0;
-#if DRIVE_SYSTEM==3
-    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-#endif
     Printer::maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM!=3
     Printer::maxZJerk = MAX_ZJERK;
@@ -699,16 +699,31 @@ void Printer::setup()
     UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
     EEPROM::init(); // Read settings from eeprom if wanted
     Printer::updateDerivedParameter();
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
 
 #if SDSUPPORT
     sd.initsd();
 
 #endif
     Commands::checkFreeMemory();
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
+#if DRIVE_SYSTEM==3
+    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+    Printer::homeAxis(true,true,true);
+    Commands::printCurrentPosition();
+#endif // DRIVE_SYSTEM
+    Extruder::selectExtruderById(0);
 }
 
 void Printer::defaultLoopActions()
@@ -764,21 +779,32 @@ void Printer::homeZAxis()
 #if FEATURE_Z_PROBE // Fix skew by going down
     if(isAutolevelActive())
     {
+        long dx = -EEPROM::deltaTowerXOffsetSteps();
+        long dy = -EEPROM::deltaTowerYOffsetSteps();
+        long dz = -EEPROM::deltaTowerZOffsetSteps();
+        long dm = RMath::min(dx,RMath::min(dy,dz));
+        //Com::printFLN(Com::tTower1,dx);
+        //Com::printFLN(Com::tTower2,dy);
+        //Com::printFLN(Com::tTower3,dz);
+        dx-=dm;dy-=dm;dz-=dm;
         currentPositionSteps[0] = 0;
         currentPositionSteps[1] = 0;
-        currentPositionSteps[2] = 0;
-        PrintLine::moveRelativeDistanceInSteps((long)autolevelTransformation[0],(long)autolevelTransformation[1],
-                                               (long)autolevelTransformation[2],0,homingFeedrate[0],true,false);
+        currentPositionSteps[2] = zMaxSteps;
+        transformCartesianStepsToDeltaSteps(currentPositionSteps,currentDeltaPositionSteps);
+        currentDeltaPositionSteps[0]-=dx;
+        currentDeltaPositionSteps[1]-=dy;
+        currentDeltaPositionSteps[2]-=dz;
+        PrintLine::moveRelativeDistanceInSteps(0,0,dm,0,homingFeedrate[0],true,false);
     }
 #endif
-    Printer::currentPositionSteps[0] = 0;
-    Printer::currentPositionSteps[1] = 0;
-    Printer::currentPositionSteps[2] = zMaxSteps;
-    Printer::coordinateOffset[0] = 0;
-    Printer::coordinateOffset[1] = 0;
-    Printer::coordinateOffset[2] = 0;
-    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-    Printer::maxDeltaPositionSteps = Printer::currentDeltaPositionSteps[0];
+    currentPositionSteps[0] = 0;
+    currentPositionSteps[1] = 0;
+    currentPositionSteps[2] = zMaxSteps;
+    coordinateOffset[0] = 0;
+    coordinateOffset[1] = 0;
+    coordinateOffset[2] = 0;
+    transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
+    maxDeltaPositionSteps = currentDeltaPositionSteps[0];
     Extruder::selectExtruderById(Extruder::current->id);
 }
 
@@ -1024,6 +1050,11 @@ float Printer::runZProbe(bool first,bool last)
         return -1;
     }
     setZProbingActive(false);
+#if DRIVE_SYSTEM==3
+    currentDeltaPositionSteps[0] += stepsRemainingAtZHit;
+    currentDeltaPositionSteps[1] += stepsRemainingAtZHit;
+    currentDeltaPositionSteps[2] += stepsRemainingAtZHit;
+#endif
     currentPositionSteps[2] += stepsRemainingAtZHit;
     probeDepth -= stepsRemainingAtZHit;
     float distance = (float)probeDepth*invAxisStepsPerMM[2]+EEPROM::zProbeHeight();

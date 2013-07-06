@@ -92,6 +92,9 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_HORIZONTAL_RADIUS 885
 #define EPR_DELTA_SEGMENTS_PER_SECOND_PRINT 889
 #define EPR_DELTA_SEGMENTS_PER_SECOND_MOVE 891
+#define EPR_DELTA_TOWERX_OFFSET_STEPS 893
+#define EPR_DELTA_TOWERY_OFFSET_STEPS 895
+#define EPR_DELTA_TOWERZ_OFFSET_STEPS 897
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -232,18 +235,65 @@ public:
         return DELTA_RADIUS;
 #endif
     }
-    static inline int deltaSegmentsPerSecondPrint() {
+    static inline int16_t deltaSegmentsPerSecondPrint() {
 #if EEPROM_MODE!=0
         return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
 #else
         return DELTA_SEGMENTS_PER_SECOND_PRINT;
 #endif
     }
-    static inline int deltaSegmentsPerSecondMove() {
+    static inline int16_t deltaSegmentsPerSecondMove() {
 #if EEPROM_MODE!=0
         return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
 #else
         return DELTA_SEGMENTS_PER_SECOND_MOVE;
+#endif
+    }
+#endif
+#if DRIVE_SYSTEM==3
+    static inline int16_t deltaTowerXOffsetSteps() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_int(EPR_DELTA_TOWERX_OFFSET_STEPS);
+#else
+        return DELTA_X_ENDSTOP_OFFSET_STEPS;
+#endif
+    }
+    static inline int16_t deltaTowerYOffsetSteps() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_int(EPR_DELTA_TOWERY_OFFSET_STEPS);
+#else
+        return DELTA_Y_ENDSTOP_OFFSET_STEPS;
+#endif
+    }
+    static inline int16_t deltaTowerZOffsetSteps() {
+#if EEPROM_MODE!=0
+        return HAL::epr_get_int(EPR_DELTA_TOWERZ_OFFSET_STEPS);
+#else
+        return DELTA_Z_ENDSTOP_OFFSET_STEPS;
+#endif
+    }
+    static inline void setDeltaTowerXOffsetSteps(int16_t steps) {
+#if EEPROM_MODE!=0
+        HAL::epr_set_int(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
+        byte newcheck = computeChecksum();
+        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
+            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+#endif
+    }
+    static inline void setDeltaTowerYOffsetSteps(int16_t steps) {
+#if EEPROM_MODE!=0
+        HAL::epr_set_int(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
+        byte newcheck = computeChecksum();
+        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
+            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+#endif
+    }
+    static inline void setDeltaTowerZOffsetSteps(int16_t steps) {
+#if EEPROM_MODE!=0
+        HAL::epr_set_int(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
+        byte newcheck = computeChecksum();
+        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
+            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
 #endif

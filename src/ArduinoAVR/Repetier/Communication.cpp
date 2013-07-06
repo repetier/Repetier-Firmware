@@ -279,6 +279,10 @@ FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal radius [mm]")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 
+FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
+FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")
+FSTRINGVALUE(Com::tEPRTowerZOffset,"Tower Z endstop offset [steps]")
+
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM,"X-axis steps per mm")

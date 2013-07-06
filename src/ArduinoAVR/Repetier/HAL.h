@@ -47,6 +47,7 @@
 #define FSTRINGPARAM(var) PGM_P var
 
 #include <avr/eeprom.h>
+#include <avr/wdt.h>
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
@@ -455,17 +456,17 @@ public:
     {
         ::noTone(pin);
     }
-    static inline void epr_set_byte(unsigned int pos,byte value)
+    static inline void epr_set_byte(unsigned int pos,uint8_t value)
     {
         eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
     }
-    static inline void epr_set_int(unsigned int pos,int value)
+    static inline void epr_set_int(unsigned int pos,int16_t value)
     {
         eeprom_write_word((unsigned int*)(EEPROM_OFFSET+pos),value);
     }
-    static inline void epr_set_long(unsigned int pos,long value)
+    static inline void epr_set_long(unsigned int pos,int32_t value)
     {
-        eeprom_write_dword((unsigned long*)(EEPROM_OFFSET+pos),value);
+        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET+pos),value);
     }
     static inline void epr_set_float(unsigned int pos,float value)
     {
@@ -590,6 +591,11 @@ public:
     static unsigned char i2cWrite( unsigned char data );
     static unsigned char i2cReadAck(void);
     static unsigned char i2cReadNak(void);
+
+    // Watchdog support
+
+    inline static void startWatchdog() {wdt_enable(WDTO_1S);};
+    inline static void pingWatchdog() {wdt_reset();};
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
     static void servoMicroseconds(byte servo,int ms);

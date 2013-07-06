@@ -583,13 +583,16 @@ void Commands::executeGCode(GCode *com)
             break;
         case 32: // Auto-Bed leveling
         {
+            bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
-            Printer::setAutolevelActive(false);
-#if DERIVE_SYSTEM==3
+            Printer::setAutolevelActive(iterate);
+#if DRIVE_SYSTEM==3
             Printer::homeAxis(true,true,true);
-            PrintLine::moveRelativeDistanceInSteps(0,0,-axisStepsPerMM[0]*(Printer::zLength-50.0-EEPROM::zProbeHeight()),0,Printer::homingFeedrate[0], true, false);
+            Printer::setAutolevelActive(false);
+            float aboveDist = Printer::zLength-Z_PROBE_GAP-EEPROM::zProbeHeight();
+            PrintLine::moveRelativeDistanceInSteps(0,0,-Printer::axisStepsPerMM[0]*aboveDist,0,Printer::homingFeedrate[0], true, false);
 #endif
-            float h1,h2,h3,oldFeedrate = Printer::feedrate;
+            float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false);
             if(h1<0) break;
@@ -603,25 +606,37 @@ void Commands::executeGCode(GCode *com)
 #if DRIVE_SYSTEM==3
             // Compute z height at the tower positions
             float ox,oy,ozx,ozy,ozz,oz;
-            Printer::transformToPrinter(-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozx);
-            Printer::transformToPrinter(Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozy);
-            Printer::transformToPrinter(0, Printer::deltaRadiusSteps,0,ox,oy,ozz);
-            Printer::transformToPrinter(0, 0,0,ox,oy,oz); // z = 0, rotation point
+            Printer::transformFromPrinter(-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozx);
+            Printer::transformFromPrinter(Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozy);
+            Printer::transformFromPrinter(0, Printer::deltaRadiusSteps,0,ox,oy,ozz);
+            Com::printFLN(Com::tTower1,ozx);
+            Com::printFLN(Com::tTower2,ozy);
+            Com::printFLN(Com::tTower3,ozz);
+            if(iterate) {
+                ozx+=EEPROM::deltaTowerXOffsetSteps();
+                ozy+=EEPROM::deltaTowerYOffsetSteps();
+                ozz+=EEPROM::deltaTowerZOffsetSteps();
+            }
             ox = RMath::min(ozx,RMath::min(ozy,ozz));
             oy = RMath::max(ozx,RMath::max(ozy,ozz));
-            Printer::autolevelTransformation[0] = ox-ozx;
-            Printer::autolevelTransformation[1] = ox-ozy;
-            Printer::autolevelTransformation[2] = ox-ozz;
+            EEPROM::setDeltaTowerXOffsetSteps(-ox+ozx);
+            EEPROM::setDeltaTowerYOffsetSteps(-ox+ozy);
+            EEPROM::setDeltaTowerZOffsetSteps(-ox+ozz);
+            Printer::zLength = aboveDist+(ox)*Printer::invAxisStepsPerMM[2]+(h1+h2+h3)/3.0;
+            Printer::setAutolevelActive(true);
+            Printer::updateDerivedParameter();
             Printer::homeAxis(true,true,true);
+            aboveDist = Printer::zLength-Z_PROBE_GAP-EEPROM::zProbeHeight();
+            Printer::moveTo(0,0,Z_PROBE_GAP+EEPROM::zProbeHeight(),IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            hc = Printer::runZProbe(true,true);
+            if(hc<0) break;
+            Printer::zLength = aboveDist+hc;
             if(com->hasS() && com->S)
             {
-                Printer::zLength = Printer::zLength-50.0-EEPROM::zProbeHeight()+ox*Printer::invAxisStepsPerMM[2];
-                Printer::setAutolevelActive(true);
                 if(com->S == 2)
                     EEPROM::storeDataIntoEEPROM();
             }
             Printer::setAutolevelActive(true);
-            Printer::updateDerivedParameter();
 #else
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
             float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*

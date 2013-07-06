@@ -98,6 +98,9 @@ Move printer the given number of steps. Puts the move into the queue. Used by e.
 */
 void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop)
 {
+    //Com::printF(Com::tJerkColon,x);
+    //Com::printF(Com::tComma,y);
+    //Com::printFLN(Com::tComma,z);
     float saved_feedrate = Printer::feedrate;
     Printer::destinationSteps[0] = Printer::currentPositionSteps[0] + x;
     Printer::destinationSteps[1] = Printer::currentPositionSteps[1] + y;
@@ -824,6 +827,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             cur->setXMoveFinished();
             cur->setYMoveFinished();
             cur->setZMoveFinished();
+            dir = 0;
             Printer::stepsRemainingAtZHit = cur->stepsRemaining;
         }
     }
@@ -1004,6 +1008,9 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(byte softEndstop)
                 if (max_axis_move < d->deltaSteps[i]) max_axis_move = d->deltaSteps[i];
                 Printer::currentDeltaPositionSteps[i] = destination_delta_steps[i];
             }
+           // Com::printF(Com::tTower1,(long)d->deltaSteps[0]);
+           // Com::printF(Com::tComma,(long)d->deltaSteps[1]);
+           // Com::printFLN(Com::tComma,(long)d->deltaSteps[2]);
         }
         else
         {
@@ -1573,30 +1580,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
     {
         if(curd!=NULL)
             curd->checkEndstops(cur,(cur->isCheckEndstops()));
-        if(cur->isCheckEndstops() && (curd != 0))
-        {
-#if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
-            if((curd->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING)
-                {
-                    curd->dir&=~16;
-                    cur->setXMoveFinished();
-                }
-#endif
-#if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
-            if((curd->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING)
-                {
-                    curd->dir&=~32;
-                    cur->setYMoveFinished();
-                }
-#endif
-#if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
-            if((curd->dir & 68)==68) if(READ(Z_MAX_PIN)!= ENDSTOP_Z_MAX_INVERTING)
-                {
-                    curd->dir&=~64;
-                    cur->setZMoveFinished();
-                }
-#endif
-        }
     }
     byte max_loops = (Printer::stepsPerTimerCall<=cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
     if(cur->stepsRemaining>0)

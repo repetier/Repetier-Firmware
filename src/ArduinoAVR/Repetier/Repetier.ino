@@ -45,7 +45,7 @@ Implemented Codes
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 - Single z-probe at current position
 - G31 - Write signal of probe sensor
-- G32 S<0..2> - Autolevel print bed. S = 1 measure zLength, S = 2 Measue and store new zLength
+- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measue and store new zLength, P = 1 iterative correction for delta
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to cordinates given

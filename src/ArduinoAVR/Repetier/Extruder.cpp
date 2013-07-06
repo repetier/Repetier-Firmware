@@ -60,6 +60,10 @@ Is called every 100ms.
 
 void Extruder::manageTemperatures()
 {
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
     for(byte controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
     {
         if(controller == autotuneIndex) continue;
@@ -171,6 +175,9 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
     float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
     for(byte i=0; i<GENERIC_THERM_NUM_ENTRIES; i++)
     {
+#if FEATURE_WATCHDOG
+        HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
         float t = maxTemp-i*delta;
         float r = exp(beta/(t+272.65))*k;
         float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
@@ -258,7 +265,6 @@ void Extruder::initExtruder()
     SET_OUTPUT(HEATED_BED_HEATER_PIN);
     Extruder::initHeatedBed();
 #endif
-    Extruder::selectExtruderById(0);
     HAL::analogStart();
 
 }

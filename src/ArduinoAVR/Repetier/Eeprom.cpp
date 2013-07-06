@@ -456,6 +456,9 @@ void EEPROM::initalizeUncached()
     HAL::epr_set_float(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
     HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
     HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
+    HAL::epr_set_int(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
+    HAL::epr_set_int(EPR_DELTA_TOWERY_OFFSET_STEPS,DELTA_Y_ENDSTOP_OFFSET_STEPS);
+    HAL::epr_set_int(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
 }
 
@@ -584,6 +587,9 @@ void EEPROM::readDataFromEEPROM()
             HAL::epr_set_float(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
             HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
             HAL::epr_set_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
+            HAL::epr_set_int(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
+            HAL::epr_set_int(EPR_DELTA_TOWERY_OFFSET_STEPS,DELTA_Y_ENDSTOP_OFFSET_STEPS);
+            HAL::epr_set_int(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
         storeDataIntoEEPROM(false); // Store new fields for changed version
@@ -702,6 +708,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_DELTA_HORIZONTAL_RADIUS,Com::tEPRHorizontalRadius);
     writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,Com::tEPRSegmentsPerSecondTravel);
     writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,Com::tEPRSegmentsPerSecondPrint);
+    writeInt(EPR_DELTA_TOWERX_OFFSET_STEPS,Com::tEPRTowerXOffset);
+    writeInt(EPR_DELTA_TOWERY_OFFSET_STEPS,Com::tEPRTowerYOffset);
+    writeInt(EPR_DELTA_TOWERZ_OFFSET_STEPS,Com::tEPRTowerZOffset);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
