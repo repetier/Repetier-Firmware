@@ -456,35 +456,35 @@ public:
     {
         ::noTone(pin);
     }
-    static inline void epr_set_byte(unsigned int pos,uint8_t value)
+    static inline void eprSetByte(unsigned int pos,uint8_t value)
     {
         eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
     }
-    static inline void epr_set_int(unsigned int pos,int16_t value)
+    static inline void eprSetInt16(unsigned int pos,int16_t value)
     {
         eeprom_write_word((unsigned int*)(EEPROM_OFFSET+pos),value);
     }
-    static inline void epr_set_long(unsigned int pos,int32_t value)
+    static inline void eprSetInt32(unsigned int pos,int32_t value)
     {
         eeprom_write_dword((uint32_t*)(EEPROM_OFFSET+pos),value);
     }
-    static inline void epr_set_float(unsigned int pos,float value)
+    static inline void eprSetFloat(unsigned int pos,float value)
     {
         eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
     }
-    static inline byte epr_get_byte(unsigned int pos)
+    static inline byte eprGetByte(unsigned int pos)
     {
         return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
     }
-    static inline int epr_get_int(unsigned int pos)
+    static inline int16_t eprGetInt16(unsigned int pos)
     {
-        return eeprom_read_word((unsigned int *)(EEPROM_OFFSET+pos));
+        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET+pos));
     }
-    static inline long epr_get_long(unsigned int pos)
+    static inline int32_t eprGetInt32(unsigned int pos)
     {
-        return eeprom_read_dword((unsigned long*)(EEPROM_OFFSET+pos));
+        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET+pos));
     }
-    static inline float epr_get_float(unsigned int pos)
+    static inline float eprGetFloat(unsigned int pos)
     {
         float v;
         eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
@@ -595,7 +595,9 @@ public:
     // Watchdog support
 
     inline static void startWatchdog() {wdt_enable(WDTO_1S);};
+    inline static void stopWatchdog() {wdt_disable();}
     inline static void pingWatchdog() {wdt_reset();};
+    inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
     static void servoMicroseconds(byte servo,int ms);

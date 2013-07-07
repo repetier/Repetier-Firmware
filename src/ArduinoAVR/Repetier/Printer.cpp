@@ -191,10 +191,6 @@ void Printer::updateDerivedParameter()
     }
     else
         deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
-    Com::printF(Com::tInfo,deltaSin60RadiusSteps);
-    Com::printF(Com::tComma,deltaMinusCos60RadiusSteps);
-    Com::printF(Com::tComma,deltaRadiusSteps);
-    Com::printFLN(Com::tComma,deltaDiagonalStepsSquared);
     long cart[3], delta[3];
     cart[0] = cart[1] = 0;
     cart[2] = zMaxSteps;
@@ -443,6 +439,7 @@ byte Printer::setDestinationStepsFromGCode(GCode *com)
 
 void Printer::setup()
 {
+    HAL::stopWatchdog();
 #ifdef ANALYZER
 // Channel->pin assignments
 #if ANALYZER_CH0>=0
@@ -632,9 +629,6 @@ void Printer::setup()
     WRITE(EXT5_HEATER_PIN,LOW);
 #endif
 
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
 #ifdef XY_GANTRY
     Printer::motorX = 0;
     Printer::motorY = 0;
@@ -699,23 +693,12 @@ void Printer::setup()
     UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
-#if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
     EEPROM::init(); // Read settings from eeprom if wanted
     Printer::updateDerivedParameter();
-#if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 #if SDSUPPORT
     sd.initsd();
-
 #endif
     Commands::checkFreeMemory();
-#if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
 #if DRIVE_SYSTEM==3
@@ -724,6 +707,9 @@ void Printer::setup()
     Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 }
 
 void Printer::defaultLoopActions()
@@ -849,7 +835,7 @@ void Printer::homeXAxis()
 #endif
         long offX = 0;
 #if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offX = max(offX,extruder[i].xOffset);
+        for(byte i=0; i<NUM_EXTRUDER; i++) offX = RMath::max(offX,extruder[i].xOffset);
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? Printer::xMinSteps-offX : Printer::xMaxSteps+offX;
@@ -876,7 +862,7 @@ void Printer::homeYAxis()
 #endif
         long offY = 0;
 #if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offY = max(offY,extruder[i].yOffset);
+        for(byte i=0; i<NUM_EXTRUDER; i++) offY = RMath::max(offY,extruder[i].yOffset);
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? Printer::yMinSteps-offY : Printer::yMaxSteps+offY;
@@ -1153,7 +1139,7 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     len = sqrt(autolevelTransformation[4]*autolevelTransformation[4]+autolevelTransformation[5]*autolevelTransformation[5]);
     autolevelTransformation[4] /= len;
     autolevelTransformation[5] /= len;
-    Com::printArrayFLN(Com::tInfo,autolevelTransformation,9,5);
+    //Com::printArrayFLN(Com::tInfo,autolevelTransformation,9,5);
 }
 #endif
 

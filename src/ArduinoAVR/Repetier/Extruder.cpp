@@ -324,7 +324,7 @@ void Extruder::selectExtruderById(byte extruderId)
         maxdist-= Extruder::current->maxStartFeedrate*Extruder::current->maxStartFeedrate*0.5/Extruder::current->maxAcceleration;
         Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
-    float fmax=((float)F_CPU/((float)Printer::maxExtruderSpeed*TIMER0_PRESCALE*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
+    float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
     if(fmax<Printer::maxFeedrate[3]) Printer::maxFeedrate[3] = fmax;
 #endif
     Extruder::current->tempControl.updateTempControlVars();
@@ -835,6 +835,10 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
 
     for(;;)
     {
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
         unsigned long time = HAL::timeInMilliseconds();

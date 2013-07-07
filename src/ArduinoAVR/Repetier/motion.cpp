@@ -1098,29 +1098,29 @@ inline void PrintLine::queue_E_move(long e_diff,byte check_endstops,byte pathOpt
         p->delta[i] = 0;
         axis_diff[i] = 0;
     }
-    axis_diff[3] = e_diff*Printer::invAxisStepsPerMM[3];
+    axis_diff[E_AXIS] = e_diff*Printer::invAxisStepsPerMM[E_AXIS];
     if (e_diff >= 0)
     {
-        p->delta[3] = e_diff;
+        p->delta[E_AXIS] = e_diff;
         p->dir = 0x88;
     }
     else
     {
-        p->delta[3] = -e_diff;
+        p->delta[E_AXIS] = -e_diff;
         p->dir = 0x80;
     }
     if(Printer::extrudeMultiply!=100)
     {
         //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-        p->delta[3]=(long)((p->delta[3]*(float)Printer::extrudeMultiply)*0.01f);
+        p->delta[E_AXIS]=(long)((p->delta[E_AXIS]*(float)Printer::extrudeMultiply)*0.01f);
     }
-    Printer::currentPositionSteps[3] = Printer::destinationSteps[3];
+    Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS];
 
     p->numDeltaSegments = 0;
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-    p->primaryAxis = 3;
-    p->stepsRemaining = p->delta[3];
-    p->distance = fabs(axis_diff[3]);
+    p->primaryAxis = E_AXIS;
+    p->stepsRemaining = p->delta[E_AXIS];
+    p->distance = fabs(axis_diff[E_AXIS]);
     p->moveID = lastMoveID++;
     p->calculate_move(axis_diff,pathOptimize);
 }
@@ -1459,7 +1459,7 @@ DeltaSegment *curd;
 long curd_errupd, stepsPerSegRemaining;
 long PrintLine::bresenhamStep() // Version for delta printer
 {
-    if(cur == 0)
+    if(cur == NULL)
     {
         HAL::allowInterrupts();
         setCurrentLine();
@@ -1524,7 +1524,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
             }
             stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
         }
-        else curd=0;
+        else curd=NULL;
         cur_errupd = (cur->isFullstepping() ? cur->stepsRemaining : cur->stepsRemaining << 1);
 
         if(!cur->areParameterUpToDate())  // should never happen, but with bad timings???
@@ -1597,7 +1597,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 if((cur->error[3] -= cur->delta[3]) < 0)
                 {
 #if defined(USE_ADVANCE)
-                    if((Printer::flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT))   // Use interrupt for movement
+                    if(Printer::isAdvanceActivated())   // Use interrupt for movement
                     {
                         if(cur->isEPositiveMove())
                             Printer::extruderStepsNeeded++;
@@ -1606,14 +1606,14 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     }
                     else
 #endif
-                        Extruder::step();
+                         Extruder::step();
                     cur->error[3] += cur_errupd;
                 }
             }
             if (curd)
             {
                 // Take delta steps
-                if(curd->dir & 16)
+                if(curd->isXMove())
                 {
                     if((cur->error[0] -= curd->deltaSteps[0]) < 0)
                     {
@@ -1622,7 +1622,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     }
                 }
 
-                if(curd->dir & 32)
+                if(curd->isYMove())
                 {
                     if((cur->error[1] -= curd->deltaSteps[1]) < 0)
                     {
@@ -1631,7 +1631,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     }
                 }
 
-                if(curd->dir & 64)
+                if(curd->isZMove())
                 {
                     if((cur->error[2] -= curd->deltaSteps[2]) < 0)
                     {
@@ -1676,7 +1676,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 }
             }
 #if defined(USE_ADVANCE)
-            if(Printer::isAdvanceActivated()) // Use interrupt for movement
+            if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
                 Extruder::unstep();
         } // for loop

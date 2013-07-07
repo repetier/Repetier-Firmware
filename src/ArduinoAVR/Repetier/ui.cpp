@@ -1927,6 +1927,7 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_LOAD_EEPROM:
             EEPROM::readDataFromEEPROM();
+            Extruder::selectExtruderById(Extruder::current->id);
             pushMenu((void*)&ui_menu_eeprom_loaded,false);
             BEEP_LONG;
             skipBeep = true;

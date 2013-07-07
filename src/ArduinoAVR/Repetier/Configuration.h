@@ -1082,7 +1082,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
-#define FEATURE_WATCHDOG true
+#define FEATURE_WATCHDOG false
 
 /* Z-Probing */
 

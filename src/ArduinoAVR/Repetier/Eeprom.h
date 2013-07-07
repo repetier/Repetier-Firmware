@@ -145,77 +145,77 @@ public:
 
     static inline float zProbeSpeed() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_SPEED);
+        return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);
 #else
         return Z_PROBE_SPEED;
 #endif
     }
     static inline float zProbeXYSpeed() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_XY_SPEED);
+        return HAL::eprGetFloat(EPR_Z_PROBE_XY_SPEED);
 #else
         return Z_PROBE_XY_SPEED;
 #endif
     }
     static inline float zProbeXOffset() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_X_OFFSET);
+        return HAL::eprGetFloat(EPR_Z_PROBE_X_OFFSET);
 #else
         return Z_PROBE_X_OFFSET;
 #endif
     }
     static inline float zProbeYOffset() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_Y_OFFSET);
+        return HAL::eprGetFloat(EPR_Z_PROBE_Y_OFFSET);
 #else
         return Z_PROBE_Y_OFFSET;
 #endif
     }
     static inline float zProbeHeight() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_HEIGHT);
+        return HAL::eprGetFloat(EPR_Z_PROBE_HEIGHT);
 #else
         return Z_PROBE_HEIGHT;
 #endif
     }
     static inline float zProbeX1() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_X1);
+        return HAL::eprGetFloat(EPR_Z_PROBE_X1);
 #else
         return Z_PROBE_X1;
 #endif
     }
     static inline float zProbeY1() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_Y1);
+        return HAL::eprGetFloat(EPR_Z_PROBE_Y1);
 #else
         return Z_PROBE_Y1;
 #endif
     }
     static inline float zProbeX2() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_X2);
+        return HAL::eprGetFloat(EPR_Z_PROBE_X2);
 #else
         return Z_PROBE_X2;
 #endif
     }
     static inline float zProbeY2() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_Y2);
+        return HAL::eprGetFloat(EPR_Z_PROBE_Y2);
 #else
         return Z_PROBE_Y2;
 #endif
     }
     static inline float zProbeX3() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_X3);
+        return HAL::eprGetFloat(EPR_Z_PROBE_X3);
 #else
         return Z_PROBE_X3;
 #endif
     }
     static inline float zProbeY3() {
 #if FEATURE_Z_PROBE
-        return HAL::epr_get_float(EPR_Z_PROBE_Y3);
+        return HAL::eprGetFloat(EPR_Z_PROBE_Y3);
 #else
         return Z_PROBE_Y3;
 #endif
@@ -223,28 +223,28 @@ public:
 #if DRIVE_SYSTEM==3
     static inline float deltaDiagonalRodLength() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_float(EPR_DELTA_DIAGONAL_ROD_LENGTH);
+        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH);
 #else
         return DELTA_DIAGONAL_ROD;
 #endif
     }
     static inline float deltaHorizontalRadius() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_float(EPR_DELTA_HORIZONTAL_RADIUS);
+        return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #else
         return DELTA_RADIUS;
 #endif
     }
     static inline int16_t deltaSegmentsPerSecondPrint() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
+        return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
 #else
         return DELTA_SEGMENTS_PER_SECOND_PRINT;
 #endif
     }
     static inline int16_t deltaSegmentsPerSecondMove() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_int(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
+        return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
 #else
         return DELTA_SEGMENTS_PER_SECOND_MOVE;
 #endif
@@ -253,47 +253,47 @@ public:
 #if DRIVE_SYSTEM==3
     static inline int16_t deltaTowerXOffsetSteps() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_int(EPR_DELTA_TOWERX_OFFSET_STEPS);
+        return HAL::eprGetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS);
 #else
         return DELTA_X_ENDSTOP_OFFSET_STEPS;
 #endif
     }
     static inline int16_t deltaTowerYOffsetSteps() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_int(EPR_DELTA_TOWERY_OFFSET_STEPS);
+        return HAL::eprGetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS);
 #else
         return DELTA_Y_ENDSTOP_OFFSET_STEPS;
 #endif
     }
     static inline int16_t deltaTowerZOffsetSteps() {
 #if EEPROM_MODE!=0
-        return HAL::epr_get_int(EPR_DELTA_TOWERZ_OFFSET_STEPS);
+        return HAL::eprGetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS);
 #else
         return DELTA_Z_ENDSTOP_OFFSET_STEPS;
 #endif
     }
     static inline void setDeltaTowerXOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
-        HAL::epr_set_int(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
+        HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
         byte newcheck = computeChecksum();
-        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
-            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
     static inline void setDeltaTowerYOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
-        HAL::epr_set_int(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
+        HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
         byte newcheck = computeChecksum();
-        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
-            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
     static inline void setDeltaTowerZOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
-        HAL::epr_set_int(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
+        HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
         byte newcheck = computeChecksum();
-        if(newcheck!=HAL::epr_get_byte(EPR_INTEGRITY_BYTE))
-            HAL::epr_set_byte(EPR_INTEGRITY_BYTE,newcheck);
+        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
     }
 #endif

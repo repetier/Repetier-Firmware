@@ -151,14 +151,14 @@ void Commands::setFanSpeed(int speed,bool wait)
 void Commands::reportPrinterUsage()
 {
 #if EEPROM_MODE!=0
-    float dist = Printer::filamentPrinted*0.001+HAL::epr_get_float(EPR_PRINTING_DISTANCE);
+    float dist = Printer::filamentPrinted*0.001+HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
     Com::printF(Com::tPrintedFilament,dist,2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
     for(byte i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
 
-    long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000)+HAL::epr_get_long(EPR_PRINTING_TIME);
+    long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000)+HAL::eprGetInt32(EPR_PRINTING_TIME);
     long tmp = seconds/86400;
     seconds-=tmp*86400;
     Com::printF(Com::tPrintingTime,tmp);
@@ -643,7 +643,6 @@ void Commands::executeGCode(GCode *com)
                        (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
                                Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*Printer::invAxisStepsPerMM[0])/
                       (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
-            Com::printFLN(Com::tInfo,z);
             long zBottom = Printer::currentPositionSteps[2] = (h3+z)*Printer::axisStepsPerMM[2];
             Printer::zMin = 0;
             if(com->hasS() && com->S)
@@ -1201,6 +1200,7 @@ void Commands::executeGCode(GCode *com)
         {
 #if EEPROM_MODE!=0
             EEPROM::readDataFromEEPROM();
+            Extruder::selectExtruderById(Extruder::current->id);
             Com::printInfoF(Com::tConfigLoadedEEPROM);
 #else
             Com::printErrorF(Com::tNoEEPROMSupport);
@@ -1249,10 +1249,10 @@ void Commands::executeGCode(GCode *com)
                 EEPROM::storeDataIntoEEPROM();
             }
             break;
-        case 700: // test new square root function
+/*        case 700: // test new square root function
             if(com->hasS())
                 Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
-            break;
+            break;*/
 #endif // FEATURE_AUTOLEVEL
 #if FEATURE_SERVO
         case 340:
