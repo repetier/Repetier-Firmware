@@ -733,6 +733,11 @@ on this endstop.
 */
 #define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 
+/** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
+If you don't do it, make sure to home first before your first move.
+*/
+#define DELTA_HOME_ON_POWER true
+
 /** \brief Enable counter to count steps for Z max calculations
 */
 #define STEP_COUNTER
@@ -1012,7 +1017,7 @@ execution.
 #define ACK_WITH_LINENUMBER
 /** Communication errors can swollow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
-second, if our queue is empty should prevent this. Uncomment if you don't wan't this feature. */
+second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
 #define WAITING_IDENTIFIER "wait"
 
 /** \brief Sets time for echo debug

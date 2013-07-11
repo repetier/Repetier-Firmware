@@ -445,6 +445,7 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 #define Y_AXIS 1
 #define Z_AXIS 2
 #define E_AXIS 3
+#define VIRTUAL_AXIS 4
 
 #endif
 

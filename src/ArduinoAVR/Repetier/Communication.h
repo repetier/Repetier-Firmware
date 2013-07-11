@@ -202,7 +202,6 @@ FSTRINGVAR(tDBGMissedSteps)
 #if FEATURE_Z_PROBE
 FSTRINGVAR(tZProbe)
 FSTRINGVAR(tZProbeState)
-FSTRINGVAR(tZProbeFailed)
 FSTRINGVAR(tZProbeStartScript)
 FSTRINGVAR(tZProbeEndScript)
 FSTRINGVAR(tHitZProbe)
@@ -213,6 +212,7 @@ FSTRINGVAR(tAutolevelReset)
 FSTRINGVAR(tAutolevelEnabled)
 FSTRINGVAR(tAutolevelDisabled)
 #if MAX_HARDWARE_ENDSTOP_Z
+FSTRINGVAR(tZProbeFailed)
 FSTRINGVAR(tZProbeMax)
 FSTRINGVAR(tZProbePrinterHeight)
 #endif

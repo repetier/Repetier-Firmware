@@ -275,13 +275,13 @@ void Printer::updateAdvanceFlags()
 void Printer::moveTo(float x,float y,float z,float e,float f)
 {
     if(x!=IGNORE_COORDINATE)
-        destinationSteps[0] = (x+Printer::offsetX)*axisStepsPerMM[0];
+        destinationSteps[X_AXIS] = (x+Printer::offsetX)*axisStepsPerMM[X_AXIS];
     if(y!=IGNORE_COORDINATE)
-        destinationSteps[1] = (y+Printer::offsetY)*axisStepsPerMM[1];
+        destinationSteps[Y_AXIS] = (y+Printer::offsetY)*axisStepsPerMM[Y_AXIS];
     if(z!=IGNORE_COORDINATE)
-        destinationSteps[2] = z*axisStepsPerMM[2];
+        destinationSteps[Z_AXIS] = z*axisStepsPerMM[Z_AXIS];
     if(e!=IGNORE_COORDINATE)
-        destinationSteps[3] = e*axisStepsPerMM[3];
+        destinationSteps[E_AXIS] = e*axisStepsPerMM[E_AXIS];
     if(f!=IGNORE_COORDINATE)
         Printer::feedrate = f;
 #if DRIVE_SYSTEM == 3
@@ -302,9 +302,9 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
         y = startY;
     if(z==IGNORE_COORDINATE)
         z = startZ;
-    currentPosition[0] = x;
-    currentPosition[1] = y;
-    currentPosition[2] = z;
+    currentPosition[X_AXIS] = x;
+    currentPosition[Y_AXIS] = y;
+    currentPosition[Z_AXIS] = z;
     if(isAutolevelActive())
         transformToPrinter(x+Printer::offsetX,y+Printer::offsetY,z,x,y,z);
     else
@@ -701,7 +701,7 @@ void Printer::setup()
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==3 && DELTA_HOME_ON_POWER
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
     Printer::homeAxis(true,true,true);
     Commands::printCurrentPosition();
@@ -791,6 +791,10 @@ void Printer::homeZAxis()
     coordinateOffset[2] = 0;
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
     maxDeltaPositionSteps = currentDeltaPositionSteps[0];
+#if defined(ENDSTOP_Z_BACK_ON_HOME)
+    if(ENDSTOP_Z_BACK_ON_HOME > 0)
+        maxDeltaPositionSteps += axisStepsPerMM[2]*ENDSTOP_Z_BACK_ON_HOME;
+#endif
     Extruder::selectExtruderById(Extruder::current->id);
 }
 
