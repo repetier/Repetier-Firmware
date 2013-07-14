@@ -1163,6 +1163,7 @@ The following settings override uiconfig.h!
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
 5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
+6 = ReprapWorld Keypad / LCD
 */
 #define FEATURE_CONTROLLER 2
 
