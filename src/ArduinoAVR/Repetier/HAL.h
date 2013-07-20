@@ -42,6 +42,8 @@
 #define pgm_read_byte(x) (*(char*)x)
 #endif
 
+#define PACK
+
 #define FSTRINGVALUE(var,value) const char var[] PROGMEM = value;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
 #define FSTRINGPARAM(var) PGM_P var
@@ -532,7 +534,20 @@ public:
     static void resetHardware();
 
     // SPI related functions
-
+    static void spiBegin() {
+        SET_INPUT(MISO_PIN);
+        SET_OUTPUT(MOSI_PIN);
+        SET_OUTPUT(SCK_PIN);
+        // SS must be in output mode even it is not chip select
+        SET_OUTPUT(SDSS);
+#if SDSSORIG >- 1
+        SET_OUTPUT(SDSSORIG);
+#endif
+  // set SS high - may be chip select for another SPI device
+#if SET_SPI_SS_HIGH
+        WRITE(SDSS, HIGH);
+#endif  // SET_SPI_SS_HIGH
+    }
     static inline void spiInit(byte spiRate)
     {
         WRITE(SS,HIGH);

@@ -73,10 +73,19 @@ void Extruder::manageTemperatures()
         act->updateCurrentTemperature();
         if(controller<NUM_EXTRUDER)
         {
-            if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
-                extruder[controller].coolerPWM = 0;
-            else
-                extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+#if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
+            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
+                if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
+                        tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                    extruder[0].coolerPWM = 0;
+                else
+                    extruder[0].coolerPWM = extruder[0].coolerSpeed;
+            if(controller>1)
+#endif // NUM_EXTRUDER
+                if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                    extruder[controller].coolerPWM = 0;
+                else
+                    extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
         if(!(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
@@ -88,9 +97,9 @@ void Extruder::manageTemperatures()
 #ifdef TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
-        if(act->heatManager==1)
+        if(act->heatManager == 1)
         {
-            byte output;
+            uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
             if(act->targetTemperatureC<20.0f) output = 0; // off is off, even if damping term wants a heat peak!
             else if(error>PID_CONTROL_RANGE)
@@ -111,21 +120,45 @@ void Extruder::manageTemperatures()
             }
             pwm_pos[act->pwmIndex] = output;
         }
+        else if(act->heatManager == 3)     // deat-time control
+        {
+            uint8_t output;
+            float error = act->targetTemperatureC - act->currentTemperatureC;
+            if(act->targetTemperatureC<20.0f)
+                output = 0; // off is off, even if damping term wants a heat peak!
+            else if(error>PID_CONTROL_RANGE)
+                output = act->pidMax;
+            else if(error<-PID_CONTROL_RANGE)
+                output = 0;
+            else
+            {
+                float m_1 = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // MA Steigung dT/dt, 2.5 = Kehrwert Zeitintervall (300 ms)
+                // m_4 in act->tempIState
+                // temp_m1 in act->tempIStateLimitMin
+                act->tempIState = 0.25 * (3.0 * act->tempIState + m_1); // MA Steigungsänderung dämpfen
+                float temp_prog = act->currentTemperatureC + act->tempIState * act->pidPGain; // MA prognostizierte Temp. nach der Totzeit
+                if (temp_prog >= act->targetTemperatureC) // MA
+                    output = 0; //MA
+                else //MA
+                    output = act->pidMax; //MA
+            }
+            pwm_pos[act->pwmIndex] = output;
+        }
         else
 #endif
-            if(act->heatManager == 2)   // Bang-bang with reduced change frequency to save relais life
-            {
-                unsigned long time = HAL::timeInMilliseconds();
-                if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
-                {
-                    pwm_pos[act->pwmIndex] = (on ? 255 : 0);
-                    act->lastTemperatureUpdate = time;
-                }
-            }
-            else     // Fast Bang-Bang fallback
+        if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
+        {
+            unsigned long time = HAL::timeInMilliseconds();
+            if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                act->lastTemperatureUpdate = time;
             }
+        }
+        else     // Fast Bang-Bang fallback
+        {
+            pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+        }
 #ifdef MAXTEMP
         if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
             pwm_pos[act->pwmIndex] = 0;
@@ -271,7 +304,7 @@ void Extruder::initExtruder()
 void TemperatureController::updateTempControlVars()
 {
 #ifdef TEMP_PID
-    if(pidIGain)   // prevent division by zero
+    if(heatManager==1 && pidIGain!=0)   // prevent division by zero
     {
         tempIStateLimitMax = (float)pidDriveMax*10.0f/pidIGain;
         tempIStateLimitMin = (float)pidDriveMin*10.0f/pidIGain;
@@ -443,34 +476,38 @@ const short temptable_8[NUMTEMPS_8][2] PROGMEM =
     {2851,640},{3137,560},{3385,480},{3588,400},{3746,320},{3863,240},{3945,160},{4002,80},{4038,0},{4061,-80},{4075,-160}
 };
 #define NUMTEMPS_9 67 // 100k Honeywell 135-104LAG-J01
-const short temptable_9[NUMTEMPS_9][2] PROGMEM = {
-   {1*4, 941*8},{19*4, 362*8},{37*4, 299*8}, //top rating 300C
-   {55*4, 266*8},{73*4, 245*8},{91*4, 229*8},{109*4, 216*8},{127*4, 206*8},{145*4, 197*8},{163*4, 190*8},{181*4, 183*8},{199*4, 177*8},
-   {217*4, 171*8},{235*4, 166*8},{253*4, 162*8},{271*4, 157*8},{289*4, 153*8},{307*4, 149*8},{325*4, 146*8},{343*4, 142*8},{361*4, 139*8},
-   {379*4, 135*8},{397*4, 132*8},{415*4, 129*8},{433*4, 126*8},{451*4, 123*8},{469*4, 121*8},{487*4, 118*8},{505*4, 115*8},{523*4, 112*8},
-   {541*4, 110*8},{559*4, 107*8},{577*4, 105*8},{595*4, 102*8},{613*4, 99*8},{631*4, 97*8},{649*4, 94*8},{667*4, 92*8},{685*4, 89*8},
-   {703*4, 86*8},{721*4, 84*8},{739*4, 81*8},{757*4, 78*8},{775*4, 75*8},{793*4, 72*8},{811*4, 69*8},{829*4, 66*8},{847*4, 62*8},
-   {865*4, 59*8},{883*4, 55*8},{901*4, 51*8},{919*4, 46*8},{937*4, 41*8},
-   {955*4, 35*8},{973*4, 27*8},{991*4, 17*8},{1009*4, 1*8},{1023*4, 0}  //to allow internal 0 degrees C
+const short temptable_9[NUMTEMPS_9][2] PROGMEM =
+{
+    {1*4, 941*8},{19*4, 362*8},{37*4, 299*8}, //top rating 300C
+    {55*4, 266*8},{73*4, 245*8},{91*4, 229*8},{109*4, 216*8},{127*4, 206*8},{145*4, 197*8},{163*4, 190*8},{181*4, 183*8},{199*4, 177*8},
+    {217*4, 171*8},{235*4, 166*8},{253*4, 162*8},{271*4, 157*8},{289*4, 153*8},{307*4, 149*8},{325*4, 146*8},{343*4, 142*8},{361*4, 139*8},
+    {379*4, 135*8},{397*4, 132*8},{415*4, 129*8},{433*4, 126*8},{451*4, 123*8},{469*4, 121*8},{487*4, 118*8},{505*4, 115*8},{523*4, 112*8},
+    {541*4, 110*8},{559*4, 107*8},{577*4, 105*8},{595*4, 102*8},{613*4, 99*8},{631*4, 97*8},{649*4, 94*8},{667*4, 92*8},{685*4, 89*8},
+    {703*4, 86*8},{721*4, 84*8},{739*4, 81*8},{757*4, 78*8},{775*4, 75*8},{793*4, 72*8},{811*4, 69*8},{829*4, 66*8},{847*4, 62*8},
+    {865*4, 59*8},{883*4, 55*8},{901*4, 51*8},{919*4, 46*8},{937*4, 41*8},
+    {955*4, 35*8},{973*4, 27*8},{991*4, 17*8},{1009*4, 1*8},{1023*4, 0}  //to allow internal 0 degrees C
 };
 #define NUMTEMPS_10 20 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
-const short temptable_10[NUMTEMPS_10][2] PROGMEM = {
-   {1*4, 704*8},{54*4, 216*8},{107*4, 175*8},{160*4, 152*8},{213*4, 137*8},{266*4, 125*8},{319*4, 115*8},{372*4, 106*8},{425*4, 99*8},
-   {478*4, 91*8},{531*4, 85*8},{584*4, 78*8},{637*4, 71*8},{690*4, 65*8},{743*4, 58*8},{796*4, 50*8},{849*4, 42*8},{902*4, 31*8},
-   {955*4, 17*8},{1008*4, 0}
+const short temptable_10[NUMTEMPS_10][2] PROGMEM =
+{
+    {1*4, 704*8},{54*4, 216*8},{107*4, 175*8},{160*4, 152*8},{213*4, 137*8},{266*4, 125*8},{319*4, 115*8},{372*4, 106*8},{425*4, 99*8},
+    {478*4, 91*8},{531*4, 85*8},{584*4, 78*8},{637*4, 71*8},{690*4, 65*8},{743*4, 58*8},{796*4, 50*8},{849*4, 42*8},{902*4, 31*8},
+    {955*4, 17*8},{1008*4, 0}
 };
 #define NUMTEMPS_11 31 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
-const short temptable_11[NUMTEMPS_11][2] PROGMEM = {
-	{1*4, 936*8},{36*4, 300*8},{71*4, 246*8},{106*4, 218*8},{141*4, 199*8},{176*4, 185*8},{211*4, 173*8},{246*4, 163*8},{281*4, 155*8},
-	{316*4, 147*8},{351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},
-	{631*4, 97*8},{666*4, 92*8},{701*4, 87*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},
-	{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0}
+const short temptable_11[NUMTEMPS_11][2] PROGMEM =
+{
+    {1*4, 936*8},{36*4, 300*8},{71*4, 246*8},{106*4, 218*8},{141*4, 199*8},{176*4, 185*8},{211*4, 173*8},{246*4, 163*8},{281*4, 155*8},
+    {316*4, 147*8},{351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},
+    {631*4, 97*8},{666*4, 92*8},{701*4, 87*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},
+    {946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0}
 };
 #define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pullup)
-const short temptable_12[NUMTEMPS_12][2] PROGMEM = {
-   {1*4, 929*8},{36*4, 299*8},{71*4, 246*8},{106*4, 217*8},{141*4, 198*8},{176*4, 184*8},{211*4, 173*8},{246*4, 163*8},{281*4, 154*8},{316*4, 147*8},
-   {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
-   {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
+const short temptable_12[NUMTEMPS_12][2] PROGMEM =
+{
+    {1*4, 929*8},{36*4, 299*8},{71*4, 246*8},{106*4, 217*8},{141*4, 198*8},{176*4, 184*8},{211*4, 173*8},{246*4, 163*8},{281*4, 154*8},{316*4, 147*8},
+    {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
+    {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
 #if NUM_TEMPS_USERTHERMISTOR0>0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
@@ -502,9 +539,10 @@ const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_10[0][0]
         ,(short int *)&temptable_11[0][0]
         ,(short int *)&temptable_12[0][0]
-                                            };
+                                             };
 const byte temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-    NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12};
+                              NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12
+                                        };
 
 
 void TemperatureController::updateCurrentTemperature()
@@ -832,11 +870,15 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     Extruder::disableAllHeater(); // switch off all heaters.
     autotuneIndex = controllerId;
     pwm_pos[pwmIndex] = pidMax;
-
+    if(controllerId<NUM_EXTRUDER)
+    {
+        extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;
+        extruder[0].coolerPWM = extruder[0].coolerSpeed;
+    }
     for(;;)
     {
 #if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
+        HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
         updateCurrentTemperature();

@@ -154,11 +154,11 @@ typedef struct
     {
         return (dir & (16<<axis));
     }
-    inline bool setMoveOfAxis(byte axis)
+    inline void setMoveOfAxis(byte axis)
     {
         dir |= 16<<axis;
     }
-    inline bool setPositiveDirectionForAxis(byte axis)
+    inline void setPositiveDirectionForAxis(byte axis)
     {
         dir |= 1<<axis;
     }
@@ -242,11 +242,11 @@ public:
     {
         return joinFlags & FLAG_JOIN_START_FIXED;
     }
-    inline bool setStartSpeedFixed(bool newState)
+    inline void setStartSpeedFixed(bool newState)
     {
         joinFlags = (newState ? joinFlags | FLAG_JOIN_START_FIXED : joinFlags & ~FLAG_JOIN_START_FIXED);
     }
-    inline bool fixStartAndEndSpeed()
+    inline void fixStartAndEndSpeed()
     {
         joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
     }
@@ -254,7 +254,7 @@ public:
     {
         return joinFlags & FLAG_JOIN_END_FIXED;
     }
-    inline bool setEndSpeedFixed(bool newState)
+    inline void setEndSpeedFixed(bool newState)
     {
         joinFlags = (newState ? joinFlags | FLAG_JOIN_END_FIXED : joinFlags & ~FLAG_JOIN_END_FIXED);
     }
@@ -426,11 +426,11 @@ public:
     {
         return (dir & (16<<axis));
     }
-    inline bool setMoveOfAxis(byte axis)
+    inline void setMoveOfAxis(byte axis)
     {
         dir |= 16<<axis;
     }
-    inline bool setPositiveDirectionForAxis(byte axis)
+    inline void setPositiveDirectionForAxis(byte axis)
     {
         dir |= 1<<axis;
     }

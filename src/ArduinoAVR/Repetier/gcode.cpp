@@ -343,7 +343,7 @@ void GCode::readFromSerial()
         else     // Ascii command
         {
             char ch = commandReceiving[commandsReceivingWritePosition-1];
-            if(ch == '\n' || ch == '\r' || ch == ':' || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
+            if(ch == '\n' || ch == '\r' || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition-1]=0;
                 commentDetected = false;
@@ -404,7 +404,7 @@ void GCode::readFromSerial()
         else
         {
             char ch = commandReceiving[commandsReceivingWritePosition-1];
-            if(ch == '\n' || ch == '\r' || ch == ':' || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
+            if(ch == '\n' || ch == '\r' || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition-1]=0;
                 commentDetected = false;

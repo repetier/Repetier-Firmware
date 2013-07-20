@@ -75,7 +75,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #include "pins.h"
 
 // Override pin definions from pins.h
-//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
+#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 
 // Uncomment the following line if oyu are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
@@ -263,10 +263,10 @@ to 0 to disable.
 /** You can run any gcode command son extruder deselect/select. Seperate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
 The codes are only executed for multiple extruder when changing the extruder. */
-#define EXT0_SELECT_COMMANDS "M120 S5 P5\nM117 Extruder 1"
+#define EXT0_SELECT_COMMANDS "M117 Extruder 1"
 #define EXT0_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
-#define EXT0_EXTRUDER_COOLER_PIN -1
+#define EXT0_EXTRUDER_COOLER_PIN 5
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 
@@ -363,13 +363,13 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_ADVANCE_L 0.0f
 
 #define EXT1_WAIT_RETRACT_TEMP 	150
-#define EXT1_WAIT_RETRACT_UNITS	40
-#define EXT1_SELECT_COMMANDS "M120 S5 P15\nM117 Extruder 2"
+#define EXT1_WAIT_RETRACT_UNITS	0
+#define EXT1_SELECT_COMMANDS "M117 Extruder 2"
 #define EXT1_DESELECT_COMMANDS ""
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. */
-#define EXT1_EXTRUDER_COOLER_PIN -1
+#define EXT1_EXTRUDER_COOLER_PIN 5
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT1_EXTRUDER_COOLER_SPEED 255
+#define EXT1_EXTRUDER_COOLER_SPEED 120
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */

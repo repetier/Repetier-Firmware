@@ -10,9 +10,13 @@ Version 0.90alpha in development use only if you know what you are doing, config
   Added z-probing.
   Added auto leveling of heated bed.
   Fixed pin assignment for RUMBA
-  Added ui support for 3. etxruder
+  Added ui support for 3. extruder
   Mirror stepper driver signals if wanted for two x,y,z drivers with same signals.
   Support for servo control through M340 command.
+  Fixed bug with cura profile comment string.
+  The first two extruder can share a cooler. SImply set both pins to identical values.
+  Enable hot-end cooler for M303 if available.
+  New heat manage 3: dead-time control. P in pid values is dead time in seconds.
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
