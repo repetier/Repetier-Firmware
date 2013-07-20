@@ -29,7 +29,7 @@ class TemperatureController
     unsigned long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
     char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
 #ifdef TEMP_PID
-    long tempIState; ///< Temp. var. for PID computation.
+    float tempIState; ///< Temp. var. for PID computation.
     byte pidDriveMax; ///< Used for windup in PID calculation.
     byte pidDriveMin; ///< Used for windup in PID calculation.
     float pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].

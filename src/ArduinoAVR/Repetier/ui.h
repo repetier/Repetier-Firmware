@@ -633,6 +633,94 @@ void ui_check_slow_keys(int &action) {
 #endif
 #endif // Controller 5
 
+#if FEATURE_CONTROLLER==6 // ReprapWorld Keypad / LCD
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 0
+#define UI_COLS 20
+#define UI_ROWS 2
+
+#if MOTHERBOARD==701 // Megatronics v2.0
+#define UI_DISPLAY_RS_PIN 14
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 15
+#define UI_DISPLAY_D4_PIN 30
+#define UI_DISPLAY_D5_PIN 31
+#define UI_DISPLAY_D6_PIN 32
+#define UI_DISPLAY_D7_PIN 33
+#define UI_ENCODER_A 61
+#define UI_ENCODER_B 59
+#define UI_ENCODER_CLICK 43
+
+#define UI_SHIFT_OUT 17
+#define UI_SHIFT_LD 42
+#define UI_SHIFT_CLK 63
+
+#else // RAMPS 1.4
+#define UI_DISPLAY_RS_PIN 16
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 17
+#define UI_DISPLAY_D4_PIN 23
+#define UI_DISPLAY_D5_PIN 25
+#define UI_DISPLAY_D6_PIN 27
+#define UI_DISPLAY_D7_PIN 29
+#define UI_ENCODER_A 64
+#define UI_ENCODER_B 59
+#define UI_ENCODER_CLICK 63
+
+#define UI_SHIFT_OUT 40
+#define UI_SHIFT_LD 42
+#define UI_SHIFT_CLK 44
+#endif
+
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION true
+#ifdef UI_MAIN
+void ui_init_keys() {
+    UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
+    UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
+
+    SET_OUTPUT(UI_SHIFT_CLK);
+    SET_OUTPUT(UI_SHIFT_LD);
+    SET_INPUT(UI_SHIFT_OUT);
+
+    WRITE(UI_SHIFT_OUT,HIGH);
+    WRITE(UI_SHIFT_LD,HIGH);
+}
+
+void ui_check_keys(int &action) {
+    UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
+    UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+}
+
+inline void ui_check_slow_encoder() {} // not used
+
+void ui_check_slow_keys(int &action) {
+
+    WRITE(UI_SHIFT_LD,LOW);
+    WRITE(UI_SHIFT_LD,HIGH);
+
+    for(int8_t i=1;i<=8;i++) {
+        if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
+            switch (i) {
+                case 1: action = UI_ACTION_Z_DOWN; break; // F3
+                case 2: action = UI_ACTION_Z_UP; break; // F2
+                case 3: action = UI_ACTION_EMERGENCY_STOP; break; // F1
+                case 4: action = UI_ACTION_Y_UP; break; // UP
+                case 5: action = UI_ACTION_X_UP; break; // RIGHT
+                case 6: action = UI_ACTION_HOME_ALL; break; // MID
+                case 7: action = UI_ACTION_Y_DOWN; break; // DOWN
+                case 8: action = UI_ACTION_X_DOWN; break; // LEFT
+            }
+            i = 9; // if button detected, exit "for loop"
+        }
+        WRITE(UI_SHIFT_CLK,HIGH);
+        WRITE(UI_SHIFT_CLK,LOW);
+    }
+}
+#endif
+#endif // Controller 6
 
 #if FEATURE_CONTROLLER>0
 

@@ -132,15 +132,9 @@ void Extruder::manageTemperatures()
                 output = 0;
             else
             {
-                float m_1 = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // MA Steigung dT/dt, 2.5 = Kehrwert Zeitintervall (300 ms)
-                // m_4 in act->tempIState
-                // temp_m1 in act->tempIStateLimitMin
-                act->tempIState = 0.25 * (3.0 * act->tempIState + m_1); // MA Steigungsänderung dämpfen
-                float temp_prog = act->currentTemperatureC + act->tempIState * act->pidPGain; // MA prognostizierte Temp. nach der Totzeit
-                if (temp_prog >= act->targetTemperatureC) // MA
-                    output = 0; //MA
-                else //MA
-                    output = act->pidMax; //MA
+                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
+                act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
+                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
             }
             pwm_pos[act->pwmIndex] = output;
         }
