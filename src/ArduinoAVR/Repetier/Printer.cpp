@@ -280,7 +280,7 @@ void Printer::moveTo(float x,float y,float z,float e,float f)
 }
 void Printer::moveToReal(float x,float y,float z,float e,float f)
 {
-#if FEATURE_AUTOLEVEL && DRIVE_SYSTEM!=3
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE && DRIVE_SYSTEM!=3
     float startX,startY,startZ;
     realPosition(startX,startY,startZ);
     if(x==IGNORE_COORDINATE)
@@ -319,7 +319,7 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
 
 void Printer::setOrigin(float xOff,float yOff,float zOff)
 {
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(Printer::isAutolevelActive())
         Printer::transformToPrinter(xOff,yOff,zOff,xOff,yOff,zOff);
 #endif // FEATURE_AUTOLEVEL
@@ -334,7 +334,7 @@ void Printer::updateCurrentPosition()
     currentPosition[0] = (float)(currentPositionSteps[0]-coordinateOffset[0])*invAxisStepsPerMM[0];
     currentPosition[1] = (float)(currentPositionSteps[1]-coordinateOffset[1])*invAxisStepsPerMM[1];
     currentPosition[2] = (float)(currentPositionSteps[2]-coordinateOffset[2])*invAxisStepsPerMM[2];
-#if FEATURE_AUTOLEVEL && DRIVE_SYSTEM!=3
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE && DRIVE_SYSTEM!=3
     transformFromPrinter(currentPosition[0],currentPosition[1],currentPosition[2],currentPosition[0],currentPosition[1],currentPosition[2]);
 #endif // FEATURE_AUTOLEVEL
     currentPosition[0] -= Printer::offsetX;
@@ -376,7 +376,7 @@ byte Printer::setDestinationStepsFromGCode(GCode *com)
         if(com->hasZ()) currentPosition[2] += (z = convertToMM(com->Z));
         else z = 0;
     }
-#if FEATURE_AUTOLEVEL && DRIVE_SYSTEM!=3
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE && DRIVE_SYSTEM!=3
     if(isAutolevelActive())
         transformToPrinter(x+Printer::offsetX,y+Printer::offsetY,z,x,y,z);
     else
@@ -626,7 +626,7 @@ void Printer::setup()
     current_control_init(); // Set current if it is firmware controlled
 #endif
     microstep_init();
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     Printer::resetTransformationMatrix(true);
 #endif // FEATURE_AUTOLEVEL
     Printer::feedrate = 50; ///< Current feedrate in mm/s.
@@ -878,7 +878,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis)
 {
     float startX,startY,startZ;
     float coordX,coordY,coordZ;
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(isAutolevelActive())
         transformFromPrinter(coordinateOffset[0]*invAxisStepsPerMM[0],coordinateOffset[1]*invAxisStepsPerMM[1],
                              coordinateOffset[2]*invAxisStepsPerMM[2],coordX,coordY,coordZ);
@@ -936,7 +936,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis)
         if(Z_HOME_DIR<0) startZ = Printer::zMin;
         else startZ = Printer::zMin+Printer::zLength;
     }
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(Printer::isAutolevelActive())
         Printer::transformToPrinter(coordX,coordY,coordZ,coordX,coordY,coordZ);
 #endif

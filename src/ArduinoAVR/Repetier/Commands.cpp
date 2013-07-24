@@ -1186,6 +1186,7 @@ void Commands::executeGCode(GCode *com)
 #endif
         }
         break;
+#if FEATURE_Z_PROBE
 #if FEATURE_AUTOLEVEL
         case 320: // Activate autolevel
             Printer::setAutolevelActive(true);
@@ -1215,6 +1216,7 @@ void Commands::executeGCode(GCode *com)
                 Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
             break;*/
 #endif // FEATURE_AUTOLEVEL
+#endif // FEATURE_Z_PROBE
 #if FEATURE_SERVO
         case 340:
             if(com->hasP() && com->P<4 && com->P>=0) {

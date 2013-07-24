@@ -284,7 +284,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->advanceL = EXT5_ADVANCE_L;
 #endif
 #endif // NUM_EXTRUDER > 5
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     Printer::setAutolevelActive(false);
     Printer::resetTransformationMatrix(true);
 #endif

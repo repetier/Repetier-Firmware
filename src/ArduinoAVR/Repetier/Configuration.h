@@ -178,7 +178,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/¡ãC and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/ï¿½ï¿½C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -221,8 +221,8 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180¡ãC
-180 => ABS for temperatures around 240¡ãC
+130 => PLA for temperatures from 170-180ï¿½ï¿½C
+180 => ABS for temperatures around 240ï¿½ï¿½C
 
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
@@ -289,7 +289,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/¡ãC and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/ï¿½ï¿½C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -331,8 +331,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180¡ãC
-180 => ABS for temperatures around 240¡ãC
+130 => PLA for temperatures from 170-180ï¿½ï¿½C
+180 => ABS for temperatures around 240ï¿½ï¿½C
 
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
@@ -394,7 +394,7 @@ If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
-/** Temperature range for target temperature to hold in M109 command. 5 means +/-5¡ãC
+/** Temperature range for target temperature to hold in M109 command. 5 means +/-5ï¿½ï¿½C
 
 Uncomment define to force the temperature into the range for given watchperiod.
 */
