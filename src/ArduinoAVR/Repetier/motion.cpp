@@ -214,7 +214,7 @@ void PrintLine::queueCartesianMove(byte check_endstops,byte pathOptimize)
     }
     else
         p->distance = fabs(axis_diff[3]);
-    p->calculate_move(axis_diff,pathOptimize);
+    p->calculateMove(axis_diff,pathOptimize);
 }
 #endif
 void PrintLine::calculateMove(float axis_diff[],byte pathOptimize)

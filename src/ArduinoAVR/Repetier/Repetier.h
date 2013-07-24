@@ -434,6 +434,10 @@ extern SDCard sd;
 extern volatile int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
 extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 
+#define X_AXIS 0
+#define Y_AXIS 1
+#define Z_AXIS 2
+#define E_AXIS 3
 
 #if DRIVE_SYSTEM==3
 #define SIN_60 0.8660254037844386
@@ -441,10 +445,6 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 
 
 #define NUM_AXIS 4
-#define X_AXIS 0
-#define Y_AXIS 1
-#define Z_AXIS 2
-#define E_AXIS 3
 #define VIRTUAL_AXIS 4
 
 #endif
