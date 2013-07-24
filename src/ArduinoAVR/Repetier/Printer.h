@@ -52,7 +52,7 @@ public:
     static byte debugLevel;
     static byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
     static byte stepsPerTimerCall;
-#if USE_OPS==1 || defined(USE_ADVANCE)
+#if defined(USE_ADVANCE)
     volatile static int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
     static byte minExtruderSpeed;            ///< Timer delay for start extruder speed
@@ -60,9 +60,6 @@ public:
     static byte extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
     static unsigned long interval;    ///< Last step duration in ticks.
-#if USE_OPS==1
-    static bool filamentRetracted;           ///< Is the extruder filament retracted
-#endif
     static unsigned long timer;              ///< used for acceleration/deceleration timing
     static unsigned long stepNumber;         ///< Step number in current move.
     static long coordinateOffset[3];
@@ -95,16 +92,6 @@ public:
     static long levelingP1[3];
     static long levelingP2[3];
     static long levelingP3[3];
-#endif
-#if USE_OPS==1
-    static int opsRetractSteps;              ///< Retract filament this much steps
-    static int opsPushbackSteps;             ///< Retract+extra distance for backsash
-    static float opsMinDistance;
-    static float opsRetractDistance;
-    static float opsRetractBacklash;
-    static byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
-    static float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
-    static int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix

@@ -52,7 +52,7 @@ byte Printer::stepsPerTimerCall = 1;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
-#if USE_OPS==1 || defined(USE_ADVANCE)
+#if defined(USE_ADVANCE)
 volatile  int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
 byte Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
@@ -60,9 +60,6 @@ byte Printer::maxExtruderSpeed;            ///< Timer delay for end extruder spe
 byte Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
 unsigned long Printer::interval;    ///< Last step duration in ticks.
-#if USE_OPS==1
-bool Printer::filamentRetracted;           ///< Is the extruder filament retracted
-#endif
 unsigned long Printer::timer;              ///< used for acceleration/deceleration timing
 unsigned long Printer::stepNumber;         ///< Step number in current move.
 #ifdef USE_ADVANCE
@@ -90,16 +87,6 @@ long Printer::stepsRemainingAtZHit;
 long Printer::levelingP1[3];
 long Printer::levelingP2[3];
 long Printer::levelingP3[3];
-#endif
-#if USE_OPS==1
-int Printer::opsRetractSteps;              ///< Retract filament this much steps
-int Printer::opsPushbackSteps;             ///< Retract+extra distance for backsash
-float Printer::opsMinDistance;
-float Printer::opsRetractDistance;
-float Printer::opsRetractBacklash;
-byte Printer::opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
-float Printer::opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
-int Printer::opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
 float Printer::minimumSpeed;               ///< lowest allowed speed to keep integration error small
 long Printer::xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -439,6 +426,7 @@ byte Printer::setDestinationStepsFromGCode(GCode *com)
 
 void Printer::setup()
 {
+    HAL::hwSetup();
     HAL::stopWatchdog();
 #ifdef ANALYZER
 // Channel->pin assignments
@@ -641,14 +629,6 @@ void Printer::setup()
 #if FEATURE_AUTOLEVEL
     Printer::resetTransformationMatrix(true);
 #endif // FEATURE_AUTOLEVEL
-#if USE_OPS==1
-    Printer::opsMode = OPS_MODE;
-    Printer::opsMinDistance = OPS_MIN_DISTANCE;
-    Printer::opsRetractDistance = OPS_RETRACT_DISTANCE;
-    Printer::opsRetractBacklash = OPS_RETRACT_BACKLASH;
-    Printer::opsMoveAfter = OPS_MOVE_AFTER;
-    Printer::filamentRetracted = false;
-#endif
     Printer::feedrate = 50; ///< Current feedrate in mm/s.
     Printer::feedrateMultiply = 100;
     Printer::extrudeMultiply = 100;

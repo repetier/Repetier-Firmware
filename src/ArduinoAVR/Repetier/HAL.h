@@ -210,6 +210,8 @@ class HAL
 public:
     HAL();
     virtual ~HAL();
+    static inline void hwSetup(void)
+    {}
     // return val'val
     static uint16_t integerSqrt(long a);
     /** \brief Optimized division

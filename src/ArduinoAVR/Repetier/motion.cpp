@@ -217,7 +217,7 @@ void PrintLine::queueCartesianMove(byte check_endstops,byte pathOptimize)
     p->calculate_move(axis_diff,pathOptimize);
 }
 #endif
-void PrintLine::calculate_move(float axis_diff[],byte pathOptimize)
+void PrintLine::calculateMove(float axis_diff[],byte pathOptimize)
 {
 #if DRIVE_SYSTEM==3
     long axis_interval[5];
@@ -311,7 +311,7 @@ void PrintLine::calculate_move(float axis_diff[],byte pathOptimize)
     }
     // Errors for delta move are initialized in timer (except extruder)
 #if DRIVE_SYSTEM==3
-    error[3] = stepsRemaining >> 1;
+    error[E_AXIS] = stepsRemaining >> 1;
 #endif
     invFullSpeed = 1.0/fullSpeed;
     accelerationPrim = slowest_axis_plateau_time_repro / axis_interval[primaryAxis]; // a = v/t = F_CPU/(c*t): Steps/s^2
@@ -1121,7 +1121,7 @@ inline void PrintLine::queue_E_move(long e_diff,byte check_endstops,byte pathOpt
     p->stepsRemaining = p->delta[E_AXIS];
     p->distance = fabs(axis_diff[E_AXIS]);
     p->moveID = lastMoveID++;
-    p->calculate_move(axis_diff,pathOptimize);
+    p->calculateMove(axis_diff,pathOptimize);
 }
 
 /**
@@ -1293,7 +1293,7 @@ void PrintLine::queueDeltaMove(byte check_endstops,byte pathOptimize, byte softE
         Com::printFLN(Com::tDBGDeltaVirtualAxisSteps, p->stepsRemaining);
 #endif
 
-        p->calculate_move(axis_diff,pathOptimize);
+        p->calculateMove(axis_diff,pathOptimize);
         for (byte i=0; i < 4; i++)
         {
             Printer::currentPositionSteps[i] += fractional_steps[i];

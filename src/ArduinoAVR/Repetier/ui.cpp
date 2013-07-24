@@ -833,20 +833,6 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='p') addLong(max_inactive_time,4);
             break;
         case 'O': // ops related stuff
-#if USE_OPS==1
-            if(c2=='0') addStringP(Printer::opsMode==0?ui_selected:ui_unselected);
-            else if(c2=='1') addStringP(Printer::opsMode==1?ui_selected:ui_unselected);
-            else if(c2=='2') addStringP(Printer::opsMode==2?ui_selected:ui_unselected);
-            else if(c2=='r') addFloat(Printer::opsRetractDistance,2,1);
-            else if(c2=='b') addFloat(Printer::opsRetractBacklash,2,1);
-            else if(c2=='d') addFloat(Printer::opsMinDistance,2,1);
-            else if(c2=='a')
-            {
-                addFloat(Printer::opsMoveAfter,3,0);
-                if(col<UI_COLS)
-                    printCols[col++]='%';
-            }
-#endif
             break;
         case 'l':
             if(c2=='a') addInt(lastAction,4);
@@ -1530,32 +1516,6 @@ void UIDisplay::nextPreviousAction(char next)
     }
 #endif
     break;
-#if USE_OPS==1
-    case UI_ACTION_OPS_RETRACTDISTANCE:
-        Printer::opsRetractDistance+=increment*0.1;
-        if(Printer::opsRetractDistance<0) Printer::opsRetractDistance=0;
-        else if(Printer::opsRetractDistance>10) Printer::opsRetractDistance=10;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_BACKLASH:
-        Printer::opsRetractBacklash+=increment*0.1;
-        if(Printer::opsRetractBacklash<-5) Printer::opsRetractBacklash=-5;
-        else if(Printer::opsRetractBacklash>5) Printer::opsRetractBacklash=5;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_MOVE_AFTER:
-        Printer::opsMoveAfter+=increment;
-        if(Printer::opsMoveAfter<0) Printer::opsMoveAfter=0;
-        else if(Printer::opsMoveAfter>10) Printer::opsMoveAfter=100;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_MINDISTANCE:
-        Printer::opsMinDistance+=increment;
-        if(Printer::opsMinDistance<0) Printer::opsMinDistance=0;
-        else if(Printer::opsMinDistance>10) Printer::opsMinDistance=10;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-#endif
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -1885,17 +1845,6 @@ void UIDisplay::executeAction(int action)
             Extruder::setTemperatureForExtruder(0,2);
 #endif
             break;
-#if USE_OPS==1
-        case UI_ACTION_OPS_OFF:
-            Printer::opsMode=0;
-            break;
-        case UI_ACTION_OPS_CLASSIC:
-            Printer::opsMode=1;
-            break;
-        case UI_ACTION_OPS_FAST:
-            Printer::opsMode=2;
-            break;
-#endif
         case UI_ACTION_DISABLE_STEPPER:
             Printer::kill(true);
             break;

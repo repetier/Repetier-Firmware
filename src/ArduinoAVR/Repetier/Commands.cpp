@@ -1105,45 +1105,6 @@ void Commands::executeGCode(GCode *com)
             maxadvspeed=0;
             break;
 #endif
-#if USE_OPS==1
-        case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
-            if(com->hasS() && com->S>=0 && com->S<3)
-                Printer::opsMode = com->S;
-            if(com->hasX() && com->X>=0)
-                Printer::opsMinDistance = com->X;
-            if(com->hasY() && com->Y>=0)
-                Printer::opsRetractDistance = com->Y;
-            if(com->hasZ() && com->Z>=-Printer::opsRetractDistance)
-                Printer::opsRetractBacklash = com->Z;
-            if(com->hasF() && com->F>=0 && com->F<=100)
-                Printer::opsMoveAfter = com->F;
-            Extruder::selectExtruderById(Extruder::current->id);
-            if(Printer::opsMode==0)
-            {
-                Com::printFLN(Com::tOPSDisabled);
-            }
-            else
-            {
-                if(Printer::opsMode==1)
-                    Com::printFLN(Com::tOPSClassicMode);
-                else
-                    Com::printFLN(Com::tOPSFastMode);
-
-                Com::printF(Com::tMinDistance,Printer::opsMinDistance);
-                Com::printF(Com::tRetractEqual,Printer::opsRetractDistance);
-                Com::printF(Com::tBacklashEqual,Printer::opsRetractBacklash);
-                if(Printer::opsMode==2)
-                    Com::printF(Com::tMoveAfter,Printer::opsMoveAfter);
-                Com::println();
-                Printer::updateAdvanceFlags();
-            }
-#ifdef DEBUG_OPS
-            Com::printFLN(Com::tRetrSteps,Printer::opsRetractSteps);
-            Com::printFLN(Com::tPushBackSteps,Printer::opsPushbackSteps);
-            Com::printFLN(Com::tMoveAfterSteps,Printer::opsMoveAfterSteps);
-#endif
-            break;
-#endif
 #ifdef USE_ADVANCE
         case 233:
             if(com->hasY())

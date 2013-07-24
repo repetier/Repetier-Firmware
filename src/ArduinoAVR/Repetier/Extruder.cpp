@@ -328,18 +328,18 @@ void Extruder::selectExtruderById(byte extruderId)
     long dy = -Printer::offsetY*Printer::axisStepsPerMM[1]-Extruder::current->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
-    Printer::currentPositionSteps[3] = Extruder::current->extrudePosition;
+    Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
 #endif
-    Printer::destinationSteps[3] = Printer::currentPositionSteps[3];
-    Printer::axisStepsPerMM[3] = Extruder::current->stepsPerMM;
-    Printer::invAxisStepsPerMM[3] = 1.0f/Printer::axisStepsPerMM[3];
-    Printer::maxFeedrate[3] = Extruder::current->maxFeedrate;
+    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+    Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
+    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f/Printer::axisStepsPerMM[E_AXIS];
+    Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
 //   max_start_speed_units_per_second[3] = Extruder::current->maxStartFeedrate;
-    Printer::maxAccelerationMMPerSquareSecond[3] = Printer::maxTravelAccelerationMMPerSquareSecond[3] = Extruder::current->maxAcceleration;
-    Printer::maxTravelAccelerationStepsPerSquareSecond[3] = Printer::maxPrintAccelerationStepsPerSquareSecond[3] = Printer::maxAccelerationMMPerSquareSecond[3] * Printer::axisStepsPerMM[3];
+    Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
+    Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxAccelerationMMPerSquareSecond[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
 #if defined(USE_ADVANCE)
-    Printer::minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
-    Printer::maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
+    Printer::minExtruderSpeed = (byte)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
+    Printer::maxExtruderSpeed = (byte)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
     if(Printer::maxExtruderSpeed>15) Printer::maxExtruderSpeed = 15;
     if(Printer::maxExtruderSpeed>=Printer::minExtruderSpeed)
     {
@@ -351,18 +351,10 @@ void Extruder::selectExtruderById(byte extruderId)
         maxdist-= Extruder::current->maxStartFeedrate*Extruder::current->maxStartFeedrate*0.5/Extruder::current->maxAcceleration;
         Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
-    float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
-    if(fmax<Printer::maxFeedrate[3]) Printer::maxFeedrate[3] = fmax;
+    float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
+    if(fmax<Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif
     Extruder::current->tempControl.updateTempControlVars();
-#if USE_OPS==1
-    Printer::opsRetractSteps = Printer::opsRetractDistance*Extruder::current->stepsPerMM;
-    Printer::opsPushbackSteps = (Printer::opsRetractDistance+Printer::opsRetractBacklash)*Extruder::current->stepsPerMM;
-    if(Printer::opsMode<=1)
-        Printer::opsMoveAfterSteps = 0;
-    else
-        Printer::opsMoveAfterSteps = (int)(-(float)Printer::opsRetractSteps*(100.0-Printer::opsMoveAfter)*0.01);
-#endif
     if(dx || dy)
     {
         float oldfeedrate = Printer::feedrate;

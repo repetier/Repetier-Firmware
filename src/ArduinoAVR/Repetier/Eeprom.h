@@ -38,7 +38,7 @@ have problems with other modules using the eeprom */
 #define EPR_Y_HOMING_FEEDRATE      31
 #define EPR_Z_HOMING_FEEDRATE      35
 #define EPR_MAX_JERK               39
-#define EPR_OPS_MIN_DISTANCE       43
+//#define EPR_OPS_MIN_DISTANCE       43
 #define EPR_MAX_ZJERK              47
 #define EPR_X_MAX_ACCEL            51
 #define EPR_Y_MAX_ACCEL            55
@@ -49,11 +49,11 @@ have problems with other modules using the eeprom */
 #define EPR_BAUDRATE               75
 #define EPR_MAX_INACTIVE_TIME      79
 #define EPR_STEPPER_INACTIVE_TIME  83
-#define EPR_OPS_RETRACT_DISTANCE   87
-#define EPR_OPS_RETRACT_BACKLASH   91
+//#define EPR_OPS_RETRACT_DISTANCE   87
+//#define EPR_OPS_RETRACT_BACKLASH   91
 #define EPR_EXTRUDER_SPEED         95
-#define EPR_OPS_MOVE_AFTER         99
-#define EPR_OPS_MODE              103
+//#define EPR_OPS_MOVE_AFTER         99
+//#define EPR_OPS_MODE              103
 #define EPR_INTEGRITY_BYTE        104   // Here the xored sum over eeprom is stored
 #define EPR_VERSION               105   // Version id for updates in EEPROM storage
 #define EPR_BED_HEAT_MANAGER      106

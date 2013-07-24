@@ -776,7 +776,7 @@ you can also change the values online and auleveling will store the results here
 #define MAX_FEEDRATE_Y 300
 #define MAX_FEEDRATE_Z 300
 
-/** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
+/** Home position speed in mm/s. Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 80
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 80
@@ -902,58 +902,6 @@ it 0 as default.
 */
 
 #define MIN_EXTRUDER_TEMP 0
-/** \brief Activate ooze prevention system
-
-The ooze prevention system tries to prevent ooze, by a fast retract of the filament every time
-printing stops. Most slicing software have already an option to do this. Using OPS_MODE=1 will
-in fact mimic this. This works good, but can increase printing time. To reduce the additional
-waiting time, the OPS has a fast mode, which performs the retraction during the travelling move.
-The only reason your slicer doesn't do it, is because it can't tell. There is simple no
-G-Code command telling the firmware to do that.
-
-You can always compile including OPS. Then you can disable/enable it anytime you want. To disable it
-set USE_OPS 0
-
-Caution: Don't enable anti-ooze in your slicer if you are using this.
-*/
-#define USE_OPS 1
-
-/** \brief Sets the OPS operation mode
-
-0: Off
-1: Classic mode. Stop head, retract move to target, push filament back.
-2: Fast mode. Retract during move, start pushing back the filament during move. For safty, we start
-   at with a low speed and wait for the push back, before the pintmove starts. Normally there is some
-   time needed to wait for the filament.
-
- Overridden if EEPROM activated.
-*/
-#define OPS_MODE 0
-
-/** \brief Minimum distance for retraction.
-
-If a travel move is shorter than this distance, no retraction will occur. This is to prevent
-retraction with infill, where the angle to the perimeter needs a short stop. Unit is mm.
- Overridden if EEPROM activated.
-*/
-#define OPS_MIN_DISTANCE 0.8
-
-/** \brief Move printhead only after x% of retract distance have been retracted.
-
- Overridden if EEPROM activated.*/
-#define OPS_MOVE_AFTER 50.0
-/** \brief Retraction distance in mm. If you want to enable OPS only sometimes, compile with
-OPS support and set retraction distance to 0. If you set it to e.g. 3 in your EEPROM3 settings it is enabled.
- Overridden if EEPROM activated.*/
-#define OPS_RETRACT_DISTANCE 1.5
-
-/** \brief Backslash produced by extruder reversal
-
-If you are using a bowden extruder, you may need some extra distance to push the filament back into the
-original place. This is the value you enter here. Unit is mm.
- Overridden if EEPROM activated.
-*/
-#define OPS_RETRACT_BACKLASH 0.0
 
 /** \brief Enable advance algorithm.
 

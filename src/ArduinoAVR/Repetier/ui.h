@@ -76,10 +76,6 @@
 #define UI_ACTION_HOME_Y                1023
 #define UI_ACTION_HOME_Z                1024
 #define UI_ACTION_SELECT_EXTRUDER1      1025
-#define UI_ACTION_OPS_RETRACTDISTANCE   1026
-#define UI_ACTION_OPS_BACKLASH          1027
-#define UI_ACTION_OPS_MOVE_AFTER        1028
-#define UI_ACTION_OPS_MINDISTANCE       1029
 #define UI_ACTION_STORE_EEPROM          1030
 #define UI_ACTION_LOAD_EEPROM           1031
 #define UI_ACTION_PRINT_ACCEL_X         1032
@@ -312,7 +308,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries};
 #define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries};
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
-#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
+#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 #if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin
 #undef SDCARDDETECT

@@ -81,13 +81,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::maxTravelAccelerationMMPerSquareSecond[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     Printer::maxTravelAccelerationMMPerSquareSecond[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
-#if USE_OPS==1
-    Printer::opsMode = OPS_MODE;
-    Printer::opsMinDistance = OPS_MIN_DISTANCE;
-    Printer::opsRetractDistance = OPS_RETRACT_DISTANCE;
-    Printer::opsRetractBacklash = OPS_RETRACT_BACKLASH;
-    Printer::opsMoveAfter = OPS_MOVE_AFTER;
-#endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
 #ifdef TEMP_PID
@@ -334,19 +327,6 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::eprSetFloat(EPR_Y_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[1]);
     HAL::eprSetFloat(EPR_Z_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[2]);
 #endif
-#if USE_OPS==1
-    HAL::eprSetFloat(EPR_OPS_MIN_DISTANCE,Printer::opsMinDistance);
-    HAL::eprSetByte(EPR_OPS_MODE,Printer::opsMode);
-    HAL::eprSetFloat(EPR_OPS_MOVE_AFTER,Printer::opsMoveAfter);
-    HAL::eprSetFloat(EPR_OPS_RETRACT_DISTANCE,Printer::opsRetractDistance);
-    HAL::eprSetFloat(EPR_OPS_RETRACT_BACKLASH,Printer::opsRetractBacklash);
-#else
-    HAL::eprSetFloat(EPR_OPS_MIN_DISTANCE,OPS_MIN_DISTANCE);
-    HAL::eprSetByte(EPR_OPS_MODE,OPS_MODE);
-    HAL::eprSetFloat(EPR_OPS_MOVE_AFTER,OPS_MOVE_AFTER);
-    HAL::eprSetFloat(EPR_OPS_RETRACT_DISTANCE,OPS_RETRACT_DISTANCE);
-    HAL::eprSetFloat(EPR_OPS_RETRACT_BACKLASH,OPS_RETRACT_BACKLASH);
-#endif
 #if HAVE_HEATED_BED
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
 #else
@@ -491,13 +471,6 @@ void EEPROM::readDataFromEEPROM()
     Printer::maxTravelAccelerationMMPerSquareSecond[0] = HAL::eprGetFloat(EPR_X_MAX_TRAVEL_ACCEL);
     Printer::maxTravelAccelerationMMPerSquareSecond[1] = HAL::eprGetFloat(EPR_Y_MAX_TRAVEL_ACCEL);
     Printer::maxTravelAccelerationMMPerSquareSecond[2] = HAL::eprGetFloat(EPR_Z_MAX_TRAVEL_ACCEL);
-#endif
-#if USE_OPS==1
-    Printer::opsMode = HAL::eprGetByte(EPR_OPS_MODE);
-    Printer::opsMoveAfter = HAL::eprGetFloat(EPR_OPS_MOVE_AFTER);
-    Printer::opsMinDistance = HAL::eprGetFloat(EPR_OPS_MIN_DISTANCE);
-    Printer::opsRetractDistance = HAL::eprGetFloat(EPR_OPS_RETRACT_DISTANCE);
-    Printer::opsRetractBacklash = HAL::eprGetFloat(EPR_OPS_RETRACT_BACKLASH);
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
@@ -720,15 +693,6 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
 #endif
 #endif
-/*
-#if USE_OPS==1
-    writeByte(EPR_OPS_MODE,Com::tEPROPSMode);
-    writeFloat(EPR_OPS_MOVE_AFTER,Com::tEPROPSMoveAfter);
-    writeFloat(EPR_OPS_MIN_DISTANCE,Com::tEPROPSMinDistance);
-    writeFloat(EPR_OPS_RETRACT_DISTANCE,Com::tEPROPSRetractionLength);
-    writeFloat(EPR_OPS_RETRACT_BACKLASH,Com::tEPROPSRetractionBacklash);
-#endif
-*/
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT,Com::tZProbeHeight);
     writeFloat(EPR_Z_PROBE_SPEED,Com::tZProbeSpeed);

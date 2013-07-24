@@ -216,9 +216,6 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 #endif
     unsigned int advanceL;         ///< Recomputated L value
 #endif
-#if USE_OPS==1
-    long opsReverseSteps;           ///< How many steps are needed to reverse retracted filament at full speed
-#endif
 #ifdef DEBUG_STEPCOUNT
     long totalStepsRemaining;
 #endif
@@ -572,7 +569,7 @@ public:
     }
     void updateStepsParameter();
     inline float safeSpeed();
-    void calculate_move(float axis_diff[],byte pathOptimize);
+    void calculateMove(float axis_diff[],byte pathOptimize);
     void logLine();
     inline long getWaitTicks()
     {

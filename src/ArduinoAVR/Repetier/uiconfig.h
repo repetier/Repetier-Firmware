@@ -28,7 +28,7 @@ of the firmware at the same time. You have to disable some features to gain the
 ram needed. What should work:
 - No sd card - the sd card code is quite large.
 - No keys attached - The longest part is the menu handling.
-- EEPROM_MODE 0 and USE_OPS 0.
+- EEPROM_MODE 0 .
 
 Currently supported hardware:
 
