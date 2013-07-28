@@ -78,7 +78,7 @@
 #define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
 
-#define BEGIN_INTERRUPT_PROTECTED {byte sreg=SREG;__asm volatile( "cli" ::: "memory" );
+#define BEGIN_INTERRUPT_PROTECTED {uint8_t sreg=SREG;__asm volatile( "cli" ::: "memory" );
 #define END_INTERRUPT_PROTECTED SREG=sreg;}
 #define ESCAPE_INTERRUPT_PROTECTED SREG=sreg;
 
@@ -431,15 +431,15 @@ public:
         return ((long)a*b)>>16;
 #endif
     }
-    static inline void digitalWrite(byte pin,byte value)
+    static inline void digitalWrite(uint8_t pin,uint8_t value)
     {
         ::digitalWrite(pin,value);
     }
-    static inline byte digitalRead(byte pin)
+    static inline uint8_t digitalRead(uint8_t pin)
     {
         return ::digitalRead(pin);
     }
-    static inline void pinMode(byte pin,byte mode)
+    static inline void pinMode(uint8_t pin,uint8_t mode)
     {
         ::pinMode(pin,mode);
     }
@@ -452,11 +452,11 @@ public:
     {
         ::delay(delayMs);
     }
-    static inline void tone(byte pin,int duration)
+    static inline void tone(uint8_t pin,int duration)
     {
         ::tone(pin,duration);
     }
-    static inline void noTone(byte pin)
+    static inline void noTone(uint8_t pin)
     {
         ::noTone(pin);
     }
@@ -476,7 +476,7 @@ public:
     {
         eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
     }
-    static inline byte eprGetByte(unsigned int pos)
+    static inline uint8_t eprGetByte(unsigned int pos)
     {
         return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
     }
@@ -518,7 +518,7 @@ public:
     {
         return RFSERIAL.available()>0;
     }
-    static inline byte serialReadByte()
+    static inline uint8_t serialReadByte()
     {
         return RFSERIAL.read();
     }
@@ -550,7 +550,7 @@ public:
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
     }
-    static inline void spiInit(byte spiRate)
+    static inline void spiInit(uint8_t spiRate)
     {
         WRITE(SS,HIGH);
         SET_OUTPUT(SS);
@@ -561,13 +561,13 @@ public:
         SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
 
     }
-    static inline byte spiReceive()
+    static inline uint8_t spiReceive()
     {
         SPDR = 0XFF;
         while (!(SPSR & (1 << SPIF)));
         return SPDR;
     }
-    static inline void spiReadBlock(byte*buf,uint16_t nbyte)
+    static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte)
     {
         if (nbyte-- == 0) return;
         SPDR = 0XFF;
@@ -580,7 +580,7 @@ public:
         while (!(SPSR & (1 << SPIF)));
         buf[nbyte] = SPDR;
     }
-    static inline void spiSend(byte b)
+    static inline void spiSend(uint8_t b)
     {
         SPDR = b;
         while (!(SPSR & (1 << SPIF)));
@@ -617,7 +617,7 @@ public:
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(byte servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms);
 #endif
     static void analogStart();
 protected:

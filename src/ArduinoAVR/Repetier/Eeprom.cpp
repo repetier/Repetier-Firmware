@@ -30,7 +30,7 @@ void EEPROM::update(GCode *com)
     if(com->hasT() && com->hasP()) switch(com->T)
         {
         case 0:
-            if(com->hasS()) HAL::eprSetByte(com->P,(byte)com->S);
+            if(com->hasS()) HAL::eprSetByte(com->P,(uint8_t)com->S);
             break;
         case 1:
             if(com->hasS()) HAL::eprSetInt16(com->P,(int)com->S);
@@ -42,7 +42,7 @@ void EEPROM::update(GCode *com)
             if(com->hasX()) HAL::eprSetFloat(com->P,com->X);
             break;
         }
-    byte newcheck = computeChecksum();
+    uint8_t newcheck = computeChecksum();
     if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
     readDataFromEEPROM();
@@ -55,10 +55,10 @@ void EEPROM::update(GCode *com)
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 #if EEPROM_MODE!=0
-    byte version = EEPROM_PROTOCOL_VERSION;
+    uint8_t version = EEPROM_PROTOCOL_VERSION;
     baudrate = BAUDRATE;
-    max_inactive_time = MAX_INACTIVE_TIME*1000L;
-    stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
+    maxInactiveTime = MAX_INACTIVE_TIME*1000L;
+    stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
     Printer::axisStepsPerMM[0] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[1] = YAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[2] = ZAXIS_STEPS_PER_MM;
@@ -299,12 +299,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 }
 
-void EEPROM::storeDataIntoEEPROM(byte corrupted)
+void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
 #if EEPROM_MODE!=0
     HAL::eprSetInt32(EPR_BAUDRATE,baudrate);
-    HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,max_inactive_time);
-    HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepper_inactive_time);
+    HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
+    HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
 //#define EPR_ACCELERATION_TYPE 1
     HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[0]);
     HAL::eprSetFloat(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[1]);
@@ -364,11 +364,11 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
 #endif
 #if FEATURE_AUTOLEVEL
     HAL::eprSetByte(EPR_AUTOLEVEL_ACTIVE,Printer::isAutolevelActive());
-    for(byte i=0; i<9; i++)
+    for(uint8_t i=0; i<9; i++)
         HAL::eprSetFloat(EPR_AUTOLEVEL_MATRIX+((int)i)<<2,Printer::autolevelTransformation[i]);
 #endif
     // now the extruder
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
@@ -446,10 +446,10 @@ void EEPROM::initalizeUncached()
 void EEPROM::readDataFromEEPROM()
 {
 #if EEPROM_MODE!=0
-    byte version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
+    uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
-    max_inactive_time = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
-    stepper_inactive_time = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
+    maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
+    stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
 //#define EPR_ACCELERATION_TYPE 1
     Printer::axisStepsPerMM[0] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
     Printer::axisStepsPerMM[1] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);
@@ -497,14 +497,14 @@ void EEPROM::readDataFromEEPROM()
 #if FEATURE_AUTOLEVEL
     if(version>2)
     {
-        for(byte i=0; i<9; i++)
+        for(uint8_t i=0; i<9; i++)
             Printer::autolevelTransformation[i] = HAL::eprGetFloat(EPR_AUTOLEVEL_MATRIX+((int)i)<<2);
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
         //Com::printArrayFLN(Com::tInfo,Printer::autolevelTransformation,9,6);
     }
 #endif
     // now the extruder
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
@@ -586,8 +586,8 @@ void EEPROM::initBaudrate()
 void EEPROM::init()
 {
 #if EEPROM_MODE!=0
-    byte check = computeChecksum();
-    byte storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
+    uint8_t check = computeChecksum();
+    uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check)
     {
         readDataFromEEPROM();
@@ -611,7 +611,7 @@ void EEPROM::updatePrinterUsage()
     HAL::eprSetFloat(EPR_PRINTING_DISTANCE,HAL::eprGetFloat(EPR_PRINTING_DISTANCE)+Printer::filamentPrinted*0.001);
     Printer::filamentPrinted = 0;
     Printer::msecondsPrinting = HAL::timeInMilliseconds();
-    byte newcheck = computeChecksum();
+    uint8_t newcheck = computeChecksum();
     if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
     Commands::reportPrinterUsage();
@@ -721,7 +721,7 @@ void EEPROM::writeSettings()
 #endif
 #endif
     // now the extruder
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
@@ -760,10 +760,10 @@ void EEPROM::writeSettings()
 
 #if EEPROM_MODE!=0
 
-byte EEPROM::computeChecksum()
+uint8_t EEPROM::computeChecksum()
 {
     unsigned int i;
-    byte checksum=0;
+    uint8_t checksum=0;
     for(i=0; i<2048; i++)
     {
         if(i==EEPROM_OFFSET+EPR_INTEGRITY_BYTE) continue;

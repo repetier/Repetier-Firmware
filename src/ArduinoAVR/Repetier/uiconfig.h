@@ -330,7 +330,7 @@ inline void ui_check_slow_encoder() {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
   HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
-  byte keymask = HAL::i2cReadNak(); // Read current key mask
+  uint8_t keymask = HAL::i2cReadNak(); // Read current key mask
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
@@ -349,7 +349,7 @@ void ui_check_slow_keys(int &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
-    byte keymask = HAL::i2cReadNak(); // Read current key mask
+    uint8_t keymask = HAL::i2cReadNak(); // Read current key mask
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);

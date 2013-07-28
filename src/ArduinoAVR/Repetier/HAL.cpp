@@ -268,7 +268,7 @@ void HAL::setupTimer() {
 
 void HAL::showStartReason() {
     // Check startup - does nothing if bootloader sets MCUSR to 0
-    byte mcu = MCUSR;
+    uint8_t mcu = MCUSR;
     if(mcu & 1) Com::printInfoFLN(Com::tPowerUp);
     if(mcu & 2) Com::printInfoFLN(Com::tExternalReset);
     if(mcu & 4) Com::printInfoFLN(Com::tBrownOut);
@@ -297,7 +297,7 @@ void HAL::resetHardware() {
 void HAL::analogStart() {
 #if ANALOG_INPUTS>0
     ADMUX = ANALOG_REF; // refernce voltage
-    for(byte i=0; i<ANALOG_INPUTS; i++)
+    for(uint8_t i=0; i<ANALOG_INPUTS; i++)
     {
         osAnalogInputCounter[i] = 0;
         osAnalogInputBuildup[i] = 0;
@@ -310,7 +310,7 @@ void HAL::analogStart() {
     uint dummyADCResult;
     dummyADCResult = ADCW;
     // Enable interrupt driven conversion loop
-    byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+    uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
     if(channel & 8)  // Reading channel 0-7 or 8-15?
         ADCSRB |= _BV(MUX5);
@@ -490,8 +490,8 @@ unsigned char HAL::i2cReadNak(void)
 #define SERVO2500US F_CPU/3200
 #define SERVO5000US F_CPU/1600
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
-static byte servoIndex = 0;
-void HAL::servoMicroseconds(byte servo,int ms) {
+static uint8_t servoIndex = 0;
+void HAL::servoMicroseconds(uint8_t servo,int ms) {
     if(ms<500) ms = 0;
     if(ms>2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
@@ -628,7 +628,7 @@ inline void setTimer(unsigned long delay)
       }*/
 }
 
-volatile byte insideTimer1=0;
+volatile uint8_t insideTimer1 = 0;
 long stepperWait = 0;
 extern long bresenham_step();
 /** \brief Timer interrupt routine to drive the stepper motors.
@@ -636,7 +636,7 @@ extern long bresenham_step();
 ISR(TIMER1_COMPA_vect)
 {
     if(insideTimer1) return;
-    byte doExit;
+    uint8_t doExit;
     __asm__ __volatile__ (
         "ldi %[ex],0 \n\t"
         "lds r23,stepperWait+2 \n\t"
@@ -662,24 +662,24 @@ ISR(TIMER1_COMPA_vect)
         "end%=: \n\t"
         :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
     if(doExit) return;
-    insideTimer1=1;
-    OCR1A=61000;
+    insideTimer1 = 1;
+    OCR1A = 61000;
     if(PrintLine::hasLines())
     {
         setTimer(PrintLine::bresenhamStep());
     }
     else
     {
-        if(waitRelax==0)
+        if(waitRelax == 0)
         {
 #ifdef USE_ADVANCE
-            if(Printer::advance_steps_set)
+            if(Printer::advanceStepsSet)
             {
-                Printer::extruderStepsNeeded-=Printer::advance_steps_set;
+                Printer::extruderStepsNeeded -= Printer::advanceStepsSet;
 #ifdef ENABLE_QUADRATIC_ADVANCE
-                Printer::advance_executed = 0;
+                Printer::advanceExecuted = 0;
 #endif
-                Printer::advance_steps_set = 0;
+                Printer::advanceStepsSet = 0;
             }
 #endif
 #if defined(USE_ADVANCE)
@@ -693,7 +693,7 @@ ISR(TIMER1_COMPA_vect)
         OCR1A = 65500; // Wait for next move
     }
     DEBUG_MEMORY;
-    insideTimer1=0;
+    insideTimer1 = 0;
 }
 
 /**
@@ -701,9 +701,9 @@ This timer is called 3906 timer per second. It is used to update pwm values for 
 */
 ISR(PWM_TIMER_VECTOR)
 {
-    static byte pwm_count = 0;
-    static byte pwm_pos_set[NUM_EXTRUDER+3];
-    static byte pwm_cooler_pos_set[NUM_EXTRUDER];
+    static uint8_t pwm_count = 0;
+    static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
+    static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
     PWM_OCR += 64;
     if(pwm_count==0)
     {
@@ -715,7 +715,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
         if((pwm_pos_set[1] = pwm_pos[1])>0) WRITE(EXT1_HEATER_PIN,1);
-#if EXT1_EXTRUDER_COOLER_PIN>-1
+#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
         if((pwm_cooler_pos_set[1] = extruder[1].coolerPWM)>0) WRITE(EXT1_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
@@ -761,7 +761,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
     if(pwm_pos_set[1] == pwm_count && pwm_pos_set[1]!=255) WRITE(EXT1_HEATER_PIN,0);
-#if EXT1_EXTRUDER_COOLER_PIN>-1
+#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
     if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1]!=255) WRITE(EXT1_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
@@ -830,7 +830,7 @@ ISR(PWM_TIMER_VECTOR)
             osAnalogInputCounter[osAnalogInputPos] = 0;
             // Start next conversion
             if(++osAnalogInputPos>=ANALOG_INPUTS) osAnalogInputPos = 0;
-            byte channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+            uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
             if(channel & 8)  // Reading channel 0-7 or 8-15?
                 ADCSRB |= _BV(MUX5);
@@ -847,9 +847,9 @@ ISR(PWM_TIMER_VECTOR)
     pwm_count++;
 }
 #if defined(USE_ADVANCE)
-byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
+uint8_t extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
 char extruder_last_dir = 0;
-byte extruder_speed = 0;
+uint8_t extruder_speed = 0;
 #endif
 
 /** \brief Timer routine for extruder stepper.
@@ -865,39 +865,26 @@ ISR(EXTRUDER_TIMER_VECTOR)
 {
 #if defined(USE_ADVANCE)
     if(!Printer::isAdvanceActivated()) return; // currently no need
-    byte timer = EXTRUDER_OCR;
-    bool increasing = Printer::extruderStepsNeeded>0;
+    uint8_t timer = EXTRUDER_OCR;
+    bool increasing = Printer::extruderStepsNeeded > 0;
 
     // Require at least 2 steps in one direction before going to action
     if(abs(Printer::extruderStepsNeeded)<2)
     {
-        EXTRUDER_OCR = timer+Printer::maxExtruderSpeed;
+        EXTRUDER_OCR = timer + Printer::maxExtruderSpeed;
         ANALYZER_OFF(ANALYZER_CH2);
         extruder_last_dir = 0;
         return;
     }
-
-    /*  if(printer_state.extruderStepsNeeded==0) {
-          extruder_last_dir = 0;
-      }  else if((increasing>0 && extruder_last_dir<0) || (!increasing && extruder_last_dir>0)) {
-        EXTRUDER_OCR = timer+50; // Little delay to accomodate to reversed direction
-        extruder_set_direction(increasing ? 1 : 0);
-        extruder_last_dir = (increasing ? 1 : -1);
-        return;
-      } else*/
+    if(extruder_last_dir == 0)
     {
-        if(extruder_last_dir==0)
-        {
-            Extruder::setDirection(increasing ? 1 : 0);
-            extruder_last_dir = (increasing ? 1 : -1);
-        }
-        Extruder::step();
-        Printer::extruderStepsNeeded-=extruder_last_dir;
-#if STEPPER_HIGH_DELAY>0
-        HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
-#endif
-        Extruder::unstep();
+        Extruder::setDirection(increasing);
+        extruder_last_dir = (increasing ? 1 : -1);
     }
+    Extruder::step();
+    Printer::extruderStepsNeeded-=extruder_last_dir;
+    Printer::insertStepperHighDelay();
+    Extruder::unstep();
     EXTRUDER_OCR = timer+Printer::maxExtruderSpeed;
 #endif
 }

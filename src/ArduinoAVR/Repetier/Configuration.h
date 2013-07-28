@@ -76,6 +76,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 // Override pin definions from pins.h
 #define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
+//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
@@ -130,7 +131,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
     will be allocated for the delta buffer. With defaults 7 * 16 * 30 = 3360 bytes. This leaves ~1K free RAM on an Arduino
     Mega. */
-    #define MAX_DELTA_SEGMENTS_PER_LINE 25
+    #define MAX_DELTA_SEGMENTS_PER_LINE 22
 
     // Calculations
     #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
@@ -178,7 +179,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/��C and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -370,7 +371,7 @@ L is the linear factor and seems to be working better then the quadratic depende
 /** The extruder cooler is a fan to cool the extruder when it is heating. If you turn the extruder on, the fan goes on. */
 #define EXT1_EXTRUDER_COOLER_PIN 5
 /** PWM speed for the cooler fan. 0=off 255=full speed */
-#define EXT1_EXTRUDER_COOLER_SPEED 120
+#define EXT1_EXTRUDER_COOLER_SPEED 255
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -714,7 +715,7 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 200 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
@@ -736,7 +737,7 @@ on this endstop.
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.
 */
-#define DELTA_HOME_ON_POWER true
+#define DELTA_HOME_ON_POWER false
 
 /** \brief Enable counter to count steps for Z max calculations
 */

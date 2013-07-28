@@ -125,7 +125,7 @@ have problems with other modules using the eeprom */
 class EEPROM
 {
 #if EEPROM_MODE!=0
-    static byte computeChecksum();
+    static uint8_t computeChecksum();
     static void writeExtruderPrefix(uint pos);
     static void writeFloat(uint pos,PGM_P text);
     static void writeLong(uint pos,PGM_P text);
@@ -136,7 +136,7 @@ public:
 
     static void init();
     static void initBaudrate();
-    static void storeDataIntoEEPROM(byte corrupted=0);
+    static void storeDataIntoEEPROM(uint8_t corrupted=0);
     static void readDataFromEEPROM();
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
@@ -275,7 +275,7 @@ public:
     static inline void setDeltaTowerXOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
-        byte newcheck = computeChecksum();
+        uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
@@ -283,7 +283,7 @@ public:
     static inline void setDeltaTowerYOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
-        byte newcheck = computeChecksum();
+        uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif
@@ -291,7 +291,7 @@ public:
     static inline void setDeltaTowerZOffsetSteps(int16_t steps) {
 #if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
-        byte newcheck = computeChecksum();
+        uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
             HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 #endif

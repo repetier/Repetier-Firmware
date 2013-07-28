@@ -222,6 +222,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SD_MAX_FOLDER_DEPTH 2
 
 #include "ui.h"
+#include "Communication.h"
 
 #ifndef SDSUPPORT
 #define SDSUPPORT false
@@ -320,7 +321,7 @@ extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-extern byte pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
+extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
@@ -332,26 +333,26 @@ extern float maxadvspeed;
 
 #include "Extruder.h"
 
-void manage_inactivity(byte debug);
+void manage_inactivity(uint8_t debug);
 
 extern void finishNextSegment();
 #if DRIVE_SYSTEM==3
-extern byte transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
+extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
-extern void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop);
+extern void split_delta_move(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
 #ifdef SOFTWARE_LEVELING
-extern void calculate_plane(long factors[], long p1[], long p2[], long p3[]);
-extern float calc_zoffset(long factors[], long pointX, long pointY);
+extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
+extern float calcZOffset(long factors[], long pointX, long pointY);
 #endif
 #endif
 extern void linear_move(long steps_remaining[]);
 
 
 
-extern unsigned long previous_millis_cmd;
-extern unsigned long max_inactive_time;
-extern unsigned long stepper_inactive_time;
+extern unsigned long previousMillisCmd;
+extern unsigned long maxInactiveTime;
+extern unsigned long stepperInactiveTime;
 
 extern void setupTimerInterrupt();
 extern void current_control_init();
@@ -370,8 +371,8 @@ extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
 
 
 extern unsigned int counter_periodical;
-extern volatile byte execute_periodical;
-extern byte counter_250ms;
+extern volatile uint8_t execute_periodical;
+extern uint8_t counter_250ms;
 extern void write_monitor();
 
 
@@ -424,7 +425,7 @@ public:
   bool showFilename(const uint8_t *name);
   void automount();
 private:
-  void lsRecursive(SdBaseFile *parent,byte level);
+  void lsRecursive(SdBaseFile *parent,uint8_t level);
  // SdFile *getDirectory(char* name);
 };
 
@@ -432,7 +433,7 @@ extern SDCard sd;
 #endif
 
 extern volatile int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
-extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
+extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 
 #define X_AXIS 0
 #define Y_AXIS 1
@@ -453,6 +454,5 @@ extern void updateStepsParameter(PrintLine *p/*,byte caller*/);
 #define XSTR(s) STR(s)
 #include "Commands.h"
 #include "Eeprom.h"
-#include "Communication.h"
 
 #endif

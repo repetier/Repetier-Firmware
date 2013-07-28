@@ -151,6 +151,7 @@
 #define UI_ACTION_EXTRUDER2_OFF         1102
 #define UI_ACTION_EXTRUDER2_TEMP        1103
 #define UI_ACTION_SELECT_EXTRUDER2      1104
+#define UI_ACTION_WRITE_DEBUG           1105
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -237,7 +238,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
     if(c4>=0) {SET_INPUT(c4);WRITE(c4,HIGH);}if(r1>=0)SET_OUTPUT(r1);if(r2>=0)SET_OUTPUT(r2);if(r3>=0)SET_OUTPUT(r3);if(r4>=0)SET_OUTPUT(r4);\
     if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);
 //      out.print_int_P(PSTR("r4=>c1:"),READ(c1));out.print_int_P(PSTR(" c2:"),READ(c2));out.print_int_P(PSTR(" c3:"),READ(c3));out.println_int_P(PSTR(" c4:"),READ(c4));
-#define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {byte r = (c1>=0?READ(c1):0) && (c2>=0?READ(c2):0) && (c3>=0?READ(c3):0) && (c4>=0?READ(c4):0);\
+#define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):0) && (c2>=0?READ(c2):0) && (c3>=0?READ(c3):0) && (c4>=0?READ(c4):0);\
     if(!r) {\
       r = 255;\
       if(r2>=0)WRITE(r2,HIGH);if(r3>=0)WRITE(r3,HIGH);if(r4>=0)WRITE(r4,HIGH);\
@@ -321,12 +322,12 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 class UIDisplay {
   public:
-    volatile byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
-    byte col; // current col for buffer prefill
-    byte menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    byte menuPos[5]; // Positions in menu
+    volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
+    uint8_t col; // current col for buffer prefill
+    uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
+    uint8_t menuPos[5]; // Positions in menu
     void *menu[5]; // Menus active
-    byte menuTop[5]; // Top row in menu
+    uint8_t menuTop[5]; // Top row in menu
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
     unsigned int activeAction; // action for ok/next/previous
@@ -338,9 +339,9 @@ class UIDisplay {
     unsigned long nextRepeat; // Time of next autorepeat
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
-    void addInt(int value,byte digits); // Print int into printCols
+    void addInt(int value,uint8_t digits); // Print int into printCols
     void addLong(long value,char digits);
-    void addFloat(float number, char fixdigits,byte digits);
+    void addFloat(float number, char fixdigits,uint8_t digits);
     void addStringP(PGM_P text);
     void okAction();
     void nextPreviousAction(char next);
@@ -349,10 +350,10 @@ class UIDisplay {
     int8_t encoderLast;
     PGM_P statusText;
     UIDisplay();
-    void createChar(byte location,const byte charmap[]);
+    void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
-    void printRow(byte r,char *txt); // Print row on display
-    void printRowP(byte r,PGM_P txt);
+    void printRow(uint8_t r,char *txt); // Print row on display
+    void printRowP(uint8_t r,PGM_P txt);
     void parse(char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
     void executeAction(int action);
@@ -367,11 +368,11 @@ class UIDisplay {
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
 //#if SDSUPPORT
     void updateSDFileCount();
-    void sdrefresh(byte &r);
+    void sdrefresh(uint8_t &r);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*13+2];
-    byte folderLevel;
+    uint8_t folderLevel;
 //#endif
 };
 extern UIDisplay uid;
@@ -487,7 +488,7 @@ inline void ui_check_slow_encoder() {
   HAL::i2cWrite(0x12); // GIOA
   HAL::i2cStop();
   HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = HAL::i2cEeadAck();
+  unsigned int keymask = HAL::i2cReadAck();
   keymask = keymask + (HAL::i2cReadNak()<<8);
   HAL::i2cStop();
 }
@@ -787,7 +788,7 @@ void ui_check_slow_keys(int &action) {
 #define BEEP_SHORT beep(BEEPER_SHORT_SEQUENCE);
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
-extern void beep(byte duration,byte count);
+extern void beep(uint8_t duration,uint8_t count);
 
 #endif
 

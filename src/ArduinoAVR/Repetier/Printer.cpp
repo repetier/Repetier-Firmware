@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-byte Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
+uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float Printer::axisStepsPerMM[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEPS_PER_MM,1}; ///< Number of steps per mm needed.
 float Printer::invAxisStepsPerMM[4]; ///< Inverse of axisStepsPerMM for faster conversion
@@ -37,37 +37,36 @@ unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[4];
 long Printer::currentDeltaPositionSteps[4];
 DeltaSegment segments[DELTA_CACHE_SIZE];
 unsigned int delta_segment_write_pos = 0; // Position where we write the next cached delta move
-byte lastMoveID = 0; // Last move ID
+uint8_t lastMoveID = 0; // Last move ID
 #endif
-byte Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
-byte Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
+uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
+uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
 long Printer::currentPositionSteps[4];
 float Printer::currentPosition[3];
 long Printer::destinationSteps[4];
 long Printer::coordinateOffset[3] = {0,0,0};
-byte Printer::flag0 = 0;
-byte Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
-byte Printer::stepsPerTimerCall = 1;
+uint8_t Printer::flag0 = 0;
+uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
+uint8_t Printer::stepsPerTimerCall = 1;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
 #if defined(USE_ADVANCE)
 volatile  int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //  float extruderSpeed;              ///< Extruder speed in mm/s.
-byte Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
-byte Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
-byte Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
+uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
+uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
+uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
 unsigned long Printer::interval;    ///< Last step duration in ticks.
 unsigned long Printer::timer;              ///< used for acceleration/deceleration timing
 unsigned long Printer::stepNumber;         ///< Step number in current move.
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-long Printer::advance_executed;             ///< Executed advance steps
+long Printer::advanceExecuted;             ///< Executed advance steps
 #endif
-int Printer::advance_steps_set;
-unsigned int Printer::advance_lin_set;
+int Printer::advanceStepsSet;
 #endif
 #if DRIVE_SYSTEM==3
 #ifdef STEP_COUNTER
@@ -113,12 +112,12 @@ float Printer::offsetY;                     ///< Y-offset for different extruder
 unsigned int Printer::vMaxReached;         ///< Maximumu reached speed
 unsigned long Printer::msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;            ///< mm of filament printed since counting started
-byte Printer::waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
+uint8_t Printer::wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
 float Printer::backlashX;
 float Printer::backlashY;
 float Printer::backlashZ;
-byte Printer::backlashDir;
+uint8_t Printer::backlashDir;
 #endif
 #ifdef DEBUG_STEPCOUNT
 long Printer::totalStepsRemaining;
@@ -203,7 +202,7 @@ void Printer::updateDerivedParameter()
     if(backlashZ!=0) backlashDir |= 32;
 #endif
 #endif
-    for(byte i=0; i<4; i++)
+    for(uint8_t i=0; i<4; i++)
     {
         invAxisStepsPerMM[i] = 1.0f/axisStepsPerMM[i];
 #ifdef RAMP_ACCELERATION
@@ -220,7 +219,7 @@ void Printer::updateDerivedParameter()
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
-void Printer::kill(byte only_steppers)
+void Printer::kill(uint8_t only_steppers)
 {
     if(areAllSteppersDisabled() && only_steppers) return;
     setAllSteppersDiabled();
@@ -230,7 +229,7 @@ void Printer::kill(byte only_steppers)
     Extruder::disableCurrentExtruderMotor();
     if(!only_steppers)
     {
-        for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+        for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
             Extruder::setTemperatureForExtruder(0,i);
         Extruder::setHeatedBedTemperature(0);
         UI_STATUS_UPD(UI_TEXT_KILLED);
@@ -246,7 +245,7 @@ void Printer::updateAdvanceFlags()
 {
     Printer::setAdvanceActivated(false);
 #if defined(USE_ADVANCE)
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         if(extruder[i].advanceL!=0)
         {
@@ -350,7 +349,7 @@ void Printer::updateCurrentPosition()
   - Reltive or absolute positioning with special case only extruder relative.
   - Offset in x and y direction for multiple extruder support.
 */
-byte Printer::setDestinationStepsFromGCode(GCode *com)
+uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register long p;
     if(!PrintLine::hasLines())
@@ -634,12 +633,11 @@ void Printer::setup()
     Printer::extrudeMultiply = 100;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    Printer::advance_executed = 0;
+    Printer::advanceExecuted = 0;
 #endif
-    Printer::advance_steps_set = 0;
-    Printer::advance_lin_set = 0;
+    Printer::advanceStepsSet = 0;
 #endif
-    for(byte i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
+    for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
     Printer::currentPositionSteps[0] = Printer::currentPositionSteps[1] = Printer::currentPositionSteps[2] = Printer::currentPositionSteps[3] = 0;
     Printer::maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM!=3
@@ -657,7 +655,7 @@ void Printer::setup()
     Printer::xMin = X_MIN_POS;
     Printer::yMin = Y_MIN_POS;
     Printer::zMin = Z_MIN_POS;
-    Printer::waslasthalfstepping = 0;
+    Printer::wasLastHalfstepping = 0;
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = X_BACKLASH;
     Printer::backlashY = Y_BACKLASH;
@@ -681,9 +679,11 @@ void Printer::setup()
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
-#if DRIVE_SYSTEM==3 && DELTA_HOME_ON_POWER
+#if DRIVE_SYSTEM==3
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+#if DELTA_HOME_ON_POWER
     Printer::homeAxis(true,true,true);
+#endif
     Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
@@ -699,9 +699,9 @@ void Printer::defaultLoopActions()
     UI_MEDIUM; // do check encoder
     unsigned long curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
-        previous_millis_cmd = curtime;
-    if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) Printer::kill(false);
-    if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time )
+        previousMillisCmd = curtime;
+    if(maxInactiveTime!=0 && (curtime-previousMillisCmd) >  maxInactiveTime ) Printer::kill(false);
+    if(stepperInactiveTime!=0 && (curtime-previousMillisCmd) >  stepperInactiveTime )
         Printer::kill(true);
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
     sd.automount();
@@ -715,7 +715,7 @@ void Printer::defaultLoopActions()
 void deltaMoveToTopEndstops(float feedrate)
 {
     long up_steps = Printer::zMaxSteps;
-    for (byte i=0; i<3; i++)
+    for (uint8_t i=0; i<3; i++)
         Printer::currentPositionSteps[i] = 0;
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
     PrintLine::moveRelativeDistanceInSteps(0,0,Printer::zMaxSteps*1.5,0,feedrate, true, true);
@@ -819,7 +819,7 @@ void Printer::homeXAxis()
 #endif
         long offX = 0;
 #if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offX = RMath::max(offX,extruder[i].xOffset);
+        for(uint8_t i=0; i<NUM_EXTRUDER; i++) offX = RMath::max(offX,extruder[i].xOffset);
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? Printer::xMinSteps-offX : Printer::xMaxSteps+offX;
@@ -846,7 +846,7 @@ void Printer::homeYAxis()
 #endif
         long offY = 0;
 #if NUM_EXTRUDER>1
-        for(byte i=0; i<NUM_EXTRUDER; i++) offY = RMath::max(offY,extruder[i].yOffset);
+        for(uint8_t i=0; i<NUM_EXTRUDER; i++) offY = RMath::max(offY,extruder[i].yOffset);
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? Printer::yMinSteps-offY : Printer::yMaxSteps+offY;

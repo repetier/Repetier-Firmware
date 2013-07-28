@@ -302,8 +302,9 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_origin,UI_TEXT_SET_TO_ORIGIN,UI_ACTION_SET_O
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER);
 UI_MENU_CHANGEACTION(ui_menu_quick_speedmultiply,UI_TEXT_SPEED_MULTIPLY,UI_ACTION_FEEDRATE_MULTIPLY);
 UI_MENU_CHANGEACTION(ui_menu_quick_flowmultiply,UI_TEXT_FLOW_MULTIPLY,UI_ACTION_FLOWRATE_MULTIPLY);
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT);
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper,&ui_menu_quick_debug}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,9+UI_MENU_BACKCNT);
 
 // **** Fan menu
 
