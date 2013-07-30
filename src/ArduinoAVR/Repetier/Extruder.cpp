@@ -355,7 +355,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     {
         float maxdist = Extruder::current->maxFeedrate*Extruder::current->maxFeedrate*0.00013888/Extruder::current->maxAcceleration;
         maxdist-= Extruder::current->maxStartFeedrate*Extruder::current->maxStartFeedrate*0.5/Extruder::current->maxAcceleration;
-        Printer::extruderAccelerateDelay = (uint8_t)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
+        //Printer::extruderAccelerateDelay = (uint8_t)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
     float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
     if(fmax<Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
@@ -1067,7 +1067,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT0_ADVANCE_K
 #endif
-        ,EXT0_ADVANCE_L
+        ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
@@ -1087,7 +1087,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT1_ADVANCE_K
 #endif
-        ,EXT1_ADVANCE_L
+        ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
@@ -1107,7 +1107,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT2_ADVANCE_K
 #endif
-        ,EXT2_ADVANCE_L
+        ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
@@ -1127,7 +1127,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT3_ADVANCE_K
 #endif
-        ,EXT3_ADVANCE_L
+        ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
@@ -1147,7 +1147,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT4_ADVANCE_K
 #endif
-        ,EXT4_ADVANCE_L
+        ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
@@ -1167,7 +1167,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT5_ADVANCE_K
 #endif
-        ,EXT5_ADVANCE_L
+        ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER

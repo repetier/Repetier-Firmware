@@ -35,11 +35,20 @@
 class Printer
 {
 public:
+#if defined(USE_ADVANCE)
+    static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+    static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
+    static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
+    //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
+    static int advanceStepsSet;
+#ifdef ENABLE_QUADRATIC_ADVANCE
+    static long advanceExecuted;             ///< Executed advance steps
+#endif
+#endif
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
-    static float max_start_speed_units_per_second[];
     static long maxAccelerationMMPerSquareSecond[];
     static long maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
@@ -52,17 +61,6 @@ public:
     static uint8_t debugLevel;
     static uint8_t flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
     static uint8_t stepsPerTimerCall;
-#if defined(USE_ADVANCE)
-    volatile static int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-//  float extruderSpeed;              ///< Extruder speed in mm/s.
-    static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
-    static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
-    static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
-    static int advanceStepsSet;
-#ifdef ENABLE_QUADRATIC_ADVANCE
-    static long advanceExecuted;             ///< Executed advance steps
-#endif
-#endif
     static unsigned long interval;    ///< Last step duration in ticks.
     static unsigned long timer;              ///< used for acceleration/deceleration timing
     static unsigned long stepNumber;         ///< Step number in current move.

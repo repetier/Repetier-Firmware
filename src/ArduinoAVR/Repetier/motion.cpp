@@ -146,9 +146,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             p->setPositiveDirectionForAxis(axis);
         else
             p->delta[axis] = -p->delta[axis];
-        if(axis==3 && Printer::extrudeMultiply!=100)
-            p->delta[3]=(long)((p->delta[3]*(float)Printer::extrudeMultiply)*0.01f);
-        axis_diff[axis] = p->delta[axis]*Printer::invAxisStepsPerMM[axis];
+        if(axis == E_AXIS && Printer::extrudeMultiply!=100)
+            p->delta[3] = (long)((p->delta[3] * (float)Printer::extrudeMultiply) * 0.01f);
+        axis_diff[axis] = p->delta[axis] * Printer::invAxisStepsPerMM[axis];
         if(p->delta[axis]) p->setMoveOfAxis(axis);
         Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
     }
@@ -1132,17 +1132,17 @@ inline void PrintLine::queueEMove(long e_diff,uint8_t check_endstops,uint8_t pat
 */
 void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop)
 {
-    if (softEndstop && Printer::destinationSteps[2] < 0) Printer::destinationSteps[2] = 0;
+    if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0;
     long difference[NUM_AXIS];
     float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
     for(uint8_t axis=0; axis < NUM_AXIS; axis++)
     {
         difference[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
-        if(axis==3 && Printer::extrudeMultiply!=100)
-            difference[3]=(long)((difference[3]*(float)Printer::extrudeMultiply)*0.01f);
+        if(axis == E_AXIS && Printer::extrudeMultiply!=100)
+            difference[E_AXIS] = (long)((difference[E_AXIS]*(float)Printer::extrudeMultiply) * 0.01f);
         axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
     }
-    Printer::filamentPrinted+=axis_diff[3];
+    Printer::filamentPrinted += axis_diff[E_AXIS];
 
 #if max_software_endstop_r == true
 // TODO - Implement radius checking
@@ -1315,15 +1315,15 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     float center_axis0 = position[0] + offset[0];
     float center_axis1 = position[1] + offset[1];
     float linear_travel = 0; //target[axis_linear] - position[axis_linear];
-    float extruder_travel = (Printer::destinationSteps[3]-Printer::currentPositionSteps[3])*Printer::invAxisStepsPerMM[3];
+    float extruder_travel = (Printer::destinationSteps[E_AXIS]-Printer::currentPositionSteps[E_AXIS])*Printer::invAxisStepsPerMM[E_AXIS];
     float r_axis0 = -offset[0];  // Radius vector from center to current location
     float r_axis1 = -offset[1];
     float rt_axis0 = target[0] - center_axis0;
     float rt_axis1 = target[1] - center_axis1;
-    long xtarget = Printer::destinationSteps[0];
-    long ytarget = Printer::destinationSteps[1];
-    long ztarget = Printer::destinationSteps[2];
-    long etarget = Printer::destinationSteps[3];
+    long xtarget = Printer::destinationSteps[X_AXIS];
+    long ytarget = Printer::destinationSteps[Y_AXIS];
+    long ztarget = Printer::destinationSteps[Z_AXIS];
+    long etarget = Printer::destinationSteps[E_AXIS];
 
     // CCW angle between position and target from circle center. Only one atan2() trig computation required.
     float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
@@ -1545,14 +1545,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
-        long h = HAL::mulu16xu16to32(cur->vStart,cur->advanceL);
-        int tred = ((
-#ifdef ENABLE_QUADRATIC_ADVANCE
-                        (Printer::advanceExecuted = cur->advanceStart)+
-#endif
-                        h)>>16);
-        Printer::extruderStepsNeeded+=tred-Printer::advanceStepsSet;
-        Printer::advanceStepsSet = tred;
+        Printer::advanceExecuted = cur->advanceStart;
+        cur->updateAdvanceSteps(cur->vStart,0,false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {
@@ -1573,13 +1567,13 @@ long PrintLine::bresenhamStep() // Version for delta printer
     uint8_t doEven = cur->halfStep & 6;
     uint8_t doOdd = cur->halfStep & 5;
     if(cur->halfStep!=4) cur->halfStep = 3-(cur->halfStep);
-    HAL::forbidInterrupts();
     if(doEven)
     {
         if(curd!=NULL)
             curd->checkEndstops(cur,(cur->isCheckEndstops()));
     }
     uint8_t maxLoops = (Printer::stepsPerTimerCall<=cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
+    HAL::forbidInterrupts();
     if(cur->stepsRemaining>0)
     {
         for(uint8_t loop=0; loop<maxLoops; loop++)
@@ -1868,14 +1862,8 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
-        long h = HAL::mulu16xu16to32(cur->vStart,cur->advanceL);
-        int tred = ((
-#ifdef ENABLE_QUADRATIC_ADVANCE
-                        (Printer::advanceExecuted = cur->advanceStart)+
-#endif
-                        h)>>16);
-        Printer::extruderStepsNeeded+=tred-Printer::advance_steps_set;
-        Printer::advance_steps_set = tred;
+        Printer::advanceExecuted = cur->advanceStart;
+        cur->updateAdvanceSteps(cur->vStart,0,false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {

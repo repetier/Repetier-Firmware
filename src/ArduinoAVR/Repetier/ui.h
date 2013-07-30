@@ -718,6 +718,45 @@ void ui_check_slow_keys(int &action) {
 }
 #endif
 #endif // Controller 6
+#if FEATURE_CONTROLLER==7 // RADDS pin assignment for displays
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define BEEPER_TYPE 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define BEEPER_PIN             41
+#define UI_DISPLAY_RS_PIN      42
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  43
+#define UI_DISPLAY_D0_PIN      44
+#define UI_DISPLAY_D1_PIN      45
+#define UI_DISPLAY_D2_PIN      46
+#define UI_DISPLAY_D3_PIN      47
+#define UI_DISPLAY_D4_PIN      44
+#define UI_DISPLAY_D5_PIN      45
+#define UI_DISPLAY_D6_PIN      46
+#define UI_DISPLAY_D7_PIN      47
+#define UI_ENCODER_A           52
+#define UI_ENCODER_B           50
+#define UI_ENCODER_CLICK       48
+#define UI_RESET_PIN           -1
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION false
+#ifdef UI_MAIN
+void ui_init_keys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 7
 
 #if FEATURE_CONTROLLER>0
 

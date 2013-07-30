@@ -451,17 +451,14 @@ public:
             if(advanceTarget<advanceEnd)
                 advanceTarget = advanceEnd;
         }
-        HAL::forbidInterrupts();
         long h = HAL::mulu16xu16to32(v,advanceL);
         int tred = ((advanceTarget + h) >> 16);
-        if(tred<-500 || tred>500) {
-            Com::printF(Com::tTower1,tred);
-            Com::printF(Com::tComma,advanceTarget);
-            Com::printF(Com::tComma,(long)v);
-            Com::printF(Com::tComma,advanceL,3);
-            Com::printFLN(Com::tComma,h);
-        }
-        Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
+        HAL::forbidInterrupts();
+        Printer::extruderStepsNeeded += tred-Printer::advanceStepsSet;
+        if(tred>0 && Printer::advanceStepsSet<=0)
+            Printer::extruderStepsNeeded += Extruder::current->advanceBacklash;
+        else if(tred<0 && Printer::advanceStepsSet>=0)
+            Printer::extruderStepsNeeded -= Extruder::current->advanceBacklash;
         Printer::advanceStepsSet = tred;
         HAL::allowInterrupts();
         Printer::advanceExecuted = advanceTarget;
@@ -469,6 +466,10 @@ public:
         int tred = HAL::mulu6xu16shift16(v,advanceL);
         HAL::forbidInterrupts();
         Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
+        if(tred>0 && Printer::advanceStepsSet<=0)
+            Printer::extruderStepsNeeded += (current->advanceBacklash << 1);
+        else if(tred<0 && Printer::advanceStepsSet>=0)
+            Printer::extruderStepsNeeded -= (current->advanceBacklash << 1);
         Printer::advanceStepsSet = tred;
         HAL::allowInterrupts();
 #endif

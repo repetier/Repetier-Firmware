@@ -18,6 +18,12 @@
 
 #include "Repetier.h"
 
+#if defined(USE_ADVANCE)
+uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
+uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
+volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+//uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
+#endif
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float Printer::axisStepsPerMM[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEPS_PER_MM,1}; ///< Number of steps per mm needed.
@@ -51,13 +57,6 @@ uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 
 uint8_t Printer::stepsPerTimerCall = 1;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
-#endif
-#if defined(USE_ADVANCE)
-volatile  int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-//  float extruderSpeed;              ///< Extruder speed in mm/s.
-uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
-uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
-uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
 unsigned long Printer::interval;    ///< Last step duration in ticks.
 unsigned long Printer::timer;              ///< used for acceleration/deceleration timing

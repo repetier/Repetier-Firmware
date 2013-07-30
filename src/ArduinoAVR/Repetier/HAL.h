@@ -137,14 +137,14 @@ typedef unsigned long millis_t;
 struct ring_buffer
 {
     unsigned char buffer[SERIAL_BUFFER_SIZE];
-    volatile int head;
-    volatile int tail;
+    volatile uint8_t head;
+    volatile uint8_t tail;
 };
 struct ring_buffer_tx
 {
     unsigned char buffer[SERIAL_TX_BUFFER_SIZE];
-    volatile int head;
-    volatile int tail;
+    volatile uint8_t head;
+    volatile uint8_t tail;
 };
 
 class RFHardwareSerial : public Print
@@ -181,6 +181,7 @@ public:
 #endif
     using Print::write; // pull in write(str) and write(buf, size) from Print
     operator bool();
+    int outputUnused(void); // Used for output in interrupts
 };
 extern RFHardwareSerial RFSerial;
 #define RFSERIAL RFSerial

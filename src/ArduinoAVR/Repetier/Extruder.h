@@ -22,12 +22,12 @@ class TemperatureController
     uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
     uint8_t sensorType; ///< Type of temperature sensor.
     uint8_t sensorPin; ///< Pin to read extruder temperature.
-    int currentTemperature; ///< Currenttemperature value read from sensor.
-    int targetTemperature; ///< Target temperature value in units of sensor.
+    int16_t currentTemperature; ///< Currenttemperature value read from sensor.
+    int16_t targetTemperature; ///< Target temperature value in units of sensor.
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
-    unsigned long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+    uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
+    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
 #ifdef TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
@@ -59,8 +59,8 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     public:
     static Extruder *current;
     uint8_t id;
-    long xOffset;
-    long yOffset;
+    int32_t xOffset;
+    int32_t yOffset;
     float stepsPerMM;        ///< Steps per mm.
     uint8_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
@@ -70,15 +70,16 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     float maxFeedrate;      ///< Maximum feedrate in mm/s.
     float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
     float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
-    long extrudePosition;   ///< Current extruder position in steps.
-    int watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
-    int waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
-    int waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
+    int32_t extrudePosition;   ///< Current extruder position in steps.
+    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
+    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
+    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     float advanceK;         ///< Koefficient for advance algorithm. 0 = off
 #endif
     float advanceL;
+    int16_t advanceBacklash;
 #endif
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;

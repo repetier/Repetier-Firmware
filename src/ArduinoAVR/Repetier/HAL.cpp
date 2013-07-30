@@ -13,7 +13,8 @@ HAL::~HAL()
     //dtor
 }
 
-uint16_t HAL::integerSqrt(long a) {
+uint16_t HAL::integerSqrt(long a)
+{
 // http://www.mikrocontroller.net/articles/AVR_Arithmetik#32_Bit_.2F_32_Bit
 //-----------------------------------------------------------
 // Fast and short 32 bits AVR sqrt routine, avr-gcc ABI compliant
@@ -24,49 +25,49 @@ uint16_t HAL::integerSqrt(long a) {
 // Stack incl call = 2-3
 //-----------------------------------------------------------
 
-uint16_t b;
+    uint16_t b;
 
-__asm__ __volatile__ (
-    "ldi   R19, 0xc0 \n\t"
-    "clr   R18 \n\t"        // rotation mask in R19:R18
-    "ldi   R27, 0x40 \n\t"
-    "sub   R26, R26 \n\t"   // developing sqrt in R27:R26, C=0
-"1:  brcs  2f \n\t"           // C --> Bit is always 1
-    "cp    %C1, R26 \n\t"
-    "cpc   %D1, R27 \n\t"     // Does test value fit?
-    "brcs  3f \n\t"           // C --> nope, bit is 0
-"2:  sub   %C1, R26 \n\t"
-    "sbc   %D1, R27 \n\t"     // Adjust argument for next bit
-    "or    R26, R18 \n\t"
-    "or    R27, R19 \n\t"     // Set bit to 1
-"3:  lsr   R19 \n\t"
-    "ror   R18 \n\t"          // Shift right mask, C --> end loop
-    "eor   R27, R19 \n\t"
-    "eor   R26, R18 \n\t"     // Shift right only test bit in result
-    "rol   %A1 \n\t"          // Bit 0 only set if end of loop
-    "rol   %B1 \n\t"
-    "rol   %C1 \n\t"
-    "rol   %D1 \n\t"          // Shift left remaining argument (C used at 1:)
-    "sbrs  %A1, 0 \n\t"       // Skip if 15 bits developed
-    "rjmp  1b \n\t"           // Develop 15 bits of the sqrt
-    "brcs  4f \n\t"           // C--> Last bits always 1
-    "cp    R26, %C1 \n\t"
-    "cpc   R27, %D1 \n\t"     // Test for last bit 1
-    "brcc  5f \n\t"           // NC --> bit is 0
-"4:  sbc   %B1, R19 \n\t"     // Subtract C (any value from 1 to 0x7f will do)
-    "sbc   %C1, R26 \n\t"
-    "sbc   %D1, R27 \n\t"     // Update argument for test
-    "inc   R26 \n\t"          // Last bit is 1
-"5:  lsl   %B1 \n\t"          // Only bit 7 matters
-    "rol   %C1 \n\t"
-    "rol   %D1 \n\t"          // Remainder * 2 + C
-    "brcs  6f \n\t"           // C --> Always round up
-    "cp    R26, %C1 \n\t"
-    "cpc   R27, %D1 \n\t"     // C decides rounding
-"6:  adc   R26, R19 \n\t"
-    "adc   R27, R19 \n\t"     // Round up if C (R19=0)
-    "mov   %B0, R27 \n\t"     // return in R25:R24 for avr-gcc ABI compliance
-    "mov   %A0, R26 \n\t"
+    __asm__ __volatile__ (
+        "ldi   R19, 0xc0 \n\t"
+        "clr   R18 \n\t"        // rotation mask in R19:R18
+        "ldi   R27, 0x40 \n\t"
+        "sub   R26, R26 \n\t"   // developing sqrt in R27:R26, C=0
+        "1:  brcs  2f \n\t"           // C --> Bit is always 1
+        "cp    %C1, R26 \n\t"
+        "cpc   %D1, R27 \n\t"     // Does test value fit?
+        "brcs  3f \n\t"           // C --> nope, bit is 0
+        "2:  sub   %C1, R26 \n\t"
+        "sbc   %D1, R27 \n\t"     // Adjust argument for next bit
+        "or    R26, R18 \n\t"
+        "or    R27, R19 \n\t"     // Set bit to 1
+        "3:  lsr   R19 \n\t"
+        "ror   R18 \n\t"          // Shift right mask, C --> end loop
+        "eor   R27, R19 \n\t"
+        "eor   R26, R18 \n\t"     // Shift right only test bit in result
+        "rol   %A1 \n\t"          // Bit 0 only set if end of loop
+        "rol   %B1 \n\t"
+        "rol   %C1 \n\t"
+        "rol   %D1 \n\t"          // Shift left remaining argument (C used at 1:)
+        "sbrs  %A1, 0 \n\t"       // Skip if 15 bits developed
+        "rjmp  1b \n\t"           // Develop 15 bits of the sqrt
+        "brcs  4f \n\t"           // C--> Last bits always 1
+        "cp    R26, %C1 \n\t"
+        "cpc   R27, %D1 \n\t"     // Test for last bit 1
+        "brcc  5f \n\t"           // NC --> bit is 0
+        "4:  sbc   %B1, R19 \n\t"     // Subtract C (any value from 1 to 0x7f will do)
+        "sbc   %C1, R26 \n\t"
+        "sbc   %D1, R27 \n\t"     // Update argument for test
+        "inc   R26 \n\t"          // Last bit is 1
+        "5:  lsl   %B1 \n\t"          // Only bit 7 matters
+        "rol   %C1 \n\t"
+        "rol   %D1 \n\t"          // Remainder * 2 + C
+        "brcs  6f \n\t"           // C --> Always round up
+        "cp    R26, %C1 \n\t"
+        "cpc   R27, %D1 \n\t"     // C decides rounding
+        "6:  adc   R26, R19 \n\t"
+        "adc   R27, R19 \n\t"     // Round up if C (R19=0)
+        "mov   %B0, R27 \n\t"     // return in R25:R24 for avr-gcc ABI compliance
+        "mov   %A0, R26 \n\t"
         :"=r"(b)
         :"r"(a)
         :"r18","r19","r27","r26" );
@@ -221,7 +222,8 @@ long HAL::CPUDivU2(unsigned int divisor)
 #endif
 }
 
-void HAL::setupTimer() {
+void HAL::setupTimer()
+{
 #if defined(USE_ADVANCE)
     EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
     EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
@@ -258,7 +260,7 @@ void HAL::setupTimer() {
     TCNT3 = 0;              // clear the timer count
 #if defined(__AVR_ATmega128__)
     TIFR |= _BV(OCF3A);     // clear any pending interrupts;
-	ETIMSK |= _BV(OCIE3A);  // enable the output compare interrupt
+    ETIMSK |= _BV(OCIE3A);  // enable the output compare interrupt
 #else
     TIFR3 = _BV(OCF3A);     // clear any pending interrupts;
     TIMSK3 =  _BV(OCIE3A) ; // enable the output compare interrupt
@@ -266,7 +268,8 @@ void HAL::setupTimer() {
 #endif
 }
 
-void HAL::showStartReason() {
+void HAL::showStartReason()
+{
     // Check startup - does nothing if bootloader sets MCUSR to 0
     uint8_t mcu = MCUSR;
     if(mcu & 1) Com::printInfoFLN(Com::tPowerUp);
@@ -276,7 +279,8 @@ void HAL::showStartReason() {
     if(mcu & 32) Com::printInfoFLN(Com::tSoftwareReset);
     MCUSR=0;
 }
-int HAL::getFreeRam() {
+int HAL::getFreeRam()
+{
     int freeram = 0;
     BEGIN_INTERRUPT_PROTECTED
     uint8_t * heapptr, * stackptr;
@@ -290,11 +294,13 @@ int HAL::getFreeRam() {
 
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
-void HAL::resetHardware() {
+void HAL::resetHardware()
+{
     resetFunc();
 }
 
-void HAL::analogStart() {
+void HAL::analogStart()
+{
 #if ANALOG_INPUTS>0
     ADMUX = ANALOG_REF; // refernce voltage
     for(uint8_t i=0; i<ANALOG_INPUTS; i++)
@@ -491,78 +497,88 @@ unsigned char HAL::i2cReadNak(void)
 #define SERVO5000US F_CPU/1600
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
-void HAL::servoMicroseconds(uint8_t servo,int ms) {
+void HAL::servoMicroseconds(uint8_t servo,int ms)
+{
     if(ms<500) ms = 0;
     if(ms>2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
 }
 SIGNAL (TIMER3_COMPA_vect)
 {
-  switch(servoIndex) {
-  case 0:
-      TCNT3 = 0;
-      if(HAL::servoTimings[0]) {
+    switch(servoIndex)
+    {
+    case 0:
+        TCNT3 = 0;
+        if(HAL::servoTimings[0])
+        {
 #if SERVO0_PIN>-1
-        WRITE(SERVO0_PIN,HIGH);
+            WRITE(SERVO0_PIN,HIGH);
 #endif
-        OCR3A = HAL::servoTimings[0];
-      } else OCR3A = SERVO2500US;
-    break;
-  case 1:
+            OCR3A = HAL::servoTimings[0];
+        }
+        else OCR3A = SERVO2500US;
+        break;
+    case 1:
 #if SERVO0_PIN>-1
-      WRITE(SERVO0_PIN,LOW);
+        WRITE(SERVO0_PIN,LOW);
 #endif
-      OCR3A = SERVO5000US;
-    break;
-  case 2:
-      TCNT3 = 0;
-      if(HAL::servoTimings[1]) {
+        OCR3A = SERVO5000US;
+        break;
+    case 2:
+        TCNT3 = 0;
+        if(HAL::servoTimings[1])
+        {
 #if SERVO1_PIN>-1
-        WRITE(SERVO1_PIN,HIGH);
+            WRITE(SERVO1_PIN,HIGH);
 #endif
-        OCR3A = HAL::servoTimings[1];
-      } else OCR3A = SERVO2500US;
-    break;
-  case 3:
+            OCR3A = HAL::servoTimings[1];
+        }
+        else OCR3A = SERVO2500US;
+        break;
+    case 3:
 #if SERVO1_PIN>-1
-      WRITE(SERVO1_PIN,LOW);
+        WRITE(SERVO1_PIN,LOW);
 #endif
-      OCR3A = SERVO5000US;
-    break;
-  case 4:
-      TCNT3 = 0;
-      if(HAL::servoTimings[2]) {
+        OCR3A = SERVO5000US;
+        break;
+    case 4:
+        TCNT3 = 0;
+        if(HAL::servoTimings[2])
+        {
 #if SERVO2_PIN>-1
-        WRITE(SERVO2_PIN,HIGH);
+            WRITE(SERVO2_PIN,HIGH);
 #endif
-        OCR3A = HAL::servoTimings[2];
-      } else OCR3A = SERVO2500US;
-    break;
-  case 5:
+            OCR3A = HAL::servoTimings[2];
+        }
+        else OCR3A = SERVO2500US;
+        break;
+    case 5:
 #if SERVO2_PIN>-1
-      WRITE(SERVO2_PIN,LOW);
+        WRITE(SERVO2_PIN,LOW);
 #endif
-      OCR3A = SERVO5000US;
-    break;
-  case 6:
-      TCNT3 = 0;
-      if(HAL::servoTimings[3]) {
+        OCR3A = SERVO5000US;
+        break;
+    case 6:
+        TCNT3 = 0;
+        if(HAL::servoTimings[3])
+        {
 #if SERVO3_PIN>-1
-        WRITE(SERVO3_PIN,HIGH);
+            WRITE(SERVO3_PIN,HIGH);
 #endif
-        OCR3A = HAL::servoTimings[3];
-      } else OCR3A = SERVO2500US;
-    break;
-  case 7:
+            OCR3A = HAL::servoTimings[3];
+        }
+        else OCR3A = SERVO2500US;
+        break;
+    case 7:
 #if SERVO3_PIN>-1
-      WRITE(SERVO3_PIN,LOW);
+        WRITE(SERVO3_PIN,LOW);
 #endif
-      OCR3A = SERVO5000US;
-    break;
-  }
-  servoIndex++;
-  if(servoIndex>7)
-    servoIndex = 0;
+        OCR3A = SERVO5000US;
+        break;
+    }
+    servoIndex++;
+    if(servoIndex>7)
+        servoIndex = 0;
 }
 #else
 #error No servo support for your board, please diable FEATURE_SERVO
@@ -847,10 +863,6 @@ ISR(PWM_TIMER_VECTOR)
     pwm_count++;
 }
 #if defined(USE_ADVANCE)
-uint8_t extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
-char extruder_last_dir = 0;
-uint8_t extruder_speed = 0;
-#endif
 
 /** \brief Timer routine for extruder stepper.
 
@@ -863,31 +875,31 @@ allowable speed for the extruder.
 */
 ISR(EXTRUDER_TIMER_VECTOR)
 {
-#if defined(USE_ADVANCE)
-    if(!Printer::isAdvanceActivated()) return; // currently no need
+    static int8_t extruderLastDirection = 0;
     uint8_t timer = EXTRUDER_OCR;
-    bool increasing = Printer::extruderStepsNeeded > 0;
-
-    // Require at least 2 steps in one direction before going to action
-    if(abs(Printer::extruderStepsNeeded)<2)
+    if(!Printer::isAdvanceActivated()) return; // currently no need
+    if(Printer::extruderStepsNeeded > 0 && extruderLastDirection!=1)
     {
-        EXTRUDER_OCR = timer + Printer::maxExtruderSpeed;
-        ANALYZER_OFF(ANALYZER_CH2);
-        extruder_last_dir = 0;
-        return;
+        Extruder::setDirection(true);
+        extruderLastDirection = 1;
+        timer += 40; // Add some more wait time to prevent blocking
     }
-    if(extruder_last_dir == 0)
+    else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection!=-1)
     {
-        Extruder::setDirection(increasing);
-        extruder_last_dir = (increasing ? 1 : -1);
+        Extruder::setDirection(false);
+        extruderLastDirection = -1;
+        timer += 40; // Add some more wait time to prevent blocking
     }
-    Extruder::step();
-    Printer::extruderStepsNeeded-=extruder_last_dir;
-    Printer::insertStepperHighDelay();
-    Extruder::unstep();
-    EXTRUDER_OCR = timer+Printer::maxExtruderSpeed;
-#endif
+    else
+    {
+        Extruder::step();
+        Printer::extruderStepsNeeded -= extruderLastDirection;
+        Printer::insertStepperHighDelay();
+        Extruder::unstep();
+    }
+    EXTRUDER_OCR = timer + Printer::maxExtruderSpeed;
 }
+#endif
 
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
@@ -919,55 +931,56 @@ ring_buffer_tx tx_buffer = { { 0 }, 0, 0};
 
 inline void rf_store_char(unsigned char c, ring_buffer *buffer)
 {
-  int i = (unsigned int)(buffer->head + 1) & SERIAL_BUFFER_MASK;
+    uint8_t i = (buffer->head + 1) & SERIAL_BUFFER_MASK;
 
-  // if we should be storing the received character into the location
-  // just before the tail (meaning that the head would advance to the
-  // current location of the tail), we're about to overflow the buffer
-  // and so we don't write the character or advance the head.
-  if (i != buffer->tail) {
-    buffer->buffer[buffer->head] = c;
-    buffer->head = i;
-  }
+    // if we should be storing the received character into the location
+    // just before the tail (meaning that the head would advance to the
+    // current location of the tail), we're about to overflow the buffer
+    // and so we don't write the character or advance the head.
+    if (i != buffer->tail)
+    {
+        buffer->buffer[buffer->head] = c;
+        buffer->head = i;
+    }
 }
 #if !defined(USART0_RX_vect) && defined(USART1_RX_vect)
 // do nothing - on the 32u4 the first USART is USART1
 #else
-  void rfSerialEvent() __attribute__((weak));
-  void rfSerialEvent() {}
-  #define serialEvent_implemented
+void rfSerialEvent() __attribute__((weak));
+void rfSerialEvent() {}
+#define serialEvent_implemented
 #if defined(USART_RX_vect)
-  SIGNAL(USART_RX_vect)
+SIGNAL(USART_RX_vect)
 #elif defined(USART0_RX_vect)
-  SIGNAL(USART0_RX_vect)
+SIGNAL(USART0_RX_vect)
 #else
 #if defined(SIG_USART0_RECV)
-  SIGNAL(SIG_USART0_RECV)
+SIGNAL(SIG_USART0_RECV)
 #elif defined(SIG_UART0_RECV)
-  SIGNAL(SIG_UART0_RECV)
+SIGNAL(SIG_UART0_RECV)
 #elif defined(SIG_UART_RECV)
-  SIGNAL(SIG_UART_RECV)
+SIGNAL(SIG_UART_RECV)
 #else
-  #error "Don't know what the Data Received vector is called for the first UART"
+#error "Don't know what the Data Received vector is called for the first UART"
 #endif
 #endif
-  {
-  #if defined(UDR0)
+{
+#if defined(UDR0)
     unsigned char c  =  UDR0;
-  #elif defined(UDR)
+#elif defined(UDR)
     unsigned char c  =  UDR;
-  #else
-    #error UDR not defined
-  #endif
+#else
+#error UDR not defined
+#endif
     rf_store_char(c, &rx_buffer);
-  }
+}
 #endif
 
 #if !defined(USART0_UDRE_vect) && defined(USART1_UDRE_vect)
 // do nothing - on the 32u4 the first USART is USART1
 #else
 #if !defined(UART0_UDRE_vect) && !defined(UART_UDRE_vect) && !defined(USART0_UDRE_vect) && !defined(USART_UDRE_vect)
-  #error "Don't know what the Data Register Empty vector is called for the first UART"
+#error "Don't know what the Data Register Empty vector is called for the first UART"
 #else
 #if defined(UART0_UDRE_vect)
 ISR(UART0_UDRE_vect)
@@ -979,27 +992,29 @@ ISR(USART0_UDRE_vect)
 ISR(USART_UDRE_vect)
 #endif
 {
-  if (tx_buffer.head == tx_buffer.tail) {
-	// Buffer empty, so disable interrupts
+    if (tx_buffer.head == tx_buffer.tail)
+    {
+        // Buffer empty, so disable interrupts
 #if defined(UCSR0B)
-    bit_clear(UCSR0B, UDRIE0);
+        bit_clear(UCSR0B, UDRIE0);
 #else
-    bit_clear(UCSRB, UDRIE);
+        bit_clear(UCSRB, UDRIE);
 #endif
-  }
-  else {
-    // There is more data in the output buffer. Send the next byte
-    unsigned char c = tx_buffer.buffer[tx_buffer.tail];
-    tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
+    }
+    else
+    {
+        // There is more data in the output buffer. Send the next byte
+        uint8_t c = tx_buffer.buffer[tx_buffer.tail];
+        tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
 
-  #if defined(UDR0)
-    UDR0 = c;
-  #elif defined(UDR)
-    UDR = c;
-  #else
-    #error UDR not defined
-  #endif
-  }
+#if defined(UDR0)
+        UDR0 = c;
+#elif defined(UDR)
+        UDR = c;
+#else
+#error UDR not defined
+#endif
+    }
 }
 #endif
 #endif
@@ -1008,146 +1023,154 @@ ISR(USART_UDRE_vect)
 // Constructors ////////////////////////////////////////////////////////////////
 
 RFHardwareSerial::RFHardwareSerial(ring_buffer *rx_buffer, ring_buffer_tx *tx_buffer,
-  volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
-  volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
-  volatile uint8_t *udr,
-  uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
+                                   volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
+                                   volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
+                                   volatile uint8_t *udr,
+                                   uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)
 {
-  _rx_buffer = rx_buffer;
-  _tx_buffer = tx_buffer;
-  _ubrrh = ubrrh;
-  _ubrrl = ubrrl;
-  _ucsra = ucsra;
-  _ucsrb = ucsrb;
-  _udr = udr;
-  _rxen = rxen;
-  _txen = txen;
-  _rxcie = rxcie;
-  _udrie = udrie;
-  _u2x = u2x;
+    _rx_buffer = rx_buffer;
+    _tx_buffer = tx_buffer;
+    _ubrrh = ubrrh;
+    _ubrrl = ubrrl;
+    _ucsra = ucsra;
+    _ucsrb = ucsrb;
+    _udr = udr;
+    _rxen = rxen;
+    _txen = txen;
+    _rxcie = rxcie;
+    _udrie = udrie;
+    _u2x = u2x;
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
 
 void RFHardwareSerial::begin(unsigned long baud)
 {
-  uint16_t baud_setting;
-  bool use_u2x = true;
+    uint16_t baud_setting;
+    bool use_u2x = true;
 
 #if F_CPU == 16000000UL
-  // hardcoded exception for compatibility with the bootloader shipped
-  // with the Duemilanove and previous boards and the firmware on the 8U2
-  // on the Uno and Mega 2560.
-  if (baud == 57600) {
-    use_u2x = false;
-  }
+    // hardcoded exception for compatibility with the bootloader shipped
+    // with the Duemilanove and previous boards and the firmware on the 8U2
+    // on the Uno and Mega 2560.
+    if (baud == 57600)
+    {
+        use_u2x = false;
+    }
 #endif
 
 try_again:
 
-  if (use_u2x) {
-    *_ucsra = 1 << _u2x;
-    baud_setting = (F_CPU / 4 / baud - 1) / 2;
-  } else {
-    *_ucsra = 0;
-    baud_setting = (F_CPU / 8 / baud - 1) / 2;
-  }
+    if (use_u2x)
+    {
+        *_ucsra = 1 << _u2x;
+        baud_setting = (F_CPU / 4 / baud - 1) / 2;
+    }
+    else
+    {
+        *_ucsra = 0;
+        baud_setting = (F_CPU / 8 / baud - 1) / 2;
+    }
 
-  if ((baud_setting > 4095) && use_u2x)
-  {
-    use_u2x = false;
-    goto try_again;
-  }
+    if ((baud_setting > 4095) && use_u2x)
+    {
+        use_u2x = false;
+        goto try_again;
+    }
 
-  // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
-  *_ubrrh = baud_setting >> 8;
-  *_ubrrl = baud_setting;
+    // assign the baud_setting, a.k.a. ubbr (USART Baud Rate Register)
+    *_ubrrh = baud_setting >> 8;
+    *_ubrrl = baud_setting;
 
-  bit_set(*_ucsrb, _rxen);
-  bit_set(*_ucsrb, _txen);
-  bit_set(*_ucsrb, _rxcie);
-  bit_clear(*_ucsrb, _udrie);
+    bit_set(*_ucsrb, _rxen);
+    bit_set(*_ucsrb, _txen);
+    bit_set(*_ucsrb, _rxcie);
+    bit_clear(*_ucsrb, _udrie);
 }
 
 void RFHardwareSerial::end()
 {
-  // wait for transmission of outgoing data
-  while (_tx_buffer->head != _tx_buffer->tail)
-    ;
+    // wait for transmission of outgoing data
+    while (_tx_buffer->head != _tx_buffer->tail)
+        ;
 
-  bit_clear(*_ucsrb, _rxen);
-  bit_clear(*_ucsrb, _txen);
-  bit_clear(*_ucsrb, _rxcie);
-  bit_clear(*_ucsrb, _udrie);
+    bit_clear(*_ucsrb, _rxen);
+    bit_clear(*_ucsrb, _txen);
+    bit_clear(*_ucsrb, _rxcie);
+    bit_clear(*_ucsrb, _udrie);
 
-  // clear a  ny received data
-  _rx_buffer->head = _rx_buffer->tail;
+    // clear a  ny received data
+    _rx_buffer->head = _rx_buffer->tail;
 }
 
 int RFHardwareSerial::available(void)
 {
-  return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) & SERIAL_BUFFER_MASK;
+    return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) & SERIAL_BUFFER_MASK;
+}
+int RFHardwareSerial::outputUnused(void)
+{
+    return SERIAL_TX_BUFFER_SIZE-(unsigned int)((SERIAL_TX_BUFFER_SIZE + _tx_buffer->head - _tx_buffer->tail) & SERIAL_TX_BUFFER_MASK);
 }
 
 int RFHardwareSerial::peek(void)
 {
-  if (_rx_buffer->head == _rx_buffer->tail) {
-    return -1;
-  } else {
+    if (_rx_buffer->head == _rx_buffer->tail)
+    {
+        return -1;
+    }
     return _rx_buffer->buffer[_rx_buffer->tail];
-  }
 }
 
 int RFHardwareSerial::read(void)
 {
-  // if the head isn't ahead of the tail, we don't have any characters
-  if (_rx_buffer->head == _rx_buffer->tail) {
-    return -1;
-  } else {
+    // if the head isn't ahead of the tail, we don't have any characters
+    if (_rx_buffer->head == _rx_buffer->tail)
+    {
+        return -1;
+    }
     unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
-    _rx_buffer->tail = (unsigned int)(_rx_buffer->tail + 1) & SERIAL_BUFFER_MASK;
+    _rx_buffer->tail = (_rx_buffer->tail + 1) & SERIAL_BUFFER_MASK;
     return c;
-  }
 }
 
 void RFHardwareSerial::flush()
 {
-  while (_tx_buffer->head != _tx_buffer->tail)
-    ;
+    while (_tx_buffer->head != _tx_buffer->tail)
+        ;
 }
 #ifdef COMPAT_PRE1
-  void
+void
 #else
-  size_t
+size_t
 #endif
 RFHardwareSerial::write(uint8_t c)
 {
-  int i = (_tx_buffer->head + 1) & SERIAL_TX_BUFFER_MASK;
+    uint8_t i = (_tx_buffer->head + 1) & SERIAL_TX_BUFFER_MASK;
 
-  // If the output buffer is full, there's nothing for it other than to
-  // wait for the interrupt handler to empty it a bit
-  while (i == _tx_buffer->tail)
-    ;
+    // If the output buffer is full, there's nothing for it other than to
+    // wait for the interrupt handler to empty it a bit
+    while (i == _tx_buffer->tail)
+        ;
 
-  _tx_buffer->buffer[_tx_buffer->head] = c;
-  _tx_buffer->head = i;
+    _tx_buffer->buffer[_tx_buffer->head] = c;
+    _tx_buffer->head = i;
 
-  bit_set(*_ucsrb, _udrie);
+    bit_set(*_ucsrb, _udrie);
 #ifndef COMPAT_PRE1
-  return 1;
+    return 1;
 #endif
 }
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
 #if defined(UBRRH) && defined(UBRRL)
-  RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRIE, U2X);
+RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRIE, U2X);
 #elif defined(UBRR0H) && defined(UBRR0L)
-  RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
+RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
 #elif defined(USBCON)
-  // do nothing - Serial object and buffers are initialized in CDC code
+// do nothing - Serial object and buffers are initialized in CDC code
 #else
-  #error no serial port defined  (port 0)
+#error no serial port defined  (port 0)
 #endif
 
 #endif

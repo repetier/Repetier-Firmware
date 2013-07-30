@@ -253,7 +253,10 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT0_ADVANCE_K 0.0f
 #define EXT0_ADVANCE_L 0.0f
-
+/* Motor steps to remove backlash for advance alorithm. These are the steps
+needed to move the motor cog in reverse direction until it hits the driving
+cog. Direct drive extruder need 0. */
+#define EXT0_ADVANCE_BACKLASH_STEPS 0
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
 #define EXT0_WAIT_RETRACT_TEMP 		150
@@ -363,6 +366,10 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT1_ADVANCE_K 0.0f
 #define EXT1_ADVANCE_L 0.0f
+/* Motor steps to remove backlash for advance alorithm. These are the steps
+needed to move the motor cog in reverse direction until it hits the driving
+cog. Direct drive extruder need 0. */
+#define EXT1_ADVANCE_BACKLASH_STEPS 0
 
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	0
@@ -1036,7 +1043,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
-#define FEATURE_WATCHDOG false
+#define FEATURE_WATCHDOG true
 
 /* Z-Probing */
 
