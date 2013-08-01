@@ -90,8 +90,8 @@ void SDCard::initsd()
 void SDCard::write_command(GCode *code)
 {
     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
-    byte buf[100];
-    byte p=2;
+    uint8_t buf[100];
+    uint8_t p=2;
     file.writeError = false;
     int params = 128 | (code->params & ~1);
     *(int*)buf = params;
@@ -116,11 +116,11 @@ void SDCard::write_command(GCode *code)
     {
         if(code->hasM())
         {
-            buf[p++] = (byte)code->M;
+            buf[p++] = (uint8_t)code->M;
         }
         if(code->hasG())
         {
-            buf[p++] = (byte)code->G;
+            buf[p++] = (uint8_t)code->G;
         }
     }
     if(code->hasX())
@@ -172,24 +172,24 @@ void SDCard::write_command(GCode *code)
         *(float*)&buf[p] = code->J;
         p+=4;
     }
-    if(code->hasString())   // read 16 byte into string
+    if(code->hasString())   // read 16 uint8_t into string
     {
         char *sp = code->text;
         if(code->isV2())
         {
-            byte i = strlen(code->text);
+            uint8_t i = strlen(code->text);
             for(; i; i--) buf[p++] = *sp++;
         }
         else
         {
-            for(byte i=0; i<16; ++i) buf[p++] = *sp++;
+            for(uint8_t i=0; i<16; ++i) buf[p++] = *sp++;
         }
     }
-    byte *ptr = buf;
-    byte len = p;
+    uint8_t *ptr = buf;
+    uint8_t len = p;
     while (len)
     {
-        byte tlen = len > 21 ? 21 : len;
+        uint8_t tlen = len > 21 ? 21 : len;
         len -= tlen;
         do
         {
@@ -212,7 +212,7 @@ void SDCard::write_command(GCode *code)
 char *SDCard::createFilename(char *buffer,const dir_t &p)
 {
     char *pos = buffer,*src = (char*)p.name;
-    for (byte i = 0; i < 11; i++,src++)
+    for (uint8_t i = 0; i < 11; i++,src++)
     {
         if (*src == ' ') continue;
         if (i == 8)
@@ -227,7 +227,7 @@ bool SDCard::showFilename(const uint8_t *name)
 {
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
 #if !SD_ALLOW_LONG_NAMES
-    byte i=11;
+    uint8_t i=11;
     while(i--)
     {
         if(*name=='~') return false;
@@ -237,7 +237,7 @@ bool SDCard::showFilename(const uint8_t *name)
     return true;
 }
 
-void  SDCard::lsRecursive(SdBaseFile *parent,byte level)
+void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
 {
     dir_t *p;
     uint8_t cnt=0;
@@ -342,7 +342,6 @@ void SDCard::startWrite(char *filename)
     if(!file.open(filename, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))
     {
         Com::printFLN(Com::tOpenFailedFile,filename);
-
     }
     else
     {

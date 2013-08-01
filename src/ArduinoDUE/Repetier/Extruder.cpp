@@ -27,13 +27,13 @@
 #endif
 
 
-byte manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
+uint8_t manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 unsigned int counter_periodical=0;
-volatile byte execute_periodical=0;
-byte counter_250ms=25;
+volatile uint8_t execute_periodical=0;
+uint8_t counter_250ms=25;
 
 #ifdef SUPPORT_MAX6675
-extern int read_max6675(byte ss_pin);
+extern int read_max6675(uint8_t ss_pin);
 #endif
 
 #if ANALOG_INPUTS>0
@@ -57,14 +57,14 @@ short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 
 Is called every 100ms.
 */
-
+static uint8_t extruderTempErrors = 0;
 void Extruder::manageTemperatures()
 {
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
-
-    for(byte controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
+    uint8_t errorDetected = 0;
+    for(uint8_t controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
     {
         if(controller == autotuneIndex) continue;
         TemperatureController *act = tempController[controller];
@@ -76,28 +76,32 @@ void Extruder::manageTemperatures()
 #if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
             if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
                 if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
-                        tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                   tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[0].coolerPWM = 0;
                 else
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
             if(controller>1)
 #endif // NUM_EXTRUDER
-            if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
-                extruder[controller].coolerPWM = 0;
-            else
-                extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+                if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                    extruder[controller].coolerPWM = 0;
+                else
+                    extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
         if(!(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
-            Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
-            reportTempsensorError();
+            extruderTempErrors++;
+            errorDetected = 1;
+            if(extruderTempErrors>10) { // Ignore short temporary failures
+                Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+                reportTempsensorError();
+            }
         }
         if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
-        byte on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+        uint8_t on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
 #ifdef TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
-        if(act->heatManager==1)
+        if(act->heatManager == 1)
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
@@ -140,19 +144,19 @@ void Extruder::manageTemperatures()
         }
         else
 #endif
-            if(act->heatManager == 2)   // Bang-bang with reduced change frequency to save relais life
-            {
-                unsigned long time = HAL::timeInMilliseconds();
-                if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
-                {
-                    pwm_pos[act->pwmIndex] = (on ? 255 : 0);
-                    act->lastTemperatureUpdate = time;
-                }
-            }
-            else     // Fast Bang-Bang fallback
+        if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
+        {
+            unsigned long time = HAL::timeInMilliseconds();
+            if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                act->lastTemperatureUpdate = time;
             }
+        }
+        else     // Fast Bang-Bang fallback
+        {
+            pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+        }
 #ifdef MAXTEMP
         if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
             pwm_pos[act->pwmIndex] = 0;
@@ -162,9 +166,11 @@ void Extruder::manageTemperatures()
             WRITE(LED_PIN,on);
 #endif
     }
+    if(errorDetected == 0 && extruderTempErrors>0)
+        extruderTempErrors--;
     if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
     {
-        for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+        for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
         {
             pwm_pos[tempController[i]->pwmIndex] = 0;
         }
@@ -200,7 +206,7 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
     }
     float k = r0*exp(-beta/t0);
     float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
-    for(byte i=0; i<GENERIC_THERM_NUM_ENTRIES; i++)
+    for(uint8_t i=0; i<GENERIC_THERM_NUM_ENTRIES; i++)
     {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
@@ -229,7 +235,7 @@ for temperature reading.
 */
 void Extruder::initExtruder()
 {
-    byte i;
+    uint8_t i;
     Extruder::current = &extruder[0];
 #ifdef USE_GENERIC_THERMISTORTABLE_1
     createGenericTable(temptable_generic1,GENERIC_THERM1_MIN_TEMP,GENERIC_THERM1_MAX_TEMP,GENERIC_THERM1_BETA,GENERIC_THERM1_R0,GENERIC_THERM1_T0,GENERIC_THERM1_R1,GENERIC_THERM1_R2);
@@ -310,7 +316,7 @@ void TemperatureController::updateTempControlVars()
 
 This function changes and initalizes a new extruder. This is also called, after the eeprom values are changed.
 */
-void Extruder::selectExtruderById(byte extruderId)
+void Extruder::selectExtruderById(uint8_t extruderId)
 {
     if(extruderId>=NUM_EXTRUDER)
         extruderId = 0;
@@ -328,18 +334,18 @@ void Extruder::selectExtruderById(byte extruderId)
     long dy = -Printer::offsetY*Printer::axisStepsPerMM[1]-Extruder::current->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
-    Printer::currentPositionSteps[3] = Extruder::current->extrudePosition;
+    Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
 #endif
-    Printer::destinationSteps[3] = Printer::currentPositionSteps[3];
-    Printer::axisStepsPerMM[3] = Extruder::current->stepsPerMM;
-    Printer::invAxisStepsPerMM[3] = 1.0f/Printer::axisStepsPerMM[3];
-    Printer::maxFeedrate[3] = Extruder::current->maxFeedrate;
+    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+    Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
+    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f/Printer::axisStepsPerMM[E_AXIS];
+    Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
 //   max_start_speed_units_per_second[3] = Extruder::current->maxStartFeedrate;
-    Printer::maxAccelerationMMPerSquareSecond[3] = Printer::maxTravelAccelerationMMPerSquareSecond[3] = Extruder::current->maxAcceleration;
-    Printer::maxTravelAccelerationStepsPerSquareSecond[3] = Printer::maxPrintAccelerationStepsPerSquareSecond[3] = Printer::maxAccelerationMMPerSquareSecond[3] * Printer::axisStepsPerMM[3];
+    Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
+    Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxAccelerationMMPerSquareSecond[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
 #if defined(USE_ADVANCE)
-    Printer::minExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
-    Printer::maxExtruderSpeed = (byte)floor(F_CPU/(TIMER0_PRESCALE*Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
+    Printer::minExtruderSpeed = (uint8_t)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
+    Printer::maxExtruderSpeed = (uint8_t)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
     if(Printer::maxExtruderSpeed>15) Printer::maxExtruderSpeed = 15;
     if(Printer::maxExtruderSpeed>=Printer::minExtruderSpeed)
     {
@@ -349,20 +355,12 @@ void Extruder::selectExtruderById(byte extruderId)
     {
         float maxdist = Extruder::current->maxFeedrate*Extruder::current->maxFeedrate*0.00013888/Extruder::current->maxAcceleration;
         maxdist-= Extruder::current->maxStartFeedrate*Extruder::current->maxStartFeedrate*0.5/Extruder::current->maxAcceleration;
-        Printer::extruderAccelerateDelay = (byte)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
+        //Printer::extruderAccelerateDelay = (uint8_t)constrain(ceil(maxdist*Extruder::current->stepsPerMM/(Printer::minExtruderSpeed-Printer::maxExtruderSpeed)),1,255);
     }
-    float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[3]))*60.0; // Limit feedrate to interrupt speed
-    if(fmax<Printer::maxFeedrate[3]) Printer::maxFeedrate[3] = fmax;
+    float fmax=((float)HAL::maxExtruderTimerFrequency()/((float)Printer::maxExtruderSpeed*Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
+    if(fmax<Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif
     Extruder::current->tempControl.updateTempControlVars();
-#if USE_OPS==1
-    Printer::opsRetractSteps = Printer::opsRetractDistance*Extruder::current->stepsPerMM;
-    Printer::opsPushbackSteps = (Printer::opsRetractDistance+Printer::opsRetractBacklash)*Extruder::current->stepsPerMM;
-    if(Printer::opsMode<=1)
-        Printer::opsMoveAfterSteps = 0;
-    else
-        Printer::opsMoveAfterSteps = (int)(-(float)Printer::opsRetractSteps*(100.0-Printer::opsMoveAfter)*0.01);
-#endif
     if(dx || dy)
     {
         float oldfeedrate = Printer::feedrate;
@@ -378,10 +376,10 @@ void Extruder::selectExtruderById(byte extruderId)
 #endif
 }
 
-void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
+void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
 {
     bool alloffs = true;
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloffs = false;
 #ifdef MAXTEMP
     if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
@@ -394,7 +392,7 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,byte extr)
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temp_celsius,0);
     bool alloff = true;
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
 #if EEPROM_MODE != 0
     if(alloff && !alloffs) // All heaters are now switched off?
@@ -472,36 +470,36 @@ const short temptable_8[NUMTEMPS_8][2] PROGMEM =
 #define NUMTEMPS_9 67 // 100k Honeywell 135-104LAG-J01
 const short temptable_9[NUMTEMPS_9][2] PROGMEM =
 {
-   {1*4, 941*8},{19*4, 362*8},{37*4, 299*8}, //top rating 300C
-   {55*4, 266*8},{73*4, 245*8},{91*4, 229*8},{109*4, 216*8},{127*4, 206*8},{145*4, 197*8},{163*4, 190*8},{181*4, 183*8},{199*4, 177*8},
-   {217*4, 171*8},{235*4, 166*8},{253*4, 162*8},{271*4, 157*8},{289*4, 153*8},{307*4, 149*8},{325*4, 146*8},{343*4, 142*8},{361*4, 139*8},
-   {379*4, 135*8},{397*4, 132*8},{415*4, 129*8},{433*4, 126*8},{451*4, 123*8},{469*4, 121*8},{487*4, 118*8},{505*4, 115*8},{523*4, 112*8},
-   {541*4, 110*8},{559*4, 107*8},{577*4, 105*8},{595*4, 102*8},{613*4, 99*8},{631*4, 97*8},{649*4, 94*8},{667*4, 92*8},{685*4, 89*8},
-   {703*4, 86*8},{721*4, 84*8},{739*4, 81*8},{757*4, 78*8},{775*4, 75*8},{793*4, 72*8},{811*4, 69*8},{829*4, 66*8},{847*4, 62*8},
-   {865*4, 59*8},{883*4, 55*8},{901*4, 51*8},{919*4, 46*8},{937*4, 41*8},
-   {955*4, 35*8},{973*4, 27*8},{991*4, 17*8},{1009*4, 1*8},{1023*4, 0}  //to allow internal 0 degrees C
+    {1*4, 941*8},{19*4, 362*8},{37*4, 299*8}, //top rating 300C
+    {55*4, 266*8},{73*4, 245*8},{91*4, 229*8},{109*4, 216*8},{127*4, 206*8},{145*4, 197*8},{163*4, 190*8},{181*4, 183*8},{199*4, 177*8},
+    {217*4, 171*8},{235*4, 166*8},{253*4, 162*8},{271*4, 157*8},{289*4, 153*8},{307*4, 149*8},{325*4, 146*8},{343*4, 142*8},{361*4, 139*8},
+    {379*4, 135*8},{397*4, 132*8},{415*4, 129*8},{433*4, 126*8},{451*4, 123*8},{469*4, 121*8},{487*4, 118*8},{505*4, 115*8},{523*4, 112*8},
+    {541*4, 110*8},{559*4, 107*8},{577*4, 105*8},{595*4, 102*8},{613*4, 99*8},{631*4, 97*8},{649*4, 94*8},{667*4, 92*8},{685*4, 89*8},
+    {703*4, 86*8},{721*4, 84*8},{739*4, 81*8},{757*4, 78*8},{775*4, 75*8},{793*4, 72*8},{811*4, 69*8},{829*4, 66*8},{847*4, 62*8},
+    {865*4, 59*8},{883*4, 55*8},{901*4, 51*8},{919*4, 46*8},{937*4, 41*8},
+    {955*4, 35*8},{973*4, 27*8},{991*4, 17*8},{1009*4, 1*8},{1023*4, 0}  //to allow internal 0 degrees C
 };
 #define NUMTEMPS_10 20 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
 const short temptable_10[NUMTEMPS_10][2] PROGMEM =
 {
-   {1*4, 704*8},{54*4, 216*8},{107*4, 175*8},{160*4, 152*8},{213*4, 137*8},{266*4, 125*8},{319*4, 115*8},{372*4, 106*8},{425*4, 99*8},
-   {478*4, 91*8},{531*4, 85*8},{584*4, 78*8},{637*4, 71*8},{690*4, 65*8},{743*4, 58*8},{796*4, 50*8},{849*4, 42*8},{902*4, 31*8},
-   {955*4, 17*8},{1008*4, 0}
+    {1*4, 704*8},{54*4, 216*8},{107*4, 175*8},{160*4, 152*8},{213*4, 137*8},{266*4, 125*8},{319*4, 115*8},{372*4, 106*8},{425*4, 99*8},
+    {478*4, 91*8},{531*4, 85*8},{584*4, 78*8},{637*4, 71*8},{690*4, 65*8},{743*4, 58*8},{796*4, 50*8},{849*4, 42*8},{902*4, 31*8},
+    {955*4, 17*8},{1008*4, 0}
 };
 #define NUMTEMPS_11 31 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
 const short temptable_11[NUMTEMPS_11][2] PROGMEM =
 {
-	{1*4, 936*8},{36*4, 300*8},{71*4, 246*8},{106*4, 218*8},{141*4, 199*8},{176*4, 185*8},{211*4, 173*8},{246*4, 163*8},{281*4, 155*8},
-	{316*4, 147*8},{351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},
-	{631*4, 97*8},{666*4, 92*8},{701*4, 87*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},
-	{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0}
+    {1*4, 936*8},{36*4, 300*8},{71*4, 246*8},{106*4, 218*8},{141*4, 199*8},{176*4, 185*8},{211*4, 173*8},{246*4, 163*8},{281*4, 155*8},
+    {316*4, 147*8},{351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},
+    {631*4, 97*8},{666*4, 92*8},{701*4, 87*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},
+    {946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0}
 };
 #define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pullup)
 const short temptable_12[NUMTEMPS_12][2] PROGMEM =
 {
-   {1*4, 929*8},{36*4, 299*8},{71*4, 246*8},{106*4, 217*8},{141*4, 198*8},{176*4, 184*8},{211*4, 173*8},{246*4, 163*8},{281*4, 154*8},{316*4, 147*8},
-   {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
-   {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
+    {1*4, 929*8},{36*4, 299*8},{71*4, 246*8},{106*4, 217*8},{141*4, 198*8},{176*4, 184*8},{211*4, 173*8},{246*4, 163*8},{281*4, 154*8},{316*4, 147*8},
+    {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
+    {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
 #if NUM_TEMPS_USERTHERMISTOR0>0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
@@ -533,15 +531,15 @@ const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_10[0][0]
         ,(short int *)&temptable_11[0][0]
         ,(short int *)&temptable_12[0][0]
-                                            };
-const byte temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                             };
+const uint8_t temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
                               NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12
                                         };
 
 
 void TemperatureController::updateCurrentTemperature()
 {
-    byte type = sensorType;
+    uint8_t type = sensorType;
     // get raw temperature
     switch(type)
     {
@@ -566,7 +564,7 @@ void TemperatureController::updateCurrentTemperature()
     case 50: // User defined PTC table
     case 51:
     case 52:
-    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
     case 100: // AD595
         currentTemperature = (osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS));
         break;
@@ -597,8 +595,8 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     {
         type--;
-        byte num = pgm_read_byte(&temptables_num[type])<<1;
-        byte i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
+        uint8_t i=2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -627,8 +625,8 @@ void TemperatureController::updateCurrentTemperature()
     case 52:
     {
         type-=46;
-        byte num = pgm_read_byte(&temptables_num[type])<<1;
-        byte i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
+        uint8_t i=2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -649,7 +647,7 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
         break;
     }
-    case 60: // AD8495 (Delivers 5mV/°C vs the AD595's 10mV)
+    case 60: // AD8495 (Delivers 5mV/degC vs the AD595's 10mV)
         currentTemperatureC = ((float)currentTemperature * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -665,7 +663,7 @@ void TemperatureController::updateCurrentTemperature()
     case 98:
     case 99:
     {
-        byte i=2;
+        uint8_t i=2;
         const short *temptable;
 #ifdef USE_GENERIC_THERMISTORTABLE_1
         if(type == 97)
@@ -708,7 +706,7 @@ void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
     int temp = TEMP_FLOAT_TO_INT(target);
-    byte type = sensorType;
+    uint8_t type = sensorType;
     switch(sensorType)
     {
     case 1:
@@ -725,8 +723,8 @@ void TemperatureController::setTargetTemperature(float target)
     case 12:
     {
         type--;
-        byte num = pgm_read_byte(&temptables_num[type])<<1;
-        byte i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
+        uint8_t i=2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -752,8 +750,8 @@ void TemperatureController::setTargetTemperature(float target)
     case 52:
     {
         type-=46;
-        byte num = pgm_read_byte(&temptables_num[type])<<1;
-        byte i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
+        uint8_t i=2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -774,7 +772,7 @@ void TemperatureController::setTargetTemperature(float target)
         targetTemperature = newraw;
         break;
     }
-    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
         targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
         break;
     case 100: // HEATER_USES_AD595
@@ -790,7 +788,7 @@ void TemperatureController::setTargetTemperature(float target)
     case 98:
     case 99:
     {
-        byte i=2;
+        uint8_t i=2;
         const short *temptable;
 #ifdef USE_GENERIC_THERMISTORTABLE_1
         if(type == 97)
@@ -827,10 +825,10 @@ void TemperatureController::setTargetTemperature(float target)
     }
 }
 
-byte autotuneIndex = 255;
+uint8_t autotuneIndex = 255;
 void Extruder::disableAllHeater()
 {
-    for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+    for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
     {
         TemperatureController *c = tempController[i];
         c->targetTemperature = 0;
@@ -841,7 +839,7 @@ void Extruder::disableAllHeater()
 }
 
 #ifdef TEMP_PID
-void TemperatureController::autotunePID(float temp,byte controllerId)
+void TemperatureController::autotunePID(float temp,uint8_t controllerId)
 {
     float currentTemp;
     int cycles=0;
@@ -864,7 +862,6 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     Extruder::disableAllHeater(); // switch off all heaters.
     autotuneIndex = controllerId;
     pwm_pos[pwmIndex] = pidMax;
-
     if(controllerId<NUM_EXTRUDER)
     {
         extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;
@@ -873,7 +870,7 @@ void TemperatureController::autotunePID(float temp,byte controllerId)
     for(;;)
     {
 #if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
+        HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
         updateCurrentTemperature();
@@ -993,7 +990,7 @@ void write_monitor()
 bool reportTempsensorError()
 {
     if(!Printer::isAnyTempsensorDefect()) return false;
-    for(byte i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+    for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
     {
         int temp = tempController[i]->currentTemperatureC;
         if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
@@ -1009,7 +1006,7 @@ bool reportTempsensorError()
 }
 
 #ifdef SUPPORT_MAX6675
-int read_max6675(byte ss_pin)
+int read_max6675(uint8_t ss_pin)
 {
     int max6675_temp = 0;
 #ifdef	PRR
@@ -1070,7 +1067,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT0_ADVANCE_K
 #endif
-        ,EXT0_ADVANCE_L
+        ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
@@ -1090,7 +1087,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT1_ADVANCE_K
 #endif
-        ,EXT1_ADVANCE_L
+        ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
@@ -1110,7 +1107,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT2_ADVANCE_K
 #endif
-        ,EXT2_ADVANCE_L
+        ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
@@ -1130,7 +1127,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT3_ADVANCE_K
 #endif
-        ,EXT3_ADVANCE_L
+        ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
@@ -1150,7 +1147,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT4_ADVANCE_K
 #endif
-        ,EXT4_ADVANCE_L
+        ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
@@ -1170,7 +1167,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef ENABLE_QUADRATIC_ADVANCE
         ,EXT5_ADVANCE_K
 #endif
-        ,EXT5_ADVANCE_L
+        ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER

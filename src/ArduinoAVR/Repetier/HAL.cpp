@@ -890,7 +890,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
         extruderLastDirection = -1;
         timer += 40; // Add some more wait time to prevent blocking
     }
-    else
+    else if(Printer::extruderStepsNeeded > 0)
     {
         Extruder::step();
         Printer::extruderStepsNeeded -= extruderLastDirection;

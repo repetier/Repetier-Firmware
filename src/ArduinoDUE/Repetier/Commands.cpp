@@ -110,7 +110,7 @@ void Commands::printTemperatures()
     Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
 #if NUM_EXTRUDER>1
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         Com::printF(Com::tSpaceT,(int)i);
         Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
@@ -155,7 +155,7 @@ void Commands::reportPrinterUsage()
     Com::printF(Com::tPrintedFilament,dist,2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
 
     long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000)+HAL::eprGetInt32(EPR_PRINTING_TIME);
@@ -206,11 +206,11 @@ void current_control_init() //Initialize Digipot Motor Current
 
 #if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
 
-void set_current( byte channel, unsigned short level )
+void set_current( uint8_t channel, unsigned short level )
 {
-    const byte ltc_channels[] =  LTC2600_CHANNELS;
+    const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
     if(channel>LTC2600_NUM_CHANNELS) return;
-    byte address = ltc_channels[channel];
+    uint8_t address = ltc_channels[channel];
     char i;
 
 
@@ -254,7 +254,7 @@ void set_current( byte channel, unsigned short level )
 void current_control_init() //Initialize LTC2600 Motor Current
 {
     const unsigned int ltc_current[] =  MOTOR_CURRENT;
-    byte i;
+    uint8_t i;
     for(i=0; i<LTC2600_NUM_CHANNELS; i++)
     {
         set_current(i, ltc_current[i] );
@@ -366,7 +366,7 @@ void Commands::executeGCode(GCode *com)
     {
         if(com->hasG() || (com->hasM() && com->M!=111))
         {
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             return;
         }
     }
@@ -527,7 +527,7 @@ void Commands::executeGCode(GCode *com)
             break;
         case 28:  //G28 Home all Axis one at a time
         {
-            byte home_all_axis = (com->hasNoXYZ());
+            uint8_t home_all_axis = (com->hasNoXYZ());
             Printer::homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
             Printer::updateCurrentPosition();
         }
@@ -687,7 +687,7 @@ void Commands::executeGCode(GCode *com)
         break;
 
         }
-        previous_millis_cmd = HAL::timeInMilliseconds();
+        previousMillisCmd = HAL::timeInMilliseconds();
     }
 
     else if(com->hasM())    // Process M Code
@@ -744,7 +744,7 @@ void Commands::executeGCode(GCode *com)
             if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)
             {
                 int pin_number = com->P;
-                for(byte i = 0; i < (byte)sizeof(sensitive_pins); i++)
+                for(uint8_t i = 0; i < (uint8_t)sizeof(sensitive_pins); i++)
                 {
                     if (pgm_read_byte(&sensitive_pins[i]) == pin_number)
                     {
@@ -765,7 +765,7 @@ void Commands::executeGCode(GCode *com)
         case 104: // M104
 #if NUM_EXTRUDER>0
             if(reportTempsensorError()) break;
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
 #ifdef EXACT_TEMPERATURE_TIMING
             Commands::waitUntilEndOfAllMoves();
@@ -784,7 +784,7 @@ void Commands::executeGCode(GCode *com)
             break;
         case 140: // M140 set bed temp
             if(reportTempsensorError()) break;
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
             if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
             break;
@@ -795,7 +795,7 @@ void Commands::executeGCode(GCode *com)
         {
 #if NUM_EXTRUDER>0
             if(reportTempsensorError()) break;
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
             UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
             Commands::waitUntilEndOfAllMoves();
@@ -809,7 +809,7 @@ void Commands::executeGCode(GCode *com)
             millis_t printedTime = HAL::timeInMilliseconds();
             millis_t waituntil = 0;
 #if RETRACT_DURING_HEATUP
-            byte retracted = 0;
+            uint8_t retracted = 0;
 #endif
             millis_t cur_time;
             do
@@ -848,7 +848,7 @@ void Commands::executeGCode(GCode *com)
         }
         UI_CLEAR_STATUS;
 #endif
-        previous_millis_cmd = HAL::timeInMilliseconds();
+        previousMillisCmd = HAL::timeInMilliseconds();
         break;
         case 190: // M190 - Wait bed for heater to reach target.
 #if HAVE_HEATED_BED
@@ -873,7 +873,7 @@ void Commands::executeGCode(GCode *com)
 #endif
 #endif
             UI_CLEAR_STATUS;
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             break;
 #ifdef BEEPER_PIN
         case 300:
@@ -911,7 +911,7 @@ void Commands::executeGCode(GCode *com)
         case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
             Commands::waitUntilEndOfAllMoves();
-            previous_millis_cmd = HAL::timeInMilliseconds();
+            previousMillisCmd = HAL::timeInMilliseconds();
             SET_OUTPUT(PS_ON_PIN); //GND
             WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
@@ -932,7 +932,7 @@ void Commands::executeGCode(GCode *com)
         case 84:
             if(com->hasS())
             {
-                stepper_inactive_time = com->S * 1000;
+                stepperInactiveTime = com->S * 1000;
             }
             else
             {
@@ -942,9 +942,9 @@ void Commands::executeGCode(GCode *com)
             break;
         case 85: // M85
             if(com->hasS())
-                max_inactive_time = (long)com->S * 1000;
+                maxInactiveTime = (long)com->S * 1000;
             else
-                max_inactive_time = 0;
+                maxInactiveTime = 0;
             break;
         case 92: // M92
             if(com->hasX()) Printer::axisStepsPerMM[0] = com->X;
@@ -1089,8 +1089,11 @@ void Commands::executeGCode(GCode *com)
             break;
 #ifdef USE_ADVANCE
         case 223: // Extruder interrupt test
-            if(com->hasS())
+            if(com->hasS()) {
+                BEGIN_INTERRUPT_PROTECTED
                 Printer::extruderStepsNeeded+=com->S;
+                END_INTERRUPT_PROTECTED
+            }
             break;
         case 232:
             Com::printF(Com::tLinearStepsColon,maxadv2);
@@ -1103,45 +1106,6 @@ void Commands::executeGCode(GCode *com)
 #endif
             maxadv2=0;
             maxadvspeed=0;
-            break;
-#endif
-#if USE_OPS==1
-        case 231: // M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backslash> F<ReatrctMove>
-            if(com->hasS() && com->S>=0 && com->S<3)
-                Printer::opsMode = com->S;
-            if(com->hasX() && com->X>=0)
-                Printer::opsMinDistance = com->X;
-            if(com->hasY() && com->Y>=0)
-                Printer::opsRetractDistance = com->Y;
-            if(com->hasZ() && com->Z>=-Printer::opsRetractDistance)
-                Printer::opsRetractBacklash = com->Z;
-            if(com->hasF() && com->F>=0 && com->F<=100)
-                Printer::opsMoveAfter = com->F;
-            Extruder::selectExtruderById(Extruder::current->id);
-            if(Printer::opsMode==0)
-            {
-                Com::printFLN(Com::tOPSDisabled);
-            }
-            else
-            {
-                if(Printer::opsMode==1)
-                    Com::printFLN(Com::tOPSClassicMode);
-                else
-                    Com::printFLN(Com::tOPSFastMode);
-
-                Com::printF(Com::tMinDistance,Printer::opsMinDistance);
-                Com::printF(Com::tRetractEqual,Printer::opsRetractDistance);
-                Com::printF(Com::tBacklashEqual,Printer::opsRetractBacklash);
-                if(Printer::opsMode==2)
-                    Com::printF(Com::tMoveAfter,Printer::opsMoveAfter);
-                Com::println();
-                Printer::updateAdvanceFlags();
-            }
-#ifdef DEBUG_OPS
-            Com::printFLN(Com::tRetrSteps,Printer::opsRetractSteps);
-            Com::printFLN(Com::tPushBackSteps,Printer::opsPushbackSteps);
-            Com::printFLN(Com::tMoveAfterSteps,Printer::opsMoveAfterSteps);
-#endif
             break;
 #endif
 #ifdef USE_ADVANCE
@@ -1225,6 +1189,7 @@ void Commands::executeGCode(GCode *com)
 #endif
         }
         break;
+#if FEATURE_Z_PROBE
 #if FEATURE_AUTOLEVEL
         case 320: // Activate autolevel
             Printer::setAutolevelActive(true);
@@ -1254,6 +1219,7 @@ void Commands::executeGCode(GCode *com)
                 Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
             break;*/
 #endif // FEATURE_AUTOLEVEL
+#endif // FEATURE_Z_PROBE
 #if FEATURE_SERVO
         case 340:
             if(com->hasP() && com->P<4 && com->P>=0) {
@@ -1285,7 +1251,7 @@ void Commands::executeGCode(GCode *com)
                     Printer::zMin = 0;
                     Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
                     Printer::zMaxSteps = Printer::countZSteps;
-                    for (byte i=0; i<3; i++)
+                    for (uint8_t i=0; i<3; i++)
                     {
                         Printer::currentPositionSteps[i] = 0;
                     }
@@ -1325,7 +1291,7 @@ void Commands::emergencyStop()
     //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
     kill(false);
     Extruder::manageTemperatures();
-    for(byte i=0; i<NUM_EXTRUDER+3; i++)
+    for(uint8_t i=0; i<NUM_EXTRUDER+3; i++)
         pwm_pos[i] = 0;
 #if EXT0_HEATER_PIN>-1
     WRITE(EXT0_HEATER_PIN,0);

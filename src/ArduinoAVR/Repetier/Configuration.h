@@ -307,7 +307,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_STEP_PIN E1_STEP_PIN
 #define EXT1_DIR_PIN E1_DIR_PIN
 // set to false/true for normal/inverse direction
-#define EXT1_INVERSE false
+#define EXT1_INVERSE true
 #define EXT1_ENABLE_PIN E1_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT1_ENABLE_ON false
@@ -327,7 +327,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
  Overridden if EEPROM activated.
 */
-#define EXT1_HEAT_MANAGER 1
+#define EXT1_HEAT_MANAGER 3
 /** Wait x seconds, after reaching target temperature. Only used for M109.  Overridden if EEPROM activated. */
 #define EXT1_WATCHPERIOD 1
 
@@ -350,8 +350,8 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
  Overridden if EEPROM activated.
 */
 #define EXT1_PID_INTEGRAL_DRIVE_MIN 60
-/** P-gain.  Overridden if EEPROM activated. */
-#define EXT1_PID_P   24
+/** P-gain or dead time for heat manager 3.  Overridden if EEPROM activated. */
+#define EXT1_PID_P   8
 /** I-gain.  Overridden if EEPROM activated.
 */
 #define EXT1_PID_I   0.88

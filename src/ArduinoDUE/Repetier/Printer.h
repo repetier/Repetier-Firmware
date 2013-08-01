@@ -35,44 +35,36 @@
 class Printer
 {
 public:
+#if defined(USE_ADVANCE)
+    static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
+    static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
+    static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
+    //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
+    static int advanceStepsSet;
+#ifdef ENABLE_QUADRATIC_ADVANCE
+    static long advanceExecuted;             ///< Executed advance steps
+#endif
+#endif
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
-    static float max_start_speed_units_per_second[];
     static long maxAccelerationMMPerSquareSecond[];
     static long maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
     static unsigned long maxTravelAccelerationStepsPerSquareSecond[];
-    static byte relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
-    static byte relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
+    static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
+    static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-    static byte unitIsInches;
+    static uint8_t unitIsInches;
 
-    static byte debugLevel;
-    static byte flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
-    static byte stepsPerTimerCall;
-#if USE_OPS==1 || defined(USE_ADVANCE)
-    volatile static int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-//  float extruderSpeed;              ///< Extruder speed in mm/s.
-    static byte minExtruderSpeed;            ///< Timer delay for start extruder speed
-    static byte maxExtruderSpeed;            ///< Timer delay for end extruder speed
-    static byte extruderAccelerateDelay;     ///< delay between 2 speec increases
-#endif
+    static uint8_t debugLevel;
+    static uint8_t flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
+    static uint8_t stepsPerTimerCall;
     static unsigned long interval;    ///< Last step duration in ticks.
-#if USE_OPS==1
-    static bool filamentRetracted;           ///< Is the extruder filament retracted
-#endif
     static unsigned long timer;              ///< used for acceleration/deceleration timing
     static unsigned long stepNumber;         ///< Step number in current move.
     static long coordinateOffset[3];
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
-    static long advance_executed;             ///< Executed advance steps
-#endif
-    static int advance_steps_set;
-    static unsigned int advance_lin_set;
-#endif
     static long currentPositionSteps[4];     ///< Position in steps from origin.
     static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
@@ -95,16 +87,6 @@ public:
     static long levelingP1[3];
     static long levelingP2[3];
     static long levelingP3[3];
-#endif
-#if USE_OPS==1
-    static int opsRetractSteps;              ///< Retract filament this much steps
-    static int opsPushbackSteps;             ///< Retract+extra distance for backsash
-    static float opsMinDistance;
-    static float opsRetractDistance;
-    static float opsRetractBacklash;
-    static byte opsMode;                     ///< OPS operation mode. 0 = Off, 1 = Classic, 2 = Fast
-    static float opsMoveAfter;               ///< Start move after opsModeAfter percent off full retract.
-    static int opsMoveAfterSteps;            ///< opsMoveAfter converted in steps (negative value!).
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
@@ -134,12 +116,12 @@ public:
     static unsigned int vMaxReached;         ///< Maximumu reached speed
     static unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;            ///< mm of filament printed since counting started
-    static byte waslasthalfstepping;         ///< Indicates if last move had halfstepping enabled
+    static uint8_t wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
     static float backlashX;
     static float backlashY;
     static float backlashZ;
-    static byte backlashDir;
+    static uint8_t backlashDir;
 #endif
 #ifdef DEBUG_STEPCOUNT
     static long totalStepsRemaining;
@@ -287,19 +269,19 @@ public:
 #endif
         }
     }
-    static inline byte isLargeMachine()
+    static inline uint8_t isLargeMachine()
     {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
-    static inline void setLargeMachine(byte b)
+    static inline void setLargeMachine(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
     }
-    static inline byte isAdvanceActivated()
+    static inline uint8_t isAdvanceActivated()
     {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
-    static inline void setAdvanceActivated(byte b)
+    static inline void setAdvanceActivated(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
@@ -521,14 +503,19 @@ public:
         yp = currentPosition[1];
         zp = currentPosition[2];
     }
+    static inline void insertStepperHighDelay() {
+#if STEPPER_HIGH_DELAY>0
+        HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
+#endif
+    }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();
     static void updateCurrentPosition();
-    static void kill(byte only_steppers);
+    static void kill(uint8_t only_steppers);
     static void updateAdvanceFlags();
     static void setup();
     static void defaultLoopActions();
-    static byte setDestinationStepsFromGCode(GCode *com);
+    static uint8_t setDestinationStepsFromGCode(GCode *com);
     static void moveTo(float x,float y,float z,float e,float f);
     static void moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis

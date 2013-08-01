@@ -4,13 +4,13 @@
 #define CELSIUS_EXTRA_BITS 3
 
 //#ifdef TEMP_PID
-//extern byte current_extruder_out;
+//extern uint8_t current_extruder_out;
 //#endif
 
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggels the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
-extern byte manage_monitor;
+extern uint8_t manage_monitor;
 
 /** TemperatureController manages one heater-temperature sensore loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
@@ -19,26 +19,26 @@ extern byte manage_monitor;
 class TemperatureController
 {
     public:
-    byte pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
-    byte sensorType; ///< Type of temperature sensor.
-    byte sensorPin; ///< Pin to read extruder temperature.
-    int currentTemperature; ///< Currenttemperature value read from sensor.
-    int targetTemperature; ///< Target temperature value in units of sensor.
-    float currentTemperatureC; ///< Current temperature in ¡ãC.
-    float targetTemperatureC; ///< Target temperature in ¡ãC.
-    unsigned long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+    uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
+    uint8_t sensorType; ///< Type of temperature sensor.
+    uint8_t sensorPin; ///< Pin to read extruder temperature.
+    int16_t currentTemperature; ///< Currenttemperature value read from sensor.
+    int16_t targetTemperature; ///< Target temperature value in units of sensor.
+    float currentTemperatureC; ///< Current temperature in degC.
+    float targetTemperatureC; ///< Target temperature in degC.
+    uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
+    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
 #ifdef TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
-    byte pidDriveMax; ///< Used for windup in PID calculation.
-    byte pidDriveMin; ///< Used for windup in PID calculation.
+    uint8_t pidDriveMax; ///< Used for windup in PID calculation.
+    uint8_t pidDriveMin; ///< Used for windup in PID calculation.
     float pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
     float pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
     float pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
-    byte pidMax; ///< Maximum PWM value, the heater should be set.
+    uint8_t pidMax; ///< Maximum PWM value, the heater should be set.
     float tempIStateLimitMax;
     float tempIStateLimitMin;
-    byte tempPointer;
+    uint8_t tempPointer;
     float tempArray[4];
 #endif
 
@@ -46,7 +46,7 @@ class TemperatureController
     void updateCurrentTemperature();
     void updateTempControlVars();
 #ifdef TEMP_PID
-    void autotunePID(float temp,byte controllerId);
+    void autotunePID(float temp,uint8_t controllerId);
 #endif
 };
 /** \brief Data to drive one extruder.
@@ -58,33 +58,34 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 {
     public:
     static Extruder *current;
-    byte id;
-    long xOffset;
-    long yOffset;
+    uint8_t id;
+    int32_t xOffset;
+    int32_t yOffset;
     float stepsPerMM;        ///< Steps per mm.
-    byte enablePin;          ///< Pin to enable extruder stepper motor.
-//  byte directionPin; ///< Pin number to assign the direction.
-//  byte stepPin; ///< Pin number for a step.
-    byte enableOn;
-//  byte invertDir; ///< 1 if the direction of the extruder should be inverted.
+    uint8_t enablePin;          ///< Pin to enable extruder stepper motor.
+//  uint8_t directionPin; ///< Pin number to assign the direction.
+//  uint8_t stepPin; ///< Pin number for a step.
+    uint8_t enableOn;
+//  uint8_t invertDir; ///< 1 if the direction of the extruder should be inverted.
     float maxFeedrate;      ///< Maximum feedrate in mm/s.
     float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
     float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
-    long extrudePosition;   ///< Current extruder position in steps.
-    int watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
-    int waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
-    int waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
+    int32_t extrudePosition;   ///< Current extruder position in steps.
+    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
+    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
+    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     float advanceK;         ///< Koefficient for advance algorithm. 0 = off
 #endif
     float advanceL;
+    int16_t advanceBacklash;
 #endif
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
-    byte coolerSpeed; ///< Speed to use when enabled
-    byte coolerPWM; ///< current PWM setting
+    uint8_t coolerSpeed; ///< Speed to use when enabled
+    uint8_t coolerPWM; ///< current PWM setting
 
     /** \brief Sends the high-signal to the stepper for next extruder step.
     Call this function only, if interrupts are disabled.
@@ -174,7 +175,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #endif
     }
     /** \brief Activates the extruder stepper and sets the direction. */
-    static inline void setDirection(byte dir)
+    static inline void setDirection(uint8_t dir)
     {
 #if NUM_EXTRUDER==1
         if(dir)
@@ -248,13 +249,13 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     }
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
-    static void selectExtruderById(byte extruderId);
+    static void selectExtruderById(uint8_t extruderId);
     static void disableAllHeater();
     static void initExtruder();
     static void initHeatedBed();
     static void setHeatedBedTemperature(float temp_celsius);
     static float getHeatedBedTemperature();
-    static void setTemperatureForExtruder(float temp_celsius,byte extr);
+    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr);
 };
 
 #if HAVE_HEATED_BED
@@ -269,7 +270,7 @@ extern TemperatureController heatedBedController;
 //extern Extruder *Extruder::current;
 extern Extruder extruder[];
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
-extern byte autotuneIndex;
+extern uint8_t autotuneIndex;
 
 
 #endif // EXTRUDER_H_INCLUDED

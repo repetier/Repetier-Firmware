@@ -302,8 +302,9 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_origin,UI_TEXT_SET_TO_ORIGIN,UI_ACTION_SET_O
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER);
 UI_MENU_CHANGEACTION(ui_menu_quick_speedmultiply,UI_TEXT_SPEED_MULTIPLY,UI_ACTION_FEEDRATE_MULTIPLY);
 UI_MENU_CHANGEACTION(ui_menu_quick_flowmultiply,UI_TEXT_FLOW_MULTIPLY,UI_ACTION_FLOWRATE_MULTIPLY);
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT);
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper,&ui_menu_quick_debug}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,9+UI_MENU_BACKCNT);
 
 // **** Fan menu
 
@@ -354,23 +355,6 @@ UI_MENU_ACTIONCOMMAND(ui_menu_debug_dryrun,UI_TEXT_DBG_DRYRUN,UI_ACTION_DEBUG_DR
 
 #define UI_MENU_DEBUGGING {UI_MENU_ADDCONDBACK &ui_menu_debug_echo,&ui_menu_debug_info,&ui_menu_debug_error,&ui_menu_debug_dryrun}
 UI_MENU(ui_menu_debugging,UI_MENU_DEBUGGING,4+UI_MENU_BACKCNT);
-
-// **** OPS configuration
-#if USE_OPS==1
-UI_MENU_ACTIONCOMMAND(ui_menu_ops_off,UI_TEXT_OPS_OFF,UI_ACTION_OPS_OFF);
-UI_MENU_ACTIONCOMMAND(ui_menu_ops_classic,UI_TEXT_OPS_CLASSIC,UI_ACTION_OPS_CLASSIC);
-UI_MENU_ACTIONCOMMAND(ui_menu_ops_fast,UI_TEXT_OPS_FAST,UI_ACTION_OPS_FAST);
-UI_MENU_CHANGEACTION(ui_menu_ops_retract,UI_TEXT_OPS_RETRACT,UI_ACTION_OPS_RETRACTDISTANCE);
-UI_MENU_CHANGEACTION(ui_menu_ops_backslash,UI_TEXT_OPS_BACKSLASH,UI_ACTION_OPS_BACKLASH);
-UI_MENU_CHANGEACTION(ui_menu_ops_mindist,UI_TEXT_OPS_MINDIST,UI_ACTION_OPS_MINDISTANCE);
-UI_MENU_CHANGEACTION(ui_menu_ops_moveafter,UI_TEXT_OPS_MOVE_AFTER,UI_ACTION_OPS_MOVE_AFTER);
-#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &ui_menu_ops_off,&ui_menu_ops_classic,&ui_menu_ops_fast,&ui_menu_ops_retract,&ui_menu_ops_backslash,&ui_menu_ops_mindist,&ui_menu_ops_moveafter}
-UI_MENU(ui_menu_ops,UI_MENU_OPS,7+UI_MENU_BACKCNT);
-UI_MENU_SUBMENU(ui_menu_ops_sub,UI_TEXT_ANTI_OOZE,ui_menu_ops);
-#define UI_MENU_ADDCONDOPS &ui_menu_ops_sub,
-#else
-#define UI_MENU_ADDCONDOPS
-#endif
 
 // **** Acceleration settings
 #if DRIVE_SYSTEM!=3
@@ -497,8 +481,8 @@ UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_DELTA, ui_menu_delta);
 #define UI_MENU_DELTA_COND
 #define UI_MENU_DELTA_CNT 0
 #endif
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,UI_MENU_ADDCONDOPS &ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+USE_OPS+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
 // Main menu
 UI_MENU_SUBMENU(ui_menu_main1,UI_TEXT_QUICK_SETTINGS,ui_menu_quick);
 UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);

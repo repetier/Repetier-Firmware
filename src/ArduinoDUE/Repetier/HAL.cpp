@@ -156,6 +156,7 @@ void HAL::analogStart(void)
   {
       osAnalogInputCounter[i] = 0;
       osAnalogInputValues[i] = 0;
+
   // osAnalogInputChannels
       //adcEnable |= (0x1u << adcChannel[i]);
       adcEnable |= (0x1u << osAnalogInputChannels[i]);
@@ -232,45 +233,46 @@ void HAL::resetHardware() {
 *************************************************************************/
 void HAL::i2cInit(unsigned long clockSpeedHz)
 {
-    // enable TWI
-	pmc_enable_periph_clk(TWI_ID);
-
-    // Configure pins
-	PIO_Configure(g_APinDescription[SDA_PIN].pPort,
-                  g_APinDescription[SDA_PIN].ulPinType,
-                  g_APinDescription[SDA_PIN].ulPin,
-                  g_APinDescription[SDA_PIN].ulPinConfiguration);
-	PIO_Configure(g_APinDescription[SCL_PIN].pPort,
-                  g_APinDescription[SCL_PIN].ulPinType,
-                  g_APinDescription[SCL_PIN].ulPin,
-                  g_APinDescription[SCL_PIN].ulPinConfiguration);
-
-    // Set to Master mode with known state
-    TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;
-    TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;
-    TWI_INTERFACE->TWI_RHR;
-    TWI_INTERFACE->TWI_IMR = 0;
-
-    TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSDIS;
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN; 
-
-    // Set i2c clock rate
-    uint32_t dwCkDiv = 0;
-    uint32_t dwClDiv;
-    while ( dwClDiv == 0 )
-    {
+    // enable TWI                                                        
+    pmc_enable_periph_clk(TWI_ID);                                       
+                                                                         
+    // Configure pins                                                    
+    PIO_Configure(g_APinDescription[SDA_PIN].pPort,                      
+                  g_APinDescription[SDA_PIN].ulPinType,                  
+                  g_APinDescription[SDA_PIN].ulPin,                      
+                  g_APinDescription[SDA_PIN].ulPinConfiguration);        
+    PIO_Configure(g_APinDescription[SCL_PIN].pPort,                      
+                  g_APinDescription[SCL_PIN].ulPinType,                  
+                  g_APinDescription[SCL_PIN].ulPin,                      
+                  g_APinDescription[SCL_PIN].ulPinConfiguration);        
+                                                                         
+    // Set to Master mode with known state                               
+    TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;                                 
+    TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;                                
+    TWI_INTERFACE->TWI_RHR;                                              
+    TWI_INTERFACE->TWI_IMR = 0;                                          
+                                                                         
+    TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;                                
+    TWI_INTERFACE->TWI_CR = TWI_CR_MSDIS;                                
+    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN;                                 
+                                                                         
+    // Set i2c clock rate                                                
+    uint32_t dwCkDiv = 0;                                                
+    uint32_t dwClDiv;                                                    
+    while ( dwClDiv == 0 )                                               
+    {                                                                    
         dwClDiv = ((F_CPU_TRUE / (2 * clockSpeedHz)) - 4) / (1<<dwCkDiv);
-
-        if ( dwClDiv > 255 )
-        {
-            dwCkDiv++;
-            dwClDiv = 0;
-        }
-    }
-    TWI_INTERFACE->TWI_CWGR = 0;
+                                                                         
+        if ( dwClDiv > 255 )                                             
+        {                                                                
+            dwCkDiv++;                                                   
+            dwClDiv = 0;                                                 
+        }                                                                
+    }                                                                    
+    TWI_INTERFACE->TWI_CWGR = 0;                                         
     TWI_INTERFACE->TWI_CWGR = (dwCkDiv << 16) | (dwClDiv << 8) | dwClDiv;
 }
+
 
 /*************************************************************************
   Issues a start condition and sends address and transfer direction.
@@ -302,7 +304,7 @@ unsigned char HAL::i2cStart(unsigned char address_and_direction)
 *************************************************************************/
 void HAL::i2cStartWait(unsigned char address_and_direction)
 {
-    uint32_t twiDirection = address_and_direction & 1;
+     uint32_t twiDirection = address_and_direction & 1;
     uint32_t address = address_and_direction >> 1;
 
     while(!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP));
@@ -334,15 +336,13 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
       pos &= 0xFF;
     }
 
-    // set to master mode
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS;
-
     // set master mode register with internal address
     TWI_INTERFACE->TWI_MMR = 0;
     TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | EEPROM_ADDRSZ_BYTES |
          TWI_MMR_DADR(address);
 
     // write internal address register
+    TWI_INTERFACE->TWI_IADR = 0;
     TWI_INTERFACE->TWI_IADR = TWI_IADR_IADR(pos);
 }
 
@@ -351,8 +351,8 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
 *************************************************************************/
 void HAL::i2cStop(void)
 {
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;
     i2cTxFinished();
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; 
     i2cCompleted ();
 }
 
@@ -377,8 +377,9 @@ void HAL::i2cCompleted (void)
 *************************************************************************/
 void HAL::i2cTxFinished(void)
 {
-    while(!((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) == TWI_SR_TXRDY));
+    while( (TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY);
 }
+
 
 /*************************************************************************
   Send one byte to I2C device
@@ -413,7 +414,7 @@ void HAL::i2cWriting( uint8_t data )
 *************************************************************************/
 unsigned char HAL::i2cReadAck(void)
 {
-    while( !((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) == TWI_SR_RXRDY) );
+    while( (TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY );
     return TWI_INTERFACE->TWI_RHR;
 }
 
@@ -426,7 +427,7 @@ unsigned char HAL::i2cReadNak(void)
 {
     TWI_INTERFACE->TWI_CR = TWI_CR_STOP;
     
-    while( !((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) == TWI_SR_RXRDY) );
+    while( (TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY );
     unsigned char data = i2cReadAck();
     i2cCompleted();
     return data;
@@ -557,13 +558,13 @@ void TIMER1_COMPA_VECTOR ()
         if(waitRelax==0)
         {
 #ifdef USE_ADVANCE
-            if(Printer::advance_steps_set)
+            if(Printer::advanceStepsSet)
             {
-                Printer::extruderStepsNeeded-=Printer::advance_steps_set;
+                Printer::extruderStepsNeeded-=Printer::advanceStepsSet;
 #ifdef ENABLE_QUADRATIC_ADVANCE
-                Printer::advance_executed = 0;
+                Printer::advanceExecuted = 0;
 #endif
-                Printer::advance_steps_set = 0;
+                Printer::advanceStepsSet = 0;
             }
             if((!Printer::extruderStepsNeeded) && (DISABLE_E)) 
                 Extruder::disableCurrentExtruderMotor();
@@ -730,12 +731,6 @@ void PWM_TIMER_VECTOR ()
     pwm_count++;
 }
 
-#if defined(USE_ADVANCE)
-byte extruder_wait_dirchange=0; ///< Wait cycles, if direction changes. Prevents stepper from loosing steps.
-char extruder_last_dir = 0;
-byte extruder_speed = 0;
-#endif
-
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optimal 
@@ -749,38 +744,34 @@ be done with the maximum allowable speed for the extruder.
 // EXTRUDER_TIMER IRQ handler
 void EXTRUDER_TIMER_VECTOR ()
 {
+    static int8_t extruderLastDirection = 0;
     // apparently have to read status register
     TC_GetStatus(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);
 
     if(!Printer::isAdvanceActivated()) return; // currently no need
-
     // get current extruder timer count value
     uint32_t timer = EXTRUDER_TIMER->TC_CHANNEL[EXTRUDER_TIMER_CHANNEL].TC_RC;
 
-    // have to convert old AVR delay values for Due timers
-    timer += Printer::maxExtruderSpeed; // / (F_CPU_TRUE / F_CPU);
-    bool increasing = Printer::extruderStepsNeeded>0;
-
-    // Require at least 2 steps in one direction before going to action
-    if(abs(Printer::extruderStepsNeeded)<2)
+    if(!Printer::isAdvanceActivated()) return; // currently no need
+    if(Printer::extruderStepsNeeded > 0 && extruderLastDirection!=1)
     {
-        TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, timer);
-        ANALYZER_OFF(ANALYZER_CH2);
-        extruder_last_dir = 0;
-        return;
+        Extruder::setDirection(true);
+        extruderLastDirection = 1;
+        timer += 40; // Add some more wait time to prevent blocking
     }
-
-    if(extruder_last_dir==0)
+    else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection!=-1)
     {
-        Extruder::setDirection(increasing ? 1 : 0);
-        extruder_last_dir = (increasing ? 1 : -1);
+        Extruder::setDirection(false);
+        extruderLastDirection = -1;
+        timer += 40; // Add some more wait time to prevent blocking
     }
-    Extruder::step();
-    Printer::extruderStepsNeeded-=extruder_last_dir;
-#if STEPPER_HIGH_DELAY>0
-    HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
-#endif
-    Extruder::unstep();
+    else if(Printer::extruderStepsNeeded > 0)
+    {
+        Extruder::step();
+        Printer::extruderStepsNeeded -= extruderLastDirection;
+        Printer::insertStepperHighDelay();
+        Extruder::unstep();
+    }
 
     TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, timer);
 }

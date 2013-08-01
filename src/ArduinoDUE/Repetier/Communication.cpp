@@ -30,6 +30,7 @@ FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWAR
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #endif
 #endif
+FSTRINGVALUE(Com::tDebug,"Debug:");
 FSTRINGVALUE(Com::tOk,"ok")
 FSTRINGVALUE(Com::tNewline,"\r\n")
 FSTRINGVALUE(Com::tNAN,"NAN")
@@ -111,16 +112,6 @@ FSTRINGVALUE(Com::tLinearStepsColon," linear steps:")
 FSTRINGVALUE(Com::tQuadraticStepsColon," quadratic steps:")
 FSTRINGVALUE(Com::tCommaSpeedEqual,", speed=")
 
-FSTRINGVALUE(Com::tOPSDisabled,"OPS disabled")
-FSTRINGVALUE(Com::tOPSClassicMode,"OPS classic mode:")
-FSTRINGVALUE(Com::tOPSFastMode,"OPS fast mode:")
-FSTRINGVALUE(Com::tMinDistance,"min distance = ")
-FSTRINGVALUE(Com::tRetractEqual,", retract = ")
-FSTRINGVALUE(Com::tBacklashEqual,", backlash = ")
-FSTRINGVALUE(Com::tMoveAfter,", move after = ")
-FSTRINGVALUE(Com::tRetrSteps,"Ret. steps:")
-FSTRINGVALUE(Com::tPushBackSteps,"PushBack Steps:")
-FSTRINGVALUE(Com::tMoveAfterSteps,"Move after steps:")
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
 #if DRIVE_SYSTEM==3
@@ -429,12 +420,12 @@ void Com::printFLN(FSTRINGPARAM(text),unsigned long value) {
     printNumber(value);
     println();
 }
-void Com::printFLN(FSTRINGPARAM(text),float value,byte digits) {
+void Com::printFLN(FSTRINGPARAM(text),float value,uint8_t digits) {
     printF(text);
     printFloat(value,digits);
     println();
 }
-void Com::printF(FSTRINGPARAM(text),float value,byte digits) {
+void Com::printF(FSTRINGPARAM(text),float value,uint8_t digits) {
     printF(text);
     printFloat(value,digits);
 }
@@ -464,15 +455,15 @@ void Com::printNumber(unsigned long n) {
 
   print(str);
 }
-void Com::printArrayFLN(FSTRINGPARAM(text),float *arr,byte n,byte digits) {
+void Com::printArrayFLN(FSTRINGPARAM(text),float *arr,uint8_t n,uint8_t digits) {
     printF(text);
-    for(byte i=0; i<n; i++)
+    for(uint8_t i=0; i<n; i++)
         printF(Com::tSpace,arr[i],digits);
     println();
 }
-void Com::printArrayFLN(FSTRINGPARAM(text),long *arr,byte n) {
+void Com::printArrayFLN(FSTRINGPARAM(text),long *arr,uint8_t n) {
     printF(text);
-    for(byte i=0; i<n; i++)
+    for(uint8_t i=0; i<n; i++)
         printF(Com::tSpace,arr[i]);
     println();
 }

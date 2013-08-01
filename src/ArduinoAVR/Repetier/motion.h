@@ -467,9 +467,9 @@ public:
         HAL::forbidInterrupts();
         Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
         if(tred>0 && Printer::advanceStepsSet<=0)
-            Printer::extruderStepsNeeded += (current->advanceBacklash << 1);
+            Printer::extruderStepsNeeded += (Extruder::current->advanceBacklash << 1);
         else if(tred<0 && Printer::advanceStepsSet>=0)
-            Printer::extruderStepsNeeded -= (current->advanceBacklash << 1);
+            Printer::extruderStepsNeeded -= (Extruder::current->advanceBacklash << 1);
         Printer::advanceStepsSet = tred;
         HAL::allowInterrupts();
 #endif

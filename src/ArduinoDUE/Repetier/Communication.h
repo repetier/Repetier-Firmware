@@ -25,6 +25,7 @@
 class Com
 {
     public:
+FSTRINGVAR(tDebug)
 FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)
 FSTRINGVAR(tNewline)
@@ -106,16 +107,6 @@ FSTRINGVAR(tZJerkColon)
 FSTRINGVAR(tLinearStepsColon)
 FSTRINGVAR(tQuadraticStepsColon)
 FSTRINGVAR(tCommaSpeedEqual)
-FSTRINGVAR(tOPSDisabled)
-FSTRINGVAR(tOPSClassicMode)
-FSTRINGVAR(tOPSFastMode)
-FSTRINGVAR(tMinDistance)
-FSTRINGVAR(tRetractEqual)
-FSTRINGVAR(tBacklashEqual)
-FSTRINGVAR(tMoveAfter)
-FSTRINGVAR(tRetrSteps)
-FSTRINGVAR(tPushBackSteps)
-FSTRINGVAR(tMoveAfterSteps)
 FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 
@@ -360,20 +351,20 @@ static void printF(FSTRINGPARAM(text),int value);
 static void printF(FSTRINGPARAM(text),const char *msg);
 static void printF(FSTRINGPARAM(text),long value);
 static void printF(FSTRINGPARAM(text),unsigned long value);
-static void printF(FSTRINGPARAM(text),float value,byte digits=2);
+static void printF(FSTRINGPARAM(text),float value,uint8_t digits=2);
 static void printFLN(FSTRINGPARAM(text),int value);
 static void printFLN(FSTRINGPARAM(text),long value);
 static void printFLN(FSTRINGPARAM(text),unsigned long value);
 static void printFLN(FSTRINGPARAM(text),const char *msg);
-static void printFLN(FSTRINGPARAM(text),float value,byte digits=2);
-static void printArrayFLN(FSTRINGPARAM(text),float *arr,byte n=4,byte digits=2);
-static void printArrayFLN(FSTRINGPARAM(text),long *arr,byte n=4);
+static void printFLN(FSTRINGPARAM(text),float value,uint8_t digits=2);
+static void printArrayFLN(FSTRINGPARAM(text),float *arr,uint8_t n=4,uint8_t digits=2);
+static void printArrayFLN(FSTRINGPARAM(text),long *arr,uint8_t n=4);
 static void print(long value);
 static inline void print(unsigned long value) {printNumber(value);}
 static inline void print(int value) {print((long)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}
-static void printFloat(float number, byte digits);
+static void printFloat(float number, uint8_t digits);
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
     protected:
     private:

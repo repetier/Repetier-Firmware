@@ -20,7 +20,7 @@
 
 #define MAX_CMD_SIZE 96
 class SDCard;
-class GCode   // 52 bytes per command needed
+class GCode   // 52 uint8_ts per command needed
 {
     unsigned int params;
     unsigned int params2;
@@ -33,7 +33,7 @@ public:
     float Z;
     float E;
     float F;
-    byte T;
+    uint8_t T;
     long S;
     long P;
     float I;
@@ -120,7 +120,7 @@ public:
     }
 
     void printCommand();
-    bool parseBinary(byte *buffer,bool fromSerial);
+    bool parseBinary(uint8_t *buffer,bool fromSerial);
     bool parseAscii(char *line,bool fromSerial);
     void popCurrentCommand();
     void echoCommand();
@@ -130,9 +130,10 @@ public:
     static void readFromSerial();
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
-    static byte computeBinarySize(char *ptr);
+    static uint8_t computeBinarySize(char *ptr);
 
     friend class SDCard;
+    friend class UIDisplay;
 private:
     void checkAndPushCommand();
     static void requestResend();
@@ -146,20 +147,20 @@ private:
     }
 
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
-    static byte bufferReadIndex; ///< Read position in gcode_buffer.
-    static byte bufferWriteIndex; ///< Write position in gcode_buffer.
-    static byte commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
-    static byte commandsReceivingWritePosition; ///< Writing position in gcode_transbuffer.
-    static byte sendAsBinary; ///< Flags the command as binary input.
-    static byte wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
-    static byte commentDetected; ///< Flags true if we are reading the comment part of a command.
-    static byte binaryCommandSize; ///< Expected size of the incoming binary command.
+    static uint8_t bufferReadIndex; ///< Read position in gcode_buffer.
+    static uint8_t bufferWriteIndex; ///< Write position in gcode_buffer.
+    static uint8_t commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
+    static uint8_t commandsReceivingWritePosition; ///< Writing position in gcode_transbuffer.
+    static uint8_t sendAsBinary; ///< Flags the command as binary input.
+    static uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
+    static uint8_t commentDetected; ///< Flags true if we are reading the comment part of a command.
+    static uint8_t binaryCommandSize; ///< Expected size of the incoming binary command.
     static bool waitUntilAllCommandsAreParsed; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
     static long lastLineNumber; ///< Last line number received.
     static long actLineNumber; ///< Line number of current command.
     static signed char waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
-    static volatile byte bufferLength; ///< Number of commands stored in gcode_buffer
-    static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing bytes.
+    static volatile uint8_t bufferLength; ///< Number of commands stored in gcode_buffer
+    static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 };
 
 

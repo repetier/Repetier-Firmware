@@ -47,7 +47,7 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // 
 long ui_autoreturn_time=0;
 #endif
 
-void beep(byte duration,byte count)
+void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
 #if BEEPER_TYPE!=0
@@ -60,7 +60,7 @@ void beep(byte duration,byte count)
     HAL::i2cWrite( 0x14); // Start at port a
 #endif
 #endif
-    for(byte i=0; i<count; i++)
+    for(uint8_t i=0; i<count; i++)
     {
 #if BEEPER_TYPE==1
         WRITE(BEEPER_PIN,HIGH);
@@ -115,7 +115,7 @@ UIDisplay uid;
 // ..... 0
 // ..... 0
 // ..... 0
-const byte character_back[8] PROGMEM = {4,14,21,4,28,0,0,0};
+const uint8_t character_back[8] PROGMEM = {4,14,21,4,28,0,0,0};
 // Degrees sign - code 2
 // ..*.. 4
 // .*.*. 10
@@ -125,7 +125,7 @@ const byte character_back[8] PROGMEM = {4,14,21,4,28,0,0,0};
 // ..... 0
 // ..... 0
 // ..... 0
-const byte character_degree[8] PROGMEM = {4,10,4,0,0,0,0,0};
+const uint8_t character_degree[8] PROGMEM = {4,10,4,0,0,0,0,0};
 // selected - code 3
 // ..... 0
 // ***** 31
@@ -136,7 +136,7 @@ const byte character_degree[8] PROGMEM = {4,10,4,0,0,0,0,0};
 // ***** 31
 // ..... 0
 // ..... 0
-const byte character_selected[8] PROGMEM = {0,31,31,31,31,31,0,0};
+const uint8_t character_selected[8] PROGMEM = {0,31,31,31,31,31,0,0};
 // unselected - code 4
 // ..... 0
 // ***** 31
@@ -147,7 +147,7 @@ const byte character_selected[8] PROGMEM = {0,31,31,31,31,31,0,0};
 // ***** 31
 // ..... 0
 // ..... 0
-const byte character_unselected[8] PROGMEM = {0,31,17,17,17,31,0,0};
+const uint8_t character_unselected[8] PROGMEM = {0,31,17,17,17,31,0,0};
 // unselected - code 5
 // ..*.. 4
 // .*.*. 10
@@ -158,7 +158,7 @@ const byte character_unselected[8] PROGMEM = {0,31,17,17,17,31,0,0};
 // ***** 31
 // ***** 31
 // .***. 14
-const byte character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
+const uint8_t character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
 // unselected - code 6
 // ..... 0
 // ***.. 28
@@ -168,7 +168,7 @@ const byte character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
 // ***** 31
 // ..... 0
 // ..... 0
-const byte character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
+const uint8_t character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
 const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,0};
 
 #define LCD_ENTRYMODE			0x04			/**< Set entrymode */
@@ -223,7 +223,7 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define lcdPutChar(value) lcdWriteByte(value,1)
 #define lcdCommand(value) lcdWriteByte(value,0)
 
-static const byte LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
+static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
 static const char versionString[] PROGMEM = UI_VERSION_STRING;
 static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 
@@ -242,7 +242,7 @@ inline void lcdStopWrite()
 {
     HAL::i2cStop();
 }
-void lcdWriteNibble(byte value)
+void lcdWriteNibble(uint8_t value)
 {
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     value|=uid.outputMask;
@@ -250,7 +250,7 @@ void lcdWriteNibble(byte value)
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
 #else
-    byte v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0);
+    uint8_t v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0);
     HAL::i2cWrite((v) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(v);
 #endif
@@ -264,19 +264,19 @@ void lcdWriteNibble(byte value)
     HAL::i2cWrite(v >> 8);
 #endif
 }
-void lcdWriteByte(byte c,byte rs)
+void lcdWriteByte(uint8_t c,uint8_t rs)
 {
 #if UI_DISPLAY_I2C_CHIPTYPE==0
-    byte mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
+    uint8_t mod = (rs?UI_DISPLAY_RS_PIN:0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
-    byte value = (c >> 4) | mod;
+    uint8_t value = (c >> 4) | mod;
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
     value = (c & 15) | mod;
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
 #else
-    byte value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
+    uint8_t value = (c & 16?UI_DISPLAY_D4_PIN:0)|(c & 32?UI_DISPLAY_D5_PIN:0)|(c & 64?UI_DISPLAY_D6_PIN:0)|(c & 128?UI_DISPLAY_D7_PIN:0) | mod;
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
     value = (c & 1?UI_DISPLAY_D4_PIN:0)|(c & 2?UI_DISPLAY_D5_PIN:0)|(c & 4?UI_DISPLAY_D6_PIN:0)|(c & 8?UI_DISPLAY_D7_PIN:0) | mod;
@@ -338,7 +338,7 @@ void initializeLCD()
 #endif
 #if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2
 
-void lcdWriteNibble(byte value)
+void lcdWriteNibble(uint8_t value)
 {
     WRITE(UI_DISPLAY_D4_PIN,value & 1);
     WRITE(UI_DISPLAY_D5_PIN,value & 2);
@@ -349,7 +349,7 @@ void lcdWriteNibble(byte value)
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
     __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t");
 }
-void lcdWriteByte(byte c,byte rs)
+void lcdWriteByte(uint8_t c,uint8_t rs)
 {
 #if UI_DISPLAY_RW_PIN<0
    HAL::delayMicroseconds(UI_DELAYPERCHAR);
@@ -467,19 +467,19 @@ void initializeLCD()
 
 LiquidCrystal lcd(UI_DISPLAY_RS_PIN, UI_DISPLAY_RW_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN);
 
-void UIDisplay::createChar(byte location,const byte charmap[])
+void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
-    byte data[8];
+    uint8_t data[8];
     for (int i=0; i<8; i++)
     {
         data[i]=pgm_read_byte(&(charmap[i]));
     }
     lcd.createChar(location, data);
 }
-void UIDisplay::printRow(byte r,char *txt)
+void UIDisplay::printRow(uint8_t r,char *txt)
 {
-    byte col=0;
+    uint8_t col=0;
 // Set row
     if(r >= UI_ROWS) return;
     lcd.setCursor(0,r);
@@ -576,7 +576,7 @@ void UIDisplay::initialize()
 #endif
 }
 #if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2 || UI_DISPLAY_TYPE==3
-void UIDisplay::createChar(byte location,const byte PROGMEM charmap[])
+void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     lcdCommand(LCD_SETCGRAMADDR | (location << 3));
@@ -585,9 +585,9 @@ void UIDisplay::createChar(byte location,const byte PROGMEM charmap[])
         lcdPutChar(pgm_read_byte(&(charmap[i])));
     }
 }
-void UIDisplay::printRow(byte r,char *txt)
+void UIDisplay::printRow(uint8_t r,char *txt)
 {
-    byte col=0;
+    uint8_t col=0;
 // Set row
     if(r >= UI_ROWS) return;
 #if UI_DISPLAY_TYPE==3
@@ -615,7 +615,7 @@ void UIDisplay::printRow(byte r,char *txt)
 }
 #endif
 
-void UIDisplay::printRowP(byte r,PGM_P txt)
+void UIDisplay::printRowP(uint8_t r,PGM_P txt)
 {
     if(r >= UI_ROWS) return;
     col=0;
@@ -623,9 +623,9 @@ void UIDisplay::printRowP(byte r,PGM_P txt)
     printCols[col]=0;
     printRow(r,printCols);
 }
-void UIDisplay::addInt(int value,byte digits)
+void UIDisplay::addInt(int value,uint8_t digits)
 {
-    byte dig=0,neg=0;
+    uint8_t dig=0,neg=0;
     if(value<0)
     {
         value = -value;
@@ -660,7 +660,7 @@ void UIDisplay::addInt(int value,byte digits)
 }
 void UIDisplay::addLong(long value,char digits)
 {
-    byte dig = 0,neg=0;
+    uint8_t dig = 0,neg=0;
     if(value<0)
     {
         neg=1;
@@ -694,7 +694,7 @@ void UIDisplay::addLong(long value,char digits)
     }
 }
 const float roundingTable[] PROGMEM = {0.5,0.05,0.005,0.0005};
-void UIDisplay::addFloat(float number, char fixdigits,byte digits)
+void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
 {
     // Handle negative numbers
     if (number < 0.0)
@@ -722,7 +722,7 @@ void UIDisplay::addFloat(float number, char fixdigits,byte digits)
     while (col<UI_COLS && digits-- > 0)
     {
         remainder *= 10.0;
-        byte toPrint = byte(remainder);
+        uint8_t toPrint = uint8_t(remainder);
         printCols[col++] = '0'+toPrint;
         remainder -= toPrint;
     }
@@ -731,7 +731,7 @@ void UIDisplay::addStringP(FSTRINGPARAM(text))
 {
     while(col<UI_COLS)
     {
-        byte c = HAL::readFlashByte(text++);
+        uint8_t c = HAL::readFlashByte(text++);
         if(c==0) return;
         printCols[col++]=c;
     }
@@ -829,24 +829,10 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='Z') addFloat(Printer::homingFeedrate[2],5,0);
             break;
         case 'i':
-            if(c2=='s') addLong(stepper_inactive_time,4);
-            else if(c2=='p') addLong(max_inactive_time,4);
+            if(c2=='s') addLong(stepperInactiveTime,4);
+            else if(c2=='p') addLong(maxInactiveTime,4);
             break;
         case 'O': // ops related stuff
-#if USE_OPS==1
-            if(c2=='0') addStringP(Printer::opsMode==0?ui_selected:ui_unselected);
-            else if(c2=='1') addStringP(Printer::opsMode==1?ui_selected:ui_unselected);
-            else if(c2=='2') addStringP(Printer::opsMode==2?ui_selected:ui_unselected);
-            else if(c2=='r') addFloat(Printer::opsRetractDistance,2,1);
-            else if(c2=='b') addFloat(Printer::opsRetractBacklash,2,1);
-            else if(c2=='d') addFloat(Printer::opsMinDistance,2,1);
-            else if(c2=='a')
-            {
-                addFloat(Printer::opsMoveAfter,3,0);
-                if(col<UI_COLS)
-                    printCols[col++]='%';
-            }
-#endif
             break;
         case 'l':
             if(c2=='a') addInt(lastAction,4);
@@ -882,7 +868,7 @@ void UIDisplay::parse(char *txt,bool ram)
             }
             if(c2=='B')
             {
-                addInt((int)PrintLine::lines_count,2);
+                addInt((int)PrintLine::linesCount,2);
                 break;
             }
             if(c2=='f')
@@ -1060,10 +1046,10 @@ void UIDisplay::parse(char *txt,bool ram)
 }
 void UIDisplay::setStatusP(PGM_P txt)
 {
-    byte i=0;
+    uint8_t i=0;
     while(i<16)
     {
-        byte c = pgm_read_byte(txt++);
+        uint8_t c = pgm_read_byte(txt++);
         if(!c) break;
         statusMsg[i++] = c;
     }
@@ -1071,7 +1057,7 @@ void UIDisplay::setStatusP(PGM_P txt)
 }
 void UIDisplay::setStatus(char *txt)
 {
-    byte i=0;
+    uint8_t i=0;
     while(*txt && i<16)
         statusMsg[i++] = *txt++;
     statusMsg[i]=0;
@@ -1079,12 +1065,12 @@ void UIDisplay::setStatus(char *txt)
 
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
 #if SDSUPPORT
-byte nFilesOnCard;
+uint8_t nFilesOnCard;
 
 void UIDisplay::updateSDFileCount()
 {
     dir_t* p;
-    byte offset = menuTop[menuLevel];
+    uint8_t offset = menuTop[menuLevel];
     SdBaseFile *root = sd.fat.vwd();
     root->rewind();
     nFilesOnCard = 0;
@@ -1101,10 +1087,10 @@ void UIDisplay::updateSDFileCount()
         if(nFilesOnCard==254) return;
     }
 }
-void getSDFilenameAt(byte filePos,char *filename)
+void getSDFilenameAt(uint8_t filePos,char *filename)
 {
     dir_t* p;
-    byte c=0;
+    uint8_t c=0;
     SdBaseFile *root = sd.fat.vwd();
     root->rewind();
     while ((p = root->readDirCache()))
@@ -1163,14 +1149,14 @@ void UIDisplay::goDir(char *name)
     sd.fat.chdir(cwd);
     updateSDFileCount();
 }
-void UIDisplay::sdrefresh(byte &r)
+void UIDisplay::sdrefresh(uint8_t &r)
 {
     dir_t* p;
-    byte offset = menuTop[menuLevel];
+    uint8_t offset = menuTop[menuLevel];
     sd.fat.chdir(cwd);
     SdBaseFile *root = sd.fat.vwd();
     root->rewind();
-    byte skip = (offset>0?offset-1:0);
+    uint8_t skip = (offset>0?offset-1:0);
     while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->readDirCache()))
     {
         // done if past last used entry
@@ -1195,7 +1181,7 @@ void UIDisplay::sdrefresh(byte &r)
             printCols[col++] = 6; // Prepend folder symbol
         else
             printCols[col++] = ' ';
-        for (byte i = 0; i < 11; i++)
+        for (uint8_t i = 0; i < 11; i++)
         {
             if (p->name[i] == ' ')continue;
             if (i == 8)
@@ -1211,12 +1197,12 @@ void UIDisplay::sdrefresh(byte &r)
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
-    byte r;
-    byte mtype;
+    uint8_t r;
+    uint8_t mtype;
     if(menuLevel==0)
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
-        byte nr = pgm_read_word_near(&(men->numEntries));
+        uint8_t nr = pgm_read_word_near(&(men->numEntries));
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
         for(r=0; r<nr && r<UI_ROWS; r++)
         {
@@ -1229,9 +1215,9 @@ void UIDisplay::refreshPage()
     else
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        byte nr = pgm_read_word_near((void*)&(men->numEntries));
+        uint8_t nr = pgm_read_word_near((void*)&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));
-        byte offset = menuTop[menuLevel];
+        uint8_t offset = menuTop[menuLevel];
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
         for(r=0; r+offset<nr && r<UI_ROWS; r++)
         {
@@ -1298,8 +1284,8 @@ void UIDisplay::okAction()
         return;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
-    //byte nr = pgm_read_word_near(&(menu->numEntries));
-    byte mtype = pgm_read_byte(&(men->menuType));
+    //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
+    uint8_t mtype = pgm_read_byte(&(men->menuType));
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     unsigned char entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action
@@ -1330,7 +1316,7 @@ void UIDisplay::okAction()
             executeAction(UI_ACTION_BACK);
             return;
         }
-        byte filePos = menuPos[menuLevel]-1;
+        uint8_t filePos = menuPos[menuLevel]-1;
         char filename[14];
         getSDFilenameAt(filePos,filename);
         if(isDirname(filename))   // Directory change selected
@@ -1425,8 +1411,8 @@ void UIDisplay::nextPreviousAction(char next)
         return;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
-    byte nr = pgm_read_word_near(&(men->numEntries));
-    byte mtype = pgm_read_byte(&(men->menuType));
+    uint8_t nr = pgm_read_word_near(&(men->numEntries));
+    uint8_t mtype = pgm_read_byte(&(men->menuType));
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     unsigned char entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
@@ -1530,32 +1516,6 @@ void UIDisplay::nextPreviousAction(char next)
     }
 #endif
     break;
-#if USE_OPS==1
-    case UI_ACTION_OPS_RETRACTDISTANCE:
-        Printer::opsRetractDistance+=increment*0.1;
-        if(Printer::opsRetractDistance<0) Printer::opsRetractDistance=0;
-        else if(Printer::opsRetractDistance>10) Printer::opsRetractDistance=10;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_BACKLASH:
-        Printer::opsRetractBacklash+=increment*0.1;
-        if(Printer::opsRetractBacklash<-5) Printer::opsRetractBacklash=-5;
-        else if(Printer::opsRetractBacklash>5) Printer::opsRetractBacklash=5;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_MOVE_AFTER:
-        Printer::opsMoveAfter+=increment;
-        if(Printer::opsMoveAfter<0) Printer::opsMoveAfter=0;
-        else if(Printer::opsMoveAfter>10) Printer::opsMoveAfter=100;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-    case UI_ACTION_OPS_MINDISTANCE:
-        Printer::opsMinDistance+=increment;
-        if(Printer::opsMinDistance<0) Printer::opsMinDistance=0;
-        else if(Printer::opsMinDistance>10) Printer::opsMinDistance=10;
-        Extruder::selectExtruderById(Extruder::current->id);
-        break;
-#endif
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -1570,10 +1530,10 @@ void UIDisplay::nextPreviousAction(char next)
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:
-        INCREMENT_MIN_MAX(stepper_inactive_time,60,0,9999);
+        INCREMENT_MIN_MAX(stepperInactiveTime,60,0,9999);
         break;
     case UI_ACTION_MAX_INACTIVE:
-        INCREMENT_MIN_MAX(max_inactive_time,60,0,9999);
+        INCREMENT_MIN_MAX(maxInactiveTime,60,0,9999);
         break;
     case UI_ACTION_PRINT_ACCEL_X:
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[0],100,0,10000);
@@ -1885,17 +1845,6 @@ void UIDisplay::executeAction(int action)
             Extruder::setTemperatureForExtruder(0,2);
 #endif
             break;
-#if USE_OPS==1
-        case UI_ACTION_OPS_OFF:
-            Printer::opsMode=0;
-            break;
-        case UI_ACTION_OPS_CLASSIC:
-            Printer::opsMode=1;
-            break;
-        case UI_ACTION_OPS_FAST:
-            Printer::opsMode=2;
-            break;
-#endif
         case UI_ACTION_DISABLE_STEPPER:
             Printer::kill(true);
             break;
@@ -2139,7 +2088,7 @@ void UIDisplay::executeAction(int action)
                 Printer::countZSteps = -Printer::countZSteps;
             Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
             Printer::zMaxSteps = Printer::countZSteps;
-            for (byte i=0; i<3; i++)
+            for (uint8_t i=0; i<3; i++)
             {
                 Printer::currentPositionSteps[i] = 0;
             }
@@ -2153,7 +2102,7 @@ void UIDisplay::executeAction(int action)
 #endif
         case UI_ACTION_SET_P1:
 #ifdef SOFTWARE_LEVELING
-            for (byte i=0; i<3; i++)
+            for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP1[i] = Printer::currentPositionSteps[i];
             }
@@ -2161,7 +2110,7 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_SET_P2:
 #ifdef SOFTWARE_LEVELING
-            for (byte i=0; i<3; i++)
+            for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP2[i] = Printer::currentPositionSteps[i];
             }
@@ -2169,7 +2118,7 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_SET_P3:
 #ifdef SOFTWARE_LEVELING
-            for (byte i=0; i<3; i++)
+            for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP3[i] = Printer::currentPositionSteps[i];
             }
@@ -2178,11 +2127,11 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_CALC_LEVEL:
 #ifdef SOFTWARE_LEVELING
             long factors[4];
-            PrintLine::calculate_plane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
+            PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calc_zoffset(factors,-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower2, PrintLine::calc_zoffset(factors, -Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower3, PrintLine::calc_zoffset(factors, 0, Printer::deltaRadiusSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors,-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, -Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, 0, Printer::deltaRadiusSteps) * Printer::invAxisStepsPerMM[2]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:
@@ -2226,6 +2175,14 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_PAUSE:
             OUT_P_LN("RequestPause:");
             break;
+        case UI_ACTION_WRITE_DEBUG:
+            Com::printF(Com::tDebug,(int)GCode::bufferReadIndex);
+            Com::printF(Com::tComma,(int)GCode::bufferWriteIndex);
+            Com::printF(Com::tComma,(int)GCode::commentDetected);
+            Com::printF(Com::tComma,(int)GCode::bufferLength);
+            Com::printF(Com::tComma,(int)GCode::waitingForResend);
+            Com::printFLN(Com::tComma,(int)GCode::commandsReceivingWritePosition);
+            break;
         }
     refreshPage();
     if(!skipBeep)
@@ -2244,7 +2201,7 @@ void UIDisplay::mediumAction()
 void UIDisplay::slowAction()
 {
     unsigned long time = HAL::timeInMilliseconds();
-    byte refresh=0;
+    uint8_t refresh=0;
 #if UI_HAS_KEYS==1
     // Update key buffer
     HAL::forbidInterrupts();
@@ -2356,7 +2313,7 @@ void UIDisplay::slowAction()
     else if(time-lastRefresh>=1000)
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        byte mtype = pgm_read_byte((void*)&(men->menuType));
+        uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
         if(mtype!=1)
             refresh=1;
     }

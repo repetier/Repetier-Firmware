@@ -251,6 +251,7 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT0_ADVANCE_K 0.0f
 #define EXT0_ADVANCE_L 0.0f
+#define EXT0_ADVANCE_BACKLASH_STEPS 0
 
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
@@ -370,6 +371,7 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
+#define EXT1_ADVANCE_BACKLASH_STEPS 0
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -511,7 +513,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED true
+#define HAVE_HEATED_BED false
 
 #define HEATED_BED_MAX_TEMP 125
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -735,7 +737,7 @@ on this endstop.
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.
 */
-#define DELTA_HOME_ON_POWER true
+#define DELTA_HOME_ON_POWER false
 /** \brief Enable counter to count steps for Z max calculations
 */
 #define STEP_COUNTER

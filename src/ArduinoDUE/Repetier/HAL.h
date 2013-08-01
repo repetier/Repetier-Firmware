@@ -106,7 +106,7 @@
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
 #define ADC_ISR_EOC(channel)    (0x1u << channel) 
-#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
+//#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
 
 #define PULLUP(IO,v)            WRITE(IO, v)
 
@@ -166,7 +166,7 @@
 #define I2C_WRITE   0
 
 #if ANALOG_INPUTS>0
-static const uint32_t adcChannel[] = ENABLED_ADC_CHANNELS;
+//static const uint32_t adcChannel[] = ENABLED_ADC_CHANNELS;
 #endif
 #ifndef DUE_SOFTWARE_SPI
     static int spiDueDividors[] = {10,21,42,84,168,255,255};

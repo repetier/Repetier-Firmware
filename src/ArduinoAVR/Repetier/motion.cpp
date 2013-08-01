@@ -1545,7 +1545,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
+#endif
         cur->updateAdvanceSteps(cur->vStart,0,false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
@@ -1862,7 +1864,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
 #ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
+#endif
         cur->updateAdvanceSteps(cur->vStart,0,false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping

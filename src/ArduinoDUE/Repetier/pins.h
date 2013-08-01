@@ -57,7 +57,7 @@ STEPPER_CURRENT_CONTROL
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN   10
-#define TEMP_0_PIN     11   // Due analog pin #
+#define TEMP_0_PIN     11  // Due analog pin #
 #define HEATER_1_PIN   8
 #define TEMP_1_PIN     12  // Due analog pin #
 #define HEATER_2_PIN   9
@@ -154,7 +154,7 @@ STEPPER_CURRENT_CONTROL
 
 #define SDSUPPORT      true
 #define SDPOWER 	   -1
-#define SDSS		   4 // 10 if using HW SPI. 53 if using SW SPI
+#define SDSS		   4 // 4,10,52 if using HW SPI.
 #define SDCARDDETECT       14
 #define SDCARDDETECTINVERTED false
 #define LED_PIN 	   -1
@@ -182,11 +182,11 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 #define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
 
-#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN,TEMP_3_PIN,TEMP_4_PIN}  
-
 #define TWI_CLOCK_FREQ          400000
+// see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR      0x50   // 7 bit i2c address (without R/W bit)
-#define EEPROM_PAGE_SIZE        64
+#define EEPROM_PAGE_SIZE        64     // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME  7      // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE

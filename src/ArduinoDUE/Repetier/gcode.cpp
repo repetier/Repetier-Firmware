@@ -28,20 +28,20 @@
 #endif
 
 GCode GCode::commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
-byte GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
-byte GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
-byte GCode::commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
-byte GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer.
-byte GCode::sendAsBinary; ///< Flags the command as binary input.
-byte GCode::wasLastCommandReceivedAsBinary=0; ///< Was the last successful command in binary mode?
-byte GCode::commentDetected=false; ///< Flags true if we are reading the comment part of a command.
-byte GCode::binaryCommandSize; ///< Expected size of the incoming binary command.
+uint8_t GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
+uint8_t GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
+uint8_t GCode::commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
+uint8_t GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer.
+uint8_t GCode::sendAsBinary; ///< Flags the command as binary input.
+uint8_t GCode::wasLastCommandReceivedAsBinary=0; ///< Was the last successful command in binary mode?
+uint8_t GCode::commentDetected=false; ///< Flags true if we are reading the comment part of a command.
+uint8_t GCode::binaryCommandSize; ///< Expected size of the incoming binary command.
 bool GCode::waitUntilAllCommandsAreParsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
 long GCode::lastLineNumber=0; ///< Last line number received.
 long GCode::actLineNumber; ///< Line number of current command.
 signed char GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
-volatile byte GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
-millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing bytes.
+volatile uint8_t GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
+millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 
 /** \page Repetier-protocol
 
@@ -67,15 +67,15 @@ all implemented features.
 
 /** \brief Computes size of binary data from bitfield.
 
-In the repetier-protocol in binary mode, the first 2 bytes define the
+In the repetier-protocol in binary mode, the first 2 uint8_ts define the
 data. From this bitfield, this function computes the size of the command
-including the 2 bytes of the bitfield and the 2 bytes for the checksum.
+including the 2 uint8_ts of the bitfield and the 2 uint8_ts for the checksum.
 
 Gcode Letter to Bit and Datatype:
 
 - N : Bit 0 : 16-Bit Integer
-- M : Bit 1 :  8-Bit unsigned byte
-- G : Bit 2 :  8-Bit unsigned byte
+- M : Bit 1 :  8-Bit unsigned uint8_t
+- G : Bit 2 :  8-Bit unsigned uint8_t
 - X : Bit 3 :  32-Bit Float
 - Y : Bit 4 :  32-Bit Float
 - Z : Bit 5 :  32-Bit Float
@@ -86,7 +86,7 @@ Gcode Letter to Bit and Datatype:
 - S : Bit 10 : 32 Bit Value
 - P : Bit 11 : 32 Bit Integer
 - V2 : Bit 12 : Version 2 command for additional commands/sizes
-- Ext : Bit 13 : There are 2 more bytes following with Bits, only for future versions
+- Ext : Bit 13 : There are 2 more uint8_ts following with Bits, only for future versions
 - Int :Bit 14 : Marks it as internal command,
 - Text : Bit 15 : 16 Byte ASCII String terminated with 0
 Second word if V2:
@@ -94,9 +94,9 @@ Second word if V2:
 - J : Bit 1 : 32-Bit float
 - R : Bit 2 : 32-Bit float
 */
-byte GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
+uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 {
-    byte s = 4; // include checksum and bitfield
+    uint8_t s = 4; // include checksum and bitfield
     unsigned int bitfield = *(int*)ptr;
     if(bitfield & 1) s+=2;
     if(bitfield & 8) s+=4;
@@ -116,7 +116,7 @@ byte GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
         if(bitfield2 & 1) s+= 4;
         if(bitfield2 & 2) s+= 4;
         if(bitfield2 & 4) s+= 4;
-        if(bitfield & 32768) s+=(byte)ptr[4]+1;
+        if(bitfield & 32768) s+=(uint8_t)ptr[4]+1;
         //OUT_P_I_LN("LenStr:",(int)ptr[4]);
         //OUT_P_I_LN("LenBinV2:",s);
     }
@@ -243,14 +243,14 @@ void GCode::echoCommand()
 void GCode::executeFString(FSTRINGPARAM(cmd))
 {
     char buf[80];
-    byte buflen;
+    uint8_t buflen;
     char c;
     GCode code;
     do
     {
         // Wait for a free place in command buffer
         // Scan next command from string
-        byte comment=0;
+        uint8_t comment=0;
         buflen = 0;
         do
         {
@@ -381,7 +381,7 @@ void GCode::readFromSerial()
             break;
         }
         sd.sdpos++; // = file.curPosition();
-        commandReceiving[commandsReceivingWritePosition++] = (byte)n;
+        commandReceiving[commandsReceivingWritePosition++] = (uint8_t)n;
 
         // first lets detect, if we got an old type ascii command
         if(commandsReceivingWritePosition==1)
@@ -433,20 +433,20 @@ void GCode::readFromSerial()
 }
 
 /**
-  Converts a binary bytefield containing one GCode line into a GCode structure.
+  Converts a binary uint8_tfield containing one GCode line into a GCode structure.
   Returns true if checksum was correct.
 */
-bool GCode::parseBinary(byte *buffer,bool fromSerial)
+bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 {
     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
-    byte i=0;
-    byte *p = buffer;
-    byte len = binaryCommandSize-2;
+    uint8_t i=0;
+    uint8_t *p = buffer;
+    uint8_t len = binaryCommandSize-2;
     while (len)
     {
-        byte tlen = len > 21 ? 21 : len;
+        uint8_t tlen = len > 21 ? 21 : len;
         len -= tlen;
         do
         {
@@ -470,7 +470,7 @@ bool GCode::parseBinary(byte *buffer,bool fromSerial)
     p = buffer;
     params = *(unsigned int *)p;
     p+=2;
-    byte textlen=16;
+    uint8_t textlen=16;
     if(isV2())
     {
         params2 = *(unsigned int *)p;
@@ -679,8 +679,8 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     }
     if((pos = strchr(line,'*'))!=0)   // checksum
     {
-        byte checksum_given = gcode_value_long(pos+1);
-        byte checksum = 0;
+        uint8_t checksum_given = gcode_value_long(pos+1);
+        uint8_t checksum = 0;
         while(line!=pos) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
         Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
