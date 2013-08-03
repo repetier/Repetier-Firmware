@@ -75,7 +75,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #include "pins.h"
 
 // Override pin definions from pins.h
-#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
+//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
@@ -222,8 +222,8 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180��C
-180 => ABS for temperatures around 240��C
+130 => PLA for temperatures from 170-180 deg C
+180 => ABS for temperatures around 240 deg C
 
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
@@ -293,7 +293,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/��C and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -335,8 +335,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180��C
-180 => ABS for temperatures around 240��C
+130 => PLA for temperatures from 170-180 deg C
+180 => ABS for temperatures around 240 deg C
 
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.

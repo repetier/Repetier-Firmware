@@ -773,10 +773,6 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
-		<Unit filename="libraries/SoftwareSerial.cpp">
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
 		<Unit filename="libraries/Stepper.cpp">
 			<Option compile="0" />
 			<Option link="0" />

@@ -32,7 +32,7 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
-volatile byte insideTimer1=0;
+volatile uint8_t insideTimer1=0;
 
 
 HAL::HAL()
@@ -440,8 +440,8 @@ unsigned char HAL::i2cReadNak(void)
 #define SERVO2500US F_CPU_TRUE / 3200
 #define SERVO5000US F_CPU_TRUE / 1600
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
-static byte servoIndex = 0;
-void HAL::servoMicroseconds(byte servo,int ms) {
+static uint8_t servoIndex = 0;
+void HAL::servoMicroseconds(uint8_t servo,int ms) {
     if(ms<500) ms = 0;
     if(ms>2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / 1000000)*(long)ms)>>3);
@@ -587,9 +587,9 @@ void PWM_TIMER_VECTOR ()
     // apparently have to read status register
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
-    static byte pwm_count = 0;
-    static byte pwm_pos_set[NUM_EXTRUDER+3];
-    static byte pwm_cooler_pos_set[NUM_EXTRUDER];
+    static uint8_t pwm_count = 0;
+    static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
+    static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
 
     if(pwm_count==0)
     {
@@ -731,6 +731,7 @@ void PWM_TIMER_VECTOR ()
     pwm_count++;
 }
 
+
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optimal 
@@ -759,6 +760,7 @@ void EXTRUDER_TIMER_VECTOR ()
         extruderLastDirection = 1;
         timer += 40; // Add some more wait time to prevent blocking
     }
+
     else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection!=-1)
     {
         Extruder::setDirection(false);
@@ -767,10 +769,10 @@ void EXTRUDER_TIMER_VECTOR ()
     }
     else if(Printer::extruderStepsNeeded > 0)
     {
-        Extruder::step();
+    Extruder::step();
         Printer::extruderStepsNeeded -= extruderLastDirection;
         Printer::insertStepperHighDelay();
-        Extruder::unstep();
+    Extruder::unstep();
     }
 
     TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, timer);

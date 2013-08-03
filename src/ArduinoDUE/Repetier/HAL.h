@@ -34,12 +34,12 @@
 #define HAL_H
 
 #include <inttypes.h>
+#include "pins.h"
 
 // Hack to make 84 MHz Due clock work without changes to pre-existing code
 // which would otherwise have problems with int overflow.
-// Timer routines must have 4x correction factor to compensate.
 #define F_CPU       21000000        // should be factor of F_CPU_TRUE
-#define F_CPU_TRUE  84000000
+#define F_CPU_TRUE  84000000        // actual CPU clock frequency
 
 // another hack to keep AVR code happy (i.e. SdFat.cpp)
 #define SPR0    0
@@ -68,7 +68,6 @@
 #define FSTRINGPARAM(var) PGM_P var
 
 
-//#if MOTHERBOARD == 401      // Arduino Due
 #define EXTRUDER_TIMER          TC0
 #define EXTRUDER_TIMER_CHANNEL  0
 #define EXTRUDER_TIMER_IRQ      ID_TC0
@@ -106,23 +105,13 @@
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
 #define ADC_ISR_EOC(channel)    (0x1u << channel) 
-//#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
+#define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}  
 
 #define PULLUP(IO,v)            WRITE(IO, v)
-
-#define TWI_CLOCK_FREQ          400000
-#define EEPROM_SERIAL_ADDR      0x50   // 7 bit i2c address (without R/W bit)
-#define EEPROM_PAGE_SIZE        64
-// specify size of eeprom address register
-// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
-#define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
 
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL       250  // 1sec  (~16 seconds max)
 
-//#endif
-
-#include "pins.h"
 
 #ifndef DUE_SOFTWARE_SPI
 #include <SPI.h>
@@ -165,9 +154,6 @@
 /** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
 #define I2C_WRITE   0
 
-#if ANALOG_INPUTS>0
-//static const uint32_t adcChannel[] = ENABLED_ADC_CHANNELS;
-#endif
 #ifndef DUE_SOFTWARE_SPI
     static int spiDueDividors[] = {10,21,42,84,168,255,255};
 #endif
@@ -214,6 +200,8 @@ public:
     static inline void hwSetup(void)
     {
         HAL::i2cInit(TWI_CLOCK_FREQ);
+// make debugging startup easier
+//Serial.begin(115200);
     }
 
     // return val'val
@@ -239,15 +227,15 @@ public:
     {
         return ((unsigned long)a / (unsigned long)b);
     }
-    static inline void digitalWrite(byte pin,byte value)
+    static inline void digitalWrite(uint8_t pin,uint8_t value)
     {
         ::digitalWrite(pin,value);
     }
-    static inline byte digitalRead(byte pin)
+    static inline uint8_t digitalRead(uint8_t pin)
     {
         return ::digitalRead(pin);
     }
-    static inline void pinMode(byte pin,byte mode)
+    static inline void pinMode(uint8_t pin,uint8_t mode)
     {
         ::pinMode(pin,mode);
     }
@@ -260,7 +248,7 @@ public:
     {
         ::delay(delayMs);
     }
-    static inline void tone(byte pin,int frequency) {
+    static inline void tone(uint8_t pin,int frequency) {
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.  
         SET_OUTPUT(pin);
@@ -279,12 +267,12 @@ public:
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR=~TC_IER_CPCS;
         NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
     }
-    static inline void noTone(byte pin) {
+    static inline void noTone(uint8_t pin) {
         TC_Stop(TC1, 0); 
         WRITE(pin, LOW);
     }
 
-    static inline void eprSetByte(unsigned int pos,byte value)
+    static inline void eprSetByte(unsigned int pos,uint8_t value)
     {
         eeval_t v;
         v.b[0] = value;
@@ -314,7 +302,7 @@ public:
         v.f = value;
         eprBurnValue(pos, sizeof(float), v);
     }
-    static inline byte eprGetByte(unsigned int pos)
+    static inline uint8_t eprGetByte(unsigned int pos)
     {
         eeval_t v = eprGetValue(pos,1);
         return v.b[0];
@@ -352,7 +340,7 @@ public:
             if ((pos % EEPROM_PAGE_SIZE) == 0) {
                 // burn current page then address next one
                 i2cStop();
-                delay(5);           // page writes take 5 msec max
+                delayMilliseconds(EEPROM_PAGE_WRITE_TIME); 
                 i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
             } else {
               i2cTxFinished();      // wait for transmission register to empty
@@ -360,7 +348,7 @@ public:
             i2cWriting(newvalue.b[i]);
         }
         i2cStop();          // signal end of transaction
-        delay(5);           // wait for page write to complete
+        delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -407,7 +395,7 @@ public:
     {
         return RFSERIAL.available();
     }
-    static inline byte serialReadByte()
+    static inline uint8_t serialReadByte()
     {
         return RFSERIAL.read();
     }
@@ -429,7 +417,7 @@ public:
 #ifdef DUE_SOFTWARE_SPI
     // bitbanging transfer
     // run at ~100KHz (necessary for init)
-    static byte spiTransfer(byte b)  // using Mode 0
+    static uint8_t spiTransfer(uint8_t b)  // using Mode 0
     {
         for (int bits = 0; bits < 8; bits++) {
             if (b & 0x80) {
@@ -459,20 +447,20 @@ public:
         SET_OUTPUT(MOSI_PIN);
     }
 
-    static inline void spiInit(byte spiClock) 
+    static inline void spiInit(uint8_t spiClock) 
    {
        WRITE(SDSS, HIGH);
        WRITE(MOSI_PIN, HIGH);
        WRITE(SCK_PIN, LOW);
     }
-   static inline byte spiReceive()
+   static inline uint8_t spiReceive()
    {
        WRITE(SDSS, LOW);
-       byte b = spiTransfer(0xff);       
+       uint8_t b = spiTransfer(0xff);       
        WRITE(SDSS, HIGH);
        return b;
    }
-   static inline void spiReadBlock(byte*buf,uint16_t nbyte) 
+   static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte) 
    {   
        if (nbyte == 0) return;
        WRITE(SDSS, LOW);  
@@ -483,16 +471,16 @@ public:
        WRITE(SDSS, HIGH);
 
    }
-   static inline void spiSend(byte b) {
+   static inline void spiSend(uint8_t b) {
        WRITE(SDSS, LOW);
-       byte response = spiTransfer(b);
+       uint8_t response = spiTransfer(b);
        WRITE(SDSS, HIGH);
    }
 
    inline __attribute__((always_inline))
    static void spiSendBlock(uint8_t token, const uint8_t* buf)
    {
-       byte response;
+       uint8_t response;
 
        WRITE(SDSS, LOW);
        response = spiTransfer(token);
@@ -512,18 +500,18 @@ public:
    }
    // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
    // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
-    static inline void spiInit(byte spiClock) 
+    static inline void spiInit(uint8_t spiClock) 
    {
        SPI.begin(SDSS);
        SPI.setBitOrder(SDSS, MSBFIRST);
        SPI.setDataMode(SDSS, SPI_MODE0);
        SPI.setClockDivider(SDSS, spiDueDividors[spiClock]);
    }
-   static inline byte spiReceive()
+   static inline uint8_t spiReceive()
    {
        return SPI.transfer(SDSS, 0xff);
    }
-   static inline void spiReadBlock(byte*buf,uint16_t nbyte) 
+   static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte) 
    {     
        if (nbyte-- == 0) return;
 
@@ -534,14 +522,14 @@ public:
        buf[nbyte] = SPI.transfer(SDSS, 0xff, SPI_LAST);
    }
 
-   static inline void spiSend(byte b) {
-       byte response = SPI.transfer(SDSS, b);
+   static inline void spiSend(uint8_t b) {
+       uint8_t response = SPI.transfer(SDSS, b);
    }
 
    static inline __attribute__((always_inline))
    void spiSendBlock(uint8_t token, const uint8_t* buf)
    {
-       byte response;
+       uint8_t response;
 
        response = SPI.transfer(SDSS, token, SPI_CONTINUE);
        for (int i=0; i<511; i++)
@@ -575,7 +563,7 @@ public:
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(byte servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms);
 #endif
 
 #if ANALOG_INPUTS>0
