@@ -370,6 +370,10 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
         HAL::eprSetFloat(o+EPR_EXTRUDER_STEPS_PER_MM,e->stepsPerMM);
@@ -506,6 +510,10 @@ void EEPROM::readDataFromEEPROM()
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
         e->stepsPerMM = HAL::eprGetFloat(o+EPR_EXTRUDER_STEPS_PER_MM);

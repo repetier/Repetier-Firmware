@@ -104,7 +104,7 @@
 #define UI_TEXT_BED_TEMP         "Bed Temp.:%Eb\002C"
 #define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
 #define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 2  :%E2\002C"
+#define UI_TEXT_EXTR2_TEMP       "Temp. 2  :%E2\002C"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Off"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR2_OFF        "Extruder 2 Off"
