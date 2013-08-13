@@ -107,6 +107,9 @@ void set_fan_speed(int speed,bool wait) {
   pwm_pos[NUM_EXTRUDER+2] = speed;
 #endif
 }
+int get_fan_speed() {
+  return (int)pwm_pos[NUM_EXTRUDER+2];
+}
 #if DRIVE_SYSTEM==3
 void delta_move_to_top_endstops(float feedrate) {
   long up_steps = printer_state.zMaxSteps;
