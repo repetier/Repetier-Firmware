@@ -223,10 +223,10 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 //extern const int matrixActions[] PROGMEM;
 // Key codes
-#define UI_KEYS_INIT_CLICKENCODER_LOW(pinA,pinB) SET_INPUT(pinA);SET_INPUT(pinB); WRITE(pinA,HIGH);WRITE(pinB,HIGH);
-#define UI_KEYS_INIT_BUTTON_LOW(pin) SET_INPUT(pin);WRITE(pin,HIGH);
-#define UI_KEYS_INIT_CLICKENCODER_HIGH(pinA,pinB) SET_INPUT(pinA);SET_INPUT(pinB); WRITE(pinA,LOW);WRITE(pinB,LOW);
-#define UI_KEYS_INIT_BUTTON_HIGH(pin) SET_INPUT(pin);WRITE(pin,LOW);
+#define UI_KEYS_INIT_CLICKENCODER_LOW(pinA,pinB) SET_INPUT(pinA);SET_INPUT(pinB); PULLUP(pinA,HIGH);PULLUP(pinB,HIGH);
+#define UI_KEYS_INIT_BUTTON_LOW(pin) SET_INPUT(pin);PULLUP(pin,HIGH);
+#define UI_KEYS_INIT_CLICKENCODER_HIGH(pinA,pinB) SET_INPUT(pinA);SET_INPUT(pinB); PULLUP(pinA,LOW);PULLUP(pinB,LOW);
+#define UI_KEYS_INIT_BUTTON_HIGH(pin) SET_INPUT(pin);PULLUP(pin,LOW);
 
 #define UI_KEYS_CLICKENCODER_LOW(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (!READ(pinA)) uid.encoderLast |=2;if (!READ(pinB)) uid.encoderLast |=1; uid.encoderPos += pgm_read_byte(&encoder_table[uid.encoderLast]);
 #define UI_KEYS_CLICKENCODER_LOW_REV(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (!READ(pinA)) uid.encoderLast |=2;if (!READ(pinB)) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&encoder_table[uid.encoderLast]);
@@ -344,9 +344,9 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,uint8_t digits);
     void addStringP(PGM_P text);
     void okAction();
-    void nextPreviousAction(char next);
+    void nextPreviousAction(int8_t next);
     char statusMsg[17];
-    char encoderPos;
+    int8_t encoderPos;
     int8_t encoderLast;
     PGM_P statusText;
     UIDisplay();

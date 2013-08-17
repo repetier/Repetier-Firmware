@@ -2460,7 +2460,7 @@ void (*SdBaseFile::oldDateTime_)(uint16_t& date, uint16_t& time) = 0;  // NOLINT
  * initialize SPI pins
  */
 static void spiBegin() {
-  HAL::spiBegin();
+    HAL::spiBegin();
 }
 //------------------------------------------------------------------------------
 /**

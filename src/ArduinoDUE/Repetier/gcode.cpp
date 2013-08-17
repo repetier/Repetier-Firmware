@@ -404,7 +404,7 @@ void GCode::readFromSerial()
         else
         {
             char ch = commandReceiving[commandsReceivingWritePosition-1];
-            if(ch == '\n' || ch == '\r' || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
+            if(ch == '\n' || ch == '\r' || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition-1]=0;
                 commentDetected = false;
@@ -698,7 +698,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     else
     {
         if(!fromSerial) return true;
-        if(hasM() && (M == 110 || hasString()) return true;
+        if(hasM() && (M == 110 || hasString())) return true;
                 if(Printer::debugErrors())
         {
             Com::printErrorFLN(Com::tMissingChecksum);

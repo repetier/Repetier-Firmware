@@ -32,7 +32,7 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
-volatile uint8_t insideTimer1=0;
+volatile uint8_t HAL::insideTimer1=0;
 
 
 HAL::HAL()
@@ -128,14 +128,14 @@ void HAL::setupTimer() {
     pmc_enable_periph_clk(SERVO_TIMER_IRQ );
     NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 2, 0));
       
-    TC_FindMckDivisor(SERVO_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
     TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | 
-                 TC_CMR_WAVE | tc_clock);
+                 TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
 
-    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, (F_CPU_TRUE / tc_count) / SERVO_CLOCK_FREQ);
+    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, (F_CPU_TRUE / SERVO_PRESCALE) / SERVO_CLOCK_FREQ);
+    TC_Start(SERVO_TIMER, SERVO_TIMER_CHANNEL);
 
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    SERvo_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
+    SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
 }
@@ -434,94 +434,123 @@ unsigned char HAL::i2cReadNak(void)
 }
 
 
-#if FEATURE_SERVO
-// may need further restrictions here in the future
-#if defined (__SAM3X8E__)
-#define SERVO2500US F_CPU_TRUE / 3200
-#define SERVO5000US F_CPU_TRUE / 1600
-unsigned int HAL::servoTimings[4] = {0,0,0,0};
-static uint8_t servoIndex = 0;
-void HAL::servoMicroseconds(uint8_t servo,int ms) {
-    if(ms<500) ms = 0;
-    if(ms>2500) ms = 2500;
-    servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / 1000000)*(long)ms)>>3);
+// Wait for X microseconds 
+// this could be simpler but its used inside interrupts so must be reentrant
+void HAL::microsecondsWait(uint32_t us) 
+{
+    uint32_t usStart, goal;
+
+    // get the current count
+    usStart =  TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL);
+
+    // funny math here to give good accuracy with no overflow 
+    goal = usStart + ((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
+
+    // goal may have wrapped, if so wait for counter to catch up
+    if(goal < usStart) {
+        while(goal < TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL));
+    }   
+    // wait for counter to reach requested value
+    while(goal > TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL));
 }
 
 
+
+#if FEATURE_SERVO
+// may need further restrictions here in the future
+#if defined (__SAM3X8E__)
+unsigned int HAL::servoTimings[4] = {0,0,0,0};
+static uint8_t servoIndex = 0;
+void HAL::servoMicroseconds(uint8_t servo,int microsec) {
+    if(microsec<500) microsec = 0;
+    if(microsec>2500) microsec = 2500;
+    servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 
+                                         1000000) * microsec);
+}
+ 
 
 // ================== Interrupt handling ======================
 
 // Servo timer Interrupt handler
 void SERVO_COMPA_VECTOR ()
 {
+    static uint32_t     interval;
+
   // apparently have to read status register
   TC_GetStatus(SERVO_TIMER, SERVO_TIMER_CHANNEL);
 
   switch(servoIndex) {
   case 0:
-      TCNT3 = 0;
       if(HAL::servoTimings[0]) {
 #if SERVO0_PIN>-1
-        WRITE(SERVO0_PIN,HIGH);
-#endif
-        TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, HAL::servoTimings[0]);
-      } else TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO2500US);
-    break;
+          WRITE(SERVO0_PIN,HIGH);
+#endif  
+          interval =  HAL::servoTimings[0];
+      } else 
+          interval = SERVO2500US;
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
+      break;
   case 1:
 #if SERVO0_PIN>-1
       WRITE(SERVO0_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO5000US);
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
+               SERVO5000US - interval);
     break;
   case 2:
-      TCNT3 = 0;
       if(HAL::servoTimings[1]) {
 #if SERVO1_PIN>-1
         WRITE(SERVO1_PIN,HIGH);
 #endif
-        TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, HAL::servoTimings[1]);
-      } else TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO2500US);
+        interval =  HAL::servoTimings[1];
+      } else 
+          interval = SERVO2500US;
+    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 3:
 #if SERVO1_PIN>-1
       WRITE(SERVO1_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO5000US);
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
+               SERVO5000US - interval);
     break;
   case 4:
-      TCNT3 = 0;
       if(HAL::servoTimings[2]) {
 #if SERVO2_PIN>-1
         WRITE(SERVO2_PIN,HIGH);
 #endif
-        TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, HAL::servoTimings[2]);
-      } else TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO2500US);
+        interval =  HAL::servoTimings[2];
+      } else  
+          interval = SERVO2500US;
+    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 5:
 #if SERVO2_PIN>-1
       WRITE(SERVO2_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO5000US);
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
+               SERVO5000US - interval);
     break;
   case 6:
-      TCNT3 = 0;
       if(HAL::servoTimings[3]) {
 #if SERVO3_PIN>-1
         WRITE(SERVO3_PIN,HIGH);
 #endif
-        TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, HAL::servoTimings[3]);
-      } else TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO2500US);
+        interval =  HAL::servoTimings[3];
+      } else 
+          interval = SERVO2500US;
+    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 7:
 #if SERVO3_PIN>-1
       WRITE(SERVO3_PIN,LOW);
 #endif
-      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO5000US);
+      TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
+               SERVO5000US - interval);
     break;
   }
   servoIndex++;
-  if(servoIndex>7)
-    servoIndex = 0;
+  if(servoIndex>7) servoIndex = 0;
 }
 #else
 #error No servo support for your board, please diable FEATURE_SERVO
@@ -546,8 +575,8 @@ void TIMER1_COMPA_VECTOR ()
 {
     // apparently have to read status register
     TC_GetStatus(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
-    if(insideTimer1) return;
-    insideTimer1 = 1;
+    if(HAL::insideTimer1) return;
+    HAL::insideTimer1 = 1;
     if(PrintLine::hasLines())
     {
         setTimer(PrintLine::bresenhamStep());
@@ -575,7 +604,7 @@ void TIMER1_COMPA_VECTOR ()
         else waitRelax--;
     }
     DEBUG_MEMORY;
-    insideTimer1=0;
+    HAL::insideTimer1=0;
 }
 
 /**

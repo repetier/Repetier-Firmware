@@ -143,7 +143,12 @@ UI_TEXT_PAGE_EXTRUDER2
 #else
  ""
 #endif
- ,UI_TEXT_PAGE_BED,"%os");
+ #if HAVE_HEATED_BED==true
+ ,UI_TEXT_PAGE_BED
+ #else
+ ,""
+#endif
+ ,"%os");
 
 /*
 Merge pages together. Use the following pattern:

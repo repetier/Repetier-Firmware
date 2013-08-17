@@ -89,6 +89,9 @@ volatile int waitRelax=0; // Delay filament relax at the end of print, could be 
 
 PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
+#if CPU_ARCH==ARCH_ARM
+volatile bool PrintLine::nlFlag = false;
+#endif
 uint8_t PrintLine::linesWritePos=0;           ///< Position where we write the next cached line move.
 volatile uint8_t PrintLine::linesCount=0;      ///< Number of lines cached 0 = nothing to do.
 uint8_t PrintLine::linesPos=0;                 ///< Position for executing line movement.
@@ -200,7 +203,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
     if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS] && p->delta[Y_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 1;
-    else if (p->delta[X] > p->delta[Z_AXIS] && p->delta[X_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 0;
+    else if (p->delta[X_AXIS] > p->delta[Z_AXIS] && p->delta[X_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 0;
     else if (p->delta[Z_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 2;
     else p->primaryAxis = 3;
     p->stepsRemaining = p->delta[p->primaryAxis];
@@ -1457,7 +1460,11 @@ DeltaSegment *curd;
 long curd_errupd, stepsPerSegRemaining;
 long PrintLine::bresenhamStep() // Version for delta printer
 {
+#if CPU_ARCH==ARCH_ARM
+    if(!PrintLine::nlFlag)
+#else
     if(cur == NULL)
+#endif
     {
         HAL::allowInterrupts();
         setCurrentLine();
@@ -1468,7 +1475,10 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 lastblk = (int)cur;
                 Com::printFLN(Com::tBLK,linesCount);
             }
-            cur = 0;
+            cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+            PrintLine::nlFlag = false;
+#endif
             return 2000;
         }
         lastblk = -1;
@@ -1485,7 +1495,10 @@ long PrintLine::bresenhamStep() // Version for delta printer
             // a bit of time to get the planning up to date.
             if(linesCount<=cur->getWaitForXLinesFilled())
             {
-                cur=0;
+                cur=NULL;
+#if CPU_ARCH==ARCH_ARM
+                PrintLine::nlFlag = false;
+#endif
                 return 2000;
             }
             long wait = cur->getWaitTicks();
@@ -1780,7 +1793,11 @@ int lastblk=-1;
 long cur_errupd;
 long PrintLine::bresenhamStep() // version for cartesian printer
 {
-    if(cur == NULL) // Initalize new line
+#if CPU_ARCH==ARCH_ARM
+    if(!PrintLine::nlFlag)
+#else
+    if(cur == NULL)
+#endif
     {
         HAL::allowInterrupts();
         ANALYZER_ON(ANALYZER_CH0);
@@ -1793,6 +1810,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 Com::printFLN(Com::tBLK,lines_count);
             }*/
             cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+            PrintLine::nlFlag = false;
+#endif
             return 2000;
         }
         lastblk = -1;
@@ -1808,9 +1828,12 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         {
             // This is a warmup move to initalize the path planner correctly. Just waste
             // a bit of time to get the planning up to date.
-            if(lines_count<=cur->getWaitForXLinesFilled())
+            if(linesCount<=cur->getWaitForXLinesFilled())
             {
                 cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+                PrintLine::nlFlag = false;
+#endif
                 return 2000;
             }
             long wait = cur->getWaitTicks();
@@ -1884,9 +1907,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
     HAL::allowInterrupts();
     /* For halfstepping, we divide the actions into even and odd actions to split
        time used per loop. */
-    uint8_t doEven = cur->halfstep & 6;
-    uint8_t doOdd = cur->halfstep & 5;
-    if(cur->halfstep!=4) cur->halfstep = 3-(cur->halfstep);
+    uint8_t doEven = cur->halfStep & 6;
+    uint8_t doOdd = cur->halfStep & 5;
+    if(cur->halfStep!=4) cur->halfStep = 3-(cur->halfStep);
     HAL::forbidInterrupts();
     if(doEven) cur->checkEndstops();
     uint8_t max_loops = RMath::min((long)Printer::stepsPerTimerCall,cur->stepsRemaining);
@@ -1960,7 +1983,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             //If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
             if (cur->moveAccelerating())   // we are accelerating
             {
-                Printer::vMaxReached = HAL::ComputeV(Printer::timer,cur->facceleration)+cur->vStart;
+                Printer::vMaxReached = HAL::ComputeV(Printer::timer,cur->fAcceleration)+cur->vStart;
                 if(Printer::vMaxReached>cur->vMax) Printer::vMaxReached = cur->vMax;
                 unsigned int v = Printer::updateStepsPerTimerCall(Printer::vMaxReached);
                 Printer::interval = HAL::CPUDivU2(v);
@@ -1969,7 +1992,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             }
             else if (cur->moveDecelerating())     // time to slow down
             {
-                unsigned int v = HAL::ComputeV(Printer::timer,cur->facceleration);
+                unsigned int v = HAL::ComputeV(Printer::timer,cur->fAcceleration);
                 if (v > Printer::vMaxReached)   // if deceleration goes too far it can become too large
                     v = cur->vEnd;
                 else
@@ -2036,7 +2059,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(lines_count == 0) UI_STATUS(UI_TEXT_IDLE);
+        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

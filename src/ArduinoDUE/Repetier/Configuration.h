@@ -129,7 +129,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
     will be allocated for the delta buffer. With defaults 7 * 16 * 30 = 3360 bytes. This leaves ~1K free RAM on an Arduino
     Mega. */
-    #define MAX_DELTA_SEGMENTS_PER_LINE 30
+    #define MAX_DELTA_SEGMENTS_PER_LINE 60
 
     // Calculations
     #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
@@ -199,13 +199,13 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_FEEDRATE 45
+#define EXT0_MAX_FEEDRATE 300
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_START_FEEDRATE 40
+#define EXT0_MAX_START_FEEDRATE 100
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_ACCELERATION 500  //6500
+#define EXT0_MAX_ACCELERATION 9000  //6500
 /** Type of heat manager for this extruder.
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -251,8 +251,11 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT0_ADVANCE_K 0.0f
 #define EXT0_ADVANCE_L 0.0f
-#define EXT0_ADVANCE_BACKLASH_STEPS 0
 
+/* Motor steps to remove backlash for advance alorithm. These are the steps
+needed to move the motor cog in reverse direction until it hits the driving
+cog. Direct drive extruder need 0. */
+#define EXT0_ADVANCE_BACKLASH_STEPS 0
 /** \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.
 */
 #define EXT0_WAIT_RETRACT_TEMP 		150
@@ -362,6 +365,10 @@ L is the linear factor and seems to be working better then the quadratic depende
 */
 #define EXT1_ADVANCE_K 0.0f
 #define EXT1_ADVANCE_L 0.0f
+/* Motor steps to remove backlash for advance alorithm. These are the steps
+needed to move the motor cog in reverse direction until it hits the driving
+cog. Direct drive extruder need 0. */
+#define EXT1_ADVANCE_BACKLASH_STEPS 0
 
 #define EXT1_WAIT_RETRACT_TEMP 	150
 #define EXT1_WAIT_RETRACT_UNITS	0
@@ -371,7 +378,6 @@ L is the linear factor and seems to be working better then the quadratic depende
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
-#define EXT1_ADVANCE_BACKLASH_STEPS 0
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -683,9 +689,9 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 386.1
-#define Y_MAX_LENGTH 386.1
-#define Z_MAX_LENGTH 386.1  // Set this to your appx maximum Z height from home position to table measred from the nozzle tip.  You can fine-tune this with either the endstop screws or eeprom settings in Repetier Host
+#define X_MAX_LENGTH 385.6
+#define Y_MAX_LENGTH 385.6
+#define Z_MAX_LENGTH 385.6  // Set this to your appx maximum Z height from home position to table measred from the nozzle tip.  You can fine-tune this with either the endstop screws or eeprom settings in Repetier Host
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -715,7 +721,7 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 200 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 400 // Move accurate setting for print moves
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 200 // Less accurate setting for other moves
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
@@ -737,7 +743,7 @@ on this endstop.
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.
 */
-#define DELTA_HOME_ON_POWER false
+#define DELTA_HOME_ON_POWER true
 /** \brief Enable counter to count steps for Z max calculations
 */
 #define STEP_COUNTER
@@ -770,9 +776,9 @@ you can also change the values online and auleveling will store the results here
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
     */
-#define MAX_FEEDRATE_X 250
-#define MAX_FEEDRATE_Y 250
-#define MAX_FEEDRATE_Z 250
+#define MAX_FEEDRATE_X 500
+#define MAX_FEEDRATE_Y 500
+#define MAX_FEEDRATE_Z 500
 
 /** Speed in mm/min for finding the home position.  Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 60
@@ -826,14 +832,14 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high!
  Overridden if EEPROM activated.
 */
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 1500
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 3000
 
 /** \brief X, Y, Z max acceleration in mm/s^2 for travel moves.  Overridden if EEPROM activated.*/
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 3000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 3000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 4000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 4000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 4000
 
 /** \brief Maximum allowable jerk.
 
@@ -866,7 +872,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 16
+#define MOVE_CACHE_SIZE 32
 
 /** \brief Low filled cache size.
 
@@ -874,7 +880,7 @@ If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is
 If a move would be shorter, the feedrate will be reduced. This should prevent buffer underflows. Set this to 0 if you
 don't care about empty buffers during print.
 */
-#define MOVE_CACHE_LOW 10
+#define MOVE_CACHE_LOW 14
 /** \brief Cycles per move, if move cache is low.
 
 This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
@@ -900,58 +906,6 @@ it 0 as default.
 */
 
 #define MIN_EXTRUDER_TEMP 0
-/** \brief Activate ooze prevention system
-
-The ooze prevention system tries to prevent ooze, by a fast retract of the filament every time
-printing stops. Most slicing software have already an option to do this. Using OPS_MODE=1 will
-in fact mimic this. This works good, but can increase printing time. To reduce the additional
-waiting time, the OPS has a fast mode, which performs the retraction during the travelling move.
-The only reason your slicer doesn't do it, is because it can't tell. There is simple no
-G-Code command telling the firmware to do that.
-
-You can always compile including OPS. Then you can disable/enable it anytime you want. To disable it
-set USE_OPS 0
-
-Caution: Don't enable anti-ooze in your slicer if you are using this.
-*/
-#define USE_OPS 0
-
-/** \brief Sets the OPS operation mode
-
-0: Off
-1: Classic mode. Stop head, retract move to target, push filament back.
-2: Fast mode. Retract during move, start pushing back the filament during move. For safty, we start
-   at with a low speed and wait for the push back, before the pintmove starts. Normally there is some
-   time needed to wait for the filament.
-
- Overridden if EEPROM activated.
-*/
-#define OPS_MODE 0
-
-/** \brief Minimum distance for retraction.
-
-If a travel move is shorter than this distance, no retraction will occur. This is to prevent
-retraction with infill, where the angle to the perimeter needs a short stop. Unit is mm.
- Overridden if EEPROM activated.
-*/
-#define OPS_MIN_DISTANCE 5.0
-
-/** \brief Move printhead only after x% of retract distance have been retracted.
-
- Overridden if EEPROM activated.*/
-#define OPS_MOVE_AFTER 50.0
-/** \brief Retraction distance in mm. If you want to enable OPS only sometimes, compile with
-OPS support and set retraction distance to 0. If you set it to e.g. 3 in your EEPROM3 settings it is enabled.
- Overridden if EEPROM activated.*/
-#define OPS_RETRACT_DISTANCE 4.5
-
-/** \brief Backslash produced by extruder reversal
-
-If you are using a bowden extruder, you may need some extra distance to push the filament back into the
-original place. This is the value you enter here. Unit is mm.
- Overridden if EEPROM activated.
-*/
-#define OPS_RETRACT_BACKLASH 0.0
 
 /** \brief Enable advance algorithm.
 
@@ -965,7 +919,7 @@ For more informations, read the wiki.
 
 Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
 to activate the quadratic term. Only adds lots of computations and storage usage. */
-//#define ENABLE_QUADRATIC_ADVANCE
+#define ENABLE_QUADRATIC_ADVANCE
 
 
 // ##########################################################################################
@@ -1040,7 +994,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 2
 
 
 /**************** duplicate motor driver ***************
@@ -1173,7 +1127,7 @@ Select the language to use.
 3 = brazilian portuguese
 4 = italian
 */
-#define UI_LANGUAGE 0
+#define UI_LANGUAGE 1
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_VERSION_STRING2 "Delta Tower"
@@ -1194,7 +1148,7 @@ info pages with next/previous button/click-encoder */
 Unfotunately, the encoder have a different count of phase changes between clicks.
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
-#define UI_ENCODER_SPEED 0
+#define UI_ENCODER_SPEED 2
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
 
@@ -1205,7 +1159,7 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER true
+#define FEATURE_BEEPER false
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.

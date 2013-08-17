@@ -89,6 +89,9 @@ volatile int waitRelax=0; // Delay filament relax at the end of print, could be 
 
 PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
+#if CPU_ARCH==ARCH_ARM
+volatile bool PrintLine::nlFlag = false;
+#endif
 uint8_t PrintLine::linesWritePos=0;           ///< Position where we write the next cached line move.
 volatile uint8_t PrintLine::linesCount=0;      ///< Number of lines cached 0 = nothing to do.
 uint8_t PrintLine::linesPos=0;                 ///< Position for executing line movement.
@@ -1457,7 +1460,11 @@ DeltaSegment *curd;
 long curd_errupd, stepsPerSegRemaining;
 long PrintLine::bresenhamStep() // Version for delta printer
 {
+#if CPU_ARCH==ARCH_ARM
+    if(!PrintLine::nlFlag)
+#else
     if(cur == NULL)
+#endif
     {
         HAL::allowInterrupts();
         setCurrentLine();
@@ -1468,7 +1475,10 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 lastblk = (int)cur;
                 Com::printFLN(Com::tBLK,linesCount);
             }
-            cur = 0;
+            cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+            PrintLine::nlFlag = false;
+#endif
             return 2000;
         }
         lastblk = -1;
@@ -1485,7 +1495,10 @@ long PrintLine::bresenhamStep() // Version for delta printer
             // a bit of time to get the planning up to date.
             if(linesCount<=cur->getWaitForXLinesFilled())
             {
-                cur=0;
+                cur=NULL;
+#if CPU_ARCH==ARCH_ARM
+                PrintLine::nlFlag = false;
+#endif
                 return 2000;
             }
             long wait = cur->getWaitTicks();
@@ -1780,7 +1793,11 @@ int lastblk=-1;
 long cur_errupd;
 long PrintLine::bresenhamStep() // version for cartesian printer
 {
-    if(cur == NULL) // Initalize new line
+#if CPU_ARCH==ARCH_ARM
+    if(!PrintLine::nlFlag)
+#else
+    if(cur == NULL)
+#endif
     {
         HAL::allowInterrupts();
         ANALYZER_ON(ANALYZER_CH0);
@@ -1793,6 +1810,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 Com::printFLN(Com::tBLK,lines_count);
             }*/
             cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+            PrintLine::nlFlag = false;
+#endif
             return 2000;
         }
         lastblk = -1;
@@ -1811,6 +1831,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             if(linesCount<=cur->getWaitForXLinesFilled())
             {
                 cur = NULL;
+#if CPU_ARCH==ARCH_ARM
+                PrintLine::nlFlag = false;
+#endif
                 return 2000;
             }
             long wait = cur->getWaitTicks();

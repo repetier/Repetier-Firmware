@@ -171,6 +171,9 @@ extern uint8_t lastMoveID;
 
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
+#if CPU_ARCH==ARCH_ARM
+    static volatile bool nlFlag;
+#endif
     static uint8_t linesPos; // Position for executing line movement
     static PrintLine lines[];
     static uint8_t linesWritePos; // Position where we write the next cached line move
@@ -601,12 +604,19 @@ public:
     static inline void setCurrentLine()
     {
         cur = &lines[linesPos];
+#if CPU_ARCH==ARCH_ARM
+        PrintLine::nlFlag = true;
+#endif
     }
     static inline void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
         if(linesPos>=MOVE_CACHE_SIZE) linesPos=0;
         cur = 0;
+#if CPU_ARCH==ARCH_ARM
+        nlFlag = false;
+#endif
+
         HAL::forbidInterrupts();
         --linesCount;
     }

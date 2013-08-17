@@ -31,7 +31,9 @@ const int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; 
 #elif UI_ENCODER_SPEED==1
 const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
 #else
-const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
+//const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
+//const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
+const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // Quart speed
 #endif
 
 
@@ -1389,7 +1391,7 @@ void UIDisplay::okAction()
 #endif
 }
 #define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
-void UIDisplay::nextPreviousAction(char next)
+void UIDisplay::nextPreviousAction(int8_t next)
 {
 #if UI_HAS_KEYS==1
     if(menuLevel==0)
@@ -1449,7 +1451,7 @@ void UIDisplay::nextPreviousAction(char next)
 #endif
     if(mtype==3) action = pgm_read_word(&(men->id));
     else action=activeAction;
-    char increment = next;
+    int8_t increment = next;
     switch(action)
     {
     case UI_ACTION_XPOSITION:
@@ -2244,7 +2246,7 @@ void UIDisplay::slowAction()
         flags |= 4;
         // Reset click encoder
         HAL::forbidInterrupts();
-        char epos = encoderPos;
+        int8_t epos = encoderPos;
         encoderPos=0;
         HAL::allowInterrupts();
         if(epos)
