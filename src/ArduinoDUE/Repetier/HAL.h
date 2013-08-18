@@ -106,7 +106,7 @@
 
 
 #define EXTRUDER_CLOCK_FREQ     244    // don't know what this should be
-#define PWM_CLOCK_FREQ          3096
+#define PWM_CLOCK_FREQ          3906
 #define TIMER1_CLOCK_FREQ       244
 #define TIMER1_PRESCALE         2
 
