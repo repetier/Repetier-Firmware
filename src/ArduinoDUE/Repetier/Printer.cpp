@@ -804,6 +804,16 @@ void Printer::homeXAxis()
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1))
     {
+        long offX = 0;
+#if NUM_EXTRUDER>1
+        for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+#if X_HOME_DIR < 0
+            offX = RMath::max(offX,extruder[i].xOffset);
+#else
+            offX = RMath::min(offX,extruder[i].xOffset);
+#endif
+        // Reposition extruder that way, that all extruders can be selected at home pos.
+#endif
         UI_STATUS_UPD(UI_TEXT_HOME_X);
         steps = (Printer::xMaxSteps-Printer::xMinSteps) * X_HOME_DIR;
         Printer::currentPositionSteps[0] = -steps;
@@ -814,11 +824,6 @@ void Printer::homeXAxis()
 #if defined(ENDSTOP_X_BACK_ON_HOME)
         if(ENDSTOP_X_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[0]*-ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homingFeedrate[0],true,false);
-#endif
-        long offX = 0;
-#if NUM_EXTRUDER>1
-        for(uint8_t i=0; i<NUM_EXTRUDER; i++) offX = RMath::max(offX,extruder[i].xOffset);
-        // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[0] = (X_HOME_DIR == -1) ? Printer::xMinSteps-offX : Printer::xMaxSteps+offX;
 #if NUM_EXTRUDER>1
@@ -831,6 +836,16 @@ void Printer::homeYAxis()
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
     {
+        long offY = 0;
+#if NUM_EXTRUDER>1
+        for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+#if Y_HOME_DIR<0
+            offY = RMath::max(offY,extruder[i].yOffset);
+#else
+            offY = RMath::min(offY,extruder[i].yOffset);
+#endif
+        // Reposition extruder that way, that all extruders can be selected at home pos.
+#endif
         UI_STATUS_UPD(UI_TEXT_HOME_Y);
         steps = (Printer::yMaxSteps-Printer::yMinSteps) * Y_HOME_DIR;
         currentPositionSteps[1] = -steps;
@@ -841,11 +856,6 @@ void Printer::homeYAxis()
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
         if(ENDSTOP_Y_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[1]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homingFeedrate[1],true,false);
-#endif
-        long offY = 0;
-#if NUM_EXTRUDER>1
-        for(uint8_t i=0; i<NUM_EXTRUDER; i++) offY = RMath::max(offY,extruder[i].yOffset);
-        // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
         Printer::currentPositionSteps[1] = (Y_HOME_DIR == -1) ? Printer::yMinSteps-offY : Printer::yMaxSteps+offY;
 #if NUM_EXTRUDER>1

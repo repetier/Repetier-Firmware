@@ -196,7 +196,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
         else
             p->distance = sqrt(xydist2);
         Printer::backlashDir = (Printer::backlashDir & 56) | (p2->dir & 7);
-        p->calculate_move(back_diff,pathOptimize);
+        p->calculateMove(back_diff,pathOptimize);
         p = p2; // use saved instance for the real move
     }
 #endif
