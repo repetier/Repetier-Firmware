@@ -298,7 +298,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
 
     // slowest time to accelerate from v0 to limitInterval determines used acceleration
     // t = (v_end-v_start)/a
-    float slowest_axis_plateau_time_repro = 1e8; // repro to reduce division Unit: 1/s
+    float slowest_axis_plateau_time_repro = 1e15; // repro to reduce division Unit: 1/s
     for(uint8_t i=0; i < 4 ; i++)
     {
         // Errors for delta move are initialized in timer
