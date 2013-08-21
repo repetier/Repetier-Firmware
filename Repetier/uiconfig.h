@@ -111,16 +111,16 @@ Rows of your display. 2 or 4
 1 : MCP23017
 */
 #define UI_DISPLAY_I2C_CHIPTYPE 0
-// 0x40 till 0x4e for PCF8574, 0x40 for the adafruid RGB shield, 0x40 - 0x4e for MCP23017
+// 0x40 till 0x4e for PCF8574, 0x40 for the Adafruit RGB shield, 0x40 - 0x4e for MCP23017
 // Official addresses have a value half as high!
 #define UI_DISPLAY_I2C_ADDRESS 0x4e
 // For MCP 23017 define which pins should be output
 #define UI_DISPLAY_I2C_OUTPUT_PINS 65504
 // Set the output mask that is or'd over the output data. This is needed to activate
 // a backlight switched over the I2C. 
-// The adafruit RGB shields enables a light if the bit is not set. Bits 6-8 are used for backlight.
+// The Adafruit RGB shields enables a light if the bit is not set. Bits 6-8 are used for backlight.
 #define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
-// For MCP which inputs are with pullup. 31 = pins 0-4 for adafruid rgb shield buttons
+// For MCP which inputs are with pullup. 31 = pins 0-4 for Adafruit rgb shield buttons
 #define UI_DISPLAY_I2C_PULLUP 31
 /* How fast should the I2C clock go. The PCF8574 work only with the lowest setting 100000.
 A MCP23017 can run also with 400000 Hz */
@@ -141,7 +141,7 @@ Define the pin
 #define UI_DISPLAY_D6_PIN _BV(2)
 #define UI_DISPLAY_D7_PIN _BV(3)
 
-// Pins for adafruid RGB shield
+// Pins for Adafruit RGB shield
 /*#define UI_DISPLAY_RS_PIN _BV(15)
 #define UI_DISPLAY_RW_PIN _BV(14)
 #define UI_DISPLAY_ENABLE_PIN _BV(13)
@@ -212,8 +212,8 @@ or more of the predefined key macros, to define a mapper. If no matching mapper
 is available, you can add you c-code for mapping directly into the keyboard
 routines. The predefined macros do the same, just hiding the code behind it.
 
-For each key, two seperate parts must be defined. The first is the initialization
-which must be added inside ui_init_keys() and the second ist a testing routine.
+For each key, two separate parts must be defined. The first is the initialization
+which must be added inside ui_init_keys() and the second is a testing routine.
 These come into ui_check_keys() or ui_check_slow_keys() depending on the time needed
 for testing. If you are in doubt, put it in ui_check_slow_keys().
 ui_init_keys() is called from an interrupt controlling the extruder, so only
@@ -256,7 +256,7 @@ at the beginning of ui.h It's best to use the symbol name, in case the value cha
 
 All keys and the buzzer if present must be on a connected to a single PCF8574 chip!
 As all I2C request take time, they belong all in ui_check_slow_keys.
-Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin
+Don't use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin
 
 6. Click encoder, A/B connected to gnd if closed.
     init -> not needed, but make sure UI_HAS_I2C_KEY is not commented out.
@@ -283,7 +283,7 @@ Type 3: Show menu action. These actions have a _MENU_ in their name. If they are
         menu is pushed on the menu stack and you see the menu. If you assign these actions directly
         to a key, you might not want this pushing behaviour. In this case add UI_ACTION_TOPMENU to the
         action, like UI_ACTION_TOPMENU+UI_ACTION_MENU_XPOSFAST. That will show the menu as top-menu
-        closing all othe submenus that were open.
+        closing all other submenus that were open.
         
    ####################################################################### */
 
@@ -368,7 +368,7 @@ void ui_check_slow_keys(int &action) {
     UI_KEYS_I2C_BUTTON_LOW(_BV(5),UI_ACTION_MENU_EXTRUDER+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
     UI_KEYS_I2C_BUTTON_LOW(_BV(6),UI_ACTION_MENU_POSITIONS+UI_ACTION_TOPMENU); // push button, connects gnd to pin  
 /*
-  // Button handling for the Adafruit RGB shild
+  // Button handling for the Adafruit RGB shield
     UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
     UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
     UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
