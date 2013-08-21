@@ -21,7 +21,7 @@
 
 /* Some words on units:
 
-From 0.80 onwards the units used are unified for easier configuration, watch out when transfering from older configs!
+From 0.80 onwards the units used are unified for easier configuration, watch out when transferring from older configurations!
 
 Speed is in mm/s
 Acceleration in mm/s^2
@@ -35,17 +35,17 @@ Temperature is in degrees celsius
 For easy configuration, the default settings enable parameter storage in EEPROM.
 This means, after the first upload many variables can only be changed using the special
 M commands as described in the documentation. Changing these value sin the configuration.h
-has no effect. Parameters overriden by EEPROM settings are calibartion values, extruder 
+has no effect. Parameters overridden by EEPROM settings are calibration values, extruder 
 values except thermistor tables and some other parameter likely to change during usage
 like advance steps or ops mode.
-To override EEPROM settings with config settings, set EEPROM_MODE 0
+To override EEPROM settings with configuration file settings, set EEPROM_MODE 0
 
 */
 
 
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
-/** Number of extruders. Maximum 2 extruder. */
+/** Number of extruders. Maximum 2 extruders. */
 #define NUM_EXTRUDER 1
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
@@ -73,14 +73,14 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #include "pins.h"
 
-// Uncomment the following line if oyu are using arduino compatible firmware made for Arduino version earlier then 1.0
-// If it is incompatible you will get compiler errors about write functions not beeing compatible!
+// Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
+// If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 
 /* Define the type of axis movements needed for your printer. The typical case
-is a full cartesian system where x, y and z moves are handled by seperate motors.
+is a full cartesian system where x, y and z moves are handled by separate motors.
 
-0 = full cartesian system, xyz have seperate motors.
+0 = full cartesian system, xyz have separate motors.
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
 3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
@@ -110,7 +110,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
       #define PULLEY_TEETH 20
       #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
     #elif DELTA_DRIVE_TYPE == 1
-      /** \brief Filament pulley diameter in milimeters */
+      /** \brief Filament pulley diameter in millimetres */
       #define PULLEY_DIAMETER 10
       #define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
     #endif
@@ -134,7 +134,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #else
     // *******************************************************
-    // *** These parameter are for all othe rprinter types ***
+    // *** These parameter are for all other printer types ***
     // *******************************************************
 
     /** Drive settings for printers with cartesian drive systems */
@@ -159,7 +159,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
-// for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
+// for skeinforge 40 and later, steps to pull the plastic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT0_STEPS_PER_MM 413 //385
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
@@ -193,7 +193,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 #define EXT0_ENABLE_ON false
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
-// skeinforge use hiher values.
+// skeinforge use higher values.
 //  Overridden if EEPROM activated.
 #define EXT0_MAX_FEEDRATE 30
 // Feedrate from halted extruder in mm/s
@@ -239,7 +239,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define EXT0_PID_D 80
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
-/** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
+/** \brief Factor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
 K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
 the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
 L is the linear factor and seems to be working better then the quadratic dependency.
@@ -255,7 +255,7 @@ to 0 to disable.
 */
 #define EXT0_WAIT_RETRACT_UNITS 	0
 
-/** You can run any gcode command son extruder deselect/select. Seperate multiple commands with a new line \n.
+/** You can run any gcode command son extruder deselect/select. Separate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
 The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_SELECT_COMMANDS "M120 S5 P5\nM117 Extruder 1"
@@ -269,7 +269,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 10
 #define EXT1_Y_OFFSET 0
-// for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
+// for skeinforge 40 and later, steps to pull the plastic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT1_STEPS_PER_MM 373
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
@@ -349,7 +349,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define EXT1_PID_D 200
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT1_PID_MAX 255
-/** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
+/** \brief Factor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
 K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
 the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
 L is the linear factor and seems to be working better then the quadratic dependency.
@@ -398,7 +398,7 @@ Uncomment define to use force the temperature into the range for given watchperi
 
 There are many different thermistors, which can be combined with different resistors. This result
 in unpredictable number of tables. As a resolution, the user can define one table here, that can
-be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries
+be used as type 5 for thermistor type in extruder/heated bed definition. Make sure, the number of entries
 matches the value in NUM_TEMPS_USERTHERMISTOR0. If you span definition over multiple lines, make sure to end
 each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with
 increasing adc values. For more informations, read 
@@ -426,17 +426,17 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 
 /** If defined, creates a thermistortable at startup.
 
-If you dont feel like computing the table on your own, you can use this generic method. It is
+If you don't feel like computing the table on your own, you can use this generic method. It is
 a simple approximation which may be not as accurate as a good table computed from the reference
 values in the datasheet. You can increase precision if you use a temperature/resistance for
 R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures,
-which are not realy important. The resistors must fit the following schematic:
+which are not really important. The resistors must fit the following schematic:
 @code
-VREF ---- R2 ---+--- Termistor ---+-- GND
-                |                 |
-                +------ R1 -------+
-                |                 |
-                +---- Capacitor --+
+VREF ---- R2 ---+--- Thermistor ---+-- GND
+                |                  |
+                +------- R1 -------+
+                |                  |
+                +---- Capacitor ---+
                 |
                 V measured
 @endcode                
@@ -600,7 +600,7 @@ on this endstop.
 #define ENDSTOP_Y_MAX_INVERTING false
 #define ENDSTOP_Z_MAX_INVERTING true
 
-// Set the values true where you have a hardware endstop. The Pin numbe ris taken from pins.h.
+// Set the values true where you have a hardware endstop. The Pin number is taken from pins.h.
 
 #define MIN_HARDWARE_ENDSTOP_X true
 #define MIN_HARDWARE_ENDSTOP_Y true
@@ -676,7 +676,7 @@ on this endstop.
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
-// If EEPROM is enabled these values will be overidden with the values in the EEPROM
+// If EEPROM is enabled these values will be overridden with the values in the EEPROM
 #define X_MAX_LENGTH 165
 #define Y_MAX_LENGTH 175
 #define Z_MAX_LENGTH 80
@@ -795,7 +795,7 @@ for some printers causing an early stall.
 */
 #define DOUBLE_STEP_DELAY 1 // time in us
 
-/** The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in
+/** The firmware supports trajectory smoothing. To achieve this, it divides the stepsize by 2, resulting in
 the double computation cost. For slow movements this is not an issue, but for really fast moves this is 
 too much. The value specified here is the number of clock cycles between a step on the driving axis.
 If the interval at full speed is below this value, smoothing is disabled for that line.*/
@@ -843,7 +843,7 @@ Overridden if EEPROM activated.
 
 /** \brief Number of moves we can cache in advance.
 
-This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
+This number of moves can be cached in advance. If you want to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
 #define MOVE_CACHE_SIZE 16
@@ -873,9 +873,9 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 
 /* \brief Minimum temperature for extruder operation
 
-This is a saftey value. If your extruder temperature is below this temperature, no
-extruder steps are executed. This is to prevent your extruder to move unless the fiament
-is at least molten. After havong some complains that the extruder does not work, I leave
+This is a safety value. If your extruder temperature is below this temperature, no
+extruder steps are executed. This is to prevent your extruder to move unless the filament
+is at least molten. After having some complains that the extruder does not work, I leave
 it 0 as default.
 */
 
@@ -956,7 +956,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 
 /** \brief Communication speed.
 
-- 250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
+- 250000 : Fastest with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
 - 115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%
 - 76800 : Best setting for Arduino with 16 MHz, Error rate 0,2% page 198 AVR1284 Manual. Result: Faster communication then 115200
 - 57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection
@@ -993,9 +993,9 @@ execution.
 #define GCODE_BUFFER_SIZE 2
 /** Appends the linenumber after ever ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this */
 #define ACK_WITH_LINENUMBER
-/** Communication errors can swollow part of the ok, which tells the host software to send
+/** Communication errors can swallow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
-second, if our queue is empty should prevent this. Uncomment if you don't wan't this feature. */
+second, if our queue is empty should prevent this. Uncomment if you don't want this feature. */
 #define WAITING_IDENTIFIER "wait"
 
 /** \brief Sets time for echo debug
@@ -1011,7 +1011,7 @@ and it is elsewise difficult to know, what your reprap is currently doing.
 
 /** \brief EEPROM storage mode 
 
-Set the EEPROM_MODE to 0 if you always wan't to use the settings in this configuration file. If not,
+Set the EEPROM_MODE to 0 if you always want to use the settings in this configuration file. If not,
 set it to a value not stored in the first EEPROM-byte used. If you later want to overwrite your current
 eeprom settings with configuration defaults, just select an other value. On the first call to epr_init()
 it will detect a mismatch of the first byte and copys default values into EEPROM. If the first byte
@@ -1040,7 +1040,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
    This works only if feature is set to true. */
 #define FEATURE_MEMORY_POSITION true
 
-/** If a checksum is send, all future comamnds must also contain a checksum. Increases reliability especially for binary protocol. */
+/** If a checksum is send, all future commands must also contain a checksum. Increases reliability especially for binary protocol. */
 #define FEATURE_CHECKSUM_FORCED false
 
 /** Should support for fan control be compiled in. If you enable this make sure 
@@ -1071,6 +1071,7 @@ Select the language to use.
 2 = dutch
 3 = brazilian portuguese
 4 = italian
+46 = swedish
 */
 #define UI_LANGUAGE 1
 
@@ -1084,13 +1085,13 @@ Select the language to use.
 info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH true
 
-/** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
+/** Time to return to info menu if x milliseconds passed with no key pressed. Set to 0 to disable it. */
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
 
 #define FEATURE_UI_KEYS 0
 
-/* Normally cou want a next/previous actions with every click of your encoder.
-Unfotunately, the encoder have a different count of phase changes between clicks.
+/* Normally you want a next/previous actions with every click of your encoder.
+Unfortunately, the encoder have a different count of phase changes between clicks.
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
 #define UI_ENCODER_SPEED 1
@@ -1108,7 +1109,7 @@ Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.
-Parameter is is delay in microseconds and the secons is the number of repetitions.
+Parameter is, delay in microseconds and the seconds is the number of repetitions.
 Values must be in range 1..255
 */
 #define BEEPER_SHORT_SEQUENCE 2,2
