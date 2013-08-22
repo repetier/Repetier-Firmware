@@ -224,8 +224,15 @@
 #define UI_TEXT_SD_REMOVED       "SD Card removed"
 #define UI_TEXT_SD_INSERTED      "SD Card inserted"
 #define UI_TEXT_PRINTER_READY    "Printer ready."
+// Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
+// ___88 days 12:45
+#define UI_TEXT_PRINTTIME_DAYS   " days "
+#define UI_TEXT_PRINTTIME_HOURS  ":"
+#define UI_TEXT_PRINTTIME_MINUTES ""
+#define UI_TEXT_PRINT_TIME     "Printing time"
+#define UI_TEXT_PRINT_FILAMENT "Filament printed"
 
-// *************** german translation ****************
+// *************** German translation ****************
 
 #if UI_LANGUAGE==1
 
@@ -386,6 +393,13 @@
 #define UI_TEXT_SD_REMOVED       "Karte entfernt"
 #define UI_TEXT_SD_INSERTED      "Karte eingelegt"
 #define UI_TEXT_PRINTER_READY    "Drucker bereit."
+// Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
+// ___88 days 12:45
+#define UI_TEXT_PRINTTIME_DAYS   " Tage "
+#define UI_TEXT_PRINTTIME_HOURS  ":"
+#define UI_TEXT_PRINTTIME_MINUTES ""
+#define UI_TEXT_PRINT_TIME     "Ges. Druckzeit"
+#define UI_TEXT_PRINT_FILAMENT "Filament gedruckt"
 
 #endif
 
@@ -538,7 +552,7 @@
 
 #endif
 
-// *************** brazilian portuguese translation ****************
+// *************** Brazilian portuguese translation ****************
 
 #if UI_LANGUAGE==3
 
@@ -994,6 +1008,151 @@
 
 #endif
 
+// *************** Swedish translation ****************
+// By Daniel Tedenljung 2013-08-21
+#if UI_LANGUAGE==6
+#define UI_TEXT_ON               "P" STR_uuml ""
+#define UI_TEXT_OFF              "Av"
+#define UI_TEXT_NA               "N/A" // Output for not available
+#define UI_TEXT_YES              "Ja"
+#define UI_TEXT_NO               "Nej"
+#define UI_TEXT_SEL              "\003"
+#define UI_TEXT_NOSEL            "\004"
+#define UI_TEXT_PRINT_POS        "Skriver ut..."
+#define UI_TEXT_PRINTING         "Skriver"
+#define UI_TEXT_IDLE             "Idle"
+#define UI_TEXT_NOSDCARD         "Inget SD Kort"
+#define UI_TEXT_ERROR            "**** ERROR ****"
+#define UI_TEXT_BACK             "Tillbaka \001"
+#define UI_TEXT_QUICK_SETTINGS   "Inst" STR_auml "llnigar"
+#define UI_TEXT_CONFIGURATION    "Konfiguration"
+#define UI_TEXT_POSITION         "Position"
+#define UI_TEXT_EXTRUDER         "Extruder"
+#define UI_TEXT_SD_CARD          "SD Kort"
+#define UI_TEXT_DEBUGGING        "Debugging"
+#define UI_TEXT_HOME_ALL         "K" STR_ouml "r hem alla"
+#define UI_TEXT_HOME_X           "K" STR_ouml "r hem X"
+#define UI_TEXT_HOME_Y           "K" STR_ouml "r hem Y"
+#define UI_TEXT_HOME_Z           "K" STR_ouml "r hem Z"
+#define UI_TEXT_PREHEAT_PLA      "F" STR_ouml "rv" STR_auml "rm f" STR_ouml "r PLA"
+#define UI_TEXT_PREHEAT_ABS      "F" STR_ouml "rv" STR_auml "rm f" STR_ouml "r ABS"
+#define UI_TEXT_COOLDOWN         "Kyl ner"
+#define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
+#define UI_TEXT_DISABLE_STEPPER  "St" STR_auml "ng av stegmotor"
+#define UI_TEXT_X_POSITION       "X Position"
+#define UI_TEXT_X_POS_FAST       "X Pos. Snabb"
+#define UI_TEXT_Y_POSITION       "Y Position"
+#define UI_TEXT_Y_POS_FAST       "Y Pos. Snabb"
+#define UI_TEXT_Z_POSITION       "Z Position"
+#define UI_TEXT_Z_POS_FAST       "Z Pos. Snabb"
+#define UI_TEXT_E_POSITION       "Extr. position"
+#define UI_TEXT_BED_TEMP         "Bord Temp.:%Eb\002C"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
+#define UI_TEXT_EXTR0_OFF        "Extruder 0 Off"
+#define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
+#define UI_TEXT_EXTR0_SELECT     "%X0 V"STR_auml"lj Extr.0"
+#define UI_TEXT_EXTR1_SELECT     "%X1 V"STR_auml"lj Extr.1"
+#define UI_TEXT_EXTR_ORIGIN      "Set Origin"
+#define UI_TEXT_PRINT_X          "Skriv X:%ax"
+#define UI_TEXT_PRINT_Y          "Skriv Y:%ay"
+#define UI_TEXT_PRINT_Z          "Skriv Z:%az"
+#define UI_TEXT_MOVE_X           "Transp X:%aX"
+#define UI_TEXT_MOVE_Y           "Transp Y:%aY"
+#define UI_TEXT_MOVE_Z           "Transp. Z:%aZ"
+#define UI_TEXT_JERK             "Jerk:%aj"
+#define UI_TEXT_ZJERK            "Z-Jerk:%aJ"
+#define UI_TEXT_ACCELERATION     "Acceleration"
+#define UI_TEXT_STORE_TO_EEPROM  "Spara till EEPROM"
+#define UI_TEXT_LOAD_EEPROM      "Ladda f. EEPROM"
+#define UI_TEXT_DBG_ECHO         "Eko   :%do"
+#define UI_TEXT_DBG_INFO         "Info   :%di"
+#define UI_TEXT_DBG_ERROR        "Errors :%de"
+#define UI_TEXT_DBG_DRYRUN       "Torr k" STR_ouml "r:%dd"
+#define UI_TEXT_OPS_OFF          "%O0 OPS Av"
+#define UI_TEXT_OPS_CLASSIC      "%O1 OPS Klassik"
+#define UI_TEXT_OPS_FAST         "%O2 OPS Snabb"
+#define UI_TEXT_OPS_RETRACT      "Dra tillbaka :%Or"
+#define UI_TEXT_OPS_BACKSLASH    "Backsl. :%Ob"
+#define UI_TEXT_OPS_MINDIST      "Min.dist:%Od"
+#define UI_TEXT_OPS_MOVE_AFTER   "Flytta efter:%Oa"
+#define UI_TEXT_ANTI_OOZE        "Anti Ooze"
+#define UI_TEXT_PRINT_FILE       "Skriv ut fil"
+#define UI_TEXT_PAUSE_PRINT      "Pausa utskrift"
+#define UI_TEXT_CONTINUE_PRINT   "Forts" STR_auml "tt Utskrift"
+#define UI_TEXT_UNMOUNT_CARD     "Avmontera Kort"
+#define UI_TEXT_MOUNT_CARD       "Montera Kort"
+#define UI_TEXT_DELETE_FILE      "Radera fil"
+#define UI_TEXT_FEEDRATE         "Matning"
+#define UI_TEXT_FEED_MAX_X       "Max X:%fx"
+#define UI_TEXT_FEED_MAX_Y       "Max Y:%fy"
+#define UI_TEXT_FEED_MAX_Z       "Max Z:%fz"
+#define UI_TEXT_FEED_HOME_X      "Ref X:%fX"
+#define UI_TEXT_FEED_HOME_Y      "Ref Y:%fY"
+#define UI_TEXT_FEED_HOME_Z      "Ref Z:%fZ"
+#define UI_TEXT_ACTION_XPOSITION4 "X:%x0 mm","Min " STR_auml "ndl" STR_auml "ge:%sx","Max " STR_auml "ndl" STR_auml "ge:%sX",""
+#define UI_TEXT_ACTION_YPOSITION4 "Y:%x1 mm","Min " STR_auml "ndl" STR_auml "ge:%sy","Max " STR_auml "ndl" STR_auml "ge:%sY",""
+#define UI_TEXT_ACTION_ZPOSITION4 "Z:%x2 mm","Min " STR_auml "ndl" STR_auml "ge:%sz","Max " STR_auml "ndl" STR_auml "ge:%sZ",""
+#define UI_TEXT_ACTION_XPOSITION_FAST4 "X:%x0 mm","Min " STR_auml "ndl" STR_auml "ge:%sx","Max " STR_auml "ndl" STR_auml "ge:%sX",""
+#define UI_TEXT_ACTION_YPOSITION_FAST4 "Y:%x1 mm","Min " STR_auml "ndl" STR_auml "ge:%sy","Max " STR_auml "ndl" STR_auml "ge:%sY",""
+#define UI_TEXT_ACTION_ZPOSITION_FAST4 "Z:%x2 mm","Min " STR_auml "ndl" STR_auml "ge:%sz","Max " STR_auml "ndl" STR_auml "ge:%sZ",""
+#define UI_TEXT_ACTION_EPOSITION_FAST2 "E:%x3 mm","1 click = 1 mm"
+#define UI_TEXT_ACTION_XPOSITION2 "X:%x0 mm","Min:%sx Max:%sX"
+#define UI_TEXT_ACTION_YPOSITION2 "Y:%x1 mm","Min:%sy Max:%sY"
+#define UI_TEXT_ACTION_ZPOSITION2 "Z:%x2 mm","Min:%sz Max:%sZ"
+#define UI_TEXT_ACTION_XPOSITION_FAST2 "X:%x0 mm","Min:%sx Max:%sX"
+#define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
+#define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
+#define UI_TEXT_FANSPEED          "Fl" STR_auml "kt hast."
+#define UI_TEXT_FAN_OFF           "St" STR_auml "ng av fl" STR_auml "kt"
+#define UI_TEXT_FAN_25            "Fl" STR_auml "kt 25%%%"
+#define UI_TEXT_FAN_50            "Fl" STR_auml "kt 50%%%"
+#define UI_TEXT_FAN_75            "Fl" STR_auml "kt 75%%%"
+#define UI_TEXT_FAN_FULL          "Full fl" STR_auml "kt"
+#define UI_TEXT_STEPPER_INACTIVE  "Stegmotorer inakt."
+#define UI_TEXT_STEPPER_INACTIVE2 "Inakt. Efter:%is","[s] 0=Off"
+#define UI_TEXT_POWER_INACTIVE    "Max. Inaktiv"
+#define UI_TEXT_POWER_INACTIVE2   "Inakt. Efter:%ip","[s] 0=Off"
+#define UI_TEXT_GENERAL           "Generella"
+#define UI_TEXT_BAUDRATE          "Baudrate:%oc"
+#define UI_TEXT_EXTR_STEPS        "Steg/MM:%Se"
+#define UI_TEXT_EXTR_START_FEED   "Start FR:%Xf"
+#define UI_TEXT_EXTR_MAX_FEED     "Max FR:%XF"
+#define UI_TEXT_EXTR_ACCEL        "Accel:%XA"
+#define UI_TEXT_EXTR_WATCH        "Stab.Time:%Xw"
+#define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
+#define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
+#define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
+#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
+#define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
+#define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
+#define UI_TEXT_EXTR_DMAX         "Drive Max:%XM"
+#define UI_TEXT_EXTR_PMAX         "PID Max:%XD"
+#define UI_TEXT_EXTR_XOFF         "X-Offset:%Xx"
+#define UI_TEXT_EXTR_YOFF         "Y-Offset:%Xy"
+#define UI_TEXT_STRING_HM_BANGBANG "BangBang"
+#define UI_TEXT_STRING_HM_PID     "PID"
+#define UI_TEXT_STRING_ACTION     "Action:%la"
+#define UI_TEXT_HEATING_EXTRUDER  "V" STR_auml "rmer Extruder"
+#define UI_TEXT_HEATING_BED       "V" STR_auml "rmer Bord"
+#define UI_TEXT_KILLED            "Killed"
+#define UI_TEXT_STEPPER_DISABLED  "Stegmotorer Av"
+#define UI_TEXT_EEPROM_STORED     "Konfiguration","sparad i EEPROM"
+#define UI_TEXT_EEPROM_LOADED     "Konfiguration","laddat fr EEPROM"
+#define UI_TEXT_UPLOADING         "Uppladdning..."
+#define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_SPEED_MULTIPLY    "Hast. Mul.:%om%%%"
+#define UI_TEXT_FLOW_MULTIPLY     "Fl" STR_ouml "de Mul.:%of%%%"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "V" STR_auml "nta Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "V" STR_auml "nta Units:%XUmm"
+#define UI_TEXT_PRINTER_READY    "Utskrift Klar."
+#endif
+
 // *************************************************************************************
 //                             User defined language
 //
@@ -1151,5 +1310,12 @@
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 #define UI_TEXT_PRINTER_READY    "Printer ready."
+// Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
+// ___88 days 12:45
+#define UI_TEXT_PRINTTIME_DAYS   " days "
+#define UI_TEXT_PRINTTIME_HOURS  ":"
+#define UI_TEXT_PRINTTIME_MINUTES ""
+#define UI_TEXT_PRINT_TIME     "Printing time"
+#define UI_TEXT_PRINT_FILAMENT "Filament printed"
 
 #endif

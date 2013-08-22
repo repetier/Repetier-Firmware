@@ -1,22 +1,26 @@
 Version 0.90alpha in development use only if you know what you are doing, config may change heavily!
+  Support for Arduino Due - thank to John Silvia for this port!
+  Compatible with Code::Blocks for Arduino.
+  Added z-probing.
+  Added auto leveling of heated bed.
+  Moved hardware dependend code into HAL.[h|cpp]
+  New heat manage 3: dead-time control. P in pid values is dead time in seconds.
+
   Switch heater 1/heater2 and sensore 1/2 for Megatronics 2.0.
   Switch temp sensore 0/1 for Gen1.5
   Optimized path planner.
   Fixed shock on z-level switches.
   Changed serial handling.
-  Moved hardware dependend code into HAL.[h|cpp]
-  Compatible with Code::Blocks for Arduino.
   Definition of homing order axis.
-  Added z-probing.
-  Added auto leveling of heated bed.
   Fixed pin assignment for RUMBA
   Added ui support for 3. extruder
   Mirror stepper driver signals if wanted for two x,y,z drivers with same signals.
   Support for servo control through M340 command.
   Fixed bug with cura profile comment string.
+  Fixed missing return bug for prints from sd card.
   The first two extruder can share a cooler. SImply set both pins to identical values.
   Enable hot-end cooler for M303 if available.
-  New heat manage 3: dead-time control. P in pid values is dead time in seconds.
+  Swedish translation from Daniel Tedenljung
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.

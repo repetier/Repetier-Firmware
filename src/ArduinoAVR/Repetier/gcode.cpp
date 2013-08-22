@@ -406,7 +406,10 @@ void GCode::readFromSerial()
             char ch = commandReceiving[commandsReceivingWritePosition-1];
             if(ch == '\n' || ch == '\r' || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
-                commandReceiving[commandsReceivingWritePosition-1]=0;
+                if(ch == '\n' || ch == '\r' || ch == ':')
+                    commandReceiving[commandsReceivingWritePosition-1]=0;
+                else
+                    commandReceiving[commandsReceivingWritePosition]=0;
                 commentDetected = false;
                 if(commandsReceivingWritePosition==1)   // empty line ignore
                 {

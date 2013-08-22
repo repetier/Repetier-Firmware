@@ -85,6 +85,8 @@ List of placeholder:
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
 %Se : Steps per mm current extruder
+%Ut : Shows printing time
+%Uf : Shows total filament usage
 %is : Stepper inactive time in seconds
 %ip : Max. inactive time in seconds
 %X0..9 : Extruder selected marker
@@ -149,14 +151,21 @@ UI_TEXT_PAGE_EXTRUDER2
  ,""
 #endif
  ,"%os");
-
+#if EEPROM_MODE!=0
+  UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
+  #define UI_PRINTTIME_PAGES ,&ui_page4
+  #define UI_PRINTTIME_COUNT 1
+#else
+  #define UI_PRINTTIME_PAGES
+  #define UI_PRINTTIME_COUNT 0
+#endif
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3}
+#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3 UI_PRINTTIME_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3
+#define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
 #else
 #if HAVE_HEATED_BED==true
 UI_PAGE2(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED);

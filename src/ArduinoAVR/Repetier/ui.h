@@ -339,7 +339,7 @@ class UIDisplay {
     unsigned long nextRepeat; // Time of next autorepeat
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
-    void addInt(int value,uint8_t digits); // Print int into printCols
+    void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
     void addLong(long value,char digits);
     void addFloat(float number, char fixdigits,uint8_t digits);
     void addStringP(PGM_P text);

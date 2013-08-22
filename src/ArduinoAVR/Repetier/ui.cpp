@@ -354,7 +354,7 @@ void lcdWriteNibble(uint8_t value)
 void lcdWriteByte(uint8_t c,uint8_t rs)
 {
 #if UI_DISPLAY_RW_PIN<0
-   HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
 #else
     SET_INPUT(UI_DISPLAY_D4_PIN);
     SET_INPUT(UI_DISPLAY_D5_PIN);
@@ -625,7 +625,7 @@ void UIDisplay::printRowP(uint8_t r,PGM_P txt)
     printCols[col]=0;
     printRow(r,printCols);
 }
-void UIDisplay::addInt(int value,uint8_t digits)
+void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
 {
     uint8_t dig=0,neg=0;
     if(value<0)
@@ -651,7 +651,7 @@ void UIDisplay::addInt(int value,uint8_t digits)
     if(digits<6)
         while(dig<digits)
         {
-            *--str = ' ';
+            *--str = fillChar; //' ';
             dig++;
         }
     while(*str && col<UI_COLS)
@@ -1042,6 +1042,35 @@ void UIDisplay::parse(char *txt,bool ram)
             if(c2=='z') addFloat(Printer::axisStepsPerMM[2],3,1);
             if(c2=='e') addFloat(Extruder::current->stepsPerMM,3,1);
             break;
+        case 'U':
+            if(c2=='t')   // Printing time
+            {
+#if EEPROM_MODE!=0
+                bool alloff = true;
+                for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+                    if(tempController[i]->targetTemperatureC>15) alloff = false;
+
+                long seconds = (alloff ? 0 : (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000)+HAL::eprGetInt32(EPR_PRINTING_TIME);
+                long tmp = seconds/86400;
+                seconds-=tmp*86400;
+                addInt(tmp,5);
+                addStringP(PSTR(UI_TEXT_PRINTTIME_DAYS));
+                tmp=seconds/3600;
+                addInt(tmp,2);
+                addStringP(PSTR(UI_TEXT_PRINTTIME_HOURS));
+                seconds-=tmp*3600;
+                tmp = seconds/60;
+                addInt(tmp,2,0);
+                addStringP(PSTR(UI_TEXT_PRINTTIME_MINUTES));
+#endif
+            }
+            else if(c2=='f')     // Filament usage
+            {
+#if EEPROM_MODE!=0
+                float dist = Printer::filamentPrinted*0.001+HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
+                addFloat(dist,6,1);
+#endif
+            }
         }
     }
     printCols[col] = 0;
