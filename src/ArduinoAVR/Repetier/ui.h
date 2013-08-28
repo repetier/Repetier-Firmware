@@ -758,8 +758,94 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 7
 
-#if FEATURE_CONTROLLER>0
+#if FEATURE_CONTROLLER==8 || FEATURE_CONTROLLER==9 // PiBot Expansion Port
 
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_DELAYPERCHAR 320
+#define UI_INVERT_MENU_DIRECTION true
+#define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
+#define BEEPER_LONG_SEQUENCE 24,8
+
+#if FEATURE_CONTROLLER==9   // 16x02 Display
+ #define UI_COLS 16
+ #define UI_ROWS 2
+#else  ////20x04 Display
+ #define UI_COLS 20
+ #define UI_ROWS 4
+#endif
+
+#ifdef PiBot_V_1_4
+#define BEEPER_PIN             31
+#define UI_DISPLAY_RS_PIN      45
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  44
+#define UI_DISPLAY_D0_PIN      43
+#define UI_DISPLAY_D1_PIN      42
+#define UI_DISPLAY_D2_PIN      19
+#define UI_DISPLAY_D3_PIN      18
+#define UI_DISPLAY_D4_PIN      43
+#define UI_DISPLAY_D5_PIN      42
+#define UI_DISPLAY_D6_PIN      19
+#define UI_DISPLAY_D7_PIN      18
+#define UI_ENCODER_A           61
+#define UI_ENCODER_B           62
+#define UI_ENCODER_CLICK       63
+#define UI_RESET_PIN           28
+#define UI_DELAYPERCHAR 320
+#define UI_BUTTON_OK       46
+#define UI_BUTTON_NEXT     48
+#define UI_BUTTON_PREVIOUS 47
+#define UI_BUTTON_BACK     49
+#define UI_BUTTON_SD_PRINT 29
+#else
+#define BEEPER_PIN             37
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      23
+#define UI_DISPLAY_D1_PIN      25
+#define UI_DISPLAY_D2_PIN      27
+#define UI_DISPLAY_D3_PIN      29
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_ENCODER_A           33
+#define UI_ENCODER_B           31
+#define UI_ENCODER_CLICK       35
+#define UI_RESET_PIN           41
+#define UI_DELAYPERCHAR 320
+#define UI_BUTTON_OK       4
+#define UI_BUTTON_NEXT     6
+#define UI_BUTTON_PREVIOUS 5
+#define UI_BUTTON_BACK     11
+#define UI_BUTTON_SD_PRINT 42
+#endif
+
+#ifdef UI_MAIN
+void ui_init_keys() {
+  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_OK); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_NEXT);
+  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_PREVIOUS);
+  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
+  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_SD_PRINT);
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_BUTTON_LOW(UI_BUTTON_OK,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_BUTTON_NEXT,UI_ACTION_NEXT); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_BUTTON_PREVIOUS,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_BUTTON_SD_PRINT,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif
+
+#if FEATURE_CONTROLLER>0
 #if UI_ROWS==4
 #if UI_COLS==16
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16

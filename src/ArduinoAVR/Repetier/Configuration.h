@@ -67,7 +67,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Megatronics 2.0            = 701
 // RUMBA                      = 80  // Get it from reprapdiscount
 // Rambo                      = 301
-// Arduino Due                = 401 // This is only experimental
+// PiBot for Repetier V1.0-1.3= 314
+// PiBot for Repetier V1.4    = 315
 // Sanguish Beta              = 501
 
 #define MOTHERBOARD 33
@@ -1119,6 +1120,9 @@ The following settings override uiconfig.h!
 4 = Foltyn 3DMaster with display attached
 5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
 6 = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
+7 = RADDS Extension Port
+8 = PiBot Display/Controller extension with 20x4 character display
+9 = PiBot Display/Controller extension with 16x2 character display
 */
 #define FEATURE_CONTROLLER 2
 
