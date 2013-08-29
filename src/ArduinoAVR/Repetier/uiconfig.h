@@ -72,6 +72,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 */
 #ifndef BEEPER_TYPE
 #define BEEPER_TYPE 1
+#define BEEPER_TYPE_INVERTING false
 #endif
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)

@@ -768,6 +768,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_INVERT_MENU_DIRECTION true
 #define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
 #define BEEPER_LONG_SEQUENCE 24,8
+#define BEEPER_TYPE 1
+#define BEEPER_TYPE_INVERTING true
 
 #if FEATURE_CONTROLLER==9   // 16x02 Display
  #define UI_COLS 16
@@ -795,10 +797,10 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_CLICK       63
 #define UI_RESET_PIN           28
 #define UI_DELAYPERCHAR 320
-#define UI_BUTTON_OK       46
+#define UI_BUTTON_OK       49
 #define UI_BUTTON_NEXT     48
 #define UI_BUTTON_PREVIOUS 47
-#define UI_BUTTON_BACK     49
+#define UI_BUTTON_BACK     46
 #define UI_BUTTON_SD_PRINT 29
 #else
 #define BEEPER_PIN             37

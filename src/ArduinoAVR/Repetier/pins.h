@@ -1438,7 +1438,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            40
 #define FAN_PIN            7        ////*****fan0
 //uncomment when the 2nd fan used - works only without heated bed!
-/*  #define FAN2_PIN           6  */
+#define FAN2_PIN           2
 #define PS_ON_PIN          30
 #define KILL_PIN           -1
 

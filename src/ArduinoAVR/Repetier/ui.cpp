@@ -65,7 +65,11 @@ void beep(uint8_t duration,uint8_t count)
     for(uint8_t i=0; i<count; i++)
     {
 #if BEEPER_TYPE==1
+#if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
+        WRITE(BEEPER_PIN,LOW);
+#else
         WRITE(BEEPER_PIN,HIGH);
+#endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
@@ -81,7 +85,11 @@ void beep(uint8_t duration,uint8_t count)
 #endif
         HAL::delayMilliseconds(duration);
 #if BEEPER_TYPE==1
+#if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
+        WRITE(BEEPER_PIN,HIGH);
+#else
         WRITE(BEEPER_PIN,LOW);
+#endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 
