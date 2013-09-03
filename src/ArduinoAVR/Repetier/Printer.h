@@ -79,6 +79,7 @@ public:
 #ifdef STEP_COUNTER
     static long countZSteps;					///< Count of steps from last position reset
 #endif
+    static float delta_radius;
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
 #endif

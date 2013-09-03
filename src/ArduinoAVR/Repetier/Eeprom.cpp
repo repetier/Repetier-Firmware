@@ -102,6 +102,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::xMin = X_MIN_POS;
     Printer::yMin = Y_MIN_POS;
     Printer::zMin = Z_MIN_POS;
+#if DRIVE_SYSTEM==3
+    Printer::delta_radius = DELTA_RADIUS;
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = X_BACKLASH;
     Printer::backlashY = Y_BACKLASH;
@@ -372,6 +375,9 @@ void EEPROM::storeDataIntoEEPROM(byte corrupted)
     HAL::epr_set_float(EPR_BACKLASH_X,Printer::backlashX);
     HAL::epr_set_float(EPR_BACKLASH_Y,Printer::backlashY);
     HAL::epr_set_float(EPR_BACKLASH_Z,Printer::backlashZ);
+#if DRIVE_SYSTEM==3
+    HAL::epr_set_float(EPR_DELTA_R,Printer::delta_radius);
+#endif
 #else
     HAL::epr_set_float(EPR_BACKLASH_X,0);
     HAL::epr_set_float(EPR_BACKLASH_Y,0);
@@ -500,6 +506,9 @@ void EEPROM::readDataFromEEPROM()
     Printer::xLength = HAL::epr_get_float(EPR_X_LENGTH);
     Printer::yLength = HAL::epr_get_float(EPR_Y_LENGTH);
     Printer::zLength = HAL::epr_get_float(EPR_Z_LENGTH);
+#if DRIVE_SYSTEM==3
+    Printer::delta_radius = HAL::epr_get_float(EPR_DELTA_R);
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::epr_get_float(EPR_BACKLASH_X);
     Printer::backlashY = HAL::epr_get_float(EPR_BACKLASH_Y);
@@ -655,6 +664,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_X_LENGTH,Com::tEPRXMaxLength);
     writeFloat(EPR_Y_LENGTH,Com::tEPRYMaxLength);
     writeFloat(EPR_Z_LENGTH,Com::tEPRZMaxLength);
+#if DRIVE_SYSTEM==3
+    writeFloat(EPR_DELTA_R,Com::tEPRDeltaRadius);
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
     writeFloat(EPR_BACKLASH_X,Com::tEPRXBacklash);
     writeFloat(EPR_BACKLASH_Y,Com::tEPRYBacklash);

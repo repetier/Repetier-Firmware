@@ -88,7 +88,7 @@ is a full cartesian system where x, y and z moves are handled by seperate motors
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in
 the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
-#define DRIVE_SYSTEM 0
+#define DRIVE_SYSTEM 3
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -117,7 +117,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     #endif
 
     /** \brief Steps per rotation of stepper motor */
-    #define STEPS_PER_ROTATION 400
+    #define STEPS_PER_ROTATION 200
 
     /** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
     #define MICRO_STEPS 8

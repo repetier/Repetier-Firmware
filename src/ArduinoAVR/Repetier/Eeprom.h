@@ -75,6 +75,10 @@ have problems with other modules using the eeprom */
 #define EPR_BACKLASH_Y            161
 #define EPR_BACKLASH_Z            165
 
+#if DRIVE_SYSTEM==3
+#define EPR_DELTA_R               169
+#endif
+
 #define EPR_Z_PROBE_X_OFFSET      800
 #define EPR_Z_PROBE_Y_OFFSET      804
 #define EPR_Z_PROBE_HEIGHT        808

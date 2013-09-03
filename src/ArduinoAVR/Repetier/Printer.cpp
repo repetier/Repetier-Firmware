@@ -78,6 +78,7 @@ volatile  int Printer::extruderStepsNeeded; ///< This many extruder steps are st
  long Printer::countZSteps;					///< Count of steps from last position reset
 #endif
 long Printer::maxDeltaPositionSteps;
+float Printer::delta_radius;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
  long Printer::stepsRemainingAtZHit;
@@ -628,6 +629,7 @@ void Printer::setup()
     Printer::currentPositionSteps[0] = Printer::currentPositionSteps[1] = Printer::currentPositionSteps[2] = Printer::currentPositionSteps[3] = 0;
 #if DRIVE_SYSTEM==3
     calculate_delta(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+    Printer::delta_radius = DELTA_RADIUS;
 #endif
     Printer::maxJerk = MAX_JERK;
     Printer::maxZJerk = MAX_ZJERK;
