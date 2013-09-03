@@ -680,6 +680,7 @@ void TemperatureController::updateCurrentTemperature()
         short oldraw = temptable[0];
         short oldtemp = temptable[1];
         short newraw,newtemp;
+        currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-currentTemperature;
         while(i<GENERIC_THERM_NUM_ENTRIES*2)
         {
             newraw = temptable[i++];
