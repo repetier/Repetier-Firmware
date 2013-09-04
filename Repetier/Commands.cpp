@@ -1109,25 +1109,41 @@ void process_command(GCode *com,byte bufferedCommand)
     if(GCODE_HAS_S(com)) {
       if (com->S == 0) {
         printer_state.countZSteps = 0;
-	out.println_P(PSTR("Measurement reset."));
+        out.println_P(PSTR("Measurement reset."));
       } else if (com->S == 1) {
-	OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps);
-	OUT_P_F_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
+        OUT_P_L_LN("Measure/delta (Steps) =",printer_state.countZSteps);
+        OUT_P_F_LN("Measure/delta =",printer_state.countZSteps * inv_axis_steps_per_unit[2]);
       } else if (com->S = 2) {
-        if (printer_state.countZSteps < 0)
-	  printer_state.countZSteps = -printer_state.countZSteps;
-	printer_state.zMin = 0;
-	printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
-	printer_state.zMaxSteps = printer_state.countZSteps;
-	for (byte i=0; i<3; i++) {
-	  printer_state.currentPositionSteps[i] = 0;
-	}
-	calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
-	OUT_P_LN("Measured origin set. Measurement reset.");
-	#if EEPROM_MODE!=0
-	  epr_data_to_eeprom(false);
-	  OUT_P_LN("EEPROM updated");
-	#endif
+        // Only proceed if the hot end is exactly in the middle of the
+        // print area, i.e., disallow any X/Y cartesian moves when
+        // setting the zero point.
+        if (printer_state.currentPositionSteps[0] == 0 && printer_state.currentPositionSteps[1] == 0) {
+          if (printer_state.countZSteps < 0)
+            printer_state.countZSteps = -printer_state.countZSteps;
+          // Set min and max for all three axes
+          printer_state.xMin = 0;
+          printer_state.yMin = 0;
+          printer_state.zMin = 0;
+          printer_state.xLength = inv_axis_steps_per_unit[0] * printer_state.countZSteps;
+          printer_state.yLength = inv_axis_steps_per_unit[1] * printer_state.countZSteps;
+          printer_state.zLength = inv_axis_steps_per_unit[2] * printer_state.countZSteps;
+          printer_state.xMaxSteps = printer_state.countZSteps;
+          printer_state.yMaxSteps = printer_state.countZSteps;
+          printer_state.zMaxSteps = printer_state.countZSteps;
+          // Now update the current position to be at zero so the
+          // printer knows where it is.
+          for (byte i=0; i<3; i++) {
+            printer_state.currentPositionSteps[i] = 0;
+          }
+          calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
+          OUT_P_LN("Measured origin set. Measurement reset.");
+#if EEPROM_MODE!=0
+          epr_data_to_eeprom(false);
+          OUT_P_LN("EEPROM updated");
+#endif
+        } else {
+          OUT_P_LN("Origin measurement cannot be set.  Use only Z-Cartesian (straight up and down) movements and try again.");
+        }
       }
     }
     break;
