@@ -701,7 +701,7 @@ ISR(TIMER1_COMPA_vect)
 #if defined(USE_ADVANCE)
             if(!Printer::extruderStepsNeeded) if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
 #else
-            if(DISABLE_E) extruder_disable();
+            if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
 #endif
         }
         else waitRelax--;
