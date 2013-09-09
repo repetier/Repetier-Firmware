@@ -1246,21 +1246,34 @@ void Commands::executeGCode(GCode *com)
                 }
                 else if (com->S = 2)
                 {
-                    if (Printer::countZSteps < 0)
-                        Printer::countZSteps = -Printer::countZSteps;
-                    Printer::zMin = 0;
-                    Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
-                    Printer::zMaxSteps = Printer::countZSteps;
-                    for (uint8_t i=0; i<3; i++)
+                    if (Printer::currentPositionSteps[0] == 0 && Printer::currentPositionSteps[1] == 0)
                     {
-                        Printer::currentPositionSteps[i] = 0;
-                    }
-                    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-                    Com::printFLN(Com::tMeasureOriginReset);
+                        if (Printer::countZSteps < 0)
+                            Printer::countZSteps = -Printer::countZSteps;
+                        Printer::xMin = 0;
+                        Printer::yMin = 0;
+                        Printer::zMin = 0;
+                        Printer::xLength = Printer::invAxisStepsPerMM[0] * Printer::countZSteps;
+                        Printer::yLength = Printer::invAxisStepsPerMM[1] * Printer::countZSteps;
+                        Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
+                        Printer::xMaxSteps = Printer::countZSteps;
+                        Printer::yMaxSteps = Printer::countZSteps;
+                        Printer::zMaxSteps = Printer::countZSteps;
+                        for (uint8_t i=0; i<3; i++)
+                        {
+                            Printer::currentPositionSteps[i] = 0;
+                        }
+                        transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+                        Com::printFLN(Com::tMeasureOriginReset);
 #if EEPROM_MODE!=0
-                    EEPROM::storeDataIntoEEPROM(false);
-                    Com::printFLN(Com::tEEPROMUpdated);
+                        EEPROM::storeDataIntoEEPROM(false);
+                        Com::printFLN(Com::tEEPROMUpdated);
 #endif
+                    }
+                    else
+                    {
+                        Com::printErrorFLN(Com::tMeasurementAbortedOrigin);
+                    }
                 }
             }
             break;

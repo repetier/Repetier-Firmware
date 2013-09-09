@@ -1253,8 +1253,14 @@ void Commands::executeGCode(GCode *com)
                     {
                         if (Printer::countZSteps < 0)
                             Printer::countZSteps = -Printer::countZSteps;
+                        Printer::xMin = 0;
+                        Printer::yMin = 0;
                         Printer::zMin = 0;
+                        Printer::xLength = Printer::invAxisStepsPerMM[0] * Printer::countZSteps;
+                        Printer::yLength = Printer::invAxisStepsPerMM[1] * Printer::countZSteps;
                         Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
+                        Printer::xMaxSteps = Printer::countZSteps;
+                        Printer::yMaxSteps = Printer::countZSteps;
                         Printer::zMaxSteps = Printer::countZSteps;
                         for (uint8_t i=0; i<3; i++)
                         {
