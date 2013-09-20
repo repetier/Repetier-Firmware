@@ -1100,7 +1100,6 @@ inline void PrintLine::queueEMove(long e_diff,uint8_t check_endstops,uint8_t pat
         p->delta[i] = 0;
         axis_diff[i] = 0;
     }
-    axis_diff[E_AXIS] = e_diff*Printer::invAxisStepsPerMM[E_AXIS];
     if (e_diff >= 0)
     {
         p->delta[E_AXIS] = e_diff;
@@ -1122,7 +1121,7 @@ inline void PrintLine::queueEMove(long e_diff,uint8_t check_endstops,uint8_t pat
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
     p->primaryAxis = E_AXIS;
     p->stepsRemaining = p->delta[E_AXIS];
-    p->distance = fabs(axis_diff[E_AXIS]);
+    p->distance = axis_diff[E_AXIS] = p->delta[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
     p->moveID = lastMoveID++;
     p->calculateMove(axis_diff,pathOptimize);
 }

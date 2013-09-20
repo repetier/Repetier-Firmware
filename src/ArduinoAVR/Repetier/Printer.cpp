@@ -299,11 +299,11 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
         y+= Printer::offsetY;
     }
     if(x!=IGNORE_COORDINATE)
-        destinationSteps[0] = x*axisStepsPerMM[0]+coordinateOffset[0];
+        destinationSteps[0] = floor(x*axisStepsPerMM[0]+coordinateOffset[0]+0.5);
     if(y!=IGNORE_COORDINATE)
-        destinationSteps[1] = y*axisStepsPerMM[1]+coordinateOffset[1];
+        destinationSteps[1] = floor(y*axisStepsPerMM[1]+coordinateOffset[1]+0.5);
     if(z!=IGNORE_COORDINATE)
-        destinationSteps[2] = z*axisStepsPerMM[2]+coordinateOffset[2];
+        destinationSteps[2] = floor(z*axisStepsPerMM[2]+coordinateOffset[2]+0.5);
     if(e!=IGNORE_COORDINATE)
         destinationSteps[3] = e*axisStepsPerMM[3];
     if(f!=IGNORE_COORDINATE)
@@ -321,9 +321,9 @@ void Printer::setOrigin(float xOff,float yOff,float zOff)
     if(Printer::isAutolevelActive())
         Printer::transformToPrinter(xOff,yOff,zOff,xOff,yOff,zOff);
 #endif // FEATURE_AUTOLEVEL
-    Printer::coordinateOffset[0] -= xOff*Printer::axisStepsPerMM[0];
-    Printer::coordinateOffset[1] -= yOff*Printer::axisStepsPerMM[1];
-    Printer::coordinateOffset[2] -= zOff*Printer::axisStepsPerMM[2];
+    Printer::coordinateOffset[0] -= floor(xOff*Printer::axisStepsPerMM[0]+0.5);
+    Printer::coordinateOffset[1] -= floor(yOff*Printer::axisStepsPerMM[1]+0.5);
+    Printer::coordinateOffset[2] -= floor(zOff*Printer::axisStepsPerMM[2]+0.5);
     Printer::updateCurrentPosition();
 }
 
@@ -358,58 +358,52 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     float x,y,z;
     if(!relativeCoordinateMode)
     {
-        if(!com->hasX()) x = currentPosition[0];
-        else currentPosition[0] = x = convertToMM(com->X);
-        if(!com->hasY()) y = currentPosition[1];
-        else currentPosition[1] = y = convertToMM(com->Y);
-        if(!com->hasZ()) z = currentPosition[2];
-        else currentPosition[2] = z = convertToMM(com->Z);
+        if(!com->hasX()) x = currentPosition[X_AXIS]; else currentPosition[X_AXIS] = x = convertToMM(com->X);
+        if(!com->hasY()) y = currentPosition[Y_AXIS]; else currentPosition[Y_AXIS] = y = convertToMM(com->Y);
+        if(!com->hasZ()) z = currentPosition[Z_AXIS]; else currentPosition[Z_AXIS] = z = convertToMM(com->Z);
     }
     else
     {
-        if(com->hasX()) currentPosition[0] += (x = convertToMM(com->X));
-        else x = 0;
-        if(com->hasY()) currentPosition[1] += (y = convertToMM(com->Y));
-        else y = 0;
-        if(com->hasZ()) currentPosition[2] += (z = convertToMM(com->Z));
-        else z = 0;
+        if(com->hasX()) currentPosition[X_AXIS] += (x = convertToMM(com->X)); else x = 0;
+        if(com->hasY()) currentPosition[Y_AXIS] += (y = convertToMM(com->Y)); else y = 0;
+        if(com->hasZ()) currentPosition[Z_AXIS] += (z = convertToMM(com->Z)); else z = 0;
     }
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE && DRIVE_SYSTEM!=3
     if(isAutolevelActive())
-        transformToPrinter(x+Printer::offsetX,y+Printer::offsetY,z,x,y,z);
+        transformToPrinter(x + Printer::offsetX, y + Printer::offsetY, z, x, y, z);
     else
 #endif // FEATURE_AUTOLEVEL
     {
         if(!relativeCoordinateMode)
         {
-            x+= Printer::offsetX;
-            y+= Printer::offsetY;
+            x += Printer::offsetX;
+            y += Printer::offsetY;
         }
     }
-    long xSteps = x*axisStepsPerMM[0];
-    long ySteps = y*axisStepsPerMM[1];
-    long zSteps = z*axisStepsPerMM[2];
+    long xSteps = static_cast<long>(floor(x * axisStepsPerMM[X_AXIS] + 0.5));
+    long ySteps = static_cast<long>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5));
+    long zSteps = static_cast<long>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5));
     if(relativeCoordinateMode)
     {
-        destinationSteps[0] = currentPositionSteps[0]+xSteps;
-        destinationSteps[1] = currentPositionSteps[1]+ySteps;
-        destinationSteps[2] = currentPositionSteps[2]+zSteps;
+        destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS] + xSteps;
+        destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS] + ySteps;
+        destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS] + zSteps;
     }
     else
     {
-        destinationSteps[0] = xSteps+coordinateOffset[0];
-        destinationSteps[1] = ySteps+coordinateOffset[1];
-        destinationSteps[2] = zSteps+coordinateOffset[2];
+        destinationSteps[X_AXIS] = xSteps + coordinateOffset[X_AXIS];
+        destinationSteps[Y_AXIS] = ySteps + coordinateOffset[Y_AXIS];
+        destinationSteps[Z_AXIS] = zSteps + coordinateOffset[Z_AXIS];
     }
     if(com->hasE() && !Printer::debugDryrun())
     {
-        p = convertToMM(com->E*axisStepsPerMM[3]);
+        p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
-            destinationSteps[3] = currentPositionSteps[3]+p;
+            destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
         else
-            destinationSteps[3] = p;
+            destinationSteps[E_AXIS] = p;
     }
-    else Printer::destinationSteps[3] = Printer::currentPositionSteps[3];
+    else Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
     if(com->hasF())
     {
         if(com->F < 1)
@@ -419,7 +413,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
             Printer::feedrate = com->F*(float)Printer::feedrateMultiply*0.00016666666f;
     }
-    return !com->hasNoXYZ() || (com->hasE() && destinationSteps[3]!=currentPositionSteps[3]); // ignore unproductive moves
+    return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS]!=currentPositionSteps[E_AXIS]); // ignore unproductive moves
 }
 
 void Printer::setup()
@@ -948,9 +942,9 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis)
     if(Printer::isAutolevelActive())
         Printer::transformToPrinter(coordX,coordY,coordZ,coordX,coordY,coordZ);
 #endif
-    coordinateOffset[0] = (long)(coordX*axisStepsPerMM[0]);
-    coordinateOffset[1] = (long)(coordY*axisStepsPerMM[1]);
-    coordinateOffset[2] = (long)(coordZ*axisStepsPerMM[2]);
+    coordinateOffset[0] = (long)floor(coordX*axisStepsPerMM[0]+0.5);
+    coordinateOffset[1] = (long)floor(coordY*axisStepsPerMM[1]+0.5);
+    coordinateOffset[2] = (long)floor(coordZ*axisStepsPerMM[2]+0.5);
     updateCurrentPosition();
     moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homingFeedrate[0]);
     UI_CLEAR_STATUS
