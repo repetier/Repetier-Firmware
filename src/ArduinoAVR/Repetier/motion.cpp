@@ -150,7 +150,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
         else
             p->delta[axis] = -p->delta[axis];
         if(axis == E_AXIS && Printer::extrudeMultiply!=100)
-            p->delta[3] = (long)((p->delta[3] * (float)Printer::extrudeMultiply) * 0.01f);
+            p->delta[E_AXIS] = (long)((p->delta[E_AXIS] * (float)Printer::extrudeMultiply) * 0.01f);
         axis_diff[axis] = p->delta[axis] * Printer::invAxisStepsPerMM[axis];
         if(p->delta[axis]) p->setMoveOfAxis(axis);
         Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
@@ -161,7 +161,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             resetPathPlanner();
         return; // No steps included
     }
-    Printer::filamentPrinted+=axis_diff[3];
+    Printer::filamentPrinted += axis_diff[E_AXIS];
     float xydist2;
 #if ENABLE_BACKLASH_COMPENSATION
     if((p->isXYZMove()) && ((p->dir & 7)^(Printer::backlashDir & 7)) & (Printer::backlashDir >> 3))   // We need to compensate backlash, add a move
@@ -185,9 +185,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             if(p->delta[i]) p->dir |= 16<<i;
         }
         //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-        if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS]) p->primaryAxis = 1;
-        else if (p->delta[X_AXIS] > p->delta[Z_AXIS] ) p->primaryAxis = 0;
-        else p->primaryAxis = 2;
+        if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS]) p->primaryAxis = Y_AXIS;
+        else if (p->delta[X_AXIS] > p->delta[Z_AXIS] ) p->primaryAxis = X_AXIS;
+        else p->primaryAxis = Z_AXIS;
         p->stepsRemaining = p->delta[p->primaryAxis];
         //Feedrate calc based on XYZ travel distance
         xydist2 = back_diff[X_AXIS] * back_diff[X_AXIS] + back_diff[Y_AXIS] * back_diff[Y_AXIS];
@@ -202,28 +202,28 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 #endif
 
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-    if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS] && p->delta[Y_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 1;
-    else if (p->delta[X_AXIS] > p->delta[Z_AXIS] && p->delta[X_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 0;
-    else if (p->delta[Z_AXIS] > p->delta[E_AXIS]) p->primaryAxis = 2;
-    else p->primaryAxis = 3;
+    if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS] && p->delta[Y_AXIS] > p->delta[E_AXIS]) p->primaryAxis = Y_AXIS;
+    else if (p->delta[X_AXIS] > p->delta[Z_AXIS] && p->delta[X_AXIS] > p->delta[E_AXIS]) p->primaryAxis = X_AXIS;
+    else if (p->delta[Z_AXIS] > p->delta[E_AXIS]) p->primaryAxis = Z_AXIS;
+    else p->primaryAxis = E_AXIS;
     p->stepsRemaining = p->delta[p->primaryAxis];
     if(p->isXYZMove())
     {
-        xydist2 = axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1];
+        xydist2 = axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS];
         if(p->isZMove())
-            p->distance = sqrt(xydist2 + axis_diff[2] * axis_diff[2]);
+            p->distance = RMath::max(sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]),fabs(axis_diff[E_AXIS]));
         else
-            p->distance = sqrt(xydist2);
+            p->distance = RMath::max(sqrt(xydist2),fabs(axis_diff[E_AXIS]));
     }
     else
-        p->distance = fabs(axis_diff[3]);
+        p->distance = fabs(axis_diff[E_AXIS]);
     p->calculateMove(axis_diff,pathOptimize);
 }
 #endif
 void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
 {
 #if DRIVE_SYSTEM==3
-    long axisInterval[5];
+    long axisInterval[5]; // shortest interval possible for that axis
 #else
     long axisInterval[4];
 #endif
@@ -240,20 +240,26 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     UI_MEDIUM; // do check encoder
     // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
     long limitInterval = timeForMove/stepsRemaining; // until not violated by other constraints it is your target speed
-    axisInterval[X_AXIS] = fabs(axis_diff[X_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
-    limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
-    axisInterval[Y_AXIS] = fabs(axis_diff[Y_AXIS])*F_CPU/(Printer::maxFeedrate[Y_AXIS]*stepsRemaining);
-    limitInterval = RMath::max(axisInterval[Y_AXIS],limitInterval);
+    if(isXMove()) {
+        axisInterval[X_AXIS] = fabs(axis_diff[X_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+        limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
+    } else axisInterval[X_AXIS] = 0;
+    if(isYMove()) {
+        axisInterval[Y_AXIS] = fabs(axis_diff[Y_AXIS])*F_CPU/(Printer::maxFeedrate[Y_AXIS]*stepsRemaining);
+        limitInterval = RMath::max(axisInterval[Y_AXIS],limitInterval);
+    } else axisInterval[Y_AXIS] = 0;
     if(isZMove())   // normally no move in z direction
     {
         axisInterval[Z_AXIS] = fabs((float)axis_diff[Z_AXIS])*(float)F_CPU/(float)(Printer::maxFeedrate[Z_AXIS]*stepsRemaining); // must prevent overflow!
         limitInterval = RMath::max(axisInterval[Z_AXIS],limitInterval);
     }
     else axisInterval[Z_AXIS] = 0;
-    axisInterval[E_AXIS] = fabs(axis_diff[E_AXIS])*F_CPU/(Printer::maxFeedrate[E_AXIS]*stepsRemaining);
-    limitInterval = RMath::max(axisInterval[E_AXIS],limitInterval);
+    if(isEMove()) {
+        axisInterval[E_AXIS] = fabs(axis_diff[E_AXIS])*F_CPU/(Printer::maxFeedrate[E_AXIS]*stepsRemaining);
+        limitInterval = RMath::max(axisInterval[E_AXIS],limitInterval);
+    } else axisInterval[E_AXIS] = 0;
 #if DRIVE_SYSTEM==3
-    axisInterval[4] = fabs(axis_diff[VIRTUAL_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining);
+    axisInterval[VIRTUAL_AXIS] = fabs(axis_diff[VIRTUAL_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining);
 #endif
 
     fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
@@ -288,31 +294,26 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
         if(isENegativeMove()) speedE = -speedE;
     }
 #if DRIVE_SYSTEM==3
-    axisInterval[VIRTUAL_AXIS] = timeForMove/stepsRemaining;
+    axisInterval[VIRTUAL_AXIS] = limitInterval; //timeForMove/stepsRemaining;
 #endif
     fullSpeed = distance * inv_time_s;
     //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
-    uint8_t is_print_move = isEPositiveMove(); // are we printing
     //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
 #ifdef RAMP_ACCELERATION
-
     // slowest time to accelerate from v0 to limitInterval determines used acceleration
     // t = (v_end-v_start)/a
     float slowest_axis_plateau_time_repro = 1e15; // repro to reduce division Unit: 1/s
+    unsigned long *accel = (isEPositiveMove() ?  Printer::maxPrintAccelerationStepsPerSquareSecond : Printer::maxTravelAccelerationStepsPerSquareSecond);
     for(uint8_t i=0; i < 4 ; i++)
     {
-        // Errors for delta move are initialized in timer
-#if DRIVE_SYSTEM!=3
-        error[i] = delta[primaryAxis] >> 1;
-#endif
         if(isMoveOfAxis(i))
-        {
             // v = a * t => t = v/a = F_CPU/(c*a) => 1/t = c*a/F_CPU
-            slowest_axis_plateau_time_repro = RMath::min(slowest_axis_plateau_time_repro,
-                                              (float)axisInterval[i] * (float)(is_print_move ?  Printer::maxPrintAccelerationStepsPerSquareSecond[i] : Printer::maxTravelAccelerationStepsPerSquareSecond[i])); //  steps/s^2 * step/tick  Ticks/s^2
-        }
+            slowest_axis_plateau_time_repro = RMath::min(slowest_axis_plateau_time_repro,(float)axisInterval[i] * (float)accel[i]); //  steps/s^2 * step/tick  Ticks/s^2
     }
     // Errors for delta move are initialized in timer (except extruder)
+#if DRIVE_SYSTEM!=3
+        error[0] = error[1] = error[2] = delta[primaryAxis] >> 1;
+#endif
 #if DRIVE_SYSTEM==3
     error[E_AXIS] = stepsRemaining >> 1;
 #endif
@@ -1041,21 +1042,21 @@ uint8_t PrintLine::calculateDistance(float axis_diff[], uint8_t dir, float *dist
     if(dir & 112)
     {
         if(dir & 16)
-            *distance = axis_diff[0] * axis_diff[0];
+            *distance = axis_diff[X_AXIS] * axis_diff[X_AXIS];
         else
             *distance = 0;
         if(dir & 32)
-            *distance += axis_diff[1] * axis_diff[1];
+            *distance += axis_diff[Y_AXIS] * axis_diff[Y_AXIS];
         if(dir & 64)
-            *distance += axis_diff[2] * axis_diff[2];
-        *distance = sqrt(*distance);
+            *distance += axis_diff[Z_AXIS] * axis_diff[Z_AXIS];
+        *distance = RMath::max((float)sqrt(*distance),fabs(axis_diff[E_AXIS]));
         return 1;
     }
     else
     {
         if(dir & 128)
         {
-            *distance = fabs(axis_diff[3]);
+            *distance = fabs(axis_diff[E_AXIS]);
             return 1;
         }
         *distance = 0;
