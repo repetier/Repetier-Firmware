@@ -60,7 +60,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Gen7 1.1 till 1.3.x        = 7
 // Gen7 1.4.1 and later       = 71
-// Teensylu (at90usb)         = 8 // requires Teensyduino
+// Sethi 3d_1                 = 72 // Cpu Sethi 3D_1 extruder
+/// Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Foltyn 3D Master           = 12
 // MegaTronics 1.0            = 70
