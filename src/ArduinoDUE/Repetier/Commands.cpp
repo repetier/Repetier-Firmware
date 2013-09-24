@@ -340,7 +340,7 @@ void microstep_readings()
 }
 #endif
 
-              void microstep_init()
+void microstep_init()
 {
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
     const uint8_t microstep_modes[] = MICROSTEP_MODES;
@@ -612,7 +612,8 @@ void Commands::executeGCode(GCode *com)
             Com::printFLN(Com::tTower1,ozx);
             Com::printFLN(Com::tTower2,ozy);
             Com::printFLN(Com::tTower3,ozz);
-            if(iterate) {
+            if(iterate)
+            {
                 ozx+=EEPROM::deltaTowerXOffsetSteps();
                 ozy+=EEPROM::deltaTowerYOffsetSteps();
                 ozz+=EEPROM::deltaTowerZOffsetSteps();
@@ -640,8 +641,8 @@ void Commands::executeGCode(GCode *com)
 #else
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
             float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
-                       (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
-                               Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*Printer::invAxisStepsPerMM[0])/
+                        (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
+                                Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*Printer::invAxisStepsPerMM[0])/
                       (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
             long zBottom = Printer::currentPositionSteps[2] = (h3+z)*Printer::axisStepsPerMM[2];
             Printer::zMin = 0;
@@ -950,8 +951,11 @@ void Commands::executeGCode(GCode *com)
             if(com->hasX()) Printer::axisStepsPerMM[0] = com->X;
             if(com->hasY()) Printer::axisStepsPerMM[1] = com->Y;
             if(com->hasZ()) Printer::axisStepsPerMM[2] = com->Z;
-            if(com->hasE()) Extruder::current->stepsPerMM = com->E;
             Printer::updateDerivedParameter();
+            if(com->hasE()) {
+                Extruder::current->stepsPerMM = com->E;
+                Extruder::selectExtruderById(Extruder::current->id);
+            }
             break;
         case 111:
             if(com->hasS()) Printer::debugLevel = com->S;
@@ -1089,7 +1093,8 @@ void Commands::executeGCode(GCode *com)
             break;
 #ifdef USE_ADVANCE
         case 223: // Extruder interrupt test
-            if(com->hasS()) {
+            if(com->hasS())
+            {
                 BEGIN_INTERRUPT_PROTECTED
                 Printer::extruderStepsNeeded+=com->S;
                 END_INTERRUPT_PROTECTED
@@ -1214,15 +1219,16 @@ void Commands::executeGCode(GCode *com)
                 EEPROM::storeDataIntoEEPROM();
             }
             break;
-/*        case 700: // test new square root function
-            if(com->hasS())
-                Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
-            break;*/
+            /*        case 700: // test new square root function
+                        if(com->hasS())
+                            Com::printFLN(Com::tInfo,(long)HAL::integerSqrt(com->S));
+                        break;*/
 #endif // FEATURE_AUTOLEVEL
 #endif // FEATURE_Z_PROBE
 #if FEATURE_SERVO
         case 340:
-            if(com->hasP() && com->P<4 && com->P>=0) {
+            if(com->hasP() && com->P<4 && com->P>=0)
+            {
                 int s = 0;
                 if(com->hasS())
                     s = com->S;
@@ -1246,21 +1252,28 @@ void Commands::executeGCode(GCode *com)
                 }
                 else if (com->S = 2)
                 {
-                    if (Printer::countZSteps < 0)
-                        Printer::countZSteps = -Printer::countZSteps;
-                    Printer::zMin = 0;
-                    Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
-                    Printer::zMaxSteps = Printer::countZSteps;
-                    for (uint8_t i=0; i<3; i++)
+                    if (Printer::currentPositionSteps[0] == 0 && Printer::currentPositionSteps[1] == 0)
                     {
-                        Printer::currentPositionSteps[i] = 0;
-                    }
-                    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-                    Com::printFLN(Com::tMeasureOriginReset);
+                        if (Printer::countZSteps < 0)
+                            Printer::countZSteps = -Printer::countZSteps;
+                        Printer::zMin = 0;
+                        Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
+                        Printer::zMaxSteps = Printer::countZSteps;
+                        for (uint8_t i=0; i<3; i++)
+                        {
+                            Printer::currentPositionSteps[i] = 0;
+                        }
+                        transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+                        Com::printFLN(Com::tMeasureOriginReset);
 #if EEPROM_MODE!=0
-                    EEPROM::storeDataIntoEEPROM(false);
-                    Com::printFLN(Com::tEEPROMUpdated);
+                        EEPROM::storeDataIntoEEPROM(false);
+                        Com::printFLN(Com::tEEPROMUpdated);
 #endif
+                    }
+                    else
+                    {
+                        Com::printErrorFLN(Com::tMeasurementAbortedOrigin);
+                    }
                 }
             }
             break;

@@ -951,8 +951,11 @@ void Commands::executeGCode(GCode *com)
             if(com->hasX()) Printer::axisStepsPerMM[0] = com->X;
             if(com->hasY()) Printer::axisStepsPerMM[1] = com->Y;
             if(com->hasZ()) Printer::axisStepsPerMM[2] = com->Z;
-            if(com->hasE()) Extruder::current->stepsPerMM = com->E;
             Printer::updateDerivedParameter();
+            if(com->hasE()) {
+                Extruder::current->stepsPerMM = com->E;
+                Extruder::selectExtruderById(Extruder::current->id);
+            }
             break;
         case 111:
             if(com->hasS()) Printer::debugLevel = com->S;
