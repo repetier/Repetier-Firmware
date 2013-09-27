@@ -211,9 +211,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
     {
         xydist2 = axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS];
         if(p->isZMove())
-            p->distance = RMath::max(sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]),fabs(axis_diff[E_AXIS]));
+            p->distance = RMath::max((float)sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]),fabs(axis_diff[E_AXIS]));
         else
-            p->distance = RMath::max(sqrt(xydist2),fabs(axis_diff[E_AXIS]));
+            p->distance = RMath::max((float)sqrt(xydist2),fabs(axis_diff[E_AXIS]));
     }
     else
         p->distance = fabs(axis_diff[E_AXIS]);
@@ -1483,9 +1483,11 @@ long PrintLine::bresenhamStep() // Version for delta printer
         }
         lastblk = -1;
 #ifdef INCLUDE_DEBUG_NO_MOVE
-        if(DEBUG_NO_MOVES)   // simulate a move, but do nothing in reality
+        if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
+            deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
             removeCurrentLineForbidInterrupt();
+            if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
             return 1000;
         }
 #endif
@@ -1817,7 +1819,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         }
         lastblk = -1;
 #ifdef INCLUDE_DEBUG_NO_MOVE
-        if(DEBUG_NO_MOVES)   // simulate a move, but do nothing in reality
+        if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
             removeCurrentLineForbidInterrupt();
             return 1000;

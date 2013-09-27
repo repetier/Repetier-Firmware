@@ -156,7 +156,9 @@ public:
     {
         return ((debugLevel & 16)!=0);
     }
-#define DEBUG_NO_MOVES ((debug_level & 32)!=0)
+    static inline bool debugNoMoves() {
+        return ((debugLevel & 32)!=0);
+    }
 
     /** \brief Disable stepper motor for x direction. */
     static inline void disableXStepper()

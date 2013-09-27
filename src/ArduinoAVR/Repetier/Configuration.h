@@ -1049,16 +1049,16 @@ is always running and is not hung up for some unknown reason. */
 /* Z-Probing */
 
 #define FEATURE_Z_PROBE true
-#define Z_PROBE_PIN 63
-#define Z_PROBE_PULLUP true
-#define Z_PROBE_ON_HIGH true
+#define Z_PROBE_PIN Z_MIN_PIN //63
+#define Z_PROBE_PULLUP false
+#define Z_PROBE_ON_HIGH false
 #define Z_PROBE_X_OFFSET -11.2625
 #define Z_PROBE_Y_OFFSET -6.5
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
-#define Z_PROBE_WAIT_BEFORE_TEST true
+#define Z_PROBE_WAIT_BEFORE_TEST false
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 5
+#define Z_PROBE_SPEED 25
 #define Z_PROBE_XY_SPEED 150
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91
