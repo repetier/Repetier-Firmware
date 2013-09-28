@@ -179,7 +179,8 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
-#define EXT0_TEMPSENSOR_TYPE 1
+// 102 is MAX31855
+#define EXT0_TEMPSENSOR_TYPE 101
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // WHich pin enables the heater
@@ -289,6 +290,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 99 Generic thermistor table 3
 // 100 is AD595
 // 101 is MAX6675
+// 102 is MAX31855
 #define EXT1_TEMPSENSOR_TYPE 3
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT1_TEMPSENSOR_PIN TEMP_2_PIN 
@@ -503,6 +505,9 @@ Value is used for all generic tables created. */
 
 // uncomment the following line for MAX6675 support.
 //#define SUPPORT_MAX6675
+
+// uncomment the following line for MAX31855 support.
+#define SUPPORT_MAX31855
 
 // ############# Heated bed configuration ########################
 
