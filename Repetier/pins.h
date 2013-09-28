@@ -413,7 +413,6 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          52
 #define MISO_PIN         50
 #define MOSI_PIN         51
-#define MAX6675_SS       53
 
 #ifdef AZTEEG_X3
 #define SDSUPPORT true
@@ -1082,7 +1081,6 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          52	// PINB.1, 20, SCK
 #define MISO_PIN         50	// PINB.3, 22, MISO
 #define MOSI_PIN         51	// PINB.2, 21, MOSI
-#define MAX6675_SS       53	// PINB.0, 19, SS
 
 #endif // MOTHERBOARD == 12
 
@@ -1356,7 +1354,6 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          52
 #define MISO_PIN         50
 #define MOSI_PIN         51
-#define MAX6675_SS       53
 #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_DIGIPOT
 
 #endif

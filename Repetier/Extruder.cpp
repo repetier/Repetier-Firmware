@@ -217,6 +217,10 @@ byte counter_250ms=25;
 extern int read_max6675(byte ss_pin);
 #endif
 
+#ifdef SUPPORT_MAX31855
+extern int read_max31855(byte ss_pin);
+#endif
+
 #if ANALOG_INPUTS>0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
 uint8 osAnalogInputCounter[ANALOG_INPUTS];
@@ -323,16 +327,17 @@ void initExtruder() {
       if(!act->enableOn) digitalWrite(act->enablePin,HIGH);
     }
     act->tempControl.lastTemperatureUpdate = millis();
-#ifdef SUPPORT_MAX6675
-    if(act->sensorType==101) {
-      WRITE(SCK_PIN,0);
+#if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
+    if(act->tempControl.sensorType == 101 || act->tempControl.sensorType == 102) {
+      WRITE(SCK_PIN, LOW);
       SET_OUTPUT(SCK_PIN);
-      WRITE(MOSI_PIN,1);
+      WRITE(MOSI_PIN, HIGH);
       SET_OUTPUT(MOSI_PIN);
-      WRITE(MISO_PIN,1);
+      WRITE(MISO_PIN, HIGH);
       SET_INPUT(MISO_PIN);
-      digitalWrite(act->tempControl.sensorPin,1);
-      pinMode(act->tempControl.sensorPin,OUTPUT);
+      digitalWrite(act->tempControl.sensorPin, HIGH);
+      digitalWrite(SDSS, HIGH);
+      pinMode(act->tempControl.sensorPin, OUTPUT);
     }
 #endif
   }
@@ -618,6 +623,10 @@ int read_raw_temperature(byte type,byte pin) {
     case 101: // MAX6675
       return read_max6675(pin);
 #endif
+#ifdef SUPPORT_MAX31855
+    case 102: // MAX31855
+      return read_max31855(pin);
+#endif
   }
   return 4095; // unknown method, return high value to switch heater off for safety
 }
@@ -688,6 +697,10 @@ float conv_raw_temp(byte type,int raw_temp) {
       return ((float)raw_temp * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
+      return raw_temp /4;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102: // MAX31855
       return raw_temp /4;
 #endif
 #if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
@@ -793,6 +806,10 @@ int conv_temp_raw(byte type,float tempf) {
       return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
 #ifdef SUPPORT_MAX6675
     case 101:  // defined HEATER_USES_MAX6675
+      return temp * 4;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102:  // defined HEATER_USES_MAX31855
       return temp * 4;
 #endif
 #if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
@@ -1108,3 +1125,47 @@ int read_max6675(byte ss_pin)
 }
 #endif
 
+// ------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------- read_max31855 -----------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------
+
+#ifdef SUPPORT_MAX31855
+int read_max31855(byte ss_pin) {
+
+  unsigned long data = 0;
+  int temperature;
+  
+  #ifdef	PRR
+    PRR &= ~(1<<PRSPI);
+  #elif defined PRR0
+    PRR0 &= ~(1<<PRSPI);
+  #endif
+  SPCR = (1<<MSTR) | (1<<SPE) | (1<<SPR0);
+  digitalWrite(ss_pin, 0);  // enable TT_MAX31855
+  delay(1);    // ensure 100ns delay - a bit extra is fine
+  
+  for (unsigned short byte = 0; byte < 4; byte++) {
+    data <<= 8;
+    SPDR = 0XFF;
+    while (!(SPSR & (1 << SPIF)));
+    data |= SPDR;
+  }
+
+  digitalWrite(ss_pin, 1);  // disable TT_MAX31855
+  
+  //Process temp
+  if (data & 0x00010000) {
+	//Some form of error.
+	return 65535;
+  } else {
+	data = data >> 18;
+	temperature = data & 0x00001FFF;
+	
+	if (data & 0x00002000) {
+      data = ~data;
+      temperature = -1 * ((data & 0x00001FFF) + 1);
+	}
+  }
+  return temperature;
+}
+#endif

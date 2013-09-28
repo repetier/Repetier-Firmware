@@ -143,7 +143,7 @@ Custom M Codes
 // ####################################################################################
 // #          No configuration below this line - just some errorchecking              #
 // ####################################################################################
-#ifdef SUPPORT_MAX6675
+#if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
 #if !defined SCK_PIN || !defined MOSI_PIN || !defined MISO_PIN
 #error For MAX6675 support, you need to define SCK_PIN, MISO_PIN and MOSI_PIN in pins.h
 #endif
