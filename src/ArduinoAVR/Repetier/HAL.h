@@ -553,18 +553,24 @@ public:
     }
     static inline void spiInit(uint8_t spiRate)
     {
-        WRITE(SS,HIGH);
         SET_OUTPUT(SS);
+        WRITE(SS,HIGH);
         SET_OUTPUT(SCK);
         SET_OUTPUT(MOSI_PIN);
+        SET_INPUT(MISO_PIN);
+        #ifdef	PRR
+        PRR &= ~(1<<PRSPI);
+#elif defined PRR0
+        PRR0 &= ~(1<<PRSPI);
+#endif
         // See avr processor documentation
         SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
         SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
 
     }
-    static inline uint8_t spiReceive()
+    static inline uint8_t spiReceive(uint8_t send=0xff)
     {
-        SPDR = 0XFF;
+        SPDR = send;
         while (!(SPSR & (1 << SPIF)));
         return SPDR;
     }
