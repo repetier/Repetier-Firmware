@@ -444,6 +444,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
     HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,DELTA_Y_ENDSTOP_OFFSET_STEPS);
     HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
 #endif
 }
 
@@ -574,6 +577,13 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
+        if(version<5) {
+#if DRIVE_SYSTEM==3
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
+#endif
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
@@ -692,6 +702,9 @@ void EEPROM::writeSettings()
     writeInt(EPR_DELTA_TOWERX_OFFSET_STEPS,Com::tEPRTowerXOffset);
     writeInt(EPR_DELTA_TOWERY_OFFSET_STEPS,Com::tEPRTowerYOffset);
     writeInt(EPR_DELTA_TOWERZ_OFFSET_STEPS,Com::tEPRTowerZOffset);
+    writeFloat(EPR_DELTA_ALPHA_A,Com::tDeltaAlphaA);
+    writeFloat(EPR_DELTA_ALPHA_B,Com::tDeltaAlphaB);
+    writeFloat(EPR_DELTA_ALPHA_C,Com::tDeltaAlphaC);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);

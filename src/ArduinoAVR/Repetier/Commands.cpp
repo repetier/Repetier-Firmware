@@ -606,9 +606,9 @@ void Commands::executeGCode(GCode *com)
 #if DRIVE_SYSTEM==3
             // Compute z height at the tower positions
             float ox,oy,ozx,ozy,ozz,oz;
-            Printer::transformFromPrinter(-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozx);
-            Printer::transformFromPrinter(Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps,0,ox,oy,ozy);
-            Printer::transformFromPrinter(0, Printer::deltaRadiusSteps,0,ox,oy,ozz);
+            Printer::transformFromPrinter(Printer::deltaAPosXSteps, Printer::deltaAPosYSteps,0,ox,oy,ozx);
+            Printer::transformFromPrinter(Printer::deltaBPosXSteps, Printer::deltaBPosYSteps,0,ox,oy,ozy);
+            Printer::transformFromPrinter(Printer::deltaCPosXSteps, Printer::deltaCPosYSteps,0,ox,oy,ozz);
             Com::printFLN(Com::tTower1,ozx);
             Com::printFLN(Com::tTower2,ozy);
             Com::printFLN(Com::tTower3,ozz);
@@ -620,9 +620,9 @@ void Commands::executeGCode(GCode *com)
             }
             ox = RMath::min(ozx,RMath::min(ozy,ozz));
             oy = RMath::max(ozx,RMath::max(ozy,ozz));
-            EEPROM::setDeltaTowerXOffsetSteps(-ox+ozx);
-            EEPROM::setDeltaTowerYOffsetSteps(-ox+ozy);
-            EEPROM::setDeltaTowerZOffsetSteps(-ox+ozz);
+            EEPROM::setDeltaTowerXOffsetSteps(floor(-ox+ozx+0.5));
+            EEPROM::setDeltaTowerYOffsetSteps(floor(-ox+ozy+0.5));
+            EEPROM::setDeltaTowerZOffsetSteps(floor(-ox+ozz+0.5));
             Printer::zLength = aboveDist+(ox)*Printer::invAxisStepsPerMM[2]+(h1+h2+h3)/3.0;
             Printer::setAutolevelActive(true);
             Printer::updateDerivedParameter();

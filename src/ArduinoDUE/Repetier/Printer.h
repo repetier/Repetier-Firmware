@@ -76,9 +76,12 @@ public:
     static long maxDeltaPositionSteps;
     static long deltaDiagonalStepsSquared;
     static float deltaDiagonalStepsSquaredF;
-    static long deltaSin60RadiusSteps;
-    static long deltaMinusCos60RadiusSteps;
-    static long deltaRadiusSteps;
+    static long deltaAPosXSteps;
+    static long deltaAPosYSteps;
+    static long deltaBPosXSteps;
+    static long deltaBPosYSteps;
+    static long deltaCPosXSteps;
+    static long deltaCPosYSteps;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
     static long stepsRemainingAtZHit;
@@ -156,7 +159,9 @@ public:
     {
         return ((debugLevel & 16)!=0);
     }
-#define DEBUG_NO_MOVES ((debug_level & 32)!=0)
+    static inline bool debugNoMoves() {
+        return ((debugLevel & 32)!=0);
+    }
 
     /** \brief Disable stepper motor for x direction. */
     static inline void disableXStepper()
@@ -530,6 +535,7 @@ public:
         currentDeltaPositionSteps[1] = yaxis;
         currentDeltaPositionSteps[2] = zaxis;
     }
+    static void deltaMoveToTopEndstops(float feedrate);
 #endif
 #if MAX_HARDWARE_ENDSTOP_Z
     static float runZMaxProbe();

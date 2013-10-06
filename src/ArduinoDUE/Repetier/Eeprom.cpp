@@ -444,6 +444,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
     HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,DELTA_Y_ENDSTOP_OFFSET_STEPS);
     HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
+    HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
 #endif
 }
 
@@ -574,6 +577,13 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
+        if(version<5) {
+#if DRIVE_SYSTEM==3
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
+            HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
+#endif
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
@@ -648,10 +658,10 @@ void EEPROM::writeSettings()
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM!=3
-    writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM);
-    writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM);
+    writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM,4);
+    writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM,4);
 #endif
-    writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM);
+    writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM,4);
 #if DRIVE_SYSTEM!=3
     writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
@@ -692,6 +702,9 @@ void EEPROM::writeSettings()
     writeInt(EPR_DELTA_TOWERX_OFFSET_STEPS,Com::tEPRTowerXOffset);
     writeInt(EPR_DELTA_TOWERY_OFFSET_STEPS,Com::tEPRTowerYOffset);
     writeInt(EPR_DELTA_TOWERZ_OFFSET_STEPS,Com::tEPRTowerZOffset);
+    writeFloat(EPR_DELTA_ALPHA_A,Com::tDeltaAlphaA);
+    writeFloat(EPR_DELTA_ALPHA_B,Com::tDeltaAlphaB);
+    writeFloat(EPR_DELTA_ALPHA_C,Com::tDeltaAlphaC);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
@@ -741,9 +754,9 @@ void EEPROM::writeSettings()
 #ifdef TEMP_PID
         writeByte(o+EPR_EXTRUDER_DRIVE_MAX,Com::tEPRDriveMax);
         writeByte(o+EPR_EXTRUDER_DRIVE_MIN,Com::tEPRDriveMin);
-        writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain);
-        writeFloat(o+EPR_EXTRUDER_PID_IGAIN,Com::tEPRIGain);
-        writeFloat(o+EPR_EXTRUDER_PID_DGAIN,Com::tEPRDGain);
+        writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain,4);
+        writeFloat(o+EPR_EXTRUDER_PID_IGAIN,Com::tEPRIGain,4);
+        writeFloat(o+EPR_EXTRUDER_PID_DGAIN,Com::tEPRDGain,4);
         writeByte(o+EPR_EXTRUDER_PID_MAX,Com::tEPRPIDMaxValue);
 #endif
         writeLong(o+EPR_EXTRUDER_X_OFFSET,Com::tEPRXOffset);
@@ -788,11 +801,11 @@ void EEPROM::writeExtruderPrefix(uint pos)
     Com::print(' ');
 }
 
-void EEPROM::writeFloat(uint pos,PGM_P text)
+void EEPROM::writeFloat(uint pos,PGM_P text,uint8_t digits)
 {
     Com::printF(Com::tEPR3,(int)pos);
     Com::print(' ');
-    Com::printFloat(HAL::eprGetFloat(pos),3);
+    Com::printFloat(HAL::eprGetFloat(pos),digits);
     Com::print(' ');
     writeExtruderPrefix(pos);
     Com::printFLN(text);

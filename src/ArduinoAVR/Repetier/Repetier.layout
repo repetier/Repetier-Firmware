@@ -1,59 +1,193 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Arduino Mega 2560/ADK" />
-	<File name="cores\Print.cpp" open="1" top="0" tabpos="26" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Extruder.cpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="838" zoom_1="-1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="0" />
+			<Cursor1 position="25195" topLine="565" />
 		</Cursor>
 	</File>
-	<File name="cores\Stream.cpp" open="1" top="0" tabpos="27" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Extruder.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="0" />
+			<Cursor1 position="2944" topLine="51" />
+		</Cursor>
+	</File>
+	<File name="FatStructs.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="14780" topLine="340" />
+		</Cursor>
+	</File>
+	<File name="HAL.cpp" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12288" topLine="258" />
+		</Cursor>
+	</File>
+	<File name="HAL.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1905" topLine="39" />
+		</Cursor>
+	</File>
+	<File name="Printer.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="30722" topLine="531" />
+		</Cursor>
+		<Folding>
+			<Collapse line="419" />
+		</Folding>
+	</File>
+	<File name="Printer.h" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="6723" topLine="114" />
+		</Cursor>
+		<Folding>
+			<Collapse line="0" />
+		</Folding>
+	</File>
+	<File name="libraries\SPI.cpp" open="0" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="20" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="Repetier.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1365" topLine="302" />
+		</Cursor>
+	</File>
+	<File name="Repetier.ino" open="1" top="0" tabpos="22" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3607" topLine="66" />
+		</Cursor>
+	</File>
+	<File name="SDCard.cpp" open="0" top="0" tabpos="24" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5445" topLine="213" />
+		</Cursor>
+	</File>
+	<File name="SdFat.cpp" open="0" top="0" tabpos="22" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="105883" topLine="3555" />
+		</Cursor>
+	</File>
+	<File name="fastio.h" open="1" top="0" tabpos="26" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="369" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="SdFat.h" open="0" top="0" tabpos="23" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="79632" topLine="2037" />
+		</Cursor>
+	</File>
+	<File name="gcode.cpp" open="1" top="1" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="9647" topLine="262" />
+		</Cursor>
+	</File>
+	<File name="gcode.h" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4777" topLine="132" />
 		</Cursor>
 	</File>
 	<File name="motion.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="22675" topLine="513" />
+			<Cursor1 position="59107" topLine="830" />
+		</Cursor>
+		<Folding>
+			<Collapse line="0" />
+			<Collapse line="98" />
+			<Collapse line="181" />
+			<Collapse line="269" />
+			<Collapse line="397" />
+			<Collapse line="411" />
+			<Collapse line="434" />
+			<Collapse line="444" />
+			<Collapse line="538" />
+			<Collapse line="550" />
+			<Collapse line="571" />
+			<Collapse line="579" />
+			<Collapse line="594" />
+			<Collapse line="621" />
+			<Collapse line="639" />
+			<Collapse line="645" />
+			<Collapse line="652" />
+			<Collapse line="663" />
+			<Collapse line="668" />
+			<Collapse line="672" />
+			<Collapse line="680" />
+			<Collapse line="695" />
+			<Collapse line="699" />
+			<Collapse line="706" />
+			<Collapse line="719" />
+			<Collapse line="723" />
+			<Collapse line="731" />
+			<Collapse line="739" />
+			<Collapse line="749" />
+			<Collapse line="754" />
+			<Collapse line="756" />
+			<Collapse line="759" />
+			<Collapse line="773" />
+			<Collapse line="794" />
+			<Collapse line="796" />
+			<Collapse line="805" />
+			<Collapse line="807" />
+			<Collapse line="809" />
+			<Collapse line="814" />
+			<Collapse line="819" />
+			<Collapse line="829" />
+			<Collapse line="831" />
+			<Collapse line="842" />
+			<Collapse line="849" />
+			<Collapse line="851" />
+			<Collapse line="876" />
+		</Folding>
+	</File>
+	<File name="cores\Print.cpp" open="0" top="0" tabpos="26" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="motion.h" open="1" top="0" tabpos="29" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="motion.h" open="1" top="0" tabpos="25" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3965" topLine="114" />
+			<Cursor1 position="17359" topLine="592" />
 		</Cursor>
 	</File>
-	<File name="pins.h" open="1" top="1" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="cores\Stream.cpp" open="0" top="0" tabpos="27" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="14754" topLine="466" />
+			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="ui.cpp" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="pins.h" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2204" topLine="57" />
+			<Cursor1 position="10238" topLine="325" />
 		</Cursor>
 	</File>
-	<File name="ui.h" open="1" top="0" tabpos="28" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="ui.cpp" open="1" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="32581" topLine="750" />
+			<Cursor1 position="34310" topLine="1067" />
 		</Cursor>
 	</File>
-	<File name="uiconfig.h" open="1" top="0" tabpos="25" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="ui.h" open="1" top="0" tabpos="24" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2445" topLine="49" />
+			<Cursor1 position="36473" topLine="324" />
+		</Cursor>
+	</File>
+	<File name="uiconfig.h" open="1" top="0" tabpos="23" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2445" topLine="46" />
+		</Cursor>
+	</File>
+	<File name="uilang.h" open="1" top="0" tabpos="21" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="11677" topLine="204" />
 		</Cursor>
 	</File>
 	<File name="Commands.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="35395" topLine="869" />
+			<Cursor1 position="20965" topLine="552" />
 		</Cursor>
 	</File>
-	<File name="Communication.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="uimenu.h" open="1" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="10553" topLine="337" />
-		</Cursor>
-	</File>
-	<File name="uilang.h" open="1" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="11677" topLine="204" />
+			<Cursor1 position="3380" topLine="72" />
 		</Cursor>
 	</File>
 	<File name="Commands.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -61,19 +195,19 @@
 			<Cursor1 position="1443" topLine="12" />
 		</Cursor>
 	</File>
-	<File name="Configuration.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="2" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="39709" topLine="897" />
-		</Cursor>
-	</File>
-	<File name="uimenu.h" open="1" top="0" tabpos="19" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3380" topLine="72" />
-		</Cursor>
-	</File>
-	<File name="Communication.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Communication.cpp" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="16394" topLine="325" />
+		</Cursor>
+	</File>
+	<File name="Communication.h" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10383" topLine="337" />
+		</Cursor>
+	</File>
+	<File name="Configuration.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="29959" topLine="677" />
 		</Cursor>
 	</File>
 	<File name="Eeprom.cpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -84,92 +218,6 @@
 	<File name="Eeprom.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="4573" topLine="96" />
-		</Cursor>
-	</File>
-	<File name="Extruder.cpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="838" zoom_1="-1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="8785" topLine="199" />
-		</Cursor>
-	</File>
-	<File name="fastio.h" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1591" topLine="36" />
-		</Cursor>
-	</File>
-	<File name="Extruder.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2724" topLine="57" />
-		</Cursor>
-	</File>
-	<File name="gcode.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="15742" topLine="394" />
-		</Cursor>
-	</File>
-	<File name="FatStructs.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="14780" topLine="340" />
-		</Cursor>
-	</File>
-	<File name="gcode.h" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="4923" topLine="132" />
-		</Cursor>
-	</File>
-	<File name="HAL.cpp" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="25861" topLine="679" />
-		</Cursor>
-	</File>
-	<File name="HAL.h" open="1" top="0" tabpos="30" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="14596" topLine="457" />
-		</Cursor>
-	</File>
-	<File name="Printer.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="25798" topLine="694" />
-		</Cursor>
-	</File>
-	<File name="Printer.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1454" topLine="6" />
-		</Cursor>
-		<Folding>
-			<Collapse line="0" />
-		</Folding>
-	</File>
-	<File name="Repetier.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3903" topLine="83" />
-		</Cursor>
-	</File>
-	<File name="Repetier.ino" open="1" top="0" tabpos="21" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1554" topLine="30" />
-		</Cursor>
-	</File>
-	<File name="SDCard.cpp" open="1" top="0" tabpos="24" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="5445" topLine="213" />
-		</Cursor>
-		<Folding>
-			<Collapse line="240" />
-		</Folding>
-	</File>
-	<File name="SdFat.cpp" open="1" top="0" tabpos="22" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="105883" topLine="3555" />
-		</Cursor>
-	</File>
-	<File name="libraries\SPI.cpp" open="0" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="20" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="SdFat.h" open="1" top="0" tabpos="23" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="79632" topLine="2037" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

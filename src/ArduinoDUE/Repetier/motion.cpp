@@ -211,9 +211,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
     {
         xydist2 = axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS];
         if(p->isZMove())
-            p->distance = RMath::max(sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]),fabs(axis_diff[E_AXIS]));
+            p->distance = RMath::max((float)sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]),fabs(axis_diff[E_AXIS]));
         else
-            p->distance = RMath::max(sqrt(xydist2),fabs(axis_diff[E_AXIS]));
+            p->distance = RMath::max((float)sqrt(xydist2),fabs(axis_diff[E_AXIS]));
     }
     else
         p->distance = fabs(axis_diff[E_AXIS]);
@@ -433,7 +433,7 @@ void PrintLine::updateTrapezoids()
     // Skip as many stored moves as needed to gain enough time for computation
     while(timeleft<4500*MOVE_CACHE_SIZE && maxfirst!=linesWritePos)
     {
-        timeleft+=lines[maxfirst].timeInTicks;
+        timeleft += lines[maxfirst].timeInTicks;
         nextPlannerIndex(maxfirst);
     }
     // Search last fixed element
@@ -443,6 +443,7 @@ void PrintLine::updateTrapezoids()
         nextPlannerIndex(first);
     if(first==linesWritePos)   // Nothing to plan
     {
+        act->block();
         ESCAPE_INTERRUPT_PROTECTED
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
@@ -460,14 +461,16 @@ void PrintLine::updateTrapezoids()
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
 #if DRIVE_SYSTEM!=3
-    if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
+
+    // should filter z-move not z-move, but does it make sense to do so?
+    /*if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
     {
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
         firstLine->unblock();
         return;
-    }
+    }*/
 #endif // DRIVE_SYSTEM
 
     computeMaxJunctionSpeed(previous,act); // Set maximum junction speed if we have a real move before
@@ -487,9 +490,11 @@ void PrintLine::updateTrapezoids()
     do
     {
         lines[first].updateStepsParameter();
+        BEGIN_INTERRUPT_PROTECTED;
         lines[first].unblock();  // Flying block to release next used segment as early as possible
         nextPlannerIndex(first);
         lines[first].block();
+        END_INTERRUPT_PROTECTED;
     }
     while(first!=linesWritePos);
     act->updateStepsParameter();
@@ -850,24 +855,26 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
 {
     if(Printer::isLargeMachine())
     {
-        float temp = Printer::deltaMinusCos60RadiusSteps- cartesianPosSteps[Y_AXIS];
+        float temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         float opt = Printer::deltaDiagonalStepsSquaredF - temp*temp;
-        float temp2 = -Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        float temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
             deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
 
-        temp2 = Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
+        opt = Printer::deltaDiagonalStepsSquaredF - temp*temp;
+        temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
             deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
 
-        temp2 = Printer::deltaRadiusSteps - cartesianPosSteps[Y_AXIS];
-        if ((temp = Printer::deltaDiagonalStepsSquaredF
-                    - cartesianPosSteps[X_AXIS]*cartesianPosSteps[X_AXIS]
-                    - temp2*temp2) >= 0)
+        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
+        opt = Printer::deltaDiagonalStepsSquaredF - temp*temp;
+        temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
             deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
@@ -875,9 +882,9 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
     }
     else
     {
-        long temp = Printer::deltaMinusCos60RadiusSteps- cartesianPosSteps[Y_AXIS];
+        long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         long opt = Printer::deltaDiagonalStepsSquared - temp*temp;
-        long temp2 = -Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        long temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
             deltaPosSteps[X_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
@@ -887,7 +894,9 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         else
             return 0;
 
-        temp2 = Printer::deltaSin60RadiusSteps - cartesianPosSteps[X_AXIS];
+        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
+        opt = Printer::deltaDiagonalStepsSquared - temp*temp;
+        temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
             deltaPosSteps[Y_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
@@ -897,10 +906,10 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         else
             return 0;
 
-        temp2 = Printer::deltaRadiusSteps - cartesianPosSteps[Y_AXIS];
-        if ((temp = Printer::deltaDiagonalStepsSquared
-                    - cartesianPosSteps[X_AXIS]*cartesianPosSteps[X_AXIS]
-                    - temp2*temp2) >= 0)
+        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
+        opt = Printer::deltaDiagonalStepsSquared - temp*temp;
+        temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
+        if ((temp = opt - temp2*temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
             deltaPosSteps[Z_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
 #else
@@ -1466,12 +1475,12 @@ long PrintLine::bresenhamStep() // Version for delta printer
     if(cur == NULL)
 #endif
     {
-        HAL::allowInterrupts();
         setCurrentLine();
         if(cur->isBlocked())   // This step is in computation - shouldn't happen
         {
             if(lastblk!=(int)cur)
             {
+                HAL::allowInterrupts();
                 lastblk = (int)cur;
                 Com::printFLN(Com::tBLK,linesCount);
             }
@@ -1481,11 +1490,14 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #endif
             return 2000;
         }
+        HAL::allowInterrupts();
         lastblk = -1;
 #ifdef INCLUDE_DEBUG_NO_MOVE
-        if(DEBUG_NO_MOVES)   // simulate a move, but do nothing in reality
+        if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
+            deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
             removeCurrentLineForbidInterrupt();
+            if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
             return 1000;
         }
 #endif
@@ -1799,13 +1811,13 @@ long PrintLine::bresenhamStep() // version for cartesian printer
     if(cur == NULL)
 #endif
     {
-        HAL::allowInterrupts();
         ANALYZER_ON(ANALYZER_CH0);
         setCurrentLine();
         if(cur->isBlocked())   // This step is in computation - shouldn't happen
         {
             /*if(lastblk!=(int)cur) // can cause output errors!
             {
+                HAL::allowInterrupts();
                 lastblk = (int)cur;
                 Com::printFLN(Com::tBLK,lines_count);
             }*/
@@ -1815,9 +1827,10 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #endif
             return 2000;
         }
+        HAL::allowInterrupts();
         lastblk = -1;
 #ifdef INCLUDE_DEBUG_NO_MOVE
-        if(DEBUG_NO_MOVES)   // simulate a move, but do nothing in reality
+        if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
             removeCurrentLineForbidInterrupt();
             return 1000;

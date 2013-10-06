@@ -33,7 +33,10 @@ volatile uint8_t execute_periodical=0;
 uint8_t counter_250ms=25;
 
 #ifdef SUPPORT_MAX6675
-extern int read_max6675(uint8_t ss_pin);
+extern int16_t read_max6675(uint8_t ss_pin);
+#endif
+#ifdef SUPPORT_MAX31855
+extern int16_t read_max31855(uint8_t ss_pin);
 #endif
 
 #if ANALOG_INPUTS>0
@@ -76,7 +79,7 @@ void Extruder::manageTemperatures()
 #if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
             if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
                 if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
-                   tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                        tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[0].coolerPWM = 0;
                 else
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
@@ -91,7 +94,8 @@ void Extruder::manageTemperatures()
         {
             extruderTempErrors++;
             errorDetected = 1;
-            if(extruderTempErrors>10) { // Ignore short temporary failures
+            if(extruderTempErrors>10)   // Ignore short temporary failures
+            {
                 Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
                 reportTempsensorError();
             }
@@ -144,19 +148,19 @@ void Extruder::manageTemperatures()
         }
         else
 #endif
-        if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
-        {
-            unsigned long time = HAL::timeInMilliseconds();
-            if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
+            if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
+            {
+                unsigned long time = HAL::timeInMilliseconds();
+                if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
+                {
+                    pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                    act->lastTemperatureUpdate = time;
+                }
+            }
+            else     // Fast Bang-Bang fallback
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
-                act->lastTemperatureUpdate = time;
             }
-        }
-        else     // Fast Bang-Bang fallback
-        {
-            pwm_pos[act->pwmIndex] = (on ? 255 : 0);
-        }
 #ifdef MAXTEMP
         if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
             pwm_pos[act->pwmIndex] = 0;
@@ -280,8 +284,8 @@ void Extruder::initExtruder()
             if(!act->enableOn) HAL::digitalWrite(act->enablePin,HIGH);
         }
         act->tempControl.lastTemperatureUpdate = HAL::timeInMilliseconds();
-#ifdef SUPPORT_MAX6675
-        if(act->sensorType==101)
+#if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
+        if(act->tempControl.sensorType==101 || act->tempControl.sensorType==102)
         {
             WRITE(SCK_PIN,0);
             SET_OUTPUT(SCK_PIN);
@@ -289,6 +293,8 @@ void Extruder::initExtruder()
             SET_OUTPUT(MOSI_PIN);
             WRITE(MISO_PIN,1);
             SET_INPUT(MISO_PIN);
+            SET_OUTPUT(SS);
+            WRITE(SS,HIGH);
             HAL::digitalWrite(act->tempControl.sensorPin,1);
             HAL::pinMode(act->tempControl.sensorPin,OUTPUT);
         }
@@ -533,8 +539,8 @@ const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_12[0][0]
                                              };
 const uint8_t temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                              NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12
-                                        };
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12
+                                           };
 
 
 void TemperatureController::updateCurrentTemperature()
@@ -573,6 +579,10 @@ void TemperatureController::updateCurrentTemperature()
     case 101: // MAX6675
         currentTemperature = read_max6675(sensorPin);
         break;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102: // MAX31855
+        currentTemperature = read_max31855(sensorPin);
 #endif
     default:
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
@@ -655,7 +665,12 @@ void TemperatureController::updateCurrentTemperature()
         break;
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperatureC = currentTemperature /4;
+        currentTemperatureC = (float)currentTemperature /4.0;
+        break;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102: // MAX31855
+        currentTemperatureC = (float)currentTemperature /4.0;
         break;
 #endif
 #if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
@@ -680,6 +695,7 @@ void TemperatureController::updateCurrentTemperature()
         short oldraw = temptable[0];
         short oldtemp = temptable[1];
         short newraw,newtemp;
+        currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-currentTemperature;
         while(i<GENERIC_THERM_NUM_ENTRIES*2)
         {
             newraw = temptable[i++];
@@ -780,6 +796,11 @@ void TemperatureController::setTargetTemperature(float target)
         break;
 #ifdef SUPPORT_MAX6675
     case 101:  // defined HEATER_USES_MAX6675
+        targetTemperature = temp * 4;
+        break;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102:  // defined HEATER_USES_MAX31855
         targetTemperature = temp * 4;
         break;
 #endif
@@ -1006,29 +1027,53 @@ bool reportTempsensorError()
 }
 
 #ifdef SUPPORT_MAX6675
-int read_max6675(uint8_t ss_pin)
+int16_t read_max6675(uint8_t ss_pin)
 {
-    int max6675_temp = 0;
-#ifdef	PRR
-    PRR &= ~(1<<PRSPI);
-#elif defined PRR0
-    PRR0 &= ~(1<<PRSPI);
-#endif
-    SPCR = (1<<MSTR) | (1<<SPE) | (1<<SPR0);
+    int16_t max6675_temp = 0;
+    HAL::spiInit(1);
     HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
     HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
-    SPDR = 0;   // read MSB
-    while ((SPSR & (1<<SPIF)) == 0);
-    max6675_temp = SPDR;
+    max6675_temp = HAL::spiReceive(0);
     max6675_temp <<= 8;
-    SPDR = 0; // read LSB
-    while ((SPSR & (1<<SPIF)) == 0);
-    HAL::max6675_temp |= SPDR;
+    HAL::max6675_temp |= HAL::spiReceive(0);
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
     return max6675_temp & 4 ? 2000 : max6675_temp >> 3; // thermocouple open?
 }
 #endif
+#ifdef SUPPORT_MAX31855
+int16_t read_max31855(uint8_t ss_pin)
+{
+    uint32_t data = 0;
+    int16_t temperature;
+    HAL::spiInit(1);
+    HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX31855
+    HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
 
+    for (unsigned short byte = 0; byte < 4; byte++)
+    {
+        data <<= 8;
+        data |= HAL::spiReceive();
+    }
+
+    HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX31855
+
+    //Process temp
+    if (data & 0x00010000)
+        return 20000; //Some form of error.
+    else
+    {
+        data = data >> 18;
+        temperature = data & 0x00001FFF;
+
+        if (data & 0x00002000)
+        {
+            data = ~data;
+            temperature = -1 * ((data & 0x00001FFF) + 1);
+        }
+    }
+    return temperature;
+}
+#endif
 Extruder *Extruder::current;
 
 #if NUM_EXTRUDER>0

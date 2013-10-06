@@ -646,7 +646,6 @@ inline void setTimer(unsigned long delay)
 
 volatile uint8_t insideTimer1 = 0;
 long stepperWait = 0;
-extern long bresenham_step();
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
@@ -890,7 +889,7 @@ ISR(EXTRUDER_TIMER_VECTOR)
         extruderLastDirection = -1;
         timer += 40; // Add some more wait time to prevent blocking
     }
-    else if(Printer::extruderStepsNeeded > 0)
+    else if(Printer::extruderStepsNeeded != 0)
     {
         Extruder::step();
         Printer::extruderStepsNeeded -= extruderLastDirection;

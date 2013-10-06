@@ -126,6 +126,9 @@ FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
 FSTRINGVALUE(Com::tTower1,"Tower 1:")
 FSTRINGVALUE(Com::tTower2,"Tower 2:")
 FSTRINGVALUE(Com::tTower3,"Tower 3:")
+FSTRINGVALUE(Com::tDeltaAlphaA,"Alpha A(210):")
+FSTRINGVALUE(Com::tDeltaAlphaB,"Alpha B(330):")
+FSTRINGVALUE(Com::tDeltaAlphaC,"Alpha C(90):")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC

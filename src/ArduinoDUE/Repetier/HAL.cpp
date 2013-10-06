@@ -796,12 +796,12 @@ void EXTRUDER_TIMER_VECTOR ()
         extruderLastDirection = -1;
         timer += 40; // Add some more wait time to prevent blocking
     }
-    else if(Printer::extruderStepsNeeded > 0)
+    else if(Printer::extruderStepsNeeded != 0)
     {
-    Extruder::step();
+        Extruder::step();
         Printer::extruderStepsNeeded -= extruderLastDirection;
         Printer::insertStepperHighDelay();
-    Extruder::unstep();
+        Extruder::unstep();
     }
 
     TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, timer);

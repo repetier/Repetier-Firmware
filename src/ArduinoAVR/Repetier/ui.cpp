@@ -2168,9 +2168,9 @@ void UIDisplay::executeAction(int action)
             long factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors,-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, -Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, 0, Printer::deltaRadiusSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[2]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:

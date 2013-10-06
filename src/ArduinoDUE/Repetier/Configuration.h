@@ -724,6 +724,29 @@ on this endstop.
 #define DELTA_SEGMENTS_PER_SECOND_PRINT 400 // Move accurate setting for print moves
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 200 // Less accurate setting for other moves
 
+/*  =========== Parameter essential for delta calibration ===================
+
+            C, Y-Axis              Carriage horizontal offset
+            |                        |___
+            |                        |   \
+            |_________ X-axis        |    \
+           / \                       |     \  diagonal rod length
+          /   \                             \
+         /     \                             \    carriage is at printer center!
+         A      B                             \_____/
+                                         |----|--| effector horizontal offset
+                                        delta radius
+                                     |-----------| printer radius
+
+    Column angles are measured from X-axis counterclockwise
+    alpha_A = 210, alpha_B = 330, alpha_C = 90
+*/
+
+/** \brief column positions - change only to correct build imperfections! */
+#define DELTA_ALPHA_A 210
+#define DELTA_ALPHA_B 330
+#define DELTA_ALPHA_C 90
+
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
 #define END_EFFECTOR_HORIZONTAL_OFFSET 33  //41.5 
@@ -739,6 +762,8 @@ on this endstop.
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+
+/* ========== END Delta calibation data ==============*/
 
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.

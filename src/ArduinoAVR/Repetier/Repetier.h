@@ -29,7 +29,7 @@
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
+#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION
@@ -311,9 +311,6 @@ void manage_inactivity(uint8_t debug);
 extern void finishNextSegment();
 #if DRIVE_SYSTEM==3
 extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-extern void set_delta_position(long xaxis, long yaxis, long zaxis);
-extern float rodMaxLength;
-extern void split_delta_move(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
 #ifdef SOFTWARE_LEVELING
 extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
 extern float calcZOffset(long factors[], long pointX, long pointY);

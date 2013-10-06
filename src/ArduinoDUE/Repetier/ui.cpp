@@ -65,7 +65,11 @@ void beep(uint8_t duration,uint8_t count)
     for(uint8_t i=0; i<count; i++)
     {
 #if BEEPER_TYPE==1
+#if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
+        WRITE(BEEPER_PIN,LOW);
+#else
         WRITE(BEEPER_PIN,HIGH);
+#endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
@@ -81,7 +85,11 @@ void beep(uint8_t duration,uint8_t count)
 #endif
         HAL::delayMilliseconds(duration);
 #if BEEPER_TYPE==1
+#if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
+        WRITE(BEEPER_PIN,HIGH);
+#else
         WRITE(BEEPER_PIN,LOW);
+#endif
 #else
 #if UI_DISPLAY_I2C_CHIPTYPE==0
 
@@ -2160,9 +2168,9 @@ void UIDisplay::executeAction(int action)
             long factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors,-Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, -Printer::deltaSin60RadiusSteps, Printer::deltaMinusCos60RadiusSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, 0, Printer::deltaRadiusSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[2]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:

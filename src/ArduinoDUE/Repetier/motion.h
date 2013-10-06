@@ -612,7 +612,7 @@ public:
     {
         linesPos++;
         if(linesPos>=MOVE_CACHE_SIZE) linesPos=0;
-        cur = 0;
+        cur = NULL;
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
 #endif

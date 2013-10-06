@@ -122,6 +122,9 @@ FSTRINGVAR(tLevelingCalc)
 FSTRINGVAR(tTower1)
 FSTRINGVAR(tTower2)
 FSTRINGVAR(tTower3)
+FSTRINGVAR(tDeltaAlphaA)
+FSTRINGVAR(tDeltaAlphaB)
+FSTRINGVAR(tDeltaAlphaC)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
