@@ -731,20 +731,20 @@ on this endstop.
 
 /*  =========== Parameter essential for delta calibration ===================
 
-            C, Y-Axis              Carriage horizontal offset
-            |                        |___
+            C, Y-Axis
+            |                        |___| CARRIAGE_HORIZONTAL_OFFSET
             |                        |   \
             |_________ X-axis        |    \
-           / \                       |     \  diagonal rod length
+           / \                       |     \  DELTA_DIAGONAL_ROD
           /   \                             \
-         /     \                             \    carriage is at printer center!
+         /     \                             \    Carriage is at printer center!
          A      B                             \_____/
-                                         |----|--| effector horizontal offset
-                                        delta radius
-                                     |-----------| printer radius
+                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET
+                                         |----| DELTA_RADIUS
+                                     |-----------| PRINTER_RADIUS
 
     Column angles are measured from X-axis counterclockwise
-    alpha_A = 210, alpha_B = 330, alpha_C = 90
+    "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
 */
 
 /** \brief column positions - change only to correct build imperfections! */
