@@ -125,6 +125,9 @@ FSTRINGVAR(tTower3)
 FSTRINGVAR(tDeltaAlphaA)
 FSTRINGVAR(tDeltaAlphaB)
 FSTRINGVAR(tDeltaAlphaC)
+FSTRINGVAR(tDeltaRadiusCorrectionA)
+FSTRINGVAR(tDeltaRadiusCorrectionB)
+FSTRINGVAR(tDeltaRadiusCorrectionC)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC

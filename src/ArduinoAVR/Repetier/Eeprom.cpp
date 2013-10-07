@@ -447,6 +447,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
     HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
     HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
+    HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_A,DELTA_RADIUS_CORRECTION_A);
+    HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
+    HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
 #endif
 }
 
@@ -577,13 +580,18 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
-        if(version<5) {
 #if DRIVE_SYSTEM==3
+        if(version<5) {
             HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
-#endif
         }
+        if(version<6) {
+            HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_A,DELTA_RADIUS_CORRECTION_A);
+            HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
+            HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
+        }
+#endif
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
@@ -705,6 +713,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_DELTA_ALPHA_A,Com::tDeltaAlphaA);
     writeFloat(EPR_DELTA_ALPHA_B,Com::tDeltaAlphaB);
     writeFloat(EPR_DELTA_ALPHA_C,Com::tDeltaAlphaC);
+    writeFloat(EPR_DELTA_RADIUS_CORR_A,Com::tDeltaRadiusCorrectionA);
+    writeFloat(EPR_DELTA_RADIUS_CORR_B,Com::tDeltaRadiusCorrectionB);
+    writeFloat(EPR_DELTA_RADIUS_CORR_C,Com::tDeltaRadiusCorrectionC);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);

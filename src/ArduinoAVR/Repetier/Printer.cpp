@@ -168,12 +168,16 @@ void Printer::updateDerivedParameter()
     maxFeedrate[0] = maxFeedrate[1] = maxFeedrate[2];
     maxTravelAccelerationMMPerSquareSecond[0] = maxTravelAccelerationMMPerSquareSecond[1] = maxTravelAccelerationMMPerSquareSecond[2];
     zMaxSteps = axisStepsPerMM[2]*(zLength - zMin);
-    deltaAPosXSteps = floor(EEPROM::deltaHorizontalRadius() * cos(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaAPosYSteps = floor(EEPROM::deltaHorizontalRadius() * sin(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaBPosXSteps = floor(EEPROM::deltaHorizontalRadius() * cos(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaBPosYSteps = floor(EEPROM::deltaHorizontalRadius() * sin(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaCPosXSteps = floor(EEPROM::deltaHorizontalRadius() * cos(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaCPosYSteps = floor(EEPROM::deltaHorizontalRadius() * sin(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    float radius0 = EEPROM::deltaHorizontalRadius();
+    float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
+    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionA();
+    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionA();
+    deltaAPosXSteps = floor(radiusA * cos(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    deltaAPosYSteps = floor(radiusA * sin(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    deltaBPosXSteps = floor(radiusB * cos(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    deltaBPosYSteps = floor(radiusB * sin(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    deltaCPosXSteps = floor(radiusC * cos(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
+    deltaCPosYSteps = floor(radiusC * sin(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
     deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[2]);
     if(deltaDiagonalStepsSquared>46000)
     {
@@ -274,7 +278,7 @@ void Printer::moveTo(float x,float y,float z,float e,float f)
     if(e!=IGNORE_COORDINATE)
         destinationSteps[E_AXIS] = e*axisStepsPerMM[E_AXIS];
     if(f!=IGNORE_COORDINATE)
-        feedrate = RMath::max(minimumSpeed,f);
+        feedrate = f;
 #if DRIVE_SYSTEM == 3
     PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
@@ -313,7 +317,7 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
     if(e!=IGNORE_COORDINATE)
         destinationSteps[3] = e*axisStepsPerMM[3];
     if(f!=IGNORE_COORDINATE)
-        Printer::feedrate = RMath::max(minimumSpeed,f);
+        Printer::feedrate = f;
 #if DRIVE_SYSTEM == 3
     PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
@@ -416,8 +420,6 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
             feedrate = com->F*0.0042333f*(float)feedrateMultiply;  // Factor is 25.5/60/100
         else
             feedrate = com->F*(float)feedrateMultiply*0.00016666666f;
-        if(feedrate < minimumSpeed)
-            feedrate = minimumSpeed;
     }
     return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS]!=currentPositionSteps[E_AXIS]); // ignore unproductive moves
 }
