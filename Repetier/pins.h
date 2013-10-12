@@ -945,8 +945,8 @@ STEPPER_CURRENT_CONTROL
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
   #define SCK_PIN          21
-  #define MISO_PIN         22
-  #define MOSI_PIN         23
+  #define MISO_PIN         23     // MISO is B3
+  #define MOSI_PIN         22     // MOSI is B2
 #endif
 
 #endif
@@ -1000,8 +1000,8 @@ STEPPER_CURRENT_CONTROL
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
   #define SCK_PIN          21
-  #define MISO_PIN         22
-  #define MOSI_PIN         23
+  #define MISO_PIN         23     // MISO is B3
+  #define MOSI_PIN         22     // MOSI is B2
 #endif
 
 #endif
