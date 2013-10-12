@@ -430,6 +430,18 @@ STEPPER_CURRENT_CONTROL
 #define LIGHT_PIN         6
 #define BEEPER_PIN        33  // Activate beeper on extension shield
 #define BEEPER_TYPE        1
+
+#define E2_STEP_PIN         27  // Only available with X3 shield
+#define E2_DIR_PIN          29  // Only available with X3 shield
+#define E2_ENABLE_PIN       41  // Only available with X3 shield
+#define E3_STEP_PIN         23  // Only available with X3 shield
+#define E3_DIR_PIN          25  // Only available with X3 shield
+#define E3_ENABLE_PIN       40  // Only available with X3 shield
+#define HEATER_3_PIN        17  // Only available with X3 shield
+#define TEMP_3_PIN          12  // Only available with X3 shield
+#define HEATER_4_PIN        16  // Only available with X3 shield
+#define TEMP_4_PIN          11  // Only available with X3 shield
+
 #endif
 #endif
 
