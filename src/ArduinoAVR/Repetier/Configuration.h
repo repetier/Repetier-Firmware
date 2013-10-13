@@ -45,7 +45,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
-/** Number of extruders. Maximum 2 extruders. */
+/** Number of extruders. Maximum 6 extruders. */
 #define NUM_EXTRUDER 2
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup

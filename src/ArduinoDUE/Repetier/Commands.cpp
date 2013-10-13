@@ -793,8 +793,8 @@ void Commands::executeGCode(GCode *com)
             printTemperatures();
             break;
         case 109: // M109 - Wait for extruder heater to reach target.
-        {
 #if NUM_EXTRUDER>0
+        {
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;

@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 5
+#define EEPROM_PROTOCOL_VERSION 6
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -98,6 +98,9 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_ALPHA_A         901
 #define EPR_DELTA_ALPHA_B         905
 #define EPR_DELTA_ALPHA_C         909
+#define EPR_DELTA_RADIUS_CORR_A   913
+#define EPR_DELTA_RADIUS_CORR_B   917
+#define EPR_DELTA_RADIUS_CORR_C   921
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -318,6 +321,27 @@ public:
         return HAL::eprGetFloat(EPR_DELTA_ALPHA_C);
 #else
         return DELTA_ALPHA_C;
+#endif
+    }
+    static inline float deltaRadiusCorrectionA() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_A);
+#else
+        return DELTA_RADIUS_CORRECTION_A;
+#endif
+    }
+    static inline float deltaRadiusCorrectionB() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_B);
+#else
+        return DELTA_RADIUS_CORRECTION_B;
+#endif
+    }
+    static inline float deltaRadiusCorrectionC() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_C);
+#else
+        return DELTA_RADIUS_CORRECTION_C;
 #endif
     }
 #endif

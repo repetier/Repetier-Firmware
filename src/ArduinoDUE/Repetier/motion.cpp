@@ -227,7 +227,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
 #else
     long axisInterval[4];
 #endif
-    float timeForMove = (float)(F_CPU)*distance / Printer::feedrate; // time is in ticks
+    float timeForMove = (float)(F_CPU)*distance / (isXOrYMove() ? RMath::max(Printer::minimumSpeed,Printer::feedrate): Printer::feedrate); // time is in ticks
     bool critical=false;
     if(linesCount<MOVE_CACHE_LOW && timeForMove<LOW_TICKS_PER_MOVE)   // Limit speed to keep cache full.
     {

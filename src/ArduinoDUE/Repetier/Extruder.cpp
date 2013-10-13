@@ -1257,7 +1257,11 @@ TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] =
     ,&extruder[5].tempControl
 #endif
 #if HAVE_HEATED_BED
+#if NUM_EXTRUDER==0
+    &heatedBedController
+#else
     ,&heatedBedController
+#endif
 #endif
 };
 

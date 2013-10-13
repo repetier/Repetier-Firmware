@@ -442,6 +442,10 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_4_PIN        16  // Only available with X3 shield
 #define TEMP_4_PIN          11  // Only available with X3 shield
 
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+#define E3_PINS E3_STEP_PIN,E3_DIR_PIN,E3_ENABLE_PIN,
+
 #endif
 #endif
 
@@ -1037,8 +1041,8 @@ STEPPER_CURRENT_CONTROL
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
-#define MISO_PIN         22
-#define MOSI_PIN         23
+#define MISO_PIN         23
+#define MOSI_PIN         22
 #endif
 
 #endif
@@ -1094,8 +1098,8 @@ STEPPER_CURRENT_CONTROL
 #ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
-#define MISO_PIN         22
-#define MOSI_PIN         23
+#define MISO_PIN         23
+#define MOSI_PIN         22
 #endif
 
 #endif
