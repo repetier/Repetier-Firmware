@@ -91,6 +91,7 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
 3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
+4 = Tuga printer
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
@@ -127,12 +128,6 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
     /** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
     #define MICRO_STEPS 16
-
-    /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
-    Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-    will be allocated for the delta buffer. With defaults 7 * 16 * 30 = 3360 bytes. This leaves ~1K free RAM on an Arduino
-    Mega. */
-    #define MAX_DELTA_SEGMENTS_PER_LINE 22
 
     // Calculations
     #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
@@ -795,6 +790,16 @@ you can also change the values online and auleveling will store the results here
 //#define SOFTWARE_LEVELING
 
 #endif
+#if DRIVE_SYSTEM == 4 // ========== Tuga special settings =============
+/* Radius of the long arm in mm. */
+#define DELTA_RADIUS 250
+#endif
+
+/** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
+Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
+will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino
+Mega. Used only for nonlinear systems like delta or tuga. */
+#define MAX_DELTA_SEGMENTS_PER_LINE 22
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -1055,6 +1060,10 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z2_DIR_PIN    E1_DIR_PIN
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
 
+/* Ditto printing allows 2 extruders to do the same action. This effectively allows
+to print an object two times at the speed of one. Works only with dual extruder setup.
+*/
+#define FEATURE_DITTO_PRINTING true
 
 /* Servos
 

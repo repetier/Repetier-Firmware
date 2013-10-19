@@ -27,21 +27,22 @@
 #define FEATURE_CHECKSUM_FORCED false
 #endif
 
-GCode GCode::commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
-uint8_t GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
-uint8_t GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
-uint8_t GCode::commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
-uint8_t GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer.
-uint8_t GCode::sendAsBinary; ///< Flags the command as binary input.
-uint8_t GCode::wasLastCommandReceivedAsBinary=0; ///< Was the last successful command in binary mode?
-uint8_t GCode::commentDetected=false; ///< Flags true if we are reading the comment part of a command.
-uint8_t GCode::binaryCommandSize; ///< Expected size of the incoming binary command.
-bool GCode::waitUntilAllCommandsAreParsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
-long GCode::lastLineNumber=0; ///< Last line number received.
-long GCode::actLineNumber; ///< Line number of current command.
-signed char GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
+GCode    GCode::commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
+uint8_t  GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
+uint8_t  GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
+uint8_t  GCode::commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
+uint8_t  GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer.
+uint8_t  GCode::sendAsBinary; ///< Flags the command as binary input.
+uint8_t  GCode::wasLastCommandReceivedAsBinary=0; ///< Was the last successful command in binary mode?
+uint8_t  GCode::commentDetected=false; ///< Flags true if we are reading the comment part of a command.
+uint8_t  GCode::binaryCommandSize; ///< Expected size of the incoming binary command.
+bool     GCode::waitUntilAllCommandsAreParsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
+uint32_t GCode::lastLineNumber=0; ///< Last line number received.
+uint32_t GCode::actLineNumber; ///< Line number of current command.
+int8_t   GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
 volatile uint8_t GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
 millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
+uint8_t  GCode::formatErrors=0;
 
 /** \page Repetier-protocol
 
@@ -97,7 +98,7 @@ Second word if V2:
 uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 {
     uint8_t s = 4; // include checksum and bitfield
-    unsigned int bitfield = *(int*)ptr;
+    uint16_t bitfield = *(uint16_t*)ptr;
     if(bitfield & 1) s+=2;
     if(bitfield & 8) s+=4;
     if(bitfield & 16) s+=4;
@@ -110,15 +111,13 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
     if(bitfield & 4096)   // Version 2 or later
     {
         s+=2; // for bitfield 2
-        unsigned int bitfield2 = *(int*)(ptr+2);
+        uint16_t bitfield2 = *(uint16_t*)(ptr+2);
         if(bitfield & 2) s+=2;
         if(bitfield & 4) s+=2;
         if(bitfield2 & 1) s+= 4;
         if(bitfield2 & 2) s+= 4;
         if(bitfield2 & 4) s+= 4;
-        if(bitfield & 32768) s+=(uint8_t)ptr[4]+1;
-        //OUT_P_I_LN("LenStr:",(int)ptr[4]);
-        //OUT_P_I_LN("LenBinV2:",s);
+        if(bitfield & 32768) s+=RMath::min(80,(uint8_t)ptr[4]+1);
     }
     else
     {
@@ -161,7 +160,8 @@ void GCode::checkAndPushCommand()
             Commands::emergencyStop();
         }
 #ifdef DEBUG_COM_ERRORS
-        if(M==666) {
+        if(M==666)
+        {
             lastLineNumber++;
             return;
         }
@@ -214,19 +214,17 @@ void GCode::pushCommand()
 */
 GCode *GCode::peekCurrentCommand()
 {
-    if(bufferLength==0) return 0; // No more data
+    if(bufferLength==0) return NULL; // No more data
     return &commandsBuffered[bufferReadIndex];
 }
-/** \brief Removes the last returned command from cache.
-
-*/
+/** \brief Removes the last returned command from cache. */
 void GCode::popCurrentCommand()
 {
     if(!bufferLength) return; // Should not happen, but safety first
 #ifdef ECHO_ON_EXECUTE
     echoCommand();
 #endif
-    bufferReadIndex = (bufferReadIndex+1) % GCODE_BUFFER_SIZE;
+    if(++bufferReadIndex == GCODE_BUFFER_SIZE) bufferReadIndex = 0;
     bufferLength--;
 }
 
@@ -236,6 +234,19 @@ void GCode::echoCommand()
     {
         Com::printF(Com::tEcho);
         printCommand();
+    }
+}
+void GCode::debugCommandBuffer()
+{
+    Com::printF(PSTR("CommandBuffer"));
+    for(int i=0; i<commandsReceivingWritePosition; i++)
+        Com::printF(Com::tColon,(int)commandReceiving[i]);
+    Com::println();
+    Com::printFLN(PSTR("Binary:"),(int)sendAsBinary);
+    if(!sendAsBinary)
+    {
+        Com::print((char*)commandReceiving);
+        Com::println();
     }
 }
 
@@ -285,7 +296,6 @@ void GCode::readFromSerial()
     if(bufferLength>=GCODE_BUFFER_SIZE) return; // all buffers full
     if(waitUntilAllCommandsAreParsed && bufferLength) return;
     waitUntilAllCommandsAreParsed=false;
-    GCode *act;
     millis_t time = HAL::timeInMilliseconds();
     if(!HAL::serialByteAvailable())
     {
@@ -318,7 +328,7 @@ void GCode::readFromSerial()
                 commandsReceivingWritePosition = 0;
                 continue;
             }
-            if(!commandReceiving[0])
+            if(!commandReceiving[0]) // Ignore zeros
             {
                 commandsReceivingWritePosition = 0;
                 continue;
@@ -328,10 +338,11 @@ void GCode::readFromSerial()
         if(sendAsBinary)
         {
             if(commandsReceivingWritePosition < 2 ) continue;
-            if(commandsReceivingWritePosition == 5) binaryCommandSize = computeBinarySize((char*)commandReceiving);
-            if(commandsReceivingWritePosition==binaryCommandSize)
+            if(commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4)
+                binaryCommandSize = computeBinarySize((char*)commandReceiving);
+            if(commandsReceivingWritePosition == binaryCommandSize)
             {
-                act = &commandsBuffered[bufferWriteIndex];
+                GCode *act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseBinary(commandReceiving,true))   // Success
                     act->checkAndPushCommand();
                 else
@@ -343,8 +354,9 @@ void GCode::readFromSerial()
         else     // Ascii command
         {
             char ch = commandReceiving[commandsReceivingWritePosition-1];
-            if(ch == '\n' || ch == '\r' || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
+            if(ch == 0 || ch == '\n' || ch == '\r' || (!commentDetected && ch == ':'))  // complete line read
             {
+                //Com::printF(PSTR("Parse ascii"));Com::print((char*)commandReceiving);Com::println();
                 commandReceiving[commandsReceivingWritePosition-1]=0;
                 commentDetected = false;
                 if(commandsReceivingWritePosition==1)   // empty line ignore
@@ -352,7 +364,7 @@ void GCode::readFromSerial()
                     commandsReceivingWritePosition = 0;
                     continue;
                 }
-                act = &commandsBuffered[bufferWriteIndex];
+                GCode *act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseAscii((char *)commandReceiving,true))   // Success
                     act->checkAndPushCommand();
                 else
@@ -366,6 +378,11 @@ void GCode::readFromSerial()
                 if(commentDetected) commandsReceivingWritePosition--;
             }
         }
+        if(commandsReceivingWritePosition == MAX_CMD_SIZE)
+        {
+            requestResend();
+            return;
+        }
     }
 #if SDSUPPORT
     if(!sd.sdmode || commandsReceivingWritePosition!=0)   // not reading or incoming serial command
@@ -378,6 +395,7 @@ void GCode::readFromSerial()
         {
             Com::printFLN(Com::tSDReadError);
             sd.sdmode = false;
+            UI_STATUS("SD Read Error");
             break;
         }
         sd.sdpos++; // = file.curPosition();
@@ -391,11 +409,12 @@ void GCode::readFromSerial()
         if(sendAsBinary)
         {
             if(commandsReceivingWritePosition < 2 ) continue;
-            if(commandsReceivingWritePosition == 5) binaryCommandSize = computeBinarySize((char*)commandReceiving);
+            if(commandsReceivingWritePosition == 4 || commandsReceivingWritePosition == 5)
+                binaryCommandSize = computeBinarySize((char*)commandReceiving);
             if(commandsReceivingWritePosition==binaryCommandSize)
             {
-                act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving,false))   // Success
+                GCode *act = &commandsBuffered[bufferWriteIndex];
+                if(act->parseBinary(commandReceiving,false))   // Success, silently ignore illegal commands
                     pushCommand();
                 commandsReceivingWritePosition = 0;
                 return;
@@ -404,9 +423,10 @@ void GCode::readFromSerial()
         else
         {
             char ch = commandReceiving[commandsReceivingWritePosition-1];
-            if(ch == '\n' || ch == '\r' || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
+            bool returnChar = ch == '\n' || ch == '\r';
+            if(returnChar || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
-                if(ch == '\n' || ch == '\r' || ch == ':')
+                if(returnChar || ch == ':')
                     commandReceiving[commandsReceivingWritePosition-1]=0;
                 else
                     commandReceiving[commandsReceivingWritePosition]=0;
@@ -416,7 +436,7 @@ void GCode::readFromSerial()
                     commandsReceivingWritePosition = 0;
                     continue;
                 }
-                act = &commandsBuffered[bufferWriteIndex];
+                GCode *act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseAscii((char *)commandReceiving,false))   // Success
                     pushCommand();
                 commandsReceivingWritePosition = 0;
@@ -429,9 +449,13 @@ void GCode::readFromSerial()
             }
         }
     }
+    Com::printF(Com::tFreeRAM,(long)sd.filesize);
+    Com::printF(Com::tColon,(long)sd.sdpos);
+    Com::printFLN(Com::tColon,(int)commandsReceivingWritePosition);
     sd.sdmode = false;
     Com::printFLN(Com::tDonePrinting);
     commandsReceivingWritePosition = 0;
+    commentDetected = false;
 #endif
 }
 
@@ -466,7 +490,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     {
         if(Printer::debugErrors())
         {
-            OUT_P_LN("Error:Binary cmd wrong checksum.");
+            Com::printErrorFLN(Com::tWrongChecksum);
         }
         return false;
     }
@@ -484,19 +508,19 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     else params2 = 0;
     if(params & 1)
     {
-        actLineNumber=N=*(unsigned int *)p;
+        actLineNumber=N=*(uint16_t *)p;
         p+=2;
     }
     if(isV2())   // Read G,M as 16 bit value
     {
         if(params & 2)
         {
-            M=*(unsigned int *)p;
+            M=*(uint16_t *)p;
             p+=2;
         }
         if(params & 4)
         {
-            G=*(unsigned int *)p;
+            G=*(uint16_t *)p;
             p+=2;
         }
     }
@@ -543,12 +567,12 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     }
     if(params & 1024)
     {
-        S=*(long int*)p;
+        S=*(int32_t*)p;
         p+=4;
     }
     if(params & 2048)
     {
-        P=*(long int*)p;
+        P=*(int32_t*)p;
         p+=4;
     }
     if(hasI())
@@ -572,6 +596,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
         text[textlen] = 0; // Terminate string overwriting checksum
         waitUntilAllCommandsAreParsed=true; // Don't destroy string until executed
     }
+    formatErrors = 0;
     return true;
 }
 
@@ -586,13 +611,13 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     params2 = 0;
     if((pos = strchr(line,'N'))!=0)   // Line number detected
     {
-        actLineNumber = gcode_value_long(++pos);
+        actLineNumber = parseLongValue(++pos);
         params |=1;
         N = actLineNumber & 0xffff;
     }
     if((pos = strchr(line,'M'))!=0)   // M command
     {
-        M = gcode_value_long(++pos) & 0xffff;
+        M = parseLongValue(++pos) & 0xffff;
         params |= 2;
         if(M>255) params |= 4096;
     }
@@ -617,72 +642,72 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     {
         if((pos = strchr(line,'G'))!=0)   // G command
         {
-            G = gcode_value_long(++pos) & 0xffff;
+            G = parseLongValue(++pos) & 0xffff;
             params |= 4;
             if(G>255) params |= 4096;
         }
         if((pos = strchr(line,'X'))!=0)
         {
-            X = gcode_value(++pos);
+            X = parseFloatValue(++pos);
             params |= 8;
         }
         if((pos = strchr(line,'Y'))!=0)
         {
-            Y = gcode_value(++pos);
+            Y = parseFloatValue(++pos);
             params |= 16;
         }
         if((pos = strchr(line,'Z'))!=0)
         {
-            Z = gcode_value(++pos);
+            Z = parseFloatValue(++pos);
             params |= 32;
         }
         if((pos = strchr(line,'E'))!=0)
         {
-            E = gcode_value(++pos);
+            E = parseFloatValue(++pos);
             params |= 64;
         }
         if((pos = strchr(line,'F'))!=0)
         {
-            F = gcode_value(++pos);
+            F = parseFloatValue(++pos);
             params |= 256;
         }
         if((pos = strchr(line,'T'))!=0)   // M command
         {
-            T = gcode_value_long(++pos) & 0xff;
+            T = parseLongValue(++pos) & 0xff;
             params |= 512;
         }
         if((pos = strchr(line,'S'))!=0)   // M command
         {
-            S = gcode_value_long(++pos);
+            S = parseLongValue(++pos);
             params |= 1024;
         }
         if((pos = strchr(line,'P'))!=0)   // M command
         {
-            P = gcode_value_long(++pos);
+            P = parseLongValue(++pos);
             params |= 2048;
         }
         if((pos = strchr(line,'I'))!=0)
         {
-            I = gcode_value(++pos);
+            I = parseFloatValue(++pos);
             params2 |= 1;
             params |= 4096; // Needs V2 for saving
         }
         if((pos = strchr(line,'J'))!=0)
         {
-            J = gcode_value(++pos);
+            J = parseFloatValue(++pos);
             params2 |= 2;
             params |= 4096; // Needs V2 for saving
         }
         if((pos = strchr(line,'R'))!=0)
         {
-            R = gcode_value(++pos);
+            R = parseFloatValue(++pos);
             params2 |= 4;
             params |= 4096; // Needs V2 for saving
         }
     }
     if((pos = strchr(line,'*'))!=0)   // checksum
     {
-        uint8_t checksum_given = gcode_value_long(pos+1);
+        uint8_t checksum_given = parseLongValue(pos+1);
         uint8_t checksum = 0;
         while(line!=pos) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
@@ -702,13 +727,21 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     {
         if(!fromSerial) return true;
         if(hasM() && (M == 110 || hasString())) return true;
-                if(Printer::debugErrors())
+        if(Printer::debugErrors())
         {
             Com::printErrorFLN(Com::tMissingChecksum);
-            }
+        }
         return false;
     }
 #endif
+    if(hasFormatError() || (params & 518)==0)   // Must contain G, M or T command and parameter need to have variables!
+    {
+        formatErrors++;
+        if(Printer::debugErrors())
+            Com::printErrorFLN(Com::tFormatError);
+        if(formatErrors<3) return false;
+    }
+    else formatErrors = 0;
     return true;
 }
 

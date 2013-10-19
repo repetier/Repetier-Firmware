@@ -38,9 +38,9 @@ void Commands::commandLoop()
 #if SDSUPPORT
             if(sd.savetosd)
             {
-                if(!(code->hasM() && code->M==29))   // still writing to file
+                if(!(code->hasM() && code->M == 29))   // still writing to file
                 {
-                    sd.write_command(code);
+                    sd.writeCommand(code);
                 }
                 else
                 {
@@ -378,7 +378,7 @@ void Commands::executeGCode(GCode *com)
         case 0: // G0 -> G1
         case 1: // G1
             if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
-#if DRIVE_SYSTEM == 3
+#if NONLINEAR_SYSTEM
                 PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
                 PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS,true);
@@ -876,6 +876,13 @@ void Commands::executeGCode(GCode *com)
             UI_CLEAR_STATUS;
             previousMillisCmd = HAL::timeInMilliseconds();
             break;
+#if FEATURE_DITTO_PRINTING
+        case 280:
+            if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = on
+                Extruder::dittoMode = com->S;
+            }
+#endif
+
 #ifdef BEEPER_PIN
         case 300:
         {

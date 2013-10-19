@@ -22,6 +22,10 @@ Version 0.90alpha in development use only if you know what you are doing, config
   Enable hot-end cooler for M303 if available.
   Swedish translation from Daniel Tedenljung
   Added MAX31855 support.
+  Added ditto printing.
+  Better communication error detection preventing hangs.
+  Run init.g on sd card when started or mounted.
+  Added Tuga support.
 
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.

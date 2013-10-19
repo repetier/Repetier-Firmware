@@ -68,10 +68,8 @@ public:
     static long currentPositionSteps[4];     ///< Position in steps from origin.
     static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
-#if DRIVE_SYSTEM==3
-#ifdef STEP_COUNTER
+#if NONLINEAR_SYSTEM
     static long countZSteps;					///< Count of steps from last position reset
-#endif
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
     static long deltaDiagonalStepsSquared;

@@ -700,6 +700,9 @@ void EEPROM::writeSettings()
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
+#if DRIVE_SYSTEM==4
+    writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
+#endif
 #if DRIVE_SYSTEM==3
     writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);

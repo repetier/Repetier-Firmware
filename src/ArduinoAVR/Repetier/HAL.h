@@ -537,7 +537,8 @@ public:
     static void resetHardware();
 
     // SPI related functions
-    static void spiBegin() {
+    static void spiBegin()
+    {
         SET_INPUT(MISO_PIN);
         SET_OUTPUT(MOSI_PIN);
         SET_OUTPUT(SCK_PIN);
@@ -546,19 +547,20 @@ public:
 #if SDSSORIG >- 1
         SET_OUTPUT(SDSSORIG);
 #endif
-  // set SS high - may be chip select for another SPI device
+        // set SS high - may be chip select for another SPI device
 #if SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
     }
     static inline void spiInit(uint8_t spiRate)
     {
+        spiRate = spiRate > 12 ? 6 : spiRate/2;
         SET_OUTPUT(SS);
         WRITE(SS,HIGH);
         SET_OUTPUT(SCK);
         SET_OUTPUT(MOSI_PIN);
         SET_INPUT(MISO_PIN);
-        #ifdef	PRR
+#ifdef	PRR
         PRR &= ~(1<<PRSPI);
 #elif defined PRR0
         PRR0 &= ~(1<<PRSPI);
@@ -574,11 +576,11 @@ public:
         while (!(SPSR & (1 << SPIF)));
         return SPDR;
     }
-    static inline void spiReadBlock(uint8_t*buf,uint16_t nbyte)
+    static inline void spiReadBlock(uint8_t*buf,size_t nbyte)
     {
         if (nbyte-- == 0) return;
         SPDR = 0XFF;
-        for (uint16_t i = 0; i < nbyte; i++)
+        for (size_t i = 0; i < nbyte; i++)
         {
             while (!(SPSR & (1 << SPIF)));
             buf[i] = SPDR;
@@ -592,6 +594,25 @@ public:
         SPDR = b;
         while (!(SPSR & (1 << SPIF)));
     }
+    static inline void spiSend(const uint8_t* buf , size_t n)
+    {
+        if (n == 0) return;
+        SPDR = buf[0];
+        if (n > 1)
+        {
+            uint8_t b = buf[1];
+            size_t i = 2;
+            while (1)
+            {
+                while (!(SPSR & (1 << SPIF)));
+                SPDR = b;
+                if (i == n) break;
+                b = buf[i++];
+            }
+        }
+        while (!(SPSR & (1 << SPIF)));
+    }
+
     static inline __attribute__((always_inline))
     void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
@@ -618,10 +639,22 @@ public:
 
     // Watchdog support
 
-    inline static void startWatchdog() {wdt_enable(WDTO_1S);};
-    inline static void stopWatchdog() {wdt_disable();}
-    inline static void pingWatchdog() {wdt_reset();};
-    inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
+    inline static void startWatchdog()
+    {
+        wdt_enable(WDTO_1S);
+    };
+    inline static void stopWatchdog()
+    {
+        wdt_disable();
+    }
+    inline static void pingWatchdog()
+    {
+        wdt_reset();
+    };
+    inline static float maxExtruderTimerFrequency()
+    {
+        return (float)F_CPU/TIMER0_PRESCALE;
+    }
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo,int ms);

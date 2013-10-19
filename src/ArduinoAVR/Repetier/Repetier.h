@@ -22,7 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.90beta"
+#define REPETIER_VERSION "0.90"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -100,6 +100,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZYX 6
 
 #include "Configuration.h"
+
+#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4
+#define NONLINEAR_SYSTEM true
+#else
+#define NONLINEAR_SYSTEM false
+#endif
 
 #ifdef FEATURE_Z_PROBE
 #define MANUAL_CONTROL true
@@ -309,7 +315,7 @@ extern float maxadvspeed;
 void manage_inactivity(uint8_t debug);
 
 extern void finishNextSegment();
-#if DRIVE_SYSTEM==3
+#if NONLINEAR_SYSTEM
 extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
 #ifdef SOFTWARE_LEVELING
 extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
@@ -317,12 +323,17 @@ extern float calcZOffset(long factors[], long pointX, long pointY);
 #endif
 #endif
 extern void linear_move(long steps_remaining[]);
+#ifndef FEATURE_DITTO_PRINTING
+#define FEATURE_DITTO_PRINTING false
+#endif
+#if FEATURE_DITTO_PRINTING && NUM_EXTRUDER!=2
+#error Ditto printin requires exactly 2 extruder.
+#endif
 
 
-
-extern unsigned long previousMillisCmd;
-extern unsigned long maxInactiveTime;
-extern unsigned long stepperInactiveTime;
+extern millis_t previousMillisCmd;
+extern millis_t maxInactiveTime;
+extern millis_t stepperInactiveTime;
 
 extern void setupTimerInterrupt();
 extern void current_control_init();
@@ -372,8 +383,8 @@ public:
   bool savetosd;
   SDCard();
   void initsd();
-  void write_command(GCode *code);
-  void selectFile(char *filename);
+  void writeCommand(GCode *code);
+  bool selectFile(char *filename,bool silent=false);
   inline void mount() {
     sdmode = false;
     initsd();
@@ -410,14 +421,9 @@ extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 #define Z_AXIS 2
 #define E_AXIS 3
 
-#if DRIVE_SYSTEM==3
-#define SIN_60 0.8660254037844386
-#define COS_60 0.5
-
-
+#if NONLINEAR_SYSTEM
 #define NUM_AXIS 4
 #define VIRTUAL_AXIS 4
-
 #endif
 
 #define STR(s) #s

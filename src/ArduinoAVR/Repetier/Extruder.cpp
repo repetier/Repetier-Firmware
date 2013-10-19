@@ -31,6 +31,9 @@ uint8_t manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM
 unsigned int counter_periodical=0;
 volatile uint8_t execute_periodical=0;
 uint8_t counter_250ms=25;
+#if FEATURE_DITTO_PRINTING
+uint8_t Extruder::dittoMode = 0;
+#endif
 
 #ifdef SUPPORT_MAX6675
 extern int16_t read_max6675(uint8_t ss_pin);
@@ -392,11 +395,18 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
 #endif
     if(temp_celsius<0) temp_celsius=0;
     TemperatureController *tc = tempController[extr];
-    if(temp_celsius==tc->targetTemperatureC) return;
+    //if(temp_celsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temp_celsius);
     if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temp_celsius,0);
+#if FEATURE_DITTO_PRINTING
+    if(Extruder::dittoMode && extr == 0) {
+        TemperatureController *tc2 = tempController[1];
+        tc2->setTargetTemperature(temp_celsius);
+        if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
+    }
+#endif // FEATURE_DITTO_PRINTING
     bool alloff = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
@@ -433,6 +443,12 @@ void Extruder::disableCurrentExtruderMotor()
 {
     if(Extruder::current->enablePin > -1)
         digitalWrite(Extruder::current->enablePin,!Extruder::current->enableOn);
+#if FEATURE_DITTO_PRINTING
+        if(Extruder::dittoMode) {
+            if(extruder[1].enablePin > -1)
+                digitalWrite(extruder[1].enablePin,!extruder[1].enableOn);
+        }
+#endif
 }
 #define NUMTEMPS_1 28
 // Epcos B57560G0107F000

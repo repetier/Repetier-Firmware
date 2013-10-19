@@ -179,7 +179,9 @@ const uint8_t character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
 // ..... 0
 // ..... 0
 const uint8_t character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
-const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,0};
+const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,
+                                  460800,500000,921600,1000000,1500000,0
+                                 };
 
 #define LCD_ENTRYMODE			0x04			/**< Set entrymode */
 
