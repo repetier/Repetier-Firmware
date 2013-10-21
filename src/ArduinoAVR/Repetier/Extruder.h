@@ -27,7 +27,7 @@ class TemperatureController
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
 #ifdef TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
@@ -46,7 +46,7 @@ class TemperatureController
     void updateCurrentTemperature();
     void updateTempControlVars();
 #ifdef TEMP_PID
-    void autotunePID(float temp,uint8_t controllerId);
+    void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
 };
 

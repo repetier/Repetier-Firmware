@@ -97,7 +97,7 @@ void Commands::printCurrentPosition()
     Com::printF(Com::tSpaceZColon,z*(Printer::unitIsInches?0.03937:1),2);
     Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3]*(Printer::unitIsInches?0.03937:1),2);
 }
-void Commands::printTemperatures()
+void Commands::printTemperatures(bool showRaw)
 {
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE==0
@@ -105,6 +105,11 @@ void Commands::printTemperatures()
 #else
     Com::printF(Com::tTColon,temp);
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
+    if(showRaw)
+    {
+        Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
+        Com::printF(Com::tColon,(1023<<(2-ANALOG_REDUCE_BITS))-heatedBedController.currentTemperature);
+    }
 #endif
 #ifdef TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
@@ -118,6 +123,11 @@ void Commands::printTemperatures()
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
+        if(showRaw)
+        {
+            Com::printF(Com::tSpaceRaw,(int)i);
+            Com::printF(Com::tColon,(1023<<(2-ANALOG_REDUCE_BITS))-extruder[i].tempControl.currentTemperature);
+        }
     }
 #endif
     Com::println();
@@ -790,7 +800,7 @@ void Commands::executeGCode(GCode *com)
             if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
             break;
         case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
-            printTemperatures();
+            printTemperatures(com->hasX());
             break;
         case 109: // M109 - Wait for extruder heater to reach target.
 #if NUM_EXTRUDER>0
@@ -878,7 +888,8 @@ void Commands::executeGCode(GCode *com)
             break;
 #if FEATURE_DITTO_PRINTING
         case 280:
-            if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = on
+            if(com->hasS())   // Set ditto mode S: 0 = off, 1 = on
+            {
                 Extruder::dittoMode = com->S;
             }
 #endif
@@ -904,7 +915,7 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS()) temp = com->S;
             if(com->hasP()) cont = com->P;
             if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
-            tempController[cont]->autotunePID(temp,cont);
+            tempController[cont]->autotunePID(temp,cont,com->hasX());
 #endif
         }
         break;
@@ -959,7 +970,8 @@ void Commands::executeGCode(GCode *com)
             if(com->hasY()) Printer::axisStepsPerMM[1] = com->Y;
             if(com->hasZ()) Printer::axisStepsPerMM[2] = com->Z;
             Printer::updateDerivedParameter();
-            if(com->hasE()) {
+            if(com->hasE())
+            {
                 Extruder::current->stepsPerMM = com->E;
                 Extruder::selectExtruderById(Extruder::current->id);
             }

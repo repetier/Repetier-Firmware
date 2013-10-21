@@ -1165,6 +1165,7 @@ The following settings override uiconfig.h!
 7 = RADDS Extension Port
 8 = PiBot Display/Controller extension with 20x4 character display
 9 = PiBot Display/Controller extension with 16x2 character display
+10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
 */
 #define FEATURE_CONTROLLER 2
 

@@ -876,7 +876,7 @@ void Extruder::disableAllHeater()
 }
 
 #ifdef TEMP_PID
-void TemperatureController::autotunePID(float temp,uint8_t controllerId)
+void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool storeValues)
 {
     float currentTemp;
     int cycles=0;
@@ -1002,6 +1002,13 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId)
         {
             Com::printInfoFLN(Com::tAPIDFinished);
             Extruder::disableAllHeater();
+            if(storeValues) {
+                pidDGain = Kp;
+                pidIGain = Ki;
+                pidDGain = Kd;
+                heatManager = 1;
+                EEPROM::storeDataIntoEEPROM();
+            }
             return;
         }
         UI_MEDIUM;
