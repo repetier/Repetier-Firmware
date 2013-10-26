@@ -105,11 +105,13 @@ void Commands::printTemperatures(bool showRaw)
 #else
     Com::printF(Com::tTColon,temp);
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
+#if HAVE_HEATED_BED
     if(showRaw)
     {
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023<<(2-ANALOG_REDUCE_BITS))-heatedBedController.currentTemperature);
     }
+#endif
 #endif
 #ifdef TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
