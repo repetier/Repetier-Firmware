@@ -39,6 +39,7 @@ FSTRINGVAR(tEcho)
 FSTRINGVAR(tOkSpace)
 FSTRINGVAR(tWrongChecksum)
 FSTRINGVAR(tMissingChecksum)
+FSTRINGVAR(tFormatError)
 FSTRINGVAR(tDonePrinting)
 FSTRINGVAR(tX)
 FSTRINGVAR(tY)
@@ -73,6 +74,7 @@ FSTRINGVAR(tTColon)
 FSTRINGVAR(tSpaceBColon)
 FSTRINGVAR(tSpaceAtColon)
 FSTRINGVAR(tSpaceT)
+FSTRINGVAR(tSpaceRaw)
 FSTRINGVAR(tSpaceAt)
 FSTRINGVAR(tColon)
 FSTRINGVAR(tSpeedMultiply);
@@ -130,6 +132,11 @@ FSTRINGVAR(tDeltaRadiusCorrectionB)
 FSTRINGVAR(tDeltaRadiusCorrectionC)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 #endif // DRIVE_SYSTEM
+#if DRIVE_SYSTEM==4
+FSTRINGVAR(tInvalidDeltaCoordinate)
+FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
+FSTRINGVAR(tEPRDiagonalRodLength)
+#endif
 #ifdef DEBUG_GENERIC
 FSTRINGVAR(tGenTemp)
 #endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")

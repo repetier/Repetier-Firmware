@@ -3928,7 +3928,7 @@ SdFile::SdFile(const char* path, uint8_t oflag) : SdBaseFile(path, oflag) {
  * for a read-only file, device is full, a corrupt file system or an I/O error.
  *
  */
-int16_t SdFile::write(const void* buf, uint16_t nbyte) {
+int SdFile::write(const void* buf, size_t nbyte) {
   return SdBaseFile::write(buf, nbyte);
 }
 //------------------------------------------------------------------------------
@@ -3953,7 +3953,7 @@ size_t SdFile::write(uint8_t b) {
  * Use getWriteError to check for errors.
  * \return count of characters written for success or -1 for failure.
  */
-int16_t SdFile::write(const char* str) {
+int SdFile::write(const char* str) {
   return SdBaseFile::write(str, strlen(str));
 }
 //------------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 REM Copies hardware independent files from avr to due version
 
+copy ArduinoAVR\Repetier\Repetier.h  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\Repetier.ino  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Commands.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Communication.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Eeprom.*  ArduinoDue\Repetier

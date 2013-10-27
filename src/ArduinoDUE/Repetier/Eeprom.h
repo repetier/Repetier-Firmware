@@ -226,7 +226,14 @@ public:
         return Z_PROBE_Y3;
 #endif
     }
-#if DRIVE_SYSTEM==3
+#if NONLINEAR_SYSTEM
+    static inline int16_t deltaSegmentsPerSecondMove() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
+#else
+        return DELTA_SEGMENTS_PER_SECOND_MOVE;
+#endif
+    }
     static inline float deltaDiagonalRodLength() {
 #if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH);
@@ -246,13 +253,6 @@ public:
         return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
 #else
         return DELTA_SEGMENTS_PER_SECOND_PRINT;
-#endif
-    }
-    static inline int16_t deltaSegmentsPerSecondMove() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
-#else
-        return DELTA_SEGMENTS_PER_SECOND_MOVE;
 #endif
     }
 #endif

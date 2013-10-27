@@ -110,15 +110,18 @@ public:
     }
     inline long getS(long def)
     {
-        if(hasS()) return S;
-        return def;
+        return (hasS() ? S : def);
     }
     inline long getP(long def)
     {
-        if(hasP()) return P;
-        return def;
+        return (hasP() ? P : def);
     }
-
+    inline void setFormatError() {
+        params2 |= 32768;
+    }
+    inline bool hasFormatError() {
+        return ((params2 & 32768)!=0);
+    }
     void printCommand();
     bool parseBinary(uint8_t *buffer,bool fromSerial);
     bool parseAscii(char *line,bool fromSerial);
@@ -135,15 +138,22 @@ public:
     friend class SDCard;
     friend class UIDisplay;
 private:
+    void debugCommandBuffer();
     void checkAndPushCommand();
     static void requestResend();
-    inline float gcode_value(char *s)
+    inline float parseFloatValue(char *s)
     {
-        return (strtod(s, NULL));
+        char *endPtr;
+        float f = (strtod(s, &endPtr));
+        if(s == endPtr) setFormatError();
+        return f;
     }
-    inline long gcode_value_long(char *s)
+    inline long parseLongValue(char *s)
     {
-        return (strtol(s, NULL, 10));
+        char *endPtr;
+        long l = (strtol(s, &endPtr, 10));
+        if(s == endPtr) setFormatError();
+        return l;
     }
 
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
@@ -156,11 +166,12 @@ private:
     static uint8_t commentDetected; ///< Flags true if we are reading the comment part of a command.
     static uint8_t binaryCommandSize; ///< Expected size of the incoming binary command.
     static bool waitUntilAllCommandsAreParsed; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
-    static long lastLineNumber; ///< Last line number received.
-    static long actLineNumber; ///< Line number of current command.
-    static signed char waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
+    static uint32_t lastLineNumber; ///< Last line number received.
+    static uint32_t actLineNumber; ///< Line number of current command.
+    static int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
     static volatile uint8_t bufferLength; ///< Number of commands stored in gcode_buffer
     static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
+    static uint8_t formatErrors; ///< Number of sequential format errors
 };
 
 

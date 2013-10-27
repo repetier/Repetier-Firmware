@@ -391,7 +391,7 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif
-#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller
+#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 // reprapdiscount smartcontroller (2) gadgets3d (10)
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE 1
@@ -399,6 +399,24 @@ void ui_check_slow_keys(int &action) {}
 #define BEEPER_TYPE 1
 #define UI_COLS 20
 #define UI_ROWS 4
+#if FEATURE_CONTROLLER==10 // Gadgets3d shield
+#define BEEPER_PIN             33
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      23
+#define UI_DISPLAY_D1_PIN      25
+#define UI_DISPLAY_D2_PIN      27
+#define UI_DISPLAY_D3_PIN      29
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_ENCODER_A           35
+#define UI_ENCODER_B           37
+#define UI_ENCODER_CLICK       31
+#define UI_RESET_PIN           41
+#else  // Smartcontroller
 #if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
@@ -434,6 +452,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_CLICK       35
 #define UI_RESET_PIN           41
 #endif
+#endif
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
@@ -450,7 +469,7 @@ void ui_check_keys(int &action) {
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
-#endif // Controller 2
+#endif // Controller 2 and 10
 
 #if FEATURE_CONTROLLER==3 // Adafruit RGB controller
 #define UI_HAS_KEYS 1

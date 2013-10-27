@@ -27,7 +27,7 @@ class TemperatureController
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
+    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
 #ifdef TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
@@ -46,9 +46,13 @@ class TemperatureController
     void updateCurrentTemperature();
     void updateTempControlVars();
 #ifdef TEMP_PID
-    void autotunePID(float temp,uint8_t controllerId);
+    void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
 };
+
+class Extruder;
+extern Extruder extruder[];
+
 /** \brief Data to drive one extruder.
 
 This structure contains all definitions for an extruder and all
@@ -58,6 +62,9 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 {
     public:
     static Extruder *current;
+#if FEATURE_DITTO_PRINTING
+    static uint8_t dittoMode;
+#endif
     uint8_t id;
     int32_t xOffset;
     int32_t yOffset;
@@ -100,6 +107,11 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         case 0:
 #if NUM_EXTRUDER>0
             WRITE(EXT0_STEP_PIN,HIGH);
+#if FEATURE_DITTO_PRINTING
+            if(Extruder::dittoMode) {
+                WRITE(EXT1_STEP_PIN,HIGH);
+            }
+#endif
 #endif
             break;
 #if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
@@ -144,6 +156,11 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         case 0:
 #if NUM_EXTRUDER>0
             WRITE(EXT0_STEP_PIN,LOW);
+#if FEATURE_DITTO_PRINTING
+            if(Extruder::dittoMode) {
+                WRITE(EXT1_STEP_PIN,LOW);
+            }
+#endif
 #endif
             break;
 #if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
@@ -191,6 +208,14 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
                 WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
             else
                 WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+#if FEATURE_DITTO_PRINTING
+            if(Extruder::dittoMode) {
+                if(dir)
+                    WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
+                else
+                    WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
+            }
+#endif
             break;
 #endif
 #if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
@@ -245,6 +270,12 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #else
         if(Extruder::current->enablePin > -1)
             digitalWrite(Extruder::current->enablePin,Extruder::current->enableOn);
+#if FEATURE_DITTO_PRINTING
+        if(Extruder::dittoMode) {
+            if(extruder[1].enablePin > -1)
+                digitalWrite(extruder[1].enablePin,extruder[1].enableOn);
+        }
+#endif
 #endif
     }
     static void manageTemperatures();
@@ -268,7 +299,6 @@ extern TemperatureController heatedBedController;
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
 //extern Extruder *Extruder::current;
-extern Extruder extruder[];
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
 extern uint8_t autotuneIndex;
 

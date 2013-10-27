@@ -85,9 +85,12 @@ void SDCard::initsd()
     }
     sdactive = true;
 #endif
+    if(!selectFile("init.g",false)) {
+        startPrint();
+    }
 }
 
-void SDCard::write_command(GCode *code)
+void SDCard::writeCommand(GCode *code)
 {
     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
     uint8_t buf[100];
@@ -202,6 +205,9 @@ void SDCard::write_command(GCode *code)
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
+    if(params == 128) {
+        Com::printErrorFLN(Com::tAPIDFinished);
+    } else
     file.write(buf,p);
     if (file.writeError)
     {
@@ -301,23 +307,28 @@ void SDCard::ls()
     Com::printFLN(Com::tEndFileList);
 }
 
-void SDCard::selectFile(char *filename)
+bool SDCard::selectFile(char *filename,bool silent)
 {
-    if(!sdactive) return;
+    if(!sdactive) return false;
     sdmode = false;
     file.close();
     fat.chdir();
     if (file.open(fat.vwd(),filename, O_READ))
     {
-        Com::printF(Com::tFileOpened,filename);
-        Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
+        if(!silent) {
+            Com::printF(Com::tFileOpened,filename);
+            Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
+        }
         sdpos = 0;
         filesize = file.fileSize();
         Com::printFLN(Com::tFileSelected);
+        return true;
     }
     else
     {
-        Com::printFLN(Com::tFileOpenFailed);
+        if(!silent)
+            Com::printFLN(Com::tFileOpenFailed);
+        return false;
     }
 }
 

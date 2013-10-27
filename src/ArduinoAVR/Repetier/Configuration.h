@@ -318,7 +318,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_MAX_START_FEEDRATE 40
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
-#define EXT1_MAX_ACCELERATION 6000
+#define EXT1_MAX_ACCELERATION 10000
 /** Type of heat manager for this extruder.
 - 0 = Simply switch on/off if temperature is reached. Works always.
 - 1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.
@@ -487,10 +487,10 @@ See http://reprap.org/wiki/MeasuringThermistorBeta for more details.
 
 // The same for table 2 and 3 if needed
 
-//#define USE_GENERIC_THERMISTORTABLE_2
-#define GENERIC_THERM2_T0 170
-#define GENERIC_THERM2_R0 1042.7
-#define GENERIC_THERM2_BETA 4036
+// #define USE_GENERIC_THERMISTORTABLE_2
+#define GENERIC_THERM2_R0 100000
+#define GENERIC_THERM2_T0 25
+#define GENERIC_THERM2_BETA 3950
 #define GENERIC_THERM2_MIN_TEMP -20
 #define GENERIC_THERM2_MAX_TEMP 300
 #define GENERIC_THERM2_R1 0

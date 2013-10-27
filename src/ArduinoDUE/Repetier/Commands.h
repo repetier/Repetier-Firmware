@@ -32,7 +32,7 @@ public:
     static void executeGCode(GCode *com);
     static void waitUntilEndOfAllMoves();
     static void printCurrentPosition();
-    static void printTemperatures();
+    static void printTemperatures(bool showRaw = false);
     static void setFanSpeed(int speed,bool wait); /// Set fan speed 0..255
     static void changeFeedrateMultiply(int factorInPercent);
     static void changeFlowateMultiply(int factorInPercent);
