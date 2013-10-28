@@ -238,24 +238,30 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     UI_MEDIUM; // do check encoder
     // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
     long limitInterval = timeForMove/stepsRemaining; // until not violated by other constraints it is your target speed
-    if(isXMove()) {
+    if(isXMove())
+    {
         axisInterval[X_AXIS] = fabs(axis_diff[X_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
         limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
-    } else axisInterval[X_AXIS] = 0;
-    if(isYMove()) {
+    }
+    else axisInterval[X_AXIS] = 0;
+    if(isYMove())
+    {
         axisInterval[Y_AXIS] = fabs(axis_diff[Y_AXIS])*F_CPU/(Printer::maxFeedrate[Y_AXIS]*stepsRemaining);
         limitInterval = RMath::max(axisInterval[Y_AXIS],limitInterval);
-    } else axisInterval[Y_AXIS] = 0;
+    }
+    else axisInterval[Y_AXIS] = 0;
     if(isZMove())   // normally no move in z direction
     {
         axisInterval[Z_AXIS] = fabs((float)axis_diff[Z_AXIS])*(float)F_CPU/(float)(Printer::maxFeedrate[Z_AXIS]*stepsRemaining); // must prevent overflow!
         limitInterval = RMath::max(axisInterval[Z_AXIS],limitInterval);
     }
     else axisInterval[Z_AXIS] = 0;
-    if(isEMove()) {
+    if(isEMove())
+    {
         axisInterval[E_AXIS] = fabs(axis_diff[E_AXIS])*F_CPU/(Printer::maxFeedrate[E_AXIS]*stepsRemaining);
         limitInterval = RMath::max(axisInterval[E_AXIS],limitInterval);
-    } else axisInterval[E_AXIS] = 0;
+    }
+    else axisInterval[E_AXIS] = 0;
 #if NONLINEAR_SYSTEM
     axisInterval[VIRTUAL_AXIS] = fabs(axis_diff[VIRTUAL_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining);
 #endif
@@ -310,7 +316,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     }
     // Errors for delta move are initialized in timer (except extruder)
 #if !NONLINEAR_SYSTEM
-        error[0] = error[1] = error[2] = delta[primaryAxis] >> 1;
+    error[0] = error[1] = error[2] = delta[primaryAxis] >> 1;
 #endif
 #if NONLINEAR_SYSTEM
     error[E_AXIS] = stepsRemaining >> 1;
@@ -629,9 +635,12 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
          }*/
 
         // Avoid speed calcs if we know we can accelerate within the line
-        if (act->isNominalMove()) {
+        if (act->isNominalMove())
+        {
             lastJunctionSpeed = act->fullSpeed;
-        } else {
+        }
+        else
+        {
             // If you accelerate from end of move to start what speed do you reach?
             lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->accelerationDistance2); // acceleration is acceleration*distance*2! What can be reached if we try?
         }
@@ -895,13 +904,15 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long tugaP
     tugaPosSteps[0] = cartesianPosSteps[0];
     tugaPosSteps[2] = cartesianPosSteps[2];
     long y2 = Printer::deltaBPosXSteps-cartesianPosSteps[1];
-     if(Printer::isLargeMachine())
+    if(Printer::isLargeMachine())
     {
         float y2f = (float)y2*(float)y2;
         float temp = Printer::deltaDiagonalStepsSquaredF - y2f;
         if(temp<0) return 0;
         tugaPosSteps[1] = tugaPosSteps[0] + sqrt(temp);
-    } else {
+    }
+    else
+    {
         y2 = y2*y2;
         long temp = Printer::deltaDiagonalStepsSquared - y2;
         if(temp<0) return 0;
@@ -928,6 +939,10 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setYMoveFinished();
             cur->setYMoveFinished();
         }
+        if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+            setXMoveFinished();
+        if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+            setYMoveFinished();
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -950,6 +965,9 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         }
     }
 #endif
+    if(isZNegativeMove() && Printer::isZMinEndstopHit())
+        setZMoveFinished();
+
 }
 
 void PrintLine::calculateDirectionAndDelta(long difference[], uint8_t *dir, long delta[])

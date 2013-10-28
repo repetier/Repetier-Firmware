@@ -713,16 +713,17 @@ on this endstop.
 #define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #endif
 
+/** \brief Number of segments to generate for delta conversions per second of move
+*/
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
+
 // Delta settings
 #if DRIVE_SYSTEM==3
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
 
-/** \brief Number of segments to generate for delta conversions per second of move
-*/
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 /*  =========== Parameter essential for delta calibration ===================
 
@@ -792,7 +793,7 @@ you can also change the values online and auleveling will store the results here
 #endif
 #if DRIVE_SYSTEM == 4 // ========== Tuga special settings =============
 /* Radius of the long arm in mm. */
-#define DELTA_RADIUS 250
+#define DELTA_DIAGONAL_ROD 240
 #endif
 
 /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.

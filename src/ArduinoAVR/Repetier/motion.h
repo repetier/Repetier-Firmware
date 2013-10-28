@@ -303,9 +303,17 @@ public:
             if(isYPositiveMove() && Printer::isYMaxEndstopHit())
                 setYMoveFinished();
         }
-        // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
-        if(isZNegativeMove() && Printer::isZMinEndstopHit())
+#if FEATURE_Z_PROBE
+        if(Printer::isZProbingActive() && isZNegativeMove() && Printer::isZProbeHit())
+        {
             setZMoveFinished();
+            Printer::stepsRemainingAtZHit = stepsRemaining;
+        }
+        else
+#endif
+            // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
+            if(isZNegativeMove() && Printer::isZMinEndstopHit())
+                setZMoveFinished();
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -315,16 +323,6 @@ public:
         }
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
             setZMoveFinished();
-#if FEATURE_Z_PROBE
-        if(Printer::isZProbingActive())
-        {
-            if(isZNegativeMove() && Printer::isZProbeHit())
-            {
-                setZMoveFinished();
-                Printer::stepsRemainingAtZHit = stepsRemaining;
-            }
-        }
-#endif
     }
     inline void setXMoveFinished()
     {
@@ -437,11 +435,14 @@ public:
         if(!Printer::isAdvanceActivated()) return;
 #ifdef ENABLE_QUADRATIC_ADVANCE
         long advanceTarget = Printer::advanceExecuted;
-        if(accelerate) {
+        if(accelerate)
+        {
             for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget += advanceRate;
             if(advanceTarget>advanceFull)
                 advanceTarget = advanceFull;
-        } else {
+        }
+        else
+        {
             for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget -= advanceRate;
             if(advanceTarget<advanceEnd)
                 advanceTarget = advanceEnd;
@@ -570,7 +571,8 @@ public:
         totalStepsRemaining--;
 #endif
     }
-    inline void startZStep() {
+    inline void startZStep()
+    {
         WRITE(Z_STEP_PIN,HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,HIGH);
