@@ -894,6 +894,7 @@ void Commands::executeGCode(GCode *com)
             {
                 Extruder::dittoMode = com->S;
             }
+            break;
 #endif
 
 #ifdef BEEPER_PIN

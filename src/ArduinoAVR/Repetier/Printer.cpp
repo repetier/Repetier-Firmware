@@ -203,7 +203,7 @@ void Printer::updateDerivedParameter()
     }
     else
         deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
-    deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[0])*2;
+    deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[0]);
     xMaxSteps = (long)(axisStepsPerMM[0]*(xMin+xLength));
     yMaxSteps = (long)(axisStepsPerMM[1]*yLength);
     zMaxSteps = (long)(axisStepsPerMM[2]*(zMin+zLength));

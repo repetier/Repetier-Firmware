@@ -898,6 +898,20 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
   @param cartesianPosSteps Array containing cartesian coordinates.
   @param deltaPosSteps Result array with tower coordinates.
   @returns 1 if cartesian coordinates have a valid delta tower position 0 if not.
+
+  X         Y
+  *        *
+   \      /
+    \    /
+     \  /
+      \/
+      /
+     /
+    /
+   /
+  *  Extruder
+
+
 */
 uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long tugaPosSteps[])
 {
@@ -939,10 +953,14 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setYMoveFinished();
             cur->setYMoveFinished();
         }
-        if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+        if(isXPositiveMove() && Printer::isXMaxEndstopHit()) {
             setXMoveFinished();
-        if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+            cur->setXMoveFinished();
+        }
+        if(isYPositiveMove() && Printer::isYMaxEndstopHit()) {
             setYMoveFinished();
+            cur->setYMoveFinished();
+        }
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -965,8 +983,10 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         }
     }
 #endif
-    if(isZNegativeMove() && Printer::isZMinEndstopHit())
+    if(isZNegativeMove() && Printer::isZMinEndstopHit()) {
         setZMoveFinished();
+        cur->setZMoveFinished();
+    }
 
 }
 
@@ -1315,11 +1335,7 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
         if (line_number == num_lines && !pathOptimize)
             p->setEndSpeedFixed(true);
 
-        if(check_endstops)
-            p->flags = FLAG_CHECK_ENDSTOPS;
-        else
-            p->flags = 0;
-
+        p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
         p->numDeltaSegments = segments_per_line;
 
         long max_delta_step = p->calculateDeltaSubSegments(softEndstop);
@@ -1643,10 +1659,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
     uint8_t doEven = cur->halfStep & 6;
     uint8_t doOdd = cur->halfStep & 5;
     if(cur->halfStep!=4) cur->halfStep = 3-(cur->halfStep);
-    if(doEven)
+    if(doEven && curd != NULL)
     {
-        if(curd!=NULL)
-            curd->checkEndstops(cur,(cur->isCheckEndstops()));
+        curd->checkEndstops(cur,(cur->isCheckEndstops()));
     }
     uint8_t maxLoops = (Printer::stepsPerTimerCall<=cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
     HAL::forbidInterrupts();
