@@ -984,6 +984,9 @@ void Printer::homeZAxis()
             PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[2]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[2],true,false);
 #endif
         currentPositionSteps[2] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
+#if DRIVE_SYSTEM==4
+        currentDeltaPositionSteps[2] = currentPositionSteps[2];
+#endif
     }
 }
 
