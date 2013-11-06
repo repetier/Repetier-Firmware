@@ -217,6 +217,7 @@
 #define UI_TEXT_SD_REMOVED       "SD Card removed"
 #define UI_TEXT_SD_INSERTED      "SD Card inserted"
 #define UI_TEXT_PRINTER_READY    "Printer ready."
+#define UI_TEXT_POWER            "ATX power on/off"
 
 // *************** german translation ****************
 
@@ -372,7 +373,7 @@
 #define UI_TEXT_SD_REMOVED       "Karte entfernt"
 #define UI_TEXT_SD_INSERTED      "Karte eingelegt"
 #define UI_TEXT_PRINTER_READY    "Drucker bereit."
-
+#define UI_TEXT_POWER            "ATX Netzteil an/aus"
 #endif
 
 // Dutch translation

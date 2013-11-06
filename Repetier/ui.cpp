@@ -1795,6 +1795,9 @@ void UIDisplay::executeAction(int action) {
       }
       break;
     case UI_ACTION_POWER:
+      wait_until_end_of_move();
+      SET_OUTPUT(PS_ON_PIN); //GND
+      TOGGLE(PS_ON_PIN);
       break;
     case UI_ACTION_PREHEAT_PLA:
       UI_STATUS(UI_TEXT_PREHEAT_PLA);
