@@ -159,6 +159,7 @@
 #define UI_ACTION_PAUSE                 1099
 #define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
 #define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
+#define UI_ACTION_FANSPEED              1102
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

@@ -303,13 +303,10 @@ UI_MENU(ui_menu_quick,UI_MENU_QUICK,9+UI_MENU_BACKCNT);
 // **** Fan menu
 
 #if FAN_PIN>-1
+UI_MENU_CHANGEACTION(ui_menu_fan_fanspeed, UI_TEXT_ACTION_FANSPEED,UI_ACTION_FANSPEED);
 UI_MENU_ACTIONCOMMAND(ui_menu_fan_off,UI_TEXT_FAN_OFF,UI_ACTION_FAN_OFF);
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_25,UI_TEXT_FAN_25,UI_ACTION_FAN_25);
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_50,UI_TEXT_FAN_50,UI_ACTION_FAN_50);
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_75,UI_TEXT_FAN_75,UI_ACTION_FAN_75);
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_full,UI_TEXT_FAN_FULL,UI_ACTION_FAN_FULL);
-#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full}
-UI_MENU(ui_menu_fan,UI_MENU_FAN,5+UI_MENU_BACKCNT);
+#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off}
+UI_MENU(ui_menu_fan,UI_MENU_FAN,2+UI_MENU_BACKCNT);
 UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan);
 #define UI_MENU_FAN_COND &ui_menu_fan_sub,
 #define UI_MENU_FAN_CNT 1
