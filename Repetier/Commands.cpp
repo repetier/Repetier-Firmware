@@ -152,7 +152,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       steps = (printer_state.xMaxSteps-printer_state.xMinSteps) * X_HOME_DIR;         
       printer_state.currentPositionSteps[0] = -steps;
       move_steps(2*steps,0,0,0,homing_feedrate[0],true,true);
-      printer_state.currentPositionSteps[0] = 0;
+      printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps : printer_state.xMaxSteps;
       move_steps(axis_steps_per_unit[0]*-ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(axis_steps_per_unit[0]*2*ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homing_feedrate[0]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_X_BACK_ON_HOME)
@@ -176,7 +176,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       steps = (printer_state.yMaxSteps-printer_state.yMinSteps) * Y_HOME_DIR;         
       printer_state.currentPositionSteps[1] = -steps;
       move_steps(0,2*steps,0,0,homing_feedrate[1],true,true);
-      printer_state.currentPositionSteps[1] = 0;
+      printer_state.currentPositionSteps[1] = (Y_HOME_DIR == -1) ? printer_state.yMinSteps : printer_state.yMaxSteps;
       move_steps(0,axis_steps_per_unit[1]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,axis_steps_per_unit[1]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homing_feedrate[1]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
@@ -200,7 +200,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       steps = (printer_state.zMaxSteps-printer_state.zMinSteps) * Z_HOME_DIR;         
       printer_state.currentPositionSteps[2] = -steps;
       move_steps(0,0,2*steps,0,homing_feedrate[2],true,true);
-      printer_state.currentPositionSteps[2] = 0;
+      printer_state.currentPositionSteps[2] = (Z_HOME_DIR == -1) ? printer_state.zMinSteps : printer_state.zMaxSteps;
       move_steps(0,0,axis_steps_per_unit[2]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
       move_steps(0,0,axis_steps_per_unit[2]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homing_feedrate[2]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
