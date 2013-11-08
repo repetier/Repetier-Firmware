@@ -950,7 +950,12 @@ void UIDisplay::parse(char *txt,bool ram) {
         else if(c2=='Y') addFloat(homing_feedrate[1],5,0);
         else if(c2=='Z') addFloat(homing_feedrate[2],5,0);
         break;
-      case 'i':
+#if FAN_PIN > -1
+		case 'F': // FAN speed
+          if(c2=='s') addInt(get_fan_speed()*100/255,3);
+		  break;
+#endif	
+		case 'i':
         if(c2=='s') addLong(stepper_inactive_time,4);
         else if(c2=='p') addLong(max_inactive_time,4);
         break;
@@ -1448,6 +1453,9 @@ void UIDisplay::nextPreviousAction(char next) {
   if(mtype==3) action = pgm_read_word(&(men->id)); else action=activeAction;
   char increment = next;
   switch(action) {
+  case UI_ACTION_FANSPEED:
+      set_fan_speed(get_fan_speed()+increment*3,false);
+	break;
   case UI_ACTION_XPOSITION:
     move_steps(increment,0,0,0,homing_feedrate[0],true,true);
     printPosition();
@@ -1795,6 +1803,9 @@ void UIDisplay::executeAction(int action) {
       }
       break;
     case UI_ACTION_POWER:
+      wait_until_end_of_move();
+      SET_OUTPUT(PS_ON_PIN); //GND
+      TOGGLE(PS_ON_PIN);
       break;
     case UI_ACTION_PREHEAT_PLA:
       UI_STATUS(UI_TEXT_PREHEAT_PLA);

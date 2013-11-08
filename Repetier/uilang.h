@@ -158,6 +158,7 @@
 #define UI_TEXT_ACTION_XPOSITION_FAST2 "X:%x0 mm","Min:%sx Max:%sX"
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
+#define UI_TEXT_ACTION_FANSPEED	  "Fan speed:%Fs%%%"
 #define UI_TEXT_FANSPEED          "Fan speed"
 #define UI_TEXT_FAN_OFF           "Turn Fan Off"
 #define UI_TEXT_FAN_25            "Set Fan 25%%%"
@@ -217,6 +218,7 @@
 #define UI_TEXT_SD_REMOVED       "SD Card removed"
 #define UI_TEXT_SD_INSERTED      "SD Card inserted"
 #define UI_TEXT_PRINTER_READY    "Printer ready."
+#define UI_TEXT_POWER            "ATX power on/off"
 
 // *************** german translation ****************
 
@@ -311,6 +313,7 @@
 #define UI_TEXT_ACTION_XPOSITION_FAST2 "X:%x0 mm","Min:%sx Max:%sX"
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
+#define UI_TEXT_ACTION_FANSPEED	  "L" STR_uuml "fter:%Fs%%%"
 #define UI_TEXT_FANSPEED          "L" STR_uuml "fter"
 #define UI_TEXT_FAN_OFF           "L" STR_uuml "fter Aus"
 #define UI_TEXT_FAN_25            "L" STR_uuml "fter auf 25%%%"
@@ -372,7 +375,7 @@
 #define UI_TEXT_SD_REMOVED       "Karte entfernt"
 #define UI_TEXT_SD_INSERTED      "Karte eingelegt"
 #define UI_TEXT_PRINTER_READY    "Drucker bereit."
-
+#define UI_TEXT_POWER            "ATX Netzteil an/aus"
 #endif
 
 // Dutch translation
