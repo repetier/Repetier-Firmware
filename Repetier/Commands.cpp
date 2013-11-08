@@ -146,7 +146,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
 #else
 void home_axis(bool xaxis,bool yaxis,bool zaxis) {
   long steps;
-  if(xaxis) { 
+  if(xaxis) {
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1)){
       UI_STATUS_UPD(UI_TEXT_HOME_X);
       steps = (printer_state.xMaxSteps-printer_state.xMinSteps) * X_HOME_DIR;         
@@ -162,6 +162,7 @@ void home_axis(bool xaxis,bool yaxis,bool zaxis) {
       long offX = 0;
 #if NUM_EXTRUDER>1
       for(byte i=0;i<NUM_EXTRUDER;i++) offX = max(offX,extruder[i].xOffset);
+      // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
       printer_state.currentPositionSteps[0] = (X_HOME_DIR == -1) ? printer_state.xMinSteps-offX : printer_state.xMaxSteps+offX;
 #if NUM_EXTRUDER>1
