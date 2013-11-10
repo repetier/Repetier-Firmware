@@ -29,7 +29,7 @@
 // ##########################################################################################
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-#define DEBUG_QUEUE_MOVE
+//#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION
@@ -51,7 +51,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define DEBUG_COM_ERRORS
 //#define DEBUG_DELTA_OVERFLOW
 // Add write debug to quicksettings menu to debug some vars during hang
-#define DEBUG_PRINT
+//#define DEBUG_PRINT
 //#define DEBUG_SPLIT
 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
