@@ -156,13 +156,14 @@ typedef struct
     }
 } DeltaSegment;
 extern DeltaSegment segments[];					// Delta segment cache
-extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
+extern unsigned int deltaSegmentWritePos; 	// Position where we write the next cached delta move
 extern volatile unsigned int deltaSegmentCount; // Number of delta moves cached 0 = nothing in cache
 extern uint8_t lastMoveID;
 #endif
-
+class UIDisplay;
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
+    friend class UIDisplay;
 #if CPU_ARCH==ARCH_ARM
     static volatile bool nlFlag;
 #endif
@@ -187,6 +188,7 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
     float startSpeed;               ///< Staring speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
+    float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
     uint8_t numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.

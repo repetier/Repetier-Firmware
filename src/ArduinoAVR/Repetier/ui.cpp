@@ -1828,6 +1828,9 @@ void UIDisplay::executeAction(int action)
             }
             break;
         case UI_ACTION_POWER:
+            Commands::waitUntilEndOfAllMoves();
+            SET_OUTPUT(PS_ON_PIN); //GND
+            TOGGLE(PS_ON_PIN);
             break;
         case UI_ACTION_PREHEAT_PLA:
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
@@ -2223,6 +2226,16 @@ void UIDisplay::executeAction(int action)
             Com::printF(Com::tComma,(int)GCode::bufferLength);
             Com::printF(Com::tComma,(int)GCode::waitingForResend);
             Com::printFLN(Com::tComma,(int)GCode::commandsReceivingWritePosition);
+            Com::printF(Com::tDebug,Printer::minimumSpeed);
+            Com::printF(Com::tComma,Printer::minimumZSpeed);
+            Com::printF(Com::tComma,(int)PrintLine::linesPos);
+            Com::printF(Com::tComma,(int)PrintLine::linesWritePos);
+#if DRIVE_SYSTEM==3
+            Com::printF(Com::tComma,(long)deltaSegmentCount);
+            Com::printFLN(Com::tComma,(int)deltaSegmentWritePos);
+#else
+            Com::println();
+#endif
             break;
         }
     refreshPage();

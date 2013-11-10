@@ -231,6 +231,7 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
+#define UI_TEXT_POWER            "ATX power on/off"
 
 // *************** German translation ****************
 
@@ -400,6 +401,7 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Ges. Druckzeit"
 #define UI_TEXT_PRINT_FILAMENT "Filament gedruckt"
+#define UI_TEXT_POWER            "ATX Netzteil an/aus"
 
 #endif
 
@@ -1317,5 +1319,6 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
+#define UI_TEXT_POWER            "ATX power on/off"
 
 #endif

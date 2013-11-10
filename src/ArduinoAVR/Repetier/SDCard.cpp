@@ -85,7 +85,7 @@ void SDCard::initsd()
     }
     sdactive = true;
 #endif
-    if(!selectFile("init.g",false)) {
+    if(!selectFile("init.g",true)) {
         startPrint();
     }
 }

@@ -77,7 +77,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #include "pins.h"
 
 // Override pin definions from pins.h
-//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
+#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
@@ -91,7 +91,8 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
 3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
-4 = Tuga printer
+4 = Tuga printer (Scott-Russell mechanism)
+5 = Bipod system (not implemented)
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
@@ -539,7 +540,8 @@ Value is used for all generic tables created. */
 Heat manager for heated bed:
 0 = Bang Bang, fast update
 1 = PID controlled
-2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life
+2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life time
+3 = dead time control
 */
 #define HEATED_BED_HEAT_MANAGER 1
 /** \brief The maximum value, I-gain can contribute to the output.
@@ -915,7 +917,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 16
+#define MOVE_CACHE_SIZE 15
 
 /** \brief Low filled cache size.
 
@@ -1064,7 +1066,7 @@ instead of driving both with a single stepper. The same works for the other axis
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
-#define FEATURE_DITTO_PRINTING true
+#define FEATURE_DITTO_PRINTING false
 
 /* Servos
 
@@ -1100,7 +1102,7 @@ is always running and is not hung up for some unknown reason. */
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST false
 /** Speed of z-axis in mm/s when probing */
-#define Z_PROBE_SPEED 25
+#define Z_PROBE_SPEED 15
 #define Z_PROBE_XY_SPEED 150
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91

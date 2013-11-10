@@ -776,7 +776,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
 #define TEMP_2_PIN         -1
 #define SDPOWER            -1
-#define SDSS               37 // 31
+#define SDSS               31 // 31 http://reprap.org/wiki/Melzi#Melzi_Arduino_Pin_Numbers says 31, schamtic show pin 37 = PA0 which is arduino pin 31!
 #define SCK_PIN          7
 #define MISO_PIN         6
 #define MOSI_PIN         5

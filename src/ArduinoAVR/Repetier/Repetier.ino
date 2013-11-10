@@ -49,6 +49,8 @@ Implemented Codes
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to cordinates given
+- G131 - set extruder offset position to 0 - needed for calibration with G132
+- G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 
 RepRap M Codes
 
