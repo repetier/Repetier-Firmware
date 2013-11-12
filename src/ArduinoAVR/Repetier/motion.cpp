@@ -991,6 +991,20 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setYMoveFinished();
             cur->setYMoveFinished();
         }
+#if DRIVE_SYSTEM!=3
+        if(isXNegativeMove() && Printer::isXMinEndstopHit()) {
+            setXMoveFinished();
+            cur->setXMoveFinished();
+            setYMoveFinished();
+            cur->setYMoveFinished();
+        }
+        if(isYNegativeMove() && Printer::isYMinEndstopHit()) {
+            setYMoveFinished();
+            cur->setYMoveFinished();
+            setXMoveFinished();
+            cur->setXMoveFinished();
+        }
+#endif
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
