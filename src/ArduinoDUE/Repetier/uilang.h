@@ -166,6 +166,7 @@
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
 #define UI_TEXT_FANSPEED          "Fan speed"
+#define UI_TEXT_ACTION_FANSPEED   "Fan speed:%Fs%%%"
 #define UI_TEXT_FAN_OFF           "Turn Fan Off"
 #define UI_TEXT_FAN_25            "Set Fan 25%%%"
 #define UI_TEXT_FAN_50            "Set Fan 50%%%"
@@ -231,6 +232,7 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
+#define UI_TEXT_POWER            "ATX power on/off"
 
 // *************** German translation ****************
 
@@ -333,6 +335,7 @@
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
 #define UI_TEXT_FANSPEED          "L" STR_uuml "fter"
+#define UI_TEXT_ACTION_FANSPEED   "L" STR_uuml "fter:%Fs%%%"
 #define UI_TEXT_FAN_OFF           "L" STR_uuml "fter Aus"
 #define UI_TEXT_FAN_25            "L" STR_uuml "fter auf 25%%%"
 #define UI_TEXT_FAN_50            "L" STR_uuml "fter auf 50%%%"
@@ -400,6 +403,7 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Ges. Druckzeit"
 #define UI_TEXT_PRINT_FILAMENT "Filament gedruckt"
+#define UI_TEXT_POWER            "ATX Netzteil an/aus"
 
 #endif
 
@@ -1263,6 +1267,7 @@
 #define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
 #define UI_TEXT_FANSPEED          "Fan speed"
+#define UI_TEXT_ACTION_FANSPEED   "Fan speed:%Fs%%%"
 #define UI_TEXT_FAN_OFF           "Turn Fan Off"
 #define UI_TEXT_FAN_25            "Set Fan 25%%%"
 #define UI_TEXT_FAN_50            "Set Fan 50%%%"
@@ -1317,5 +1322,6 @@
 #define UI_TEXT_PRINTTIME_MINUTES ""
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
+#define UI_TEXT_POWER            "ATX power on/off"
 
 #endif

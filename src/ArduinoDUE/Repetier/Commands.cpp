@@ -92,10 +92,15 @@ void Commands::printCurrentPosition()
 {
     float x,y,z;
     Printer::realPosition(x,y,z);
+    x += Printer::coordinateOffset[X_AXIS];
+    y += Printer::coordinateOffset[Y_AXIS];
+    z += Printer::coordinateOffset[Z_AXIS];
     Com::printF(Com::tXColon,x*(Printer::unitIsInches?0.03937:1),2);
     Com::printF(Com::tSpaceYColon,y*(Printer::unitIsInches?0.03937:1),2);
     Com::printF(Com::tSpaceZColon,z*(Printer::unitIsInches?0.03937:1),2);
     Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3]*(Printer::unitIsInches?0.03937:1),2);
+    //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
+    //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
 }
 void Commands::printTemperatures(bool showRaw)
 {
@@ -153,6 +158,7 @@ void Commands::setFanSpeed(int speed,bool wait)
 {
 #if FAN_PIN>=0
     speed = constrain(speed,0,255);
+    Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed!=pwm_pos[NUM_EXTRUDER+2])
@@ -195,14 +201,14 @@ int digitalPotWrite(int address, unsigned int value) // From Arduino DigitalPotC
     //delay(10);
 }
 
-void set_current(uint8_t driver, unsigned int current)
+void setMotorCurrent(uint8_t driver, unsigned int current)
 {
     const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
     digitalPotWrite(digipot_ch[driver], current);
 }
 #endif
 
-void current_control_init() //Initialize Digipot Motor Current
+void motorCurrentControlInit() //Initialize Digipot Motor Current
 {
 #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
@@ -211,14 +217,14 @@ void current_control_init() //Initialize Digipot Motor Current
     SET_OUTPUT(DIGIPOTSS_PIN);
     for(int i=0; i<=4; i++)
         //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
-        set_current(i,digipot_motor_current[i]);
+        setMotorCurrent(i,digipot_motor_current[i]);
 #endif
 }
 #endif
 
 #if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
 
-void set_current( uint8_t channel, unsigned short level )
+void setMotorCurrent( uint8_t channel, unsigned short level )
 {
     const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
     if(channel>LTC2600_NUM_CHANNELS) return;
@@ -263,19 +269,19 @@ void set_current( uint8_t channel, unsigned short level )
 
 } // setLTC2600
 
-void current_control_init() //Initialize LTC2600 Motor Current
+void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 {
     const unsigned int ltc_current[] =  MOTOR_CURRENT;
     uint8_t i;
     for(i=0; i<LTC2600_NUM_CHANNELS; i++)
     {
-        set_current(i, ltc_current[i] );
+        setMotorCurrent(i, ltc_current[i] );
     }
 }
 #endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
-void microstep_ms(uint8_t driver, int8_t ms1, int8_t ms2)
+void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2)
 {
     if(ms1 > -1) switch(driver)
         {
@@ -315,28 +321,28 @@ void microstep_ms(uint8_t driver, int8_t ms1, int8_t ms2)
         }
 }
 
-void microstep_mode(uint8_t driver, uint8_t stepping_mode)
+void microstepMode(uint8_t driver, uint8_t stepping_mode)
 {
     switch(stepping_mode)
     {
     case 1:
-        microstep_ms(driver,MICROSTEP1);
+        microstepMS(driver,MICROSTEP1);
         break;
     case 2:
-        microstep_ms(driver,MICROSTEP2);
+        microstepMS(driver,MICROSTEP2);
         break;
     case 4:
-        microstep_ms(driver,MICROSTEP4);
+        microstepMS(driver,MICROSTEP4);
         break;
     case 8:
-        microstep_ms(driver,MICROSTEP8);
+        microstepMS(driver,MICROSTEP8);
         break;
     case 16:
-        microstep_ms(driver,MICROSTEP16);
+        microstepMS(driver,MICROSTEP16);
         break;
     }
 }
-void microstep_readings()
+void microstepReadings()
 {
     Com::printFLN(Com::tMS1MS2Pins);
     Com::printF(Com::tXColon,READ(X_MS1_PIN));
@@ -352,7 +358,7 @@ void microstep_readings()
 }
 #endif
 
-void microstep_init()
+void microstepInit()
 {
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
     const uint8_t microstep_modes[] = MICROSTEP_MODES;
@@ -361,7 +367,7 @@ void microstep_init()
     SET_OUTPUT(Z_MS2_PIN);
     SET_OUTPUT(E0_MS2_PIN);
     SET_OUTPUT(E1_MS2_PIN);
-    for(int i=0; i<=4; i++) microstep_mode(i,microstep_modes[i]);
+    for(int i=0; i<=4; i++) microstepMode(i,microstep_modes[i]);
 #endif
 }
 
@@ -595,10 +601,10 @@ void Commands::executeGCode(GCode *com)
             break;
         case 32: // Auto-Bed leveling
         {
-            bool iterate = com->hasP() && com->P>0;
+            //bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
-            Printer::setAutolevelActive(iterate);
-#if DRIVE_SYSTEM==3
+            Printer::setAutolevelActive(false); // iterate
+#if DRIVE_SYSTEM==33
             Printer::homeAxis(true,true,true);
             Printer::setAutolevelActive(false);
             float aboveDist = Printer::zLength-Z_PROBE_GAP-EEPROM::zProbeHeight();
@@ -615,7 +621,7 @@ void Commands::executeGCode(GCode *com)
             h3 = Printer::runZProbe(false,true);
             if(h3<0) break;
             Printer::buildTransformationMatrix(h1,h2,h3);
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==33
             // Compute z height at the tower positions
             float ox,oy,ozx,ozy,ozz,oz;
             Printer::transformFromPrinter(Printer::deltaAPosXSteps, Printer::deltaAPosYSteps,0,ox,oy,ozx);
@@ -652,16 +658,30 @@ void Commands::executeGCode(GCode *com)
             Printer::setAutolevelActive(true);
 #else
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
-            float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
-                        (float)Printer::currentPositionSteps[1]*Printer::invAxisStepsPerMM[0]+(Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
-                                Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*(float)Printer::currentPositionSteps[0]*Printer::invAxisStepsPerMM[0])/
+            // z = z-deviation from origin due to bed transformation
+            float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-
+                         Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
+                        (float)Printer::currentPositionSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS]+
+                        (Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
+                         Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*
+                        (float)Printer::currentPositionSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS])/
                       (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
-            long zBottom = Printer::currentPositionSteps[2] = (h3+z)*Printer::axisStepsPerMM[2];
             Printer::zMin = 0;
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
+#if DRIVE_SYSTEM==3
+                /* Printer::offsetX = 0;
+                 Printer::offsetY = 0;
+                 Printer::moveToReal(0,0,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+                     PrintLine::moveRelativeDistanceInSteps(Printer::offsetX-Printer::currentPositionSteps[0],Printer::offsetY-Printer::currentPositionSteps[1],0,0,Printer::homingFeedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
+                     Printer::offsetX = 0;
+                     Printer::offsetY = 0;*/
+                Printer::zLength += (h3+z)-Printer::currentPosition[Z_AXIS];
+#else
+                long zBottom = Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
                 Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
+#endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
                 Printer::setAutolevelActive(true);
@@ -672,6 +692,9 @@ void Commands::executeGCode(GCode *com)
             Printer::updateDerivedParameter();
             Printer::updateCurrentPosition();
             printCurrentPosition();
+#if DRIVE_SYSTEM==3
+            Printer::homeAxis(true,true,true);
+#endif
 #endif
             Printer::feedrate = oldFeedrate;
         }
@@ -685,20 +708,65 @@ void Commands::executeGCode(GCode *com)
             break;
         case 92: // G92
         {
-            float xOff = 0,yOff = 0, zOff = 0;
-            float xPos,yPos,zPos;
-            Printer::realPosition(xPos,yPos,zPos);
-            if(com->hasX()) xOff = Printer::convertToMM(com->X)-xPos;
-            if(com->hasY()) yOff = Printer::convertToMM(com->Y)-yPos;
-            if(com->hasZ()) zOff = Printer::convertToMM(com->Z)-zPos;
+            float xOff = Printer::coordinateOffset[X_AXIS];
+            float yOff = Printer::coordinateOffset[Y_AXIS];
+            float zOff = Printer::coordinateOffset[Z_AXIS];
+            if(com->hasX()) xOff = Printer::convertToMM(com->X)-Printer::currentPosition[X_AXIS];
+            if(com->hasY()) yOff = Printer::convertToMM(com->Y)-Printer::currentPosition[Y_AXIS];
+            if(com->hasZ()) zOff = Printer::convertToMM(com->Z)-Printer::currentPosition[Z_AXIS];
             Printer::setOrigin(xOff,yOff,zOff);
             if(com->hasE())
             {
-                Printer::currentPositionSteps[3] = Printer::convertToMM(com->E)*Printer::axisStepsPerMM[3];
+                Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E)*Printer::axisStepsPerMM[E_AXIS];
             }
         }
         break;
+#if DRIVE_SYSTEM==3
+        case 131: // Remove offset
+        {
+            float cx,cy,cz;
+            Printer::realPosition(cx,cy,cz);
+            float oldfeedrate = Printer::feedrate;
+            Printer::offsetX = 0;
+            Printer::offsetY = 0;
+            Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+            Printer::feedrate = oldfeedrate;
+            Printer::updateCurrentPosition();
+        }
+        break;
+        case 132: // Calibrate endstop offsets
+        {
+            Printer::setAutolevelActive(false); // don't let transformations change result!
+            Printer::currentPositionSteps[X_AXIS] = 0;
+            Printer::currentPositionSteps[Y_AXIS] = 0;
+            Printer::currentPositionSteps[Z_AXIS] = Printer::zMaxSteps;
+            Printer::coordinateOffset[X_AXIS] = 0;
+            Printer::coordinateOffset[Y_AXIS] = 0;
+            Printer::coordinateOffset[Z_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[X_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Y_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Z_AXIS] = Printer::zMaxSteps;
+            Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
+            long m = RMath::max(Printer::stepsRemainingAtXHit,RMath::max(Printer::stepsRemainingAtYHit,Printer::stepsRemainingAtZHit));
+            long offx = m-Printer::stepsRemainingAtXHit;
+            long offy = m-Printer::stepsRemainingAtYHit;
+            long offz = m-Printer::stepsRemainingAtZHit;
+            Com::printFLN(Com::tTower1,offx);
+            Com::printFLN(Com::tTower2,offy);
+            Com::printFLN(Com::tTower3,offz);
+#if EEPROM_MODE!=0
+            if(com->hasS() && com->S>0)
+            {
+                EEPROM::setDeltaTowerXOffsetSteps(offx);
+                EEPROM::setDeltaTowerYOffsetSteps(offy);
+                EEPROM::setDeltaTowerZOffsetSteps(offz);
+            }
+#endif
+            Printer::homeAxis(true,true,true);
+        }
 
+        break;
+#endif // DRIVE_SYSTEM
         }
         previousMillisCmd = HAL::timeInMilliseconds();
     }
@@ -894,6 +962,7 @@ void Commands::executeGCode(GCode *com)
             {
                 Extruder::dittoMode = com->S;
             }
+            break;
 #endif
 
 #ifdef BEEPER_PIN
@@ -1172,7 +1241,7 @@ void Commands::executeGCode(GCode *com)
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
             uint8_t channel,current;
             if(com->hasP() && com->hasS())
-                set_current((uint8_t)com->P, (unsigned int)com->S);
+                setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
 #endif
         }
         break;
@@ -1205,13 +1274,13 @@ void Commands::executeGCode(GCode *com)
         {
             OUT_P_LN("Set Microstepping");
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
-            if(com->hasS()) for(int i=0; i<=4; i++) microstep_mode(i,com->S);
-            if(com->hasX()) microstep_mode(0,(uint8_t)com->X);
-            if(com->hasY()) microstep_mode(1,(uint8_t)com->Y);
-            if(com->hasZ()) microstep_mode(2,(uint8_t)com->Z);
-            if(com->hasE()) microstep_mode(3,(uint8_t)com->E);
-            if(com->hasP()) microstep_mode(4,com->P); // Original B but is not supported here
-            microstep_readings();
+            if(com->hasS()) for(int i=0; i<=4; i++) microstepMode(i,com->S);
+            if(com->hasX()) microstepMode(0,(uint8_t)com->X);
+            if(com->hasY()) microstepMode(1,(uint8_t)com->Y);
+            if(com->hasZ()) microstepMode(2,(uint8_t)com->Z);
+            if(com->hasE()) microstepMode(3,(uint8_t)com->E);
+            if(com->hasP()) microstepMode(4,com->P); // Original B but is not supported here
+            microstepReadings();
 #endif
         }
         break;

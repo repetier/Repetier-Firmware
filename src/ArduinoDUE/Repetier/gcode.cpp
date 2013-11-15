@@ -449,13 +449,11 @@ void GCode::readFromSerial()
             }
         }
     }
-    Com::printF(Com::tFreeRAM,(long)sd.filesize);
-    Com::printF(Com::tColon,(long)sd.sdpos);
-    Com::printFLN(Com::tColon,(int)commandsReceivingWritePosition);
     sd.sdmode = false;
     Com::printFLN(Com::tDonePrinting);
     commandsReceivingWritePosition = 0;
     commentDetected = false;
+    Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
 #endif
 }
 

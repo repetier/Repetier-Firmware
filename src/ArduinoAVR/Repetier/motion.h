@@ -155,9 +155,6 @@ typedef struct
         dir |= 1<<axis;
     }
 } DeltaSegment;
-extern DeltaSegment segments[];					// Delta segment cache
-extern unsigned int deltaSegmentWritePos; 	// Position where we write the next cached delta move
-extern volatile unsigned int deltaSegmentCount; // Number of delta moves cached 0 = nothing in cache
 extern uint8_t lastMoveID;
 #endif
 class UIDisplay;
@@ -191,10 +188,10 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
-    uint8_t numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
-    uint8_t moveID;							///< ID used to identify moves which are all part of the same line
-    int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
-    long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
+    uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
+    uint8_t moveID;					///< ID used to identify moves which are all part of the same line
+    long numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
+    DeltaSegment segments[MAX_DELTA_SEGMENTS_PER_LINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -612,7 +609,6 @@ public:
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
 #endif
-
         HAL::forbidInterrupts();
         --linesCount;
     }

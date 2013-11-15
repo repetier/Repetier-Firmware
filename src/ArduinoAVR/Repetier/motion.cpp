@@ -64,10 +64,6 @@
 #error MOVE_CACHE_SIZE must be at least 5
 #endif
 
-#if NONLINEAR_SYSTEM
-volatile unsigned int deltaSegmentCount = 0; // Number of delta moves cached 0 = nothing in cache
-#endif
-
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 
 //Inactivity shutdown variables
@@ -995,14 +991,10 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         if(isXNegativeMove() && Printer::isXMinEndstopHit()) {
             setXMoveFinished();
             cur->setXMoveFinished();
-            setYMoveFinished();
-            cur->setYMoveFinished();
         }
         if(isYNegativeMove() && Printer::isYMinEndstopHit()) {
             setYMoveFinished();
             cur->setYMoveFinished();
-            setXMoveFinished();
-            cur->setXMoveFinished();
         }
 #endif
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
@@ -1053,17 +1045,14 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
         destinationSteps[i] = Printer::currentPositionSteps[i];
 
 //	out.println_byte_P(PSTR("Calculate delta segments:"), p->numDeltaSegments);
-    deltaSegmentReadPos = deltaSegmentWritePos;
 #ifdef DEBUG_STEPCOUNT
     totalStepsRemaining=0;
 #endif
 
     uint16_t max_axis_move = 0;
-    unsigned int producedSegments = 0;
     for (int s = numDeltaSegments; s > 0; s--)
     {
-        DeltaSegment *d = &segments[deltaSegmentWritePos++];
-        if (deltaSegmentWritePos >= DELTA_CACHE_SIZE) deltaSegmentWritePos=0;
+        DeltaSegment *d = &segments[s-1];
         for(i=0; i < NUM_AXIS - 1; i++)
         {
             long diff = Printer::destinationSteps[i] - destinationSteps[i];
@@ -1071,13 +1060,6 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
                 destinationSteps[i] -= HAL::Div4U2U(-diff, s);
             else
                 destinationSteps[i] += HAL::Div4U2U(diff, s);
-        }
-
-        // Wait for buffer here
-        while(deltaSegmentCount + producedSegments >= DELTA_CACHE_SIZE)   // wait for a free entry in movement cache
-        {
-            GCode::readFromSerial();
-            Commands::checkForPeriodicalActions();
         }
         // Verify that delta calc has a solution
         if (transformCartesianStepsToDeltaSteps(destinationSteps, destinationDeltaSteps))
@@ -1088,15 +1070,7 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
                 if (softEndstop && destinationDeltaSteps[i] > Printer::maxDeltaPositionSteps)
                     destinationDeltaSteps[i] = Printer::maxDeltaPositionSteps;
                 long delta = destinationDeltaSteps[i] - Printer::currentDeltaPositionSteps[i];
-//#ifdef DEBUG_DELTA_CALC
-//				out.println_long_P(PSTR("dest:"), destinationDeltaSteps[i]);
-//				out.println_long_P(PSTR("cur:"), printer_state.currentDeltaPositionSteps[i]);
-//#endif
-                /* if (delta == 0)
-                 {
-                     d->deltaSteps[i] = 0;
-                 }
-                 else*/ if (delta > 0)
+                if (delta > 0)
                 {
                     d->dir |= 17<<i;
 #ifdef DEBUG_DELTA_OVERFLOW
@@ -1129,12 +1103,7 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
             d->dir = 0;
             d->deltaSteps[0]=d->deltaSteps[1]=d->deltaSteps[2]=0;
         }
-        producedSegments++;
     }
-    BEGIN_INTERRUPT_PROTECTED
-    deltaSegmentCount+=producedSegments;
-    END_INTERRUPT_PROTECTED
-
 #ifdef DEBUG_STEPCOUNT
 //		out.println_long_P(PSTR("totalStepsRemaining:"), p->totalStepsRemaining);
 #endif
@@ -1585,8 +1554,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #ifdef INCLUDE_DEBUG_NO_MOVE
         if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
-            HAL::forbidInterrupts();
-            deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
+            //HAL::forbidInterrupts();
+            //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
             removeCurrentLineForbidInterrupt();
             if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
             return 1000;
@@ -1614,8 +1583,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         if (cur->numDeltaSegments)
         {
             // If there are delta segments point to them here
-            curd = &segments[cur->deltaSegmentReadPos++];
-            if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
+            curd = &cur->segments[--cur->numDeltaSegments];
             // Enable axis - All axis are enabled since they will most probably all be involved in a move
             // Since segments could involve different axis this reduces load when switching segments and
             // makes disabling easier.
@@ -1679,8 +1647,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
             return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     HAL::allowInterrupts();
-    if(deltaSegmentCount>1000)
-        Com::printFLN(PSTR("B2:"),(long)deltaSegmentCount);
 
     /* For halfstepping, we divide the actions into even and odd actions to split
        time used per loop. */
@@ -1759,15 +1725,13 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 stepsPerSegRemaining--;
                 if (!stepsPerSegRemaining)
                 {
-                    cur->numDeltaSegments--;
                     if (cur->numDeltaSegments)
                     {
                         // Get the next delta segment
-                        curd = &segments[cur->deltaSegmentReadPos++];
-                        if (cur->deltaSegmentReadPos >= DELTA_CACHE_SIZE) cur->deltaSegmentReadPos=0;
+                        curd = &cur->segments[--cur->numDeltaSegments];
 
                         // Initialize bresenham for this segment (numPrimaryStepPerSegment is already correct for the half step setting)
-                        cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment>>1;
+                        cur->error[0] = cur->error[1] = cur->error[2] = cur->numPrimaryStepPerSegment >> 1;
 
                         // Reset the counter of the primary steps. This is initialized in the line
                         // generation so don't have to do this the first time.
@@ -1779,8 +1743,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
                         Printer::setZDirection(curd->dir & 4);
                     }
                     else
-                        curd=0;// Release the last segment
-                    deltaSegmentCount--;
+                        curd = 0;// Release the last segment
+                    //deltaSegmentCount--;
                 }
             }
 #if defined(USE_ADVANCE)
@@ -1855,8 +1819,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
         } // doOdd
         if(doEven)
         {
-            Printer::stepNumber+=maxLoops;
-            PrintLine::cur->stepsRemaining-=maxLoops;
+            Printer::stepNumber += maxLoops;
+            PrintLine::cur->stepsRemaining -= maxLoops;
         }
 
     } // stepsRemaining
@@ -1874,12 +1838,12 @@ long PrintLine::bresenhamStep() // Version for delta printer
             Com::printFLN(PSTR("HS:"), (int) cur->halfStep);
         }
 #endif
-        HAL::forbidInterrupts();
-        deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
+        //HAL::forbidInterrupts();
+        //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
-        interval = Printer::interval = interval>>1; // 50% of time to next call to do cur=0
+        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
     return interval;

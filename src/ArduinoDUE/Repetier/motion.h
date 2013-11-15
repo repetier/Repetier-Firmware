@@ -155,14 +155,12 @@ typedef struct
         dir |= 1<<axis;
     }
 } DeltaSegment;
-extern DeltaSegment segments[];					// Delta segment cache
-extern unsigned int delta_segment_write_pos; 	// Position where we write the next cached delta move
-extern volatile unsigned int deltaSegmentCount; // Number of delta moves cached 0 = nothing in cache
 extern uint8_t lastMoveID;
 #endif
-
+class UIDisplay;
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
+    friend class UIDisplay;
 #if CPU_ARCH==ARCH_ARM
     static volatile bool nlFlag;
 #endif
@@ -187,12 +185,13 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
     float startSpeed;               ///< Staring speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
+    float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
-    uint8_t numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
-    uint8_t moveID;							///< ID used to identify moves which are all part of the same line
-    int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
-    long numPrimaryStepPerSegment;		///< Number of primary bresenham axis steps in each delta segment
+    uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
+    uint8_t moveID;					///< ID used to identify moves which are all part of the same line
+    long numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
+    DeltaSegment segments[MAX_DELTA_SEGMENTS_PER_LINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -303,9 +302,17 @@ public:
             if(isYPositiveMove() && Printer::isYMaxEndstopHit())
                 setYMoveFinished();
         }
-        // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
-        if(isZNegativeMove() && Printer::isZMinEndstopHit())
+#if FEATURE_Z_PROBE
+        if(Printer::isZProbingActive() && isZNegativeMove() && Printer::isZProbeHit())
+        {
             setZMoveFinished();
+            Printer::stepsRemainingAtZHit = stepsRemaining;
+        }
+        else
+#endif
+            // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
+            if(isZNegativeMove() && Printer::isZMinEndstopHit())
+                setZMoveFinished();
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -315,16 +322,6 @@ public:
         }
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
             setZMoveFinished();
-#if FEATURE_Z_PROBE
-        if(Printer::isZProbingActive())
-        {
-            if(isZNegativeMove() && Printer::isZProbeHit())
-            {
-                setZMoveFinished();
-                Printer::stepsRemainingAtZHit = stepsRemaining;
-            }
-        }
-#endif
     }
     inline void setXMoveFinished()
     {
@@ -437,11 +434,14 @@ public:
         if(!Printer::isAdvanceActivated()) return;
 #ifdef ENABLE_QUADRATIC_ADVANCE
         long advanceTarget = Printer::advanceExecuted;
-        if(accelerate) {
+        if(accelerate)
+        {
             for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget += advanceRate;
             if(advanceTarget>advanceFull)
                 advanceTarget = advanceFull;
-        } else {
+        }
+        else
+        {
             for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget -= advanceRate;
             if(advanceTarget<advanceEnd)
                 advanceTarget = advanceEnd;
@@ -570,7 +570,8 @@ public:
         totalStepsRemaining--;
 #endif
     }
-    inline void startZStep() {
+    inline void startZStep()
+    {
         WRITE(Z_STEP_PIN,HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,HIGH);
@@ -608,7 +609,6 @@ public:
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
 #endif
-
         HAL::forbidInterrupts();
         --linesCount;
     }

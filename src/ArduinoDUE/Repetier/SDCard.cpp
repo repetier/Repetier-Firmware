@@ -58,6 +58,7 @@ void SDCard::automount()
             sdmode = false;
             UI_STATUS(UI_TEXT_SD_REMOVED);
             Com::printFLN(Com::tSDRemoved);
+            Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
         }
     }
     else
@@ -66,7 +67,11 @@ void SDCard::automount()
         {
             UI_STATUS(UI_TEXT_SD_INSERTED);
             Com::printFLN(Com::tSDInserted);
+            Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
             initsd();
+#if UI_DISPLAY_TYPE!=0
+            uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
+#endif
         }
     }
 #endif
@@ -84,10 +89,11 @@ void SDCard::initsd()
         return;
     }
     sdactive = true;
-#endif
-    if(!selectFile("init.g",false)) {
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
+    if(!selectFile("init.g",true)) {
         startPrint();
     }
+#endif
 }
 
 void SDCard::writeCommand(GCode *code)

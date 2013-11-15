@@ -63,7 +63,6 @@ RepRap M Codes
 
 Custom M Codes
 
-- M80  - Turn on Power Supply
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card

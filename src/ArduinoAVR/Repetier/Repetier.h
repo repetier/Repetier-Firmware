@@ -231,6 +231,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL}
 #endif
 
+#define MENU_MODE_SD_MOUNTED 1
+#define MENU_MODE_SD_PRINTING 2
+#define MENU_MODE_SD_PAUSED 4
+#define MENU_MODE_FAN_RUNNING 8
+
 #include "HAL.h"
 #include "gcode.h"
 
@@ -400,9 +405,10 @@ public:
   inline void unmount() {
     sdmode = false;
     sdactive = false;
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
   }
-  inline void startPrint() {if(sdactive) sdmode = true; }
-  inline void pausePrint() {sdmode = false;}
+  inline void startPrint() {if(sdactive) sdmode = true;Printer::setMenuMode(MENU_MODE_SD_PRINTING,true); Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);}
+  inline void pausePrint() {sdmode = false;Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);}
   inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
   void printStatus();
   void ls();

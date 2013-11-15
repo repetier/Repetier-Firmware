@@ -158,6 +158,7 @@ void Commands::setFanSpeed(int speed,bool wait)
 {
 #if FAN_PIN>=0
     speed = constrain(speed,0,255);
+    Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed!=pwm_pos[NUM_EXTRUDER+2])

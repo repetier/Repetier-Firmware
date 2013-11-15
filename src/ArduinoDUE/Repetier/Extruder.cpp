@@ -337,10 +337,8 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         executeSelect = true;
     }
 #endif
-    Extruder::current->extrudePosition = Printer::currentPositionSteps[3];
+    Extruder::current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
     Extruder::current = &extruder[extruderId];
-    long dx = -Printer::offsetX*Printer::axisStepsPerMM[0]-Extruder::current->xOffset;
-    long dy = -Printer::offsetY*Printer::axisStepsPerMM[1]-Extruder::current->yOffset;
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
@@ -370,14 +368,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     if(fmax<Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif
     Extruder::current->tempControl.updateTempControlVars();
-    if(dx || dy)
-    {
-        float oldfeedrate = Printer::feedrate;
-        PrintLine::moveRelativeDistanceInSteps(dx,dy,0,0,Printer::homingFeedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
-        Printer::feedrate = oldfeedrate;
-    }
-    Printer::offsetX = -Extruder::current->xOffset*Printer::invAxisStepsPerMM[0];
-    Printer::offsetY = -Extruder::current->yOffset*Printer::invAxisStepsPerMM[1];
+    float cx,cy,cz;
+    Printer::realPosition(cx,cy,cz);
+    float oldfeedrate = Printer::feedrate;
+    Printer::offsetX = -Extruder::current->xOffset*Printer::invAxisStepsPerMM[X_AXIS];
+    Printer::offsetY = -Extruder::current->yOffset*Printer::invAxisStepsPerMM[Y_AXIS];
+    Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+    Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
 #if NUM_EXTRUDER>1
     if(executeSelect) // Run only when changing
@@ -401,7 +398,8 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temp_celsius,0);
 #if FEATURE_DITTO_PRINTING
-    if(Extruder::dittoMode && extr == 0) {
+    if(Extruder::dittoMode && extr == 0)
+    {
         TemperatureController *tc2 = tempController[1];
         tc2->setTargetTemperature(temp_celsius);
         if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
@@ -444,10 +442,11 @@ void Extruder::disableCurrentExtruderMotor()
     if(Extruder::current->enablePin > -1)
         digitalWrite(Extruder::current->enablePin,!Extruder::current->enableOn);
 #if FEATURE_DITTO_PRINTING
-        if(Extruder::dittoMode) {
-            if(extruder[1].enablePin > -1)
-                digitalWrite(extruder[1].enablePin,!extruder[1].enableOn);
-        }
+    if(Extruder::dittoMode)
+    {
+        if(extruder[1].enablePin > -1)
+            digitalWrite(extruder[1].enablePin,!extruder[1].enableOn);
+    }
 #endif
 }
 #define NUMTEMPS_1 28
@@ -1002,7 +1001,8 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         {
             Com::printInfoFLN(Com::tAPIDFinished);
             Extruder::disableAllHeater();
-            if(storeValues) {
+            if(storeValues)
+            {
                 pidDGain = Kp;
                 pidIGain = Ki;
                 pidDGain = Kd;

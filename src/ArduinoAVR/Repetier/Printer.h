@@ -41,6 +41,7 @@ public:
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
+    static uint8_t menuMode;
 #ifdef ENABLE_QUADRATIC_ADVANCE
     static long advanceExecuted;             ///< Executed advance steps
 #endif
@@ -142,6 +143,12 @@ public:
     static char motorX;
     static char motorY;
 #endif
+    static inline void setMenuMode(uint8_t mode,bool on) {
+        if(on)
+            menuMode |= mode;
+        else
+            menuMode &= ~mode;
+    }
     static inline bool debugEcho()
     {
         return ((debugLevel & 1)!=0);

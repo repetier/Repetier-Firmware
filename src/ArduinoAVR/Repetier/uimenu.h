@@ -81,6 +81,7 @@ List of placeholder:
 %fX : Homing feedrate x direction
 %fY : Homing feedrate y direction
 %fZ : Homing feedrate z direction
+%Fs : Fan speed
 %Sx : Steps per mm x direction
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
@@ -312,7 +313,7 @@ UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU
 #if PS_ON_PIN>=0
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_power,UI_TEXT_POWER,UI_ACTION_POWER);
 #define MENU_PSON_COUNT 1
-#define MENU_PSON_ENTRY &ui_menu_quick_power,
+#define MENU_PSON_ENTRY ,&ui_menu_quick_power
 #else
 #define MENU_PSON_COUNT 0
 #define MENU_PSON_ENTRY
@@ -332,19 +333,20 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK MENU_PSON_ENTRY &ui_menu_home_all,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper DEBUG_PRINT_EXTRA}
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
 UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT);
 
 // **** Fan menu
 
 #if FAN_PIN>-1
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_off,UI_TEXT_FAN_OFF,UI_ACTION_FAN_OFF);
+UI_MENU_CHANGEACTION(ui_menu_fan_fanspeed, UI_TEXT_ACTION_FANSPEED,UI_ACTION_FANSPEED);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_fan_off,UI_TEXT_FAN_OFF,UI_ACTION_FAN_OFF,MENU_MODE_FAN_RUNNING,0);
 UI_MENU_ACTIONCOMMAND(ui_menu_fan_25,UI_TEXT_FAN_25,UI_ACTION_FAN_25);
 UI_MENU_ACTIONCOMMAND(ui_menu_fan_50,UI_TEXT_FAN_50,UI_ACTION_FAN_50);
 UI_MENU_ACTIONCOMMAND(ui_menu_fan_75,UI_TEXT_FAN_75,UI_ACTION_FAN_75);
 UI_MENU_ACTIONCOMMAND(ui_menu_fan_full,UI_TEXT_FAN_FULL,UI_ACTION_FAN_FULL);
-#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full}
-UI_MENU(ui_menu_fan,UI_MENU_FAN,5+UI_MENU_BACKCNT);
+#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full}
+UI_MENU(ui_menu_fan,UI_MENU_FAN,6+UI_MENU_BACKCNT);
 UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan);
 #define UI_MENU_FAN_COND &ui_menu_fan_sub,
 #define UI_MENU_FAN_CNT 1
@@ -358,14 +360,21 @@ UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan);
 #ifdef SDSUPPORT
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_printfile,UI_TEXT_PRINT_FILE,UI_ACTION_SD_PRINT);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_pause,UI_TEXT_PAUSE_PRINT,UI_ACTION_SD_PAUSE);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_continue,UI_TEXT_CONTINUE_PRINT,UI_ACTION_SD_CONTINUE);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_unmount,UI_TEXT_UNMOUNT_CARD,UI_ACTION_SD_UNMOUNT);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MOUNT);
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE);
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_unmount,&ui_menu_sd_mount,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+6);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile,UI_TEXT_PRINT_FILE,UI_ACTION_SD_PRINT,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_pause,UI_TEXT_PAUSE_PRINT,UI_ACTION_SD_PAUSE,MENU_MODE_SD_PRINTING,MENU_MODE_SD_PAUSED);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,UI_TEXT_CONTINUE_PRINT,UI_ACTION_SD_CONTINUE,MENU_MODE_SD_PAUSED,0);
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#define UI_MOUNT_CNT 0
+#define UI_MOUNT_CMD
+#else
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_unmount,UI_TEXT_UNMOUNT_CARD,UI_ACTION_SD_UNMOUNT,MENU_MODE_SD_MOUNTED,0);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MOUNT,0,MENU_MODE_SD_MOUNTED);
+#define UI_MOUNT_CNT 2
+#define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
+#endif
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
+#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
+UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+6+UI_MOUNT_CNT);
 UI_MENU_SUBMENU(ui_menu_sd_sub,UI_TEXT_SD_CARD,ui_menu_sd);
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,
@@ -518,8 +527,8 @@ UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);
 UI_MENU_SUBMENU(ui_menu_main3,UI_TEXT_EXTRUDER,ui_menu_extruder);
 UI_MENU_SUBMENU(ui_menu_main4,UI_TEXT_DEBUGGING,ui_menu_debugging);
 UI_MENU_SUBMENU(ui_menu_main5,UI_TEXT_CONFIGURATION,ui_menu_configuration);
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,&ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5}
-UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,&ui_menu_sd_printfile,&ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5}
+UI_MENU(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
 
 /* Define menus accessible by action commands
 

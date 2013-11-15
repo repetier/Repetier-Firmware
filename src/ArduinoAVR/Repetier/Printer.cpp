@@ -41,8 +41,6 @@ unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[4];
 #endif
 #if NONLINEAR_SYSTEM
 long Printer::currentDeltaPositionSteps[4];
-DeltaSegment segments[DELTA_CACHE_SIZE];
-unsigned int deltaSegmentWritePos = 0; // Position where we write the next cached delta move
 uint8_t lastMoveID = 0; // Last move ID
 #endif
 uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
@@ -55,6 +53,8 @@ float Printer::coordinateOffset[3] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
+uint8_t Printer::menuMode = 0;
+
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
@@ -727,9 +727,6 @@ void Printer::setup()
     Extruder::initExtruder();
     EEPROM::init(); // Read settings from eeprom if wanted
     updateDerivedParameter();
-#if SDSUPPORT
-    sd.initsd();
-#endif
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
@@ -744,6 +741,9 @@ void Printer::setup()
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
+#if SDSUPPORT
+    sd.initsd();
+#endif
 }
 
 void Printer::defaultLoopActions()

@@ -113,6 +113,21 @@ void beep(uint8_t duration,uint8_t count)
 #endif
 }
 
+bool UIMenuEntry::showEntry() const
+{
+    bool ret = true;
+    uint8_t f,f2;
+    f = HAL::readFlashByte((const prog_char*)&filter);
+    if(f!=0)
+        ret = (f & Printer::menuMode) != 0;
+    f2 = HAL::readFlashByte((const prog_char*)&nofilter);
+    if(ret && f2!=0)
+    {
+        ret = (f2 & Printer::menuMode) == 0;
+    }
+    return ret;
+}
+
 #if UI_DISPLAY_TYPE!=0
 UIDisplay uid;
 
@@ -831,7 +846,11 @@ void UIDisplay::parse(char *txt,bool ram)
 #endif
             addFloat(fvalue,3,0 /*UI_TEMP_PRECISION*/);
             break;
-
+#if FAN_PIN > -1
+        case 'F': // FAN speed
+            if(c2=='s') addInt(Printer::getFanSpeed()*100/255,3);
+            break;
+#endif
         case 'f':
             if(c2=='x') addFloat(Printer::maxFeedrate[0],5,0);
             else if(c2=='y') addFloat(Printer::maxFeedrate[1],5,0);
@@ -1260,9 +1279,14 @@ void UIDisplay::refreshPage()
         mtype = pgm_read_byte((void*)&(men->menuType));
         uint8_t offset = menuTop[menuLevel];
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
-        for(r=0; r+offset<nr && r<UI_ROWS; r++)
+        for(r=0; r+offset<nr && r<UI_ROWS; )
         {
             UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r+offset]));
+            if(!ent->showEntry())
+            {
+                offset++;
+                continue;
+            }
             unsigned char entType = pgm_read_byte(&(ent->menuType));
             unsigned int entAction = pgm_read_word(&(ent->action));
             col=0;
@@ -1282,6 +1306,7 @@ void UIDisplay::refreshPage()
                 printCols[UI_COLS-1]=CHAR_RIGHT; // Arrow right
             }
             printRow(r,(char*)printCols);
+            r++;
         }
     }
 #if SDSUPPORT
@@ -1453,19 +1478,34 @@ void UIDisplay::nextPreviousAction(int8_t next)
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     uint8_t nr = pgm_read_word_near(&(men->numEntries));
-    uint8_t mtype = pgm_read_byte(&(men->menuType));
+    uint8_t mtype = HAL::readFlashByte((const prog_char*)&(men->menuType));
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
-    unsigned char entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
+    UIMenuEntry *testEnt;
+    uint8_t entType = HAL::readFlashByte((const prog_char*)&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
     int action = pgm_read_word(&(ent->action));
     if(mtype==2 && activeAction==0)   // browse through menu items
     {
         if((UI_INVERT_MENU_DIRECTION && next<0) || (!UI_INVERT_MENU_DIRECTION && next>0))
         {
-            if(menuPos[menuLevel]+1<nr) menuPos[menuLevel]++;
+            while(menuPos[menuLevel]+1<nr)
+            {
+                menuPos[menuLevel]++;
+                testEnt = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+                if(testEnt->showEntry())
+                    break;
+            }
         }
         else if(menuPos[menuLevel]>0)
-            menuPos[menuLevel]--;
+        {
+            while(menuPos[menuLevel]>0)
+            {
+                menuPos[menuLevel]--;
+                testEnt = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+                if(testEnt->showEntry())
+                    break;
+            }
+        }
         if(menuTop[menuLevel]>menuPos[menuLevel])
             menuTop[menuLevel]=menuPos[menuLevel];
         else if(menuTop[menuLevel]+UI_ROWS-1<menuPos[menuLevel])
@@ -1493,6 +1533,9 @@ void UIDisplay::nextPreviousAction(int8_t next)
     int8_t increment = next;
     switch(action)
     {
+    case UI_ACTION_FANSPEED:
+        Commands::setFanSpeed(Printer::getFanSpeed()+increment*3,false);
+        break;
     case UI_ACTION_XPOSITION:
         PrintLine::moveRelativeDistanceInSteps(increment,0,0,0,Printer::homingFeedrate[0],true,true);
         Commands::printCurrentPosition();
@@ -1956,12 +1999,10 @@ void UIDisplay::executeAction(int action)
             }
             break;
         case UI_ACTION_SD_UNMOUNT:
-            sd.sdmode = false;
-            sd.sdactive = false;
+            sd.unmount();
             break;
         case UI_ACTION_SD_MOUNT:
-            sd.sdmode = false;
-            sd.initsd();
+            sd.mount();
             break;
         case UI_ACTION_MENU_SDCARD:
             pushMenu((void*)&ui_menu_sd,false);
@@ -2217,7 +2258,7 @@ void UIDisplay::executeAction(int action)
             HAL::resetHardware();
             break;
         case UI_ACTION_PAUSE:
-            OUT_P_LN("RequestPause:");
+            Com::printFLN(PSTR("RequestPause:"));
             break;
         case UI_ACTION_WRITE_DEBUG:
             Com::printF(Com::tDebug,(int)GCode::bufferReadIndex);
@@ -2229,13 +2270,7 @@ void UIDisplay::executeAction(int action)
             Com::printF(Com::tDebug,Printer::minimumSpeed);
             Com::printF(Com::tComma,Printer::minimumZSpeed);
             Com::printF(Com::tComma,(int)PrintLine::linesPos);
-            Com::printF(Com::tComma,(int)PrintLine::linesWritePos);
-#if DRIVE_SYSTEM==3
-            Com::printF(Com::tComma,(long)deltaSegmentCount);
-            Com::printFLN(Com::tComma,(int)deltaSegmentWritePos);
-#else
-            Com::println();
-#endif
+            Com::printFLN(Com::tComma,(int)PrintLine::linesWritePos);
             break;
         }
     refreshPage();

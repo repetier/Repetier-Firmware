@@ -802,7 +802,7 @@ you can also change the values online and auleveling will store the results here
 Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
 will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define MAX_DELTA_SEGMENTS_PER_LINE 22
+#define MAX_DELTA_SEGMENTS_PER_LINE 24
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -917,7 +917,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 15
+#define MOVE_CACHE_SIZE 16
 
 /** \brief Low filled cache size.
 

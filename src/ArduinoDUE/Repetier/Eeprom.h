@@ -241,13 +241,6 @@ public:
         return DELTA_DIAGONAL_ROD;
 #endif
     }
-    static inline float deltaHorizontalRadius() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
-#else
-        return DELTA_RADIUS;
-#endif
-    }
     static inline int16_t deltaSegmentsPerSecondPrint() {
 #if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
@@ -257,6 +250,13 @@ public:
     }
 #endif
 #if DRIVE_SYSTEM==3
+    static inline float deltaHorizontalRadius() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
+#else
+        return DELTA_RADIUS;
+#endif
+    }
     static inline int16_t deltaTowerXOffsetSteps() {
 #if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS);
