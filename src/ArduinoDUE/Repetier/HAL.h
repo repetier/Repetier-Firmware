@@ -55,6 +55,7 @@
 // do not use program space memory with Due
 #define PROGMEM
 #define PGM_P const char *
+typedef char prog_char;
 #define PSTR(s) s
 #define pgm_read_byte_near(x) (*(int8_t*)x)
 #define pgm_read_byte(x) (*(int8_t*)x)
@@ -143,6 +144,7 @@
     PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0) 
 #define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
     g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
+#define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define LOW         0
 #define HIGH        1
 
@@ -499,6 +501,7 @@ public:
    
    static inline void spiSend(const uint8_t* buf , size_t n)
    {
+        uint8_t response;
         if (n == 0) return;
         WRITE(SDSS, LOW);
         for (uint16_t i = 0; i < n; i++) {

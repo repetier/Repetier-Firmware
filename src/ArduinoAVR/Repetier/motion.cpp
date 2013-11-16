@@ -1834,7 +1834,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
             Com::printFLN(PSTR("Missed steps:"), cur->totalStepsRemaining);
             Com::printFLN(PSTR("Step/seg r:"), stepsPerSegRemaining);
             Com::printFLN(PSTR("NDS:"), (int) cur->numDeltaSegments);
-            Com::printFLN(PSTR("DSC:"),(long)deltaSegmentCount);
             Com::printFLN(PSTR("HS:"), (int) cur->halfStep);
         }
 #endif
