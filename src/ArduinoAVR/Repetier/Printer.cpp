@@ -738,12 +738,12 @@ void Printer::setup()
     Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
 #if SDSUPPORT
     sd.initsd();
 #endif
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 }
 
 void Printer::defaultLoopActions()
