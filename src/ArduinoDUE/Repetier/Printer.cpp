@@ -68,7 +68,6 @@ long Printer::advanceExecuted;             ///< Executed advance steps
 int Printer::advanceStepsSet;
 #endif
 #if NONLINEAR_SYSTEM
-long Printer::countZSteps;					///< Count of steps from last position reset
 long Printer::maxDeltaPositionSteps;
 long Printer::deltaDiagonalStepsSquared;
 float Printer::deltaDiagonalStepsSquaredF;
@@ -166,12 +165,12 @@ void Printer::constrainDestinationCoords()
 void Printer::updateDerivedParameter()
 {
 #if DRIVE_SYSTEM==3
-    axisStepsPerMM[0] = axisStepsPerMM[1] = axisStepsPerMM[2];
-    maxAccelerationMMPerSquareSecond[0] = maxAccelerationMMPerSquareSecond[1] = maxAccelerationMMPerSquareSecond[2];
-    homingFeedrate[0] = homingFeedrate[1] = homingFeedrate[2];
-    maxFeedrate[0] = maxFeedrate[1] = maxFeedrate[2];
-    maxTravelAccelerationMMPerSquareSecond[0] = maxTravelAccelerationMMPerSquareSecond[1] = maxTravelAccelerationMMPerSquareSecond[2];
-    zMaxSteps = axisStepsPerMM[2]*(zLength - zMin);
+    axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
+    maxAccelerationMMPerSquareSecond[X_AXIS] = maxAccelerationMMPerSquareSecond[Y_AXIS] = maxAccelerationMMPerSquareSecond[Z_AXIS];
+    homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
+    maxFeedrate[X_AXIS] = maxFeedrate[Y_AXIS] = maxFeedrate[Z_AXIS];
+    maxTravelAccelerationMMPerSquareSecond[X_AXIS] = maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
+    zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength - zMin);
     float radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
     float radiusB = radius0 + EEPROM::deltaRadiusCorrectionA();
@@ -738,12 +737,12 @@ void Printer::setup()
     Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
 #if SDSUPPORT
     sd.initsd();
 #endif
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
 }
 
 void Printer::defaultLoopActions()
@@ -850,7 +849,6 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
             if (yaxis) Printer::destinationSteps[Y_AXIS] = 0;
             PrintLine::queueDeltaMove(true,false,false);
         }
-        Printer::countZSteps = 0;
         UI_CLEAR_STATUS
     }
 

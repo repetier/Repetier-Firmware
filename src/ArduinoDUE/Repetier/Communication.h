@@ -196,11 +196,6 @@ FSTRINGVAR(tDBGDeltaMaxDS)
 FSTRINGVAR(tDBGDeltaStepsPerSegment)
 FSTRINGVAR(tDBGDeltaVirtualAxisSteps)
 #endif
-#ifdef STEP_COUNTER
-FSTRINGVAR(tDBGDeltaMeasurerDelta)
-FSTRINGVAR(tDBGDeltaMeasurementReset)
-FSTRINGVAR(tDBGDeltaMeasuredOriginSet)
-#endif // STEP_COUNTER
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVAR(tDBGMissedSteps)
 #endif

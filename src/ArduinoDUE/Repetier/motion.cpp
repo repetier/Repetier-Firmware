@@ -1713,7 +1713,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     if((cur->error[Z_AXIS] -= curd->deltaSteps[Z_AXIS]) < 0)
                     {
                         cur->startZStep();
-                        Printer::countZSteps += ( cur->dir & 4 ? 1 : -1 );
                         cur->error[Z_AXIS] += curd_errupd;
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
@@ -1834,7 +1833,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
             Com::printFLN(PSTR("Missed steps:"), cur->totalStepsRemaining);
             Com::printFLN(PSTR("Step/seg r:"), stepsPerSegRemaining);
             Com::printFLN(PSTR("NDS:"), (int) cur->numDeltaSegments);
-            Com::printFLN(PSTR("DSC:"),(long)deltaSegmentCount);
             Com::printFLN(PSTR("HS:"), (int) cur->halfStep);
         }
 #endif

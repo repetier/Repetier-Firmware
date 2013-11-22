@@ -588,9 +588,10 @@ void Commands::executeGCode(GCode *com)
         break;
         case 30: //single probe set Z0
         {
+            uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
             bool oldAutolevel = Printer::isAutolevelActive();
             Printer::setAutolevelActive(false);
-            Printer::runZProbe(true,true);
+            Printer::runZProbe(p & 1,p & 2);
             Printer::setAutolevelActive(oldAutolevel);
         }
         break;
@@ -604,12 +605,6 @@ void Commands::executeGCode(GCode *com)
             //bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false); // iterate
-#if DRIVE_SYSTEM==33
-            Printer::homeAxis(true,true,true);
-            Printer::setAutolevelActive(false);
-            float aboveDist = Printer::zLength-Z_PROBE_GAP-EEPROM::zProbeHeight();
-            PrintLine::moveRelativeDistanceInSteps(0,0,-Printer::axisStepsPerMM[0]*aboveDist,0,Printer::homingFeedrate[0], true, false);
-#endif
             float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false);
@@ -621,42 +616,6 @@ void Commands::executeGCode(GCode *com)
             h3 = Printer::runZProbe(false,true);
             if(h3<0) break;
             Printer::buildTransformationMatrix(h1,h2,h3);
-#if DRIVE_SYSTEM==33
-            // Compute z height at the tower positions
-            float ox,oy,ozx,ozy,ozz,oz;
-            Printer::transformFromPrinter(Printer::deltaAPosXSteps, Printer::deltaAPosYSteps,0,ox,oy,ozx);
-            Printer::transformFromPrinter(Printer::deltaBPosXSteps, Printer::deltaBPosYSteps,0,ox,oy,ozy);
-            Printer::transformFromPrinter(Printer::deltaCPosXSteps, Printer::deltaCPosYSteps,0,ox,oy,ozz);
-            Com::printFLN(Com::tTower1,ozx);
-            Com::printFLN(Com::tTower2,ozy);
-            Com::printFLN(Com::tTower3,ozz);
-            if(iterate)
-            {
-                ozx+=EEPROM::deltaTowerXOffsetSteps();
-                ozy+=EEPROM::deltaTowerYOffsetSteps();
-                ozz+=EEPROM::deltaTowerZOffsetSteps();
-            }
-            ox = RMath::min(ozx,RMath::min(ozy,ozz));
-            oy = RMath::max(ozx,RMath::max(ozy,ozz));
-            EEPROM::setDeltaTowerXOffsetSteps(floor(-ox+ozx+0.5));
-            EEPROM::setDeltaTowerYOffsetSteps(floor(-ox+ozy+0.5));
-            EEPROM::setDeltaTowerZOffsetSteps(floor(-ox+ozz+0.5));
-            Printer::zLength = aboveDist+(ox)*Printer::invAxisStepsPerMM[2]+(h1+h2+h3)/3.0;
-            Printer::setAutolevelActive(true);
-            Printer::updateDerivedParameter();
-            Printer::homeAxis(true,true,true);
-            aboveDist = Printer::zLength-Z_PROBE_GAP-EEPROM::zProbeHeight();
-            Printer::moveTo(0,0,Z_PROBE_GAP+EEPROM::zProbeHeight(),IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-            hc = Printer::runZProbe(true,true);
-            if(hc<0) break;
-            Printer::zLength = aboveDist+hc;
-            if(com->hasS() && com->S)
-            {
-                if(com->S == 2)
-                    EEPROM::storeDataIntoEEPROM();
-            }
-            Printer::setAutolevelActive(true);
-#else
             //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
             // z = z-deviation from origin due to bed transformation
             float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-
@@ -694,7 +653,6 @@ void Commands::executeGCode(GCode *com)
             printCurrentPosition();
 #if DRIVE_SYSTEM==3
             Printer::homeAxis(true,true,true);
-#endif
 #endif
             Printer::feedrate = oldFeedrate;
         }
@@ -1325,49 +1283,22 @@ void Commands::executeGCode(GCode *com)
                 HAL::servoMicroseconds(com->P,s);
             }
 #endif // FEATURE_SERVO
-#ifdef STEP_COUNTER
-#if DRIVE_SYSTEM==3
+#if Z_HOME_DIR<0
         case 251:
-            if(com->hasS())
-            {
-                if (com->S == 0)
-                {
-                    Printer::countZSteps = 0;
-                    Com::printFLN(Com::tMeasurementReset);
-                }
-                else if (com->S == 1)
-                {
-                    Com::printFLN(Com::tMeasureDeltaSteps,Printer::countZSteps);
-                    Com::printFLN(Com::tMeasureDelta,Printer::countZSteps * Printer::invAxisStepsPerMM[2]);
-                }
-                else if (com->S = 2)
-                {
-                    if (Printer::currentPositionSteps[0] == 0 && Printer::currentPositionSteps[1] == 0)
-                    {
-                        if (Printer::countZSteps < 0)
-                            Printer::countZSteps = -Printer::countZSteps;
-                        Printer::zMin = 0;
-                        Printer::zLength = Printer::invAxisStepsPerMM[2] * Printer::countZSteps;
-                        Printer::zMaxSteps = Printer::countZSteps;
-                        for (uint8_t i=0; i<3; i++)
-                        {
-                            Printer::currentPositionSteps[i] = 0;
-                        }
-                        transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
-                        Com::printFLN(Com::tMeasureOriginReset);
+            Printer::zLength -= Printer::currentPosition[Z_AXIS];
+            Printer::currentPositionSteps[Z_AXIS] = 0;
+            Printer::updateDerivedParameter();
+#if NONLINEAR_SYSTEM
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+#endif
+            Printer::updateCurrentPosition();
+            Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #if EEPROM_MODE!=0
-                        EEPROM::storeDataIntoEEPROM(false);
-                        Com::printFLN(Com::tEEPROMUpdated);
+            EEPROM::storeDataIntoEEPROM(false);
+            Com::printFLN(Com::tEEPROMUpdated);
 #endif
-                    }
-                    else
-                    {
-                        Com::printErrorFLN(Com::tMeasurementAbortedOrigin);
-                    }
-                }
-            }
+            Commands::printCurrentPosition();
             break;
-#endif
 #endif
         }
     }

@@ -164,8 +164,8 @@
 #define UI_ACTION_MENU_QUICKSETTINGS    4007
 #define UI_ACTION_MENU_EXTRUDER         4008
 #define UI_ACTION_MENU_POSITIONS        4009
-#define UI_ACTION_SHOW_MEASUREMENT		4010
-#define UI_ACTION_RESET_MEASUREMENT		4011
+//#define UI_ACTION_SHOW_MEASUREMENT		4010
+//#define UI_ACTION_RESET_MEASUREMENT		4011
 #define UI_ACTION_SET_MEASURED_ORIGIN	4012
 #define UI_ACTION_SET_P1				4013
 #define UI_ACTION_SET_P2				4014
@@ -336,13 +336,15 @@ class UIDisplay {
     uint8_t menuTop[5]; // Top row in menu
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
-    unsigned int activeAction; // action for ok/next/previous
-    unsigned int lastAction;
-    unsigned long lastSwitch; // Last time display switched pages
-    unsigned long lastRefresh;
-    unsigned int lastButtonAction;
-    unsigned long lastButtonStart;
-    unsigned long nextRepeat; // Time of next autorepeat
+    uint16_t activeAction; // action for ok/next/previous
+    uint16_t lastAction;
+    millis_t lastSwitch; // Last time display switched pages
+    millis_t lastRefresh;
+    uint16_t lastButtonAction;
+    millis_t lastButtonStart;
+    millis_t nextRepeat; // Time of next autorepeat
+    millis_t lastNextPrev; // for increasing speed settings
+    float lastNextAccumul; // Accumulated value
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
