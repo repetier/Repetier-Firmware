@@ -200,11 +200,6 @@ FSTRINGVALUE(Com::tDBGDeltaMaxDS,"Max DS:")
 FSTRINGVALUE(Com::tDBGDeltaStepsPerSegment,"Steps Per Segment:")
 FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps,"Virtual axis steps:")
 #endif
-#ifdef STEP_COUNTER
-FSTRINGVALUE(Com::tDBGDeltaMeasurerDelta,"Measure/delta =")
-FSTRINGVALUE(Com::tDBGDeltaMeasurementReset,"Measurement reset.")
-FSTRINGVALUE(Com::tDBGDeltaMeasuredOriginSet,"Measured origin set. Measurement reset.")
-#endif // STEP_COUNTER
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVALUE(Com::tDBGMissedSteps,"Missed steps:")
 #endif // DEBUG_STEPCOUNT

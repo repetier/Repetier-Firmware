@@ -777,10 +777,6 @@ If you don't do it, make sure to home first before your first move.
 */
 #define DELTA_HOME_ON_POWER false
 
-/** \brief Enable counter to count steps for Z max calculations
-*/
-#define STEP_COUNTER
-
 /** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
 you can also change the values online and auleveling will store the results here. */
 #define DELTA_X_ENDSTOP_OFFSET_STEPS 0
@@ -1202,6 +1198,15 @@ Unfotunately, the encoder have a different count of phase changes between clicks
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
 #define UI_ENCODER_SPEED 1
+
+/* There are 2 ways to change positions. You can move by increments of 1/0.1 mm resulting in more menu entries
+and requiring many turns on your encode. The alternative is to enable speed dependent positioning. It will change
+the move distance depending on the speed you turn the encoder. That way you can move very fast and very slow in the
+same setting.
+
+*/
+#define UI_SPEEDDEPENDENT_POSITIONING true
+
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
 

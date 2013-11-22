@@ -110,6 +110,14 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#define SPEED_MIN_MILLIS 300
+#define SPEED_MAX_MILLIS 50
+#define SPEED_MAGNIFICATION 100.0f
+
+#ifndef UI_SPEEDDEPENDENT_POSITIONING
+#define UI_SPEEDDEPENDENT_POSITIONING true
+#endif
+
 #if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4
 #define NONLINEAR_SYSTEM true
 #else

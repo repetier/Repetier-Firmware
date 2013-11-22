@@ -70,7 +70,6 @@ public:
     static float currentPosition[3];
     static long destinationSteps[4];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
-    static long countZSteps;					///< Count of steps from last position reset
     static long currentDeltaPositionSteps[4];
     static long maxDeltaPositionSteps;
     static long deltaDiagonalStepsSquared;
