@@ -81,7 +81,7 @@ public:
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
     static long stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3

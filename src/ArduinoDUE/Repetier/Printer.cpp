@@ -78,7 +78,7 @@ long Printer::deltaBPosYSteps;
 long Printer::deltaCPosXSteps;
 long Printer::deltaCPosYSteps;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
 long Printer::stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3

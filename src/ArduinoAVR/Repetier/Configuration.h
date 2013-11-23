@@ -778,7 +778,7 @@ If you don't do it, make sure to home first before your first move.
 #define DELTA_HOME_ON_POWER false
 
 /** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
-you can also change the values online and auleveling will store the results here. */
+you can also change the values online and autoleveling will store the results here. */
 #define DELTA_X_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
