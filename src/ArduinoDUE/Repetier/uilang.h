@@ -186,7 +186,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -233,6 +233,8 @@
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
 #define UI_TEXT_POWER            "ATX power on/off"
+#define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
+#define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 
 // *************** German translation ****************
 
@@ -355,7 +357,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Regler:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -404,6 +406,8 @@
 #define UI_TEXT_PRINT_TIME     "Ges. Druckzeit"
 #define UI_TEXT_PRINT_FILAMENT "Filament gedruckt"
 #define UI_TEXT_POWER            "ATX Netzteil an/aus"
+#define UI_TEXT_STRING_HM_DEADTIME     "Totzeit"
+#define UI_TEXT_STRING_HM_SLOWBANG     "Langs.BB"
 
 #endif
 
@@ -528,7 +532,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -679,7 +683,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Controle:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -832,7 +836,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Avanzamento lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Avanzamento espon:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Controllo:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -981,7 +985,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -1287,7 +1291,7 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
+#define UI_TEXT_EXTR_PGAIN        "DT/PID P:%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
 #define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
@@ -1323,5 +1327,7 @@
 #define UI_TEXT_PRINT_TIME     "Printing time"
 #define UI_TEXT_PRINT_FILAMENT "Filament printed"
 #define UI_TEXT_POWER            "ATX power on/off"
+#define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
+#define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 
 #endif
