@@ -326,6 +326,9 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define SDSUPPORT true
 #endif
 
+// Maximum size of a row - if row is larger, text gets scrolled
+#define MAX_COLS 28
+
 class UIDisplay {
   public:
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
@@ -334,6 +337,7 @@ class UIDisplay {
     uint8_t menuPos[5]; // Positions in menu
     void *menu[5]; // Menus active
     uint8_t menuTop[5]; // Top row in menu
+    int8_t shift; // Display shift for scrolling text
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
     uint16_t activeAction; // action for ok/next/previous
