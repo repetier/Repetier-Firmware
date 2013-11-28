@@ -538,8 +538,7 @@ void initializeLCD()
 }
 // ------------------ End LiquidCrystal library as LCD driver
 #endif
-
-char printCols[UI_COLS+1];
+char printCols[MAX_COLS+1];
 UIDisplay::UIDisplay()
 {
 #ifdef COMPILE_I2C_DRIVER
@@ -568,6 +567,7 @@ UIDisplay::UIDisplay()
 #endif
     flags = 0;
     menuLevel = 0;
+    shift = -2;
     menuPos[0] = 0;
     lastAction = 0;
     lastButtonAction = 0;
@@ -622,6 +622,10 @@ void UIDisplay::printRow(uint8_t r,char *txt)
 #endif
     lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
     char c;
+    uint8_t len = strlen(txt);
+    if(len>UI_COLS && shift>0) {
+        txt += RMath::min(shift,len-UI_COLS);
+    }
     while(col<UI_COLS && (c=*txt) != 0x00)
     {
         txt++;
@@ -679,7 +683,7 @@ void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
             *--str = fillChar; //' ';
             dig++;
         }
-    while(*str && col<UI_COLS)
+    while(*str && col<MAX_COLS)
     {
         printCols[col++] = *str;
         str++;
@@ -714,7 +718,7 @@ void UIDisplay::addLong(long value,char digits)
             *--str = ' ';
             dig++;
         }
-    while(*str && col<UI_COLS)
+    while(*str && col<MAX_COLS)
     {
         printCols[col++] = *str;
         str++;
@@ -727,7 +731,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
     if (number < 0.0)
     {
         printCols[col++]='-';
-        if(col>=UI_COLS) return;
+        if(col>=MAX_COLS) return;
         number = -number;
         fixdigits--;
     }
@@ -746,7 +750,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
     }
 
     // Extract digits from the remainder one at a time
-    while (col<UI_COLS && digits-- > 0)
+    while (col<MAX_COLS && digits-- > 0)
     {
         remainder *= 10.0;
         uint8_t toPrint = uint8_t(remainder);
@@ -756,7 +760,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
 }
 void UIDisplay::addStringP(FSTRINGPARAM(text))
 {
-    while(col<UI_COLS)
+    while(col<MAX_COLS)
     {
         uint8_t c = HAL::readFlashByte(text++);
         if(c==0) return;
@@ -778,7 +782,7 @@ void UIDisplay::parse(char *txt,bool ram)
 {
     int ivalue=0;
     float fvalue=0;
-    while(col<UI_COLS)
+    while(col<MAX_COLS)
     {
         char c=(ram ? *(txt++) : pgm_read_byte(txt++));
         if(c==0) break; // finished
@@ -793,7 +797,7 @@ void UIDisplay::parse(char *txt,bool ram)
         switch(c1)
         {
         case '%':
-            if(c2=='%' && col<UI_COLS)
+            if(c2=='%' && col<MAX_COLS)
                 printCols[col++]='%';
             break;
         case 'a': // Acceleration settings
@@ -879,7 +883,7 @@ void UIDisplay::parse(char *txt,bool ram)
                     if(sd.filesize<20000000) percent=sd.sdpos*100/sd.filesize;
                     else percent = (sd.sdpos>>8)*100/(sd.filesize>>8);
                     addInt((int)percent,3);
-                    if(col<UI_COLS)
+                    if(col<MAX_COLS)
                         printCols[col++]='%';
                 }
                 else
@@ -920,7 +924,7 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='C') ivalue=pwm_pos[Extruder::current->id];
             ivalue=(ivalue*100)/255;
             addInt(ivalue,3);
-            if(col<UI_COLS)
+            if(col<MAX_COLS)
                 printCols[col++]='%';
             break;
         case 'x':
@@ -1310,8 +1314,12 @@ void UIDisplay::refreshPage()
             parse((char*)pgm_read_word(&(ent->text)),false);
             if(entType==2)   // Draw submenu marker at the right side
             {
-                while(col<UI_COLS) printCols[col++]=' ';
-                printCols[UI_COLS-1]=CHAR_RIGHT; // Arrow right
+                while(col<UI_COLS-1) printCols[col++]=' ';
+                if(col>UI_COLS) {
+                    printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
+                } else
+                printCols[col] = CHAR_RIGHT; // Arrow right
+                printCols[++col] = 0;
             }
             printRow(r,(char*)printCols);
             r++;
@@ -2431,15 +2439,18 @@ void UIDisplay::slowAction()
         }
         else if(time-lastRefresh>=1000) refresh=1;
     }
-    else if(time-lastRefresh>=1000)
+    else if(time-lastRefresh>=800)
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
-        if(mtype!=1)
+        //if(mtype!=1)
             refresh=1;
     }
     if(refresh)
     {
+        shift++;
+        if(shift+UI_COLS>MAX_COLS+1)
+            shift = -2;
         refreshPage();
         lastRefresh = time;
     }

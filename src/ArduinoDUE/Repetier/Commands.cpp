@@ -1283,7 +1283,7 @@ void Commands::executeGCode(GCode *com)
                 HAL::servoMicroseconds(com->P,s);
             }
 #endif // FEATURE_SERVO
-#if Z_HOME_DIR<0
+#if Z_HOME_DIR>0 && MAX_HARDWARE_ENDSTOP_Z
         case 251:
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
