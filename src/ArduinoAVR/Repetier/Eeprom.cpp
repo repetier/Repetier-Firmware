@@ -81,6 +81,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::maxTravelAccelerationMMPerSquareSecond[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     Printer::maxTravelAccelerationMMPerSquareSecond[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+    Printer::bBedHasBeenLeveled = 0;
+#endif
+
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
 #ifdef TEMP_PID
@@ -299,6 +303,14 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 }
 
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+void EEPROM::storeHardwareBedLeveled(byte bLeveled)
+{
+    Printer::bBedHasBeenLeveled = bLeveled;
+    HAL::eprSetByte(EPR_HARDWARE_BED_LEVELED, Printer::bBedHasBeenLeveled);
+}
+#endif
+
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
 #if EEPROM_MODE!=0
@@ -460,6 +472,11 @@ void EEPROM::readDataFromEEPROM()
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
+    
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+    Printer::bBedHasBeenLeveled = HAL::eprGetByte(EPR_HARDWARE_BED_LEVELED);
+#endif
+
 //#define EPR_ACCELERATION_TYPE 1
     Printer::axisStepsPerMM[0] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
     Printer::axisStepsPerMM[1] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);

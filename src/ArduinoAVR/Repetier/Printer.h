@@ -88,6 +88,10 @@ public:
     static long stepsRemainingAtXHit;
     static long stepsRemainingAtYHit;
 #endif
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+    static uint8_t bBedHasBeenLeveled;
+#endif
+
 #ifdef SOFTWARE_LEVELING
     static long levelingP1[3];
     static long levelingP2[3];

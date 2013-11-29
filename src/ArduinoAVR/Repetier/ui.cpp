@@ -1446,6 +1446,14 @@ void UIDisplay::refreshPage()
     uint8_t r;
     uint8_t mtype;
     
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+    if (!Printer::bBedHasBeenLeveled)
+      {
+      EEPROM::storeHardwareBedLeveled(true);        
+      executeAction(UI_ACTION_LEVEL_BED);
+      }
+#endif
+
     encoderStartScreen = uid.encoderLast;
     iScreenTransition = menuLevel == oldMenuLevel ? 0 : random(0, MAX_SCREEN_TRANSITIONS);
     
@@ -2114,23 +2122,25 @@ void UIDisplay::executeAction(int action)
             TOGGLE(PS_ON_PIN);
             break;
 
-#if HELX_BED_LEVELING==true            
+#if HARDWARE_BED_LEVELING==true
          case UI_ACTION_LEVEL_BED:
-            beep(100, 3);
-            printRow(0, "Press to continue 1");
-            printRow(1, "");
+            printRow(2, "");
+            GCode::executeFString(PSTR("G28\nG1 X10 Y10 E0\nG28 Z0\n"));
+            printRow(0, "Adjust Bed Area 1");
+            printRow(1, "Continue to Next?");
             waitForKey();
-            beep(500, 1);
-            printRow(0, "Press to continue 2");
-            printRow(1, "");
+            GCode::executeFString(PSTR("G1 Z10\nG1 X290 Y10\nG28 Z0\n"));
+            printRow(0, "Adjust Bed Area 2");
+            printRow(1, "Continue to Next?");
             waitForKey();
-            beep(200, 4);
-            printRow(0, "Press to continue 3");
-            printRow(1, "");
+            GCode::executeFString(PSTR("G1 Z10\nG1 X150 Y290\nG28 Z0\n"));
+            printRow(0, "Adjust Bed Area 3");
+            printRow(1, "Continue to Next?");
             waitForKey();
-            beep(100, 2);
-      //      gcode_execute_PString(PSTR("G28\nG1 X10 Y10 E0\nG28 Z0\nG1 Z10\nG1 X290 Y10\nG28 Z0\nG1 Z10\nG1 X150 Y290\nG28 Z0\nG1 Z20\nG28 X0 Y0\n"));
-            beep(500, 1);
+            GCode::executeFString(PSTR("G1 Z20\nG28 X0 Y0\n"));
+            printRow(0, "Adjust Bed Area 4");
+            printRow(1, "Done! Click to End");
+            waitForKey();
             break;
 #endif
         
