@@ -50,8 +50,8 @@ long ui_autoreturn_time=0;
 #endif
 
 char printCols[MAX_COLS+1];
-char tempLongFilename[70];
-byte oldOffset, oldMenuLevel;
+char tempLongFilename[LONG_FILENAME_LENGTH+1];
+byte oldOffset, oldMenuLevel, encoderStartScreen, iScreenTransition;
 
 void beep(uint8_t duration,uint8_t count)
 {
@@ -516,10 +516,34 @@ void  UIDisplay::waitForKey()
         }
 }
 
+void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
+{  
+    switch(iScreenTransition)
+      {
+        default:
+        case 0:
+          printRow(r, (char *)txt);
+          break;
+        case 1:
+          scrollHorzRow(r,(PGM_P)txt, bProgMem, 1);
+          break;
+        case 2:
+          scrollHorzRow(r, (PGM_P)txt, bProgMem, 0);
+          break;
+        case 3:
+          scrollVertRow(r, txt, bProgMem, false);
+          break;
+        case 4:
+          randomRow(r, txt, bProgMem);
+          break;
+      }
+}
+
 void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
 {
   char *spaceUsed = tempLongFilename;
   
+
   if (bProgMem)
     {
     col=0;
@@ -527,6 +551,12 @@ void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
     }
   for(int8_t i=UI_ROWS-1;i>=r;i--)
     {
+  // check for any encoder or key action and finish animation
+    if (uid.encoderLast != encoderStartScreen)
+      {
+      printRow(r, 0, printCols, 0);
+      break;
+      }      
     printRow(i, 0, printCols, 0);
     if (i<UI_ROWS-1)
       printRow(i+1, UI_COLS, printCols, 0);
@@ -548,6 +578,13 @@ void UIDisplay::randomRow(byte r, PGM_P txt, byte bProgMem)
   for(byte i=0;i<UI_COLS;i++)
     {
     byte xRand = random(UI_COLS-i-1);
+
+   // check for any encoder or key action and finish animation
+   if (uid.encoderLast != encoderStartScreen)
+      {
+      printRow(r, 0, printCols, 0);
+      break;
+      }
     
     for(byte ii=0;;ii++)
         {
@@ -578,9 +615,15 @@ void UIDisplay::scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft
     col=0;
     addStringP(txt);
     }
-  memset(printCols+col, 0, UI_COLS-col);
+  memset(printCols+col, 0, MAX_COLS-col);
   for(i=UI_COLS;i>=0;--i)
     {
+  // check for any encoder or key action and finish animation
+    if (uid.encoderLast != encoderStartScreen)
+      {
+      printRow(r, 0, printCols, 0);
+      break;
+      }      
     if (bFromLeft)
        printRow(r, 0, printCols, i);
     else
@@ -933,8 +976,8 @@ void UIDisplay::parse(char *txt,bool ram)
             continue;
         }
         // dynamic parameter, parse meaning and replace
-        char c1=pgm_read_byte(txt++);
-        char c2=pgm_read_byte(txt++);
+        char c1=(ram ? *(txt++) : pgm_read_byte(txt++));
+        char c2=(ram ? *(txt++) : pgm_read_byte(txt++));
         switch(c1)
         {
         case '%':
@@ -1387,14 +1430,11 @@ void UIDisplay::sdrefresh(byte &r) {
       // print file name with possible blank fill
       if(DIR_IS_SUBDIR(p))
         printCols[col++] = 6; // Prepend folder symbol
-      length =  RMath::min((int)strlen(tempLongFilename), UI_COLS-col);
+      length =  RMath::min((int)strlen(tempLongFilename), MAX_COLS-col);
       memcpy(printCols+col, tempLongFilename, length);
       col += length;
       printCols[col] = 0;
-      if (menuLevel != oldMenuLevel)
-        scrollHorzRow(r,(PGM_P)printCols, false, -1);
-      else
-        printRow(r, printCols);
+      transitionInRow(r,(PGM_P)printCols, false);
       r++;
       }
   }
@@ -1405,6 +1445,10 @@ void UIDisplay::refreshPage()
 {
     uint8_t r;
     uint8_t mtype;
+    
+    encoderStartScreen = uid.encoderLast;
+    iScreenTransition = menuLevel == oldMenuLevel ? 0 : random(0, MAX_SCREEN_TRANSITIONS);
+    
     if(menuLevel==0)
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
@@ -1417,7 +1461,6 @@ void UIDisplay::refreshPage()
             parse((char*)pgm_read_word(&(ent->text)),false);
             printRow(r,(char*)printCols);
         }
-     oldMenuLevel = menuLevel;              
     }
     else
     {
@@ -1456,10 +1499,7 @@ void UIDisplay::refreshPage()
                 printCols[col] = CHAR_RIGHT; // Arrow right
                 printCols[++col] = 0;
             }
-          if (menuLevel != oldMenuLevel)
-            scrollHorzRow(r,(PGM_P)printCols, false, -1);
-          else
-            printRow(r, printCols);            
+            transitionInRow(r, (PGM_P)printCols, false);
             r++;
         }
     }

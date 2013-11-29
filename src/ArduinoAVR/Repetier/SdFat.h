@@ -1427,7 +1427,7 @@ struct directoryVFATEntry {
 } PACK;
 typedef struct directoryVFATEntry vfat_t;
 
-#define MAX_VFAT_ENTRIES (10)
+#define MAX_VFAT_ENTRIES (3)
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 

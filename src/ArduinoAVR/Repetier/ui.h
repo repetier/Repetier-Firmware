@@ -330,6 +330,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #define MAX_COLS 28
+#define MAX_SCREEN_TRANSITIONS 5
 
 class UIDisplay {
   public:
@@ -367,6 +368,7 @@ class UIDisplay {
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
     void waitForKey(); 
+    void transitionInRow(byte r, PGM_P txt, byte bProgMem);    
     void randomRow(byte r, PGM_P txt, byte bProgMem);
     void scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft);
     void scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromBottom);
