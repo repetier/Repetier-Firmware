@@ -2073,32 +2073,33 @@ void UIDisplay::executeAction(int action)
             SET_OUTPUT(PS_ON_PIN); //GND
             TOGGLE(PS_ON_PIN);
             break;
-            
-        case UI_ACTION_LEVEL_BED:
-      beep(100, 3);
-      printRow(0, "Press to continue 1");
-      printRow(1, "");
-      waitForKey();
-      beep(500, 1);
-      printRow(0, "Press to continue 2");
-      printRow(1, "");
-      waitForKey();
-      beep(200, 4);
-      printRow(0, "Press to continue 3");
-      printRow(1, "");
-      waitForKey();
-      beep(100, 2);
-//      gcode_execute_PString(PSTR("G28\nG1 X10 Y10 E0\nG28 Z0\nG1 Z10\nG1 X290 Y10\nG28 Z0\nG1 Z10\nG1 X150 Y290\nG28 Z0\nG1 Z20\nG28 X0 Y0\n"));
-      beep(500, 1);
+
+#if HELX_BED_LEVELING==true            
+         case UI_ACTION_LEVEL_BED:
+            beep(100, 3);
+            printRow(0, "Press to continue 1");
+            printRow(1, "");
+            waitForKey();
+            beep(500, 1);
+            printRow(0, "Press to continue 2");
+            printRow(1, "");
+            waitForKey();
+            beep(200, 4);
+            printRow(0, "Press to continue 3");
+            printRow(1, "");
+            waitForKey();
+            beep(100, 2);
+      //      gcode_execute_PString(PSTR("G28\nG1 X10 Y10 E0\nG28 Z0\nG1 Z10\nG1 X290 Y10\nG28 Z0\nG1 Z10\nG1 X150 Y290\nG28 Z0\nG1 Z20\nG28 X0 Y0\n"));
+            beep(500, 1);
             break;
-        
-    case UI_ACTION_LIGHTS_ONOFF:
-#if LIGHTS_PIN > 0
-     WRITE(LIGHTS_PIN, HIGH);
 #endif
-      UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
- 
-      break;
+        
+#if CASE_LIGHTS_PIN > 0
+        case UI_ACTION_LIGHTS_ONOFF:
+            WRITE(CASE_LIGHTS_PIN, HIGH);
+            UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
+          break;
+#endif
             
         case UI_ACTION_PREHEAT_PLA:
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
