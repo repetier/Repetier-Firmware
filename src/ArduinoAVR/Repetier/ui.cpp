@@ -49,6 +49,10 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 long ui_autoreturn_time=0;
 #endif
 
+char printCols[MAX_COLS+1];
+char tempLongFilename[70];
+byte oldOffset, oldMenuLevel;
+
 void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
@@ -194,6 +198,18 @@ const uint8_t character_temperature[8] PROGMEM = {4,10,10,10,14,31,31,14};
 // ..... 0
 // ..... 0
 const uint8_t character_folder[8] PROGMEM = {0,28,31,17,17,31,0,0};
+
+// printer ready - code 7
+// *...* 17
+// .*.*. 10
+// ..*.. 4
+// *...* 17
+// ..*.. 4
+// .*.*. 10
+// *...* 17
+// *...* 17
+const byte character_ready[8] PROGMEM = {17,10,4,17,4,10,17,17};
+
 const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800,111112,115200,128000,230400,250000,256000,
                                   460800,500000,921600,1000000,1500000,0
                                  };
@@ -251,9 +267,8 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 #define lcdCommand(value) lcdWriteByte(value,0)
 
 static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
-static const char versionString[] PROGMEM = UI_VERSION_STRING;
-static const char versionString2[] PROGMEM = UI_VERSION_STRING2;
 
+static const char versionString[] PROGMEM = UI_VERSION_STRING;
 
 #if UI_DISPLAY_TYPE==3
 
@@ -360,6 +375,7 @@ void initializeLCD()
     uid.createChar(4,character_unselected);
     uid.createChar(5,character_temperature);
     uid.createChar(6,character_folder);
+    uid.createChar(7,character_ready);    
     lcdStopWrite();
 }
 #endif
@@ -484,9 +500,94 @@ void initializeLCD()
     uid.createChar(4,character_unselected);
     uid.createChar(5,character_temperature);
     uid.createChar(6,character_folder);
+    uid.createChar(7,character_ready);  
 }
 // ----------- end direct LCD driver
 #endif
+
+void  UIDisplay::waitForKey()
+{
+    int nextAction = 0;
+    
+    lastButtonAction = 0;
+    while(lastButtonAction==nextAction)
+        {
+        ui_check_slow_keys(nextAction);
+        }
+}
+
+void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
+{
+  char *spaceUsed = tempLongFilename;
+  
+  if (bProgMem)
+    {
+    col=0;
+    addStringP(txt);
+    }
+  for(int8_t i=UI_ROWS-1;i>=r;i--)
+    {
+    printRow(i, 0, printCols, 0);
+    if (i<UI_ROWS-1)
+      printRow(i+1, UI_COLS, printCols, 0);
+    delay(125);
+    }
+}
+
+
+void UIDisplay::randomRow(byte r, PGM_P txt, byte bProgMem)
+{
+  char *spaceUsed = tempLongFilename;
+  
+  if (bProgMem)
+    {
+    col=0;
+    addStringP(txt);
+    }
+  memset(spaceUsed, '-', UI_COLS);
+  for(byte i=0;i<UI_COLS;i++)
+    {
+    byte xRand = random(UI_COLS-i-1);
+    
+    for(byte ii=0;;ii++)
+        {
+        if (spaceUsed[ii] == '-')
+          {
+          if (xRand == 0)
+            {
+            spaceUsed[ii] = ii < col ? *(printCols+ii) : ' ';
+            printRow(r, 0, spaceUsed, 0);
+            delay(25);
+            break;
+            }
+          xRand--;
+          }
+        }
+    }
+}
+
+void UIDisplay::scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft)
+{
+  int8_t i;
+  
+  if (bFromLeft == -1)
+    bFromLeft = random(10) > 4;
+    
+  if (bProgMem)
+    {
+    col=0;
+    addStringP(txt);
+    }
+  memset(printCols+col, 0, UI_COLS-col);
+  for(i=UI_COLS;i>=0;--i)
+    {
+    if (bFromLeft)
+       printRow(r, 0, printCols, i);
+    else
+       printRow(r, i, printCols, 0);    
+     delay(20);
+    }
+}
 
 #if UI_DISPLAY_TYPE==4
 // Use LiquidCrystal library instead
@@ -504,27 +605,44 @@ void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
     }
     lcd.createChar(location, data);
 }
-void UIDisplay::printRow(uint8_t r,char *txt)
-{
-    uint8_t col=0;
-// Set row
-    if(r >= UI_ROWS) return;
-    lcd.setCursor(0,r);
-    char c;
-    while(col<UI_COLS && (c=*txt) != 0x00)
-    {
-        txt++;
-        lcd.write(c);
-        col++;
-    }
-    while(col<UI_COLS)
-    {
-        lcd.write(' ');
-        col++;
-    }
+
+
+void UIDisplay::printRow(byte r, byte x, char *txt, byte xChar)
+{    
+ byte col=0;
+ char c;
+
+ // Set row
+ if(r >= UI_ROWS) return;
+ 
+ lcd.setCursor(0,r);
+ 
+ while(col<x)
+   {
+   lcd.write(' ');
+   col++; 
+   }
+   
+ txt += xChar;
+ while(col<UI_COLS && (c=*txt) != 0x00)
+   {
+   txt++;
+   lcd.write(c);
+   col++;
+   }
+ 
+ while(col<UI_COLS) 
+   {
+   lcd.write(' ');
+   col++; 
+   }
 #if UI_HAS_KEYS==1
-    mediumAction();
+ mediumAction();
 #endif
+}
+
+void UIDisplay::printRow(byte r,char *txt) { 
+  printRow(r, 0, txt, 0);  
 }
 
 void initializeLCD()
@@ -538,7 +656,6 @@ void initializeLCD()
 }
 // ------------------ End LiquidCrystal library as LCD driver
 #endif
-char printCols[MAX_COLS+1];
 UIDisplay::UIDisplay()
 {
 #ifdef COMPILE_I2C_DRIVER
@@ -592,8 +709,12 @@ void UIDisplay::initialize()
     HAL::i2cInit(UI_I2C_CLOCKSPEED);
     initializeLCD();
 #endif
-    uid.printRowP(0,versionString);
-    uid.printRowP(1,versionString2);
+    // SHOW STARTUP SCREEN HERE
+    randomSeed(analogRead(0));
+    scrollVertRow(0, PSTR(UI_PRINTER_NAME), true, false);
+    scrollHorzRow(1, PSTR(UI_PRINTER_COMPANY), true, random(4) > 2);
+    randomRow(3, versionString, true);
+    delay(2500);
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
     // Make sure the beeper is off
@@ -612,38 +733,58 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
         lcdPutChar(pgm_read_byte(&(charmap[i])));
     }
 }
-void UIDisplay::printRow(uint8_t r,char *txt)
-{
-    uint8_t col=0;
-// Set row
-    if(r >= UI_ROWS) return;
-#if UI_DISPLAY_TYPE==3
-    lcdStartWrite();
+
+
+void UIDisplay::printRow(byte r, byte x, char *txt, byte xChar)
+{    
+ byte col=0;
+ char c;
+
+ // Set row
+ if(r >= UI_ROWS) return;
+ #if UI_DISPLAY_TYPE==3
+  lcdStartWrite();
 #endif
-    lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
-    char c;
-    uint8_t len = strlen(txt);
-    if(len>UI_COLS && shift>0) {
-        txt += RMath::min(shift,len-UI_COLS);
-    }
-    while(col<UI_COLS && (c=*txt) != 0x00)
-    {
-        txt++;
-        lcdPutChar(c);
-        col++;
-    }
-    while(col<UI_COLS)
-    {
-        lcdPutChar(' ');
-        col++;
-    }
+  lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
+ 
+  uint8_t len = strlen(txt);
+  if(len>UI_COLS && shift>0) {
+      txt += RMath::min(shift,len-UI_COLS);
+  }
+
+ while(col<x)
+   {
+   lcdPutChar(' ');
+   col++; 
+   }
+   
+ txt += xChar;
+ 
+ while(col<UI_COLS && (c=*txt) != 0x00)
+   {
+   lcdPutChar(c);
+   txt++;
+   col++;
+   }
+ 
+ while(col<UI_COLS) 
+   {
+   lcdPutChar(' ');
+   col++; 
+   }
 #if UI_DISPLAY_TYPE==3
-    lcdStopWrite();
+  lcdStopWrite();
 #endif
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
-    ui_check_slow_encoder();
+ ui_check_slow_encoder();
 #endif
+
 }
+
+void UIDisplay::printRow(byte r,char *txt) {
+  printRow(r,0,txt,0);  
+}
+
 #endif
 
 void UIDisplay::printRowP(uint8_t r,PGM_P txt)
@@ -871,6 +1012,7 @@ void UIDisplay::parse(char *txt,bool ram)
             break;
         case 'l':
             if(c2=='a') addInt(lastAction,4);
+            else if(c2=='o') addStringP(Printer::debugEcho()?ui_text_on:ui_text_off);        // Lights on/off        
             break;
         case 'o':
             if(c2=='s')
@@ -1083,6 +1225,9 @@ void UIDisplay::parse(char *txt,bool ram)
             if(c2=='z') addFloat(Printer::axisStepsPerMM[2],3,1);
             if(c2=='e') addFloat(Extruder::current->stepsPerMM,3,1);
             break;
+        case 'P':
+            if(c2=='N') addStringP(PSTR(UI_PRINTER_NAME));
+            break;
         case 'U':
             if(c2=='t')   // Printing time
             {
@@ -1138,65 +1283,58 @@ void UIDisplay::setStatus(char *txt)
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
 #if SDSUPPORT
 uint8_t nFilesOnCard;
+void UIDisplay::updateSDFileCount() {
+  dir_t* p = NULL;
+  byte offset = menuTop[menuLevel];
+  SdBaseFile *root = sd.fat.vwd();
+  
+  root->rewind();
+  nFilesOnCard = 0;
+  while ((p = root->getLongFilename(p, tempLongFilename))) {
+      if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) 
+        continue;
+      if (folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) 
+        continue;
+      nFilesOnCard++;
+      if (nFilesOnCard==254) 
+        return;
+  }
+}
 
-void UIDisplay::updateSDFileCount()
-{
-    dir_t* p;
-    uint8_t offset = menuTop[menuLevel];
-    SdBaseFile *root = sd.fat.vwd();
-    root->rewind();
-    nFilesOnCard = 0;
-    while ((p = root->readDirCache()))
-    {
-        // done if past last used entry
-        if (p->name[0] == DIR_NAME_FREE) break;
-        // skip deleted entry and entries for . and  ..
-        if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        // only list subdirectories and files
-        if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
-        if(folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        nFilesOnCard++;
-        if(nFilesOnCard==254) return;
+void getSDFilenameAt(byte filePos,char *filename) {
+  dir_t* p;
+  byte c=0;
+  SdBaseFile *root = sd.fat.vwd();
+  root->rewind();
+
+  while ((p = root->getLongFilename(p, tempLongFilename))) {
+    if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
+    if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
+    if (filePos) {
+      filePos--;
+      continue;
     }
+    for (uint8_t i = 0; i < 11; i++) 
+      {
+      if (i == 8)
+         filename[c++]='.';
+      if (p->name[i] == ' ')
+        continue;
+      filename[c++]=tolower(p->name[i]);
+      }
+    if(DIR_IS_SUBDIR(p)) filename[c++]='/'; // Set marker for directory
+      break;
+  }
+  filename[c]=0;
 }
-void getSDFilenameAt(uint8_t filePos,char *filename)
-{
-    dir_t* p;
-    uint8_t c=0;
-    SdBaseFile *root = sd.fat.vwd();
-    root->rewind();
-    while ((p = root->readDirCache()))
-    {
-        // done if past last used entry
-        if (p->name[0] == DIR_NAME_FREE) break;
-        // skip deleted entry and entries for . and  ..
-        if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        // only list subdirectories and files
-        if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
-        if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        if(filePos)
-        {
-            filePos--;
-            continue;
-        }
-        for (uint8_t i = 0; i < 11; i++)
-        {
-            if (p->name[i] == ' ')continue;
-            if (i == 8)
-                filename[c++]='.';
-            filename[c++]=tolower(p->name[i]);
-        }
-        if(DIR_IS_SUBDIR(p)) filename[c++]='/'; // Set marker for directory
-        break;
-    }
-    filename[c]=0;
-}
+
 bool UIDisplay::isDirname(char *name)
 {
     while(*name) name++;
     name--;
     return *name=='/';
 }
+
 void UIDisplay::goDir(char *name)
 {
     char *p = cwd;
@@ -1221,49 +1359,45 @@ void UIDisplay::goDir(char *name)
     sd.fat.chdir(cwd);
     updateSDFileCount();
 }
-void UIDisplay::sdrefresh(uint8_t &r)
-{
-    dir_t* p;
-    uint8_t offset = menuTop[menuLevel];
-    sd.fat.chdir(cwd);
-    SdBaseFile *root = sd.fat.vwd();
-    root->rewind();
-    uint8_t skip = (offset>0?offset-1:0);
-    while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->readDirCache()))
-    {
-        // done if past last used entry
-        if (p->name[0] == DIR_NAME_FREE) break;
-        // skip deleted entry and entries for . and  ..
-        if(!sd.showFilename(p->name) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        // only list subdirectories and files
-        if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
-        if(folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        if(skip>0)
+void UIDisplay::sdrefresh(byte &r) {
+  dir_t* p = NULL;
+  byte offset = menuTop[menuLevel];
+  SdBaseFile *root;
+  byte length, skip;
+  
+  sd.fat.chdir(cwd);
+  root = sd.fat.vwd();
+  root->rewind();  
+  skip = (offset>0?offset-1:0);
+  
+  while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->getLongFilename(p, tempLongFilename))) {
+    // done if past last used entry
+      // skip deleted entry and entries for . and  ..
+      // only list subdirectories and files
+      if ((DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
         {
-            skip--;
-            continue;
-        }
-        col=0;
-        if(r+offset==menuPos[menuLevel])
-            printCols[col++]='>';
-        else
-            printCols[col++]=' ';
-        // print file name with possible blank fill
-        if(DIR_IS_SUBDIR(p))
-            printCols[col++] = 6; // Prepend folder symbol
-        else
-            printCols[col++] = ' ';
-        for (uint8_t i = 0; i < 11; i++)
-        {
-            if (p->name[i] == ' ')continue;
-            if (i == 8)
-                printCols[col++]='.';
-            printCols[col++]=tolower(p->name[i]);
-        }
-        printCols[col]=0;
-        printRow(r,printCols);
-        r++;
-    }
+      if(folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) 
+        continue;
+      if(skip>0) {skip--;continue;}
+      col=0;
+      if(r+offset==menuPos[menuLevel])
+         printCols[col++]='>';
+      else
+         printCols[col++]=' ';
+      // print file name with possible blank fill
+      if(DIR_IS_SUBDIR(p))
+        printCols[col++] = 6; // Prepend folder symbol
+      length =  RMath::min((int)strlen(tempLongFilename), UI_COLS-col);
+      memcpy(printCols+col, tempLongFilename, length);
+      col += length;
+      printCols[col] = 0;
+      if (menuLevel != oldMenuLevel)
+        scrollHorzRow(r,(PGM_P)printCols, false, -1);
+      else
+        printRow(r, printCols);
+      r++;
+      }
+  }
 }
 #endif
 // Refresh current menu page
@@ -1283,6 +1417,7 @@ void UIDisplay::refreshPage()
             parse((char*)pgm_read_word(&(ent->text)),false);
             printRow(r,(char*)printCols);
         }
+     oldMenuLevel = menuLevel;              
     }
     else
     {
@@ -1321,7 +1456,10 @@ void UIDisplay::refreshPage()
                 printCols[col] = CHAR_RIGHT; // Arrow right
                 printCols[++col] = 0;
             }
-            printRow(r,(char*)printCols);
+          if (menuLevel != oldMenuLevel)
+            scrollHorzRow(r,(PGM_P)printCols, false, -1);
+          else
+            printRow(r, printCols);            
             r++;
         }
     }
@@ -1331,6 +1469,7 @@ void UIDisplay::refreshPage()
         sdrefresh(r);
     }
 #endif
+    oldMenuLevel = menuLevel;      
     printCols[0]=0;
     while(r<UI_ROWS)
         printRow(r++,printCols);
@@ -1407,6 +1546,7 @@ void UIDisplay::okAction()
             menuTop[menuLevel]=0;
             menuPos[menuLevel]=1;
             refreshPage();
+            oldMenuLevel = -1;            
             return;
         }
         menuLevel--;
@@ -1933,6 +2073,33 @@ void UIDisplay::executeAction(int action)
             SET_OUTPUT(PS_ON_PIN); //GND
             TOGGLE(PS_ON_PIN);
             break;
+            
+        case UI_ACTION_LEVEL_BED:
+      beep(100, 3);
+      printRow(0, "Press to continue 1");
+      printRow(1, "");
+      waitForKey();
+      beep(500, 1);
+      printRow(0, "Press to continue 2");
+      printRow(1, "");
+      waitForKey();
+      beep(200, 4);
+      printRow(0, "Press to continue 3");
+      printRow(1, "");
+      waitForKey();
+      beep(100, 2);
+//      gcode_execute_PString(PSTR("G28\nG1 X10 Y10 E0\nG28 Z0\nG1 Z10\nG1 X290 Y10\nG28 Z0\nG1 Z10\nG1 X150 Y290\nG28 Z0\nG1 Z20\nG28 X0 Y0\n"));
+      beep(500, 1);
+            break;
+        
+    case UI_ACTION_LIGHTS_ONOFF:
+#if LIGHTS_PIN > 0
+     WRITE(LIGHTS_PIN, HIGH);
+#endif
+      UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
+ 
+      break;
+            
         case UI_ACTION_PREHEAT_PLA:
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);

@@ -249,6 +249,8 @@ bool SDCard::showFilename(const uint8_t *name)
     return true;
 }
 
+extern char *tempLongFilename;
+
 void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
 {
     dir_t *p;
@@ -256,11 +258,11 @@ void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
     char *oldpathend = pathend;
     char filename[13];
     parent->rewind();
-    while ((p= parent->readDirCache()))
+    
+  while ((p = parent->getLongFilename(p, tempLongFilename)))
     {
-        if (p->name[0] == DIR_NAME_FREE) break;
         if (!showFilename(p->name)) continue;
-        if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
+        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
         if( DIR_IS_SUBDIR(p))
         {
             if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
@@ -297,6 +299,9 @@ void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
             Com::print(filename);
 #ifdef SD_EXTENDED_DIR
             Com::printF(Com::tSpace,(long)p->fileSize);
+#endif
+#ifdef SD_ALLOW_LONG_NAMES
+            Com::print(tempLongFilename);
 #endif
             Com::println();
         }

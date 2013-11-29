@@ -1178,8 +1178,8 @@ Select the language to use.
 */
 #define UI_LANGUAGE 1
 
-// This is line 2 of the status display at startup. Change to your like.
-#define UI_VERSION_STRING2 "Delta Tower"
+#define UI_PRINTER_NAME "Helix"
+#define UI_PRINTER_COMPANY "Acuity Design LLC"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
