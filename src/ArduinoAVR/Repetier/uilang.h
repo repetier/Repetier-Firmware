@@ -91,6 +91,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
+#define UI_TEXT_LIGHTS_ONOFF     "Lights :%lo"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
 #define UI_TEXT_DISABLE_STEPPER  "Disable stepper"
@@ -224,7 +225,8 @@
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 #define UI_TEXT_SD_REMOVED       "SD Card removed"
 #define UI_TEXT_SD_INSERTED      "SD Card inserted"
-#define UI_TEXT_PRINTER_READY    "Printer ready."
+#define UI_TEXT_PRINTER_READY    "\007 %PN is Ready!"
+
 // Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
 // ___88 days 12:45
 #define UI_TEXT_PRINTTIME_DAYS   " days "
@@ -263,6 +265,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Vorheizen PLA"
 #define UI_TEXT_PREHEAT_ABS      "Vorheizen ABS"
+#define UI_TEXT_LIGHTS_ONOFF     "Lights :%lo"
 #define UI_TEXT_COOLDOWN         "Abk" STR_uuml "hlen"
 #define UI_TEXT_SET_TO_ORIGIN    "Setze Nullpunkt"
 #define UI_TEXT_DISABLE_STEPPER  "Motoren Aussch."
@@ -397,7 +400,7 @@
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 #define UI_TEXT_SD_REMOVED       "Karte entfernt"
 #define UI_TEXT_SD_INSERTED      "Karte eingelegt"
-#define UI_TEXT_PRINTER_READY    "Drucker bereit."
+#define UI_TEXT_PRINTER_READY    "\007 %PN bereit."
 // Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
 // ___88 days 12:45
 #define UI_TEXT_PRINTTIME_DAYS   " Tage "
@@ -710,7 +713,7 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Mult. Fluxo:%of%%%"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Aguardar Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Aguardar Unidades:%XUmm"
-#define UI_TEXT_PRINTER_READY    "Impressora pronta."
+#define UI_TEXT_PRINTER_READY    "\007 %PN pronta."
 
 #endif
 
@@ -863,7 +866,7 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Molt. Flusso:%of%%%"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Attesa Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Attesa Unita':%XUmm"
-#define UI_TEXT_PRINTER_READY    "Stampante pronta."
+#define UI_TEXT_PRINTER_READY    "\007 %PN pronta."
 
 #endif
 
@@ -1012,7 +1015,7 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Mult. Flujo.:%of%%%"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Esperando Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Esperando Unidad:%XUmm"
-#define UI_TEXT_PRINTER_READY    "Impresora Lista."
+#define UI_TEXT_PRINTER_READY    "\007 %PN Lista."
 
 #endif
 
@@ -1158,7 +1161,7 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Fl" STR_ouml "de Mul.:%of%%%"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "V" STR_auml "nta Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "V" STR_auml "nta Units:%XUmm"
-#define UI_TEXT_PRINTER_READY    "Utskrift Klar."
+#define UI_TEXT_PRINTER_READY    "\007 %PN Klar."
 #endif
 
 // *************************************************************************************
@@ -1196,6 +1199,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
+#define UI_TEXT_LIGHTS_ONOFF     "Lights :%lo"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
 #define UI_TEXT_DISABLE_STEPPER  "Disable stepper"
@@ -1318,7 +1322,7 @@
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 #define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
-#define UI_TEXT_PRINTER_READY    "Printer ready."
+#define UI_TEXT_PRINTER_READY    "\007 %PN is ready."
 // Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
 // ___88 days 12:45
 #define UI_TEXT_PRINTTIME_DAYS   " days "

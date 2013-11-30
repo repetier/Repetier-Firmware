@@ -153,6 +153,8 @@
 #define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
+#define UI_ACTION_LIGHTS_ONOFF          1107
+#define UI_ACTION_LEVEL_BED             1108
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -328,6 +330,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #define MAX_COLS 28
+#define MAX_SCREEN_TRANSITIONS 5
 
 class UIDisplay {
   public:
@@ -364,6 +367,12 @@ class UIDisplay {
     UIDisplay();
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
+    void waitForKey(); 
+    void transitionInRow(byte r, PGM_P txt, byte bProgMem);    
+    void randomRow(byte r, PGM_P txt, byte bProgMem);
+    void scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft);
+    void scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromBottom);
+    void printRow(byte r, byte x,  char *txt, byte xChar);    
     void printRow(uint8_t r,char *txt); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
     void parse(char *txt,bool ram); /// Parse output and write to printCols;

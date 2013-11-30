@@ -16,6 +16,8 @@ STEPPER_CURRENT_CONTROL
 
 */
 
+#define CASE_LIGHTS_PIN 22
+
 #define ARCH_AVR 1
 #define ARCH_ARM 2
 

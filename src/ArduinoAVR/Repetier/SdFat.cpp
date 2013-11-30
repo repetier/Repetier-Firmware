@@ -1344,7 +1344,7 @@ bool SdBaseFile::openParent(SdBaseFile* dir) {
   }
   // search for parent in '../..'
   do {
-    if (file.readDir(&entry) != 32) {
+    if (file.readDir(&entry, NULL) != 32) {
       DBG_FAIL_MACRO;
       goto fail;
     }
@@ -1741,6 +1741,115 @@ int SdBaseFile::read(void* buf, size_t nbyte) {
  fail:
   return -1;
 }
+
+
+//------------------------------------------------------------------------------
+/** Read the next directory entry from a directory file with the long filename 
+ *
+ * \param[out] dir The dir_t struct that will receive the data.
+ * \param[out] longFiename The long filename associated with the 8.3 name
+ *
+ * \return For success getLongFilename() returns a pointer to dir_t
+ * A value of zero will be returned if end of file is reached.
+ */
+
+dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename)
+{
+  int16_t n;
+  uint8_t bLastPart = true;
+  
+    if (longFilename != NULL)
+      *longFilename = 0;
+      
+    while (1)
+      {
+       if (!(dir = readDirCache()) || dir->name[0] == DIR_NAME_FREE )
+         return NULL;
+      
+//        out.print("Attr:");
+//        out.println(dir->attributes);
+//        out.println(dir->name[0]);
+        
+      if (dir->name[0] == DIR_NAME_0XE5 || dir->name[0] == DIR_NAME_DELETED)
+           {
+           bLastPart = true;
+          if (longFilename != NULL)
+             *longFilename = 0;
+           continue;
+           }
+              
+      if (DIR_IS_LONG_NAME(dir))
+        {
+          
+ #if SD_ALLOW_LONG_NAMES==true
+       if (longFilename != NULL)
+        {
+    	vfat_t *VFAT = (vfat_t*)dir;
+        int8_t nSeq = VFAT->sequenceNumber & 0x1F;
+        
+//        out.print("long file: ");
+//        out.println(nSeq);
+//        out.println(VFAT->firstClusterLow);
+        
+	// Sanity check the VFAT entry. The first cluster is always set to zero. And th esequence number should be higher then 0
+    	if (VFAT->firstClusterLow == 0 && nSeq > 0 && nSeq <= MAX_VFAT_ENTRIES)
+    	      {
+	      //TODO: Store the filename checksum to verify if a none-long filename aware system modified the file table.
+
+    		n = (nSeq - 1) * 13;
+    
+		longFilename[n+0] = (char)VFAT->name1[0];
+      		longFilename[n+1] = (char)VFAT->name1[1];
+      		longFilename[n+2] = (char)VFAT->name1[2];
+     		longFilename[n+3] = (char)VFAT->name1[3];
+     		longFilename[n+4] = (char)VFAT->name1[4];
+     		longFilename[n+5] = (char)VFAT->name2[0];
+     		longFilename[n+6] = (char)VFAT->name2[1];
+     		longFilename[n+7] = (char)VFAT->name2[2];
+      		longFilename[n+8] = (char)VFAT->name2[3];
+      		longFilename[n+9] = (char)VFAT->name2[4];
+      		longFilename[n+10] = (char)VFAT->name2[5];
+      		longFilename[n+11] = (char)VFAT->name3[0];
+      		longFilename[n+12] = (char)VFAT->name3[1];
+      
+                if (bLastPart)
+                   longFilename[n+13] = 0;
+                bLastPart = false;
+		}
+          }
+ #endif
+        }
+       else
+         {
+         if ((dir->attributes & DIR_ATT_HIDDEN || dir->attributes & DIR_ATT_SYSTEM) || (dir->name[0] == '.' && dir->name[1] != '.'))
+           {
+           bLastPart = true;
+           if (longFilename != NULL)
+             *longFilename = 0;
+           continue;
+           }
+         if (DIR_IS_FILE(dir) || DIR_IS_SUBDIR(dir)) 
+             {
+             if (longFilename && bLastPart)
+               {
+               byte i, c = 0;
+               
+               for(i=0;i<11 && dir->name[i] != 0;i++)
+                 {
+                 if (i== 8 && !DIR_IS_SUBDIR(dir))
+                   longFilename[c++] = '.';
+                 longFilename[c++] = dir->name[i];
+                 }
+                longFilename[c] = 0;
+               }
+             return dir;   
+             }
+         } 
+      }
+     
+    return dir;
+}
+
 //------------------------------------------------------------------------------
 /** Read the next directory entry from a directory file.
  *
@@ -1752,7 +1861,8 @@ int SdBaseFile::read(void* buf, size_t nbyte) {
  * readDir() called before a directory has been opened, this is not
  * a directory file or an I/O error occurred.
  */
-int8_t SdBaseFile::readDir(dir_t* dir) {
+ 
+int8_t SdBaseFile::readDir(dir_t* dir, char* longFilename) {
   int16_t n;
   // if not a directory file or miss-positioned return an error
   if (!isDir() || (0X1F & curPosition_)) return -1;

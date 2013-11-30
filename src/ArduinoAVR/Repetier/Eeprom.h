@@ -74,6 +74,8 @@ have problems with other modules using the eeprom */
 #define EPR_BACKLASH_X            157
 #define EPR_BACKLASH_Y            161
 #define EPR_BACKLASH_Z            165
+#define EPR_HARDWARE_BED_LEVELED  166
+
 
 #define EPR_Z_PROBE_X_OFFSET      800
 #define EPR_Z_PROBE_Y_OFFSET      804
@@ -148,7 +150,9 @@ public:
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
-
+#if HARDWARE_BED_LEVELING==true && HARDWARE_BED_LEVELING_BEFORE_USING==true
+    static void storeHardwareBedLeveled(byte bLeveled);
+#endif
     static inline float zProbeSpeed() {
 #if FEATURE_Z_PROBE
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);

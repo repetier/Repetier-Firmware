@@ -48,6 +48,9 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 /** Number of extruders. Maximum 6 extruders. */
 #define NUM_EXTRUDER 2
 
+#define HARDWARE_BED_LEVELING false
+#define HARDWARE_BED_LEVELING_BEFORE_USING true
+
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // Gen3 PLUS for RepRap Motherboard V1.2 = 21
 // MEGA/RAMPS up to 1.2       = 3
@@ -1178,8 +1181,8 @@ Select the language to use.
 */
 #define UI_LANGUAGE 1
 
-// This is line 2 of the status display at startup. Change to your like.
-#define UI_VERSION_STRING2 "Delta Tower"
+#define UI_PRINTER_NAME "Helix"
+#define UI_PRINTER_COMPANY "Acuity Design LLC"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

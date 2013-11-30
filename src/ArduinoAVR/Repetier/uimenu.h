@@ -318,6 +318,14 @@ UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU
 
 // **** SD card menu
 
+#if CASE_LIGHTS_PIN > 0
+// **** Case Lights menu
+UI_MENU_ACTIONCOMMAND(ui_menu_lights_on_off,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS_ONOFF);
+#define UI_MENU_LIGHTS {UI_MENU_ADDCONDBACK &ui_menu_lights_on_off}
+UI_MENU(ui_menu_lights,UI_MENU_LIGHTS,1+UI_MENU_BACKCNT);
+#endif
+
+
 // **** Quick menu
 #if PS_ON_PIN>=0
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_power,UI_TEXT_POWER,UI_ACTION_POWER);
@@ -536,8 +544,19 @@ UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions);
 UI_MENU_SUBMENU(ui_menu_main3,UI_TEXT_EXTRUDER,ui_menu_extruder);
 UI_MENU_SUBMENU(ui_menu_main4,UI_TEXT_DEBUGGING,ui_menu_debugging);
 UI_MENU_SUBMENU(ui_menu_main5,UI_TEXT_CONFIGURATION,ui_menu_configuration);
+
+#if CASE_LIGHTS_PIN > 0
+UI_MENU_SUBMENU(ui_menu_main6,UI_TEXT_LIGHTS_ONOFF,ui_menu_lights);
+
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,&ui_menu_sd_printfile,&ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5, &ui_menu_main6}
+UI_MENU(ui_menu_main,UI_MENU_MAIN,7+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
+
+#else
+
 #define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,&ui_menu_sd_printfile,&ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5}
 UI_MENU(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
+
+#endif
 
 /* Define menus accessible by action commands
 
