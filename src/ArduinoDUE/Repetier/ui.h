@@ -317,7 +317,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
-#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin
+#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller has a sd card buildin
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -325,6 +325,9 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #undef SDSUPPORT
 #define SDSUPPORT true
 #endif
+
+// Maximum size of a row - if row is larger, text gets scrolled
+#define MAX_COLS 28
 
 class UIDisplay {
   public:
@@ -334,6 +337,7 @@ class UIDisplay {
     uint8_t menuPos[5]; // Positions in menu
     void *menu[5]; // Menus active
     uint8_t menuTop[5]; // Top row in menu
+    int8_t shift; // Display shift for scrolling text
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
     uint16_t activeAction; // action for ok/next/previous
@@ -399,14 +403,34 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif
-#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 // reprapdiscount smartcontroller (2) gadgets3d (10)
+#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller (2) gadgets3d (10)
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
+#if FEATURE_CONTROLLER==11
+#define UI_DISPLAY_TYPE 5
+#define U8GLIB_ST7920
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_DEFAULT u8g_font_6x10
+#endif
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3
+#else
 #define UI_DISPLAY_TYPE 1
 #define UI_DISPLAY_CHARSET 1
-#define BEEPER_TYPE 1
 #define UI_COLS 20
 #define UI_ROWS 4
+#endif
+#define BEEPER_TYPE 1
 #if FEATURE_CONTROLLER==10 // Gadgets3d shield
 #define BEEPER_PIN             33
 #define UI_DISPLAY_RS_PIN      16

@@ -94,6 +94,7 @@ What display type do you use?
 4 = Use the slower LiquiedCrystal library bundled with arduino.
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
+5 = U8G supported display
 */
 #define UI_DISPLAY_TYPE 0
 

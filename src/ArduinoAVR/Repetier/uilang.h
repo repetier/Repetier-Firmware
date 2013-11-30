@@ -16,7 +16,7 @@
 
 */
 
-#if !defined(UI_DISPLAY_CHARSET) || UI_DISPLAY_CHARSET>2
+#if !defined(UI_DISPLAY_CHARSET) || UI_DISPLAY_CHARSET>3
 #define UI_DISPLAY_CHARSET 1
 #endif
 
@@ -59,6 +59,23 @@
 #define STR_szlig "160"
 #endif
 
+
+#if UI_DISPLAY_CHARSET==3 // U8glib
+#define CHAR_RIGHT 187 //>>
+#define CHAR_SELECTOR 255 //'>'
+#define CHAR_SELECTED 254 //'*'
+#define STR_auml "\344"
+#define STR_Auml "\304"
+#define STR_uuml "\374"
+#define STR_Uuml "\334"
+#define STR_ouml "\366"
+#define STR_Ouml "\326"
+#define STR_szlig "\337"
+#endif
+#define TEST176 "176\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277"
+#define TEST192 "192\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317"
+#define TEST208 "208\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337"
+#define TEST224 "224\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357"
 
 
 // At first all terms in english are defined. After that the selected language

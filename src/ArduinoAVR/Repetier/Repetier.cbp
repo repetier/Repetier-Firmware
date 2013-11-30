@@ -5,6 +5,7 @@
 		<Option title="Repetier" />
 		<Option pch_mode="2" />
 		<Option compiler="avrgcc" />
+		<Option virtualFolders="libraries\;" />
 		<Build>
 			<Target title="Simulator - Debug">
 				<Option output="bin/Release/Repetier_sim.exe" prefix_auto="1" extension_auto="0" />
@@ -780,6 +781,11 @@
 		<Unit filename="libraries/TinyGPS.cpp">
 			<Option compile="0" />
 			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/U8gui.cpp" />
+		<Unit filename="libraries/U8gui.h">
+			<Option virtualFolder="libraries/" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="libraries/WiFi.cpp">
 			<Option compile="0" />

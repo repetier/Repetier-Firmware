@@ -538,6 +538,95 @@ void initializeLCD()
 }
 // ------------------ End LiquidCrystal library as LCD driver
 #endif
+
+#if UI_DISPLAY_TYPE==5
+#include <U8glib.h>
+
+//u8glib
+#ifdef U8GLIB_ST7920
+U8GLIB_ST7920_128X64_1X u8g(UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN);
+#endif
+
+void UIDisplay::printRow(uint8_t r,char *txt)
+{
+    uint8_t col=0;
+    // Set row
+    if(r >= UI_ROWS) return;
+
+    u8g.setPrintPos(0, r*UI_FONT_HEIGHT+UI_FONT_HEIGHT); //set position
+
+    char c;
+    while(col<UI_COLS && (c=*txt) != 0x00)
+    {
+        txt++;
+        //catch the special chars /001 to /006
+        switch(c){
+          case '\001': //Back
+                   u8g.setFont(u8g_font_6x12_67_75);
+                   u8g.print('\x35'); //arrow back
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          case '\002':  //degrees
+                   u8g.print('\xb0');
+                   break;
+          case '\003': //char selected
+                   u8g.setFont(u8g_font_m2icon_5);
+                   u8g.print('\x47');
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          case '\004': //unselect
+                   u8g.setFont(u8g_font_m2icon_5);
+                   u8g.print('\x45');
+                   u8g.setFont(UI_FONT_DEFAULT);
+                    break;
+          case '\005': //temp
+                   u8g.print('T');
+                   break;
+          case '\006': //folder
+                   u8g.setFont(u8g_font_m2icon_5);
+                   u8g.print('\x41'); //arrow back
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          case 0x7E: // right arrow
+                   u8g.setFont(u8g_font_6x12_67_75);
+                   u8g.print('\x52'); //arrow back
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          case CHAR_SELECTOR:
+                   u8g.setFont(u8g_font_6x12_67_75);
+                   u8g.print('\xb7'); //arrow back
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          case CHAR_SELECTED:
+                   u8g.setFont(u8g_font_6x12_67_75);
+                   u8g.print('\xb6'); //arrow back
+                   u8g.setFont(UI_FONT_DEFAULT);
+                   break;
+          default:
+                   u8g.print(c);
+        }
+        col++;
+    }
+#if UI_HAS_KEYS==1
+    mediumAction();
+#endif
+
+}
+
+void initializeLCD()
+{
+   u8g.firstPage();
+    do {
+        u8g.setColorIndex(0);
+    } while( u8g.nextPage() );
+
+    u8g.setFont(UI_FONT_DEFAULT);
+    u8g.setColorIndex(1);
+    uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
+}
+// ------------------ End u8GLIB library as LCD driver
+#endif
+
 char printCols[MAX_COLS+1];
 UIDisplay::UIDisplay()
 {
@@ -623,7 +712,8 @@ void UIDisplay::printRow(uint8_t r,char *txt)
     lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
     char c;
     uint8_t len = strlen(txt);
-    if(len>UI_COLS && shift>0) {
+    if(len>UI_COLS && shift>0)
+    {
         txt += RMath::min(shift,len-UI_COLS);
     }
     while(col<UI_COLS && (c=*txt) != 0x00)
@@ -645,6 +735,7 @@ void UIDisplay::printRow(uint8_t r,char *txt)
 #endif
 }
 #endif
+
 
 void UIDisplay::printRowP(uint8_t r,PGM_P txt)
 {
@@ -1271,69 +1362,82 @@ void UIDisplay::refreshPage()
 {
     uint8_t r;
     uint8_t mtype;
-    if(menuLevel==0)
+#if UI_DISPLAY_TYPE == 5
+    //u8g picture loop
+    u8g.firstPage();
+    do
     {
-        UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
-        uint8_t nr = pgm_read_word_near(&(men->numEntries));
-        UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
-        for(r=0; r<nr && r<UI_ROWS; r++)
-        {
-            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
-            col=0;
-            parse((char*)pgm_read_word(&(ent->text)),false);
-            printRow(r,(char*)printCols);
-        }
-    }
-    else
-    {
-        UIMenu *men = (UIMenu*)menu[menuLevel];
-        uint8_t nr = pgm_read_word_near((void*)&(men->numEntries));
-        mtype = pgm_read_byte((void*)&(men->menuType));
-        uint8_t offset = menuTop[menuLevel];
-        UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
-        for(r=0; r+offset<nr && r<UI_ROWS; )
-        {
-            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r+offset]));
-            if(!ent->showEntry())
-            {
-                offset++;
-                continue;
-            }
-            unsigned char entType = pgm_read_byte(&(ent->menuType));
-            unsigned int entAction = pgm_read_word(&(ent->action));
-            col=0;
-            if(entType>=2 && entType<=4)
-            {
-                if(r+offset==menuPos[menuLevel] && activeAction!=entAction)
-                    printCols[col++]=CHAR_SELECTOR;
-                else if(activeAction==entAction)
-                    printCols[col++]=CHAR_SELECTED;
-                else
-                    printCols[col++]=' ';
-            }
-            parse((char*)pgm_read_word(&(ent->text)),false);
-            if(entType==2)   // Draw submenu marker at the right side
-            {
-                while(col<UI_COLS-1) printCols[col++]=' ';
-                if(col>UI_COLS) {
-                    printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
-                } else
-                printCols[col] = CHAR_RIGHT; // Arrow right
-                printCols[++col] = 0;
-            }
-            printRow(r,(char*)printCols);
-            r++;
-        }
-    }
-#if SDSUPPORT
-    if(mtype==1)
-    {
-        sdrefresh(r);
-    }
 #endif
-    printCols[0]=0;
-    while(r<UI_ROWS)
-        printRow(r++,printCols);
+
+        if(menuLevel==0)
+        {
+            UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
+            uint8_t nr = pgm_read_word_near(&(men->numEntries));
+            UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
+            for(r=0; r<nr && r<UI_ROWS; r++)
+            {
+                UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
+                col=0;
+                parse((char*)pgm_read_word(&(ent->text)),false);
+                printRow(r,(char*)printCols);
+            }
+        }
+        else
+        {
+            UIMenu *men = (UIMenu*)menu[menuLevel];
+            uint8_t nr = pgm_read_word_near((void*)&(men->numEntries));
+            mtype = pgm_read_byte((void*)&(men->menuType));
+            uint8_t offset = menuTop[menuLevel];
+            UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
+            for(r=0; r+offset<nr && r<UI_ROWS; )
+            {
+                UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r+offset]));
+                if(!ent->showEntry())
+                {
+                    offset++;
+                    continue;
+                }
+                unsigned char entType = pgm_read_byte(&(ent->menuType));
+                unsigned int entAction = pgm_read_word(&(ent->action));
+                col=0;
+                if(entType>=2 && entType<=4)
+                {
+                    if(r+offset==menuPos[menuLevel] && activeAction!=entAction)
+                        printCols[col++]=CHAR_SELECTOR;
+                    else if(activeAction==entAction)
+                        printCols[col++]=CHAR_SELECTED;
+                    else
+                        printCols[col++]=' ';
+                }
+                parse((char*)pgm_read_word(&(ent->text)),false);
+                if(entType==2)   // Draw submenu marker at the right side
+                {
+                    while(col<UI_COLS-1) printCols[col++]=' ';
+                    if(col>UI_COLS)
+                    {
+                        printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
+                    }
+                    else
+                        printCols[col] = CHAR_RIGHT; // Arrow right
+                    printCols[++col] = 0;
+                }
+                printRow(r,(char*)printCols);
+                r++;
+            }
+        }
+#if SDSUPPORT
+        if(mtype==1)
+        {
+            sdrefresh(r);
+        }
+#endif
+        printCols[0]=0;
+        while(r<UI_ROWS)
+            printRow(r++,printCols);
+#if UI_DISPLAY_TYPE == 5
+    }
+    while( u8g.nextPage() );  //end picture loop
+#endif
 }
 void UIDisplay::pushMenu(void *men,bool refresh)
 {
@@ -1478,7 +1582,11 @@ void UIDisplay::nextPreviousAction(int8_t next)
     millis_t dt = dtReal = actTime-lastNextPrev;
     lastNextPrev = actTime;
     if(dt<SPEED_MAX_MILLIS) dt = SPEED_MAX_MILLIS;
-    if(dt>SPEED_MIN_MILLIS) {dt = SPEED_MIN_MILLIS;lastNextAccumul = 1;}
+    if(dt>SPEED_MIN_MILLIS)
+    {
+        dt = SPEED_MIN_MILLIS;
+        lastNextAccumul = 1;
+    }
     float f = (float)(SPEED_MIN_MILLIS-dt)/(float)(SPEED_MIN_MILLIS-SPEED_MAX_MILLIS);
     lastNextAccumul = 1.0f+(float)SPEED_MAGNIFICATION*f*f*f;
 
@@ -1563,49 +1671,49 @@ void UIDisplay::nextPreviousAction(int8_t next)
         break;
     case UI_ACTION_XPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[X_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[X_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(steps,0,0,0,Printer::maxFeedrate[2],true,true);
-        }
+    {
+        float d = 0.01*(float)increment*lastNextAccumul;
+        if(fabs(d)*2000>Printer::maxFeedrate[X_AXIS]*dtReal)
+            d *= Printer::maxFeedrate[X_AXIS]*dtReal/(2000*fabs(d));
+        long steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
+        steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
+        PrintLine::moveRelativeDistanceInSteps(steps,0,0,0,Printer::maxFeedrate[2],true,true);
+    }
 #else
-        PrintLine::moveRelativeDistanceInSteps(increment,0,0,0,Printer::homingFeedrate[0],true,true);
+    PrintLine::moveRelativeDistanceInSteps(increment,0,0,0,Printer::homingFeedrate[0],true,true);
 #endif
-        Commands::printCurrentPosition();
-        break;
+    Commands::printCurrentPosition();
+    break;
     case UI_ACTION_YPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[Y_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[Y_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(0,steps,0,0,Printer::maxFeedrate[2],true,true);
-        }
+    {
+        float d = 0.01*(float)increment*lastNextAccumul;
+        if(fabs(d)*2000>Printer::maxFeedrate[Y_AXIS]*dtReal)
+            d *= Printer::maxFeedrate[Y_AXIS]*dtReal/(2000*fabs(d));
+        long steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
+        steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
+        PrintLine::moveRelativeDistanceInSteps(0,steps,0,0,Printer::maxFeedrate[2],true,true);
+    }
 #else
-        PrintLine::moveRelativeDistanceInSteps(0,increment,0,0,Printer::homingFeedrate[1],true,true);
+    PrintLine::moveRelativeDistanceInSteps(0,increment,0,0,Printer::homingFeedrate[1],true,true);
 #endif
-        Commands::printCurrentPosition();
-        break;
+    Commands::printCurrentPosition();
+    break;
     case UI_ACTION_ZPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01*(float)increment*lastNextAccumul;
-            if(fabs(d)*2000>Printer::maxFeedrate[Z_AXIS]*dtReal)
-                d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
-            long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
-            steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[2],true,true);
-        }
+    {
+        float d = 0.01*(float)increment*lastNextAccumul;
+        if(fabs(d)*2000>Printer::maxFeedrate[Z_AXIS]*dtReal)
+            d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
+        long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
+        steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
+        PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[2],true,true);
+    }
 #else
-        PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[2],true,true);
+    PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[2],true,true);
 #endif
-        Commands::printCurrentPosition();
-        break;
+    Commands::printCurrentPosition();
+    break;
     case UI_ACTION_XPOSITION_FAST:
         PrintLine::moveRelativeDistanceInSteps(Printer::axisStepsPerMM[0]*increment,0,0,0,Printer::homingFeedrate[0],true,true);
         Commands::printCurrentPosition();
@@ -2444,7 +2552,7 @@ void UIDisplay::slowAction()
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
         //if(mtype!=1)
-            refresh=1;
+        refresh=1;
     }
     if(refresh)
     {
