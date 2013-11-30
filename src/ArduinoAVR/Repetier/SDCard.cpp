@@ -295,14 +295,14 @@ void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
                 Com::print(fullName);
                 Com::print('/');
             }
+#if SD_ALLOW_LONG_NAMES==true
+            Com::print("\"");
+            Com::print(tempLongFilename);
+            Com::print("\" ");
+#endif
             Com::print(filename);
 #ifdef SD_EXTENDED_DIR
             Com::printF(Com::tSpace,(long)p->fileSize);
-#endif
-#if SD_ALLOW_LONG_NAMES==true
-            Com::print(" \"");
-            Com::print(tempLongFilename);
-            Com::print("\"");
 #endif
             Com::println();
         }
