@@ -1517,12 +1517,9 @@ void UIDisplay::refreshPage()
             if(entType==2)   // Draw submenu marker at the right side
             {
                 while(col<UI_COLS-1) printCols[col++]=' ';
-                if(col>UI_COLS) {
-                    printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
-                } else
-                printCols[col] = CHAR_RIGHT; // Arrow right
-                printCols[++col] = 0;
+                printCols[col++] = CHAR_RIGHT; // Arrow right
             }
+            printCols[col] = 0;
             transitionInRow(r, (PGM_P)printCols, false);
             r++;
         }
