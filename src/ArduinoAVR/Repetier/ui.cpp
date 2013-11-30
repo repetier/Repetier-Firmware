@@ -528,7 +528,7 @@ void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
       // **** HELP ***** Without these lines in, always 1-2 secs into the screen animation it crashes.. only 0.90 not 0.80
       // When I add these lines works always, 100% of the time... but the delays don't get executed...
       // Something in the interrupt is conflicting with the screen not being painted quick enough....
-//    HAL::forbidInterrupts();
+    HAL::forbidInterrupts();
 
     switch(iScreenTransition)
       {
@@ -549,7 +549,7 @@ void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
           break;
       }
       // **** HELP ***** Without these lines in, always 1-2 secs into the screen animation it crashes.. only 0.90 not 0.80
-//         HAL::allowInterrupts();
+         HAL::allowInterrupts();
 #endif
 }
 

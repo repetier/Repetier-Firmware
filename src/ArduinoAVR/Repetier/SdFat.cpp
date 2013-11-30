@@ -1832,15 +1832,7 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename)
              {
              if (longFilename && bLastPart)
                {
-               byte i, c = 0;
-               
-               for(i=0;i<11 && dir->name[i] != 0;i++)
-                 {
-                 if (i== 8 && !DIR_IS_SUBDIR(dir))
-                   longFilename[c++] = '.';
-                 longFilename[c++] = dir->name[i];
-                 }
-                longFilename[c] = 0;
+               sd.createFilename(longFilename, *dir);               
                }
              return dir;   
              }
