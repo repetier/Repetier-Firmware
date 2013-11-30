@@ -522,6 +522,14 @@ void  UIDisplay::waitForKey()
 
 void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
 {    
+#if NO_SCREEN_ANIMATION==true
+    printRow(r, (char *)txt);
+#else
+      // **** HELP ***** Without these lines in, always 1-2 secs into the screen animation it crashes.. only 0.90 not 0.80
+      // When I add these lines works always, 100% of the time... but the delays don't get executed...
+      // Something in the interrupt is conflicting with the screen not being painted quick enough....
+//    HAL::forbidInterrupts();
+
     switch(iScreenTransition)
       {
         case 0:
@@ -540,7 +548,12 @@ void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
           randomRow(r, txt, bProgMem);
           break;
       }
+      // **** HELP ***** Without these lines in, always 1-2 secs into the screen animation it crashes.. only 0.90 not 0.80
+//         HAL::allowInterrupts();
+#endif
 }
+
+#if !defined(NOSCREEN_ANIMATION) || NO_SCREEN_ANIMATION!=true
 
 void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
 {
@@ -563,7 +576,7 @@ void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
     printRow(i, 0, printCols, 0);
     if (i<UI_ROWS-1)
       printRow(i+1, UI_COLS, printCols, 0);
-    delay(125);
+    HAL::delayMilliseconds(125);
     }
 }
 
@@ -598,7 +611,7 @@ void UIDisplay::randomRow(byte r, PGM_P txt, byte bProgMem)
             {
             spaceUsed[ii] = ii < col ? *(printCols+ii) : ' ';
             printRow(r, 0, spaceUsed, 0);
-            delay(25);
+            HAL::delayMilliseconds(25);
             break;
             }
           xRand--;
@@ -632,10 +645,11 @@ void UIDisplay::scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft
     if (bFromLeft)
        printRow(r, 0, printCols, i);
     else
-       printRow(r, i, printCols, 0);    
-     delay(20);
+       printRow(r, i, printCols, 0);  
+    HAL::delayMilliseconds(20);
     }
 }
+#endif
 
 #if UI_DISPLAY_TYPE==4
 // Use LiquidCrystal library instead
@@ -759,9 +773,15 @@ void UIDisplay::initialize()
 #endif
     // SHOW STARTUP SCREEN HERE
     randomSeed(analogRead(0));
+#if NO_SCREEN_ANIMATION==true
+    printRowP(0, PSTR(UI_PRINTER_NAME));
+    printRowP(1, PSTR(UI_PRINTER_COMPANY));
+    printRowP(3, versionString);
+#else    
     scrollVertRow(0, PSTR(UI_PRINTER_NAME), true, false);
     scrollHorzRow(1, PSTR(UI_PRINTER_COMPANY), true, random(4) > 2);
     randomRow(3, versionString, true);
+#endif
     delay(2500);
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
