@@ -1773,12 +1773,15 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename)
       if (dir->name[0] == DIR_NAME_0XE5 || dir->name[0] == DIR_NAME_DELETED)
            {
            bLastPart = true;
-           *longFilename = 0;
+          if (longFilename != NULL)
+             *longFilename = 0;
            continue;
            }
               
       if (DIR_IS_LONG_NAME(dir))
         {
+          
+ #if SD_ALLOW_LONG_NAMES==true
        if (longFilename != NULL)
         {
     	vfat_t *VFAT = (vfat_t*)dir;
@@ -1814,13 +1817,15 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename)
                 bLastPart = false;
 		}
           }
+ #endif
         }
        else
          {
          if ((dir->attributes & DIR_ATT_HIDDEN || dir->attributes & DIR_ATT_SYSTEM) || (dir->name[0] == '.' && dir->name[1] != '.'))
            {
            bLastPart = true;
-           *longFilename = 0;
+           if (longFilename != NULL)
+             *longFilename = 0;
            continue;
            }
          if (DIR_IS_FILE(dir) || DIR_IS_SUBDIR(dir)) 

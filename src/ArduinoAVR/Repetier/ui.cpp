@@ -50,7 +50,11 @@ long ui_autoreturn_time=0;
 #endif
 
 char printCols[MAX_COLS+2];
+#if SDSUPPORT!=true
+char tempLongFilename[MAX_COLS+3];
+#else
 char tempLongFilename[LONG_FILENAME_LENGTH+1];
+#endif
 byte oldOffset, oldMenuLevel, encoderStartScreen, iScreenTransition;
 
 void beep(uint8_t duration,uint8_t count)
