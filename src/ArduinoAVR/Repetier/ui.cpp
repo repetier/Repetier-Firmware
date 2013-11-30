@@ -49,7 +49,7 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 long ui_autoreturn_time=0;
 #endif
 
-char printCols[MAX_COLS+2];
+char printCols[MAX_COLS+1];
 char tempLongFilename[LONG_FILENAME_LENGTH+1];
 byte oldOffset, oldMenuLevel, encoderStartScreen, iScreenTransition;
 
@@ -517,9 +517,10 @@ void  UIDisplay::waitForKey()
 }
 
 void UIDisplay::transitionInRow(byte r, PGM_P txt, byte bProgMem)
-{    
+{  
     switch(iScreenTransition)
       {
+        default:
         case 0:
           printRow(r, (char *)txt);
           break;
@@ -542,16 +543,16 @@ void UIDisplay::scrollVertRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromTop)
 {
   char *spaceUsed = tempLongFilename;
   
+
   if (bProgMem)
     {
     col=0;
     addStringP(txt);
     }
-
   for(int8_t i=UI_ROWS-1;i>=r;i--)
     {
   // check for any encoder or key action and finish animation
-    if (!bProgMem && uid.encoderLast != encoderStartScreen)
+    if (uid.encoderLast != encoderStartScreen)
       {
       printRow(r, 0, printCols, 0);
       break;
@@ -573,14 +574,13 @@ void UIDisplay::randomRow(byte r, PGM_P txt, byte bProgMem)
     col=0;
     addStringP(txt);
     }
-    
   memset(spaceUsed, '-', UI_COLS);
   for(byte i=0;i<UI_COLS;i++)
     {
     byte xRand = random(UI_COLS-i-1);
 
    // check for any encoder or key action and finish animation
-   if (!bProgMem && uid.encoderLast != encoderStartScreen)
+   if (uid.encoderLast != encoderStartScreen)
       {
       printRow(r, 0, printCols, 0);
       break;
@@ -615,12 +615,11 @@ void UIDisplay::scrollHorzRow(byte r, PGM_P txt, byte bProgMem, int8_t bFromLeft
     col=0;
     addStringP(txt);
     }
-
-  memset(printCols+col, 0, RMath::max(1, MAX_COLS-col));
+  memset(printCols+col, 0, MAX_COLS-col);
   for(i=UI_COLS;i>=0;--i)
     {
   // check for any encoder or key action and finish animation
-    if (!bProgMem && uid.encoderLast != encoderStartScreen)
+    if (uid.encoderLast != encoderStartScreen)
       {
       printRow(r, 0, printCols, 0);
       break;
@@ -781,11 +780,9 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 
 void UIDisplay::printRow(byte r, byte x, char *txt, byte xChar)
 {    
- byte cols=0;
- uint8_t len;
+ byte col=0;
  char c;
 
-// Com::print("Enter Row");
  // Set row
  if(r >= UI_ROWS) return;
  #if UI_DISPLAY_TYPE==3
@@ -793,32 +790,30 @@ void UIDisplay::printRow(byte r, byte x, char *txt, byte xChar)
 #endif
   lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
  
-// Com::print("shift:");
-//Com::print(shift);
+  uint8_t len = strlen(txt);
+  if(len>UI_COLS && shift>0) {
+      txt += RMath::min(shift,len-UI_COLS);
+  }
 
-  if (shift>0 && (len = strlen(txt)) > UI_COLS) 
-      txt += RMath::min(shift, len-UI_COLS);
-
- while(cols<x)
+ while(col<x)
    {
    lcdPutChar(' ');
-   cols++; 
+   col++; 
    }
    
  txt += xChar;
-// Com::print("name");
- while(cols<UI_COLS && (c=*txt) != 0x00)
+ 
+ while(col<UI_COLS && (c=*txt) != 0x00)
    {
    lcdPutChar(c);
    txt++;
-   cols++;
+   col++;
    }
-// Com::print("name done");
  
- while(cols<UI_COLS) 
+ while(col<UI_COLS) 
    {
    lcdPutChar(' ');
-   cols++; 
+   col++; 
    }
 #if UI_DISPLAY_TYPE==3
   lcdStopWrite();
@@ -826,8 +821,6 @@ void UIDisplay::printRow(byte r, byte x, char *txt, byte xChar)
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
  ui_check_slow_encoder();
 #endif
-
-// Com::print("leave done\n\n");
 
 }
 
@@ -1414,7 +1407,7 @@ void UIDisplay::sdrefresh(byte &r) {
   byte offset = menuTop[menuLevel];
   SdBaseFile *root;
   byte length, skip;
-    
+  
   sd.fat.chdir(cwd);
   root = sd.fat.vwd();
   root->rewind();  
@@ -1461,11 +1454,6 @@ void UIDisplay::refreshPage()
       }
 #endif
 
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
-    // Reset timeout on menu back when user active on menu
-    if (uid.encoderLast != encoderStartScreen)
-      ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
-#endif
     encoderStartScreen = uid.encoderLast;
     iScreenTransition = menuLevel == oldMenuLevel ? 0 : random(0, MAX_SCREEN_TRANSITIONS);
     
@@ -2678,15 +2666,9 @@ void UIDisplay::slowAction()
     }
     if(refresh)
     {
-      if (menuLevel > 1 && iScreenTransition == 0)
-        {
         shift++;
         if(shift+UI_COLS>MAX_COLS+1)
             shift = -2;
-        }
-     else
-        shift = -2;
-        
         refreshPage();
         lastRefresh = time;
     }
