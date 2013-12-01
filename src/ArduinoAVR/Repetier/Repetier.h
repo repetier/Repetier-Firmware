@@ -428,7 +428,7 @@ public:
   bool showFilename(const uint8_t *name);
   void automount();
 private:
-  void lsRecursive(SdBaseFile *parent,uint8_t level);
+  byte lsRecursive(SdBaseFile *parent,uint8_t level, char *findFilename);
  // SdFile *getDirectory(char* name);
 };
 

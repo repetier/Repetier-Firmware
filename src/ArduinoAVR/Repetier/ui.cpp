@@ -1438,7 +1438,7 @@ void UIDisplay::sdrefresh(byte &r) {
   byte offset = menuTop[menuLevel];
   SdBaseFile *root;
   byte length, skip;
-    
+      
   sd.fat.chdir(cwd);
   root = sd.fat.vwd();
   root->rewind();  
