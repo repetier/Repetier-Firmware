@@ -381,6 +381,10 @@ extern void write_monitor();
 
 #if SDSUPPORT
 
+#define MAX_VFAT_ENTRIES (3)
+/** Total size of the buffer used to store the long filenames */
+#define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
+extern char tempLongFilename[LONG_FILENAME_LENGTH+1];
 
 #include "SdFat.h"
 
@@ -402,21 +406,18 @@ public:
   bool sdactive;
   //int16_t n;
   bool savetosd;
+  SdBaseFile parentFound;
+
   SDCard();
   void initsd();
   void writeCommand(GCode *code);
   bool selectFile(char *filename,bool silent=false);
-  inline void mount() {
-    sdmode = false;
-    initsd();
-  }
-  inline void unmount() {
-    sdmode = false;
-    sdactive = false;
-    Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
-  }
-  inline void startPrint() {if(sdactive) sdmode = true;Printer::setMenuMode(MENU_MODE_SD_PRINTING,true); Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);}
-  inline void pausePrint() {sdmode = false;Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);}
+  void mount();
+  void unmount();
+  void startPrint();
+  void pausePrint(bool intern = false);
+  void continuePrint(bool intern=false);
+  void stopPrint();
   inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
   void printStatus();
   void ls();
@@ -428,7 +429,7 @@ public:
   bool showFilename(const uint8_t *name);
   void automount();
 private:
-  void lsRecursive(SdBaseFile *parent,uint8_t level);
+  uint8_t lsRecursive(SdBaseFile *parent,uint8_t level,char *findFilename);
  // SdFile *getDirectory(char* name);
 };
 

@@ -82,6 +82,7 @@ List of placeholder:
 %fY : Homing feedrate y direction
 %fZ : Homing feedrate z direction
 %Fs : Fan speed
+%PN : Printer name
 %Sx : Steps per mm x direction
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
@@ -327,6 +328,14 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_power,UI_TEXT_POWER,UI_ACTION_POWER);
 #define MENU_PSON_COUNT 0
 #define MENU_PSON_ENTRY
 #endif
+#if CASE_LIGHTS_PIN > 0
+UI_MENU_ACTIONCOMMAND(ui_menu_toggle_light,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS_ONOFF);
+#define UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_toggle_light
+#define UI_TOGGLE_LIGHT_COUNT 1
+#else
+#define UI_TOOGLE_LIGHT_ENTRY
+#define UI_TOGGLE_LIGHT_COUNT 0
+#endif
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_pla,UI_TEXT_PREHEAT_PLA,UI_ACTION_PREHEAT_PLA);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS,UI_ACTION_PREHEAT_ABS);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN,UI_ACTION_COOLDOWN);
@@ -342,8 +351,8 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT);
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT);
 
 // **** Fan menu
 
@@ -372,6 +381,7 @@ UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile,UI_TEXT_PRINT_FILE,UI_ACTION_SD_PRINT,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_pause,UI_TEXT_PAUSE_PRINT,UI_ACTION_SD_PAUSE,MENU_MODE_SD_PRINTING,MENU_MODE_SD_PAUSED);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,UI_TEXT_CONTINUE_PRINT,UI_ACTION_SD_CONTINUE,MENU_MODE_SD_PAUSED,0);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,UI_TEXT_STOP_PRINT,UI_ACTION_SD_STOP,MENU_MODE_SD_PRINTING,0);
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
@@ -382,8 +392,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MO
 #define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
 #endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+4+UI_MOUNT_CNT);
+#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_stop,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
+UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+5+UI_MOUNT_CNT);
 UI_MENU_SUBMENU(ui_menu_sd_sub,UI_TEXT_SD_CARD,ui_menu_sd);
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,

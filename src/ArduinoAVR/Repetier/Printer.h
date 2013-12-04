@@ -31,7 +31,8 @@
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
 #define PRINTER_FLAG0_ZPROBEING             64
 #define PRINTER_FLAG0_LARGE_MACHINE         128
-
+#define PRINTER_FLAG1_HOMED                 1
+#define PRINTER_FLAG1_AUTOMOUNT             2
 class Printer
 {
 public:
@@ -60,7 +61,7 @@ public:
     static uint8_t unitIsInches;
 
     static uint8_t debugLevel;
-    static uint8_t flag0; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect
+    static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t stepsPerTimerCall;
     static unsigned long interval;    ///< Last step duration in ticks.
     static unsigned long timer;              ///< used for acceleration/deceleration timing
@@ -298,6 +299,22 @@ public:
     static inline void setAdvanceActivated(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
+    }
+    static inline uint8_t isHomed()
+    {
+        return flag1 & PRINTER_FLAG1_HOMED;
+    }
+    static inline void setHomed(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
+    }
+    static inline uint8_t isAutomount()
+    {
+        return flag1 & PRINTER_FLAG1_AUTOMOUNT;
+    }
+    static inline void setAutomount(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
     }
     static inline float convertToMM(float x)
     {
@@ -558,6 +575,10 @@ public:
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
+#endif
+#if FEATURE_MEMORY_POSITION
+    static void MemoryPosition();
+    static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
 #endif
 private:
     static void homeXAxis();

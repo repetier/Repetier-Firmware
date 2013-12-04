@@ -77,7 +77,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #include "pins.h"
 
 // Override pin definions from pins.h
-//#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
+#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
@@ -105,52 +105,52 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /** Drive settings for the Delta printers
 */
 #if DRIVE_SYSTEM==3
-    // ***************************************************
-    // *** These parameter are only for Delta printers ***
-    // ***************************************************
+// ***************************************************
+// *** These parameter are only for Delta printers ***
+// ***************************************************
 
-    /** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive */
-    #define DELTA_DRIVE_TYPE 0
+/** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive */
+#define DELTA_DRIVE_TYPE 0
 
-    #if DELTA_DRIVE_TYPE == 0
-      /** \brief Pitch in mm of drive belt. GT2 = 2mm */
-      #define BELT_PITCH 2
-      /** \brief Number of teeth on X, Y and Z tower pulleys */
-      #define PULLEY_TEETH 20
-      #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
-    #elif DELTA_DRIVE_TYPE == 1
-      /** \brief Filament pulley diameter in milimeters */
-      #define PULLEY_DIAMETER 10
-      #define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
-    #endif
+#if DELTA_DRIVE_TYPE == 0
+/** \brief Pitch in mm of drive belt. GT2 = 2mm */
+#define BELT_PITCH 2
+/** \brief Number of teeth on X, Y and Z tower pulleys */
+#define PULLEY_TEETH 20
+#define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
+#elif DELTA_DRIVE_TYPE == 1
+/** \brief Filament pulley diameter in milimeters */
+#define PULLEY_DIAMETER 10
+#define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
+#endif
 
-    /** \brief Steps per rotation of stepper motor */
-    #define STEPS_PER_ROTATION 200
+/** \brief Steps per rotation of stepper motor */
+#define STEPS_PER_ROTATION 200
 
-    /** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
-    #define MICRO_STEPS 16
+/** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
+#define MICRO_STEPS 16
 
-    // Calculations
-    #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
-    #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
-    #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
-    #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+// Calculations
+#define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
+#define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #else
-    // *******************************************************
-    // *** These parameter are for all other printer types ***
-    // *******************************************************
+// *******************************************************
+// *** These parameter are for all other printer types ***
+// *******************************************************
 
-    /** Drive settings for printers with cartesian drive systems */
-    /** \brief Number of steps for a 1mm move in x direction.
-    For xy gantry use 2*belt moved!
-    Overridden if EEPROM activated. */
-    #define XAXIS_STEPS_PER_MM 98.425196
-    /** \brief Number of steps for a 1mm move in y direction.
-    For xy gantry use 2*belt moved!
-    Overridden if EEPROM activated.*/
-    #define YAXIS_STEPS_PER_MM 98.425196
-    /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
-    #define ZAXIS_STEPS_PER_MM 2560
+/** Drive settings for printers with cartesian drive systems */
+/** \brief Number of steps for a 1mm move in x direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated. */
+#define XAXIS_STEPS_PER_MM 98.425196
+/** \brief Number of steps for a 1mm move in y direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated.*/
+#define YAXIS_STEPS_PER_MM 98.425196
+/** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
+#define ZAXIS_STEPS_PER_MM 2560
 #endif
 
 // ##########################################################################################
@@ -798,7 +798,7 @@ you can also change the values online and autoleveling will store the results he
 Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
 will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define MAX_DELTA_SEGMENTS_PER_LINE 24
+#define MAX_DELTA_SEGMENTS_PER_LINE 22
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -1118,11 +1118,16 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
 
+/* Define a pin to tuen light on/off */
+#define CASE_LIGHTS_PIN -1
+
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT false
-/** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
-#define SD_ALLOW_LONG_NAMES false
+/** Will show long filenames as entered. You can not create long filenames view g-code. Do not delete files
+with long filenames!
+ */
+#define SD_ALLOW_LONG_NAMES true
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
@@ -1180,11 +1185,18 @@ Select the language to use.
 #define UI_LANGUAGE 1
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_VERSION_STRING2 "Delta Tower"
+#define UI_PRINTER_NAME "Delta Tower"
+#define UI_PRINTER_COMPANY "Dreamfactory"
+
+
+/** Animate switches between menus etc. */
+#define UI_ANIMATION true
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
 
+/** Delay of start screen in milliseconds */
+#define UI_START_SCREEN_DELAY 1000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH true

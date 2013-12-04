@@ -1180,19 +1180,11 @@ void Commands::executeGCode(GCode *com)
             break;
 #if FEATURE_MEMORY_POSITION
         case 401: // Memory position
-            Printer::memoryX = Printer::currentPositionSteps[0];
-            Printer::memoryY = Printer::currentPositionSteps[1];
-            Printer::memoryZ = Printer::currentPositionSteps[2];
+            Printer::MemoryPosition();
             break;
         case 402: // Go to stored position
-        {
-            bool all = !(com->hasX() && com->hasY() && com->hasZ());
-            PrintLine::moveRelativeDistanceInSteps((all || com->hasX() ? Printer::memoryX-Printer::currentPositionSteps[0] : 0)
-                                                   ,(all || com->hasY() ? Printer::memoryY-Printer::currentPositionSteps[1] : 0)
-                                                   ,(all || com->hasZ() ? Printer::memoryZ-Printer::currentPositionSteps[2] : 0)
-                                                   ,0,(com->hasF() ? com->F : Printer::feedrate),false,ALWAYS_CHECK_ENDSTOPS);
-        }
-        break;
+            Printer::GoToMemoryPosition(com->hasX(),com->hasY(),com->hasZ(),com->hasE(),(com->hasF() ? com->F : Printer::feedrate));
+            break;
 #endif
         case 908: // Control digital trimpot directly.
         {

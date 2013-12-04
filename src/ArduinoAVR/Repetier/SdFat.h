@@ -1401,6 +1401,33 @@ struct directoryEntry {
            /** 32-bit unsigned holding this file's size in bytes. */
   uint32_t fileSize;
 } PACK;
+
+// LONG FILENAME FAT ENTRY
+struct directoryVFATEntry {
+  /**
+   * Sequence number. Consists of 2 parts:
+   *  bit 6:   indicates first long filename block for the next file
+   *  bit 0-4: the position of this long filename block (first block is 1)
+   */
+  uint8_t  sequenceNumber;
+  /** First set of UTF-16 characters */
+  uint16_t name1[5];//UTF-16
+  /** attributes (at the same location as in directoryEntry), always 0x0F */
+  uint8_t  attributes;
+  /** Reserved for use by Windows NT. Always 0. */
+  uint8_t  reservedNT;
+  /** Checksum of the short 8.3 filename, can be used to checked if the file system as modified by a not-long-filename aware implementation. */
+  uint8_t  checksum;
+  /** Second set of UTF-16 characters */
+  uint16_t name2[6];//UTF-16
+  /** firstClusterLow is always zero for longFilenames */
+  uint16_t firstClusterLow;
+  /** Third set of UTF-16 characters */
+  uint16_t name3[2];//UTF-16
+} PACK;
+typedef struct directoryVFATEntry vfat_t;
+
+
 //------------------------------------------------------------------------------
 // Definitions for directory entries
 //
@@ -1928,6 +1955,7 @@ class SdBaseFile {
   bool open(const char* path, uint8_t oflag = O_READ);
   bool openNext(SdBaseFile* dirFile, uint8_t oflag);
   bool openRoot(SdVolume* vol);
+  int8_t readDir(dir_t& dir, char *longfilename) {return readDir(&dir, longfilename);}
   int peek();
   bool printCreateDateTime();
   static void printFatDate(uint16_t fatDate);
@@ -1940,7 +1968,8 @@ class SdBaseFile {
   bool printName();
   int16_t read();
   int read(void* buf, size_t nbyte);
-  int8_t readDir(dir_t* dir);
+  int8_t readDir(dir_t* dir, char *longfilename);
+
   static bool remove(SdBaseFile* dirFile, const char* path);
   bool remove();
   /** Set the file's current position to zero. */
@@ -2015,6 +2044,8 @@ class SdBaseFile {
   bool open(SdBaseFile* dirFile, const uint8_t dname[11], uint8_t oflag);
   bool openCachedEntry(uint8_t cacheIndex, uint8_t oflags);
   dir_t* readDirCache();
+  dir_t* readDirCacheSpecial();
+  dir_t* getLongFilename(dir_t *dir, char *longFilename);
   bool setDirSize();
 //------------------------------------------------------------------------------
 // to be deleted

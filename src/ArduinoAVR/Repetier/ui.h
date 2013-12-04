@@ -153,6 +153,8 @@
 #define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
+#define UI_ACTION_LIGHTS_ONOFF          1107
+#define UI_ACTION_SD_STOP               1108
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -351,6 +353,8 @@ class UIDisplay {
     float lastNextAccumul; // Accumulated value
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
+    int8_t oldMenuLevel;
+    uint8_t encoderStartScreen;
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
     void addLong(long value,char digits);
     void addFloat(float number, char fixdigits,uint8_t digits);
@@ -364,7 +368,8 @@ class UIDisplay {
     UIDisplay();
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
-    void printRow(uint8_t r,char *txt); // Print row on display
+    void waitForKey();
+    void printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
     void parse(char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
@@ -380,7 +385,7 @@ class UIDisplay {
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
 //#if SDSUPPORT
     void updateSDFileCount();
-    void sdrefresh(uint8_t &r);
+    //void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*13+2];
@@ -417,7 +422,7 @@ void ui_check_slow_keys(int &action) {}
 #ifdef UI_FONT_6X10
 #define UI_FONT_WIDTH 6
 #define UI_FONT_HEIGHT 10
-#define UI_FONT_DEFAULT u8g_font_6x10
+#define UI_FONT_DEFAULT u8g_font_6x10_repetier //u8g_font_6x10
 #endif
 
 //calculate rows and cols available with current font
