@@ -547,6 +547,22 @@ void initializeLCD()
 U8GLIB_ST7920_128X64_1X u8g(UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN);
 #endif
 
+
+#define drawHProgressBar(x,y,width,height,progress) \
+    {u8g.drawFrame(x,y, width, height);  \
+    int p = ceil((width-2) * progress / 100); \
+    u8g.drawBox(x+1,y+1, p, height-2);} 
+
+
+#define drawVProgressBar(x,y,width,height,progress) \
+    {u8g.drawFrame(x,y, width, height);  \
+    int p = height-1 - ceil((height-2) * progress / 100); \
+    u8g.drawBox(x+1,y+p, width-2, (height-p));}
+
+
+char statusBuffer[6][MAX_COLS+1]; //buffer the 6 lines on the status page
+int animSequence = 0;
+
 void UIDisplay::printRow(uint8_t r,char *txt)
 {
     uint8_t col=0;
@@ -561,32 +577,6 @@ void UIDisplay::printRow(uint8_t r,char *txt)
         txt++;
         //catch the special chars /001 to /006
         switch(c){
-          case '\001': //Back
-                   u8g.setFont(u8g_font_6x12_67_75);
-                   u8g.print('\x35'); //arrow back
-                   u8g.setFont(UI_FONT_DEFAULT);
-                   break;
-          case '\002':  //degrees
-                   u8g.print('\xb0');
-                   break;
-          case '\003': //char selected
-                   u8g.setFont(u8g_font_m2icon_5);
-                   u8g.print('\x47');
-                   u8g.setFont(UI_FONT_DEFAULT);
-                   break;
-          case '\004': //unselect
-                   u8g.setFont(u8g_font_m2icon_5);
-                   u8g.print('\x45');
-                   u8g.setFont(UI_FONT_DEFAULT);
-                    break;
-          case '\005': //temp
-                   u8g.print('T');
-                   break;
-          case '\006': //folder
-                   u8g.setFont(u8g_font_m2icon_5);
-                   u8g.print('\x41'); //arrow back
-                   u8g.setFont(UI_FONT_DEFAULT);
-                   break;
           case 0x7E: // right arrow
                    u8g.setFont(u8g_font_6x12_67_75);
                    u8g.print('\x52'); //arrow back
@@ -615,10 +605,7 @@ void UIDisplay::printRow(uint8_t r,char *txt)
 
 void initializeLCD()
 {
-   u8g.firstPage();
-    do {
-        u8g.setColorIndex(0);
-    } while( u8g.nextPage() );
+    u8g.begin();
 
     u8g.setFont(UI_FONT_DEFAULT);
     u8g.setColorIndex(1);
@@ -1357,20 +1344,129 @@ void UIDisplay::sdrefresh(uint8_t &r)
     }
 }
 #endif
+
+
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
     uint8_t r;
     uint8_t mtype;
+    
+    
 #if UI_DISPLAY_TYPE == 5
+
+     if(menuLevel==0 && menuPos[0] == 0 ) 
+     {
+         //gather only Status data outside of picture loop
+         
+         //Note based on my testing, the picture loop can loop around 8 times
+         //It would probably be better to parse and buffer all lines before the picture loop
+
+         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
+         uint8_t nr = pgm_read_word_near(&(men->numEntries));
+         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
+         for(r=0; r<nr; r++)
+         {
+            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
+            col=0;
+            parse((char*)pgm_read_word(&(ent->text)),false);
+            //TODO: printcols to handle all the lines? or adapt parse to take a pointer to the buffer?
+            strcpy(statusBuffer[r], printCols);
+         }
+        
+         //ext1 and ext2 animation symbols
+         if(extruder[0].tempControl.targetTemperatureC > 0)
+             statusBuffer[0][0] = animSequence==0?'\x08':'\x09';
+         else 
+             statusBuffer[0][0] = '\x0a'; //off
+         #if NUM_EXTRUDER>1
+           if(extruder[1].tempControl.targetTemperatureC > 0)
+               statusBuffer[1][0] = animSequence==0?'\x08':'\x09';
+           else 
+         #endif
+            statusBuffer[1][0] = '\x0a'; //off
+         #if HAVE_HEATED_BED==true
+         
+           //heatbed animated icons
+           if(heatedBedController.targetTemperatureC > 0)
+               statusBuffer[2][0] = animSequence==0?'\x0c':'\x0d';
+           else 
+               statusBuffer[2][0] = '\x0b';
+         #endif  
+         
+         
+     }
     //u8g picture loop
     u8g.firstPage();
     do
     {
-#endif
+      
 
+        u8g.setColorIndex(1);
         if(menuLevel==0)
         {
+            if(menuPos[0]==0)
+            {
+              //status screen (first 3 rows)
+              
+              u8g.setFont(UI_FONT_SMALL); 
+              
+              for(int r=0; r<3; r++)
+              {
+                  u8g.setPrintPos(0, r*10+8); 
+                  u8g.print(statusBuffer[r]);
+              }
+              
+              //fan 
+              int fanPercent = Printer::getFanSpeed()*100/255;
+              u8g.setPrintPos(115, 30);
+              if(fanPercent > 0){ //fan running anmation
+                  u8g.print( (animSequence==0?'\x0e':'\x0f') );
+              } else {
+                  u8g.print( '\x0e' );
+              }
+              drawVProgressBar(114, 0, 9, 20, fanPercent);
+    
+    
+              u8g.setPrintPos(0, 43);
+              u8g.print(statusBuffer[3]); //mul
+              u8g.setPrintPos(0, 52);
+              u8g.print(statusBuffer[4]); //buf
+   
+              //SD Card
+              unsigned long sdPercent;
+              if(sd.sdactive && sd.sdmode)
+              {
+                  if(sd.filesize<20000000) sdPercent=sd.sdpos*100/sd.filesize;
+                  else sdPercent = (sd.sdpos>>8)*100/(sd.filesize>>8);
+              } else {
+                  sdPercent = 0;
+              }
+
+              u8g.setPrintPos(70, 48);
+              u8g.print("SD");
+              drawHProgressBar(83,42, 40, 5, sdPercent);  
+
+              //Satus
+              u8g.setPrintPos(0, u8g.getHeight()-2);
+              u8g.print(statusBuffer[5]);
+              
+              //divider lines
+              u8g.drawLine(0, 32, u8g.getWidth(), 32);
+              u8g.drawLine(108, 0, 108, 32);
+              u8g.drawLine(55, 0, 55, 32);
+
+              
+ 
+            } 
+            else 
+            { // menulevel=0 and menuPos[0] > 0 - handle as default rows
+                u8g.setFont(UI_FONT_DEFAULT);
+#else
+        if(menuLevel==0)
+        {
+#endif
+
             UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
             uint8_t nr = pgm_read_word_near(&(men->numEntries));
             UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -1381,6 +1477,9 @@ void UIDisplay::refreshPage()
                 parse((char*)pgm_read_word(&(ent->text)),false);
                 printRow(r,(char*)printCols);
             }
+          #if UI_DISPLAY_TYPE==5
+          }// end additional else statement 
+          #endif
         }
         else
         {
@@ -1431,12 +1530,18 @@ void UIDisplay::refreshPage()
             sdrefresh(r);
         }
 #endif
+
+#if UI_DISPLAY_TYPE == 5
+
+    } while( u8g.nextPage() );  //end picture loop
+    
+    
+    animSequence=~animSequence;
+#else 
         printCols[0]=0;
         while(r<UI_ROWS)
             printRow(r++,printCols);
-#if UI_DISPLAY_TYPE == 5
-    }
-    while( u8g.nextPage() );  //end picture loop
+
 #endif
 }
 void UIDisplay::pushMenu(void *men,bool refresh)
