@@ -105,6 +105,12 @@ void Extruder::manageTemperatures()
         }
         if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
         uint8_t on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+        //alarm BEEP on reaching temp 
+        if(act->currentTemperature>=act->targetTemperature && act->alarmOntemp)
+	{
+          beep(50*(controller+1),3);
+	  act->alarmOntemp=false;  //reset alarm
+	}
 #ifdef TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
@@ -414,6 +420,12 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
 #endif
     if(alloffs && !alloff) // heaters are turned on, start measuring printing time
         Printer::msecondsPrinting = HAL::timeInMilliseconds();
+}
+
+void Extruder::setAlarm(uint8_t extr)
+{
+  TemperatureController *tc = tempController[extr];
+  tc->alarmOntemp=true;
 }
 
 void Extruder::setHeatedBedTemperature(float temp_celsius)
@@ -1142,7 +1154,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+     ,false }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1162,7 +1174,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+    ,false }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1182,7 +1194,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+    ,false }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1202,7 +1214,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+    ,false }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1222,7 +1234,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+    ,false }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1242,7 +1254,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+     ,false }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1254,7 +1266,7 @@ TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE
 #ifdef TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-                                            };
+   ,false};
 #else
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif
