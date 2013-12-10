@@ -48,6 +48,7 @@ class TemperatureController
 #ifdef TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
+    bool alarmOntemp;
 };
 
 class Extruder;
@@ -287,6 +288,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     static void setHeatedBedTemperature(float temp_celsius);
     static float getHeatedBedTemperature();
     static void setTemperatureForExtruder(float temp_celsius,uint8_t extr);
+    static void setAlarm(uint8_t extr);
 };
 
 #if HAVE_HEATED_BED
