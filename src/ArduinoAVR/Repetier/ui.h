@@ -613,11 +613,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_A      7 // pins the click encoder are connected to
 #define UI_ENCODER_B      22
 #define UI_RESET_PIN      32 // single button for reset
-//#define SDCARDDETECT      15 // Set to -1 if you have not connected that pin
-//#define SDSS              31 // Chip select pin
+#define SDCARDDETECT      49 // Set to -1 if you have not connected that pin
+#define SDSS              53 // Chip select pin
 
-//#define SDSUPPORT true
-//#define SDCARDDETECTINVERTED false
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1

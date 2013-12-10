@@ -132,12 +132,12 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_0_PIN     13
 #define TEMP_0_PIN       7 // Due analog pin #54
 #define HEATER_1_PIN     7 
-#define TEMP_1_PIN       6 // Due analog pin #55
+#define TEMP_1_PIN       3 // Due analog pin #58
 #define HEATER_2_PIN     12
-#define TEMP_2_PIN       5 // Due analog pin #56
+#define TEMP_2_PIN       6 // Due analog pin #55
 #define HEATER_3_PIN     11
-#define TEMP_3_PIN       4 // Due analog pin #57
-#define TEMP_4_PIN       3 // Due analog pin #58
+#define TEMP_3_PIN       5 // Due analog pin #56
+#define TEMP_4_PIN       4 // Due analog pin #57
 
 #define E0_STEP_PIN    61 // A7
 #define E0_DIR_PIN     60 // A6
@@ -158,7 +158,7 @@ STEPPER_CURRENT_CONTROL
 #define SDCARDDETECTINVERTED false
 #define LED_PIN 	   -1
 #define FAN_PIN 	   9 
-#define FAN2_PIN     8 
+#define FAN2_PIN           8 
 #define PS_ON_PIN          40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.

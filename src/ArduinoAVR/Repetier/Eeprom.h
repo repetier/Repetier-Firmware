@@ -150,77 +150,77 @@ public:
     static void updatePrinterUsage();
 
     static inline float zProbeSpeed() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);
 #else
         return Z_PROBE_SPEED;
 #endif
     }
     static inline float zProbeXYSpeed() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_XY_SPEED);
 #else
         return Z_PROBE_XY_SPEED;
 #endif
     }
     static inline float zProbeXOffset() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X_OFFSET);
 #else
         return Z_PROBE_X_OFFSET;
 #endif
     }
     static inline float zProbeYOffset() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y_OFFSET);
 #else
         return Z_PROBE_Y_OFFSET;
 #endif
     }
     static inline float zProbeHeight() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_HEIGHT);
 #else
         return Z_PROBE_HEIGHT;
 #endif
     }
     static inline float zProbeX1() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X1);
 #else
         return Z_PROBE_X1;
 #endif
     }
     static inline float zProbeY1() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y1);
 #else
         return Z_PROBE_Y1;
 #endif
     }
     static inline float zProbeX2() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X2);
 #else
         return Z_PROBE_X2;
 #endif
     }
     static inline float zProbeY2() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y2);
 #else
         return Z_PROBE_Y2;
 #endif
     }
     static inline float zProbeX3() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X3);
 #else
         return Z_PROBE_X3;
 #endif
     }
     static inline float zProbeY3() {
-#if FEATURE_Z_PROBE
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y3);
 #else
         return Z_PROBE_Y3;

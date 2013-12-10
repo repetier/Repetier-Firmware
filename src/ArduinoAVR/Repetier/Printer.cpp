@@ -378,10 +378,10 @@ void Printer::updateCurrentPosition()
 uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register long p;
-    if(!PrintLine::hasLines())
+    /*if(!PrintLine::hasLines()) // only print for the first line
     {
         UI_STATUS(UI_TEXT_PRINTING);
-    }
+    }*/
     float x,y,z;
     if(!relativeCoordinateMode)
     {
@@ -454,9 +454,12 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 
 void Printer::setup()
 {
+    HAL::stopWatchdog();
+#if FEATURE_CONTROLLER==5
+    HAL::delayMilliseconds(100);
+#endif // FEATURE_CONTROLLER
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
     HAL::hwSetup();
-    HAL::stopWatchdog();
 #ifdef ANALYZER
 // Channel->pin assignments
 #if ANALYZER_CH0>=0

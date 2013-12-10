@@ -1059,7 +1059,7 @@ int16_t read_max6675(uint8_t ss_pin)
     HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
     max6675_temp = HAL::spiReceive(0);
     max6675_temp <<= 8;
-    HAL::max6675_temp |= HAL::spiReceive(0);
+    max6675_temp |= HAL::spiReceive(0);
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
     return max6675_temp & 4 ? 2000 : max6675_temp >> 3; // thermocouple open?
 }

@@ -1379,7 +1379,7 @@ void getSDFilenameAt(byte filePos,char *filename)
         }
         for (uint8_t i = 0; i < 11; i++)
         {
-            if (i == 8)
+            if (i == 8 && !(p->name[0]=='.' && p->name[1]=='.'))
                 filename[c++]='.';
             if (p->name[i] == ' ')
                 continue;
@@ -1389,6 +1389,7 @@ void getSDFilenameAt(byte filePos,char *filename)
         break;
     }
     filename[c]=0;
+    Com::printFLN(PSTR("SDSelect:"),filename);
 }
 
 bool UIDisplay::isDirname(char *name)
@@ -1551,7 +1552,7 @@ void UIDisplay::refreshPage()
 #if UI_ANIMATION
     if(menuLevel != oldMenuLevel && !PrintLine::hasLines())
     {
-        if(oldMenuLevel == 0)
+        if(oldMenuLevel == 0 || oldMenuLevel == -2)
             transition = 1;
         else if(menuLevel == 0)
             transition = 2;
@@ -1764,6 +1765,7 @@ void UIDisplay::okAction()
         uint8_t filePos = menuPos[menuLevel]-1;
         char filename[14];
         getSDFilenameAt(filePos,filename);
+        Com::printFLN(PSTR("Filepos:"),(int)filePos);
         if(isDirname(filename))   // Directory change selected
         {
             goDir(filename);
@@ -1775,17 +1777,18 @@ void UIDisplay::okAction()
         }
 
         int16_t action;
-
         if (Printer::isAutomount())
             action = UI_ACTION_SD_PRINT;
         else
         {
+            Com::printFLN(PSTR("Level up"));
             menuLevel--;
             men = (UIMenu*)menu[menuLevel];
             entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
             ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
             action = pgm_read_word(&(ent->action));
         }
+        Com::printFLN(PSTR("Action"),action);
         switch(action)
         {
         case UI_ACTION_SD_PRINT:
@@ -1794,6 +1797,7 @@ void UIDisplay::okAction()
                 sd.sdmode = false;
                 sd.file.close();
                 sd.fat.chdir(cwd);
+                Com::printFLN(PSTR("Open:"),filename);
                 if (sd.file.open(filename, O_READ))
                 {
                     Com::printF(Com::tFileOpened,filename);
@@ -2789,7 +2793,7 @@ void UIDisplay::slowAction()
             if(time-nextRepeat<10000)
             {
                 executeAction(lastAction);
-                repeatDuration -=UI_KEY_REDUCE_REPEAT;
+                repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration<UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time+repeatDuration;
             }
@@ -2830,7 +2834,7 @@ void UIDisplay::slowAction()
     }
     if(refresh)
     {
-        if (menuLevel > 1 || Printer.isAutomount())
+        if (menuLevel > 1 || Printer::isAutomount())
         {
             shift++;
             if(shift+UI_COLS>MAX_COLS+1)
