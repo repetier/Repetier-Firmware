@@ -806,6 +806,14 @@ void Commands::executeGCode(GCode *com)
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
+            // P>0 set alarm, beep once when temperature is reached.
+            if(com->hasP() && com->P>0) 
+            {
+                if(com->hasT())
+                    Extruder::setAlarm(com->T);
+                else
+                    Extruder::setAlarm(Extruder::current->id);
+            }        
 #ifdef EXACT_TEMPERATURE_TIMING
             Commands::waitUntilEndOfAllMoves();
 #else
@@ -824,6 +832,8 @@ void Commands::executeGCode(GCode *com)
         case 140: // M140 set bed temp
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
+            // P1 beep when bed temperature is reached
+            if(com->hasP() && com->P>0) Extruder::setAlarm(NUM_EXTRUDER);
             if(Printer::debugDryrun()) break;
             if (com->hasS()) Extruder::setHeatedBedTemperature(com->S);
             break;
