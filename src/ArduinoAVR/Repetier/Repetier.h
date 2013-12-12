@@ -246,7 +246,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "HAL.h"
 #include "gcode.h"
-
+#define MAX_VFAT_ENTRIES (2)
+/** Total size of the buffer used to store the long filenames */
+#define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 #define SD_MAX_FOLDER_DEPTH 2
 
 #include "ui.h"
@@ -380,12 +382,9 @@ extern void write_monitor();
 
 
 #if SDSUPPORT
-
-#define MAX_VFAT_ENTRIES (3)
-/** Total size of the buffer used to store the long filenames */
-#define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 extern char tempLongFilename[LONG_FILENAME_LENGTH+1];
-
+extern char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+10];
+#define SHORT_FILENAME_LENGTH 14
 #include "SdFat.h"
 
 enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
@@ -428,6 +427,9 @@ public:
   void makeDirectory(char *filename);
   bool showFilename(const uint8_t *name);
   void automount();
+#ifdef GLENN_DEBUG
+  void writeToFile();
+#endif
 private:
   uint8_t lsRecursive(SdBaseFile *parent,uint8_t level,char *findFilename);
  // SdFile *getDirectory(char* name);

@@ -383,14 +383,14 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
-//#if SDSUPPORT
+#if SDSUPPORT
     void updateSDFileCount();
     //void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
-    char cwd[SD_MAX_FOLDER_DEPTH*13+2];
+    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
-//#endif
+#endif
 };
 extern UIDisplay uid;
 

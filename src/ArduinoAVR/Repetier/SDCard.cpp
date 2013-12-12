@@ -29,6 +29,7 @@
 #endif
 
 char tempLongFilename[LONG_FILENAME_LENGTH+1];
+char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+10];
 
 SDCard sd;
 
@@ -96,6 +97,8 @@ void SDCard::initsd()
     }
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
+
+    fat.chdir();
     if(selectFile("init.g",true))
     {
         startPrint();
@@ -329,190 +332,39 @@ int8_t strnicmp(const char* s1, const char* s2, size_t n)
     }
     return 0;
 }
-uint8_t SDCard::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename)
-{
-    dir_t *p = NULL;
-    uint8_t cnt=0;
-    char *oldpathend = pathend;
-    char filename[13];
-    parent->rewind();
 
-    while ((p = parent->getLongFilename(p, tempLongFilename)))
-    {
-        HAL::pingWatchdog();
-        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
-        if( DIR_IS_SUBDIR(p))
-        {
-            if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
-            if(level<SD_MAX_FOLDER_DEPTH)
-            {
-                createFilename(filename, *p);
-                if (findFilename == NULL)
-                {
-                    if(level)
-                    {
-                        Com::print(fullName);
-                        Com::print('/');
-                    }
-                    Com::print(filename);
-                    Com::printFLN(Com::tSlash); //End with / to mark it as directory entry, so we can see empty directories.
-                }
-            }
-            char *tmp = oldpathend;
-            if(level) *tmp++ = '/';
-            char *dirname = tmp;
-            pathend = createFilename(tmp,*p);
-            SdBaseFile next;
-            uint16_t index = parent->curPosition()/32 - 1;
-            if(next.open(parent, dirname, O_READ))
-            {
-                if (lsRecursive(&next,level+1, findFilename))
-                    return true;
-            }
-            parent->seekSet(32 * (index + 1));
-            *oldpathend = 0;
-        }
-        else
-        {
-            createFilename(filename,*p);
 
-            if (findFilename != NULL)
-            {
-                int8_t cFullname;
-
-                cFullname = strlen(fullName);
-                if (strnicmp(fullName, findFilename, cFullname) == 0)
-                {
-                    if (cFullname > 0)
-                        cFullname++;
-                    if (stricmp(tempLongFilename, findFilename+cFullname) == 0)
-                    {
-                        strcpy(findFilename, filename);
-                        parentFound = *parent;
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                if(level)
-                {
-                    Com::print(fullName);
-                    Com::print('/');
-                }
-#if SD_ALLOW_LONG_NAMES==true
-                Com::print(tempLongFilename);
-#else
-                Com::print(filename);
-#endif
-#ifdef SD_EXTENDED_DIR
-                Com::printF(Com::tSpace,(long)p->fileSize);
-#endif
-                Com::println();
-            }
-        }
-    }
-    return false;
-}
 void SDCard::ls()
 {
+    SdBaseFile file;
+
     Com::printFLN(Com::tBeginFileList);
-    *fullName = 0;
-    pathend = fullName;
     fat.chdir();
-    lsRecursive(fat.vwd(),0,NULL);
+
+    file.openRoot(fat.vol());
+    file.ls(0, 0);
     Com::printFLN(Com::tEndFileList);
 }
-/*
-bool SDCard::selectFile(char *filename,bool silent)
-{
-    SdBaseFile *parent;
-    char searchFilename[LONG_FILENAME_LENGTH+1], *oldP = filename, *p;
-    SdBaseFile next;
 
-    if(!sdactive) return false;
-    sdmode = false;
-    file.close();
-    fat.chdir();
-
-    parent = fat.vwd();
-    if ((p = strrchr(oldP, '/')) != NULL)
-    {
-        *p = 0;
-        if (!next.open(parent, filename, O_READ))
-            return false;
-        parent = &next;
-        oldP = p+1;
-    }
-    strcpy(searchFilename, oldP);
-    if (lsRecursive(parent, SD_MAX_FOLDER_DEPTH, searchFilename) != NULL && file.open(&parentFound, searchFilename, O_READ))
-    {
-        if(!silent)
-        {
-            Com::printF(Com::tFileOpened,filename);
-            Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
-        }
-        sdpos = 0;
-        filesize = file.fileSize();
-        Com::printFLN(Com::tFileSelected);
-        return true;
-    }
-    else
-    {
-        if(!silent)
-            Com::printFLN(Com::tFileOpenFailed);
-        return false;
-    }
-}*/
-bool SDCard::selectFile(char *filename,bool silent)
+bool SDCard::selectFile(char *filename, bool silent)
 {
     SdBaseFile parent;
-    char searchFilename[LONG_FILENAME_LENGTH+1], *oldP = filename, *p;
-    SdBaseFile next;
+    char *oldP = filename;
     boolean bFound;
-    if(!sdactive) return false;
 
+    if(!sdactive) return false;
     sdmode = false;
+
     file.close();
-    fat.chdir();
 
     parent = *fat.vwd();
+    if (file.open(&parent, filename, O_READ))
+      {
+      if ((oldP = strrchr(filename, '/')) != NULL)
+          oldP++;
+      else
+          oldP = filename;
 
-    // Traverse the Long Directory Name Path until we get to the LEAF (long file name)
-
-    while ((p = strchr(oldP, '/')) != NULL)
-    {
-        dir_t *pEntry = NULL;
-        *p = 0;
-        bFound = false;
-        while ((pEntry = parent.getLongFilename(pEntry, tempLongFilename)))
-        {
-          HAL::pingWatchdog();
-          if (!DIR_IS_SUBDIR(pEntry)) continue;
-          if (stricmp(tempLongFilename, oldP) == 0)
-            {
-            createFilename(searchFilename, *pEntry);
-            bFound = true;
-            break;
-            }
-        }
-        next.close();
-        if (!bFound || !next.open(&parent, searchFilename, O_READ))
-            {
-            if(!silent)
-              Com::printFLN(Com::tFileOpenFailed);
-            return false;
-            }
-        parent = next;
-        oldP = p+1;
-    }
-
-    next.close();
-
-    // Find the LEAF (long file name) in the directory.
-    strcpy(searchFilename, oldP);
-    if (lsRecursive(&parent, SD_MAX_FOLDER_DEPTH, searchFilename) != NULL && file.open(&parentFound, searchFilename, O_READ))
-    {
         if(!silent)
         {
             Com::printF(Com::tFileOpened, oldP);
@@ -600,5 +452,21 @@ void SDCard::makeDirectory(char *filename)
         Com::printFLN(Com::tCreationFailed);
     }
 }
+
+#ifdef GLENN_DEBUG
+void SDCard::writeToFile()
+{
+  size_t nbyte;
+  char szName[10];
+
+  strcpy(szName, "Testing\r\n");
+  nbyte = file.write(szName, strlen(szName));
+  Com::print("L=");
+  Com::print((long)nbyte);
+  Com::println();
+}
+
+#endif
+
 #endif
 

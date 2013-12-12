@@ -747,7 +747,10 @@ void Commands::executeGCode(GCode *com)
             break;
         case 23: //M23 - Select file
             if(com->hasString())
+            {
+                sd.fat.chdir();
                 sd.selectFile(com->text);
+            }
             break;
         case 24: //M24 - Start SD print
             sd.startPrint();
@@ -772,12 +775,44 @@ void Commands::executeGCode(GCode *com)
             break;
         case 30: // M30 filename - Delete file
             if(com->hasString())
+            {
+                sd.fat.chdir();
                 sd.deleteFile(com->text);
+            }
             break;
         case 32: // M32 directoryname
             if(com->hasString())
+            {
+                sd.fat.chdir();
                 sd.makeDirectory(com->text);
+            }
             break;
+#ifdef GLENN_DEBUG
+        case 33:
+        {
+            dir_t* p = NULL;
+            byte offset = uid.menuTop[uid.menuLevel];
+            SdBaseFile *root;
+            byte length, skip;
+
+            Com::printF(PSTR("Ls:"));
+            Com::print(uid.cwd);
+            Com::println();
+
+            sd.makeDirectory("/AAA/folder");
+
+            char filename[LONG_FILENAME_LENGTH+1];
+
+            strcpy(filename, "w.g");
+            sd.startWrite(filename);
+            for(length=0; length<50; length++)
+            {
+                sd.writeToFile();
+            }
+            sd.finishWrite();
+            return;
+        }
+#endif
 #endif
         case 42: //M42 -Change pin status via gcode
             if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)

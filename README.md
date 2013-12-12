@@ -2,17 +2,30 @@
 
 ## Important notice of this development version
 
-This development version is under heavy code change. Im reorganizing and refactoring
-this code. Planned achievements for this release:
+The development is nearly finished. Code is stable as far as we know. Depending on
+your configuration you may get some compilation problems. This is, because we have many
+conditional compilations and can not test every combination. If you find such a combination,
+please let us know, so we can fix the problem. Best is to send your Configuration.h causing
+the problems and the error message from the compiler.
 
+Improvements over old code:
 * Works with CodeBlocks for Arduino http://www.arduinodev.com/codeblocks/#download
   which can replace the ArduinoIDE with a much better one on windows systems. Load the
   Repetier.cdb project file for this.
 * Better readable code.
+* Long filename support (from Glenn Kreisel).
+* Animated menu changes.
 * Separation of logic and hardware access to allow different processor architectures
   by changing the hardware related files.
 * z-leveling support.
-* Modified OPS handling.
+* Mirroring of x,y and z motor.
+* Ditto printing.
+* Faster and better delta printing.
+* New heat manager (dead time control).
+* Removed OPS handling.
+* Full graphic display support.
+* Many bug fixes.
+* many other changes.
 
 ## Documentation
 
@@ -20,13 +33,16 @@ by repetier  (repetierdev@gmail.com)
 
 For documentation please visit [http://www.repetier.com/documentation/repetier-firmware/](http://www.repetier.com/documentation/repetier-firmware/)
 
-Beta version with added delta move and homing calculations and several other features for delta printers.
+## Developer
 
-To set rod height on a delta printer use command M251 which will allow you to measure 
-the rod length or, if you have an LCD panel then you can select delta calibration in the
-configuration menu.
-
-Version 0.81  03.02.2013
+The sources are managed by the Hot-World GmbH & Co. KG
+It was initially based on the Sprinter firmware from Kliment, but the code has run
+through many changes since them.
+Other developers:
+- Glenn Kreisel (long filename support)
+- Martin Croome (first delta implementation)
+- John Silvia (Arduino Due port)
+- plus several small contributions from other users.
 
 ## Introduction
 

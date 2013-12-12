@@ -791,7 +791,7 @@ void UIDisplay::initialize()
     do
     {
 #endif
-        for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y] = 0;
+        for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
         printRowP(0, versionString);
         printRowP(1, PSTR(UI_PRINTER_NAME));
 #if UI_ROWS>2
@@ -1348,7 +1348,7 @@ void UIDisplay::updateSDFileCount()
 
     root->rewind();
     nFilesOnCard = 0;
-    while ((p = root->getLongFilename(p, tempLongFilename)))
+    while ((p = root->getLongFilename(p, NULL, 0, NULL)))
     {
         if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
             continue;
@@ -1365,31 +1365,19 @@ void getSDFilenameAt(byte filePos,char *filename)
     dir_t* p;
     byte c=0;
     SdBaseFile *root = sd.fat.vwd();
-    root->rewind();
 
-    while ((p = root->getLongFilename(p, tempLongFilename)))
+    root->rewind();
+    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
         HAL::pingWatchdog();
         if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
         if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        if (filePos)
-        {
-            filePos--;
+        if (filePos--)
             continue;
-        }
-        for (uint8_t i = 0; i < 11; i++)
-        {
-            if (i == 8 && !(p->name[0]=='.' && p->name[1]=='.'))
-                filename[c++]='.';
-            if (p->name[i] == ' ')
-                continue;
-            filename[c++]=tolower(p->name[i]);
-        }
-        if(DIR_IS_SUBDIR(p)) filename[c++]='/'; // Set marker for directory
+        strcpy(filename, tempLongFilename);
+        if(DIR_IS_SUBDIR(p)) strcat(filename, "/"); // Set marker for directory
         break;
     }
-    filename[c]=0;
-    Com::printFLN(PSTR("SDSelect:"),filename);
 }
 
 bool UIDisplay::isDirname(char *name)
@@ -1423,6 +1411,7 @@ void UIDisplay::goDir(char *name)
     sd.fat.chdir(cwd);
     updateSDFileCount();
 }
+
 void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
 {
     dir_t* p = NULL;
@@ -1433,9 +1422,10 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
     sd.fat.chdir(uid.cwd);
     root = sd.fat.vwd();
     root->rewind();
+
     skip = (offset>0?offset-1:0);
 
-    while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->getLongFilename(p, tempLongFilename)))
+    while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
         HAL::pingWatchdog();
         // done if past last used entry
@@ -1762,10 +1752,13 @@ void UIDisplay::okAction()
             executeAction(UI_ACTION_BACK);
             return;
         }
+        if(!sd.sdactive)
+          return;
+
         uint8_t filePos = menuPos[menuLevel]-1;
-        char filename[14];
-        getSDFilenameAt(filePos,filename);
-        Com::printFLN(PSTR("Filepos:"),(int)filePos);
+        char filename[LONG_FILENAME_LENGTH+1];
+
+        getSDFilenameAt(filePos, filename);
         if(isDirname(filename))   // Directory change selected
         {
             goDir(filename);
@@ -1781,39 +1774,22 @@ void UIDisplay::okAction()
             action = UI_ACTION_SD_PRINT;
         else
         {
-            Com::printFLN(PSTR("Level up"));
-            menuLevel--;
-            men = (UIMenu*)menu[menuLevel];
+            men = (UIMenu*)menu[menuLevel-1];
             entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
-            ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+            ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel-1]]));
             action = pgm_read_word(&(ent->action));
         }
-        Com::printFLN(PSTR("Action"),action);
+        sd.file.close();
+        sd.fat.chdir(cwd);
         switch(action)
         {
         case UI_ACTION_SD_PRINT:
-            if(sd.sdactive)
-            {
-                sd.sdmode = false;
-                sd.file.close();
-                sd.fat.chdir(cwd);
-                Com::printFLN(PSTR("Open:"),filename);
-                if (sd.file.open(filename, O_READ))
+                if (sd.selectFile(filename, false))
                 {
-                    Com::printF(Com::tFileOpened,filename);
-                    Com::printFLN(Com::tSpaceSizeColon,sd.file.fileSize());
-                    sd.sdpos = 0;
-                    sd.filesize = sd.file.fileSize();
-                    Com::printFLN(Com::tFileSelected);
-                    menuLevel = 0;
                     sd.startPrint();
                     BEEP_LONG;
+                    menuLevel = 0;
                 }
-                else
-                {
-                    Com::printFLN(Com::tFileOpenFailed);
-                }
-            }
             break;
         case UI_ACTION_SD_DELETE:
             if(sd.sdactive)
@@ -1832,6 +1808,7 @@ void UIDisplay::okAction()
             }
             break;
         }
+        return;
     }
 #endif
     if(entType==2)   // Enter submenu

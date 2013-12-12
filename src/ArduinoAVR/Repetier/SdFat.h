@@ -1321,6 +1321,9 @@ uint32_t const FAT32EOC = 0X0FFFFFFF;
 uint32_t const FAT32EOC_MIN = 0X0FFFFFF8;
 /** Mask a for FAT32 entry. Entries are 28 bits. */
 uint32_t const FAT32MASK = 0X0FFFFFFF;
+
+// Reuse directory entries from deleted files
+#define SD_CARD_REUSE_FAT_ENTRIES true
 //------------------------------------------------------------------------------
 /**
  * \struct directoryEntry
@@ -1931,6 +1934,10 @@ class SdBaseFile {
   /** \return The first cluster number for a file or directory. */
   uint32_t firstCluster() const {return firstCluster_;}
   bool getFilename(char* name);
+  uint8_t lfn_checksum(const unsigned char *pFCBName);
+  bool openParentReturnFile(SdBaseFile* dirFile, const char* path, uint8_t *dname, SdBaseFile *newParent, boolean bMakeDirs);
+
+  
   /** \return True if this is a directory else false. */
   bool isDir() const {return type_ >= FAT_FILE_TYPE_MIN_DIR;}
   /** \return True if this is a normal file else false. */
@@ -2031,6 +2038,9 @@ class SdBaseFile {
   uint32_t  dirBlock_;      // block for this files directory entry
   uint32_t  fileSize_;      // file size in bytes
   uint32_t  firstCluster_;  // first cluster of file
+  char *pathend;
+
+
 
   /** experimental don't use */
   bool openParent(SdBaseFile* dir);
@@ -2040,12 +2050,15 @@ class SdBaseFile {
   dir_t* cacheDirEntry(uint8_t action);
   int8_t lsPrintNext(uint8_t flags, uint8_t indent);
   static bool make83Name(const char* str, uint8_t* name, const char** ptr);
-  bool mkdir(SdBaseFile* parent, const uint8_t dname[11]);
-  bool open(SdBaseFile* dirFile, const uint8_t dname[11], uint8_t oflag);
+  bool mkdir(SdBaseFile* parent, const uint8_t *dname);
+  bool open(SdBaseFile* dirFile, const uint8_t *dname, uint8_t oflag, bool bDir);
   bool openCachedEntry(uint8_t cacheIndex, uint8_t oflags);
   dir_t* readDirCache();
   dir_t* readDirCacheSpecial();
-  dir_t* getLongFilename(dir_t *dir, char *longFilename);
+  dir_t *getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATNeeded, uint32_t *pwIndexPos);
+  bool findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos);
+  uint8_t lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound);
+
   bool setDirSize();
 //------------------------------------------------------------------------------
 // to be deleted
