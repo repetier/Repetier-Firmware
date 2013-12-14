@@ -437,6 +437,7 @@
 					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
 					<Add directory="$(ARDUINO_DIR)/libraries" />
 					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/mega" />
+					<Add directory="$(ARDUINO_DIR)/libraries/U8glib" />
 				</Compiler>
 				<Linker>
 					<Add option="-mmcu=$(MCU)" />
@@ -612,6 +613,7 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="Font_Repetier_6x10.h" />
 		<Unit filename="HAL.cpp" />
 		<Unit filename="HAL.h" />
 		<Unit filename="Printer.cpp" />
@@ -782,7 +784,6 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
-		<Unit filename="libraries/U8gui.cpp" />
 		<Unit filename="libraries/U8gui.h">
 			<Option virtualFolder="libraries/" />
 			<Option target="&lt;{~None~}&gt;" />

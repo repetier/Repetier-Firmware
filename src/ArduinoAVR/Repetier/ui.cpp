@@ -292,6 +292,7 @@ void lcdWriteNibble(uint8_t value)
     uint8_t v=(value & 1?UI_DISPLAY_D4_PIN:0)|(value & 2?UI_DISPLAY_D5_PIN:0)|(value & 4?UI_DISPLAY_D6_PIN:0)|(value & 8?UI_DISPLAY_D7_PIN:0);
     HAL::i2cWrite((v) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(v);
+#
 #endif
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==1
@@ -620,7 +621,7 @@ void initializeLCD()
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
 #endif
-#include "Font_Repetier_6x10.h"
+#include "u8glib_ex.h"
 u8g_t u8g;
 u8g_uint_t u8_tx = 0, u8_ty = 0;
 
@@ -630,34 +631,29 @@ void u8PrintChar(char c)
     {
     case 0x7E: // right arrow
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
-        //u8g.setFont(u8g_font_6x12_67_75);
-        //u8g.write('\x52'); //arrow back
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0x52);
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-        //u8g.setFont(UI_FONT_DEFAULT);
         break;
     case CHAR_SELECTOR:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
-        //u8g.setFont(u8g_font_6x12_67_75);
-        //u8g.write('\xb7'); //arrow back
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb7);
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-        //u8g.setFont(UI_FONT_DEFAULT);
         break;
     case CHAR_SELECTED:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
-        //u8g.setFont(u8g_font_6x12_67_75);
-        //u8g.write('\xb6'); //arrow back
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb6);
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-        //u8g.setFont(UI_FONT_DEFAULT);
         break;
     default:
-        //u8g.write(c);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, c);
     }
 }
-
+void printU8GRow(uint8_t x,uint8_t y,char *text)
+{
+    char c;
+    while((c = *(text++)) != 0)
+        x += u8g_DrawGlyph(&u8g,x,y,c);
+}
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
     changeAtCol = RMath::min(UI_COLS,changeAtCol);
@@ -665,9 +661,16 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 // Set row
     if(r >= UI_ROWS) return;
     int y = r*UI_FONT_HEIGHT;
-    if(!u8g_IsBBXIntersection(&u8g,0,y,UI_LCD_WIDTH,UI_FONT_HEIGHT)) return; // row not visible
+    if(!u8g_IsBBXIntersection(&u8g,0,y,UI_LCD_WIDTH,UI_FONT_HEIGHT+2)) return; // row not visible
     u8_tx = 0;
     u8_ty = y+UI_FONT_HEIGHT; //set position
+    bool highlight = ((uint8_t)(*txt) == CHAR_SELECTOR) || ((uint8_t)(*txt) == CHAR_SELECTED);
+    if(highlight)
+    {
+        u8g_SetColorIndex(&u8g,1);
+        u8g_draw_box(&u8g, 0, y+1, u8g_GetWidth(&u8g), UI_FONT_HEIGHT+1);
+        u8g_SetColorIndex(&u8g,0);
+    }
     char c;
     while((c = *(txt++)) != 0 && col < changeAtCol)
     {
@@ -684,6 +687,11 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
             col++;
         }
     }
+    if(highlight)
+    {
+        u8g_SetColorIndex(&u8g,1);
+    }
+
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
     ui_check_slow_encoder();
 #endif
@@ -705,8 +713,6 @@ void initializeLCD()
     while( u8g_NextPage(&u8g) );
 
     u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-    //u8g.setFont(UI_FONT_DEFAULT);
-    //u8g.setColorIndex(1);
     u8g_SetColorIndex(&u8g, 1);
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
 }
@@ -811,7 +817,7 @@ void UIDisplay::initialize()
     strcpy(displayCache[UI_ROWS-1], printCols);
 #endif
 #endif
-    delay(UI_START_SCREEN_DELAY);
+    HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
     // Make sure the beeper is off
@@ -1022,12 +1028,12 @@ void UIDisplay::parse(char *txt,bool ram)
                 addStringP(Printer::relativeExtruderCoordinateMode?ui_yes:ui_no);
                 break;
             }
+            ivalue = UI_TEMP_PRECISION;
             if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
             {
-                addStringP(PSTR("def"));
+                addStringP(PSTR(" def "));
                 break;
             }
-            ivalue = UI_TEMP_PRECISION;
             if(c2=='c') fvalue=Extruder::current->tempControl.currentTemperatureC;
             else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
             else if(c2=='b') fvalue=Extruder::getHeatedBedTemperature();
@@ -1136,7 +1142,7 @@ void UIDisplay::parse(char *txt,bool ram)
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
-            addFloat(fvalue,3,2);
+            addFloat(fvalue,4,2);
             break;
         case 'y':
 #if DRIVE_SYSTEM==3
@@ -1433,7 +1439,7 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
         // only list subdirectories and files
         if ((DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
         {
-            if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
+            if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
                 continue;
             if(skip>0)
             {
@@ -1441,14 +1447,14 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
                 continue;
             }
             uid.col=0;
-            if(r+offset==uid.menuPos[uid.menuLevel])
-                printCols[uid.col++]=CHAR_SELECTOR;
+            if(r+offset == uid.menuPos[uid.menuLevel])
+                printCols[uid.col++] = CHAR_SELECTOR;
             else
-                printCols[uid.col++]=' ';
+                printCols[uid.col++] = ' ';
             // print file name with possible blank fill
             if(DIR_IS_SUBDIR(p))
                 printCols[uid.col++] = 6; // Prepend folder symbol
-            length =  RMath::min((int)strlen(tempLongFilename), MAX_COLS-uid.col);
+            length = RMath::min((int)strlen(tempLongFilename), MAX_COLS-uid.col);
             memcpy(printCols+uid.col, tempLongFilename, length);
             uid.col += length;
             printCols[uid.col] = 0;
@@ -1599,6 +1605,68 @@ void UIDisplay::refreshPage()
         }
         scroll += dt;
 #if UI_DISPLAY_TYPE == 5
+#define drawHProgressBar(x,y,width,height,progress) \
+     {u8g_DrawFrame(&u8g,x,y, width, height);  \
+     int p = ceil((width-2) * progress / 100); \
+     u8g_DrawBox(&u8g,x+1,y+1, p, height-2);}
+
+
+#define drawVProgressBar(x,y,width,height,progress) \
+     {u8g_DrawFrame(&u8g,x,y, width, height);  \
+     int p = height-1 - ceil((height-2) * progress / 100); \
+     u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
+#if UI_DISPLAY_TYPE == 5
+        unsigned long sdPercent;
+        //fan
+        int fanPercent;
+        char fanString[2];
+        if(menuLevel==0 && menuPos[0] == 0 )
+        {
+//ext1 and ext2 animation symbols
+            if(extruder[0].tempControl.targetTemperatureC > 0)
+                cache[0][0] = Printer::isAnimation()?'\x08':'\x09';
+            else
+                cache[0][0] = '\x0a'; //off
+#if NUM_EXTRUDER>1
+            if(extruder[1].tempControl.targetTemperatureC > 0)
+                cache[1][0] = Printer::isAnimation()?'\x08':'\x09';
+            else
+#endif
+                cache[1][0] = '\x0a'; //off
+#if HAVE_HEATED_BED==true
+
+            //heatbed animated icons
+            if(heatedBedController.targetTemperatureC > 0)
+                cache[2][0] = Printer::isAnimation()?'\x0c':'\x0d';
+            else
+                cache[2][0] = '\x0b';
+#endif
+            //fan
+            fanPercent = Printer::getFanSpeed()*100/255;
+            fanString[1]=0;
+            if(fanPercent > 0)  //fan running anmation
+            {
+                fanString[0] = Printer::isAnimation() ? '\x0e' : '\x0f';
+            }
+            else
+            {
+                fanString[0] = '\x0e';
+            }
+            //SD Card
+            if(sd.sdactive)
+            {
+                if(sd.sdactive && sd.sdmode)
+                {
+                    if(sd.filesize<20000000) sdPercent=sd.sdpos*100/sd.filesize;
+                    else sdPercent = (sd.sdpos>>8)*100/(sd.filesize>>8);
+                }
+                else
+                {
+                    sdPercent = 0;
+                }
+            }
+        }
+#endif
         //u8g picture loop
         u8g_FirstPage(&u8g);
         do
@@ -1606,8 +1674,56 @@ void UIDisplay::refreshPage()
 #endif
             if(transition == 0)
             {
-                for(y=0; y<UI_ROWS; y++)
-                    printRow(y,&cache[y][off[y]],NULL,UI_COLS);
+#if UI_DISPLAY_TYPE == 5
+
+                if(menuLevel==0 && menuPos[0] == 0 )
+                {
+                    u8g_SetFont(&u8g,UI_FONT_SMALL);
+                    uint8_t py = 8;
+                    for(uint8_t r=0; r<3; r++)
+                    {
+                        if(u8g_IsBBXIntersection(&u8g, 0, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                            printU8GRow(0,py,cache[r]);
+                        py+=10;
+                    }
+                    //fan
+                    if(u8g_IsBBXIntersection(&u8g, 0, 30-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        printU8GRow(117,30,fanString);
+                    drawVProgressBar(116, 0, 9, 20, fanPercent);
+                    if(u8g_IsBBXIntersection(&u8g, 0, 43-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        printU8GRow(0,43,cache[3]); //mul
+                    if(u8g_IsBBXIntersection(&u8g, 0, 52-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        printU8GRow(0,52,cache[4]); //buf
+
+                    //SD Card
+                    if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 70, 48-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                    {
+                        printU8GRow(70,48,"SD");
+                        drawHProgressBar(83,42, 40, 5, sdPercent);
+                    }
+
+                    //Status
+                    py = u8g_GetHeight(&u8g)-2;
+                    if(u8g_IsBBXIntersection(&u8g, 70, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        printU8GRow(0,py,cache[5]);
+
+                    //divider lines
+                    u8g_DrawHLine(&u8g,0, 32, u8g_GetWidth(&u8g));
+                    if ( u8g_IsBBXIntersection(&u8g, 55, 0, 1, 32) )
+                    {
+                        u8g_draw_vline(&u8g,112, 0, 32);
+                        u8g_draw_vline(&u8g,62, 0, 32);
+                    }
+                    u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                }
+                else
+                {
+#endif
+                    for(y=0; y<UI_ROWS; y++)
+                        printRow(y,&cache[y][off[y]],NULL,UI_COLS);
+#if UI_DISPLAY_TYPE == 5
+                }
+#endif
             }
 #if UI_ANIMATION
             else
@@ -1679,6 +1795,7 @@ void UIDisplay::refreshPage()
 #if UI_DISPLAY_TYPE == 5
         }
         while( u8g_NextPage(&u8g) );  //end picture loop
+        Printer::toggleAnimation();
 #endif
     } // for l
 #if UI_ANIMATION
@@ -1753,7 +1870,7 @@ void UIDisplay::okAction()
             return;
         }
         if(!sd.sdactive)
-          return;
+            return;
 
         uint8_t filePos = menuPos[menuLevel]-1;
         char filename[LONG_FILENAME_LENGTH+1];
@@ -1784,12 +1901,12 @@ void UIDisplay::okAction()
         switch(action)
         {
         case UI_ACTION_SD_PRINT:
-                if (sd.selectFile(filename, false))
-                {
-                    sd.startPrint();
-                    BEEP_LONG;
-                    menuLevel = 0;
-                }
+            if (sd.selectFile(filename, false))
+            {
+                sd.startPrint();
+                BEEP_LONG;
+                menuLevel = 0;
+            }
             break;
         case UI_ACTION_SD_DELETE:
             if(sd.sdactive)
@@ -1890,9 +2007,15 @@ void UIDisplay::nextPreviousAction(int8_t next)
                     break;
             }
         }
-        if(menuTop[menuLevel]>menuPos[menuLevel])
+        uint8_t skipped = 0;
+        for(uint8_t r=0;r<menuPos[menuLevel];r++) {
+            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
+            if(!ent->showEntry())
+                skipped++;
+        }
+        if(menuTop[menuLevel]+skipped>menuPos[menuLevel])
             menuTop[menuLevel]=menuPos[menuLevel];
-        else if(menuTop[menuLevel]+UI_ROWS-1<menuPos[menuLevel])
+        else if(menuTop[menuLevel]+skipped+UI_ROWS-1<menuPos[menuLevel])
             menuTop[menuLevel]=menuPos[menuLevel]+1-UI_ROWS;
         return;
     }
@@ -2572,6 +2695,7 @@ void UIDisplay::executeAction(int action)
         }
 #endif
         break;
+#if MAX_HARDWARE_ENDSTOP_Z
         case UI_ACTION_SET_MEASURED_ORIGIN:
         {
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
@@ -2588,6 +2712,8 @@ void UIDisplay::executeAction(int action)
 #endif
             Commands::printCurrentPosition();
         }
+        break;
+#endif
         case UI_ACTION_SET_P1:
 #ifdef SOFTWARE_LEVELING
             for (uint8_t i=0; i<3; i++)

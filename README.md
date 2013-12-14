@@ -42,6 +42,7 @@ Other developers:
 - Glenn Kreisel (long filename support)
 - Martin Croome (first delta implementation)
 - John Silvia (Arduino Due port)
+- sdavi (first u8glib code implementation)
 - plus several small contributions from other users.
 
 ## Introduction

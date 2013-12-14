@@ -1175,6 +1175,9 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
         }
       else
         {
+        // only 512 entries allowed in FAT16 Root Fixed dir
+        if (dirFile->type() == FAT_FILE_TYPE_ROOT_FIXED && (dirFile->curPosition_ >> 5) >= 512)
+          goto fail;
         cVFATFoundCur = cVFATNeeded + 1; 
         if (dirFile->curPosition_ > 0)
           wIndexPos = dirFile->curPosition_-32;
@@ -1223,7 +1226,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
       uint8_t cb = pExt-(char *)dname;
       memcpy(newName, dname, cb);
       newName[cb] = 0;
-      strcat(newName, "-1");
+      strcat(newName, "~1");
       strcat(newName, szExt);
       }
     else

@@ -33,6 +33,7 @@
 #define PRINTER_FLAG0_LARGE_MACHINE         128
 #define PRINTER_FLAG1_HOMED                 1
 #define PRINTER_FLAG1_AUTOMOUNT             2
+#define PRINTER_FLAG1_ANIMATION             4
 class Printer
 {
 public:
@@ -315,6 +316,17 @@ public:
     static inline void setAutomount(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
+    }
+    static inline uint8_t isAnimation()
+    {
+        return flag1 & PRINTER_FLAG1_ANIMATION;
+    }
+    static inline void setAnimation(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
+    }
+    static inline void toggleAnimation() {
+        setAnimation(!isAnimation());
     }
     static inline float convertToMM(float x)
     {

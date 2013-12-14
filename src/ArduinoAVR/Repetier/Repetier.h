@@ -383,7 +383,7 @@ extern void write_monitor();
 
 #if SDSUPPORT
 extern char tempLongFilename[LONG_FILENAME_LENGTH+1];
-extern char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+10];
+extern char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1];
 #define SHORT_FILENAME_LENGTH 14
 #include "SdFat.h"
 
@@ -398,7 +398,7 @@ public:
   SdFile file;
   uint32_t filesize;
   uint32_t sdpos;
-  char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+  //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
   char *shortname; // Pointer to start of filename itself
   char *pathend; // File to char where pathname in fullname ends
   bool sdmode;  // true if we are printing from sd card

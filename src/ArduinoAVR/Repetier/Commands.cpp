@@ -787,32 +787,6 @@ void Commands::executeGCode(GCode *com)
                 sd.makeDirectory(com->text);
             }
             break;
-#ifdef GLENN_DEBUG
-        case 33:
-        {
-            dir_t* p = NULL;
-            byte offset = uid.menuTop[uid.menuLevel];
-            SdBaseFile *root;
-            byte length, skip;
-
-            Com::printF(PSTR("Ls:"));
-            Com::print(uid.cwd);
-            Com::println();
-
-            sd.makeDirectory("/AAA/folder");
-
-            char filename[LONG_FILENAME_LENGTH+1];
-
-            strcpy(filename, "w.g");
-            sd.startWrite(filename);
-            for(length=0; length<50; length++)
-            {
-                sd.writeToFile();
-            }
-            sd.finishWrite();
-            return;
-        }
-#endif
 #endif
         case 42: //M42 -Change pin status via gcode
             if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)
