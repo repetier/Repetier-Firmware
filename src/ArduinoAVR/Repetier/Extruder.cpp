@@ -139,7 +139,7 @@ void Extruder::manageTemperatures()
                 output = 0; // off is off, even if damping term wants a heat peak!
             else if(error>PID_CONTROL_RANGE)
                 output = act->pidMax;
-            else if(error<-PID_CONTROL_RANGE)
+            else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {

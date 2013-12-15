@@ -127,10 +127,6 @@ Custom M Codes
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
 #endif
 
-#if UI_DISPLAY_TYPE==5
-#include <U8glib.h>  // comment this if you get compilation problems
-#endif
-
 void setup()
 {
     Printer::setup();

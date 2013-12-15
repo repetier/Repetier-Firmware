@@ -734,7 +734,7 @@
 	"Commands.h"
 	"Eeprom.h"
 
-1387038259 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1387095693 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
 1386169512 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
@@ -871,14 +871,14 @@
 	"WProgram.h"
 	<SoftSPI.h>
 
-1387037845 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
+1387038270 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
 	<math.h>
 	<stdlib.h>
 	<inttypes.h>
 	<ctype.h>
 	<LiquidCrystal.h>
-	"Font_Repetier_6x10.h"
+	"u8glib_ex.h"
 
 1380830876 c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\u8glib.h
 	<Print.h>
@@ -1657,6 +1657,25 @@
 	"u8g.h"
 
 1387028940 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\font_repetier_6x10.h
+	<stddef.h>
+	<stdint.h>
+	<avr/pgmspace.h>
+	<avr/interrupt.h>
+	<avr/io.h>
+	<util/delay.h>
+	<delays.h>
+	"plib.h"
+	<avr/interrupt.h>
+	"sam.h"
+	<string.h>
+	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
+
+1387028940 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\u8glib_ex.h
 	<stddef.h>
 	<stdint.h>
 	<avr/pgmspace.h>
