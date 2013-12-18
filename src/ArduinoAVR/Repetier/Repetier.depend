@@ -734,7 +734,7 @@
 	"Commands.h"
 	"Eeprom.h"
 
-1387095693 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1387375329 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
 1386169512 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
@@ -767,7 +767,7 @@
 
 1385747464 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
 
-1387035011 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
+1387101776 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
 
 1385279439 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
 
@@ -836,7 +836,7 @@
 1382356654 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
 	"Repetier.h"
 
-1386338770 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+1387098717 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
 	"Repetier.h"
 	"pins_arduino.h"
 	"ui.h"
@@ -856,12 +856,11 @@
 1386351309 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
-1385797346 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
+1387101788 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
 	"Repetier.h"
 	<SPI.h>
-	<U8glib.h>
 
-1386868754 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
+1387375339 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
 	"Repetier.h"
 	"ui.h"
 
@@ -871,7 +870,7 @@
 	"WProgram.h"
 	<SoftSPI.h>
 
-1387038270 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
+1387375017 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
 	<math.h>
 	<stdlib.h>

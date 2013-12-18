@@ -613,7 +613,6 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
-		<Unit filename="Font_Repetier_6x10.h" />
 		<Unit filename="HAL.cpp" />
 		<Unit filename="HAL.h" />
 		<Unit filename="Printer.cpp" />
@@ -822,6 +821,7 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="u8glib_ex.h" />
 		<Unit filename="ui.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />

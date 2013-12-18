@@ -24,10 +24,6 @@
 
 #if SDSUPPORT
 
-#ifndef SD_ALLOW_LONG_NAMES
-#define SD_ALLOW_LONG_NAMES false
-#endif
-
 char tempLongFilename[LONG_FILENAME_LENGTH+1];
 char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1];
 
@@ -304,14 +300,6 @@ char *SDCard::createFilename(char *buffer,const dir_t &p)
 bool SDCard::showFilename(const uint8_t *name)
 {
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
-#if !SD_ALLOW_LONG_NAMES
-    uint8_t i=11;
-    while(i--)
-    {
-        if(*name=='~') return false;
-        name++;
-    }
-#endif
     return true;
 }
 
