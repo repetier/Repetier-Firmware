@@ -551,7 +551,7 @@ U8GLIB_ST7920_128X64_1X u8g(UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY
 #define drawHProgressBar(x,y,width,height,progress) \
     {u8g.drawFrame(x,y, width, height);  \
     int p = ceil((width-2) * progress / 100); \
-    u8g.drawBox(x+1,y+1, p, height-2);} 
+    u8g.drawBox(x+1,y+1, p, height-2);}
 
 
 #define drawVProgressBar(x,y,width,height,progress) \
@@ -1351,14 +1351,14 @@ void UIDisplay::refreshPage()
 {
     uint8_t r;
     uint8_t mtype;
-    
-    
+
+
 #if UI_DISPLAY_TYPE == 5
 
-     if(menuLevel==0 && menuPos[0] == 0 ) 
+     if(menuLevel==0 && menuPos[0] == 0 )
      {
          //gather only Status data outside of picture loop
-         
+
          //Note based on my testing, the picture loop can loop around 8 times
          //It would probably be better to parse and buffer all lines before the picture loop
 
@@ -1373,34 +1373,34 @@ void UIDisplay::refreshPage()
             //TODO: printcols to handle all the lines? or adapt parse to take a pointer to the buffer?
             strcpy(statusBuffer[r], printCols);
          }
-        
+
          //ext1 and ext2 animation symbols
          if(extruder[0].tempControl.targetTemperatureC > 0)
              statusBuffer[0][0] = animSequence==0?'\x08':'\x09';
-         else 
+         else
              statusBuffer[0][0] = '\x0a'; //off
          #if NUM_EXTRUDER>1
            if(extruder[1].tempControl.targetTemperatureC > 0)
                statusBuffer[1][0] = animSequence==0?'\x08':'\x09';
-           else 
+           else
          #endif
             statusBuffer[1][0] = '\x0a'; //off
          #if HAVE_HEATED_BED==true
-         
+
            //heatbed animated icons
            if(heatedBedController.targetTemperatureC > 0)
                statusBuffer[2][0] = animSequence==0?'\x0c':'\x0d';
-           else 
+           else
                statusBuffer[2][0] = '\x0b';
-         #endif  
-         
-         
+         #endif
+
+
      }
     //u8g picture loop
     u8g.firstPage();
     do
     {
-      
+
 
         u8g.setColorIndex(1);
         if(menuLevel==0)
@@ -1408,16 +1408,16 @@ void UIDisplay::refreshPage()
             if(menuPos[0]==0)
             {
               //status screen (first 3 rows)
-              
-              u8g.setFont(UI_FONT_SMALL); 
-              
+
+              u8g.setFont(UI_FONT_SMALL);
+
               for(int r=0; r<3; r++)
               {
-                  u8g.setPrintPos(0, r*10+8); 
+                  u8g.setPrintPos(0, r*10+8);
                   u8g.print(statusBuffer[r]);
               }
-              
-              //fan 
+
+              //fan
               int fanPercent = Printer::getFanSpeed()*100/255;
               u8g.setPrintPos(115, 30);
               if(fanPercent > 0){ //fan running anmation
@@ -1426,13 +1426,13 @@ void UIDisplay::refreshPage()
                   u8g.print( '\x0e' );
               }
               drawVProgressBar(114, 0, 9, 20, fanPercent);
-    
-    
+
+
               u8g.setPrintPos(0, 43);
               u8g.print(statusBuffer[3]); //mul
               u8g.setPrintPos(0, 52);
               u8g.print(statusBuffer[4]); //buf
-   
+
               //SD Card
               unsigned long sdPercent;
               if(sd.sdactive && sd.sdmode)
@@ -1445,21 +1445,21 @@ void UIDisplay::refreshPage()
 
               u8g.setPrintPos(70, 48);
               u8g.print("SD");
-              drawHProgressBar(83,42, 40, 5, sdPercent);  
+              drawHProgressBar(83,42, 40, 5, sdPercent);
 
               //Satus
               u8g.setPrintPos(0, u8g.getHeight()-2);
               u8g.print(statusBuffer[5]);
-              
+
               //divider lines
               u8g.drawLine(0, 32, u8g.getWidth(), 32);
               u8g.drawLine(108, 0, 108, 32);
               u8g.drawLine(55, 0, 55, 32);
 
-              
- 
-            } 
-            else 
+
+
+            }
+            else
             { // menulevel=0 and menuPos[0] > 0 - handle as default rows
                 u8g.setFont(UI_FONT_DEFAULT);
 #else
@@ -1478,7 +1478,7 @@ void UIDisplay::refreshPage()
                 printRow(r,(char*)printCols);
             }
           #if UI_DISPLAY_TYPE==5
-          }// end additional else statement 
+          }// end additional else statement
           #endif
         }
         else
@@ -1534,10 +1534,10 @@ void UIDisplay::refreshPage()
 #if UI_DISPLAY_TYPE == 5
 
     } while( u8g.nextPage() );  //end picture loop
-    
-    
+
+
     animSequence=~animSequence;
-#else 
+#else
         printCols[0]=0;
         while(r<UI_ROWS)
             printRow(r++,printCols);
@@ -2149,27 +2149,35 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_PREHEAT_PLA:
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
+            Extruder::setAlarm(0);
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
+            Extruder::setAlarm(1);
 #endif
 #if NUM_EXTRUDER>2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
+            Extruder::setAlarm(2);
 #endif
 #if HAVE_HEATED_BED==true
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
+            Extruder::setAlarm(NUM_EXTRUDER);
 #endif
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
+            Extruder::setAlarm(0);
 #if NUM_EXTRUDER>1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
+            Extruder::setAlarm(1);
 #endif
 #if NUM_EXTRUDER>2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
+            Extruder::setAlarm(2);
 #endif
 #if HAVE_HEATED_BED==true
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
+            Extruder::setAlarm(NUM_EXTRUDER);
 #endif
             break;
         case UI_ACTION_COOLDOWN:
