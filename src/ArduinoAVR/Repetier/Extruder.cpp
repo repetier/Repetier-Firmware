@@ -27,10 +27,10 @@
 #endif
 
 
-uint8_t manage_monitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
-unsigned int counter_periodical=0;
-volatile uint8_t execute_periodical=0;
-uint8_t counter_250ms=25;
+uint8_t manageMonitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
+unsigned int counterPeriodical = 0;
+volatile uint8_t executePeriodical = 0;
+uint8_t counter250ms=25;
 #if FEATURE_DITTO_PRINTING
 uint8_t Extruder::dittoMode = 0;
 #endif
@@ -105,6 +105,10 @@ void Extruder::manageTemperatures()
         }
         if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
         uint8_t on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+        if(!on && act->isAlarm()) {
+            beep(50*(controller+1),3);
+            act->setAlarm(false);  //reset alarm
+        }
 #ifdef TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
@@ -383,7 +387,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 }
 
-void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
+void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep)
 {
     bool alloffs = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
@@ -395,6 +399,8 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
     TemperatureController *tc = tempController[extr];
     //if(temp_celsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temp_celsius);
+    if(beep && temp_celsius>30)
+        tc->setAlarm(true);
     if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temp_celsius,0);
@@ -417,13 +423,14 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr)
         Printer::msecondsPrinting = HAL::timeInMilliseconds();
 }
 
-void Extruder::setHeatedBedTemperature(float temp_celsius)
+void Extruder::setHeatedBedTemperature(float temp_celsius,bool beep)
 {
 #if HAVE_HEATED_BED
     if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
     if(temp_celsius<0) temp_celsius = 0;
     if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temp_celsius);
+    if(beep && temp_celsius>30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
 #endif
 }
@@ -1023,10 +1030,10 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
 This function is called every 250ms to write the monitored temperature. If monitoring is
 disabled, the function is not called.
 */
-void write_monitor()
+void writeMonitor()
 {
     Com::printF(Com::tMTEMPColon,(long)HAL::timeInMilliseconds());
-    TemperatureController *act = tempController[manage_monitor];
+    TemperatureController *act = tempController[manageMonitor];
     Com::printF(Com::tSpace,act->currentTemperatureC);
     Com::printF(Com::tSpace,act->targetTemperatureC,0);
     Com::printFLN(Com::tSpace,pwm_pos[act->pwmIndex]);
@@ -1143,7 +1150,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1163,7 +1170,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1183,7 +1190,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1203,7 +1210,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1223,7 +1230,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1243,7 +1250,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #ifdef TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        }
+        ,0}
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1255,7 +1262,7 @@ TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE
 #ifdef TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-                                            };
+                                            ,0};
 #else
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif

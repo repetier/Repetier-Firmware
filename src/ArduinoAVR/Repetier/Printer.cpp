@@ -436,10 +436,15 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
-        if(relativeCoordinateMode || relativeExtruderCoordinateMode)
+        if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
+            if(fabs(com->E)>EXTRUDE_MAXLENGTH)
+                p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
-        else
+        } else {
+            if(fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
+        }
     }
     else Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
     if(com->hasF())

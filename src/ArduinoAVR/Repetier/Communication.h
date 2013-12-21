@@ -76,6 +76,7 @@ FSTRINGVAR(tSpaceAtColon)
 FSTRINGVAR(tSpaceT)
 FSTRINGVAR(tSpaceRaw)
 FSTRINGVAR(tSpaceAt)
+FSTRINGVAR(tSpaceBAtColon)
 FSTRINGVAR(tColon)
 FSTRINGVAR(tSpeedMultiply);
 FSTRINGVAR(tFlowMultiply);

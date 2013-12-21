@@ -2764,36 +2764,7 @@ void UIDisplay::executeAction(int action)
             Commands::setFanSpeed(Printer::getFanSpeed()-32,false);
             break;
         case UI_ACTION_KILL:
-            HAL::forbidInterrupts(); // Don't allow interrupts to do their work
-            Printer::kill(false);
-            Extruder::manageTemperatures();
-            pwm_pos[0] = pwm_pos[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER+1] = pwm_pos[NUM_EXTRUDER+2]=0;
-#if EXT0_HEATER_PIN>-1
-            WRITE(EXT0_HEATER_PIN,0);
-#endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-            WRITE(EXT1_HEATER_PIN,0);
-#endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-            WRITE(EXT2_HEATER_PIN,0);
-#endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-            WRITE(EXT3_HEATER_PIN,0);
-#endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-            WRITE(EXT4_HEATER_PIN,0);
-#endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-            WRITE(EXT5_HEATER_PIN,0);
-#endif
-#if FAN_PIN>-1
-            WRITE(FAN_PIN,0);
-#endif
-#if HEATED_BED_HEATER_PIN>-1
-            WRITE(HEATED_BED_HEATER_PIN,0);
-#endif
-            while(1) {}
-
+            Commands::emergencyStop();
             break;
         case UI_ACTION_RESET:
             HAL::resetHardware();

@@ -10,8 +10,9 @@
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggels the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
-extern uint8_t manage_monitor;
+extern uint8_t manageMonitor;
 
+#define TEMPERATURE_CONTROLLER_FLAG_ALARM 1
 /** TemperatureController manages one heater-temperature sensore loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
 
@@ -41,10 +42,13 @@ class TemperatureController
     uint8_t tempPointer;
     float tempArray[4];
 #endif
+    uint8_t flags;
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
     void updateTempControlVars();
+    inline bool isAlarm() {return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;}
+    inline void setAlarm(bool on) {if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM; else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;}
 #ifdef TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
@@ -284,9 +288,9 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     static void disableAllHeater();
     static void initExtruder();
     static void initHeatedBed();
-    static void setHeatedBedTemperature(float temp_celsius);
+    static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
     static float getHeatedBedTemperature();
-    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr);
+    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false);
 };
 
 #if HAVE_HEATED_BED

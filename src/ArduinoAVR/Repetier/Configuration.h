@@ -388,6 +388,9 @@ need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm h
 */
 #define PID_CONTROL_RANGE 20
 
+/** Prevent extrusions longer then x mm for one command. This is especially important if you abort a print. Then the
+extrusion poistion might be at any value like 23344. If you then have an G1 E-2 it will roll back 23 meter! */
+#define EXTRUDE_MAXLENGTH 100
 /** Skip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
 #define SKIP_M109_IF_WITHIN 2
 

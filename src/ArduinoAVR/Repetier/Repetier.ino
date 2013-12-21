@@ -84,12 +84,14 @@ Custom M Codes
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axisStepsPerMM - same syntax as G92
+- M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
 - M112 - Emergency kill
 - M115- Capabilities string
+- M116 - Wait for all temperatures in a +/- 1 degree range
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
-- M140 - Set bed target temp
+- M140 S<temp> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
 - M190 - Wait for bed current temp to reach target temp.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
