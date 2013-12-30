@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier-Firmware for Arduino based RepRaps</title>
+<title>Repetier-Firmware: Arduino SdFat Library</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -92,86 +92,79 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Repetier-Firmware for Arduino based RepRaps </div>  </div>
+<div class="title">Arduino SdFat Library </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><center>Copyright &copy; 2011-2013 by repetier </center><h2><a class="anchor" id="Intro"></a>
+<div class="textblock"><center>Copyright &copy; 2012 by William Greiman </center><h2><a class="anchor" id="Intro"></a>
 Introduction</h2>
-<h2><a class="anchor" id="GCodes"></a>
-Implemented GCodes</h2>
-<p>look here for descriptions of gcodes: <a href="http://linuxcnc.org/handbook/gcode/g-code.html">http://linuxcnc.org/handbook/gcode/g-code.html</a> and <a href="http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes">http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes</a></p>
-<p>Implemented Codes</p>
-<ul>
-<li>G0 -&gt; G1</li>
-<li>G1 - Coordinated Movement X Y Z E</li>
-<li>G4 - Dwell S&lt;seconds&gt; or P&lt;milliseconds&gt;</li>
-<li>G20 - Units for G0/G1 are inches.</li>
-<li>G21 - Units for G0/G1 are mm.</li>
-<li>G28 - Home all axis or named axis.</li>
-<li>G90 - Use absolute coordinates</li>
-<li>G91 - Use relative coordinates</li>
-<li>G92 - Set current position to cordinates given</li>
-</ul>
-<p>RepRap M Codes</p>
-<ul>
-<li>M104 - Set extruder target temp</li>
-<li>M105 - Read current temp</li>
-<li>M106 - Fan on</li>
-<li>M107 - Fan off</li>
-<li>M109 - Wait for extruder current temp to reach target temp.</li>
-<li>M114 - Display current position</li>
-</ul>
-<p>Custom M Codes</p>
-<ul>
-<li>M80 - Turn on Power Supply</li>
-<li>M20 - List SD card</li>
-<li>M21 - Init SD card</li>
-<li>M22 - Release SD card</li>
-<li>M23 - Select SD file (M23 filename.g)</li>
-<li>M24 - Start/resume SD print</li>
-<li>M25 - Pause SD print</li>
-<li>M26 - Set SD position in bytes (M26 S12345)</li>
-<li>M27 - Report SD print status</li>
-<li>M28 - Start SD write (M28 filename.g)</li>
-<li>M29 - Stop SD write</li>
-<li>M30 &lt;filename&gt; - Delete file on sd card</li>
-<li>M32 &lt;dirname&gt; create subdirectory</li>
-<li>M42 P&lt;pin number&gt; S&lt;value 0..255&gt; - Change output of pin P to S. Does not work on most important pins.</li>
-<li>M80 - Turn on power supply</li>
-<li>M81 - Turn off power supply</li>
-<li>M82 - Set E codes absolute (default)</li>
-<li>M83 - Set E codes relative while in Absolute Coordinates (G90) mode</li>
-<li>M84 - Disable steppers until next move, or use S&lt;seconds&gt; to specify an inactivity timeout, after which the steppers will be disabled. S0 to disable the timeout.</li>
-<li>M85 - Set inactivity shutdown timer with parameter S&lt;seconds&gt;. To disable set zero (default)</li>
-<li>M92 - Set axis_steps_per_unit - same syntax as G92</li>
-<li>M112 - Emergency kill</li>
-<li>M115- Capabilities string</li>
-<li>M117 &lt;message&gt; - Write message in status row on lcd</li>
-<li>M119 - Report endstop status</li>
-<li>M140 - Set bed target temp</li>
-<li>M190 - Wait for bed current temp to reach target temp.</li>
-<li>M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)</li>
-<li>M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)</li>
-<li>M203 - Set temperture monitor to Sx</li>
-<li>M204 - Set PID parameter X =&gt; Kp Y =&gt; Ki Z =&gt; Kd S&lt;extruder&gt; Default is current extruder. NUM_EXTRUDER=Heated bed</li>
-<li>M205 - Output EEPROM settings</li>
-<li>M206 - Set EEPROM value</li>
-<li>M220 S&lt;Feedrate multiplier in percent&gt; - Increase/decrease given feedrate</li>
-<li>M221 S&lt;Extrusion flow multiplier in percent&gt; - Increase/decrease given flow rate</li>
-<li>M231 S&lt;OPS_MODE&gt; X&lt;Min_Distance&gt; Y&lt;Retract&gt; Z&lt;Backlash&gt; F&lt;ReatrctMove&gt; - Set OPS parameter</li>
-<li>M232 - Read and reset max. advance values</li>
-<li>M233 X&lt;AdvanceK&gt; Y&lt;AdvanceL&gt; - Set temporary advance K-value to X and linear term advanceL to Y</li>
-<li>M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)</li>
-<li>M303 P&lt;extruder/bed&gt; S&lt;drucktermeratur&gt; Autodetect pid values. Use P&lt;NUM_EXTRUDER&gt; for heated bed.</li>
-<li>M350 S&lt;mstepsAll&gt; X&lt;mstepsX&gt; Y&lt;mstepsY&gt; Z&lt;mstepsZ&gt; E&lt;mstepsE0&gt; P&lt;mstespE1&gt; : Set microstepping on RAMBO board</li>
-<li>M400 - Wait until move buffers empty.</li>
-<li>M401 - Store x, y and z position.</li>
-<li>M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.</li>
-<li>M500 Store settings to EEPROM</li>
-<li>M501 Load settings from EEPROM</li>
-<li>M502 Reset settings to the one in <a class="el" href="_configuration_8h.html">configuration.h</a>. Does not store values in EEPROM!</li>
-<li>M908 P&lt;address&gt; S&lt;value&gt; : Set stepper current for digipot (RAMBO board) </li>
-</ul>
+<p>The Arduino SdFat Library is a minimal implementation of FAT16 and FAT32 file systems on SD flash memory cards. Standard SD and high capacity SDHC cards are supported.</p>
+<p>Experimental support for FAT12 can be enabled by setting FAT12_SUPPORT nonzero in SdFatConfig.h.</p>
+<p>The SdFat library only supports short 8.3 names.</p>
+<p>The main classes in SdFat are <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a>, <a class="el" href="class_sd_file.html" title="SdBaseFile with Print.">SdFile</a>, fstream, ifstream, and ofstream.</p>
+<p>The <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> class maintains a volume working directories, a current working directory, and simplifies initialization of other classes.</p>
+<p>The <a class="el" href="class_sd_file.html" title="SdBaseFile with Print.">SdFile</a> class provides binary file access functions such as open(), read(), remove(), write(), close() and sync(). This class supports access to the root directory and subdirectories.</p>
+<p>The fstream class implements C++ iostreams for both reading and writing text files.</p>
+<p>The ifstream class implements the C++ iostreams for reading text files.</p>
+<p>The ofstream class implements the C++ iostreams for writing text files.</p>
+<p>The classes ibufstream and obufstream format and parse character strings in memory buffers.</p>
+<p>the classes ArduinoInStream and ArduinoOutStream provide iostream functions for Serial, LiquidCrystal, and other devices.</p>
+<p>The <a class="el" href="class_sd_volume.html" title="Access FAT16 and FAT32 volumes on SD and SDHC cards.">SdVolume</a> class supports FAT16 and FAT32 partitions. Most applications will not need to call <a class="el" href="class_sd_volume.html" title="Access FAT16 and FAT32 volumes on SD and SDHC cards.">SdVolume</a> member function.</p>
+<p>The <a class="el" href="class_sd2_card.html" title="Raw access to SD and SDHC flash memory cards.">Sd2Card</a> class supports access to standard SD cards and SDHC cards. Most applications will not need to call <a class="el" href="class_sd2_card.html" title="Raw access to SD and SDHC flash memory cards.">Sd2Card</a> functions. The <a class="el" href="class_sd2_card.html" title="Raw access to SD and SDHC flash memory cards.">Sd2Card</a> class can be used for raw access to the SD card.</p>
+<p>A number of example are provided in the SdFat/examples folder. These were developed to test SdFat and illustrate its use.</p>
+<p>SdFat was developed for high speed data recording. SdFat was used to implement an audio record/play class, WaveRP, for the Adafruit Wave Shield. This application uses special <a class="el" href="class_sd2_card.html" title="Raw access to SD and SDHC flash memory cards.">Sd2Card</a> calls to write to contiguous files in raw mode. These functions reduce write latency so that audio can be recorded with the small amount of RAM in the Arduino.</p>
+<h2><a class="anchor" id="SDcard"></a>
+SD\SDHC Cards</h2>
+<p>Arduinos access SD cards using the cards SPI protocol. PCs, Macs, and most consumer devices use the 4-bit parallel SD protocol. A card that functions well on A PC or Mac may not work well on the Arduino.</p>
+<p>Most cards have good SPI read performance but cards vary widely in SPI write performance. Write performance is limited by how efficiently the card manages internal erase/remapping operations. The Arduino cannot optimize writes to reduce erase operations because of its limit RAM.</p>
+<p>SanDisk cards generally have good write performance. They seem to have more internal RAM buffering than other cards and therefore can limit the number of flash erase operations that the Arduino forces due to its limited RAM.</p>
+<h2><a class="anchor" id="Hardware"></a>
+Hardware Configuration</h2>
+<p>SdFat was developed using an <a href="http://www.adafruit.com/">Adafruit Industries</a> <a href="http://www.ladyada.net/make/waveshield/">Wave Shield</a>.</p>
+<p>The hardware interface to the SD card should not use a resistor based level shifter. SdFat sets the SPI bus frequency to 8 MHz which results in signal rise times that are too slow for the edge detectors in many newer SD card controllers when resistor voltage dividers are used.</p>
+<p>The 5 to 3.3 V level shifter for 5 V Arduinos should be IC based like the 74HC4050N based circuit shown in the file SdLevel.png. The Adafruit Wave Shield uses a 74AHC125N. Gravitech sells SD and MicroSD Card Adapters based on the 74LCX245.</p>
+<p>If you are using a resistor based level shifter and are having problems try setting the SPI bus frequency to 4 MHz. This can be done by using card.init(SPI_HALF_SPEED) to initialize the SD card.</p>
+<h2><a class="anchor" id="comment"></a>
+Bugs and Comments</h2>
+<p>If you wish to report bugs or have comments, send email to <a href="mailto:fat16lib@sbcglobal.net">fat16lib@sbcglobal.net</a>.</p>
+<h2><a class="anchor" id="SdFatClass"></a>
+SdFat Usage</h2>
+<p>SdFat uses a slightly restricted form of short names. Only printable ASCII characters are supported. No characters with code point values greater than 127 are allowed. Space is not allowed even though space was allowed in the API of early versions of DOS.</p>
+<p>Short names are limited to 8 characters followed by an optional period (.) and extension of up to 3 characters. The characters may be any combination of letters and digits. The following special characters are also allowed:</p>
+<p>$ % ' - _ @ ~ ` ! ( ) { } ^ # &amp;</p>
+<p>Short names are always converted to upper case and their original case value is lost.</p>
+<dl class="note"><dt><b>Note:</b></dt><dd>The Arduino Print class uses character at a time writes so it was necessary to use a <a class="el" href="class_sd_base_file.html#a3eb7f41182c04388c951db242c13f845">sync() </a> function to control when data is written to the SD card.</dd></dl>
+<dl class="user"><dt><b></b></dt><dd>An application which writes to a file using print(), println() or <a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write() </a> must call <a class="el" href="class_sd_base_file.html#a3eb7f41182c04388c951db242c13f845">sync() </a> at the appropriate time to force data and directory information to be written to the SD Card. Data and directory information are also written to the SD card when <a class="el" href="class_sd_base_file.html#a46143fd6de3be9ab9951f140d3ae8c2f">close() </a> is called.</dd></dl>
+<dl class="user"><dt><b></b></dt><dd>Applications must use care calling <a class="el" href="class_sd_base_file.html#a3eb7f41182c04388c951db242c13f845">sync() </a> since 2048 bytes of I/O is required to update file and directory information. This includes writing the current data block, reading the block that contains the directory entry for update, writing the directory block back and reading back the current data block.</dd></dl>
+<p>It is possible to open a file with two or more instances of <a class="el" href="class_sd_file.html" title="SdBaseFile with Print.">SdFile</a>. A file may be corrupted if data is written to the file by more than one instance of <a class="el" href="class_sd_file.html" title="SdBaseFile with Print.">SdFile</a>.</p>
+<h2><a class="anchor" id="HowTo"></a>
+How to format SD Cards as FAT Volumes</h2>
+<p>You should use a freshly formatted SD card for best performance. FAT file systems become slower if many files have been created and deleted. This is because the directory entry for a deleted file is marked as deleted, but is not deleted. When a new file is created, these entries must be scanned before creating the file, a flaw in the FAT design. Also files can become fragmented which causes reads and writes to be slower.</p>
+<p>A formatter sketch, SdFormatter.pde, is included in the SdFat/examples/SdFormatter directory. This sketch attempts to emulate SD Association's SDFormatter.</p>
+<p>The best way to restore an SD card's format on a PC is to use SDFormatter which can be downloaded from:</p>
+<p><a href="http://www.sdcard.org/consumers/formatter/">http://www.sdcard.org/consumers/formatter/</a></p>
+<p>SDFormatter aligns flash erase boundaries with file system structures which reduces write latency and file system overhead.</p>
+<p>SDFormatter does not have an option for FAT type so it may format small cards as FAT12.</p>
+<p>After the MBR is restored by SDFormatter you may need to reformat small cards that have been formatted FAT12 to force the volume type to be FAT16.</p>
+<p>If you reformat the SD card with an OS utility, choose a cluster size that will result in:</p>
+<p>4084 &lt; CountOfClusters &amp;&amp; CountOfClusters &lt; 65525</p>
+<p>The volume will then be FAT16.</p>
+<p>If you are formatting an SD card on OS X or Linux, be sure to use the first partition. Format this partition with a cluster count in above range for FAT16. SDHC cards should be formatted FAT32 with a cluster size of 32 KB.</p>
+<p>Microsoft operating systems support removable media formatted with a Master Boot Record, MBR, or formatted as a super floppy with a FAT Boot Sector in block zero.</p>
+<p>Microsoft operating systems expect MBR formatted removable media to have only one partition. The first partition should be used.</p>
+<p>Microsoft operating systems do not support partitioning SD flash cards. If you erase an SD card with a program like KillDisk, Most versions of Windows will format the card as a super floppy.</p>
+<h2><a class="anchor" id="References"></a>
+References</h2>
+<p>Adafruit Industries:</p>
+<p><a href="http://www.adafruit.com/">http://www.adafruit.com/</a></p>
+<p><a href="http://www.ladyada.net/make/waveshield/">http://www.ladyada.net/make/waveshield/</a></p>
+<p>The Arduino site:</p>
+<p><a href="http://www.arduino.cc/">http://www.arduino.cc/</a></p>
+<p>For more information about FAT file systems see:</p>
+<p><a href="http://www.microsoft.com/whdc/system/platform/firmware/fatgen.mspx">http://www.microsoft.com/whdc/system/platform/firmware/fatgen.mspx</a></p>
+<p>For information about using SD cards as SPI devices see:</p>
+<p><a href="http://www.sdcard.org/developers/tech/sdcard/pls/Simplified_Physical_Layer_Spec.pdf">http://www.sdcard.org/developers/tech/sdcard/pls/Simplified_Physical_Layer_Spec.pdf</a></p>
+<p>The ATmega328 datasheet:</p>
+<p><a href="http://www.atmel.com/dyn/resources/prod_documents/doc8161.pdf">http://www.atmel.com/dyn/resources/prod_documents/doc8161.pdf</a> </p>
 </div></div><!-- contents -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
@@ -191,7 +184,7 @@ Implemented GCodes</h2>
   <div id="nav-path" class="navpath">
     <ul>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

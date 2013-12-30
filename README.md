@@ -1,16 +1,48 @@
 # Repetier-Firmware - the fast and user friendly firmware
 
-by repetier  (repetierdev@gmail.com)
+## Installation
+
+Please use your new at [http://www.repetier.com/firmware/v091](http://www.repetier.com/firmware/v091)
+for easy and fast configuration. You get the complete sources you need to compile back.
+This system also allows it to upload configurations created with this tool and modify
+the configuration.
+
+## Version 0.91 released 2013-12-30
+
+Improvements over old code:
+* Works with CodeBlocks for Arduino http://www.arduinodev.com/codeblocks/#download
+  which can replace the ArduinoIDE with a much better one on windows systems. Load the
+  Repetier.cdb project file for this.
+* Better readable code.
+* Long filename support (from Glenn Kreisel).
+* Animated menu changes.
+* Separation of logic and hardware access to allow different processor architectures
+  by changing the hardware related files.
+* z-leveling support.
+* Mirroring of x,y and z motor.
+* Ditto printing.
+* Faster and better delta printing.
+* New heat manager (dead time control).
+* Removed OPS handling.
+* Full graphic display support.
+* Many bug fixes.
+* many other changes.
+
+## Documentation
 
 For documentation please visit [http://www.repetier.com/documentation/repetier-firmware/](http://www.repetier.com/documentation/repetier-firmware/)
 
-Beta version with added delta move and homing calculations and several other features for delta printers.
+## Developer
 
-To set rod height on a delta printer use command M251 which will allow you to measure 
-the rod length or, if you have an LCD panel then you can select delta calibration in the
-configuration menu.
-
-Version 0.81  03.02.2013
+The sources are managed by the Hot-World GmbH & Co. KG
+It was initially based on the Sprinter firmware from Kliment, but the code has run
+through many changes since them.
+Other developers:
+- Glenn Kreisel (long filename support)
+- Martin Croome (first delta implementation)
+- John Silvia (Arduino Due port)
+- sdavi (first u8glib code implementation)
+- plus several small contributions from other users.
 
 ## Introduction
 
@@ -27,16 +59,19 @@ require a matching pin definition.
 
 * MEGA/RAMPS up to 1.2       = 3
 * RAMPS 1.3/RAMPS 1.4        = 33
+* Azteeg X3                  = 34
 * Gen6                       = 5 
 * Gen6 deluxe                = 51
 * Sanguinololu up to 1.1     = 6
 * Sanguinololu 1.2 and above = 62
+* Melzi board                = 63
 * Gen7 1.1 till 1.3.x        = 7
 * Gen7 1.4.1 and later       = 71
 * Teensylu (at90usb)         = 8 // requires Teensyduino
 * Printrboard (at90usb)      = 9 // requires Teensyduino
 * Foltyn 3D Master           = 12
 * MegaTronics                = 70
+* Megatronics 2.0            = 701
 * RUMBA                      = 80  // Get it from reprapdiscount
 * Rambo                      = 301
 

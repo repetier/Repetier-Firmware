@@ -5,8 +5,8 @@ var class_sd_file =
     [ "clearWriteError", "class_sd_file.html#af50f0c1e1c726ef3dee08a84456090b9", null ],
     [ "getWriteError", "class_sd_file.html#a9b199fded04cffe6a609465dce43fdcc", null ],
     [ "write", "class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee", null ],
-    [ "write", "class_sd_file.html#a13a01b8a75f64e33fbea47e95186cdf1", null ],
-    [ "write", "class_sd_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7", null ],
-    [ "write_P", "class_sd_file.html#af4dace00a7941e0936830200cb3fc9f9", null ],
-    [ "writeln_P", "class_sd_file.html#a01a8e28448c6120f8de1db3f44c15da9", null ]
+    [ "write", "class_sd_file.html#abc47d1855b6d1ac124b27c3bea6ad9ef", null ],
+    [ "write", "class_sd_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07", null ],
+    [ "write_P", "class_sd_file.html#a125d7f01d9c471f0f45266bc5f1fdef8", null ],
+    [ "writeln_P", "class_sd_file.html#a355726bfcd0db6fe83cb4516f6c4f124", null ]
 ];

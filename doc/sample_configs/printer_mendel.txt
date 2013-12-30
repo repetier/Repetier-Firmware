@@ -1,0 +1,15 @@
+
+For Stepper controller with 1/8 step, metric system
+#define XAXIS_STEPS_PER_MM 40
+#define YAXIS_STEPS_PER_MM 40
+#define ZAXIS_STEPS_PER_MM 3360
+
+---------------------------------------------------------------------
+
+For Stepper controller with 1/16 step, metric system
+#define XAXIS_STEPS_PER_MM 80
+#define YAXIS_STEPS_PER_MM 80
+#define ZAXIS_STEPS_PER_MM 6720
+
+---------------------------------------------------------------------
+

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/Eeprom.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/Eeprom.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,20 +98,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="summary">
-<a href="#define-members">Defines</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#define-members">Defines</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/Eeprom.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/Eeprom.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;avr/eeprom.h&gt;</code><br/>
-</div>
+
 <p><a href="_eeprom_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr><td colspan="2"><h2><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a></td></tr>
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">EEPROM_PROTOCOL_VERSION</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">EEPROM_PROTOCOL_VERSION</a>&#160;&#160;&#160;6</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ade30e27b166cc7fa8c6c61cd8a01d1d1">EPR_MAGIC_BYTE</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac50a4c7f2bc4d7e2c876a28f631561d7">EPR_ACCELERATION_TYPE</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a8922fb8a0e782dcf6a51fb5a38d1d8b8">EPR_XAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;3</td></tr>
@@ -124,7 +125,6 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a848be186f70158156487357cea8a076f">EPR_Y_HOMING_FEEDRATE</a>&#160;&#160;&#160;31</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a2bbc6d31ec012b522b7b8700852fb236">EPR_Z_HOMING_FEEDRATE</a>&#160;&#160;&#160;35</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aa90bbc0fc3c7b8e8e0a1bca0c99a5a44">EPR_MAX_JERK</a>&#160;&#160;&#160;39</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aaac0aa2508218f3241396b2f71b74acf">EPR_OPS_MIN_DISTANCE</a>&#160;&#160;&#160;43</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#affc38f44bedceafaa70242ece11a43b6">EPR_MAX_ZJERK</a>&#160;&#160;&#160;47</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac5c699b9db85fa31d55057190d426f8a">EPR_X_MAX_ACCEL</a>&#160;&#160;&#160;51</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac92348123f02b917797b1f1aeabae211">EPR_Y_MAX_ACCEL</a>&#160;&#160;&#160;55</td></tr>
@@ -135,11 +135,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a67738eb9838d52221677f73de020f87c">EPR_BAUDRATE</a>&#160;&#160;&#160;75</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a5eebdcc1d55d8635fb4296f9dc371f33">EPR_MAX_INACTIVE_TIME</a>&#160;&#160;&#160;79</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a3e3982e8d6fbf37b06de3253722170bc">EPR_STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;83</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a4b48a037ac143186e460bec3c5c3ec4a">EPR_OPS_RETRACT_DISTANCE</a>&#160;&#160;&#160;87</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aa688939bd8b7f1f7e640f40d4b4beb97">EPR_OPS_RETRACT_BACKLASH</a>&#160;&#160;&#160;91</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a16ea8a2464dbc67f58429c7e1699b916">EPR_EXTRUDER_SPEED</a>&#160;&#160;&#160;95</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a4b3e9d284d63fdddc2707765e01aca81">EPR_OPS_MOVE_AFTER</a>&#160;&#160;&#160;99</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a6812ff9c2354db4eddeda8afa24e6727">EPR_OPS_MODE</a>&#160;&#160;&#160;103</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>&#160;&#160;&#160;104</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a09417ae921b9d1693e57c854ea7b54d3">EPR_VERSION</a>&#160;&#160;&#160;105</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a431c0d7daae00f28b101769db333f669">EPR_BED_HEAT_MANAGER</a>&#160;&#160;&#160;106</td></tr>
@@ -160,6 +156,32 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a188992c8f5056c25aa32663180e8671e">EPR_BACKLASH_X</a>&#160;&#160;&#160;157</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a076338d01a1438efa02108c08ef293ed">EPR_BACKLASH_Y</a>&#160;&#160;&#160;161</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a8f78c6be0c233d4e3c5597b0fee2a086">EPR_BACKLASH_Z</a>&#160;&#160;&#160;165</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a80bf0281ddde2a2512279cf3cf139d92">EPR_Z_PROBE_X_OFFSET</a>&#160;&#160;&#160;800</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ab76f89f7895e1e390989ccb2dfb4cb2c">EPR_Z_PROBE_Y_OFFSET</a>&#160;&#160;&#160;804</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#abe14026280395e813c2effc984921232">EPR_Z_PROBE_HEIGHT</a>&#160;&#160;&#160;808</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a9e1312cdcc6454cec7e06af42b0787f0">EPR_Z_PROBE_SPEED</a>&#160;&#160;&#160;812</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a02bfd8e5a195b643ef3b9a6da1025f71">EPR_Z_PROBE_X1</a>&#160;&#160;&#160;816</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a5ad63d9efd3f3aefeb0c38ccf06db6e0">EPR_Z_PROBE_Y1</a>&#160;&#160;&#160;820</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a6ef40dcd1941cb3ac787a9002801d772">EPR_Z_PROBE_X2</a>&#160;&#160;&#160;824</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac950c84f046fe3b56fce66da782941e7">EPR_Z_PROBE_Y2</a>&#160;&#160;&#160;828</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#afe125983166607f24dfbea05b191d7c1">EPR_Z_PROBE_X3</a>&#160;&#160;&#160;832</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a96c5f28e68b5cf457332a04c9072f0eb">EPR_Z_PROBE_Y3</a>&#160;&#160;&#160;836</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a7227b7e0564473a670020a925d3b0bb7">EPR_Z_PROBE_XY_SPEED</a>&#160;&#160;&#160;840</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a390e8839cfa29a1cf8fbbb1830721f2c">EPR_AUTOLEVEL_MATRIX</a>&#160;&#160;&#160;844</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a5b6df4b1de7c02625e66331bb2807ec2">EPR_AUTOLEVEL_ACTIVE</a>&#160;&#160;&#160;880</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a77172c00c31a25cfc4f831d2c1da7ae9">EPR_DELTA_DIAGONAL_ROD_LENGTH</a>&#160;&#160;&#160;881</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a9b46383b2fddb7b9e3efec6b837af3e4">EPR_DELTA_HORIZONTAL_RADIUS</a>&#160;&#160;&#160;885</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a8f51a6c7f48f48ed60691740f20c55f3">EPR_DELTA_SEGMENTS_PER_SECOND_PRINT</a>&#160;&#160;&#160;889</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a99a88872e4a0dad430f6f28ecaaf10ff">EPR_DELTA_SEGMENTS_PER_SECOND_MOVE</a>&#160;&#160;&#160;891</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a18a0d04c5e1eb9a63d2f4685536a82bc">EPR_DELTA_TOWERX_OFFSET_STEPS</a>&#160;&#160;&#160;893</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a97deb23c43de0cc6efed4f83df07e340">EPR_DELTA_TOWERY_OFFSET_STEPS</a>&#160;&#160;&#160;895</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a7a1dfd32287137b04916e331ca790d98">EPR_DELTA_TOWERZ_OFFSET_STEPS</a>&#160;&#160;&#160;897</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#af6d064eb27cc2ce9439b52908cbe1bb8">EPR_DELTA_ALPHA_A</a>&#160;&#160;&#160;901</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a44a50634fcfa27eb9d2138225fd9dd2a">EPR_DELTA_ALPHA_B</a>&#160;&#160;&#160;905</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ab81ab54bcbf30669695c121e90b0cc58">EPR_DELTA_ALPHA_C</a>&#160;&#160;&#160;909</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ac3a50022366946a5e86bc423f8146c62">EPR_DELTA_RADIUS_CORR_A</a>&#160;&#160;&#160;913</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a0c735c861397a15d530a8378de008c75">EPR_DELTA_RADIUS_CORR_B</a>&#160;&#160;&#160;917</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ae708532fc7ea889dfea6495c7bef7602">EPR_DELTA_RADIUS_CORR_C</a>&#160;&#160;&#160;921</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a2e4d24d1f849863e301efa608a0e741b">EEPROM_EXTRUDER_OFFSET</a>&#160;&#160;&#160;200</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a2b0a7c91c014b194d4f3b523d9d3dc80">EEPROM_EXTRUDER_LENGTH</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ae486cf564337eb8348f02693a7a1db15">EPR_EXTRUDER_STEPS_PER_MM</a>&#160;&#160;&#160;0</td></tr>
@@ -180,14 +202,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a51d7d0452567f9a4a7e988fe92555ca0">EPR_EXTRUDER_ADVANCE_L</a>&#160;&#160;&#160;46</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#aecc4cd24a102279140365a1e214a8966">EPR_EXTRUDER_WAIT_RETRACT_TEMP</a>&#160;&#160;&#160;50</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a53dad7df44314718656b7a57ffad4378">EPR_EXTRUDER_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;52</td></tr>
-<tr><td colspan="2"><h2><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a56159747b47dd1eda34659f51287c89d">epr_output_settings</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes all eeprom settings to serial console.  <a href="#a56159747b47dd1eda34659f51287c89d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a1688d15668bdcefb7c078e75161f5242">epr_update</a> (<a class="el" href="struct_g_code.html">GCode</a> *com)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a739c1d676ce722809e48629d65217b08">epr_init</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#ae8e836ee3254ec9a160e904dcb631bde">epr_init_baudrate</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a526c528a70afb99c2d9bf8083d502f9f">epr_update_usage</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_eeprom_8h.html#a19535993cc5ff2983c818949a9c80c3f">EPR_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;54</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
 <a class="anchor" id="a2b0a7c91c014b194d4f3b523d9d3dc80"></a><!-- doxytag: member="Eeprom.h::EEPROM_EXTRUDER_LENGTH" ref="a2b0a7c91c014b194d4f3b523d9d3dc80" args="" -->
@@ -216,26 +231,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afe7387252655a7ee07b26cb83c5ed0be"></a><!-- doxytag: member="Eeprom.h::EEPROM_OFFSET" ref="afe7387252655a7ee07b26cb83c5ed0be" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Where to start with our datablock in memory. Can be moved if you have problems with other modules using the eeprom </p>
-
-</div>
-</div>
 <a class="anchor" id="a0837cb4b56bf81f801e83758a6191e44"></a><!-- doxytag: member="Eeprom.h::EEPROM_PROTOCOL_VERSION" ref="a0837cb4b56bf81f801e83758a6191e44" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">EEPROM_PROTOCOL_VERSION</a>&#160;&#160;&#160;1</td>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">EEPROM_PROTOCOL_VERSION</a>&#160;&#160;&#160;6</td>
         </tr>
       </table>
 </div>
@@ -249,6 +250,32 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_eeprom_8h.html#ac50a4c7f2bc4d7e2c876a28f631561d7">EPR_ACCELERATION_TYPE</a>&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5b6df4b1de7c02625e66331bb2807ec2"></a><!-- doxytag: member="Eeprom.h::EPR_AUTOLEVEL_ACTIVE" ref="a5b6df4b1de7c02625e66331bb2807ec2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a5b6df4b1de7c02625e66331bb2807ec2">EPR_AUTOLEVEL_ACTIVE</a>&#160;&#160;&#160;880</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a390e8839cfa29a1cf8fbbb1830721f2c"></a><!-- doxytag: member="Eeprom.h::EPR_AUTOLEVEL_MATRIX" ref="a390e8839cfa29a1cf8fbbb1830721f2c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a390e8839cfa29a1cf8fbbb1830721f2c">EPR_AUTOLEVEL_MATRIX</a>&#160;&#160;&#160;844</td>
         </tr>
       </table>
 </div>
@@ -399,6 +426,175 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af6d064eb27cc2ce9439b52908cbe1bb8"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_ALPHA_A" ref="af6d064eb27cc2ce9439b52908cbe1bb8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#af6d064eb27cc2ce9439b52908cbe1bb8">EPR_DELTA_ALPHA_A</a>&#160;&#160;&#160;901</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a44a50634fcfa27eb9d2138225fd9dd2a"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_ALPHA_B" ref="a44a50634fcfa27eb9d2138225fd9dd2a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a44a50634fcfa27eb9d2138225fd9dd2a">EPR_DELTA_ALPHA_B</a>&#160;&#160;&#160;905</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab81ab54bcbf30669695c121e90b0cc58"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_ALPHA_C" ref="ab81ab54bcbf30669695c121e90b0cc58" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#ab81ab54bcbf30669695c121e90b0cc58">EPR_DELTA_ALPHA_C</a>&#160;&#160;&#160;909</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a77172c00c31a25cfc4f831d2c1da7ae9"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_DIAGONAL_ROD_LENGTH" ref="a77172c00c31a25cfc4f831d2c1da7ae9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a77172c00c31a25cfc4f831d2c1da7ae9">EPR_DELTA_DIAGONAL_ROD_LENGTH</a>&#160;&#160;&#160;881</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9b46383b2fddb7b9e3efec6b837af3e4"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_HORIZONTAL_RADIUS" ref="a9b46383b2fddb7b9e3efec6b837af3e4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a9b46383b2fddb7b9e3efec6b837af3e4">EPR_DELTA_HORIZONTAL_RADIUS</a>&#160;&#160;&#160;885</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac3a50022366946a5e86bc423f8146c62"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_RADIUS_CORR_A" ref="ac3a50022366946a5e86bc423f8146c62" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#ac3a50022366946a5e86bc423f8146c62">EPR_DELTA_RADIUS_CORR_A</a>&#160;&#160;&#160;913</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0c735c861397a15d530a8378de008c75"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_RADIUS_CORR_B" ref="a0c735c861397a15d530a8378de008c75" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a0c735c861397a15d530a8378de008c75">EPR_DELTA_RADIUS_CORR_B</a>&#160;&#160;&#160;917</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae708532fc7ea889dfea6495c7bef7602"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_RADIUS_CORR_C" ref="ae708532fc7ea889dfea6495c7bef7602" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#ae708532fc7ea889dfea6495c7bef7602">EPR_DELTA_RADIUS_CORR_C</a>&#160;&#160;&#160;921</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a99a88872e4a0dad430f6f28ecaaf10ff"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_SEGMENTS_PER_SECOND_MOVE" ref="a99a88872e4a0dad430f6f28ecaaf10ff" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a99a88872e4a0dad430f6f28ecaaf10ff">EPR_DELTA_SEGMENTS_PER_SECOND_MOVE</a>&#160;&#160;&#160;891</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8f51a6c7f48f48ed60691740f20c55f3"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_SEGMENTS_PER_SECOND_PRINT" ref="a8f51a6c7f48f48ed60691740f20c55f3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a8f51a6c7f48f48ed60691740f20c55f3">EPR_DELTA_SEGMENTS_PER_SECOND_PRINT</a>&#160;&#160;&#160;889</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a18a0d04c5e1eb9a63d2f4685536a82bc"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_TOWERX_OFFSET_STEPS" ref="a18a0d04c5e1eb9a63d2f4685536a82bc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a18a0d04c5e1eb9a63d2f4685536a82bc">EPR_DELTA_TOWERX_OFFSET_STEPS</a>&#160;&#160;&#160;893</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a97deb23c43de0cc6efed4f83df07e340"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_TOWERY_OFFSET_STEPS" ref="a97deb23c43de0cc6efed4f83df07e340" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a97deb23c43de0cc6efed4f83df07e340">EPR_DELTA_TOWERY_OFFSET_STEPS</a>&#160;&#160;&#160;895</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a7a1dfd32287137b04916e331ca790d98"></a><!-- doxytag: member="Eeprom.h::EPR_DELTA_TOWERZ_OFFSET_STEPS" ref="a7a1dfd32287137b04916e331ca790d98" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a7a1dfd32287137b04916e331ca790d98">EPR_DELTA_TOWERZ_OFFSET_STEPS</a>&#160;&#160;&#160;897</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="aa80919dea6acb89e650815fa56958297"></a><!-- doxytag: member="Eeprom.h::EPR_EXTRUDER_ADVANCE_K" ref="aa80919dea6acb89e650815fa56958297" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -418,6 +614,19 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_eeprom_8h.html#a51d7d0452567f9a4a7e988fe92555ca0">EPR_EXTRUDER_ADVANCE_L</a>&#160;&#160;&#160;46</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a19535993cc5ff2983c818949a9c80c3f"></a><!-- doxytag: member="Eeprom.h::EPR_EXTRUDER_COOLER_SPEED" ref="a19535993cc5ff2983c818949a9c80c3f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a19535993cc5ff2983c818949a9c80c3f">EPR_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;54</td>
         </tr>
       </table>
 </div>
@@ -669,6 +878,7 @@ Functions</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
+<p>Where to start with our datablock in memory. Can be moved if you have problems with other modules using the eeprom </p>
 
 </div>
 </div>
@@ -704,71 +914,6 @@ Functions</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_eeprom_8h.html#affc38f44bedceafaa70242ece11a43b6">EPR_MAX_ZJERK</a>&#160;&#160;&#160;47</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aaac0aa2508218f3241396b2f71b74acf"></a><!-- doxytag: member="Eeprom.h::EPR_OPS_MIN_DISTANCE" ref="aaac0aa2508218f3241396b2f71b74acf" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#aaac0aa2508218f3241396b2f71b74acf">EPR_OPS_MIN_DISTANCE</a>&#160;&#160;&#160;43</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a6812ff9c2354db4eddeda8afa24e6727"></a><!-- doxytag: member="Eeprom.h::EPR_OPS_MODE" ref="a6812ff9c2354db4eddeda8afa24e6727" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a6812ff9c2354db4eddeda8afa24e6727">EPR_OPS_MODE</a>&#160;&#160;&#160;103</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a4b3e9d284d63fdddc2707765e01aca81"></a><!-- doxytag: member="Eeprom.h::EPR_OPS_MOVE_AFTER" ref="a4b3e9d284d63fdddc2707765e01aca81" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a4b3e9d284d63fdddc2707765e01aca81">EPR_OPS_MOVE_AFTER</a>&#160;&#160;&#160;99</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aa688939bd8b7f1f7e640f40d4b4beb97"></a><!-- doxytag: member="Eeprom.h::EPR_OPS_RETRACT_BACKLASH" ref="aa688939bd8b7f1f7e640f40d4b4beb97" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#aa688939bd8b7f1f7e640f40d4b4beb97">EPR_OPS_RETRACT_BACKLASH</a>&#160;&#160;&#160;91</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a4b48a037ac143186e460bec3c5c3ec4a"></a><!-- doxytag: member="Eeprom.h::EPR_OPS_RETRACT_DISTANCE" ref="a4b48a037ac143186e460bec3c5c3ec4a" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a4b48a037ac143186e460bec3c5c3ec4a">EPR_OPS_RETRACT_DISTANCE</a>&#160;&#160;&#160;87</td>
         </tr>
       </table>
 </div>
@@ -1088,105 +1233,155 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="abe14026280395e813c2effc984921232"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_HEIGHT" ref="abe14026280395e813c2effc984921232" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#abe14026280395e813c2effc984921232">EPR_Z_PROBE_HEIGHT</a>&#160;&#160;&#160;808</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9e1312cdcc6454cec7e06af42b0787f0"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_SPEED" ref="a9e1312cdcc6454cec7e06af42b0787f0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a9e1312cdcc6454cec7e06af42b0787f0">EPR_Z_PROBE_SPEED</a>&#160;&#160;&#160;812</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a02bfd8e5a195b643ef3b9a6da1025f71"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_X1" ref="a02bfd8e5a195b643ef3b9a6da1025f71" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a02bfd8e5a195b643ef3b9a6da1025f71">EPR_Z_PROBE_X1</a>&#160;&#160;&#160;816</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6ef40dcd1941cb3ac787a9002801d772"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_X2" ref="a6ef40dcd1941cb3ac787a9002801d772" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a6ef40dcd1941cb3ac787a9002801d772">EPR_Z_PROBE_X2</a>&#160;&#160;&#160;824</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afe125983166607f24dfbea05b191d7c1"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_X3" ref="afe125983166607f24dfbea05b191d7c1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#afe125983166607f24dfbea05b191d7c1">EPR_Z_PROBE_X3</a>&#160;&#160;&#160;832</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a80bf0281ddde2a2512279cf3cf139d92"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_X_OFFSET" ref="a80bf0281ddde2a2512279cf3cf139d92" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a80bf0281ddde2a2512279cf3cf139d92">EPR_Z_PROBE_X_OFFSET</a>&#160;&#160;&#160;800</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a7227b7e0564473a670020a925d3b0bb7"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_XY_SPEED" ref="a7227b7e0564473a670020a925d3b0bb7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a7227b7e0564473a670020a925d3b0bb7">EPR_Z_PROBE_XY_SPEED</a>&#160;&#160;&#160;840</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5ad63d9efd3f3aefeb0c38ccf06db6e0"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_Y1" ref="a5ad63d9efd3f3aefeb0c38ccf06db6e0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a5ad63d9efd3f3aefeb0c38ccf06db6e0">EPR_Z_PROBE_Y1</a>&#160;&#160;&#160;820</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac950c84f046fe3b56fce66da782941e7"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_Y2" ref="ac950c84f046fe3b56fce66da782941e7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#ac950c84f046fe3b56fce66da782941e7">EPR_Z_PROBE_Y2</a>&#160;&#160;&#160;828</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a96c5f28e68b5cf457332a04c9072f0eb"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_Y3" ref="a96c5f28e68b5cf457332a04c9072f0eb" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#a96c5f28e68b5cf457332a04c9072f0eb">EPR_Z_PROBE_Y3</a>&#160;&#160;&#160;836</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab76f89f7895e1e390989ccb2dfb4cb2c"></a><!-- doxytag: member="Eeprom.h::EPR_Z_PROBE_Y_OFFSET" ref="ab76f89f7895e1e390989ccb2dfb4cb2c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_eeprom_8h.html#ab76f89f7895e1e390989ccb2dfb4cb2c">EPR_Z_PROBE_Y_OFFSET</a>&#160;&#160;&#160;804</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a726a50b6b49d55ad4c1be62bd8962d79"></a><!-- doxytag: member="Eeprom.h::EPR_ZAXIS_STEPS_PER_MM" ref="a726a50b6b49d55ad4c1be62bd8962d79" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_eeprom_8h.html#a726a50b6b49d55ad4c1be62bd8962d79">EPR_ZAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;11</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a739c1d676ce722809e48629d65217b08"></a><!-- doxytag: member="Eeprom.h::epr_init" ref="a739c1d676ce722809e48629d65217b08" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_eeprom_8h.html#a739c1d676ce722809e48629d65217b08">epr_init</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ae8e836ee3254ec9a160e904dcb631bde"></a><!-- doxytag: member="Eeprom.h::epr_init_baudrate" ref="ae8e836ee3254ec9a160e904dcb631bde" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_eeprom_8h.html#ae8e836ee3254ec9a160e904dcb631bde">epr_init_baudrate</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a56159747b47dd1eda34659f51287c89d"></a><!-- doxytag: member="Eeprom.h::epr_output_settings" ref="a56159747b47dd1eda34659f51287c89d" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_eeprom_8h.html#a56159747b47dd1eda34659f51287c89d">epr_output_settings</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Writes all eeprom settings to serial console. </p>
-<p>For each value stored, this function generates one line with syntax</p>
-<p>EPR: pos type value description</p>
-<p>With</p>
-<ul>
-<li>pos = Position in EEPROM, the data starts.</li>
-<li>type = Value type: 0 = byte, 1 = int, 2 = long, 3 = float</li>
-<li>value = The value currently stored</li>
-<li>description = Definition of the value </li>
-</ul>
-
-</div>
-</div>
-<a class="anchor" id="a1688d15668bdcefb7c078e75161f5242"></a><!-- doxytag: member="Eeprom.h::epr_update" ref="a1688d15668bdcefb7c078e75161f5242" args="(GCode *com)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_eeprom_8h.html#a1688d15668bdcefb7c078e75161f5242">epr_update</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_g_code.html">GCode</a> *&#160;</td>
-          <td class="paramname"><em>com</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a526c528a70afb99c2d9bf8083d502f9f"></a><!-- doxytag: member="Eeprom.h::epr_update_usage" ref="a526c528a70afb99c2d9bf8083d502f9f" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_eeprom_8h.html#a526c528a70afb99c2d9bf8083d502f9f">epr_update_usage</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
         </tr>
       </table>
 </div>
@@ -1214,7 +1409,7 @@ Functions</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="_eeprom_8h.html">Eeprom.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

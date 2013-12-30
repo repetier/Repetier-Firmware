@@ -1,7 +1,32 @@
-Version 0.83 17-03-2013
-	Switch thermistor pins 0/1 for gen1.4 and 1.5
-	Fixed hash start after z height changes. Could cause lost steps depending on settings!
-	
+Version 0.91
+  Online configuration tool: http://www.repetier.com/firmware/v091
+  Support for Arduino Due - thank to John Silvia for this port!
+  Compatible with Code::Blocks for Arduino.
+  Added z-probing.
+  Added auto leveling of heated bed.
+  Moved hardware dependend code into HAL.[h|cpp]
+  New heat manage 3: dead-time control. P in pid values is dead time in seconds.
+  Switch heater 1/heater2 and sensore 1/2 for Megatronics 2.0.
+  Switch temp sensore 0/1 for Gen1.5
+  Optimized path planner.
+  Fixed shock on z-level switches.
+  Changed serial handling.
+  Definition of homing order axis.
+  Fixed pin assignment for RUMBA
+  Added ui support for 3. extruder
+  Mirror stepper driver signals if wanted for two x,y,z drivers with same signals.
+  Support for servo control through M340 command.
+  Fixed bug with cura profile comment string.
+  Fixed missing return bug for prints from sd card.
+  The first two extruder can share a cooler. SImply set both pins to identical values.
+  Enable hot-end cooler for M303 if available.
+  Swedish translation from Daniel Tedenljung
+  Added MAX31855 support.
+  Added ditto printing.
+  Better communication error detection preventing hangs.
+  Run init.g on sd card when started or mounted.
+  Added Tuga support.
+
 Version 0.82 07-03-2013
   Support extruder cooler to cool nozzle at the top down.
   Extruder cooler fan always on if temp>50°C

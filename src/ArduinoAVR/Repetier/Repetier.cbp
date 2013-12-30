@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Repetier" />
+		<Option pch_mode="2" />
+		<Option compiler="avrgcc" />
+		<Option virtualFolders="libraries\;" />
+		<Build>
+			<Target title="Simulator - Debug">
+				<Option output="bin/Release/Repetier_sim.exe" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="GCC" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-DARDUSIM" />
+					<Add option="-D__AVR_ATmega2560__" />
+					<Add option="-x c++" />
+					<Add directory="$(ARDUINO_DIR)/arduino/cores" />
+					<Add directory="$(ARDUINO_DIR)/arduino/variants/standard" />
+					<Add directory="$(ARDUINO_DIR)/include" />
+				</Compiler>
+				<Environment>
+					<Variable name="ARDUINO_DIR" value="$(APP_PATH)\ardusim" />
+				</Environment>
+			</Target>
+			<Target title="Simulator - Release">
+				<Option output="bin/Release/Repetier_sim.exe" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="GCC" />
+				<Compiler>
+					<Add option="-Os" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-DARDUSIM" />
+					<Add option="-D__AVR_ATmega2560__" />
+					<Add option="-x c++" />
+					<Add directory="$(ARDUINO_DIR)/arduino/cores" />
+					<Add directory="$(ARDUINO_DIR)/arduino/variants/standard" />
+					<Add directory="$(ARDUINO_DIR)/include" />
+				</Compiler>
+				<Environment>
+					<Variable name="ARDUINO_DIR" value="$(APP_PATH)\ardusim" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Uno">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Uno" />
+					<Variable name="BOARD_ID" value="uno" />
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="UPLOAD_BAUDRATE" value="115200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Leonardo">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega32U4__" />
+					<Add option="-DUSB_VID=0x2341" />
+					<Add option="-DUSB_PID=0x8036" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/leonardo" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Leonardo" />
+					<Variable name="BOARD_ID" value="leonardo" />
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Esplora">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega32U4__" />
+					<Add option="-DUSB_VID=0x2341" />
+					<Add option="-DUSB_PID=0x8037" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/leonardo" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Esplora" />
+					<Variable name="BOARD_ID" value="esplora" />
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Micro">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega32U4__" />
+					<Add option="-DUSB_VID=0x2341" />
+					<Add option="-DUSB_PID=0x803C" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/micro" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Micro" />
+					<Variable name="BOARD_ID" value="micro" />
+					<Variable name="MCU" value="atmega32u4" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Duemilanove (328)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Duemilanove (328)" />
+					<Variable name="BOARD_ID" value="duemilanove328" />
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Duemilanove (168)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega168__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Duemilanove (168)" />
+					<Variable name="BOARD_ID" value="duemilanove168" />
+					<Variable name="MCU" value="atmega168" />
+					<Variable name="UPLOAD_BAUDRATE" value="19200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Nano (328)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/eightanaloginputs" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Nano (328)" />
+					<Variable name="BOARD_ID" value="nano328" />
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Nano (168)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega168__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/eightanaloginputs" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Nano (168)" />
+					<Variable name="BOARD_ID" value="nano168" />
+					<Variable name="MCU" value="atmega168" />
+					<Variable name="UPLOAD_BAUDRATE" value="19200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mini (328)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/eightanaloginputs" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Mini (328)" />
+					<Variable name="BOARD_ID" value="mini328" />
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mini (168)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega168__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/eightanaloginputs" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Mini (168)" />
+					<Variable name="BOARD_ID" value="mini168" />
+					<Variable name="MCU" value="atmega168" />
+					<Variable name="UPLOAD_BAUDRATE" value="19200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Pro Mini (328)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Pro Mini (328)" />
+					<Variable name="BOARD_ID" value="promini328" />
+					<Variable name="MCU" value="atmega328p" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Pro Mini (168)">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega168__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Pro Mini (168)" />
+					<Variable name="BOARD_ID" value="promini168" />
+					<Variable name="MCU" value="atmega168" />
+					<Variable name="UPLOAD_BAUDRATE" value="19200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mega 2560/ADK">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-Os" />
+					<Add option="-W" />
+					<Add option="-Wall" />
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega2560__" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/mega" />
+					<Add directory="$(ARDUINO_DIR)/libraries/U8glib" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Mega 2560\ADK" />
+					<Variable name="BOARD_ID" value="mega2560" />
+					<Variable name="MCU" value="atmega2560" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mega 1280">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega1280__" />
+					<Add option="-O2" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/mega" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Mega 1280" />
+					<Variable name="BOARD_ID" value="mega1280" />
+					<Variable name="MCU" value="atmega1280" />
+					<Variable name="UPLOAD_BAUDRATE" value="57600" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Arduino Mega 8">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/standard" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Arduino Mega 8" />
+					<Variable name="BOARD_ID" value="mega8" />
+					<Variable name="MCU" value="atmega8" />
+					<Variable name="UPLOAD_BAUDRATE" value="19200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+			<Target title="Microduino Core+">
+				<Option output="bin/Release/Repetier_${BOARD_ID}_${UPLOAD_PORT}.elf" prefix_auto="1" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-DF_CPU=16000000L" />
+					<Add option="-D__AVR_ATmega328P__" />
+					<Add option="-Os" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/cores/arduino" />
+					<Add directory="$(ARDUINO_DIR)/libraries" />
+					<Add directory="$(ARDUINO_DIR)/hardware/arduino/variants/plus" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=$(MCU)" />
+					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+					<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+					<Add after="avr-size --mcu=$(MCU) --format=avr $(TARGET_OUTPUT_FILE)" />
+					<Add after='cmd /c &quot;avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss&quot;' />
+				</ExtraCommands>
+				<Environment>
+					<Variable name="BOARD" value="Microduino Core+" />
+					<Variable name="BOARD_ID" value="uduino644p" />
+					<Variable name="MCU" value="atmega644p" />
+					<Variable name="UPLOAD_BAUDRATE" value="115200" />
+					<Variable name="UPLOAD_PORT" value="" />
+				</Environment>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w" />
+			<Add directory="." />
+		</Compiler>
+		<Unit filename="Commands.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Commands.h" />
+		<Unit filename="Communication.cpp" />
+		<Unit filename="Communication.h" />
+		<Unit filename="Configuration.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Eeprom.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Eeprom.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Extruder.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Extruder.h" />
+		<Unit filename="FatStructs.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="HAL.cpp" />
+		<Unit filename="HAL.h" />
+		<Unit filename="Printer.cpp" />
+		<Unit filename="Printer.h" />
+		<Unit filename="Repetier.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="Repetier.ino">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option compiler="avrgcc" use="1" buildCommand="$compiler $options -x c++ $includes -c $file -o $object" />
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="SDCard.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="SdFat.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="SdFat.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="cores/CDC.cpp" />
+		<Unit filename="cores/IPAddress.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="cores/Print.cpp" />
+		<Unit filename="cores/Stream.cpp" />
+		<Unit filename="cores/Tone.cpp" />
+		<Unit filename="cores/USBCore.cpp" />
+		<Unit filename="cores/WInterrupts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cores/WMath.cpp" />
+		<Unit filename="cores/WString.cpp" />
+		<Unit filename="cores/main.cpp" />
+		<Unit filename="cores/new.cpp" />
+		<Unit filename="cores/wiring.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cores/wiring_analog.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cores/wiring_digital.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cores/wiring_pulse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cores/wiring_shift.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fastio.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="gcode.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="gcode.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="libraries/EEPROM.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/Ethernet.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/Firmata.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/LiquidCrystal.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/MultiLCD.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Arduino Uno" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Micro" />
+			<Option target="Arduino Duemilanove (328)" />
+			<Option target="Arduino Duemilanove (168)" />
+			<Option target="Arduino Nano (328)" />
+			<Option target="Arduino Nano (168)" />
+			<Option target="Arduino Mini (328)" />
+			<Option target="Arduino Mini (168)" />
+			<Option target="Arduino Pro Mini (328)" />
+			<Option target="Arduino Pro Mini (168)" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+			<Option target="Microduino Core+" />
+		</Unit>
+		<Unit filename="libraries/OBD.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/SD.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/SPI.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/Servo.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/Stepper.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/TinyGPS.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/U8gui.h">
+			<Option virtualFolder="libraries/" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="libraries/WiFi.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/Wire.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="libraries/twi.c">
+			<Option compilerVar="CC" />
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="motion.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="motion.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="pins.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="u8glib_ex.h" />
+		<Unit filename="ui.cpp">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="ui.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="uiconfig.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="uilang.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Unit filename="uimenu.h">
+			<Option target="Simulator - Debug" />
+			<Option target="Simulator - Release" />
+			<Option target="Arduino Leonardo" />
+			<Option target="Arduino Esplora" />
+			<Option target="Arduino Mega 2560/ADK" />
+			<Option target="Arduino Mega 1280" />
+			<Option target="Arduino Mega 8" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/Extruder.cpp File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/Extruder.cpp File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -102,60 +102,48 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/Extruder.cpp File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/Extruder.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_reptier_8h_source.html">Reptier.h</a>&quot;</code><br/>
+<div class="textblock"><code>#include &quot;<a class="el" href="_repetier_8h_source.html">Repetier.h</a>&quot;</code><br/>
 <code>#include &quot;pins_arduino.h&quot;</code><br/>
 <code>#include &quot;<a class="el" href="ui_8h_source.html">ui.h</a>&quot;</code><br/>
 <code>#include &quot;<a class="el" href="_eeprom_8h_source.html">Eeprom.h</a>&quot;</code><br/>
 </div><table class="memberdecls">
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>&#160;&#160;&#160;<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ace32b87e4177753ab1afc6d34c075773">NUMTEMPS_1</a>&#160;&#160;&#160;28</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a1bbf9b959b498e8fb643a71241007087">NUMTEMPS_2</a>&#160;&#160;&#160;21</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#aa0139de66a9c5e3e4a59814133699812">NUMTEMPS_3</a>&#160;&#160;&#160;28</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ac6ea389f511b505fa947eab49564dd12">NUMTEMPS_4</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ae86a8e1df519a0c3c14b9e2ad3e87c53">NUMTEMPS_8</a>&#160;&#160;&#160;34</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a1eeffe664a7a77a5e360d42a9614dfa5">NUMTEMPS_9</a>&#160;&#160;&#160;67</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#abeb0c2af67b9eca8aa8715adf41c4f28">NUMTEMPS_10</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ac12b60070f5d80da8be25aae24e9ad9b">NUMTEMPS_11</a>&#160;&#160;&#160;31</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ac59b1fec1109302c2c450dbdfcf84f3c">NUMTEMPS_12</a>&#160;&#160;&#160;31</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>&#160;&#160;&#160;<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a></td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#afd2fec963215a36aba2a2f3bdff88d3e">initHeatedBed</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a299b2711d43b3492a9915f93c65c006a">initExtruder</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Initalizes all extruder.  <a href="#a299b2711d43b3492a9915f93c65c006a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a49a92c7058d3369b02436dd25211b67c">updateTempControlVars</a> (<a class="el" href="struct_temperature_controller.html">TemperatureController</a> *tc)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#af220f61b41d0f0bd078d2bb4cc3d1bfb">extruder_select</a> (byte ext_num)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Select extruder ext_num.  <a href="#af220f61b41d0f0bd078d2bb4cc3d1bfb"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a6bf1ac2eafba68af17215bf35ff14fc6">extruder_set_temperature</a> (float temp_celsius, byte extr)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a1914630a2073a4c17638e6fc2f56063e">heated_bed_set_temperature</a> (float temp_celsius)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a17733fe057d5070c35f4509a37937294">heated_bed_get_temperature</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a8824eecd49611029acc870592ad6be70">extruder_disable</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable stepper motor of current extruder.  <a href="#a8824eecd49611029acc870592ad6be70"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ac0ade933e4f4ea31a59a46bb4b3d1d0f">read_raw_temperature</a> (byte type, byte pin)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a6a654d5547ab2eac96026a9c7d866735">conv_raw_temp</a> (byte type, int raw_temp)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ad568e41911d12f28d137eb8cb8141335">conv_temp_raw</a> (byte type, float tempf)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a3de6389d6f361381ae46410acbb16c94">disableAllHeater</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a2f07939d0c7336666afe69d80cbe5c79">autotunePID</a> (float temp, int controllerId)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a6d1913a88484dfc9b75bc94cb5162732">write_monitor</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes monitored temperatures.  <a href="#a6d1913a88484dfc9b75bc94cb5162732"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a7b9f5bc67725449f737bb229c9c8cae9">writeMonitor</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes monitored temperatures.  <a href="#a7b9f5bc67725449f737bb229c9c8cae9"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a315932161064446f91dee3f444feb52e">reportTempsensorError</a> ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Report defect sensors.  <a href="#a315932161064446f91dee3f444feb52e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a9c74216576e595d7b19e9969cbfad889">manage_temperatures</a> ()</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_extruder.html">Extruder</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#ab84dda104f284de062a86af121a2914e">current_extruder</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">prog_char ext0_select_cmd[]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a45d78075d2bdba1342ffc091bf87fed4">PROGMEM</a> = <a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_extruder.html">Extruder</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a485dac419eea0995358ffddf13135870">extruder</a> [<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_temperature_controller.html">TemperatureController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a0644388d0727745182f33056c5b030c4">tempController</a> [<a class="el" href="_reptier_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#abcd617e7b1857a5150399cc2c97209d2">manage_monitor</a> = 255</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed.  <a href="#abcd617e7b1857a5150399cc2c97209d2"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a1f22601a5c7cda4cf95c1532e1d3eb16">counter_periodical</a> = 0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a0c234a716118000599c0cc61504aa8f9">execute_periodical</a> = 0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a080979eac1a4554a154cc247b9b4e867">counter_250ms</a> = 25</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_reptier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a07a4ca15886903cf2fb4f1eaf8c159cd">osAnalogInputCounter</a> [<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a384beae2dd995028fca6d9f4170b577c">osAnalogInputBuildup</a> [<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_reptier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a74b358db2517ebe9a05df050f7a2b180">osAnalogInputPos</a> = 0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile <a class="el" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a2b0e4706d5ae47ec0c077dd1481d036a">osAnalogInputValues</a> [<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a065838dbd2b9780f1015b625db746b16">autotuneIndex</a> = 255</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#acf662ee7130e0dd201b34efdad6398e8">manageMonitor</a> = 255</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed.  <a href="#acf662ee7130e0dd201b34efdad6398e8"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a80262161624db16ad488d66ed40012a1">counterPeriodical</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a777e2a3aefbd82c1428f8ff4770460a1">executePeriodical</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a4c75d15f049109d5954884fa06aea1bf">counter250ms</a> = 25</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="_repetier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a> osAnalogInputChannels[]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a57cb64fe4cfc4b2da83b3ee063eaddb9">PROGMEM</a> = <a class="el" href="_repetier_8h.html#a24a64a1f575248a06f4ba8689a578c3f">ANALOG_INPUT_CHANNELS</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_repetier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a07a4ca15886903cf2fb4f1eaf8c159cd">osAnalogInputCounter</a> [<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a384beae2dd995028fca6d9f4170b577c">osAnalogInputBuildup</a> [<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_repetier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a74b358db2517ebe9a05df050f7a2b180">osAnalogInputPos</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile <a class="el" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a2b0e4706d5ae47ec0c077dd1481d036a">osAnalogInputValues</a> [<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#aa540215a43d76f55efbfaf2ce0519766">extruderTempErrors</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#aead8bf2fe743650b4fbd1a811ab91710">autotuneIndex</a> = 255</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_extruder.html">Extruder</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a485dac419eea0995358ffddf13135870">extruder</a> [<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_temperature_controller.html">TemperatureController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_extruder_8cpp.html#a0644388d0727745182f33056c5b030c4">tempController</a> [<a class="el" href="_extruder_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>]</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
 <a class="anchor" id="a732572fe39e3be2beed6b641e11cb29b"></a><!-- doxytag: member="Extruder.cpp::NUM_TEMPERATURE_LOOPS" ref="a732572fe39e3be2beed6b641e11cb29b" args="" -->
@@ -163,7 +151,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_reptier_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>&#160;&#160;&#160;<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a></td>
+          <td class="memname">#define <a class="el" href="_extruder_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>&#160;&#160;&#160;<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a></td>
         </tr>
       </table>
 </div>
@@ -177,6 +165,45 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_extruder_8cpp.html#ace32b87e4177753ab1afc6d34c075773">NUMTEMPS_1</a>&#160;&#160;&#160;28</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="abeb0c2af67b9eca8aa8715adf41c4f28"></a><!-- doxytag: member="Extruder.cpp::NUMTEMPS_10" ref="abeb0c2af67b9eca8aa8715adf41c4f28" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_extruder_8cpp.html#abeb0c2af67b9eca8aa8715adf41c4f28">NUMTEMPS_10</a>&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac12b60070f5d80da8be25aae24e9ad9b"></a><!-- doxytag: member="Extruder.cpp::NUMTEMPS_11" ref="ac12b60070f5d80da8be25aae24e9ad9b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_extruder_8cpp.html#ac12b60070f5d80da8be25aae24e9ad9b">NUMTEMPS_11</a>&#160;&#160;&#160;31</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac59b1fec1109302c2c450dbdfcf84f3c"></a><!-- doxytag: member="Extruder.cpp::NUMTEMPS_12" ref="ac59b1fec1109302c2c450dbdfcf84f3c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_extruder_8cpp.html#ac59b1fec1109302c2c450dbdfcf84f3c">NUMTEMPS_12</a>&#160;&#160;&#160;31</td>
         </tr>
       </table>
 </div>
@@ -223,288 +250,39 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae86a8e1df519a0c3c14b9e2ad3e87c53"></a><!-- doxytag: member="Extruder.cpp::NUMTEMPS_8" ref="ae86a8e1df519a0c3c14b9e2ad3e87c53" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_extruder_8cpp.html#ae86a8e1df519a0c3c14b9e2ad3e87c53">NUMTEMPS_8</a>&#160;&#160;&#160;34</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a1eeffe664a7a77a5e360d42a9614dfa5"></a><!-- doxytag: member="Extruder.cpp::NUMTEMPS_9" ref="a1eeffe664a7a77a5e360d42a9614dfa5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_extruder_8cpp.html#a1eeffe664a7a77a5e360d42a9614dfa5">NUMTEMPS_9</a>&#160;&#160;&#160;67</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a2f07939d0c7336666afe69d80cbe5c79"></a><!-- doxytag: member="Extruder.cpp::autotunePID" ref="a2f07939d0c7336666afe69d80cbe5c79" args="(float temp, int controllerId)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a2f07939d0c7336666afe69d80cbe5c79">autotunePID</a> </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>temp</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>controllerId</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a6a654d5547ab2eac96026a9c7d866735"></a><!-- doxytag: member="Extruder.cpp::conv_raw_temp" ref="a6a654d5547ab2eac96026a9c7d866735" args="(byte type, int raw_temp)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float <a class="el" href="_reptier_8h.html#a6a654d5547ab2eac96026a9c7d866735">conv_raw_temp</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>raw_temp</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ad568e41911d12f28d137eb8cb8141335"></a><!-- doxytag: member="Extruder.cpp::conv_temp_raw" ref="ad568e41911d12f28d137eb8cb8141335" args="(byte type, float tempf)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int <a class="el" href="_reptier_8h.html#a030ec791c13f574abb45d20538660e22">conv_temp_raw</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>tempf</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a3de6389d6f361381ae46410acbb16c94"></a><!-- doxytag: member="Extruder.cpp::disableAllHeater" ref="a3de6389d6f361381ae46410acbb16c94" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_extruder_8cpp.html#a3de6389d6f361381ae46410acbb16c94">disableAllHeater</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a8824eecd49611029acc870592ad6be70"></a><!-- doxytag: member="Extruder.cpp::extruder_disable" ref="a8824eecd49611029acc870592ad6be70" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a8824eecd49611029acc870592ad6be70">extruder_disable</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Disable stepper motor of current extruder. </p>
-
-</div>
-</div>
-<a class="anchor" id="af220f61b41d0f0bd078d2bb4cc3d1bfb"></a><!-- doxytag: member="Extruder.cpp::extruder_select" ref="af220f61b41d0f0bd078d2bb4cc3d1bfb" args="(byte ext_num)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#af220f61b41d0f0bd078d2bb4cc3d1bfb">extruder_select</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>ext_num</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Select extruder ext_num. </p>
-<p>This function changes and initalizes a new extruder. This is also called, after the eeprom values are changed. </p>
-
-</div>
-</div>
-<a class="anchor" id="a6bf1ac2eafba68af17215bf35ff14fc6"></a><!-- doxytag: member="Extruder.cpp::extruder_set_temperature" ref="a6bf1ac2eafba68af17215bf35ff14fc6" args="(float temp_celsius, byte extr)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a6bf1ac2eafba68af17215bf35ff14fc6">extruder_set_temperature</a> </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>temp_celsius</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>extr</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a17733fe057d5070c35f4509a37937294"></a><!-- doxytag: member="Extruder.cpp::heated_bed_get_temperature" ref="a17733fe057d5070c35f4509a37937294" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float <a class="el" href="_reptier_8h.html#a17733fe057d5070c35f4509a37937294">heated_bed_get_temperature</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a1914630a2073a4c17638e6fc2f56063e"></a><!-- doxytag: member="Extruder.cpp::heated_bed_set_temperature" ref="a1914630a2073a4c17638e6fc2f56063e" args="(float temp_celsius)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a1914630a2073a4c17638e6fc2f56063e">heated_bed_set_temperature</a> </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>temp_celsius</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a299b2711d43b3492a9915f93c65c006a"></a><!-- doxytag: member="Extruder.cpp::initExtruder" ref="a299b2711d43b3492a9915f93c65c006a" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a299b2711d43b3492a9915f93c65c006a">initExtruder</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Initalizes all extruder. </p>
-<p>Updates the pin configuration needed for the extruder and activates extruder 0. Starts a interrupt based analog input reader, which is used by simple thermistors for temperature reading. </p>
-
-</div>
-</div>
-<a class="anchor" id="afd2fec963215a36aba2a2f3bdff88d3e"></a><!-- doxytag: member="Extruder.cpp::initHeatedBed" ref="afd2fec963215a36aba2a2f3bdff88d3e" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#afd2fec963215a36aba2a2f3bdff88d3e">initHeatedBed</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a9c74216576e595d7b19e9969cbfad889"></a><!-- doxytag: member="Extruder.cpp::manage_temperatures" ref="a9c74216576e595d7b19e9969cbfad889" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a9c74216576e595d7b19e9969cbfad889">manage_temperatures</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Makes updates to temperatures and heater state every call.</p>
-<p>Is called every 100ms. </p>
-
-</div>
-</div>
-<a class="anchor" id="ac0ade933e4f4ea31a59a46bb4b3d1d0f"></a><!-- doxytag: member="Extruder.cpp::read_raw_temperature" ref="ac0ade933e4f4ea31a59a46bb4b3d1d0f" args="(byte type, byte pin)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int <a class="el" href="_reptier_8h.html#ac0ade933e4f4ea31a59a46bb4b3d1d0f">read_raw_temperature</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>pin</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a315932161064446f91dee3f444feb52e"></a><!-- doxytag: member="Extruder.cpp::reportTempsensorError" ref="a315932161064446f91dee3f444feb52e" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="_reptier_8h.html#a315932161064446f91dee3f444feb52e">reportTempsensorError</a> </td>
+          <td class="memname">bool <a class="el" href="_extruder_8h.html#a315932161064446f91dee3f444feb52e">reportTempsensorError</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -517,29 +295,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a49a92c7058d3369b02436dd25211b67c"></a><!-- doxytag: member="Extruder.cpp::updateTempControlVars" ref="a49a92c7058d3369b02436dd25211b67c" args="(TemperatureController *tc)" -->
+<a class="anchor" id="a7b9f5bc67725449f737bb229c9c8cae9"></a><!-- doxytag: member="Extruder.cpp::writeMonitor" ref="a7b9f5bc67725449f737bb229c9c8cae9" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a49a92c7058d3369b02436dd25211b67c">updateTempControlVars</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_temperature_controller.html">TemperatureController</a> *&#160;</td>
-          <td class="paramname"><em>tc</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a6d1913a88484dfc9b75bc94cb5162732"></a><!-- doxytag: member="Extruder.cpp::write_monitor" ref="a6d1913a88484dfc9b75bc94cb5162732" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a6d1913a88484dfc9b75bc94cb5162732">write_monitor</a> </td>
+          <td class="memname">void <a class="el" href="_repetier_8h.html#a7b9f5bc67725449f737bb229c9c8cae9">writeMonitor</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -554,12 +315,12 @@ Variables</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Variable Documentation</h2>
-<a class="anchor" id="a065838dbd2b9780f1015b625db746b16"></a><!-- doxytag: member="Extruder.cpp::autotuneIndex" ref="a065838dbd2b9780f1015b625db746b16" args="" -->
+<a class="anchor" id="aead8bf2fe743650b4fbd1a811ab91710"></a><!-- doxytag: member="Extruder.cpp::autotuneIndex" ref="aead8bf2fe743650b4fbd1a811ab91710" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="_reptier_8h.html#a065838dbd2b9780f1015b625db746b16">autotuneIndex</a> = 255</td>
+          <td class="memname">uint8_t <a class="el" href="_extruder_8h.html#aead8bf2fe743650b4fbd1a811ab91710">autotuneIndex</a> = 255</td>
         </tr>
       </table>
 </div>
@@ -567,12 +328,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a080979eac1a4554a154cc247b9b4e867"></a><!-- doxytag: member="Extruder.cpp::counter_250ms" ref="a080979eac1a4554a154cc247b9b4e867" args="" -->
+<a class="anchor" id="a4c75d15f049109d5954884fa06aea1bf"></a><!-- doxytag: member="Extruder.cpp::counter250ms" ref="a4c75d15f049109d5954884fa06aea1bf" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="_reptier_8h.html#a080979eac1a4554a154cc247b9b4e867">counter_250ms</a> = 25</td>
+          <td class="memname">uint8_t <a class="el" href="_repetier_8h.html#a4c75d15f049109d5954884fa06aea1bf">counter250ms</a> = 25</td>
         </tr>
       </table>
 </div>
@@ -580,12 +341,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1f22601a5c7cda4cf95c1532e1d3eb16"></a><!-- doxytag: member="Extruder.cpp::counter_periodical" ref="a1f22601a5c7cda4cf95c1532e1d3eb16" args="" -->
+<a class="anchor" id="a80262161624db16ad488d66ed40012a1"></a><!-- doxytag: member="Extruder.cpp::counterPeriodical" ref="a80262161624db16ad488d66ed40012a1" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="_reptier_8h.html#a1f22601a5c7cda4cf95c1532e1d3eb16">counter_periodical</a> = 0</td>
+          <td class="memname">unsigned int <a class="el" href="_repetier_8h.html#a80262161624db16ad488d66ed40012a1">counterPeriodical</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -593,25 +354,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab84dda104f284de062a86af121a2914e"></a><!-- doxytag: member="Extruder.cpp::current_extruder" ref="ab84dda104f284de062a86af121a2914e" args="" -->
+<a class="anchor" id="a777e2a3aefbd82c1428f8ff4770460a1"></a><!-- doxytag: member="Extruder.cpp::executePeriodical" ref="a777e2a3aefbd82c1428f8ff4770460a1" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_extruder.html">Extruder</a>* <a class="el" href="_reptier_8h.html#ab84dda104f284de062a86af121a2914e">current_extruder</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a0c234a716118000599c0cc61504aa8f9"></a><!-- doxytag: member="Extruder.cpp::execute_periodical" ref="a0c234a716118000599c0cc61504aa8f9" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">volatile byte <a class="el" href="_reptier_8h.html#a0c234a716118000599c0cc61504aa8f9">execute_periodical</a> = 0</td>
+          <td class="memname">volatile uint8_t <a class="el" href="_repetier_8h.html#a777e2a3aefbd82c1428f8ff4770460a1">executePeriodical</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -624,7 +372,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_extruder.html">Extruder</a> <a class="el" href="_reptier_8h.html#aa730feabd67ec703351bf120a9373e8e">extruder</a>[<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>]</td>
+          <td class="memname"><a class="el" href="class_extruder.html">Extruder</a> <a class="el" href="_extruder_8h.html#aa730feabd67ec703351bf120a9373e8e">extruder</a>[<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>]</td>
         </tr>
       </table>
 </div>
@@ -632,12 +380,27 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abcd617e7b1857a5150399cc2c97209d2"></a><!-- doxytag: member="Extruder.cpp::manage_monitor" ref="abcd617e7b1857a5150399cc2c97209d2" args="" -->
+<a class="anchor" id="aa540215a43d76f55efbfaf2ce0519766"></a><!-- doxytag: member="Extruder.cpp::extruderTempErrors" ref="aa540215a43d76f55efbfaf2ce0519766" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="_reptier_8h.html#abcd617e7b1857a5150399cc2c97209d2">manage_monitor</a> = 255</td>
+          <td class="memname">uint8_t <a class="el" href="_extruder_8cpp.html#aa540215a43d76f55efbfaf2ce0519766">extruderTempErrors</a> = 0<code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Makes updates to temperatures and heater state every call.</p>
+<p>Is called every 100ms. </p>
+
+</div>
+</div>
+<a class="anchor" id="acf662ee7130e0dd201b34efdad6398e8"></a><!-- doxytag: member="Extruder.cpp::manageMonitor" ref="acf662ee7130e0dd201b34efdad6398e8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="_extruder_8h.html#acf662ee7130e0dd201b34efdad6398e8">manageMonitor</a> = 255</td>
         </tr>
       </table>
 </div>
@@ -652,7 +415,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> <a class="el" href="_reptier_8h.html#a384beae2dd995028fca6d9f4170b577c">osAnalogInputBuildup</a>[<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
+          <td class="memname"><a class="el" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> <a class="el" href="_repetier_8h.html#a384beae2dd995028fca6d9f4170b577c">osAnalogInputBuildup</a>[<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
         </tr>
       </table>
 </div>
@@ -665,7 +428,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="_reptier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a> <a class="el" href="_reptier_8h.html#a07a4ca15886903cf2fb4f1eaf8c159cd">osAnalogInputCounter</a>[<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
+          <td class="memname"><a class="el" href="_repetier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a> <a class="el" href="_repetier_8h.html#a07a4ca15886903cf2fb4f1eaf8c159cd">osAnalogInputCounter</a>[<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
         </tr>
       </table>
 </div>
@@ -678,7 +441,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="_reptier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a> <a class="el" href="_reptier_8h.html#a74b358db2517ebe9a05df050f7a2b180">osAnalogInputPos</a> = 0</td>
+          <td class="memname"><a class="el" href="_repetier_8h.html#a2d25bcd37166cc98f0d823cdb8c553ef">uint8</a> <a class="el" href="_repetier_8h.html#a74b358db2517ebe9a05df050f7a2b180">osAnalogInputPos</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -691,7 +454,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">volatile <a class="el" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> <a class="el" href="_reptier_8h.html#a2b0e4706d5ae47ec0c077dd1481d036a">osAnalogInputValues</a>[<a class="el" href="_reptier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
+          <td class="memname">volatile <a class="el" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> <a class="el" href="_repetier_8h.html#a2b0e4706d5ae47ec0c077dd1481d036a">osAnalogInputValues</a>[<a class="el" href="_repetier_8h.html#a4791bfa40258d27fa714fff6d8e62a30">ANALOG_INPUTS</a>]</td>
         </tr>
       </table>
 </div>
@@ -699,12 +462,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a45d78075d2bdba1342ffc091bf87fed4"></a><!-- doxytag: member="Extruder.cpp::PROGMEM" ref="a45d78075d2bdba1342ffc091bf87fed4" args="" -->
+<a class="anchor" id="a57cb64fe4cfc4b2da83b3ee063eaddb9"></a><!-- doxytag: member="Extruder.cpp::PROGMEM" ref="a57cb64fe4cfc4b2da83b3ee063eaddb9" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const byte temptables_num [7] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = <a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a></td>
+          <td class="memname">const char ext0_deselect_cmd [] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = <a class="el" href="_repetier_8h.html#a24a64a1f575248a06f4ba8689a578c3f">ANALOG_INPUT_CHANNELS</a></td>
         </tr>
       </table>
 </div>
@@ -717,14 +480,19 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_temperature_controller.html">TemperatureController</a>* <a class="el" href="_reptier_8h.html#a0644388d0727745182f33056c5b030c4">tempController</a>[<a class="el" href="_reptier_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>]</td>
+          <td class="memname"><a class="el" href="class_temperature_controller.html">TemperatureController</a>* <a class="el" href="_extruder_8h.html#a0644388d0727745182f33056c5b030c4">tempController</a>[<a class="el" href="_extruder_8h.html#a732572fe39e3be2beed6b641e11cb29b">NUM_TEMPERATURE_LOOPS</a>]</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Initial value:</b><div class="fragment"><pre class="fragment"> {
+<b>Initial value:</b><div class="fragment"><pre class="fragment">
+{
 
-  &amp;<a class="code" href="_extruder_8cpp.html#a485dac419eea0995358ffddf13135870">extruder</a>[0].<a class="code" href="struct_extruder.html#a99b16c6a12c5f3a447114fad9e76c38d">tempControl</a>
+    &amp;<a class="code" href="_extruder_8cpp.html#a485dac419eea0995358ffddf13135870">extruder</a>[0].<a class="code" href="class_extruder.html#a99b16c6a12c5f3a447114fad9e76c38d">tempControl</a>
+
+
+
+
 
 
 
@@ -768,7 +536,7 @@ Variables</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="_extruder_8cpp.html">Extruder.cpp</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

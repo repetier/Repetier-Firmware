@@ -6,10 +6,19 @@ Private/**
 *.db
 Private/*
 
-*.elf
-
 *.hex
+src/ArduinoAVR/Repetier/bin/*
+src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf
 
-*.lss
+src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.hex
 
-*.map
+src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.lss
+
+src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.map
+
+src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.map
+
+src/ArduinoAVR/Configuration_ordbot.h
+
+src/ArduinoAVR/Configuration_delta.h
+Configuration_*.h

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/fastio.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/fastio.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -100,7 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#define-members">Defines</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/fastio.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/fastio.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;avr/io.h&gt;</code><br/>
@@ -127,6 +127,7 @@ Defines</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a pin wrapper.  <a href="#a9716cca366b99de7c0d101eeab24c967"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(IO, v)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#acb82a1ce7f87b692abfb5e41d6810f2b">_WRITE</a>(IO, v)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Write to a pin wrapper.  <a href="#a3d38c0667426652d3fa2eb62f23e1591"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(IO, v)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#acb82a1ce7f87b692abfb5e41d6810f2b">_WRITE</a>(IO, v)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastio_8h.html#af060bb41ede214a91d237e63f3e080d4">TOGGLE</a>(IO)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#ac80afd6e46adcab936eb01031e25043c">_TOGGLE</a>(IO)</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">toggle a pin wrapper  <a href="#af060bb41ede214a91d237e63f3e080d4"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(IO)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#ab76d0856bcf266de49269a05b96fb79b">_SET_INPUT</a>(IO)</td></tr>
@@ -320,6 +321,33 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a608adcba13929aae3476f1de99498566"></a><!-- doxytag: member="fastio.h::PULLUP" ref="a608adcba13929aae3476f1de99498566" args="(IO, v)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">IO, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">v&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#acb82a1ce7f87b692abfb5e41d6810f2b">_WRITE</a>(IO, v)</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a9716cca366b99de7c0d101eeab24c967"></a><!-- doxytag: member="fastio.h::READ" ref="a9716cca366b99de7c0d101eeab24c967" args="(IO)" -->
 <div class="memitem">
 <div class="memproto">
@@ -445,7 +473,7 @@ Defines</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="fastio_8h.html">fastio.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

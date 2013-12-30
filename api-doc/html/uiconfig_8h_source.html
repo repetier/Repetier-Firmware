@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/uiconfig.h Source File</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/uiconfig.h Source File</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Repetier/uiconfig.h</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/uiconfig.h</div>  </div>
 </div><!--header-->
 <div class="contents">
 <a href="uiconfig_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -131,7 +131,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00028"></a>00028 <span class="comment">ram needed. What should work:</span>
 <a name="l00029"></a>00029 <span class="comment">- No sd card - the sd card code is quite large.</span>
 <a name="l00030"></a>00030 <span class="comment">- No keys attached - The longest part is the menu handling.</span>
-<a name="l00031"></a>00031 <span class="comment">- EEPROM_MODE 0 and USE_OPS 0. </span>
+<a name="l00031"></a>00031 <span class="comment">- EEPROM_MODE 0 .</span>
 <a name="l00032"></a>00032 <span class="comment"></span>
 <a name="l00033"></a>00033 <span class="comment">Currently supported hardware:</span>
 <a name="l00034"></a>00034 <span class="comment"></span>
@@ -160,287 +160,288 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00067"></a>00067 <span class="preprocessor"></span>
 <a name="l00073"></a>00073 <span class="preprocessor">#ifndef BEEPER_TYPE</span>
 <a name="l00074"></a>00074 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_TYPE 1</span>
-<a name="l00075"></a>00075 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00076"></a>00076 <span class="preprocessor"></span>
-<a name="l00077"></a>00077 <span class="preprocessor">#if BEEPER_TYPE==1 &amp;&amp; !defined(BEEPER_PIN)</span>
-<a name="l00078"></a>00078 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_PIN 37</span>
-<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00080"></a>00080 <span class="preprocessor"></span><span class="preprocessor">#if BEEPER_TYPE==2</span>
-<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin</span>
-<a name="l00082"></a>00082 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_PIN _BV(7)  // Bit value for pin 8</span>
-<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="preprocessor">#define COMPILE_I2C_DRIVER  // We need the I2C driver as we are using i2c</span>
-<a name="l00084"></a>00084 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00085"></a>00085 <span class="preprocessor"></span>
-<a name="l00086"></a>00086 
-<a name="l00097"></a><a class="code" href="uiconfig_8h.html#a1f1cfb8da393500709a423b74c8c60c9">00097</a> <span class="preprocessor">#define UI_DISPLAY_TYPE 0</span>
-<a name="l00098"></a>00098 <span class="preprocessor"></span>
-<a name="l00103"></a><a class="code" href="uiconfig_8h.html#a358d532c9bed430d93e65ddabc9ef375">00103</a> <span class="preprocessor">#define UI_COLS 20</span>
-<a name="l00104"></a>00104 <span class="preprocessor"></span>
-<a name="l00107"></a><a class="code" href="uiconfig_8h.html#abc388782791eea22ff9ca1b2a97c1cd7">00107</a> <span class="preprocessor">#define UI_ROWS 4</span>
-<a name="l00108"></a>00108 <span class="preprocessor"></span>
-<a name="l00109"></a>00109 <span class="comment">/* What type of chip is used for I2C communication</span>
-<a name="l00110"></a>00110 <span class="comment">0 : PCF8574 or PCF8574A or compatible chips.</span>
-<a name="l00111"></a>00111 <span class="comment">1 : MCP23017</span>
-<a name="l00112"></a>00112 <span class="comment">*/</span>
-<a name="l00113"></a><a class="code" href="uiconfig_8h.html#a66082321aee99d4f00f639bdf05b9dc8">00113</a> <span class="preprocessor">#define UI_DISPLAY_I2C_CHIPTYPE 0</span>
-<a name="l00114"></a>00114 <span class="preprocessor"></span><span class="comment">// 0x40 till 0x4e for PCF8574, 0x40 for the adafruid RGB shield, 0x40 - 0x4e for MCP23017</span>
-<a name="l00115"></a>00115 <span class="comment">// Official addresses have a value twice as high!</span>
-<a name="l00116"></a><a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">00116</a> <span class="preprocessor">#define UI_DISPLAY_I2C_ADDRESS 0x4e</span>
-<a name="l00117"></a>00117 <span class="preprocessor"></span><span class="comment">// For MCP 23017 define which pins should be output</span>
-<a name="l00118"></a><a class="code" href="uiconfig_8h.html#a28dc42dc5664e2f558eb10866cf34bbc">00118</a> <span class="preprocessor">#define UI_DISPLAY_I2C_OUTPUT_PINS 65504</span>
-<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="comment">// Set the output mask that is or&#39;d over the output data. This is needed to activate</span>
-<a name="l00120"></a>00120 <span class="comment">// a backlight switched over the I2C. </span>
-<a name="l00121"></a>00121 <span class="comment">// The adafruit RGB shields enables a light if the bit is not set. Bits 6-8 are used for backlight.</span>
-<a name="l00122"></a><a class="code" href="uiconfig_8h.html#ac6b2b977cdf7c713366841a8d0de15a1">00122</a> <span class="preprocessor">#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0</span>
-<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="comment">// For MCP which inputs are with pullup. 31 = pins 0-4 for adafruid rgb shield buttons</span>
-<a name="l00124"></a><a class="code" href="uiconfig_8h.html#a42ebf9e35d25362e11be8e3e410c2b08">00124</a> <span class="preprocessor">#define UI_DISPLAY_I2C_PULLUP 31</span>
-<a name="l00125"></a>00125 <span class="preprocessor"></span><span class="comment">/* How fast should the I2C clock go. The PCF8574 work only with the lowest setting 100000.</span>
-<a name="l00126"></a>00126 <span class="comment">A MCP23017 can run also with 400000 Hz */</span>
-<a name="l00127"></a><a class="code" href="uiconfig_8h.html#ae88f28e8969a19c6be1c1ce9f5934b75">00127</a> <span class="preprocessor">#define UI_I2C_CLOCKSPEED 100000L</span>
-<a name="l00128"></a>00128 <span class="preprocessor"></span>
-<a name="l00131"></a>00131 <span class="preprocessor">#if UI_DISPLAY_TYPE==3 // I2C Pin configuration</span>
-<a name="l00132"></a>00132 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RS_PIN _BV(4)</span>
-<a name="l00133"></a>00133 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RW_PIN _BV(5)</span>
-<a name="l00134"></a>00134 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_ENABLE_PIN _BV(6)</span>
-<a name="l00135"></a>00135 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D0_PIN _BV(0)</span>
-<a name="l00136"></a>00136 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D1_PIN _BV(1)</span>
-<a name="l00137"></a>00137 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D2_PIN _BV(2)</span>
-<a name="l00138"></a>00138 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D3_PIN _BV(3)</span>
-<a name="l00139"></a>00139 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D4_PIN _BV(0)</span>
-<a name="l00140"></a>00140 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D5_PIN _BV(1)</span>
-<a name="l00141"></a>00141 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D6_PIN _BV(2)</span>
-<a name="l00142"></a>00142 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D7_PIN _BV(3)</span>
-<a name="l00143"></a>00143 <span class="preprocessor"></span>
-<a name="l00144"></a>00144 <span class="comment">// Pins for adafruid RGB shield</span>
-<a name="l00145"></a>00145 <span class="comment">/*#define UI_DISPLAY_RS_PIN _BV(15)</span>
-<a name="l00146"></a>00146 <span class="comment">#define UI_DISPLAY_RW_PIN _BV(14)</span>
-<a name="l00147"></a>00147 <span class="comment">#define UI_DISPLAY_ENABLE_PIN _BV(13)</span>
-<a name="l00148"></a>00148 <span class="comment">#define UI_DISPLAY_D0_PIN _BV(12)</span>
-<a name="l00149"></a>00149 <span class="comment">#define UI_DISPLAY_D1_PIN _BV(11)</span>
-<a name="l00150"></a>00150 <span class="comment">#define UI_DISPLAY_D2_PIN _BV(10)</span>
-<a name="l00151"></a>00151 <span class="comment">#define UI_DISPLAY_D3_PIN _BV(9)</span>
-<a name="l00152"></a>00152 <span class="comment">#define UI_DISPLAY_D4_PIN _BV(12)</span>
-<a name="l00153"></a>00153 <span class="comment">#define UI_DISPLAY_D5_PIN _BV(11)</span>
-<a name="l00154"></a>00154 <span class="comment">#define UI_DISPLAY_D6_PIN _BV(10)</span>
-<a name="l00155"></a>00155 <span class="comment">#define UI_DISPLAY_D7_PIN _BV(9)*/</span>
-<a name="l00156"></a>00156 
-<a name="l00157"></a>00157 <span class="preprocessor">#else // Direct display connections</span>
-<a name="l00158"></a><a class="code" href="uiconfig_8h.html#abe452c44eef8523ec9ad22ff02b3114a">00158</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RS_PIN               63              // PINK.1, 88, D_RS</span>
-<a name="l00159"></a><a class="code" href="uiconfig_8h.html#a1117450b96efb7813ba6a7eae538cba9">00159</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RW_PIN               -1</span>
-<a name="l00160"></a><a class="code" href="uiconfig_8h.html#afdd4e20a3a946a0a7a68a21f3325f328">00160</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_ENABLE_PIN           65              // PINK.3, 86, D_E</span>
-<a name="l00161"></a><a class="code" href="uiconfig_8h.html#aba4b516f14fca27013b8bb8b9b61ba5d">00161</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D0_PIN               59              // PINF.5, 92, D_D4</span>
-<a name="l00162"></a><a class="code" href="uiconfig_8h.html#a280b85321eb67c6752941354ded541a8">00162</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D1_PIN               64              // PINK.2, 87, D_D5</span>
-<a name="l00163"></a><a class="code" href="uiconfig_8h.html#a64d1ee8afc5a8213f4cbb7304deb8d7d">00163</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D2_PIN               44              // PINL.5, 40, D_D6</span>
-<a name="l00164"></a><a class="code" href="uiconfig_8h.html#a52a2fcf183efa66effede46fce32262d">00164</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D3_PIN               66              // PINK.4, 85, D_D7</span>
-<a name="l00165"></a><a class="code" href="uiconfig_8h.html#a6f9744ec7bf8dda47a76571da6ac54f6">00165</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D4_PIN               59              // PINF.5, 92, D_D4</span>
-<a name="l00166"></a><a class="code" href="uiconfig_8h.html#a95bc1bb51a278366322969a7275d747a">00166</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D5_PIN               64              // PINK.2, 87, D_D5</span>
-<a name="l00167"></a><a class="code" href="uiconfig_8h.html#a3dc9c2bb136aa3594051c13fcfdc2040">00167</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D6_PIN               44              // PINL.5, 40, D_D6</span>
-<a name="l00168"></a><a class="code" href="uiconfig_8h.html#a10e8713a4ba78388b5cafb819ab165d4">00168</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D7_PIN               66              // PINK.4, 85, D_D7</span>
-<a name="l00169"></a><a class="code" href="uiconfig_8h.html#a0aac5694198f8d58c7ffde791a7034c2">00169</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DELAYPERCHAR            320</span>
-<a name="l00170"></a>00170 <span class="preprocessor"></span>
-<a name="l00171"></a>00171 <span class="preprocessor">#endif</span>
+<a name="l00075"></a><a class="code" href="uiconfig_8h.html#acc832c7c2fc6bfc96baf17ded9ffe94c">00075</a> <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_TYPE_INVERTING false</span>
+<a name="l00076"></a>00076 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00077"></a>00077 <span class="preprocessor"></span>
+<a name="l00078"></a>00078 <span class="preprocessor">#if BEEPER_TYPE==1 &amp;&amp; !defined(BEEPER_PIN)</span>
+<a name="l00079"></a>00079 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_PIN 37</span>
+<a name="l00080"></a>00080 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="preprocessor">#if BEEPER_TYPE==2</span>
+<a name="l00082"></a>00082 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin</span>
+<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="preprocessor">#define BEEPER_PIN _BV(7)  // Bit value for pin 8</span>
+<a name="l00084"></a>00084 <span class="preprocessor"></span><span class="preprocessor">#define COMPILE_I2C_DRIVER  // We need the I2C driver as we are using i2c</span>
+<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00086"></a>00086 <span class="preprocessor"></span>
+<a name="l00087"></a>00087 
+<a name="l00099"></a><a class="code" href="uiconfig_8h.html#a1f1cfb8da393500709a423b74c8c60c9">00099</a> <span class="preprocessor">#define UI_DISPLAY_TYPE 0</span>
+<a name="l00100"></a>00100 <span class="preprocessor"></span>
+<a name="l00105"></a><a class="code" href="uiconfig_8h.html#a358d532c9bed430d93e65ddabc9ef375">00105</a> <span class="preprocessor">#define UI_COLS 20</span>
+<a name="l00106"></a>00106 <span class="preprocessor"></span>
+<a name="l00109"></a><a class="code" href="uiconfig_8h.html#abc388782791eea22ff9ca1b2a97c1cd7">00109</a> <span class="preprocessor">#define UI_ROWS 4</span>
+<a name="l00110"></a>00110 <span class="preprocessor"></span>
+<a name="l00111"></a>00111 <span class="comment">/* What type of chip is used for I2C communication</span>
+<a name="l00112"></a>00112 <span class="comment">0 : PCF8574 or PCF8574A or compatible chips.</span>
+<a name="l00113"></a>00113 <span class="comment">1 : MCP23017</span>
+<a name="l00114"></a>00114 <span class="comment">*/</span>
+<a name="l00115"></a><a class="code" href="uiconfig_8h.html#a66082321aee99d4f00f639bdf05b9dc8">00115</a> <span class="preprocessor">#define UI_DISPLAY_I2C_CHIPTYPE 0</span>
+<a name="l00116"></a>00116 <span class="preprocessor"></span><span class="comment">// 0x40 till 0x4e for PCF8574, 0x40 for the adafruid RGB shield, 0x40 - 0x4e for MCP23017</span>
+<a name="l00117"></a>00117 <span class="comment">// Official addresses have a value half as high!</span>
+<a name="l00118"></a><a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">00118</a> <span class="preprocessor">#define UI_DISPLAY_I2C_ADDRESS 0x4e</span>
+<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="comment">// For MCP 23017 define which pins should be output</span>
+<a name="l00120"></a><a class="code" href="uiconfig_8h.html#a28dc42dc5664e2f558eb10866cf34bbc">00120</a> <span class="preprocessor">#define UI_DISPLAY_I2C_OUTPUT_PINS 65504</span>
+<a name="l00121"></a>00121 <span class="preprocessor"></span><span class="comment">// Set the output mask that is or&#39;d over the output data. This is needed to activate</span>
+<a name="l00122"></a>00122 <span class="comment">// a backlight switched over the I2C.</span>
+<a name="l00123"></a>00123 <span class="comment">// The adafruit RGB shields enables a light if the bit is not set. Bits 6-8 are used for backlight.</span>
+<a name="l00124"></a><a class="code" href="uiconfig_8h.html#ac6b2b977cdf7c713366841a8d0de15a1">00124</a> <span class="preprocessor">#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0</span>
+<a name="l00125"></a>00125 <span class="preprocessor"></span><span class="comment">// For MCP which inputs are with pullup. 31 = pins 0-4 for adafruid rgb shield buttons</span>
+<a name="l00126"></a><a class="code" href="uiconfig_8h.html#a42ebf9e35d25362e11be8e3e410c2b08">00126</a> <span class="preprocessor">#define UI_DISPLAY_I2C_PULLUP 31</span>
+<a name="l00127"></a>00127 <span class="preprocessor"></span><span class="comment">/* How fast should the I2C clock go. The PCF8574 work only with the lowest setting 100000.</span>
+<a name="l00128"></a>00128 <span class="comment">A MCP23017 can run also with 400000 Hz */</span>
+<a name="l00129"></a><a class="code" href="uiconfig_8h.html#ae88f28e8969a19c6be1c1ce9f5934b75">00129</a> <span class="preprocessor">#define UI_I2C_CLOCKSPEED 100000L</span>
+<a name="l00130"></a>00130 <span class="preprocessor"></span>
+<a name="l00133"></a>00133 <span class="preprocessor">#if UI_DISPLAY_TYPE==3 // I2C Pin configuration</span>
+<a name="l00134"></a>00134 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RS_PIN _BV(4)</span>
+<a name="l00135"></a>00135 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RW_PIN _BV(5)</span>
+<a name="l00136"></a>00136 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_ENABLE_PIN _BV(6)</span>
+<a name="l00137"></a>00137 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D0_PIN _BV(0)</span>
+<a name="l00138"></a>00138 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D1_PIN _BV(1)</span>
+<a name="l00139"></a>00139 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D2_PIN _BV(2)</span>
+<a name="l00140"></a>00140 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D3_PIN _BV(3)</span>
+<a name="l00141"></a>00141 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D4_PIN _BV(0)</span>
+<a name="l00142"></a>00142 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D5_PIN _BV(1)</span>
+<a name="l00143"></a>00143 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D6_PIN _BV(2)</span>
+<a name="l00144"></a>00144 <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D7_PIN _BV(3)</span>
+<a name="l00145"></a>00145 <span class="preprocessor"></span>
+<a name="l00146"></a>00146 <span class="comment">// Pins for adafruid RGB shield</span>
+<a name="l00147"></a>00147 <span class="comment">/*#define UI_DISPLAY_RS_PIN _BV(15)</span>
+<a name="l00148"></a>00148 <span class="comment">#define UI_DISPLAY_RW_PIN _BV(14)</span>
+<a name="l00149"></a>00149 <span class="comment">#define UI_DISPLAY_ENABLE_PIN _BV(13)</span>
+<a name="l00150"></a>00150 <span class="comment">#define UI_DISPLAY_D0_PIN _BV(12)</span>
+<a name="l00151"></a>00151 <span class="comment">#define UI_DISPLAY_D1_PIN _BV(11)</span>
+<a name="l00152"></a>00152 <span class="comment">#define UI_DISPLAY_D2_PIN _BV(10)</span>
+<a name="l00153"></a>00153 <span class="comment">#define UI_DISPLAY_D3_PIN _BV(9)</span>
+<a name="l00154"></a>00154 <span class="comment">#define UI_DISPLAY_D4_PIN _BV(12)</span>
+<a name="l00155"></a>00155 <span class="comment">#define UI_DISPLAY_D5_PIN _BV(11)</span>
+<a name="l00156"></a>00156 <span class="comment">#define UI_DISPLAY_D6_PIN _BV(10)</span>
+<a name="l00157"></a>00157 <span class="comment">#define UI_DISPLAY_D7_PIN _BV(9)*/</span>
+<a name="l00158"></a>00158 
+<a name="l00159"></a>00159 <span class="preprocessor">#else // Direct display connections</span>
+<a name="l00160"></a><a class="code" href="uiconfig_8h.html#abe452c44eef8523ec9ad22ff02b3114a">00160</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RS_PIN               63              // PINK.1, 88, D_RS</span>
+<a name="l00161"></a><a class="code" href="uiconfig_8h.html#a1117450b96efb7813ba6a7eae538cba9">00161</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_RW_PIN               -1</span>
+<a name="l00162"></a><a class="code" href="uiconfig_8h.html#afdd4e20a3a946a0a7a68a21f3325f328">00162</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_ENABLE_PIN           65              // PINK.3, 86, D_E</span>
+<a name="l00163"></a><a class="code" href="uiconfig_8h.html#aba4b516f14fca27013b8bb8b9b61ba5d">00163</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D0_PIN               59              // PINF.5, 92, D_D4</span>
+<a name="l00164"></a><a class="code" href="uiconfig_8h.html#a280b85321eb67c6752941354ded541a8">00164</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D1_PIN               64              // PINK.2, 87, D_D5</span>
+<a name="l00165"></a><a class="code" href="uiconfig_8h.html#a64d1ee8afc5a8213f4cbb7304deb8d7d">00165</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D2_PIN               44              // PINL.5, 40, D_D6</span>
+<a name="l00166"></a><a class="code" href="uiconfig_8h.html#a52a2fcf183efa66effede46fce32262d">00166</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D3_PIN               66              // PINK.4, 85, D_D7</span>
+<a name="l00167"></a><a class="code" href="uiconfig_8h.html#a6f9744ec7bf8dda47a76571da6ac54f6">00167</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D4_PIN               59              // PINF.5, 92, D_D4</span>
+<a name="l00168"></a><a class="code" href="uiconfig_8h.html#a95bc1bb51a278366322969a7275d747a">00168</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D5_PIN               64              // PINK.2, 87, D_D5</span>
+<a name="l00169"></a><a class="code" href="uiconfig_8h.html#a3dc9c2bb136aa3594051c13fcfdc2040">00169</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D6_PIN               44              // PINL.5, 40, D_D6</span>
+<a name="l00170"></a><a class="code" href="uiconfig_8h.html#a10e8713a4ba78388b5cafb819ab165d4">00170</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DISPLAY_D7_PIN               66              // PINK.4, 85, D_D7</span>
+<a name="l00171"></a><a class="code" href="uiconfig_8h.html#a0aac5694198f8d58c7ffde791a7034c2">00171</a> <span class="preprocessor"></span><span class="preprocessor">#define UI_DELAYPERCHAR            320</span>
 <a name="l00172"></a>00172 <span class="preprocessor"></span>
-<a name="l00173"></a>00173 
-<a name="l00179"></a><a class="code" href="uiconfig_8h.html#a267f14484086fc10fbc14aecf9bf26a9">00179</a> <span class="preprocessor">#define UI_HAS_KEYS 0</span>
-<a name="l00180"></a>00180 <span class="preprocessor"></span>
-<a name="l00181"></a>00181 
-<a name="l00187"></a><a class="code" href="uiconfig_8h.html#aca4374429bb3fe511b688ad4450bfbf8">00187</a> <span class="preprocessor">#define UI_HAS_BACK_KEY 1</span>
-<a name="l00188"></a>00188 <span class="preprocessor"></span>
-<a name="l00189"></a>00189 <span class="comment">/* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.</span>
-<a name="l00190"></a>00190 <span class="comment">If you set it to true, next will go to previous menu instead of the next menu.</span>
-<a name="l00191"></a>00191 <span class="comment"></span>
-<a name="l00192"></a>00192 <span class="comment">*/</span>
-<a name="l00193"></a><a class="code" href="uiconfig_8h.html#a4635b4a804fd89b733657535482862c9">00193</a> <span class="preprocessor">#define UI_INVERT_MENU_DIRECTION false</span>
-<a name="l00194"></a>00194 <span class="preprocessor"></span>
-<a name="l00196"></a>00196 <span class="comment">//#define UI_HAS_I2C_KEYS</span>
-<a name="l00197"></a>00197 
-<a name="l00198"></a>00198 <span class="comment">// Do you have a I2C connected encoder? </span>
-<a name="l00199"></a><a class="code" href="uiconfig_8h.html#a3d48a110748918da40a37fdde067bfaf">00199</a> <span class="preprocessor">#define UI_HAS_I2C_ENCODER 0</span>
-<a name="l00200"></a>00200 <span class="preprocessor"></span>
-<a name="l00201"></a>00201 <span class="comment">// Under which address can the key status requested. This is the address of your PCF8574 where the keys are connected.</span>
-<a name="l00202"></a>00202 <span class="comment">// If you use a MCP23017 the address from display is used also for keys.</span>
-<a name="l00203"></a><a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">00203</a> <span class="preprocessor">#define UI_I2C_KEY_ADDRESS 0x40</span>
-<a name="l00204"></a>00204 <span class="preprocessor"></span>
-<a name="l00205"></a>00205 
-<a name="l00206"></a>00206 <span class="preprocessor">#ifdef UI_MAIN</span>
-<a name="l00207"></a>00207 <span class="preprocessor"></span><span class="comment">/* #######################################################################</span>
-<a name="l00208"></a>00208 <span class="comment">                      Key definitions</span>
-<a name="l00209"></a>00209 <span class="comment"></span>
-<a name="l00210"></a>00210 <span class="comment">The firmware is very flexible regarding your input methods. You can use one</span>
-<a name="l00211"></a>00211 <span class="comment">or more of the predefined key macros, to define a mapper. If no matching mapper</span>
-<a name="l00212"></a>00212 <span class="comment">is available, you can add you c-code for mapping directly into the keyboard</span>
-<a name="l00213"></a>00213 <span class="comment">routines. The predefined macros do the same, just hiding the code behind it.</span>
-<a name="l00214"></a>00214 <span class="comment"></span>
-<a name="l00215"></a>00215 <span class="comment">For each key, two seperate parts must be defined. The first is the initialization</span>
-<a name="l00216"></a>00216 <span class="comment">which must be added inside ui_init_keys() and the second ist a testing routine.</span>
-<a name="l00217"></a>00217 <span class="comment">These come into ui_check_keys() or ui_check_slow_keys() depending on the time needed</span>
-<a name="l00218"></a>00218 <span class="comment">for testing. If you are in doubt, put it in ui_check_slow_keys().</span>
-<a name="l00219"></a>00219 <span class="comment">ui_init_keys() is called from an interrupt controlling the extruder, so only</span>
-<a name="l00220"></a>00220 <span class="comment">fast tests should be put there.</span>
-<a name="l00221"></a>00221 <span class="comment">The detect methods need an action identifier. A list of supported ids is found</span>
-<a name="l00222"></a>00222 <span class="comment">at the beginning of ui.h It&#39;s best to use the symbol name, in case the value changes.</span>
-<a name="l00223"></a>00223 <span class="comment"></span>
-<a name="l00224"></a>00224 <span class="comment">1. Simple push button connected to gnd if closed on a free arduino pin</span>
-<a name="l00225"></a>00225 <span class="comment">    init -&gt; UI_KEYS_INIT_BUTTON_LOW(pinNumber);</span>
-<a name="l00226"></a>00226 <span class="comment">    detect -&gt; UI_KEYS_BUTTON_LOW(pinNumber,action);</span>
-<a name="l00227"></a>00227 <span class="comment">    </span>
-<a name="l00228"></a>00228 <span class="comment">2. Simple push button connected to 5v if closed on a free arduino pin</span>
-<a name="l00229"></a>00229 <span class="comment">    init -&gt; UI_KEYS_INIT_BUTTON_HIGH(pinNumber);</span>
-<a name="l00230"></a>00230 <span class="comment">    detect -&gt; UI_KEYS_BUTTON_HIGH(pinNumber,action);</span>
-<a name="l00231"></a>00231 <span class="comment">    </span>
-<a name="l00232"></a>00232 <span class="comment">3. Click encoder, A/B connected to gnd if closed.</span>
-<a name="l00233"></a>00233 <span class="comment">    init -&gt; UI_KEYS_INIT_CLICKENCODER_LOW(pinA,pinB);</span>
-<a name="l00234"></a>00234 <span class="comment">    detect -&gt; UI_KEYS_CLICKENCODER_LOW(pinA,pinB);</span>
-<a name="l00235"></a>00235 <span class="comment">         or   UI_KEYS_CLICKENCODER_LOW_REV(pinA,pinB); // reverse direction</span>
-<a name="l00236"></a>00236 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
-<a name="l00237"></a>00237 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
-<a name="l00238"></a>00238 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
-<a name="l00239"></a>00239 <span class="comment">    For the push button of the encoder use 1.</span>
-<a name="l00240"></a>00240 <span class="comment">    </span>
-<a name="l00241"></a>00241 <span class="comment">4. Click encoder, A/B connected to 5V if closed.</span>
-<a name="l00242"></a>00242 <span class="comment">    init -&gt; UI_KEYS_INIT_CLICKENCODER_HIGH(pinA,pinB);</span>
-<a name="l00243"></a>00243 <span class="comment">    detect -&gt; UI_KEYS_CLICKENCODER_HIGH(pinA,pinB);</span>
-<a name="l00244"></a>00244 <span class="comment">         or   UI_KEYS_CLICKENCODER_HIGH_REV(pinA,pinB); // reverse direction</span>
-<a name="l00245"></a>00245 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
-<a name="l00246"></a>00246 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
-<a name="l00247"></a>00247 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
-<a name="l00248"></a>00248 <span class="comment">    For the push button of the encoder use 2.</span>
-<a name="l00249"></a>00249 <span class="comment">    </span>
-<a name="l00250"></a>00250 <span class="comment">5. Maxtrix keyboard with 1-4 rows and 1-4 columns.</span>
-<a name="l00251"></a>00251 <span class="comment">    init -&gt; UI_KEYS_INIT_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);</span>
-<a name="l00252"></a>00252 <span class="comment">    detect -&gt; UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);</span>
-<a name="l00253"></a>00253 <span class="comment">    In addition you have to set UI_MATRIX_ACTIONS to match your desired actions.</span>
-<a name="l00254"></a>00254 <span class="comment">    </span>
-<a name="l00255"></a>00255 <span class="comment">------- Keys connected via I2C -------------</span>
+<a name="l00173"></a>00173 <span class="preprocessor">#endif</span>
+<a name="l00174"></a>00174 <span class="preprocessor"></span>
+<a name="l00175"></a>00175 
+<a name="l00181"></a><a class="code" href="uiconfig_8h.html#a267f14484086fc10fbc14aecf9bf26a9">00181</a> <span class="preprocessor">#define UI_HAS_KEYS 0</span>
+<a name="l00182"></a>00182 <span class="preprocessor"></span>
+<a name="l00183"></a>00183 
+<a name="l00189"></a><a class="code" href="uiconfig_8h.html#aca4374429bb3fe511b688ad4450bfbf8">00189</a> <span class="preprocessor">#define UI_HAS_BACK_KEY 1</span>
+<a name="l00190"></a>00190 <span class="preprocessor"></span>
+<a name="l00191"></a>00191 <span class="comment">/* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.</span>
+<a name="l00192"></a>00192 <span class="comment">If you set it to true, next will go to previous menu instead of the next menu.</span>
+<a name="l00193"></a>00193 <span class="comment"></span>
+<a name="l00194"></a>00194 <span class="comment">*/</span>
+<a name="l00195"></a><a class="code" href="uiconfig_8h.html#a4635b4a804fd89b733657535482862c9">00195</a> <span class="preprocessor">#define UI_INVERT_MENU_DIRECTION false</span>
+<a name="l00196"></a>00196 <span class="preprocessor"></span>
+<a name="l00198"></a>00198 <span class="comment">//#define UI_HAS_I2C_KEYS</span>
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200 <span class="comment">// Do you have a I2C connected encoder?</span>
+<a name="l00201"></a><a class="code" href="uiconfig_8h.html#a3d48a110748918da40a37fdde067bfaf">00201</a> <span class="preprocessor">#define UI_HAS_I2C_ENCODER 0</span>
+<a name="l00202"></a>00202 <span class="preprocessor"></span>
+<a name="l00203"></a>00203 <span class="comment">// Under which address can the key status requested. This is the address of your PCF8574 where the keys are connected.</span>
+<a name="l00204"></a>00204 <span class="comment">// If you use a MCP23017 the address from display is used also for keys.</span>
+<a name="l00205"></a><a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">00205</a> <span class="preprocessor">#define UI_I2C_KEY_ADDRESS 0x40</span>
+<a name="l00206"></a>00206 <span class="preprocessor"></span>
+<a name="l00207"></a>00207 
+<a name="l00208"></a>00208 <span class="preprocessor">#ifdef UI_MAIN</span>
+<a name="l00209"></a>00209 <span class="preprocessor"></span><span class="comment">/* #######################################################################</span>
+<a name="l00210"></a>00210 <span class="comment">                      Key definitions</span>
+<a name="l00211"></a>00211 <span class="comment"></span>
+<a name="l00212"></a>00212 <span class="comment">The firmware is very flexible regarding your input methods. You can use one</span>
+<a name="l00213"></a>00213 <span class="comment">or more of the predefined key macros, to define a mapper. If no matching mapper</span>
+<a name="l00214"></a>00214 <span class="comment">is available, you can add you c-code for mapping directly into the keyboard</span>
+<a name="l00215"></a>00215 <span class="comment">routines. The predefined macros do the same, just hiding the code behind it.</span>
+<a name="l00216"></a>00216 <span class="comment"></span>
+<a name="l00217"></a>00217 <span class="comment">For each key, two seperate parts must be defined. The first is the initialization</span>
+<a name="l00218"></a>00218 <span class="comment">which must be added inside ui_init_keys() and the second ist a testing routine.</span>
+<a name="l00219"></a>00219 <span class="comment">These come into ui_check_keys() or ui_check_slow_keys() depending on the time needed</span>
+<a name="l00220"></a>00220 <span class="comment">for testing. If you are in doubt, put it in ui_check_slow_keys().</span>
+<a name="l00221"></a>00221 <span class="comment">ui_init_keys() is called from an interrupt controlling the extruder, so only</span>
+<a name="l00222"></a>00222 <span class="comment">fast tests should be put there.</span>
+<a name="l00223"></a>00223 <span class="comment">The detect methods need an action identifier. A list of supported ids is found</span>
+<a name="l00224"></a>00224 <span class="comment">at the beginning of ui.h It&#39;s best to use the symbol name, in case the value changes.</span>
+<a name="l00225"></a>00225 <span class="comment"></span>
+<a name="l00226"></a>00226 <span class="comment">1. Simple push button connected to gnd if closed on a free arduino pin</span>
+<a name="l00227"></a>00227 <span class="comment">    init -&gt; UI_KEYS_INIT_BUTTON_LOW(pinNumber);</span>
+<a name="l00228"></a>00228 <span class="comment">    detect -&gt; UI_KEYS_BUTTON_LOW(pinNumber,action);</span>
+<a name="l00229"></a>00229 <span class="comment"></span>
+<a name="l00230"></a>00230 <span class="comment">2. Simple push button connected to 5v if closed on a free arduino pin</span>
+<a name="l00231"></a>00231 <span class="comment">    init -&gt; UI_KEYS_INIT_BUTTON_HIGH(pinNumber);</span>
+<a name="l00232"></a>00232 <span class="comment">    detect -&gt; UI_KEYS_BUTTON_HIGH(pinNumber,action);</span>
+<a name="l00233"></a>00233 <span class="comment"></span>
+<a name="l00234"></a>00234 <span class="comment">3. Click encoder, A/B connected to gnd if closed.</span>
+<a name="l00235"></a>00235 <span class="comment">    init -&gt; UI_KEYS_INIT_CLICKENCODER_LOW(pinA,pinB);</span>
+<a name="l00236"></a>00236 <span class="comment">    detect -&gt; UI_KEYS_CLICKENCODER_LOW(pinA,pinB);</span>
+<a name="l00237"></a>00237 <span class="comment">         or   UI_KEYS_CLICKENCODER_LOW_REV(pinA,pinB); // reverse direction</span>
+<a name="l00238"></a>00238 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
+<a name="l00239"></a>00239 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
+<a name="l00240"></a>00240 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
+<a name="l00241"></a>00241 <span class="comment">    For the push button of the encoder use 1.</span>
+<a name="l00242"></a>00242 <span class="comment"></span>
+<a name="l00243"></a>00243 <span class="comment">4. Click encoder, A/B connected to 5V if closed.</span>
+<a name="l00244"></a>00244 <span class="comment">    init -&gt; UI_KEYS_INIT_CLICKENCODER_HIGH(pinA,pinB);</span>
+<a name="l00245"></a>00245 <span class="comment">    detect -&gt; UI_KEYS_CLICKENCODER_HIGH(pinA,pinB);</span>
+<a name="l00246"></a>00246 <span class="comment">         or   UI_KEYS_CLICKENCODER_HIGH_REV(pinA,pinB); // reverse direction</span>
+<a name="l00247"></a>00247 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
+<a name="l00248"></a>00248 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
+<a name="l00249"></a>00249 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
+<a name="l00250"></a>00250 <span class="comment">    For the push button of the encoder use 2.</span>
+<a name="l00251"></a>00251 <span class="comment"></span>
+<a name="l00252"></a>00252 <span class="comment">5. Maxtrix keyboard with 1-4 rows and 1-4 columns.</span>
+<a name="l00253"></a>00253 <span class="comment">    init -&gt; UI_KEYS_INIT_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);</span>
+<a name="l00254"></a>00254 <span class="comment">    detect -&gt; UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4);</span>
+<a name="l00255"></a>00255 <span class="comment">    In addition you have to set UI_MATRIX_ACTIONS to match your desired actions.</span>
 <a name="l00256"></a>00256 <span class="comment"></span>
-<a name="l00257"></a>00257 <span class="comment">All keys and the buzzer if present must be on a connected to a single PCF8574 chip!</span>
-<a name="l00258"></a>00258 <span class="comment">As all I2C request take time, they belong all in ui_check_slow_keys.</span>
-<a name="l00259"></a>00259 <span class="comment">Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin</span>
-<a name="l00260"></a>00260 <span class="comment"></span>
-<a name="l00261"></a>00261 <span class="comment">6. Click encoder, A/B connected to gnd if closed.</span>
-<a name="l00262"></a>00262 <span class="comment">    init -&gt; not needed, but make sure UI_HAS_I2C_KEY is not commented out.</span>
-<a name="l00263"></a>00263 <span class="comment">    detect -&gt; UI_KEYS_I2C_CLICKENCODER_LOW(pinA,pinB);</span>
-<a name="l00264"></a>00264 <span class="comment">         or   UI_KEYS_I2C_CLICKENCODER_LOW_REV(pinA,pinB); // reverse direction</span>
-<a name="l00265"></a>00265 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
-<a name="l00266"></a>00266 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
-<a name="l00267"></a>00267 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
-<a name="l00268"></a>00268 <span class="comment">    For the push button of the encoder use 7.</span>
-<a name="l00269"></a>00269 <span class="comment">    NOTICE: The polling frequency is limited, so only slow turns are captured correct!</span>
-<a name="l00270"></a>00270 <span class="comment"></span>
-<a name="l00271"></a>00271 <span class="comment">7. Simple push button connected to gnd if closed via I2C on a PCF8574</span>
-<a name="l00272"></a>00272 <span class="comment">    init -&gt; not needed, but make sure UI_HAS_I2C_KEY is not commented out.</span>
-<a name="l00273"></a>00273 <span class="comment">    detect -&gt; UI_KEYS_I2C_BUTTON_LOW(pinNumber,action);</span>
-<a name="l00274"></a>00274 <span class="comment"></span>
-<a name="l00275"></a>00275 <span class="comment">-------- Some notes on actions -------------</span>
+<a name="l00257"></a>00257 <span class="comment">------- Keys connected via I2C -------------</span>
+<a name="l00258"></a>00258 <span class="comment"></span>
+<a name="l00259"></a>00259 <span class="comment">All keys and the buzzer if present must be on a connected to a single PCF8574 chip!</span>
+<a name="l00260"></a>00260 <span class="comment">As all I2C request take time, they belong all in ui_check_slow_keys.</span>
+<a name="l00261"></a>00261 <span class="comment">Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin</span>
+<a name="l00262"></a>00262 <span class="comment"></span>
+<a name="l00263"></a>00263 <span class="comment">6. Click encoder, A/B connected to gnd if closed.</span>
+<a name="l00264"></a>00264 <span class="comment">    init -&gt; not needed, but make sure UI_HAS_I2C_KEY is not commented out.</span>
+<a name="l00265"></a>00265 <span class="comment">    detect -&gt; UI_KEYS_I2C_CLICKENCODER_LOW(pinA,pinB);</span>
+<a name="l00266"></a>00266 <span class="comment">         or   UI_KEYS_I2C_CLICKENCODER_LOW_REV(pinA,pinB); // reverse direction</span>
+<a name="l00267"></a>00267 <span class="comment">    If you can move the menu cursor without a click, just be adding some force in one direction,</span>
+<a name="l00268"></a>00268 <span class="comment">    toggle the _REV with non _REV and toggle pins.</span>
+<a name="l00269"></a>00269 <span class="comment">    If the direction is wrong, toggle _REV with non _REV version.</span>
+<a name="l00270"></a>00270 <span class="comment">    For the push button of the encoder use 7.</span>
+<a name="l00271"></a>00271 <span class="comment">    NOTICE: The polling frequency is limited, so only slow turns are captured correct!</span>
+<a name="l00272"></a>00272 <span class="comment"></span>
+<a name="l00273"></a>00273 <span class="comment">7. Simple push button connected to gnd if closed via I2C on a PCF8574</span>
+<a name="l00274"></a>00274 <span class="comment">    init -&gt; not needed, but make sure UI_HAS_I2C_KEY is not commented out.</span>
+<a name="l00275"></a>00275 <span class="comment">    detect -&gt; UI_KEYS_I2C_BUTTON_LOW(pinNumber,action);</span>
 <a name="l00276"></a>00276 <span class="comment"></span>
-<a name="l00277"></a>00277 <span class="comment">There are three kinds of actions. </span>
+<a name="l00277"></a>00277 <span class="comment">-------- Some notes on actions -------------</span>
 <a name="l00278"></a>00278 <span class="comment"></span>
-<a name="l00279"></a>00279 <span class="comment">Type 1: Immediate actions - these are execute and forget actions like home/pre-heat</span>
-<a name="l00280"></a>00280 <span class="comment">Type 2: Parameter change action - these change the mode for next/previous keys. They are valid</span>
-<a name="l00281"></a>00281 <span class="comment">        until a new change action is initiated or the action is finished with ok button.</span>
-<a name="l00282"></a>00282 <span class="comment">Type 3: Show menu action. These actions have a _MENU_ in their name. If they are executed, a new</span>
-<a name="l00283"></a>00283 <span class="comment">        menu is pushed on the menu stack and you see the menu. If you assign these actions directly</span>
-<a name="l00284"></a>00284 <span class="comment">        to a key, you might not want this pushing behaviour. In this case add UI_ACTION_TOPMENU to the</span>
-<a name="l00285"></a>00285 <span class="comment">        action, like UI_ACTION_TOPMENU+UI_ACTION_MENU_XPOSFAST. That will show the menu as top-menu</span>
-<a name="l00286"></a>00286 <span class="comment">        closing all othe submenus that were open.</span>
-<a name="l00287"></a>00287 <span class="comment">        </span>
-<a name="l00288"></a>00288 <span class="comment">   ####################################################################### */</span>
-<a name="l00289"></a>00289 
-<a name="l00290"></a>00290 <span class="comment">// Use these codes for key detect. The main menu will show the pressed action in the lcd display.</span>
-<a name="l00291"></a>00291 <span class="comment">// after that assign the desired codes.</span>
-<a name="l00292"></a>00292 <span class="comment">//#define UI_MATRIX_ACTIONS {2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015}</span>
-<a name="l00293"></a>00293 <span class="comment">// Define your matrix actions</span>
-<a name="l00294"></a>00294 <span class="preprocessor">#define UI_MATRIX_ACTIONS {UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU,       UI_ACTION_SET_ORIGIN,      UI_ACTION_NEXT,\</span>
-<a name="l00295"></a>00295 <span class="preprocessor">                           UI_ACTION_HOME_Z,   UI_ACTION_MENU_ZPOS,      UI_ACTION_COOLDOWN,        UI_ACTION_OK,\</span>
-<a name="l00296"></a>00296 <span class="preprocessor">                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ABS,     UI_ACTION_PREVIOUS,\</span>
-<a name="l00297"></a>00297 <span class="preprocessor">                           UI_ACTION_HOME_X,   UI_ACTION_MENU_XPOSFAST,  UI_ACTION_DISABLE_STEPPER, UI_ACTION_BACK}</span>
-<a name="l00298"></a>00298 <span class="preprocessor"></span><span class="preprocessor">#ifdef UI_MATRIX_ACTIONS</span>
-<a name="l00299"></a>00299 <span class="preprocessor"></span><span class="keyword">const</span> <span class="keywordtype">int</span> matrixActions[] <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = UI_MATRIX_ACTIONS;
-<a name="l00300"></a>00300 <span class="preprocessor">#endif</span>
-<a name="l00301"></a>00301 <span class="preprocessor"></span>
-<a name="l00302"></a>00302 <span class="keywordtype">void</span> ui_init_keys() {
-<a name="l00303"></a>00303 <span class="preprocessor">#if UI_HAS_KEYS!=0</span>
-<a name="l00304"></a>00304 <span class="preprocessor"></span>  <span class="comment">//UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
-<a name="l00305"></a>00305   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(4); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00306"></a>00306   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(5);
-<a name="l00307"></a>00307   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(6);
-<a name="l00308"></a>00308   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(11);
-<a name="l00309"></a>00309   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(42);
-<a name="l00310"></a>00310 
-<a name="l00311"></a>00311 <span class="comment">//  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
-<a name="l00312"></a>00312 <span class="comment">//  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin</span>
-<a name="l00313"></a>00313 <span class="comment">//  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);</span>
-<a name="l00314"></a>00314 <span class="preprocessor">#endif</span>
-<a name="l00315"></a>00315 <span class="preprocessor"></span>}
-<a name="l00316"></a>00316 <span class="keywordtype">void</span> ui_check_keys(<span class="keywordtype">int</span> &amp;action) {
-<a name="l00317"></a>00317 <span class="preprocessor">#if UI_HAS_KEYS!=0</span>
-<a name="l00318"></a>00318 <span class="preprocessor"></span>
-<a name="l00319"></a>00319  <span class="comment">//UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
-<a name="l00320"></a>00320  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(4,<a class="code" href="ui_8h.html#a404bc634b7ad57423b8b8412a531c583">UI_ACTION_OK</a>); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00321"></a>00321  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(5,<a class="code" href="ui_8h.html#aaa4a7b89072ed573078be6dc3655e6b3">UI_ACTION_NEXT</a>); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00322"></a>00322  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(6,<a class="code" href="ui_8h.html#a7d761251c7c0b55f7f7edb2a621f6d12">UI_ACTION_PREVIOUS</a>); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00323"></a>00323  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(11,<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00324"></a>00324  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(42,<a class="code" href="ui_8h.html#ae915626599ace17139e49669b86acb10">UI_ACTION_SD_PRINT</a> ); <span class="comment">// push button, connects gnd to pin</span>
-<a name="l00325"></a>00325 <span class="comment">//  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
-<a name="l00326"></a>00326 <span class="comment">//  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin</span>
-<a name="l00327"></a>00327 <span class="preprocessor">#endif</span>
-<a name="l00328"></a>00328 <span class="preprocessor"></span>}
-<a name="l00329"></a>00329 <span class="keyword">inline</span> <span class="keywordtype">void</span> ui_check_slow_encoder() {
-<a name="l00330"></a>00330 <span class="preprocessor">#if defined(UI_HAS_I2C_KEYS) &amp;&amp; UI_HAS_KEYS!=0</span>
-<a name="l00331"></a>00331 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==0</span>
-<a name="l00332"></a>00332 <span class="preprocessor"></span>  <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">UI_I2C_KEY_ADDRESS</a>+<a class="code" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
-<a name="l00333"></a>00333   byte keymask = <a class="code" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e" title="read one byte from the I2C device, read is followed by a stop condition">i2c_readNak</a>(); <span class="comment">// Read current key mask</span>
-<a name="l00334"></a>00334 <span class="preprocessor">#endif</span>
-<a name="l00335"></a>00335 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==1</span>
-<a name="l00336"></a>00336 <span class="preprocessor"></span>    <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="ui_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>);
-<a name="l00337"></a>00337     <a class="code" href="ui_8h.html#add947aade44ed6b7f92265f9dec4a711" title="Send one byte to I2C device.">i2c_write</a>(0x12); <span class="comment">// GIOA</span>
-<a name="l00338"></a>00338     <a class="code" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3" title="Terminates the data transfer and releases the I2C bus.">i2c_stop</a>();
-<a name="l00339"></a>00339     <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
-<a name="l00340"></a>00340     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> keymask = <a class="code" href="ui_8h.html#a32ac22052d55f93375b024192217db21" title="read one byte from the I2C device, request more data from device">i2c_readAck</a>();
-<a name="l00341"></a>00341     keymask = keymask + (<a class="code" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e" title="read one byte from the I2C device, read is followed by a stop condition">i2c_readNak</a>()&lt;&lt;8);
-<a name="l00342"></a>00342 <span class="preprocessor">#endif</span>
-<a name="l00343"></a>00343 <span class="preprocessor"></span>  <a class="code" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3" title="Terminates the data transfer and releases the I2C bus.">i2c_stop</a>();
-<a name="l00344"></a>00344   <span class="comment">// Add I2C click encoder tests here, all other i2c tests and a copy of the encoder test belog in ui_check_slow_keys</span>
-<a name="l00345"></a>00345   <a class="code" href="ui_8h.html#a767f01eb8f4686b2493c21788aa03c60">UI_KEYS_I2C_CLICKENCODER_LOW_REV</a>(_BV(2),_BV(0)); <span class="comment">// click encoder on pins 0 and 2. Phase is connected with gnd for signals.</span>
-<a name="l00346"></a>00346 <span class="preprocessor">#endif</span>
-<a name="l00347"></a>00347 <span class="preprocessor"></span>}
-<a name="l00348"></a>00348 <span class="keywordtype">void</span> ui_check_slow_keys(<span class="keywordtype">int</span> &amp;action) {
-<a name="l00349"></a>00349 <span class="preprocessor">#if defined(UI_HAS_I2C_KEYS) &amp;&amp; UI_HAS_KEYS!=0</span>
-<a name="l00350"></a>00350 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==0</span>
-<a name="l00351"></a>00351 <span class="preprocessor"></span>    <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">UI_I2C_KEY_ADDRESS</a>+<a class="code" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
-<a name="l00352"></a>00352     byte keymask = <a class="code" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e" title="read one byte from the I2C device, read is followed by a stop condition">i2c_readNak</a>(); <span class="comment">// Read current key mask</span>
-<a name="l00353"></a>00353 <span class="preprocessor">#endif</span>
-<a name="l00354"></a>00354 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==1</span>
-<a name="l00355"></a>00355 <span class="preprocessor"></span>    <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="ui_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>);
-<a name="l00356"></a>00356     <a class="code" href="ui_8h.html#add947aade44ed6b7f92265f9dec4a711" title="Send one byte to I2C device.">i2c_write</a>(0x12); <span class="comment">// GPIOA</span>
-<a name="l00357"></a>00357     <a class="code" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3" title="Terminates the data transfer and releases the I2C bus.">i2c_stop</a>();
-<a name="l00358"></a>00358     <a class="code" href="ui_8h.html#aee3747a01738315cd5580588994b6c28" title="Issues a start condition and sends address and transfer direction.">i2c_start_wait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
-<a name="l00359"></a>00359     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> keymask = <a class="code" href="ui_8h.html#a32ac22052d55f93375b024192217db21" title="read one byte from the I2C device, request more data from device">i2c_readAck</a>();
-<a name="l00360"></a>00360     keymask = keymask + (<a class="code" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e" title="read one byte from the I2C device, read is followed by a stop condition">i2c_readNak</a>()&lt;&lt;8);
-<a name="l00361"></a>00361 <span class="preprocessor">#endif</span>
-<a name="l00362"></a>00362 <span class="preprocessor"></span>    <a class="code" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3" title="Terminates the data transfer and releases the I2C bus.">i2c_stop</a>();
-<a name="l00363"></a>00363     <span class="comment">// Add I2C key tests here</span>
-<a name="l00364"></a>00364     <a class="code" href="ui_8h.html#a767f01eb8f4686b2493c21788aa03c60">UI_KEYS_I2C_CLICKENCODER_LOW_REV</a>(_BV(2),_BV(0)); <span class="comment">// click encoder on pins 0 and 2. Phase is connected with gnd for signals.</span>
-<a name="l00365"></a>00365     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(1),<a class="code" href="ui_8h.html#a404bc634b7ad57423b8b8412a531c583">UI_ACTION_OK</a>); <span class="comment">// push button, connects gnd to pin  </span>
-<a name="l00366"></a>00366     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(3),<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>); <span class="comment">// push button, connects gnd to pin  </span>
-<a name="l00367"></a>00367     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(4),<a class="code" href="ui_8h.html#ab3d8752161348913470ede0ca42249f4">UI_ACTION_MENU_QUICKSETTINGS</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin  </span>
-<a name="l00368"></a>00368     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(5),<a class="code" href="ui_8h.html#af5f27972b91aec3c713a79624f8c43a9">UI_ACTION_MENU_EXTRUDER</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin  </span>
-<a name="l00369"></a>00369     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(6),<a class="code" href="ui_8h.html#a8b7577d468ba88db2cdaf41e1a85436c">UI_ACTION_MENU_POSITIONS</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin  </span>
-<a name="l00370"></a>00370 <span class="comment">/*</span>
-<a name="l00371"></a>00371 <span class="comment">  // Button handling for the Adafruit RGB shild</span>
-<a name="l00372"></a>00372 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button</span>
-<a name="l00373"></a>00373 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button</span>
-<a name="l00374"></a>00374 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button</span>
-<a name="l00375"></a>00375 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button</span>
-<a name="l00376"></a>00376 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button</span>
-<a name="l00377"></a>00377 <span class="comment">  // ----- End RGB shield ----------</span>
-<a name="l00378"></a>00378 <span class="comment">  */</span>
-<a name="l00379"></a>00379 <span class="preprocessor">#endif</span>
-<a name="l00380"></a>00380 <span class="preprocessor"></span>
-<a name="l00381"></a>00381   <span class="comment">//UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);</span>
-<a name="l00382"></a>00382 }
-<a name="l00383"></a>00383 
-<a name="l00384"></a>00384 <span class="preprocessor">#endif</span>
+<a name="l00279"></a>00279 <span class="comment">There are three kinds of actions.</span>
+<a name="l00280"></a>00280 <span class="comment"></span>
+<a name="l00281"></a>00281 <span class="comment">Type 1: Immediate actions - these are execute and forget actions like home/pre-heat</span>
+<a name="l00282"></a>00282 <span class="comment">Type 2: Parameter change action - these change the mode for next/previous keys. They are valid</span>
+<a name="l00283"></a>00283 <span class="comment">        until a new change action is initiated or the action is finished with ok button.</span>
+<a name="l00284"></a>00284 <span class="comment">Type 3: Show menu action. These actions have a _MENU_ in their name. If they are executed, a new</span>
+<a name="l00285"></a>00285 <span class="comment">        menu is pushed on the menu stack and you see the menu. If you assign these actions directly</span>
+<a name="l00286"></a>00286 <span class="comment">        to a key, you might not want this pushing behaviour. In this case add UI_ACTION_TOPMENU to the</span>
+<a name="l00287"></a>00287 <span class="comment">        action, like UI_ACTION_TOPMENU+UI_ACTION_MENU_XPOSFAST. That will show the menu as top-menu</span>
+<a name="l00288"></a>00288 <span class="comment">        closing all othe submenus that were open.</span>
+<a name="l00289"></a>00289 <span class="comment"></span>
+<a name="l00290"></a>00290 <span class="comment">   ####################################################################### */</span>
+<a name="l00291"></a>00291 
+<a name="l00292"></a>00292 <span class="comment">// Use these codes for key detect. The main menu will show the pressed action in the lcd display.</span>
+<a name="l00293"></a>00293 <span class="comment">// after that assign the desired codes.</span>
+<a name="l00294"></a>00294 <span class="comment">//#define UI_MATRIX_ACTIONS {2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015}</span>
+<a name="l00295"></a>00295 <span class="comment">// Define your matrix actions</span>
+<a name="l00296"></a>00296 <span class="preprocessor">#define UI_MATRIX_ACTIONS {UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU,       UI_ACTION_SET_ORIGIN,      UI_ACTION_NEXT,\</span>
+<a name="l00297"></a>00297 <span class="preprocessor">                           UI_ACTION_HOME_Z,   UI_ACTION_MENU_ZPOS,      UI_ACTION_COOLDOWN,        UI_ACTION_OK,\</span>
+<a name="l00298"></a>00298 <span class="preprocessor">                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ABS,     UI_ACTION_PREVIOUS,\</span>
+<a name="l00299"></a>00299 <span class="preprocessor">                           UI_ACTION_HOME_X,   UI_ACTION_MENU_XPOSFAST,  UI_ACTION_DISABLE_STEPPER, UI_ACTION_BACK}</span>
+<a name="l00300"></a>00300 <span class="preprocessor"></span><span class="preprocessor">#ifdef UI_MATRIX_ACTIONS</span>
+<a name="l00301"></a>00301 <span class="preprocessor"></span><span class="keyword">const</span> <span class="keywordtype">int</span> matrixActions[] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = UI_MATRIX_ACTIONS;
+<a name="l00302"></a>00302 <span class="preprocessor">#endif</span>
+<a name="l00303"></a>00303 <span class="preprocessor"></span>
+<a name="l00304"></a>00304 <span class="keywordtype">void</span> ui_init_keys() {
+<a name="l00305"></a>00305 <span class="preprocessor">#if UI_HAS_KEYS!=0</span>
+<a name="l00306"></a>00306 <span class="preprocessor"></span>  <span class="comment">//UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
+<a name="l00307"></a>00307   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(4); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00308"></a>00308   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(5);
+<a name="l00309"></a>00309   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(6);
+<a name="l00310"></a>00310   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(11);
+<a name="l00311"></a>00311   <a class="code" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(42);
+<a name="l00312"></a>00312 
+<a name="l00313"></a>00313 <span class="comment">//  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
+<a name="l00314"></a>00314 <span class="comment">//  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin</span>
+<a name="l00315"></a>00315 <span class="comment">//  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);</span>
+<a name="l00316"></a>00316 <span class="preprocessor">#endif</span>
+<a name="l00317"></a>00317 <span class="preprocessor"></span>}
+<a name="l00318"></a>00318 <span class="keywordtype">void</span> ui_check_keys(<span class="keywordtype">int</span> &amp;action) {
+<a name="l00319"></a>00319 <span class="preprocessor">#if UI_HAS_KEYS!=0</span>
+<a name="l00320"></a>00320 <span class="preprocessor"></span>
+<a name="l00321"></a>00321  <span class="comment">//UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
+<a name="l00322"></a>00322  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(4,<a class="code" href="ui_8h.html#a404bc634b7ad57423b8b8412a531c583">UI_ACTION_OK</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00323"></a>00323  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(5,<a class="code" href="ui_8h.html#aaa4a7b89072ed573078be6dc3655e6b3">UI_ACTION_NEXT</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00324"></a>00324  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(6,<a class="code" href="ui_8h.html#a7d761251c7c0b55f7f7edb2a621f6d12">UI_ACTION_PREVIOUS</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00325"></a>00325  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(11,<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00326"></a>00326  <a class="code" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(42,<a class="code" href="ui_8h.html#ae915626599ace17139e49669b86acb10">UI_ACTION_SD_PRINT</a> ); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00327"></a>00327 <span class="comment">//  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.</span>
+<a name="l00328"></a>00328 <span class="comment">//  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin</span>
+<a name="l00329"></a>00329 <span class="preprocessor">#endif</span>
+<a name="l00330"></a>00330 <span class="preprocessor"></span>}
+<a name="l00331"></a>00331 <span class="keyword">inline</span> <span class="keywordtype">void</span> ui_check_slow_encoder() {
+<a name="l00332"></a>00332 <span class="preprocessor">#if defined(UI_HAS_I2C_KEYS) &amp;&amp; UI_HAS_KEYS!=0</span>
+<a name="l00333"></a>00333 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==0</span>
+<a name="l00334"></a>00334 <span class="preprocessor"></span>  <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">UI_I2C_KEY_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
+<a name="l00335"></a>00335   uint8_t keymask = <a class="code" href="class_h_a_l.html#aee78ce54d9b9923624e960f77669852e">HAL::i2cReadNak</a>(); <span class="comment">// Read current key mask</span>
+<a name="l00336"></a>00336 <span class="preprocessor">#endif</span>
+<a name="l00337"></a>00337 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==1</span>
+<a name="l00338"></a>00338 <span class="preprocessor"></span>    <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>);
+<a name="l00339"></a>00339     <a class="code" href="class_h_a_l.html#a2b905c212d29a99cd82e7f16d8572ed0">HAL::i2cWrite</a>(0x12); <span class="comment">// GIOA</span>
+<a name="l00340"></a>00340     <a class="code" href="class_h_a_l.html#a46f365de216a017131a0fdc53067b741">HAL::i2cStop</a>();
+<a name="l00341"></a>00341     <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
+<a name="l00342"></a>00342     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> keymask = <a class="code" href="class_h_a_l.html#ab7b23a8495801a3ec28f2b2e3e483df1">HAL::i2cReadAck</a>();
+<a name="l00343"></a>00343     keymask = keymask + (<a class="code" href="class_h_a_l.html#aee78ce54d9b9923624e960f77669852e">HAL::i2cReadNak</a>()&lt;&lt;8);
+<a name="l00344"></a>00344 <span class="preprocessor">#endif</span>
+<a name="l00345"></a>00345 <span class="preprocessor"></span>  <a class="code" href="class_h_a_l.html#a46f365de216a017131a0fdc53067b741">HAL::i2cStop</a>();
+<a name="l00346"></a>00346   <span class="comment">// Add I2C click encoder tests here, all other i2c tests and a copy of the encoder test belog in ui_check_slow_keys</span>
+<a name="l00347"></a>00347   <a class="code" href="ui_8h.html#a767f01eb8f4686b2493c21788aa03c60">UI_KEYS_I2C_CLICKENCODER_LOW_REV</a>(_BV(2),_BV(0)); <span class="comment">// click encoder on pins 0 and 2. Phase is connected with gnd for signals.</span>
+<a name="l00348"></a>00348 <span class="preprocessor">#endif</span>
+<a name="l00349"></a>00349 <span class="preprocessor"></span>}
+<a name="l00350"></a>00350 <span class="keywordtype">void</span> ui_check_slow_keys(<span class="keywordtype">int</span> &amp;action) {
+<a name="l00351"></a>00351 <span class="preprocessor">#if defined(UI_HAS_I2C_KEYS) &amp;&amp; UI_HAS_KEYS!=0</span>
+<a name="l00352"></a>00352 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==0</span>
+<a name="l00353"></a>00353 <span class="preprocessor"></span>    <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">UI_I2C_KEY_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
+<a name="l00354"></a>00354     uint8_t keymask = <a class="code" href="class_h_a_l.html#aee78ce54d9b9923624e960f77669852e">HAL::i2cReadNak</a>(); <span class="comment">// Read current key mask</span>
+<a name="l00355"></a>00355 <span class="preprocessor">#endif</span>
+<a name="l00356"></a>00356 <span class="preprocessor"></span><span class="preprocessor">#if UI_DISPLAY_I2C_CHIPTYPE==1</span>
+<a name="l00357"></a>00357 <span class="preprocessor"></span>    <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>);
+<a name="l00358"></a>00358     <a class="code" href="class_h_a_l.html#a2b905c212d29a99cd82e7f16d8572ed0">HAL::i2cWrite</a>(0x12); <span class="comment">// GPIOA</span>
+<a name="l00359"></a>00359     <a class="code" href="class_h_a_l.html#a46f365de216a017131a0fdc53067b741">HAL::i2cStop</a>();
+<a name="l00360"></a>00360     <a class="code" href="class_h_a_l.html#a80acad3cb511fbc8b546c64eccb40c20">HAL::i2cStartWait</a>(<a class="code" href="uiconfig_8h.html#a66017bbab05e934b49579f36888e644e">UI_DISPLAY_I2C_ADDRESS</a>+<a class="code" href="_h_a_l_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>);
+<a name="l00361"></a>00361     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> keymask = <a class="code" href="class_h_a_l.html#ab7b23a8495801a3ec28f2b2e3e483df1">HAL::i2cReadAck</a>();
+<a name="l00362"></a>00362     keymask = keymask + (<a class="code" href="class_h_a_l.html#aee78ce54d9b9923624e960f77669852e">HAL::i2cReadNak</a>()&lt;&lt;8);
+<a name="l00363"></a>00363 <span class="preprocessor">#endif</span>
+<a name="l00364"></a>00364 <span class="preprocessor"></span>    <a class="code" href="class_h_a_l.html#a46f365de216a017131a0fdc53067b741">HAL::i2cStop</a>();
+<a name="l00365"></a>00365     <span class="comment">// Add I2C key tests here</span>
+<a name="l00366"></a>00366     <a class="code" href="ui_8h.html#a767f01eb8f4686b2493c21788aa03c60">UI_KEYS_I2C_CLICKENCODER_LOW_REV</a>(_BV(2),_BV(0)); <span class="comment">// click encoder on pins 0 and 2. Phase is connected with gnd for signals.</span>
+<a name="l00367"></a>00367     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(1),<a class="code" href="ui_8h.html#a404bc634b7ad57423b8b8412a531c583">UI_ACTION_OK</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00368"></a>00368     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(3),<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00369"></a>00369     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(4),<a class="code" href="ui_8h.html#ab3d8752161348913470ede0ca42249f4">UI_ACTION_MENU_QUICKSETTINGS</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00370"></a>00370     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(5),<a class="code" href="ui_8h.html#af5f27972b91aec3c713a79624f8c43a9">UI_ACTION_MENU_EXTRUDER</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00371"></a>00371     <a class="code" href="ui_8h.html#a855e669efc242816863c0b4e7b0e42d6">UI_KEYS_I2C_BUTTON_LOW</a>(_BV(6),<a class="code" href="ui_8h.html#a8b7577d468ba88db2cdaf41e1a85436c">UI_ACTION_MENU_POSITIONS</a>+<a class="code" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>); <span class="comment">// push button, connects gnd to pin</span>
+<a name="l00372"></a>00372 <span class="comment">/*</span>
+<a name="l00373"></a>00373 <span class="comment">  // Button handling for the Adafruit RGB shild</span>
+<a name="l00374"></a>00374 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button</span>
+<a name="l00375"></a>00375 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button</span>
+<a name="l00376"></a>00376 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button</span>
+<a name="l00377"></a>00377 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button</span>
+<a name="l00378"></a>00378 <span class="comment">    UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button</span>
+<a name="l00379"></a>00379 <span class="comment">  // ----- End RGB shield ----------</span>
+<a name="l00380"></a>00380 <span class="comment">  */</span>
+<a name="l00381"></a>00381 <span class="preprocessor">#endif</span>
+<a name="l00382"></a>00382 <span class="preprocessor"></span>
+<a name="l00383"></a>00383   <span class="comment">//UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);</span>
+<a name="l00384"></a>00384 }
+<a name="l00385"></a>00385 
+<a name="l00386"></a>00386 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 </div>
 <!-- window showing the filter options -->
@@ -461,7 +462,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul>
       <li class="navelem"><a class="el" href="uiconfig_8h.html">uiconfig.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

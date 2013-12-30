@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -101,9 +101,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pri-attribs">Private Attributes</a> &#124;
-<a href="#pri-static-attribs">Static Private Attributes</a>  </div>
+<a href="#pub-attribs">Data Fields</a> &#124;
+<a href="#pri-attribs">Private Attributes</a>  </div>
   <div class="headertitle">
 <div class="title">SdFat Class Reference</div>  </div>
 </div><!--header-->
@@ -117,27 +116,28 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#aae557bf2fc77ba0b45b20727ff28667e">SdFat</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#abb957a84fd9bc395b887952f0e962f7f">begin</a> (uint8_t chipSelectPin=<a class="el" href="_sd_fat_8h.html#ae6b17538c14ba6c91ccb513db2c4c29c">SD_CHIP_SELECT_PIN</a>, uint8_t sckRateID=<a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a0a78869d5eb1c6c3149211e2a8704091">init</a> () <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use sd.begin()&quot;)))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a0b87bf60c37b88ad062309a1d8f189fc">init</a> (uint8_t sckRateID) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use sd.begin(chipSelect</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a8b641d5285542fe6d41f70a702d3c2ad">init</a> (uint8_t sckRateID, uint8_t chipSelectPin) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use sd.begin(chipSelect</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd2_card.html">Sd2Card</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#aef4142d94f7839ca995258104689cb49">card</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ae3d2d2603557ec715424ce49a492b88d">chdir</a> (bool set_cwd=false)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ab1cce194302632fea44f4fc19568243c">chdir</a> (const char *path, bool set_cwd=false)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a6938c3c1aa123a347a141e8c0ce7f6cd">chvol</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a4b6e75ef716adc1bbcb507d44e3526e3">errorHalt</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#afff7768f7b2f9e4f3b716e013d214d06">errorHalt_P</a> (PGM_P msg)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a99c62c86793881986b998f5bcfbe833f">errorHalt_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a17d9c22d2f6d0e09e7b6f17984a894a8">errorHalt</a> (char const *msg)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a6b4142fb31ccc0934cef399449884044">errorPrint</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a991adb9c8255a4de98125834571da062">errorPrint_P</a> (PGM_P msg)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#aa836e7754805218f3336cbd3dc519909">errorPrint_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a47e82cd1147e73941e283845fa3cd357">errorPrint</a> (char const *msg)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ace1cb5fa7dac7c504114b2b24ec144d2">exists</a> (const char *name)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a008934b78ad099ce978883287b320b47">init</a> (uint8_t sckRateID=<a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a>, uint8_t chipSelectPin=<a class="el" href="_sd_fat_8h.html#ae6b17538c14ba6c91ccb513db2c4c29c">SD_CHIP_SELECT_PIN</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#abb957a84fd9bc395b887952f0e962f7f">begin</a> (uint8_t chipSelectPin=<a class="el" href="_sd_fat_8h.html#ae6b17538c14ba6c91ccb513db2c4c29c">SD_CHIP_SELECT_PIN</a>, uint8_t sckRateID=<a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a9eac8973a61936ee8757c31eb23b5f93">initErrorHalt</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#abced6792e61807da3f4f8dbf18384d08">initErrorHalt</a> (char const *msg)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ad7163f8ffb5ea2a3adc4c76c4bbc8a00">initErrorHalt_P</a> (PGM_P msg)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a0c87e24c6ef15938ad67dd57e1042d55">initErrorHalt_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a72896d51dedf0ed435e1e83914702a37">initErrorPrint</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ad4d6d875ad6bd6e0f88e24d2b7e8761a">initErrorPrint</a> (char const *msg)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a408a9d1360c8288e25403cdc84380c22">initErrorPrint_P</a> (PGM_P msg)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a55da52cd531b5a5c4b55e240dcc92b4e">initErrorPrint_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#afaff0496e55019ed50d950230dd9c4f0">ls</a> (uint8_t flags=0)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a02c37b626448ff79d9e99479afacc587">ls</a> (Print *pr, uint8_t flags=0)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a11f4d9363a6e15b63119b97f4f0d36ff">mkdir</a> (const char *path, bool pFlag=true)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a46bf284f6c0bf88215a0e137add1e731">remove</a> (const char *path)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ad03015888b864c21b0f42ba09011efd5">rename</a> (const char *oldPath, const char *newPath)</td></tr>
@@ -145,18 +145,14 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#adc3d5de76cc88efabd490bf830d445cb">truncate</a> (const char *path, uint32_t length)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_volume.html">SdVolume</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a20e558523fde8b36ef1085018c270e0a">vol</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ad8a32a2789b135cc0fafc9964cfb2d31">vwd</a> ()</td></tr>
-<tr><td colspan="2"><h2><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a625a8635c2db7a668fc93f82766688f9">setStdOut</a> (Print *stream)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static Print *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a957df3529dafdd6ed3e17b23b4efbf27">stdOut</a> ()</td></tr>
+<tr><td colspan="2"><h2><a name="pub-attribs"></a>
+Data Fields</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#ae74a8b9d0caedc18a0cecda1c99e4a4c">sckRate</a></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd2_card.html">Sd2Card</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a1b169bdfeb406ef2e6fb77bb1c06ce26">card_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_volume.html">SdVolume</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#aa76bab2a76aa11b7fa39d963a1782130">vol_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_base_file.html">SdBaseFile</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a72ad0dde47cbd5a6aeb6786955148736">vwd_</a></td></tr>
-<tr><td colspan="2"><h2><a name="pri-static-attribs"></a>
-Static Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static Print *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_fat.html#a7836b2cfa542d5f1b1d2373318aa02e2">stdOut_</a></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Integration class for the SdFat library. </p>
@@ -197,21 +193,11 @@ Static Private Attributes</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Initialize an <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> object. Arduino friendly version of init.</p>
-<p>Initializes the SD card, SD volume, and root directory.</p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">chipSelectPin</td><td>SD chip select pin. See <a class="el" href="class_sd2_card.html#a008934b78ad099ce978883287b320b47">Sd2Card::init()</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sckRateID</td><td>value for SPI SCK rate. See <a class="el" href="class_sd2_card.html#a008934b78ad099ce978883287b320b47">Sd2Card::init()</a>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>The value one, true, is returned for success and the value zero, false, is returned for failure. </dd></dl>
 
 </div>
 </div>
@@ -325,15 +311,15 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afff7768f7b2f9e4f3b716e013d214d06"></a><!-- doxytag: member="SdFat::errorHalt_P" ref="afff7768f7b2f9e4f3b716e013d214d06" args="(PGM_P msg)" -->
+<a class="anchor" id="a99c62c86793881986b998f5bcfbe833f"></a><!-- doxytag: member="SdFat::errorHalt_P" ref="a99c62c86793881986b998f5bcfbe833f" args="(FSTRINGPARAM(msg))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_fat.html#afff7768f7b2f9e4f3b716e013d214d06">errorHalt_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_fat.html#a99c62c86793881986b998f5bcfbe833f">errorHalt_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -375,15 +361,15 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a991adb9c8255a4de98125834571da062"></a><!-- doxytag: member="SdFat::errorPrint_P" ref="a991adb9c8255a4de98125834571da062" args="(PGM_P msg)" -->
+<a class="anchor" id="aa836e7754805218f3336cbd3dc519909"></a><!-- doxytag: member="SdFat::errorPrint_P" ref="aa836e7754805218f3336cbd3dc519909" args="(FSTRINGPARAM(msg))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_fat.html#a991adb9c8255a4de98125834571da062">errorPrint_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_fat.html#aa836e7754805218f3336cbd3dc519909">errorPrint_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -409,21 +395,54 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a008934b78ad099ce978883287b320b47"></a><!-- doxytag: member="SdFat::init" ref="a008934b78ad099ce978883287b320b47" args="(uint8_t sckRateID=SPI_FULL_SPEED, uint8_t chipSelectPin=SD_CHIP_SELECT_PIN)" -->
+<a class="anchor" id="a0a78869d5eb1c6c3149211e2a8704091"></a><!-- doxytag: member="SdFat::init" ref="a0a78869d5eb1c6c3149211e2a8704091" args="() __attribute__((error(&quot;use sd.begin()&quot;)))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="class_sd_fat.html#a008934b78ad099ce978883287b320b47">init</a> </td>
+          <td class="memname">bool <a class="el" href="class_sd_fat.html#a0a78869d5eb1c6c3149211e2a8704091">init</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0b87bf60c37b88ad062309a1d8f189fc"></a><!-- doxytag: member="SdFat::init" ref="a0b87bf60c37b88ad062309a1d8f189fc" args="(uint8_t sckRateID) __attribute__((error(&quot;use sd.begin(chipSelect" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_fat.html#a0a78869d5eb1c6c3149211e2a8704091">init</a> </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>sckRateID</em> = <code><a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a></code>, </td>
+          <td class="paramname"><em>sckRateID</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8b641d5285542fe6d41f70a702d3c2ad"></a><!-- doxytag: member="SdFat::init" ref="a8b641d5285542fe6d41f70a702d3c2ad" args="(uint8_t sckRateID, uint8_t chipSelectPin) __attribute__((error(&quot;use sd.begin(chipSelect" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_fat.html#a0a78869d5eb1c6c3149211e2a8704091">init</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>sckRateID</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>chipSelectPin</em> = <code><a class="el" href="_sd_fat_8h.html#ae6b17538c14ba6c91ccb513db2c4c29c">SD_CHIP_SELECT_PIN</a></code>&#160;</td>
+          <td class="paramname"><em>chipSelectPin</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -469,15 +488,15 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad7163f8ffb5ea2a3adc4c76c4bbc8a00"></a><!-- doxytag: member="SdFat::initErrorHalt_P" ref="ad7163f8ffb5ea2a3adc4c76c4bbc8a00" args="(PGM_P msg)" -->
+<a class="anchor" id="a0c87e24c6ef15938ad67dd57e1042d55"></a><!-- doxytag: member="SdFat::initErrorHalt_P" ref="a0c87e24c6ef15938ad67dd57e1042d55" args="(FSTRINGPARAM(msg))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_fat.html#ad7163f8ffb5ea2a3adc4c76c4bbc8a00">initErrorHalt_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_fat.html#a0c87e24c6ef15938ad67dd57e1042d55">initErrorHalt_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -519,15 +538,15 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a408a9d1360c8288e25403cdc84380c22"></a><!-- doxytag: member="SdFat::initErrorPrint_P" ref="a408a9d1360c8288e25403cdc84380c22" args="(PGM_P msg)" -->
+<a class="anchor" id="a55da52cd531b5a5c4b55e240dcc92b4e"></a><!-- doxytag: member="SdFat::initErrorPrint_P" ref="a55da52cd531b5a5c4b55e240dcc92b4e" args="(FSTRINGPARAM(msg))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_fat.html#a408a9d1360c8288e25403cdc84380c22">initErrorPrint_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_fat.html#a55da52cd531b5a5c4b55e240dcc92b4e">initErrorPrint_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(msg)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -546,33 +565,6 @@ Static Private Attributes</h2></td></tr>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>flags</em> = <code>0</code></td><td>)</td>
           <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a02c37b626448ff79d9e99479afacc587"></a><!-- doxytag: member="SdFat::ls" ref="a02c37b626448ff79d9e99479afacc587" args="(Print *pr, uint8_t flags=0)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="class_sd_fat.html#afaff0496e55019ed50d950230dd9c4f0">ls</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>flags</em> = <code>0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div>
@@ -668,47 +660,6 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a625a8635c2db7a668fc93f82766688f9"></a><!-- doxytag: member="SdFat::setStdOut" ref="a625a8635c2db7a668fc93f82766688f9" args="(Print *stream)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void <a class="el" href="class_sd_fat.html#a625a8635c2db7a668fc93f82766688f9">setStdOut</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>stream</em></td><td>)</td>
-          <td><code> [inline, static]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Set stdOut Print stream for messages. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">stream</td><td>The new Print stream. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="a957df3529dafdd6ed3e17b23b4efbf27"></a><!-- doxytag: member="SdFat::stdOut" ref="a957df3529dafdd6ed3e17b23b4efbf27" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static Print* <a class="el" href="class_sd_fat.html#a957df3529dafdd6ed3e17b23b4efbf27">stdOut</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td><code> [inline, static]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="return"><dt><b>Returns:</b></dt><dd>Print stream for messages. </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="adc3d5de76cc88efabd490bf830d445cb"></a><!-- doxytag: member="SdFat::truncate" ref="adc3d5de76cc88efabd490bf830d445cb" args="(const char *path, uint32_t length)" -->
 <div class="memitem">
 <div class="memproto">
@@ -784,12 +735,12 @@ Static Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7836b2cfa542d5f1b1d2373318aa02e2"></a><!-- doxytag: member="SdFat::stdOut_" ref="a7836b2cfa542d5f1b1d2373318aa02e2" args="" -->
+<a class="anchor" id="ae74a8b9d0caedc18a0cecda1c99e4a4c"></a><!-- doxytag: member="SdFat::sckRate" ref="ae74a8b9d0caedc18a0cecda1c99e4a4c" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Print* <a class="el" href="class_sd_fat.html#a7836b2cfa542d5f1b1d2373318aa02e2">stdOut_</a><code> [static, private]</code></td>
+          <td class="memname">bool <a class="el" href="class_sd_fat.html#ae74a8b9d0caedc18a0cecda1c99e4a4c">sckRate</a></td>
         </tr>
       </table>
 </div>
@@ -824,7 +775,7 @@ Static Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -846,7 +797,7 @@ Static Private Attributes</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_sd_fat.html">SdFat</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

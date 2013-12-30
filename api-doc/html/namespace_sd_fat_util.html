@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -107,10 +107,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a9103b9a4934cfc4d5dea9e7fec7353d1">FreeRam</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#ad286914ceca90b6952327d90237d3e56">print_P</a> (Print *pr, PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a59f16a2fc62ff5c3af0ec2f10edaf6a1">println_P</a> (Print *pr, PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a97af8c0fb43dece0f32e5cbd36dfd34c">SerialPrint_P</a> (PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a9b4dae4ef11bfdf2458295c5b7ac9102">SerialPrintln_P</a> (PGM_P str)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a53501f750724a30711199f13157368b0">SerialPrint_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#ac5a07ab8c6efe1f2e2a635cfb395a8c3">SerialPrintln_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
 </table>
 <hr/><h2>Function Documentation</h2>
 <a class="anchor" id="a9103b9a4934cfc4d5dea9e7fec7353d1"></a><!-- doxytag: member="SdFatUtil::FreeRam" ref="a9103b9a4934cfc4d5dea9e7fec7353d1" args="()" -->
@@ -129,69 +127,15 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad286914ceca90b6952327d90237d3e56"></a><!-- doxytag: member="SdFatUtil::print_P" ref="ad286914ceca90b6952327d90237d3e56" args="(Print *pr, PGM_P str)" -->
+<a class="anchor" id="a53501f750724a30711199f13157368b0"></a><!-- doxytag: member="SdFatUtil::SerialPrint_P" ref="a53501f750724a30711199f13157368b0" args="(FSTRINGPARAM(str))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#ad286914ceca90b6952327d90237d3e56">SdFatUtil::print_P</a> </td>
+          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#a53501f750724a30711199f13157368b0">SdFatUtil::SerialPrint_P</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a59f16a2fc62ff5c3af0ec2f10edaf6a1"></a><!-- doxytag: member="SdFatUtil::println_P" ref="a59f16a2fc62ff5c3af0ec2f10edaf6a1" args="(Print *pr, PGM_P str)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#a59f16a2fc62ff5c3af0ec2f10edaf6a1">SdFatUtil::println_P</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a97af8c0fb43dece0f32e5cbd36dfd34c"></a><!-- doxytag: member="SdFatUtil::SerialPrint_P" ref="a97af8c0fb43dece0f32e5cbd36dfd34c" args="(PGM_P str)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#a97af8c0fb43dece0f32e5cbd36dfd34c">SdFatUtil::SerialPrint_P</a> </td>
-          <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -200,15 +144,15 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9b4dae4ef11bfdf2458295c5b7ac9102"></a><!-- doxytag: member="SdFatUtil::SerialPrintln_P" ref="a9b4dae4ef11bfdf2458295c5b7ac9102" args="(PGM_P str)" -->
+<a class="anchor" id="ac5a07ab8c6efe1f2e2a635cfb395a8c3"></a><!-- doxytag: member="SdFatUtil::SerialPrintln_P" ref="ac5a07ab8c6efe1f2e2a635cfb395a8c3" args="(FSTRINGPARAM(str))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#a9b4dae4ef11bfdf2458295c5b7ac9102">SdFatUtil::SerialPrintln_P</a> </td>
+          <td class="memname">void <a class="el" href="namespace_sd_fat_util.html#ac5a07ab8c6efe1f2e2a635cfb395a8c3">SdFatUtil::SerialPrintln_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -237,7 +181,7 @@ Functions</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="namespace_sd_fat_util.html">SdFatUtil</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

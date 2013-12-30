@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -135,18 +135,13 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a9867c10a00c41a6c23471287be38ced3">rootDirStart</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd2_card.html">Sd2Card</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#adf6dac7ae17bdf477d077482dc4d76d7">sdCard</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a6359ecffed0d28a726e355ea86089899">dbgFat</a> (uint32_t n, uint32_t *v)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a4fc7199bb9551202ce2f8e17db87e03f">init</a> (<a class="el" href="class_sd2_card.html">Sd2Card</a> &amp;dev)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ac818e3d58b624dcd91ae8858708e25c8">init</a> (<a class="el" href="class_sd2_card.html">Sd2Card</a> &amp;dev, uint8_t part)</td></tr>
 <tr><td colspan="2"><h2><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a083aec3686ceb42e5d7ec33a677665da">cacheAddress</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a72b2590d65ddecf9b64c055e6ca2e875">cacheBlockNumber</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a5d40516ac800b55c55a377419c1d7d8b">allocContiguous</a> (uint32_t count, uint32_t *curCluster)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a40416a35beda5b5b7ebf000d274d80e5">blockOfCluster</a> (uint32_t position) const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a1a7376b8098a3b1f5d6a125e4f985d58">clusterStartBlock</a> (uint32_t cluster) const </td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ab46d2008c87d7604e1aff44ebcb9734f">cache</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a72b2590d65ddecf9b64c055e6ca2e875">cacheBlockNumber</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a49e372a24edd4db3414dcd64bd7caf34">cacheSetBlockNumber</a> (uint32_t blockNumber, bool dirty)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ae876a84440f2b348c97172183725709b">cacheSetDirty</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a6f3aedc491506782043bab09bf55535f">chainSize</a> (uint32_t beginCluster, uint32_t *size)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#acab4b43b1042289f8b965c66116685c5">fatGet</a> (uint32_t cluster, uint32_t *value)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a6e1860556a3da9a39e1d2cf5689fe7b4">fatPut</a> (uint32_t cluster, uint32_t value)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a24e8af77381a24055df652f120cd1cef">fatPutEOC</a> (uint32_t cluster)</td></tr>
@@ -156,8 +151,13 @@ Private Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a71ab95c288539ccc64a48184bab860ae">writeBlock</a> (uint32_t block, const uint8_t *dst)</td></tr>
 <tr><td colspan="2"><h2><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a8f6240faed1d05713227cafef110415d">cacheFlush</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a3b1c8114c2fbc13253c7f2935e758b5a">cacheRawBlock</a> (uint32_t blockNumber, bool dirty)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ad1819a01240230107e1c6b62e442bf71">cacheFetch</a> (uint32_t blockNumber, uint8_t options)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ad9c0d97c93fbbf878296ec10d54fee4d">cacheFetchData</a> (uint32_t blockNumber, uint8_t options)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#adedfcc45c70319f1c589b6788e740828">cacheFetchFat</a> (uint32_t blockNumber, uint8_t options)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#acb94e54dae4fea8860fe449105e3d0f6">cacheInvalidate</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a8897e95709ce46e8fa93674f509f9052">cacheSync</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a17ba199a18ee148251f273939fe9f0e7">cacheWriteData</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#acf0fb87b8ded74b67b8a6abae2ef2ca0">cacheWriteFat</a> ()</td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a8971134e76e36a58bc13dd08960f7355">allocSearchStart_</a></td></tr>
@@ -173,13 +173,18 @@ Private Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a6c73bc9622358cc717df0290dcfc226c">rootDirStart_</a></td></tr>
 <tr><td colspan="2"><h2><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a598cd5ee76563fcb8aa82c2c14d51426">CACHE_FOR_READ</a> = false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a7cc6b88576b56f77b2be91b55c86e99b">CACHE_FOR_WRITE</a> = true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> = 1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#abcc63369a240dff82c0141762884142c">CACHE_STATUS_FAT_BLOCK</a> = 2</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a598a8d80cba5bf39d82720c02226c5ea">CACHE_STATUS_MASK</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> | <a class="el" href="class_sd_volume.html#abcc63369a240dff82c0141762884142c">CACHE_STATUS_FAT_BLOCK</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ad7dcdbc6dfef683733c9b4e473cc9a39">CACHE_OPTION_NO_READ</a> = 4</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a5330b5c50bf685a94db992c5cbbbc1d9">CACHE_FOR_READ</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ae65a3251694e51e0f38f1b813f234998">CACHE_FOR_WRITE</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a84445120a60d7ee393d3500e8e410276">CACHE_RESERVE_FOR_WRITE</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> | <a class="el" href="class_sd_volume.html#ad7dcdbc6dfef683733c9b4e473cc9a39">CACHE_OPTION_NO_READ</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="unioncache__t.html">cache_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a2cc1a626151e1ae372cab5540c740a9c">cacheBuffer_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#aff7820d33e7459503afe447ccd6fb867">cacheBlockNumber_</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a879f5e0e65321f8e852d112f2996c12b">cacheFatOffset_</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#ac9538c87b47325f47ca882ee0a2913be">cacheStatus_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_sd2_card.html">Sd2Card</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a4af785acfbe605270a1270eabd99eec0">sdCard_</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a14df7a95b9789104d25885ee202ab94e">cacheDirty_</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a1ef6877e2e738b66d5ffebddcc8d59f3">cacheMirrorBlock_</a></td></tr>
 <tr><td colspan="2"><h2><a name="friends"></a>
 Friends</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html#a05e466c179d34fec11c4406677fe0533">SdBaseFile</a></td></tr>
@@ -283,12 +288,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab46d2008c87d7604e1aff44ebcb9734f"></a><!-- doxytag: member="SdVolume::cache" ref="ab46d2008c87d7604e1aff44ebcb9734f" args="()" -->
+<a class="anchor" id="a083aec3686ceb42e5d7ec33a677665da"></a><!-- doxytag: member="SdVolume::cacheAddress" ref="a083aec3686ceb42e5d7ec33a677665da" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_volume.html#ab46d2008c87d7604e1aff44ebcb9734f">cache</a> </td>
+          <td class="memname"><a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_volume.html#a083aec3686ceb42e5d7ec33a677665da">cacheAddress</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [inline, private]</code></td>
@@ -333,28 +338,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8f6240faed1d05713227cafef110415d"></a><!-- doxytag: member="SdVolume::cacheFlush" ref="a8f6240faed1d05713227cafef110415d" args="()" -->
+<a class="anchor" id="ad1819a01240230107e1c6b62e442bf71"></a><!-- doxytag: member="SdVolume::cacheFetch" ref="ad1819a01240230107e1c6b62e442bf71" args="(uint32_t blockNumber, uint8_t options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static bool <a class="el" href="class_sd_volume.html#a8f6240faed1d05713227cafef110415d">cacheFlush</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td><code> [static, private]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a3b1c8114c2fbc13253c7f2935e758b5a"></a><!-- doxytag: member="SdVolume::cacheRawBlock" ref="a3b1c8114c2fbc13253c7f2935e758b5a" args="(uint32_t blockNumber, bool dirty)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static bool <a class="el" href="class_sd_volume.html#a3b1c8114c2fbc13253c7f2935e758b5a">cacheRawBlock</a> </td>
+          <td class="memname">static <a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_volume.html#ad1819a01240230107e1c6b62e442bf71">cacheFetch</a> </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>blockNumber</em>, </td>
@@ -362,8 +351,8 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>dirty</em>&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -376,12 +365,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a49e372a24edd4db3414dcd64bd7caf34"></a><!-- doxytag: member="SdVolume::cacheSetBlockNumber" ref="a49e372a24edd4db3414dcd64bd7caf34" args="(uint32_t blockNumber, bool dirty)" -->
+<a class="anchor" id="ad9c0d97c93fbbf878296ec10d54fee4d"></a><!-- doxytag: member="SdVolume::cacheFetchData" ref="ad9c0d97c93fbbf878296ec10d54fee4d" args="(uint32_t blockNumber, uint8_t options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_volume.html#a49e372a24edd4db3414dcd64bd7caf34">cacheSetBlockNumber</a> </td>
+          <td class="memname">static <a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_volume.html#ad9c0d97c93fbbf878296ec10d54fee4d">cacheFetchData</a> </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>blockNumber</em>, </td>
@@ -389,13 +378,13 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>dirty</em>&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline, private]</code></td>
+          <td></td><td><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -403,42 +392,90 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae876a84440f2b348c97172183725709b"></a><!-- doxytag: member="SdVolume::cacheSetDirty" ref="ae876a84440f2b348c97172183725709b" args="()" -->
+<a class="anchor" id="adedfcc45c70319f1c589b6788e740828"></a><!-- doxytag: member="SdVolume::cacheFetchFat" ref="adedfcc45c70319f1c589b6788e740828" args="(uint32_t blockNumber, uint8_t options)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_volume.html#ae876a84440f2b348c97172183725709b">cacheSetDirty</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td><code> [inline, private]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a6f3aedc491506782043bab09bf55535f"></a><!-- doxytag: member="SdVolume::chainSize" ref="a6f3aedc491506782043bab09bf55535f" args="(uint32_t beginCluster, uint32_t *size)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="class_sd_volume.html#a6f3aedc491506782043bab09bf55535f">chainSize</a> </td>
+          <td class="memname">static <a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_volume.html#adedfcc45c70319f1c589b6788e740828">cacheFetchFat</a> </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>beginCluster</em>, </td>
+          <td class="paramname"><em>blockNumber</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t *&#160;</td>
-          <td class="paramname"><em>size</em>&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [private]</code></td>
+          <td></td><td><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="acb94e54dae4fea8860fe449105e3d0f6"></a><!-- doxytag: member="SdVolume::cacheInvalidate" ref="acb94e54dae4fea8860fe449105e3d0f6" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void <a class="el" href="class_sd_volume.html#acb94e54dae4fea8860fe449105e3d0f6">cacheInvalidate</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8897e95709ce46e8fa93674f509f9052"></a><!-- doxytag: member="SdVolume::cacheSync" ref="a8897e95709ce46e8fa93674f509f9052" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool <a class="el" href="class_sd_volume.html#a8897e95709ce46e8fa93674f509f9052">cacheSync</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a17ba199a18ee148251f273939fe9f0e7"></a><!-- doxytag: member="SdVolume::cacheWriteData" ref="a17ba199a18ee148251f273939fe9f0e7" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool <a class="el" href="class_sd_volume.html#a17ba199a18ee148251f273939fe9f0e7">cacheWriteData</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="acf0fb87b8ded74b67b8a6abae2ef2ca0"></a><!-- doxytag: member="SdVolume::cacheWriteFat" ref="acf0fb87b8ded74b67b8a6abae2ef2ca0" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool <a class="el" href="class_sd_volume.html#acf0fb87b8ded74b67b8a6abae2ef2ca0">cacheWriteFat</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -489,7 +526,7 @@ Friends</h2></td></tr>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>cluster</em></td><td>)</td>
-          <td> const<code> [inline, private]</code></td>
+          <td> const<code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -757,67 +794,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4fc7199bb9551202ce2f8e17db87e03f"></a><!-- doxytag: member="SdVolume::init" ref="a4fc7199bb9551202ce2f8e17db87e03f" args="(Sd2Card &amp;dev)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="class_sd_volume.html#ada2a0a79cd7ce879d8c6daf35ad86834">init</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="class_sd2_card.html">Sd2Card</a> &amp;&#160;</td>
-          <td class="paramname"><em>dev</em></td><td>)</td>
-          <td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_volume.html#ada2a0a79cd7ce879d8c6daf35ad86834">SdVolume::init(Sd2Card* dev)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dev</td><td>The SD card where the volume is located. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ac818e3d58b624dcd91ae8858708e25c8"></a><!-- doxytag: member="SdVolume::init" ref="ac818e3d58b624dcd91ae8858708e25c8" args="(Sd2Card &amp;dev, uint8_t part)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="class_sd_volume.html#ada2a0a79cd7ce879d8c6daf35ad86834">init</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="class_sd2_card.html">Sd2Card</a> &amp;&#160;</td>
-          <td class="paramname"><em>dev</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>part</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000002">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_volume.html#af178086a8274ddf1346bed1a108622b3">SdVolume::init(Sd2Card* dev, uint8_t vol)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dev</td><td>The SD card where the volume is located. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">part</td><td>The partition to be used. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="abe0fc33c22e66bc9ebc7635058b5d045"></a><!-- doxytag: member="SdVolume::isEOC" ref="abe0fc33c22e66bc9ebc7635058b5d045" args="(uint32_t cluster) const " -->
 <div class="memitem">
 <div class="memproto">
@@ -995,12 +971,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a598cd5ee76563fcb8aa82c2c14d51426"></a><!-- doxytag: member="SdVolume::CACHE_FOR_READ" ref="a598cd5ee76563fcb8aa82c2c14d51426" args="" -->
+<a class="anchor" id="a5330b5c50bf685a94db992c5cbbbc1d9"></a><!-- doxytag: member="SdVolume::CACHE_FOR_READ" ref="a5330b5c50bf685a94db992c5cbbbc1d9" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool const <a class="el" href="class_sd_volume.html#a598cd5ee76563fcb8aa82c2c14d51426">CACHE_FOR_READ</a> = false<code> [static, private]</code></td>
+          <td class="memname">uint8_t const <a class="el" href="class_sd_volume.html#a5330b5c50bf685a94db992c5cbbbc1d9">CACHE_FOR_READ</a> = 0<code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -1008,12 +984,77 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7cc6b88576b56f77b2be91b55c86e99b"></a><!-- doxytag: member="SdVolume::CACHE_FOR_WRITE" ref="a7cc6b88576b56f77b2be91b55c86e99b" args="" -->
+<a class="anchor" id="ae65a3251694e51e0f38f1b813f234998"></a><!-- doxytag: member="SdVolume::CACHE_FOR_WRITE" ref="ae65a3251694e51e0f38f1b813f234998" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool const <a class="el" href="class_sd_volume.html#a7cc6b88576b56f77b2be91b55c86e99b">CACHE_FOR_WRITE</a> = true<code> [static, private]</code></td>
+          <td class="memname">uint8_t const <a class="el" href="class_sd_volume.html#ae65a3251694e51e0f38f1b813f234998">CACHE_FOR_WRITE</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad7dcdbc6dfef683733c9b4e473cc9a39"></a><!-- doxytag: member="SdVolume::CACHE_OPTION_NO_READ" ref="ad7dcdbc6dfef683733c9b4e473cc9a39" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t <a class="el" href="class_sd_volume.html#ad7dcdbc6dfef683733c9b4e473cc9a39">CACHE_OPTION_NO_READ</a> = 4<code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a84445120a60d7ee393d3500e8e410276"></a><!-- doxytag: member="SdVolume::CACHE_RESERVE_FOR_WRITE" ref="a84445120a60d7ee393d3500e8e410276" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t const <a class="el" href="class_sd_volume.html#a84445120a60d7ee393d3500e8e410276">CACHE_RESERVE_FOR_WRITE</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> | <a class="el" href="class_sd_volume.html#ad7dcdbc6dfef683733c9b4e473cc9a39">CACHE_OPTION_NO_READ</a><code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3e779174888dcf714468ee58d07307b5"></a><!-- doxytag: member="SdVolume::CACHE_STATUS_DIRTY" ref="a3e779174888dcf714468ee58d07307b5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> = 1<code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="abcc63369a240dff82c0141762884142c"></a><!-- doxytag: member="SdVolume::CACHE_STATUS_FAT_BLOCK" ref="abcc63369a240dff82c0141762884142c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t <a class="el" href="class_sd_volume.html#abcc63369a240dff82c0141762884142c">CACHE_STATUS_FAT_BLOCK</a> = 2<code> [static, private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a598a8d80cba5bf39d82720c02226c5ea"></a><!-- doxytag: member="SdVolume::CACHE_STATUS_MASK" ref="a598a8d80cba5bf39d82720c02226c5ea" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t <a class="el" href="class_sd_volume.html#a598a8d80cba5bf39d82720c02226c5ea">CACHE_STATUS_MASK</a> = <a class="el" href="class_sd_volume.html#a3e779174888dcf714468ee58d07307b5">CACHE_STATUS_DIRTY</a> | <a class="el" href="class_sd_volume.html#abcc63369a240dff82c0141762884142c">CACHE_STATUS_FAT_BLOCK</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -1047,12 +1088,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a14df7a95b9789104d25885ee202ab94e"></a><!-- doxytag: member="SdVolume::cacheDirty_" ref="a14df7a95b9789104d25885ee202ab94e" args="" -->
+<a class="anchor" id="a879f5e0e65321f8e852d112f2996c12b"></a><!-- doxytag: member="SdVolume::cacheFatOffset_" ref="a879f5e0e65321f8e852d112f2996c12b" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="class_sd_volume.html#a14df7a95b9789104d25885ee202ab94e">cacheDirty_</a><code> [static, private]</code></td>
+          <td class="memname">uint32_t <a class="el" href="class_sd_volume.html#a879f5e0e65321f8e852d112f2996c12b">cacheFatOffset_</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -1060,12 +1101,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1ef6877e2e738b66d5ffebddcc8d59f3"></a><!-- doxytag: member="SdVolume::cacheMirrorBlock_" ref="a1ef6877e2e738b66d5ffebddcc8d59f3" args="" -->
+<a class="anchor" id="ac9538c87b47325f47ca882ee0a2913be"></a><!-- doxytag: member="SdVolume::cacheStatus_" ref="ac9538c87b47325f47ca882ee0a2913be" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t <a class="el" href="class_sd_volume.html#a1ef6877e2e738b66d5ffebddcc8d59f3">cacheMirrorBlock_</a><code> [static, private]</code></td>
+          <td class="memname">uint8_t <a class="el" href="class_sd_volume.html#ac9538c87b47325f47ca882ee0a2913be">cacheStatus_</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -1191,7 +1232,7 @@ Friends</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -1213,7 +1254,7 @@ Friends</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_sd_volume.html">SdVolume</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

@@ -1,5 +1,6 @@
 var uiconfig_8h =
 [
+    [ "BEEPER_TYPE_INVERTING", "uiconfig_8h.html#acc832c7c2fc6bfc96baf17ded9ffe94c", null ],
     [ "UI_COLS", "uiconfig_8h.html#a358d532c9bed430d93e65ddabc9ef375", null ],
     [ "UI_DELAYPERCHAR", "uiconfig_8h.html#a0aac5694198f8d58c7ffde791a7034c2", null ],
     [ "UI_DISPLAY_CHARSET", "uiconfig_8h.html#a01568045a16bd4c43a379d8d9130076c", null ],

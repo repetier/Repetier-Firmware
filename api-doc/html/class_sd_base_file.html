@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -104,8 +104,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Data Fields</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
-<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
-<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="#friends">Friends</a>  </div>
   <div class="headertitle">
 <div class="title">SdBaseFile Class Reference</div>  </div>
@@ -129,15 +127,15 @@ Inheritance diagram for SdBaseFile:</div>
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9e1a71e3766b3acc8171920ada4e7717">SdBaseFile</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1e2296895cd32f7269ee1cb9e2c94d92">SdBaseFile</a> (const char *path, uint8_t oflag)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a82c164ca83dc69f7551324a027ffe89e">~SdBaseFile</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1e2296895cd32f7269ee1cb9e2c94d92">SdBaseFile</a> (const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9b199fded04cffe6a609465dce43fdcc">getWriteError</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#af50f0c1e1c726ef3dee08a84456090b9">clearWriteError</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5c199c948d09245cbcab572d457989cb">getpos</a> (<a class="el" href="structfpos__t.html">fpos_t</a> *pos)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aadbe16c070ea4d0df211c983f6945592">setpos</a> (<a class="el" href="structfpos__t.html">fpos_t</a> *pos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#af64a10413bed83901d3f08274019d6bb">getpos</a> (<a class="el" href="struct_fat_pos__t.html">FatPos_t</a> *pos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a48594bc03b5a4a47cf774e01c40be1b5">setpos</a> (<a class="el" href="struct_fat_pos__t.html">FatPos_t</a> *pos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#af93dbeb8dc6867fcc97a7b42e2898f02">available</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a46143fd6de3be9ab9951f140d3ae8c2f">close</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1934f84b25a170fbdfbee1f874c7a315">contiguousRange</a> (uint32_t *bgnBlock, uint32_t *endBlock)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa541db9563ce4a0b765b11b10f76b449">createContiguous</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *path, uint32_t size)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1934f84b25a170fbdfbee1f874c7a315">contiguousRange</a> (uint32_t *bgnBlock, uint32_t *<a class="el" href="class_sd_base_file.html#a59ccb0407e4759a5363d4262e18aec73">endBlock</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa541db9563ce4a0b765b11b10f76b449">createContiguous</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint32_t size)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ab5cffcf9871ff99fc7ed9caef94d1849">curCluster</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a4c56d435ee4c9cbc50c6f5aaf1e5d64d">curPosition</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5a55859ea4ca96697df8852acb2e76d1">dirEntry</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir)</td></tr>
@@ -146,28 +144,34 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a134f35678a76fc9be1efe2c290483814">fileSize</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a58d3a00e51805ee03012cb2c86414796">firstCluster</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a6ee2b08977084de3a31d1509d7a8e6af">getFilename</a> (char *name)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9077541555656202bf04dd667b7214e6">lfn_checksum</a> (const unsigned char *pFCBName)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a31e4a87b15abb09d98d3a4ab1415f02c">openParentReturnFile</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint8_t *dname, <a class="el" href="class_sd_base_file.html">SdBaseFile</a> *newParent, boolean bMakeDirs)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a50918fb073b73ccef883870dfb705d74">isDir</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aee673f3d8abf2d1bfd841274900fd40a">isFile</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3c7351cec1380d07f9e4b3ec96b2b1ff">isOpen</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a8a0d7f6a7297d2b9772c4033b2296d56">isSubDir</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adb67b2a249620b49f23a8bc03cbdb3b0">isRoot</a> () const </td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ab4ab4da84ebfc68fe4c3035d156fab59">ls</a> (Print *pr, uint8_t flags=0, uint8_t indent=0)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3b2b7caeb6c55be39ac4aceee4718f1d">ls</a> (uint8_t flags=0, uint8_t indent=0)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#afaff0496e55019ed50d950230dd9c4f0">ls</a> (uint8_t flags=0)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a204a0b140efe0da51252fab0fd3bddcc">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dir, const char *path, bool pFlag=true)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a920b65592f1ba58c38c01e0518ae94c9">makeDir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dir, const char *path)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, uint16_t index, uint8_t oflag)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a8359b5001f4a8382a2f945939cafd592">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *path, uint8_t oflag)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a77b8ed77fc5763bd65c27e688ad750c9">open</a> (const char *path, uint8_t oflag=<a class="el" href="_sd_fat_8h.html#ac5a1c3e543273b0374ba114c496e662e">O_READ</a>)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#abd013dab96da2ef4253c7ddc9cddf14a">openNext</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, uint8_t oflag)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a204a0b140efe0da51252fab0fd3bddcc">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dir, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, bool pFlag=true)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a920b65592f1ba58c38c01e0518ae94c9">makeDir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dir, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, uint16_t <a class="el" href="class_sd_base_file.html#a7e1f783bbc6758254c17c5d46122e830">index</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a8359b5001f4a8382a2f945939cafd592">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a77b8ed77fc5763bd65c27e688ad750c9">open</a> (const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>=<a class="el" href="_sd_fat_8h.html#ac5a1c3e543273b0374ba114c496e662e">O_READ</a>)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#abd013dab96da2ef4253c7ddc9cddf14a">openNext</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2e90ca886ca5681df690eeb646758aa5">openRoot</a> (<a class="el" href="class_sd_volume.html">SdVolume</a> *vol)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa905d6674b7a318e6f75a7f5bfd252fa">readDir</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir, char *longfilename)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9040fa1d479d71edf3a826f4691c35c4">peek</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a37fb3af46ea3958c7c7bdc11f3dff345">printCreateDateTime</a> (Print *pr)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9a50d259cda61d39b96e4c5ee8a2e45a">printModifyDateTime</a> (Print *pr)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a7c8af12f026b1fc080e8ebfef7fce909">printCreateDateTime</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5ded19364c125073d664935bed8239aa">printModifyDateTime</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aeb564423f405ec9e71b62926b1ef8ab5">printField</a> (int16_t value, char term)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac9a25d21b439ac5c270ebcb42aa208db">printField</a> (uint16_t value, char term)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5a95541e25ab84c7ddbe3404db0e2efd">printField</a> (int32_t value, char term)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a85d0c7a2190689f774a07a5bfb9668bd">printField</a> (uint32_t value, char term)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a57f9e42369a4b97e6b21ed0040115e17">printName</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ad5e2bbdaf498b66fcf393137bb30a1c2">printName</a> (Print *pr)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5a4c0ff07215b20f25d11fef7710ed59">read</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a6e72556ca777c52cfc8f7fb70a51581a">read</a> (void *buf, uint16_t nbyte)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#addfe59dc0e7a6a8a88e9b7ecf5b51860">readDir</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2af650686f0fc5fa748f6478f5f8afb1">read</a> (void *buf, size_t nbyte)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3962e6a3278ffe0dea853d3a1fd1d726">readDir</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir, char *longfilename)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1f9c4a4bd47b7cd9beb431504c5ae46c">remove</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ab8734e666421c9fe3b6380a818c6c727">rewind</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a34221bbb3afb83430f8d21f59d8e5b1c">rename</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *newPath)</td></tr>
@@ -183,66 +187,70 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a7c3e8c8aa22970484617493a084000b9">type</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa0f431cd6c841a1a006aee221a8e411d">truncate</a> (uint32_t size)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_volume.html">SdVolume</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aed2457152a60a9f78da3c34813e396d0">volume</a> () const </td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write</a> (const void *buf, uint16_t nbyte)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write</a> (const void *buf, size_t nbyte)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adb95113ff5d9b9ef071e06ecc27ad7fa">openParent</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dir)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2e2cb16fcc27d66e464cecf298392019">addCluster</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac249afd8063fe9a99294ea9902547478">addDirCluster</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="unioncache__t.html">cache_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a4c1da892dee2bddc018794aa1caf3294">addDirCluster</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aae06fb5c45eef10196905a0227feceef">cacheDirEntry</a> (uint8_t action)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a1cca2aaaf0ffc46996c40943062fb250">lsPrintNext</a> (Print *pr, uint8_t flags, uint8_t indent)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2fb3a8ee33883c7c0d1fdb1c0f5de53d">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *parent, const uint8_t dname[11])</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a63d88e9ff47e8aae5c0b69cd1fd6942a">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const uint8_t dname[11], uint8_t oflag)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa4bd621a5bee79f8d723f913165f5078">lsPrintNext</a> (uint8_t flags, uint8_t indent)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac5dccacab8d9c5e2aa00abc770f66e3f">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *parent, const uint8_t *dname)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae754f262089ebdd79e6bb27a945b7c56">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const uint8_t *dname, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>, bool bDir)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a60f805a79ed58914758a998025ec4f54">openCachedEntry</a> (uint8_t cacheIndex, uint8_t oflags)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adae59feaadf1b33cdbcb5e46a338980e">readDirCache</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a0426dcf523a5e03e2f0c74c74818813a">contiguousRange</a> (uint32_t &amp;bgnBlock, uint32_t &amp;endBlock)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae972bb88d39f16ec1ddf0e2875d6c9c0">createContiguous</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *path, uint32_t size)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a91a0fdd9114ce337f732cde0c68da60a">dirEntry</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adf75e2853f3eccf36f4af272004e375c">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dir, const char *path)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a25c3ee43cff053a6f1a0cfea386dec4b">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *path, uint8_t oflag)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adc63535d800dd20592cb1c3a496ed1a0">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *path)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2ce81d60ae6a0b36acca0f4f8d3b7545">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, uint16_t index, uint8_t oflag)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a332db691b2bbad3fd8976abaf5a39261">openRoot</a> (<a class="el" href="class_sd_volume.html">SdVolume</a> &amp;vol)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a751e8b0edf4238abdde246d6346653b0">readDir</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a855caab821dc329660acb6fd51f99ae2">readDirCacheSpecial</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2ebc5837267d2a533e858bbf800b96ed">getLongFilename</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir, char *longFilename, int8_t cVFATNeeded, uint32_t *pwIndexPos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a8c94aea910dca9cce81fa337d505e281">findSpace</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a0015654d9a0ad17f253c2704640f411b">lsRecursive</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *parent, uint8_t level, char *findFilename, <a class="el" href="class_sd_base_file.html">SdBaseFile</a> *pParentFound)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a12319368009edbd69755172aba6ff61f">setDirSize</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a831f884ee269ed01d900f700d4999b37">contiguousRange</a> (uint32_t &amp;bgnBlock, uint32_t &amp;<a class="el" href="class_sd_base_file.html#a59ccb0407e4759a5363d4262e18aec73">endBlock</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a1934f84b25a170fbdfbee1f874c7a315">contiguousRange</a>(&amp;bgnBlock</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a24b797b735d0a69291c28c35e1d1be90">createContiguous</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint32_t size) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#aa541db9563ce4a0b765b11b10f76b449">createContiguous</a>(&amp;bgnBlock</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ad7a4eda4563ff1e5a6251e36db92a53d">dirEntry</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a5a55859ea4ca96697df8852acb2e76d1">dirEntry</a>(&amp;dir)&quot;)))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a6b604b073052842aa4c479cb9ccd8be4">mkdir</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dir, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a204a0b140efe0da51252fab0fd3bddcc">mkdir</a>(&amp;dir</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a5d1c617ddf4e6019613e79af477d5c6f">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open</a>(&amp;dirFile</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adb73974c3511171cb2e0f30792745b18">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open</a>(&amp;dirFile</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a62bf8ae3d7b7c0c43bcce0a0f1d5b464">open</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, uint16_t <a class="el" href="class_sd_base_file.html#a7e1f783bbc6758254c17c5d46122e830">index</a>, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open</a>(&amp;dirFile</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a8543f213a9b5402564d4ea85a3463616">openRoot</a> (<a class="el" href="class_sd_volume.html">SdVolume</a> &amp;vol) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#a2e90ca886ca5681df690eeb646758aa5">openRoot</a>(&amp;vol)&quot;)))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac688af3bef42702b4d6513ff586ba802">readDir</a> (<a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#aa905d6674b7a318e6f75a7f5bfd252fa">readDir</a>(&amp;dir)&quot;)))</td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2c5568d41d6270faa79b89323ae63c6d">cwd</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae89cdf7331e346cc8b7ce4a935c5b3e5">dateTimeCallback</a> (void(*dateTime)(uint16_t *date, uint16_t *time))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae89cdf7331e346cc8b7ce4a935c5b3e5">dateTimeCallback</a> (void(*dateTime)(uint16_t *date, uint16_t *<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa8e3adbe61ae1e665819aa0f56c50169">dateTimeCallbackCancel</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3d5d6e21ff652084fa88f8f7d902c5b5">dirName</a> (const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir, char *name)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a56d33961896e2a571012c6f64f69f86e">printFatDate</a> (uint16_t fatDate)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aff1d50035d73d2857a1c144f4ddd0669">printFatDate</a> (Print *pr, uint16_t fatDate)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a93fd2d0e3e1a51127dd59815c3ad92a3">printFatTime</a> (uint16_t fatTime)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a95baaf3c9e0a7ee4d48fd5c83f037527">printFatTime</a> (Print *pr, uint16_t fatTime)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa016aa548d2e1ff27450e5617b17611e">remove</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *path)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aa016aa548d2e1ff27450e5617b17611e">remove</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> *dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac8ad97ceb89862568bdbe6dbe23605f9">make83Name</a> (const char *str, uint8_t *name, const char **ptr)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae55cbdb1584e2f11592c493f42993629">printDirName</a> (const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir, uint8_t width, bool printSlash)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3e4156b0b5d2906688213ff996570c99">printDirName</a> (Print *pr, const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;dir, uint8_t width, bool printSlash)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a9342a99088a514724a56e941a9851602">dateTimeCallback</a> (void(*dateTime)(uint16_t &amp;date, uint16_t &amp;time))</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a70236419166e77de26913c0214d22040">remove</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *path)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#af6a5d760094c8957e18a8d46d0abbee3">dateTimeCallback</a> (void(*dateTime)(uint16_t &amp;date, uint16_t &amp;<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>)) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use void <a class="el" href="class_sd_base_file.html#ae89cdf7331e346cc8b7ce4a935c5b3e5">dateTimeCallback</a>(&quot;&quot;void (*dateTime)(uint16_t* date</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2691a24f7ba00f556e8320c28d1d5bed">remove</a> (<a class="el" href="class_sd_base_file.html">SdBaseFile</a> &amp;dirFile, const char *<a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a>) <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a>((error(&quot;use <a class="el" href="class_sd_base_file.html#aa016aa548d2e1ff27450e5617b17611e">remove</a>(&amp;dirFile</td></tr>
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a800e5043596b8bec0dd32076d3c9750c">writeError</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ab9bc8d18308217bd7df78a01eca175b3">flags_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ae5269bbb9495f29e3f68ddaf24856fec">fstate_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac52855672d3aac6d0e3b2228ac9e19dc">type_</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adf65af6edbe7a86d1e94c7604c66ea51">dirIndex_</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_volume.html">SdVolume</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a63016fa006e3d5ca83b84d58fc49de23">vol_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aff23051fbe8e6ad2efa75c06390047d5">curCluster_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ade9334005143268ed5c81348abbffb4b">curPosition_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a99b330c30b74c2cf030c279593a4c1dc">dirBlock_</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#adf65af6edbe7a86d1e94c7604c66ea51">dirIndex_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a95d9791fe91d8b1385fc1f11b1dccb83">fileSize_</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a3ef82733a6bdd87b2f4a3128d2ad510d">firstCluster_</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_sd_volume.html">SdVolume</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a63016fa006e3d5ca83b84d58fc49de23">vol_</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a7475d64e6045e51366045a2616fd0f41">pathend</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a59ccb0407e4759a5363d4262e18aec73">endBlock</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void uint16_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a49c49194ba38e12c0991dfb65cf4876a">O_RDWR</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a7e1f783bbc6758254c17c5d46122e830">index</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a00928c3349d354109e2413bcc58c5701">cwd_</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a0fbdf53a669c68035108f7e71804ebc2">dateTime_</a> )(uint16_t *date, uint16_t *time)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a0fbdf53a669c68035108f7e71804ebc2">dateTime_</a> )(uint16_t *date, uint16_t *<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#aba9e279d9dcd886c9ed2ceb557fdecef">F_OFLAG</a> = (<a class="el" href="_sd_fat_8h.html#a4efda39151f5ef2dc7fbd138be51336a">O_ACCMODE</a> | <a class="el" href="_sd_fat_8h.html#a4242b37e810af3a6485adda0e08a9a2b">O_APPEND</a> | <a class="el" href="_sd_fat_8h.html#a3066c471d52b056dec13fa567f7bbd9d">O_SYNC</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a6254189769a26f9cb550358dd8b3db26">F_FILE_DIR_DIRTY</a> = 0X80</td></tr>
-<tr><td colspan="2"><h2><a name="pri-static-methods"></a>
-Static Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a0c24497d7d8d84b02a15703e5d6d787c">oldToNew</a> (uint16_t *date, uint16_t *time)</td></tr>
-<tr><td colspan="2"><h2><a name="pri-static-attribs"></a>
-Static Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#a065270f4bcd49e3cd298c20d8b30b59a">oldDateTime_</a> )(uint16_t &amp;date, uint16_t &amp;time)</td></tr>
 <tr><td colspan="2"><h2><a name="friends"></a>
 Friends</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html#ac838f1e6beb01ec57bd4b52e57df85e7">SdFat</a></td></tr>
@@ -294,22 +302,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a82c164ca83dc69f7551324a027ffe89e"></a><!-- doxytag: member="SdBaseFile::~SdBaseFile" ref="a82c164ca83dc69f7551324a027ffe89e" args="()" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">~<a class="el" href="class_sd_base_file.html">SdBaseFile</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <hr/><h2>Member Function Documentation</h2>
 <a class="anchor" id="a2e2cb16fcc27d66e464cecf298392019"></a><!-- doxytag: member="SdBaseFile::addCluster" ref="a2e2cb16fcc27d66e464cecf298392019" args="()" -->
 <div class="memitem">
@@ -327,12 +319,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac249afd8063fe9a99294ea9902547478"></a><!-- doxytag: member="SdBaseFile::addDirCluster" ref="ac249afd8063fe9a99294ea9902547478" args="()" -->
+<a class="anchor" id="a4c1da892dee2bddc018794aa1caf3294"></a><!-- doxytag: member="SdBaseFile::addDirCluster" ref="a4c1da892dee2bddc018794aa1caf3294" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="class_sd_base_file.html#ac249afd8063fe9a99294ea9902547478">addDirCluster</a> </td>
+          <td class="memname"><a class="el" href="unioncache__t.html">cache_t</a>* <a class="el" href="class_sd_base_file.html#a4c1da892dee2bddc018794aa1caf3294">addDirCluster</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -340,6 +332,24 @@ Friends</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af93dbeb8dc6867fcc97a7b42e2898f02"></a><!-- doxytag: member="SdBaseFile::available" ref="af93dbeb8dc6867fcc97a7b42e2898f02" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t <a class="el" href="class_sd_base_file.html#af93dbeb8dc6867fcc97a7b42e2898f02">available</a> </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<dl class="return"><dt><b>Returns:</b></dt><dd>number of bytes available from yhe current position to EOF </dd></dl>
 
 </div>
 </div>
@@ -422,7 +432,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0426dcf523a5e03e2f0c74c74818813a"></a><!-- doxytag: member="SdBaseFile::contiguousRange" ref="a0426dcf523a5e03e2f0c74c74818813a" args="(uint32_t &amp;bgnBlock, uint32_t &amp;endBlock)" -->
+<a class="anchor" id="a831f884ee269ed01d900f700d4999b37"></a><!-- doxytag: member="SdBaseFile::contiguousRange" ref="a831f884ee269ed01d900f700d4999b37" args="(uint32_t &amp;bgnBlock, uint32_t &amp;endBlock) __attribute__((error(&quot;use contiguousRange(&amp;bgnBlock" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -441,20 +451,11 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_base_file.html#a1934f84b25a170fbdfbee1f874c7a315">contiguousRange(uint32_t* bgnBlock, uint32_t* endBlock)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">bgnBlock</td><td>the first block address for the file. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">endBlock</td><td>the last block address for the file. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -491,7 +492,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae972bb88d39f16ec1ddf0e2875d6c9c0"></a><!-- doxytag: member="SdBaseFile::createContiguous" ref="ae972bb88d39f16ec1ddf0e2875d6c9c0" args="(SdBaseFile &amp;dirFile, const char *path, uint32_t size)" -->
+<a class="anchor" id="a24b797b735d0a69291c28c35e1d1be90"></a><!-- doxytag: member="SdBaseFile::createContiguous" ref="a24b797b735d0a69291c28c35e1d1be90" args="(SdBaseFile &amp;dirFile, const char *path, uint32_t size) __attribute__((error(&quot;use createContiguous(&amp;bgnBlock" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -516,21 +517,11 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000004">Deprecated:</a></b></dt><dd>Use: bool createContiguous(SdBaseFile* dirFile, const char* path, uint32_t size) </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dirFile</td><td>The directory where the file will be created. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>A path with a valid DOS 8.3 file name. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>The desired file size. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -592,7 +583,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">static void <a class="el" href="class_sd_base_file.html#ae89cdf7331e346cc8b7ce4a935c5b3e5">dateTimeCallback</a> </td>
           <td>(</td>
-          <td class="paramtype">void(*)(uint16_t *date, uint16_t *time)&#160;</td>
+          <td class="paramtype">void(*)(uint16_t *date, uint16_t *<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>)&#160;</td>
           <td class="paramname"><em>dateTime</em></td><td>)</td>
           <td><code> [inline, static]</code></td>
         </tr>
@@ -606,7 +597,7 @@ Friends</h2></td></tr>
   </table>
   </dd>
 </dl>
-<div class="fragment"><pre class="fragment"> <span class="keywordtype">void</span> dateTime(uint16_t* date, uint16_t* time) {
+<div class="fragment"><pre class="fragment"> <span class="keywordtype">void</span> dateTime(uint16_t* date, uint16_t* <a class="code" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>) {
    uint16_t year;
    uint8_t month, day, hour, minute, second;
 
@@ -623,27 +614,20 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9342a99088a514724a56e941a9851602"></a><!-- doxytag: member="SdBaseFile::dateTimeCallback" ref="a9342a99088a514724a56e941a9851602" args="(void(*dateTime)(uint16_t &amp;date, uint16_t &amp;time))" -->
+<a class="anchor" id="af6a5d760094c8957e18a8d46d0abbee3"></a><!-- doxytag: member="SdBaseFile::dateTimeCallback" ref="af6a5d760094c8957e18a8d46d0abbee3" args="(void(*dateTime)(uint16_t &amp;date, uint16_t &amp;time)) __attribute__((error(&quot;use void dateTimeCallback(&quot;&quot;void (*dateTime)(uint16_t* date" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">static void <a class="el" href="class_sd_base_file.html#ae89cdf7331e346cc8b7ce4a935c5b3e5">dateTimeCallback</a> </td>
           <td>(</td>
-          <td class="paramtype">void(*)(uint16_t &amp;date, uint16_t &amp;time)&#160;</td>
+          <td class="paramtype">void(*)(uint16_t &amp;date, uint16_t &amp;<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>)&#160;</td>
           <td class="paramname"><em>dateTime</em></td><td>)</td>
-          <td><code> [inline, static]</code></td>
+          <td><code> [static]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000005">Deprecated:</a></b></dt><dd>Use: static void dateTimeCallback( void (*dateTime)(uint16_t* date, uint16_t* time)); </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dateTime</td><td>The user's call back function. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -681,7 +665,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a91a0fdd9114ce337f732cde0c68da60a"></a><!-- doxytag: member="SdBaseFile::dirEntry" ref="a91a0fdd9114ce337f732cde0c68da60a" args="(dir_t &amp;dir)" -->
+<a class="anchor" id="ad7a4eda4563ff1e5a6251e36db92a53d"></a><!-- doxytag: member="SdBaseFile::dirEntry" ref="ad7a4eda4563ff1e5a6251e36db92a53d" args="(dir_t &amp;dir) __attribute__((error(&quot;use dirEntry(&amp;dir)&quot;)))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -690,19 +674,11 @@ Friends</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
           <td class="paramname"><em>dir</em></td><td>)</td>
-          <td><code> [inline]</code></td>
+          <td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000006">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_base_file.html#a5a55859ea4ca96697df8852acb2e76d1">dirEntry(dir_t* dir)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">dir</td><td>Location for return of the file's directory entry. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -800,6 +776,45 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8c94aea910dca9cce81fa337d505e281"></a><!-- doxytag: member="SdBaseFile::findSpace" ref="a8c94aea910dca9cce81fa337d505e281" args="(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a8c94aea910dca9cce81fa337d505e281">findSpace</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td>
+          <td class="paramname"><em>dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>cVFATNeeded</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t *&#160;</td>
+          <td class="paramname"><em>pcVFATFound</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *&#160;</td>
+          <td class="paramname"><em>pwIndexPos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a58d3a00e51805ee03012cb2c86414796"></a><!-- doxytag: member="SdBaseFile::firstCluster" ref="a58d3a00e51805ee03012cb2c86414796" args="() const " -->
 <div class="memitem">
 <div class="memproto">
@@ -834,14 +849,53 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5c199c948d09245cbcab572d457989cb"></a><!-- doxytag: member="SdBaseFile::getpos" ref="a5c199c948d09245cbcab572d457989cb" args="(fpos_t *pos)" -->
+<a class="anchor" id="a2ebc5837267d2a533e858bbf800b96ed"></a><!-- doxytag: member="SdBaseFile::getLongFilename" ref="a2ebc5837267d2a533e858bbf800b96ed" args="(dir_t *dir, char *longFilename, int8_t cVFATNeeded, uint32_t *pwIndexPos)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_base_file.html#a5c199c948d09245cbcab572d457989cb">getpos</a> </td>
+          <td class="memname"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a>* <a class="el" href="class_sd_base_file.html#a2ebc5837267d2a533e858bbf800b96ed">getLongFilename</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structfpos__t.html">fpos_t</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td>
+          <td class="paramname"><em>dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>longFilename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>cVFATNeeded</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *&#160;</td>
+          <td class="paramname"><em>pwIndexPos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af64a10413bed83901d3f08274019d6bb"></a><!-- doxytag: member="SdBaseFile::getpos" ref="af64a10413bed83901d3f08274019d6bb" args="(FatPos_t *pos)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_sd_base_file.html#af64a10413bed83901d3f08274019d6bb">getpos</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_fat_pos__t.html">FatPos_t</a> *&#160;</td>
           <td class="paramname"><em>pos</em></td><td>)</td>
           <td></td>
         </tr>
@@ -962,19 +1016,30 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab4ab4da84ebfc68fe4c3035d156fab59"></a><!-- doxytag: member="SdBaseFile::ls" ref="ab4ab4da84ebfc68fe4c3035d156fab59" args="(Print *pr, uint8_t flags=0, uint8_t indent=0)" -->
+<a class="anchor" id="a9077541555656202bf04dd667b7214e6"></a><!-- doxytag: member="SdBaseFile::lfn_checksum" ref="a9077541555656202bf04dd667b7214e6" args="(const unsigned char *pFCBName)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_base_file.html#ab4ab4da84ebfc68fe4c3035d156fab59">ls</a> </td>
+          <td class="memname">uint8_t <a class="el" href="class_sd_base_file.html#a9077541555656202bf04dd667b7214e6">lfn_checksum</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const unsigned char *&#160;</td>
+          <td class="paramname"><em>pFCBName</em></td><td>)</td>
           <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3b2b7caeb6c55be39ac4aceee4718f1d"></a><!-- doxytag: member="SdBaseFile::ls" ref="a3b2b7caeb6c55be39ac4aceee4718f1d" args="(uint8_t flags=0, uint8_t indent=0)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_sd_base_file.html#a3b2b7caeb6c55be39ac4aceee4718f1d">ls</a> </td>
+          <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>flags</em> = <code>0</code>, </td>
         </tr>
@@ -1000,7 +1065,7 @@ Friends</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_base_file.html#ab4ab4da84ebfc68fe4c3035d156fab59">ls</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_base_file.html#a3b2b7caeb6c55be39ac4aceee4718f1d">ls</a> </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>flags</em> = <code>0</code></td><td>)</td>
@@ -1012,19 +1077,13 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1cca2aaaf0ffc46996c40943062fb250"></a><!-- doxytag: member="SdBaseFile::lsPrintNext" ref="a1cca2aaaf0ffc46996c40943062fb250" args="(Print *pr, uint8_t flags, uint8_t indent)" -->
+<a class="anchor" id="aa4bd621a5bee79f8d723f913165f5078"></a><!-- doxytag: member="SdBaseFile::lsPrintNext" ref="aa4bd621a5bee79f8d723f913165f5078" args="(uint8_t flags, uint8_t indent)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#a1cca2aaaf0ffc46996c40943062fb250">lsPrintNext</a> </td>
+          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#aa4bd621a5bee79f8d723f913165f5078">lsPrintNext</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>flags</em>, </td>
         </tr>
@@ -1033,6 +1092,45 @@ Friends</h2></td></tr>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>indent</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0015654d9a0ad17f253c2704640f411b"></a><!-- doxytag: member="SdBaseFile::lsRecursive" ref="a0015654d9a0ad17f253c2704640f411b" args="(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="class_sd_base_file.html#a0015654d9a0ad17f253c2704640f411b">lsRecursive</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td>
+          <td class="paramname"><em>parent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>findFilename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td>
+          <td class="paramname"><em>pParentFound</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1138,7 +1236,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2fb3a8ee33883c7c0d1fdb1c0f5de53d"></a><!-- doxytag: member="SdBaseFile::mkdir" ref="a2fb3a8ee33883c7c0d1fdb1c0f5de53d" args="(SdBaseFile *parent, const uint8_t dname[11])" -->
+<a class="anchor" id="ac5dccacab8d9c5e2aa00abc770f66e3f"></a><!-- doxytag: member="SdBaseFile::mkdir" ref="ac5dccacab8d9c5e2aa00abc770f66e3f" args="(SdBaseFile *parent, const uint8_t *dname)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1151,8 +1249,8 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const uint8_t&#160;</td>
-          <td class="paramname"><em>dname</em>[11]&#160;</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>dname</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1165,7 +1263,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="adf75e2853f3eccf36f4af272004e375c"></a><!-- doxytag: member="SdBaseFile::mkdir" ref="adf75e2853f3eccf36f4af272004e375c" args="(SdBaseFile &amp;dir, const char *path)" -->
+<a class="anchor" id="a6b604b073052842aa4c479cb9ccd8be4"></a><!-- doxytag: member="SdBaseFile::mkdir" ref="a6b604b073052842aa4c479cb9ccd8be4" args="(SdBaseFile &amp;dir, const char *path) __attribute__((error(&quot;use mkdir(&amp;dir" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1184,43 +1282,7 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000007">Deprecated:</a></b></dt><dd>Use: bool mkdir(SdBaseFile* dir, const char* path); </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dir</td><td>An open <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> instance for the directory that will contain the new directory. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>A path with a valid 8.3 DOS name for the new directory. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a0c24497d7d8d84b02a15703e5d6d787c"></a><!-- doxytag: member="SdBaseFile::oldToNew" ref="a0c24497d7d8d84b02a15703e5d6d787c" args="(uint16_t *date, uint16_t *time)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void <a class="el" href="class_sd_base_file.html#a0c24497d7d8d84b02a15703e5d6d787c">oldToNew</a> </td>
-          <td>(</td>
-          <td class="paramtype">uint16_t *&#160;</td>
-          <td class="paramname"><em>date</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t *&#160;</td>
-          <td class="paramname"><em>time</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [inline, static, private]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
@@ -1321,7 +1383,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a63d88e9ff47e8aae5c0b69cd1fd6942a"></a><!-- doxytag: member="SdBaseFile::open" ref="a63d88e9ff47e8aae5c0b69cd1fd6942a" args="(SdBaseFile *dirFile, const uint8_t dname[11], uint8_t oflag)" -->
+<a class="anchor" id="ae754f262089ebdd79e6bb27a945b7c56"></a><!-- doxytag: member="SdBaseFile::open" ref="ae754f262089ebdd79e6bb27a945b7c56" args="(SdBaseFile *dirFile, const uint8_t *dname, uint8_t oflag, bool bDir)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1334,14 +1396,20 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const uint8_t&#160;</td>
-          <td class="paramname"><em>dname</em>[11], </td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>dname</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>oflag</em>&#160;</td>
+          <td class="paramname"><em>oflag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bDir</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1354,7 +1422,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a25c3ee43cff053a6f1a0cfea386dec4b"></a><!-- doxytag: member="SdBaseFile::open" ref="a25c3ee43cff053a6f1a0cfea386dec4b" args="(SdBaseFile &amp;dirFile, const char *path, uint8_t oflag)" -->
+<a class="anchor" id="a5d1c617ddf4e6019613e79af477d5c6f"></a><!-- doxytag: member="SdBaseFile::open" ref="a5d1c617ddf4e6019613e79af477d5c6f" args="(SdBaseFile &amp;dirFile, const char *path, uint8_t oflag) __attribute__((error(&quot;use open(&amp;dirFile" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1379,25 +1447,15 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000008">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_base_file.html#a8359b5001f4a8382a2f945939cafd592">open(SdBaseFile* dirFile, const char* path, uint8_t oflag)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dirFile</td><td>An open <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> instance for the directory containing the file to be opened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>A path with a valid 8.3 DOS name for the file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">oflag</td><td>Values for <em>oflag</em> are constructed by a bitwise-inclusive OR of flags O_READ, O_WRITE, O_TRUNC, and O_SYNC. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="adc63535d800dd20592cb1c3a496ed1a0"></a><!-- doxytag: member="SdBaseFile::open" ref="adc63535d800dd20592cb1c3a496ed1a0" args="(SdBaseFile &amp;dirFile, const char *path)" -->
+<a class="anchor" id="adb73974c3511171cb2e0f30792745b18"></a><!-- doxytag: member="SdBaseFile::open" ref="adb73974c3511171cb2e0f30792745b18" args="(SdBaseFile &amp;dirFile, const char *path) __attribute__((error(&quot;use open(&amp;dirFile" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1416,24 +1474,15 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000009">Deprecated:</a></b></dt><dd>Do not use in new apps </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dirFile</td><td>An open <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> instance for the directory containing the file to be opened. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>A path with a valid 8.3 DOS name for a file to be opened. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a2ce81d60ae6a0b36acca0f4f8d3b7545"></a><!-- doxytag: member="SdBaseFile::open" ref="a2ce81d60ae6a0b36acca0f4f8d3b7545" args="(SdBaseFile &amp;dirFile, uint16_t index, uint8_t oflag)" -->
+<a class="anchor" id="a62bf8ae3d7b7c0c43bcce0a0f1d5b464"></a><!-- doxytag: member="SdBaseFile::open" ref="a62bf8ae3d7b7c0c43bcce0a0f1d5b464" args="(SdBaseFile &amp;dirFile, uint16_t index, uint8_t oflag) __attribute__((error(&quot;use open(&amp;dirFile" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1458,21 +1507,11 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000010">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_base_file.html#a52c7074d47cf3798184d1fbaa7d2711a">open(SdBaseFile* dirFile, uint16_t index, uint8_t oflag)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dirFile</td><td>An open <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a> instance for the directory. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>The <em>index</em> of the directory entry for the file to be opened. The value for <em>index</em> is (directory file position)/32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">oflag</td><td>Values for <em>oflag</em> are constructed by a bitwise-inclusive OR of flags O_READ, O_WRITE, O_TRUNC, and O_SYNC. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -1548,6 +1587,51 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a31e4a87b15abb09d98d3a4ab1415f02c"></a><!-- doxytag: member="SdBaseFile::openParentReturnFile" ref="a31e4a87b15abb09d98d3a4ab1415f02c" args="(SdBaseFile *dirFile, const char *path, uint8_t *dname, SdBaseFile *newParent, boolean bMakeDirs)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a31e4a87b15abb09d98d3a4ab1415f02c">openParentReturnFile</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td>
+          <td class="paramname"><em>dirFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_sd_base_file.html">SdBaseFile</a> *&#160;</td>
+          <td class="paramname"><em>newParent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">boolean&#160;</td>
+          <td class="paramname"><em>bMakeDirs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a2e90ca886ca5681df690eeb646758aa5"></a><!-- doxytag: member="SdBaseFile::openRoot" ref="a2e90ca886ca5681df690eeb646758aa5" args="(SdVolume *vol)" -->
 <div class="memitem">
 <div class="memproto">
@@ -1565,7 +1649,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a332db691b2bbad3fd8976abaf5a39261"></a><!-- doxytag: member="SdBaseFile::openRoot" ref="a332db691b2bbad3fd8976abaf5a39261" args="(SdVolume &amp;vol)" -->
+<a class="anchor" id="a8543f213a9b5402564d4ea85a3463616"></a><!-- doxytag: member="SdBaseFile::openRoot" ref="a8543f213a9b5402564d4ea85a3463616" args="(SdVolume &amp;vol) __attribute__((error(&quot;use openRoot(&amp;vol)&quot;)))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1574,19 +1658,11 @@ Friends</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="class_sd_volume.html">SdVolume</a> &amp;&#160;</td>
           <td class="paramname"><em>vol</em></td><td>)</td>
-          <td><code> [inline]</code></td>
+          <td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000011">Deprecated:</a></b></dt><dd>Use: bool <a class="el" href="class_sd_base_file.html#a2e90ca886ca5681df690eeb646758aa5">openRoot(SdVolume* vol)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">vol</td><td>The FAT volume containing the root directory to be opened. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -1606,15 +1682,14 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a37fb3af46ea3958c7c7bdc11f3dff345"></a><!-- doxytag: member="SdBaseFile::printCreateDateTime" ref="a37fb3af46ea3958c7c7bdc11f3dff345" args="(Print *pr)" -->
+<a class="anchor" id="a7c8af12f026b1fc080e8ebfef7fce909"></a><!-- doxytag: member="SdBaseFile::printCreateDateTime" ref="a7c8af12f026b1fc080e8ebfef7fce909" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a37fb3af46ea3958c7c7bdc11f3dff345">printCreateDateTime</a> </td>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a7c8af12f026b1fc080e8ebfef7fce909">printCreateDateTime</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1630,45 +1705,6 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">static void <a class="el" href="class_sd_base_file.html#ae55cbdb1584e2f11592c493f42993629">printDirName</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
-          <td class="paramname"><em>dir</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>printSlash</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [static]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a3e4156b0b5d2906688213ff996570c99"></a><!-- doxytag: member="SdBaseFile::printDirName" ref="a3e4156b0b5d2906688213ff996570c99" args="(Print *pr, const dir_t &amp;dir, uint8_t width, bool printSlash)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void <a class="el" href="class_sd_base_file.html#ae55cbdb1584e2f11592c493f42993629">printDirName</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
           <td class="paramname"><em>dir</em>, </td>
         </tr>
@@ -1712,33 +1748,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aff1d50035d73d2857a1c144f4ddd0669"></a><!-- doxytag: member="SdBaseFile::printFatDate" ref="aff1d50035d73d2857a1c144f4ddd0669" args="(Print *pr, uint16_t fatDate)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void <a class="el" href="class_sd_base_file.html#a56d33961896e2a571012c6f64f69f86e">printFatDate</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>fatDate</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [static]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a93fd2d0e3e1a51127dd59815c3ad92a3"></a><!-- doxytag: member="SdBaseFile::printFatTime" ref="a93fd2d0e3e1a51127dd59815c3ad92a3" args="(uint16_t fatTime)" -->
 <div class="memitem">
 <div class="memproto">
@@ -1756,26 +1765,26 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a95baaf3c9e0a7ee4d48fd5c83f037527"></a><!-- doxytag: member="SdBaseFile::printFatTime" ref="a95baaf3c9e0a7ee4d48fd5c83f037527" args="(Print *pr, uint16_t fatTime)" -->
+<a class="anchor" id="aeb564423f405ec9e71b62926b1ef8ab5"></a><!-- doxytag: member="SdBaseFile::printField" ref="aeb564423f405ec9e71b62926b1ef8ab5" args="(int16_t value, char term)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static void <a class="el" href="class_sd_base_file.html#a93fd2d0e3e1a51127dd59815c3ad92a3">printFatTime</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#aeb564423f405ec9e71b62926b1ef8ab5">printField</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em>, </td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>fatTime</em>&#160;</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>term</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [static]</code></td>
+          <td></td><td></td>
         </tr>
       </table>
 </div>
@@ -1783,15 +1792,95 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9a50d259cda61d39b96e4c5ee8a2e45a"></a><!-- doxytag: member="SdBaseFile::printModifyDateTime" ref="a9a50d259cda61d39b96e4c5ee8a2e45a" args="(Print *pr)" -->
+<a class="anchor" id="ac9a25d21b439ac5c270ebcb42aa208db"></a><!-- doxytag: member="SdBaseFile::printField" ref="ac9a25d21b439ac5c270ebcb42aa208db" args="(uint16_t value, char term)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a9a50d259cda61d39b96e4c5ee8a2e45a">printModifyDateTime</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#aeb564423f405ec9e71b62926b1ef8ab5">printField</a> </td>
           <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em></td><td>)</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>term</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5a95541e25ab84c7ddbe3404db0e2efd"></a><!-- doxytag: member="SdBaseFile::printField" ref="a5a95541e25ab84c7ddbe3404db0e2efd" args="(int32_t value, char term)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#aeb564423f405ec9e71b62926b1ef8ab5">printField</a> </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>term</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a85d0c7a2190689f774a07a5bfb9668bd"></a><!-- doxytag: member="SdBaseFile::printField" ref="a85d0c7a2190689f774a07a5bfb9668bd" args="(uint32_t value, char term)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#aeb564423f405ec9e71b62926b1ef8ab5">printField</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>term</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5ded19364c125073d664935bed8239aa"></a><!-- doxytag: member="SdBaseFile::printModifyDateTime" ref="a5ded19364c125073d664935bed8239aa" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a5ded19364c125073d664935bed8239aa">printModifyDateTime</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1816,23 +1905,6 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad5e2bbdaf498b66fcf393137bb30a1c2"></a><!-- doxytag: member="SdBaseFile::printName" ref="ad5e2bbdaf498b66fcf393137bb30a1c2" args="(Print *pr)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a57f9e42369a4b97e6b21ed0040115e17">printName</a> </td>
-          <td>(</td>
-          <td class="paramtype">Print *&#160;</td>
-          <td class="paramname"><em>pr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a5a4c0ff07215b20f25d11fef7710ed59"></a><!-- doxytag: member="SdBaseFile::read" ref="a5a4c0ff07215b20f25d11fef7710ed59" args="()" -->
 <div class="memitem">
 <div class="memproto">
@@ -1849,12 +1921,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6e72556ca777c52cfc8f7fb70a51581a"></a><!-- doxytag: member="SdBaseFile::read" ref="a6e72556ca777c52cfc8f7fb70a51581a" args="(void *buf, uint16_t nbyte)" -->
+<a class="anchor" id="a2af650686f0fc5fa748f6478f5f8afb1"></a><!-- doxytag: member="SdBaseFile::read" ref="a2af650686f0fc5fa748f6478f5f8afb1" args="(void *buf, size_t nbyte)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int16_t <a class="el" href="class_sd_base_file.html#a5a4c0ff07215b20f25d11fef7710ed59">read</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#a5a4c0ff07215b20f25d11fef7710ed59">read</a> </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>buf</em>, </td>
@@ -1862,7 +1934,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>nbyte</em>&#160;</td>
         </tr>
         <tr>
@@ -1876,14 +1948,68 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="addfe59dc0e7a6a8a88e9b7ecf5b51860"></a><!-- doxytag: member="SdBaseFile::readDir" ref="addfe59dc0e7a6a8a88e9b7ecf5b51860" args="(dir_t *dir)" -->
+<a class="anchor" id="aa905d6674b7a318e6f75a7f5bfd252fa"></a><!-- doxytag: member="SdBaseFile::readDir" ref="aa905d6674b7a318e6f75a7f5bfd252fa" args="(dir_t &amp;dir, char *longfilename)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#addfe59dc0e7a6a8a88e9b7ecf5b51860">readDir</a> </td>
+          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#aa905d6674b7a318e6f75a7f5bfd252fa">readDir</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>longfilename</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3962e6a3278ffe0dea853d3a1fd1d726"></a><!-- doxytag: member="SdBaseFile::readDir" ref="a3962e6a3278ffe0dea853d3a1fd1d726" args="(dir_t *dir, char *longfilename)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#aa905d6674b7a318e6f75a7f5bfd252fa">readDir</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *&#160;</td>
+          <td class="paramname"><em>dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>longfilename</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac688af3bef42702b4d6513ff586ba802"></a><!-- doxytag: member="SdBaseFile::readDir" ref="ac688af3bef42702b4d6513ff586ba802" args="(dir_t &amp;dir) __attribute__((error(&quot;use readDir(&amp;dir)&quot;)))" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#aa905d6674b7a318e6f75a7f5bfd252fa">readDir</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
           <td class="paramname"><em>dir</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1893,37 +2019,28 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a751e8b0edf4238abdde246d6346653b0"></a><!-- doxytag: member="SdBaseFile::readDir" ref="a751e8b0edf4238abdde246d6346653b0" args="(dir_t &amp;dir)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int8_t <a class="el" href="class_sd_base_file.html#addfe59dc0e7a6a8a88e9b7ecf5b51860">readDir</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> &amp;&#160;</td>
-          <td class="paramname"><em>dir</em></td><td>)</td>
-          <td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>Use: int8_t <a class="el" href="class_sd_base_file.html#addfe59dc0e7a6a8a88e9b7ecf5b51860">readDir(dir_t* dir)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">dir</td><td>The dir_t struct that will receive the data. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>bytes read for success zero for eof or -1 for failure. </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="adae59feaadf1b33cdbcb5e46a338980e"></a><!-- doxytag: member="SdBaseFile::readDirCache" ref="adae59feaadf1b33cdbcb5e46a338980e" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a>* <a class="el" href="class_sd_base_file.html#adae59feaadf1b33cdbcb5e46a338980e">readDirCache</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a855caab821dc329660acb6fd51f99ae2"></a><!-- doxytag: member="SdBaseFile::readDirCacheSpecial" ref="a855caab821dc329660acb6fd51f99ae2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a>* <a class="el" href="class_sd_base_file.html#a855caab821dc329660acb6fd51f99ae2">readDirCacheSpecial</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1977,7 +2094,7 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a70236419166e77de26913c0214d22040"></a><!-- doxytag: member="SdBaseFile::remove" ref="a70236419166e77de26913c0214d22040" args="(SdBaseFile &amp;dirFile, const char *path)" -->
+<a class="anchor" id="a2691a24f7ba00f556e8320c28d1d5bed"></a><!-- doxytag: member="SdBaseFile::remove" ref="a2691a24f7ba00f556e8320c28d1d5bed" args="(SdBaseFile &amp;dirFile, const char *path) __attribute__((error(&quot;use remove(&amp;dirFile" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1996,20 +2113,11 @@ Friends</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td><code> [inline, static]</code></td>
+          <td></td><td><code> [static]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000013">Deprecated:</a></b></dt><dd>Use: static uint8_t <a class="el" href="class_sd_base_file.html#aa016aa548d2e1ff27450e5617b17611e">remove(SdBaseFile* dirFile, const char* path)</a>; </dd></dl>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dirFile</td><td>The directory that contains the file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>The name of the file to be removed. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>true for success or false for failure. </dd></dl>
 
 </div>
 </div>
@@ -2172,14 +2280,30 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aadbe16c070ea4d0df211c983f6945592"></a><!-- doxytag: member="SdBaseFile::setpos" ref="aadbe16c070ea4d0df211c983f6945592" args="(fpos_t *pos)" -->
+<a class="anchor" id="a12319368009edbd69755172aba6ff61f"></a><!-- doxytag: member="SdBaseFile::setDirSize" ref="a12319368009edbd69755172aba6ff61f" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_base_file.html#aadbe16c070ea4d0df211c983f6945592">setpos</a> </td>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a12319368009edbd69755172aba6ff61f">setDirSize</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structfpos__t.html">fpos_t</a> *&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a48594bc03b5a4a47cf774e01c40be1b5"></a><!-- doxytag: member="SdBaseFile::setpos" ref="a48594bc03b5a4a47cf774e01c40be1b5" args="(FatPos_t *pos)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_sd_base_file.html#a48594bc03b5a4a47cf774e01c40be1b5">setpos</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_fat_pos__t.html">FatPos_t</a> *&#160;</td>
           <td class="paramname"><em>pos</em></td><td>)</td>
           <td></td>
         </tr>
@@ -2338,12 +2462,12 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac2cd3987fc778298bd4c23a4d53fbfd7"></a><!-- doxytag: member="SdBaseFile::write" ref="ac2cd3987fc778298bd4c23a4d53fbfd7" args="(const void *buf, uint16_t nbyte)" -->
+<a class="anchor" id="aaf4f4cafe922e54d7b10c1b18bf60d07"></a><!-- doxytag: member="SdBaseFile::write" ref="aaf4f4cafe922e54d7b10c1b18bf60d07" args="(const void *buf, size_t nbyte)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int16_t <a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write</a> </td>
           <td>(</td>
           <td class="paramtype">const void *&#160;</td>
           <td class="paramname"><em>buf</em>, </td>
@@ -2351,7 +2475,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>nbyte</em>&#160;</td>
         </tr>
         <tr>
@@ -2363,7 +2487,7 @@ Friends</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Reimplemented in <a class="el" href="class_sd_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">SdFile</a>.</p>
+<p>Reimplemented in <a class="el" href="class_sd_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">SdFile</a>.</p>
 
 </div>
 </div>
@@ -2426,7 +2550,7 @@ Friends</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* <a class="el" href="class_sd_base_file.html#a0fbdf53a669c68035108f7e71804ebc2">dateTime_</a>)(uint16_t *date, uint16_t *time)<code> [static]</code></td>
+          <td class="memname">void(* <a class="el" href="class_sd_base_file.html#a0fbdf53a669c68035108f7e71804ebc2">dateTime_</a>)(uint16_t *date, uint16_t *<a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a>)<code> [static]</code></td>
         </tr>
       </table>
 </div>
@@ -2453,6 +2577,19 @@ Friends</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">uint8_t <a class="el" href="class_sd_base_file.html#adf65af6edbe7a86d1e94c7604c66ea51">dirIndex_</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a59ccb0407e4759a5363d4262e18aec73"></a><!-- doxytag: member="SdBaseFile::endBlock" ref="a59ccb0407e4759a5363d4262e18aec73" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool &amp; <a class="el" href="class_sd_base_file.html#a59ccb0407e4759a5363d4262e18aec73">endBlock</a></td>
         </tr>
       </table>
 </div>
@@ -2538,12 +2675,90 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a065270f4bcd49e3cd298c20d8b30b59a"></a><!-- doxytag: member="SdBaseFile::oldDateTime_" ref="a065270f4bcd49e3cd298c20d8b30b59a" args=")(uint16_t &amp;date, uint16_t &amp;time)" -->
+<a class="anchor" id="a7e1f783bbc6758254c17c5d46122e830"></a><!-- doxytag: member="SdBaseFile::index" ref="a7e1f783bbc6758254c17c5d46122e830" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* <a class="el" href="class_sd_base_file.html#a065270f4bcd49e3cd298c20d8b30b59a">oldDateTime_</a>)(uint16_t &amp;date, uint16_t &amp;time)<code> [static, private]</code></td>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a7e1f783bbc6758254c17c5d46122e830">index</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a49c49194ba38e12c0991dfb65cf4876a"></a><!-- doxytag: member="SdBaseFile::O_RDWR" ref="a49c49194ba38e12c0991dfb65cf4876a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a49c49194ba38e12c0991dfb65cf4876a">O_RDWR</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2319f1b18c7dcb22957b3f75f6436299"></a><!-- doxytag: member="SdBaseFile::oflag" ref="a2319f1b18c7dcb22957b3f75f6436299" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a55cf894a3c789d80a963f10433251dfe"></a><!-- doxytag: member="SdBaseFile::path" ref="a55cf894a3c789d80a963f10433251dfe" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a55cf894a3c789d80a963f10433251dfe"></a><!-- doxytag: member="SdBaseFile::path" ref="a55cf894a3c789d80a963f10433251dfe" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="class_sd_base_file.html#a55cf894a3c789d80a963f10433251dfe">path</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a7475d64e6045e51366045a2616fd0f41"></a><!-- doxytag: member="SdBaseFile::pathend" ref="a7475d64e6045e51366045a2616fd0f41" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* <a class="el" href="class_sd_base_file.html#a7475d64e6045e51366045a2616fd0f41">pathend</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="affcf6be1d8a276e78f7a669c22fee4e6"></a><!-- doxytag: member="SdBaseFile::time" ref="affcf6be1d8a276e78f7a669c22fee4e6" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void uint16_t* <a class="el" href="class_sd_base_file.html#affcf6be1d8a276e78f7a669c22fee4e6">time</a></td>
         </tr>
       </table>
 </div>
@@ -2587,12 +2802,12 @@ Friends</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>writeError is set to true if an error occurs during a <a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write()</a>. Set writeError to false before calling print() and/or <a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write()</a> and check for true after calls to print() and/or <a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write()</a>. </p>
+<p>writeError is set to true if an error occurs during a <a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write()</a>. Set writeError to false before calling print() and/or <a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write()</a> and check for true after calls to print() and/or <a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write()</a>. </p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -2614,7 +2829,7 @@ Friends</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_sd_base_file.html">SdBaseFile</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

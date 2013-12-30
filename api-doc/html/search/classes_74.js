@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['temperaturecontroller',['TemperatureController',['../struct_temperature_controller.html',1,'']]]
+  ['temperaturecontroller',['TemperatureController',['../class_temperature_controller.html',1,'']]]
 ];
