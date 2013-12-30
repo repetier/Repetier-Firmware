@@ -2412,9 +2412,11 @@ void UIDisplay::executeAction(int action)
             }
             break;
         case UI_ACTION_POWER:
-            Commands::waitUntilEndOfAllMoves();
-            SET_OUTPUT(PS_ON_PIN); //GND
-            TOGGLE(PS_ON_PIN);
+			#if PS_ON_PIN>=0 // avoid compiler errors when the power supply pin is disabled
+				Commands::waitUntilEndOfAllMoves();
+				SET_OUTPUT(PS_ON_PIN); //GND
+				TOGGLE(PS_ON_PIN);
+			#endif
             break;
 #if CASE_LIGHTS_PIN > 0
         case UI_ACTION_LIGHTS_ONOFF:
