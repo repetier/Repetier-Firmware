@@ -53,7 +53,7 @@ void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
 #if BEEPER_TYPE!=0
-#if BEEPER_TYPE==1
+#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
     SET_OUTPUT(BEEPER_PIN);
 #endif
 #if BEEPER_TYPE==2
@@ -64,7 +64,7 @@ void beep(uint8_t duration,uint8_t count)
 #endif
     for(uint8_t i=0; i<count; i++)
     {
-#if BEEPER_TYPE==1
+#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
         WRITE(BEEPER_PIN,LOW);
 #else
@@ -84,7 +84,7 @@ void beep(uint8_t duration,uint8_t count)
 #endif
 #endif
         HAL::delayMilliseconds(duration);
-#if BEEPER_TYPE==1
+#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
         WRITE(BEEPER_PIN,HIGH);
 #else
@@ -722,7 +722,27 @@ void initializeLCD()
 char printCols[MAX_COLS+1];
 UIDisplay::UIDisplay()
 {
-    oldMenuLevel = -2;
+
+}
+#if UI_ANIMATION
+void slideIn(uint8_t row,FSTRINGPARAM(text))
+{
+    char *empty="";
+    int8_t i = 0;
+    uid.col=0;
+    uid.addStringP(text);
+    printCols[uid.col]=0;
+    for(i=UI_COLS-1; i>=0; i--)
+    {
+        uid.printRow(row,empty,printCols,i);
+        HAL::pingWatchdog();
+        HAL::delayMilliseconds(10);
+    }
+}
+#endif // UI_ANIMATION
+void UIDisplay::initialize()
+{
+        oldMenuLevel = -2;
 #ifdef COMPILE_I2C_DRIVER
     uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
@@ -762,25 +782,6 @@ UIDisplay::UIDisplay()
     folderLevel=0;
 #endif
     UI_STATUS(UI_TEXT_PRINTER_READY);
-}
-#if UI_ANIMATION
-void slideIn(uint8_t row,FSTRINGPARAM(text))
-{
-    char *empty="";
-    int8_t i = 0;
-    uid.col=0;
-    uid.addStringP(text);
-    printCols[uid.col]=0;
-    for(i=UI_COLS-1; i>=0; i--)
-    {
-        uid.printRow(row,empty,printCols,i);
-        HAL::pingWatchdog();
-        HAL::delayMilliseconds(10);
-    }
-}
-#endif // UI_ANIMATION
-void UIDisplay::initialize()
-{
 #if UI_DISPLAY_TYPE>0
     initializeLCD();
 #if UI_DISPLAY_TYPE==3
@@ -2412,9 +2413,11 @@ void UIDisplay::executeAction(int action)
             }
             break;
         case UI_ACTION_POWER:
+#if PS_ON_PIN>=0 // avoid compiler errors when the power supply pin is disabled
             Commands::waitUntilEndOfAllMoves();
             SET_OUTPUT(PS_ON_PIN); //GND
             TOGGLE(PS_ON_PIN);
+#endif
             break;
 #if CASE_LIGHTS_PIN > 0
         case UI_ACTION_LIGHTS_ONOFF:

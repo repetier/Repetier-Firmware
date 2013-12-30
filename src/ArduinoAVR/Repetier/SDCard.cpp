@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -134,18 +134,22 @@ void SDCard::pausePrint(bool intern)
     if(!sd.sdactive) return;
     sdmode = false;
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);
+#if FEATURE_MEMORY_POSITION
     if(intern) {
         Printer::MemoryPosition();
         Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],Printer::currentPosition[E_AXIS],Printer::maxFeedrate[X_AXIS]);
     }
+#endif
 }
 void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+#if FEATURE_MEMORY_POSITION
     if(intern) {
         Printer::GoToMemoryPosition(true,true,false,true,Printer::maxFeedrate[X_AXIS]);
     }
+#endif
 }
 void SDCard::stopPrint()
 {
@@ -303,13 +307,13 @@ bool SDCard::showFilename(const uint8_t *name)
     return true;
 }
 
-int8_t stricmp(const char* s1, const char* s2)
+int8_t RFstricmp(const char* s1, const char* s2)
 {
     while(*s1 && (tolower(*s1) == tolower(*s2)))
         s1++,s2++;
     return (const uint8_t)tolower(*s1)-(const uint8_t)tolower(*s2);
 }
-int8_t strnicmp(const char* s1, const char* s2, size_t n)
+int8_t RFstrnicmp(const char* s1, const char* s2, size_t n)
 {
     while(n--)
     {

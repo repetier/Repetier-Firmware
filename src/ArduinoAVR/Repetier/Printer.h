@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -52,8 +52,8 @@ public:
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
-    static long maxAccelerationMMPerSquareSecond[];
-    static long maxTravelAccelerationMMPerSquareSecond[];
+    static float maxAccelerationMMPerSquareSecond[];
+    static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
     static unsigned long maxTravelAccelerationStepsPerSquareSecond[];
     static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).

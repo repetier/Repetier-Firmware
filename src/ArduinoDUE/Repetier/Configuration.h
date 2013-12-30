@@ -71,7 +71,8 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
 3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
-4 = Tuga printer
+4 = Tuga printer (Scott-Russell mechanism)
+5 = Bipod system (not implemented)
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
@@ -214,14 +215,14 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
  Overridden if EEPROM activated.
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 60
-/** P-gain. Dead-time if dead-time heat manager selected. Overridden if EEPROM activated. */
-#define EXT0_PID_P   14.52 //24
+/** P-gain.  Overridden if EEPROM activated. */
+#define EXT0_PID_P   24
 /** I-gain. Overridden if EEPROM activated.
 */
-#define EXT0_PID_I   0.95 //0.88
-/** D-gain.  Overridden if EEPROM activated.*/
-#define EXT0_PID_D 55.48 //80
-// maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
+#define EXT0_PID_I   0.88
+/** Dgain.  Overridden if EEPROM activated.*/
+#define EXT0_PID_D 80
+// maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
 K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
@@ -367,6 +368,9 @@ need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm h
 */
 #define PID_CONTROL_RANGE 20
 
+/** Prevent extrusions longer then x mm for one command. This is especially important if you abort a print. Then the
+extrusion poistion might be at any value like 23344. If you then have an G1 E-2 it will roll back 23 meter! */
+#define EXTRUDE_MAXLENGTH 100
 /** Skip wait, if the extruder temperature is already within x degrees. Only fixed numbers, 0 = off */
 #define SKIP_M109_IF_WITHIN 2
 
@@ -520,6 +524,7 @@ Heat manager for heated bed:
 0 = Bang Bang, fast update
 1 = PID controlled
 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life
+3 = dead time control
 */
 #define HEATED_BED_HEAT_MANAGER 1
 /** \brief The maximum value, I-gain can contribute to the output.
@@ -544,29 +549,13 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
 
-/** Include PID control for all heaters. */
-#define TEMP_PID true
-
-//// Experimental watchdog and minimal temp
-// The watchdog waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature
-// If the temperature has not increased at the end of that period, the target temperature is set to zero. It can be reset with another M104/M109
-//#define WATCHPERIOD 5000 //5 seconds
-
-//// The minimal temperature defines the temperature below which the heater will not be enabled
-#define MINTEMP 5
-
-//// Experimental max temp
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
-// You should use MINTEMP for thermistor short/failure protection.
 #define MAXTEMP 260
 
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
-
-/** \brief Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V internaly generated */
-#define ANALOG_REF ANALOG_REF_AVCC
 
 
 // ##########################################################################################
@@ -693,16 +682,17 @@ on this endstop.
 #define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #endif
 
+/** \brief Number of segments to generate for delta conversions per second of move
+*/
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
+
 // Delta settings
 #if DRIVE_SYSTEM==3
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
 
-/** \brief Number of segments to generate for delta conversions per second of move
-*/
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 400 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 200 // Less accurate setting for other moves
 
 /*  =========== Parameter essential for delta calibration ===================
 
@@ -754,12 +744,8 @@ If you don't do it, make sure to home first before your first move.
 */
 #define DELTA_HOME_ON_POWER false
 
-/** \brief Enable counter to count steps for Z max calculations
-*/
-#define STEP_COUNTER
-
 /** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
-you can also change the values online and auleveling will store the results here. */
+you can also change the values online and autoleveling will store the results here. */
 #define DELTA_X_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
@@ -793,7 +779,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
     Set value to 0 for disabled.
     Overridden if EEPROM activated.
 */
-#define MAX_INACTIVE_TIME 900
+#define MAX_INACTIVE_TIME 0L
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.
@@ -914,10 +900,6 @@ if you are printing many very short segments at high speed. Higher delays here a
 // ##                           Extruder control                                           ##
 // ##########################################################################################
 
-/** \brief Prescale factor, timer0 runs at.
-
-All known arduino boards use 64. This value is needed for the extruder timing. */
-#define TIMER0_PRESCALE 128
 
 /* \brief Minimum temperature for extruder operation
 
@@ -1083,8 +1065,6 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_XY_SPEED 150
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91
-/** Gap between probe and bed resp. extruder and z sensor. Must be greater then inital z height inaccuracy! Only used for delta printer calibration. */
-#define Z_PROBE_GAP 30.0
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
@@ -1101,18 +1081,19 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
 
+/* Define a pin to tuen light on/off */
+#define CASE_LIGHTS_PIN -1
+
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT true
-/** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
-#define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR
+#define SD_EXTENDED_DIR true
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT true
 
@@ -1146,16 +1127,17 @@ The following settings override uiconfig.h!
 8 = PiBot Display/Controller extension with 20x4 character display
 9 = PiBot Display/Controller extension with 16x2 character display
 10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
+11 = RepRapDiscount Full Graphic Smart Controller
 */
 #define FEATURE_CONTROLLER 7
 
 /**
 Select the language to use.
-0 = english
-1 = german
-2 = dutch
-3 = brazilian portuguese
-4 = italian
+0 = English
+1 = German
+2 = Dutch
+3 = Brazilian portuguese
+4 = Italian
 5 = Spanish
 6 = Swedish
 */
@@ -1163,10 +1145,17 @@ Select the language to use.
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_VERSION_STRING2 "Delta Tower"
+#define UI_PRINTER_COMPANY "RepRapDiscount"
+
+
+/** Animate switches between menus etc. */
+#define UI_ANIMATION true
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
 
+/** Delay of start screen in milliseconds */
+#define UI_START_SCREEN_DELAY 1000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH true
@@ -1181,6 +1170,7 @@ Unfotunately, the encoder have a different count of phase changes between clicks
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
 */
 #define UI_ENCODER_SPEED 2
+
 /* There are 2 ways to change positions. You can move by increments of 1/0.1 mm resulting in more menu entries
 and requiring many turns on your encode. The alternative is to enable speed dependent positioning. It will change
 the move distance depending on the speed you turn the encoder. That way you can move very fast and very slow in the
@@ -1188,6 +1178,7 @@ same setting.
 
 */
 #define UI_SPEEDDEPENDENT_POSITIONING true
+
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
 

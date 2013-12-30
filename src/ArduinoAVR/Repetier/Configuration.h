@@ -569,29 +569,13 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
 
-/** Include PID control for all heaters. */
-#define TEMP_PID true
-
-//// Experimental watchdog and minimal temp
-// The watchdog waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature
-// If the temperature has not increased at the end of that period, the target temperature is set to zero. It can be reset with another M104/M109
-//#define WATCHPERIOD 5000 //5 seconds
-
-//// The minimal temperature defines the temperature below which the heater will not be enabled
-#define MINTEMP 5
-
-//// Experimental max temp
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
-// You should use MINTEMP for thermistor short/failure protection.
 #define MAXTEMP 260
 
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
-
-/** \brief Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V internaly generated */
-#define ANALOG_REF ANALOG_REF_AVCC
 
 
 // ##########################################################################################
@@ -936,10 +920,6 @@ if you are printing many very short segments at high speed. Higher delays here a
 // ##                           Extruder control                                           ##
 // ##########################################################################################
 
-/** \brief Prescale factor, timer0 runs at.
-
-All known arduino boards use 64. This value is needed for the extruder timing. */
-#define TIMER0_PRESCALE 64
 
 /* \brief Minimum temperature for extruder operation
 
@@ -949,7 +929,7 @@ is at least molten. After havong some complains that the extruder does not work,
 it 0 as default.
 */
 
-#define MIN_EXTRUDER_TEMP 0
+#define MIN_EXTRUDER_TEMP 160
 
 /** \brief Enable advance algorithm.
 
@@ -1133,7 +1113,7 @@ is always running and is not hung up for some unknown reason. */
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR
+#define SD_EXTENDED_DIR true
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT true
 

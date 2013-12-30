@@ -212,11 +212,9 @@ FSTRINGVAR(tAutolevelReset)
 #endif
 FSTRINGVAR(tAutolevelEnabled)
 FSTRINGVAR(tAutolevelDisabled)
-#if MAX_HARDWARE_ENDSTOP_Z
 FSTRINGVAR(tZProbeFailed)
 FSTRINGVAR(tZProbeMax)
 FSTRINGVAR(tZProbePrinterHeight)
-#endif
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)

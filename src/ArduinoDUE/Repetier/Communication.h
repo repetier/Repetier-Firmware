@@ -76,6 +76,7 @@ FSTRINGVAR(tSpaceAtColon)
 FSTRINGVAR(tSpaceT)
 FSTRINGVAR(tSpaceRaw)
 FSTRINGVAR(tSpaceAt)
+FSTRINGVAR(tSpaceBAtColon)
 FSTRINGVAR(tColon)
 FSTRINGVAR(tSpeedMultiply);
 FSTRINGVAR(tFlowMultiply);
@@ -211,11 +212,9 @@ FSTRINGVAR(tAutolevelReset)
 #endif
 FSTRINGVAR(tAutolevelEnabled)
 FSTRINGVAR(tAutolevelDisabled)
-#if MAX_HARDWARE_ENDSTOP_Z
 FSTRINGVAR(tZProbeFailed)
 FSTRINGVAR(tZProbeMax)
 FSTRINGVAR(tZProbePrinterHeight)
-#endif
 
 #ifdef WAITING_IDENTIFIER
 FSTRINGVAR(tWait)

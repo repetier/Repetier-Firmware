@@ -33,7 +33,9 @@ extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
 volatile uint8_t HAL::insideTimer1=0;
-
+#ifndef DUE_SOFTWARE_SPI
+    int spiDueDividors[] = {10,21,42,84,168,255,255};
+#endif
 
 HAL::HAL()
 {
@@ -227,6 +229,120 @@ void HAL::resetHardware() {
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
+
+#ifndef DUE_SOFTWARE_SPI
+   // hardware SPI
+   void HAL::spiBegin()
+   {
+        // Configre SPI pins
+        PIO_Configure(
+           g_APinDescription[SCK_PIN].pPort,
+           g_APinDescription[SCK_PIN].ulPinType,
+           g_APinDescription[SCK_PIN].ulPin,
+           g_APinDescription[SCK_PIN].ulPinConfiguration);
+        PIO_Configure(
+           g_APinDescription[MOSI_PIN].pPort,
+           g_APinDescription[MOSI_PIN].ulPinType,
+           g_APinDescription[MOSI_PIN].ulPin,
+           g_APinDescription[MOSI_PIN].ulPinConfiguration);
+        PIO_Configure(
+           g_APinDescription[MISO_PIN].pPort,
+           g_APinDescription[MISO_PIN].ulPinType,
+           g_APinDescription[MISO_PIN].ulPin,
+           g_APinDescription[MISO_PIN].ulPinConfiguration);
+
+        // set master mode, peripheral select, fault detection
+        SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR | 
+                     SPI_MR_MODFDIS | SPI_MR_PS);
+       SPI_Enable(SPI0);
+        PIO_Configure(
+           g_APinDescription[SPI_PIN].pPort,
+           g_APinDescription[SPI_PIN].ulPinType,
+           g_APinDescription[SPI_PIN].ulPin,
+           g_APinDescription[SPI_PIN].ulPinConfiguration);
+        spiInit(1);
+   }
+   // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
+   // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
+    void HAL::spiInit(uint8_t spiClock) 
+   {
+        if(spiClock>4) spiClock = 1;
+        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
+        SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
+                         SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | 
+                         SPI_CSR_DLYBCT(1));
+       SPI_Enable(SPI0);
+   }
+    // Write single byte to SPI
+   void HAL::spiSend(byte b) {
+        // wait for transmit register empty
+        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+        // write byte with address and end transmission flag
+        SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+        // wait for receive register 
+        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+        // clear status
+        SPI0->SPI_RDR;
+    }
+   void HAL::spiSend(const uint8_t* buf , size_t n)
+   {
+       if (n == 0) return;
+       for (int i=0; i<n-1; i++)
+       {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           SPI0->SPI_RDR;
+       }
+       spiSend(buf[n-1]);
+   }
+
+    // Read single byte from SPI
+   uint8_t HAL::spiReceive()
+   {
+        // wait for transmit register empty
+        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+        // write dummy byte with address and end transmission flag
+        SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+
+        // wait for receive register 
+        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+        // get byte from receive register
+        return SPI0->SPI_RDR;
+   }
+    // Read from SPI into buffer
+   void HAL::spiReadBlock(uint8_t*buf,uint16_t nbyte) 
+   {     
+       if (nbyte-- == 0) return;
+
+       for (int i=0; i<nbyte; i++)
+        {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           buf[i] = SPI0->SPI_RDR;
+        }
+       buf[nbyte] = spiReceive();
+   }
+
+    // Write from buffer to SPI
+
+   void HAL::spiSendBlock(uint8_t token, const uint8_t* buf)
+   {
+       while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+       SPI0->SPI_TDR = (uint32_t)token | SPI_PCS(SPI_CHAN);
+       while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+       SPI0->SPI_RDR;
+       for (int i=0; i<511; i++)
+       {
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
+           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           SPI0->SPI_RDR;
+       }
+       spiSend(buf[511]);
+   }
+#endif
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
@@ -714,11 +830,11 @@ void PWM_TIMER_VECTOR ()
     if(pwm_pos_set[NUM_EXTRUDER] == pwm_count && pwm_pos_set[NUM_EXTRUDER]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
 #endif
     HAL::allowInterrupts();
-    counter_periodical++; // Appxoimate a 100ms timer
-    if(counter_periodical >= 390) //  (int)(F_CPU/40960))
+    counterPeriodical++; // Appxoimate a 100ms timer
+    if(counterPeriodical >= 390) //  (int)(F_CPU/40960))
     {
-        counter_periodical=0;
-        execute_periodical=1;
+        counterPeriodical=0;
+        executePeriodical=1;
     }
 // read analog values -- only read one per interrupt
 #if ANALOG_INPUTS>0

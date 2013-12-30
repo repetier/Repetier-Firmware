@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -387,29 +387,29 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 }
 
-void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep)
+void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr,bool beep)
 {
     bool alloffs = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloffs = false;
 #ifdef MAXTEMP
-    if(temp_celsius>MAXTEMP) temp_celsius = MAXTEMP;
+    if(temperatureInCelsius>MAXTEMP) temperatureInCelsius = MAXTEMP;
 #endif
-    if(temp_celsius<0) temp_celsius=0;
+    if(temperatureInCelsius<0) temperatureInCelsius=0;
     TemperatureController *tc = tempController[extr];
-    //if(temp_celsius==tc->targetTemperatureC) return;
-    tc->setTargetTemperature(temp_celsius);
-    if(beep && temp_celsius>30)
+    //if(temperatureInCelsius==tc->targetTemperatureC) return;
+    tc->setTargetTemperature(temperatureInCelsius);
+    if(beep && temperatureInCelsius>30)
         tc->setAlarm(true);
-    if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+    if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
-    Com::printFLN(Com::tColon,temp_celsius,0);
+    Com::printFLN(Com::tColon,temperatureInCelsius,0);
 #if FEATURE_DITTO_PRINTING
     if(Extruder::dittoMode && extr == 0)
     {
         TemperatureController *tc2 = tempController[1];
-        tc2->setTargetTemperature(temp_celsius);
-        if(temp_celsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
+        tc2->setTargetTemperature(temperatureInCelsius);
+        if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
     }
 #endif // FEATURE_DITTO_PRINTING
     bool alloff = true;
@@ -423,14 +423,14 @@ void Extruder::setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool be
         Printer::msecondsPrinting = HAL::timeInMilliseconds();
 }
 
-void Extruder::setHeatedBedTemperature(float temp_celsius,bool beep)
+void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 {
 #if HAVE_HEATED_BED
-    if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
-    if(temp_celsius<0) temp_celsius = 0;
-    if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
-    heatedBedController.setTargetTemperature(temp_celsius);
-    if(beep && temp_celsius>30) heatedBedController.setAlarm(true);
+    if(temperatureInCelsius>HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
+    if(temperatureInCelsius<0) temperatureInCelsius = 0;
+    if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
+    heatedBedController.setTargetTemperature(temperatureInCelsius);
+    if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
 #endif
 }

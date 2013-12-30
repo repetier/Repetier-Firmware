@@ -50,6 +50,10 @@
 
 #include <avr/eeprom.h>
 #include <avr/wdt.h>
+/** \brief Prescale factor, timer0 runs at.
+
+All known arduino boards use 64. This value is needed for the extruder timing. */
+#define TIMER0_PRESCALE 64
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 

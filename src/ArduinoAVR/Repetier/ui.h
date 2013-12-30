@@ -191,7 +191,7 @@
 typedef struct {
   const char *text; // Menu text
   uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
-  uint16_t action;
+  unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
   bool showEntry() const;

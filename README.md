@@ -1,12 +1,13 @@
 # Repetier-Firmware - the fast and user friendly firmware
 
-## Important notice of this development version
+## Installation
 
-The development is nearly finished. Code is stable as far as we know. Depending on
-your configuration you may get some compilation problems. This is, because we have many
-conditional compilations and can not test every combination. If you find such a combination,
-please let us know, so we can fix the problem. Best is to send your Configuration.h causing
-the problems and the error message from the compiler.
+Please use your new at [http://www.repetier.com/firmware/v091](http://www.repetier.com/firmware/v091)
+for easy and fast configuration. You get the complete sources you need to compile back.
+This system also allows it to upload configurations created with this tool and modify
+the configuration.
+
+## Version 0.91 released 2013-12-30
 
 Improvements over old code:
 * Works with CodeBlocks for Arduino http://www.arduinodev.com/codeblocks/#download
@@ -28,8 +29,6 @@ Improvements over old code:
 * many other changes.
 
 ## Documentation
-
-by repetier  (repetierdev@gmail.com)
 
 For documentation please visit [http://www.repetier.com/documentation/repetier-firmware/](http://www.repetier.com/documentation/repetier-firmware/)
 

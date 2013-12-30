@@ -32,8 +32,8 @@ float Printer::maxFeedrate[4] = {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}
 float Printer::homingFeedrate[3] = {HOMING_FEEDRATE_X, HOMING_FEEDRATE_Y, HOMING_FEEDRATE_Z};
 #ifdef RAMP_ACCELERATION
 //  float max_start_speed_units_per_second[4] = MAX_START_SPEED_UNITS_PER_SECOND; ///< Speed we can use, without acceleration.
-long Printer::maxAccelerationMMPerSquareSecond[4] = {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
-long Printer::maxTravelAccelerationMMPerSquareSecond[4] = {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z max acceleration in mm/s^2 for travel moves
+float Printer::maxAccelerationMMPerSquareSecond[4] = {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
+float Printer::maxTravelAccelerationMMPerSquareSecond[4] = {MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y,MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z max acceleration in mm/s^2 for travel moves
 /** Acceleration in steps/s^3 in printing mode.*/
 unsigned long Printer::maxPrintAccelerationStepsPerSquareSecond[4];
 /** Acceleration in steps/s^2 in movement mode.*/
@@ -241,9 +241,10 @@ void Printer::updateDerivedParameter()
         maxTravelAccelerationStepsPerSquareSecond[i] = maxTravelAccelerationMMPerSquareSecond[i] * axisStepsPerMM[i];
 #endif
     }
-    float accel = RMath::max(maxAccelerationMMPerSquareSecond[0],maxTravelAccelerationMMPerSquareSecond[0]);
-    minimumSpeed = accel*sqrt(2.0f/(axisStepsPerMM[0]*accel));
-    minimumZSpeed = accel*sqrt(2.0f/(axisStepsPerMM[2]*maxTravelAccelerationMMPerSquareSecond[2]));
+    float accel = RMath::max(maxAccelerationMMPerSquareSecond[X_AXIS],maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
+    minimumSpeed = accel*sqrt(2.0f/(axisStepsPerMM[X_AXIS]*accel));
+    accel = RMath::max(maxAccelerationMMPerSquareSecond[Z_AXIS],maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
+    minimumZSpeed = accel*sqrt(2.0f/(axisStepsPerMM[Z_AXIS]*accel));
     Printer::updateAdvanceFlags();
 }
 /**
@@ -437,11 +438,19 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
-            if(fabs(com->E)>EXTRUDE_MAXLENGTH)
+            if(
+#if MIN_EXTRUDER_TEMP > 30
+               Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+#endif
+                fabs(com->E)>EXTRUDE_MAXLENGTH)
                 p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
         } else {
-            if(fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+            if(
+#if MIN_EXTRUDER_TEMP > 30
+               Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+#endif
+               fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
         }
@@ -702,7 +711,7 @@ void Printer::setup()
     advanceStepsSet = 0;
 #endif
     for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
-    currentPositionSteps[0] = currentPositionSteps[1] = currentPositionSteps[2] = currentPositionSteps[3] = 0;
+    currentPositionSteps[X_AXIS] = currentPositionSteps[Y_AXIS] = currentPositionSteps[Z_AXIS] = currentPositionSteps[E_AXIS] = 0;
     maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM!=3
     maxZJerk = MAX_ZJERK;

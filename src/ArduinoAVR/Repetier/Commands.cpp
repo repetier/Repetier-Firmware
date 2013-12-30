@@ -116,8 +116,8 @@ void Commands::printTemperatures(bool showRaw)
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023<<(2-ANALOG_REDUCE_BITS))-heatedBedController.currentTemperature);
     }
-#endif
     Com::printF(Com::tSpaceBAtColon,(pwm_pos[heatedBedController.pwmIndex])); // Show output of autotune when tuning!
+#endif
 #endif
 #ifdef TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
@@ -860,38 +860,39 @@ void Commands::executeGCode(GCode *com)
 #if RETRACT_DURING_HEATUP
             uint8_t retracted = 0;
 #endif
-            millis_t cur_time;
+            millis_t currentTime;
             do
             {
-                cur_time = HAL::timeInMilliseconds();
-                if( (cur_time - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
+                currentTime = HAL::timeInMilliseconds();
+                if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
                 {
                     printTemperatures();
-                    printedTime = cur_time;
+                    printedTime = currentTime;
                 }
                 Commands::checkForPeriodicalActions();
                 //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
-                if (actExtruder==Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
+                if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
                 {
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[3],actExtruder->maxFeedrate,false,false);
+                    PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
                     retracted = 1;
                 }
 #endif
-                if((waituntil==0 && (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC-1:actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
-#ifdef TEMP_HYSTERESIS
+                if((waituntil == 0 &&
+                    (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1 : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
+#if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
                         || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
 #endif
                   )
                 {
-                    waituntil = cur_time+1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                    waituntil = currentTime+1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
                 }
             }
-            while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-cur_time)<2000000000UL));
+            while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-currentTime)<2000000000UL));
 #if RETRACT_DURING_HEATUP
             if (retracted && actExtruder==Extruder::current)
             {
-                PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[3],actExtruder->maxFeedrate,false,false);
+                PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
             }
 #endif
         }
@@ -954,7 +955,7 @@ void Commands::executeGCode(GCode *com)
             break;
 #endif
 
-#ifdef BEEPER_PIN
+#if defined(BEEPER_PIN) && BEEPER_PIN>=0
         case 300:
         {
             int beepS = 1;

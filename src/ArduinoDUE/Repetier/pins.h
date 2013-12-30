@@ -211,15 +211,15 @@ STEPPER_CURRENT_CONTROL
 #if (SDSS == 52) 
 #define SPI_PIN         86
 #define SPI_CHAN        2
-#else 
-#define SPI_PIN         77
-#define SPI_CHAN        0
-#endif
+#else // SDSS == 4
+#define SPI_PIN         87
+#define SPI_CHAN        1
+  #endif
 #endif
 #define MOSI_PIN        75
 #define MISO_PIN        74
 #define SCK_PIN         76
-
+//#define DUE_SOFTWARE_SPI
 #else
 #define DUE_SOFTWARE_SPI
 #define MOSI_PIN		51

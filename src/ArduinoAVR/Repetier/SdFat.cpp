@@ -27,8 +27,8 @@
 #endif
 //#include <SdFat.h>
 
-extern int8_t stricmp(const char* s1, const char* s2);
-extern int8_t strnicmp(const char* s1, const char* s2, size_t n);
+extern int8_t RFstricmp(const char* s1, const char* s2);
+extern int8_t RFstrnicmp(const char* s1, const char* s2, size_t n);
 
 //#define GLENN_DEBUG
 
@@ -707,11 +707,11 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
                 int8_t cFullname;
 
                 cFullname = strlen(fullName);
-                if (strnicmp(fullName, findFilename, cFullname) == 0)
+                if (RFstrnicmp(fullName, findFilename, cFullname) == 0)
                 {
                     if (cFullname > 0)
                         cFullname++;
-                    if (stricmp(tempLongFilename, findFilename+cFullname) == 0)
+                    if (RFstricmp(tempLongFilename, findFilename+cFullname) == 0)
                     {
                         if (pParentFound != NULL)
                           *pParentFound = *parent;
@@ -727,7 +727,7 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
                     Com::printF(Com::tSlash);
                 }
                 Com::print(tempLongFilename);
-#ifdef SD_EXTENDED_DIR
+#if SD_EXTENDED_DIR
                 Com::printF(Com::tSpace,(long)p->fileSize);
 #endif
                 Com::println();
@@ -1142,7 +1142,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
     {
         HAL::pingWatchdog();
         index = (0XF & ((dirFile->curPosition_-31) >> 5));
-        if (stricmp(tempLongFilename, (char *)dname) == 0)
+        if (RFstricmp(tempLongFilename, (char *)dname) == 0)
           {
 #ifdef GLENN_DEBUG
           Com::print("FFound");
@@ -3254,7 +3254,7 @@ uint32_t Sd2Card::cardSize() {
 void Sd2Card::chipSelectHigh() {
   HAL::digitalWrite(chipSelectPin_, HIGH);
   // insure MISO goes high impedance
-  spiSend(0XFF);
+  HAL::spiSend(0XFF);
 }
 //------------------------------------------------------------------------------
 void Sd2Card::chipSelectLow() {

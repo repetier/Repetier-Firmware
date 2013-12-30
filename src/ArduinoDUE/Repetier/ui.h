@@ -153,6 +153,8 @@
 #define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
+#define UI_ACTION_LIGHTS_ONOFF          1107
+#define UI_ACTION_SD_STOP               1108
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -189,7 +191,7 @@
 typedef struct {
   const char *text; // Menu text
   uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
-  uint16_t action;
+  unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
   bool showEntry() const;
@@ -279,6 +281,15 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 #define UI_STRING(name,text) const char PROGMEM name[] = text;
 
+#define UI_PAGE6(name,row1,row2,row3,row4,row5,row6) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
+   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
+   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+   UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0};\
+   UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0};\
+   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
+   const UIMenu name PROGMEM = {0,0,6,name ## _entries};
 #define UI_PAGE4(name,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
@@ -351,6 +362,8 @@ class UIDisplay {
     float lastNextAccumul; // Accumulated value
     unsigned int outputMask; // Output mask for backlight, leds etc.
     int repeatDuration; // Time beween to actions if autorepeat is enabled
+    int8_t oldMenuLevel;
+    uint8_t encoderStartScreen;
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
     void addLong(long value,char digits);
     void addFloat(float number, char fixdigits,uint8_t digits);
@@ -364,7 +377,8 @@ class UIDisplay {
     UIDisplay();
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
-    void printRow(uint8_t r,char *txt); // Print row on display
+    void waitForKey();
+    void printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
     void parse(char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
@@ -378,14 +392,14 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
-//#if SDSUPPORT
+#if SDSUPPORT
     void updateSDFileCount();
-    void sdrefresh(uint8_t &r);
+    //void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
-    char cwd[SD_MAX_FOLDER_DEPTH*13+2];
+    char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
-//#endif
+#endif
 };
 extern UIDisplay uid;
 
@@ -417,7 +431,11 @@ void ui_check_slow_keys(int &action) {}
 #ifdef UI_FONT_6X10
 #define UI_FONT_WIDTH 6
 #define UI_FONT_HEIGHT 10
-#define UI_FONT_DEFAULT u8g_font_6x10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION false  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
@@ -608,11 +626,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_A      7 // pins the click encoder are connected to
 #define UI_ENCODER_B      22
 #define UI_RESET_PIN      32 // single button for reset
-//#define SDCARDDETECT      15 // Set to -1 if you have not connected that pin
-//#define SDSS              31 // Chip select pin
+#define SDCARDDETECT      49 // Set to -1 if you have not connected that pin
+#define SDSS              53 // Chip select pin
 
-//#define SDSUPPORT true
-//#define SDCARDDETECTINVERTED false
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1

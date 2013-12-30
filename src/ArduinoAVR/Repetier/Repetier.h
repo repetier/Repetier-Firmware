@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -22,7 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.90"
+#define REPETIER_VERSION "0.91"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -93,6 +93,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
+#define ANALOG_REF ANALOG_REF_AVCC
 
 // MS1 MS2 Stepper Driver Microstepping mode table
 #define MICROSTEP1 LOW,LOW
@@ -107,6 +108,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_YZX 4
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
+
+#define TEMP_PID true // add pid control
+
 
 #include "Configuration.h"
 

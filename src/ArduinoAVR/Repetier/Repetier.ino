@@ -99,6 +99,7 @@ Custom M Codes
 - M204 - Set PID parameter X => Kp Y => Ki Z => Kd S<extruder> Default is current extruder. NUM_EXTRUDER=Heated bed
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
+- M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter

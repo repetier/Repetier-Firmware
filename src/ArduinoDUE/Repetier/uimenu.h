@@ -82,6 +82,7 @@ List of placeholder:
 %fY : Homing feedrate y direction
 %fZ : Homing feedrate z direction
 %Fs : Fan speed
+%PN : Printer name
 %Sx : Steps per mm x direction
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
@@ -131,7 +132,41 @@ for 4 row displays and
 UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
-#if UI_ROWS>=4
+
+#if UI_ROWS>=6 && UI_DISPLAY_TYPE==5
+
+ //graphic main status
+
+   UI_PAGE6(ui_page1,"\xa %e0/%E0\xb0 X:%x0",
+   #if NUM_EXTRUDER>1
+     "\xa %e1/%E1\xb0 Y:%x1",
+  #else
+     "\xa -----/---\xb0 Y:%x1",
+   #endif
+   #if HAVE_HEATED_BED==true
+     "\xe %eb/%Eb\xb0 Z:%x2",
+   #else
+     "\xb -----/---\xb0 Z:%x2",
+   #endif
+   "Mul:%om", "Buf:%oB", "%os");
+
+  #if EEPROM_MODE!=0
+    UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
+    #define UI_PRINTTIME_PAGES ,&ui_page2
+    #define UI_PRINTTIME_COUNT 1
+  #else
+    #define UI_PRINTTIME_PAGES
+    #define UI_PRINTTIME_COUNT 0
+  #endif
+  /*
+  Merge pages together. Use the following pattern:
+  #define UI_PAGES {&name1,&name2,&name3}
+  */
+  #define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES}
+  // How many pages do you want to have. Minimum is 1.
+  #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT
+
+#elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
    UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2","Mul:%om Buf:%oB","%os");
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
@@ -140,33 +175,33 @@ for 2 row displays. You can add additional pages or change the default pages lik
  #endif
   UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
 //UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
- UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1,
-#if NUM_EXTRUDER>1
-UI_TEXT_PAGE_EXTRUDER2
-#else
- ""
-#endif
- #if HAVE_HEATED_BED==true
- ,UI_TEXT_PAGE_BED
+   UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1,
+ #if NUM_EXTRUDER>1
+   UI_TEXT_PAGE_EXTRUDER2
  #else
- ,""
-#endif
+   ""
+ #endif
+ #if HAVE_HEATED_BED==true
+  ,UI_TEXT_PAGE_BED
+ #else
+  ,""
+ #endif
  ,"%os");
-#if EEPROM_MODE!=0
+ #if EEPROM_MODE!=0
   UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
   #define UI_PRINTTIME_PAGES ,&ui_page4
   #define UI_PRINTTIME_COUNT 1
-#else
+ #else
   #define UI_PRINTTIME_PAGES
   #define UI_PRINTTIME_COUNT 0
-#endif
+ #endif
 /*
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3 UI_PRINTTIME_PAGES}
+ #define UI_PAGES {&ui_page1,&ui_page2,&ui_page3 UI_PRINTTIME_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
+ #define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
 #else
 #if HAVE_HEATED_BED==true
 UI_PAGE2(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED);
@@ -277,7 +312,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
 UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_ACTION_CALC_LEVEL);
-#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_z}
+#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_Z}
 UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT);
 #endif
 
@@ -327,6 +362,14 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_power,UI_TEXT_POWER,UI_ACTION_POWER);
 #define MENU_PSON_COUNT 0
 #define MENU_PSON_ENTRY
 #endif
+#if CASE_LIGHTS_PIN > 0
+UI_MENU_ACTIONCOMMAND(ui_menu_toggle_light,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS_ONOFF);
+#define UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_toggle_light
+#define UI_TOGGLE_LIGHT_COUNT 1
+#else
+#define UI_TOOGLE_LIGHT_ENTRY
+#define UI_TOGGLE_LIGHT_COUNT 0
+#endif
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_pla,UI_TEXT_PREHEAT_PLA,UI_ACTION_PREHEAT_PLA);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_preheat_abs,UI_TEXT_PREHEAT_ABS,UI_ACTION_PREHEAT_ABS);
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_cooldown,UI_TEXT_COOLDOWN,UI_ACTION_COOLDOWN);
@@ -342,8 +385,8 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT);
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT);
 
 // **** Fan menu
 
@@ -372,6 +415,7 @@ UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile,UI_TEXT_PRINT_FILE,UI_ACTION_SD_PRINT,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_pause,UI_TEXT_PAUSE_PRINT,UI_ACTION_SD_PAUSE,MENU_MODE_SD_PRINTING,MENU_MODE_SD_PAUSED);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,UI_TEXT_CONTINUE_PRINT,UI_ACTION_SD_CONTINUE,MENU_MODE_SD_PAUSED,0);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,UI_TEXT_STOP_PRINT,UI_ACTION_SD_STOP,MENU_MODE_SD_PRINTING,0);
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
@@ -382,8 +426,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MO
 #define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
 #endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING);
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+4+UI_MOUNT_CNT);
+#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_stop,&ui_menu_sd_continue UI_MOUNT_CMD ,&ui_menu_sd_delete}
+UI_MENU(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+5+UI_MOUNT_CNT);
 UI_MENU_SUBMENU(ui_menu_sd_sub,UI_TEXT_SD_CARD,ui_menu_sd);
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,
