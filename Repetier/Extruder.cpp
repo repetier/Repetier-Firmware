@@ -488,7 +488,12 @@ void extruder_set_temperature(float temp_celsius,byte extr) {
 
 void heated_bed_set_temperature(float temp_celsius) {
 #if HAVE_HEATED_BED
-   if(temp_celsius>HEATED_BED_MAX_TEMP) temp_celsius = HEATED_BED_MAX_TEMP;
+   if(temp_celsius>HEATED_BED_MAX_TEMP){
+     temp_celsius = HEATED_BED_MAX_TEMP;
+     out.println_int_P(PSTR("Target temperature exceeds HEATED_BED_MAX_TEMP="), HEATED_BED_MAX_TEMP);
+     out.println_P(PSTR("If you need a higher temperature, you'll have to change your firmware configuration."));
+   }
+
    if(temp_celsius<0) temp_celsius = 0;
    if(heatedBedController.targetTemperatureC==temp_celsius) return; // don't flood log with messages if killed
    heatedBedController.targetTemperatureC=temp_celsius;
@@ -604,6 +609,8 @@ int read_raw_temperature(byte type,byte pin) {
     case 51:
     case 52:
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result    
+    case 60: // AD8495 (Delivers 5mV/°C)
+      return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
     case 100: // AD595
       return (osAnalogInputValues[pin]>>(ANALOG_REDUCE_BITS));
 #endif
@@ -674,6 +681,8 @@ float conv_raw_temp(byte type,int raw_temp) {
       // Overflow: Set to last value in the table
       return TEMP_INT_TO_FLOAT(newtemp);
     }
+    case 60: // AD8495 (Delivers 5mV/°C vs the AD595's 10mV)
+      return ((float)raw_temp * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
     case 100: // AD595
       //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
       return ((float)raw_temp * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
@@ -778,6 +787,8 @@ int conv_temp_raw(byte type,float tempf) {
       // Overflow: Set to last value in the table
       return newraw;
     }
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/°C)
+      return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
     case 100: // HEATER_USES_AD595
       return (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
 #ifdef SUPPORT_MAX6675
@@ -1007,7 +1018,7 @@ void manage_temperatures() {
     act->currentTemperature = read_raw_temperature(act->sensorType,act->sensorPin);
     act->currentTemperatureC = conv_raw_temp(act->sensorType,act->currentTemperature);
     if(controller<NUM_EXTRUDER) {
-       if(act->currentTemperatureC<50 && act->targetTemperatureC<50)
+       if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
          extruder[controller].coolerPWM = 0;
        else
          extruder[controller].coolerPWM = extruder[controller].coolerSpeed;

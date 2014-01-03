@@ -24,7 +24,7 @@
 
 #include <avr/io.h>
 
-#define REPETIER_VERSION "0.82"
+#define REPETIER_VERSION "0.83SeeMe"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -570,6 +570,7 @@ void process_command(GCode *code,byte bufferedCommand);
 
 void manage_inactivity(byte debug);
 
+extern int get_fan_speed();
 extern void wait_until_end_of_move();
 extern void update_ramps_parameter();
 extern void update_extruder_flags();

@@ -684,6 +684,9 @@ STEPPER_CURRENT_CONTROL
     #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
     #define SDPOWER          -1
     #define SDSS          31
+    #define SCK_PIN          7
+    #define MISO_PIN         6
+    #define MOSI_PIN         5
     
     #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
     #define E1_PINS
@@ -749,7 +752,12 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
 #define TEMP_2_PIN         -1
 #define SDPOWER            -1
-#define SDSS               31
+#define SDSS               37 //31
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
@@ -857,8 +865,8 @@ STEPPER_CURRENT_CONTROL
   #define E0_STEP_PIN      19     
   #define E0_DIR_PIN       18     
   #define E0_ENABLE_PIN    25     
-  #define TEMP_0_PIN      0 
-  #define TEMP_1_PIN      1    
+  #define TEMP_0_PIN      1 
+  #define TEMP_1_PIN      0    
   #define HEATER_0_PIN    4    
   #define HEATER_1_PIN    3    
     
@@ -1313,7 +1321,7 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_0_PIN   9
 #define TEMP_0_PIN     0
 
-#define HEATER_1_PIN   7
+#define HEATER_1_PIN   -1 //7
 #define TEMP_1_PIN     1
 
 #define HEATER_2_PIN   -1
@@ -1339,7 +1347,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN        13
 #define FAN_PIN        8
 #define PS_ON_PIN      4
-#define KILL_PIN       -1
+#define KILL_PIN       80
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
