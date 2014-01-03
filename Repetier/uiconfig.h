@@ -207,7 +207,7 @@ Without a back key, you need to navigate to the back entry in the menu. Setting 
 If you set it to true, next will go to previous menu instead of the next menu.
 
 */
-#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_MENU_DIRECTION true
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
@@ -390,3 +390,4 @@ void ui_check_slow_keys(int &action) {
 }
 
 #endif
+

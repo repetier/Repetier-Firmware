@@ -64,20 +64,21 @@
 // At first all terms in english are defined. After that the selected language
 // can overwrite the definition. That way new strings are at least in english
 // available.
+// This handled UI_ENGLISH, UI_LANGUAGE undefined, and UI_LANGUAGE has bad value
 
 #define UI_TEXT_ON               "On"
 #define UI_TEXT_OFF              "Off"
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Yes"
 #define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              "\003"
-#define UI_TEXT_NOSEL            "\004"
-#define UI_TEXT_PRINT_POS        "Printing..."
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
+#define UI_TEXT_PRINT_POS        "done."
 #define UI_TEXT_PRINTING         "Printing"
 #define UI_TEXT_IDLE             "Idle"
 #define UI_TEXT_NOSDCARD         "No SD Card"
 #define UI_TEXT_ERROR            "**** ERROR ****"
-#define UI_TEXT_BACK             "Back \001"
+#define UI_TEXT_BACK             "Back " cUP
 #define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
 #define UI_TEXT_CONFIGURATION    "Configuration"
 #define UI_TEXT_POSITION         "Position"
@@ -101,9 +102,16 @@
 #define UI_TEXT_Z_POSITION       "Z Position"
 #define UI_TEXT_Z_POS_FAST       "Z Pos. Fast"
 #define UI_TEXT_E_POSITION       "Extr. position"
-#define UI_TEXT_BED_TEMP         "Bed Temp.:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
+#define UI_TEXT_BED_TEMP         "Bed Temp.:%EbC"
+#define UI_TEXT_BED_CAL         "Bed Temp Cal :%Cb"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1C"
+#define UI_TEXT_EXTR2_TEMP       "Temp. 2  :%E2C"
+#define UI_TEXT_EXTR3_TEMP       "Temp. 3  :%E3C"
+#define UI_TEXT_EXTR0_CAL       "Temp 0 Cal :%C0"
+#define UI_TEXT_EXTR1_CAL       "Temp 1 Cal :%C1"
+#define UI_TEXT_EXTR2_CAL       "Temp 2 Cal :%C2"
+#define UI_TEXT_EXTR3_CAL       "Temp 3 Cal :%C3"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Off"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
@@ -160,9 +168,9 @@
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
 #define UI_TEXT_FANSPEED          "Fan speed"
 #define UI_TEXT_FAN_OFF           "Turn Fan Off"
-#define UI_TEXT_FAN_25            "Set Fan 25%%%"
-#define UI_TEXT_FAN_50            "Set Fan 50%%%"
-#define UI_TEXT_FAN_75            "Set Fan 75%%%"
+#define UI_TEXT_FAN_25            "Set Fan 25%%"
+#define UI_TEXT_FAN_50            "Set Fan 50%%"
+#define UI_TEXT_FAN_75            "Set Fan 75%%"
 #define UI_TEXT_FAN_FULL          "Set Fan Full"
 #define UI_TEXT_STEPPER_INACTIVE  "Stepper Inactive"
 #define UI_TEXT_STEPPER_INACTIVE2 "Dis. After:%is","[s] 0=Off"
@@ -197,12 +205,12 @@
 #define UI_TEXT_EEPROM_LOADED     "Configuration","loaded f. EEPROM"
 #define UI_TEXT_UPLOADING         "Uploading..."
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
-#define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
-#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul. :%of%%%"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%EbC" cARROW "%ob"
+#define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%"
+#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul. :%of%%"
 #define UI_TEXT_SHOW_MEASUREMENT  "Show meas."
 #define UI_TEXT_RESET_MEASUREMENT "Reset meas."
 #define UI_TEXT_SET_MEASURED_ORIGIN "Set meas. origin"
@@ -212,7 +220,7 @@
 #define UI_TEXT_SET_P3	          "Set P3"
 #define UI_TEXT_CALCULATE_LEVELING "Calculate Leveling"
 #define UI_TEXT_LEVEL             "Level delta"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP "Wait Temp. %XTC"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units: %XU mm"
 #define UI_TEXT_SD_REMOVED       "SD Card removed"
 #define UI_TEXT_SD_INSERTED      "SD Card inserted"
@@ -220,7 +228,7 @@
 
 // *************** german translation ****************
 
-#if UI_LANGUAGE==1
+#if UI_LANGUAGE==UI_GERMAN
 
 #define UI_TEXT_ON               "An"
 #define UI_TEXT_OFF              "Aus"
@@ -232,7 +240,7 @@
 #define UI_TEXT_IDLE             "Leerlauf"
 #define UI_TEXT_NOSDCARD         "Keine SD Karte"
 #define UI_TEXT_ERROR            "**** FEHLER ****"
-#define UI_TEXT_BACK             "Zur" STR_uuml "ck \001"
+#define UI_TEXT_BACK             "Zur" STR_uuml "ck " cUP 
 #define UI_TEXT_QUICK_SETTINGS   "Schnelleinst."
 #define UI_TEXT_CONFIGURATION    "Konfiguration"
 #define UI_TEXT_POSITION         "Position"
@@ -255,9 +263,9 @@
 #define UI_TEXT_Z_POSITION       "Z Position"
 #define UI_TEXT_Z_POS_FAST       "Z Pos. Schnell"
 #define UI_TEXT_E_POSITION       "Extr. Position"
-#define UI_TEXT_BED_TEMP         "Bed Temp.:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
+#define UI_TEXT_BED_TEMP         "Bed Temp.:%EbC"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1C"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Aus"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Aus"
 #define UI_TEXT_EXTR0_SELECT     "W" STR_auml "hle Extr. 0"
@@ -313,9 +321,9 @@
 #define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
 #define UI_TEXT_FANSPEED          "L" STR_uuml "fter"
 #define UI_TEXT_FAN_OFF           "L" STR_uuml "fter Aus"
-#define UI_TEXT_FAN_25            "L" STR_uuml "fter auf 25%%%"
-#define UI_TEXT_FAN_50            "L" STR_uuml "fter auf 50%%%"
-#define UI_TEXT_FAN_75            "L" STR_uuml "fter auf 75%%%"
+#define UI_TEXT_FAN_25            "L" STR_uuml "fter auf 25%%"
+#define UI_TEXT_FAN_50            "L" STR_uuml "fter auf 50%%"
+#define UI_TEXT_FAN_75            "L" STR_uuml "fter auf 75%%"
 #define UI_TEXT_FAN_FULL          "L" STR_uuml "fter Voll"
 #define UI_TEXT_STEPPER_INACTIVE  "Motor Inaktiv"
 #define UI_TEXT_STEPPER_INACTIVE2 "Aus nach:%is","[s] 0=Aus"
@@ -350,10 +358,10 @@
 #define UI_TEXT_EEPROM_LOADED     "Konfiguration","geladen."
 #define UI_TEXT_UPLOADING         "Hochladen..."
 #define UI_TEXT_PAGE_BUFFER       "Puffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%EbC" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Geschw.Mul:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 #define UI_TEXT_ADVANCE_L         "Advance lin:%Xl"
@@ -367,7 +375,7 @@
 #define UI_TEXT_SET_P3			  "Setze P3"
 #define UI_TEXT_CALCULATE_LEVELING "Berechne Leveling"
 #define UI_TEXT_LEVEL			  "Level delta"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XTC"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 #define UI_TEXT_SD_REMOVED       "Karte entfernt"
 #define UI_TEXT_SD_INSERTED      "Karte eingelegt"
@@ -376,21 +384,21 @@
 #endif
 
 // Dutch translation
-#if UI_LANGUAGE==2
+#if UI_LANGUAGE==UI_DUTCH 
 
 #define UI_TEXT_ON               "Aan"
 #define UI_TEXT_OFF              "Uit"
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Ja"
 #define UI_TEXT_NO               "Nee"
-#define UI_TEXT_SEL              "\003"
-#define UI_TEXT_NOSEL            "\004"
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
 #define UI_TEXT_PRINT_POS        "Printen..."
 #define UI_TEXT_PRINTING         "Printen"
 #define UI_TEXT_IDLE             "Rust"
 #define UI_TEXT_NOSDCARD         "Geen SD Kaart"
 #define UI_TEXT_ERROR            "**** FOUT ****"
-#define UI_TEXT_BACK             "Terug \001"
+#define UI_TEXT_BACK             "Terug " cUP 
 #define UI_TEXT_QUICK_SETTINGS   "Snel Instelling"
 #define UI_TEXT_CONFIGURATION    "Configuratie"
 #define UI_TEXT_POSITION         "Positie"
@@ -412,9 +420,9 @@
 #define UI_TEXT_Z_POSITION       "Z Positie"
 #define UI_TEXT_Z_POS_FAST       "Z Pos. Snel"
 #define UI_TEXT_E_POSITION       "Extr. positie"
-#define UI_TEXT_BED_TEMP         "Bed Temp.:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
+#define UI_TEXT_BED_TEMP         "Bed Temp.:%EbC"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1C"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Uit"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Uit"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
@@ -508,10 +516,10 @@
 #define UI_TEXT_EEPROM_LOADED     "Configuratie","loaded f. EEPROM"
 #define UI_TEXT_UPLOADING         "Uploaden..."
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%EbC" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Snelh. Mul.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
 
@@ -519,21 +527,21 @@
 
 // *************** brazilian portuguese translation ****************
 
-#if UI_LANGUAGE==3
+#if UI_LANGUAGE==UI_BRAZILIAN_PORTUGESE
 
 #define UI_TEXT_ON               "On"
 #define UI_TEXT_OFF              "Off"
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Sim"
-#define UI_TEXT_NO               "Não"
-#define UI_TEXT_SEL              "\003"
-#define UI_TEXT_NOSEL            "\004"
+#define UI_TEXT_NO               "NÃ£o"
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
 #define UI_TEXT_PRINT_POS        "Imprimindo..."
 #define UI_TEXT_PRINTING         "Imprimindo"
 #define UI_TEXT_IDLE             "Ocioso"
 #define UI_TEXT_NOSDCARD         "Nenhum cartao SD"
 #define UI_TEXT_ERROR            "**** ERRO ****"
-#define UI_TEXT_BACK             "Voltar \001"
+#define UI_TEXT_BACK             "Voltar " cUP 
 #define UI_TEXT_QUICK_SETTINGS   "Configuracoes Rapidas"
 #define UI_TEXT_CONFIGURATION    "Configuracao"
 #define UI_TEXT_POSITION         "Posicao"
@@ -556,9 +564,9 @@
 #define UI_TEXT_Z_POSITION       "Posicao Z"
 #define UI_TEXT_Z_POS_FAST       "Pos. Rapida Z"
 #define UI_TEXT_E_POSITION       "Posicao Extrusor"
-#define UI_TEXT_BED_TEMP         "Temp. Cama:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0   :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1   :%E1\002C"
+#define UI_TEXT_BED_TEMP         "Temp. Cama:%EbC"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0   :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1   :%E1C"
 #define UI_TEXT_EXTR0_OFF        "Extrusor 0 Desligado"
 #define UI_TEXT_EXTR1_OFF        "Extrusor 1 Desligado"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Selecionar Extr.0"
@@ -652,34 +660,34 @@
 #define UI_TEXT_EEPROM_LOADED     "Configuracao","carregada da EEPROM"
 #define UI_TEXT_UPLOADING         "Enviando..."
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%EbC" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Mult. Veloc.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Mult. Fluxo:%of%%%"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Aguardar Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Aguardar Temp.%XTC"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Aguardar Unidades:%XUmm"
 #define UI_TEXT_PRINTER_READY    "Impressora pronta."
 
 #endif
 
 // *************** Italian translation ****************
-#if UI_LANGUAGE==4
+#if UI_LANGUAGE==UI_ITALIAN
 
 #define UI_TEXT_ON               "On"
 #define UI_TEXT_OFF              "Off"
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Si"
 #define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              "\003"
-#define UI_TEXT_NOSEL            "\004"
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
 #define UI_TEXT_PRINT_POS        "Stampa..."
 #define UI_TEXT_PRINTING         "Stampa"
 #define UI_TEXT_IDLE             "Pausa"
 #define UI_TEXT_NOSDCARD         "No Scheda SD"
 #define UI_TEXT_ERROR            "**** ERRORE ****"
-#define UI_TEXT_BACK             "Indietro \001"
+#define UI_TEXT_BACK             "Indietro " cUP 
 #define UI_TEXT_QUICK_SETTINGS   "Impostazioni veloci"
 #define UI_TEXT_CONFIGURATION    "Configurazione"
 #define UI_TEXT_POSITION         "Posizione"
@@ -702,9 +710,9 @@
 #define UI_TEXT_Z_POSITION       "Posizione Z"
 #define UI_TEXT_Z_POS_FAST       "Pos. Z Veloce"
 #define UI_TEXT_E_POSITION       "Posizione Estrusore"
-#define UI_TEXT_BED_TEMP         "Temp. Piatto:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E0\002C"
+#define UI_TEXT_BED_TEMP         "Temp. Piatto:%EbC"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E0C"
 #define UI_TEXT_EXTR0_OFF        "Estrusore 0 Spento"
 #define UI_TEXT_EXTR1_OFF        "Estrusore 1 Spento"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Seleziona Estr.0"
@@ -798,13 +806,13 @@
 #define UI_TEXT_EEPROM_LOADED     "Configurazione","Caricata da EEPROM"
 #define UI_TEXT_UPLOADING         "Caricamento..."
 #define UI_TEXT_PAGE_BUFFER       "Tampone:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "P:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "P:%eb/%EbC" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Molt. Velocita':%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Molt. Flusso:%of%%%"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Attesa Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Attesa Temp.%XTC"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Attesa Unita':%XUmm"
 #define UI_TEXT_PRINTER_READY    "Stampante pronta."
 
@@ -825,14 +833,14 @@
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Yes"
 #define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              "\003"
-#define UI_TEXT_NOSEL            "\004"
-#define UI_TEXT_PRINT_POS        "Printing..."
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
+#define UI_TEXT_PRINT_POS        "done."
 #define UI_TEXT_PRINTING         "Printing"
 #define UI_TEXT_IDLE             "Idle"
 #define UI_TEXT_NOSDCARD         "No SD Card"
 #define UI_TEXT_ERROR            "**** ERROR ****"
-#define UI_TEXT_BACK             "Back \001"
+#define UI_TEXT_BACK             "Back " cUP 
 #define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
 #define UI_TEXT_CONFIGURATION    "Configuration"
 #define UI_TEXT_POSITION         "Position"
@@ -855,9 +863,9 @@
 #define UI_TEXT_Z_POSITION       "Z Position"
 #define UI_TEXT_Z_POS_FAST       "Z Pos. Fast"
 #define UI_TEXT_E_POSITION       "Extr. position"
-#define UI_TEXT_BED_TEMP         "Bed Temp.:%Eb\002C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0\002C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1\002C"
+#define UI_TEXT_BED_TEMP         "Bed Temp.:%EbC"
+#define UI_TEXT_EXTR0_TEMP       "Temp. 0  :%E0C"
+#define UI_TEXT_EXTR1_TEMP       "Temp. 1  :%E1C"
 #define UI_TEXT_EXTR0_OFF        "Extruder 0 Off"
 #define UI_TEXT_EXTR1_OFF        "Extruder 1 Off"
 #define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr.0"
@@ -951,14 +959,15 @@
 #define UI_TEXT_EEPROM_LOADED     "Configuration","loaded f. EEPROM"
 #define UI_TEXT_UPLOADING         "Uploading..."
 #define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%Ec\002C\176%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0\002C\176%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1\002C\176%o1"
-#define UI_TEXT_PAGE_BED          "B:%eb/%Eb\002C\176%ob"
+#define UI_TEXT_PAGE_EXTRUDER     "E:%ec/%EcC" cARROW "%oC"
+#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0C" cARROW "%o0"
+#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1C" cARROW "%o1"
+#define UI_TEXT_PAGE_BED          "B:%eb/%EbC" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT\002C"
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XTC"
 #define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
 #define UI_TEXT_PRINTER_READY    "Printer ready."
 
 #endif
+

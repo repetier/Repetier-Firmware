@@ -76,6 +76,9 @@ have problems with other modules using the eeprom */
 #define EPR_BACKLASH_X            157
 #define EPR_BACKLASH_Y            161
 #define EPR_BACKLASH_Z            165
+#define EPR_PRINTER_RADIUS        169
+#define EPR_DELTA_XY_RADIUS       173
+#define EPR_BED_TEMP_CALIBRATION  177
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -102,12 +105,15 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #define EPR_EXTRUDER_COOLER_SPEED       54
+#define EPR_EXTRUDER_TEMP_CALIBRATION 58
 #if EEPROM_MODE!=0
 
 extern inline void epr_set_byte(uint pos,byte value);
 extern inline void epr_set_int(uint pos,int value);
 extern inline void epr_set_long(uint pos,long value);
+extern inline void epr_set_float(uint pos,float value, float defaultVal, float minVal, float maxVal);
 extern inline void epr_set_float(uint pos,float value);
+
 extern void epr_data_to_eeprom(byte corrupted);
 extern void epr_eeprom_to_data();
 extern void epr_eeprom_reset();
@@ -126,6 +132,25 @@ inline float epr_get_float(uint pos) {
   eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
   return v;
 }
+inline float epr_get_float(uint pos, float defaultVal) {
+  float v;
+  eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
+  if (isnan(v) || isinf(v)) {
+    v = defaultVal;
+    epr_set_float(pos, v);
+  }
+  return v;
+}
+inline float epr_get_float(uint pos, float defaultVal, float minVal, float maxVal) {
+  float v;
+  eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
+  if (isnan(v) || isinf(v) || v<minVal || v>maxVal) {
+    v = defaultVal;
+    epr_set_float(pos, v);
+  }
+  return v;
+}
+
 #endif
 
 extern void epr_output_settings();
@@ -134,4 +159,5 @@ extern void epr_init();
 extern void epr_init_baudrate();
 extern void epr_update_usage();
 #endif
+
 

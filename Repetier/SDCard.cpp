@@ -22,7 +22,7 @@
 #include "Reptier.h"
 #include "ui.h"
 
-#if SDSUPPORT
+#ifdef SDSUPPORT
 
 #ifndef SD_ALLOW_LONG_NAMES
 #define SD_ALLOW_LONG_NAMES false
@@ -102,8 +102,11 @@ void SDCard::write_command(GCode *code) {
       if(code->params & 512) {buf[p++] = code->T;}
       if(code->params & 1024) {*(long int*)&buf[p] = code->S;p+=4;}
       if(code->params & 2048) {*(long int*)&buf[p] = code->P;p+=4;}
+#if ARC_SUPPORT
       if(code->params2 & 1) {*(float*)&buf[p] = code->I;p+=4;}
       if(code->params2 & 2) {*(float*)&buf[p] = code->J;p+=4;}
+      // R is missing too!
+#endif
       if(GCODE_HAS_STRING(code)) { // read 16 byte into string
         char *sp = code->text;
         if(GCODE_IS_V2(code)) {
@@ -286,4 +289,5 @@ void SDCard::makeDirectory(char *filename) {
   }
 }
 #endif
+
 

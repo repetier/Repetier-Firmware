@@ -18,7 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
  #include "Reptier.h"
-#if SDSUPPORT
+#ifdef SDSUPPORT
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -3761,4 +3761,5 @@ void SdFatUtil::SerialPrintln_P(PGM_P str) {
 // ============== 
 
 #endif  // SDSUPPORT
+
 

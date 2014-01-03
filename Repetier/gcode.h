@@ -25,24 +25,28 @@
 //#define PROGMEM __attribute__((section(".progmem.data"))) 
 //#endif
 
-typedef struct { // 52 bytes per command needed
+typedef struct { // (wrong-- altered by alignment, and it does not add up) 52 bytes per command needed
    unsigned int params;
    unsigned int params2;
-   unsigned int N; // Line number
    unsigned int M;
    unsigned int G;
+   unsigned long N; // Line number MUST be bugger than short int, print files are megabytes, millions of lines
    float X;
    float Y;
    float Z;
    float E;
    float F;
-   byte T;
    long S;
    long P;
+#ifdef ARC_SUPPORT
+   // memeory is tight, and these fields are only used for arc support
+   // so if there is no arc support, these are write only memory, so useless.
    float I;
    float J;
    float R;   
+#endif
    char *text; //text[17];
+   byte T; 
 } GCode;
 
 #ifndef EXTERNALSERIAL
@@ -159,15 +163,17 @@ public:
 extern SerialOutput out;
 /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
 extern GCode *gcode_next_command();
+
+extern void process_command(GCode *code);
 /** Frees the cache used by the last command fetched. */ 
 extern void gcode_command_finished(GCode *code);
 // check for new commands
 extern void gcode_read_serial();
 extern void gcode_execute_PString(PGM_P cmd);
-extern void gcode_print_command(GCode *code);
+extern void gcode_print_command(const GCode *code);
 extern byte gcode_comp_binary_size(char *ptr);
 extern bool gcode_parse_binary(GCode *code,byte *buffer);
-extern bool gcode_parse_ascii(GCode *code,char *line,bool fromSerial);
+extern bool gcode_parse_ascii(GCode *code, char *line,bool fromSerial);
 extern void emergencyStop();
 
 // Helper macros to detect, if parameter is stored in GCode struct
@@ -197,5 +203,23 @@ extern byte debug_level;
 #define DEBUG_COMMUNICATION ((debug_level & 16)!=0)
 #define DEBUG_NO_MOVES ((debug_level & 32)!=0)
 
+// would like these volatile but compiler has bug, wont allow assignment from non volatile to volatile object
+extern  GCode lastLine; 
+extern long NextN;
+extern  GCode lastOutBoundsLine;
+extern  GCode lastBadLine;
+inline void clearLineReports() {NextN /* =lastLine.N = lastOutBoundsLine.N = lastBadLine.N */=0;};
+
+extern void reportLastLine(const GCode *code);
+extern void reportBadLine(const GCode *code, const char * reason);
+inline void reportBadLine(const GCode *code) {reportBadLine(code, PSTR(" unspecified error"));};
+extern void reportOutBoundsLine(const GCode *code);
+
+inline const  GCode * getLine( const GCode *line) {if (line&&line->N) return line; return 0;}
+inline const  GCode * getLastLine() {  getLine(&lastLine);  } ;
+inline const  GCode * getLastBadLine() { getLine(&lastBadLine); };
+inline const  GCode * getLastOutBoundsLine() { getLine(&lastOutBoundsLine); };
+
 #endif
+
 

@@ -161,28 +161,6 @@ Custom M Codes
 #error MOVE_CACHE_SIZE must be at least 5
 #endif
 
-#if DRIVE_SYSTEM==3
-#define SIN_60 0.8660254037844386
-#define COS_60 0.5
-#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
-#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
-#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
-#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
-
-#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER3_X_STEPS 0.0
-#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
-
-#define NUM_AXIS 4
-#define X_AXIS 0
-#define Y_AXIS 1
-#define Z_AXIS 2
-#define E_AXIS 3
-
-#endif
 
 #define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
 // RAM usage of variables: Non RAMPS 114+MOVE_CACHE_SIZE*59+printer_state(32) = 382 Byte with MOVE_CACHE_SIZE=4
@@ -204,7 +182,7 @@ byte STEP_PIN[3] = {X_STEP_PIN, Y_STEP_PIN, Z_STEP_PIN};
   /** Acceleration in steps/s^2 in movement mode.*/
   unsigned long axis_travel_steps_per_sqr_second[4];
 #endif
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 DeltaSegment segments[DELTA_CACHE_SIZE];
 unsigned int delta_segment_write_pos = 0; // Position where we write the next cached delta move
 volatile unsigned int  delta_segment_count = 0; // Number of delta moves cached 0 = nothing in cache
@@ -283,25 +261,25 @@ void update_extruder_flags() {
 }
 
 void update_ramps_parameter() {
-#if DRIVE_SYSTEM==3
-  printer_state.zMaxSteps = axis_steps_per_unit[0]*(printer_state.zLength - printer_state.zMin);
+#if DRIVE_SYSTEM==DeltaDrive
+  printer_state.zMaxSteps = axis_steps_per_unit[XAxis]*(printer_state.zLength - printer_state.zMin);
   long cart[3], delta[3];
   cart[0] = cart[1] = 0;
   cart[2] = printer_state.zMaxSteps;
   calculate_delta(cart, delta);
   printer_state.maxDeltaPositionSteps = delta[0];
-  printer_state.xMaxSteps = (long)(axis_steps_per_unit[0]*(printer_state.xMin+printer_state.xLength));
-  printer_state.yMaxSteps = (long)(axis_steps_per_unit[1]*(printer_state.yMin+printer_state.yLength));
-  printer_state.xMinSteps = (long)(axis_steps_per_unit[0]*printer_state.xMin);
-  printer_state.yMinSteps = (long)(axis_steps_per_unit[1]*printer_state.yMin);
+  printer_state.xMaxSteps = (long)(axis_steps_per_unit[XAxis]*(printer_state.xMin+printer_state.xLength));
+  printer_state.yMaxSteps = (long)(axis_steps_per_unit[YAxis]*(printer_state.yMin+printer_state.yLength));
+  printer_state.xMinSteps = (long)(axis_steps_per_unit[XAxis]*printer_state.xMin);
+  printer_state.yMinSteps = (long)(axis_steps_per_unit[YAxis]*printer_state.yMin);
   printer_state.zMinSteps = 0;
 #else
-  printer_state.xMaxSteps = (long)(axis_steps_per_unit[0]*(printer_state.xMin+printer_state.xLength));
-  printer_state.yMaxSteps = (long)(axis_steps_per_unit[1]*(printer_state.yMin+printer_state.yLength));
-  printer_state.zMaxSteps = (long)(axis_steps_per_unit[2]*(printer_state.zMin+printer_state.zLength));
-  printer_state.xMinSteps = (long)(axis_steps_per_unit[0]*printer_state.xMin);
-  printer_state.yMinSteps = (long)(axis_steps_per_unit[1]*printer_state.yMin);
-  printer_state.zMinSteps = (long)(axis_steps_per_unit[2]*printer_state.zMin);
+  printer_state.xMaxSteps = (long)(axis_steps_per_unit[XAxis]*(printer_state.xMin+printer_state.xLength));
+  printer_state.yMaxSteps = (long)(axis_steps_per_unit[YAxis]*(printer_state.yMin+printer_state.yLength));
+  printer_state.zMaxSteps = (long)(axis_steps_per_unit[ZAxis]*(printer_state.zMin+printer_state.zLength));
+  printer_state.xMinSteps = (long)(axis_steps_per_unit[XAxis]*printer_state.xMin);
+  printer_state.yMinSteps = (long)(axis_steps_per_unit[YAxis]*printer_state.yMin);
+  printer_state.zMinSteps = (long)(axis_steps_per_unit[ZAxis]*printer_state.zMin);
   // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashDir &= 7;
@@ -323,8 +301,8 @@ void update_ramps_parameter() {
     axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
 #endif
   }
-  float accel = max(max_acceleration_units_per_sq_second[0],max_travel_acceleration_units_per_sq_second[0]);
-  printer_state.minimumSpeed = accel*sqrt(2.0f/(axis_steps_per_unit[0]*accel));
+  float accel = max(max_acceleration_units_per_sq_second[XAxis],max_travel_acceleration_units_per_sq_second[XAxis]);
+  printer_state.minimumSpeed = accel*sqrt(2.0f/(axis_steps_per_unit[XAxis]*accel));
   update_extruder_flags();
 }
 
@@ -498,8 +476,8 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.advance_lin_set = 0;
 #endif
   for(byte i=0;i<NUM_EXTRUDER+3;i++) pwm_pos[i]=0;
-  printer_state.currentPositionSteps[0] = printer_state.currentPositionSteps[1] = printer_state.currentPositionSteps[2] = printer_state.currentPositionSteps[3] = 0;
-#if DRIVE_SYSTEM==3
+  printer_state.currentPositionSteps[XAxis] = printer_state.currentPositionSteps[YAxis] = printer_state.currentPositionSteps[ZAxis] = printer_state.currentPositionSteps[ExtruderAxis] = 0;
+#if DRIVE_SYSTEM==DeltaDrive
   calculate_delta(printer_state.currentPositionSteps, printer_state.currentDeltaPositionSteps);
 #endif
   printer_state.maxJerk = MAX_JERK;
@@ -516,6 +494,10 @@ SET_OUTPUT(ANALYZER_CH7);
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
   printer_state.waslasthalfstepping = 0;
+#if DRIVE_SYSTEM==DeltaDrive
+  printer_state.printer_radius = PRINTER_RADIUS;
+  printer_state.delta_xy_radius = DELTA_XY_RADIUS;
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashX = X_BACKLASH;
   printer_state.backlashY = Y_BACKLASH;
@@ -543,7 +525,7 @@ SET_OUTPUT(ANALYZER_CH7);
   epr_init(); // Read settings from eeprom if wanted
   update_ramps_parameter();
 
-#if SDSUPPORT
+#ifdef SDSUPPORT
 
   sd.initsd();
 
@@ -569,11 +551,10 @@ void defaultLoopActions() {
   check_periodical();
   UI_MEDIUM; // do check encoder
   unsigned long curtime = millis();
-  if(lines_count)
-    previous_millis_cmd = curtime;
+  if(lines_count) previous_millis_cmd = curtime; // There are still queued moves to process.
   if(max_inactive_time!=0 && (curtime-previous_millis_cmd) >  max_inactive_time ) kill(false);
   if(stepper_inactive_time!=0 && (curtime-previous_millis_cmd) >  stepper_inactive_time ) { kill(true); }
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) 
   sd.automount();
 #endif
   //void finishNextSegment();
@@ -590,27 +571,21 @@ void loop()
   //UI_SLOW; // do longer timed user interface action
   UI_MEDIUM; // do check encoder
   if(code){
-#if SDSUPPORT
-    if(sd.savetosd){
-        if(!(GCODE_HAS_M(code) && code->M==29)) { // still writing to file
-            sd.write_command(code);
-        } else {
-            sd.finishWrite();
-        }
-#ifdef ECHO_ON_EXECUTE
-        if(DEBUG_ECHO) {
-           OUT_P("Echo:");
-           gcode_print_command(code);
-           out.println();
-        }
+    // gets here when receiving a command, so is active
+    previous_millis_cmd = millis(); // mark activity
+
+    // sd writing done in process_command to fix echo bug and simplify
+
+#ifdef INCLUDE_DEBUG_COMMUNICATION
+    if(DEBUG_COMMUNICATION && 
+      (!GCODE_HAS_M(code) || code->M!=111)) {
+        // do nothing if debugging communication 
+    } else // here does not debug communication or got M111 command
 #endif
-        gcode_command_finished(code);
-    } else {
-        process_command(code,true);
-    }
-#else
-    process_command(code,true);
-#endif
+      process_command(code);
+
+    // Echo after execute processed in close command. (Previously sd writes were echoed twice.)
+    gcode_command_finished(code);
   }
   defaultLoopActions();
 }
@@ -848,76 +823,7 @@ long CPUDivU2(unsigned int divisor) {
   }
 }
 
-/**
-  \brief Sets the destination coordinates to values stored in com.
 
-  For the computation of the destination, the following facts are considered:
-  - Are units inches or mm.
-  - Reltive or absolute positioning with special case only extruder relative.
-  - Offset in x and y direction for multiple extruder support.
-*/
-byte get_coordinates(GCode *com)
-{
-  register long p;
-  register byte r=0;
-  if(lines_count==0) {
-    UI_STATUS(UI_TEXT_PRINTING);
-  }
-  if(GCODE_HAS_X(com)) {
-    r = 1;
-    if(unit_inches)
-      p = com->X*25.4*axis_steps_per_unit[0];
-    else
-      p = com->X*axis_steps_per_unit[0];
-    if(relative_mode)
-        printer_state.destinationSteps[0] = printer_state.currentPositionSteps[0]+p;
-    else
-        printer_state.destinationSteps[0] = p+printer_state.offsetX;
-  } else printer_state.destinationSteps[0] = printer_state.currentPositionSteps[0];
-  if(GCODE_HAS_Y(com)) {
-    r = 1;
-    if(unit_inches)
-      p = com->Y*25.4*axis_steps_per_unit[1];
-    else
-      p = com->Y*axis_steps_per_unit[1];
-    if(relative_mode)
-        printer_state.destinationSteps[1] = printer_state.currentPositionSteps[1]+p;
-    else
-        printer_state.destinationSteps[1] = p+printer_state.offsetY;
-  } else printer_state.destinationSteps[1] = printer_state.currentPositionSteps[1];
-  if(GCODE_HAS_Z(com)) {
-    r = 1;
-    if(unit_inches)
-      p = com->Z*25.4*axis_steps_per_unit[2];
-    else
-      p = com->Z*axis_steps_per_unit[2];
-    if(relative_mode) {
-        printer_state.destinationSteps[2] = printer_state.currentPositionSteps[2]+p;
-    } else {
-        printer_state.destinationSteps[2] = p;
-    }
-  } else printer_state.destinationSteps[2] = printer_state.currentPositionSteps[2];
-  if(GCODE_HAS_E(com) && !DEBUG_DRYRUN) {
-    if(unit_inches)
-      p = com->E*25.4*axis_steps_per_unit[3];
-    else
-      p = com->E*axis_steps_per_unit[3];
-    if(relative_mode || relative_mode_e)
-        printer_state.destinationSteps[3] = printer_state.currentPositionSteps[3]+p;
-    else
-        printer_state.destinationSteps[3] = p;
-  } else printer_state.destinationSteps[3] = printer_state.currentPositionSteps[3];
-  if(GCODE_HAS_F(com)) {
-    if(com->F < 1)
-      printer_state.feedrate = 1;
-    else
-      if(unit_inches)
-        printer_state.feedrate = com->F*0.0042333f*(float)printer_state.feedrateMultiply;  // Factor is 25.5/60/100
-      else
-        printer_state.feedrate = com->F*(float)printer_state.feedrateMultiply*0.00016666666f;
-  }
-  return r || (GCODE_HAS_E(com) && printer_state.destinationSteps[3]!=printer_state.currentPositionSteps[3]); // ignore unproductive moves
-}
 inline unsigned int ComputeV(long timer,long accel) {
 #if CPU_ARCH==ARCH_AVR
   unsigned int res;
@@ -1025,7 +931,7 @@ inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b) {
   This is a modified version that implements a bresenham 'multi-step' algorithm where the dominant
   cartesian axis steps may be less than the changing dominant delta axis.
 */
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 int lastblk=-1;
 long cur_errupd;
 //#define DEBUG_DELTA_TIMER
@@ -1789,7 +1695,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #else
       long gdx = (cur->dir & 1 ? cur->delta[0] : -cur->delta[0]); // Compute signed difference in steps
       long gdy = (cur->dir & 2 ? cur->delta[1] : -cur->delta[1]);
-#if DRIVE_SYSTEM==1
+#if DRIVE_SYSTEM==GantryX_YDrive
       if(gdx+gdy>=0) {
         WRITE(X_DIR_PIN,!INVERT_X_DIR);
         ANALYZER_ON(ANALYZER_CH4);
@@ -1805,7 +1711,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
         ANALYZER_OFF(ANALYZER_CH5);
       }
 #endif
-#if DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==GantryY_XDrive
       if(gdx+gdy>=0) {
         WRITE(X_DIR_PIN,!INVERT_X_DIR);
       } else {
@@ -1867,7 +1773,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 	if(cur->flags & FLAG_CHECK_ENDSTOPS) {
 #if X_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_X
 		if((cur->dir & 17)==16) if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==CartesianDrive
 			cur->dir&=~16;
 #else
 			cur->dir&=~48;
@@ -1876,7 +1782,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #endif
 #if Y_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Y
 		if((cur->dir & 34)==32) if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING) {
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==CartesianDrive
 			cur->dir&=~32;
 #else
 			cur->dir&=~48;
@@ -1885,7 +1791,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #endif
 #if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
 		if((cur->dir & 17)==17) if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==CartesianDrive
 			cur->dir&=~16;
 #else
 			cur->dir&=~48;
@@ -1894,7 +1800,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
 #endif
 #if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
 		if((cur->dir & 34)==34) if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING) {
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==CartesianDrive
 			cur->dir&=~32;
 #else
 			cur->dir&=~48;
@@ -1942,11 +1848,11 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     if(cur->dir & 16) {
       if((cur->error[0] -= cur->delta[0]) < 0) {
         ANALYZER_ON(ANALYZER_CH6);
-#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
+#if DRIVE_SYSTEM==CartesianDrive || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
 #else
-#if DRIVE_SYSTEM==1
+#if DRIVE_SYSTEM==GantryX_YDrive
         if(cur->dir & 1) {
           printer_state.motorX++;
           printer_state.motorY++;
@@ -1955,7 +1861,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
           printer_state.motorY--;
         }
 #endif
-#if DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==GantryY_XDrive
         if(cur->dir & 1) {
           printer_state.motorX++;
           printer_state.motorY--;
@@ -1974,11 +1880,11 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
     if(cur->dir & 32) {
       if((cur->error[1] -= cur->delta[1]) < 0) {
         ANALYZER_ON(ANALYZER_CH7);
-#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
+#if DRIVE_SYSTEM==CartesianDrive || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
 #else
-#if DRIVE_SYSTEM==1
+#if DRIVE_SYSTEM==GantryX_YDrive
         if(cur->dir & 2) {
           printer_state.motorX++;
           printer_state.motorY--;
@@ -1987,7 +1893,7 @@ OUT_P_L_LN("MSteps:",cur->stepsRemaining);
           printer_state.motorY++;
         }
 #endif
-#if DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==GantryY_XDrive
         if(cur->dir & 2) {
           printer_state.motorX++;
           printer_state.motorY++;
@@ -2686,5 +2592,6 @@ if((ADCSRA & _BV(ADSC))==0) { // Conversion finished?
  UI_FAST; // Short timed user interface action
  pwm_count++;
 }
+
 
 

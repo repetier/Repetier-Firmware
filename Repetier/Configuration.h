@@ -87,7 +87,14 @@ is a full cartesian system where x, y and z moves are handled by seperate motors
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y. If a motor turns in 
 the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
-#define DRIVE_SYSTEM 3
+// It appears constants from enums confuse the preprocessor.
+//enum {CartesianDrive=0, GantryX_YDrive=1, GantryY_XDrive=2, DeltaDrive=3};
+#define CartesianDrive 0
+#define GantryX_YDrive 1
+#define GantryY_XDrive 2
+#define DeltaDrive 3
+
+#define DRIVE_SYSTEM DeltaDrive
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -95,21 +102,25 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
 
     /** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive */
-    #define DELTA_DRIVE_TYPE 0
+//enum { DeltaBeltDrive=0, DeltaFilamentDrive=1 };
+#define DeltaBeltDrive 0
+#define DeltaFilamentDrive 1
 
-    #if DELTA_DRIVE_TYPE == 0
+#define DELTA_DRIVE_TYPE DeltaBeltDrive
+
+    #if DELTA_DRIVE_TYPE == DeltaBeltDrive
       /** \brief Pitch in mm of drive belt. GT2 = 2mm */
       #define BELT_PITCH 2
       /** \brief Number of teeth on X, Y and Z tower pulleys */
       #define PULLEY_TEETH 20
       #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
-    #elif DELTA_DRIVE_TYPE == 1
+    #elif DELTA_DRIVE_TYPE == DeltaFilamentDrive
       /** \brief Filament pulley diameter in milimeters */
       #define PULLEY_DIAMETER 10
       #define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
@@ -122,10 +133,17 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
     #define MICRO_STEPS 16
 
     /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
-    Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-    will be allocated for the delta buffer. With defaults 7 * 16 * 30 = 3360 bytes. This leaves ~1K free RAM on an Arduino
-    Mega. */
-    #define MAX_DELTA_SEGMENTS_PER_LINE 30
+    Increasing this figure can use a lot of memory since 
+    DeltaSegmen(7 bytes) * MOVE_CACHE_SIZE (move buffer) * MAX_DELTA_SEGMENTS_PER_LINE
+    will be allocated for the delta buffer. 
+    With defaults 7 * 5 * 10 = 350 bytes. 
+    Using 16 and 30 would leave ~1K RAM on an Arduino for all other variables, which is unlikely to handle
+    gcode buffers, SD input, serial IO, LCD variables, and stack variables. 
+    While printing, the phyical moves take MUCH longer than calculating the next move,
+    so there is little motivation to having a big buffer. 
+    5 lines of 10 segments or 50 total segments is an abundant amount of physical movement 
+    to allow time to fill in the next segment. */
+    #define MAX_DELTA_SEGMENTS_PER_LINE 10
 
     // Calculations
     #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
@@ -160,7 +178,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 92.000 //steves extruder    set to 92 for ezstruder
+#define EXT0_STEPS_PER_MM 100.7 //steves extruder    set to 92 for ezstruder
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -173,7 +191,7 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/°C and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/Â°C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -215,8 +233,8 @@ the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180°C
-180 => ABS for temperatures around 240°C
+130 => PLA for temperatures from 170-180Â°C
+180 => ABS for temperatures around 240Â°C
 
 The precise values may differ for different nozzle/resistor combination. 
  Overridden if EEPROM activated.
@@ -231,12 +249,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain.  Overridden if EEPROM activated. */
-#define EXT0_PID_P   11.65
+#define EXT0_PID_P 4
 /** I-gain. Overridden if EEPROM activated.
 */
-#define EXT0_PID_I   0.48
+#define EXT0_PID_I 0.25
 /** Dgain.  Overridden if EEPROM activated.*/
-#define EXT0_PID_D 70.75
+#define EXT0_PID_D 16
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define EXT0_PID_MAX 255
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
@@ -283,7 +301,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
-// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/°C and 1/4 the price of AD595 but only MSOT_08 package)
+// 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/Â°C and 1/4 the price of AD595 but only MSOT_08 package)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -325,8 +343,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 
 A good value is slightly higher then the output needed for your temperature.
 Values for starts:
-130 => PLA for temperatures from 170-180°C
-180 => ABS for temperatures around 240°C
+130 => PLA for temperatures from 170-180Â°C
+180 => ABS for temperatures around 240Â°C
 
 The precise values may differ for different nozzle/resistor combination. 
  Overridden if EEPROM activated.
@@ -388,7 +406,7 @@ If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
-/** Temperature range for target temperature to hold in M109 command. 5 means +/-5°C
+/** Temperature range for target temperature to hold in M109 command. 5 means +/-5Â°C
 
 Uncomment define to use force the temperature into the range for given watchperiod. 
 */
@@ -545,11 +563,11 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
 /** P-gain.  Overridden if EEPROM activated. */
-#define HEATED_BED_PID_PGAIN   478
+#define HEATED_BED_PID_PGAIN  80
 /** I-gain  Overridden if EEPROM activated.*/
-#define HEATED_BED_PID_IGAIN   136
+#define HEATED_BED_PID_IGAIN   5
 /** Dgain.  Overridden if EEPROM activated.*/
-#define HEATED_BED_PID_DGAIN 440
+#define HEATED_BED_PID_DGAIN 200
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 230
 
@@ -568,11 +586,11 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define MAXTEMP 250
+#define MAXTEMP 300 // for metal heads
 
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
-#define MAX_DEFECT_TEMPERATURE 300
+#define MAX_DEFECT_TEMPERATURE 320
 
 /** \brief Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V inernaly generated */
 #define ANALOG_REF ANALOG_REF_AVCC
@@ -639,9 +657,6 @@ on this endstop.
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR 1
 
-// Delta robot radius endstop
-#define max_software_endstop_r true
-
 //If true, axis won't move to coordinates less than zero.
 #define min_software_endstop_x false
 #define min_software_endstop_y false
@@ -678,9 +693,9 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 366.25
-#define Y_MAX_LENGTH 366.25
-#define Z_MAX_LENGTH 366.25
+#define X_MAX_LENGTH 374
+#define Y_MAX_LENGTH 374
+#define Z_MAX_LENGTH 374
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
@@ -700,7 +715,7 @@ on this endstop.
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 
 // Delta settings
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 269.0 // mm
@@ -721,10 +736,11 @@ on this endstop.
 /** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
 #define PRINTER_RADIUS 197.4
+#define DELTA_XY_RADIUS 138
 
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
-#define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+#define DELTA_RADIUS(x) (x-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 
 /** \brief Enable counter to count steps for Z max calculations
 */
@@ -847,7 +863,8 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 16
+// reduced for <8k total memory limit
+#define MOVE_CACHE_SIZE 5
 
 /** \brief Low filled cache size. 
 
@@ -855,7 +872,7 @@ If the cache contains less then MOVE_CACHE_LOW segments, the time per segment is
 If a move would be shorter, the feedrate will be reduced. This should prevent buffer underflows. Set this to 0 if you
 don't care about empty buffers during print.
 */
-#define MOVE_CACHE_LOW 10
+#define MOVE_CACHE_LOW 2
 /** \brief Cycles per move, if move cache is low. 
 
 This value must be high enough, that the buffer has time to fill up. The problem only occurs at the beginning of a print or
@@ -953,7 +970,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 // ##                           Communication configuration                                ##
 // ##########################################################################################
 
-//// AD595 THERMOCOUPLE SUPPORT UNTESTED... USE WITH CAUTION!!!!
+//// AD595 THERMOCOUPLE SUPPORT UNTESTED... USE WITH CAUTION!
 
 /** \brief Communication speed.
 
@@ -1008,7 +1025,7 @@ uncommented, you will see the last command executed. To be more specific: It is 
 execution. This helps tracking errors, because there may be 8 or more commands in the queue
 and it is elsewise difficult to know, what your reprap is currently doing.
 */
-#define ECHO_ON_EXECUTE
+#define ECHO_AFTER_EXECUTE 
 
 /** \brief EEPROM storage mode 
 
@@ -1021,10 +1038,10 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, as they are 
            taken from the EEPROM.
 */
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT true
+#define SDSUPPORT 
 /** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES true
 // Uncomment to enable or changed card detection pin. With card detection the card is mounted on insertion.
@@ -1035,7 +1052,7 @@ IMPORTANT: With mode <>0 some changes in configuration.h are not set any more, a
 /** Show extended directory including file length. Don't use this with pronterface! */
 #define SD_EXTENDED_DIR
 // If you want support for G2/G3 arc commands set to true, otherwise false.
-#define ARC_SUPPORT false
+//#define ARC_SUPPORT false
 
 /** You can store the current position with M401 and go back to it with M402. 
    This works only if feature is set to true. */
@@ -1061,9 +1078,17 @@ The following settings override uiconfig.h!
 2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
 3 = Adafruit RGB controller
 4 = Foltyn 3DMaster with display attached
-5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
+5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5! sd card disabled by default!
 */
-#define FEATURE_CONTROLLER 1
+//enum contoller_types {NO_CONTROLLER=0, CONTROLLER_UICONFIG=1, SMARTCONTROLLER=2, ADAFRUIT_CONTROLLER=3, FOLTYN_CONTROLLER=4, VIKI_LCD=5};
+#define NO_CONTROLLER 0
+#define CONTROLLER_UICONFIG 1
+#define SMARTCONTROLLER 2
+#define ADAFRUIT_CONTROLLER 3
+#define FOLTYN_CONTROLLER 4
+#define VIKI_LCD 5
+
+#define FEATURE_CONTROLLER CONTROLLER_UICONFIG
 
 /**
 Select the language to use.
@@ -1073,10 +1098,17 @@ Select the language to use.
 3 = brazilian portuguese
 4 = italian
 */
-#define UI_LANGUAGE 0
+//enum {UI_ENGLISH=0, UI_GERMAN=1, UI_DUTCH=2, UI_BRAZILIAN_PORTUGESE=3, UI_ITALIAN=4};
+#define UI_ENGLISH 0
+#define UI_GERMAN 1
+#define UI_DUTCH 2
+#define UI_BRAZILIAN_PORTUGESE 3 
+#define UI_ITALIAN 4
+
+#define UI_LANGUAGE UI_ENGLISH
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_VERSION_STRING2 "RostockMAX"
+#define UI_VERSION_STRING2 "Repetier " REPETIER_VERSION
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1086,14 +1118,14 @@ info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH true
 
 /** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
-#define UI_AUTORETURN_TO_MENU_AFTER 30000
+#define UI_AUTORETURN_TO_MENU_AFTER 300000
 
 #define FEATURE_UI_KEYS 0
 
 /* Normally cou want a next/previous actions with every click of your encoder.
 Unfotunately, the encoder have a different count of phase changes between clicks.
 Select an encoder speed from 0 = fastest to 2 = slowest that results in one menu move per click.
-*/
+NOT SURE, MAY SET BACK TO 1*/
 #define UI_ENCODER_SPEED 1
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -1113,7 +1145,7 @@ Parameter is is delay in microseconds and the secons is the number of repetition
 Values must be in range 1..255
 */
 #define BEEPER_SHORT_SEQUENCE 2,2
-#define BEEPER_LONG_SEQUENCE 8,8
+#define BEEPER_LONG_SEQUENCE 800,2
 
 // ###############################################################################
 // ##                         Values for menu settings                          ##
@@ -1123,14 +1155,19 @@ Values must be in range 1..255
 #define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
 #define UI_SET_PRESET_EXTRUDER_TEMP_PLA   150
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 80
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   175
+#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   200
 // Extreme values 
 #define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 100
 #define UI_SET_MIN_EXTRUDER_TEMP   60
-#define UI_SET_MAX_EXTRUDER_TEMP   230
+#define UI_SET_MAX_EXTRUDER_TEMP   300  // for metal heads
+// #define UI_SET_MAX_EXTRUDER_TEMP   250  // for heads with plastic
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
+#define UI_SET_MIN_TEMP_CAL  90.0
+#define UI_SET_MAX_TEMP_CAL  110.0
+
 #endif
+
 

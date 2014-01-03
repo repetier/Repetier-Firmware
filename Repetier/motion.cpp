@@ -57,7 +57,7 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
   }
 #ifdef USE_ADVANCE
     if(printer_state.isAdvanceActivated()) {
-        if((previous->dir & 128)!=(current->dir & 128) && ((previous->dir & 48) || (current->dir & 48))) {
+        if((previous->dir & ED_FLAG)!=(current->dir & ED_FLAG) && ((previous->dir & XYD_FLAG) || (current->dir & XYD_FLAG))) {
             previous->joinFlags |= FLAG_JOIN_END_FIXED;
             current->joinFlags |= FLAG_JOIN_START_FIXED;
             previous->maxJunctionSpeed = min(previous->endSpeed,current->startSpeed);
@@ -68,7 +68,7 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
         }
     }
 #endif // USE_ADVANCE
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
   if (previous->moveID == current->moveID) { // Avoid computing junction speed for split delta lines
    if(previous->fullSpeed>current->fullSpeed)
       previous->maxJunctionSpeed = current->fullSpeed;
@@ -81,7 +81,7 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
    float dx = current->speedX-previous->speedX;
    float dy = current->speedY-previous->speedY;
    float factor=1,tmp;
-#if (DRIVE_SYSTEM == 3) // No point computing Z Jerk separately for delta moves
+#if (DRIVE_SYSTEM==DeltaDrive) // No point computing Z Jerk separately for delta moves
    float dz = current->speedZ-previous->speedZ;
    float jerk = sqrt(dx*dx+dy*dy+dz*dz);
 #else
@@ -90,8 +90,8 @@ inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current) {
    //if(DEBUG_ECHO) {OUT_P_F_LN("Jerk:",jerk);OUT_P_F_LN("FS:",p1->fullSpeed);OUT_P_F_LN("MaxJerk:",printer_state.maxJerk);}
    if(jerk>printer_state.maxJerk)
      factor = printer_state.maxJerk/jerk;
-#if (DRIVE_SYSTEM!=3)
-   if((previous->dir & 64) || (current->dir & 64)) {
+#if (DRIVE_SYSTEM!=DeltaDrive)
+   if((previous->dir & ZD_FLAG) || (current->dir & ZD_FLAG)) {
    //  float dz = (p2->speedZ*p2->invFullSpeed-p1->speedZ*p1->invFullSpeed)*printer_state.maxJerk/printer_state.maxZJerk;
      float dz = fabs(current->speedZ-previous->speedZ);
      if(dz>printer_state.maxZJerk) {
@@ -153,7 +153,7 @@ void updateStepsParameter(PrintLine *p/*,byte caller*/) {
       out.print_float_P(PSTR("st./end speed:"),p->startSpeed);
       out.println_float_P(PSTR("/"),p->endSpeed);
 #if USE_OPS==1
-      if(!(p->dir & 128) && printer_state.opsMode==2)
+      if(!(p->dir & ED_FLAG) && printer_state.opsMode==2)
         out.println_long_P(PSTR("Reverse at:"),p->opsReverseSteps);
 #endif
       out.println_int_P(PSTR("flags:"),p->flags);
@@ -193,8 +193,8 @@ inline void backwardPlanner(byte p,byte last) {
 #if USE_OPS==1
     // Retraction points are fixed points where the extruder movement stops anyway. Finish the computation for the move and exit.
     if(printer_state.opsMode && printmoveSeen) {
-      if((prev->dir & 136)==136 && (act->dir & 136)!=136) {
-        if((act->dir & 64)!=0 || act->distance>printer_state.opsMinDistance) { // Switch printing - travel
+      if((prev->dir & XED_FLAG)==XED_FLAG && (act->dir & XED_FLAG)!=XED_FLAG) {
+        if((act->dir & ZD_FLAG)!=0 || act->distance>printer_state.opsMinDistance) { // Switch printing - travel
           act->joinFlags |= FLAG_JOIN_START_RETRACT | FLAG_JOIN_START_FIXED; // enable retract for this point
           prev->joinFlags |= FLAG_JOIN_END_FIXED;
           return;
@@ -202,7 +202,7 @@ inline void backwardPlanner(byte p,byte last) {
           act->joinFlags |= FLAG_JOIN_NO_RETRACT;
         }
       } else
-      if((prev->dir & 136)!=136 && (act->dir & 136)==136) { // Switch travel - print
+      if((prev->dir & XED_FLAG)!=XED_FLAG && (act->dir & XED_FLAG)==XED_FLAG) { // Switch travel - print
         prev->joinFlags |= FLAG_JOIN_END_RETRACT | FLAG_JOIN_END_FIXED; // reverse retract for this point
         if(printer_state.opsMode==2) {
           prev->opsReverseSteps = ((long)printer_state.opsPushbackSteps*(long)printer_state.maxExtruderSpeed*TIMER0_PRESCALE)/prev->fullInterval;
@@ -216,7 +216,7 @@ inline void backwardPlanner(byte p,byte last) {
     }
 #endif
     // Avoid speed calc once crusing in split delta move
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
     if (prev->moveID==act->moveID && lastJunctionSpeed==prev->maxJunctionSpeed) {
       act->startSpeed = prev->endSpeed = lastJunctionSpeed;
       prev->joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED; // Needs recomputation
@@ -225,7 +225,7 @@ inline void backwardPlanner(byte p,byte last) {
 #endif
 
     // Switch move-retraction or vice versa start always with save speeds! Keeps extruder from blocking
-    if(((prev->dir & 240)!=128) && ((act->dir & 240)==128)) { // switch move - extruder only move
+    if(((prev->dir & XYZED_FLAG)!=ED_FLAG) && ((act->dir & XYZED_FLAG)==ED_FLAG)) { // switch move - extruder only move
       prev->joinFlags |= FLAG_JOIN_END_FIXED;
       act->joinFlags |= FLAG_JOIN_START_FIXED;
       return;          
@@ -281,7 +281,7 @@ inline void forwardPlanner(byte p) {
       continue; // Nothing to do here
     }
 	// Avoid speed calc once crusing in split delta move	
-	#if DRIVE_SYSTEM==3
+	#if DRIVE_SYSTEM==DeltaDrive
 	if (act->moveID == next->moveID && act->endSpeed == act->maxJunctionSpeed) {
 		act->startSpeed = leftspeed;
 		leftspeed       = act->endSpeed;
@@ -359,7 +359,7 @@ void updateTrapezoids(byte p) {
     computeMaxJunctionSpeed(previous,act); // Set maximum junction speed if we have a real move before
   else
     act->joinFlags |= FLAG_JOIN_START_FIXED;
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DeltaDrive
     if((previous->primaryAxis==2 && act->primaryAxis!=2) || (previous->primaryAxis!=2 && act->primaryAxis==2)) {
         previous->joinFlags |= FLAG_JOIN_END_FIXED;
         act->joinFlags |= FLAG_JOIN_START_FIXED;
@@ -392,21 +392,21 @@ void updateTrapezoids(byte p) {
 inline float safeSpeed(PrintLine *p) {
     float safe;
     #ifdef USE_ADVANCE
-    if((p->dir & 128) && printer_state.isAdvanceActivated()) {
+    if((p->dir & ED_FLAG) && printer_state.isAdvanceActivated()) {
         safe = min(p->fullSpeed,printer_state.minimumSpeed);
     } else
     #endif
     safe = min(p->fullSpeed,max(printer_state.minimumSpeed,printer_state.maxJerk*0.5));
-#if DRIVE_SYSTEM != 3
-  if(p->dir & 64) {
+#if DRIVE_SYSTEM!=DeltaDrive
+  if(p->dir & ZD_FLAG) {
     if(fabs(p->speedZ)>printer_state.maxZJerk*0.5) {
       float safe2 = printer_state.maxZJerk*0.5*p->fullSpeed/fabs(p->speedZ);
       if(safe2<safe) safe = safe2;
     }
   }
 #endif
-  if(p->dir & 128) {
-    if(p->dir & 112) {
+  if(p->dir & ED_FLAG) {
+    if(p->dir & XYZD_FLAG) {
       float safe2 = 0.5*current_extruder->maxStartFeedrate*p->fullSpeed/fabs(p->speedE);
       if(safe2<safe) safe = safe2;
     } else {
@@ -424,12 +424,12 @@ void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool che
   for(byte i=0; i < 4; i++) {
       printer_state.destinationSteps[i] = printer_state.currentPositionSteps[i];
   }
-  printer_state.destinationSteps[0]+=x;
-  printer_state.destinationSteps[1]+=y;
-  printer_state.destinationSteps[2]+=z;
-  printer_state.destinationSteps[3]+=e;
+  printer_state.destinationSteps[XAxis]+=x;
+  printer_state.destinationSteps[YAxis]+=y;
+  printer_state.destinationSteps[ZAxis]+=z;
+  printer_state.destinationSteps[ExtruderAxis]+=e;
   printer_state.feedrate = feedrate;
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
   split_delta_move(check_endstop,false,false);
 #else
   queue_move(check_endstop,false);
@@ -478,9 +478,9 @@ void log_long_array(PGM_P ptr,long *arr) {
 }
 void log_float_array(PGM_P ptr,float *arr) {
   out.print_P(ptr);
-  for(byte i=0;i<3;i++)
+  for(byte i=0;i<NUM_AXIS;i++)
     out.print_float_P(PSTR(" "),arr[i]);
-  out.println_float_P(PSTR(" "),arr[3]);
+  out.println();
 }
 void log_printLine(PrintLine *p) {
   out.println_int_P(PSTR("ID:"),(int)p);
@@ -506,11 +506,7 @@ void log_printLine(PrintLine *p) {
 
 void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte pathOptimize)
 {
-#if DRIVE_SYSTEM==3
-  long axis_interval[5];
-#else
-  long axis_interval[4];
-#endif
+  long axis_interval[MAX_AXIS];
   float time_for_move = (float)(F_CPU)*p->distance / printer_state.feedrate; // time is in ticks
   bool critical=false;
   if(lines_count<MOVE_CACHE_LOW && time_for_move<LOW_TICKS_PER_MOVE) { // Limit speed to keep cache full.
@@ -523,52 +519,52 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
   UI_MEDIUM; // do check encoder
   // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
   long limitInterval = time_for_move/p->stepsRemaining; // until not violated by other constraints it is your target speed
-  axis_interval[0] = fabs(axis_diff[0])*F_CPU/(max_feedrate[0]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
-  if(axis_interval[0]>limitInterval) limitInterval = axis_interval[0];
-  axis_interval[1] = fabs(axis_diff[1])*F_CPU/(max_feedrate[1]*p->stepsRemaining);
-  if(axis_interval[1]>limitInterval) limitInterval = axis_interval[1];
-  if(p->dir & 64) { // normally no move in z direction
-    axis_interval[2] = fabs((float)axis_diff[2])*(float)F_CPU/(float)(max_feedrate[2]*p->stepsRemaining); // must prevent overflow!
-    if(axis_interval[2]>limitInterval) limitInterval = axis_interval[2];
-  } else axis_interval[2] = 0;
-  axis_interval[3] = fabs(axis_diff[3])*F_CPU/(max_feedrate[3]*p->stepsRemaining);
-  if(axis_interval[3]>limitInterval) limitInterval = axis_interval[3];
-#if DRIVE_SYSTEM==3
-  axis_interval[4] = fabs(axis_diff[4])*F_CPU/(max_feedrate[0]*p->stepsRemaining);
+  axis_interval[X_AXIS] = fabs(axis_diff[X_AXIS])*F_CPU/(max_feedrate[XAxis]*p->stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
+  if(axis_interval[X_AXIS]>limitInterval) limitInterval = axis_interval[X_AXIS];
+  axis_interval[Y_AXIS] = fabs(axis_diff[Y_AXIS])*F_CPU/(max_feedrate[YAxis]*p->stepsRemaining);
+  if(axis_interval[Y_AXIS]>limitInterval) limitInterval = axis_interval[Y_AXIS];
+  if(p->dir & ZD_FLAG) { // normally no move in z direction
+    axis_interval[Z_AXIS] = fabs((float)axis_diff[Z_AXIS])*(float)F_CPU/(float)(max_feedrate[ZAxis]*p->stepsRemaining); // must prevent overflow!
+    if(axis_interval[Z_AXIS]>limitInterval) limitInterval = axis_interval[Z_AXIS];
+  } else axis_interval[Z_AXIS] = 0;
+  axis_interval[E_AXIS] = fabs(axis_diff[E_AXIS])*F_CPU/(max_feedrate[E_AXIS]*p->stepsRemaining);
+  if(axis_interval[E_AXIS]>limitInterval) limitInterval = axis_interval[E_AXIS];
+#if DRIVE_SYSTEM==DeltaDrive
+  axis_interval[V_AXIS] = fabs(axis_diff[V_AXIS])*F_CPU/(max_feedrate[XAxis]*p->stepsRemaining);
 #endif
 
   p->fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
   // new time at full speed = limitInterval*p->stepsRemaining [ticks]
   time_for_move = (float)limitInterval*(float)p->stepsRemaining; // for large z-distance this overflows with long computation
   float inv_time_s = (float)F_CPU/time_for_move;
-  if(p->dir & 16) {
-    axis_interval[0] = time_for_move/p->delta[0];
-    p->speedX = axis_diff[0]*inv_time_s;
-    if(!(p->dir & 1)) p->speedX = -p->speedX;
+  if(p->dir & XD_FLAG) {
+    axis_interval[X_AXIS] = time_for_move/p->delta[X_AXIS];
+    p->speedX = axis_diff[X_AXIS]*inv_time_s;
+    if(!(p->dir & XC_FLAG)) p->speedX = -p->speedX;
   } else p->speedX = 0;
-  if(p->dir & 32) {
-    axis_interval[1] = time_for_move/p->delta[1];
-    p->speedY = axis_diff[1]*inv_time_s;
-    if(!(p->dir & 2)) p->speedY = -p->speedY;
+  if(p->dir & YD_FLAG) {
+    axis_interval[Y_AXIS] = time_for_move/p->delta[Y_AXIS];
+    p->speedY = axis_diff[Y_AXIS]*inv_time_s;
+    if(!(p->dir & YC_FLAG)) p->speedY = -p->speedY;
   } else p->speedY = 0;
-  if(p->dir & 64) {
-    axis_interval[2] = time_for_move/p->delta[2];
-    p->speedZ = axis_diff[2]*inv_time_s;
-    if(!(p->dir & 4)) p->speedZ = -p->speedZ;
+  if(p->dir & ZD_FLAG) {
+    axis_interval[Z_AXIS] = time_for_move/p->delta[Z_AXIS];
+    p->speedZ = axis_diff[Z_AXIS]*inv_time_s;
+    if(!(p->dir & ZC_FLAG)) p->speedZ = -p->speedZ;
   } else p->speedZ = 0;
-  if(p->dir & 128) {
-    axis_interval[3] = time_for_move/p->delta[3];
-    p->speedE = axis_diff[3]*inv_time_s;
-    if(!(p->dir & 8)) p->speedE = -p->speedE;
+  if(p->dir & ED_FLAG) {
+    axis_interval[E_AXIS] = time_for_move/p->delta[E_AXIS];
+    p->speedE = axis_diff[E_AXIS]*inv_time_s;
+    if(!(p->dir & EC_FLAG)) p->speedE = -p->speedE;
   }
-#if DRIVE_SYSTEM==3
-  axis_interval[4] = time_for_move/p->stepsRemaining;
+#if DRIVE_SYSTEM==DeltaDrive
+  axis_interval[V_AXIS] = time_for_move/p->stepsRemaining;
 #endif
   p->fullSpeed = p->distance*inv_time_s;
 
 
   //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
-  byte is_print_move = (p->dir & 136)==136; // are we printing
+  byte is_print_move = (p->dir & XED_FLAG)==XED_FLAG; // are we printing
 #if USE_OPS==1
   if(is_print_move) printmoveSeen = 1;
 #endif
@@ -580,18 +576,18 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     float slowest_axis_plateau_time_repro = 1e20; // repro to reduce division Unit: 1/s
     for(byte i=0; i < 4 ; i++) {
 	// Errors for delta move are initialized in timer
-	#if DRIVE_SYSTEM!=3
+	#if DRIVE_SYSTEM!=DeltaDrive
       p->error[i] = p->delta[p->primaryAxis] >> 1;
 	#endif
-      if(p->dir & (16<<i)) {
+      if(p->dir & (XD_FLAG<<i)) {
         // v = a * t => t = v/a = F_CPU/(c*a) => 1/t = c*a/F_CPU
         slowest_axis_plateau_time_repro = min(slowest_axis_plateau_time_repro,
                (float)axis_interval[i] * (float)(is_print_move ?  axis_steps_per_sqr_second[i] : axis_travel_steps_per_sqr_second[i])); //  steps/s^2 * step/tick  Ticks/s^2
       }
     }
 	// Errors for delta move are initialized in timer (except extruder)
-#if DRIVE_SYSTEM==3
-    p->error[3] = p->stepsRemaining >> 1;
+#if DRIVE_SYSTEM==DeltaDrive
+    p->error[E_AXIS] = p->stepsRemaining >> 1;
 #endif
     p->invFullSpeed = 1.0/p->fullSpeed;
     p->accelerationPrim = slowest_axis_plateau_time_repro / axis_interval[p->primaryAxis]; // a = v/t = F_CPU/(c*t): Steps/s^2
@@ -604,18 +600,15 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 	  p->flags |= FLAG_NOMINAL;
 
     p->vMax = F_CPU / p->fullInterval; // maximum steps per second, we can reach
-   // if(p->vMax>46000)  // gets overflow in N computation
-   //   p->vMax = 46000;
-    //p->plateauN = (p->vMax*p->vMax/p->accelerationPrim)>>1;
 #ifdef USE_ADVANCE
-  if((p->dir & 112)==0 || (p->dir & 128)==0 || (p->dir & 8)==0) {
+  if((p->dir & XYZD_FLAG)==0 || (p->dir & ED_FLAG)==0 || (p->dir & EC_FLAG)==0) {
 #ifdef ENABLE_QUADRATIC_ADVANCE
     p->advanceRate = 0; // No head move or E move only or sucking filament back
     p->advanceFull = 0;
 #endif
     p->advanceL = 0;
   } else {
-    float advlin = fabs(p->speedE)*current_extruder->advanceL*0.001*axis_steps_per_unit[3];
+    float advlin = fabs(p->speedE)*current_extruder->advanceL*0.001*axis_steps_per_unit[ExtruderAxis];
     p->advanceL = (65536*advlin)/p->vMax; //advanceLscaled = (65536*vE*k2)/vMax
  #ifdef ENABLE_QUADRATIC_ADVANCE;
     p->advanceFull = 65536*current_extruder->advanceK*p->speedE*p->speedE; // Steps*65536 at full speed
@@ -634,8 +627,6 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
 #endif
     UI_MEDIUM; // do check encoder
     updateTrapezoids(lines_write_pos);
-    // how much steps on primary axis do we need to reach target feedrate
-    //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
   #else
   #ifdef USE_ADVANCE
   #ifdef ENABLE_QUADRATIC_ADVANCE
@@ -650,17 +641,17 @@ void calculate_move(PrintLine *p,float axis_diff[],byte check_endstops,byte path
     p->halfstep = 0;
   else {
     p->halfstep = 1;
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
     // Error 0-2 are used for the towers and set up in the timer
-    p->error[3] = p->stepsRemaining;
+    p->error[E_AXIS] = p->stepsRemaining;
 #else
-    p->error[0] = p->error[1] = p->error[2] = p->error[3] = p->delta[p->primaryAxis];
+    p->error[X_AXIS] = p->error[Y_AXIS] = p->error[Z_AXIS] = p->error[E_AXIS] = p->delta[p->primaryAxis];
 #endif
   }
 #ifdef DEBUG_STEPCOUNT
 // Set in delta move calculation
-#if DRIVE_SYSTEM!=3
-  p->totalStepsRemaining = p->delta[0]+p->delta[1]+p->delta[2];
+#if DRIVE_SYSTEM!=DeltaDrive
+  p->totalStepsRemaining = p->delta[X_AXIS]+p->delta[Y_AXIS]+p->delta[Z_AXIS];
 #endif
 #endif
 #ifdef DEBUG_QUEUE_MOVE
@@ -683,7 +674,7 @@ END_INTERRUPT_PROTECTED
   DEBUG_MEMORY;
 }
 
-#if DRIVE_SYSTEM != 3
+#if DRIVE_SYSTEM!=DeltaDrive
 /**
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
@@ -698,77 +689,77 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   }
   byte newPath=check_new_move(pathOptimize, 0);
   PrintLine *p = &lines[lines_write_pos];
-  float axis_diff[4]; // Axis movement in mm
+  float axis_diff[MAX_AXIS]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
   else p->flags = 0;
   p->joinFlags = 0;
   if(!pathOptimize) p->joinFlags = FLAG_JOIN_END_FIXED;
   p->dir = 0;
 #if min_software_endstop_x == true
-    if (printer_state.destinationSteps[0] < 0) printer_state.destinationSteps[0] = 0.0;
+    if (printer_state.destinationSteps[XAxis] < 0) printer_state.destinationSteps[XAxis] = 0.0;
 #endif
 #if min_software_endstop_y == true
-    if (printer_state.destinationSteps[1] < 0) printer_state.destinationSteps[1] = 0.0;
+    if (printer_state.destinationSteps[YAxis] < 0) printer_state.destinationSteps[YAxis] = 0.0;
 #endif
 #if min_software_endstop_z == true
-    if (printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0.0;
+    if (printer_state.destinationSteps[ZAxis] < 0) printer_state.destinationSteps[ZAxis] = 0.0;
 #endif
 
 #if max_software_endstop_x == true
-    if (printer_state.destinationSteps[0] > printer_state.xMaxSteps) printer_state.destinationSteps[0] = printer_state.xMaxSteps;
+    if (printer_state.destinationSteps[XAxis] > printer_state.xMaxSteps) printer_state.destinationSteps[XAxis] = printer_state.xMaxSteps;
 #endif
 #if max_software_endstop_y == true
-    if (printer_state.destinationSteps[1] > printer_state.yMaxSteps) printer_state.destinationSteps[1] = printer_state.yMaxSteps;
+    if (printer_state.destinationSteps[YAxis] > printer_state.yMaxSteps) printer_state.destinationSteps[YAxis] = printer_state.yMaxSteps;
 #endif
 #if max_software_endstop_z == true
-    if (printer_state.destinationSteps[2] > printer_state.zMaxSteps) printer_state.destinationSteps[2] = printer_state.zMaxSteps;
+    if (printer_state.destinationSteps[ZAxis] > printer_state.zMaxSteps) printer_state.destinationSteps[ZAxis] = printer_state.zMaxSteps;
 #endif
   //Find direction
-#if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
+#if DRIVE_SYSTEM==CartesianDrive || defined(NEW_XY_GANTRY)
   for(byte i=0; i < 4; i++) {
     if((p->delta[i]=printer_state.destinationSteps[i]-printer_state.currentPositionSteps[i])>=0) {
-      p->dir |= 1<<i;
+      p->dir |= XC_FLAG<<i;
     } else {
       p->delta[i] = -p->delta[i];
     }
     if(i==3 && printer_state.extrudeMultiply!=100) {
-      p->delta[3]=(long)((p->delta[3]*(float)printer_state.extrudeMultiply)*0.01f); 
-      //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
+      p->delta[E_AXIS]=(long)((p->delta[E_AXIS]*(float)printer_state.extrudeMultiply)*0.01f); 
+      //p->delta[E_AXIS]=(p->delta[E_AXIS]*printer_state.extrudeMultiply)/100;
     }
     axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
-    if(p->delta[i]) p->dir |= 16<<i;
+    if(p->delta[i]) p->dir |= XD_FLAG<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
-  printer_state.filamentPrinted+=axis_diff[3];
+  printer_state.filamentPrinted+=axis_diff[E_AXIS];
 #else
-  long deltax = printer_state.destinationSteps[0]-printer_state.currentPositionSteps[0];
-  long deltay = printer_state.destinationSteps[1]-printer_state.currentPositionSteps[1];
-#if DRIVE_SYSTEM==1
-  p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
-  p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
-  p->delta[0] = deltax+deltay;
-  p->delta[1] = deltax-deltay;
+  long deltax = printer_state.destinationSteps[XAxis]-printer_state.currentPositionSteps[XAxis];
+  long deltay = printer_state.destinationSteps[YAxis]-printer_state.currentPositionSteps[YAxis];
+#if DRIVE_SYSTEM==GantryX_YDrive
+  p->delta[Z_AXIS] = printer_state.destinationSteps[ZAxis]-printer_state.currentPositionSteps[ZAxis];
+  p->delta[E_AXIS] = printer_state.destinationSteps[ExtruderAxis]-printer_state.currentPositionSteps[ExtruderAxis];
+  p->delta[X_AXIS] = deltax+deltay;
+  p->delta[Y_AXIS] = deltax-deltay;
 #endif
-#if DRIVE_SYSTEM==2
-  p->delta[2] = printer_state.destinationSteps[2]-printer_state.currentPositionSteps[2];
-  p->delta[3] = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
-  p->delta[0] = deltay+deltax;
-  p->delta[1] = deltay-deltax;
+#if DRIVE_SYSTEM==GantryY_XDrive
+  p->delta[Z_AXIS] = printer_state.destinationSteps[ZAxis]-printer_state.currentPositionSteps[ZAxis];
+  p->delta[E_AXIS] = printer_state.destinationSteps[ExtruderAxis]-printer_state.currentPositionSteps[ExtruderAxis];
+  p->delta[X_AXIS] = deltay+deltax;
+  p->delta[Y_AXIS] = deltay-deltax;
 #endif
   //Find direction
   for(byte i=0; i < 4; i++) {
     if(p->delta[i]>=0) {
-      p->dir |= 1<<i;
+      p->dir |= XC_FLAG<<i;
       axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
     } else {
       axis_diff[i] = p->delta[i]*inv_axis_steps_per_unit[i];
       p->delta[i] = -p->delta[i];
     }
-    if(p->delta[i]) p->dir |= 16<<i;
+    if(p->delta[i]) p->dir |= XD_FLAG<<i;
     printer_state.currentPositionSteps[i] = printer_state.destinationSteps[i];
   }
 #endif
-  if((p->dir & 240)==0) {
+  if((p->dir & XYZED_FLAG)==0) {
     if(newPath) { // need to delete dummy elements, otherwise commands can get locked.
       lines_count = 0;
       lines_pos = lines_write_pos;
@@ -781,7 +772,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
   p->opsReverseSteps=0;
 #endif
 #if ENABLE_BACKLASH_COMPENSATION
-  if((p->dir & 112) && ((p->dir & 7)^(printer_state.backlashDir & 7)) & (printer_state.backlashDir >> 3)) { // We need to compensate backlash, add a move
+  if((p->dir & XYZD_FLAG) && ((p->dir & XYZC_FLAG)^(printer_state.backlashDir & XYZC_FLAG)) & (printer_state.backlashDir >> 3)) { // We need to compensate backlash, add a move
     while(lines_count>=MOVE_CACHE_SIZE-1) { // wait for a second free entry in movement cache
       gcode_read_serial();
       check_periodical();
@@ -790,67 +781,67 @@ void queue_move(byte check_endstops,byte pathOptimize) {
     if(wpos2>=MOVE_CACHE_SIZE) wpos2 = 0;
     PrintLine *p2 = &lines[wpos2];
     memcpy(p2,p,sizeof(PrintLine)); // Move current data to p2
-    byte changed = (p->dir & 7)^(printer_state.backlashDir & 7);
-    float back_diff[4]; // Axis movement in mm
-    back_diff[3] = 0;
-    back_diff[0] = (changed & 1 ? (p->dir & 1 ? printer_state.backlashX : -printer_state.backlashX) : 0);
-    back_diff[1] = (changed & 2 ? (p->dir & 2 ? printer_state.backlashY : -printer_state.backlashY) : 0);
-    back_diff[2] = (changed & 4 ? (p->dir & 4 ? printer_state.backlashZ : -printer_state.backlashZ) : 0);
-    p->dir &=7; // x,y and z are already correct
+    byte changed = (p->dir & XYZC_FLAG)^(printer_state.backlashDir & XYZC_FLAG);
+    float back_diff[NUM_AXIS]; // Axis movement in mm
+    back_diff[E_AXIS] = 0;
+    back_diff[X_AXIS] = (changed & 1 ? (p->dir & XC_FLAG ? printer_state.backlashX : -printer_state.backlashX) : 0);
+    back_diff[Y_AXIS] = (changed & 2 ? (p->dir & YC_FLAG ? printer_state.backlashY : -printer_state.backlashY) : 0);
+    back_diff[Z_AXIS] = (changed & 4 ? (p->dir & ZC_FLAG ? printer_state.backlashZ : -printer_state.backlashZ) : 0);
+    p->dir &=XYZC_FLAG; // x,y and z are already correct
     for(byte i=0; i < 4; i++) {
       float f = back_diff[i]*axis_steps_per_unit[i];
       p->delta[i] = abs((long)f);
-      if(p->delta[i]) p->dir |= 16<<i;
+      if(p->delta[i]) p->dir |= XD_FLAG<<i;
     }
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-    if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2]) p->primaryAxis = 1;
-    else if (p->delta[0] > p->delta[2] ) p->primaryAxis = 0;
+    if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS]) p->primaryAxis = 1;
+    else if (p->delta[X_AXIS] > p->delta[Z_AXIS] ) p->primaryAxis = 0;
     else p->primaryAxis = 2;
     p->stepsRemaining = p->delta[p->primaryAxis];
     //Feedrate calc based on XYZ travel distance
-    xydist2 = back_diff[0] * back_diff[0] + back_diff[1] * back_diff[1];
-    if(p->dir & 64) {
-      p->distance = sqrt(xydist2 + back_diff[2] * back_diff[2]);
+    xydist2 = back_diff[X_AXIS] * back_diff[X_AXIS] + back_diff[Y_AXIS] * back_diff[Y_AXIS];
+    if(p->dir & ZD_FLAG) {
+      p->distance = sqrt(xydist2 + back_diff[Z_AXIS] * back_diff[Z_AXIS]);
     } else {
       p->distance = sqrt(xydist2);
     }
-    printer_state.backlashDir = (printer_state.backlashDir & 56) | (p2->dir & 7);
+    printer_state.backlashDir = (printer_state.backlashDir & 56) | (p2->dir & XYZC_FLAG);
     calculate_move(p,back_diff,false,pathOptimize);    
     p = p2; // use saved instance for the real move
   } 
 #endif
 
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
-  if(p->delta[1] > p->delta[0] && p->delta[1] > p->delta[2] && p->delta[1] > p->delta[3]) primary_axis = 1;
-  else if (p->delta[0] > p->delta[2] && p->delta[0] > p->delta[3]) primary_axis = 0;
-  else if (p->delta[2] > p->delta[3]) primary_axis = 2;
+  if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS] && p->delta[Y_AXIS] > p->delta[E_AXIS]) primary_axis = 1;
+  else if (p->delta[X_AXIS] > p->delta[Z_AXIS] && p->delta[X_AXIS] > p->delta[E_AXIS]) primary_axis = 0;
+  else if (p->delta[Z_AXIS] > p->delta[E_AXIS]) primary_axis = 2;
   else primary_axis = 3;
   p->primaryAxis = primary_axis;
   p->stepsRemaining = p->delta[primary_axis];
   //Feedrate calc based on XYZ travel distance
   // TODO - Simplify since Z will always move
-  if(p->dir & 112) {
-#if DRIVE_SYSTEM==0 || defined(NEW_XY_GANTRY)
-    xydist2 = axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1];
+  if(p->dir & XYZD_FLAG) {
+#if DRIVE_SYSTEM==CartesianDrive || defined(NEW_XY_GANTRY)
+    xydist2 = axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS];
 #else
     float dx,dy;
-#if DRIVE_SYSTEM==1
-    dx = 0.5*(axis_diff[0]+axis_diff[1]);
-    dy = axis_diff[0]-dx;
+#if DRIVE_SYSTEM==GantryX_YDrive
+    dx = 0.5*(axis_diff[X_AXIS]+axis_diff[Y_AXIS]);
+    dy = axis_diff[X_AXIS]-dx;
 #endif
-#if DRIVE_SYSTEM==2
-    dy = 0.5*(axis_diff[0]+axis_diff[1]);
-    dx = axis_diff[0]-dy;
+#if DRIVE_SYSTEM==GantryY_XDrive
+    dy = 0.5*(axis_diff[X_AXIS]+axis_diff[Y_AXIS]);
+    dx = axis_diff[X_AXIS]-dy;
 #endif
     xydist2 = dx*dx+dy*dy;
 #endif
-    if(p->dir & 64) {
-      p->distance = sqrt(xydist2 + axis_diff[2] * axis_diff[2]);
+    if(p->dir & ZD_FLAG) {
+      p->distance = sqrt(xydist2 + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]);
     } else {
       p->distance = sqrt(xydist2);
     }
-  }  else if(p->dir & 128)
-    p->distance = fabs(axis_diff[3]);
+  }  else if(p->dir & ED_FLAG)
+    p->distance = fabs(axis_diff[E_AXIS]);
   else {
     return; // no steps to take, we are finished
   }
@@ -858,7 +849,7 @@ void queue_move(byte check_endstops,byte pathOptimize) {
 }
 #endif
 
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 #define DEBUG_DELTA_OVERFLOW
 /**
   Calculate and cache the delta robot positions of the cartesian move in a line.
@@ -915,7 +906,7 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
 	#endif
 					d->deltaSteps[i] = delta;
 				} else {
-					d->dir |= 16<<i;
+					d->dir |= XD_FLAG<<i;
 	#ifdef DEBUG_DELTA_OVERFLOW
 					if (-delta > 65535)
 						out.println_long_P(PSTR("Delta overflow:"), delta);
@@ -958,9 +949,9 @@ inline long calculate_delta_segments(PrintLine *p, byte softEndstop) {
   @param zaxis Z tower position.
 */
 inline void set_delta_position(long xaxis, long yaxis, long zaxis) {
-	printer_state.currentDeltaPositionSteps[0] = xaxis;
-	printer_state.currentDeltaPositionSteps[1] = yaxis;
-	printer_state.currentDeltaPositionSteps[2] = zaxis;
+	printer_state.currentDeltaPositionSteps[X_AXIS] = xaxis;
+	printer_state.currentDeltaPositionSteps[Y_AXIS] = yaxis;
+	printer_state.currentDeltaPositionSteps[Z_AXIS] = zaxis;
 }
 
 /**
@@ -971,21 +962,21 @@ inline void set_delta_position(long xaxis, long yaxis, long zaxis) {
 */
 byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]) {
 	long temp;
-	long opt = DELTA_DIAGONAL_ROD_STEPS_SQUARED - sq(DELTA_TOWER1_Y_STEPS - cartesianPosSteps[Y_AXIS]);
+	long opt = DELTA_DIAGONAL_ROD_STEPS_SQUARED - sq(DELTA_TOWER1_Y_STEPS(printer_state.printer_radius) - cartesianPosSteps[Y_AXIS]);
 
-	if ((temp = opt - sq(DELTA_TOWER1_X_STEPS - cartesianPosSteps[X_AXIS])) >= 0)
+	if ((temp = opt - sq(DELTA_TOWER1_X_STEPS(printer_state.printer_radius) - cartesianPosSteps[X_AXIS])) >= 0)
 		deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
 
-	if ((temp = opt - sq(DELTA_TOWER2_X_STEPS - cartesianPosSteps[X_AXIS])) >= 0)
+	if ((temp = opt - sq(DELTA_TOWER2_X_STEPS(printer_state.printer_radius) - cartesianPosSteps[X_AXIS])) >= 0)
 		deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
 
 	if ((temp = DELTA_DIAGONAL_ROD_STEPS_SQUARED
-		 - sq(DELTA_TOWER3_X_STEPS - cartesianPosSteps[X_AXIS])
-		 - sq(DELTA_TOWER3_Y_STEPS - cartesianPosSteps[Y_AXIS])) >= 0)
+		 - sq(DELTA_TOWER3_X_STEPS(printer_state.printer_radius) - cartesianPosSteps[X_AXIS])
+		 - sq(DELTA_TOWER3_Y_STEPS(printer_state.printer_radius) - cartesianPosSteps[Y_AXIS])) >= 0)
 		deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 	else
 		return 0;
@@ -999,27 +990,27 @@ inline void calculate_dir_delta(long difference[], byte *dir, long delta[]) {
 	for(byte i=0; i < 4; i++) {
 		if(difference[i]>=0) {
 			delta[i] = difference[i];
-			*dir |= 1<<i;
+			*dir |= XC_FLAG<<i;
 		} else {
 			delta[i] = -difference[i];
 	}
-		if(delta[i]) *dir |= 16<<i;
+		if(delta[i]) *dir |= XD_FLAG<<i;
 	}
 	if(printer_state.extrudeMultiply!=100) {
-		delta[3]=(long)((delta[3]*(float)printer_state.extrudeMultiply)*0.01f);
+		delta[E_AXIS]=(long)((delta[E_AXIS]*(float)printer_state.extrudeMultiply)*0.01f);
 	}
 }
 
 inline byte calculate_distance(float axis_diff[], byte dir, float *distance) {
   // Calculate distance depending on direction
-	if(dir & 112) {
-		if(dir & 64) {
-			*distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1] + axis_diff[2] * axis_diff[2]);
+	if(dir & XYZD_FLAG) {
+		if(dir & ZD_FLAG) {
+			*distance = sqrt(axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS] + axis_diff[Z_AXIS] * axis_diff[Z_AXIS]);
 		} else {
-			*distance = sqrt(axis_diff[0] * axis_diff[0] + axis_diff[1] * axis_diff[1]);
+			*distance = sqrt(axis_diff[X_AXIS] * axis_diff[X_AXIS] + axis_diff[Y_AXIS] * axis_diff[Y_AXIS]);
 		}
-	} else if(dir & 128)
-		*distance = fabs(axis_diff[3]);
+	} else if(dir & ED_FLAG)
+		*distance = fabs(axis_diff[E_AXIS]);
 	else {
 		return 0; // no steps to take, we are finished
 	}
@@ -1047,7 +1038,7 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   }
   byte newPath=check_new_move(pathOptimize, 0);
   PrintLine *p = &lines[lines_write_pos];
-  float axis_diff[4]; // Axis movement in mm
+  float axis_diff[NUM_AXIS]; // Axis movement in mm
   if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
   else p->flags = 0;
   p->joinFlags = 0;
@@ -1058,19 +1049,19 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
 	p->delta[i] = 0;
 	axis_diff[i] = 0;
   }
-  axis_diff[3] = e_diff*inv_axis_steps_per_unit[3];
+  axis_diff[E_AXIS] = e_diff*inv_axis_steps_per_unit[E_AXIS];
   if (e_diff >= 0) {
-	p->delta[3] = e_diff;
+	p->delta[E_AXIS] = e_diff;
 	p->dir = 0x88;
   } else {
-	p->delta[3] = -e_diff;
+	p->delta[E_AXIS] = -e_diff;
 	p->dir = 0x80;
   }
   if(printer_state.extrudeMultiply!=100) {
-    //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
-    p->delta[3]=(long)((p->delta[3]*(float)printer_state.extrudeMultiply)*0.01f);
+    //p->delta[E_AXIS]=(p->delta[E_AXIS]*printer_state.extrudeMultiply)/100;
+    p->delta[E_AXIS]=(long)((p->delta[E_AXIS]*(float)printer_state.extrudeMultiply)*0.01f);
   }
-  printer_state.currentPositionSteps[3] = printer_state.destinationSteps[3];
+  printer_state.currentPositionSteps[ExtruderAxis] = printer_state.destinationSteps[ExtruderAxis];
 
 #if USE_OPS==1
   p->opsReverseSteps=0;
@@ -1078,8 +1069,8 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   p->numDeltaSegments = 0;
   //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
   p->primaryAxis = 3;
-  p->stepsRemaining = p->delta[3];
-  p->distance = fabs(axis_diff[3]);
+  p->stepsRemaining = p->delta[E_AXIS];
+  p->distance = fabs(axis_diff[E_AXIS]);
   p->moveID = lastMoveID++;
   calculate_move(p,axis_diff,check_endstops,pathOptimize);
 }
@@ -1090,40 +1081,30 @@ inline void queue_E_move(long e_diff,byte check_endstops,byte pathOptimize) {
   @param pathOptimize Run the path optimizer.
   @param delta_step_rate delta step rate in segments per second for the move.
 */
+//#define DEBUG_SPLIT
 void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
-    if (softEndstop && printer_state.destinationSteps[2] < 0) printer_state.destinationSteps[2] = 0;
+    if (softEndstop && printer_state.destinationSteps[ZAxis] < 0) printer_state.destinationSteps[ZAxis] = 0;
 	long difference[NUM_AXIS];
-	float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
+	float axis_diff[MAX_AXIS]; // Axis movement in mm. Virtual axis in 4 V_AXIS;
 	for(byte i=0; i < NUM_AXIS; i++) {
 		difference[i] = printer_state.destinationSteps[i] - printer_state.currentPositionSteps[i];
 		axis_diff[i] = fabs(difference[i] * inv_axis_steps_per_unit[i]);
 	}
-    printer_state.filamentPrinted+=axis_diff[3];
+    printer_state.filamentPrinted+=axis_diff[E_AXIS];
 
-#if max_software_endstop_r == true
-// TODO - Implement radius checking
-// I'm guessing I need the floats to prevent overflow. This is pretty horrible.
-// The NaN checking in the delta calculation routine should be enough
-//float a = difference[0] * difference[0] + difference[1] * difference[1];
-//float b = 2 * (difference[0] * printer_state.currentPositionSteps[0] + difference[1] * printer_state.currentPositionSteps[1]);
-//float c = printer_state.currentPositionSteps[0] * printer_state.currentPositionSteps[0] + printer_state.currentPositionSteps[1] * printer_state.currentPositionSteps[1] - r * r;
-//float disc = b * b - 4 * a * c;
-//if (disc >= 0) {
-//    float t = (-b + (float)sqrt(disc)) / (2 * a);
-//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[0] + difference[0] * t;
-//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[1] + difference[1] * t;
-//}
-#endif
+// Deleted commented out unfinished bounds/endstop check
+// Check moved to commands.c get_coordinates where they may be 
+// more efficicntly evaluated in millimeter coordinates.
 
 	float save_distance;
 	byte save_dir;
-	long save_delta[4];
+	long save_delta[NUM_AXIS];
 	calculate_dir_delta(difference, &save_dir, save_delta);
 	if (!calculate_distance(axis_diff, save_dir, &save_distance))
 		return;
 
-	if (!(save_dir & 112)) {
-		queue_E_move(difference[3],check_endstops,pathOptimize);
+	if (!(save_dir & XYZD_FLAG)) {
+		queue_E_move(difference[E_AXIS],check_endstops,pathOptimize);
 		return;
 	}
 	
@@ -1131,14 +1112,14 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 	int num_lines;
 	int segments_per_line;
 
-	if (save_dir & 48) {
+	if (save_dir & XYD_FLAG) {
 		// Compute number of seconds for move and hence number of segments needed
 		//float seconds = 100 * save_distance / (printer_state.feedrate * printer_state.feedrateMultiply);
 		float seconds = save_distance / printer_state.feedrate;
 #ifdef DEBUG_SPLIT
 		out.println_float_P(PSTR("Seconds: "), seconds);
 #endif
-		segment_count = max(1, int(((save_dir & 136)==136 ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
+		segment_count = max(1, int(((save_dir & XED_FLAG)==XED_FLAG ? DELTA_SEGMENTS_PER_SECOND_PRINT : DELTA_SEGMENTS_PER_SECOND_MOVE) * seconds));
 		// Now compute the number of lines needed
 		num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
 		// There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
@@ -1147,14 +1128,14 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		// Optimize pure Z axis move. Since a pure Z axis move is linear all we have to watch out for is unsigned integer overuns in
 		// the queued moves;
 #ifdef DEBUG_SPLIT
-		out.println_long_P(PSTR("Z delta: "), save_delta[2]);
+		out.println_long_P(PSTR("Z delta: "), save_delta[Z_AXIS]);
 #endif
-		segment_count = (save_delta[2] + (unsigned long)65534) / (unsigned long)65535;
+		segment_count = (save_delta[Z_AXIS] + (unsigned long)65534) / (unsigned long)65535;
 		num_lines = (segment_count + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
 		segments_per_line = segment_count / num_lines;
 	}
 
-	long start_position[4], fractional_steps[4];
+	long start_position[NUM_AXIS], fractional_steps[NUM_AXIS];
 	for (byte i = 0; i < 4; i++) {
 		start_position[i] = printer_state.currentPositionSteps[i];
 	}
@@ -1224,22 +1205,22 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 		out.println_long_P(PSTR("Max DS:"), max_delta_step);
 	#endif
 		long virtual_axis_move = max_delta_step * segments_per_line;
-		if (virtual_axis_move == 0 && p->delta[3] == 0) {
+		if (virtual_axis_move == 0 && p->delta[E_AXIS] == 0) {
 			if (num_lines!=1)
-				OUT_P_LN("ERROR: No move in delta segment with > 1 segment. This should never happen and may cause a problem!");
+				OUT_P_LN("ERROR: No move in delta segment with > 1 segment. This should never happen and may cause a problem.");
 			return;  // Line too short in low precision area
 		}
 		p->primaryAxis = 4; // Virtual axis will lead bresenham step either way
-		if (virtual_axis_move > p->delta[3]) { // Is delta move or E axis leading
+		if (virtual_axis_move > p->delta[E_AXIS]) { // Is delta move or E axis leading
 			p->stepsRemaining = virtual_axis_move;
-			axis_diff[4] = virtual_axis_move * inv_axis_steps_per_unit[0]; // Steps/unit same as all the towers
+			axis_diff[V_AXIS] = virtual_axis_move * inv_axis_steps_per_unit[X_AXIS]; // Steps/unit same as all the towers
 			// Virtual axis steps per segment
 			p->numPrimaryStepPerSegment = max_delta_step;
 		} else {
 			// Round up the E move to get something divisible by segment count which is greater than E move
-			p->numPrimaryStepPerSegment = (p->delta[3] + segments_per_line - 1) / segments_per_line;
+			p->numPrimaryStepPerSegment = (p->delta[E_AXIS] + segments_per_line - 1) / segments_per_line;
 			p->stepsRemaining = p->numPrimaryStepPerSegment * segments_per_line;
-			axis_diff[4] = p->stepsRemaining * inv_axis_steps_per_unit[0];
+			axis_diff[V_AXIS] = p->stepsRemaining * inv_axis_steps_per_unit[X_AXIS];
 		}
 #ifdef DEBUG_SPLIT
 		out.println_long_P(PSTR("Steps Per Segment:"), p->numPrimaryStepPerSegment);
@@ -1256,7 +1237,7 @@ void split_delta_move(byte check_endstops,byte pathOptimize, byte softEndstop) {
 
 #endif
 
-#if ARC_SUPPORT
+#ifdef ARC_SUPPORT
 // Arc function taken from grbl
 // The arc is approximated by generating a huge number of tiny, linear segments. The length of each 
 // segment is configured in settings.mm_per_arc_segment.  
@@ -1264,17 +1245,17 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
 {      
   //   int acceleration_manager_was_enabled = plan_is_acceleration_manager_enabled();
   //   plan_set_acceleration_manager_enabled(false); // disable acceleration management for the duration of the arc
-  float center_axis0 = position[0] + offset[0];
-  float center_axis1 = position[1] + offset[1];
+  float center_axis0 = position[X_AXIS] + offset[X_AXIS];
+  float center_axis1 = position[Y_AXIS] + offset[Y_AXIS];
   float linear_travel = 0; //target[axis_linear] - position[axis_linear];
-  float extruder_travel = printer_state.destinationSteps[3]-printer_state.currentPositionSteps[3];
-  float r_axis0 = -offset[0];  // Radius vector from center to current location
-  float r_axis1 = -offset[1];
-  float rt_axis0 = target[0] - center_axis0;
-  float rt_axis1 = target[1] - center_axis1;
-  long xtarget = printer_state.destinationSteps[0];
-  long ytarget = printer_state.destinationSteps[1];
-  long etarget = printer_state.destinationSteps[3];
+  float extruder_travel = printer_state.destinationSteps[ExtruderAxis]-printer_state.currentPositionSteps[ExtruderAxis];
+  float r_axis0 = -offset[X_AXIS];  // Radius vector from center to current location
+  float r_axis1 = -offset[Y_AXIS];
+  float rt_axis0 = target[X_AXIS] - center_axis0;
+  float rt_axis1 = target[Y_AXIS] - center_axis1;
+  long xtarget = printer_state.destinationSteps[XAxis];
+  long ytarget = printer_state.destinationSteps[YAxis];
+  long etarget = printer_state.destinationSteps[ExtruderAxis];
   
   // CCW angle between position and target from circle center. Only one atan2() trig computation required.
   float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
@@ -1326,7 +1307,7 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
   float cos_T = 1-0.5*theta_per_segment*theta_per_segment; // Small angle approximation
   float sin_T = theta_per_segment;
   
-  float arc_target[4];
+  float arc_target[NUM_AXIS];
   float sin_Ti;
   float cos_Ti;
   float r_axisi;
@@ -1337,7 +1318,7 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
   //arc_target[axis_linear] = position[axis_linear];
   
   // Initialize the extruder axis
-  arc_target[3] = printer_state.currentPositionSteps[3];
+  arc_target[E_AXIS] = printer_state.currentPositionSteps[ExtruderAxis];
 
   for (i = 1; i<segments; i++) 
   { // Increment (segments-1)
@@ -1363,34 +1344,35 @@ void mc_arc(float *position, float *target, float *offset, float radius, uint8_t
       // Compute exact location by applying transformation matrix from initial radius vector(=-offset).
       cos_Ti  = cos(i*theta_per_segment);
       sin_Ti  = sin(i*theta_per_segment);
-      r_axis0 = -offset[0]*cos_Ti + offset[1]*sin_Ti;
-      r_axis1 = -offset[0]*sin_Ti - offset[1]*cos_Ti;
+      r_axis0 = -offset[X_AXIS]*cos_Ti + offset[Y_AXIS]*sin_Ti;
+      r_axis1 = -offset[X_AXIS]*sin_Ti - offset[Y_AXIS]*cos_Ti;
       count = 0;
     }
 
     // Update arc_target location
-    arc_target[0] = center_axis0 + r_axis0;
-    arc_target[1] = center_axis1 + r_axis1;
+    arc_target[X_AXIS] = center_axis0 + r_axis0;
+    arc_target[Y_AXIS] = center_axis1 + r_axis1;
     //arc_target[axis_linear] += linear_per_segment;
-    arc_target[3] += extruder_per_segment;
+    arc_target[E_AXIS] += extruder_per_segment;
     
-    printer_state.destinationSteps[0] = arc_target[0]*axis_steps_per_unit[0];
-    printer_state.destinationSteps[1] = arc_target[1]*axis_steps_per_unit[1];
-    printer_state.destinationSteps[3] = arc_target[3];
-#if DRIVE_SYSTEM == 3
+    printer_state.destinationSteps[XAxis] = arc_target[X_AXIS]*axis_steps_per_unit[XAxis];
+    printer_state.destinationSteps[YAxis] = arc_target[Y_AXIS]*axis_steps_per_unit[YAxis];
+    printer_state.destinationSteps[ExtruderAxis] = arc_target[E_AXIS];
+#if DRIVE_SYSTEM==DeltaDrive
     split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
     queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
   }
   // Ensure last segment arrives at target location.
-  printer_state.destinationSteps[0] = xtarget;
-  printer_state.destinationSteps[1] = ytarget;
-  printer_state.destinationSteps[3] = etarget;
-#if DRIVE_SYSTEM == 3
+  printer_state.destinationSteps[XAxis] = xtarget;
+  printer_state.destinationSteps[YAxis] = ytarget;
+  printer_state.destinationSteps[ExtruderAxis] = etarget;
+#if DRIVE_SYSTEM==DeltaDrive
   split_delta_move(ALWAYS_CHECK_ENDSTOPS, true, true);
 #else
   queue_move(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
 }
 #endif
+

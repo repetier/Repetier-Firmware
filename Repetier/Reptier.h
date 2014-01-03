@@ -23,8 +23,9 @@
 #define _REPETIER_H
 
 #include <avr/io.h>
+#include "Configuration.h"
 
-#define REPETIER_VERSION "0.83SeeMe"
+#define REPETIER_VERSION "v0.82plus"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -92,8 +93,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #define NEW_XY_GANTRY
 
-#include "Configuration.h"
-#if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==GantryX_YDrive || DRIVE_SYSTEM==GantryY_XDrive
 #define XY_GANTRY
 #endif
 
@@ -240,20 +240,15 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define	SET_INPUT(IO)  pinMode(IO, INPUT)
 #define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
-#define SD_MAX_FOLDER_DEPTH 2
+// This is used to calculate the buffer size for 2 full length filename variables
+// 13 characters per level for short names, 
+// plus 13 for the end file short name plus nul terminator
+// setting ths low saves very little memory, but there IS very little memory.
+#define SD_MAX_FOLDER_DEPTH 6
 
 #include "ui.h"
 
-#ifndef SDSUPPORT
-#define SDSUPPORT false
-#endif
-#if SDSUPPORT
-#include "SdFat.h"
-#endif
-#ifndef SDSUPPORT
-#define SDSUPPORT false
-#endif
-#if SDSUPPORT
+#ifdef SDSUPPORT
 #include "SdFat.h"
 #endif
 
@@ -305,8 +300,8 @@ typedef struct {
   byte sensorPin; ///< Pin to read extruder temperature.
   int currentTemperature; ///< Currenttemperature value read from sensor.
   int targetTemperature; ///< Target temperature value in units of sensor.
-  float currentTemperatureC; ///< Current temperature in °C.
-  float targetTemperatureC; ///< Target temperature in °C.
+  float currentTemperatureC; ///< Current temperature in Â°C.
+  float targetTemperatureC; ///< Target temperature in Â°C.
   unsigned long lastTemperatureUpdate; ///< Time in millis of the last temperature update.
   char heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control
 #ifdef TEMP_PID
@@ -321,6 +316,7 @@ typedef struct {
   float tempIStateLimitMin;
   byte tempPointer;
   float tempArray[4];
+  float tempCalibration; // in percent, default 100. So users can calibrate variations in devices from specs
 #endif
 } TemperatureController;
 /** \brief Data to drive one extruder.
@@ -389,7 +385,8 @@ extern void heated_bed_set_temperature(float temp_celsius);
 extern void extruder_set_direction(byte steps);
 extern void extruder_disable();
 #ifdef TEMP_PID
-void autotunePID(float temp,int controllerId);
+void autotunePID(float temp, unsigned char controllerId);
+void autotunePID(float temp, unsigned char heaterId, unsigned char methods);
 #endif
 
 //#ifdef TEMP_PID
@@ -551,13 +548,13 @@ inline void extruder_enable() {
 #endif
 }
 extern void(* resetFunc) (void); 
-// Read a temperature and return its value in °C
+// Read a temperature and return its value in Â°C
 // this high level method supports all known methods
 extern int read_raw_temperature(byte type,byte pin);
 extern float heated_bed_get_temperature();
-// Convert a raw temperature value into °C
+// Convert a raw temperature value into Â°C
 extern float conv_raw_temp(byte type,int raw_temp);
-// Converts a temperture temp in °C into a raw value
+// Converts a temperture temp in Â°C into a raw value
 // which can be compared with results of read_raw_temperature
 extern int conv_temp_raw(byte type,float temp);
 // Updates the temperature of all extruders and heated bed if it's time.
@@ -565,10 +562,6 @@ extern int conv_temp_raw(byte type,float temp);
 extern void manage_temperatures();
 extern bool reportTempsensorError(); ///< Report defect sensors
 extern byte manage_monitor;
-
-void process_command(GCode *code,byte bufferedCommand);
-
-void manage_inactivity(byte debug);
 
 extern int get_fan_speed();
 extern void wait_until_end_of_move();
@@ -580,10 +573,9 @@ extern void defaultLoopActions();
 extern void change_feedrate_multiply(int factor); ///< Set feedrate multiplier
 extern void set_fan_speed(int speed,bool wait); /// Set fan speed 0..255
 extern void home_axis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
-extern byte get_coordinates(GCode *com);
 extern void move_steps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
 extern void queue_move(byte check_endstops,byte pathOptimize);
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 extern byte calculate_delta(long cartesianPosSteps[], long deltaPosSteps[]);
 extern void set_delta_position(long xaxis, long yaxis, long zaxis);
 extern float rodMaxLength;
@@ -606,6 +598,11 @@ extern inline void enable_z();
 
 extern void kill(byte only_steppers);
 
+//enum {XAxis=0, YAxis=1, ZAxis=2, ExtruderAxis=3};
+#define XAxis 0
+#define YAxis 1
+#define ZAxis 2
+#define ExtruderAxis 3
 extern float axis_steps_per_unit[];
 extern float inv_axis_steps_per_unit[];
 extern float max_feedrate[];
@@ -661,12 +658,14 @@ typedef struct {
 #endif
   long currentPositionSteps[4];     ///< Position in steps from origin.
   long destinationSteps[4];         ///< Target position in steps.
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 #ifdef STEP_COUNTER
   long countZSteps;					///< Count of steps from last position reset
 #endif
   long currentDeltaPositionSteps[4];
   long maxDeltaPositionSteps;
+  float delta_xy_radius;
+  float printer_radius;
 #endif
 #ifdef SOFTWARE_LEVELING
   long levelingP1[3];
@@ -757,7 +756,7 @@ extern PrinterState printer_state;
 /** Wait for the extruder to finish it's down movement */
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
 // MAX_DELTA_SEGMENTS_PER_LINE * 
 #define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
@@ -770,13 +769,31 @@ extern unsigned int delta_segment_write_pos; 	// Position where we write the nex
 extern volatile unsigned int delta_segment_count; // Number of delta moves cached 0 = nothing in cache
 extern byte lastMoveID;
 #endif
+//cartesion flags
+#define XC_FLAG 1
+#define YC_FLAG 2
+#define ZC_FLAG 4
+#define EC_FLAG 8
+#define XYZC_FLAG 7
+//delta flags
+#define XD_FLAG 16
+#define YD_FLAG 32
+#define ZD_FLAG 64
+#define ED_FLAG 128
+#define XYZD_FLAG 112
+#define XYD_FLAG 48
+#define XYZED_FLAG 240
+#define XED_FLAG 136
+
+
 typedef struct { // RAM usage: 24*4+15 = 113 Byte
   byte primaryAxis;
   volatile byte flags;
   long timeInTicks;
   byte joinFlags;
   byte halfstep;                  ///< 0 = disabled, 1 = halfstep, 2 = fulstep
-  byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+  byte dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, delta 16,32,64,128 values can be combined.
+
   long delta[4];                  ///< Steps we want to move.
   long error[4];                  ///< Error calculation for Bresenham algorithm
   float speedX;                   ///< Speed in x direction at fullInterval in mm/s
@@ -785,12 +802,12 @@ typedef struct { // RAM usage: 24*4+15 = 113 Byte
   float speedE;                   ///< Speed in E direction at fullInterval in mm/s
   float fullSpeed;                ///< Desired speed mm/s
   float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
-  float acceleration;             ///< Real 2.0*distanceÜacceleration mm²/s²
+  float acceleration;             ///< Real 2.0*distanceÃœacceleration mmÂ²/sÂ²
   float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
   float startSpeed;               ///< Staring speed in mm/s
   float endSpeed;                 ///< Exit speed in mm/s
   float distance;
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DeltaDrive
   byte numDeltaSegments;		  		///< Number of delta segments left in line. Decremented by stepper timer.
   byte moveID;							///< ID used to identify moves which are all part of the same line
   int deltaSegmentReadPos; 	 			///< Pointer to next DeltaSegment
@@ -860,12 +877,11 @@ extern TemperatureController heatedBedController;
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
 extern byte autotuneIndex;
 
-#if SDSUPPORT
+#ifdef SDSUPPORT
 
+// aleady done #include "SdFat.h"
 
-#include "SdFat.h"
-
-enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
+enum LsAction {LS_SerialPrint=0,LS_Count=1,LS_GetFilename=2};
 class SDCard {
 public:
   SdFat fat;
@@ -876,7 +892,7 @@ public:
   SdFile file;
   uint32_t filesize;
   uint32_t sdpos;
-  char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+  char fullName[13*SD_MAX_FOLDER_DEPTH+13+2]; // Full name
   char *shortname; // Pointer to start of filename itself
   char *pathend; // File to char where pathname in fullname ends
   bool sdmode;  // true if we are printing from sd card
@@ -895,7 +911,7 @@ public:
     sdmode = false;
     sdactive = false;
   }
-  inline void startPrint() {if(sdactive) sdmode = true; }
+  inline void startPrint() {if(sdactive) {sdmode = true; clearLineReports(); UI_CLEAR_STATUS} } // allow counting file's gcode lines with no line numbers
   inline void pausePrint() {sdmode = false;}
   inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
   void printStatus();
@@ -914,7 +930,7 @@ private:
 
 extern SDCard sd;
 #endif
-
+ 
 extern int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
 #ifdef USE_OPS
 extern byte printmoveSeen;
@@ -958,27 +974,33 @@ inline void  enable_z() {
 #endif
 }
 
-
-#if DRIVE_SYSTEM==3
-#define SIN_60 0.8660254037844386
-#define COS_60 0.5
-#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
-#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
-#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
-#define DELTA_RADIUS_STEPS (AXIS_STEPS_PER_MM * DELTA_RADIUS)
-
-#define DELTA_TOWER1_X_STEPS -SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER1_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_X_STEPS SIN_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER2_Y_STEPS -COS_60*DELTA_RADIUS_STEPS
-#define DELTA_TOWER3_X_STEPS 0.0
-#define DELTA_TOWER3_Y_STEPS DELTA_RADIUS_STEPS
-
 #define NUM_AXIS 4
 #define X_AXIS 0
 #define Y_AXIS 1
 #define Z_AXIS 2
 #define E_AXIS 3
+
+#if DRIVE_SYSTEM==DeltaDrive
+#define SIN_60 0.8660254037844386
+#define COS_60 0.5
+#define DELTA_DIAGONAL_ROD_STEPS (AXIS_STEPS_PER_MM * DELTA_DIAGONAL_ROD)
+#define DELTA_DIAGONAL_ROD_STEPS_SQUARED (DELTA_DIAGONAL_ROD_STEPS * DELTA_DIAGONAL_ROD_STEPS)
+#define DELTA_ZERO_OFFSET_STEPS (AXIS_STEPS_PER_MM * DELTA_ZERO_OFFSET)
+#define DELTA_RADIUS_STEPS(x) (AXIS_STEPS_PER_MM * DELTA_RADIUS(x))
+
+#define DELTA_TOWER1_X_STEPS(x) (-SIN_60*DELTA_RADIUS_STEPS(x))
+#define DELTA_TOWER1_Y_STEPS(x) (-COS_60*DELTA_RADIUS_STEPS(x))
+#define DELTA_TOWER2_X_STEPS(x) (SIN_60*DELTA_RADIUS_STEPS(x))
+#define DELTA_TOWER2_Y_STEPS(x) (-COS_60*DELTA_RADIUS_STEPS(x))
+#define DELTA_TOWER3_X_STEPS(x) 0.0
+#define DELTA_TOWER3_Y_STEPS(x) (DELTA_RADIUS_STEPS(x))
+
+//for when virtual axis is needed
+#define V_AXIS 4
+#define MAX_AXIS 5
+#else
+#define MAX_AXIS 4
+
 
 #endif
 
@@ -986,3 +1008,4 @@ inline void  enable_z() {
 #define XSTR(s) STR(s)
 
 #endif
+

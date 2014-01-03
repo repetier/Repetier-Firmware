@@ -1,25 +1,25 @@
 /*
     This file is part of Repetier-Firmware.
-
-    Repetier-Firmware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Repetier-Firmware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
-
-    This firmware is a nearly complete rewrite of the sprinter firmware
-    by kliment (https://github.com/kliment/Sprinter)
-    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
-
-  Functions in this file are used to communicate using ascii or repetier protocol.
-*/
+ 
+ Repetier-Firmware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Repetier-Firmware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ This firmware is a nearly complete rewrite of the sprinter firmware
+ by kliment (https://github.com/kliment/Sprinter)
+ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+ 
+ Functions in this file are used to communicate using ascii or repetier protocol.
+ */
 
 #include "Reptier.h"
 
@@ -49,6 +49,10 @@ inline void epr_set_long(uint pos,long value) {
   eeprom_write_dword((unsigned long*)(EEPROM_OFFSET+pos),value);
 }
 inline void epr_set_float(uint pos,float value) {
+  eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
+}
+inline void epr_set_float(uint pos,float value, float defaultVal, float minVal, float maxVal) {
+  if (isnan(value) || isinf(value) || value < minVal || value > maxVal) value = defaultVal;
   eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
 }
 void epr_out_prefix(uint pos) {
@@ -96,18 +100,18 @@ void epr_out_byte(uint pos,PGM_P text) {
 
 void epr_update(GCode *com) {
   if(GCODE_HAS_T(com) && GCODE_HAS_P(com)) switch(com->T) {
-    case 0:
-      if(GCODE_HAS_S(com)) epr_set_byte(com->P,(byte)com->S);
-      break;
-    case 1:
-      if(GCODE_HAS_S(com)) epr_set_int(com->P,(int)com->S);
-      break;
-    case 2:
-      if(GCODE_HAS_S(com)) epr_set_long(com->P,(long)com->S);
-      break;
-    case 3:
-      if(GCODE_HAS_X(com)) epr_set_float(com->P,com->X);
-      break;
+  case 0:
+    if(GCODE_HAS_S(com)) epr_set_byte(com->P,(byte)com->S);
+    break;
+  case 1:
+    if(GCODE_HAS_S(com)) epr_set_int(com->P,(int)com->S);
+    break;
+  case 2:
+    if(GCODE_HAS_S(com)) epr_set_long(com->P,(long)com->S);
+    break;
+  case 3:
+    if(GCODE_HAS_X(com)) epr_set_float(com->P,com->X);
+    break;
   }
   byte newcheck = epr_compute_checksum();
   if(newcheck!=epr_get_byte(EPR_INTEGRITY_BYTE))
@@ -116,31 +120,31 @@ void epr_update(GCode *com) {
 }
 
 /** \brief Copy data from EEPROM to variables.
-*/
+ */
 void epr_eeprom_reset() {
   byte version = EEPROM_PROTOCOL_VERSION;
   baudrate = BAUDRATE;
   max_inactive_time = MAX_INACTIVE_TIME*1000L;
   stepper_inactive_time = STEPPER_INACTIVE_TIME*1000L;
-  axis_steps_per_unit[0] = XAXIS_STEPS_PER_MM;
-  axis_steps_per_unit[1] = YAXIS_STEPS_PER_MM; 
-  axis_steps_per_unit[2] = ZAXIS_STEPS_PER_MM;
-  axis_steps_per_unit[3] = 1;
-  max_feedrate[0] = MAX_FEEDRATE_X;
-  max_feedrate[1] = MAX_FEEDRATE_Y;
-  max_feedrate[2] = MAX_FEEDRATE_Z;
-  homing_feedrate[0] = HOMING_FEEDRATE_X;
-  homing_feedrate[1] = HOMING_FEEDRATE_Y;
-  homing_feedrate[2] = HOMING_FEEDRATE_Z;
+  axis_steps_per_unit[XAxis] = XAXIS_STEPS_PER_MM;
+  axis_steps_per_unit[YAxis] = YAXIS_STEPS_PER_MM; 
+  axis_steps_per_unit[ZAxis] = ZAXIS_STEPS_PER_MM;
+  axis_steps_per_unit[ExtruderAxis] = 1;
+  max_feedrate[XAxis] = MAX_FEEDRATE_X;
+  max_feedrate[YAxis] = MAX_FEEDRATE_Y;
+  max_feedrate[ZAxis] = MAX_FEEDRATE_Z;
+  homing_feedrate[XAxis] = HOMING_FEEDRATE_X;
+  homing_feedrate[YAxis] = HOMING_FEEDRATE_Y;
+  homing_feedrate[ZAxis] = HOMING_FEEDRATE_Z;
   printer_state.maxJerk = MAX_JERK;
   printer_state.maxZJerk = MAX_ZJERK;
 #ifdef RAMP_ACCELERATION
-  max_acceleration_units_per_sq_second[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-  max_acceleration_units_per_sq_second[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-  max_acceleration_units_per_sq_second[2] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-  max_travel_acceleration_units_per_sq_second[0] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-  max_travel_acceleration_units_per_sq_second[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-  max_travel_acceleration_units_per_sq_second[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+  max_acceleration_units_per_sq_second[XAxis] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+  max_acceleration_units_per_sq_second[YAxis] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+  max_acceleration_units_per_sq_second[ZAxis] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+  max_travel_acceleration_units_per_sq_second[XAxis] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+  max_travel_acceleration_units_per_sq_second[YAxis] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+  max_travel_acceleration_units_per_sq_second[ZAxis] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
 #if USE_OPS==1
   printer_state.opsMode = OPS_MODE;
@@ -166,6 +170,10 @@ void epr_eeprom_reset() {
   printer_state.xMin = X_MIN_POS;
   printer_state.yMin = Y_MIN_POS;
   printer_state.zMin = Z_MIN_POS;
+#if DRIVE_SYSTEM==DeltaDrive
+  printer_state.printer_radius = PRINTER_RADIUS;
+  printer_state.delta_xy_radius = DELTA_XY_RADIUS;
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashX = X_BACKLASH;
   printer_state.backlashY = Y_BACKLASH;
@@ -357,31 +365,31 @@ void epr_eeprom_reset() {
   initHeatedBed();
 }
 /** \brief Moves current settings to EEPROM.
-
-The values the are currently set are used to fill the eeprom.*/
+ * 
+ The values the are currently set are used to fill the eeprom.*/
 void epr_data_to_eeprom(byte corrupted) {
   epr_set_long(EPR_BAUDRATE,baudrate);
   epr_set_long(EPR_MAX_INACTIVE_TIME,max_inactive_time);
   epr_set_long(EPR_STEPPER_INACTIVE_TIME,stepper_inactive_time);
-//#define EPR_ACCELERATION_TYPE 1
-  epr_set_float(EPR_XAXIS_STEPS_PER_MM,axis_steps_per_unit[0]);
-  epr_set_float(EPR_YAXIS_STEPS_PER_MM,axis_steps_per_unit[1]);
-  epr_set_float(EPR_ZAXIS_STEPS_PER_MM,axis_steps_per_unit[2]);
-  epr_set_float(EPR_X_MAX_FEEDRATE,max_feedrate[0]);
-  epr_set_float(EPR_Y_MAX_FEEDRATE,max_feedrate[1]);
-  epr_set_float(EPR_Z_MAX_FEEDRATE,max_feedrate[2]);
-  epr_set_float(EPR_X_HOMING_FEEDRATE,homing_feedrate[0]);
-  epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[1]);
-  epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[2]);
+  //#define EPR_ACCELERATION_TYPE 1
+  epr_set_float(EPR_XAXIS_STEPS_PER_MM,axis_steps_per_unit[XAxis]);
+  epr_set_float(EPR_YAXIS_STEPS_PER_MM,axis_steps_per_unit[YAxis]);
+  epr_set_float(EPR_ZAXIS_STEPS_PER_MM,axis_steps_per_unit[ZAxis]);
+  epr_set_float(EPR_X_MAX_FEEDRATE,max_feedrate[XAxis]);
+  epr_set_float(EPR_Y_MAX_FEEDRATE,max_feedrate[YAxis]);
+  epr_set_float(EPR_Z_MAX_FEEDRATE,max_feedrate[ZAxis]);
+  epr_set_float(EPR_X_HOMING_FEEDRATE,homing_feedrate[XAxis]);
+  epr_set_float(EPR_Y_HOMING_FEEDRATE,homing_feedrate[YAxis]);
+  epr_set_float(EPR_Z_HOMING_FEEDRATE,homing_feedrate[ZAxis]);
   epr_set_float(EPR_MAX_JERK,printer_state.maxJerk);
   epr_set_float(EPR_MAX_ZJERK,printer_state.maxZJerk);
 #ifdef RAMP_ACCELERATION
-  epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[0]);
-  epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[1]);
-  epr_set_float(EPR_Z_MAX_ACCEL,max_acceleration_units_per_sq_second[2]);
-  epr_set_float(EPR_X_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[0]);
-  epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[1]);
-  epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[2]);
+  epr_set_float(EPR_X_MAX_ACCEL,max_acceleration_units_per_sq_second[XAxis]);
+  epr_set_float(EPR_Y_MAX_ACCEL,max_acceleration_units_per_sq_second[YAxis]);
+  epr_set_float(EPR_Z_MAX_ACCEL,max_acceleration_units_per_sq_second[ZAxis]);
+  epr_set_float(EPR_X_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[XAxis]);
+  epr_set_float(EPR_Y_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[YAxis]);
+  epr_set_float(EPR_Z_MAX_TRAVEL_ACCEL,max_travel_acceleration_units_per_sq_second[ZAxis]);
 #endif
 #if USE_OPS==1
   epr_set_float(EPR_OPS_MIN_DISTANCE,printer_state.opsMinDistance);
@@ -398,6 +406,7 @@ void epr_data_to_eeprom(byte corrupted) {
 #endif
 #if HAVE_HEATED_BED
   epr_set_byte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
+  epr_set_float(EPR_BED_TEMP_CALIBRATION,heatedBedController.tempCalibration, 100, UI_SET_MIN_TEMP_CAL, UI_SET_MAX_TEMP_CAL); // sanity check for safety
 #else
   epr_set_byte(EPR_BED_HEAT_MANAGER,HEATED_BED_HEAT_MANAGER);
 #endif
@@ -422,6 +431,10 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_float(EPR_X_LENGTH,printer_state.xLength);
   epr_set_float(EPR_Y_LENGTH,printer_state.yLength);
   epr_set_float(EPR_Z_LENGTH,printer_state.zLength);
+#if DRIVE_SYSTEM==DeltaDrive
+  epr_set_float(EPR_PRINTER_RADIUS,printer_state.printer_radius);
+  epr_set_float(EPR_DELTA_XY_RADIUS,printer_state.delta_xy_radius);
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
   epr_set_float(EPR_BACKLASH_X,printer_state.backlashX);
   epr_set_float(EPR_BACKLASH_Y,printer_state.backlashY);
@@ -441,6 +454,8 @@ void epr_data_to_eeprom(byte corrupted) {
     epr_set_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,e->maxStartFeedrate);
     epr_set_float(o+EPR_EXTRUDER_MAX_ACCELERATION,e->maxAcceleration);
     epr_set_byte(o+EPR_EXTRUDER_HEAT_MANAGER,e->tempControl.heatManager);
+    epr_set_float(o+EPR_EXTRUDER_TEMP_CALIBRATION,e->tempControl.tempCalibration, 100, UI_SET_MIN_TEMP_CAL, UI_SET_MAX_TEMP_CAL); // sanity check for safety
+
 #ifdef TEMP_PID
     epr_set_byte(o+EPR_EXTRUDER_DRIVE_MAX,e->tempControl.pidDriveMax);
     epr_set_byte(o+EPR_EXTRUDER_DRIVE_MIN,e->tempControl.pidDriveMin);
@@ -481,31 +496,31 @@ void epr_data_to_eeprom(byte corrupted) {
   epr_set_byte(EPR_INTEGRITY_BYTE,epr_compute_checksum());
 }
 /** \brief Copy data from EEPROM to variables.
-*/
+ */
 void epr_eeprom_to_data() {
   byte version = epr_get_byte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
   baudrate = epr_get_long(EPR_BAUDRATE);
   max_inactive_time = epr_get_long(EPR_MAX_INACTIVE_TIME);
   stepper_inactive_time = epr_get_long(EPR_STEPPER_INACTIVE_TIME);
-//#define EPR_ACCELERATION_TYPE 1
-  axis_steps_per_unit[0] = epr_get_float(EPR_XAXIS_STEPS_PER_MM);
-  axis_steps_per_unit[1] = epr_get_float(EPR_YAXIS_STEPS_PER_MM);
-  axis_steps_per_unit[2] = epr_get_float(EPR_ZAXIS_STEPS_PER_MM);
-  max_feedrate[0] = epr_get_float(EPR_X_MAX_FEEDRATE);
-  max_feedrate[1] = epr_get_float(EPR_Y_MAX_FEEDRATE);
-  max_feedrate[2] = epr_get_float(EPR_Z_MAX_FEEDRATE);
-  homing_feedrate[0] = epr_get_float(EPR_X_HOMING_FEEDRATE);
-  homing_feedrate[1] = epr_get_float(EPR_Y_HOMING_FEEDRATE);
-  homing_feedrate[2] = epr_get_float(EPR_Z_HOMING_FEEDRATE);
+  //#define EPR_ACCELERATION_TYPE 1
+  axis_steps_per_unit[XAxis] = epr_get_float(EPR_XAXIS_STEPS_PER_MM);
+  axis_steps_per_unit[YAxis] = epr_get_float(EPR_YAXIS_STEPS_PER_MM);
+  axis_steps_per_unit[ZAxis] = epr_get_float(EPR_ZAXIS_STEPS_PER_MM);
+  max_feedrate[XAxis] = epr_get_float(EPR_X_MAX_FEEDRATE);
+  max_feedrate[YAxis] = epr_get_float(EPR_Y_MAX_FEEDRATE);
+  max_feedrate[ZAxis] = epr_get_float(EPR_Z_MAX_FEEDRATE);
+  homing_feedrate[XAxis] = epr_get_float(EPR_X_HOMING_FEEDRATE);
+  homing_feedrate[YAxis] = epr_get_float(EPR_Y_HOMING_FEEDRATE);
+  homing_feedrate[ZAxis] = epr_get_float(EPR_Z_HOMING_FEEDRATE);
   printer_state.maxJerk = epr_get_float(EPR_MAX_JERK);
   printer_state.maxZJerk = epr_get_float(EPR_MAX_ZJERK);
 #ifdef RAMP_ACCELERATION
-  max_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_ACCEL);
-  max_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_ACCEL);
-  max_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_ACCEL);
-  max_travel_acceleration_units_per_sq_second[0] = epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
-  max_travel_acceleration_units_per_sq_second[1] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
-  max_travel_acceleration_units_per_sq_second[2] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
+  max_acceleration_units_per_sq_second[XAxis] = epr_get_float(EPR_X_MAX_ACCEL);
+  max_acceleration_units_per_sq_second[YAxis] = epr_get_float(EPR_Y_MAX_ACCEL);
+  max_acceleration_units_per_sq_second[ZAxis] = epr_get_float(EPR_Z_MAX_ACCEL);
+  max_travel_acceleration_units_per_sq_second[XAxis] = epr_get_float(EPR_X_MAX_TRAVEL_ACCEL);
+  max_travel_acceleration_units_per_sq_second[YAxis] = epr_get_float(EPR_Y_MAX_TRAVEL_ACCEL);
+  max_travel_acceleration_units_per_sq_second[ZAxis] = epr_get_float(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
 #if USE_OPS==1
   printer_state.opsMode = epr_get_byte(EPR_OPS_MODE);
@@ -516,6 +531,7 @@ void epr_eeprom_to_data() {
 #endif
 #if HAVE_HEATED_BED
   heatedBedController.heatManager= epr_get_byte(EPR_BED_HEAT_MANAGER);
+  heatedBedController.tempCalibration = epr_get_float(EPR_BED_TEMP_CALIBRATION,100, UI_SET_MIN_TEMP_CAL, UI_SET_MAX_TEMP_CAL); // sanity check calibration for safety
 #ifdef TEMP_PID
   heatedBedController.pidDriveMax = epr_get_byte(EPR_BED_DRIVE_MAX);
   heatedBedController.pidDriveMin = epr_get_byte(EPR_BED_DRIVE_MIN);
@@ -531,6 +547,10 @@ void epr_eeprom_to_data() {
   printer_state.xLength = epr_get_float(EPR_X_LENGTH);
   printer_state.yLength = epr_get_float(EPR_Y_LENGTH);
   printer_state.zLength = epr_get_float(EPR_Z_LENGTH);
+#if DRIVE_SYSTEM==DeltaDrive
+  printer_state.printer_radius = epr_get_float(EPR_PRINTER_RADIUS, PRINTER_RADIUS); // use default value if stored value is nan
+  printer_state.delta_xy_radius = epr_get_float(EPR_DELTA_XY_RADIUS, DELTA_XY_RADIUS); 
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
   printer_state.backlashX = epr_get_float(EPR_BACKLASH_X);
   printer_state.backlashY = epr_get_float(EPR_BACKLASH_Y);
@@ -545,6 +565,7 @@ void epr_eeprom_to_data() {
     e->maxStartFeedrate = epr_get_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
     e->maxAcceleration = epr_get_float(o+EPR_EXTRUDER_MAX_ACCELERATION);
     e->tempControl.heatManager = epr_get_byte(o+EPR_EXTRUDER_HEAT_MANAGER);
+    e->tempControl.tempCalibration = epr_get_float(o+EPR_EXTRUDER_TEMP_CALIBRATION,100, UI_SET_MIN_TEMP_CAL, UI_SET_MAX_TEMP_CAL); // sanity check calibration for safety
 #ifdef TEMP_PID
     e->tempControl.pidDriveMax = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MAX);
     e->tempControl.pidDriveMin = epr_get_byte(o+EPR_EXTRUDER_DRIVE_MIN);
@@ -560,12 +581,12 @@ void epr_eeprom_to_data() {
     e->waitRetractTemperature = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
     e->waitRetractUnits = epr_get_int(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
 #endif
- #ifdef USE_ADVANCE
- #ifdef ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     e->advanceK = epr_get_float(o+EPR_EXTRUDER_ADVANCE_K);
 #endif
     e->advanceL = epr_get_float(o+EPR_EXTRUDER_ADVANCE_L);
- #endif
+#endif
     if(version>1)
       e->coolerSpeed = epr_get_byte(o+EPR_EXTRUDER_COOLER_SPEED);
   }
@@ -591,14 +612,15 @@ void epr_init() {
   byte storedcheck = epr_get_byte(EPR_INTEGRITY_BYTE);
   if(epr_get_byte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check) {
     epr_eeprom_to_data();
-  } else {
+  } 
+  else {
     epr_set_byte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
     epr_data_to_eeprom(storedcheck!=check);
   }
 #endif
 }
 /**
-*/
+ */
 void epr_update_usage() {
 #if EEPROM_MODE!=0
   if(printer_state.filamentPrinted==0) return; // No miles only enabled
@@ -616,17 +638,17 @@ void epr_update_usage() {
 }
 
 /** \brief Writes all eeprom settings to serial console.
-
-For each value stored, this function generates one line with syntax
-
-EPR: pos type value description
-
-With
-- pos = Position in EEPROM, the data starts.
-- type = Value type: 0 = byte, 1 = int, 2 = long, 3 = float
-- value = The value currently stored
-- description = Definition of the value
-*/
+ * 
+ * For each value stored, this function generates one line with syntax
+ * 
+ * EPR: pos type value description
+ * 
+ * With
+ * - pos = Position in EEPROM, the data starts.
+ * - type = Value type: 0 = byte, 1 = int, 2 = long, 3 = float
+ * - value = The value currently stored
+ * - description = Definition of the value
+ */
 void epr_output_settings() {
 #if EEPROM_MODE!=0
   epr_out_long(EPR_BAUDRATE,PSTR("Baudrate"));
@@ -634,7 +656,7 @@ void epr_output_settings() {
   epr_out_long(EPR_PRINTING_TIME,PSTR("Printer active [s]"));
   epr_out_long(EPR_MAX_INACTIVE_TIME,PSTR("Max. inactive time [ms,0=off]"));
   epr_out_long(EPR_STEPPER_INACTIVE_TIME,PSTR("Stop stepper after inactivity [ms,0=off]"));
-//#define EPR_ACCELERATION_TYPE 1
+  //#define EPR_ACCELERATION_TYPE 1
   epr_out_float(EPR_XAXIS_STEPS_PER_MM,PSTR("X-axis steps per mm"));
   epr_out_float(EPR_YAXIS_STEPS_PER_MM,PSTR("Y-axis steps per mm"));
   epr_out_float(EPR_ZAXIS_STEPS_PER_MM,PSTR("Z-axis steps per mm"));
@@ -652,6 +674,10 @@ void epr_output_settings() {
   epr_out_float(EPR_X_LENGTH,PSTR("X max length [mm]"));
   epr_out_float(EPR_Y_LENGTH,PSTR("Y max length [mm]"));
   epr_out_float(EPR_Z_LENGTH,PSTR("Z max length [mm]"));
+#if DRIVE_SYSTEM==DeltaDrive
+  epr_out_float(EPR_PRINTER_RADIUS,PSTR("Printer Radius"));
+  epr_out_float(EPR_DELTA_XY_RADIUS,PSTR("Delta Safe XY Radius"));
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
   epr_out_float(EPR_BACKLASH_X,PSTR("X backlash [mm]"));
   epr_out_float(EPR_BACKLASH_Y,PSTR("Y backlash [mm]"));
@@ -678,6 +704,7 @@ void epr_output_settings() {
 #endif
 #if HAVE_HEATED_BED
   epr_out_byte(EPR_BED_HEAT_MANAGER,PSTR("Bed Heat Manager [0-2]"));
+  epr_out_float(EPR_BED_TEMP_CALIBRATION,PSTR("Bed Temp Cal, def 100.0%"));
 #ifdef TEMP_PID
   epr_out_byte(EPR_BED_DRIVE_MAX,PSTR("Bed PID drive max"));
   epr_out_byte(EPR_BED_DRIVE_MIN,PSTR("Bed PID drive min"));
@@ -696,6 +723,7 @@ void epr_output_settings() {
     epr_out_float(o+EPR_EXTRUDER_MAX_START_FEEDRATE,PSTR("start feedrate [mm/s]"));
     epr_out_float(o+EPR_EXTRUDER_MAX_ACCELERATION,PSTR("acceleration [mm/s^2]"));
     epr_out_byte(o+EPR_EXTRUDER_HEAT_MANAGER,PSTR("heat manager [0-1]"));
+    epr_out_float(o+EPR_EXTRUDER_TEMP_CALIBRATION,PSTR("Temp Calibration def 100.0%"));
 #ifdef TEMP_PID
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MAX,PSTR("PID drive max"));
     epr_out_byte(o+EPR_EXTRUDER_DRIVE_MIN,PSTR("PID drive min"));
@@ -723,4 +751,6 @@ void epr_output_settings() {
   out.println_P(PSTR("No EEPROM support compiled."));
 #endif
 }
+
+
 

@@ -159,6 +159,12 @@
 #define UI_ACTION_PAUSE                 1099
 #define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
 #define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
+#define UI_ACTION_EXTRUDER0_CAL 1102
+#define UI_ACTION_EXTRUDER1_CAL 1103
+#define UI_ACTION_EXTRUDER2_CAL 1104
+#define UI_ACTION_EXTRUDER3_CAL 1105
+#define UI_ACTION_EXTRUDER4_CAL 1106
+#define UI_ACTION_HEATED_BED_CAL 1107
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -202,11 +208,11 @@ typedef struct {
   unsigned int action;
 } const UIMenuEntry;
 
-typedef struct {
+typedef struct uimenu {
   // 0 = info page
   // 1 = file selector
   // 2 = submenu
-  // 3 = modififaction menu
+  // 3 = modification menu
   unsigned char menuType;
   int id; // Type of modification
   int numEntries;
@@ -227,7 +233,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 **************************************************************************/
 
 #if (__GNUC__ * 100 + __GNUC_MINOR__) < 304
-#error "This library requires AVR-GCC 3.4 or later, update to newer AVR-GCC compiler !"
+#error "This library requires AVR-GCC 3.4 or later, update to newer AVR-GCC compiler"
 #endif
 
 #include <avr/io.h>
@@ -381,23 +387,26 @@ extern unsigned char i2c_read(unsigned char ack);
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry *name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
-#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller has a sd card buildin 
+#if FEATURE_CONTROLLER==SMARTCONTROLLER // reprapdiscount smartcontroller has a sd card buildin 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED false
-#undef SDSUPPORT
-#define SDSUPPORT true
+#define SDSUPPORT 
 #endif
+
+// set this to the largest display width
+#define UI_MAXCOLS 20
+#define UI_MENU_MAXLEVEL 5
 
 class UIDisplay {
   public:
     volatile byte flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     byte col; // current col for buffer prefill
     byte menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    byte menuPos[5]; // Positions in menu
-    void *menu[5]; // Menus active
-    byte menuTop[5]; // Top row in menu
+    byte menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
+    UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
+    byte menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
     unsigned int activeAction; // action for ok/next/previous
@@ -411,34 +420,41 @@ class UIDisplay {
     int repeatDuration; // Time beween to actions if autorepeat is enabled
     void addInt(int value,byte digits); // Print int into printCols
     void addLong(long value,char digits);
+    inline void addLong(long value) {addLong(value, -11);};
     void addFloat(float number, char fixdigits,byte digits);
+    inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
+    void addChar(const char c);
+    void addGCode(const GCode *code);
     void okAction();
     void nextPreviousAction(char next);
-    char statusMsg[17];
+    char statusMsg[UI_MAXCOLS+1];
+    char userMsg[UI_MAXCOLS+1];
     char encoderPos;
     int8_t encoderLast;
-    PGM_P statusText;
+    //PGM_P statusText;
     UIDisplay();
     void createChar(byte location,const byte charmap[]);
     void initialize(); // Initialize display and keys
     void printRow(byte r,char *txt); // Print row on display
     void printRowP(byte r,PGM_P txt);
-    void parse(char *txt,bool ram); /// Parse output and write to printCols;
+    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
     void executeAction(int action);
     void finishAction(int action);
     void slowAction();
     void fastAction();
     void mediumAction();
-    void pushMenu(void *men,bool refresh);
+    void pushMenu(UIMenu *men,bool refresh);
     void setStatusP(PGM_P txt);
-    void setStatus(char *txt);
+    void setStatus(const char *txt);
+    void setMsg(char *msg, const char *txt);
+    void setMsgP(char *msg, PGM_P txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
-#if SDSUPPORT
+#ifdef SDSUPPORT
     void updateSDFileCount();
-    void sdrefresh(byte &r);
+    void sdrefresh(long &r);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*13+2];
@@ -447,11 +463,21 @@ class UIDisplay {
 };
 extern UIDisplay uid;
 
+inline void incrementFloat(float *val, int inc, float min, float max) 
+{ 
+   float tmp = *val;
+   tmp+= (float)inc;
+   if(tmp<min) tmp = min;
+   else if(tmp>max) tmp = max;
+   *val = tmp;
+}
 
-#if FEATURE_CONTROLLER==1
+extern void incrementTemperature(int extruderIndex, int inc, float min, float max);
+
+#if FEATURE_CONTROLLER==CONTROLLER_UICONFIG
 #include "uiconfig.h"
 #endif
-#if FEATURE_CONTROLLER==0 // No controller at all
+#if FEATURE_CONTROLLER==NO_CONTROLLER // No controller at all
 #define UI_HAS_KEYS 0
 #define UI_DISPLAY_TYPE 0
 #ifdef UI_MAIN
@@ -461,7 +487,7 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif
-#if FEATURE_CONTROLLER==2 // reprapdiscount smartcontroller
+#if FEATURE_CONTROLLER==SMARTCONTROLLER // reprapdiscount smartcontroller
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE 1
@@ -522,7 +548,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2
 
-#if FEATURE_CONTROLLER==3 // Adafruit RGB controller
+#if FEATURE_CONTROLLER==ADAFRUIT_CONTROLLER // Adafruit RGB controller
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
 #define UI_DISPLAY_TYPE 3
@@ -579,7 +605,7 @@ void ui_check_slow_keys(int &action) {
 #endif
 #endif // Controller 3
 
-#if FEATURE_CONTROLLER==4 // Foltyn 3D Master
+#if FEATURE_CONTROLLER==FOLTYN_CONTROLLER // Foltyn 3D Master
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
 #define UI_DISPLAY_TYPE 1
@@ -620,7 +646,7 @@ void ui_check_slow_keys(int &action) {}
 #endif // Controller 4
 
 
-#if FEATURE_CONTROLLER==5 // Viki Lcd
+#if FEATURE_CONTROLLER==VIKI_LCD // Viki Lcd
 
 // You need to change these 3 button according to the positions
 // where you put them into your board!
@@ -700,8 +726,7 @@ void ui_check_slow_keys(int &action) {
 #endif
 #endif // Controller 5
 
-
-#if FEATURE_CONTROLLER>0
+#if FEATURE_CONTROLLER!=NO_CONTROLLER
 
 #if UI_ROWS==4
 #if UI_COLS==16
@@ -716,7 +741,6 @@ void ui_check_slow_keys(int &action) {
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
 #endif
 #include "uilang.h"
-#include "uimenu.h"
 #endif
 
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION
@@ -745,11 +769,12 @@ void ui_check_slow_keys(int &action) {
 #define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW uid.slowAction();
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
-#define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
+#define UI_STATUS_UPD(status) {uid.setStatusP(status);uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
-#define UI_ERROR(msg) {uid.errorMsg=PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
-#define UI_CLEAR_STATUS {uid.statusMsg[0]=0;}
+#define UI_ERROR(msg) {uid.errorMsg=PSTR(msg);pushMenu(&ui_menu_error,true);}
+#define UI_CLEAR_STATUS {uid.statusMsg[0]=0; uid.setMsgP(uid.userMsg, PSTR("M117 _____"));}
+#define UI_USER(msg) uid.setMsg(uid.userMsg, msg);
 #else
 #define UI_INITIALIZE {}
 #define UI_FAST {}
@@ -773,4 +798,5 @@ void ui_check_slow_keys(int &action) {
 extern void beep(byte duration,byte count);
 
 #endif
+
 

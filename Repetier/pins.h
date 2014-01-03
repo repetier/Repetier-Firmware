@@ -81,7 +81,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN        6
-#define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!
 
 
 #endif
@@ -154,7 +154,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       14
-#define TEMP_0_PIN          4 //D27   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_0_PIN          4 //D27   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!
 
 /*  Unused (1) (2) (3) 4 5 6 7 8 9 10 11 12 13 (14) (15) (16) 17 (18) (19) (20) (21) (22) (23) 24 (25) (26) (27) 28 (29) (30) (31)  */
 
@@ -166,7 +166,7 @@ STEPPER_CURRENT_CONTROL
 
 
 /****************************************************************************************
-* RepRap Motherboard  ****---NOOOOOO RS485/EXTRUDER CONTROLLER!!!!!!!!!!!!!!!!!---*******
+* RepRap Motherboard  ****---NOOOOOO RS485/EXTRUDER CONTROLLER!---*******
 *
 ****************************************************************************************/
 #if MOTHERBOARD == 2
@@ -217,7 +217,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN        -1
 
 #define HEATER_0_PIN    -1
-#define TEMP_0_PIN      -1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_0_PIN      -1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!
 
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
@@ -403,8 +403,8 @@ STEPPER_CURRENT_CONTROL
   #define FAN_PIN           9    // RAMPS 1.1
 #endif
 
-#define TEMP_0_PIN          2    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_1_PIN          1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_0_PIN          2    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!
+#define TEMP_1_PIN          1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!
 #endif
 
 // SPI for Max6675 Thermocouple 
@@ -416,7 +416,7 @@ STEPPER_CURRENT_CONTROL
 #define MAX6675_SS       53
 
 #ifdef AZTEEG_X3
-#define SDSUPPORT true
+#define SDSUPPORT 
 #define SDCARDDETECTINVERTED false
 #define SDCARDDETECT -1
 #define FAN_PIN           4
@@ -542,7 +542,7 @@ STEPPER_CURRENT_CONTROL
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN        6
-#define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
@@ -680,8 +680,8 @@ STEPPER_CURRENT_CONTROL
 
     #endif
 
-    #define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
-    #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
+    #define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING  (pin 33 extruder)
+    #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING  (pin 34 bed)
     #define SDPOWER          -1
     #define SDSS          31
     #define SCK_PIN          7
@@ -748,15 +748,15 @@ STEPPER_CURRENT_CONTROL
 #define Y_ENABLE_PIN       14
 #define Z_ENABLE_PIN       26
 
-#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
-#define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
+#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING  (pin 33 extruder)
+#define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING  (pin 34 bed)
 #define TEMP_2_PIN         -1
 #define SDPOWER            -1
 #define SDSS               37 //31
 #define SCK_PIN          7
 #define MISO_PIN         6
 #define MOSI_PIN         5
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT   // sd card reader on board
 #define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
@@ -970,7 +970,7 @@ STEPPER_CURRENT_CONTROL
 #define Y_STEP_PIN         30
 #define Y_DIR_PIN          31
 #define Y_ENABLE_PIN       18
-#define Y_MIN_PIN           20 // Don't use this if you want to use SD card. Use 37 and put the endstop in the e-stop slot!!!
+#define Y_MIN_PIN           20 // Don't use this if you want to use SD card. Use 37 and put the endstop in the e-stop slot!
 #define Y_MAX_PIN          -1
 
 #define Z_STEP_PIN         32
@@ -1028,7 +1028,7 @@ STEPPER_CURRENT_CONTROL
 // On board beeper, so define values already here
 #define BEEPER_PIN 23
 #define BEEPER_TYPE 1
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT   // sd card reader on board
 #define SDCARDDETECT -1
 
 // digital pin mappings
@@ -1151,7 +1151,7 @@ STEPPER_CURRENT_CONTROL
 
 #define BEEPER_PIN 33			// Beeper on AUX-4
 #define BEEPER_TYPE 1
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT   // sd card reader on board
 #define SDCARDDETECT -1
 
 
@@ -1460,4 +1460,5 @@ STEPPER_CURRENT_CONTROL
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
                         HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
+
 
