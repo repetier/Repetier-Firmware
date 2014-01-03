@@ -174,8 +174,8 @@ void Printer::updateDerivedParameter()
     zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength - zMin);
     float radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
-    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionA();
-    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionA();
+    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
+    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionC();
     deltaAPosXSteps = floor(radiusA * cos(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
     deltaAPosYSteps = floor(radiusA * sin(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
     deltaBPosXSteps = floor(radiusB * cos(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
