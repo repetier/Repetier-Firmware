@@ -1272,6 +1272,83 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
+* FELIXprinters
+*
+****************************************************************************************/
+#if MOTHERBOARD == 101
+  #define KNOWN_BOARD 1
+
+
+//////////////////FIX THIS//////////////
+  #ifndef __AVR_ATmega1280__
+    #ifndef __AVR_ATmega2560__
+     #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+    #endif
+  #endif
+
+#define X_STEP_PIN         54
+#define X_DIR_PIN          55
+#define X_ENABLE_PIN       38
+#define X_MIN_PIN          3
+#define X_MAX_PIN          -1
+
+#define Y_STEP_PIN         60
+#define Y_DIR_PIN          61
+#define Y_ENABLE_PIN       56
+#define Y_MIN_PIN          14
+#define Y_MAX_PIN          -1
+
+#define Z_STEP_PIN         46
+#define Z_DIR_PIN          48
+#define Z_ENABLE_PIN       62
+#define Z_MIN_PIN          18
+#define Z_MAX_PIN          -1
+
+#define E0_STEP_PIN         26
+#define E0_DIR_PIN          28
+#define E0_ENABLE_PIN       24
+
+#define E1_STEP_PIN         36
+#define E1_DIR_PIN          34
+#define E1_ENABLE_PIN       30
+
+
+
+#define LED_PIN            13
+#define FAN_PIN            9
+#define PS_ON_PIN          12
+#define KILL_PIN           -1
+
+#define HEATER_0_PIN       10
+#define HEATER_1_PIN       8 //BED
+#define HEATER_2_PIN       7
+
+#define TEMP_0_PIN         13   // ANALOG NUMBERING
+#define TEMP_1_PIN         14   // BED,ANALOG NUMBERING
+#define TEMP_2_PIN         15
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+
+#define SDPOWER            1
+#define SDSS               53
+#define SDCARDDETECT 	   6
+#define SDSUPPORT true            // already defined in config.h
+#define SDCARDDETECTINVERTED true // already defined in config.h
+
+// these pins are defined in the SD library if building with SD support
+#define SCK_PIN          52	// PINB.1, 20, SCK
+#define MISO_PIN         50	// PINB.3, 22, MISO
+#define MOSI_PIN         51	// PINB.2, 21, MOSI
+#define MAX6675_SS       -1//53	// PINB.0, 19, SS
+
+#define BEEPER_PIN        -1  // Activate beeper on extension shield
+#define BEEPER_TYPE        1
+
+#endif//MOTHERBOARD == 101
+
+
+/****************************************************************************************
 * MegaTronics v2.0
 *
 ****************************************************************************************/

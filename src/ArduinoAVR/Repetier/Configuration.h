@@ -67,6 +67,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MegaTronics 1.0            = 70
 // Megatronics 2.0            = 701
 // RUMBA                      = 80  // Get it from reprapdiscount
+// FELIXprinters              = 101
 // Rambo                      = 301
 // PiBot for Repetier V1.0-1.3= 314
 // PiBot for Repetier V1.4    = 315

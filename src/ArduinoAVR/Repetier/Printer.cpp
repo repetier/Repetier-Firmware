@@ -174,15 +174,15 @@ void Printer::updateDerivedParameter()
     zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength - zMin);
     float radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
-    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionA();
-    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionA();
-    deltaAPosXSteps = floor(radiusA * cos(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaAPosYSteps = floor(radiusA * sin(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaBPosXSteps = floor(radiusB * cos(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaBPosYSteps = floor(radiusB * sin(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaCPosXSteps = floor(radiusC * cos(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaCPosYSteps = floor(radiusC * sin(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[2] + 0.5);
-    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[2]);
+    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
+    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionC();
+    deltaAPosXSteps = floor(radiusA * cos(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaAPosYSteps = floor(radiusA * sin(EEPROM::deltaAlphaA() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaBPosXSteps = floor(radiusB * cos(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaBPosYSteps = floor(radiusB * sin(EEPROM::deltaAlphaB() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaCPosXSteps = floor(radiusC * cos(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaCPosYSteps = floor(radiusC * sin(EEPROM::deltaAlphaC() * M_PI/180.0) * axisStepsPerMM[Z_AXIS] + 0.5);
+    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[Z_AXIS]);
     if(deltaDiagonalStepsSquared>46000 || 2*EEPROM::deltaHorizontalRadius()*axisStepsPerMM[2]>46000)
     {
         setLargeMachine(true);
@@ -191,17 +191,17 @@ void Printer::updateDerivedParameter()
     else
         deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
     long cart[3], delta[3];
-    cart[0] = cart[1] = 0;
-    cart[2] = zMaxSteps;
+    cart[X_AXIS] = cart[Y_AXIS] = 0;
+    cart[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(cart, delta);
     maxDeltaPositionSteps = delta[0];
-    xMaxSteps = (long)(axisStepsPerMM[2]*(xMin+xLength));
-    yMaxSteps = (long)(axisStepsPerMM[2]*(yMin+yLength));
-    xMinSteps = (long)(axisStepsPerMM[2]*xMin);
-    yMinSteps = (long)(axisStepsPerMM[2]*yMin);
+    xMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(xMin+xLength));
+    yMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(yMin+yLength));
+    xMinSteps = (long)(axisStepsPerMM[Z_AXIS]*xMin);
+    yMinSteps = (long)(axisStepsPerMM[Z_AXIS]*yMin);
     zMinSteps = 0;
 #elif DRIVE_SYSTEM==4
-    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[0]);
+    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     if(deltaDiagonalStepsSquared>46000)
     {
         setLargeMachine(true);
@@ -209,20 +209,20 @@ void Printer::updateDerivedParameter()
     }
     else
         deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
-    deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[0]);
-    xMaxSteps = (long)(axisStepsPerMM[0]*(xMin+xLength));
-    yMaxSteps = (long)(axisStepsPerMM[1]*yLength);
-    zMaxSteps = (long)(axisStepsPerMM[2]*(zMin+zLength));
-    xMinSteps = (long)(axisStepsPerMM[0]*xMin);
+    deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
+    xMaxSteps = (long)(axisStepsPerMM[X_AXIS]*(xMin+xLength));
+    yMaxSteps = (long)(axisStepsPerMM[Y_AXIS]*yLength);
+    zMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(zMin+zLength));
+    xMinSteps = (long)(axisStepsPerMM[X_AXIS]*xMin);
     yMinSteps = 0;
-    zMinSteps = (long)(axisStepsPerMM[2]*zMin);
+    zMinSteps = (long)(axisStepsPerMM[Z_AXIS]*zMin);
 #else
-    xMaxSteps = (long)(axisStepsPerMM[0]*(xMin+xLength));
-    yMaxSteps = (long)(axisStepsPerMM[1]*(yMin+yLength));
-    zMaxSteps = (long)(axisStepsPerMM[2]*(zMin+zLength));
-    xMinSteps = (long)(axisStepsPerMM[0]*xMin);
-    yMinSteps = (long)(axisStepsPerMM[1]*yMin);
-    zMinSteps = (long)(axisStepsPerMM[2]*zMin);
+    xMaxSteps = (long)(axisStepsPerMM[X_AXIS]*(xMin+xLength));
+    yMaxSteps = (long)(axisStepsPerMM[Y_AXIS]*(yMin+yLength));
+    zMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(zMin+zLength));
+    xMinSteps = (long)(axisStepsPerMM[X_AXIS]*xMin);
+    yMinSteps = (long)(axisStepsPerMM[Y_AXIS]*yMin);
+    zMinSteps = (long)(axisStepsPerMM[Z_AXIS]*zMin);
     // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
     backlashDir &= 7;

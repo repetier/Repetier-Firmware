@@ -1004,12 +1004,12 @@ void UIDisplay::parse(char *txt,bool ram)
                 printCols[col++]='%';
             break;
         case 'a': // Acceleration settings
-            if(c2=='x') addFloat(Printer::maxAccelerationMMPerSquareSecond[0],5,0);
-            else if(c2=='y') addFloat(Printer::maxAccelerationMMPerSquareSecond[1],5,0);
-            else if(c2=='z') addFloat(Printer::maxAccelerationMMPerSquareSecond[2],5,0);
-            else if(c2=='X') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[0],5,0);
-            else if(c2=='Y') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[1],5,0);
-            else if(c2=='Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[2],5,0);
+            if(c2=='x') addFloat(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],5,0);
+            else if(c2=='y') addFloat(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],5,0);
+            else if(c2=='z') addFloat(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],5,0);
+            else if(c2=='X') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],5,0);
+            else if(c2=='Y') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],5,0);
+            else if(c2=='Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],5,0);
             else if(c2=='j') addFloat(Printer::maxJerk,3,1);
 #if DRIVE_SYSTEM!=3
             else if(c2=='J') addFloat(Printer::maxZJerk,3,1);
@@ -2161,27 +2161,35 @@ void UIDisplay::nextPreviousAction(int8_t next)
         INCREMENT_MIN_MAX(maxInactiveTime,60,0,9999);
         break;
     case UI_ACTION_PRINT_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[0],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_PRINT_ACCEL_Y:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[1],100,0,10000);
+#if DRIVE_SYSTEM!=3
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
+#else
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
+#endif
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_PRINT_ACCEL_Z:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[2],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[0],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_Y:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[1],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_Z:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[2],100,0,10000);
+#if DRIVE_SYSTEM!=3
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
+#else
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
+#endif
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MAX_JERK:
