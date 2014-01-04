@@ -71,22 +71,22 @@ millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
 long baudrate = BAUDRATE;         ///< Communication speed rate.
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-int maxadv=0;
+int maxadv = 0;
 #endif
-int maxadv2=0;
-float maxadvspeed=0;
+int maxadv2 = 0;
+float maxadvspeed = 0;
 #endif
 uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
-volatile int waitRelax=0; // Delay filament relax at the end of print, could be a simple timeout
+volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
 PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
 #if CPU_ARCH==ARCH_ARM
 volatile bool PrintLine::nlFlag = false;
 #endif
-uint8_t PrintLine::linesWritePos=0;           ///< Position where we write the next cached line move.
-volatile uint8_t PrintLine::linesCount=0;      ///< Number of lines cached 0 = nothing to do.
-uint8_t PrintLine::linesPos=0;                 ///< Position for executing line movement.
+uint8_t PrintLine::linesWritePos = 0;            ///< Position where we write the next cached line move.
+volatile uint8_t PrintLine::linesCount = 0;      ///< Number of lines cached 0 = nothing to do.
+uint8_t PrintLine::linesPos = 0;                 ///< Position for executing line movement.
 
 /**
 Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
@@ -97,10 +97,10 @@ void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float fe
     //Com::printF(Com::tComma,y);
     //Com::printFLN(Com::tComma,z);
     float savedFeedrate = Printer::feedrate;
-    Printer::destinationSteps[0] = Printer::currentPositionSteps[0] + x;
-    Printer::destinationSteps[1] = Printer::currentPositionSteps[1] + y;
-    Printer::destinationSteps[2] = Printer::currentPositionSteps[2] + z;
-    Printer::destinationSteps[3] = Printer::currentPositionSteps[3] + e;
+    Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS] + x;
+    Printer::destinationSteps[Y_AXIS] = Printer::currentPositionSteps[Y_AXIS] + y;
+    Printer::destinationSteps[Z_AXIS] = Printer::currentPositionSteps[Z_AXIS] + z;
+    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] + e;
     Printer::feedrate = feedrate;
 #if NONLINEAR_SYSTEM
     queueDeltaMove(checkEndstop,false,false);
@@ -424,22 +424,22 @@ void PrintLine::updateTrapezoids()
     PrintLine *act = &lines[linesWritePos];
     BEGIN_INTERRUPT_PROTECTED;
     uint8_t maxfirst = linesPos; // first non fixed segment
-    if(maxfirst!=linesWritePos)
+    if(maxfirst != linesWritePos)
         nextPlannerIndex(maxfirst); // don't touch the line printing
     // Now ignore enough segments to gain enough time for path planning
     long timeleft = 0;
     // Skip as many stored moves as needed to gain enough time for computation
-    while(timeleft<4500*MOVE_CACHE_SIZE && maxfirst!=linesWritePos)
+    while(timeleft < 4500 * MOVE_CACHE_SIZE && maxfirst != linesWritePos)
     {
         timeleft += lines[maxfirst].timeInTicks;
         nextPlannerIndex(maxfirst);
     }
     // Search last fixed element
-    while(first!=maxfirst && !lines[first].isEndSpeedFixed())
+    while(first != maxfirst && !lines[first].isEndSpeedFixed())
         previousPlannerIndex(first);
-    if(first!=linesWritePos && lines[first].isEndSpeedFixed())
+    if(first != linesWritePos && lines[first].isEndSpeedFixed())
         nextPlannerIndex(first);
-    if(first==linesWritePos)   // Nothing to plan
+    if(first == linesWritePos)   // Nothing to plan
     {
         act->block();
         ESCAPE_INTERRUPT_PROTECTED
@@ -458,17 +458,16 @@ void PrintLine::updateTrapezoids()
     uint8_t previousIndex = linesWritePos;
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
-#if !NONLINEAR_SYSTEM
-
-    // should filter z-move not z-move, but does it make sense to do so?
-    /*if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
+#if DRIVE_SYSTEM != 3
+    // filters z-move<->not z-move
+    if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
     {
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
         firstLine->unblock();
         return;
-    }*/
+    }
 #endif // DRIVE_SYSTEM
 
     computeMaxJunctionSpeed(previous,act); // Set maximum junction speed if we have a real move before
@@ -538,7 +537,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
     if(jerk>Printer::maxJerk)
         factor = Printer::maxJerk/jerk;
 #if DRIVE_SYSTEM!=3
-    if((previous->dir & current->dir) & 64)
+    if((previous->dir | current->dir) & 64)
     {
         float dz = fabs(current->speedZ-previous->speedZ);
         if(dz>Printer::maxZJerk)
@@ -549,6 +548,12 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
     if(eJerk > Extruder::current->maxStartFeedrate)
         factor = RMath::min(factor,Extruder::current->maxStartFeedrate/eJerk);
     previous->maxJunctionSpeed = RMath::min(previous->fullSpeed*factor,current->fullSpeed);
+#ifdef DEBUG_QUEUE_MOVE
+    if(Printer::debugEcho()) {
+        Com::printF(PSTR("ID:"),(int)previous);
+        Com::printFLN(PSTR(" MJ:"),previous->maxJunctionSpeed);
+    }
+#endif // DEBUG_QUEUE_MOVE
 }
 
 /** Update parameter used by updateTrapezoids
@@ -571,9 +576,9 @@ void PrintLine::updateStepsParameter()
     advanceEnd   = (float)advanceFull*endFactor   * endFactor;
 #endif
 #endif
-    if(accelSteps+decelSteps>=stepsRemaining)   // can't reach limit speed
+    if(accelSteps+decelSteps >= stepsRemaining)   // can't reach limit speed
     {
-        unsigned int red = (accelSteps+decelSteps+2-stepsRemaining)>>1;
+        unsigned int red = (accelSteps+decelSteps + 2 - stepsRemaining) >> 1;
         accelSteps = accelSteps-RMath::min(accelSteps,red);
         decelSteps = decelSteps-RMath::min(decelSteps,red);
     }
@@ -608,7 +613,7 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
     float lastJunctionSpeed = act->endSpeed; // Start always with safe speed
 
     //PREVIOUS_PLANNER_INDEX(last); // Last element is already fixed in start speed
-    while(start!=last)
+    while(start != last)
     {
         previousPlannerIndex(start);
         previous = &lines[start];
@@ -629,36 +634,29 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
          }*/
 
         // Avoid speed calcs if we know we can accelerate within the line
-        if (act->isNominalMove())
-        {
-            lastJunctionSpeed = act->fullSpeed;
-        }
-        else
-        {
-            // If you accelerate from end of move to start what speed do you reach?
-            lastJunctionSpeed = sqrt(lastJunctionSpeed*lastJunctionSpeed+act->accelerationDistance2); // acceleration is acceleration*distance*2! What can be reached if we try?
-        }
+        lastJunctionSpeed = (act->isNominalMove() ? act->fullSpeed : sqrt(lastJunctionSpeed*lastJunctionSpeed+act->accelerationDistance2)); // acceleration is acceleration*distance*2! What can be reached if we try?
         // If that speed is more that the maximum junction speed allowed then ...
-        if(lastJunctionSpeed>=previous->maxJunctionSpeed)   // Limit is reached
+        if(lastJunctionSpeed >= previous->maxJunctionSpeed)   // Limit is reached
         {
             // If the previous line's end speed has not been updated to maximum speed then do it now
-            if(previous->endSpeed!=previous->maxJunctionSpeed)
+            if(previous->endSpeed != previous->maxJunctionSpeed)
             {
                 previous->invalidateParameter(); // Needs recomputation
                 previous->endSpeed = RMath::max(previous->minSpeed,previous->maxJunctionSpeed); // possibly unneeded???
             }
             // If actual line start speed has not been updated to maximum speed then do it now
-            if(act->startSpeed!=previous->maxJunctionSpeed)
+            if(act->startSpeed != previous->maxJunctionSpeed)
             {
                 act->startSpeed = RMath::max(act->minSpeed,previous->maxJunctionSpeed); // possibly unneeded???
                 act->invalidateParameter();
             }
-            lastJunctionSpeed = previous->maxJunctionSpeed;
+            lastJunctionSpeed = previous->endSpeed;
         }
         else
         {
             // Block prev end and act start as calculated speed and recalculate plateau speeds (which could move the speed higher again)
-            act->startSpeed = RMath::max(act->minSpeed,previous->endSpeed = lastJunctionSpeed);
+            act->startSpeed = RMath::max(act->minSpeed,lastJunctionSpeed);
+            lastJunctionSpeed = previous->endSpeed = RMath::max(lastJunctionSpeed,previous->minSpeed);
             previous->invalidateParameter();
             act->invalidateParameter();
         }
@@ -668,10 +666,11 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
 
 void PrintLine::forwardPlanner(uint8_t first)
 {
-    PrintLine *act,*next;
-    next = &lines[first];
+    PrintLine *act;
+    PrintLine *next = &lines[first];
+    float vmaxRight;
     float leftSpeed = next->startSpeed;
-    while(first!=linesWritePos)   // All except last segment, which has fixed end speed
+    while(first != linesWritePos)   // All except last segment, which has fixed end speed
     {
         act = next;
         nextPlannerIndex(first);
@@ -692,16 +691,16 @@ void PrintLine::forwardPlanner(uint8_t first)
             continue;
         }
 #endif
-        float vmaxRight;
         // Avoid speed calcs if we know we can accelerate within the line.
-        if (act->isNominalMove())
-            vmaxRight = act->fullSpeed;
-        else
-            vmaxRight = sqrt(leftSpeed*leftSpeed+act->accelerationDistance2);
-        if(vmaxRight>act->endSpeed)   // Could be higher next run?
+        vmaxRight = (act->isNominalMove() ? act->fullSpeed : sqrt(leftSpeed * leftSpeed + act->accelerationDistance2));
+        if(vmaxRight > act->endSpeed)   // Could be higher next run?
         {
-            act->startSpeed = RMath::max(act->minSpeed,leftSpeed);
-            leftSpeed       = act->endSpeed;
+            if(leftSpeed < act->minSpeed) {
+                leftSpeed = act->minSpeed;
+                act->endSpeed = sqrt(leftSpeed * leftSpeed + act->accelerationDistance2);
+            }
+            act->startSpeed = leftSpeed;
+            next->startSpeed = leftSpeed = RMath::max(RMath::min(act->endSpeed,act->maxJunctionSpeed),next->minSpeed);
             if(act->endSpeed == act->maxJunctionSpeed)  // Full speed reached, don't compute again!
             {
                 act->setEndSpeedFixed(true);
@@ -713,12 +712,17 @@ void PrintLine::forwardPlanner(uint8_t first)
         {
             act->fixStartAndEndSpeed();
             act->invalidateParameter();
-            act->startSpeed = RMath::max(act->minSpeed,leftSpeed);
-            act->endSpeed = leftSpeed = RMath::max(act->minSpeed,vmaxRight);
+            if(act->minSpeed > leftSpeed) {
+                leftSpeed = act->minSpeed;
+                vmaxRight = sqrt(leftSpeed * leftSpeed + act->accelerationDistance2);
+            }
+            act->startSpeed = leftSpeed;
+            act->endSpeed = RMath::max(act->minSpeed,vmaxRight);
+            next->startSpeed = leftSpeed = RMath::max(RMath::min(act->endSpeed,act->maxJunctionSpeed),next->minSpeed);
             next->setStartSpeedFixed(true);
         }
-    }
-    next->startSpeed = RMath::max(next->minSpeed,leftSpeed); // This is the new segment, wgich is updated anyway, no extra flag needed.
+    } // While
+    next->startSpeed = RMath::max(next->minSpeed,leftSpeed); // This is the new segment, which is updated anyway, no extra flag needed.
 }
 
 

@@ -34,6 +34,7 @@
 #define PRINTER_FLAG1_HOMED                 1
 #define PRINTER_FLAG1_AUTOMOUNT             2
 #define PRINTER_FLAG1_ANIMATION             4
+#define PRINTER_FLAG1_ALLKILLED             8
 class Printer
 {
 public:
@@ -309,6 +310,14 @@ public:
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
     }
+    static inline uint8_t isAllKilled()
+    {
+        return flag1 & PRINTER_FLAG1_ALLKILLED;
+    }
+    static inline void setAllKilled(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
+    }
     static inline uint8_t isAutomount()
     {
         return flag1 & PRINTER_FLAG1_AUTOMOUNT;
@@ -391,6 +400,9 @@ public:
     static inline void unsetAllSteppersDisabled()
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
+#if FAN_BOARD_PIN>-1
+    pwm_pos[NUM_EXTRUDER+1] = 255;
+#endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()
     {

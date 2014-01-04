@@ -805,7 +805,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #if FAN_BOARD_PIN>-1
-    if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_BOARD_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER+1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1]!=255) WRITE(FAN_BOARD_PIN,0);
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);

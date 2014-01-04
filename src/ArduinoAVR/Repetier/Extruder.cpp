@@ -93,17 +93,17 @@ void Extruder::manageTemperatures()
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
-        if(!(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) && (act->currentTemperatureC<MIN_DEFECT_TEMPERATURE || act->currentTemperatureC>MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
+        if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
             extruderTempErrors++;
             errorDetected = 1;
-            if(extruderTempErrors>10)   // Ignore short temporary failures
+            if(extruderTempErrors > 10)   // Ignore short temporary failures
             {
                 Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
                 reportTempsensorError();
             }
         }
-        if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT) continue;
+        if(Printer::isAnyTempsensorDefect()) continue;
         uint8_t on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
         if(!on && act->isAlarm()) {
             beep(50*(controller+1),3);
@@ -179,7 +179,7 @@ void Extruder::manageTemperatures()
     }
     if(errorDetected == 0 && extruderTempErrors>0)
         extruderTempErrors--;
-    if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
+    if(Printer::isAnyTempsensorDefect())
     {
         for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
         {
@@ -682,6 +682,7 @@ void TemperatureController::updateCurrentTemperature()
     }
     case 60: // AD8495 (Delivers 5mV/degC vs the AD595's 10mV)
         currentTemperatureC = ((float)currentTemperature * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
+        break;
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
         currentTemperatureC = ((float)currentTemperature * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
