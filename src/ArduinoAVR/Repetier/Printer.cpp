@@ -819,7 +819,7 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 
 
 #if DRIVE_SYSTEM==3
-                                       void Printer::deltaMoveToTopEndstops(float feedrate)
+void Printer::deltaMoveToTopEndstops(float feedrate)
 {
     for (uint8_t i=0; i<3; i++)
         Printer::currentPositionSteps[i] = 0;

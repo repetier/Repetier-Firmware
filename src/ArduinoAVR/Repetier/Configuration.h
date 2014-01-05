@@ -1150,6 +1150,7 @@ The following settings override uiconfig.h!
 10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
 11 = RepRapDiscount Full Graphic Smart Controller
 12 = FELIXPrinters Controller
+13 = SeeMeCNC Display on Rambo (ORION)
 
 */
 #define FEATURE_CONTROLLER 2
