@@ -41,8 +41,6 @@ values >500 for safety, since it doesn't catch every function call. Nice to twea
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
 //#define DEBUG_ADVANCE
-/** \brief print ops related debug info. */
-//#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */

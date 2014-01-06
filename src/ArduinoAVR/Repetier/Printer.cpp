@@ -143,23 +143,23 @@ char Printer::motorY;
 void Printer::constrainDestinationCoords()
 {
 #if min_software_endstop_x == true
-    if (destinationSteps[0] < xMinSteps) Printer::destinationSteps[0] = Printer::xMinSteps;
+    if (destinationSteps[X_AXIS] < xMinSteps) Printer::destinationSteps[X_AXIS] = Printer::xMinSteps;
 #endif
 #if min_software_endstop_y == true
-    if (destinationSteps[1] < yMinSteps) Printer::destinationSteps[1] = Printer::yMinSteps;
+    if (destinationSteps[Y_AXIS] < yMinSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMinSteps;
 #endif
 #if min_software_endstop_z == true
-    if (destinationSteps[2] < zMinSteps) Printer::destinationSteps[2] = Printer::zMinSteps;
+    if (destinationSteps[Z_AXIS] < zMinSteps) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
 #endif
 
 #if max_software_endstop_x == true
-    if (destinationSteps[0] > Printer::xMaxSteps) Printer::destinationSteps[0] = Printer::xMaxSteps;
+    if (destinationSteps[X_AXIS] > Printer::xMaxSteps) Printer::destinationSteps[X_AXIS] = Printer::xMaxSteps;
 #endif
 #if max_software_endstop_y == true
-    if (destinationSteps[1] > Printer::yMaxSteps) Printer::destinationSteps[1] = Printer::yMaxSteps;
+    if (destinationSteps[Y_AXIS] > Printer::yMaxSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMaxSteps;
 #endif
 #if max_software_endstop_z == true
-    if (destinationSteps[2] > Printer::zMaxSteps) Printer::destinationSteps[2] = Printer::zMaxSteps;
+    if (destinationSteps[Z_AXIS] > Printer::zMaxSteps) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
 }
 

@@ -137,7 +137,7 @@ void SDCard::pausePrint(bool intern)
 #if FEATURE_MEMORY_POSITION
     if(intern) {
         Printer::MemoryPosition();
-        Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],Printer::currentPosition[E_AXIS],Printer::maxFeedrate[X_AXIS]);
+        Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
     }
 #endif
 }
