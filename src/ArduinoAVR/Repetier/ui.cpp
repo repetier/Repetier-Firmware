@@ -742,7 +742,7 @@ void slideIn(uint8_t row,FSTRINGPARAM(text))
 #endif // UI_ANIMATION
 void UIDisplay::initialize()
 {
-        oldMenuLevel = -2;
+    oldMenuLevel = -2;
 #ifdef COMPILE_I2C_DRIVER
     uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
@@ -1470,7 +1470,7 @@ void UIDisplay::refreshPage()
     uint8_t r;
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
-
+    adjustMenuPos();
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     // Reset timeout on menu back when user active on menu
     if (uid.encoderLast != encoderStartScreen)
@@ -1944,6 +1944,41 @@ void UIDisplay::okAction()
 #endif
 }
 #define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
+void UIDisplay::adjustMenuPos()
+{
+    if(menuLevel == 0) return;
+    UIMenu *men = (UIMenu*)menu[menuLevel];
+    UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
+    uint8_t mtype = HAL::readFlashByte((const prog_char*)&(men->menuType));
+    if(mtype != 2) return;
+    while(menuPos[menuLevel]>0)
+    {
+        if(((UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]])))->showEntry())
+            break;
+        menuPos[menuLevel]--;
+    }
+    uint8_t skipped = 0;
+    bool modified;
+    if(menuTop[menuLevel] > menuPos[menuLevel])
+        menuTop[menuLevel] = menuPos[menuLevel];
+    do
+    {
+        skipped = 0;
+        modified = false;
+        for(uint8_t r=menuTop[menuLevel]; r<menuPos[menuLevel]; r++)
+        {
+            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
+            if(!ent->showEntry())
+                skipped++;
+        }
+        if(menuTop[menuLevel] + skipped + UI_ROWS - 1 < menuPos[menuLevel]) {
+            menuTop[menuLevel] = menuPos[menuLevel] + 1 - UI_ROWS;
+            modified = true;
+        }
+    }
+    while(modified);
+}
+
 void UIDisplay::nextPreviousAction(int8_t next)
 {
     millis_t actTime = HAL::timeInMilliseconds();
@@ -1971,10 +2006,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         }
         else
         {
-            if(menuPos[0]==0)
-                menuPos[0]=UI_NUM_PAGES-1;
-            else
-                menuPos[0]--;
+            menuPos[0] = (menuPos[0]==0 ? UI_NUM_PAGES-1 : menuPos[0]-1);
         }
         return;
     }
@@ -2008,16 +2040,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
                     break;
             }
         }
-        uint8_t skipped = 0;
-        for(uint8_t r=0;r<menuPos[menuLevel];r++) {
-            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
-            if(!ent->showEntry())
-                skipped++;
-        }
-        if(menuTop[menuLevel]+skipped>menuPos[menuLevel])
-            menuTop[menuLevel]=menuPos[menuLevel];
-        else if(menuTop[menuLevel]+skipped+UI_ROWS-1<menuPos[menuLevel])
-            menuTop[menuLevel]=menuPos[menuLevel]+1-UI_ROWS;
+        adjustMenuPos();
         return;
     }
 #if SDSUPPORT

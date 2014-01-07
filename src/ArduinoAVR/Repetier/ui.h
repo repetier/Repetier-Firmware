@@ -388,6 +388,7 @@ class UIDisplay {
     void fastAction();
     void mediumAction();
     void pushMenu(void *men,bool refresh);
+    void adjustMenuPos();
     void setStatusP(PGM_P txt);
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}

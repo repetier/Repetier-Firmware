@@ -128,10 +128,10 @@ uint8_t Printer::backlashDir;
 long Printer::totalStepsRemaining;
 #endif
 #if FEATURE_MEMORY_POSITION
-long Printer::memoryX;
-long Printer::memoryY;
-long Printer::memoryZ;
-long Printer::memoryE;
+float Printer::memoryX;
+float Printer::memoryY;
+float Printer::memoryZ;
+float Printer::memoryE;
 #endif
 #ifdef XY_GANTRY
 char Printer::motorX;
@@ -317,33 +317,33 @@ void Printer::moveTo(float x,float y,float z,float e,float f)
 
 void Printer::moveToReal(float x,float y,float z,float e,float f)
 {
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
-    if(x==IGNORE_COORDINATE)
+    if(x == IGNORE_COORDINATE)
         x = currentPosition[X_AXIS];
-    if(y==IGNORE_COORDINATE)
+    if(y == IGNORE_COORDINATE)
         y = currentPosition[Y_AXIS];
-    if(z==IGNORE_COORDINATE)
+    if(z == IGNORE_COORDINATE)
         z = currentPosition[Z_AXIS];
     currentPosition[X_AXIS] = x;
     currentPosition[Y_AXIS] = y;
     currentPosition[Z_AXIS] = z;
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(isAutolevelActive())
-        transformToPrinter(x+Printer::offsetX,y+Printer::offsetY,z,x,y,z);
+        transformToPrinter(x + Printer::offsetX,y + Printer::offsetY,z,x,y,z);
     else
 #endif // FEATURE_AUTOLEVEL
     {
         x += Printer::offsetX;
         y += Printer::offsetY;
     }
-    if(x!=IGNORE_COORDINATE)
-        destinationSteps[X_AXIS] = floor(x*axisStepsPerMM[X_AXIS]+0.5);
-    if(y!=IGNORE_COORDINATE)
-        destinationSteps[Y_AXIS] = floor(y*axisStepsPerMM[Y_AXIS]+0.5);
-    if(z!=IGNORE_COORDINATE)
-        destinationSteps[Z_AXIS] = floor(z*axisStepsPerMM[Z_AXIS]+0.5);
-    if(e!=IGNORE_COORDINATE)
-        destinationSteps[E_AXIS] = e*axisStepsPerMM[E_AXIS];
-    if(f!=IGNORE_COORDINATE)
+    if(x != IGNORE_COORDINATE)
+        destinationSteps[X_AXIS] = floor(x * axisStepsPerMM[X_AXIS] + 0.5);
+    if(y != IGNORE_COORDINATE)
+        destinationSteps[Y_AXIS] = floor(y * axisStepsPerMM[Y_AXIS] + 0.5);
+    if(z != IGNORE_COORDINATE)
+        destinationSteps[Z_AXIS] = floor(z * axisStepsPerMM[Z_AXIS] + 0.5);
+    if(e != IGNORE_COORDINATE)
+        destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+    if(f != IGNORE_COORDINATE)
         Printer::feedrate = f;
 #if NONLINEAR_SYSTEM
     PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
@@ -366,7 +366,7 @@ void Printer::updateCurrentPosition()
     currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(isAutolevelActive())
-        transformFromPrinter(currentPosition[0],currentPosition[1],currentPosition[2],currentPosition[0],currentPosition[1],currentPosition[2]);
+        transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
 #endif // FEATURE_AUTOLEVEL
     currentPosition[X_AXIS] -= Printer::offsetX;
     currentPosition[Y_AXIS] -= Printer::offsetY;
@@ -442,20 +442,23 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
-        if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
+        if(relativeCoordinateMode || relativeExtruderCoordinateMode)
+        {
             if(
 #if MIN_EXTRUDER_TEMP > 30
-               Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+                Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
                 fabs(com->E)>EXTRUDE_MAXLENGTH)
                 p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
-        } else {
+        }
+        else
+        {
             if(
 #if MIN_EXTRUDER_TEMP > 30
-               Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+                Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
-               fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
         }
@@ -797,22 +800,20 @@ void Printer::defaultLoopActions()
 #if FEATURE_MEMORY_POSITION
 void Printer::MemoryPosition()
 {
-    memoryX = currentPositionSteps[X_AXIS];
-    memoryY = currentPositionSteps[Y_AXIS];
-    memoryZ = currentPositionSteps[Z_AXIS];
-    memoryE = currentPositionSteps[E_AXIS];
-
+    updateCurrentPosition();
+    realPosition(memoryX,memoryY,memoryZ);
+    memoryE = currentPositionSteps[E_AXIS]*axisStepsPerMM[E_AXIS];
 }
 
 void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 {
     bool all = !(x || y || z);
     float oldFeedrate = feedrate;
-    PrintLine::moveRelativeDistanceInSteps((all || x ? memoryX-currentPositionSteps[X_AXIS] : 0)
-                                           ,(all || y ? memoryY-currentPositionSteps[Y_AXIS] : 0)
-                                           ,(all || z ? memoryZ-currentPositionSteps[Z_AXIS] : 0)
-                                           ,(e ? memoryE-currentPositionSteps[E_AXIS]:0),
-                                                   feed,false,ALWAYS_CHECK_ENDSTOPS);
+    moveToReal((all || x ? memoryX : IGNORE_COORDINATE)
+               ,(all || y ? memoryY : IGNORE_COORDINATE)
+               ,(all || z ? memoryZ : IGNORE_COORDINATE)
+               ,(e ? memoryE:IGNORE_COORDINATE),
+               feed);
     feedrate = oldFeedrate;
 }
 #endif
@@ -909,7 +910,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 }
 #else
 #if DRIVE_SYSTEM==4  // Tuga printer homing
-                                       void Printer::homeXAxis()
+void Printer::homeXAxis()
 {
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) ||

@@ -88,6 +88,38 @@ void Commands::waitUntilEndOfAllMoves()
         UI_MEDIUM;
     }
 }
+void Commands::waitUntilEndOfAllBuffers()
+{
+    GCode *code;
+    while(PrintLine::hasLines() || (code = GCode::peekCurrentCommand()) != NULL)
+    {
+        GCode::readFromSerial();
+        UI_MEDIUM; // do check encoder
+        if(code)
+        {
+#if SDSUPPORT
+            if(sd.savetosd)
+            {
+                if(!(code->hasM() && code->M == 29))   // still writing to file
+                {
+                    sd.writeCommand(code);
+                }
+                else
+                {
+                    sd.finishWrite();
+                }
+#ifdef ECHO_ON_EXECUTE
+                code->echoCommand();
+#endif
+            }
+            else
+#endif
+                Commands::executeGCode(code);
+            code->popCurrentCommand();
+        }        Commands::checkForPeriodicalActions();
+        UI_MEDIUM;
+    }
+}
 void Commands::printCurrentPosition()
 {
     float x,y,z;

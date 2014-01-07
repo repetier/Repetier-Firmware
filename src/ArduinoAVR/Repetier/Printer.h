@@ -136,10 +136,10 @@ public:
     static long totalStepsRemaining;
 #endif
 #if FEATURE_MEMORY_POSITION
-    static long memoryX;
-    static long memoryY;
-    static long memoryZ;
-    static long memoryE;
+    static float memoryX;
+    static float memoryY;
+    static float memoryZ;
+    static float memoryE;
 #endif
 #ifdef XY_GANTRY
     static char motorX;
