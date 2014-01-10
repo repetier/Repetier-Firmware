@@ -592,7 +592,7 @@ public:
 #endif
 #if FEATURE_Z_PROBE
     static float runZProbe(bool first,bool last);
-    static void waitForZProbeStart();
+    static void waitForZProbeStart(bool first);
 #if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
