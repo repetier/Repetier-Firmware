@@ -1163,7 +1163,7 @@ float Printer::runZProbe(bool first,bool last)
     long offx = axisStepsPerMM[X_AXIS]*EEPROM::zProbeXOffset();
     long offy = axisStepsPerMM[Y_AXIS]*EEPROM::zProbeYOffset();
     //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
-    waitForZProbeStart();
+    waitForZProbeStart(first);
     setZProbingActive(true);
     PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
     if(stepsRemainingAtZHit<0)
@@ -1200,25 +1200,41 @@ float Printer::runZProbe(bool first,bool last)
     }
     return distance;
 }
-void Printer::waitForZProbeStart()
+void Printer::waitForZProbeStart(first)
 {
 #if Z_PROBE_WAIT_BEFORE_TEST
-    if(isZProbeHit()) return;
-#if UI_DISPLAY_TYPE!=0
-    uid.setStatusP(Com::tHitZProbe);
-    uid.refreshPage();
+    if(isZProbeHit())
+    {
+      #if UI_DISPLAY_TYPE!=0
+        uid.setStatusP(Com::tReleaseZProbe);
+        uid.refreshPage();
+      #endif
+      while(isZProbeHit())
+      {
+          defaultLoopActions();
+      }
+      HAL::delayMilliseconds(30);
+    }
+#if Z_PROBE_WAIT_TEST_ONLY_FIRST_TIME
+    if(first)
 #endif
-    while(!isZProbeHit())
     {
-        defaultLoopActions();
+      #if UI_DISPLAY_TYPE!=0
+        uid.setStatusP(Com::tHitZProbe);
+        uid.refreshPage();
+      #endif
+      while(!isZProbeHit())
+      {
+          defaultLoopActions();
+      }
+      HAL::delayMilliseconds(30);
+      while(isZProbeHit())
+      {
+          defaultLoopActions();
+      }
+      HAL::delayMilliseconds(30);
+      UI_CLEAR_STATUS;
     }
-    HAL::delayMilliseconds(30);
-    while(isZProbeHit())
-    {
-        defaultLoopActions();
-    }
-    HAL::delayMilliseconds(30);
-    UI_CLEAR_STATUS;
 #endif
 }
 #if FEATURE_AUTOLEVEL
