@@ -1081,6 +1081,7 @@ is always running and is not hung up for some unknown reason. */
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST true
+#define Z_PROBE_WAIT_TEST_ONLY_FIRST_TIME true
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
