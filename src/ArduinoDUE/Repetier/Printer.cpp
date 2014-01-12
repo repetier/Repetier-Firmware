@@ -48,6 +48,7 @@ uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolu
 
 long Printer::currentPositionSteps[4];
 float Printer::currentPosition[3];
+float Printer::lastCmdPos[3];
 long Printer::destinationSteps[4];
 float Printer::coordinateOffset[3] = {0,0,0};
 uint8_t Printer::flag0 = 0;
@@ -78,8 +79,11 @@ long Printer::deltaBPosXSteps;
 long Printer::deltaBPosYSteps;
 long Printer::deltaCPosXSteps;
 long Printer::deltaCPosYSteps;
+#ifdef DEBUG_DELTA_REALPOS
+long Printer::realDeltaPositionSteps[3];
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
+#endif
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
 long Printer::stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3
@@ -359,7 +363,7 @@ void Printer::setOrigin(float xOff,float yOff,float zOff)
     coordinateOffset[Z_AXIS] = zOff;
 }
 
-void Printer::updateCurrentPosition()
+void Printer::updateCurrentPosition(bool copyLastCmd)
 {
     currentPosition[X_AXIS] = (float)(currentPositionSteps[X_AXIS])*invAxisStepsPerMM[X_AXIS];
     currentPosition[Y_AXIS] = (float)(currentPositionSteps[Y_AXIS])*invAxisStepsPerMM[Y_AXIS];
@@ -370,6 +374,11 @@ void Printer::updateCurrentPosition()
 #endif // FEATURE_AUTOLEVEL
     currentPosition[X_AXIS] -= Printer::offsetX;
     currentPosition[Y_AXIS] -= Printer::offsetY;
+    if(copyLastCmd) {
+        lastCmdPos[X_AXIS] = currentPosition[X_AXIS];
+        lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS];
+        lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
+    }
     //Com::printArrayFLN(Com::tP,currentPosition,3,4);
 }
 
@@ -381,6 +390,7 @@ void Printer::updateCurrentPosition()
   - Reltive or absolute positioning with special case only extruder relative.
   - Offset in x and y direction for multiple extruder support.
 */
+
 uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register long p;
@@ -391,54 +401,34 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     float x,y,z;
     if(!relativeCoordinateMode)
     {
-        if(!com->hasX()) x = currentPosition[X_AXIS];
-        else currentPosition[X_AXIS] = x = convertToMM(com->X) - coordinateOffset[X_AXIS];
-        if(!com->hasY()) y = currentPosition[Y_AXIS];
-        else currentPosition[Y_AXIS] = y = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
-        if(!com->hasZ()) z = currentPosition[Z_AXIS];
-        else currentPosition[Z_AXIS] = z = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
+        if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
+        if(com->hasY()) lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS] = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
+        if(com->hasZ()) lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS] = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
     }
     else
     {
-        if(com->hasX()) currentPosition[X_AXIS] += (x = convertToMM(com->X));
-        else x = 0;
-        if(com->hasY()) currentPosition[Y_AXIS] += (y = convertToMM(com->Y));
-        else y = 0;
-        if(com->hasZ()) currentPosition[Z_AXIS] += (z = convertToMM(com->Z));
-        else z = 0;
+        if(com->hasX()) lastCmdPos[X_AXIS] = (currentPosition[X_AXIS] += convertToMM(com->X));
+        if(com->hasY()) lastCmdPos[Y_AXIS] = (currentPosition[Y_AXIS] += convertToMM(com->Y));
+        if(com->hasZ()) lastCmdPos[Z_AXIS] = (currentPosition[Z_AXIS] += convertToMM(com->Z));
     }
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=3
     if(isAutolevelActive())
     {
-        if(relativeCoordinateMode)
-            transformToPrinter(x, y, z, x, y, z);
-        else
-            transformToPrinter(x + Printer::offsetX, y + Printer::offsetY, z, x, y, z);
+        transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS], x, y, z);
     }
     else
 #endif // FEATURE_AUTOLEVEL
     {
-        if(!relativeCoordinateMode)
-        {
-            x += Printer::offsetX;
-            y += Printer::offsetY;
-        }
+        x = lastCmdPos[X_AXIS] + Printer::offsetX;
+        y = lastCmdPos[Y_AXIS] + Printer::offsetY;
+        z = lastCmdPos[Z_AXIS];
     }
     long xSteps = static_cast<long>(floor(x * axisStepsPerMM[X_AXIS] + 0.5));
     long ySteps = static_cast<long>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5));
     long zSteps = static_cast<long>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5));
-    if(relativeCoordinateMode)
-    {
-        destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS] + xSteps;
-        destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS] + ySteps;
-        destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS] + zSteps;
-    }
-    else
-    {
-        destinationSteps[X_AXIS] = xSteps;
-        destinationSteps[Y_AXIS] = ySteps;
-        destinationSteps[Z_AXIS] = zSteps;
-    }
+    destinationSteps[X_AXIS] = xSteps;
+    destinationSteps[Y_AXIS] = ySteps;
+    destinationSteps[Z_AXIS] = zSteps;
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
@@ -471,7 +461,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
             feedrate = com->F*(float)feedrateMultiply*0.00016666666f;
     }
-    return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS]!=currentPositionSteps[E_AXIS]); // ignore unproductive moves
+    return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS] != currentPositionSteps[E_AXIS]); // ignore unproductive moves
 }
 
 void Printer::setup()
@@ -712,6 +702,7 @@ void Printer::setup()
     feedrate = 50; ///< Current feedrate in mm/s.
     feedrateMultiply = 100;
     extrudeMultiply = 100;
+    lastCmdPos[X_AXIS] = lastCmdPos[Y_AXIS] = lastCmdPos[Z_AXIS] = 0;
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
     advanceExecuted = 0;
@@ -775,8 +766,7 @@ void Printer::setup()
 
 void Printer::defaultLoopActions()
 {
-    //check heater every n milliseconds
-    Commands::checkForPeriodicalActions();
+    Commands::checkForPeriodicalActions();  //check heater every n milliseconds
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
@@ -792,9 +782,7 @@ void Printer::defaultLoopActions()
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
     sd.automount();
 #endif
-    //void finishNextSegment();
     DEBUG_MEMORY;
-
 }
 
 #if FEATURE_MEMORY_POSITION
@@ -874,6 +862,11 @@ void Printer::homeZAxis() // Delta z homing
     coordinateOffset[Y_AXIS] = 0;
     coordinateOffset[Z_AXIS] = 0;
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
+#ifdef DEBUG_DELTA_REALPOS
+    realDeltaPositionSteps[X_AXIS] = currentDeltaPositionSteps[X_AXIS];
+    realDeltaPositionSteps[Y_AXIS] = currentDeltaPositionSteps[Y_AXIS];
+    realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS];
+#endif
     maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
     if(ENDSTOP_Z_BACK_ON_HOME > 0)
@@ -904,7 +897,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
         UI_CLEAR_STATUS
     }
 
-    updateCurrentPosition();
+    updateCurrentPosition(true);
     moveToReal(0,0,Printer::zMin+Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     UI_CLEAR_STATUS
 }
@@ -1099,7 +1092,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         if(Z_HOME_DIR<0) startZ = Printer::zMin;
         else startZ = Printer::zMin+Printer::zLength;
     }
-    updateCurrentPosition();
+    updateCurrentPosition(true);
     moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homingFeedrate[0]);
     UI_CLEAR_STATUS
 }
@@ -1145,7 +1138,7 @@ float Printer::runZMaxProbe()
 #endif
 
 #if FEATURE_Z_PROBE
-float Printer::runZProbe(bool first,bool last)
+float Printer::runZProbe(bool first,bool last,uint8_t repeat)
 {
     float oldOffX =  Printer::offsetX;
     float oldOffY =  Printer::offsetY;
@@ -1154,52 +1147,61 @@ float Printer::runZProbe(bool first,bool last)
         GCode::executeFString(Com::tZProbeStartScript);
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
-        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX-oldOffX) * Printer::axisStepsPerMM[X_AXIS],
-                                               (Printer::offsetY-oldOffY) * Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
+        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
+                                               (Printer::offsetY - oldOffY) * Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
     }
     Commands::waitUntilEndOfAllMoves();
-    long probeDepth = 2*(Printer::zMaxSteps-Printer::zMinSteps);
-    stepsRemainingAtZHit = -1;
-    long offx = axisStepsPerMM[X_AXIS]*EEPROM::zProbeXOffset();
-    long offy = axisStepsPerMM[Y_AXIS]*EEPROM::zProbeYOffset();
-    //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
-    waitForZProbeStart();
-    setZProbingActive(true);
-    PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
-    if(stepsRemainingAtZHit<0)
+    long sum = 0,lastCorrection = currentPositionSteps[Z_AXIS],probeDepth,shortMove = (long)((float)Z_PROBE_SWITCHING_DISTANCE*axisStepsPerMM[Z_AXIS]);
+    for(uint8_t r=0; r<repeat; r++)
     {
-        Com::printErrorFLN(Com::tZProbeFailed);
-        return -1;
-    }
-    setZProbingActive(false);
+        probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
+        stepsRemainingAtZHit = -1;
+        long offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
+        long offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
+        //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
+        waitForZProbeStart();
+        setZProbingActive(true);
+        PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
+        if(stepsRemainingAtZHit<0)
+        {
+            Com::printErrorFLN(Com::tZProbeFailed);
+            return -1;
+        }
+        setZProbingActive(false);
 #if DRIVE_SYSTEM==3
-    currentDeltaPositionSteps[X_AXIS] += stepsRemainingAtZHit;
-    currentDeltaPositionSteps[Y_AXIS] += stepsRemainingAtZHit;
-    currentDeltaPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
+        currentDeltaPositionSteps[X_AXIS] += stepsRemainingAtZHit;
+        currentDeltaPositionSteps[Y_AXIS] += stepsRemainingAtZHit;
+        currentDeltaPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
 #endif
-    currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
-    probeDepth -= stepsRemainingAtZHit;
-    float distance = (float)probeDepth*invAxisStepsPerMM[Z_AXIS]+EEPROM::zProbeHeight();
+        currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
+        sum += lastCorrection - currentPositionSteps[Z_AXIS];
+        if(r + 1 < repeat)
+            PrintLine::moveRelativeDistanceInSteps(0,0,shortMove,0,EEPROM::zProbeSpeed(),true,true);
+    }
+    float distance = (float)sum * invAxisStepsPerMM[Z_AXIS] / (float)repeat + EEPROM::zProbeHeight();
     Com::printF(Com::tZProbe,distance);
     Com::printF(Com::tSpaceXColon,realXPosition());
     Com::printFLN(Com::tSpaceYColon,realYPosition());
-    PrintLine::moveRelativeDistanceInSteps(0,0,probeDepth,0,EEPROM::zProbeSpeed(),true,true);
+    // Go back to start position
+    PrintLine::moveRelativeDistanceInSteps(0,0,lastCorrection-currentPositionSteps[Z_AXIS],0,EEPROM::zProbeSpeed(),true,true);
     //PrintLine::moveRelativeDistanceInSteps(offx,offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
+
     if(last)
     {
-        oldOffX =  Printer::offsetX;
-        oldOffY =  Printer::offsetY;
+        oldOffX = Printer::offsetX;
+        oldOffY = Printer::offsetY;
         GCode::executeFString(Com::tZProbeEndScript);
         if(Extruder::current)
         {
-            Printer::offsetX = -Extruder::current->xOffset*Printer::invAxisStepsPerMM[X_AXIS];
-            Printer::offsetY = -Extruder::current->yOffset*Printer::invAxisStepsPerMM[Y_AXIS];
+            Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
+            Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
         }
-        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX-oldOffX)*Printer::axisStepsPerMM[X_AXIS],
-                                               (Printer::offsetY-oldOffY)*Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
+        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX)*Printer::axisStepsPerMM[X_AXIS],
+                                               (Printer::offsetY - oldOffY)*Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
     }
     return distance;
 }
+
 void Printer::waitForZProbeStart()
 {
 #if Z_PROBE_WAIT_BEFORE_TEST

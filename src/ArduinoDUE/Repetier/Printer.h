@@ -71,6 +71,7 @@ public:
     static float coordinateOffset[3];
     static long currentPositionSteps[4];     ///< Position in steps from origin.
     static float currentPosition[3];
+    static float lastCmdPos[3]; ///< Last coordinates send by gcodes
     static long destinationSteps[4];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
     static long currentDeltaPositionSteps[4];
@@ -83,8 +84,11 @@ public:
     static long deltaBPosYSteps;
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
+#ifdef DEBUG_DELTA_REALPOS
+    static long realDeltaPositionSteps[3];
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || DRIVE_SYSTEM==3
+#endif
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==3
@@ -565,7 +569,7 @@ public:
     }
     static void constrainDestinationCoords();
     static void updateDerivedParameter();
-    static void updateCurrentPosition();
+    static void updateCurrentPosition(bool copyLastCmd = false);
     static void kill(uint8_t only_steppers);
     static void updateAdvanceFlags();
     static void setup();
@@ -578,12 +582,12 @@ public:
     static inline int getFanSpeed() {
         return (int)pwm_pos[NUM_EXTRUDER+2];
     }
-#if DRIVE_SYSTEM==3
+#if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-        currentDeltaPositionSteps[0] = xaxis;
-        currentDeltaPositionSteps[1] = yaxis;
-        currentDeltaPositionSteps[2] = zaxis;
+        currentDeltaPositionSteps[X_AXIS] = xaxis;
+        currentDeltaPositionSteps[Y_AXIS] = yaxis;
+        currentDeltaPositionSteps[Z_AXIS] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif
@@ -591,7 +595,7 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-    static float runZProbe(bool first,bool last);
+    static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS);
     static void waitForZProbeStart();
 #if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);

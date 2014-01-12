@@ -48,6 +48,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
 #define DEBUG_COM_ERRORS
 //#define DEBUG_DELTA_OVERFLOW
+//#define DEBUG_DELTA_REALPOS
 // Add write debug to quicksettings menu to debug some vars during hang
 //#define DEBUG_PRINT
 //#define DEBUG_SPLIT
@@ -111,6 +112,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #include "Configuration.h"
+
+#if !defined(Z_PROBE_REPETITIONS) || Z_PROBE_REPETITIONS < 1
+#define Z_PROBE_SWITCHING_DISTANCE 0.5 // Distance to safely untrigger probe
+#define Z_PROBE_REPETITIONS 1
+#endif
 
 #define SPEED_MIN_MILLIS 300
 #define SPEED_MAX_MILLIS 50

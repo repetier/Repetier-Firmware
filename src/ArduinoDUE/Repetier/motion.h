@@ -164,13 +164,15 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 #if CPU_ARCH==ARCH_ARM
     static volatile bool nlFlag;
 #endif
+public:
     static uint8_t linesPos; // Position for executing line movement
     static PrintLine lines[];
     static uint8_t linesWritePos; // Position where we write the next cached line move
-    uint8_t primaryAxis;
-    volatile uint8_t flags;
-    long timeInTicks;
     uint8_t joinFlags;
+    volatile uint8_t flags;
+private:
+    uint8_t primaryAxis;
+    long timeInTicks;
     uint8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
     uint8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
     long delta[4];                  ///< Steps we want to move.

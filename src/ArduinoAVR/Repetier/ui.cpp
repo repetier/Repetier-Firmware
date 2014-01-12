@@ -1617,7 +1617,9 @@ void UIDisplay::refreshPage()
      int p = height-1 - ceil((height-2) * progress / 100); \
      u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
 #if UI_DISPLAY_TYPE == 5
+#if SDSUPPORT
         unsigned long sdPercent;
+#endif
         //fan
         int fanPercent;
         char fanString[2];
@@ -1653,6 +1655,7 @@ void UIDisplay::refreshPage()
             {
                 fanString[0] = '\x0e';
             }
+#if SDSUPPORT
             //SD Card
             if(sd.sdactive)
             {
@@ -1666,6 +1669,7 @@ void UIDisplay::refreshPage()
                     sdPercent = 0;
                 }
             }
+#endif
         }
 #endif
         //u8g picture loop
@@ -1696,13 +1700,14 @@ void UIDisplay::refreshPage()
                     if(u8g_IsBBXIntersection(&u8g, 0, 52-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(0,52,cache[4]); //buf
 
+#if SDSUPPORT
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 70, 48-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                     {
                         printU8GRow(70,48,"SD");
                         drawHProgressBar(83,42, 40, 5, sdPercent);
                     }
-
+#endif
                     //Status
                     py = u8g_GetHeight(&u8g)-2;
                     if(u8g_IsBBXIntersection(&u8g, 70, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))

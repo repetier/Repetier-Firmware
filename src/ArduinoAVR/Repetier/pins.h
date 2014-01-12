@@ -982,6 +982,74 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
+    OpenHardware.co.za FrontPrint Controller 1.0
+****************************************************************************************/
+#if MOTHERBOARD == 73
+#define KNOWN_BOARD 1
+
+#if !defined(AVR_ATmega644P) && !defined(AVR_ATmega644) && !defined(AVR_ATmega1284P)
+#error Oops! Make sure you have 'Gen7' selected from the 'Tools -> Boards' menu.
+#endif
+
+//x axis pins
+#define X_STEP_PIN 29
+#define X_DIR_PIN 28
+#define X_ENABLE_PIN 25
+#define X_MIN_PIN 0
+#define X_MAX_PIN -1
+
+//y axis pins
+#define Y_STEP_PIN 27
+#define Y_DIR_PIN 26
+#define Y_ENABLE_PIN 25
+#define Y_MIN_PIN 1
+#define Y_MAX_PIN -1
+
+//z axis pins
+#define Z_STEP_PIN 23
+#define Z_DIR_PIN 22
+#define Z_ENABLE_PIN 25
+#define Z_MIN_PIN 2
+#define Z_MAX_PIN -1
+
+//First extruder pins
+#define E0_STEP_PIN 19
+#define E0_DIR_PIN 18
+#define E0_ENABLE_PIN 25
+#define TEMP_0_PIN 1
+#define HEATER_0_PIN 4
+
+//Second Extruder pins
+#define E1_STEP_PIN 20
+#define E1_DIR_PIN 18
+#define E1_ENABLE_PIN 25
+
+#define TEMP_2_PIN 7
+#define HEATER_2_PIN 13
+
+//Heated Bed Pins
+#define HEATER_1_PIN 3
+#define TEMP_1_PIN 0
+
+//SD Card Pins
+#define SDPOWER -1
+#define SDSS 14
+#define SCK_PIN 7
+#define MISO_PIN 6
+#define MOSI_PIN 5
+
+#define FAN_PIN 21 //FAN and ATX Power Supply Control Pins
+#define PS_ON_PIN 15
+
+#define LED_PIN -1
+#define SDSUPPORT true  // sd card reader on board
+#define SDCARDDETECT -1
+
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+#endif
+
+/****************************************************************************************
 * Teensylu 0.7 pin assingments (ATMEGA90USB)
 * Requires the Teensyduino software with Teensy2.0++ selected in arduino IDE!
 ****************************************************************************************/

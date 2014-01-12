@@ -1063,6 +1063,8 @@ is always running and is not hung up for some unknown reason. */
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
+#define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe
+#define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point. 
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
