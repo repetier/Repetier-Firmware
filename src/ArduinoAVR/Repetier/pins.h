@@ -445,7 +445,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
-* Pascal Arduino Mega pin assignment
+* MEGAP Arduino Mega pin assignment
 *
 ****************************************************************************************/
 #if MOTHERBOARD == 39
