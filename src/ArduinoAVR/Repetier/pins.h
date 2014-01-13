@@ -445,6 +445,79 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
+* Pascal Arduino Mega pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 39
+  #define KNOWN_BOARD 1
+//////////////////FIX THIS//////////////
+  #ifndef __AVR_ATmega1280__
+    #ifndef __AVR_ATmega2560__
+     #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+    #endif
+  #endif
+// X axis
+#define X_STEP_PIN        42
+#define X_DIR_PIN         44
+#define X_ENABLE_PIN      24
+#define X_MIN_PIN         2
+#define X_MAX_PIN         3
+// Y axis
+#define Y_STEP_PIN        38
+#define Y_DIR_PIN         40
+#define Y_ENABLE_PIN      24
+#define Y_MIN_PIN         4
+#define Y_MAX_PIN         5
+// Z axis
+#define Z_STEP_PIN        30
+#define Z_DIR_PIN         32
+#define Z_ENABLE_PIN      24
+#define Z_MIN_PIN         6
+#define Z_MAX_PIN         7
+// Extruder 0
+#define E0_STEP_PIN       22
+#define E0_DIR_PIN        26
+#define E0_ENABLE_PIN     24
+// Extruder 1
+#define E1_STEP_PIN       -1
+#define E1_DIR_PIN        -1
+#define E1_ENABLE_PIN     -1
+// Def
+#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+// Fan
+#define FAN_PIN           12
+//#define FAN2_PIN           11
+// Activity
+#define LED_PIN           13
+// Power
+#define PS_ON_PIN         57
+#define KILL_PIN          -1
+// Heater
+#define HEATER_0_PIN      9
+#define HEATER_1_PIN      8
+#define HEATER_2_PIN      -1
+// Temperature
+#define TEMP_0_PIN        0   // ANALOG NUMBERING
+#define TEMP_1_PIN        1   // ANALOG NUMBERING
+#define TEMP_2_PIN        -1
+// these pins are defined in the SD library if building with SD support  
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED  false
+#define SDCARDDETECT    46
+#define SDPOWER         -1
+#define MISO_PIN        50
+#define MOSI_PIN        51
+#define SCK_PIN         52
+#define SDSS            53
+// Beeper
+#define BEEPER_PIN      56
+#define BEEPER_TYPE     1
+// Light
+#define LIGHT_PIN       61
+#endif
+
+/****************************************************************************************
 * RUMBA pin assignment
 *
 ****************************************************************************************/
