@@ -616,7 +616,7 @@ void Commands::executeGCode(GCode *com)
             printCurrentPosition();
             if(com->hasS() && com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
-            Printer::updateCurrentPosition();
+            Printer::updateCurrentPosition(true);
         }
         break;
         case 30: //single probe set Z0
@@ -675,6 +675,10 @@ void Commands::executeGCode(GCode *com)
                 Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
 #endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
+#else
+#if DRIVE_SYSTEM!=3
+                Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
+#endif
 #endif
                 Printer::setAutolevelActive(true);
                 if(com->S == 2)
@@ -682,7 +686,7 @@ void Commands::executeGCode(GCode *com)
             }
             Printer::setAutolevelActive(true);
             Printer::updateDerivedParameter();
-            Printer::updateCurrentPosition();
+            Printer::updateCurrentPosition(true);
             printCurrentPosition();
 #if DRIVE_SYSTEM==3
             Printer::homeAxis(true,true,true);

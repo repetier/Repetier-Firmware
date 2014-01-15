@@ -182,6 +182,14 @@ STEPPER_CURRENT_CONTROL
 
 #endif
 
+
+#if MOTHERBOARD == 999
+#define KNOWN_BOARD
+#include "userpins.h"
+#endif
+
+
+
 #ifndef SDSSORIG
 #define SDSSORIG -1
 #endif

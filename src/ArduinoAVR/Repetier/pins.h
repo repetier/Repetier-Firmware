@@ -1868,6 +1868,14 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS
 #endif
 
+
+#if MOTHERBOARD == 999
+#define KNOWN_BOARD
+#include "userpins.h"
+#endif
+
+
+
 #ifndef CPU_ARCH  // Set default architecture
 #define CPU_ARCH ARCH_AVR
 #endif
