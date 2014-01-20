@@ -715,10 +715,10 @@
 	"wiring_private.h"
 	"HardwareSerial.h"
 
-1385559246 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.cpp
+1388324180 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.cpp
 	"Repetier.h"
 
-1385138927 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.h
+1388411721 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.h
 	"Configuration.h"
 	"HAL.h"
 	"gcode.h"
@@ -734,12 +734,12 @@
 	"Commands.h"
 	"Eeprom.h"
 
-1385747986 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1388408760 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
-1385737874 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
+1386169512 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\pins.h
 
-1381767601 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.h
+1387992331 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.h
 	<avr/pgmspace.h>
 	<avr/io.h>
 	<avr/io.h>
@@ -756,35 +756,35 @@
 
 1382096934 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.h
 
-1385803336 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.h
+1388329125 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.h
 	"gcode.h"
 	"uilang.h"
 	"uiconfig.h"
 	"uilang.h"
 	"uimenu.h"
 
-1385804531 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uilang.h
+1385923030 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uilang.h
 
 1385747464 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
 
-1385138626 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
+1387614591 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\uimenu.h
 
-1385279439 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
+1388408596 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.h
 
-1381855209 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.h
+1386689572 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.h
 	<stdint.h>
 
-1382173675 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.h
+1387625415 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.h
 
-1385200613 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.h
+1388410622 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.h
 
 1384508019 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.h
 
 1382357795 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\commands.h
 
-1382973117 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.h
+1386402184 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.h
 
-1385279431 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
+1388408606 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\communication.cpp
 	"Repetier.h"
 
 1378480129 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\cores\cdc.cpp
@@ -836,7 +836,7 @@
 1382356654 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
 	"Repetier.h"
 
-1384098293 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+1388071096 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
 	"Repetier.h"
 	"pins_arduino.h"
 	"ui.h"
@@ -845,42 +845,39 @@
 1384523174 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
 	"Repetier.h"
 
-1381070783 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+1387561329 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\hal.cpp
 	"Repetier.h"
 	<compat/twi.h>
 	<avr/io.h>
 
-1385135456 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.cpp
+1388410146 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\motion.cpp
 	"Repetier.h"
 
-1385200383 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
+1388410131 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
-1385797346 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
+1388409773 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\repetier.ino
 	"Repetier.h"
 	<SPI.h>
-	<U8glib.h>
 
-1384524650 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
+1388248733 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
 	"Repetier.h"
 	"ui.h"
 
-1382857032 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.cpp
+1388316644 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\sdfat.cpp
 	"Repetier.h"
 	"Arduino.h"
 	"WProgram.h"
 	<SoftSPI.h>
 
-1385799988 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
+1388331275 source:z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
-	"ui.h"
 	<math.h>
 	<stdlib.h>
 	<inttypes.h>
-	"Eeprom.h"
 	<ctype.h>
 	<LiquidCrystal.h>
-	<U8glib.h>
+	"u8glib_ex.h"
 
 1380830876 c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\u8glib.h
 	<Print.h>
@@ -1194,7 +1191,7 @@
 1380830876 source:c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\utility\u8g_font.c
 	"u8g.h"
 
-1380830876 source:c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\utility\u8g_font_data.c
+1385900599 source:c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\utility\u8g_font_data.c
 	"u8g.h"
 	"u8g.h"
 	"u8g.h"
@@ -1658,10 +1655,48 @@
 1380830876 source:c:\users\littwin\documents\arduino\codeblocks\arduino\libraries\u8glib\utility\u8g_virtual_screen.c
 	"u8g.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\commands.cpp
+1387028940 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\font_repetier_6x10.h
+	<stddef.h>
+	<stdint.h>
+	<avr/pgmspace.h>
+	<avr/interrupt.h>
+	<avr/io.h>
+	<util/delay.h>
+	<delays.h>
+	"plib.h"
+	<avr/interrupt.h>
+	"sam.h"
+	<string.h>
+	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
+
+1387028940 z:\users\littwin\documents\projekte\repetier\repetier-firmware\src\arduinoavr\repetier\u8glib_ex.h
+	<stddef.h>
+	<stdint.h>
+	<avr/pgmspace.h>
+	<avr/interrupt.h>
+	<avr/io.h>
+	<util/delay.h>
+	<delays.h>
+	"plib.h"
+	<avr/interrupt.h>
+	"sam.h"
+	<string.h>
+	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\commands.cpp
 	"Repetier.h"
 
-1386904100 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\repetier.h
+1388632118 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\repetier.h
 	"Configuration.h"
 	"HAL.h"
 	"gcode.h"
@@ -1677,12 +1712,12 @@
 	"Commands.h"
 	"Eeprom.h"
 
-1386978932 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\configuration.h
+1390162023 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\pins.h
+1390162064 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\pins.h
 
-1386978909 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\hal.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\hal.h
 	<avr/pgmspace.h>
 	<avr/io.h>
 	<avr/io.h>
@@ -1744,61 +1779,43 @@
 1362986950 f:\codeblocks\arduino\hardware\arduino\variants\mega\pins_arduino.h
 	<avr/pgmspace.h>
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\fastio.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\fastio.h
 	<avr/io.h>
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\gcode.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\gcode.h
 
-1386979403 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\ui.h
+1388601443 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\ui.h
 	"gcode.h"
 	"uilang.h"
 	"uiconfig.h"
-	<U8glib.h>
-	"Font_Repetier_5x7.h"
-	"Font_Repetier_6x10.h"
 	"uilang.h"
 	"uimenu.h"
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uilang.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\uilang.h
 
-1386754968 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
+1388601166 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\uiconfig.h
 
-1386754449 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\libraries\u8glib\u8glib.h
-	<Print.h>
-	"utility/u8g.h"
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\uimenu.h
 
-1386754450 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\libraries\u8glib\utility\u8g.h
-	<stddef.h>
-	<stdint.h>
-	<avr/pgmspace.h>
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\communication.h
 
-1386902142 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\font_repetier_5x7.h
-	<u8g.h>
-
-1386902148 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\font_repetier_6x10.h
-	<u8g.h>
-
-1386808485 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uimenu.h
-
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\communication.h
-
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdfat.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\sdfat.h
 	<stdint.h>
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\extruder.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\extruder.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\printer.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\printer.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\motion.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\motion.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\commands.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\commands.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\eeprom.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\eeprom.h
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\communication.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\communication.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\cdc.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\cdc.cpp
 	<CDC.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\cdc.cpp
@@ -1821,20 +1838,20 @@
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\usbcore.h
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\main.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\main.cpp
 	<main.cpp>
 
 1371032818 f:\codeblocks\arduino\hardware\arduino\cores\arduino\main.cpp
 	<Arduino.h>
 	<stdio.h>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\new.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\new.cpp
 	<new.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\new.cpp
 	<new.h>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\print.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\print.cpp
 	<Print.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\print.cpp
@@ -1845,14 +1862,14 @@
 	"Arduino.h"
 	"Print.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\stream.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\stream.cpp
 	<Stream.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\stream.cpp
 	"Arduino.h"
 	"Stream.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\tone.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\tone.cpp
 	<Tone.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\tone.cpp
@@ -1861,7 +1878,7 @@
 	"Arduino.h"
 	"pins_arduino.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\usbcore.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\usbcore.cpp
 	<HID.cpp>
 	<USBCore.cpp>
 
@@ -1875,7 +1892,7 @@
 	"USBAPI.h"
 	"USBDesc.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\winterrupts.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\winterrupts.c
 	<WInterrupts.c>
 
 1371032847 f:\codeblocks\arduino\hardware\arduino\cores\arduino\winterrupts.c
@@ -1893,888 +1910,120 @@
 	<stdarg.h>
 	"Arduino.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wiring.c
 	<wiring.c>
 
 1371032870 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wiring.c
 	"wiring_private.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_analog.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wiring_analog.c
 	<wiring_analog.c>
 
 1371032878 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_analog.c
 	"wiring_private.h"
 	"pins_arduino.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_digital.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wiring_digital.c
 	<wiring_digital.c>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_digital.c
 	"wiring_private.h"
 	"pins_arduino.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_pulse.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wiring_pulse.c
 	<wiring_pulse.c>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_pulse.c
 	"wiring_private.h"
 	"pins_arduino.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_shift.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wiring_shift.c
 	<wiring_shift.c>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wiring_shift.c
 	"wiring_private.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wmath.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wmath.cpp
 	<WMath.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wmath.cpp
 	"stdlib.h"
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wstring.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\cores\wstring.cpp
 	<WString.cpp>
 
 1362986950 f:\codeblocks\arduino\hardware\arduino\cores\arduino\wstring.cpp
 	"WString.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\eeprom.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\extruder.cpp
 	"Repetier.h"
 	"pins_arduino.h"
 	"ui.h"
 	"Eeprom.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\gcode.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\hal.cpp
 	"Repetier.h"
 	<compat/twi.h>
 	<avr/io.h>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\motion.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\motion.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\printer.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\repetier.ino
+	"Repetier.h"
+	<SPI.h>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\sdcard.cpp
 	"Repetier.h"
 	"ui.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdfat.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\sdfat.cpp
 	"Repetier.h"
 	"Arduino.h"
 	"WProgram.h"
 	<SoftSPI.h>
 
-1386902179 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\repetier.ino
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
-	<SPI.h>
-	<U8glib.h>
-
-1386905220 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\ui.cpp
-	"Repetier.h"
-	"ui.h"
 	<math.h>
 	<stdlib.h>
 	<inttypes.h>
-	"Eeprom.h"
 	<ctype.h>
 	<LiquidCrystal.h>
-	<U8glib.h>
+	"u8glib_ex.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\libraries\u8glib\u8glib.cpp
-	"U8glib.h"
-
-1386756806 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\u8glib.h
-	<Print.h>
-	"u8g.h"
-
-1386754450 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-development\src\arduinoavr\repetier\u8glib_ex.h
 	<stddef.h>
 	<stdint.h>
 	<avr/pgmspace.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\u8glib.cpp
-	"U8glib.h"
-
-1386754450 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\u8g.h
-	<stddef.h>
-	<stdint.h>
-	<avr/pgmspace.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_font.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7920_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_api.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_ll_api.c
-	<stddef.h>
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_font_data.c
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_cursor.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_line.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_page.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_rect.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_state.c
-	<stddef.h>
-	"u8g.h"
-	<avr/interrupt.h>
-	"sam.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\chessengine.c
-	"u8g.h"
-	<stdio.h>
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_bitmap.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_circle.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_clip.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_api_16gr.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_attiny85_hw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_common.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_fast_parallel.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-	<WProgram.h>
-	<Arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_hw_usart_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_no_en_parallel.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_parallel.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_port_d_wr.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_ssd_i2c.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_custom.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_hw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_std_sw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_sw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_arduino_t6963.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_atmega_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_atmega_parallel.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_atmega_st7920_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_atmega_st7920_spi.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_atmega_sw_spi.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_i2c.c
-	"u8g.h"
-	<avr/io.h>
-	<util/twi.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_io.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_com_null.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_delay.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
 	<avr/interrupt.h>
 	<avr/io.h>
 	<util/delay.h>
 	<delays.h>
 	"plib.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_a2_micro_printer.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_flipdisc_2x7.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_gprof.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ht1632.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ili9325d_320x240.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ks0108_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_lc7981_160x80.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_lc7981_240x128.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_lc7981_240x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_lc7981_320x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_null.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_pcd8544_84x48.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_pcf8812_96x65.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_sbn1661_122x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1306_128x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1306_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1309_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1322_nhd31oled_bw.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1322_nhd31oled_gr.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_bw.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_bw_new.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_gr.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_gr_new.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1327_96x96_gr.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_ssd1351_128x128.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_64128n.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_dogm128.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_dogm132.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_lm6059.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_lm6063.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_nhd_c12832.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7565_nhd_c12864.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7687_c144mvgd.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7920_192x32.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_st7920_202x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_t6963_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_t6963_240x128.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_t6963_240x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_tls8204_84x48.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_uc1601_c128032.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_uc1610_dogxl160.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_uc1701_dogs102.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_dev_uc1701_mini12864.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_ellipse.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb14v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb16h1.c
-	"u8g.h"
-	<string.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb16h2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb16v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb16v2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb32h1.c
-	"u8g.h"
-	<string.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8h1.c
-	"u8g.h"
+	<avr/interrupt.h>
+	"sam.h"
 	<string.h>
 	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8h1f.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8h2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8h8.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pb8v2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pbxh16.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_pbxh24.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_rot.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_scale.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_u16toa.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_u8toa.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\utility\u8g_virtual_screen.c
-	"u8g.h"
-
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\commands.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\commands.cpp
 	"Repetier.h"
 
-1387702864 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\repetier.h
+1388632118 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\repetier.h
 	"Configuration.h"
 	"HAL.h"
 	"gcode.h"
@@ -2790,12 +2039,12 @@
 	"Commands.h"
 	"Eeprom.h"
 
-1387709407 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\configuration.h
+1390162023 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\configuration.h
 	"pins.h"
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\pins.h
+1390162064 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\pins.h
 
-1386978909 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\hal.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\hal.h
 	<avr/pgmspace.h>
 	<avr/io.h>
 	<avr/io.h>
@@ -2807,924 +2056,333 @@
 	"WProgram.h"
 	"fastio.h"
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\fastio.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\fastio.h
 	<avr/io.h>
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\gcode.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\gcode.h
 
-1386979403 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\ui.h
+1388601443 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\ui.h
 	"gcode.h"
 	"uilang.h"
 	"uiconfig.h"
-	<U8glib.h>
-	"Font_Repetier_5x7.h"
-	"Font_Repetier_6x10.h"
 	"uilang.h"
 	"uimenu.h"
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\uilang.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\uilang.h
 
-1386754968 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\uiconfig.h
+1388601166 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\uiconfig.h
 
-1386756806 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\u8glib.h
-	<Print.h>
-	"u8g.h"
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\uimenu.h
 
-1386754450 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\u8g.h
-	<stddef.h>
-	<stdint.h>
-	<avr/pgmspace.h>
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\communication.h
 
-1386902142 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\font_repetier_5x7.h
-	<u8g.h>
-
-1386902148 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\font_repetier_6x10.h
-	<u8g.h>
-
-1386808485 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\uimenu.h
-
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\communication.h
-
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\sdfat.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\sdfat.h
 	<stdint.h>
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\extruder.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\extruder.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\printer.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\printer.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\motion.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\motion.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\commands.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\commands.h
 
-1386714790 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\eeprom.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\eeprom.h
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\communication.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\communication.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\cdc.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\cdc.cpp
 	<CDC.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\main.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\main.cpp
 	<main.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\new.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\new.cpp
 	<new.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\print.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\print.cpp
 	<Print.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\stream.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\stream.cpp
 	<Stream.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\tone.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\tone.cpp
 	<Tone.cpp>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\usbcore.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\usbcore.cpp
 	<HID.cpp>
 	<USBCore.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\winterrupts.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\winterrupts.c
 	<WInterrupts.c>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wiring.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wiring.c
 	<wiring.c>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wiring_analog.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wiring_analog.c
 	<wiring_analog.c>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wiring_digital.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wiring_digital.c
 	<wiring_digital.c>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wiring_pulse.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wiring_pulse.c
 	<wiring_pulse.c>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wiring_shift.c
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wiring_shift.c
 	<wiring_shift.c>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wmath.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wmath.cpp
 	<WMath.cpp>
 
-1386711454 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\cores\wstring.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\cores\wstring.cpp
 	<WString.cpp>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\eeprom.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\eeprom.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\extruder.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\extruder.cpp
 	"Repetier.h"
 	"pins_arduino.h"
 	"ui.h"
 	"Eeprom.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\gcode.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\gcode.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\hal.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\hal.cpp
 	"Repetier.h"
 	<compat/twi.h>
 	<avr/io.h>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\motion.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\motion.cpp
 	"Repetier.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\printer.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\printer.cpp
 	"Repetier.h"
 
-1386902179 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\repetier.ino
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\repetier.ino
 	"Repetier.h"
 	<SPI.h>
-	<U8glib.h>
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\sdcard.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\sdcard.cpp
 	"Repetier.h"
 	"ui.h"
 
-1386714790 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\sdfat.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\sdfat.cpp
 	"Repetier.h"
 	"Arduino.h"
 	"WProgram.h"
 	<SoftSPI.h>
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\u8glib.cpp
-	"U8glib.h"
-
-1386905220 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\ui.cpp
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\ui.cpp
 	"Repetier.h"
-	"ui.h"
 	<math.h>
 	<stdlib.h>
 	<inttypes.h>
-	"Eeprom.h"
 	<ctype.h>
 	<LiquidCrystal.h>
-	<U8glib.h>
+	"u8glib_ex.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\chessengine.c
-	"u8g.h"
-	<stdio.h>
-	<string.h>
-
-1386754450 e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g.h
+1388598165 e:\users\martin\documents\github\repetier-firmware-mrbubble-1 (8)\src\arduinoavr\repetier\u8glib_ex.h
 	<stddef.h>
 	<stdint.h>
 	<avr/pgmspace.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_bitmap.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_circle.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_clip.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_api.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_api_16gr.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_attiny85_hw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_common.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_fast_parallel.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-	<WProgram.h>
-	<Arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_hw_usart_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_no_en_parallel.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_parallel.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_port_d_wr.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_ssd_i2c.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_custom.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_hw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_st7920_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_std_sw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_sw_spi.c
-	"u8g.h"
-	<WProgram.h>
-	"wiring_private.h"
-	"pins_arduino.h"
-	<Arduino.h>
-	"wiring_private.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_arduino_t6963.c
-	"u8g.h"
-	<wiring_private.h>
-	<pins_arduino.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_atmega_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_atmega_parallel.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_atmega_st7920_hw_spi.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_atmega_st7920_spi.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_atmega_sw_spi.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_i2c.c
-	"u8g.h"
-	<avr/io.h>
-	<util/twi.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_io.c
-	"u8g.h"
-	<avr/interrupt.h>
-	<avr/io.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_com_null.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_cursor.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_delay.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
 	<avr/interrupt.h>
 	<avr/io.h>
 	<util/delay.h>
 	<delays.h>
 	"plib.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_a2_micro_printer.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_flipdisc_2x7.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_gprof.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ht1632.c
-	"u8g.h"
-	<WProgram.h>
-	<Arduino.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ili9325d_320x240.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ks0108_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_lc7981_160x80.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_lc7981_240x128.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_lc7981_240x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_lc7981_320x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_null.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_pcd8544_84x48.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_pcf8812_96x65.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_sbn1661_122x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1306_128x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1306_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1309_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1322_nhd31oled_bw.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1322_nhd31oled_gr.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_bw.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_bw_new.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_gr.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1325_nhd27oled_gr_new.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1327_96x96_gr.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_ssd1351_128x128.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_64128n.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_dogm128.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_dogm132.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_lm6059.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_lm6063.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_nhd_c12832.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7565_nhd_c12864.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7687_c144mvgd.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7920_128x64.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7920_192x32.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_st7920_202x32.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_t6963_128x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_t6963_240x128.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_t6963_240x64.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_tls8204_84x48.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_uc1601_c128032.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_uc1610_dogxl160.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_uc1701_dogs102.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_dev_uc1701_mini12864.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_ellipse.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_font.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_font_data.c
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_line.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_ll_api.c
-	<stddef.h>
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_page.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb14v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb16h1.c
-	"u8g.h"
-	<string.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb16h2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb16v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb16v2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb32h1.c
-	"u8g.h"
-	<string.h>
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8h1.c
-	"u8g.h"
-	<string.h>
-	<assert.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8h1f.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8h2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8h8.c
-	"u8g.h"
-
-1386754450 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8v1.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pb8v2.c
-	"u8g.h"
-	<string.h>
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pbxh16.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_pbxh24.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_rect.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_rot.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_scale.c
-	"u8g.h"
-
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_state.c
-	<stddef.h>
-	"u8g.h"
 	<avr/interrupt.h>
 	"sam.h"
+	<string.h>
+	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_u16toa.c
-	"u8g.h"
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\commands.cpp
+	"Repetier.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_u8toa.c
-	"u8g.h"
+1388632118 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\repetier.h
+	"Configuration.h"
+	"HAL.h"
+	"gcode.h"
+	"ui.h"
+	"Communication.h"
+	"SdFat.h"
+	"SdFat.h"
+	"Extruder.h"
+	"Printer.h"
+	"motion.h"
+	"HAL.h"
+	"SdFat.h"
+	"Commands.h"
+	"Eeprom.h"
 
-1386754449 source:e:\users\martin\documents\github\repetier-firmware - copy\src\arduinoavr\repetier\utility\u8g_virtual_screen.c
-	"u8g.h"
+1390248831 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\configuration.h
+	"pins.h"
+
+1390162064 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\pins.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\hal.h
+	<avr/pgmspace.h>
+	<avr/io.h>
+	<avr/io.h>
+	<avr/eeprom.h>
+	<avr/wdt.h>
+	<inttypes.h>
+	"Print.h"
+	"Arduino.h"
+	"WProgram.h"
+	"fastio.h"
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\fastio.h
+	<avr/io.h>
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\gcode.h
+
+1388601443 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\ui.h
+	"gcode.h"
+	"uilang.h"
+	"uiconfig.h"
+	"uilang.h"
+	"uimenu.h"
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\uilang.h
+
+1388601166 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\uiconfig.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\uimenu.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\communication.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\sdfat.h
+	<stdint.h>
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\extruder.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\printer.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\motion.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\commands.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\eeprom.h
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\communication.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\cdc.cpp
+	<CDC.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\main.cpp
+	<main.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\new.cpp
+	<new.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\print.cpp
+	<Print.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\stream.cpp
+	<Stream.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\tone.cpp
+	<Tone.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\usbcore.cpp
+	<HID.cpp>
+	<USBCore.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\winterrupts.c
+	<WInterrupts.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wiring.c
+	<wiring.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wiring_analog.c
+	<wiring_analog.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wiring_digital.c
+	<wiring_digital.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wiring_pulse.c
+	<wiring_pulse.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wiring_shift.c
+	<wiring_shift.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wmath.cpp
+	<WMath.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\cores\wstring.cpp
+	<WString.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\eeprom.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\extruder.cpp
+	"Repetier.h"
+	"pins_arduino.h"
+	"ui.h"
+	"Eeprom.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\gcode.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\hal.cpp
+	"Repetier.h"
+	<compat/twi.h>
+	<avr/io.h>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\motion.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\printer.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\repetier.ino
+	"Repetier.h"
+	<SPI.h>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\sdcard.cpp
+	"Repetier.h"
+	"ui.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\sdfat.cpp
+	"Repetier.h"
+	"Arduino.h"
+	"WProgram.h"
+	<SoftSPI.h>
+
+1390240652 source:e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\ui.cpp
+	"Repetier.h"
+	<math.h>
+	<stdlib.h>
+	<inttypes.h>
+	<ctype.h>
+	<LiquidCrystal.h>
+	"u8glib_ex.h"
+
+1388598165 e:\users\martin\documents\github\repetier-firmware-dev\src\arduinoavr\repetier\u8glib_ex.h
+	<stddef.h>
+	<stdint.h>
+	<avr/pgmspace.h>
+	<avr/interrupt.h>
+	<avr/io.h>
+	<util/delay.h>
+	<delays.h>
+	"plib.h"
+	<avr/interrupt.h>
+	"sam.h"
+	<string.h>
+	<assert.h>
+	<WProgram.h>
+	"wiring_private.h"
+	"pins_arduino.h"
+	<Arduino.h>
+	"wiring_private.h"
 

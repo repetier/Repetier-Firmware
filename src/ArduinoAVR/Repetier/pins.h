@@ -77,8 +77,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS          -1
 #define LED_PIN            -1
 #define FAN_PIN            -1
-#define PS_ON_PIN          15
-#define KILL_PIN           -1
+#define PS_ON_PIN          -1
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -151,7 +150,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN             0
 #define FAN_PIN            -1
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       14
 #define TEMP_0_PIN          4 //D27   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -218,7 +216,6 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN       14
 
 #define FAN_PIN         -1
-#define KILL_PIN        -1
 
 #define HEATER_0_PIN    -1
 #define TEMP_0_PIN      -1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -333,22 +330,20 @@ STEPPER_CURRENT_CONTROL
   #define Z_MAX_PIN 32
   #define Z_ENABLE_PIN 35
 
-  #define HEATER_BED_PIN 4
-  #define TEMP_BED_PIN 10
-
-  #define HEATER_0_PIN  2 //pwm
+  #define HEATER_0_PIN  2 //pwm  EXTRUDER 1
   #define TEMP_0_PIN 8 //analog
 
-  #define HEATER_1_PIN 3
+  #define HEATER_1_PIN 3 //bed
   #define TEMP_1_PIN 9
 
-  #define HEATER_2_PIN -1
+  #define HEATER_2_PIN -1 //EXTRUDER 2
   #define TEMP_2_PIN -1
 
   #define E0_STEP_PIN         43
   #define E0_DIR_PIN          45
   #define E0_ENABLE_PIN       41
   #define E0_FAN_PIN           -1
+  #define CASE_LIGHTS_PIN 4
 //  #define EXT1_EXTRUDER_COOLER_PIN E0_FAN_PIN
 
   #define E1_STEP_PIN         49
@@ -370,8 +365,8 @@ STEPPER_CURRENT_CONTROL
    #define BEEPER_PIN 18
    #define BEEPER_TYPE 1
    //buttons are directly attached
-   #define BTN_EN1 40
-   #define BTN_EN2 42
+   #define BTN_EN1 42
+   #define BTN_EN2 40
    #define BTN_ENC 19  //the click
    #define UI_ENCODER_A     BTN_EN1
    #define UI_ENCODER_B     BTN_EN2
@@ -383,7 +378,7 @@ STEPPER_CURRENT_CONTROL
    #define MOSI_PIN         51
    #define SDPOWER          -1
    #define SDSS             53
-//   #define SDSUPPORT false
+   #define SDSUPPORT true
    // U8g SPI
    #define UI_DISPLAY_D4_PIN 16 // SCK = en
    #define UI_DISPLAY_ENABLE_PIN 17 //MOSI = rw
@@ -392,8 +387,6 @@ STEPPER_CURRENT_CONTROL
    #define UI_RESET_PIN  44  //rewired Geetech LCD Full Graphic controller stop switch sw1 EXT-2-8 to this pin
 #endif
 #endif
-
-
 #if MOTHERBOARD == 3
 #define KNOWN_BOARD 1
 
@@ -443,7 +436,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            13
 #define FAN_PIN            9
 #define PS_ON_PIN          12
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       10
 #define HEATER_1_PIN       8
@@ -483,7 +475,6 @@ STEPPER_CURRENT_CONTROL
 #define SDSS               53
 #define LED_PIN            13
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 //#define SCL                21
 //#define SDA                20
 
@@ -517,7 +508,7 @@ STEPPER_CURRENT_CONTROL
 #ifdef AZTEEG_X3
 #define SDSUPPORT true
 #define SDCARDDETECTINVERTED false
-#define SDCARDDETECT -1
+#define SDCARDDETECT 49
 #define FAN_PIN           4
 #define FAN2_PIN          5
 #define LIGHT_PIN         6
@@ -589,7 +580,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN1 PIN  8 // (e.g. useful for electronics fan or light on/off) on PIN 8
 
 #define PS_ON_PIN          45
-#define KILL_PIN           46
 
 #define HEATER_0_PIN       2    // EXTRUDER 1
 #define HEATER_2_PIN       3    // EXTRUDER 2
@@ -653,7 +643,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            -1
 #define FAN_PIN             5
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -773,7 +762,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            -1
 
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       13 // (extruder)
 
@@ -852,7 +840,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            4
 
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       13 // (extruder)
 #define HEATER_2_PIN       -1
@@ -1127,7 +1114,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            16 // Fan
 #define PS_ON_PIN          -1
 
-#define KILL_PIN           -1
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
@@ -1185,7 +1171,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            16 // Fan
 #define PS_ON_PIN          -1
 
-#define KILL_PIN           -1
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 #ifndef SDSUPPORT
@@ -1255,7 +1240,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            25	// OUT1 PINA.3, 75, OUT1
 #define FAN_BOARD_PIN      27   // OUT2
 #define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       10	// PINB.4, 23, HZ1
 #define HEATER_1_PIN        9	// PINH.6, 18, HZ2
@@ -1327,7 +1311,6 @@ STEPPER_CURRENT_CONTROL
 
 #define FAN_PIN            7 // IO pin. Buffer needed
 #define PS_ON_PIN          12
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       9    // EXTRUDER 1
 #define HEATER_1_PIN       8    // EXTRUDER 2 (FAN On Sprinter)
@@ -1430,7 +1413,6 @@ STEPPER_CURRENT_CONTROL
 #define FAN_PIN            7
 #define FAN2_PIN           6
 #define PS_ON_PIN          12
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       9    // EXTRUDER 1
 #define HEATER_2_PIN       8    // Heated bed
@@ -1538,7 +1520,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN        13
 #define FAN_PIN        8
 #define PS_ON_PIN      4
-#define KILL_PIN       -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
@@ -1615,7 +1596,6 @@ STEPPER_CURRENT_CONTROL
 //uncomment when the 2nd fan used - works only without heated bed!
 #define FAN2_PIN           2
 #define PS_ON_PIN          30
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       3    ////**** Extuder1
 #define HEATER_1_PIN       12   ////***Extuder2
@@ -1669,7 +1649,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            13
 #define FAN_PIN            7        ////*****fan
 #define PS_ON_PIN          12
-#define KILL_PIN           -1
 
 #define HEATER_0_PIN       8    ////**** Extuder1
 #define HEATER_1_PIN       10    ////***Extuder2
@@ -1759,7 +1738,6 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN        13
 #define FAN_PIN        8
 #define PS_ON_PIN      4
-#define KILL_PIN       -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,

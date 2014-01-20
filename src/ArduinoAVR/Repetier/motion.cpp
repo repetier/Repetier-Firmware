@@ -64,8 +64,6 @@
 #error MOVE_CACHE_SIZE must be at least 5
 #endif
 
-#define OVERFLOW_PERIODICAL  (int)(F_CPU/(TIMER0_PRESCALE*40))
-
 //Inactivity shutdown variables
 millis_t previousMillisCmd = 0;
 millis_t maxInactiveTime = MAX_INACTIVE_TIME*1000L;
@@ -382,9 +380,9 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
         halfStep = 1;
 #if NONLINEAR_SYSTEM
         // Error 0-2 are used for the towers and set up in the timer
-        error[3] = stepsRemaining;
+        error[E_AXIS] = stepsRemaining;
 #else
-        error[0] = error[1] = error[2] = error[3] = delta[primaryAxis];
+        error[X_AXIS] = error[Y_AXIS] = error[Z_AXIS] = error[E_AXIS] = delta[primaryAxis];
 #endif
     }
 #ifdef DEBUG_STEPCOUNT

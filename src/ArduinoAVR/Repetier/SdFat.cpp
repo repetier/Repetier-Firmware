@@ -26,6 +26,12 @@
 #define COMPAT_PRE1
 #endif
 //#include <SdFat.h>
+
+extern int8_t RFstricmp(const char* s1, const char* s2);
+extern int8_t RFstrnicmp(const char* s1, const char* s2, size_t n);
+
+//#define GLENN_DEBUG
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 static void pstrPrint(FSTRINGPARAM(str)) {
@@ -93,6 +99,7 @@ bool SdFat::chdir(bool set_cwd) {
 bool SdFat::chdir(const char *path, bool set_cwd) {
   SdBaseFile dir;
   if (path[0] == '/' && path[1] == '\0') return chdir(set_cwd);
+
   if (!dir.open(&vwd_, path, O_READ)) goto fail;
   if (!dir.isDir()) goto fail;
   vwd_ = dir;
@@ -529,7 +536,7 @@ bool SdBaseFile::dirEntry(dir_t* dir) {
 void SdBaseFile::dirName(const dir_t& dir, char* name) {
   uint8_t j = 0;
   for (uint8_t i = 0; i < 11; i++) {
-    if (dir.name[i] == ' ')continue;
+    if (dir.name[i] == ' ') continue;
     if (i == 8) name[j++] = '.';
     name[j++] = dir.name[i];
   }
@@ -644,6 +651,92 @@ void SdBaseFile::getpos(FatPos_t* pos) {
 void SdBaseFile::ls(uint8_t flags) {
   ls(flags, 0);
 }
+
+uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound)
+{
+    dir_t *p = NULL;
+    uint8_t cnt=0;
+    char *oldpathend = pathend;
+
+    parent->rewind();
+
+    while ((p = parent->getLongFilename(p, tempLongFilename, 0, NULL)))
+    {
+        HAL::pingWatchdog();
+        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
+        if (strcmp(tempLongFilename, "..") == 0) continue;
+        if( DIR_IS_SUBDIR(p))
+        {
+            if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
+            if(level<SD_MAX_FOLDER_DEPTH)
+            {
+                if (findFilename == NULL)
+                  {
+                   if(level)
+                    {
+                     Com::print(fullName);
+                     Com::printF(Com::tSlash);
+                    }
+                  Com::print(tempLongFilename);
+                  Com::printFLN(Com::tSlash); //End with / to mark it as directory entry, so we can see empty directories.
+                }
+            }
+            SdBaseFile next;
+            char *tmp;
+
+            if(level) strcat(fullName, "/");
+
+            strcat(fullName, tempLongFilename);
+            uint16_t index = (parent->curPosition()-31) >> 5;
+
+            if(next.open(parent, index, O_READ))
+              {
+              if (next.lsRecursive(&next,level+1, findFilename, pParentFound))
+                  return true;
+              }
+            parent->seekSet(32 * (index + 1));
+            if ((tmp = strrchr(fullName, '/'))!= NULL)
+                *tmp = 0;
+            else
+               *fullName = 0;
+        }
+        else
+        {
+            if (findFilename != NULL)
+            {
+                int8_t cFullname;
+
+                cFullname = strlen(fullName);
+                if (RFstrnicmp(fullName, findFilename, cFullname) == 0)
+                {
+                    if (cFullname > 0)
+                        cFullname++;
+                    if (RFstricmp(tempLongFilename, findFilename+cFullname) == 0)
+                    {
+                        if (pParentFound != NULL)
+                          *pParentFound = *parent;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if(level)
+                {
+                    Com::print(fullName);
+                    Com::printF(Com::tSlash);
+                }
+                Com::print(tempLongFilename);
+#if SD_EXTENDED_DIR
+                Com::printF(Com::tSpace,(long)p->fileSize);
+#endif
+                Com::println();
+            }
+        }
+    }
+    return false;
+}
+
 //------------------------------------------------------------------------------
 /** List directory contents.
  *
@@ -661,16 +754,13 @@ void SdBaseFile::ls(uint8_t flags) {
  * list to indicate subdirectory level.
  */
 void SdBaseFile::ls(uint8_t flags, uint8_t indent) {
+  SdBaseFile parent;
+
   rewind();
-  int8_t status;
-  while ((status = lsPrintNext(flags, indent))) {
-    if (status > 1 && (flags & LS_R)) {
-      uint16_t index = curPosition()/32 - 1;
-      SdBaseFile s;
-      if (s.open(this, index, O_READ)) s.ls(flags, indent + 2);
-      seekSet(32 * (index + 1));
-    }
-  }
+    *fullName = 0;
+   pathend = fullName;
+  parent = *this;
+  lsRecursive(&parent, 0, NULL, NULL);
 }
 //------------------------------------------------------------------------------
 // saves 32 bytes on stack for ls recursion
@@ -678,7 +768,6 @@ void SdBaseFile::ls(uint8_t flags, uint8_t indent) {
 int8_t SdBaseFile::lsPrintNext(uint8_t flags, uint8_t indent) {
   dir_t dir;
   uint8_t w = 0;
-
   while (1) {
     if (read(&dir, sizeof(dir)) != sizeof(dir)) return 0;
     if (dir.name[0] == DIR_NAME_FREE) return 0;
@@ -690,23 +779,8 @@ int8_t SdBaseFile::lsPrintNext(uint8_t flags, uint8_t indent) {
   // indent for dir level
   for (uint8_t i = 0; i < indent; i++) Com::print(' ');
 
-  // print name
-  for (uint8_t i = 0; i < 11; i++) {
-    if (dir.name[i] == ' ')continue;
-    if (i == 8) {
-      Com::print('.');
-      w++;
-    }
-    Com::print(dir.name[i]);
-    w++;
-  }
-  if (DIR_IS_SUBDIR(&dir)) {
-    Com::print('/');
-    w++;
-  }
-  if (flags & (LS_DATE | LS_SIZE)) {
-    while (w++ < 14) Com::print(' ');
-  }
+  printDirName(dir, flags & (LS_DATE | LS_SIZE) ? 14 : 0, true);
+
   // print modify date/time if requested
   if (flags & LS_DATE) {
     Com::print(' ');
@@ -764,9 +838,8 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
 #endif  // FLASH_ILLEGAL_CHARS
 
       // check size and only allow ASCII printable characters
-      if (i > n || c < 0X21 || c > 0X7E) {
-        DBG_FAIL_MACRO;
-        goto fail;
+      if (i > n || c < 0X20 || c > 0X7E) {
+        c = '_';
       }
       // only upper case allowed in 8.3 names - convert lower to upper
       name[i++] = c < 'a' || c > 'z' ?  c : c + ('A' - 'a');
@@ -795,100 +868,48 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
  * directory, \a path is invalid or already exists in \a parent.
  */
 bool SdBaseFile::mkdir(SdBaseFile* parent, const char* path, bool pFlag) {
-  uint8_t dname[11];
-  SdBaseFile dir1, dir2;
-  SdBaseFile* sub = &dir1;
-  SdBaseFile* start = parent;
 
-  if (!parent || isOpen()) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  if (*path == '/') {
-    while (*path == '/') path++;
-    if (!parent->isRoot()) {
-      if (!dir2.openRoot(parent->vol_)) {
-        DBG_FAIL_MACRO;
-        goto fail;
-      }
-      parent = &dir2;
+  uint8_t dname[LONG_FILENAME_LENGTH+1];
+  SdBaseFile newParent;
+
+  if (openParentReturnFile(parent, path, dname, &newParent, pFlag))
+    {
+    return mkdir(&newParent, dname);
     }
-  }
-  while (1) {
-    if (!make83Name(path, dname, &path)) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
-    while (*path == '/') path++;
-    if (!*path) break;
-    if (!sub->open(parent, dname, O_READ)) {
-      if (!pFlag || !sub->mkdir(parent, dname)) {
-        DBG_FAIL_MACRO;
-        goto fail;
-      }
-    }
-    if (parent != start) parent->close();
-    parent = sub;
-    sub = parent != &dir1 ? &dir1 : &dir2;
-  }
-  return mkdir(parent, dname);
 
  fail:
   return false;
 }
 //------------------------------------------------------------------------------
-bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t dname[11]) {
-  uint32_t block;
+bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
   dir_t d;
-  dir_t* p;
-  cache_t* pc;
 
   if (!parent->isDir()) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  // create a normal file
-  if (!open(parent, dname, O_CREAT | O_EXCL | O_RDWR)) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  // convert file to directory
-  flags_ = O_READ;
-  type_ = FAT_FILE_TYPE_SUBDIR;
 
-  // allocate and zero first cluster
-  if (!addDirCluster()) {
+  // create a normal file
+  if (!open(parent, dname, O_CREAT | O_EXCL | O_RDWR, true)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  // force entry to SD
-  if (!sync()) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  // cache entry - should already be in cache due to sync() call
-  p = cacheDirEntry(SdVolume::CACHE_FOR_WRITE);
-  if (!p) {
-    DBG_FAIL_MACRO;
-    goto fail;
-  }
-  // change directory entry  attribute
-  p->attributes = DIR_ATT_DIRECTORY;
 
   // make entry for '.'
-  memcpy(&d, p, sizeof(d));
+  memset(&d, 0, sizeof(d));
+  d.creationDate = FAT_DEFAULT_DATE;
+  d.creationTime = FAT_DEFAULT_TIME;
+  d.lastAccessDate = d.creationDate;
+  d.lastWriteDate = d.creationDate;
+  d.lastWriteTime = d.creationTime;
+
   d.name[0] = '.';
+  d.attributes = DIR_ATT_DIRECTORY;
   for (uint8_t i = 1; i < 11; i++) d.name[i] = ' ';
 
-  // cache block for '.'  and '..'
-  block = vol_->clusterStartBlock(firstCluster_);
-  pc = vol_->cacheFetch(block, SdVolume::CACHE_FOR_WRITE);
-  if (!pc) {
-    DBG_FAIL_MACRO;
+  if (write(&d, sizeof(dir_t)) < 0)
     goto fail;
-  }
-  // copy '.' to block
-  memcpy(&pc->dir[0], &d, sizeof(d));
+  sync();
 
   // make entry for '..'
   d.name[1] = '.';
@@ -899,10 +920,17 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t dname[11]) {
     d.firstClusterLow = parent->firstCluster_ & 0XFFFF;
     d.firstClusterHigh = parent->firstCluster_ >> 16;
   }
-  // copy '..' to block
-  memcpy(&pc->dir[1], &d, sizeof(d));
-  // write first block
-  return vol_->cacheSync();
+  if (write(&d, sizeof(dir_t)) < 0)
+    goto fail;
+  sync();
+  memset(&d, 0, sizeof(dir_t));
+  if (write(&d, sizeof(dir_t)) < 0)
+    goto fail;
+  sync();
+//  fileSize_ = 0;
+  type_ = FAT_FILE_TYPE_SUBDIR;
+  flags_ |= F_FILE_DIR_DIRTY;
+  return true;
  fail:
   return false;
 }
@@ -920,6 +948,7 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t dname[11]) {
   bool SdBaseFile::open(const char* path, uint8_t oflag) {
     return open(cwd_, path, oflag);
   }
+
 //------------------------------------------------------------------------------
 /** Open a file or directory by name.
  *
@@ -952,7 +981,7 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t dname[11]) {
  * O_EXCL - If O_CREAT and O_EXCL are set, open() shall fail if the file exists.
  *
  * O_SYNC - Call sync() after each write.  This flag should not be used with
- * write(uint8_t), write_P(PGM_P), writeln_P(PGM_P), or the Arduino Print class.
+ * write(uint8_t), write_P(PGM_P), writelnmkdir_P(PGM_P), or the Arduino Print class.
  * These functions do character at a time writes so sync() will be called
  * after each byte.
  *
@@ -971,12 +1000,22 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t dname[11]) {
  * a directory, \a path is invalid, the file does not exist
  * or can't be opened in the access mode specified by oflag.
  */
-bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag) {
-  uint8_t dname[11];
+
+ bool SdBaseFile::openParentReturnFile(SdBaseFile* dirFile, const char* path, uint8_t *dname,
+   SdBaseFile *newParent, boolean bMakeDirs) {
   SdBaseFile dir1, dir2;
   SdBaseFile *parent = dirFile;
+  dir_t *pEntry;
   SdBaseFile *sub = &dir1;
-     //   Com::printFLN(Com::tGot,path);
+  char *p;
+  boolean bFound;
+
+#ifdef GLENN_DEBUG
+    Commands::checkFreeMemory();
+    Commands::writeLowestFreeRAM();
+#endif
+
+  *dname = 0;
 
   if (!dirFile) {
     DBG_FAIL_MACRO;
@@ -989,130 +1028,284 @@ bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag) {
   }
   if (*path == '/') {
     while (*path == '/') path++;
-    if (!dirFile->isRoot()) {
-      if (!dir2.openRoot(dirFile->vol_)) {
+    if (!dirFile->isRoot())
+      {
+      if (!dir2.openRoot(dirFile->vol_))
+        {
         DBG_FAIL_MACRO;
         goto fail;
-      }
+        }
       parent = &dir2;
     }
   }
-  while (1) {
-    if (!make83Name(path, dname, &path)) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
-    while (*path == '/') path++;
-    if (!*path) break;
+    // Traverse the Long Directory Name Path until we get to the LEAF (long file name)
+    while ((p = strchr(path, '/')) != NULL)
+    {
+       int8_t cb = p-path;
 
-    if (!sub->open(parent, dname, O_READ)) {
-      DBG_FAIL_MACRO;
-      goto fail;
+        memcpy(dname, path, cb);
+        *(dname+cb) = 0;
+
+       if (*(p+1) == 0)
+         goto success;
+#ifdef GLENN_DEBUG
+       Commands::checkFreeMemory();
+       Commands::writeLowestFreeRAM();
+#endif
+        bFound = false;
+        if (!sub->open(parent, dname, O_READ, false))
+            {
+            if (!bMakeDirs)
+               return false;
+             if (!sub->mkdir(parent, dname))
+               {
+               return false;
+               }
+            }
+        if (parent != dirFile) parent->close();
+        parent = sub;
+        sub = parent != &dir1 ? &dir1 : &dir2;
+        path = p+1;
     }
-    if (parent != dirFile) parent->close();
-    parent = sub;
-    sub = parent != &dir1 ? &dir1 : &dir2;
-  }
-  return open(parent, dname, oflag);
+   strcpy((char *)dname, path);
+
+   success:
+     *newParent = *parent;
+#ifdef GLENN_DEBUG
+     Commands::checkFreeMemory();
+     Commands::writeLowestFreeRAM();
+#endif
+     return true;
 
  fail:
   return false;
 }
+
+bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag)
+{
+  uint8_t dname[LONG_FILENAME_LENGTH+1];
+  SdBaseFile parent;
+
+  if (openParentReturnFile(dirFile, path, dname, &parent, false))
+    {
+    if (*dname == 0)
+      return true;
+    return open(&parent, dname, oflag, false);
+    }
+
+ fail:
+  return false;
+}
+
+
+uint8_t SdBaseFile::lfn_checksum(const unsigned char *pFCBName)
+{
+   int i;
+   unsigned char sum = 0;
+
+   for (i = 11; i; i--)
+      sum = ((sum & 1) << 7) + (sum >> 1) + *pFCBName++;
+
+   return sum;
+}
 //------------------------------------------------------------------------------
 // open with filename in dname
-bool SdBaseFile::open(SdBaseFile* dirFile,
-  const uint8_t dname[11], uint8_t oflag) {
+bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, bool bDir) {
   bool emptyFound = false;
-  bool fileFound = false;
-  uint8_t index;
-  dir_t* p;
-  cache_t* pc;
+  uint8_t index = 0;
+  dir_t tempDir, *p;
+  const char *tempPtr;
+  char newName[SHORT_FILENAME_LENGTH+2];
+  boolean bShortName = false;
+  int8_t cVFATNeeded = -1, wIndex, cVFATFoundCur;
+  uint32_t wIndexPos = 0;
+  uint8_t cbFilename;
+  char *Filename = (char *)dname;
 
+#ifdef GLENN_DEBUG
+  Com::print("Open File:");
+  Com::print((char*)dname);
+  Com::println();
+#endif
   vol_ = dirFile->vol_;
-
   dirFile->rewind();
   // search for file
 
-  while (dirFile->curPosition_ < dirFile->fileSize_) {
-    index = 0XF & (dirFile->curPosition_ >> 5);
-    p = dirFile->readDirCache();
-    if (!p) {
-      DBG_FAIL_MACRO;
-      goto fail;
+  if (oflag & O_CREAT)
+    {
+    int8_t cb = strlen((char *)dname);
+    bShortName = cb < 9;
+    cVFATNeeded = (cb / 13) + (cb % 13 == 0 ? 0 : 1);
     }
-    if (p->name[0] == DIR_NAME_FREE || p->name[0] == DIR_NAME_DELETED) {
-      // remember first empty slot
-      if (!emptyFound) {
-            dirBlock_ = vol_->cacheBlockNumber();
-        dirIndex_ = index;
-        emptyFound = true;
-      }
-      // done if no entries follow
-      if (p->name[0] == DIR_NAME_FREE) break;
-    } else if (!memcmp(dname, p->name, 11)) {
-      fileFound = true;
-      break;
+
+  while ((p = dirFile->getLongFilename(p, tempLongFilename, cVFATNeeded, &wIndexPos)))
+    {
+        HAL::pingWatchdog();
+        index = (0XF & ((dirFile->curPosition_-31) >> 5));
+        if (RFstricmp(tempLongFilename, (char *)dname) == 0)
+          {
+#ifdef GLENN_DEBUG
+          Com::print("FFound");
+          Com::println();
+#endif
+          if (oflag & O_EXCL)
+            {
+            DBG_FAIL_MACRO;
+            goto fail;
+            }
+          return openCachedEntry(index, oflag);
+          }
     }
-  }
-  if (fileFound) {
-    // don't open existing file if O_EXCL
-    if (oflag & O_EXCL) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
-  } else {
+
     // don't create unless O_CREAT and O_WRITE
     if (!(oflag & O_CREAT) || !(oflag & O_WRITE)) {
-      DBG_FAIL_MACRO;
       goto fail;
     }
-    if (emptyFound) {
-      index = dirIndex_;
-      p = cacheDirEntry(SdVolume::CACHE_FOR_WRITE);
-      if (!p) {
-        DBG_FAIL_MACRO;
-        goto fail;
+
+      dirFile->findSpace(&tempDir, cVFATNeeded, &cVFATFoundCur, &wIndexPos);
+      if (wIndexPos != 0)
+        {
+        emptyFound = true;
+#ifdef GLENN_DEBUG
+        Com::print("Empty FAT:");
+        Com::print((long)wIndexPos);
+        Com::println();
+#endif
+        index = wIndexPos >> 5;
+        }
+      else
+        {
+        // only 512 entries allowed in FAT16 Root Fixed dir
+        if (dirFile->type() == FAT_FILE_TYPE_ROOT_FIXED && (dirFile->curPosition_ >> 5) >= 512)
+          goto fail;
+        cVFATFoundCur = cVFATNeeded + 1;
+        if (dirFile->curPosition_ > 0)
+          wIndexPos = dirFile->curPosition_-32;
+        }
+      p = &tempDir;
+
+#ifdef GLENN_DEBUG
+    Com::print("CurPos:");
+    Com::print((long)wIndexPos);
+    Com::println();
+#endif
+      dirFile->flags_ |= O_WRITE;
+      dirFile->seekSet(wIndexPos);
+
+    // Create LONG FILE NAMES and LONG DIRECTORIES HERE
+    // FILL IN MULTIPLE dir_t enteries..
+    // DO a test and and make all files created have a long file name of "XXXXXXX <shortname>"
+#ifdef GLENN_DEBUG
+    Com::print("At Index:");
+    Com::print((long)index);
+    Com::print("-");
+    Com::print((long)bShortName);
+    Com::println();
+
+    Com::print("Create:");
+    Com::print((char *)dname);
+    Com::println();
+#endif
+    if (!bShortName)
+      {
+      char *pExt, szExt[5];
+
+      // Generate 8.3 from longfile name
+      if ((pExt = strchr((char *)dname, '.')) != NULL)
+        {
+        strncpy(szExt, pExt, 4);
+        szExt[4] = 0;
+        if (pExt > (char*)dname+6)
+          pExt = (char*)dname+6;
+        }
+      else
+        {
+        szExt[0] = 0;
+        pExt = (char*)dname+6;
+        }
+      uint8_t cb = pExt-(char *)dname;
+      memcpy(newName, dname, cb);
+      newName[cb] = 0;
+      strcat(newName, "~1");
+      strcat(newName, szExt);
       }
-    } else {
-      if (dirFile->type_ == FAT_FILE_TYPE_ROOT_FIXED) {
-        DBG_FAIL_MACRO;
-        goto fail;
+    else
+      {
+      strcpy(newName, (char *)dname);
       }
-      // add and zero cluster for dirFile - first cluster is in cache for write
-      pc = dirFile->addDirCluster();
-      if (!pc) {
-        DBG_FAIL_MACRO;
-        goto fail;
-      }
-      // use first entry in cluster
-      p = pc->dir;
-      index = 0;
-    }
+
+      uint8_t checksum;
+
+      make83Name(newName, (uint8_t *)p->name, &tempPtr);
+      checksum = lfn_checksum(p->name);
+#ifdef GLENN_DEBUG
+      Com::print("Name:");
+      Com::print((char *)p->name);
+      Com::println();
+#endif
+      cbFilename = strlen(Filename);
+
+      // Write Long File Name VFAT entries to file
+      for(uint8_t iBlk=cVFATNeeded;iBlk>0;iBlk--)
+        {
+        vfat_t *VFAT = (vfat_t *)p;
+        uint8_t n;
+
+        n = (iBlk-1) * 13;
+        memset(p, 0, sizeof(dir_t));
+        p->attributes = DIR_ATT_LONG_NAME;
+        VFAT->sequenceNumber = iBlk | (iBlk == cVFATNeeded ? 0x40 : 0);
+
+        uint16_t *pName = VFAT->name1;
+
+        for(int8_t i=0;i<13;i++)
+          {
+          if (n+i > cbFilename)
+            *pName++ = 0xffff;
+          else
+            *pName++ = (uint16_t)Filename[n+i];
+          if (i == 4)
+            pName = VFAT->name2;
+          else if (i == 10)
+            pName = VFAT->name3;
+          }
+        VFAT->checksum = checksum;
+        if (dirFile->write(p, sizeof(dir_t)) < 0)
+          goto fail;
+        dirFile->sync();
+        }
+    // END WRITING LONG FILE NAME BLK
+
+    // Start 8.3 file init
     // initialize as empty file
     memset(p, 0, sizeof(dir_t));
-    memcpy(p->name, dname, 11);
 
-    // set timestamps
-    if (dateTime_) {
-      // call user date/time function
-      dateTime_(&p->creationDate, &p->creationTime);
-    } else {
-      // use default date/time
-      p->creationDate = FAT_DEFAULT_DATE;
-      p->creationTime = FAT_DEFAULT_TIME;
-    }
+    make83Name(newName, (uint8_t *)p->name, &tempPtr);
+
+    p->attributes = bDir ? DIR_ATT_DIRECTORY : DIR_ATT_ARCHIVE;
+
+    p->creationDate = FAT_DEFAULT_DATE;
+    p->creationTime = FAT_DEFAULT_TIME;
     p->lastAccessDate = p->creationDate;
     p->lastWriteDate = p->creationDate;
     p->lastWriteTime = p->creationTime;
 
-    // write entry to SD
-    if (!dirFile->vol_->cacheSync()) {
-      DBG_FAIL_MACRO;
+    if (dirFile->write(p, sizeof(dir_t)) < 0)
       goto fail;
-    }
-  }
-  // open entry in cache
-  return openCachedEntry(index, oflag);
+    dirFile->sync();
+
+    memset(p, 0, sizeof(dir_t));
+
+    if (emptyFound)
+      p->name[0] = DIR_NAME_DELETED;
+
+    for(int8_t i=0;i< cVFATFoundCur - cVFATNeeded;i++)
+      {
+      if (dirFile->write(p, sizeof(dir_t)) < 0)
+        goto fail;
+      dirFile->sync();
+      }
+   return open(dirFile, (wIndexPos >> 5) + (cVFATNeeded), oflag & ~O_EXCL);
 
  fail:
   return false;
@@ -1178,10 +1371,10 @@ bool SdBaseFile::openCachedEntry(uint8_t dirIndex, uint8_t oflag) {
 
   // write or truncate is an error for a directory or read-only file
   if (p->attributes & (DIR_ATT_READ_ONLY | DIR_ATT_DIRECTORY)) {
-    if (oflag & (O_WRITE | O_TRUNC)) {
-      DBG_FAIL_MACRO;
-      goto fail;
-    }
+//    if (oflag & (O_WRITE | O_TRUNC)) {
+//      DBG_FAIL_MACRO;
+//      goto fail;
+//    }
   }
   // remember location of directory entry on SD
   dirBlock_ = vol_->cacheBlockNumber();
@@ -1191,14 +1384,21 @@ bool SdBaseFile::openCachedEntry(uint8_t dirIndex, uint8_t oflag) {
   firstCluster_ = (uint32_t)p->firstClusterHigh << 16;
   firstCluster_ |= p->firstClusterLow;
 
+#ifdef GLENN_DEBUG
+  Com::print("CATR:");
+  Com::print(firstCluster_);
+  Com::print("-");
+  Com::print(p->name[0]);
+  Com::println();
+#endif
+
   // make sure it is a normal file or subdirectory
   if (DIR_IS_FILE(p)) {
     fileSize_ = p->fileSize;
     type_ = FAT_FILE_TYPE_NORMAL;
   } else if (DIR_IS_SUBDIR(p)) {
       if (!setDirSize()) {
-      DBG_FAIL_MACRO;
-      goto fail;
+      fileSize_= 0;
     }
     type_ = FAT_FILE_TYPE_SUBDIR;
   } else {
@@ -1344,7 +1544,7 @@ bool SdBaseFile::openParent(SdBaseFile* dir) {
   }
   // search for parent in '../..'
   do {
-    if (file.readDir(&entry) != 32) {
+    if (file.readDir(&entry, NULL) != 32) {
       DBG_FAIL_MACRO;
       goto fail;
     }
@@ -1667,6 +1867,11 @@ int SdBaseFile::read(void* buf, size_t nbyte) {
    blockOfCluster = vol_->blockOfCluster(curPosition_);
     if (type_ == FAT_FILE_TYPE_ROOT_FIXED) {
       block = vol_->rootDirStart() + (curPosition_ >> 9);
+#ifdef GLENN_DEBUG
+  Com::print("RBL:");
+  Com::print(block);
+  Com::println();
+#endif
     } else {
       if (offset == 0 && blockOfCluster == 0) {
         // start of new cluster
@@ -1741,6 +1946,170 @@ int SdBaseFile::read(void* buf, size_t nbyte) {
  fail:
   return -1;
 }
+
+
+//------------------------------------------------------------------------------
+/** Read the next directory entry from a directory file with the long filename
+ *
+ * \param[out] dir The dir_t struct that will receive the data.
+ * \param[out] longFiename The long filename associated with the 8.3 name
+ *
+ * \return For success getLongFilename() returns a pointer to dir_t
+ * A value of zero will be returned if end of file is reached.
+ */
+
+
+dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATNeeded, uint32_t *pwIndexPos)
+{
+  int16_t n;
+  uint8_t bLastPart = true;
+  uint8_t checksum;
+
+    if (longFilename != NULL)
+      *longFilename = 0;
+
+    while (1)
+      {
+       HAL::pingWatchdog();
+#ifdef GLENN_DEBUG
+      Commands::checkFreeMemory();
+      Commands::writeLowestFreeRAM();
+#endif
+       if (!(dir = readDirCache()))
+         {
+          return NULL;
+         }
+
+        if (dir->name[0] == DIR_NAME_FREE)
+         return NULL;
+
+      if (dir->name[0] == DIR_NAME_0XE5 || dir->name[0] == DIR_NAME_DELETED)
+           {
+           bLastPart = true;
+           if (longFilename != NULL)
+             *longFilename = 0;
+           continue;
+           }
+
+      if (DIR_IS_LONG_NAME(dir))
+        {
+       if (longFilename != NULL)
+        {
+    	vfat_t *VFAT = (vfat_t*)dir;
+        int8_t nSeq = VFAT->sequenceNumber & 0x1F;
+
+	// Sanity check the VFAT entry. The first cluster is always set to zero. And the sequence number should be higher then 0
+    	if (VFAT->firstClusterLow == 0 && nSeq > 0 && nSeq <= MAX_VFAT_ENTRIES)
+    	      {
+    		n = (nSeq - 1) * 13;
+
+		longFilename[n+0] = (char)VFAT->name1[0];
+
+      		longFilename[n+1] = (char)VFAT->name1[1];
+      		longFilename[n+2] = (char)VFAT->name1[2];
+     		longFilename[n+3] = (char)VFAT->name1[3];
+     		longFilename[n+4] = (char)VFAT->name1[4];
+     		longFilename[n+5] = (char)VFAT->name2[0];
+     		longFilename[n+6] = (char)VFAT->name2[1];
+     		longFilename[n+7] = (char)VFAT->name2[2];
+      		longFilename[n+8] = (char)VFAT->name2[3];
+      		longFilename[n+9] = (char)VFAT->name2[4];
+      		longFilename[n+10] = (char)VFAT->name2[5];
+      		longFilename[n+11] = (char)VFAT->name3[0];
+      		longFilename[n+12] = (char)VFAT->name3[1];
+
+                if (bLastPart)
+                  {
+                  checksum = VFAT->checksum;
+                  longFilename[n+13] = 0;
+                  }
+                bLastPart = false;
+		}
+        }
+        }
+        else
+         {
+         if ((dir->attributes & DIR_ATT_HIDDEN || dir->attributes & DIR_ATT_SYSTEM) || (dir->name[0] == '.' && dir->name[1] != '.'))
+           {
+           bLastPart = true;
+           if (longFilename != NULL)
+             *longFilename = 0;
+           continue;
+           }
+         if (DIR_IS_FILE(dir) || DIR_IS_SUBDIR(dir))
+             {
+             if (longFilename && (bLastPart || checksum != lfn_checksum(dir->name)))
+               {
+               sd.createFilename(longFilename, *dir);
+               }
+             return dir;
+             }
+         }
+      }
+#ifdef GLENN_DEBUG
+    Commands::checkFreeMemory();
+    Commands::writeLowestFreeRAM();
+#endif
+    return dir;
+}
+
+bool SdBaseFile::findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos)
+{
+  int16_t n;
+  int8_t cVFATFound = 0;
+  // if not a directory file or miss-positioned return an error
+  if (!isDir()) return -1;
+
+  rewind();
+
+  while (1) {
+        HAL::pingWatchdog();
+    dir = readDirCache();
+    if (!dir) return false;
+    // last entry if DIR_NAME_FREE
+    if (dir->name[0] == DIR_NAME_FREE) return 0;
+    // skip empty entries and entry for .  and ..
+#ifdef GLENN_DEBUG
+      Com::print("Attr:");
+      Com::print((long)dir->attributes);
+      Com::print(" ");
+      Com::print((long)dir->name[0]);
+      Com::println();
+#endif
+
+     if (dir->name[0] == DIR_NAME_0XE5 || dir->name[0] == DIR_NAME_DELETED)
+           {
+          if (DIR_IS_LONG_NAME(dir))
+            {
+            vfat_t *VFAT = (vfat_t*)dir;
+            cVFATFound++;
+            }
+          else
+            {
+#ifdef GLENN_DEBUG
+            Com::print("Need: ");
+            Com::print(cVFATNeeded);
+            Com::print(" Got: ");
+            Com::print(cVFATFound);
+            Com::print(" ");
+            Com::println();
+#endif
+           if (pwIndexPos != NULL && cVFATNeeded > 0 && cVFATFound >= cVFATNeeded && *pwIndexPos == 0)
+             {
+             *pwIndexPos = curPosition_-sizeof(dir_t)-(cVFATFound * sizeof(dir_t));
+             *pcVFATFound = cVFATFound;
+             return true;
+             }
+            cVFATFound++;
+            }
+          }
+      else
+        {
+        cVFATFound = 0;
+        }
+  }
+}
+
 //------------------------------------------------------------------------------
 /** Read the next directory entry from a directory file.
  *
@@ -1752,7 +2121,8 @@ int SdBaseFile::read(void* buf, size_t nbyte) {
  * readDir() called before a directory has been opened, this is not
  * a directory file or an I/O error occurred.
  */
-int8_t SdBaseFile::readDir(dir_t* dir) {
+
+int8_t SdBaseFile::readDir(dir_t* dir, char* longFilename) {
   int16_t n;
   // if not a directory file or miss-positioned return an error
   if (!isDir() || (0X1F & curPosition_)) return -1;
@@ -1780,7 +2150,6 @@ dir_t* SdBaseFile::readDirCache() {
   }
   // index of entry in cache
   i = (curPosition_ >> 5) & 0XF;
-
   // use read to locate and cache block
   if (read() < 0) {
     DBG_FAIL_MACRO;
@@ -2130,6 +2499,7 @@ bool SdBaseFile::seekSet(uint32_t pos) {
   }
   if (type_ == FAT_FILE_TYPE_ROOT_FIXED) {
     curPosition_ = pos;
+    curCluster_ = 0;
     goto done;
   }
   if (pos == 0) {
@@ -2464,8 +2834,14 @@ int SdBaseFile::write(const void* buf, size_t nbyte) {
   size_t nToWrite = nbyte;
   size_t n;
 
+#ifdef GLENN_DEBUG
+  Com::print("Cur Pos:");
+  Com::print(curPosition_);
+  Com::println();
+#endif
+
   // error if not a normal file or is read-only
-  if (!isFile() || !(flags_ & O_WRITE)) {
+  if (/*!isFile() || */!(flags_ & O_WRITE)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
@@ -2481,6 +2857,21 @@ int SdBaseFile::write(const void* buf, size_t nbyte) {
   while (nToWrite) {
     uint8_t blockOfCluster = vol_->blockOfCluster(curPosition_);
     uint16_t blockOffset = curPosition_ & 0X1FF;
+
+#ifdef GLENN_DEBUG
+  Com::print("BC");
+  Com::print((long)blockOfCluster);
+  Com::print("-");
+  Com::print((long)blockOffset);
+  Com::print("-");
+  Com::print((long)curCluster_);
+  Com::print("-");
+  Com::print((long)firstCluster_);
+  Com::print("-");
+  Com::print((long)vol_->blocksPerCluster_);
+  Com::println();
+#endif
+
     if (blockOfCluster == 0 && blockOffset == 0) {
       // start of new cluster
       if (curCluster_ != 0) {
@@ -2511,7 +2902,7 @@ int SdBaseFile::write(const void* buf, size_t nbyte) {
       }
     }
     // block for data write
-    uint32_t block = vol_->clusterStartBlock(curCluster_) + blockOfCluster;
+    uint32_t block = type_ == FAT_FILE_TYPE_ROOT_FIXED ? vol_->rootDirStart() + (curPosition_ >> 9) : vol_->clusterStartBlock(curCluster_) + blockOfCluster;
 
     if (blockOffset != 0 || nToWrite < 512) {
       // partial block - must use cache
@@ -2527,6 +2918,11 @@ int SdBaseFile::write(const void* buf, size_t nbyte) {
         // rewrite part of block
         cacheOption = SdVolume::CACHE_FOR_WRITE;
         }
+#ifdef GLENN_DEBUG
+  Com::print("BL:");
+  Com::print(block);
+  Com::println();
+#endif
         pc = vol_->cacheFetch(block, cacheOption);
         if (!pc) {
           DBG_FAIL_MACRO;
@@ -2580,6 +2976,12 @@ int SdBaseFile::write(const void* buf, size_t nbyte) {
     src += n;
     nToWrite -= n;
   }
+#ifdef GLENN_DEBUG
+  Com::print("Cur Pos:");
+  Com::print(curPosition_);
+  Com::println();
+#endif
+
   if (curPosition_ > fileSize_) {
     // update fileSize and insure sync will update dir entry
     fileSize_ = curPosition_;
@@ -2852,7 +3254,7 @@ uint32_t Sd2Card::cardSize() {
 void Sd2Card::chipSelectHigh() {
   HAL::digitalWrite(chipSelectPin_, HIGH);
   // insure MISO goes high impedance
-  spiSend(0XFF);
+  HAL::spiSend(0XFF);
 }
 //------------------------------------------------------------------------------
 void Sd2Card::chipSelectLow() {
@@ -3431,6 +3833,11 @@ cache_t* SdVolume::cacheFetchData(uint32_t blockNumber, uint8_t options) {
       goto fail;
     }
     if (!(options & CACHE_OPTION_NO_READ)) {
+#ifdef GLENN_DEBUG
+      Com::print("Rd blk:");
+      Com::print(blockNumber);
+      Com::println();
+#endif
       if (!sdCard_->readBlock(blockNumber, cacheBuffer_.data)) {
         DBG_FAIL_MACRO;
         goto fail;
@@ -3537,6 +3944,11 @@ cache_t* SdVolume::cacheFetchFat(uint32_t blockNumber, uint8_t options) {
 //------------------------------------------------------------------------------
 bool SdVolume::cacheSync() {
   if (cacheStatus_ & CACHE_STATUS_DIRTY) {
+#ifdef GLENN_DEBUG
+    Com::print("Wr blk:");
+    Com::print(cacheBlockNumber_);
+    Com::println();
+#endif
     if (!sdCard_->writeBlock(cacheBlockNumber_, cacheBuffer_.data)) {
       DBG_FAIL_MACRO;
       goto fail;

@@ -814,11 +814,11 @@ ISR(PWM_TIMER_VECTOR)
     if(pwm_pos_set[NUM_EXTRUDER] == pwm_count && pwm_pos_set[NUM_EXTRUDER]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
 #endif
     HAL::allowInterrupts();
-    counter_periodical++; // Appxoimate a 100ms timer
-    if(counter_periodical>=(int)(F_CPU/40960))
+    counterPeriodical++; // Appxoimate a 100ms timer
+    if(counterPeriodical>=(int)(F_CPU/40960))
     {
-        counter_periodical=0;
-        execute_periodical=1;
+        counterPeriodical=0;
+        executePeriodical=1;
     }
 // read analog values
 #if ANALOG_INPUTS>0

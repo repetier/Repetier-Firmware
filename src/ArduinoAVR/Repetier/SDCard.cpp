@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
@@ -24,9 +24,8 @@
 
 #if SDSUPPORT
 
-#ifndef SD_ALLOW_LONG_NAMES
-#define SD_ALLOW_LONG_NAMES false
-#endif
+char tempLongFilename[LONG_FILENAME_LENGTH+1];
+char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1];
 
 SDCard sd;
 
@@ -35,6 +34,7 @@ SDCard::SDCard()
     sdmode = false;
     sdactive = false;
     savetosd = false;
+    Printer::setAutomount(false);
     //power to SD reader
 #if SDPOWER > -1
     SET_OUTPUT(SDPOWER);
@@ -53,12 +53,12 @@ void SDCard::automount()
     {
         if(sdactive)   // Card removed
         {
-            sdactive = false;
-            savetosd = false;
-            sdmode = false;
+            Com::printFLN(PSTR("SD card removed"));
+#if UI_DISPLAY_TYPE!=0
+            uid.executeAction(UI_ACTION_TOP_MENU);
+#endif
+            unmount();
             UI_STATUS(UI_TEXT_SD_REMOVED);
-            Com::printFLN(Com::tSDRemoved);
-            Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
         }
     }
     else
@@ -66,11 +66,14 @@ void SDCard::automount()
         if(!sdactive)
         {
             UI_STATUS(UI_TEXT_SD_INSERTED);
-            Com::printFLN(Com::tSDInserted);
+            Com::printFLN(PSTR("SD card inserted"));
             Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
             initsd();
 #if UI_DISPLAY_TYPE!=0
-            uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
+            if(sdactive) {
+                Printer::setAutomount(true);
+                uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
+            }
 #endif
         }
     }
@@ -90,10 +93,71 @@ void SDCard::initsd()
     }
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
-    if(!selectFile("init.g",true)) {
+
+    fat.chdir();
+    if(selectFile("init.g",true))
+    {
         startPrint();
     }
 #endif
+}
+
+void SDCard::mount()
+{
+    sdmode = false;
+    initsd();
+}
+
+void SDCard::unmount()
+{
+    sdmode = false;
+    sdactive = false;
+    savetosd = false;
+    Printer::setAutomount(false);
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
+#if UI_DISPLAY_TYPE!=0
+    uid.cwd[0]='/';
+    uid.cwd[1]=0;
+    uid.folderLevel=0;
+#endif
+}
+
+void SDCard::startPrint()
+{
+    if(!sdactive) return;
+    sdmode = true;
+    Printer::setMenuMode(MENU_MODE_SD_PRINTING,true);
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+}
+void SDCard::pausePrint(bool intern)
+{
+    if(!sd.sdactive) return;
+    sdmode = false;
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);
+#if FEATURE_MEMORY_POSITION
+    if(intern) {
+        Printer::MemoryPosition();
+        Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],Printer::currentPosition[E_AXIS],Printer::maxFeedrate[X_AXIS]);
+    }
+#endif
+}
+void SDCard::continuePrint(bool intern)
+{
+    if(!sd.sdactive) return;
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+#if FEATURE_MEMORY_POSITION
+    if(intern) {
+        Printer::GoToMemoryPosition(true,true,false,true,Printer::maxFeedrate[X_AXIS]);
+    }
+#endif
+}
+void SDCard::stopPrint()
+{
+    if(!sd.sdactive) return;
+    sdmode = false;
+    Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+    Com::printFLN(PSTR("SD print stopped by user."));
 }
 
 void SDCard::writeCommand(GCode *code)
@@ -211,10 +275,12 @@ void SDCard::writeCommand(GCode *code)
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
-    if(params == 128) {
+    if(params == 128)
+    {
         Com::printErrorFLN(Com::tAPIDFinished);
-    } else
-    file.write(buf,p);
+    }
+    else
+        file.write(buf,p);
     if (file.writeError)
     {
         Com::printFLN(Com::tErrorWritingToFile);
@@ -238,91 +304,62 @@ char *SDCard::createFilename(char *buffer,const dir_t &p)
 bool SDCard::showFilename(const uint8_t *name)
 {
     if (*name == DIR_NAME_DELETED || *name == '.') return false;
-#if !SD_ALLOW_LONG_NAMES
-    uint8_t i=11;
-    while(i--)
-    {
-        if(*name=='~') return false;
-        name++;
-    }
-#endif
     return true;
 }
 
-void  SDCard::lsRecursive(SdBaseFile *parent,uint8_t level)
+int8_t RFstricmp(const char* s1, const char* s2)
 {
-    dir_t *p;
-    uint8_t cnt=0;
-    char *oldpathend = pathend;
-    char filename[13];
-    parent->rewind();
-    while ((p= parent->readDirCache()))
-    {
-        if (p->name[0] == DIR_NAME_FREE) break;
-        if (!showFilename(p->name)) continue;
-        if (!DIR_IS_FILE_OR_SUBDIR(p)) continue;
-        if( DIR_IS_SUBDIR(p))
-        {
-            if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
-            if(level<SD_MAX_FOLDER_DEPTH)
-            {
-                createFilename(filename,*p);
-                if(level)
-                {
-                    Com::print(fullName);
-                    Com::print('/');
-                }
-                Com::print(filename);
-                Com::printFLN(Com::tSlash); //End with / to mark it as directory entry, so we can see empty directories.
-            }
-            char *tmp = oldpathend;
-            if(level) *tmp++ = '/';
-            char *dirname = tmp;
-            pathend = createFilename(tmp,*p);
-            SdBaseFile next;
-            uint16_t index = parent->curPosition()/32 - 1;
-            if(next.open(parent,dirname, O_READ))
-                lsRecursive(&next,level+1);
-            parent->seekSet(32 * (index + 1));
-            *oldpathend = 0;
-        }
-        else
-        {
-            createFilename(filename,*p);
-            if(level)
-            {
-                Com::print(fullName);
-                Com::print('/');
-            }
-            Com::print(filename);
-#ifdef SD_EXTENDED_DIR
-            Com::printF(Com::tSpace,(long)p->fileSize);
-#endif
-            Com::println();
-        }
-    }
+    while(*s1 && (tolower(*s1) == tolower(*s2)))
+        s1++,s2++;
+    return (const uint8_t)tolower(*s1)-(const uint8_t)tolower(*s2);
 }
+int8_t RFstrnicmp(const char* s1, const char* s2, size_t n)
+{
+    while(n--)
+    {
+        if(tolower(*s1)!=tolower(*s2))
+            return (uint8_t)tolower(*s1) - (uint8_t)tolower(*s2);
+        s1++;
+        s2++;
+    }
+    return 0;
+}
+
 
 void SDCard::ls()
 {
+    SdBaseFile file;
+
     Com::printFLN(Com::tBeginFileList);
-    *fullName = 0;
-    pathend = fullName;
     fat.chdir();
-    lsRecursive(fat.vwd(),0);
+
+    file.openRoot(fat.vol());
+    file.ls(0, 0);
     Com::printFLN(Com::tEndFileList);
 }
 
-bool SDCard::selectFile(char *filename,bool silent)
+bool SDCard::selectFile(char *filename, bool silent)
 {
+    SdBaseFile parent;
+    char *oldP = filename;
+    boolean bFound;
+
     if(!sdactive) return false;
     sdmode = false;
+
     file.close();
-    fat.chdir();
-    if (file.open(fat.vwd(),filename, O_READ))
-    {
-        if(!silent) {
-            Com::printF(Com::tFileOpened,filename);
+
+    parent = *fat.vwd();
+    if (file.open(&parent, filename, O_READ))
+      {
+      if ((oldP = strrchr(filename, '/')) != NULL)
+          oldP++;
+      else
+          oldP = filename;
+
+        if(!silent)
+        {
+            Com::printF(Com::tFileOpened, oldP);
             Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
         }
         sdpos = 0;
@@ -407,5 +444,21 @@ void SDCard::makeDirectory(char *filename)
         Com::printFLN(Com::tCreationFailed);
     }
 }
+
+#ifdef GLENN_DEBUG
+void SDCard::writeToFile()
+{
+  size_t nbyte;
+  char szName[10];
+
+  strcpy(szName, "Testing\r\n");
+  nbyte = file.write(szName, strlen(szName));
+  Com::print("L=");
+  Com::print((long)nbyte);
+  Com::println();
+}
+
+#endif
+
 #endif
 

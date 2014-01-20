@@ -96,8 +96,9 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE 5
-
+#ifndef(UI_DISPLAY_TYPE)
+#define UI_DISPLAY_TYPE 0
+#endif
 /** Number of columns per row
 
 Typical values are 16 and 20
@@ -127,50 +128,6 @@ Rows of your display. 2 or 4
 /* How fast should the I2C clock go. The PCF8574 work only with the lowest setting 100000.
 A MCP23017 can run also with 400000 Hz */
 #define UI_I2C_CLOCKSPEED 100000L
-/**
-Define the pin
-*/
-#if UI_DISPLAY_TYPE==3 // I2C Pin configuration
-#define UI_DISPLAY_RS_PIN _BV(4)
-#define UI_DISPLAY_RW_PIN _BV(5)
-#define UI_DISPLAY_ENABLE_PIN _BV(6)
-#define UI_DISPLAY_D0_PIN _BV(0)
-#define UI_DISPLAY_D1_PIN _BV(1)
-#define UI_DISPLAY_D2_PIN _BV(2)
-#define UI_DISPLAY_D3_PIN _BV(3)
-#define UI_DISPLAY_D4_PIN _BV(0)
-#define UI_DISPLAY_D5_PIN _BV(1)
-#define UI_DISPLAY_D6_PIN _BV(2)
-#define UI_DISPLAY_D7_PIN _BV(3)
-
-// Pins for adafruid RGB shield
-/*#define UI_DISPLAY_RS_PIN _BV(15)
-#define UI_DISPLAY_RW_PIN _BV(14)
-#define UI_DISPLAY_ENABLE_PIN _BV(13)
-#define UI_DISPLAY_D0_PIN _BV(12)
-#define UI_DISPLAY_D1_PIN _BV(11)
-#define UI_DISPLAY_D2_PIN _BV(10)
-#define UI_DISPLAY_D3_PIN _BV(9)
-#define UI_DISPLAY_D4_PIN _BV(12)
-#define UI_DISPLAY_D5_PIN _BV(11)
-#define UI_DISPLAY_D6_PIN _BV(10)
-#define UI_DISPLAY_D7_PIN _BV(9)*/
-
-//#else // Direct display connections
-//#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
-//#define UI_DISPLAY_RW_PIN		-1
-//#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
-//#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
-//#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
-//#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
-//#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
-//#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
-//#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
-//#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
-//#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
-//#define UI_DELAYPERCHAR		   320
-
-#endif
 
 
 /** \brief Are some keys connected?
@@ -304,11 +261,10 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 void ui_init_keys() {
 #if UI_HAS_KEYS!=0
   UI_KEYS_INIT_CLICKENCODER_LOW(BTN_EN1,BTN_EN2); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(BTN_ENC); // push button, connects gnd to pin
-//  UI_KEYS_INIT_BUTTON_LOW(5);
-//  UI_KEYS_INIT_BUTTON_LOW(6);
-//  UI_KEYS_INIT_BUTTON_LOW(11);
-//  UI_KEYS_INIT_BUTTON_LOW(42);
+  UI_KEYS_INIT_BUTTON_LOW(BTN_ENC); // push button, connects gnd to pin  //UI_KEYS_INIT_BUTTON_LOW(5);
+  //UI_KEYS_INIT_BUTTON_LOW(6);
+  //UI_KEYS_INIT_BUTTON_LOW(11);
+  //UI_KEYS_INIT_BUTTON_LOW(42);
 
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
@@ -328,7 +284,6 @@ void ui_check_keys(int &action) {
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif
 }
-
 inline void ui_check_slow_encoder() {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0

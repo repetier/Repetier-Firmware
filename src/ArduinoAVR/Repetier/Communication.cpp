@@ -78,6 +78,7 @@ FSTRINGVALUE(Com::tSpaceBColon," B:")
 FSTRINGVALUE(Com::tSpaceAtColon," @:")
 FSTRINGVALUE(Com::tSpaceT," T")
 FSTRINGVALUE(Com::tSpaceAt," @")
+FSTRINGVALUE(Com::tSpaceBAtColon," B@:")
 FSTRINGVALUE(Com::tSpaceRaw," RAW")
 FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
@@ -215,11 +216,9 @@ FSTRINGVALUE(Com::tAutolevelReset,"Autolevel matrix reset")
 #endif
 FSTRINGVALUE(Com::tAutolevelEnabled,"Autoleveling enabled")
 FSTRINGVALUE(Com::tAutolevelDisabled,"Autoleveling disabled")
-#if MAX_HARDWARE_ENDSTOP_Z
 FSTRINGVALUE(Com::tZProbeFailed,"Z-probe failed")
 FSTRINGVALUE(Com::tZProbeMax,"Z-probe max:")
 FSTRINGVALUE(Com::tZProbePrinterHeight,"Printer height:")
-#endif // MAX_HARDWARE_ENDSTOP_Z
 //FSTRINGVALUE(Com::,"")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)

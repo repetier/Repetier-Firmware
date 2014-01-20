@@ -1,11 +1,11 @@
-Version 0.90alpha in development use only if you know what you are doing, config may change heavily!
+Version 0.91
+  Online configuration tool: http://www.repetier.com/firmware/v091
   Support for Arduino Due - thank to John Silvia for this port!
   Compatible with Code::Blocks for Arduino.
   Added z-probing.
   Added auto leveling of heated bed.
   Moved hardware dependend code into HAL.[h|cpp]
   New heat manage 3: dead-time control. P in pid values is dead time in seconds.
-
   Switch heater 1/heater2 and sensore 1/2 for Megatronics 2.0.
   Switch temp sensore 0/1 for Gen1.5
   Optimized path planner.
