@@ -50,7 +50,7 @@
 #define UI_ACTION_FAN_UP               112
 #define UI_ACTION_FAN_DOWN             113
 
-#define UI_ACTION_DUMMY 10000
+#define UI_ACTION_DUMMY                 10000
 #define UI_ACTION_BACK                  1000
 #define UI_ACTION_OK                    1001
 #define UI_ACTION_MENU_UP               1002
@@ -187,23 +187,23 @@
 #include "uilang.h"
 
 typedef struct {
-  const char *text; // Menu text
-  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
-  uint16_t action;
-  uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
-  uint8_t nofilter; // Hide if one of these bits are set
-  bool showEntry() const;
+const char *text; // Menu text
+uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
+uint16_t action;
+uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
+uint8_t nofilter; // Hide if one of these bits are set
+bool showEntry() const;
 } const UIMenuEntry;
 
 typedef struct {
-  // 0 = info page
-  // 1 = file selector
-  // 2 = submenu
-  // 3 = modififaction menu
-  unsigned char menuType;
-  int id; // Type of modification
-  int numEntries;
-  const UIMenuEntry * const * entries;
+// 0 = info page
+// 1 = file selector
+// 2 = submenu
+// 3 = modififaction menu
+unsigned char menuType;
+int id; // Type of modification
+int numEntries;
+const UIMenuEntry * const * entries;
 } const UIMenu;
 extern const int8_t encoder_table[16] PROGMEM ;
 
@@ -237,38 +237,38 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_KEYS_CLICKENCODER_HIGH_REV(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (READ(pinA)) uid.encoderLast |=2;if (READ(pinB)) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&encoder_table[uid.encoderLast]);
 #define UI_KEYS_BUTTON_HIGH(pin,action_) if(READ(pin)!=0) action=action_;
 #define UI_KEYS_INIT_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) if(c1>=0){SET_INPUT(c1);WRITE(c1,HIGH);}if(c2>=0){SET_INPUT(c2);WRITE(c2,HIGH);}if(c3>=0){SET_INPUT(c3);WRITE(c3,HIGH);}\
-    if(c4>=0) {SET_INPUT(c4);WRITE(c4,HIGH);}if(r1>=0)SET_OUTPUT(r1);if(r2>=0)SET_OUTPUT(r2);if(r3>=0)SET_OUTPUT(r3);if(r4>=0)SET_OUTPUT(r4);\
-    if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);
+if(c4>=0) {SET_INPUT(c4);WRITE(c4,HIGH);}if(r1>=0)SET_OUTPUT(r1);if(r2>=0)SET_OUTPUT(r2);if(r3>=0)SET_OUTPUT(r3);if(r4>=0)SET_OUTPUT(r4);\
+if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);
 //      out.print_int_P(PSTR("r4=>c1:"),READ(c1));out.print_int_P(PSTR(" c2:"),READ(c2));out.print_int_P(PSTR(" c3:"),READ(c3));out.println_int_P(PSTR(" c4:"),READ(c4));
 #define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):0) && (c2>=0?READ(c2):0) && (c3>=0?READ(c3):0) && (c4>=0?READ(c4):0);\
-    if(!r) {\
-      r = 255;\
-      if(r2>=0)WRITE(r2,HIGH);if(r3>=0)WRITE(r3,HIGH);if(r4>=0)WRITE(r4,HIGH);\
-      if(r1>=0) {\
-        asm volatile ("nop\nnop\nnop\nnop\nnop");\
-        if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 0;\
-        else WRITE(r1,HIGH);\
-      }\
-      if(r==255 && r2>=0) {\
-        WRITE(r2,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
-        if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 4;\
-        else WRITE(r2,HIGH);\
-      }\
-      if(r==255 && r3>=0) {\
-        WRITE(r3,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
-        if(!((c1>=0?READ(c1):0) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 8;\
-        else WRITE(r3,HIGH);\
-      }\
-      if(r==255 && r4>=0) {\
-        WRITE(r4,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
-        if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 12;\
-        else WRITE(r4,HIGH);\
-      }\
-      if(c2>=0 && !READ(c2)) r+=1;\
-      else if(c3>=0 && !READ(c3)) r+=2;\
-      else if(c4>=0 && !READ(c4)) r+=3;\
-      if(r<16) {action = pgm_read_word(&(matrixActions[r]));}\
-    }if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);}
+if(!r) {\
+r = 255;\
+if(r2>=0)WRITE(r2,HIGH);if(r3>=0)WRITE(r3,HIGH);if(r4>=0)WRITE(r4,HIGH);\
+if(r1>=0) {\
+asm volatile ("nop\nnop\nnop\nnop\nnop");\
+if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 0;\
+else WRITE(r1,HIGH);\
+}\
+if(r==255 && r2>=0) {\
+WRITE(r2,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
+if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 4;\
+else WRITE(r2,HIGH);\
+}\
+if(r==255 && r3>=0) {\
+WRITE(r3,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
+if(!((c1>=0?READ(c1):0) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 8;\
+else WRITE(r3,HIGH);\
+}\
+if(r==255 && r4>=0) {\
+WRITE(r4,LOW);asm volatile ("nop\nnop\nnop\nnop\nnop");\
+if(!((c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1))) r = 12;\
+else WRITE(r4,HIGH);\
+}\
+if(c2>=0 && !READ(c2)) r+=1;\
+else if(c3>=0 && !READ(c3)) r+=2;\
+else if(c4>=0 && !READ(c4)) r+=3;\
+if(r<16) {action = pgm_read_word(&(matrixActions[r]));}\
+}if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);}
 // I2C keymask tests
 #define UI_KEYS_I2C_CLICKENCODER_LOW(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (!(keymask & pinA)) uid.encoderLast |=2;if (!(keymask & pinB)) uid.encoderLast |=1; uid.encoderPos += pgm_read_byte(&encoder_table[uid.encoderLast]);
 #define UI_KEYS_I2C_CLICKENCODER_LOW_REV(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (!(keymask & pinA)) uid.encoderLast |=2;if (!(keymask & pinB)) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&encoder_table[uid.encoderLast]);
@@ -280,42 +280,42 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_STRING(name,text) const char PROGMEM name[] = text;
 
 #define UI_PAGE6(name,row1,row2,row3,row4,row5,row6) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
-  UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0};\
-  UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0};\
-  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
-  const UIMenu name PROGMEM = {0,0,6,name ## _entries};
+UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
+UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0};\
+UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0};\
+const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
+const UIMenu name PROGMEM = {0,0,6,name ## _entries};
 
 
 #define UI_PAGE4(name,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
-  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
-  const UIMenu name PROGMEM = {0,0,4,name ## _entries};
+UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
+UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+const UIMenu name PROGMEM = {0,0,4,name ## _entries};
 #define UI_PAGE2(name,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
-  const UIMenu name PROGMEM = {0,0,2,name ## _entries};
+UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+const UIMenu name PROGMEM = {0,0,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows) UI_MENU_ACTION4(name,action,rows)
 #define UI_MENU_ACTION2C(name,action,rows) UI_MENU_ACTION2(name,action,rows)
 #define UI_MENU_ACTION4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
-  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
-  const UIMenu name PROGMEM = {3,action,4,name ## _entries};
+UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
+UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+const UIMenu name PROGMEM = {3,action,4,name ## _entries};
 #define UI_MENU_ACTION2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
-  const UIMenu name PROGMEM = {3,action,2,name ## _entries};
+UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+const UIMenu name PROGMEM = {3,action,2,name ## _entries};
 #define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0,0,0};
 #define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,0,0};
 #define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0};
@@ -330,18 +330,18 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 #if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller has a sd card buildin
 #undef SDCARDDETECT
-#define SDCARDDETECT 49
+#define SDCARDDETECT 38
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED false
-#undef SDSUPPORT
-#define SDSUPPORT true
+//#undef SDSUPPORT
+//#define SDSUPPORT true
 #endif
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #define MAX_COLS 28
 
 class UIDisplay {
-  public:
+    public:
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
@@ -389,14 +389,14 @@ class UIDisplay {
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
-//#if SDSUPPORT
+    //#if SDSUPPORT
     void updateSDFileCount();
     void sdrefresh(uint8_t &r);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*13+2];
     uint8_t folderLevel;
-//#endif
+    //#endif
 };
 extern UIDisplay uid;
 
@@ -417,16 +417,15 @@ void ui_check_slow_keys(int &action) {}
 #if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller (2) gadgets3d (10)
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
+
 #if FEATURE_CONTROLLER==11
 #define UI_DISPLAY_TYPE 5
 #define U8GLIB_ST7920
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
-
 #include <U8glib.h>
 #include "Font_Repetier_5x7.h"
 #include "Font_Repetier_6x10.h"
-
 //select font size
 #define UI_FONT_6X10 //default font
 #ifdef UI_FONT_6X10
@@ -434,11 +433,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_FONT_HEIGHT 10
 #define UI_FONT_DEFAULT repetier_6x10
 #endif
-
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-
-
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
@@ -449,78 +445,24 @@ void ui_check_slow_keys(int &action) {}
 #define UI_COLS 20
 #define UI_ROWS 4
 #endif
-#define BEEPER_TYPE 1
-#if FEATURE_CONTROLLER==10 // Gadgets3d shield
-#define BEEPER_PIN             33
-#define UI_DISPLAY_RS_PIN      16
-#define UI_DISPLAY_RW_PIN      -1
-#define UI_DISPLAY_ENABLE_PIN  17
-#define UI_DISPLAY_D0_PIN      23
-#define UI_DISPLAY_D1_PIN      25
-#define UI_DISPLAY_D2_PIN      27
-#define UI_DISPLAY_D3_PIN      29
-#define UI_DISPLAY_D4_PIN      23
-#define UI_DISPLAY_D5_PIN      25
-#define UI_DISPLAY_D6_PIN      27
-#define UI_DISPLAY_D7_PIN      29
-#define UI_ENCODER_A           35
-#define UI_ENCODER_B           37
-#define UI_ENCODER_CLICK       31
-#define UI_RESET_PIN           41
-#else  // Smartcontroller
-#if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
-#define BEEPER_PIN             44
-#define UI_DISPLAY_RS_PIN      19
-#define UI_DISPLAY_RW_PIN      -1
-#define UI_DISPLAY_ENABLE_PIN  42
-#define UI_DISPLAY_D0_PIN      18
-#define UI_DISPLAY_D1_PIN      38
-#define UI_DISPLAY_D2_PIN      41
-#define UI_DISPLAY_D3_PIN      40
-#define UI_DISPLAY_D4_PIN      18
-#define UI_DISPLAY_D5_PIN      38
-#define UI_DISPLAY_D6_PIN      41
-#define UI_DISPLAY_D7_PIN      40
-#define UI_ENCODER_A           12
-#define UI_ENCODER_B           11
-#define UI_ENCODER_CLICK       43
-#define UI_RESET_PIN           46
-#else
-#define BEEPER_PIN             37
-#define UI_DISPLAY_RS_PIN      16
-#define UI_DISPLAY_RW_PIN      -1
-#define UI_DISPLAY_ENABLE_PIN  17
-#define UI_DISPLAY_D0_PIN      23
-#define UI_DISPLAY_D1_PIN      25
-#define UI_DISPLAY_D2_PIN      27
-#define UI_DISPLAY_D3_PIN      29
-#define UI_DISPLAY_D4_PIN      23
-#define UI_DISPLAY_D5_PIN      25
-#define UI_DISPLAY_D6_PIN      27
-#define UI_DISPLAY_D7_PIN      29
-#define UI_ENCODER_A           33
-#define UI_ENCODER_B           31
-#define UI_ENCODER_CLICK       35
-#define UI_RESET_PIN           41
-#endif
-#endif
+
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
 void ui_init_keys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
 }
 void ui_check_keys(int &action) {
- UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
+UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
-#endif // Controller 2 and 10
+#endif // Controller 2 and 10 and 11
 
 #if FEATURE_CONTROLLER==3 // Adafruit RGB controller
 #define UI_HAS_KEYS 1
@@ -554,27 +496,27 @@ void ui_check_slow_keys(int &action) {}
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  HAL::i2cWrite(0x12); // GIOA
-  HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak()<<8);
-  HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+HAL::i2cWrite(0x12); // GIOA
+HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+unsigned int keymask = HAL::i2cReadAck();
+keymask = keymask + (HAL::i2cReadNak()<<8);
+HAL::i2cStop();
 }
 void ui_check_slow_keys(int &action) {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  HAL::i2cWrite(0x12); // GPIOA
-  HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak()<<8);
-  HAL::i2cStop();
-  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
-  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
-  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
-  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button
-  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+HAL::i2cWrite(0x12); // GPIOA
+HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+unsigned int keymask = HAL::i2cReadAck();
+keymask = keymask + (HAL::i2cReadNak()<<8);
+HAL::i2cStop();
+UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_PREVIOUS); // Up button
+UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_NEXT); // down button
+UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK); // left button
+UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_OK); // right button
+UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_MENU_QUICKSETTINGS);  //Select button
 }
 #endif
 #endif // Controller 3
@@ -601,18 +543,18 @@ void ui_check_slow_keys(int &action) {
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
 void ui_init_keys() {
-  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(5);
-  UI_KEYS_INIT_BUTTON_LOW(6);
-  UI_KEYS_INIT_BUTTON_LOW(11);
-  UI_KEYS_INIT_BUTTON_LOW(42);
+UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+UI_KEYS_INIT_BUTTON_LOW(5);
+UI_KEYS_INIT_BUTTON_LOW(6);
+UI_KEYS_INIT_BUTTON_LOW(11);
+UI_KEYS_INIT_BUTTON_LOW(42);
 }
 void ui_check_keys(int &action) {
- UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
@@ -674,27 +616,27 @@ void ui_check_slow_keys(int &action) {}
 #define UI_I2C_KEY_ADDRESS 0x40
 #ifdef UI_MAIN
 void ui_init_keys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
+UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
 }
 void ui_check_keys(int &action) {
-  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
-  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
+UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
+UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
 inline void ui_check_slow_encoder() { }// not used in Viki
 void ui_check_slow_keys(int &action) {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-  HAL::i2cWrite(0x12); // GPIOA
-  HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
-  unsigned int keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak()<<8);
-  HAL::i2cStop();
-  UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_MENU_SDCARD);        // Up button
-  UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_MENU_QUICKSETTINGS); // down button
-  UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK);              // left button
-  UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_MENU_POSITIONS);     // right button
-  UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_OK);                 //Select button
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+HAL::i2cWrite(0x12); // GPIOA
+HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+unsigned int keymask = HAL::i2cReadAck();
+keymask = keymask + (HAL::i2cReadNak()<<8);
+HAL::i2cStop();
+UI_KEYS_I2C_BUTTON_LOW(4,UI_ACTION_MENU_SDCARD);        // Up button
+UI_KEYS_I2C_BUTTON_LOW(8,UI_ACTION_MENU_QUICKSETTINGS); // down button
+UI_KEYS_I2C_BUTTON_LOW(16,UI_ACTION_BACK);              // left button
+UI_KEYS_I2C_BUTTON_LOW(2,UI_ACTION_MENU_POSITIONS);     // right button
+UI_KEYS_I2C_BUTTON_LOW(1,UI_ACTION_OK);                 //Select button
 
 }
 #endif
@@ -745,46 +687,46 @@ void ui_check_slow_keys(int &action) {
 #define UI_INVERT_MENU_DIRECTION true
 #ifdef UI_MAIN
 void ui_init_keys() {
-    UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
-    UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
+UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
+UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
 
-    SET_OUTPUT(UI_SHIFT_CLK);
-    SET_OUTPUT(UI_SHIFT_LD);
-    SET_INPUT(UI_SHIFT_OUT);
+SET_OUTPUT(UI_SHIFT_CLK);
+SET_OUTPUT(UI_SHIFT_LD);
+SET_INPUT(UI_SHIFT_OUT);
 
-    WRITE(UI_SHIFT_OUT,HIGH);
-    WRITE(UI_SHIFT_LD,HIGH);
+WRITE(UI_SHIFT_OUT,HIGH);
+WRITE(UI_SHIFT_LD,HIGH);
 }
 
 void ui_check_keys(int &action) {
-    UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
-    UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
+UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
 }
 
 inline void ui_check_slow_encoder() {} // not used
 
 void ui_check_slow_keys(int &action) {
 
-    WRITE(UI_SHIFT_LD,LOW);
-    WRITE(UI_SHIFT_LD,HIGH);
+WRITE(UI_SHIFT_LD,LOW);
+WRITE(UI_SHIFT_LD,HIGH);
 
-    for(int8_t i=1;i<=8;i++) {
-        if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
-            switch (i) {
-                case 1: action = UI_ACTION_Z_DOWN; break; // F3
-                case 2: action = UI_ACTION_Z_UP; break; // F2
-                case 3: action = UI_ACTION_EMERGENCY_STOP; break; // F1
-                case 4: action = UI_ACTION_Y_UP; break; // UP
-                case 5: action = UI_ACTION_X_UP; break; // RIGHT
-                case 6: action = UI_ACTION_HOME_ALL; break; // MID
-                case 7: action = UI_ACTION_Y_DOWN; break; // DOWN
-                case 8: action = UI_ACTION_X_DOWN; break; // LEFT
-            }
-            i = 9; // if button detected, exit "for loop"
-        }
-        WRITE(UI_SHIFT_CLK,HIGH);
-        WRITE(UI_SHIFT_CLK,LOW);
-    }
+for(int8_t i=1;i<=8;i++) {
+if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
+	switch (i) {
+		case 1: action = UI_ACTION_Z_DOWN; break; // F3
+		case 2: action = UI_ACTION_Z_UP; break; // F2
+		case 3: action = UI_ACTION_EMERGENCY_STOP; break; // F1
+		case 4: action = UI_ACTION_Y_UP; break; // UP
+		case 5: action = UI_ACTION_X_UP; break; // RIGHT
+		case 6: action = UI_ACTION_HOME_ALL; break; // MID
+		case 7: action = UI_ACTION_Y_DOWN; break; // DOWN
+		case 8: action = UI_ACTION_X_DOWN; break; // LEFT
+	}
+	i = 9; // if button detected, exit "for loop"
+}
+WRITE(UI_SHIFT_CLK,HIGH);
+WRITE(UI_SHIFT_CLK,LOW);
+}
 }
 #endif
 #endif // Controller 6
@@ -816,12 +758,12 @@ void ui_check_slow_keys(int &action) {
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
 void ui_init_keys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
 }
 void ui_check_keys(int &action) {
- UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
@@ -842,11 +784,11 @@ void ui_check_slow_keys(int &action) {}
 #define BEEPER_TYPE_INVERTING true
 
 #if FEATURE_CONTROLLER==9   // 16x02 Display
- #define UI_COLS 16
- #define UI_ROWS 2
+#define UI_COLS 16
+#define UI_ROWS 2
 #else  ////20x04 Display
- #define UI_COLS 20
- #define UI_ROWS 4
+#define UI_COLS 20
+#define UI_ROWS 4
 #endif
 
 #ifdef PiBot_V_1_4
@@ -899,18 +841,18 @@ void ui_check_slow_keys(int &action) {}
 
 #ifdef UI_MAIN
 void ui_init_keys() {
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_OK); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_NEXT);
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_PREVIOUS);
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
-  UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_SD_PRINT);
+UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_OK); // push button, connects gnd to pin
+UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_NEXT);
+UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_PREVIOUS);
+UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
+UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_SD_PRINT);
 }
 void ui_check_keys(int &action) {
- UI_KEYS_BUTTON_LOW(UI_BUTTON_OK,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_BUTTON_NEXT,UI_ACTION_NEXT); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_BUTTON_PREVIOUS,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(UI_BUTTON_SD_PRINT,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_BUTTON_OK,UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_BUTTON_NEXT,UI_ACTION_NEXT); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_BUTTON_PREVIOUS,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK); // push button, connects gnd to pin
+UI_KEYS_BUTTON_LOW(UI_BUTTON_SD_PRINT,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}

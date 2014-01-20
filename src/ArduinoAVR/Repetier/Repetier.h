@@ -46,16 +46,16 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
-//#define DEBUG_STEPCOUNT
+#define DEBUG_STEPCOUNT
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
-#define DEBUG_COM_ERRORS
+//#define DEBUG_COM_ERRORS
 //#define DEBUG_DELTA_OVERFLOW
 // Add write debug to quicksettings menu to debug some vars during hang
 //#define DEBUG_PRINT
 //#define DEBUG_SPLIT
 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
-//#define DEBUG
+#define DEBUG
 
 
 // Uncomment if no analyzer is connected

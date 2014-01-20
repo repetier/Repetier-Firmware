@@ -117,6 +117,7 @@ List of placeholder:
 #define UI_TEMP_PRECISION 0
 #endif
 #endif
+#define UI_TEMP_PRECISION 0
 
 /* ============= PAGES DEFINITION =============
 
@@ -132,10 +133,10 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 
-#if UI_DISPLAY_TYPE==5 
+#if UI_DISPLAY_TYPE==5
  //graphic main status
 
-   UI_PAGE6(ui_page1,"\xa %e0/%E0\xb0  X:%x0", 
+   UI_PAGE6(ui_page1,"\xa %e0/%E0\xb0  X:%x0",
    #if NUM_EXTRUDER>1
      "\xa %e1/%E1\xb0  Y:%x1",
    #else
@@ -146,7 +147,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #else
      "\xb ---/---\xb0  Z:%x2",
    #endif
-   "Mul:%om", "Buf:%oB", "%os");   
+   "Mul:%om", "Buf:%oB", "%os");
 
   #if EEPROM_MODE!=0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
