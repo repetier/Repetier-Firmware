@@ -74,6 +74,10 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguish Beta              = 501
 
 #define MOTHERBOARD 37
+#define UI_DISPLAY_TYPE 0
+#define MISO_PIN -1
+#define MOSI_PIN -1
+#define SCK_PIN -1
 
 #include "pins.h"
 
@@ -105,52 +109,52 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers*/
 #if DRIVE_SYSTEM==3
-    // ***************************************************
-    // *** These parameter are only for Delta printers ***
-    // ***************************************************
+// ***************************************************
+// *** These parameter are only for Delta printers ***
+// ***************************************************
 
-    /** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive */
-    #define DELTA_DRIVE_TYPE 0
+/** \brief Delta drive type: 0 - belts and pulleys, 1 - filament drive */
+#define DELTA_DRIVE_TYPE 0
 
-    #if DELTA_DRIVE_TYPE == 0
-      /** \brief Pitch in mm of drive belt. GT2 = 2mm */
-      #define BELT_PITCH 2
-      /** \brief Number of teeth on X, Y and Z tower pulleys */
-      #define PULLEY_TEETH 20
-      #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
-    #elif DELTA_DRIVE_TYPE == 1
-      /** \brief Filament pulley diameter in milimeters */
-      #define PULLEY_DIAMETER 10
-      #define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
-    #endif
+#if DELTA_DRIVE_TYPE == 0
+/** \brief Pitch in mm of drive belt. GT2 = 2mm */
+#define BELT_PITCH 2
+/** \brief Number of teeth on X, Y and Z tower pulleys */
+#define PULLEY_TEETH 20
+#define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
+#elif DELTA_DRIVE_TYPE == 1
+/** \brief Filament pulley diameter in milimeters */
+#define PULLEY_DIAMETER 10
+#define PULLEY_CIRCUMFERENCE (PULLEY_DIAMETER * 3.1415927)
+#endif
 
-    /** \brief Steps per rotation of stepper motor */
-    #define STEPS_PER_ROTATION 200
+/** \brief Steps per rotation of stepper motor */
+#define STEPS_PER_ROTATION 200
 
-    /** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
-    #define MICRO_STEPS 16
+/** \brief Micro stepping rate of X, Y and Y tower stepper drivers */
+#define MICRO_STEPS 16
 
-    // Calculations
-    #define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
-    #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
-    #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
-    #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+// Calculations
+#define AXIS_STEPS_PER_MM ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
+#define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
+#define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #else
-    // *******************************************************
-    // *** These parameter are for all other printer types ***
-    // *******************************************************
+// *******************************************************
+// *** These parameter are for all other printer types ***
+// *******************************************************
 
-    /** Drive settings for printers with cartesian drive systems */
-    /** \brief Number of steps for a 1mm move in x direction.
-    For xy gantry use 2*belt moved!
-    Overridden if EEPROM activated. */
-    #define XAXIS_STEPS_PER_MM 98.425196
-    /** \brief Number of steps for a 1mm move in y direction.
-    For xy gantry use 2*belt moved!
-    Overridden if EEPROM activated.*/
-    #define YAXIS_STEPS_PER_MM 98.425196
-    /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
-    #define ZAXIS_STEPS_PER_MM 2560
+/** Drive settings for printers with cartesian drive systems */
+/** \brief Number of steps for a 1mm move in x direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated. */
+#define XAXIS_STEPS_PER_MM 98.425196
+/** \brief Number of steps for a 1mm move in y direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated.*/
+#define YAXIS_STEPS_PER_MM 98.425196
+/** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.*/
+#define ZAXIS_STEPS_PER_MM 2560
 #endif
 
 // ##########################################################################################
@@ -756,7 +760,7 @@ on this endstop.
 
 /** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
-#define PRINTER_RADIUS 186 //slightly low?
+#define PRINTER_RADIUS 185.5 //slightly low?
 
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
@@ -1113,7 +1117,7 @@ is always running and is not hung up for some unknown reason. */
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT true
+#define SDSUPPORT false //true
 /** If set to false all files with longer names then 8.3 or having a tilde in the name will be hidden */
 #define SD_ALLOW_LONG_NAMES false
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
