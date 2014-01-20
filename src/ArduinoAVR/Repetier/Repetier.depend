@@ -2386,3 +2386,158 @@
 	<Arduino.h>
 	"wiring_private.h"
 
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\commands.cpp
+	"Repetier.h"
+
+1388632118 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\repetier.h
+	"Configuration.h"
+	"HAL.h"
+	"gcode.h"
+	"ui.h"
+	"Communication.h"
+	"SdFat.h"
+	"SdFat.h"
+	"Extruder.h"
+	"Printer.h"
+	"motion.h"
+	"HAL.h"
+	"SdFat.h"
+	"Commands.h"
+	"Eeprom.h"
+
+1390261048 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\configuration.h
+	"pins.h"
+
+1390162064 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\pins.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\hal.h
+	<avr/pgmspace.h>
+	<avr/io.h>
+	<avr/io.h>
+	<avr/eeprom.h>
+	<avr/wdt.h>
+	<inttypes.h>
+	"Print.h"
+	"Arduino.h"
+	"WProgram.h"
+	"fastio.h"
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\fastio.h
+	<avr/io.h>
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\gcode.h
+
+1388601443 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\ui.h
+	"gcode.h"
+	"uilang.h"
+	"uiconfig.h"
+	"uilang.h"
+	"uimenu.h"
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uilang.h
+
+1388601166 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uiconfig.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\uimenu.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\communication.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdfat.h
+	<stdint.h>
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\extruder.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\printer.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\motion.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\commands.h
+
+1388598165 e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\eeprom.h
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\communication.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\cdc.cpp
+	<CDC.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\main.cpp
+	<main.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\new.cpp
+	<new.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\print.cpp
+	<Print.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\stream.cpp
+	<Stream.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\tone.cpp
+	<Tone.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\usbcore.cpp
+	<HID.cpp>
+	<USBCore.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\winterrupts.c
+	<WInterrupts.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring.c
+	<wiring.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_analog.c
+	<wiring_analog.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_digital.c
+	<wiring_digital.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_pulse.c
+	<wiring_pulse.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wiring_shift.c
+	<wiring_shift.c>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wmath.cpp
+	<WMath.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\cores\wstring.cpp
+	<WString.cpp>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\eeprom.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\extruder.cpp
+	"Repetier.h"
+	"pins_arduino.h"
+	"ui.h"
+	"Eeprom.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\gcode.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\hal.cpp
+	"Repetier.h"
+	<compat/twi.h>
+	<avr/io.h>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\motion.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\printer.cpp
+	"Repetier.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\repetier.ino
+	"Repetier.h"
+	<SPI.h>
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdcard.cpp
+	"Repetier.h"
+	"ui.h"
+
+1388598165 source:e:\users\martin\documents\github\repetier-firmware\src\arduinoavr\repetier\sdfat.cpp
+	"Repetier.h"
+	"Arduino.h"
+	"WProgram.h"
+	<SoftSPI.h>
+
