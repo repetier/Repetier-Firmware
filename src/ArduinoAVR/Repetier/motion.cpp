@@ -723,11 +723,9 @@ void PrintLine::forwardPlanner(uint8_t first)
             act->startSpeed = leftSpeed;
             act->endSpeed = RMath::max(act->minSpeed,vmaxRight);
             next->startSpeed = leftSpeed = RMath::max(RMath::min(act->endSpeed,act->maxJunctionSpeed),next->minSpeed);
-
             next->setStartSpeedFixed(true);
         }
     } // While
-
     next->startSpeed = RMath::max(next->minSpeed,leftSpeed); // This is the new segment, which is updated anyway, no extra flag needed.
 }
 
@@ -1064,7 +1062,6 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
     {
         DeltaSegment *d = &segments[s-1];
         for(i=0; i < NUM_AXIS - 1; i++) // End of segment in cartesian steps
-
         {
             diff = Printer::destinationSteps[i] - destinationSteps[i];
             if(s == 1)
@@ -1175,11 +1172,6 @@ inline void PrintLine::queueEMove(long extrudeDiff,uint8_t check_endstops,uint8_
 {
     Printer::flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED; // Motor is enabled now
     waitForXFreeLines(1);
-
-
-
-
-
     uint8_t newPath = insertWaitMovesIfNeeded(pathOptimize, 0);
     PrintLine *p = getNextWriteLine();
     float axisDiff[4]; // Axis movement in mm
@@ -1187,16 +1179,13 @@ inline void PrintLine::queueEMove(long extrudeDiff,uint8_t check_endstops,uint8_
     else p->flags = 0;
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
-
     //Find direction
     for(uint8_t i = 0; i< 3; i++)
     {
         p->delta[i] = 0;
         axisDiff[i] = 0;
-
     }
     if (extrudeDiff >= 0)
-
     {
         p->delta[E_AXIS] = extrudeDiff;
         p->dir = 0x88;
@@ -1298,10 +1287,8 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
     // There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
     int segmentsPerLine = segmentCount / numLines;
 
-
     long start_position[4], fractional_steps[4];
     if(numLines>1)
-
     {
         for (uint8_t i = 0; i < 4; i++)
             start_position[i] = Printer::currentPositionSteps[i];
@@ -1321,13 +1308,11 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
     uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, RMath::min(MOVE_CACHE_SIZE-4,numLines-1));
 
     for (int lineNumber=1; lineNumber < numLines + 1; lineNumber++)
-
     {
         waitForXFreeLines(1);
         PrintLine *p = getNextWriteLine();
         // Downside a comparison per loop. Upside one less distance calculation and simpler code.
         if (numLines == 1)
-
         {
             // p->numDeltaSegments = segmentCount; // not neede, gets overwritten further down
             p->dir = cartesianDir;
@@ -1369,7 +1354,6 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
         if (virtual_axis_move == 0 && p->delta[E_AXIS] == 0)
         {
             if (numLines!=1)
-
                 Com::printErrorFLN(Com::tDBGDeltaNoMoveinDSegment);
             return;  // Line too short in low precision area
         }
