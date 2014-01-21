@@ -136,8 +136,13 @@ void SDCard::pausePrint(bool intern)
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);
 #if FEATURE_MEMORY_POSITION
     if(intern) {
+        Commands::waitUntilEndOfAllBuffers();
         Printer::MemoryPosition();
-        Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],Printer::currentPosition[E_AXIS],Printer::maxFeedrate[X_AXIS]);
+#if DRIVE_SYSTEM==3
+        Printer::moveToReal(0,0.4*Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
+#else
+        Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
+#endif
     }
 #endif
 }
@@ -148,8 +153,10 @@ void SDCard::continuePrint(bool intern)
 #if FEATURE_MEMORY_POSITION
     if(intern) {
         Printer::GoToMemoryPosition(true,true,false,true,Printer::maxFeedrate[X_AXIS]);
+        Printer::GoToMemoryPosition(false,false,true,false,Printer::maxFeedrate[Z_AXIS]);
     }
 #endif
+    sdmode = true;
 }
 void SDCard::stopPrint()
 {
@@ -344,6 +351,7 @@ bool SDCard::selectFile(char *filename, bool silent)
     char *oldP = filename;
     boolean bFound;
 
+
     if(!sdactive) return false;
     sdmode = false;
 
@@ -445,6 +453,7 @@ void SDCard::makeDirectory(char *filename)
     }
 }
 
+
 #ifdef GLENN_DEBUG
 void SDCard::writeToFile()
 {
@@ -458,7 +467,9 @@ void SDCard::writeToFile()
   Com::println();
 }
 
+
 #endif
+
 
 #endif
 

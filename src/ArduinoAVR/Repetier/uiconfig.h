@@ -99,8 +99,31 @@ What display type do you use?
 #ifndef(UI_DISPLAY_TYPE)
 #define UI_DISPLAY_TYPE 0
 #endif
-/** Number of columns per row
 
+#if UI_DISPLAY_TYPE == 5 // Special case for graphic displays
+
+#define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION false  // Animations are too slow
+#endif
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3
+#else
+/** Number of columns per row
 Typical values are 16 and 20
 */
 #define UI_COLS 20
@@ -108,6 +131,7 @@ Typical values are 16 and 20
 Rows of your display. 2 or 4
 */
 #define UI_ROWS 4
+#endif // UI_DISPLAY_TYPE
 
 /* What type of chip is used for I2C communication
 0 : PCF8574 or PCF8574A or compatible chips.
@@ -128,6 +152,50 @@ Rows of your display. 2 or 4
 /* How fast should the I2C clock go. The PCF8574 work only with the lowest setting 100000.
 A MCP23017 can run also with 400000 Hz */
 #define UI_I2C_CLOCKSPEED 100000L
+/**
+Define the pin
+*/
+#if UI_DISPLAY_TYPE==3 // I2C Pin configuration
+#define UI_DISPLAY_RS_PIN _BV(4)
+#define UI_DISPLAY_RW_PIN _BV(5)
+#define UI_DISPLAY_ENABLE_PIN _BV(6)
+#define UI_DISPLAY_D0_PIN _BV(0)
+#define UI_DISPLAY_D1_PIN _BV(1)
+#define UI_DISPLAY_D2_PIN _BV(2)
+#define UI_DISPLAY_D3_PIN _BV(3)
+#define UI_DISPLAY_D4_PIN _BV(0)
+#define UI_DISPLAY_D5_PIN _BV(1)
+#define UI_DISPLAY_D6_PIN _BV(2)
+#define UI_DISPLAY_D7_PIN _BV(3)
+
+// Pins for adafruid RGB shield
+/*#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)*/
+
+#else // Direct display connections
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+
+#endif
 
 
 /** \brief Are some keys connected?

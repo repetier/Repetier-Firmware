@@ -388,6 +388,7 @@ class UIDisplay {
     void fastAction();
     void mediumAction();
     void pushMenu(void *men,bool refresh);
+    void adjustMenuPos();
     void setStatusP(PGM_P txt);
     void setStatus(char *txt);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
@@ -449,6 +450,60 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ROWS 4
 #endif
 #define BEEPER_TYPE 1
+#if FEATURE_CONTROLLER==10 // Gadgets3d shield
+#define BEEPER_PIN             33
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      23
+#define UI_DISPLAY_D1_PIN      25
+#define UI_DISPLAY_D2_PIN      27
+#define UI_DISPLAY_D3_PIN      29
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_ENCODER_A           35
+#define UI_ENCODER_B           37
+#define UI_ENCODER_CLICK       31
+#define UI_RESET_PIN           41
+#else  // Smartcontroller
+#if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
+#define BEEPER_PIN             44
+#define UI_DISPLAY_RS_PIN      19
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D0_PIN      18
+#define UI_DISPLAY_D1_PIN      38
+#define UI_DISPLAY_D2_PIN      41
+#define UI_DISPLAY_D3_PIN      40
+#define UI_DISPLAY_D4_PIN      18
+#define UI_DISPLAY_D5_PIN      38
+#define UI_DISPLAY_D6_PIN      41
+#define UI_DISPLAY_D7_PIN      40
+#define UI_ENCODER_A           12
+#define UI_ENCODER_B           11
+#define UI_ENCODER_CLICK       43
+#define UI_RESET_PIN           46
+#else
+#define BEEPER_PIN             37
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      23
+#define UI_DISPLAY_D1_PIN      25
+#define UI_DISPLAY_D2_PIN      27
+#define UI_DISPLAY_D3_PIN      29
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_ENCODER_A           BTN_EN1
+#define UI_ENCODER_B           BTN_EN2
+#define UI_ENCODER_CLICK       BTN_ENC
+#define UI_RESET_PIN           44
+#endif
+#endif
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
@@ -862,6 +917,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif
 
+
 #if FEATURE_CONTROLLER>0
 #if UI_ROWS==4
 #if UI_COLS==16
@@ -930,6 +986,8 @@ void ui_check_slow_keys(int &action) {}
 #define BEEP_SHORT beep(BEEPER_SHORT_SEQUENCE);
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
+
+
 extern void beep(uint8_t duration,uint8_t count);
 
 #endif

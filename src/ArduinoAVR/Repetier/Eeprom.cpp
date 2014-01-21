@@ -59,27 +59,27 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
     stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
-    Printer::axisStepsPerMM[0] = XAXIS_STEPS_PER_MM;
-    Printer::axisStepsPerMM[1] = YAXIS_STEPS_PER_MM;
-    Printer::axisStepsPerMM[2] = ZAXIS_STEPS_PER_MM;
-    Printer::axisStepsPerMM[3] = 1;
-    Printer::maxFeedrate[0] = MAX_FEEDRATE_X;
-    Printer::maxFeedrate[1] = MAX_FEEDRATE_Y;
-    Printer::maxFeedrate[2] = MAX_FEEDRATE_Z;
-    Printer::homingFeedrate[0] = HOMING_FEEDRATE_X;
-    Printer::homingFeedrate[1] = HOMING_FEEDRATE_Y;
-    Printer::homingFeedrate[2] = HOMING_FEEDRATE_Z;
+    Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[Z_AXIS] = ZAXIS_STEPS_PER_MM;
+    Printer::axisStepsPerMM[E_AXIS] = 1;
+    Printer::maxFeedrate[X_AXIS] = MAX_FEEDRATE_X;
+    Printer::maxFeedrate[Y_AXIS] = MAX_FEEDRATE_Y;
+    Printer::maxFeedrate[Z_AXIS] = MAX_FEEDRATE_Z;
+    Printer::homingFeedrate[X_AXIS] = HOMING_FEEDRATE_X;
+    Printer::homingFeedrate[Y_AXIS] = HOMING_FEEDRATE_Y;
+    Printer::homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
     Printer::maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM!=3
     Printer::maxZJerk = MAX_ZJERK;
 #endif
 #ifdef RAMP_ACCELERATION
-    Printer::maxAccelerationMMPerSquareSecond[0] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    Printer::maxAccelerationMMPerSquareSecond[1] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    Printer::maxAccelerationMMPerSquareSecond[2] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-    Printer::maxTravelAccelerationMMPerSquareSecond[0] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    Printer::maxTravelAccelerationMMPerSquareSecond[1] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    Printer::maxTravelAccelerationMMPerSquareSecond[2] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    Printer::maxAccelerationMMPerSquareSecond[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    Printer::maxAccelerationMMPerSquareSecond[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;

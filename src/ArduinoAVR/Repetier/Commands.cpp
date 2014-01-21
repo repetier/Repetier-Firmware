@@ -94,6 +94,42 @@ void Commands::waitUntilEndOfAllMoves()
          #endif // UI_DISPLAY_TYPE
     }
 }
+void Commands::waitUntilEndOfAllBuffers()
+{
+    GCode *code;
+    while(PrintLine::hasLines() || (code = GCode::peekCurrentCommand()) != NULL)
+    {
+        GCode::readFromSerial();
+        #if UI_DISPLAY_TYPE > 0
+            UI_MEDIUM; // do check encoder
+        #endif
+        if(code)
+        {
+#if SDSUPPORT
+            if(sd.savetosd)
+            {
+                if(!(code->hasM() && code->M == 29))   // still writing to file
+                {
+                    sd.writeCommand(code);
+                }
+                else
+                {
+                    sd.finishWrite();
+                }
+#ifdef ECHO_ON_EXECUTE
+                code->echoCommand();
+#endif
+            }
+            else
+#endif
+                Commands::executeGCode(code);
+            code->popCurrentCommand();
+        }        Commands::checkForPeriodicalActions();
+        #if UI_DISPLAY_TYPE > 0
+        UI_MEDIUM;
+        #endif
+    }
+}
 void Commands::printCurrentPosition()
 {
     float x,y,z;
@@ -414,10 +450,10 @@ void Commands::executeGCode(GCode *com)
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
         {
             float position[3];
-            Printer::realPosition(position[0],position[1],position[2]);
+            Printer::realPosition(position[X_AXIS],position[Y_AXIS],position[Z_AXIS]);
             if(!Printer::setDestinationStepsFromGCode(com)) break; // For X Y Z E F
             float offset[2] = {Printer::convertToMM(com->hasI()?com->I:0),Printer::convertToMM(com->hasJ()?com->J:0)};
-            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[3]*Printer::invAxisStepsPerMM[3]};
+            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]};
             float r;
             if (com->hasR())
             {
@@ -472,8 +508,8 @@ void Commands::executeGCode(GCode *com)
                 */
                 r = Printer::convertToMM(com->R);
                 // Calculate the change in position along each selected axis
-                double x = target[0]-position[0];
-                double y = target[1]-position[1];
+                double x = target[X_AXIS]-position[X_AXIS];
+                double y = target[Y_AXIS]-position[Y_AXIS];
 
                 double h_x2_div_d = -sqrt(4 * r*r - x*x - y*y)/hypot(x,y); // == -(h * 2 / d)
                 // If r is smaller than d, the arc is now traversing the complex plane beyond the reach of any
@@ -590,7 +626,7 @@ void Commands::executeGCode(GCode *com)
             printCurrentPosition();
             if(com->hasS() && com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
-            Printer::updateCurrentPosition();
+            Printer::updateCurrentPosition(true);
         }
         break;
         case 30: //single probe set Z0
@@ -649,6 +685,10 @@ void Commands::executeGCode(GCode *com)
                 Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
 #endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
+#else
+#if DRIVE_SYSTEM!=3
+                Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
+#endif
 #endif
                 Printer::setAutolevelActive(true);
                 if(com->S == 2)
@@ -656,7 +696,7 @@ void Commands::executeGCode(GCode *com)
             }
             Printer::setAutolevelActive(true);
             Printer::updateDerivedParameter();
-            Printer::updateCurrentPosition();
+            Printer::updateCurrentPosition(true);
             printCurrentPosition();
 #if DRIVE_SYSTEM==3
             Printer::homeAxis(true,true,true);
@@ -702,15 +742,9 @@ void Commands::executeGCode(GCode *com)
         case 132: // Calibrate endstop offsets
         {
             Printer::setAutolevelActive(false); // don't let transformations change result!
-            Printer::currentPositionSteps[X_AXIS] = 0;
-            Printer::currentPositionSteps[Y_AXIS] = 0;
-            Printer::currentPositionSteps[Z_AXIS] = Printer::zMaxSteps;
-            Printer::coordinateOffset[X_AXIS] = 0;
+			Printer::coordinateOffset[X_AXIS] = 0;
             Printer::coordinateOffset[Y_AXIS] = 0;
             Printer::coordinateOffset[Z_AXIS] = 0;
-            Printer::currentDeltaPositionSteps[X_AXIS] = 0;
-            Printer::currentDeltaPositionSteps[Y_AXIS] = 0;
-            Printer::currentDeltaPositionSteps[Z_AXIS] = Printer::zMaxSteps;
             Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
             long m = RMath::max(Printer::stepsRemainingAtXHit,RMath::max(Printer::stepsRemainingAtYHit,Printer::stepsRemainingAtZHit));
             long offx = m-Printer::stepsRemainingAtXHit;
@@ -729,8 +763,46 @@ void Commands::executeGCode(GCode *com)
 #endif
             Printer::homeAxis(true,true,true);
         }
-
         break;
+        case 133: // Measure steps to top
+            {
+                bool oldAuto = Printer::isAutolevelActive();
+            Printer::setAutolevelActive(false); // don't let transformations change result!
+            Printer::currentPositionSteps[X_AXIS] = 0;
+            Printer::currentPositionSteps[Y_AXIS] = 0;
+            Printer::currentPositionSteps[Z_AXIS] = Printer::zMaxSteps;
+            Printer::coordinateOffset[X_AXIS] = 0;
+            Printer::coordinateOffset[Y_AXIS] = 0;
+            Printer::coordinateOffset[Z_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[X_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Y_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Z_AXIS] = Printer::zMaxSteps;
+            Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
+            long m = Printer::zMaxSteps*1.5;
+            long offx = m-Printer::stepsRemainingAtXHit;
+            long offy = m-Printer::stepsRemainingAtYHit;
+            long offz = m-Printer::stepsRemainingAtZHit;
+            Com::printFLN(Com::tTower1,offx);
+            Com::printFLN(Com::tTower2,offy);
+            Com::printFLN(Com::tTower3,offz);
+            Printer::setAutolevelActive(oldAuto);
+            Printer::homeAxis(true,true,true);
+            }
+            break;
+#ifdef DEBUG_DELTA_REALPOS
+        case 134:
+            Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[X_AXIS]);
+            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[Y_AXIS]);
+            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
+            Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[X_AXIS]);
+            Com::printF(Com::tComma,Printer::realDeltaPositionSteps[Y_AXIS]);
+            Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[Z_AXIS]);
+            Printer::updateCurrentPosition();
+            Com::printF(PSTR("PosFromSteps:"));
+            printCurrentPosition();
+            break;
+#endif
+
 #endif // DRIVE_SYSTEM
         }
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -1110,7 +1182,7 @@ void Commands::executeGCode(GCode *com)
 #if BEEPER_TYPE>0
         case 120: // Test beeper function
             if(com->hasS() && com->hasP())
-                beep(com->S,com->P); // Beep test
+           //     beep(com->S,com->P); // Beep test
             break;
 #endif
 #ifdef RAMP_ACCELERATION
@@ -1340,6 +1412,26 @@ void Commands::executeGCode(GCode *com)
             Commands::printCurrentPosition();
             break;
 #endif
+#ifdef DEBUG_QUEUE_MOVE
+        case 533: // Write move data
+            Com::printF(PSTR("Buf:"),(int)PrintLine::linesCount);
+            Com::printF(PSTR(",LP:"),(int)PrintLine::linesPos);
+            Com::printFLN(PSTR(",WP:"),(int)PrintLine::linesWritePos);
+            if(PrintLine::cur == NULL) {
+                Com::printFLN(PSTR("No move"));
+                if(PrintLine::linesCount>0) {
+                    PrintLine &cur = PrintLine::lines[PrintLine::linesPos];
+                    Com::printF(PSTR("JFlags:"),(int)cur.joinFlags);
+                    Com::printFLN(PSTR("Flags:"),(int)cur.flags);
+                    if(cur.isWarmUp()) {
+                        Com::printFLN(PSTR("warmup:"),(int)cur.getWaitForXLinesFilled());
+                    }
+                }
+            } else {
+                Com::printF(PSTR("Rem:"),PrintLine::cur->stepsRemaining);
+                Com::printFLN(PSTR("Int:"),Printer::interval);
+            }
+#endif // DEBUG_QUEUE_MOVE
         }
     }
     else if(com->hasT())      // Process T code

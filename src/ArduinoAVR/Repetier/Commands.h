@@ -31,6 +31,7 @@ public:
     static void checkForPeriodicalActions();
     static void executeGCode(GCode *com);
     static void waitUntilEndOfAllMoves();
+    static void waitUntilEndOfAllBuffers();
     static void printCurrentPosition();
     static void printTemperatures(bool showRaw = false);
     static void setFanSpeed(int speed,bool wait); /// Set fan speed 0..255

@@ -368,7 +368,7 @@ STEPPER_CURRENT_CONTROL
    #define SDSUPPORT true
    #define SDCARDDETECTINVERTED false
 
- #if UI_DISPLAY_TYPE==5
+ //#if UI_DISPLAY_TYPE==5
    // LCD Full Graphic controller (tested on the Geetech version of the Ultimaker Shield v1.5.7)
    // warning the Stop button shorts the 3v3 rail when pressed!
    // recommend you cut the trace from EXT2-8 on the shield and connect to pin 44
@@ -388,7 +388,7 @@ STEPPER_CURRENT_CONTROL
    #define UI_DISPLAY_RS_PIN 20 // CS = di
    // UI_RESET_PIN required for compile cant use -1 ??
    #define UI_RESET_PIN  44  //rewired Geetech LCD Full Graphic controller stop switch sw1 EXT-2-8 to this pin
-#endif
+//#endif
 #endif
 #if MOTHERBOARD == 3
 #define KNOWN_BOARD 1

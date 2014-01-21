@@ -21,6 +21,7 @@
 
 #ifndef _REPETIER_H
 #define _REPETIER_H
+
 #define REPETIER_VERSION "0.91"
 
 // ##########################################################################################
@@ -30,18 +31,16 @@
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
-to test your data througput or search for communication problems. */
+to test your data throughput or search for communication problems. */
 //#define INCLUDE_DEBUG_COMMUNICATION
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
 #define INCLUDE_DEBUG_NO_MOVE
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+usage or for searching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
 //#define DEBUG_ADVANCE
-/** \brief print ops related debug info. */
-//#define DEBUG_OPS
 /** If enabled, writes the created generic table to serial port at startup. */
 //#define DEBUG_GENERIC
 /** If enabled, steps to move and moved steps are compared. */
@@ -49,6 +48,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
 //#define DEBUG_COM_ERRORS
 //#define DEBUG_DELTA_OVERFLOW
+//#define DEBUG_DELTA_REALPOS
 // Add write debug to quicksettings menu to debug some vars during hang
 //#define DEBUG_PRINT
 //#define DEBUG_SPLIT
@@ -112,6 +112,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #include "Configuration.h"
+
+#if !defined(Z_PROBE_REPETITIONS) || Z_PROBE_REPETITIONS < 1
+#define Z_PROBE_SWITCHING_DISTANCE 0.5 // Distance to safely untrigger probe
+#define Z_PROBE_REPETITIONS 1
+#endif
 
 #define SPEED_MIN_MILLIS 300
 #define SPEED_MAX_MILLIS 50
@@ -254,7 +259,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 #define SD_MAX_FOLDER_DEPTH 2
 
-//#include "ui.h"
+#include "ui.h"
 #include "Communication.h"
 
 #ifndef SDSUPPORT
