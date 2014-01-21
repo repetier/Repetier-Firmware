@@ -21,7 +21,6 @@
 
 #ifndef _REPETIER_H
 #define _REPETIER_H
-
 #define REPETIER_VERSION "0.91"
 
 // ##########################################################################################
@@ -255,7 +254,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 #define SD_MAX_FOLDER_DEPTH 2
 
-#include "ui.h"
+//#include "ui.h"
 #include "Communication.h"
 
 #ifndef SDSUPPORT

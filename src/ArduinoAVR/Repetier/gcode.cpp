@@ -395,7 +395,9 @@ void GCode::readFromSerial()
         {
             Com::printFLN(Com::tSDReadError);
             sd.sdmode = false;
-            UI_STATUS("SD Read Error");
+            #if UI_DISPLAY_TYPE > 0
+                UI_STATUS("SD Read Error");
+            #endif
             break;
         }
         sd.sdpos++; // = file.curPosition();

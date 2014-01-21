@@ -229,7 +229,9 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
         critical=true;
     }
     timeInTicks = timeForMove;
+    #if UI_DISPLAY_TYPE > 0
     UI_MEDIUM; // do check encoder
+    #endif
     // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
     long limitInterval = timeForMove/stepsRemaining; // until not violated by other constraints it is your target speed
     if(isXMove())
@@ -359,7 +361,9 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
         }
     }
 #endif
+#if UI_DISPLAY_TYPE > 0
     UI_MEDIUM; // do check encoder
+#endif
     updateTrapezoids();
     // how much steps on primary axis do we need to reach target feedrate
     //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
@@ -1474,7 +1478,9 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
         {
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions();
+            #if UI_DISPLAY_TYPE > 0
             UI_MEDIUM; // do check encoder
+            #endif
         }
 
         if (count < N_ARC_CORRECTION)  //25 pieces
@@ -1555,7 +1561,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
             //HAL::forbidInterrupts();
             //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
             removeCurrentLineForbidInterrupt();
-            if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
+            #if UI_DISPLAY_TYPE > 0
+                if(linesCount==0) UI_STATUS(UI_TEXT_IDLE);
+            #endif
             return 1000;
         }
 #endif
@@ -1838,7 +1846,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
         //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        #if UI_DISPLAY_TYPE > 0
+            if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        #endif
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

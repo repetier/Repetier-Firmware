@@ -263,14 +263,20 @@ void Printer::kill(uint8_t only_steppers)
         for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
             Extruder::setTemperatureForExtruder(0,i);
         Extruder::setHeatedBedTemperature(0);
+        #if UI_DISPLAY_TYPE > 0
         UI_STATUS_UPD(UI_TEXT_KILLED);
+        #endif
 #if defined(PS_ON_PIN) && PS_ON_PIN>-1
         //pinMode(PS_ON_PIN,INPUT);
         SET_OUTPUT(PS_ON_PIN); //GND
         WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
 #endif
     }
-    else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+    else {
+        #if UI_DISPLAY_TYPE > 0
+        UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+        #endif
+    }
 }
 
 void Printer::updateAdvanceFlags()
@@ -741,7 +747,9 @@ void Printer::setup()
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
+    #if UI_DISPLAY_TYPE > 0
     UI_INITIALIZE;
+    #endif
     HAL::showStartReason();
     Extruder::initExtruder();
     EEPROM::init(); // Read settings from eeprom if wanted
@@ -769,7 +777,9 @@ void Printer::defaultLoopActions()
 {
     //check heater every n milliseconds
     Commands::checkForPeriodicalActions();
+    #if UI_DISPLAY_TYPE > 0
     UI_MEDIUM; // do check encoder
+    #endif
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
         previousMillisCmd = curtime;
@@ -882,7 +892,9 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
     if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z)
     {
+        #if UI_DISPLAY_TYPE > 0
         UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+        #endif
         // Homing Z axis means that you must home X and Y
         if (homeallaxis || zaxis)
         {
@@ -894,12 +906,16 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
             if (yaxis) Printer::destinationSteps[Y_AXIS] = 0;
             PrintLine::queueDeltaMove(true,false,false);
         }
+        #if UI_DISPLAY_TYPE > 0
         UI_CLEAR_STATUS
+        #endif
     }
 
     updateCurrentPosition();
     moveToReal(0,0,Printer::zMin+Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
+    #if UI_DISPLAY_TYPE > 0
     UI_CLEAR_STATUS
+    #endif
 }
 #else
 #if DRIVE_SYSTEM==4  // Tuga printer homing
@@ -1215,7 +1231,9 @@ void Printer::waitForZProbeStart()
         defaultLoopActions();
     }
     HAL::delayMilliseconds(30);
+    #if UI_DISPLAY_TYPE > 0
     UI_CLEAR_STATUS;
+    #endif
 #endif
 }
 #if FEATURE_AUTOLEVEL

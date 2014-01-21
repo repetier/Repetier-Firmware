@@ -333,9 +333,9 @@ FSTRINGVALUE(Com::tEPRAdvanceK,"advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL,"advance L [0=off]")
 
 #endif
-#if SDSUPPORT
-FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
-FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
+#if SDSUPPORT //&& UI_DISPLAY_TYPE > 0
+FSTRINGVALUE(Com::tSDRemoved,"SD Card removed")
+FSTRINGVALUE(Com::tSDInserted,"SD Card inserted")
 FSTRINGVALUE(Com::tSDInitFail,"SD init fail")
 FSTRINGVALUE(Com::tErrorWritingToFile,"error writing to file")
 FSTRINGVALUE(Com::tBeginFileList,"Begin file list")

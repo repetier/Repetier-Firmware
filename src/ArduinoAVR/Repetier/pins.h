@@ -358,6 +358,16 @@ STEPPER_CURRENT_CONTROL
   #define KILL_PIN           -1
   #define SUICIDE_PIN        54  //PIN that has to be turned on right after start, to keep power flowing.
 
+   // SD SPI these pins are defined in the SD library if building with SD support
+   #define SDCARDDETECT     38
+   #define SCK_PIN          52
+   #define MISO_PIN         50
+   #define MOSI_PIN         51
+   #define SDPOWER          -1
+   #define SDSS             53
+   #define SDSUPPORT true
+   #define SDCARDDETECTINVERTED false
+
  #if UI_DISPLAY_TYPE==5
    // LCD Full Graphic controller (tested on the Geetech version of the Ultimaker Shield v1.5.7)
    // warning the Stop button shorts the 3v3 rail when pressed!
@@ -371,14 +381,7 @@ STEPPER_CURRENT_CONTROL
    #define UI_ENCODER_A     BTN_EN1
    #define UI_ENCODER_B     BTN_EN2
    #define UI_ENCODER_CLICK BTN_ENC
-   // SD SPI these pins are defined in the SD library if building with SD support
-   #define SDCARDDETECT     38
-   #define SCK_PIN          52
-   #define MISO_PIN         50
-   #define MOSI_PIN         51
-   #define SDPOWER          -1
-   #define SDSS             53
-   #define SDSUPPORT true
+
    // U8g SPI
    #define UI_DISPLAY_D4_PIN 16 // SCK = en
    #define UI_DISPLAY_ENABLE_PIN 17 //MOSI = rw

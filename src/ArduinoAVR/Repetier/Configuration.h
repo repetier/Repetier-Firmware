@@ -74,7 +74,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguish Beta              = 501
 
 #define MOTHERBOARD 37
-#define UI_DISPLAY_TYPE 5
+#define UI_DISPLAY_TYPE 0//5
 #include "pins.h"
 
 // Override pin definions from pins.h
@@ -800,9 +800,9 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 /** Maximum feedrate, the system allows. Higher feedrates are reduced to these values.
     The axis order in all axis related arrays is X, Y, Z
      Overridden if EEPROM activated.*/
-#define MAX_FEEDRATE_X 300
-#define MAX_FEEDRATE_Y 300
-#define MAX_FEEDRATE_Z 300
+#define MAX_FEEDRATE_X 400
+#define MAX_FEEDRATE_Y 400
+#define MAX_FEEDRATE_Z 400
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 75
@@ -1139,8 +1139,8 @@ The following settings override uiconfig.h!
 10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
 11 = RepRapDiscount Full Graphic Smart Controller
 */
-#define FEATURE_CONTROLLER 11
-#define UI_DISPLAY_TYPE 5
+#define FEATURE_CONTROLLER 0//11
+#define UI_DISPLAY_TYPE 0//5
 
 /**
 Select the language to use.

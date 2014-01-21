@@ -112,7 +112,7 @@ void beep(uint8_t duration,uint8_t count)
 #endif
 #endif
 }
-
+#if UI_DISPLAY_TYPE!=0
 bool UIMenuEntry::showEntry() const
 {
     bool ret = true;
@@ -127,8 +127,6 @@ bool UIMenuEntry::showEntry() const
     }
     return ret;
 }
-
-#if UI_DISPLAY_TYPE!=0
 UIDisplay uid;
 char displayCache[UI_ROWS][MAX_COLS+1];
 

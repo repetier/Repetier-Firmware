@@ -32,7 +32,9 @@ void Commands::commandLoop()
         GCode::readFromSerial();
         GCode *code = GCode::peekCurrentCommand();
         //UI_SLOW; // do longer timed user interface action
-        UI_MEDIUM; // do check encoder
+        #if UI_DISPLAY_TYPE > 0
+            UI_MEDIUM; // do check encoder
+        #endif // UI_DISPLAY_TYPE
         if(code)
         {
 #if SDSUPPORT
@@ -70,7 +72,9 @@ void Commands::checkForPeriodicalActions()
             writeMonitor();
         counter250ms=5;
     }
-    UI_SLOW;
+    #if UI_DISPLAY_TYPE > 0
+        UI_SLOW;
+    #endif // UI_DISPLAY_TYPE
 }
 
 /** \brief Waits until movement cache is empty.
@@ -85,7 +89,9 @@ void Commands::waitUntilEndOfAllMoves()
     {
         GCode::readFromSerial();
         Commands::checkForPeriodicalActions();
-        UI_MEDIUM;
+         #if UI_DISPLAY_TYPE > 0
+            UI_MEDIUM;
+         #endif // UI_DISPLAY_TYPE
     }
 }
 void Commands::printCurrentPosition()
@@ -846,7 +852,9 @@ void Commands::executeGCode(GCode *com)
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
-            UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
+            #if UI_DISPLAY_TYPE > 0
+                UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
+            #endif
             Commands::waitUntilEndOfAllMoves();
             Extruder *actExtruder = Extruder::current;
             if(com->hasT() && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
@@ -896,14 +904,18 @@ void Commands::executeGCode(GCode *com)
             }
 #endif
         }
-        UI_CLEAR_STATUS;
+        #if UI_DISPLAY_TYPE > 0
+            UI_CLEAR_STATUS;
+        #endif
 #endif
         previousMillisCmd = HAL::timeInMilliseconds();
         break;
         case 190: // M190 - Wait bed for heater to reach target.
 #if HAVE_HEATED_BED
             if(Printer::debugDryrun()) break;
-            UI_STATUS_UPD(UI_TEXT_HEATING_BED);
+            #if UI_DISPLAY_TYPE > 0
+                UI_STATUS_UPD(UI_TEXT_HEATING_BED);
+            #endif
             Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
             if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F>0);
@@ -922,7 +934,9 @@ void Commands::executeGCode(GCode *com)
             }
 #endif
 #endif
-            UI_CLEAR_STATUS;
+            #if UI_DISPLAY_TYPE > 0
+                UI_CLEAR_STATUS;
+            #endif
             previousMillisCmd = HAL::timeInMilliseconds();
             break;
         case 116: // Wait for temperatures to reach target temperature
@@ -1060,7 +1074,9 @@ void Commands::executeGCode(GCode *com)
         case 117: // M117 message to lcd
             if(com->hasString())
             {
-                UI_STATUS_UPD_RAM(com->text);
+                #if UI_DISPLAY_TYPE > 0
+                    UI_STATUS_UPD_RAM(com->text);
+                #endif
             }
             break;
         case 119: // M119

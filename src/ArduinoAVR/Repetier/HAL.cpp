@@ -857,8 +857,9 @@ ISR(PWM_TIMER_VECTOR)
         ADCSRA |= _BV(ADSC);  // start next conversion
     }
 #endif
-
+#if UI_DISPLAY_TYPE > 0
     UI_FAST; // Short timed user interface action
+#endif
     pwm_count++;
 }
 #if defined(USE_ADVANCE)
