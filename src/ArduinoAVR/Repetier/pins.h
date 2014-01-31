@@ -13,7 +13,7 @@ STEPPER_CURRENT_CONTROL
   CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
   CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
   CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
-
+  CURRENT_CONTROL_DRV8711 4  // Use DRV8711 like RF1000
 */
 
 #define ARCH_AVR 1
@@ -22,6 +22,7 @@ STEPPER_CURRENT_CONTROL
 #define CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
 #define CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
 #define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
+#define CURRENT_CONTROL_DRV8711 4  // Use DRV8711 like RF1000
 
 /****************************************************************************************
 * Arduino pin assignment
@@ -1205,20 +1206,22 @@ STEPPER_CURRENT_CONTROL
 #define Z_MIN_PIN          14	// PINJ.1, 64, OPTO3
 #define Z_MAX_PIN          -1   // PIND.2, 45, OPTO6 (would be "19", -1 = disabled)
 
-#define E0_STEP_PIN         26	// PINA.4, 74, STP_DRV4
-#define E0_DIR_PIN          28	// PINA.6, 72, DIR_DRV4
-#define E0_ENABLE_PIN       24	// PINA.2, 76 ENA_DRV4
+#define E0_STEP_PIN        26	// PINA.4, 74, STP_DRV4
+#define E0_DIR_PIN         28	// PINA.6, 72, DIR_DRV4
+#define E0_ENABLE_PIN      24	// PINA.2, 76, ENA_DRV4
 
-#define E1_STEP_PIN       36	// PINC.1, 54, STP_DRV5
-#define E1_DIR_PIN        34	// PINC.3, 56, DIR_DRV5
-#define E1_ENABLE_PIN     30	// PINC.7, 60, ENA_DRV5
+#define E1_STEP_PIN        36	// PINC.1, 54, STP_DRV5
+#define E1_DIR_PIN         34	// PINC.3, 56, DIR_DRV5
+#define E1_ENABLE_PIN      30	// PINC.7, 60, ENA_DRV5
 
 #define SDPOWER            -1
 #define SDSS               53	// PINB.0, 19, SS
 #define LED_PIN            13	// PINB.7, 26, LED13
-#define FAN_PIN            25	// OUT1 PINA.3, 75, OUT1
-#define FAN_BOARD_PIN      27   // OUT2
+#define FAN_PIN            25	// PINA.3, 75, OUT1
+#define FAN_BOARD_PIN      27   // PINA.5, 73, OUT2
 #define PS_ON_PIN          -1
+#define KILL_PIN           -1
+#define WATCHDOG_PIN	   84	// PINJ.7
 
 #define HEATER_0_PIN       10	// PINB.4, 23, HZ1
 #define HEATER_1_PIN        9	// PINH.6, 18, HZ2
@@ -1233,12 +1236,122 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
 // these pins are defined in the SD library if building with SD support
-#define SCK_PIN          52	// PINB.1, 20, SCK
-#define MISO_PIN         50	// PINB.3, 22, MISO
-#define MOSI_PIN         51	// PINB.2, 21, MOSI
-#define MAX6675_SS       53	// PINB.0, 19, SS
+#define SCK_PIN			   52	// PINB.1, 20, SCK
+#define MISO_PIN           50	// PINB.3, 22, MISO
+#define MOSI_PIN           51	// PINB.2, 21, MOSI
+#define MAX6675_SS         53	// PINB.0, 19, SS
 
 #endif // MOTHERBOARD == 12
+
+
+/****************************************************************************************
+* RF1000 pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 13
+  #define KNOWN_BOARD 1
+
+  #if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+  #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+  #endif
+
+// Definition for current control
+#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_DRV8711
+
+// On board beeper, so define values already here
+#define BEEPER_PIN		   23
+#define BEEPER_TYPE		    1
+#define SDSUPPORT		 true  // sd card reader on board
+#define SDCARDDETECT	   -1
+
+// digital pin mappings
+#define X_STEP_PIN         54	// PINF.0, 97, STP_DRV1
+#define X_DIR_PIN          55	// PINF.1, 96, DIR_DRV1
+#define X_ENABLE_PIN       38	// PIND.7, 50, ENA_DRV1
+#define X_MIN_PIN           3	// PINE.5,  7, ES1
+#define X_MAX_PIN          -1   // not installed
+
+#define Y_STEP_PIN         60	// PINF.6, 91, STP_DRV2
+#define Y_DIR_PIN          61	// PINF.7, 90, DIR_DRV2
+#define Y_ENABLE_PIN       56	// PINF.2, 95, ENA_DRV2
+#define Y_MIN_PIN           2	// PINE.4,  6, ES2
+#define Y_MAX_PIN          -1   // not installed
+
+#define Z_STEP_PIN         46	// PINL.3, 38, STP_DRV3
+#define Z_DIR_PIN          48	// PINL.1, 36, DIR_DRV3
+#define Z_ENABLE_PIN       62	// PINK.0, 89, ENA_DRV3
+#define Z_MIN_PIN          31	// PINC.6, 59, ES3
+#define Z_MAX_PIN          -1   // not installed
+
+#define E0_STEP_PIN        26	// PINA.4, 74, STP_DRV4
+#define E0_DIR_PIN         28	// PINA.6, 72, DIR_DRV4
+#define E0_ENABLE_PIN      24	// PINA.2, 76, ENA_DRV4
+
+#define E1_STEP_PIN        36	// PINC.1, 54, STP_DRV5
+#define E1_DIR_PIN         34	// PINC.3, 56, DIR_DRV5
+#define E1_ENABLE_PIN      30	// PINC.7, 60, ENA_DRV5
+
+#define SDPOWER            -1
+#define SDSS               53	// PINB.0, 19, SS
+#define LED_PIN            13	// PINB.7, 26, LED13
+#define FAN_PIN            27   // PINA.5, 73, OUT2
+#define PS_ON_PIN          -1
+#define KILL_PIN           -1
+#define WATCHDOG_PIN	   37	// PINC.0
+
+#define HEATER_0_PIN       10	// PINB.4, 23, HZ1
+#define HEATER_1_PIN        9	// PINH.6, 18, HZ2
+#define HEATER_2_PIN	   -1	// PINH.5, 17, HZ3
+
+// analog pin mappings
+#define TEMP_0_PIN         13   // PINK.5, 84, TH1
+#define TEMP_1_PIN         14   // PINK.6, 83, TH2
+#define TEMP_2_PIN         15   // PINK.7, 82, TH3
+
+#define E0_PINS			   E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN,
+#define E1_PINS			   E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN,
+
+// these pins are defined in the SD library if building with SD support  
+#define SCK_PIN			   52	// PINB.1, 20, SCK
+#define MISO_PIN           50	// PINB.3, 22, MISO
+#define MOSI_PIN           51	// PINB.2, 21, MOSI
+#define MAX6675_SS         53	// PINB.0, 19, SS
+
+// motor driver pin mappings
+#define X_SCS_PIN		   49	// PINL.0, 35, SCS_1
+#define X_STALL_PIN		   41	// PING.0, 51, STALLn_1
+
+#define Y_SCS_PIN		   47	// PINL.2, 37, SCS_2
+#define Y_STALL_PIN		   40	// PING.1, 52, STALLn_2
+
+#define Z_SCS_PIN		   45	// PINL.4, 39, SCS_3
+#define Z_STALL_PIN		   39	// PING.2, 70, STALLn_3
+
+#define O0_SCS_PIN		   43	// PINL.6, 41, SCS_4
+#define O0_STALL_PIN	   95	// PING.3, 28, STALLn_4
+
+#define O1_SCS_PIN		   84	// PINJ.7, 79, SCS_5
+#define O1_STALL_PIN	   96	// PING.4, 29, STALLn_5
+
+#define	DRV_FAULT		   97	// PINE.6, 8, FAULTn
+#define DRV_RESET		   90	// PINE.7, 9, RESET_DRV
+#define DRV_SCLK		   93	// PIND.5, 48, SCLK
+#define DRV_SDATO		   92	// PIND.4, 47, SDATO
+#define DRV_SDATI		   94	// PIND.6, 49, SDATI
+
+// key pin mappings
+#define ENABLE_KEY_1	   80	// PINJ.2, 65, TAST_E1
+#define ENABLE_KEY_2	   81	// PINJ.4, 67, TAST_E2
+#define ENABLE_KEY_3	   82	// PINJ.5, 68, TAST_E3
+#define ENABLE_KEY_4	   83	// PINJ.6, 69, TAST_E4
+#define ENABLE_KEY_5	   85	// PINH.7, 27, TAST_E5
+#define ENABLE_KEY_6	   86	// PINH.2, 14, TAST_E6
+
+// other pin mappings
+#define RF1000_HZ3_PIN	    8	// PINH.5, 17, HZ3
+#define	RF1000_OUT1_PIN	   25	// PINA.3, 75, OUT1
+
+#endif // MOTHERBOARD == 13
 
 
 /****************************************************************************************
@@ -1868,13 +1981,10 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS
 #endif
 
-
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
 #include "userpins.h"
 #endif
-
-
 
 #ifndef CPU_ARCH  // Set default architecture
 #define CPU_ARCH ARCH_AVR

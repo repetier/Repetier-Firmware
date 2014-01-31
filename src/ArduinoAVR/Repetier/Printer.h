@@ -149,7 +149,31 @@ public:
     static char motorX;
     static char motorY;
 #endif
-    static inline void setMenuMode(uint8_t mode,bool on) {
+
+#if FEATURE_Z_COMPENSATION
+    static short nonCompensatedPositionStepsX;
+    static short nonCompensatedPositionStepsY;
+    static short nonCompensatedPositionStepsZ;
+    static short targetCompensationZ;
+    static short currentCompensationZ;
+    static char	doZCompensation;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+    static short targetPositionStepsX;
+    static short targetPositionStepsY;
+    static short targetPositionStepsZ;
+    static short targetPositionStepsE;
+    static short currentPositionStepsX;
+    static short currentPositionStepsY;
+    static short currentPositionStepsZ;
+    static short currentPositionStepsE;
+#endif // FEATURE_EXTENDED_BUTTONS
+
+    static short allowedZStepsAfterEndstop;
+    static short currentZStepsAfterEndstop;
+
+	static inline void setMenuMode(uint8_t mode,bool on) {
         if(on)
             menuMode |= mode;
         else
@@ -243,51 +267,81 @@ public:
     {
         if(positive)
         {
-            WRITE(X_DIR_PIN,!INVERT_X_DIR);
+            // extruder moves to the right
+            if( g_nDirectionX != 1 )
+            {
+                WRITE(X_DIR_PIN,!INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER
-            WRITE(X2_DIR_PIN,!INVERT_X_DIR);
+                WRITE(X2_DIR_PIN,!INVERT_X_DIR);
 #endif
+                g_nDirectionX = 1;
+            }
         }
         else
         {
-            WRITE(X_DIR_PIN,INVERT_X_DIR);
+            // extruder moves to the left
+            if( g_nDirectionX != -1 )
+            {
+                WRITE(X_DIR_PIN,INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER
-            WRITE(X2_DIR_PIN,INVERT_X_DIR);
+                WRITE(X2_DIR_PIN,INVERT_X_DIR);
 #endif
+                g_nDirectionX = -1;
+            }
         }
     }
     static inline void setYDirection(bool positive)
     {
         if(positive)
         {
-            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+            // heat bed moves to the front
+            if( g_nDirectionY != 1 )
+            {
+                WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
+                WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
 #endif
+                g_nDirectionY = 1;
+            }
         }
         else
         {
-            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+            // heat bed moves to the back
+            if( g_nDirectionY != -1 )
+            {
+                WRITE(Y_DIR_PIN,INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
+                WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
 #endif
+                g_nDirectionY = -1;
+            }
         }
     }
     static inline void setZDirection(bool positive)
     {
         if(positive)
         {
-            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+            // heat bed moves to the bottom
+            if( g_nDirectionZ != 1 )
+            {
+                WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+                WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
 #endif
+                g_nDirectionZ = 1;
+            }
         }
         else
         {
-            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+            // heat bed moves to the top
+            if( g_nDirectionZ != -1 )
+            {
+                WRITE(Z_DIR_PIN,INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+                WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
 #endif
+                g_nDirectionZ = -1;
+            }
         }
     }
     static inline uint8_t isLargeMachine()
@@ -405,7 +459,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER+1] = 255;
+        pwm_pos[NUM_EXTRUDER+1] = 255;
 #endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()

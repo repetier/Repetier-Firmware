@@ -1439,8 +1439,100 @@ pins
 #define DIO94_PWM		NULL
 #else // MOTHERBOARD == 12
 
-//added below DIO definitions for RAMBo support for LCD's etc...
+#if MOTHERBOARD == 13
+#define DIO80_PIN		PINJ2
+#define DIO80_RPORT		PINJ
+#define DIO80_WPORT		PORTJ
+#define DIO80_DDR		DDRJ
+#define DIO80_PWM		NULL
 
+#define DIO81_PIN		PINJ4
+#define DIO81_RPORT		PINJ
+#define DIO81_WPORT		PORTJ
+#define DIO81_DDR		DDRJ
+#define DIO81_PWM		NULL
+
+#define DIO82_PIN		PINJ5
+#define DIO82_RPORT		PINJ
+#define DIO82_WPORT		PORTJ
+#define DIO82_DDR		DDRJ
+#define DIO82_PWM		NULL
+
+#define DIO83_PIN		PINJ6
+#define DIO83_RPORT		PINJ
+#define DIO83_WPORT		PORTJ
+#define DIO83_DDR		DDRJ
+#define DIO83_PWM		NULL
+
+#define DIO84_PIN		PINJ7
+#define DIO84_RPORT		PINJ
+#define DIO84_WPORT		PORTJ
+#define DIO84_DDR		DDRJ
+#define DIO84_PWM		NULL
+
+#define DIO85_PIN		PINH7
+#define DIO85_RPORT		PINH
+#define DIO85_WPORT		PORTH
+#define DIO85_DDR		DDRH
+#define DIO85_PWM		NULL
+
+#define DIO86_PIN		PINH2
+#define DIO86_RPORT		PINH
+#define DIO86_WPORT		PORTH
+#define DIO86_DDR		DDRH
+#define DIO86_PWM		NULL
+
+#define DIO90_PIN		PINE7
+#define DIO90_RPORT		PINE
+#define DIO90_WPORT		PORTE
+#define DIO90_DDR		DDRE
+#define DIO90_PWM		NULL
+
+#define DIO91_PIN		PINE2
+#define DIO91_RPORT		PINE
+#define DIO91_WPORT		PORTE
+#define DIO91_DDR		DDRE
+#define DIO91_PWM		NULL
+
+#define DIO92_PIN		PIND4
+#define DIO92_RPORT		PIND
+#define DIO92_WPORT		PORTD
+#define DIO92_DDR		DDRD
+#define DIO92_PWM		NULL
+
+#define DIO93_PIN		PIND5
+#define DIO93_RPORT		PIND
+#define DIO93_WPORT		PORTD
+#define DIO93_DDR		DDRD
+#define DIO93_PWM		NULL
+
+#define DIO94_PIN		PIND6
+#define DIO94_RPORT		PIND
+#define DIO94_WPORT		PORTD
+#define DIO94_DDR		DDRD
+#define DIO94_PWM		NULL
+
+#define DIO95_PIN		PING3
+#define DIO95_RPORT		PING
+#define DIO95_WPORT		PORTG
+#define DIO95_DDR		DDRG
+#define DIO95_PWM		NULL
+
+#define DIO96_PIN		PING4
+#define DIO96_RPORT		PING
+#define DIO96_WPORT		PORTG
+#define DIO96_DDR		DDRG
+#define DIO96_PWM		NULL
+
+#define DIO97_PIN		PINE6
+#define DIO97_RPORT		PINE
+#define DIO97_WPORT		PORTE
+#define DIO97_DDR		DDRE
+#define DIO97_PWM		NULL
+#endif // MOTHERBOARD == 13
+
+#if MOTHERBOARD == 301
+//added below DIO definitions for Rambo support for LCD's etc...
 #define DIO70_PIN       PING4
 #define DIO70_RPORT     PING
 #define DIO70_WPORT     PORTG
@@ -1471,8 +1563,6 @@ pins
 #define DIO75_WPORT     PORTJ
 #define DIO75_DDR       DDRJ
 #define DIO75_PWM       NULL
-
-
 #define DIO76_PIN       PINJ5
 #define DIO76_RPORT     PINJ
 #define DIO76_WPORT     PORTJ
@@ -1485,24 +1575,25 @@ pins
 #define DIO77_PWM       NULL
 #define DIO78_PIN       PINE2
 #define DIO78_RPORT     PINE
-#define DIO78_WPORT    PORTE
-#define DIO78_DDR    DDRE
-#define DIO78_PWM    NULL
-#define DIO79_PIN    PINE6
-#define DIO79_RPORT   PINE
-#define DIO79_WPORT    PORTE
-#define DIO79_DDR    DDRE
-#define DIO79_PWM    NULL
-#define DIO80_PIN    PINE7
-#define DIO80_RPORT   PINE
-#define DIO80_WPORT    PORTE
-#define DIO80_DDR    DDRE
-#define DIO80_PWM    NULL
-#define DIO81_PIN    PIND4
-#define DIO81_RPORT   PIND
-#define DIO81_WPORT    PORTD
-#define DIO81_DDR    DDRD
-#define DIO81_PWM    NULL
+#define DIO78_WPORT		PORTE
+#define DIO78_DDR		DDRE
+#define DIO78_PWM		NULL
+#define DIO79_PIN		PINE6
+#define DIO79_RPORT		PINE
+#define DIO79_WPORT		PORTE
+#define DIO79_DDR		DDRE
+#define DIO79_PWM		NULL
+#define DIO80_PIN		PINE7
+#define DIO80_RPORT		PINE
+#define DIO80_WPORT		PORTE
+#define DIO80_DDR		DDRE
+#define DIO80_PWM		NULL
+#define DIO81_PIN		PIND4
+#define DIO81_RPORT		PIND
+#define DIO81_WPORT		PORTD
+#define DIO81_DDR		DDRD
+#define DIO81_PWM		NULL
+#endif // MOTHERBOARD == 301
 
 #endif
 

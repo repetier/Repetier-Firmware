@@ -200,9 +200,21 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     {
 #if NUM_EXTRUDER==1
         if(dir)
-            WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+        {
+            if( g_nDirectionE != 1 )
+            {
+                WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+                g_nDirectionE = 1;
+            }
+        }
         else
-            WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+        {
+            if( g_nDirectionE != -1 )
+            {
+                WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+                g_nDirectionE = -1;
+            }
+        }
 #else
         switch(Extruder::current->id)
         {

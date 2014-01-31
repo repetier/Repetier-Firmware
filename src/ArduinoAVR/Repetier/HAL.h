@@ -31,7 +31,6 @@
 */
 
 #include <avr/pgmspace.h>
-#include <avr/io.h>
 #if CPU_ARCH==ARCH_AVR
 #include <avr/io.h>
 #else
@@ -455,7 +454,24 @@ public:
     }
     static inline void delayMilliseconds(unsigned int delayMs)
     {
+#if WATCHDOG_PIN>-1
+		// external watchdog
+		unsigned int	doneMs = 0;
+		unsigned int	tempMs;
+
+		while( doneMs < delayMs )
+		{
+			tempMs = delayMs - doneMs;
+			if( tempMs > WATCHDOG_TIMEOUT )	tempMs = WATCHDOG_TIMEOUT;
+
+			::delay(tempMs);
+			doneMs += tempMs;
+			pingWatchdog();
+		}
+#else
+		// internal watchdog
         ::delay(delayMs);
+#endif // WATCHDOG_PIN>-1
     }
     static inline void tone(uint8_t pin,int duration)
     {
@@ -645,15 +661,45 @@ public:
 
     inline static void startWatchdog()
     {
+#if WATCHDOG_PIN>-1
+		// external watchdog
+		SET_OUTPUT(WATCHDOG_PIN);
+		pingWatchdog();
+#else
+		// internal watchdog
         wdt_enable(WDTO_1S);
+#endif // WATCHDOG_PIN>-1
     };
     inline static void stopWatchdog()
     {
+#if WATCHDOG_PIN>-1
+		// external watchdog
+		SET_INPUT(WATCHDOG_PIN);
+#else
+		// internal watchdog
         wdt_disable();
+#endif // WATCHDOG_PIN>-1
     }
     inline static void pingWatchdog()
     {
+#if WATCHDOG_PIN>-1
+		// external watchdog
+		WRITE(WATCHDOG_PIN,READ(WATCHDOG_PIN) ? 0 : 1);
+#else
+		// internal watchdog
         wdt_reset();
+#endif // WATCHDOG_PIN>-1
+    };
+    inline static void testWatchdog()
+    {
+		// start the watchdog
+		startWatchdog();
+
+		// force the watchdog to fire
+		cli();
+		while( 1 )
+		{
+		}
     };
     inline static float maxExtruderTimerFrequency()
     {

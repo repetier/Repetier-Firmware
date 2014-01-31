@@ -71,6 +71,7 @@ void Commands::checkForPeriodicalActions()
         counter250ms=5;
     }
     UI_SLOW;
+	loopRF1000();
 }
 
 /** \brief Waits until movement cache is empty.
@@ -296,11 +297,11 @@ void setMotorCurrent( uint8_t channel, unsigned short level )
         WRITE( LTC2600_SCK_PIN, 0 );
     }
 
-    // disable the ommand interface of the LTC2600 -
+    // disable the command interface of the LTC2600 -
     // this carries out the specified command
     WRITE( LTC2600_CS_PIN, HIGH );
 
-} // setLTC2600
+} // setMotorCurrent
 
 void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 {
@@ -753,6 +754,7 @@ void Commands::executeGCode(GCode *com)
 #endif
             Printer::homeAxis(true,true,true);
         }
+
         break;
         case 133: // Measure steps to top
             {
@@ -938,7 +940,7 @@ void Commands::executeGCode(GCode *com)
                     printedTime = currentTime;
                 }
                 Commands::checkForPeriodicalActions();
-                //gcode_read_serial();
+                //GCode::readFromSerial();
 #if RETRACT_DURING_HEATUP
                 if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
                 {
@@ -1412,7 +1414,12 @@ void Commands::executeGCode(GCode *com)
                 Com::printFLN(PSTR("Int:"),Printer::interval);
             }
 #endif // DEBUG_QUEUE_MOVE
-        }
+
+		default:
+			// we may have to process RF1000 specific commands
+			processCommand( com );
+			break;
+		}
     }
     else if(com->hasT())      // Process T code
     {

@@ -53,7 +53,11 @@ long Printer::destinationSteps[4];
 float Printer::coordinateOffset[3] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+#if SUPPORT_CURA
+uint8_t Printer::debugLevel = 0; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
+#else
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
+#endif // SUPPORT_CURA
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 
@@ -142,6 +146,28 @@ char Printer::motorX;
 char Printer::motorY;
 #endif
 
+#if FEATURE_Z_COMPENSATION
+short Printer::nonCompensatedPositionStepsX;
+short Printer::nonCompensatedPositionStepsY;
+short Printer::nonCompensatedPositionStepsZ;
+short Printer::targetCompensationZ;
+short Printer::currentCompensationZ;
+char  Printer::doZCompensation;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
+short Printer::targetPositionStepsX;
+short Printer::targetPositionStepsY;
+short Printer::targetPositionStepsZ;
+short Printer::targetPositionStepsE;
+short Printer::currentPositionStepsX;
+short Printer::currentPositionStepsY;
+short Printer::currentPositionStepsZ;
+short Printer::currentPositionStepsE;
+#endif // FEATURE_EXTENDED_BUTTONS
+
+short Printer::allowedZStepsAfterEndstop;
+short Printer::currentZStepsAfterEndstop;
 
 
 void Printer::constrainDestinationCoords()
@@ -322,7 +348,7 @@ void Printer::moveTo(float x,float y,float z,float e,float f)
 void Printer::moveToReal(float x,float y,float z,float e,float f)
 {
     if(x == IGNORE_COORDINATE)
-        x = currentPosition[X_AXIS];
+		x = currentPosition[X_AXIS];
     if(y == IGNORE_COORDINATE)
         y = currentPosition[Y_AXIS];
     if(z == IGNORE_COORDINATE)
@@ -370,7 +396,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
     currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if(isAutolevelActive())
-        transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
+        transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[X_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
 #endif // FEATURE_AUTOLEVEL
     currentPosition[X_AXIS] -= Printer::offsetX;
     currentPosition[Y_AXIS] -= Printer::offsetY;
@@ -404,32 +430,32 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
         if(com->hasY()) lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS] = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
         if(com->hasZ()) lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS] = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
-    }
+	}
     else
     {
         if(com->hasX()) lastCmdPos[X_AXIS] = (currentPosition[X_AXIS] += convertToMM(com->X));
         if(com->hasY()) lastCmdPos[Y_AXIS] = (currentPosition[Y_AXIS] += convertToMM(com->Y));
         if(com->hasZ()) lastCmdPos[Z_AXIS] = (currentPosition[Z_AXIS] += convertToMM(com->Z));
-    }
+	}
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=3
     if(isAutolevelActive())
     {
         transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS], x, y, z);
-    }
+	}
     else
 #endif // FEATURE_AUTOLEVEL
     {
         x = lastCmdPos[X_AXIS] + Printer::offsetX;
         y = lastCmdPos[Y_AXIS] + Printer::offsetY;
         z = lastCmdPos[Z_AXIS];
-    }
+	}
     long xSteps = static_cast<long>(floor(x * axisStepsPerMM[X_AXIS] + 0.5));
     long ySteps = static_cast<long>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5));
     long zSteps = static_cast<long>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5));
     destinationSteps[X_AXIS] = xSteps;
     destinationSteps[Y_AXIS] = ySteps;
     destinationSteps[Z_AXIS] = zSteps;
-    if(com->hasE() && !Printer::debugDryrun())
+	if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
@@ -438,12 +464,12 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 30
                 Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
-                fabs(com->E)>EXTRUDE_MAXLENGTH)
+                fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
         }
-        else
-        {
+		else
+		{
             if(
 #if MIN_EXTRUDER_TEMP > 30
                 Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
@@ -734,11 +760,39 @@ void Printer::setup()
     backlashZ = Z_BACKLASH;
     backlashDir = 0;
 #endif
+
+
+#if FEATURE_Z_COMPENSATION
+    nonCompensatedPositionStepsX = 
+    nonCompensatedPositionStepsY = 
+    nonCompensatedPositionStepsZ = 0;
+    targetCompensationZ			 = 0;
+    currentCompensationZ		 = 0;
+    doZCompensation				 = 0;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+    currentPositionStepsX =
+    currentPositionStepsY =
+    currentPositionStepsZ =
+    currentPositionStepsE =
+    targetPositionStepsX  =
+    targetPositionStepsY  =
+    targetPositionStepsZ  =
+    targetPositionStepsE  = 0;
+#endif // FEATURE_EXTENDED_BUTTONS
+
+    currentZStepsAfterEndstop = 0;
+    CalculateAllowedZStepsAfterEndStop();
+
 #if defined(USE_ADVANCE)
     extruderStepsNeeded = 0;
 #endif
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
     Com::printFLN(Com::tStart);
     UI_INITIALIZE;
     HAL::showStartReason();
@@ -759,15 +813,12 @@ void Printer::setup()
 #if SDSUPPORT
     sd.initsd();
 #endif
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
 }
 
 void Printer::defaultLoopActions()
 {
     Commands::checkForPeriodicalActions();  //check heater every n milliseconds
-    UI_MEDIUM; // do check encoder
+	UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
         previousMillisCmd = curtime;
@@ -782,7 +833,9 @@ void Printer::defaultLoopActions()
 #if defined(SDCARDDETECT) && SDCARDDETECT>-1 && defined(SDSUPPORT) && SDSUPPORT
     sd.automount();
 #endif
+    //void finishNextSegment();
     DEBUG_MEMORY;
+
 }
 
 #if FEATURE_MEMORY_POSITION
@@ -791,6 +844,7 @@ void Printer::MemoryPosition()
     updateCurrentPosition();
     realPosition(memoryX,memoryY,memoryZ);
     memoryE = currentPositionSteps[E_AXIS]*axisStepsPerMM[E_AXIS];
+
 }
 
 void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
@@ -982,6 +1036,16 @@ void Printer::homeXAxis()
             PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS],true,false);
 #endif
         currentPositionSteps[X_AXIS] = (X_HOME_DIR == -1) ? xMinSteps-offX : xMaxSteps+offX;
+
+#if FEATURE_Z_COMPENSATION
+        nonCompensatedPositionStepsX = currentPositionSteps[0];
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+        targetPositionStepsX  = 0;
+        currentPositionStepsX = 0;
+#endif // FEATURE_EXTENDED_BUTTONS
+
 #if NUM_EXTRUDER>1
         PrintLine::moveRelativeDistanceInSteps((Extruder::current->xOffset-offX) * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS],true,false);
 #endif
@@ -1014,6 +1078,16 @@ void Printer::homeYAxis()
             PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
 #endif
         currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps-offY : yMaxSteps+offY;
+
+#if FEATURE_Z_COMPENSATION
+        nonCompensatedPositionStepsY = currentPositionSteps[1];
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+        targetPositionStepsY  = 0;
+        currentPositionStepsY = 0;
+#endif // FEATURE_EXTENDED_BUTTONS
+
 #if NUM_EXTRUDER>1
         PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset-offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
 #endif
@@ -1041,7 +1115,24 @@ void Printer::homeZAxis()
 #if DRIVE_SYSTEM==4
         currentDeltaPositionSteps[Z_AXIS] = currentPositionSteps[Z_AXIS];
 #endif
-    }
+
+#if FEATURE_Z_COMPENSATION
+        g_nHeatBedScanZ = 0;
+        nonCompensatedPositionStepsZ = currentPositionSteps[2];
+
+        PrintLine::queueTask( TASK_INIT_Z_COMPENSATION );
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+        targetPositionStepsZ  = 0;
+        currentPositionStepsZ = 0;
+
+        CalculateAllowedZStepsAfterEndStop();
+#endif // FEATURE_EXTENDED_BUTTONS
+
+        CalculateAllowedZStepsAfterEndStop();
+        currentZStepsAfterEndstop = 0;
+	}
 }
 
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta printer
@@ -1147,8 +1238,8 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         GCode::executeFString(Com::tZProbeStartScript);
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
-        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
-                                               (Printer::offsetY - oldOffY) * Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
+        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX-oldOffX)*Printer::axisStepsPerMM[0],
+                                               (Printer::offsetY-oldOffY)*Printer::axisStepsPerMM[1],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
     }
     Commands::waitUntilEndOfAllMoves();
     long sum = 0,lastCorrection = currentPositionSteps[Z_AXIS],probeDepth,shortMove = (long)((float)Z_PROBE_SWITCHING_DISTANCE*axisStepsPerMM[Z_AXIS]);

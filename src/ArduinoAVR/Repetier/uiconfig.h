@@ -122,6 +122,7 @@ What display type do you use?
 #define UI_DISPLAY_CHARSET 3
 #else
 /** Number of columns per row
+
 Typical values are 16 and 20
 */
 #define UI_COLS 20
@@ -347,6 +348,7 @@ void ui_check_keys(int &action) {
  UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+
 //  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif

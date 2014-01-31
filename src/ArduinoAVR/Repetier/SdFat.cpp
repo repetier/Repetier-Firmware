@@ -3358,6 +3358,9 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
   }
 #if USE_SD_CRC
   if (cardCommand(CMD59, 1) != R1_IDLE_STATE) {
@@ -3380,6 +3383,9 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_CMD8);
       goto fail;
     }
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
   }
   // initialize card and send host supports SDHC if SD2
   arg = type() == SD_CARD_TYPE_SD2 ? 0X40000000 : 0;
@@ -3390,6 +3396,9 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_ACMD41);
       goto fail;
     }
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
   }
   // if SD2 read OCR register to check for SDHC card
   if (type() == SD_CARD_TYPE_SD2) {
@@ -3459,6 +3468,9 @@ bool Sd2Card::readData(uint8_t* dst, size_t count) {
       error(SD_CARD_ERROR_READ_TIMEOUT);
       goto fail;
     }
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
   }
   if (status_ != DATA_START_BLOCK) {
     error(SD_CARD_ERROR_READ);
@@ -3574,6 +3586,9 @@ bool Sd2Card::waitNotBusy(uint16_t timeoutMillis) {
   uint16_t t0 = HAL::timeInMilliseconds();
   while (spiRec() != 0XFF) {
     if (((uint16_t)HAL::timeInMilliseconds() - t0) >= timeoutMillis) goto fail;
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
   }
   return true;
 

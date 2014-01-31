@@ -110,7 +110,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #define TEMP_PID true // add pid control
 
-
 #include "Configuration.h"
 
 #if !defined(Z_PROBE_REPETITIONS) || Z_PROBE_REPETITIONS < 1
@@ -140,13 +139,14 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define XY_GANTRY
 #endif
 
-//Step to split a cirrcle in small Lines
+//Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
 #define MM_PER_ARC_SEGMENT 1
 #define MM_PER_ARC_SEGMENT_BIG 3
 #else
 #define MM_PER_ARC_SEGMENT_BIG MM_PER_ARC_SEGMENT
 #endif
+
 //After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
@@ -258,6 +258,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 #define SD_MAX_FOLDER_DEPTH 2
+
+#include "RF1000.h"
 
 #include "ui.h"
 #include "Communication.h"

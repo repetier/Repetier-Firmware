@@ -782,6 +782,7 @@ void UIDisplay::initialize()
     folderLevel=0;
 #endif
     UI_STATUS(UI_TEXT_PRINTER_READY);
+
 #if UI_DISPLAY_TYPE>0
     initializeLCD();
 #if UI_DISPLAY_TYPE==3
@@ -1140,7 +1141,23 @@ void UIDisplay::parse(char *txt,bool ram)
                 else if(c2=='1')
                     fvalue = Printer::realYPosition();
                 else if(c2=='2')
-                    fvalue = Printer::realZPosition();
+                {
+                    fvalue = 0;
+
+#if FEATURE_Z_COMPENSATION
+                    // add the current z-compensation
+                    fvalue += (float)Printer::currentCompensationZ;
+                    fvalue += (float)g_nHeatBedScanZ;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+                    // add the current manual z-steps
+                    fvalue += (float)Printer::targetPositionStepsZ;
+#endif // FEATURE_EXTENDED_BUTTONS
+
+                    fvalue *= Printer::invAxisStepsPerMM[Z_AXIS];
+                    fvalue += Printer::realZPosition();
+                }
                 else
                     fvalue = (float)Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
             addFloat(fvalue,4,2);
@@ -1282,6 +1299,19 @@ void UIDisplay::parse(char *txt,bool ram)
 #else
                 addStringP(ui_text_na);
 #endif
+
+#if MOTHERBOARD == 12
+            if(c2=='1')
+                addInt(readStrainGauge(I2C_ADDRESS_STRAIN_GAUGE_1),5);
+            if(c2=='2')
+                addInt(readStrainGauge(I2C_ADDRESS_STRAIN_GAUGE_2),5);
+#endif // MOTHERBOARD == 12
+
+#if MOTHERBOARD == 13
+			if(c2=='1')
+                addInt(readStrainGauge(I2C_ADDRESS_STRAIN_GAUGE),5);
+#endif // MOTHERBOARD == 13
+
             break;
         case 'S':
             if(c2=='x') addFloat(Printer::axisStepsPerMM[0],3,1);
@@ -1471,6 +1501,7 @@ void UIDisplay::refreshPage()
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
+
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     // Reset timeout on menu back when user active on menu
     if (uid.encoderLast != encoderStartScreen)
@@ -1708,6 +1739,7 @@ void UIDisplay::refreshPage()
                         drawHProgressBar(83,42, 40, 5, sdPercent);
                     }
 #endif
+
                     //Status
                     py = u8g_GetHeight(&u8g)-2;
                     if(u8g_IsBBXIntersection(&u8g, 70, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -1948,7 +1980,7 @@ void UIDisplay::okAction()
     executeAction(UI_ACTION_BACK);
 #endif
 }
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) if(a==0 && _min == 0 && increment < 0) {} else {a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;}
 void UIDisplay::adjustMenuPos()
 {
     if(menuLevel == 0) return;
@@ -2012,7 +2044,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         else
         {
             menuPos[0] = (menuPos[0]==0 ? UI_NUM_PAGES-1 : menuPos[0]-1);
-        }
+		}
         return;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
@@ -2046,7 +2078,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
             }
         }
         adjustMenuPos();
-        return;
+		return;
     }
 #if SDSUPPORT
     if(mtype==1)   // SD listing
@@ -2066,7 +2098,13 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #endif
     if(mtype==3) action = pgm_read_word(&(men->id));
     else action=activeAction;
-    int8_t increment = next;
+
+#if UI_INVERT_INCREMENT_DIRECTION
+	int8_t increment = -next;
+#else
+	int8_t increment = next;
+#endif // UI_INVERT_INCREMENT_DIRECTION
+
     switch(action)
     {
     case UI_ACTION_FANSPEED:
@@ -2373,7 +2411,16 @@ void UIDisplay::executeAction(int action)
     {
         setStatusP(ui_action);
     }
-    else
+
+    // RF1000 specific start
+    else if((action>=UI_ACTION_RF1000_MIN_REPEATABLE && action<=UI_ACTION_RF1000_MAX_REPEATABLE) ||
+		    (action>=UI_ACTION_RF1000_MIN_SINGLE && action<=UI_ACTION_RF1000_MAX_SINGLE))
+    {
+        processButton( action );
+    }
+    // RF1000 specific end
+
+	else
         switch(action)
         {
         case UI_ACTION_OK:
@@ -2448,7 +2495,7 @@ void UIDisplay::executeAction(int action)
 #endif
             }
             break;
-        case UI_ACTION_POWER:
+		case UI_ACTION_POWER:
 #if PS_ON_PIN>=0 // avoid compiler errors when the power supply pin is disabled
             Commands::waitUntilEndOfAllMoves();
             SET_OUTPUT(PS_ON_PIN); //GND

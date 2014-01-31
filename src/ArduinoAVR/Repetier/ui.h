@@ -50,7 +50,7 @@
 #define UI_ACTION_FAN_UP               112
 #define UI_ACTION_FAN_DOWN             113
 
-#define UI_ACTION_DUMMY 10000
+#define UI_ACTION_DUMMY				   10000
 #define UI_ACTION_BACK                  1000
 #define UI_ACTION_OK                    1001
 #define UI_ACTION_MENU_UP               1002
@@ -588,7 +588,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_ROWS 4
 #define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
 #define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+#define UI_DISPLAY_ENABLE_PIN	65		// PINK.3, 86, D_E
 #define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
 #define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
 #define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
@@ -599,6 +599,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
 #define UI_DELAYPERCHAR		   320
 #define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_INCREMENT_DIRECTION false
 #ifdef UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
@@ -606,6 +607,16 @@ void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(6);
   UI_KEYS_INIT_BUTTON_LOW(11);
   UI_KEYS_INIT_BUTTON_LOW(42);
+
+#if FEATURE_EXTENDED_BUTTONS
+  UI_KEYS_INIT_BUTTON_LOW(80);	// PINJ.2, 80, X12.1 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(81);	// PINJ.4, 81, X12.2 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(82);	// PINJ.5, 82, X12.3 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(83);	// PINJ.6, 83, X12.4 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(85);	// PINH.7, 85, X12.6 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(86);	// PINH.2, 86, X12.7 - push button, connects gnd to pin
+#endif // FEATURE_EXTENDED_BUTTONS
+
 }
 void ui_check_keys(int &action) {
  UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
@@ -613,11 +624,81 @@ void ui_check_keys(int &action) {
  UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+
+#if FEATURE_EXTENDED_BUTTONS
+ UI_KEYS_BUTTON_LOW(80,UI_ACTION_RF1000_HEAT_BED_UP);		// PINJ.2, 80, X12.1 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(81,UI_ACTION_RF1000_HEAT_BED_DOWN);		// PINJ.4, 81, X12.2 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(82,UI_ACTION_RF1000_EXTRUDER_RETRACT);	// PINJ.5, 82, X12.3 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(83,UI_ACTION_RF1000_EXTRUDER_OUTPUT);	// PINJ.6, 83, X12.4 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(85,UI_ACTION_RF1000_PAUSE);				// PINH.7, 85, X12.6 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(86,UI_ACTION_RF1000_CONTINUE);			// PINH.2, 86, X12.7 - push button, connects gnd to pin
+#endif // FEATURE_EXTENDED_BUTTONS
 }
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 4
+
+
+#if FEATURE_CONTROLLER==33 // RF1000
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 16
+#define UI_ROWS 4
+#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	65		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   320
+#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_INCREMENT_DIRECTION true
+#ifdef UI_MAIN
+void ui_init_keys() {
+  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(5);
+  UI_KEYS_INIT_BUTTON_LOW(6);
+  UI_KEYS_INIT_BUTTON_LOW(11);
+  UI_KEYS_INIT_BUTTON_LOW(42);
+
+#if FEATURE_EXTENDED_BUTTONS
+  UI_KEYS_INIT_BUTTON_LOW(80);	// PINJ.2, 80, X12.1 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(81);	// PINJ.4, 81, X12.2 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(82);	// PINJ.5, 82, X12.3 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(83);	// PINJ.6, 83, X12.4 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(85);	// PINH.7, 85, X12.6 - push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(86);	// PINH.2, 86, X12.7 - push button, connects gnd to pin
+#endif // FEATURE_EXTENDED_BUTTONS
+
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(42,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(6,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+
+#if FEATURE_EXTENDED_BUTTONS
+ UI_KEYS_BUTTON_LOW(80,UI_ACTION_RF1000_HEAT_BED_UP);		// PINJ.2, 80, X12.1 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(81,UI_ACTION_RF1000_HEAT_BED_DOWN);		// PINJ.4, 81, X12.2 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(82,UI_ACTION_RF1000_EXTRUDER_RETRACT);	// PINJ.5, 82, X12.3 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(83,UI_ACTION_RF1000_EXTRUDER_OUTPUT);	// PINJ.6, 83, X12.4 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(85,UI_ACTION_RF1000_CONTINUE);			// PINH.7, 85, X12.6 - push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(86,UI_ACTION_RF1000_PAUSE);				// PINH.2, 86, X12.7 - push button, connects gnd to pin
+#endif // FEATURE_EXTENDED_BUTTONS
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 13
 
 
 #if FEATURE_CONTROLLER==5 // Viki Lcd
@@ -917,6 +998,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif
 
+
 #if FEATURE_CONTROLLER==12 // FELIXPrinters Controller
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
@@ -1016,8 +1098,6 @@ void ui_check_slow_keys(int &action) {}
 #include "uilang.h"
 #include "uimenu.h"
 #endif
-
-#define UI_VERSION_STRING "Repetier " REPETIER_VERSION
 
 #ifdef UI_HAS_I2C_KEYS
 #define COMPILE_I2C_DRIVER

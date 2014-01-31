@@ -122,10 +122,18 @@ void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float fe
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 {
-    Printer::unsetAllSteppersDisabled();
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+	Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
     uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, 0);
     PrintLine *p = getNextWriteLine();
+
+#if FEATURE_Z_COMPENSATION
+    p->task = 0;
+#endif // FEATURE_Z_COMPENSATION
 
     float axis_diff[4]; // Axis movement in mm
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
@@ -235,7 +243,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     if(isXMove())
     {
         axisInterval[X_AXIS] = fabs(axis_diff[X_AXIS]) * F_CPU / (Printer::maxFeedrate[X_AXIS] * stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
-        limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
+		limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
     }
     else axisInterval[X_AXIS] = 0;
     if(isYMove())
@@ -415,7 +423,7 @@ is never exceeded. If a segment with reached maximum speed is met, the planner s
 is already optimal from previous updates.
 The first 2 entries in the queue are not checked. The first is the one that is already in print and the following will likely become active.
 
-The method is called before lines_count is increased!
+The method is called before linesCount is increased!
 */
 void PrintLine::updateTrapezoids()
 {
@@ -461,7 +469,7 @@ void PrintLine::updateTrapezoids()
 #if DRIVE_SYSTEM != 3
     // filters z-move<->not z-move
     if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
-    {
+	{
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
@@ -635,7 +643,7 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
 
         // Avoid speed calcs if we know we can accelerate within the line
         lastJunctionSpeed = (act->isNominalMove() ? act->fullSpeed : sqrt(lastJunctionSpeed*lastJunctionSpeed+act->accelerationDistance2)); // acceleration is acceleration*distance*2! What can be reached if we try?
-        // If that speed is more that the maximum junction speed allowed then ...
+		// If that speed is more that the maximum junction speed allowed then ...
         if(lastJunctionSpeed >= previous->maxJunctionSpeed)   // Limit is reached
         {
             // If the previous line's end speed has not been updated to maximum speed then do it now
@@ -691,10 +699,11 @@ void PrintLine::forwardPlanner(uint8_t first)
             continue;
         }
 #endif
+        float vmaxRight;
         // Avoid speed calcs if we know we can accelerate within the line.
         vmaxRight = (act->isNominalMove() ? act->fullSpeed : sqrt(leftSpeed * leftSpeed + act->accelerationDistance2));
         if(vmaxRight > act->endSpeed)   // Could be higher next run?
-        {
+		{
             if(leftSpeed < act->minSpeed) {
                 leftSpeed = act->minSpeed;
                 act->endSpeed = sqrt(leftSpeed * leftSpeed + act->accelerationDistance2);
@@ -722,7 +731,7 @@ void PrintLine::forwardPlanner(uint8_t first)
             next->setStartSpeedFixed(true);
         }
     } // While
-    next->startSpeed = RMath::max(next->minSpeed,leftSpeed); // This is the new segment, which is updated anyway, no extra flag needed.
+    next->startSpeed = RMath::max(next->minSpeed,leftSpeed); // This is the new segment, wgich is updated anyway, no extra flag needed.
 }
 
 
@@ -802,7 +811,11 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 {
     while(linesCount+b>MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
-        GCode::readFromSerial();
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		GCode::readFromSerial();
         Commands::checkForPeriodicalActions();
     }
 }
@@ -947,7 +960,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             dir = 0;
             Printer::stepsRemainingAtZHit = cur->stepsRemaining;
             cur->stepsRemaining = 0;
-            return;
+			return;
         }
 #endif
 #if DRIVE_SYSTEM==3
@@ -1232,13 +1245,13 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
 // I'm guessing I need the floats to prevent overflow. This is pretty horrible.
 // The NaN checking in the delta calculation routine should be enough
 //float a = difference[0] * difference[0] + difference[1] * difference[1];
-//float b = 2 * (difference[0] * printer_state.currentPositionSteps[0] + difference[1] * printer_state.currentPositionSteps[1]);
-//float c = printer_state.currentPositionSteps[0] * printer_state.currentPositionSteps[0] + printer_state.currentPositionSteps[1] * printer_state.currentPositionSteps[1] - r * r;
+//float b = 2 * (difference[0] * Printer::currentPositionSteps[0] + difference[1] * Printer::currentPositionSteps[1]);
+//float c = Printer::currentPositionSteps[0] * Printer::currentPositionSteps[0] + Printer::currentPositionSteps[1] * Printer::currentPositionSteps[1] - r * r;
 //float disc = b * b - 4 * a * c;
 //if (disc >= 0) {
 //    float t = (-b + (float)sqrt(disc)) / (2 * a);
-//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[0] + difference[0] * t;
-//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[1] + difference[1] * t;
+//    Printer::destinationSteps[0] = (long) Printer::currentPositionSteps[0] + difference[0] * t;
+//    Printer::destinationSteps[1] = (long) Printer::currentPositionSteps[1] + difference[1] * t;
 // }
 #endif
 
@@ -1265,8 +1278,7 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
 #ifdef DEBUG_SPLIT
         Com::printFLN(Com::tDBGDeltaSeconds, seconds);
 #endif
-        segmentCount = RMath::max(1, int(float((cartesianDir & 136)==136 ? EEPROM::deltaSegmentsPerSecondPrint() : EEPROM::deltaSegmentsPerSecondMove()) * seconds));
-        //Com::printFLN(PSTR("Segments:"),segmentCount);
+        segment_count = RMath::max(1, int(float((cartesianDir & 136)==136 ? EEPROM::deltaSegmentsPerSecondPrint() : EEPROM::deltaSegmentsPerSecondMove()) * seconds));
     }
     else
     {
@@ -1879,21 +1891,240 @@ int lastblk=-1;
 long cur_errupd;
 long PrintLine::bresenhamStep() // version for cartesian printer
 {
+	long	Temp;
+
+
 #if CPU_ARCH==ARCH_ARM
     if(!PrintLine::nlFlag)
 #else
     if(cur == NULL)
 #endif
     {
+#if FEATURE_PAUSE_PRINTING
+        if( g_pausePrint )
+        {
+            // the printing is paused, there is nothing to do here at the moment
+            g_printingPaused = 1;
+            g_nDirectionX	 = 0;
+            g_nDirectionY	 = 0;
+            g_nDirectionZ	 = 0;
+            g_nDirectionE	 = 0;
+            return 1000;
+        }
+        else
+        {
+            if( g_printingPaused )
+            {
+                if( (Printer::targetPositionStepsX == Printer::currentPositionStepsX) &&
+                    (Printer::targetPositionStepsY == Printer::currentPositionStepsY) &&
+                    (Printer::targetPositionStepsZ == Printer::currentPositionStepsZ) &&
+                    (Printer::targetPositionStepsE == Printer::currentPositionStepsE) )
+                {
+                    // we can leave the print pause only after we have reached the pause position
+                    g_printingPaused = 0;
+                }
+            }
+        }
+#endif // FEATURE_PAUSE_PRINTING
+
         ANALYZER_ON(ANALYZER_CH0);
         setCurrentLine();
-        if(cur->isBlocked())   // This step is in computation - shouldn't happen
+
+#if FEATURE_PAUSE_PRINTING
+        if( cur->task )
+        {
+            if( cur->task == TASK_PAUSE_PRINT_1 )
+            {
+                // the printing shall be paused without moving of the printer head
+                if( linesCount )
+                {
+                    g_pausePrint = 1;
+
+                    g_nContinueStepsX		 = 0;
+                    g_nContinueStepsY		 = 0;
+                    g_nContinueStepsZ		 = 0;
+					g_nContinueStepsExtruder = 0;
+
+                    if( g_nPauseStepsExtruder )
+                    {
+                        Printer::targetPositionStepsE += g_nPauseStepsExtruder;
+						g_nContinueStepsExtruder	  =  g_nPauseStepsExtruder;
+                    }
+                }
+                
+                nextPlannerIndex(linesPos);
+                cur = 0;
+                HAL::forbidInterrupts();
+                --linesCount;
+                return 1000;
+            }
+            if( cur->task == TASK_PAUSE_PRINT_2 )
+            {
+                // the printing shall be paused and the printer head shall be moved away
+                if( linesCount )
+                {
+                    g_pausePrint = 1;
+
+                    g_nContinueStepsX		 = 0;
+                    g_nContinueStepsY		 = 0;
+                    g_nContinueStepsZ		 = 0;
+					g_nContinueStepsExtruder = 0;
+
+                    if( g_nPauseStepsExtruder )
+                    {
+                        Printer::targetPositionStepsE += g_nPauseStepsExtruder;
+						g_nContinueStepsExtruder	  =  g_nPauseStepsExtruder;
+                    }
+                    if( g_nPauseStepsZ )
+                    {
+						Temp = g_nPauseStepsZ;
+
+#if FEATURE_Z_COMPENSATION
+						Temp += Printer::nonCompensatedPositionStepsZ;
+						Temp += Printer::currentCompensationZ;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+						Temp += Printer::targetPositionStepsZ;
+#endif // FEATURE_EXTENDED_BUTTONS
+
+                        if( Temp <= (Z_MAX_LENGTH * ZAXIS_STEPS_PER_MM - ZAXIS_STEPS_PER_MM) )
+                        {
+                            Printer::targetPositionStepsZ += g_nPauseStepsZ;
+                            g_nContinueStepsZ			  =  -g_nPauseStepsZ;
+
+                            CalculateAllowedZStepsAfterEndStop();
+                        }
+                    }
+                    if( g_nPauseStepsX )
+                    {
+						Temp = g_nPauseStepsX;
+
+#if FEATURE_Z_COMPENSATION
+						Temp += Printer::nonCompensatedPositionStepsX;
+#endif // FEATURE_Z_COMPENSATION
+
+                        if( g_nPauseStepsX < 0 &&
+                            (Temp < (XAXIS_STEPS_PER_MM *5)) )
+                        {
+                            // do not allow to drive the heat bed into the left border
+                        }
+                        else if( g_nPauseStepsX > 0 &&
+                                (Temp > (X_MAX_LENGTH * XAXIS_STEPS_PER_MM - XAXIS_STEPS_PER_MM *5)) )
+                        {
+                            // do not allow to drive the heat bed into the right border
+                        }
+                        else
+                        {
+                            Printer::targetPositionStepsX += g_nPauseStepsX;
+                            g_nContinueStepsX			  =  -g_nPauseStepsX;
+                        }
+                    }
+                    if( g_nPauseStepsY )
+                    {
+						Temp = g_nPauseStepsY;
+
+#if FEATURE_Z_COMPENSATION
+						Temp += Printer::nonCompensatedPositionStepsY;
+#endif // FEATURE_Z_COMPENSATION
+
+                        if( g_nPauseStepsY < 0 &&
+                            (Temp < (YAXIS_STEPS_PER_MM *5)) )
+                        {
+                            // do not allow to drive the heat bed into the front border
+                        }
+                        else if( g_nPauseStepsY > 0 &&
+                                 (Temp > (Y_MAX_LENGTH * YAXIS_STEPS_PER_MM - YAXIS_STEPS_PER_MM *5)) )
+                        {
+                            // do not allow to drive the heat bed into the back border
+                        }
+                        else
+                        {
+                            Printer::targetPositionStepsY += g_nPauseStepsY;
+                            g_nContinueStepsY			  =  -g_nPauseStepsY;
+                        }
+                    }
+                }
+                
+                nextPlannerIndex(linesPos);
+                cur = 0;
+                HAL::forbidInterrupts();
+                --linesCount;
+                return 1000;
+            }
+        }
+#endif // FEATURE_PAUSE_PRINTING
+
+#if FEATURE_Z_COMPENSATION
+	if( cur->task )
+	{
+		if( cur->task == TASK_ENABLE_Z_COMPENSATION )
+		{
+			// enable the z compensation
+			if( g_HeatBedCompensation[0][0] == COMPENSATION_VERSION )
+			{
+				// enable the z compensation only in case we have valid compensation values
+				Printer::doZCompensation	  = 1;
+				Printer::targetCompensationZ  = 0;
+				Printer::currentCompensationZ = 0;
+				g_recalculatedCompensation	  = 0;
+				
+				Printer::targetPositionStepsX	= 
+				Printer::targetPositionStepsY	= 
+				Printer::targetPositionStepsZ	= 
+				Printer::targetPositionStepsE	= 
+				Printer::currentPositionStepsX	= 
+				Printer::currentPositionStepsY	= 
+				Printer::currentPositionStepsZ	= 
+				Printer::currentPositionStepsE	= 0;
+
+				CalculateAllowedZStepsAfterEndStop();
+			}
+			
+			nextPlannerIndex(linesPos);
+			cur = 0;
+			HAL::forbidInterrupts();
+			--linesCount;
+			return 1000;
+		}
+		if( cur->task == TASK_DISABLE_Z_COMPENSATION )
+		{
+			// disable the z compensation
+			Printer::doZCompensation = 0;
+			
+			nextPlannerIndex(linesPos);
+			cur = 0;
+			HAL::forbidInterrupts();
+			--linesCount;
+			return 1000;
+		}
+		if( cur->task == TASK_INIT_Z_COMPENSATION )
+		{
+			// initialize the z compensation
+			if( g_HeatBedCompensation[0][0] == COMPENSATION_VERSION )
+			{
+				// initialize the z compensation only in case we have valid compensation values
+				Printer::targetCompensationZ  = 0;
+				Printer::currentCompensationZ = 0;
+				g_recalculatedCompensation	  = 0;
+			}
+			
+			nextPlannerIndex(linesPos);
+			cur = 0;
+			HAL::forbidInterrupts();
+			--linesCount;
+			return 1000;
+		}
+	}
+#endif // FEATURE_Z_COMPENSATION
+
+		if(cur->isBlocked())   // This step is in computation - shouldn't happen
         {
             /*if(lastblk!=(int)cur) // can cause output errors!
             {
                 HAL::allowInterrupts();
                 lastblk = (int)cur;
-                Com::printFLN(Com::tBLK,lines_count);
+                Com::printFLN(Com::tBLK,linesCount);
             }*/
             cur = NULL;
 #if CPU_ARCH==ARCH_ARM
@@ -2031,6 +2262,10 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 {
                     cur->startXStep();
                     cur->error[X_AXIS] += cur_errupd;
+
+#if FEATURE_Z_COMPENSATION
+                    Printer::nonCompensatedPositionStepsX += g_nDirectionX;
+#endif // FEATURE_Z_COMPENSATION
                 }
             }
             if(cur->isYMove())
@@ -2039,6 +2274,10 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 {
                     cur->startYStep();
                     cur->error[Y_AXIS] += cur_errupd;
+                
+#if FEATURE_Z_COMPENSATION
+                    Printer::nonCompensatedPositionStepsY += g_nDirectionY;
+#endif // FEATURE_Z_COMPENSATION
                 }
             }
 #if defined(XY_GANTRY)
@@ -2054,7 +2293,33 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #ifdef DEBUG_STEPCOUNT
                     cur->totalStepsRemaining--;
 #endif
-                }
+
+#if FEATURE_Z_COMPENSATION
+					Printer::nonCompensatedPositionStepsZ += g_nDirectionZ;
+#endif // FEATURE_Z_COMPENSATION
+
+					if( g_nDirectionZ < 0 )
+					{
+#if Z_MIN_PIN>-1
+					  if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING)
+#endif // Z_MIN_PIN>-1
+					  {
+						// we are moving after the endstop in z-direction - this can be dangerous but it can be necessary in case of
+						// a) a very rough surface of the heating bed and/or
+						// b) in case the user is moving into the z-direction manually
+						Printer::currentZStepsAfterEndstop ++;
+						if( Printer::allowedZStepsAfterEndstop <= Printer::currentZStepsAfterEndstop )
+						{
+						  // we have reached the endstop and shall not continue to move the heating bed upwards
+						  cur->dir&=~64;
+						}
+					  }
+					}
+					else if( Printer::currentZStepsAfterEndstop )
+					{
+					  Printer::currentZStepsAfterEndstop --;
+					}
+				}
             }
             Printer::insertStepperHighDelay();
 #if defined(USE_ADVANCE)
@@ -2063,7 +2328,28 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 Extruder::unstep();
             Printer::endXYZSteps();
         } // for loop
-        if(doOdd)  // Update timings
+
+		if( !(cur->dir & 128) )
+		{
+			g_nDirectionE = 0;
+		}
+
+		if( !(cur->dir & 16) )
+		{
+			g_nDirectionX = 0;
+		}
+
+		if( !(cur->dir & 32) )
+		{
+			g_nDirectionY = 0;
+		}
+
+		if( !(cur->dir & 64) )
+		{
+			g_nDirectionZ = 0;
+		}
+
+		if(doOdd)  // Update timings
         {
             HAL::allowInterrupts(); // Allow interrupts for other types, timer1 is still disabled
 #ifdef RAMP_ACCELERATION
@@ -2146,7 +2432,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        if(linesCount == 0 && !g_nHeatBedScanStatus) UI_STATUS(UI_TEXT_IDLE);
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

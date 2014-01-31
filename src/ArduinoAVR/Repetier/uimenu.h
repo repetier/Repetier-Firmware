@@ -107,8 +107,10 @@ List of placeholder:
 %Xf : Extruder max. start feedrate
 %XF : Extruder max. feedrate
 %XA : Extruder max. acceleration
-*/
 
+// RF1000 specific:
+%s1 : current value of the strain gauge
+*/
 
 // Define precision for temperatures. With small displays only integer values fit.
 #ifndef UI_TEMP_PRECISION
@@ -168,8 +170,11 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 #elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
-   UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2","Mul:%om Buf:%oB","%os");
-   //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
+  #if UI_COLS<=16
+     UI_PAGE4(ui_page1,"\005%ec/%EcB%eB/%Eb","Z:%x2 mm",UI_TEXT_STRAIN_GAUGE,"%os");
+  #else
+     UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2 mm",UI_TEXT_STRAIN_GAUGE,"%os");
+  #endif // UI_COLS<=16
  #else
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
  #endif
@@ -301,8 +306,9 @@ UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,2+3*UI_SPEED+UI_MENU_BACKCNT);
 
 // **** Delta calibration menu
 #ifdef Z_HOME_DIR < 0
-UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);
-#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z,&ui_menu_set_measured_origin}
+//UI_MENU_ACTIONCOMMAND(ui_menu_set_measured_origin,UI_TEXT_SET_MEASURED_ORIGIN,UI_ACTION_SET_MEASURED_ORIGIN);	// this menu item does not make sense when you don't have a max Z endstop
+UI_MENU_ACTIONCOMMAND(ui_menu_heat_bed_scan,UI_TEXT_DO_HEAT_BED_SCAN,UI_ACTION_RF1000_DO_HEAT_BED_SCAN);
+#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z,&ui_menu_heat_bed_scan}
 UI_MENU(ui_menu_delta,UI_MENU_DELTA,2+UI_SPEED+UI_MENU_BACKCNT);
 #endif
 
@@ -377,6 +383,34 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_origin,UI_TEXT_SET_TO_ORIGIN,UI_ACTION_SET_O
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_stopstepper,UI_TEXT_DISABLE_STEPPER,UI_ACTION_DISABLE_STEPPER);
 UI_MENU_CHANGEACTION(ui_menu_quick_speedmultiply,UI_TEXT_SPEED_MULTIPLY,UI_ACTION_FEEDRATE_MULTIPLY);
 UI_MENU_CHANGEACTION(ui_menu_quick_flowmultiply,UI_TEXT_FLOW_MULTIPLY,UI_ACTION_FLOWRATE_MULTIPLY);
+
+#if FEATURE_OUTPUT_PRINTED_OBJECT
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_output_object,UI_TEXT_OUTPUT_OBJECT,UI_ACTION_RF1000_OUTPUT_OBJECT);
+#define OUTPUT_OBJECT_COUNT 1
+#define OUTPUT_OBJECT_ENTRY ,&ui_menu_quick_output_object
+#else
+#define OUTPUT_OBJECT_COUNT 0
+#define OUTPUT_OBJECT_ENTRY 
+#endif // FEATURE_OUTPUT_PRINTED_OBJECT
+
+#if FEATURE_PARK
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_park,UI_TEXT_PARK,UI_ACTION_RF1000_PARK);
+#define PARK_COUNT 1
+#define PARK_ENTRY ,&ui_menu_quick_park
+#else
+#define PARK_COUNT 0
+#define PARK_ENTRY 
+#endif // FEATURE_PARK
+
+#if FEATURE_RESET_VIA_MENU
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_reset,UI_TEXT_RESET,UI_ACTION_RF1000_RESET);
+#define RESET_VIA_MENU_COUNT 1
+#define RESET_VIA_MENU_ENTRY,&ui_menu_quick_reset
+#else
+#define RESET_VIA_MENU_COUNT 0
+#define RESET_VIA_MENU_ENTRY 
+#endif // FEATURE_RESET_VIA_MENU
+
 #ifdef DEBUG_PRINT
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
 #define DEBUG_PRINT_COUNT 1
@@ -385,8 +419,9 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG);
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT);
+
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper OUTPUT_OBJECT_ENTRY PARK_ENTRY RESET_VIA_MENU_ENTRY MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT+OUTPUT_OBJECT_COUNT+PARK_COUNT+RESET_VIA_MENU_COUNT);
 
 // **** Fan menu
 

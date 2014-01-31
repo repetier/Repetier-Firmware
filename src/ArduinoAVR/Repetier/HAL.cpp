@@ -340,8 +340,6 @@ void HAL::analogStart()
 #error "This library requires AVR-GCC 3.4 or later, update to newer AVR-GCC compiler !"
 #endif
 
-#include <avr/io.h>
-
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
@@ -716,6 +714,24 @@ This timer is called 3906 timer per second. It is used to update pwm values for 
 */
 ISR(PWM_TIMER_VECTOR)
 {
+#if FEATURE_Z_COMPENSATION
+	short			i;
+	short			nXLeft;
+	short			nXRight;
+	short			nYFront;
+	short			nYBack;
+	long			nTemp;
+	static char		nCounterZCompensation	= Z_COMPENSATION_COUNTER;
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+	static char		nCounterExtendedButtons = EXTENDED_BUTTONS_COUNTER_NORMAL;
+	char			bDone;
+	char			nDirectionX;
+	char			nDirectionY;
+	char			nDirectionZ;
+#endif // FEATURE_EXTENDED_BUTTONS
+  
     static uint8_t pwm_count = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
@@ -860,13 +876,342 @@ ISR(PWM_TIMER_VECTOR)
 
     UI_FAST; // Short timed user interface action
     pwm_count++;
+
+
+#if FEATURE_Z_COMPENSATION
+	nCounterZCompensation --;
+
+	if( !nCounterZCompensation )
+	{
+		nCounterZCompensation = Z_COMPENSATION_COUNTER;
+
+		if( Printer::doZCompensation && !g_printingPaused )
+		{
+			// the z-compensation must be on and the printing must not be paused
+			if( Printer::nonCompensatedPositionStepsZ )								// we do not perform a compensation in case z is 0
+			{
+				// check whether we have to perform a compensation in z-direction
+				if( Printer::nonCompensatedPositionStepsZ < g_maxZCompensationSteps )
+				{
+					// we are doing the first rows at the moment - check which compensation is necessary
+					if( Printer::nonCompensatedPositionStepsX < g_minX ||
+						Printer::nonCompensatedPositionStepsX > g_maxX ||
+						Printer::nonCompensatedPositionStepsY < g_minY ||
+						Printer::nonCompensatedPositionStepsY > g_maxY )
+					{
+						// we went outside the last used compensation rectangle - we have to find the new compensation value
+						g_recalculatedCompensation ++;
+					
+						// find the rectangle first which covers the current position of the extruder
+						nXLeft = 1;
+						for( i=1; i<g_uHeatBedMaxX; i++ )
+						{
+							if( Printer::nonCompensatedPositionStepsX <= g_HeatBedCompensation[i][0] )
+							{
+								nXRight = i;
+								break;
+							}
+							nXLeft = i;
+						}
+					
+						nYFront = 1;
+						for( i=1; i<g_uHeatBedMaxY; i++ )
+						{
+							if( Printer::nonCompensatedPositionStepsY <= g_HeatBedCompensation[0][i] )
+							{
+								nYBack = i;
+								break;
+							}
+							nYFront = i;
+						}
+
+						// remember where we are
+						g_minX = g_HeatBedCompensation[nXLeft][0];
+						g_maxX = g_HeatBedCompensation[nXRight][0];
+						g_minY = g_HeatBedCompensation[0][nYFront];
+						g_maxY = g_HeatBedCompensation[0][nYBack];
+					
+						if( Printer::nonCompensatedPositionStepsZ <= g_noZCompensationSteps )
+						{
+							// the printer is very close to the surface - we shall print a layer of exactly the desired thickness
+							Printer::targetCompensationZ = g_HeatBedCompensation[nXLeft][nYFront] + g_manualCompensationSteps;
+						}
+						else
+						{
+							// the printer is already a bit away from the surface - do the actual compensation
+							// determine the current, non-compensated z position without the no-compensation range
+							nTemp  = Printer::nonCompensatedPositionStepsZ - g_noZCompensationSteps;
+							nTemp  = 128 - (128 * nTemp / g_diffZCompensationSteps);
+							nTemp *= (g_HeatBedCompensation[nXLeft][nYFront] - g_offsetHeatBedCompensation);
+							nTemp >>= 8;
+							nTemp += g_offsetHeatBedCompensation;
+						
+							Printer::targetCompensationZ = nTemp + g_manualCompensationSteps;
+						}
+					}
+				}
+				else
+				{	
+					// after the first layers, only the static offset to the surface must be compensated
+					Printer::targetCompensationZ = g_offsetHeatBedCompensation + g_manualCompensationSteps;
+				}
+			}
+
+			if( g_nDirectionZ == 0 )
+			{
+				// this interrupt shall move the z-axis only in case the "main" interrupt (bresenham_step()) is not running at the moment
+				HAL::forbidInterrupts();
+				if( Printer::currentCompensationZ < Printer::targetCompensationZ )
+				{
+					// we must move the heat bed up
+					WRITE( Z_DIR_PIN, !INVERT_Z_DIR );
+					HAL::delayMicroseconds( 1 );
+					WRITE( Z_STEP_PIN, HIGH );
+
+#if STEPPER_HIGH_DELAY>0
+					HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
+#endif
+					WRITE( Z_STEP_PIN, LOW );
+				
+					Printer::currentCompensationZ ++;
+				}
+				else if( Printer::currentCompensationZ > Printer::targetCompensationZ )
+				{
+					// we must move the heat bed down
+					WRITE( Z_DIR_PIN, INVERT_Z_DIR );
+					HAL::delayMicroseconds( 1 );
+					WRITE( Z_STEP_PIN, HIGH );
+
+#if STEPPER_HIGH_DELAY>0
+					HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
+#endif
+					WRITE( Z_STEP_PIN, LOW );
+				
+					Printer::currentCompensationZ --;
+				}
+				HAL::allowInterrupts();
+			}
+		}
+	}
+#endif // FEATURE_Z_COMPENSATION
+
+#if FEATURE_EXTENDED_BUTTONS
+	nCounterExtendedButtons --;
+	
+	if( !nCounterExtendedButtons )
+	{
+		HAL::forbidInterrupts();
+		nCounterExtendedButtons = EXTENDED_BUTTONS_COUNTER_NORMAL;
+		bDone					= false;
+		
+		if( Printer::currentPositionStepsE < Printer::targetPositionStepsE )
+		{
+			if( g_nDirectionE <= 0 )
+			{
+				// this interrupt shall move the extruder only in case the "main" interrupt (bresenham_step()) is not running at the moment
+				
+				// we must retract filament
+				if( g_nDirectionE == 0 )
+				{
+					// set the direction only in case it is not set already
+					Extruder::setDirection( false );
+					HAL::delayMicroseconds( 1 );
+				}
+				Extruder::step();
+
+#if STEPPER_HIGH_DELAY>0
+				HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
+#endif
+				Extruder::unstep();
+				
+				Printer::currentPositionStepsE ++;
+
+				if( g_printingPaused )
+				{
+					// we move faster while the printing is paused
+					nCounterExtendedButtons = EXTENDED_BUTTONS_COUNTER_FAST;
+				}
+
+				if( Printer::currentPositionStepsE == Printer::targetPositionStepsE )
+				{
+					// we have reached the target position
+					g_nDirectionE = 0;
+				}
+			}
+
+			bDone = true;
+		}
+		
+		if( !bDone )
+		{
+			nDirectionX = 0;
+			nDirectionY = 0;
+			nDirectionZ = 0;
+
+			if( Printer::currentPositionStepsX != Printer::targetPositionStepsX )
+			{
+				// we have to move into x-direction
+				if( Printer::currentPositionStepsX < Printer::targetPositionStepsX )
+				{
+					if( g_nDirectionX >= 0 )
+					{
+						// move the extruder to the right
+						WRITE(X_DIR_PIN,!INVERT_X_DIR);
+						nDirectionX = 1;
+						bDone		= true;
+					}
+				}
+				else
+				{
+					if( g_nDirectionX <= 0 )
+					{
+						// move the extruder to the left
+						WRITE(X_DIR_PIN,INVERT_X_DIR);
+						nDirectionX = -1;
+						bDone		= true;
+					}
+				}
+			}
+
+			if( Printer::currentPositionStepsY != Printer::targetPositionStepsY )
+			{
+				// we have to move into y-direction
+				if( Printer::currentPositionStepsY < Printer::targetPositionStepsY )
+				{
+					if( g_nDirectionY >= 0 )
+					{
+						// move the heat bed to the front
+						WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+						nDirectionY = 1;
+						bDone		= true;
+					}
+				}
+				else
+				{
+					if( g_nDirectionY <= 0 )
+					{
+						// move the heat bed to the back
+						WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+						nDirectionY = -1;
+						bDone		= true;
+					}
+				}
+			}
+
+			if( Printer::currentPositionStepsZ != Printer::targetPositionStepsZ )
+			{
+				// we have to move into z-direction
+				if( Printer::currentPositionStepsZ < Printer::targetPositionStepsZ )
+				{
+					if( g_nDirectionZ >= 0 )
+					{
+						// move the heat bed to the bottom
+						WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+						nDirectionZ = 1;
+						bDone		= true;
+					}
+				}
+				else
+				{
+					if( g_nDirectionZ <= 0 )
+					{
+						// move the heat bed to the top
+						WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+						nDirectionZ = -1;
+						bDone		= true;
+					}
+				}
+			}
+
+			while( nDirectionX || nDirectionY || nDirectionZ )
+			{
+#if FEATURE_WATCHDOG
+				HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+				HAL::delayMicroseconds( 250 );
+
+				if( nDirectionX )	WRITE( X_STEP_PIN, HIGH );
+				if( nDirectionY )	WRITE( Y_STEP_PIN, HIGH );
+				if( nDirectionZ )	WRITE( Z_STEP_PIN, HIGH );
+
+				HAL::delayMicroseconds( 250 );
+
+				if( nDirectionX )
+				{
+					WRITE( X_STEP_PIN, LOW );
+					Printer::currentPositionStepsX += nDirectionX;
+					if( Printer::currentPositionStepsX == Printer::targetPositionStepsX )
+					{
+						// we have finished to move in x-direction
+						nDirectionX = 0;
+					}
+				}
+				if( nDirectionY )
+				{
+					WRITE( Y_STEP_PIN, LOW );
+					Printer::currentPositionStepsY += nDirectionY;
+					if( Printer::currentPositionStepsY == Printer::targetPositionStepsY )
+					{
+						// we have finished to move in y-direction
+						nDirectionY = 0;
+					}
+				}
+				if( nDirectionZ )
+				{
+					WRITE( Z_STEP_PIN, LOW );
+					Printer::currentPositionStepsZ += nDirectionZ;
+					if( Printer::currentPositionStepsZ == Printer::targetPositionStepsZ )
+					{
+						// we have finished to move in z-direction
+						nDirectionZ = 0;
+					}
+				}
+			}
+		}
+		
+		if( !bDone )
+		{
+			if( Printer::currentPositionStepsE > Printer::targetPositionStepsE )
+			{
+				if( g_nDirectionE >= 0 )
+				{
+					// this interrupt shall move the extruder only in case the "main" interrupt (bresenham_step()) is not running at the moment
+				
+					// we must output filament
+					if( g_nDirectionE == 0 )
+					{
+						// set the direction only in case it is not set already
+						Extruder::setDirection( true );
+						HAL::delayMicroseconds( 1 );
+					}
+					Extruder::step();
+
+#if STEPPER_HIGH_DELAY>0
+					HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
+#endif
+					Extruder::unstep();
+				
+					Printer::currentPositionStepsE --;
+
+					if( Printer::currentPositionStepsE == Printer::targetPositionStepsE )
+					{
+						// we have reached the target position
+						g_nDirectionE = 0;
+					}
+				}
+			}
+		}
+		HAL::allowInterrupts();
+	}
+#endif // FEATURE_EXTENDED_BUTTONS
 }
 #if defined(USE_ADVANCE)
 
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optima result,
-all methods update the printer_state.extruderStepsNeeded with the
+all methods update the Printer::extruderStepsNeeded with the
 number of additional steps needed. During this interrupt, one step
 is executed. This will keep the extruder moving, until the total
 wanted movement is achieved. This will be done with the maximum

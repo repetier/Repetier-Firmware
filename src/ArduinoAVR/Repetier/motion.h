@@ -215,6 +215,11 @@ private:
 #ifdef DEBUG_STEPCOUNT
     long totalStepsRemaining;
 #endif
+
+#ifdef FEATURE_Z_COMPENSATION
+	char task;
+#endif // FEATURE_Z_COMPENSATION
+
 public:
     long stepsRemaining;            ///< Remaining steps, until move is finished
     static PrintLine *cur;
@@ -646,6 +651,21 @@ public:
     {
         p = (p==MOVE_CACHE_SIZE-1?0:p+1);
     }
+	static inline void queueTask( char task )
+	{
+		PrintLine*	p;
+
+
+		p = getNextWriteLine();
+		p->task = task;
+  
+		nextPlannerIndex( linesWritePos );
+		BEGIN_INTERRUPT_PROTECTED
+		linesCount++;
+		END_INTERRUPT_PROTECTED
+		return;
+	}
+
 #if NONLINEAR_SYSTEM
     static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
