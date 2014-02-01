@@ -149,6 +149,14 @@ typedef char prog_char;
 #define LOW         0
 #define HIGH        1
 
+#ifdef HEATER_PINS_INVERTED  
+#define HEATER_ON(pin)  WRITE(pin,0)
+#define HEATER_OFF(pin)  WRITE(pin,1)
+#else
+#define HEATER_ON(pin)  WRITE(pin,1)
+#define HEATER_OFF(pin)  WRITE(pin,0)
+#endif
+
 #define BEGIN_INTERRUPT_PROTECTED noInterrupts();
 #define END_INTERRUPT_PROTECTED interrupts();
 #define ESCAPE_INTERRUPT_PROTECTED  interrupts();

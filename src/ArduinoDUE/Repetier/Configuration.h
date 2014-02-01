@@ -50,9 +50,10 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // Arduino Due                = 401 // This is only experimental
-// Arduino Due with RADDS     = 402
+// Arduino Due with RADDS     = 402 
+// Arduino Due for RAMPS-fd   = 403
 
-#define MOTHERBOARD 402
+#define MOTHERBOARD 403
 
 #include "pins.h"
 
@@ -96,7 +97,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
       /** \brief Pitch in mm of drive belt. GT2 = 2mm */
       #define BELT_PITCH 2
       /** \brief Number of teeth on X, Y and Z tower pulleys */
-      #define PULLEY_TEETH 20
+      #define PULLEY_TEETH 40
       #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
     #elif DELTA_DRIVE_TYPE == 1
       /** \brief Filament pulley diameter in milimeters */
@@ -143,7 +144,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 106 //425 // 825.698 //457 
+#define EXT0_STEPS_PER_MM 430 //425 // 825.698 //457 
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -258,7 +259,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_X_OFFSET 0
 #define EXT1_Y_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT1_STEPS_PER_MM 319.8
+#define EXT1_STEPS_PER_MM 430
 // What type of sensor is used?
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
 // 2 is 200k thermistor
@@ -503,7 +504,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED false
+#define HAVE_HEATED_BED true
 
 #define HEATED_BED_MAX_TEMP 120
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -526,7 +527,7 @@ Heat manager for heated bed:
 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life
 3 = dead time control
 */
-#define HEATED_BED_HEAT_MANAGER 1
+#define HEATED_BED_HEAT_MANAGER 0
 /** \brief The maximum value, I-gain can contribute to the output.
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
@@ -566,12 +567,12 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 use a mechanical endstop connected with GND. Set value to false for no pullup
 on this endstop.
 */
-#define ENDSTOP_PULLUP_X_MIN false
-#define ENDSTOP_PULLUP_Y_MIN false
-#define ENDSTOP_PULLUP_Z_MIN false
-#define ENDSTOP_PULLUP_X_MAX false
-#define ENDSTOP_PULLUP_Y_MAX false
-#define ENDSTOP_PULLUP_Z_MAX false
+#define ENDSTOP_PULLUP_X_MIN true
+#define ENDSTOP_PULLUP_Y_MIN true
+#define ENDSTOP_PULLUP_Z_MIN true
+#define ENDSTOP_PULLUP_X_MAX true
+#define ENDSTOP_PULLUP_Y_MAX true
+#define ENDSTOP_PULLUP_Z_MAX true
 
 // Set to true to invert the logic of the endstops
 #define ENDSTOP_X_MIN_INVERTING false
@@ -658,15 +659,15 @@ on this endstop.
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
-#define X_MAX_LENGTH 200
-#define Y_MAX_LENGTH 200
-#define Z_MAX_LENGTH 585.16
+#define X_MAX_LENGTH 70
+#define Y_MAX_LENGTH 70
+#define Z_MAX_LENGTH 183
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
-#define X_MIN_POS 0
-#define Y_MIN_POS 0
-#define Z_MIN_POS 0
+#define X_MIN_POS -70
+#define Y_MIN_POS -70
+#define Z_MIN_POS -70
 
 // ##########################################################################################
 // ##                           Movement settings                                          ##
@@ -691,7 +692,7 @@ on this endstop.
 #if DRIVE_SYSTEM==3
 /** \brief Delta rod length
 */
-#define DELTA_DIAGONAL_ROD 345 // mm
+#define DELTA_DIAGONAL_ROD 186 // mm
 
 
 /*  =========== Parameter essential for delta calibration ===================
@@ -728,11 +729,11 @@ on this endstop.
 
 /** \brief Horizontal offset of the universal joints on the vertical carriages.
 */
-#define CARRIAGE_HORIZONTAL_OFFSET 23
+#define CARRIAGE_HORIZONTAL_OFFSET 13
 
 /** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
-#define PRINTER_RADIUS 265.25
+#define PRINTER_RADIUS 139.0
 
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
@@ -873,7 +874,7 @@ Corner can be printed with full speed of 50 mm/s
 Overridden if EEPROM activated.
 */
 #define MAX_JERK 20.0
-#define MAX_ZJERK 0.3
+#define MAX_ZJERK 20.0
 
 /** \brief Number of moves we can cache in advance.
 
@@ -998,7 +999,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 0
 
 
 /**************** duplicate motor driver ***************
@@ -1088,7 +1089,7 @@ is always running and is not hung up for some unknown reason. */
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT true
+#define SDSUPPORT false
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
@@ -1131,7 +1132,7 @@ The following settings override uiconfig.h!
 10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
 11 = RepRapDiscount Full Graphic Smart Controller
 */
-#define FEATURE_CONTROLLER 7
+#define FEATURE_CONTROLLER 0
 
 /**
 Select the language to use.
@@ -1143,12 +1144,12 @@ Select the language to use.
 5 = Spanish
 6 = Swedish
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_VERSION_STRING2 "Delta Tower"
 #define UI_PRINTER_COMPANY "RepRapDiscount"
-
+#define UI_PRINTER_NAME "Delta Tower"
 
 /** Animate switches between menus etc. */
 #define UI_ANIMATION true
@@ -1209,7 +1210,7 @@ Values must be in range 1..255
 #define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
 #define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
+#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   230
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  55
 #define UI_SET_MAX_HEATED_BED_TEMP 120
