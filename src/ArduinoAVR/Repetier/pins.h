@@ -445,6 +445,74 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 /****************************************************************************************
+* Ultimaker Shield pin assignment v1.5.7
+*
+****************************************************************************************/
+#if MOTHERBOARD == 37
+#define ULTIMAKER_157
+#define KNOWN_BOARD 1
+
+#define X_STEP_PIN 25
+#define X_DIR_PIN 23
+#define X_MIN_PIN 22
+#define X_MAX_PIN 24
+#define X_ENABLE_PIN 27
+
+#define Y_STEP_PIN 31
+#define Y_DIR_PIN 33
+#define Y_MIN_PIN 26
+#define Y_MAX_PIN 28
+#define Y_ENABLE_PIN 29
+
+#define Z_STEP_PIN 37
+#define Z_DIR_PIN 39
+#define Z_MIN_PIN 30
+#define Z_MAX_PIN 32
+#define Z_ENABLE_PIN 35
+
+#define HEATER_1_PIN 4 // bed
+#define TEMP_1_PIN 10
+
+#define HEATER_0_PIN  2 //pwm
+#define TEMP_0_PIN 8 //analog
+
+#define HEATER_2_PIN 3
+#define TEMP_2_PIN 9
+
+#define HEATER_3_PIN -1
+#define TEMP_3_PIN -1
+
+#define E0_STEP_PIN         43
+#define E0_DIR_PIN          45
+#define E0_ENABLE_PIN       41
+#define E0_FAN_PIN           -1
+//  #define EXT1_EXTRUDER_COOLER_PIN E0_FAN_PIN
+
+#define E1_STEP_PIN         49
+#define E1_DIR_PIN          47
+#define E1_ENABLE_PIN       48
+#define E1_FAN_PIN           -1
+//  #define EXT2_EXTRUDER_COOLER_PIN E1_FAN_PIN
+
+#define LED_PIN            13
+#define FAN_PIN            7
+#define PS_ON_PIN          12
+#define KILL_PIN           -1
+#define SUICIDE_PIN        54  //PIN that has to be turned on right after start, to keep power flowing.
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define SDPOWER          -1
+#define SDSS             53
+
+#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+#define E3_PINS E3_STEP_PIN,E3_DIR_PIN,E3_ENABLE_PIN,
+
+#endif
+
+/****************************************************************************************
 * RUMBA pin assignment
 *
 ****************************************************************************************/
@@ -923,7 +991,7 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 
 #if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284P__)
-    #error Oops!  Make sure you have 'Sethi' selected from the 'Tools -> Boards' menu.
+#error Oops!  Make sure you have 'Sethi' selected from the 'Tools -> Boards' menu.
 #endif
 
 //x axis pins
@@ -966,13 +1034,13 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
-    //our pin for debugging.
+//our pin for debugging.
 
-    #define DEBUG_PIN        0
+#define DEBUG_PIN        0
 
-    //our RS485 pins
-    #define TX_ENABLE_PIN	12
-    #define RX_ENABLE_PIN	13
+//our RS485 pins
+#define TX_ENABLE_PIN	12
+#define RX_ENABLE_PIN	13
 
 #define SCK_PIN          7
 #define SDSSORIG         4
@@ -1344,15 +1412,15 @@ STEPPER_CURRENT_CONTROL
 *
 ****************************************************************************************/
 #if MOTHERBOARD == 101
-  #define KNOWN_BOARD 1
+#define KNOWN_BOARD 1
 
 
 //////////////////FIX THIS//////////////
-  #ifndef __AVR_ATmega1280__
-    #ifndef __AVR_ATmega2560__
-     #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
-    #endif
-  #endif
+#ifndef __AVR_ATmega1280__
+#ifndef __AVR_ATmega2560__
+#error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+#endif
+#endif
 
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55

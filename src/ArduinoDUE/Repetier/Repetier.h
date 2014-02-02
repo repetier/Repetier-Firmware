@@ -126,7 +126,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4
+#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4 || DRIVE_SYSTEM==5 || DRIVE_SYSTEM==6
 #define NONLINEAR_SYSTEM true
 #else
 #define NONLINEAR_SYSTEM false

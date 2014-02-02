@@ -543,6 +543,7 @@ public:
     // SPI related functions
     static void spiBegin()
     {
+#if SDSS>=0
         SET_INPUT(MISO_PIN);
         SET_OUTPUT(MOSI_PIN);
         SET_OUTPUT(SCK_PIN);
@@ -555,6 +556,7 @@ public:
 #if SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
+#endif
     }
     static inline void spiInit(uint8_t spiRate)
     {

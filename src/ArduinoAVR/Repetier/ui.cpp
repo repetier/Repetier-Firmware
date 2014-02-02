@@ -2110,10 +2110,10 @@ void UIDisplay::nextPreviousAction(int8_t next)
             d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
         long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[2],true,true);
+        PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true,true);
     }
 #else
-    PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[2],true,true);
+    PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true,true);
 #endif
     Commands::printCurrentPosition();
     break;

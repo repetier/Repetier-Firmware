@@ -43,7 +43,7 @@ void EEPROM::update(GCode *com)
             break;
         }
     uint8_t newcheck = computeChecksum();
-    if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+    if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
     readDataFromEEPROM();
     Extruder::selectExtruderById(Extruder::current->id);

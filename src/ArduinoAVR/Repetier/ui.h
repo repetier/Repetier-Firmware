@@ -839,7 +839,7 @@ void ui_check_slow_keys(int &action) {}
 #define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
 #define BEEPER_LONG_SEQUENCE 24,8
 #define BEEPER_TYPE 1
-#define BEEPER_TYPE_INVERTING true
+#define BEEPER_TYPE_INVERTING false
 
 #if FEATURE_CONTROLLER==9   // 16x02 Display
  #define UI_COLS 16

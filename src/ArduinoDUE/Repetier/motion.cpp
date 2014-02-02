@@ -1671,11 +1671,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         for(uint8_t loop = 0; loop<maxLoops; loop++)
         {
             if(loop>0)
-#if STEPPER_HIGH_DELAY>0
                 HAL::delayMicroseconds(STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY);
-#else
-                HAL::delayMicroseconds(DOUBLE_STEP_DELAY);
-#endif
             if(cur->isEMove())
             {
                 if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0)

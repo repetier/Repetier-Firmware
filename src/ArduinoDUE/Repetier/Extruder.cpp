@@ -606,6 +606,7 @@ void TemperatureController::updateCurrentTemperature()
 #ifdef SUPPORT_MAX31855
     case 102: // MAX31855
         currentTemperature = read_max31855(sensorPin);
+        break;
 #endif
     default:
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety

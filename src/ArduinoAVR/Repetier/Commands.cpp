@@ -604,10 +604,10 @@ void Commands::executeGCode(GCode *com)
             Com::printFLN(Com::tZProbeAverage,sum);
             if(com->hasS() && com->S)
             {
-                Printer::currentPositionSteps[2] = sum*Printer::axisStepsPerMM[2];
+                Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                 Com::printInfoFLN(Com::tZProbeZReset);
 #if MAX_HARDWARE_ENDSTOP_Z
-                Printer::zLength = Printer::runZMaxProbe()+sum-ENDSTOP_Z_BACK_ON_HOME;
+                Printer::zLength = Printer::runZMaxProbe() + sum-ENDSTOP_Z_BACK_ON_HOME;
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
             }
@@ -619,7 +619,7 @@ void Commands::executeGCode(GCode *com)
             Printer::updateCurrentPosition(true);
         }
         break;
-        case 30: //single probe set Z0
+        case 30: // G30 single probe set Z0
         {
             uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
             bool oldAutolevel = Printer::isAutolevelActive();
@@ -628,12 +628,12 @@ void Commands::executeGCode(GCode *com)
             Printer::setAutolevelActive(oldAutolevel);
         }
         break;
-        case 31:  //display hall sensor output
+        case 31:  // G31 display hall sensor output
             Com::printF(Com::tZProbeState);
             Com::print(Printer::isZProbeHit() ? 'H' : 'L');
             Com::println();
             break;
-        case 32: // Auto-Bed leveling
+        case 32: // G32 Auto-Bed leveling
         {
             //bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
