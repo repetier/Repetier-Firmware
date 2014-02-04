@@ -712,6 +712,9 @@ void Printer::setup()
 #endif
 #if CASE_LIGHTS_PIN>=0
     SET_OUTPUT(CASE_LIGHTS_PIN);
+    #if PROTOTYPE_PCB == 1
+      WRITE(CASE_LIGHTS_PIN,HIGH);
+    #endif
 #endif // CASE_LIGHTS_PIN
 #ifdef XY_GANTRY
     Printer::motorX = 0;

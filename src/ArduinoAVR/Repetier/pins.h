@@ -1294,14 +1294,20 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER            -1
 #define SDSS               53	// PINB.0, 19, SS
 #define LED_PIN            13	// PINB.7, 26, LED13
-#define FAN_PIN            27   // PINA.5, 73, OUT2
+
+#if PROTOTYPE_PCB == 1 
+  #define FAN_PIN          25	// PINA.3, 75, OUT1
+#else
+  #define FAN_PIN          27   // PINA.5, 73, OUT2  
+#endif
+
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 #define WATCHDOG_PIN	   37	// PINC.0
 
 #define HEATER_0_PIN       10	// PINB.4, 23, HZ1
 #define HEATER_1_PIN        9	// PINH.6, 18, HZ2
-#define HEATER_2_PIN	   -1	// PINH.5, 17, HZ3
+#define HEATER_2_PIN	    8	// PINH.5, 17, HZ3
 
 // analog pin mappings
 #define TEMP_0_PIN         13   // PINK.5, 84, TH1

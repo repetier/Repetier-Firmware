@@ -82,7 +82,7 @@
 #define SCAN_X_STEP_SIZE_STEPS			long(XAXIS_STEPS_PER_MM * SCAN_X_STEP_SIZE_MM)					// [steps]
 #define SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH * XAXIS_STEPS_PER_MM - SCAN_X_END_STEPS)		// [steps]
 
-#define	SCAN_Y_START_MM					20																// [mm]
+#define	SCAN_Y_START_MM					30																// [mm]
 #define	SCAN_Y_START_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_START_MM)						// [steps]
 #define	SCAN_Y_END_MM					5																// [mm]
 #define	SCAN_Y_END_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_END_MM)						// [steps]

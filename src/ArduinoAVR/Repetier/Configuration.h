@@ -75,7 +75,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguish Beta              = 501
 // User layout defined in userpins.h = 999
 
-#define MOTHERBOARD 13
+#define MOTHERBOARD		13
+#define PROTOTYPE_PCB	 0	// 1 = first PCB's / 0 = Final
 
 #include "pins.h"
 
@@ -528,7 +529,7 @@ Value is used for all generic tables created. */
 /** \brief Set true if you have a heated bed conected to your board, false if not */
 #define HAVE_HEATED_BED true
 
-#define HEATED_BED_MAX_TEMP 180
+#define HEATED_BED_MAX_TEMP 200
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
 #define SKIP_M190_IF_WITHIN 3
 
@@ -1110,7 +1111,11 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_Y3 170
 
 /* Define a pin to turn light on/off */
-#define CASE_LIGHTS_PIN -1
+#if PROTOTYPE_PCB == 1 
+  #define CASE_LIGHTS_PIN 27
+#else
+  #define CASE_LIGHTS_PIN -1
+#endif
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
@@ -1236,7 +1241,7 @@ Values must be in range 1..255
 #define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  55
-#define UI_SET_MAX_HEATED_BED_TEMP 120
+#define UI_SET_MAX_HEATED_BED_TEMP 200
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
@@ -1317,7 +1322,7 @@ the Cura PC application may fall over the debug outputs of the firmware.
 #if FEATURE_OUTPUT_PRINTED_OBJECT
 #define OUTPUT_OFFSET_X						0
 #define	OUTPUT_OFFSET_Y						Y_MAX_LENGTH
-#define	OUTPUT_OFFSET_Z						5
+#define	OUTPUT_OFFSET_Z						20
 #endif // FEATURE_OUTPUT_PRINTED_OBJECT
 
 /** \brief Enables/disables the park feature
@@ -1342,7 +1347,7 @@ the Cura PC application may fall over the debug outputs of the firmware.
 
 /** \brief Specifies the pressure at which the emergency pause shall be performed, in [digits]
 */
-#define EMERGENCY_PAUSE_DIGITS				5000
+#define EMERGENCY_PAUSE_DIGITS				10000
 
 /** \brief Configuration of the external watchdog
 */
@@ -1374,6 +1379,6 @@ the Cura PC application may fall over the debug outputs of the firmware.
 */
 #define UI_PRINTER_NAME "RF1000"
 #define UI_PRINTER_COMPANY "Conrad SE"
-#define UI_VERSION_STRING "V " REPETIER_VERSION ".07"
+#define UI_VERSION_STRING "V " REPETIER_VERSION ".08"
 
 #endif
