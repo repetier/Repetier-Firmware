@@ -1,2 +1,5 @@
+V 0.91.08 (2014-02-04)
+- Minor adaptations for the hardware support.
+
 V 0.91.07 (2014-01-27)
 - First public version.
