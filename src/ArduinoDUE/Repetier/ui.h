@@ -632,6 +632,7 @@ void ui_check_slow_keys(int &action) {}
 
 #define SDSUPPORT true
 #define SDCARDDETECTINVERTED false
+#define SDCARDDETECT 	   -1
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1

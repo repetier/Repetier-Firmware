@@ -141,6 +141,9 @@ float Printer::memoryE;
 char Printer::motorX;
 char Printer::motorY;
 #endif
+#ifdef DEBUG_PRINT
+int debugWaitLoop = 0;
+#endif
 
 
 
@@ -767,6 +770,7 @@ void Printer::setup()
 
 void Printer::defaultLoopActions()
 {
+
     Commands::checkForPeriodicalActions();  //check heater every n milliseconds
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
@@ -1175,6 +1179,11 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         currentDeltaPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
+        if(r==0 && first) {// Modify start z position on first probe hit to speed the ZProbe process
+            long newLastCorrection=currentPositionSteps[Z_AXIS]+(long)((float)EEPROM::zProbeBedDistance()*axisStepsPerMM[Z_AXIS]);
+            if(newLastCorrection<lastCorrection)
+                lastCorrection = newLastCorrection;
+        }
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
         if(r + 1 < repeat)
             PrintLine::moveRelativeDistanceInSteps(0,0,shortMove,0,EEPROM::zProbeSpeed(),true,true);
@@ -1211,10 +1220,16 @@ void Printer::waitForZProbeStart()
     uid.setStatusP(Com::tHitZProbe);
     uid.refreshPage();
 #endif
+#ifdef DEBUG_PRINT
+    debugWaitLoop = 3;
+#endif
     while(!isZProbeHit())
     {
         defaultLoopActions();
     }
+#ifdef DEBUG_PRINT
+    debugWaitLoop = 4;
+#endif
     HAL::delayMilliseconds(30);
     while(isZProbeHit())
     {

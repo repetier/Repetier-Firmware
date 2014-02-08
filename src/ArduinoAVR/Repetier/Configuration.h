@@ -1083,6 +1083,8 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_ON_HIGH true
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
+#define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
+
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST true

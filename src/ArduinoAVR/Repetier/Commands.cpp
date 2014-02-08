@@ -29,6 +29,10 @@ void Commands::commandLoop()
 {
     while(true)
     {
+#ifdef DEBUG_PRINT
+        debugWaitLoop = 1;
+#endif
+
         GCode::readFromSerial();
         GCode *code = GCode::peekCurrentCommand();
         //UI_SLOW; // do longer timed user interface action
@@ -81,6 +85,9 @@ void Commands::checkForPeriodicalActions()
 */
 void Commands::waitUntilEndOfAllMoves()
 {
+#ifdef DEBUG_PRINT
+    debugWaitLoop = 8;
+#endif
     while(PrintLine::hasLines())
     {
         GCode::readFromSerial();
@@ -91,6 +98,9 @@ void Commands::waitUntilEndOfAllMoves()
 void Commands::waitUntilEndOfAllBuffers()
 {
     GCode *code;
+#ifdef DEBUG_PRINT
+    debugWaitLoop = 9;
+#endif
     while(PrintLine::hasLines() || (code = GCode::peekCurrentCommand()) != NULL)
     {
         GCode::readFromSerial();
@@ -578,8 +588,13 @@ void Commands::executeGCode(GCode *com)
             break;
         case 28:  //G28 Home all Axis one at a time
         {
-            uint8_t home_all_axis = (com->hasNoXYZ());
-            Printer::homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
+            uint8_t home_all_axis = (com->hasNoXYZ() && !com->hasE());
+            if(com->hasE())
+            {
+                Printer::currentPositionSteps[E_AXIS] = 0;
+            }
+            if(home_all_axis || !com->hasNoXYZ())
+                Printer::homeAxis(home_all_axis || com->hasX(),home_all_axis || com->hasY(),home_all_axis || com->hasZ());
             Printer::updateCurrentPosition();
         }
         break;
@@ -613,10 +628,10 @@ void Commands::executeGCode(GCode *com)
             }
             Printer::feedrate = oldFeedrate;
             Printer::setAutolevelActive(oldAutolevel);
-            printCurrentPosition();
             if(com->hasS() && com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
             Printer::updateCurrentPosition(true);
+            printCurrentPosition();
         }
         break;
         case 30: // G30 single probe set Z0
@@ -626,6 +641,8 @@ void Commands::executeGCode(GCode *com)
             Printer::setAutolevelActive(false);
             Printer::runZProbe(p & 1,p & 2);
             Printer::setAutolevelActive(oldAutolevel);
+            Printer::updateCurrentPosition(p & 1);
+            printCurrentPosition();
         }
         break;
         case 31:  // G31 display hall sensor output
@@ -1117,6 +1134,9 @@ void Commands::executeGCode(GCode *com)
                 if(com->hasZ())
                     Printer::disableZStepper();
                 wait += HAL::timeInMilliseconds();
+#ifdef DEBUG_PRINT
+                    debugWaitLoop = 2;
+#endif
                 while(wait-HAL::timeInMilliseconds() < 100000) {
                     Printer::defaultLoopActions();
                 }

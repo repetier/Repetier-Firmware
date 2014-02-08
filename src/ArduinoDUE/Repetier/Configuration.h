@@ -51,6 +51,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // Arduino Due                = 401 // This is only experimental
 // Arduino Due with RADDS     = 402
+// Arduino Due with RAMPS-FD  = 403
 
 #define MOTHERBOARD 402
 

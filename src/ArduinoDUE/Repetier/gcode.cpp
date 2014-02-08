@@ -280,6 +280,10 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
         // Send command into command buffer
         if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
         {
+#ifdef DEBUG_PRINT
+    debugWaitLoop = 7;
+#endif
+
             Commands::executeGCode(&code);
             Printer::defaultLoopActions();
         }
@@ -628,7 +632,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         text = sp;
         while(*sp)
         {
-            if(M != 117 && (*sp==' ' || *sp=='*')) break; // end of filename reached
+            if((M != 117 && *sp==' ') || *sp=='*') break; // end of filename reached
             sp++;
         }
         *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.

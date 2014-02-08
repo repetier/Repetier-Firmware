@@ -128,6 +128,10 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #define EPR_EXTRUDER_COOLER_SPEED       54
 
+#ifndef Z_PROBE_BED_DISTANCE
+#define Z_PROBE_BED_DISTANCE 5.0
+#endif
+
 class EEPROM
 {
 #if EEPROM_MODE!=0
@@ -225,6 +229,13 @@ public:
 #else
         return Z_PROBE_Y3;
 #endif
+    }
+    static inline float zProbeBedDistance() {
+//#if EEPROM_MODE!=0
+//        return HAL::eprGetFloat(EPR_Z_PROBE_BED_DISTANCE);
+//#else
+        return Z_PROBE_BED_DISTANCE;
+//#endif
     }
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {

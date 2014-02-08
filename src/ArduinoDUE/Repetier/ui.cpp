@@ -2811,18 +2811,22 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_PAUSE:
             Com::printFLN(PSTR("RequestPause:"));
             break;
+#ifdef DEBUG_PRINT
         case UI_ACTION_WRITE_DEBUG:
-            Com::printF(Com::tDebug,(int)GCode::bufferReadIndex);
-            Com::printF(Com::tComma,(int)GCode::bufferWriteIndex);
-            Com::printF(Com::tComma,(int)GCode::commentDetected);
-            Com::printF(Com::tComma,(int)GCode::bufferLength);
-            Com::printF(Com::tComma,(int)GCode::waitingForResend);
-            Com::printFLN(Com::tComma,(int)GCode::commandsReceivingWritePosition);
-            Com::printF(Com::tDebug,Printer::minimumSpeed);
-            Com::printF(Com::tComma,Printer::minimumZSpeed);
-            Com::printF(Com::tComma,(int)PrintLine::linesPos);
-            Com::printFLN(Com::tComma,(int)PrintLine::linesWritePos);
+            Com::printF(PSTR("Buf. Read Idx:"),(int)GCode::bufferReadIndex);
+            Com::printF(PSTR(" Buf. Write Idx:"),(int)GCode::bufferWriteIndex);
+            Com::printF(PSTR(" Comment:"),(int)GCode::commentDetected);
+            Com::printF(PSTR(" Buf. Len:"),(int)GCode::bufferLength);
+            Com::printF(PSTR(" Wait resend:"),(int)GCode::waitingForResend);
+            Com::printFLN(PSTR(" Recv. Write Pos:"),(int)GCode::commandsReceivingWritePosition);
+            Com::printF(PSTR("Min. XY Speed:"),Printer::minimumSpeed);
+            Com::printF(PSTR(" Min. Z Speed:"),Printer::minimumZSpeed);
+            Com::printF(PSTR(" Buffer:"),PrintLine::linesCount);
+            Com::printF(PSTR(" Lines pos:"),(int)PrintLine::linesPos);
+            Com::printFLN(PSTR(" Write Pos:"),(int)PrintLine::linesWritePos);
+            Com::printFLN(PSTR("Wait loop:"),debugWaitLoop);
             break;
+#endif
         }
     refreshPage();
     if(!skipBeep)

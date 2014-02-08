@@ -47,10 +47,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_STEPCOUNT
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
 #define DEBUG_COM_ERRORS
+/** Adds a menu point in quick settings to write debg informations to the host in case of hangs where the ui still works. */
+//#define DEBUG_PRINT
 //#define DEBUG_DELTA_OVERFLOW
 //#define DEBUG_DELTA_REALPOS
-// Add write debug to quicksettings menu to debug some vars during hang
-//#define DEBUG_PRINT
 //#define DEBUG_SPLIT
 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
@@ -449,6 +449,9 @@ extern SDCard sd;
 extern volatile int waitRelax; // Delay filament relax at the end of print, could be a simple timeout
 extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 
+#ifdef DEBUG_PRINT
+extern int debugWaitLoop;
+#endif
 
 #if NONLINEAR_SYSTEM
 #define NUM_AXIS 4
