@@ -1160,7 +1160,7 @@ The following settings override uiconfig.h!
 11 = RepRapDiscount Full Graphic Smart Controller
 12 = FELIXPrinters Controller
 13 = SeeMeCNC Display on Rambo (ORION)
-
+14 = OpenHardware.co.za LCD2004 V2014
 */
 #define FEATURE_CONTROLLER 2
 

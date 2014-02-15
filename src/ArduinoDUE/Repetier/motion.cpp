@@ -1256,12 +1256,12 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
     }
 
     int segmentCount;
-
+    float feedrate = RMath::min(Printer::feedrate,Printer::maxFeedrate[Z_AXIS]);
     if (cartesianDir & 48)
     {
         // Compute number of seconds for move and hence number of segments needed
         //float seconds = 100 * cartesianDistance / (Printer::feedrate * Printer::feedrateMultiply); multiply in feedrate included
-        float seconds = cartesianDistance / Printer::feedrate;
+        float seconds = cartesianDistance / feedrate;
 #ifdef DEBUG_SPLIT
         Com::printFLN(Com::tDBGDeltaSeconds, seconds);
 #endif

@@ -304,22 +304,22 @@ void Printer::updateAdvanceFlags()
 
 void Printer::moveTo(float x,float y,float z,float e,float f)
 {
-    if(x!=IGNORE_COORDINATE)
-        destinationSteps[X_AXIS] = (x+Printer::offsetX)*axisStepsPerMM[X_AXIS];
-    if(y!=IGNORE_COORDINATE)
-        destinationSteps[Y_AXIS] = (y+Printer::offsetY)*axisStepsPerMM[Y_AXIS];
-    if(z!=IGNORE_COORDINATE)
-        destinationSteps[Z_AXIS] = z*axisStepsPerMM[Z_AXIS];
-    if(e!=IGNORE_COORDINATE)
-        destinationSteps[E_AXIS] = e*axisStepsPerMM[E_AXIS];
-    if(f!=IGNORE_COORDINATE)
+    if(x != IGNORE_COORDINATE)
+        destinationSteps[X_AXIS] = (x + Printer::offsetX) * axisStepsPerMM[X_AXIS];
+    if(y != IGNORE_COORDINATE)
+        destinationSteps[Y_AXIS] = (y + Printer::offsetY) * axisStepsPerMM[Y_AXIS];
+    if(z != IGNORE_COORDINATE)
+        destinationSteps[Z_AXIS] = z * axisStepsPerMM[Z_AXIS];
+    if(e != IGNORE_COORDINATE)
+        destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+    if(f != IGNORE_COORDINATE)
         feedrate = f;
 #if NONLINEAR_SYSTEM
-    PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
+    PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, false); // Disable software endstop or we get wrong distances when length < real length
 #else
     PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
-    updateCurrentPosition();
+    updateCurrentPosition(false);
 }
 
 void Printer::moveToReal(float x,float y,float z,float e,float f)
@@ -410,9 +410,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     }
     else
     {
-        if(com->hasX()) lastCmdPos[X_AXIS] = (currentPosition[X_AXIS] += convertToMM(com->X));
-        if(com->hasY()) lastCmdPos[Y_AXIS] = (currentPosition[Y_AXIS] += convertToMM(com->Y));
-        if(com->hasZ()) lastCmdPos[Z_AXIS] = (currentPosition[Z_AXIS] += convertToMM(com->Z));
+        if(com->hasX()) currentPosition[X_AXIS] = (lastCmdPos[X_AXIS] += convertToMM(com->X));
+        if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
+        if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
     }
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=3
     if(isAutolevelActive())
@@ -451,7 +451,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 30
                 Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
 #endif
-                fabs(p - currentPositionSteps[E_AXIS])>EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                fabs(p - currentPositionSteps[E_AXIS]) > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
         }
@@ -460,9 +460,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasF())
     {
         if(unitIsInches)
-            feedrate = com->F*0.0042333f*(float)feedrateMultiply;  // Factor is 25.5/60/100
+            feedrate = com->F * 0.0042333f * (float)feedrateMultiply;  // Factor is 25.5/60/100
         else
-            feedrate = com->F*(float)feedrateMultiply*0.00016666666f;
+            feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
     return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS] != currentPositionSteps[E_AXIS]); // ignore unproductive moves
 }
@@ -772,6 +772,7 @@ void Printer::defaultLoopActions()
 {
 
     Commands::checkForPeriodicalActions();  //check heater every n milliseconds
+
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines())
@@ -793,7 +794,7 @@ void Printer::defaultLoopActions()
 #if FEATURE_MEMORY_POSITION
 void Printer::MemoryPosition()
 {
-    updateCurrentPosition();
+    updateCurrentPosition(false);
     realPosition(memoryX,memoryY,memoryZ);
     memoryE = currentPositionSteps[E_AXIS]*axisStepsPerMM[E_AXIS];
 }
@@ -902,8 +903,8 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
         UI_CLEAR_STATUS
     }
 
-    updateCurrentPosition(true);
     moveToReal(0,0,Printer::zMin+Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
+    updateCurrentPosition(true);
     UI_CLEAR_STATUS
 }
 #else
@@ -1114,7 +1115,7 @@ void Printer::setAutolevelActive(bool on)
         Com::printInfoFLN(Com::tAutolevelEnabled);
     else
         Com::printInfoFLN(Com::tAutolevelDisabled);
-    updateCurrentPosition();
+    updateCurrentPosition(false);
 #endif // FEATURE_AUTOLEVEL    if(isAutolevelActive()==on) return;
 }
 #if MAX_HARDWARE_ENDSTOP_Z
@@ -1157,6 +1158,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
     }
     Commands::waitUntilEndOfAllMoves();
     long sum = 0,lastCorrection = currentPositionSteps[Z_AXIS],probeDepth,shortMove = (long)((float)Z_PROBE_SWITCHING_DISTANCE*axisStepsPerMM[Z_AXIS]);
+    long updateZ = 0;
     for(uint8_t r=0; r<repeat; r++)
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
@@ -1180,9 +1182,11 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         if(r==0 && first) {// Modify start z position on first probe hit to speed the ZProbe process
-            long newLastCorrection=currentPositionSteps[Z_AXIS]+(long)((float)EEPROM::zProbeBedDistance()*axisStepsPerMM[Z_AXIS]);
-            if(newLastCorrection<lastCorrection)
+            long newLastCorrection = currentPositionSteps[Z_AXIS] + (long)((float)EEPROM::zProbeBedDistance()*axisStepsPerMM[Z_AXIS]);
+            if(newLastCorrection < lastCorrection) {
+                    updateZ = lastCorrection-newLastCorrection;
                 lastCorrection = newLastCorrection;
+            }
         }
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
         if(r + 1 < repeat)

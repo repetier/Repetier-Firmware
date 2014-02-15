@@ -1000,6 +1000,65 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 13
 
+#if FEATURE_CONTROLLER == 14
+#define SDSUPPORT true
+#define SDCARDDETECT -1
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 65504
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
+#define UI_DISPLAY_I2C_PULLUP 31
+#define UI_I2C_CLOCKSPEED 400000L
+#define UI_DISPLAY_RS_PIN BV(15)
+#define UIDISPLAY_RW_PIN BV(14)
+#define UIDISPLAY_ENABLE_PIN BV(13)
+#define UIDISPLAY_D0_PIN BV(12)
+#define UIDISPLAY_D1_PIN BV(11)
+#define UIDISPLAY_D2_PIN BV(10)
+#define UIDISPLAY_D3_PIN BV(9)
+#define UIDISPLAY_D4_PIN BV(12)
+#define UIDISPLAY_D5_PIN BV(11)
+#define UIDISPLAY_D6_PIN BV(10)
+#define UIDISPLAY_D7_PIN BV(9)
+#define UIINVERT_MENU_DIRECTION false
+#define UI_HAS_I2C_KEYS
+#define UI_HAS_I2C_ENCODER 0
+#define UI_I2C_KEY_ADDRESS 0x40
+
+#ifdef UI_MAIN
+void ui_init_keys() {}
+void ui_check_keys(int &action) {}
+inline void ui_check_slow_encoder() {
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+HAL::i2cWrite(0x12); // GIOA
+HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+unsigned int keymask = HAL::i2cReadAck();
+keymask = keymask + (HAL::i2cReadNak()<<8);
+HAL::i2cStop();
+}
+void ui_check_slow_keys(int &action) {
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
+HAL::i2cWrite(0x12); // GPIOA
+HAL::i2cStop();
+HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
+unsigned int keymask = HAL::i2cReadAck();
+keymask = keymask + (HAL::i2cReadNak()<<8);
+HAL::i2cStop();
+UI_KEYS_I2C_BUTTON_LOW(BV(4),UIACTION_OK); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(BV(1),UIACTION_BACK); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(BV(0),UIACTION_SD_PRINT); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(BV(3),UIACTION_PREVIOUS); // Up button
+UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
+}
+#endif
+#endif // Controller 14
 
 #if FEATURE_CONTROLLER>0
 #if UI_ROWS==4
