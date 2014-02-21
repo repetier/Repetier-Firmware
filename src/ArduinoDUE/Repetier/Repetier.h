@@ -53,7 +53,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_DELTA_REALPOS
 //#define DEBUG_SPLIT
 // Find the longest segment length during a print
-#define DEBUG_SEGMENT_LENGTH
+//#define DEBUG_SEGMENT_LENGTH
 // Find the maximum real jerk during a print
 #define DEBUG_REAL_JERK
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
