@@ -73,6 +73,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // PiBot for Repetier V1.0-1.3= 314
 // PiBot for Repetier V1.4    = 315
 // Sanguish Beta              = 501
+// Unique One rev. A          = 88
 // User layout defined in userpins.h = 999
 
 #define MOTHERBOARD 33
@@ -748,6 +749,15 @@ on this endstop.
 #define DELTA_RADIUS_CORRECTION_B 0
 #define DELTA_RADIUS_CORRECTION_C 0
 
+/** Correction of the default diagonal size. Value gets added.*/
+#define DELTA_DIAGONAL_CORRECTION_A 0
+#define DELTA_DIAGONAL_CORRECTION_B 0
+#define DELTA_DIAGONAL_CORRECTION_C 0
+
+/** Max. radius the printer should be able to reach. */
+#define DELTA_MAX_RADIUS 200
+
+
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
 #define END_EFFECTOR_HORIZONTAL_OFFSET 33
@@ -1077,7 +1087,7 @@ is always running and is not hung up for some unknown reason. */
 
 /* Z-Probing */
 
-#define FEATURE_Z_PROBE true
+#define FEATURE_Z_PROBE false
 #define Z_PROBE_PIN 63
 #define Z_PROBE_PULLUP true
 #define Z_PROBE_ON_HIGH true
@@ -1103,7 +1113,7 @@ is always running and is not hung up for some unknown reason. */
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
-#define FEATURE_AUTOLEVEL true
+#define FEATURE_AUTOLEVEL false
 #define Z_PROBE_X1 100
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160

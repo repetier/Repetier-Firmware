@@ -1067,8 +1067,8 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='Z') addFloat(Printer::homingFeedrate[2],5,0);
             break;
         case 'i':
-            if(c2=='s') addLong(stepperInactiveTime,4);
-            else if(c2=='p') addLong(maxInactiveTime,4);
+            if(c2=='s') addLong(stepperInactiveTime/1000,4);
+            else if(c2=='p') addLong(maxInactiveTime/1000,4);
             break;
         case 'O': // ops related stuff
             break;
@@ -1310,7 +1310,7 @@ void UIDisplay::parse(char *txt,bool ram)
                 addStringP(PSTR(UI_TEXT_PRINTTIME_HOURS));
                 seconds-=tmp*3600;
                 tmp = seconds/60;
-                addInt(tmp,2,0);
+                addInt(tmp,2,'0');
                 addStringP(PSTR(UI_TEXT_PRINTTIME_MINUTES));
 #endif
             }
@@ -1948,7 +1948,9 @@ void UIDisplay::okAction()
     executeAction(UI_ACTION_BACK);
 #endif
 }
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) a+=increment*steps;if(a<(_min)) a=_min;else if(a>(_max)) a=_max;
+
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
+
 void UIDisplay::adjustMenuPos()
 {
     if(menuLevel == 0) return;
@@ -2080,10 +2082,10 @@ void UIDisplay::nextPreviousAction(int8_t next)
             d *= Printer::maxFeedrate[X_AXIS]*dtReal/(2000*fabs(d));
         long steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInSteps(steps,0,0,0,Printer::maxFeedrate[2],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],true);
     }
 #else
-    PrintLine::moveRelativeDistanceInSteps(increment,0,0,0,Printer::homingFeedrate[0],true,true);
+    PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
 #endif
     Commands::printCurrentPosition();
     break;
@@ -2095,10 +2097,10 @@ void UIDisplay::nextPreviousAction(int8_t next)
             d *= Printer::maxFeedrate[Y_AXIS]*dtReal/(2000*fabs(d));
         long steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInSteps(0,steps,0,0,Printer::maxFeedrate[2],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],true);
     }
 #else
-    PrintLine::moveRelativeDistanceInSteps(0,increment,0,0,Printer::homingFeedrate[1],true,true);
+    PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
 #endif
     Commands::printCurrentPosition();
     break;
@@ -2110,23 +2112,23 @@ void UIDisplay::nextPreviousAction(int8_t next)
             d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
         long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInSteps(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
     }
 #else
-    PrintLine::moveRelativeDistanceInSteps(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true,true);
+    PrintLine::moveRelativeDistanceInStepsReal(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true);
 #endif
     Commands::printCurrentPosition();
     break;
     case UI_ACTION_XPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInSteps(Printer::axisStepsPerMM[0]*increment,0,0,0,Printer::homingFeedrate[0],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[0]*increment,0,0,0,Printer::homingFeedrate[0],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_YPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInSteps(0,Printer::axisStepsPerMM[1]*increment,0,0,Printer::homingFeedrate[1],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[1]*increment,0,0,Printer::homingFeedrate[1],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_ZPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInSteps(0,0,Printer::axisStepsPerMM[2]*increment,0,Printer::homingFeedrate[2],true,true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[2]*increment,0,Printer::homingFeedrate[2],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_EPOSITION:
@@ -2183,10 +2185,12 @@ void UIDisplay::nextPreviousAction(int8_t next)
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:
-        INCREMENT_MIN_MAX(stepperInactiveTime,60,0,9999);
+        stepperInactiveTime -= stepperInactiveTime % 1000;
+        INCREMENT_MIN_MAX(stepperInactiveTime,60000UL,0,10080000UL);
         break;
     case UI_ACTION_MAX_INACTIVE:
-        INCREMENT_MIN_MAX(maxInactiveTime,60,0,9999);
+        maxInactiveTime -= maxInactiveTime % 1000;
+        INCREMENT_MIN_MAX(maxInactiveTime,60000UL,0,10080000UL);
         break;
     case UI_ACTION_PRINT_ACCEL_X:
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
@@ -2262,7 +2266,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #if EEPROM_MODE!=0
     {
         char p=0;
-        long rate;
+        int32_t rate;
         do
         {
             rate = pgm_read_dword(&(baudrates[p]));
@@ -2686,28 +2690,28 @@ void UIDisplay::executeAction(int action)
             break;
 #endif
         case UI_ACTION_X_UP:
-            PrintLine::moveRelativeDistanceInSteps(Printer::axisStepsPerMM[0],0,0,0,Printer::homingFeedrate[0],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_X_DOWN:
-            PrintLine::moveRelativeDistanceInSteps(-Printer::axisStepsPerMM[0],0,0,0,Printer::homingFeedrate[0],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_Y_UP:
-            PrintLine::moveRelativeDistanceInSteps(0,Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false);
             break;
         case UI_ACTION_Y_DOWN:
-            PrintLine::moveRelativeDistanceInSteps(0,-Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false);
             break;
         case UI_ACTION_Z_UP:
-            PrintLine::moveRelativeDistanceInSteps(0,0,Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false);
             break;
         case UI_ACTION_Z_DOWN:
-            PrintLine::moveRelativeDistanceInSteps(0,0,-Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false);
             break;
         case UI_ACTION_EXTRUDER_UP:
-            PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_DOWN:
-            PrintLine::moveRelativeDistanceInSteps(0,0,0,-Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false,true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
         {
@@ -2779,7 +2783,7 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_CALC_LEVEL:
 #ifdef SOFTWARE_LEVELING
-            long factors[4];
+            int32_t factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
             Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[2]);

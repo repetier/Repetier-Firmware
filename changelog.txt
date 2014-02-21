@@ -1,3 +1,12 @@
+Version 0.91.5 21-02-2014
+  Delta version on due working.
+  More delta corrections.
+  Limit z probing retest height.
+  Fixed z-probing bug for large deltas (rounding errors).
+  Limit print area for deltas to a cylinder.
+  More boards like RAMPS-FD.
+  Some bug fixes.
+  
 Version 0.91
   Online configuration tool: http://www.repetier.com/firmware/v091
   Support for Arduino Due - thank to John Silvia for this port!

@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 6
+#define EEPROM_PROTOCOL_VERSION 7
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -101,6 +101,11 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_RADIUS_CORR_A   913
 #define EPR_DELTA_RADIUS_CORR_B   917
 #define EPR_DELTA_RADIUS_CORR_C   921
+#define EPR_DELTA_MAX_RADIUS      925
+#define EPR_Z_PROBE_BED_DISTANCE  929
+#define EPR_DELTA_DIAGONAL_CORR_A 933
+#define EPR_DELTA_DIAGONAL_CORR_B 937
+#define EPR_DELTA_DIAGONAL_CORR_C 941
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -231,11 +236,11 @@ public:
 #endif
     }
     static inline float zProbeBedDistance() {
-//#if EEPROM_MODE!=0
-//        return HAL::eprGetFloat(EPR_Z_PROBE_BED_DISTANCE);
-//#else
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_Z_PROBE_BED_DISTANCE);
+#else
         return Z_PROBE_BED_DISTANCE;
-//#endif
+#endif
     }
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
@@ -355,6 +360,35 @@ public:
         return DELTA_RADIUS_CORRECTION_C;
 #endif
     }
+    static inline float deltaDiagonalCorrectionA() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_A);
+#else
+        return DELTA_DIAGONAL_CORRECTION_A;
+#endif
+    }
+    static inline float deltaDiagonalCorrectionB() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_B);
+#else
+        return DELTA_DIAGONAL_CORRECTION_B;
+#endif
+    }
+    static inline float deltaDiagonalCorrectionC() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_C);
+#else
+        return DELTA_DIAGONAL_CORRECTION_C;
+#endif
+    }
+    static inline float deltaMaxRadius() {
+#if EEPROM_MODE!=0
+        return HAL::eprGetFloat(EPR_DELTA_MAX_RADIUS);
+#else
+        return DELTA_MAX_RADIUS;
+#endif
+    }
+
 #endif
     static void initalizeUncached();
 };

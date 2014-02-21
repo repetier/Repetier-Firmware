@@ -52,7 +52,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_DELTA_OVERFLOW
 //#define DEBUG_DELTA_REALPOS
 //#define DEBUG_SPLIT
-
+// Find the longest segment length during a print
+#define DEBUG_SEGMENT_LENGTH
+// Find the maximum real jerk during a print
+#define DEBUG_REAL_JERK
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 
@@ -325,6 +328,8 @@ public:
         if(a<b) return b;
         return a;
     }
+    static inline long sqr(long a) {return a*a;}
+    static inline float sqr(float a) {return a*a;}
 };
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;

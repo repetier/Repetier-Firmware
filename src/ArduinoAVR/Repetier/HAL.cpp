@@ -107,10 +107,10 @@ The result is used for timer calculation where small errors are ok. This
 function uses lookup tables to find a fast approximation of the result.
 
 */
-long HAL::CPUDivU2(unsigned int divisor)
+int32_t HAL::CPUDivU2(unsigned int divisor)
 {
 #if CPU_ARCH==ARCH_AVR
-    long res;
+    int32_t res;
     unsigned short table;
     if(divisor<8192)
     {
@@ -592,7 +592,7 @@ SIGNAL (TIMER3_COMPA_vect)
 This function sets the OCR1A compare counter  to get the next interrupt
 at delay ticks measured from the last interrupt. delay must be << 2^24
 */
-inline void setTimer(unsigned long delay)
+inline void setTimer(uint32_t delay)
 {
     __asm__ __volatile__ (
         "cli \n\t"

@@ -126,7 +126,7 @@ void Extruder::manageTemperatures()
                 float pidTerm = act->pidPGain * error;
                 act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax);
                 pidTerm += act->pidIGain * act->tempIState*0.1;
-                long dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC)*3.333f;
+                float dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC)*3.333f;
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX==1
                 pidTerm = (pidTerm*act->pidMax)*0.0039062;
@@ -157,7 +157,7 @@ void Extruder::manageTemperatures()
 #endif
             if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
             {
-                unsigned long time = HAL::timeInMilliseconds();
+                uint32_t time = HAL::timeInMilliseconds();
                 if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
@@ -776,7 +776,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp < temp)
             {
-                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (long)(oldtemp-temp)*(long)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -803,7 +803,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp > temp)
             {
-                targetTemperature = oldraw + (long)(oldtemp-temp)*(long)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -814,10 +814,10 @@ void TemperatureController::setTargetTemperature(float target)
         break;
     }
     case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
-        targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
+        targetTemperature = (int)((int32_t)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
         break;
     case 100: // HEATER_USES_AD595
-        targetTemperature = (int)((long)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
+        targetTemperature = (int)((int32_t)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
         break;
 #ifdef SUPPORT_MAX6675
     case 101:  // defined HEATER_USES_MAX6675
@@ -857,7 +857,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = temptable[i++];
             if (newtemp < temp)
             {
-                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (long)(oldtemp-temp)*(long)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -891,14 +891,14 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
     int cycles=0;
     bool heating = true;
 
-    unsigned long temp_millis = HAL::timeInMilliseconds();
-    unsigned long t1=temp_millis;
-    unsigned long t2=temp_millis;
-    long t_high;
-    long t_low;
+    uint32_t temp_millis = HAL::timeInMilliseconds();
+    uint32_t t1=temp_millis;
+    uint32_t t2=temp_millis;
+    int32_t t_high;
+    int32_t t_low;
 
-    long bias=pidMax>>1;
-    long d = pidMax>>1;
+    int32_t bias=pidMax>>1;
+    int32_t d = pidMax>>1;
     float Ku, Tu;
     float Kp, Ki, Kd;
     float maxTemp=20, minTemp=20;

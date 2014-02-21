@@ -102,9 +102,9 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #define I2C_WRITE   0
 
 
-typedef unsigned int speed_t;
-typedef unsigned long ticks_t;
-typedef unsigned long millis_t;
+typedef uint16_t speed_t;
+typedef uint32_t ticks_t;
+typedef uint32_t millis_t;
 
 #define FAST_INTEGER_SQRT
 
@@ -218,7 +218,7 @@ public:
     static inline void hwSetup(void)
     {}
     // return val'val
-    static uint16_t integerSqrt(long a);
+    static uint16_t integerSqrt(int32_t a);
     /** \brief Optimized division
 
     Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
@@ -226,7 +226,7 @@ public:
     of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the
     interval.
     */
-    static inline long Div4U2U(unsigned long a,unsigned int b)
+    static inline int32_t Div4U2U(uint32_t a,uint16_t b)
     {
 #if CPU_ARCH==ARCH_AVR
         // r14/r15 remainder
@@ -380,9 +380,9 @@ public:
 #endif
     }
 // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned long mulu16xu16to32(unsigned int a,unsigned int b)
+    static inline uint32_t mulu16xu16to32(unsigned int a,unsigned int b)
     {
-        unsigned long res;
+        uint32_t res;
         // 18 Ticks = 1.125 us
         __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
             // Result LSB first: %A0, %B0, %A1
@@ -433,7 +433,7 @@ public:
             :"r18","r19" );
         return res;
 #else
-        return ((long)a*b)>>16;
+        return ((int32_t)a*b)>>16;
 #endif
     }
     static inline void digitalWrite(uint8_t pin,uint8_t value)
@@ -448,7 +448,7 @@ public:
     {
         ::pinMode(pin,mode);
     }
-    static long CPUDivU2(unsigned int divisor);
+    static int32_t CPUDivU2(unsigned int divisor);
     static inline void delayMicroseconds(unsigned int delayUs)
     {
         ::delayMicroseconds(delayUs);

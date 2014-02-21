@@ -97,10 +97,10 @@ typedef char prog_char;
 #define DELAY_TIMER_CLOCK       TC_CMR_TCCLKS_TIMER_CLOCK2
 #define DELAY_TIMER_PRESCALE    8
 
-#define SERIAL_BUFFER_SIZE      1024
-#define SERIAL_PORT             UART
-#define SERIAL_IRQ              ID_UART
-#define SERIAL_PORT_VECTOR      UART_Handler
+//#define SERIAL_BUFFER_SIZE      1024
+//#define SERIAL_PORT             UART
+//#define SERIAL_IRQ              ID_UART
+//#define SERIAL_PORT_VECTOR      UART_Handler
 
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
 #define TWI_INTERFACE   		TWI1	    
@@ -149,9 +149,9 @@ typedef char prog_char;
 #define LOW         0
 #define HIGH        1
 
-#define BEGIN_INTERRUPT_PROTECTED noInterrupts();
-#define END_INTERRUPT_PROTECTED interrupts();
-#define ESCAPE_INTERRUPT_PROTECTED  interrupts();
+#define BEGIN_INTERRUPT_PROTECTED __disable_irq(); //noInterrupts();
+#define END_INTERRUPT_PROTECTED __enable_irq(); //interrupts();
+#define ESCAPE_INTERRUPT_PROTECTED  __enable_irq(); //interrupts();
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)

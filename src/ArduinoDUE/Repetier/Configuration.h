@@ -725,6 +725,14 @@ on this endstop.
 #define DELTA_RADIUS_CORRECTION_B 0
 #define DELTA_RADIUS_CORRECTION_C 0
 
+/** Correction of the default diagonal size. Value gets added.*/
+#define DELTA_DIAGONAL_CORRECTION_A 0
+#define DELTA_DIAGONAL_CORRECTION_B 0
+#define DELTA_DIAGONAL_CORRECTION_C 0
+
+/** Max. radius the printer should be able to reach. */
+#define DELTA_MAX_RADIUS 200
+
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
 #define END_EFFECTOR_HORIZONTAL_OFFSET 33
