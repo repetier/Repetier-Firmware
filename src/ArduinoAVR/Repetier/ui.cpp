@@ -2749,6 +2749,7 @@ void UIDisplay::executeAction(int action)
             // Delta printer need change xLength and yLength after change zLength
             Printer::xLength = Printer::zLength;
             Printer::yLength = Printer::zLength;
+            Printer::updateDerivedParameter();
 #endif
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
