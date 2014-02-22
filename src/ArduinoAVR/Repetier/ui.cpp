@@ -2745,6 +2745,11 @@ void UIDisplay::executeAction(int action)
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM==3
+            // Delta printer need change xLength and yLength after change zLength
+            Printer::xLength = Printer::zLength;
+            Printer::yLength = Printer::zLength;
+#endif
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
             Printer::updateCurrentPosition();
