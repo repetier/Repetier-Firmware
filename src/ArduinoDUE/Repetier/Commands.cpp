@@ -149,12 +149,13 @@ void Commands::printTemperatures(bool showRaw)
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE==0
     Com::printF(Com::tTColon,temp);
+    Com::printF(Com::tSpaceSlash,Extruder::current->tempControl.targetTemperatureC,0);
 #else
     Com::printF(Com::tTColon,temp);
     Com::printF(Com::tSpaceSlash,Extruder::current->tempControl.targetTemperatureC,0);
+#if HAVE_HEATED_BED
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
     Com::printF(Com::tSpaceSlash,heatedBedController.targetTemperatureC,0);
-#if HAVE_HEATED_BED
     if(showRaw)
     {
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
@@ -626,7 +627,11 @@ void Commands::executeGCode(GCode *com)
                 Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                 Com::printInfoFLN(Com::tZProbeZReset);
 #if MAX_HARDWARE_ENDSTOP_Z
+#if DRIVE_SYSTEM == 3
+                Printer::zLength += sum-Printer::currentPosition[Z_AXIS];
+#else
                 Printer::zLength = Printer::runZMaxProbe() + sum-ENDSTOP_Z_BACK_ON_HOME;
+#endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
             }
