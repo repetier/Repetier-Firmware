@@ -1171,6 +1171,7 @@ The following settings override uiconfig.h!
 12 = FELIXPrinters Controller
 13 = SeeMeCNC Display on Rambo (ORION)
 14 = OpenHardware.co.za LCD2004 V2014
+15 = Sanguinololu + Panelolu2
 */
 #define FEATURE_CONTROLLER 2
 
@@ -1236,7 +1237,7 @@ same setting.
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.
-Parameter is delay in microseconds and the secons is the number of repetitions.
+Parameter is delay in microseconds and the second is the number of repetitions.
 Values must be in range 1..255
 */
 #define BEEPER_SHORT_SEQUENCE 2,2
