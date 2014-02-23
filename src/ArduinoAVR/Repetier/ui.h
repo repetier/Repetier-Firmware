@@ -1060,6 +1060,65 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
 #endif
 #endif // Controller 14
 
+ /*
+ 	Sanguinololu + panelolu2
+ */
+#if FEATURE_CONTROLLER == 15
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_CHARSET 2
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_INVERT_MENU_DIRECTION false
+
+#define UI_DISPLAY_I2C_CHIPTYPE 1
+#define UI_DISPLAY_I2C_ADDRESS 0x40
+#define UI_DISPLAY_I2C_OUTPUT_PINS 65528
+#define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
+#define UI_DISPLAY_I2C_PULLUP 23
+#define UI_I2C_CLOCKSPEED 100000L
+//#define UI_HAS_I2C_KEYS
+//#define UI_HAS_I2C_ENCODER 0
+//#define UI_I2C_KEY_ADDRESS UI_DISPLAY_I2C_ADDRESS
+#define BEEPER_TYPE 2
+#define BEEPER_TYPE_INVERTING true
+#define BEEPER_ADDRESS UI_DISPLAY_I2C_ADDRESS
+#define COMPILE_I2C_DRIVER
+
+#define UI_DISPLAY_RS_PIN 		_BV(15)
+#define UI_DISPLAY_RW_PIN 		_BV(14)
+#define UI_DISPLAY_ENABLE_PIN 	_BV(13)
+#define UI_DISPLAY_D0_PIN 		_BV(12)
+#define UI_DISPLAY_D1_PIN 		_BV(11)
+#define UI_DISPLAY_D2_PIN 		_BV(10)
+#define UI_DISPLAY_D3_PIN 		_BV(9)
+#define UI_DISPLAY_D4_PIN 		_BV(12)
+#define UI_DISPLAY_D5_PIN 		_BV(11)
+#define UI_DISPLAY_D6_PIN 		_BV(10)
+#define UI_DISPLAY_D7_PIN 		_BV(9)
+#define BEEPER_PIN _BV(5)
+#define UI_I2C_HEATBED_LED    _BV(8)
+#define UI_I2C_HOTEND_LED     _BV(7)
+#define UI_I2C_FAN_LED        _BV(6)
+
+#ifdef UI_MAIN
+void ui_init_keys() {
+	UI_KEYS_INIT_CLICKENCODER_LOW(10,11); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+	UI_KEYS_INIT_BUTTON_LOW(30); // push button, connects gnd to pin
+}
+
+void ui_check_keys(int &action) {
+	 UI_KEYS_CLICKENCODER_LOW_REV(10,11); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+	 UI_KEYS_BUTTON_LOW(30,UI_ACTION_OK); // push button, connects gnd to pin
+}
+
+inline void ui_check_slow_encoder() {}
+
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 15
+
 #if FEATURE_CONTROLLER>0
 #if UI_ROWS==4
 #if UI_COLS==16

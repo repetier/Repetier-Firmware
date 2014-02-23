@@ -52,6 +52,8 @@ Currently supported hardware:
 
 ==============================================================*/
 
+#ifndef _ui_config_h
+#define _ui_config_h
 
 /** While the ascii chars are all the same, the driver have different charsets
 for special chars used in different countries. The charset allows to fix for
@@ -165,6 +167,15 @@ Define the pin
 #define UI_DISPLAY_D5_PIN _BV(1)
 #define UI_DISPLAY_D6_PIN _BV(2)
 #define UI_DISPLAY_D7_PIN _BV(3)
+
+// uncomment if your using led to indicated the bed is hot
+//#define UI_I2C_HEATBED_LED    _BV(8)
+
+// uncomment if your using led to indicated the extruder is hot
+//#define UI_I2C_HOTEND_LED     _BV(7)
+
+// uncomment if your using led to indicated the FAN is on
+//#define UI_I2C_FAN_LED        _BV(6)
 
 // Pins for adafruid RGB shield
 /*#define UI_DISPLAY_RS_PIN _BV(15)
@@ -406,4 +417,5 @@ void ui_check_slow_keys(int &action) {
   //UI_KEYS_MATRIX(32,47,45,43,41,39,37,35);
 }
 
+#endif
 #endif

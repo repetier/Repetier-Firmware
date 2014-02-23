@@ -227,11 +227,8 @@ void Printer::updateDerivedParameter()
     cart[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(cart, delta);
     maxDeltaPositionSteps = delta[0];
-    xMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(xMin+xLength));
-    yMaxSteps = (long)(axisStepsPerMM[Z_AXIS]*(yMin+yLength));
-    xMinSteps = (long)(axisStepsPerMM[Z_AXIS]*xMin);
-    yMinSteps = (long)(axisStepsPerMM[Z_AXIS]*yMin);
-    zMinSteps = 0;
+    xMaxSteps = yMaxSteps = zMaxSteps;
+    xMinSteps = yMinSteps = zMinSteps = 0;
 #elif DRIVE_SYSTEM==4
     deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     if(deltaDiagonalStepsSquared>46000)
