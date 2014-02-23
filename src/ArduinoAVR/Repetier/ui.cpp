@@ -274,7 +274,7 @@ inline void lcdStartWrite()
 {
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    HAL::i2cWrite( 0x14); // Start at port a
+	HAL::i2cWrite( 0x14); // Start at port a
 #endif
 }
 inline void lcdStopWrite()
@@ -344,10 +344,12 @@ void initializeLCD()
 {
     HAL::delayMilliseconds(235);
     lcdStartWrite();
-    HAL::i2cWrite(uid.outputMask & 255);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
-    HAL::i2cWrite(uid.outputMask >> 16);
+	HAL::i2cWrite(uid.outputMask & 255);
+
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
+    HAL::i2cWrite(uid.outputMask >> 8);
 #endif
+
     HAL::delayMicroseconds(10);
     lcdWriteNibble(0x03);
     HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
@@ -2857,17 +2859,19 @@ void UIDisplay::slowAction()
     {
         flags|=8;
         HAL::allowInterrupts();
-#if FEATURE_CONTROLLER==5
+#if defined(UI_I2C_HOTEND_LED) || defined(UI_I2C_HEATBED_LED) || defined(UI_I2C_FAN_LED)
         {
             // check temps and set appropriate leds
-            int led= 0;
-#if NUM_EXTRUDER>0
+            int led = 0;
+#if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
-#if HAVE_HEATED_BED
+
+#if HAVE_HEATED_BED && defined(UI_I2C_HEATBED_LED)
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
-#if FAN_PIN>=0
+
+#if FAN_PIN >= 0 && defined(UI_I2C_FAN_LED)
             led |= (Printer::getFanSpeed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds
