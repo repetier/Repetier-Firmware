@@ -624,14 +624,17 @@ void Commands::executeGCode(GCode *com)
             Com::printFLN(Com::tZProbeAverage,sum);
             if(com->hasS() && com->S)
             {
-                Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
-                Com::printInfoFLN(Com::tZProbeZReset);
 #if MAX_HARDWARE_ENDSTOP_Z
 #if DRIVE_SYSTEM == 3
-                Printer::zLength += sum-Printer::currentPosition[Z_AXIS];
+                Printer::updateCurrentPosition();
+                Printer::zLength += sum - Printer::currentPosition[Z_AXIS];
+                Printer::updateDerivedParameter();
+                Printer::homeAxis(true,true,true);
 #else
+                Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                 Printer::zLength = Printer::runZMaxProbe() + sum-ENDSTOP_Z_BACK_ON_HOME;
 #endif
+                Com::printInfoFLN(Com::tZProbeZReset);
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #endif
             }
