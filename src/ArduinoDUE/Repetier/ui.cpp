@@ -346,7 +346,7 @@ void initializeLCD()
     lcdStartWrite();
     HAL::i2cWrite(uid.outputMask & 255);
 #if UI_DISPLAY_I2C_CHIPTYPE==1
-    HAL::i2cWrite(uid.outputMask >> 16);
+    HAL::i2cWrite(uid.outputMask >> 8);
 #endif
     HAL::delayMicroseconds(10);
     lcdWriteNibble(0x03);
@@ -1325,8 +1325,9 @@ void UIDisplay::parse(char *txt,bool ram)
     }
     printCols[col] = 0;
 }
-void UIDisplay::setStatusP(PGM_P txt)
+void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
+    if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(i<16)
     {
@@ -1335,13 +1336,18 @@ void UIDisplay::setStatusP(PGM_P txt)
         statusMsg[i++] = c;
     }
     statusMsg[i]=0;
+    if(error)
+        Printer::setUIErrorMessage(true);
 }
-void UIDisplay::setStatus(char *txt)
+void UIDisplay::setStatus(char *txt,bool error)
 {
+    if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
     while(*txt && i<16)
         statusMsg[i++] = *txt++;
     statusMsg[i]=0;
+    if(error)
+        Printer::setUIErrorMessage(true);
 }
 
 const UIMenu * const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
@@ -1833,6 +1839,10 @@ void UIDisplay::pushMenu(void *men,bool refresh)
 }
 void UIDisplay::okAction()
 {
+    if(Printer::isUIErrorMessage()) {
+        Printer::setUIErrorMessage(false);
+        return;
+    }
 #if UI_HAS_KEYS==1
     if(menuLevel==0)   // Enter menu
     {
@@ -1988,6 +1998,10 @@ void UIDisplay::adjustMenuPos()
 
 void UIDisplay::nextPreviousAction(int8_t next)
 {
+    if(Printer::isUIErrorMessage()) {
+        Printer::setUIErrorMessage(false);
+        return;
+    }
     millis_t actTime = HAL::timeInMilliseconds();
     millis_t dtReal;
     millis_t dt = dtReal = actTime-lastNextPrev;
@@ -2741,13 +2755,14 @@ void UIDisplay::executeAction(int action)
 #if MAX_HARDWARE_ENDSTOP_Z
         case UI_ACTION_SET_MEASURED_ORIGIN:
         {
+            Printer::updateCurrentPosition();
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
             transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 #endif
-            Printer::updateCurrentPosition();
+            Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #if EEPROM_MODE!=0
             EEPROM::storeDataIntoEEPROM(false);
@@ -2829,6 +2844,9 @@ void UIDisplay::executeAction(int action)
             Com::printF(PSTR(" Lines pos:"),(int)PrintLine::linesPos);
             Com::printFLN(PSTR(" Write Pos:"),(int)PrintLine::linesWritePos);
             Com::printFLN(PSTR("Wait loop:"),debugWaitLoop);
+            Com::printF(PSTR("sd mode:"),(int)sd.sdmode);
+            Com::printF(PSTR(" pos:"),sd.sdpos);
+            Com::printFLN(PSTR(" of "),sd.filesize);
             break;
 #endif
         }
@@ -2857,17 +2875,17 @@ void UIDisplay::slowAction()
     {
         flags|=8;
         HAL::allowInterrupts();
-#if FEATURE_CONTROLLER==5
+#if defined(UI_I2C_HOTEND_LED) || defined(UI_I2C_HEATBED_LED) || defined(UI_I2C_FAN_LED)
         {
             // check temps and set appropriate leds
             int led= 0;
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
-#if HAVE_HEATED_BED
+#if HAVE_HEATED_BED && defined(UI_I2C_HEATBED_LED)
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
-#if FAN_PIN>=0
+#if FAN_PIN>=0 && defined(UI_I2C_FAN_LED)
             led |= (Printer::getFanSpeed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds

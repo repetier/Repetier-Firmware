@@ -636,6 +636,9 @@ void Commands::executeGCode(GCode *com)
 #endif
                 Com::printInfoFLN(Com::tZProbeZReset);
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
+#else
+                Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
+                Com::printFLN(PSTR("Adjusted z origin"));
 #endif
             }
             Printer::feedrate = oldFeedrate;

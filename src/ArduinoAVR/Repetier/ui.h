@@ -389,8 +389,8 @@ class UIDisplay {
     void mediumAction();
     void pushMenu(void *men,bool refresh);
     void adjustMenuPos();
-    void setStatusP(PGM_P txt);
-    void setStatus(char *txt);
+    void setStatusP(PGM_P txt,bool error = false);
+    void setStatus(char *txt,bool error = false);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
 #if SDSUPPORT
@@ -1165,7 +1165,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
-#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
+#define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
+#define UI_ERROR_UPD(status) {uid.setStatusP(PSTR(status),true);uid.refreshPage();}
+#define UI_ERROR_RAM(status) uid.setStatus(status,true);
+#define UI_ERROR_UPD_RAM(status) {uid.setStatus(status,true);uid.refreshPage();}
+//#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
 #define UI_CLEAR_STATUS {uid.statusMsg[0]=0;}
 #else
 #define UI_INITIALIZE {}
@@ -1173,10 +1177,14 @@ void ui_check_slow_keys(int &action) {}
 #define UI_MEDIUM {}
 #define UI_SLOW {}
 #define UI_STATUS(status) {}
+#define UI_STATUS_RAM(status) {}
 #define UI_STATUS_UPD(status) {}
+#define UI_STATUS_UPD_RAM(status) {}
 #define UI_CLEAR_STATUS {}
 #define UI_ERROR(msg) {}
-#define UI_STATUS_UPD_RAM(status) {}
+#define UI_ERROR_UPD(status) {}
+#define UI_ERROR_RAM(status) {}
+#define UI_ERROR_UPD_RAM(status) {}
 #endif  // Display
 
 // Beeper methods

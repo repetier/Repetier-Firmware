@@ -55,7 +55,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Find the longest segment length during a print
 //#define DEBUG_SEGMENT_LENGTH
 // Find the maximum real jerk during a print
-#define DEBUG_REAL_JERK
+//#define DEBUG_REAL_JERK
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 

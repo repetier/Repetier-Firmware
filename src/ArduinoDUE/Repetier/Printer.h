@@ -39,6 +39,7 @@ union floatLong {
 #define PRINTER_FLAG1_AUTOMOUNT             2
 #define PRINTER_FLAG1_ANIMATION             4
 #define PRINTER_FLAG1_ALLKILLED             8
+#define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
 class Printer
 {
 public:
@@ -347,6 +348,14 @@ public:
     static inline void setAnimation(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
+    }
+    static inline uint8_t isUIErrorMessage()
+    {
+        return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
+    }
+    static inline void setUIErrorMessage(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
     }
     static inline void toggleAnimation() {
         setAnimation(!isAnimation());
