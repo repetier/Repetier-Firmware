@@ -115,7 +115,7 @@ FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
 
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
@@ -138,7 +138,7 @@ FSTRINGVAR(tDeltaDiagonalCorrectionC)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDeltaMaxRadius)
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==4
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVAR(tInvalidDeltaCoordinate)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDiagonalRodLength)
@@ -274,7 +274,7 @@ FSTRINGVAR(tEPRZTravelAcceleration)
 FSTRINGVAR(tEPRZStepsPerMM)
 FSTRINGVAR(tEPRZMaxFeedrate)
 FSTRINGVAR(tEPRZHomingFeedrate)
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
 FSTRINGVAR(tEPRMaxZJerk)
 FSTRINGVAR(tEPRXStepsPerMM)
 FSTRINGVAR(tEPRYStepsPerMM)

@@ -16,8 +16,13 @@
 
 */
 
-#define UI_MAIN
+// Set flag to have ui.h define some display dependent low level functions
+#define UI_MAIN 1
 #include "Repetier.h"
+// The uimenu.h declares static variables of menus, which must be declared only once.
+// It does not define interfaces for other modules, so should never be included elsewhere
+#include "uimenu.h"
+
 extern const int8_t encoder_table[16] PROGMEM ;
 #include <math.h>
 #include <stdlib.h>
@@ -1011,7 +1016,7 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='Y') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],5,0);
             else if(c2=='Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],5,0);
             else if(c2=='j') addFloat(Printer::maxJerk,3,1);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
             else if(c2=='J') addFloat(Printer::maxZJerk,3,1);
 #endif
             break;
@@ -1059,12 +1064,12 @@ void UIDisplay::parse(char *txt,bool ram)
             break;
 #endif
         case 'f':
-            if(c2=='x') addFloat(Printer::maxFeedrate[0],5,0);
-            else if(c2=='y') addFloat(Printer::maxFeedrate[1],5,0);
-            else if(c2=='z') addFloat(Printer::maxFeedrate[2],5,0);
-            else if(c2=='X') addFloat(Printer::homingFeedrate[0],5,0);
-            else if(c2=='Y') addFloat(Printer::homingFeedrate[1],5,0);
-            else if(c2=='Z') addFloat(Printer::homingFeedrate[2],5,0);
+            if(c2=='x') addFloat(Printer::maxFeedrate[X_AXIS],5,0);
+            else if(c2=='y') addFloat(Printer::maxFeedrate[Y_AXIS],5,0);
+            else if(c2=='z') addFloat(Printer::maxFeedrate[Z_AXIS],5,0);
+            else if(c2=='X') addFloat(Printer::homingFeedrate[X_AXIS],5,0);
+            else if(c2=='Y') addFloat(Printer::homingFeedrate[Y_AXIS],5,0);
+            else if(c2=='Z') addFloat(Printer::homingFeedrate[Z_AXIS],5,0);
             break;
         case 'i':
             if(c2=='s') addLong(stepperInactiveTime/1000,4);
@@ -1142,11 +1147,11 @@ void UIDisplay::parse(char *txt,bool ram)
                 else if(c2=='2')
                     fvalue = Printer::realZPosition();
                 else
-                    fvalue = (float)Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
+                    fvalue = (float)Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
             addFloat(fvalue,4,2);
             break;
         case 'y':
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
             if(c2>='0' && c2<='3') fvalue = (float)Printer::currentDeltaPositionSteps[c2-'0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
@@ -1157,7 +1162,7 @@ void UIDisplay::parse(char *txt,bool ram)
             {
                 addStringP(Extruder::current->id==c2-'0'?ui_selected:ui_unselected);
             }
-#ifdef TEMP_PID
+#if TEMP_PID
             else if(c2=='i')
             {
                 addFloat(Extruder::current->tempControl.pidIGain,4,2);
@@ -1209,8 +1214,8 @@ void UIDisplay::parse(char *txt,bool ram)
                 else
                     addStringP(PSTR(UI_TEXT_STRING_HM_BANGBANG));
             }
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
             else if(c2=='a')
             {
                 addFloat(Extruder::current->advanceK,3,0);
@@ -1284,9 +1289,9 @@ void UIDisplay::parse(char *txt,bool ram)
 #endif
             break;
         case 'S':
-            if(c2=='x') addFloat(Printer::axisStepsPerMM[0],3,1);
-            if(c2=='y') addFloat(Printer::axisStepsPerMM[1],3,1);
-            if(c2=='z') addFloat(Printer::axisStepsPerMM[2],3,1);
+            if(c2=='x') addFloat(Printer::axisStepsPerMM[X_AXIS],3,1);
+            if(c2=='y') addFloat(Printer::axisStepsPerMM[Y_AXIS],3,1);
+            if(c2=='z') addFloat(Printer::axisStepsPerMM[Z_AXIS],3,1);
             if(c2=='e') addFloat(Extruder::current->stepsPerMM,3,1);
             break;
         case 'P':
@@ -2134,15 +2139,15 @@ void UIDisplay::nextPreviousAction(int8_t next)
     Commands::printCurrentPosition();
     break;
     case UI_ACTION_XPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[0]*increment,0,0,0,Printer::homingFeedrate[0],true);
+        PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS]*increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_YPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[1]*increment,0,0,Printer::homingFeedrate[1],true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS]*increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_ZPOSITION_FAST:
-        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[2]*increment,0,Printer::homingFeedrate[2],true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
         Commands::printCurrentPosition();
         break;
     case UI_ACTION_EPOSITION:
@@ -2211,7 +2216,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_PRINT_ACCEL_Y:
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
 #else
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
@@ -2231,7 +2236,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_Z:
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
 #else
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
@@ -2241,39 +2246,39 @@ void UIDisplay::nextPreviousAction(int8_t next)
     case UI_ACTION_MAX_JERK:
         INCREMENT_MIN_MAX(Printer::maxJerk,0.1,1,99.9);
         break;
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     case UI_ACTION_MAX_ZJERK:
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
 #endif
     case UI_ACTION_HOMING_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[0],1,5,1000);
+        INCREMENT_MIN_MAX(Printer::homingFeedrate[X_AXIS],1,5,1000);
         break;
     case UI_ACTION_HOMING_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[1],1,5,1000);
+        INCREMENT_MIN_MAX(Printer::homingFeedrate[Y_AXIS],1,5,1000);
         break;
     case UI_ACTION_HOMING_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[2],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::homingFeedrate[Z_AXIS],1,1,1000);
         break;
     case UI_ACTION_MAX_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[0],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::maxFeedrate[X_AXIS],1,1,1000);
         break;
     case UI_ACTION_MAX_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[1],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::maxFeedrate[Y_AXIS],1,1,1000);
         break;
     case UI_ACTION_MAX_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[2],1,1,1000);
+        INCREMENT_MIN_MAX(Printer::maxFeedrate[Z_AXIS],1,1,1000);
         break;
     case UI_ACTION_STEPS_X:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[0],0.1,0,999);
+        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[X_AXIS],0.1,0,999);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_STEPS_Y:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[1],0.1,0,999);
+        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Y_AXIS],0.1,0,999);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_STEPS_Z:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[2],0.1,0,999);
+        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Z_AXIS],0.1,0,999);
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_BAUDRATE:
@@ -2297,7 +2302,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     }
 #endif
     break;
-#ifdef TEMP_PID
+#if TEMP_PID
     case UI_ACTION_PID_PGAIN:
         INCREMENT_MIN_MAX(Extruder::current->tempControl.pidPGain,0.1,0,200);
         break;
@@ -2356,8 +2361,8 @@ void UIDisplay::nextPreviousAction(int8_t next)
         INCREMENT_MIN_MAX(Extruder::current->waitRetractUnits,1,0,99);
         break;
 #endif
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     case UI_ACTION_ADVANCE_K:
         INCREMENT_MIN_MAX(Extruder::current->advanceK,1,0,200);
         break;
@@ -2540,7 +2545,7 @@ void UIDisplay::executeAction(int action)
             Printer::kill(true);
             break;
         case UI_ACTION_RESET_EXTRUDER:
-            Printer::currentPositionSteps[3] = 0;
+            Printer::currentPositionSteps[E_AXIS] = 0;
             break;
         case UI_ACTION_EXTRUDER_RELATIVE:
             Printer::relativeExtruderCoordinateMode=!Printer::relativeExtruderCoordinateMode;
@@ -2710,22 +2715,22 @@ void UIDisplay::executeAction(int action)
             PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_Y_UP:
-            PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Y_DOWN:
-            PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[1],0,0,Printer::homingFeedrate[1],false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Z_UP:
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_Z_DOWN:
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[2],0,Printer::homingFeedrate[2],false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_EXTRUDER_UP:
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_DOWN:
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[3],UI_SET_EXTRUDER_FEEDRATE,false);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
         {
@@ -2773,7 +2778,7 @@ void UIDisplay::executeAction(int action)
         break;
 #endif
         case UI_ACTION_SET_P1:
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP1[i] = Printer::currentPositionSteps[i];
@@ -2781,7 +2786,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_SET_P2:
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP2[i] = Printer::currentPositionSteps[i];
@@ -2789,7 +2794,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_SET_P3:
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP3[i] = Printer::currentPositionSteps[i];
@@ -2797,13 +2802,13 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_CALC_LEVEL:
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
             int32_t factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[2]);
-            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[2]);
+            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
+            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
+            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:

@@ -265,7 +265,7 @@ public:
 #endif
     }
 #endif
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     static inline float deltaHorizontalRadius() {
 #if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);

@@ -40,7 +40,7 @@ SDCard::SDCard()
     SET_OUTPUT(SDPOWER);
     WRITE(SDPOWER,HIGH);
 #endif
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
     SET_INPUT(SDCARDDETECT);
     WRITE(SDCARDDETECT,HIGH);
 #endif
@@ -48,7 +48,7 @@ SDCard::SDCard()
 
 void SDCard::automount()
 {
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
         if(sdactive)   // Card removed
@@ -84,7 +84,7 @@ void SDCard::initsd()
 {
     sdactive = false;
 #if SDSS >- 1
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
@@ -142,7 +142,7 @@ void SDCard::pausePrint(bool intern)
     if(intern) {
         Commands::waitUntilEndOfAllBuffers();
         Printer::MemoryPosition();
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
         Printer::moveToReal(0,0.4*Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
 #else
         Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
