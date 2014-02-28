@@ -417,8 +417,8 @@ STEPPER_CURRENT_CONTROL
 #define MAX6675_SS       53
 
 #ifdef AZTEEG_X3
-#define SDSUPPORT true
-#define SDCARDDETECTINVERTED false
+#define SDSUPPORT 1
+#define SDCARDDETECTINVERTED 0
 #define SDCARDDETECT 49
 #define FAN_PIN           4
 #define FAN2_PIN          5
@@ -839,7 +839,7 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          7
 #define MISO_PIN         6
 #define MOSI_PIN         5
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT 1  // sd card reader on board
 #define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
@@ -1110,7 +1110,7 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN 15
 
 #define LED_PIN -1
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT 1  // sd card reader on board
 #define SDCARDDETECT -1
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
@@ -1164,7 +1164,7 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
 
-#ifndef SDSUPPORT
+#if !SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1224,7 +1224,7 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
 
-#ifndef SDSUPPORT
+#if !SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1279,7 +1279,7 @@ STEPPER_CURRENT_CONTROL
 
 #define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
 #define E1_PINS
-#ifndef SDSUPPORT
+#if !SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1310,7 +1310,7 @@ STEPPER_CURRENT_CONTROL
 // On board beeper, so define values already here
 #define BEEPER_PIN 23
 #define BEEPER_TYPE 1
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT 1  // sd card reader on board
 #define SDCARDDETECT -1
 
 // digital pin mappings
@@ -1431,7 +1431,7 @@ STEPPER_CURRENT_CONTROL
 
 #define BEEPER_PIN 33			// Beeper on AUX-4
 #define BEEPER_TYPE 1
-#define SDSUPPORT true  // sd card reader on board
+#define SDSUPPORT 1  // sd card reader on board
 #define SDCARDDETECT -1
 
 
@@ -1528,8 +1528,8 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER            1
 #define SDSS               53
 #define SDCARDDETECT 	   6
-#define SDSUPPORT true            // already defined in config.h
-#define SDCARDDETECTINVERTED true // already defined in config.h
+#define SDSUPPORT 1            // already defined in config.h
+#define SDCARDDETECTINVERTED 1 // already defined in config.h
 
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          52	// PINB.1, 20, SCK
@@ -1729,7 +1729,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 #if MOTHERBOARD == 314
 #define KNOWN_BOARD 1
-#define PiBot true
+#define PiBot 1
 #ifndef __AVR_ATmega1280__
 #ifndef __AVR_ATmega2560__
 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
@@ -1851,8 +1851,8 @@ STEPPER_CURRENT_CONTROL
 #define MISO_PIN         50
 #define MOSI_PIN         51
 
-#define SDSUPPORT true
-#define SDCARDDETECTINVERTED false
+#define SDSUPPORT 1
+#define SDCARDDETECTINVERTED 0
 
 #endif   ///////******end  PiBot for Repetier
 

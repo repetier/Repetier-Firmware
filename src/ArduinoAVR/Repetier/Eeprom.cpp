@@ -70,10 +70,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::homingFeedrate[Y_AXIS] = HOMING_FEEDRATE_Y;
     Printer::homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
     Printer::maxJerk = MAX_JERK;
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     Printer::maxZJerk = MAX_ZJERK;
 #endif
-#ifdef RAMP_ACCELERATION
+#if RAMP_ACCELERATION
     Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
     Printer::maxAccelerationMMPerSquareSecond[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     Printer::maxAccelerationMMPerSquareSecond[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
@@ -83,7 +83,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     heatedBedController.pidDriveMax = HEATED_BED_PID_INTEGRAL_DRIVE_MAX;
     heatedBedController.pidDriveMin = HEATED_BED_PID_INTEGRAL_DRIVE_MIN;
     heatedBedController.pidPGain = HEATED_BED_PID_PGAIN;
@@ -111,7 +111,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT0_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT0_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT0_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT0_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT0_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT0_PID_P;
@@ -127,8 +127,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT0_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT0_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT0_ADVANCE_K;
 #endif
     e->advanceL = EXT0_ADVANCE_L;
@@ -141,7 +141,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT1_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT1_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT1_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT1_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT1_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT1_PID_P;
@@ -157,8 +157,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT1_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT1_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT1_ADVANCE_K;
 #endif
     e->advanceL = EXT1_ADVANCE_L;
@@ -171,7 +171,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT2_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT2_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT2_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT2_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT2_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT2_PID_P;
@@ -187,8 +187,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT2_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT2_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT2_ADVANCE_K;
 #endif
     e->advanceL = EXT2_ADVANCE_L;
@@ -201,7 +201,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT3_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT3_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT3_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT3_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT3_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT3_PID_P;
@@ -217,8 +217,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT3_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT3_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT3_ADVANCE_K;
 #endif
     e->advanceL = EXT3_ADVANCE_L;
@@ -231,7 +231,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT4_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT4_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT4_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT4_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT4_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT4_PID_P;
@@ -247,8 +247,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT4_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT4_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT4_ADVANCE_K;
 #endif
     e->advanceL = EXT4_ADVANCE_L;
@@ -261,7 +261,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT5_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT5_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT5_HEAT_MANAGER;
-#ifdef TEMP_PID
+#if TEMP_PID
     e->tempControl.pidDriveMax = EXT5_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT5_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT5_PID_P;
@@ -277,8 +277,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->waitRetractUnits = EXT5_WAIT_RETRACT_UNITS;
 #endif
     e->coolerSpeed = EXT5_EXTRUDER_COOLER_SPEED;
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     e->advanceK = EXT5_ADVANCE_K;
 #endif
     e->advanceL = EXT5_ADVANCE_L;
@@ -306,26 +306,26 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
 //#define EPR_ACCELERATION_TYPE 1
-    HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[0]);
-    HAL::eprSetFloat(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[1]);
-    HAL::eprSetFloat(EPR_ZAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[2]);
-    HAL::eprSetFloat(EPR_X_MAX_FEEDRATE,Printer::maxFeedrate[0]);
-    HAL::eprSetFloat(EPR_Y_MAX_FEEDRATE,Printer::maxFeedrate[1]);
-    HAL::eprSetFloat(EPR_Z_MAX_FEEDRATE,Printer::maxFeedrate[2]);
-    HAL::eprSetFloat(EPR_X_HOMING_FEEDRATE,Printer::homingFeedrate[0]);
-    HAL::eprSetFloat(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[1]);
-    HAL::eprSetFloat(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[2]);
+    HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[X_AXIS]);
+    HAL::eprSetFloat(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Y_AXIS]);
+    HAL::eprSetFloat(EPR_ZAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Z_AXIS]);
+    HAL::eprSetFloat(EPR_X_MAX_FEEDRATE,Printer::maxFeedrate[X_AXIS]);
+    HAL::eprSetFloat(EPR_Y_MAX_FEEDRATE,Printer::maxFeedrate[Y_AXIS]);
+    HAL::eprSetFloat(EPR_Z_MAX_FEEDRATE,Printer::maxFeedrate[Z_AXIS]);
+    HAL::eprSetFloat(EPR_X_HOMING_FEEDRATE,Printer::homingFeedrate[X_AXIS]);
+    HAL::eprSetFloat(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[Y_AXIS]);
+    HAL::eprSetFloat(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[Z_AXIS]);
     HAL::eprSetFloat(EPR_MAX_JERK,Printer::maxJerk);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     HAL::eprSetFloat(EPR_MAX_ZJERK,Printer::maxZJerk);
 #endif
-#ifdef RAMP_ACCELERATION
-    HAL::eprSetFloat(EPR_X_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[0]);
-    HAL::eprSetFloat(EPR_Y_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[1]);
-    HAL::eprSetFloat(EPR_Z_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[2]);
-    HAL::eprSetFloat(EPR_X_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[0]);
-    HAL::eprSetFloat(EPR_Y_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[1]);
-    HAL::eprSetFloat(EPR_Z_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[2]);
+#if RAMP_ACCELERATION
+    HAL::eprSetFloat(EPR_X_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[X_AXIS]);
+    HAL::eprSetFloat(EPR_Y_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[Y_AXIS]);
+    HAL::eprSetFloat(EPR_Z_MAX_ACCEL,Printer::maxAccelerationMMPerSquareSecond[Z_AXIS]);
+    HAL::eprSetFloat(EPR_X_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
+    HAL::eprSetFloat(EPR_Y_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
+    HAL::eprSetFloat(EPR_Z_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
 #endif
 #if HAVE_HEATED_BED
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
@@ -381,7 +381,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,e->maxStartFeedrate);
         HAL::eprSetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,e->maxAcceleration);
         HAL::eprSetByte(o+EPR_EXTRUDER_HEAT_MANAGER,e->tempControl.heatManager);
-#ifdef TEMP_PID
+#if TEMP_PID
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MAX,e->tempControl.pidDriveMax);
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MIN,e->tempControl.pidDriveMin);
         HAL::eprSetFloat(o+EPR_EXTRUDER_PID_PGAIN,e->tempControl.pidPGain);
@@ -400,8 +400,8 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,EXT0_WAIT_RETRACT_UNITS);
 #endif
         HAL::eprSetByte(o+EPR_EXTRUDER_COOLER_SPEED,e->coolerSpeed);
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         HAL::eprSetFloat(o+EPR_EXTRUDER_ADVANCE_K,e->advanceK);
 #else
         HAL::eprSetFloat(o+EPR_EXTRUDER_ADVANCE_K,0);
@@ -437,7 +437,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
@@ -466,30 +466,30 @@ void EEPROM::readDataFromEEPROM()
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
 //#define EPR_ACCELERATION_TYPE 1
-    Printer::axisStepsPerMM[0] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
-    Printer::axisStepsPerMM[1] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);
-    Printer::axisStepsPerMM[2] = HAL::eprGetFloat(EPR_ZAXIS_STEPS_PER_MM);
-    Printer::maxFeedrate[0] = HAL::eprGetFloat(EPR_X_MAX_FEEDRATE);
-    Printer::maxFeedrate[1] = HAL::eprGetFloat(EPR_Y_MAX_FEEDRATE);
-    Printer::maxFeedrate[2] = HAL::eprGetFloat(EPR_Z_MAX_FEEDRATE);
-    Printer::homingFeedrate[0] = HAL::eprGetFloat(EPR_X_HOMING_FEEDRATE);
-    Printer::homingFeedrate[1] = HAL::eprGetFloat(EPR_Y_HOMING_FEEDRATE);
-    Printer::homingFeedrate[2] = HAL::eprGetFloat(EPR_Z_HOMING_FEEDRATE);
+    Printer::axisStepsPerMM[X_AXIS] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
+    Printer::axisStepsPerMM[Y_AXIS] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);
+    Printer::axisStepsPerMM[Z_AXIS] = HAL::eprGetFloat(EPR_ZAXIS_STEPS_PER_MM);
+    Printer::maxFeedrate[X_AXIS] = HAL::eprGetFloat(EPR_X_MAX_FEEDRATE);
+    Printer::maxFeedrate[Y_AXIS] = HAL::eprGetFloat(EPR_Y_MAX_FEEDRATE);
+    Printer::maxFeedrate[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_FEEDRATE);
+    Printer::homingFeedrate[X_AXIS] = HAL::eprGetFloat(EPR_X_HOMING_FEEDRATE);
+    Printer::homingFeedrate[Y_AXIS] = HAL::eprGetFloat(EPR_Y_HOMING_FEEDRATE);
+    Printer::homingFeedrate[Z_AXIS] = HAL::eprGetFloat(EPR_Z_HOMING_FEEDRATE);
     Printer::maxJerk = HAL::eprGetFloat(EPR_MAX_JERK);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     Printer::maxZJerk = HAL::eprGetFloat(EPR_MAX_ZJERK);
 #endif
-#ifdef RAMP_ACCELERATION
-    Printer::maxAccelerationMMPerSquareSecond[0] = HAL::eprGetFloat(EPR_X_MAX_ACCEL);
-    Printer::maxAccelerationMMPerSquareSecond[1] = HAL::eprGetFloat(EPR_Y_MAX_ACCEL);
-    Printer::maxAccelerationMMPerSquareSecond[2] = HAL::eprGetFloat(EPR_Z_MAX_ACCEL);
-    Printer::maxTravelAccelerationMMPerSquareSecond[0] = HAL::eprGetFloat(EPR_X_MAX_TRAVEL_ACCEL);
-    Printer::maxTravelAccelerationMMPerSquareSecond[1] = HAL::eprGetFloat(EPR_Y_MAX_TRAVEL_ACCEL);
-    Printer::maxTravelAccelerationMMPerSquareSecond[2] = HAL::eprGetFloat(EPR_Z_MAX_TRAVEL_ACCEL);
+#if RAMP_ACCELERATION
+    Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = HAL::eprGetFloat(EPR_X_MAX_ACCEL);
+    Printer::maxAccelerationMMPerSquareSecond[Y_AXIS] = HAL::eprGetFloat(EPR_Y_MAX_ACCEL);
+    Printer::maxAccelerationMMPerSquareSecond[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS] = HAL::eprGetFloat(EPR_X_MAX_TRAVEL_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = HAL::eprGetFloat(EPR_Y_MAX_TRAVEL_ACCEL);
+    Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
-#ifdef TEMP_PID
+#if TEMP_PID
     heatedBedController.pidDriveMax = HAL::eprGetByte(EPR_BED_DRIVE_MAX);
     heatedBedController.pidDriveMin = HAL::eprGetByte(EPR_BED_DRIVE_MIN);
     heatedBedController.pidPGain = HAL::eprGetFloat(EPR_BED_PID_PGAIN);
@@ -536,7 +536,7 @@ void EEPROM::readDataFromEEPROM()
         e->maxStartFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
         e->maxAcceleration = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION);
         e->tempControl.heatManager = HAL::eprGetByte(o+EPR_EXTRUDER_HEAT_MANAGER);
-#ifdef TEMP_PID
+#if TEMP_PID
         e->tempControl.pidDriveMax = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MAX);
         e->tempControl.pidDriveMin = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MIN);
         e->tempControl.pidPGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_PGAIN);
@@ -551,8 +551,8 @@ void EEPROM::readDataFromEEPROM()
         e->waitRetractTemperature = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
         e->waitRetractUnits = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
 #endif
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         e->advanceK = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_K);
 #endif
         e->advanceL = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_L);
@@ -579,7 +579,7 @@ void EEPROM::readDataFromEEPROM()
         }
         if(version<4)
         {
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
             HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
@@ -589,7 +589,7 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
         if(version<5) {
             HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
@@ -684,23 +684,23 @@ void EEPROM::writeSettings()
     writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM,4);
     writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM,4);
 #endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM,4);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
 #endif
     writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     writeFloat(EPR_X_HOMING_FEEDRATE,Com::tEPRXHomingFeedrate);
     writeFloat(EPR_Y_HOMING_FEEDRATE,Com::tEPRYHomingFeedrate);
 #endif
     writeFloat(EPR_Z_HOMING_FEEDRATE,Com::tEPRZHomingFeedrate);
     writeFloat(EPR_MAX_JERK,Com::tEPRMaxJerk);
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
     writeFloat(EPR_MAX_ZJERK,Com::tEPRMaxZJerk);
 #endif
     writeFloat(EPR_X_HOME_OFFSET,Com::tEPRXHomePos);
@@ -715,14 +715,14 @@ void EEPROM::writeSettings()
     writeFloat(EPR_BACKLASH_Z,Com::tEPRZBacklash);
 #endif
 
-#ifdef RAMP_ACCELERATION
+#if RAMP_ACCELERATION
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
-#if DRIVE_SYSTEM==4
+#if DRIVE_SYSTEM==TUGA
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
 #endif
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
@@ -770,7 +770,7 @@ void EEPROM::writeSettings()
 #endif
 #if HAVE_HEATED_BED
     writeByte(EPR_BED_HEAT_MANAGER,Com::tEPRBedHeatManager);
-#ifdef TEMP_PID
+#if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX,Com::tEPRBedPIDDriveMax);
     writeByte(EPR_BED_DRIVE_MIN,Com::tEPRBedPIDDriveMin);
     writeFloat(EPR_BED_PID_PGAIN,Com::tEPRBedPGain);
@@ -789,7 +789,7 @@ void EEPROM::writeSettings()
         writeFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,Com::tEPRStartFeedrate);
         writeFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,Com::tEPRAcceleration);
         writeByte(o+EPR_EXTRUDER_HEAT_MANAGER,Com::tEPRHeatManager);
-#ifdef TEMP_PID
+#if TEMP_PID
         writeByte(o+EPR_EXTRUDER_DRIVE_MAX,Com::tEPRDriveMax);
         writeByte(o+EPR_EXTRUDER_DRIVE_MIN,Com::tEPRDriveMin);
         writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain,4);
@@ -805,8 +805,8 @@ void EEPROM::writeSettings()
         writeInt(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS,Com::tEPRDistanceRetractHeating);
 #endif
         writeByte(o+EPR_EXTRUDER_COOLER_SPEED,Com::tEPRExtruderCoolerSpeed);
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         writeFloat(o+EPR_EXTRUDER_ADVANCE_K,Com::tEPRAdvanceK);
 #endif
         writeFloat(o+EPR_EXTRUDER_ADVANCE_L,Com::tEPRAdvanceL);

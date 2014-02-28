@@ -109,7 +109,7 @@ void Extruder::manageTemperatures()
             beep(50*(controller+1),3);
             act->setAlarm(false);  //reset alarm
         }
-#ifdef TEMP_PID
+#if TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
         if(act->heatManager == 1)
@@ -194,7 +194,7 @@ void Extruder::manageTemperatures()
 void Extruder::initHeatedBed()
 {
 #if HAVE_HEATED_BED
-#ifdef TEMP_PID
+#if TEMP_PID
     heatedBedController.updateTempControlVars();
 #endif
 #endif
@@ -316,7 +316,7 @@ void Extruder::initExtruder()
 }
 void TemperatureController::updateTempControlVars()
 {
-#ifdef TEMP_PID
+#if TEMP_PID
     if(heatManager==1 && pidIGain!=0)   // prevent division by zero
     {
         tempIStateLimitMax = (float)pidDriveMax*10.0f/pidIGain;
@@ -351,7 +351,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
     Printer::invAxisStepsPerMM[E_AXIS] = 1.0f/Printer::axisStepsPerMM[E_AXIS];
     Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
-//   max_start_speed_units_per_second[3] = Extruder::current->maxStartFeedrate;
+//   max_start_speed_units_per_second[E_AXIS] = Extruder::current->maxStartFeedrate;
     Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
     Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxAccelerationMMPerSquareSecond[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
 #if defined(USE_ADVANCE)
@@ -884,7 +884,7 @@ void Extruder::disableAllHeater()
     autotuneIndex = 255;
 }
 
-#ifdef TEMP_PID
+#if TEMP_PID
 void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool storeValues)
 {
     float currentTemp;
@@ -1141,15 +1141,15 @@ Extruder extruder[NUM_EXTRUDER] =
         0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
         EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
         ,EXT0_WAIT_RETRACT_TEMP,EXT0_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT0_ADVANCE_K
 #endif
         ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1161,15 +1161,15 @@ Extruder extruder[NUM_EXTRUDER] =
         1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
         EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
         ,EXT1_WAIT_RETRACT_TEMP,EXT1_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT1_ADVANCE_K
 #endif
         ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1181,15 +1181,15 @@ Extruder extruder[NUM_EXTRUDER] =
         2,EXT2_X_OFFSET,EXT2_Y_OFFSET,EXT2_STEPS_PER_MM,EXT2_ENABLE_PIN,EXT2_ENABLE_ON,
         EXT2_MAX_FEEDRATE,EXT2_MAX_ACCELERATION,EXT2_MAX_START_FEEDRATE,0,EXT2_WATCHPERIOD
         ,EXT2_WAIT_RETRACT_TEMP,EXT2_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT2_ADVANCE_K
 #endif
         ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1201,15 +1201,15 @@ Extruder extruder[NUM_EXTRUDER] =
         3,EXT3_X_OFFSET,EXT3_Y_OFFSET,EXT3_STEPS_PER_MM,EXT3_ENABLE_PIN,EXT3_ENABLE_ON,
         EXT3_MAX_FEEDRATE,EXT3_MAX_ACCELERATION,EXT3_MAX_START_FEEDRATE,0,EXT3_WATCHPERIOD
         ,EXT3_WAIT_RETRACT_TEMP,EXT3_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT3_ADVANCE_K
 #endif
         ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1221,15 +1221,15 @@ Extruder extruder[NUM_EXTRUDER] =
         4,EXT4_X_OFFSET,EXT4_Y_OFFSET,EXT4_STEPS_PER_MM,EXT4_ENABLE_PIN,EXT4_ENABLE_ON,
         EXT4_MAX_FEEDRATE,EXT4_MAX_ACCELERATION,EXT4_MAX_START_FEEDRATE,0,EXT4_WATCHPERIOD
         ,EXT4_WAIT_RETRACT_TEMP,EXT4_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT4_ADVANCE_K
 #endif
         ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1241,15 +1241,15 @@ Extruder extruder[NUM_EXTRUDER] =
         5,EXT5_X_OFFSET,EXT5_Y_OFFSET,EXT5_STEPS_PER_MM,EXT5_ENABLE_PIN,EXT5_ENABLE_ON,
         EXT5_MAX_FEEDRATE,EXT5_MAX_ACCELERATION,EXT5_MAX_START_FEEDRATE,0,EXT5_WATCHPERIOD
         ,EXT5_WAIT_RETRACT_TEMP,EXT5_WAIT_RETRACT_UNITS
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         ,EXT5_ADVANCE_K
 #endif
         ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
 #endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
@@ -1261,7 +1261,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if HAVE_HEATED_BED
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
 TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
-#ifdef TEMP_PID
+#if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
                                             ,0};

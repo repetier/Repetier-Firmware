@@ -49,7 +49,7 @@ public:
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
@@ -73,13 +73,13 @@ public:
     static unsigned long interval;    ///< Last step duration in ticks.
     static unsigned long timer;              ///< used for acceleration/deceleration timing
     static unsigned long stepNumber;         ///< Step number in current move.
-    static float coordinateOffset[3];
-    static long currentPositionSteps[4];     ///< Position in steps from origin.
-    static float currentPosition[3];
-    static float lastCmdPos[3]; ///< Last coordinates send by gcodes
-    static long destinationSteps[4];         ///< Target position in steps.
+    static float coordinateOffset[Z_AXIS_ARRAY];
+    static long currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
+    static float currentPosition[Z_AXIS_ARRAY];
+    static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
+    static long destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
-    static long currentDeltaPositionSteps[4];
+    static long currentDeltaPositionSteps[E_TOWER_ARRAY];
     static long maxDeltaPositionSteps;
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
@@ -91,16 +91,16 @@ public:
     static long deltaBPosYSteps;
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
-    static long realDeltaPositionSteps[3];
+    static long realDeltaPositionSteps[TOWER_ARRAY];
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     static long stepsRemainingAtXHit;
     static long stepsRemainingAtYHit;
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
     static long levelingP1[3];
     static long levelingP2[3];
     static long levelingP3[3];
@@ -126,7 +126,7 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
-#if DRIVE_SYSTEM != 3
+#if DRIVE_SYSTEM!=DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
@@ -150,7 +150,7 @@ public:
     static float memoryZ;
     static float memoryE;
 #endif
-#ifdef XY_GANTRY
+#if GANTRY
     static char motorX;
     static char motorY;
 #endif
@@ -462,7 +462,7 @@ public:
     }
     static inline void executeXYGantrySteps()
     {
-#if defined(XY_GANTRY)
+#if (GANTRY)
         if(motorX <= -2)
         {
             ANALYZER_ON(ANALYZER_CH2);
@@ -549,7 +549,7 @@ public:
     }
     static inline void disableAllowedStepper()
     {
-#ifdef XY_GANTRY
+#if GANTRY
         if(DISABLE_X && DISABLE_Y)
         {
             disableXStepper();
@@ -563,17 +563,17 @@ public:
     }
     static inline float realXPosition()
     {
-        return currentPosition[0];
+        return currentPosition[X_AXIS];
     }
 
     static inline float realYPosition()
     {
-        return currentPosition[1];
+        return currentPosition[Y_AXIS];
     }
 
     static inline float realZPosition()
     {
-        return currentPosition[2];
+        return currentPosition[Z_AXIS];
     }
     static inline void realPosition(float &xp,float &yp,float &zp)
     {
@@ -605,9 +605,9 @@ public:
 #if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-        currentDeltaPositionSteps[X_AXIS] = xaxis;
-        currentDeltaPositionSteps[Y_AXIS] = yaxis;
-        currentDeltaPositionSteps[Z_AXIS] = zaxis;
+        currentDeltaPositionSteps[A_TOWER] = xaxis;
+        currentDeltaPositionSteps[B_TOWER] = yaxis;
+        currentDeltaPositionSteps[C_TOWER] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif

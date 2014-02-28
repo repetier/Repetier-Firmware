@@ -687,11 +687,11 @@ ISR(TIMER1_COMPA_vect)
     {
         if(waitRelax == 0)
         {
-#ifdef USE_ADVANCE
+#if USE_ADVANCE
             if(Printer::advanceStepsSet)
             {
                 Printer::extruderStepsNeeded -= Printer::advanceStepsSet;
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
                 Printer::advanceExecuted = 0;
 #endif
                 Printer::advanceStepsSet = 0;

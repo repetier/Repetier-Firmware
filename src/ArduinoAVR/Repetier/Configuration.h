@@ -100,7 +100,14 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
-#define DRIVE_SYSTEM 0
+#define CARTESIAN 0
+#define XY_GANTRY 1
+#define YX_GANTRY 2
+#define DELTA 3
+#define TUGA 4
+#define BIPOD 5
+
+#define DRIVE_SYSTEM DELTA
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -108,7 +115,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -198,7 +205,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_INVERSE true
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON false
+#define EXT0_ENABLE_ON 0
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
@@ -530,7 +537,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED true
+#define HAVE_HEATED_BED 1
 
 #define HEATED_BED_MAX_TEMP 115
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -715,7 +722,7 @@ on this endstop.
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 // Delta settings
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
@@ -778,7 +785,7 @@ on this endstop.
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.
 */
-#define DELTA_HOME_ON_POWER false
+#define DELTA_HOME_ON_POWER 0
 
 /** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
 you can also change the values online and autoleveling will store the results here. */
@@ -788,20 +795,27 @@ you can also change the values online and autoleveling will store the results he
 
 
 /** \brief Experimental calibration utility for delta printers
+ * Change 1 to 0 to disable
 */
-#define SOFTWARE_LEVELING
+#define SOFTWARE_LEVELING (1 && (DRIVE_SYSTEM==DELTA))
 
 #endif
-#if DRIVE_SYSTEM == 4 // ========== Tuga special settings =============
+#if DRIVE_SYSTEM==TUGA 
+// ========== Tuga special settings =============
 /* Radius of the long arm in mm. */
 #define DELTA_DIAGONAL_ROD 240
 #endif
 
 /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
 Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino
+will be allocated for the delta buffer. 
+PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
+Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
+or 16 * (200 + (7*22=154) = 354) = 5664 bytes!!!!!!!1
+min is 5 * (200 + (7*10=70) =270) = 1350
+ This leaves ~1K free RAM on an Arduino which has only 8k
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define MAX_DELTA_SEGMENTS_PER_LINE 22
+#define DELTASEGMENTS_PER_PRINTLINE 10
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -833,7 +847,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define HOMING_ORDER HOME_ORDER_ZXY
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
-#define ENABLE_BACKLASH_COMPENSATION false
+#define ENABLE_BACKLASH_COMPENSATION 0
 #define Z_BACKLASH 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
@@ -858,7 +872,7 @@ additional stepper interrupts with all it's overhead. As a result you can go as 
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
-#define ALLOW_QUADSTEPPING true
+#define ALLOW_QUADSTEPPING 1
 /** If you reach STEP_DOUBLER_FREQUENCY the firmware will do 2 or 4 steps with nearly no delay. That can be too fast
 for some printers causing an early stall.
 
@@ -913,10 +927,14 @@ Overridden if EEPROM activated.
 
 /** \brief Number of moves we can cache in advance.
 
-This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
-many very short moves the cache may go empty. The minimum value is 5.
+This number of moves can be cached in advance. If you wan't to cache more, increase this. 
+Even with very small moves, 0.1mm, each line can do at least 1mm in moves with 10 delta segments, 
+or 5mm overall for min line cache of 5. 
+At 200mm/sec this is 5/200 25 milliseconds, which is abundant time to refil the cache from
+more gcode commands. It should not be possible to every exhast the cache.
+The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 16
+#define PRINTLINE_CACHE_SIZE 5
 
 /** \brief Low filled cache size.
 
@@ -953,13 +971,13 @@ Without a correct adjusted advance algorithm, you get blobs at points, where acc
 effect increases with speed and acceleration difference. Using the advance method decreases this effect.
 For more informations, read the wiki.
 */
-#define USE_ADVANCE
+#define USE_ADVANCE 1
 
 /** \brief enables quadratic component.
 
-Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
+Set 1 to allow, 0 disallow a quadratic advance dependency. Linear is the dominant value, so no real need
 to activate the quadratic term. Only adds lots of computations and storage usage. */
-#define ENABLE_QUADRATIC_ADVANCE
+#define ENABLE_QUADRATIC_ADVANCE 0
 
 
 // ##########################################################################################
@@ -992,7 +1010,7 @@ the power will be turned on without the need to call M80 if initially started.
 If you use an ATX power supply you need the power pin to work non inverting. For some special
 boards you might need to make it inverting.
 */
-#define POWER_INVERTING false
+#define POWER_INVERTING 0
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait forever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
@@ -1043,17 +1061,17 @@ If you have an unused extruder stepper free, you could use it to drive the secon
 instead of driving both with a single stepper. The same works for the other axis if needed.
 */
 
-#define FEATURE_TWO_XSTEPPER false
+#define FEATURE_TWO_XSTEPPER 0
 #define X2_STEP_PIN   E1_STEP_PIN
 #define X2_DIR_PIN    E1_DIR_PIN
 #define X2_ENABLE_PIN E1_ENABLE_PIN
 
-#define FEATURE_TWO_YSTEPPER false
+#define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
 #define Y2_DIR_PIN    E1_DIR_PIN
 #define Y2_ENABLE_PIN E1_ENABLE_PIN
 
-#define FEATURE_TWO_ZSTEPPER false
+#define FEATURE_TWO_ZSTEPPER 0
 #define Z2_STEP_PIN   E1_STEP_PIN
 #define Z2_DIR_PIN    E1_DIR_PIN
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
@@ -1061,7 +1079,7 @@ instead of driving both with a single stepper. The same works for the other axis
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
-#define FEATURE_DITTO_PRINTING false
+#define FEATURE_DITTO_PRINTING 0
 
 /* Servos
 
@@ -1074,7 +1092,7 @@ Servos are controlled by a pulse width normally between 500 and 2500 with 1500ms
 WARNING: Servos can draw a considerable amount of current. Make sure your system can handle this or you may risk your hardware!
 */
 
-#define FEATURE_SERVO false
+#define FEATURE_SERVO 0
 // Servo pins on a RAMPS board are 11,6,5,4
 #define SERVO0_PIN 11
 #define SERVO1_PIN 6
@@ -1083,14 +1101,14 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
-#define FEATURE_WATCHDOG true
+#define FEATURE_WATCHDOG 1
 
 /* Z-Probing */
 
-#define FEATURE_Z_PROBE false
+#define FEATURE_Z_PROBE 1
 #define Z_PROBE_PIN 63
-#define Z_PROBE_PULLUP true
-#define Z_PROBE_ON_HIGH true
+#define Z_PROBE_PULLUP 1
+#define Z_PROBE_ON_HIGH 1
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
 #define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
@@ -1113,7 +1131,7 @@ is always running and is not hung up for some unknown reason. */
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
-#define FEATURE_AUTOLEVEL false
+#define FEATURE_AUTOLEVEL 1
 #define Z_PROBE_X1 100
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160
@@ -1126,28 +1144,28 @@ is always running and is not hung up for some unknown reason. */
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT false
+#define SDSUPPORT 0
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
-#define SDCARDDETECTINVERTED false
+#define SDCARDDETECTINVERTED 0
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR true
+#define SD_EXTENDED_DIR 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
-#define ARC_SUPPORT true
+#define ARC_SUPPORT 1
 
 /** You can store the current position with M401 and go back to it with M402.
    This works only if feature is set to true. */
-#define FEATURE_MEMORY_POSITION true
+#define FEATURE_MEMORY_POSITION 1
 
 /** If a checksum is sent, all future comamnds must also contain a checksum. Increases reliability especially for binary protocol. */
-#define FEATURE_CHECKSUM_FORCED false
+#define FEATURE_CHECKSUM_FORCED 0
 
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL true
+#define FEATURE_FAN_CONTROL 1
 
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so
@@ -1173,7 +1191,7 @@ The following settings override uiconfig.h!
 14 = OpenHardware.co.za LCD2004 V2014
 15 = Sanguinololu + Panelolu2
 */
-#define FEATURE_CONTROLLER 0
+#define FEATURE_CONTROLLER 13
 
 /**
 Select the language to use.
@@ -1193,7 +1211,7 @@ Select the language to use.
 
 
 /** Animate switches between menus etc. */
-#define UI_ANIMATION true
+#define UI_ANIMATION 1
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1202,7 +1220,7 @@ Select the language to use.
 #define UI_START_SCREEN_DELAY 1000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
-#define UI_DISABLE_AUTO_PAGESWITCH true
+#define UI_DISABLE_AUTO_PAGESWITCH 1
 
 /** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
@@ -1221,7 +1239,7 @@ the move distance depending on the speed you turn the encoder. That way you can 
 same setting.
 
 */
-#define UI_SPEEDDEPENDENT_POSITIONING true
+#define UI_SPEEDDEPENDENT_POSITIONING 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -1233,7 +1251,7 @@ same setting.
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER true
+#define FEATURE_BEEPER 1
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.

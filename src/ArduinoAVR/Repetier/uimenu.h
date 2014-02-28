@@ -15,9 +15,9 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#if !defined(_UI_MENU_H) && defined(UI_MAIN)
+#if !defined(_UI_MENU_H)
 #define _UI_MENU_H
-
+#if UI_DISPLAY_TYPE!=0
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -291,7 +291,7 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast,UI_TEXT_Z_POS_FAST,ui_menu_zpos_fast);
 #define UI_SPEED_Z ,&ui_menu_go_zpos
 #endif
 
-#if DRIVE_SYSTEM!=3     //Positioning menu for non-delta
+#if DRIVE_SYSTEM!=DELTA     //Positioning menu for non-delta
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT);
 #else                   //Positioning menu for delta (removes individual x,y,z homing)
@@ -307,7 +307,7 @@ UI_MENU(ui_menu_delta,UI_MENU_DELTA,2 + UI_SPEED + UI_MENU_BACKCNT);
 #endif
 
 // **** Bed leveling menu
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
@@ -409,14 +409,14 @@ UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan);
 
 // **** SD card menu
 
-#ifdef SDSUPPORT
+#if SDSUPPORT
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_pause,     UI_TEXT_PAUSE_PRINT,    UI_ACTION_SD_PAUSE,    MENU_MODE_SD_PRINTING, MENU_MODE_SD_PAUSED);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT, UI_ACTION_SD_CONTINUE, MENU_MODE_SD_PAUSED,   0);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0);
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
 #else
@@ -448,7 +448,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_debug_dryrun, UI_TEXT_DBG_DRYRUN, UI_ACTION_DEBUG_
 UI_MENU(ui_menu_debugging,UI_MENU_DEBUGGING,4 + UI_MENU_BACKCNT);
 
 // **** Acceleration settings
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
 UI_MENU_CHANGEACTION(ui_menu_accel_printx,  UI_TEXT_PRINT_X,UI_ACTION_PRINT_ACCEL_X);
 UI_MENU_CHANGEACTION(ui_menu_accel_printy,  UI_TEXT_PRINT_Y,UI_ACTION_PRINT_ACCEL_Y);
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,  UI_TEXT_PRINT_Z,UI_ACTION_PRINT_ACCEL_Z);
@@ -504,17 +504,17 @@ UI_MENU_CHANGEACTION(ui_menu_ext_wait_temp,       UI_TEXT_EXTR_WAIT_RETRACT_TEMP
 UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UNITS, UI_ACTION_EXTR_WAIT_RETRACT_UNITS);
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
-#ifdef USE_ADVANCE
+#if USE_ADVANCE
 #define UI_MENU_ADV_CNT 1
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
 #define UI_MENU_ADV_CNT 2
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K,UI_ACTION_ADVANCE_K);
 #endif
 UI_MENU_CHANGEACTION(ui_menu_cext_advancel,UI_TEXT_EXTR_ADVANCE_L,UI_ACTION_ADVANCE_L);
 #endif
-#ifdef TEMP_PID
+#if TEMP_PID
 UI_MENU_CHANGEACTION(ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER, UI_ACTION_EXTR_HEATMANAGER);
 UI_MENU_CHANGEACTION(ui_menu_cext_pgain,   UI_TEXT_EXTR_PGAIN,   UI_ACTION_PID_PGAIN);
 UI_MENU_CHANGEACTION(ui_menu_cext_igain,   UI_TEXT_EXTR_IGAIN,   UI_ACTION_PID_IGAIN);
@@ -556,7 +556,7 @@ UI_MENU_ACTION2C(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADED);
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
 #define UI_MENU_SL_COND ,&ui_menu_conf_level
 #define UI_MENU_SL_CNT 1
 UI_MENU_SUBMENU(ui_menu_conf_level, UI_TEXT_LEVEL, ui_menu_level);
@@ -602,5 +602,5 @@ Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a k
 the change of temperature with the next/previous buttons.
 
 */
-
+#endif
 #endif // __UI_MENU_H
