@@ -239,7 +239,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 #define UI_I2C_KEY_ADDRESS 0x40
 
 
-#ifdef UI_MAIN
+#if UI_MAIN
 /* #######################################################################
                       Key definitions
 

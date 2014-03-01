@@ -750,25 +750,25 @@ ISR(PWM_TIMER_VECTOR)
     if(pwm_count_heater == 0)
     {
 #if EXT0_HEATER_PIN>-1
-        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,1);
+        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK))>0) WRITE(EXT1_HEATER_PIN,1);
+        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK))>0) WRITE(EXT1_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK))>0) WRITE(EXT2_HEATER_PIN,1);
+        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK))>0) WRITE(EXT2_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK))>0) WRITE(EXT3_HEATER_PIN,1);
+        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK))>0) WRITE(EXT3_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK))>0) WRITE(EXT4_HEATER_PIN,1);
+        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK))>0) WRITE(EXT4_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK))>0) WRITE(EXT5_HEATER_PIN,1);
+        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK))>0) WRITE(EXT5_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,1);
+        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
     }
     if(pwm_count==0)
@@ -809,37 +809,37 @@ ISR(PWM_TIMER_VECTOR)
 #endif
     }
 #if EXT0_HEATER_PIN>-1
-    if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,0);
+    if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT0_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0]!=255) WRITE(EXT0_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,0);
+    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
     if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1]!=255) WRITE(EXT1_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN,0);
+    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT2_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[2] == pwm_count && pwm_cooler_pos_set[2]!=255) WRITE(EXT2_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN,0);
+    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT3_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[3] == pwm_count && pwm_cooler_pos_set[3]!=255) WRITE(EXT3_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN,0);
+    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT4_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[4] == pwm_count && pwm_cooler_pos_set[4]!=255) WRITE(EXT4_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    if(pwm_pos_set[5] == pwm_count_heater && pwm_pos_set[5]!=HEATER_PWM_MASK) WRITE(EXT5_HEATER_PIN,0);
+    if(pwm_pos_set[5] == pwm_count_heater && pwm_pos_set[5]!=HEATER_PWM_MASK) WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT5_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[5] == pwm_count && pwm_cooler_pos_set[5]!=255) WRITE(EXT5_EXTRUDER_COOLER_PIN,0);
 #endif
@@ -851,7 +851,7 @@ ISR(PWM_TIMER_VECTOR)
     if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER]!=HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER]!=HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
     HAL::allowInterrupts();
     counterPeriodical++; // Appxoimate a 100ms timer

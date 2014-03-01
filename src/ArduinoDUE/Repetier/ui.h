@@ -328,13 +328,14 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
-#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller has a sd card buildin
+// reprapdiscount smartcontroller has a sd card buildin
+#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 || FEATURE_CONTROLLER==13
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
-#define SDCARDDETECTINVERTED false
+#define SDCARDDETECTINVERTED 0
 #undef SDSUPPORT
-#define SDSUPPORT true
+#define SDSUPPORT 1
 #endif
 
 // Maximum size of a row - if row is larger, text gets scrolled
@@ -411,7 +412,7 @@ extern UIDisplay uid;
 #if FEATURE_CONTROLLER==0 // No controller at all
 #define UI_HAS_KEYS 0
 #define UI_DISPLAY_TYPE 0
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {}
@@ -436,7 +437,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#define UI_ANIMATION false  // Animations are too slow
+#define UI_ANIMATION 0  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
@@ -505,8 +506,8 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION false
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 0
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
@@ -546,11 +547,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D5_PIN _BV(11)
 #define UI_DISPLAY_D6_PIN _BV(10)
 #define UI_DISPLAY_D7_PIN _BV(9)
-#define UI_INVERT_MENU_DIRECTION true
+#define UI_INVERT_MENU_DIRECTION 1
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {
@@ -598,8 +599,8 @@ void ui_check_slow_keys(int &action) {
 #define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
 #define UI_DELAYPERCHAR		   320
-#define UI_INVERT_MENU_DIRECTION false
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 0
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(5);
@@ -630,8 +631,8 @@ void ui_check_slow_keys(int &action) {}
 #define SDCARDDETECT      49 // Set to -1 if you have not connected that pin
 #define SDSS              53 // Chip select pin
 
-#define SDSUPPORT true
-#define SDCARDDETECTINVERTED false
+#define SDSUPPORT 1
+#define SDCARDDETECTINVERTED 0
 #define SDCARDDETECT 	   -1
 
 #define UI_HAS_KEYS 1
@@ -660,20 +661,18 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_D7_PIN _BV(9)
 
 
-#if true || !defined(BEEPER_PIN) || BEEPER_PIN<0
 #define BEEPER_PIN        _BV(5)
 #define BEEPER_TYPE       2
 #define BEEPER_ADDRESS    UI_DISPLAY_I2C_ADDRESS // I2C address of the chip with the beeper pin
-#endif
 #define UI_I2C_HEATBED_LED    _BV(8)
 #define UI_I2C_HOTEND_LED     _BV(7)
 #define UI_I2C_FAN_LED        _BV(6)
 
-#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
@@ -743,8 +742,8 @@ void ui_check_slow_keys(int &action) {
 #endif
 
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION true
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 1
+#if UI_MAIN
 void ui_init_keys() {
     UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
     UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
@@ -814,8 +813,8 @@ void ui_check_slow_keys(int &action) {
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION false
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 0
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
@@ -836,11 +835,11 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_TYPE 1
 #define UI_DISPLAY_CHARSET 1
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION true
+#define UI_INVERT_MENU_DIRECTION 1
 #define BEEPER_SHORT_SEQUENCE 6,2 // Needs longer beep sequence
 #define BEEPER_LONG_SEQUENCE 24,8
 #define BEEPER_TYPE 1
-#define BEEPER_TYPE_INVERTING false
+#define BEEPER_TYPE_INVERTING 0
 
 #if FEATURE_CONTROLLER==9   // 16x02 Display
  #define UI_COLS 16
@@ -898,7 +897,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_BUTTON_SD_PRINT 42
 #endif
 
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_OK); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_NEXT);
@@ -943,8 +942,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_B           37
 #define UI_ENCODER_CLICK       31
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION false
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 0
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
@@ -983,8 +982,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_CLICK       78
 #define UI_KILL_PIN            80
 #define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION true
-#ifdef UI_MAIN
+#define UI_INVERT_MENU_DIRECTION 1
+#if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
@@ -1001,7 +1000,7 @@ void ui_check_slow_keys(int &action) {}
 #endif // Controller 13
 
 #if FEATURE_CONTROLLER == 14
-#define SDSUPPORT true
+#define SDSUPPORT 1
 #define SDCARDDETECT -1
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
@@ -1026,12 +1025,12 @@ void ui_check_slow_keys(int &action) {}
 #define UIDISPLAY_D5_PIN BV(11)
 #define UIDISPLAY_D6_PIN BV(10)
 #define UIDISPLAY_D7_PIN BV(9)
-#define UIINVERT_MENU_DIRECTION false
+#define UIINVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
 
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {
@@ -1070,7 +1069,7 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
 #define UI_DISPLAY_CHARSET 2
 #define UI_COLS 20
 #define UI_ROWS 4
-#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_MENU_DIRECTION 0
 
 #define UI_DISPLAY_I2C_CHIPTYPE 1
 #define UI_DISPLAY_I2C_ADDRESS 0x40
@@ -1082,7 +1081,7 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
 //#define UI_HAS_I2C_ENCODER 0
 //#define UI_I2C_KEY_ADDRESS UI_DISPLAY_I2C_ADDRESS
 #define BEEPER_TYPE 2
-#define BEEPER_TYPE_INVERTING true
+#define BEEPER_TYPE_INVERTING 1
 #define BEEPER_ADDRESS UI_DISPLAY_I2C_ADDRESS
 #define COMPILE_I2C_DRIVER
 
@@ -1102,7 +1101,7 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
 #define UI_I2C_HOTEND_LED     _BV(7)
 #define UI_I2C_FAN_LED        _BV(6)
 
-#ifdef UI_MAIN
+#if UI_MAIN
 void ui_init_keys() {
 	UI_KEYS_INIT_CLICKENCODER_LOW(10,11); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 	UI_KEYS_INIT_BUTTON_LOW(30); // push button, connects gnd to pin
@@ -1133,7 +1132,6 @@ void ui_check_slow_keys(int &action) {}
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
 #endif
 #include "uilang.h"
-#include "uimenu.h"
 #endif
 
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION

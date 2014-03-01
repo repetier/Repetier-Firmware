@@ -1524,34 +1524,34 @@ void Commands::emergencyStop()
 #else
     BEGIN_INTERRUPT_PROTECTED
     //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
-    kill(false);
+    Printer::kill(false);
     Extruder::manageTemperatures();
     for(uint8_t i=0; i<NUM_EXTRUDER+3; i++)
         pwm_pos[i] = 0;
     pwm_pos[0] = pwm_pos[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER+1] = pwm_pos[NUM_EXTRUDER+2]=0;
 #if EXT0_HEATER_PIN>-1
-    WRITE(EXT0_HEATER_PIN,0);
+    WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    WRITE(EXT1_HEATER_PIN,0);
+    WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    WRITE(EXT2_HEATER_PIN,0);
+    WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    WRITE(EXT3_HEATER_PIN,0);
+    WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    WRITE(EXT4_HEATER_PIN,0);
+    WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    WRITE(EXT5_HEATER_PIN,0);
+    WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if FAN_PIN>-1
     WRITE(FAN_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1
-    WRITE(HEATED_BED_HEATER_PIN,0);
+    WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
     while(1) {}
     END_INTERRUPT_PROTECTED

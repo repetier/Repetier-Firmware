@@ -1096,6 +1096,7 @@ is always running and is not hung up for some unknown reason. */
 
 /* Define a pin to tuen light on/off */
 #define CASE_LIGHTS_PIN -1
+#define CASE_LIGHT_DEFAULT_ON 1
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h

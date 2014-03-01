@@ -1857,78 +1857,6 @@ STEPPER_CURRENT_CONTROL
 #endif   ///////******end  PiBot for Repetier
 
 
-#if MOTHERBOARD == 401
-#ifndef __SAM3X8E__
-#error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
-#endif
-
-#define KNOWN_BOARD
-#define CPU_ARCH ARCH_ARM
-/*****************************************************************
-* Arduino Due Pin Assignments
-******************************************************************/
-
-#define X_STEP_PIN     36
-#define X_DIR_PIN      48
-#define X_MIN_PIN      12
-#define X_MAX_PIN      19
-#define X_ENABLE_PIN   29
-#define X_MS1_PIN      40
-#define X_MS2_PIN      41
-
-#define Y_STEP_PIN     36
-#define Y_DIR_PIN      49
-#define Y_MIN_PIN      11
-#define Y_MAX_PIN      18
-#define Y_ENABLE_PIN   28
-#define Y_MS1_PIN      69
-#define Y_MS2_PIN      39
-
-#define Z_STEP_PIN     35
-#define Z_DIR_PIN      47
-#define Z_MIN_PIN      10
-#define Z_MAX_PIN      15
-#define Z_ENABLE_PIN   27
-#define Z_MS1_PIN      68
-#define Z_MS2_PIN      67
-
-#define HEATER_BED_PIN 3
-#define TEMP_BED_PIN   65
-
-#define HEATER_0_PIN   9
-#define TEMP_0_PIN     63
-
-#define HEATER_1_PIN   7
-#define TEMP_1_PIN     64
-
-#define HEATER_2_PIN   -1
-#define TEMP_2_PIN     -1
-
-#define E0_STEP_PIN    34
-#define E0_DIR_PIN     43
-#define E0_ENABLE_PIN  26
-#define E0_MS1_PIN     65
-#define E0_MS2_PIN     66
-
-#define E1_STEP_PIN    33
-#define E1_DIR_PIN     42
-#define E1_ENABLE_PIN  25
-#define E1_MS1_PIN     63
-#define E1_MS2_PIN     64
-
-#define SDPOWER        -1
-#define SDSS           53
-#define LED_PIN        13
-#define FAN_PIN        8
-#define PS_ON_PIN      4
-#define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
-
-#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
-#define E1_PINS
-
-#endif
-
-
 /****************************************************************************************
 * Sanguish Beta pin assignment
 *
@@ -2026,6 +1954,46 @@ STEPPER_CURRENT_CONTROL
 #if NUM_EXTRUDER<3
 #define E2_PINS
 #endif
+
+#ifndef HEATER_PINS_INVERTED
+#define HEATER_PINS_INVERTED 0
+#endif
+
+// Original pin assignmats to be used in configuration tool
+#define ORIG_X_STEP_PIN X_STEP_PIN
+#define ORIG_X_DIR_PIN X_DIR_PIN
+#define ORIG_X_ENABLE_PIN X_ENABLE_PIN
+#define ORIG_X_MIN_PIN X_MIN_PIN
+#define ORIG_X_MAX_PIN X_MAX_PIN
+
+#define ORIG_Y_STEP_PIN Y_STEP_PIN
+#define ORIG_Y_DIR_PIN Y_DIR_PIN
+#define ORIG_Y_ENABLE_PIN Y_ENABLE_PIN
+#define ORIG_Y_MIN_PIN Y_MIN_PIN
+#define ORIG_Y_MAX_PIN Y_MAX_PIN
+
+#define ORIG_Z_STEP_PIN Z_STEP_PIN
+#define ORIG_Z_DIR_PIN Z_DIR_PIN
+#define ORIG_Z_ENABLE_PIN Z_ENABLE_PIN
+#define ORIG_Z_MIN_PIN Z_MIN_PIN
+#define ORIG_Z_MAX_PIN Z_MAX_PIN
+
+#define ORIG_E0_STEP_PIN E0_STEP_PIN
+#define ORIG_E0_DIR_PIN E0_DIR_PIN
+#define ORIG_E0_ENABLE_PIN E0_ENABLE_PIN
+
+#define ORIG_E1_STEP_PIN E1_STEP_PIN
+#define ORIG_E1_DIR_PIN E1_DIR_PIN
+#define ORIG_E1_ENABLE_PIN E1_ENABLE_PIN
+
+#define ORIG_E2_STEP_PIN E2_STEP_PIN
+#define ORIG_E2_DIR_PIN E2_DIR_PIN
+#define ORIG_E2_ENABLE_PIN E2_ENABLE_PIN
+
+#define ORIG_FAN_PIN FAN_PIN
+#define ORIG_FAN2_PIN FAN_PIN
+
+
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
                         HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif

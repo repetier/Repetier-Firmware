@@ -309,6 +309,7 @@ void Extruder::initExtruder()
     }
 #if HEATED_BED_HEATER_PIN>-1
     SET_OUTPUT(HEATED_BED_HEATER_PIN);
+    WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
     Extruder::initHeatedBed();
 #endif
     HAL::analogStart();
