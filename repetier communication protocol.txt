@@ -60,6 +60,9 @@ Text : Bit 15 : 16 Byte ASCII String terminated with 0
 If version 2 is set, 2 more bytes with bitfields follow:
 I : Bit 0 : 32-Bit float
 J : Bit 1 : 32-Bit float
+R : Bit 2 : 32-Bit float
+D : Bit 3 : 32-Bit float (V3)
+
 Bit 2-15 reserved
 If Text bit is set in V2, the text length is send as byte 5 Text follows at
 the end just before the checksum.
@@ -87,7 +90,7 @@ If the extra data is not needed, it is preferred to use V1 command to send/store
 First main difference is G and M codes are 16 bit in V2.
 Second difference are text codes send.
 
-The checksum is computed by Fletcher-16 checksum algorithm.
+The checksum is computed by Fletcher-16 checksum algorithm (using modulus 255).
 See http://en.wikipedia.org/wiki/Fletcher's_checksum
 Advantage: We build checksum over checksum and both bytes are 0 if
 correct.
