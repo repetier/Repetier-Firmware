@@ -86,11 +86,11 @@ long Printer::realDeltaPositionSteps[TOWER_ARRAY];
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
 long Printer::stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 long Printer::stepsRemainingAtXHit;
 long Printer::stepsRemainingAtYHit;
 #endif
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
 long Printer::levelingP1[3];
 long Printer::levelingP2[3];
 long Printer::levelingP3[3];
@@ -113,7 +113,7 @@ float Printer::feedrate;                   ///< Last requested feedrate.
 int Printer::feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
 unsigned int Printer::extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
 float Printer::maxJerk;                    ///< Maximum allowed jerk in mm/s
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
 float Printer::maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
 float Printer::offsetX;                     ///< X-offset for different extruder positions.
@@ -177,7 +177,7 @@ void Printer::constrainDestinationCoords()
 }
 bool Printer::isPositionAllowed(float x,float y,float z) {
     bool allowed = true;
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     allowed &= (z >= 0) && (z <= zLength);
     allowed &= (x * x + y * y <= deltaMaxRadiusSquared);
 #endif // DRIVE_SYSTEM
@@ -189,7 +189,7 @@ bool Printer::isPositionAllowed(float x,float y,float z) {
 }
 void Printer::updateDerivedParameter()
 {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
     maxAccelerationMMPerSquareSecond[X_AXIS] = maxAccelerationMMPerSquareSecond[Y_AXIS] = maxAccelerationMMPerSquareSecond[Z_AXIS];
     homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
@@ -229,7 +229,7 @@ void Printer::updateDerivedParameter()
     maxDeltaPositionSteps = delta[A_TOWER]; // Why?
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
-#elif DRIVE_SYSTEM==TUGA
+#elif DRIVE_SYSTEM == TUGA
     deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     if(deltaDiagonalStepsSquared>46000)
     {
@@ -436,7 +436,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
         if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
     }
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=DELTA
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM != DELTA
     if(isAutolevelActive())
     {
         transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS], x, y, z);
@@ -742,7 +742,7 @@ void Printer::setup()
     for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
     currentPositionSteps[X_AXIS] = currentPositionSteps[Y_AXIS] = currentPositionSteps[Z_AXIS] = currentPositionSteps[E_AXIS] = 0;
     maxJerk = MAX_JERK;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     maxZJerk = MAX_ZJERK;
 #endif
     offsetX = offsetY = 0;
@@ -839,7 +839,7 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 #endif
 
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 void Printer::deltaMoveToTopEndstops(float feedrate)
 {
     for (uint8_t i=0; i<3; i++)
@@ -933,7 +933,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     Commands::printCurrentPosition();
 }
 #else
-#if DRIVE_SYSTEM==TUGA  // Tuga printer homing
+#if DRIVE_SYSTEM == TUGA  // Tuga printer homing
 void Printer::homeXAxis()
 {
     long steps;
@@ -1069,7 +1069,7 @@ void Printer::homeZAxis()
             PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
 #endif
         currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
         currentDeltaPositionSteps[C_TOWER] = currentPositionSteps[Z_AXIS];
 #endif
     }
@@ -1208,7 +1208,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
 #if NONLINEAR_SYSTEM
         stepsRemainingAtZHit = probeDepth + realDeltaPositionSteps[C_TOWER] - zStart;
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit;
         currentDeltaPositionSteps[B_TOWER] += stepsRemainingAtZHit;
         currentDeltaPositionSteps[C_TOWER] += stepsRemainingAtZHit;

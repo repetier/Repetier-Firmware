@@ -115,7 +115,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -722,7 +722,7 @@ on this endstop.
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 // Delta settings
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 /** \brief Delta rod length
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
@@ -797,10 +797,10 @@ you can also change the values online and autoleveling will store the results he
 /** \brief Experimental calibration utility for delta printers
  * Change 1 to 0 to disable
 */
-#define SOFTWARE_LEVELING (1 && (DRIVE_SYSTEM==DELTA))
+#define SOFTWARE_LEVELINGxx 1
 
 #endif
-#if DRIVE_SYSTEM==TUGA 
+#if DRIVE_SYSTEM == TUGA 
 // ========== Tuga special settings =============
 /* Radius of the long arm in mm. */
 #define DELTA_DIAGONAL_ROD 240
@@ -815,7 +815,7 @@ or 16 * (200 + (7*22=154) = 354) = 5664 bytes!!!!!!!1
 min is 5 * (200 + (7*10=70) =270) = 1350
  This leaves ~1K free RAM on an Arduino which has only 8k
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define DELTASEGMENTS_PER_PRINTLINE 10
+#define DELTASEGMENTS_PER_PRINTLINE 22
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -934,7 +934,7 @@ At 200mm/sec this is 5/200 25 milliseconds, which is abundant time to refil the 
 more gcode commands. It should not be possible to every exhast the cache.
 The minimum value is 5.
 */
-#define PRINTLINE_CACHE_SIZE 5
+#define PRINTLINE_CACHE_SIZE 16
 
 /** \brief Low filled cache size.
 

@@ -625,7 +625,7 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
                 Printer::updateCurrentPosition();
                 Printer::zLength += sum - Printer::currentPosition[Z_AXIS];
                 Printer::updateDerivedParameter();
@@ -695,7 +695,7 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
                 /* Printer::offsetX = 0;
                  Printer::offsetY = 0;
                  Printer::moveToReal(0,0,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
@@ -709,7 +709,7 @@ void Commands::executeGCode(GCode *com)
 #endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
                 Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
 #endif
 #endif
@@ -721,7 +721,7 @@ void Commands::executeGCode(GCode *com)
             Printer::updateDerivedParameter();
             Printer::updateCurrentPosition(true);
             printCurrentPosition();
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             Printer::homeAxis(true,true,true);
 #endif
             Printer::feedrate = oldFeedrate;
@@ -750,7 +750,7 @@ void Commands::executeGCode(GCode *com)
             }
         }
         break;
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         case 131: // Remove offset
         {
             float cx,cy,cz;
@@ -1282,7 +1282,7 @@ void Commands::executeGCode(GCode *com)
                 Extruder::current->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(Extruder::current->id);
             }
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
             if(com->hasZ())
                 Printer::maxZJerk = com->Z;
             Com::printF(Com::tJerkColon,Printer::maxJerk);

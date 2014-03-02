@@ -90,7 +90,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define E_AXIS_ARRAY 4
 #define VIRTUAL_AXIS_ARRAY 5
 
-
+#define SOFTWARE_DELTA_LEVELING (SOFTWARE_LEVELING && (DRIVE_SYSTEM == DELTA))
 #define A_TOWER 0
 #define B_TOWER 1
 #define C_TOWER 2
@@ -141,7 +141,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD 
+#if DRIVE_SYSTEM == DELTA || DRIVE_SYSTEM == TUGA || DRIVE_SYSTEM == BIPOD 
 #define NONLINEAR_SYSTEM 1
 #else
 #define NONLINEAR_SYSTEM 0
@@ -151,7 +151,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MANUAL_CONTROL 1
 #endif
 
-#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY)
+#define GANTRY ( DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY)
 
 //Step to split a cirrcle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
@@ -285,7 +285,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=CARTESIAN
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -361,7 +361,7 @@ void manage_inactivity(uint8_t debug);
 extern void finishNextSegment();
 #if NONLINEAR_SYSTEM
 extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
 extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
 extern float calcZOffset(long factors[], long pointX, long pointY);
 #endif

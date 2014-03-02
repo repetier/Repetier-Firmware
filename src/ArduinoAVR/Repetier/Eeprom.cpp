@@ -70,7 +70,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::homingFeedrate[Y_AXIS] = HOMING_FEEDRATE_Y;
     Printer::homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
     Printer::maxJerk = MAX_JERK;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     Printer::maxZJerk = MAX_ZJERK;
 #endif
 #if RAMP_ACCELERATION
@@ -316,7 +316,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[Y_AXIS]);
     HAL::eprSetFloat(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[Z_AXIS]);
     HAL::eprSetFloat(EPR_MAX_JERK,Printer::maxJerk);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     HAL::eprSetFloat(EPR_MAX_ZJERK,Printer::maxZJerk);
 #endif
 #if RAMP_ACCELERATION
@@ -437,7 +437,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
@@ -476,7 +476,7 @@ void EEPROM::readDataFromEEPROM()
     Printer::homingFeedrate[Y_AXIS] = HAL::eprGetFloat(EPR_Y_HOMING_FEEDRATE);
     Printer::homingFeedrate[Z_AXIS] = HAL::eprGetFloat(EPR_Z_HOMING_FEEDRATE);
     Printer::maxJerk = HAL::eprGetFloat(EPR_MAX_JERK);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     Printer::maxZJerk = HAL::eprGetFloat(EPR_MAX_ZJERK);
 #endif
 #if RAMP_ACCELERATION
@@ -579,7 +579,7 @@ void EEPROM::readDataFromEEPROM()
         }
         if(version<4)
         {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
             HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
@@ -589,7 +589,7 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,DELTA_Z_ENDSTOP_OFFSET_STEPS);
 #endif
         }
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         if(version<5) {
             HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
@@ -684,23 +684,23 @@ void EEPROM::writeSettings()
     writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM,4);
     writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM,4);
 #endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM,4);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
 #endif
     writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_X_HOMING_FEEDRATE,Com::tEPRXHomingFeedrate);
     writeFloat(EPR_Y_HOMING_FEEDRATE,Com::tEPRYHomingFeedrate);
 #endif
     writeFloat(EPR_Z_HOMING_FEEDRATE,Com::tEPRZHomingFeedrate);
     writeFloat(EPR_MAX_JERK,Com::tEPRMaxJerk);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_MAX_ZJERK,Com::tEPRMaxZJerk);
 #endif
     writeFloat(EPR_X_HOME_OFFSET,Com::tEPRXHomePos);
@@ -719,10 +719,10 @@ void EEPROM::writeSettings()
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);

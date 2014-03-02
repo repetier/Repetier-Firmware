@@ -478,7 +478,7 @@ void PrintLine::updateTrapezoids()
     uint8_t previousIndex = linesWritePos;
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     // filters z-move<->not z-move
     if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
     {
@@ -548,7 +548,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
     float dx = current->speedX-previous->speedX;
     float dy = current->speedY-previous->speedY;
     float factor = 1;
-#if (DRIVE_SYSTEM==DELTA) // No point computing Z Jerk separately for delta moves
+#if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
     float dz = current->speedZ-previous->speedZ;
     float jerk = sqrt(dx*dx + dy*dy + dz*dz);
 #else
@@ -556,7 +556,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
 #endif
     if(jerk>Printer::maxJerk)
         factor = Printer::maxJerk / jerk;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     if((previous->dir | current->dir) & 64)
     {
         float dz = fabs(current->speedZ - previous->speedZ);
@@ -749,7 +749,7 @@ void PrintLine::forwardPlanner(uint8_t first)
 inline float PrintLine::safeSpeed()
 {
     float safe(Printer::maxJerk * 0.5);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     if(isZMove())
     {
         if(primaryAxis == Z_AXIS) {
@@ -828,7 +828,7 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 }
 
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 /**
   Calculate the delta tower position from a cartesian position
   @param cartesianPosSteps Array containing cartesian coordinates.
@@ -906,7 +906,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
 }
 #endif
 
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
 
 /**
   Calculate the delta tower position from a cartesian position
@@ -970,7 +970,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             return;
         }
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         if(isZPositiveMove() && isXPositiveMove() && isYPositiveMove() && (Printer::isXMaxEndstopHit() || Printer::isYMaxEndstopHit() || Printer::isZMaxEndstopHit()))
 #else
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
@@ -988,7 +988,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     {
         if(isXPositiveMove() && Printer::isXMaxEndstopHit())
         {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             Printer::stepsRemainingAtXHit = cur->stepsRemaining;
 #endif
             setXMoveFinished();
@@ -996,7 +996,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         }
         if(isYPositiveMove() && Printer::isYMaxEndstopHit())
         {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             Printer::stepsRemainingAtYHit = cur->stepsRemaining;
 #endif
             setYMoveFinished();
@@ -1010,7 +1010,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setYMoveFinished();
             cur->setYMoveFinished();
         }
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
         if(isXNegativeMove() && Printer::isXMinEndstopHit()) {
             setXMoveFinished();
             cur->setXMoveFinished();
@@ -1169,7 +1169,7 @@ uint8_t PrintLine::calculateDistance(float axisDiff[], uint8_t dir, float *dista
     }
 }
 
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
 void PrintLine::calculatePlane(long factors[], long p1[], long p2[], long p3[])
 {
     factors[0] = p1[1] * (p2[2] - p3[2]) + p2[1] * (p3[2] - p1[2]) + p3[1] * (p1[2] - p2[2]);
@@ -1986,9 +1986,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         long gdx = (cur->dir & 1 ? cur->delta[0] : -cur->delta[0]); // Compute signed difference in steps
         long gdy = (cur->dir & 2 ? cur->delta[1] : -cur->delta[1]);
         Printer::setXDirection(gdx+gdy>=0);
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY
         Printer::setYDirection(gdx>gdy);
-#elif DRIVE_SYSTEM==YX_GANTRY
+#elif DRIVE_SYSTEM == YX_GANTRY
         Printer::setYDirection(gdx<=gdy);
 #endif
 #endif
