@@ -142,7 +142,7 @@ void SDCard::pausePrint(bool intern)
     if(intern) {
         Commands::waitUntilEndOfAllBuffers();
         Printer::MemoryPosition();
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         Printer::moveToReal(0,0.4*Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
 #else
         Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,Printer::currentPosition[Z_AXIS],IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);

@@ -1016,7 +1016,7 @@ void UIDisplay::parse(char *txt,bool ram)
             else if(c2=='Y') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],5,0);
             else if(c2=='Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],5,0);
             else if(c2=='j') addFloat(Printer::maxJerk,3,1);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
             else if(c2=='J') addFloat(Printer::maxZJerk,3,1);
 #endif
             break;
@@ -1151,7 +1151,7 @@ void UIDisplay::parse(char *txt,bool ram)
             addFloat(fvalue,4,2);
             break;
         case 'y':
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             if(c2>='0' && c2<='3') fvalue = (float)Printer::currentDeltaPositionSteps[c2-'0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
@@ -2216,7 +2216,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_PRINT_ACCEL_Y:
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
 #else
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
@@ -2236,7 +2236,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_Z:
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
 #else
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
@@ -2246,7 +2246,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     case UI_ACTION_MAX_JERK:
         INCREMENT_MIN_MAX(Printer::maxJerk,0.1,1,99.9);
         break;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     case UI_ACTION_MAX_ZJERK:
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
@@ -2778,7 +2778,7 @@ void UIDisplay::executeAction(int action)
         break;
 #endif
         case UI_ACTION_SET_P1:
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP1[i] = Printer::currentPositionSteps[i];
@@ -2786,7 +2786,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_SET_P2:
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP2[i] = Printer::currentPositionSteps[i];
@@ -2794,7 +2794,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_SET_P3:
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
             for (uint8_t i=0; i<3; i++)
             {
                 Printer::levelingP3[i] = Printer::currentPositionSteps[i];
@@ -2802,7 +2802,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_CALC_LEVEL:
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
             int32_t factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);

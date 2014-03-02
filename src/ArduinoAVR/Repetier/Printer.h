@@ -96,11 +96,11 @@ public:
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     static long stepsRemainingAtXHit;
     static long stepsRemainingAtYHit;
 #endif
-#if SOFTWARE_LEVELING
+#if SOFTWARE_DELTA_LEVELING
     static long levelingP1[3];
     static long levelingP2[3];
     static long levelingP3[3];
@@ -126,7 +126,7 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.

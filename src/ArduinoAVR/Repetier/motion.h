@@ -328,7 +328,7 @@ public:
     }
     inline void setXMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
         dir&=~16;
 #else
         dir&=~48;
@@ -336,7 +336,7 @@ public:
     }
     inline void setYMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
         dir&=~32;
 #else
         dir&=~48;
@@ -504,7 +504,7 @@ public:
         WRITE(X2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -516,7 +516,7 @@ public:
             Printer::motorY--;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM == YX_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -544,7 +544,7 @@ public:
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -556,7 +556,7 @@ public:
             Printer::motorY++;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM == YX_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -654,7 +654,7 @@ public:
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], uint8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING 
+#if SOFTWARE_DELTA_LEVELING 
     static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
     static float calcZOffset(long factors[], long pointX, long pointY);
 #endif

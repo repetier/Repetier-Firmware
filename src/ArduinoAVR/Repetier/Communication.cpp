@@ -21,10 +21,10 @@
 
 #include "Repetier.h"
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
-#if DRIVE_SYSTEM==CARTESIAN
+#if DRIVE_SYSTEM == CARTESIAN
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
@@ -119,7 +119,7 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
@@ -138,7 +138,7 @@ FSTRINGVALUE(Com::tDeltaRadiusCorrectionB,"Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC,"Delta Radius C(0):")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Long arm length [mm]")
@@ -268,7 +268,7 @@ FSTRINGVALUE(Com::tEPRXBacklash,"X backlash [mm]")
 FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZStepsPerMM,"Steps per mm")
