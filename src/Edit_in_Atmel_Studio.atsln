@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Repetier_atMega2560", "ArduinoAVR\Repetier_atMega2560.cproj", "{092E2AE2-034F-445F-87AE-475EBDFA37E8}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Repetier_sam3x8E", "ArduinoDUE\Repetier_sam3x8E.cproj", "{FB8B314D-5D77-4902-80A2-CBB301B854FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|AVR = Debug|AVR
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Release|ARM = Release|ARM
+		Release|AVR = Release|AVR
+		Release|Mixed Platforms = Release|Mixed Platforms
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Debug|ARM.ActiveCfg = Debug|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Debug|AVR.ActiveCfg = Debug|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Debug|AVR.Build.0 = Debug|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Debug|Mixed Platforms.ActiveCfg = Debug|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Debug|Mixed Platforms.Build.0 = Debug|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Release|ARM.ActiveCfg = Release|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Release|AVR.ActiveCfg = Release|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Release|AVR.Build.0 = Release|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Release|Mixed Platforms.ActiveCfg = Release|AVR
+		{092E2AE2-034F-445F-87AE-475EBDFA37E8}.Release|Mixed Platforms.Build.0 = Release|AVR
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Debug|ARM.ActiveCfg = Debug|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Debug|ARM.Build.0 = Debug|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Debug|AVR.ActiveCfg = Debug|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Debug|Mixed Platforms.ActiveCfg = Debug|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Debug|Mixed Platforms.Build.0 = Debug|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Release|ARM.ActiveCfg = Release|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Release|ARM.Build.0 = Release|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Release|AVR.ActiveCfg = Release|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Release|Mixed Platforms.ActiveCfg = Release|ARM
+		{FB8B314D-5D77-4902-80A2-CBB301B854FD}.Release|Mixed Platforms.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

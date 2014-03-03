@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>6.0</ProjectVersion>
+    <ToolchainName>com.Atmel.ARMGCC</ToolchainName>
+    <ProjectGuid>{fb8b314d-5d77-4902-80a2-cbb301b854fd}</ProjectGuid>
+    <avrdevice>ATSAM3X8E</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>C</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>Repetier_sam</AssemblyName>
+    <Name>Repetier_sam3x8E</Name>
+    <RootNamespace>Repetier_sam</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <AsfVersion>3.5.1</AsfVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <ArmGcc>
+        <armgcc.common.general.symbols>__SAM3X8E__</armgcc.common.general.symbols>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\ARMGCC\3.3.1.128\ARMSupportFiles</Value>
+            <Value>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\ARMGCC\3.3.1.128\ARMSupportFiles\CMSIS\Include</Value>
+            <Value>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\ARMGCC\3.3.1.128\ARMSupportFiles\Device\ATMEL</Value>
+            <Value>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\ARMGCC\3.3.1.128\ARMSupportFiles\Device\ATMEL\sam3xa\include</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+        <armgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>m</Value>
+          </ListValues>
+        </armgcc.linker.libraries.Libraries>
+        <armgcc.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>../cmsis/linkerScripts</Value>
+          </ListValues>
+        </armgcc.linker.libraries.LibrarySearchPaths>
+        <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+        <armgcc.linker.miscellaneous.LinkerFlags>-Tsam3x8e_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+      </ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <ArmGcc>
+        <armgcc.common.general.symbols>__SAM3X8E__</armgcc.common.general.symbols>
+        <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+        <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+        <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+        <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+        <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+        <armgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>C:\Program Files (x86)\Arduino\hardware\arduino\sam\cores\arduino</Value>
+            <Value>C:\Program Files (x86)\Arduino\hardware\arduino\sam\cores\arduino\avr</Value>
+            <Value>C:\Program Files (x86)\Arduino\hardware\arduino\sam\cores\arduino\USB</Value>
+            <Value>C:\Program Files (x86)\Arduino\hardware\arduino\sam\libraries\SPI</Value>
+            <Value>C:\Program Files (x86)\Arduino\hardware\arduino\sam\libraries\Wire</Value>
+          </ListValues>
+        </armgcc.compiler.directories.IncludePaths>
+        <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+        <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+        <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+        <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+        <armgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>m</Value>
+          </ListValues>
+        </armgcc.linker.libraries.Libraries>
+        <armgcc.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>../cmsis/linkerScripts</Value>
+          </ListValues>
+        </armgcc.linker.libraries.LibrarySearchPaths>
+        <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+        <armgcc.linker.miscellaneous.LinkerFlags>-Tsam3x8e_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+        <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
+        <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
+      </ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Repetier" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Repetier\Commands.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Communication.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Eeprom.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Extruder.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\gcode.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\HAL.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Makefile">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\motion.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Printer.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\Repetier.ino">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\SDCard.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\SdFat.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Repetier\ui.cpp">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Repetier\Commands.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Communication.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Configuration.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Extruder.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\fastio.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\FatStructs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\gcode.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\HAL.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\motion.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\pins.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Printer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\Repetier.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\SdFat.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\u8glib_ex.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\ui.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\uiconfig.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\uilang.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Repetier\uimenu.h">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>
