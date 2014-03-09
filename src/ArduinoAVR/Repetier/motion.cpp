@@ -252,37 +252,20 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     UI_MEDIUM; // do check encoder
     // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
     long limitInterval = timeForMove/stepsRemaining; // until not violated by other constraints it is your target speed
-    if(isXMove())
-    {
-        axisInterval[X_AXIS] = fabs(axis_diff[X_AXIS]) * F_CPU / (Printer::maxFeedrate[X_AXIS] * stepsRemaining); // mm*ticks/s/(mm/s*steps) = ticks/step
-        limitInterval = RMath::max(axisInterval[X_AXIS],limitInterval);
-    }
-    else axisInterval[X_AXIS] = 0;
-    if(isYMove())
-    {
-        axisInterval[Y_AXIS] = fabs(axis_diff[Y_AXIS])*F_CPU/(Printer::maxFeedrate[Y_AXIS]*stepsRemaining);
-        limitInterval = RMath::max(axisInterval[Y_AXIS],limitInterval);
-    }
-    else axisInterval[Y_AXIS] = 0;
-    if(isZMove())   // normally no move in z direction
-    {
-        axisInterval[Z_AXIS] = fabs((float)axis_diff[Z_AXIS])*(float)F_CPU/(float)(Printer::maxFeedrate[Z_AXIS]*stepsRemaining); // must prevent overflow!
-        limitInterval = RMath::max(axisInterval[Z_AXIS],limitInterval);
-    }
-    else axisInterval[Z_AXIS] = 0;
-    if(isEMove())
-    {
-        axisInterval[E_AXIS] = fabs(axis_diff[E_AXIS])*F_CPU/(Printer::maxFeedrate[E_AXIS]*stepsRemaining);
-        limitInterval = RMath::max(axisInterval[E_AXIS],limitInterval);
-    }
-    else axisInterval[E_AXIS] = 0;
+	axisInterval[X_AXIS] = isXMove()?fabs(axis_diff[X_AXIS]) * F_CPU / (Printer::maxFeedrate[X_AXIS] * stepsRemaining):0;
+	axisInterval[Y_AXIS] = isYMove()?fabs(axis_diff[Y_AXIS])*F_CPU/(Printer::maxFeedrate[Y_AXIS]*stepsRemaining):0;
+	axisInterval[Z_AXIS] = isZMove()?fabs((float)axis_diff[Z_AXIS])*(float)F_CPU/(float)(Printer::maxFeedrate[Z_AXIS]*stepsRemaining):0;
+	axisInterval[E_AXIS] = isEMove()?fabs(axis_diff[E_AXIS])*F_CPU/(Printer::maxFeedrate[E_AXIS]*stepsRemaining):0;
 #if NONLINEAR_SYSTEM
     axisInterval[VIRTUAL_AXIS] = fabs(axis_diff[VIRTUAL_AXIS])*F_CPU/(Printer::maxFeedrate[X_AXIS]*stepsRemaining);
+	limitInterval = RMath::max(limitInterval, RMath::max(axisInterval[X_AXIS],RMath::max(axisInterval[Y_AXIS],RMath::max(axisInterval[Z_AXIS],RMath::max(axisInterval[Z_AXIS], axisInterval[VIRTUAL_AXIS])))));
+#else
+	limitInterval = RMath::max(limitInterval,RMath::max(axisInterval[X_AXIS],RMath::max(axisInterval[Y_AXIS],RMath::max(axisInterval[Z_AXIS],axisInterval[E_AXIS]))));
 #endif
 
     fullInterval = limitInterval>200 ? limitInterval : 200; // This is our target speed
     // new time at full speed = limitInterval*p->stepsRemaining [ticks]
-    timeForMove = (float)limitInterval * (float)stepsRemaining; // for large z-distance this overflows with long computation
+    timeForMove = (float)fullInterval * (float)stepsRemaining; // for large z-distance this overflows with long computation
     float inv_time_s = (float)F_CPU / timeForMove;
     if(isXMove())
     {
