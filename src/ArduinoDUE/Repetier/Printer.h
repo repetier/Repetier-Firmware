@@ -40,6 +40,8 @@ union floatLong {
 #define PRINTER_FLAG1_ANIMATION             4
 #define PRINTER_FLAG1_ALLKILLED             8
 #define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
+#define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
+
 class Printer
 {
 public:
@@ -92,6 +94,8 @@ public:
     static long deltaCPosXSteps;
     static long deltaCPosYSteps;
     static long realDeltaPositionSteps[3];
+    static int16_t travelMovesPerSecond;
+    static int16_t printMovesPerSecond;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
@@ -108,6 +112,7 @@ public:
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
+    static signed char zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -131,7 +136,7 @@ public:
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
-    static unsigned int vMaxReached;         ///< Maximumu reached speed
+    static speed_t vMaxReached;         ///< Maximumu reached speed
     static unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;            ///< mm of filament printed since counting started
     static uint8_t wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
@@ -165,6 +170,9 @@ public:
             menuMode |= mode;
         else
             menuMode &= ~mode;
+    }
+    static inline bool isMenuMode(uint8_t mode) {
+        return (menuMode & mode)==mode;
     }
     static inline bool debugEcho()
     {
@@ -301,6 +309,18 @@ public:
 #endif
         }
     }
+    static inline bool getZDirection()
+    {
+        return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
+    }
+    static inline bool getYDirection()
+    {
+        return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
+    }
+    static inline bool getXDirection()
+    {
+        return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
+    }
     static inline uint8_t isLargeMachine()
     {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
@@ -356,6 +376,14 @@ public:
     static inline void setUIErrorMessage(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
+    }
+    static inline uint8_t isNoDestinationCheck()
+    {
+        return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
+    }
+    static inline void setNoDestinationCheck(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
     }
     static inline void toggleAnimation() {
         setAnimation(!isAnimation());
@@ -521,7 +549,7 @@ public:
         ANALYZER_OFF(ANALYZER_CH6);
         ANALYZER_OFF(ANALYZER_CH7);
     }
-    static inline unsigned int updateStepsPerTimerCall(unsigned int vbase)
+    static inline speed_t updateStepsPerTimerCall(speed_t vbase)
     {
         if(vbase>STEP_DOUBLER_FREQUENCY)
         {
@@ -628,6 +656,7 @@ public:
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
 #endif
+    static void zBabystep();
 private:
     static void homeXAxis();
     static void homeYAxis();

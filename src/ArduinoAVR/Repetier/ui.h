@@ -155,6 +155,9 @@
 #define UI_ACTION_FANSPEED              1106
 #define UI_ACTION_LIGHTS_ONOFF          1107
 #define UI_ACTION_SD_STOP               1108
+#define UI_ACTION_ZPOSITION_NOTEST      1109
+#define UI_ACTION_ZPOSITION_FAST_NOTEST 1110
+#define UI_ACTION_Z_BABYSTEPS           1111
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -632,7 +635,6 @@ void ui_check_slow_keys(int &action) {}
 
 #define SDSUPPORT true
 #define SDCARDDETECTINVERTED false
-#define SDCARDDETECT 	   -1
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1

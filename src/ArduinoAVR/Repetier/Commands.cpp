@@ -443,6 +443,8 @@ void Commands::executeGCode(GCode *com)
         {
         case 0: // G0 -> G1
         case 1: // G1
+            if(com->hasS())
+                Printer::setNoDestinationCheck(com->S!=0);
             if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
                 PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);

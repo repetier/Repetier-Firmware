@@ -140,7 +140,9 @@ typedef char prog_char;
 #endif
 
 #define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
-#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP) 
+//#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
+#define	WRITE(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+ 
 #define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
     PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0) 
 #define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
@@ -175,9 +177,14 @@ typedef char prog_char;
 
 static uint32_t    tone_pin;
 
+#define LIMIT_INTERVAL ((F_CPU/405000)+1)
+//#define LIMIT_INTERVAL ((F_CPU/65536)+1)
+
+
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
+typedef int flag8_t;
 
 #define RFSERIAL Serial
 
@@ -232,7 +239,8 @@ public:
     }
     static inline unsigned int ComputeV(long timer,long accel)
     {
-        return ((timer>>8)*accel)>>10;
+        return static_cast<unsigned int>((static_cast<int64_t>(timer)*static_cast<int64_t>(accel))>>18);
+        //return ((timer>>8)*accel)>>10;
     }
 // Multiply two 16 bit values and return 32 bit result
     static inline unsigned long mulu16xu16to32(unsigned int a,unsigned int b)
@@ -261,7 +269,9 @@ public:
         if (mode == INPUT) {SET_INPUT(pin);}
         else SET_OUTPUT(pin);
     }
-    static long CPUDivU2(unsigned int divisor);
+    static long CPUDivU2(speed_t divisor) {
+      return F_CPU/divisor;
+    }
     static inline void delayMicroseconds(unsigned int delayUs)
     {
         microsecondsWait(delayUs);

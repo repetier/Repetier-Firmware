@@ -684,6 +684,10 @@ ISR(TIMER1_COMPA_vect)
         setTimer(PrintLine::bresenhamStep());
     }
     else
+    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing) {
+        Printer::zBabystep();
+        setTimer(Printer::interval);
+    } else
     {
         if(waitRelax == 0)
         {

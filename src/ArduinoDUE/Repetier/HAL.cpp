@@ -48,10 +48,7 @@ HAL::~HAL()
 }
 
 
-long HAL::CPUDivU2(unsigned int divisor)
-{
-    return F_CPU/divisor;
-}
+
 
 // Set up all timer interrupts 
 void HAL::setupTimer() {
@@ -680,9 +677,10 @@ inline void setTimer(unsigned long delay)
     // convert old AVR timer delay value for SAM timers
     uint32_t timer_count = (delay * TIMER1_PRESCALE);
 
-    if(timer_count == 0) timer_count = 1;
+    if(timer_count < 210) timer_count = 210;
     TC_SetRC(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, timer_count);
-    TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
+    if(TC_ReadCV(TIMER1_TIMER,TIMER1_TIMER_CHANNEL)>timer_count)
+      TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
 }
 
 /** \brief Timer interrupt routine to drive the stepper motors.
@@ -699,6 +697,10 @@ void TIMER1_COMPA_VECTOR ()
         HAL::allowInterrupts();
     }
     else
+    if(Printer::zBabystepsMissing != 0) {
+        Printer::zBabystep();
+        setTimer(Printer::interval);
+    } else
     {
         if(waitRelax==0)
         {
@@ -718,6 +720,7 @@ void TIMER1_COMPA_VECTOR ()
 #endif
         }
         else waitRelax--;
+        setTimer(10000);
     }
     DEBUG_MEMORY;
     HAL::insideTimer1=0;

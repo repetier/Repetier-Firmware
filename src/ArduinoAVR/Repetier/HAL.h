@@ -101,10 +101,18 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 /** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
 #define I2C_WRITE   0
 
+#if NONLINEAR_SYSTEM
+// Maximum speed with 100% inerrupt utilization is 27000 hz at 16MHz cpu
+// leave some margin for all the extra transformations. So we keep inside clean timings.
+#define LIMIT_INTERVAL ((F_CPU/20000)+1)
+#else
+#define LIMIT_INTERVAL ((F_CPU/40000)+1)
+#endif
 
 typedef uint16_t speed_t;
 typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
+typedef uint8_t flag8_t;
 
 #define FAST_INTEGER_SQRT
 

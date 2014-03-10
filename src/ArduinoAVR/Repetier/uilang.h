@@ -254,6 +254,7 @@
 #define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 #define UI_TEXT_STOP_PRINT "Stop Print"
+#define UI_TEXT_Z_BABYSTEPPING "Z Babystepping"
 
 // *************** German translation ****************
 
@@ -429,6 +430,7 @@
 #define UI_TEXT_STRING_HM_DEADTIME     "Totzeit"
 #define UI_TEXT_STRING_HM_SLOWBANG     "Langs.BB"
 #define UI_TEXT_STOP_PRINT "Druck abbrechen"
+#define UI_TEXT_Z_BABYSTEPPING "Z Babyschritte"
 
 #endif
 

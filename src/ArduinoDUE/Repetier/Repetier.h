@@ -116,6 +116,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#ifndef FEATURE_BABYSTEPPING
+#define FEATURE_BABYSTEPPING 0
+#define BABYSTEP_MULTIPLICATOR 1
+#endif
+
 #if !defined(Z_PROBE_REPETITIONS) || Z_PROBE_REPETITIONS < 1
 #define Z_PROBE_SWITCHING_DISTANCE 0.5 // Distance to safely untrigger probe
 #define Z_PROBE_REPETITIONS 1
@@ -254,6 +259,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_SD_PRINTING 2
 #define MENU_MODE_SD_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
+#define MENU_MODE_PRINTING 16
 
 #include "HAL.h"
 #include "gcode.h"
