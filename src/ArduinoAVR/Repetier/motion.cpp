@@ -461,7 +461,7 @@ void PrintLine::updateTrapezoids()
     // Now ignore enough segments to gain enough time for path planning
     int32_t timeleft = 0;
     // Skip as many stored moves as needed to gain enough time for computation
-    millis_t minTime = 4500L * RMath::min(MOVE_CACHE_SIZE,10);
+    millis_t minTime = 4500L * RMath::min(PRINTLINE_CACHE_SIZE,10);
     while(timeleft < minTime && maxfirst != linesWritePos)
     {
         timeleft += lines[maxfirst].timeInTicks;
