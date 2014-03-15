@@ -815,18 +815,20 @@ void Commands::executeGCode(GCode *com)
             Printer::homeAxis(true,true,true);
             }
             break;
-        case 134:
+ /*       case 134:
             Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[X_AXIS]);
             Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
+#ifdef DEBUG_REAL_POSITION
             Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[X_AXIS]);
             Com::printF(Com::tComma,Printer::realDeltaPositionSteps[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[Z_AXIS]);
+#endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
             printCurrentPosition();
             break;
-
+*/
 #endif // DRIVE_SYSTEM
         }
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -1487,7 +1489,7 @@ void Commands::executeGCode(GCode *com)
                 Printer::maxRealJerk = 0;
             break;
 #endif
-        case 535:
+/*        case 535:
             Com::printF(PSTR("Last commanded position:"),Printer::lastCmdPos[X_AXIS]);
             Com::printF(Com::tComma,Printer::lastCmdPos[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::lastCmdPos[Z_AXIS]);
@@ -1502,7 +1504,7 @@ void Commands::executeGCode(GCode *com)
             Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
 #endif // NONLINEAR_SYSTEM
-            break;
+            break;*/
         }
     }
     else if(com->hasT())      // Process T code

@@ -557,7 +557,7 @@ void HAL::microsecondsWait(uint32_t us)
     usStart =  TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL);
 
     // funny math here to give good accuracy with no overflow 
-    goal = usStart + ((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
+    goal = usStart + 10*us-5; //((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
 
     // goal may have wrapped, if so wait for counter to catch up
     if(goal < usStart) {

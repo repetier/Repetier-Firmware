@@ -103,7 +103,6 @@
 #define UI_ACTION_FAN_FULL              1054
 #define UI_ACTION_FEEDRATE_MULTIPLY     1055
 #define UI_ACTION_STEPPER_INACTIVE      1056
-#define UI_ACTION_MAX_INACTIVE          1057
 #define UI_ACTION_PID_PGAIN             1058
 #define UI_ACTION_PID_IGAIN             1059
 #define UI_ACTION_PID_DGAIN             1060
@@ -158,6 +157,7 @@
 #define UI_ACTION_ZPOSITION_NOTEST      1109
 #define UI_ACTION_ZPOSITION_FAST_NOTEST 1110
 #define UI_ACTION_Z_BABYSTEPS           1111
+#define UI_ACTION_MAX_INACTIVE          1112
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

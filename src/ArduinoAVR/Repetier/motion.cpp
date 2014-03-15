@@ -1781,7 +1781,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     {
                         cur->startXStep();
                         cur->error[X_AXIS] += curd_errupd;
+#ifdef DEBUG_REAL_POSITION
                         Printer::realDeltaPositionSteps[X_AXIS] += curd->isXPositiveMove() ? 1 : -1;
+#endif
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
 #endif
@@ -1794,7 +1796,9 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     {
                         cur->startYStep();
                         cur->error[Y_AXIS] += curd_errupd;
+#ifdef DEBUG_REAL_POSITION
                         Printer::realDeltaPositionSteps[Y_AXIS] += curd->isYPositiveMove() ? 1 : -1;
+#endif
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
 #endif
@@ -1881,12 +1885,18 @@ long PrintLine::bresenhamStep() // Version for delta printer
                     //deltaSegmentCount--;
                 }
             }
+#if CPU_ARCH != ARCH_AVR
+            if(loop < maxLoops-1) {
+#endif
             Printer::insertStepperHighDelay();
             Printer::endXYZSteps();
 #if defined(USE_ADVANCE)
             if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
                 Extruder::unstep();
+#if CPU_ARCH != ARCH_AVR
+            }
+#endif
         } // for loop
 
         if(doOdd)
@@ -1989,7 +1999,14 @@ long PrintLine::bresenhamStep() // Version for delta printer
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
-
+#if CPU_ARCH != ARCH_AVR
+    Printer::insertStepperHighDelay();
+    Printer::endXYZSteps();
+#if defined(USE_ADVANCE)
+    if(!Printer::isAdvanceActivated()) // Use interrupt for movement
+#endif
+        Extruder::unstep();
+#endif
     return interval;
 }
 #else

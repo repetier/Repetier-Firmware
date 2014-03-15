@@ -104,7 +104,7 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #if NONLINEAR_SYSTEM
 // Maximum speed with 100% inerrupt utilization is 27000 hz at 16MHz cpu
 // leave some margin for all the extra transformations. So we keep inside clean timings.
-#define LIMIT_INTERVAL ((F_CPU/20000)+1)
+#define LIMIT_INTERVAL ((F_CPU/30000)+1)
 #else
 #define LIMIT_INTERVAL ((F_CPU/40000)+1)
 #endif

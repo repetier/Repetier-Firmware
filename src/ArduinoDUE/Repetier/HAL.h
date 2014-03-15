@@ -177,8 +177,8 @@ typedef char prog_char;
 
 static uint32_t    tone_pin;
 
-#define LIMIT_INTERVAL ((F_CPU/405000)+1)
-//#define LIMIT_INTERVAL ((F_CPU/65536)+1)
+/** Set max. frequency to 150000Hz */
+#define LIMIT_INTERVAL (F_CPU/150000)
 
 
 typedef unsigned int speed_t;
