@@ -37,23 +37,23 @@ STEPPER_CURRENT_CONTROL
 * Arduino Due Pin Assignments
 ******************************************************************/
 
-#define X_STEP_PIN     54  // A0
-#define X_DIR_PIN      55  // A1
-#define X_MIN_PIN      3
-#define X_MAX_PIN      2
-#define X_ENABLE_PIN   38
+#define ORIG_X_STEP_PIN     54  // A0
+#define ORIG_X_DIR_PIN      55  // A1
+#define ORIG_X_MIN_PIN      3
+#define ORIG_X_MAX_PIN      2
+#define ORIG_X_ENABLE_PIN   38
 
-#define Y_STEP_PIN     60  // A6 
-#define Y_DIR_PIN      61  // A7
-#define Y_MIN_PIN      14
-#define Y_MAX_PIN      15
-#define Y_ENABLE_PIN   56  // A2
+#define ORIG_Y_STEP_PIN     60  // A6 
+#define ORIG_Y_DIR_PIN      61  // A7
+#define ORIG_Y_MIN_PIN      14
+#define ORIG_Y_MAX_PIN      15
+#define ORIG_Y_ENABLE_PIN   56  // A2
 
-#define Z_STEP_PIN     46
-#define Z_DIR_PIN      48
-#define Z_MIN_PIN      18
-#define Z_MAX_PIN      19
-#define Z_ENABLE_PIN   62  // A8
+#define ORIG_Z_STEP_PIN     46
+#define ORIG_Z_DIR_PIN      48
+#define ORIG_Z_MIN_PIN      18
+#define ORIG_Z_MAX_PIN      19
+#define ORIG_Z_ENABLE_PIN   62  // A8
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN   10
@@ -63,18 +63,18 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_2_PIN   9
 #define TEMP_2_PIN     13  // Due analog pin #
 
-#define E0_STEP_PIN    26
-#define E0_DIR_PIN     28
-#define E0_ENABLE_PIN  24
+#define ORIG_E0_STEP_PIN    26
+#define ORIG_E0_DIR_PIN     28
+#define ORIG_E0_ENABLE_PIN  24
 
-#define E1_STEP_PIN    36
-#define E1_DIR_PIN     34
-#define E1_ENABLE_PIN  40
+#define ORIG_E1_STEP_PIN    36
+#define ORIG_E1_DIR_PIN     34
+#define ORIG_E1_ENABLE_PIN  40
 
 #define SDPOWER 	   -1
 #define SDSS		   53 // 10 if using HW SPI. 53 if using SW SPI
 #define LED_PIN 	   13
-#define FAN_PIN 	   -1
+#define ORIG_FAN_PIN 	   -1
 #define PS_ON_PIN      12
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
@@ -84,8 +84,8 @@ STEPPER_CURRENT_CONTROL
 #define SCL_PIN 				21  	// 21 or 71
 
 
-#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
-#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ          400000
 // see eeprom device data sheet for the following values, these are for 24xx256
@@ -110,23 +110,23 @@ STEPPER_CURRENT_CONTROL
 * Arduino Due Pin Assignments
 ******************************************************************/
 
-#define X_STEP_PIN     24
-#define X_DIR_PIN      23
-#define X_MIN_PIN      28
-#define X_MAX_PIN      34
-#define X_ENABLE_PIN   26
+#define ORIG_X_STEP_PIN     24
+#define ORIG_X_DIR_PIN      23
+#define ORIG_X_MIN_PIN      28
+#define ORIG_X_MAX_PIN      34
+#define ORIG_X_ENABLE_PIN   26
 
-#define Y_STEP_PIN     17 
-#define Y_DIR_PIN      16
-#define Y_MIN_PIN      30
-#define Y_MAX_PIN      36
-#define Y_ENABLE_PIN   22
+#define ORIG_Y_STEP_PIN     17 
+#define ORIG_Y_DIR_PIN      16
+#define ORIG_Y_MIN_PIN      30
+#define ORIG_Y_MAX_PIN      36
+#define ORIG_Y_ENABLE_PIN   22
 
-#define Z_STEP_PIN     2
-#define Z_DIR_PIN      3
-#define Z_MIN_PIN      32
-#define Z_MAX_PIN      38
-#define Z_ENABLE_PIN   15
+#define ORIG_Z_STEP_PIN     2
+#define ORIG_Z_DIR_PIN      3
+#define ORIG_Z_MIN_PIN      32
+#define ORIG_Z_MAX_PIN      38
+#define ORIG_Z_ENABLE_PIN   15
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     13
@@ -139,17 +139,17 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_3_PIN       5 // Due analog pin #56
 #define TEMP_4_PIN       4 // Due analog pin #57
 
-#define E0_STEP_PIN    61 // A7
-#define E0_DIR_PIN     60 // A6
-#define E0_ENABLE_PIN  62 // A8
+#define ORIG_E0_STEP_PIN    61 // A7
+#define ORIG_E0_DIR_PIN     60 // A6
+#define ORIG_E0_ENABLE_PIN  62 // A8
 
-#define E1_STEP_PIN    64 // A10
-#define E1_DIR_PIN     63 // A9
-#define E1_ENABLE_PIN  65 // A11
+#define ORIG_E1_STEP_PIN    64 // A10
+#define ORIG_E1_DIR_PIN     63 // A9
+#define ORIG_E1_ENABLE_PIN  65 // A11
 
-#define E2_STEP_PIN    51
-#define E2_DIR_PIN     53
-#define E2_ENABLE_PIN  49
+#define ORIG_E2_STEP_PIN    51
+#define ORIG_E2_DIR_PIN     53
+#define ORIG_E2_ENABLE_PIN  49
 
 #define SDSUPPORT      true
 #define SDPOWER 	   -1
@@ -157,8 +157,8 @@ STEPPER_CURRENT_CONTROL
 #define SDCARDDETECT       14
 #define SDCARDDETECTINVERTED false
 #define LED_PIN 	   -1
-#define FAN_PIN 	   9 
-#define FAN2_PIN           8 
+#define ORIG_FAN_PIN 	   9 
+#define ORIG_FAN2_PIN           8 
 #define PS_ON_PIN          40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
@@ -167,9 +167,9 @@ STEPPER_CURRENT_CONTROL
 #define SCL_PIN 				21  	// 21 or 71
 
 
-#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
-#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
-#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ          400000
 // see eeprom device data sheet for the following values these are for 24xx256
@@ -199,23 +199,23 @@ STEPPER_CURRENT_CONTROL
 * Arduino Due Pin Assignments
 ******************************************************************/
 
-#define X_STEP_PIN     63
-#define X_DIR_PIN      62
-#define X_MIN_PIN      22
-#define X_MAX_PIN      30
-#define X_ENABLE_PIN   48
+#define ORIG_X_STEP_PIN     63
+#define ORIG_X_DIR_PIN      62
+#define ORIG_X_MIN_PIN      22
+#define ORIG_X_MAX_PIN      30
+#define ORIG_X_ENABLE_PIN   48
 
-#define Y_STEP_PIN     65 
-#define Y_DIR_PIN      64
-#define Y_MIN_PIN      24
-#define Y_MAX_PIN      38
-#define Y_ENABLE_PIN   46
+#define ORIG_Y_STEP_PIN     65 
+#define ORIG_Y_DIR_PIN      64
+#define ORIG_Y_MIN_PIN      24
+#define ORIG_Y_MAX_PIN      38
+#define ORIG_Y_ENABLE_PIN   46
 
-#define Z_STEP_PIN     67
-#define Z_DIR_PIN      66
-#define Z_MIN_PIN      26
-#define Z_MAX_PIN      34
-#define Z_ENABLE_PIN   44
+#define ORIG_Z_STEP_PIN     67
+#define ORIG_Z_DIR_PIN      66
+#define ORIG_Z_MIN_PIN      26
+#define ORIG_Z_MAX_PIN      34
+#define ORIG_Z_ENABLE_PIN   44
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     8
@@ -232,17 +232,17 @@ STEPPER_CURRENT_CONTROL
 
 #define TEMP_4_PIN       3 // Due analog pin #58
 
-#define E0_STEP_PIN    36
-#define E0_DIR_PIN     28
-#define E0_ENABLE_PIN  42
+#define ORIG_E0_STEP_PIN    36
+#define ORIG_E0_DIR_PIN     28
+#define ORIG_E0_ENABLE_PIN  42
 
-#define E1_STEP_PIN    43
-#define E1_DIR_PIN     41
-#define E1_ENABLE_PIN  39
+#define ORIG_E1_STEP_PIN    43
+#define ORIG_E1_DIR_PIN     41
+#define ORIG_E1_ENABLE_PIN  39
 
-#define E2_STEP_PIN    32
-#define E2_DIR_PIN     47
-#define E2_ENABLE_PIN  45
+#define ORIG_E2_STEP_PIN    32
+#define ORIG_E2_DIR_PIN     47
+#define ORIG_E2_ENABLE_PIN  45
 
 //#define SDSUPPORT      false
 #define SDPOWER 	   -1
@@ -251,8 +251,8 @@ STEPPER_CURRENT_CONTROL
 //#define SDCARDDETECT   -1
 #define SDCARDDETECTINVERTED false
 #define LED_PIN 	   -1
-#define FAN_PIN 	   12 
-#define FAN2_PIN       2
+#define ORIG_FAN_PIN 	   12 
+#define ORIG_FAN2_PIN       2
 #define PS_ON_PIN      53
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
@@ -261,9 +261,9 @@ STEPPER_CURRENT_CONTROL
 #define SCL_PIN 				21  	// 21 or 71
 
 
-#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
-#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
-#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ          400000
 // see eeprom device data sheet for the following values these are for 24xx256
@@ -334,38 +334,38 @@ STEPPER_CURRENT_CONTROL
 
 
 // Original pin assignmats to be used in configuration tool
-#define ORIG_X_STEP_PIN X_STEP_PIN
-#define ORIG_X_DIR_PIN X_DIR_PIN
-#define ORIG_X_ENABLE_PIN X_ENABLE_PIN
-#define ORIG_X_MIN_PIN X_MIN_PIN
-#define ORIG_X_MAX_PIN X_MAX_PIN
+#define X_STEP_PIN ORIG_X_STEP_PIN
+#define X_DIR_PIN ORIG_X_DIR_PIN
+#define X_ENABLE_PIN ORIG_X_ENABLE_PIN
+#define X_MIN_PIN ORIG_X_MIN_PIN
+#define X_MAX_PIN ORIG_X_MAX_PIN
 
-#define ORIG_Y_STEP_PIN Y_STEP_PIN
-#define ORIG_Y_DIR_PIN Y_DIR_PIN
-#define ORIG_Y_ENABLE_PIN Y_ENABLE_PIN
-#define ORIG_Y_MIN_PIN Y_MIN_PIN
-#define ORIG_Y_MAX_PIN Y_MAX_PIN
+#define Y_STEP_PIN ORIG_Y_STEP_PIN
+#define Y_DIR_PIN ORIG_Y_DIR_PIN
+#define Y_ENABLE_PIN ORIG_Y_ENABLE_PIN
+#define Y_MIN_PIN ORIG_Y_MIN_PIN
+#define Y_MAX_PIN ORIG_Y_MAX_PIN
 
-#define ORIG_Z_STEP_PIN Z_STEP_PIN
-#define ORIG_Z_DIR_PIN Z_DIR_PIN
-#define ORIG_Z_ENABLE_PIN Z_ENABLE_PIN
-#define ORIG_Z_MIN_PIN Z_MIN_PIN
-#define ORIG_Z_MAX_PIN Z_MAX_PIN
+#define Z_STEP_PIN ORIG_Z_STEP_PIN
+#define Z_DIR_PIN ORIG_Z_DIR_PIN
+#define Z_ENABLE_PIN ORIG_Z_ENABLE_PIN
+#define Z_MIN_PIN ORIG_Z_MIN_PIN
+#define Z_MAX_PIN ORIG_Z_MAX_PIN
 
-#define ORIG_E0_STEP_PIN E0_STEP_PIN
-#define ORIG_E0_DIR_PIN E0_DIR_PIN
-#define ORIG_E0_ENABLE_PIN E0_ENABLE_PIN
+#define E0_STEP_PIN ORIG_E0_STEP_PIN
+#define E0_DIR_PIN ORIG_E0_DIR_PIN
+#define E0_ENABLE_PIN ORIG_E0_ENABLE_PIN
 
-#define ORIG_E1_STEP_PIN E1_STEP_PIN
-#define ORIG_E1_DIR_PIN E1_DIR_PIN
-#define ORIG_E1_ENABLE_PIN E1_ENABLE_PIN
+#define E1_STEP_PIN ORIG_E1_STEP_PIN
+#define E1_DIR_PIN ORIG_E1_DIR_PIN
+#define E1_ENABLE_PIN ORIG_E1_ENABLE_PIN
 
-#define ORIG_E2_STEP_PIN E2_STEP_PIN
-#define ORIG_E2_DIR_PIN E2_DIR_PIN
-#define ORIG_E2_ENABLE_PIN E2_ENABLE_PIN
+#define E2_STEP_PIN ORIG_E2_STEP_PIN
+#define E2_DIR_PIN ORIG_E2_DIR_PIN
+#define E2_ENABLE_PIN ORIG_E2_ENABLE_PIN
 
-#define ORIG_FAN_PIN FAN_PIN
-#define ORIG_FAN2_PIN FAN_PIN
+#define FAN_PIN ORIG_FAN_PIN
+#define FAN2_PIN ORIG_FAN2_PIN
 
 #define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
 						HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }

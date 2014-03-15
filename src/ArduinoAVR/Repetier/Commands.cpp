@@ -443,6 +443,8 @@ void Commands::executeGCode(GCode *com)
         {
         case 0: // G0 -> G1
         case 1: // G1
+            if(com->hasS())
+                Printer::setNoDestinationCheck(com->S!=0);
             if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
                 PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
@@ -813,18 +815,20 @@ void Commands::executeGCode(GCode *com)
             Printer::homeAxis(true,true,true);
             }
             break;
-        case 134:
+ /*       case 134:
             Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
             Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
             Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
+#ifdef DEBUG_REAL_POSITION
             Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
             Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
             Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[C_TOWER]);
+#endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
             printCurrentPosition();
             break;
-
+*/
 #endif // DRIVE_SYSTEM
         }
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -1485,7 +1489,7 @@ void Commands::executeGCode(GCode *com)
                 Printer::maxRealJerk = 0;
             break;
 #endif
-        case 535:
+/*        case 535:
             Com::printF(PSTR("Last commanded position:"),Printer::lastCmdPos[X_AXIS]);
             Com::printF(Com::tComma,Printer::lastCmdPos[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::lastCmdPos[Z_AXIS]);
@@ -1500,7 +1504,7 @@ void Commands::executeGCode(GCode *com)
             Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
             Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
 #endif // NONLINEAR_SYSTEM
-            break;
+            break;*/
         }
     }
     else if(com->hasT())      // Process T code

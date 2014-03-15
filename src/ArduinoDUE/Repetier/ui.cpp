@@ -30,15 +30,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #include <ctype.h>
 
 
-#if UI_ENCODER_SPEED==0
-const int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; // Full speed
-#elif UI_ENCODER_SPEED==1
-const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
-#else
-//const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
-//const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
-const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // Quart speed
-#endif
 
 
 #if BEEPER_TYPE==2 && defined(UI_HAS_I2C_KEYS) && UI_I2C_KEY_ADDRESS!=BEEPER_ADDRESS
@@ -2154,6 +2145,41 @@ void UIDisplay::nextPreviousAction(int8_t next)
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition();
         break;
+    case UI_ACTION_ZPOSITION_NOTEST:
+        Printer::setNoDestinationCheck(true);
+#if UI_SPEEDDEPENDENT_POSITIONING
+    {
+        float d = 0.01*(float)increment*lastNextAccumul;
+        if(fabs(d)*2000>Printer::maxFeedrate[Z_AXIS]*dtReal)
+            d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
+        long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
+        steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
+    }
+#else
+    PrintLine::moveRelativeDistanceInStepsReal(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true);
+#endif
+        Commands::printCurrentPosition();
+        Printer::setNoDestinationCheck(false);
+    break;
+    case UI_ACTION_ZPOSITION_FAST_NOTEST:
+        Printer::setNoDestinationCheck(true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
+        Commands::printCurrentPosition();
+        Printer::setNoDestinationCheck(false);
+        break;
+    case UI_ACTION_Z_BABYSTEPS:
+        {
+            previousMillisCmd = HAL::timeInMilliseconds();
+            if(increment > 0) {
+                if((int)Printer::zBabystepsMissing+BABYSTEP_MULTIPLICATOR<127)
+                    Printer::zBabystepsMissing+=BABYSTEP_MULTIPLICATOR;
+            } else {
+                if((int)Printer::zBabystepsMissing-BABYSTEP_MULTIPLICATOR>-127)
+                    Printer::zBabystepsMissing-=BABYSTEP_MULTIPLICATOR;
+            }
+        }
+        break;
     case UI_ACTION_HEATED_BED_TEMP:
 #if HAVE_HEATED_BED==true
     {
@@ -3027,6 +3053,15 @@ void UIDisplay::fastAction()
     HAL::allowInterrupts();
 #endif
 }
+#if UI_ENCODER_SPEED==0
+const int8_t encoder_table[16] PROGMEM = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0}; // Full speed
+#elif UI_ENCODER_SPEED==1
+const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; // Half speed
+#else
+//const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
+//const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
+const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // Quart speed
+#endif
 
 #endif
 

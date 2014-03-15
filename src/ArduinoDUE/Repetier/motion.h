@@ -60,8 +60,8 @@ class PrintLine;
 
 typedef struct
 {
-    uint8_t dir; 									///< Direction of delta movement.
-    uint16_t deltaSteps[TOWER_ARRAY];  ///< Number of steps in move.
+    flag8_t dir; 									///< Direction of delta movement.
+    uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
     inline void checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
@@ -169,13 +169,13 @@ public:
     static uint8_t linesPos; // Position for executing line movement
     static PrintLine lines[];
     static uint8_t linesWritePos; // Position where we write the next cached line move
-    uint8_t joinFlags;
-    volatile uint8_t flags;
+    flag8_t joinFlags;
+    volatile flag8_t flags;
 private:
-    uint8_t primaryAxis;
+    flag8_t primaryAxis;
     int32_t timeInTicks;
-    uint8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
-    uint8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+    flag8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
+    flag8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
     int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
     int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
@@ -431,7 +431,7 @@ public:
         linesCount = 0;
         linesPos = linesWritePos;
     }
-    inline void updateAdvanceSteps(unsigned int v,uint8_t max_loops,bool accelerate)
+    inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
     {
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
@@ -494,7 +494,7 @@ public:
     {
         return halfStep == 4;
     }
-    inline bool startXStep()
+    inline void startXStep()
     {
         ANALYZER_ON(ANALYZER_CH6);
 #if !(GANTRY)
@@ -534,7 +534,7 @@ public:
 #endif
 
     }
-    inline bool startYStep()
+    inline void startYStep()
     {
         ANALYZER_ON(ANALYZER_CH7);
 #if !(GANTRY)
@@ -614,11 +614,14 @@ public:
 #endif
         HAL::forbidInterrupts();
         --linesCount;
+        if(!linesCount)
+            Printer::setMenuMode(MENU_MODE_PRINTING,false);
     }
     static inline void pushLine()
     {
         linesWritePos++;
         if(linesWritePos>=PRINTLINE_CACHE_SIZE) linesWritePos = 0;
+        Printer::setMenuMode(MENU_MODE_PRINTING,true);
         BEGIN_INTERRUPT_PROTECTED
         linesCount++;
         END_INTERRUPT_PROTECTED
@@ -652,9 +655,9 @@ public:
     static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
-    static inline void calculateDirectionAndDelta(long difference[], uint8_t *dir, long delta[]);
+    static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING 
+#if SOFTWARE_LEVELING
     static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
     static float calcZOffset(long factors[], long pointX, long pointY);
 #endif
