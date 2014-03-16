@@ -1255,9 +1255,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
         waitForZProbeStart();
         setZProbingActive(true);
-#if NONLINEAR_SYSTEM
-        int32_t zStart = realDeltaPositionSteps[Z_AXIS];
-#endif
         PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
         if(stepsRemainingAtZHit<0)
         {
@@ -1266,7 +1263,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         }
         setZProbingActive(false);
 #if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = probeDepth + realDeltaPositionSteps[Z_AXIS] - zStart;
+        stepsRemainingAtZHit = realDeltaPositionSteps[Z_AXIS] - currentDeltaPositionSteps[Z_AXIS];
 #endif
 #if DRIVE_SYSTEM == 3
         currentDeltaPositionSteps[X_AXIS] += stepsRemainingAtZHit;
