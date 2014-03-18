@@ -815,7 +815,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_ENCODER_B           50
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 40
 #define UI_INVERT_MENU_DIRECTION false
 #ifdef UI_MAIN
 void ui_init_keys() {
