@@ -1561,7 +1561,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     {
         // Increment (segments-1)
 
-        if((count & 4) == 0)
+        if((count & 3) == 0)
         {
             GCode::readFromSerial();
             Commands::checkForPeriodicalActions();
