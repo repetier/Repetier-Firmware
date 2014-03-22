@@ -1227,13 +1227,14 @@ float Printer::runZMaxProbe()
 #endif
 
 #if FEATURE_Z_PROBE
-float Printer::runZProbe(bool first,bool last,uint8_t repeat)
+float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript)
 {
     float oldOffX =  Printer::offsetX;
     float oldOffY =  Printer::offsetY;
     if(first)
     {
-        GCode::executeFString(Com::tZProbeStartScript);
+        if(runStartScript)
+            GCode::executeFString(Com::tZProbeStartScript);
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
         PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],

@@ -608,11 +608,12 @@ void Commands::executeGCode(GCode *com)
 #if FEATURE_Z_PROBE
         case 29: // 3 points, build average
         {
+            GCode::executeFString(Com::tZProbeStartScript);
             bool oldAutolevel = Printer::isAutolevelActive();
             Printer::setAutolevelActive(false);
             float sum = 0,last,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-            sum = Printer::runZProbe(true,false);
+            sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
             if(sum<0) break;
             Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             last = Printer::runZProbe(false,false);
@@ -670,12 +671,13 @@ void Commands::executeGCode(GCode *com)
 #if FEATURE_AUTOLEVEL
         case 32: // G32 Auto-Bed leveling
         {
+            GCode::executeFString(Com::tZProbeStartScript);
             //bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false); // iterate
             float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-            h1 = Printer::runZProbe(true,false);
+            h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
             if(h1<0) break;
             Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h2 = Printer::runZProbe(false,false);

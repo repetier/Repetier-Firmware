@@ -171,7 +171,7 @@ void GCode::checkAndPushCommand()
     {
         if((((lastLineNumber+1) & 0xffff)!=(actLineNumber&0xffff)))
         {
-            if(static_cast<uint16_t>(actLineNumber - lastLineNumber) < 40) {
+            if(static_cast<uint16_t>(lastLineNumber - actLineNumber) < 40) {
                 // we have seen that line already. So we assume it is a repeated resend and we ignore it
                 commandsReceivingWritePosition = 0;
                 Com::printFLN(Com::tSkip,actLineNumber);
