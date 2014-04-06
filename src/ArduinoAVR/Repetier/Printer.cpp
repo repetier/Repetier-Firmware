@@ -494,7 +494,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
-    if(!Printer::isPositionAllowed(x,y,z)) {
+    if(!Printer::isPositionAllowed(lastCmdPos[X_AXIS],lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS])) {
         currentPositionSteps[E_AXIS] = destinationSteps[E_AXIS];
         return false; // ignore move
     }
@@ -1227,13 +1227,14 @@ float Printer::runZMaxProbe()
 #endif
 
 #if FEATURE_Z_PROBE
-float Printer::runZProbe(bool first,bool last,uint8_t repeat)
+float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript)
 {
     float oldOffX =  Printer::offsetX;
     float oldOffY =  Printer::offsetY;
     if(first)
     {
-        GCode::executeFString(Com::tZProbeStartScript);
+        if(runStartScript)
+            GCode::executeFString(Com::tZProbeStartScript);
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
         PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
@@ -1255,9 +1256,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
         waitForZProbeStart();
         setZProbingActive(true);
-#if NONLINEAR_SYSTEM
-        int32_t zStart = realDeltaPositionSteps[C_TOWER];
-#endif
         PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
         if(stepsRemainingAtZHit<0)
         {
@@ -1266,7 +1264,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat)
         }
         setZProbingActive(false);
 #if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = probeDepth + realDeltaPositionSteps[C_TOWER] - zStart;
+        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentDeltaPositionSteps[C_TOWER];
 #endif
 #if DRIVE_SYSTEM==DELTA
         currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit;

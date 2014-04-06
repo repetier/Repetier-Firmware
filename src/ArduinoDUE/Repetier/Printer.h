@@ -643,7 +643,7 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-    static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS);
+    static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
 #if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);

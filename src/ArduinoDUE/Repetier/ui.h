@@ -814,9 +814,9 @@ void ui_check_slow_keys(int &action) {
 #define UI_ENCODER_B           50
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 320
+#define UI_DELAYPERCHAR 40
 #define UI_INVERT_MENU_DIRECTION 0
-#if UI_MAIN
+#ifdef UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
