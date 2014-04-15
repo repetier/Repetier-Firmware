@@ -1649,35 +1649,35 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 
-#define X_STEP_PIN 58
-#define X_DIR_PIN 57
-#define X_ENABLE_PIN 59
-#define X_MIN_PIN 37
-#define X_MAX_PIN 40 //2 //Max endstops default to disabled "-1", set to commented value to enable.
+#define ORIG_X_STEP_PIN 58
+#define ORIG_X_DIR_PIN 57
+#define ORIG_X_ENABLE_PIN 59
+#define ORIG_X_MIN_PIN 37
+#define ORIG_X_MAX_PIN 40 //2 //Max endstops default to disabled "-1", set to commented value to enable.
 
-#define Y_STEP_PIN 5 // A6
-#define Y_DIR_PIN 17 // A0
-#define Y_ENABLE_PIN 4
-#define Y_MIN_PIN 41
-#define Y_MAX_PIN 38 //15
+#define ORIG_Y_STEP_PIN 5 // A6
+#define ORIG_Y_DIR_PIN 17 // A0
+#define ORIG_Y_ENABLE_PIN 4
+#define ORIG_Y_MIN_PIN 41
+#define ORIG_Y_MAX_PIN 38 //15
 
-#define Z_STEP_PIN 16 // A2
-#define Z_DIR_PIN 11 // A6
-#define Z_ENABLE_PIN 3 // A1
-#define Z_MIN_PIN 18
-#define Z_MAX_PIN 19
+#define ORIG_Z_STEP_PIN 16 // A2
+#define ORIG_Z_DIR_PIN 11 // A6
+#define ORIG_Z_ENABLE_PIN 3 // A1
+#define ORIG_Z_MIN_PIN 18
+#define ORIG_Z_MAX_PIN 19
 
-#define E0_STEP_PIN 28
-#define E0_DIR_PIN 27
-#define E0_ENABLE_PIN 29
+#define ORIG_E0_STEP_PIN 28
+#define ORIG_E0_DIR_PIN 27
+#define ORIG_E0_ENABLE_PIN 29
 
-#define E1_STEP_PIN 25
-#define E1_DIR_PIN 24
-#define E1_ENABLE_PIN 26
+#define ORIG_E1_STEP_PIN 25
+#define ORIG_E1_DIR_PIN 24
+#define ORIG_E1_ENABLE_PIN 26
 
-#define E2_STEP_PIN 22
-#define E2_DIR_PIN 60
-#define E2_ENABLE_PIN 23
+#define ORIG_E2_STEP_PIN 22
+#define ORIG_E2_DIR_PIN 60
+#define ORIG_E2_ENABLE_PIN 23
 
 #define SDCARDDETECT -1	 // Ramps does not use this port
 #define SDPOWER -1
@@ -1685,8 +1685,8 @@ STEPPER_CURRENT_CONTROL
 
 #define LED_PIN 13
 
-#define FAN_PIN 6
-#define FAN2_PIN 7
+#define ORIG_FAN_PIN 6
+#define ORIG_FAN2_PIN 7
 
 #define PS_ON_PIN 12
 //#define KILL_PIN -1
@@ -1739,9 +1739,9 @@ S3(ext)=9
 #define MISO_PIN 50
 #define MOSI_PIN 51
 
-#define E0_PINS E0_STEP_PIN,E0_DIR_PIN,E0_ENABLE_PIN,
-#define E1_PINS E1_STEP_PIN,E1_DIR_PIN,E1_ENABLE_PIN,
-#define E2_PINS E2_STEP_PIN,E2_DIR_PIN,E2_ENABLE_PIN,
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 
 
 #endif
