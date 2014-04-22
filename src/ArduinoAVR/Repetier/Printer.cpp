@@ -541,6 +541,17 @@ void Printer::setup()
     SET_OUTPUT(PS_ON_PIN); //GND
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
+#if SDSUPPORT
+    //power to SD reader
+#if SDPOWER > -1
+    SET_OUTPUT(SDPOWER);
+    WRITE(SDPOWER,HIGH);
+#endif
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+    SET_INPUT(SDCARDDETECT);
+    PULLUP(SDCARDDETECT,HIGH);
+#endif
+#endif
 
     //Initialize Step Pins
     SET_OUTPUT(X_STEP_PIN);

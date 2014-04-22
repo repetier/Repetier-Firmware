@@ -59,6 +59,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
+// Azteeg X1                  = 65
 // Gen7 1.1 till 1.3.x        = 7
 // Gen7 1.4.1 and later       = 71
 // Sethi 3D_1                 = 72
@@ -68,6 +69,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MegaTronics 1.0            = 70
 // Megatronics 2.0            = 701
 // Megatronics 3.0            = 703 // Thermistors predefined not thermocouples
+// Minitronics 1.0            = 702
 // RUMBA                      = 80  // Get it from reprapdiscount
 // FELIXprinters              = 101
 // Rambo                      = 301
