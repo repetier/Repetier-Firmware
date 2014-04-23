@@ -35,15 +35,6 @@ SDCard::SDCard()
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
-    //power to SD reader
-#if SDPOWER > -1
-    SET_OUTPUT(SDPOWER);
-    WRITE(SDPOWER,HIGH);
-#endif
-#if SDCARDDETECT>-1
-    SET_INPUT(SDCARDDETECT);
-    WRITE(SDCARDDETECT,HIGH);
-#endif
 }
 
 void SDCard::automount()

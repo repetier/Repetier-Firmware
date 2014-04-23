@@ -541,6 +541,17 @@ void Printer::setup()
     SET_OUTPUT(PS_ON_PIN); //GND
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
+#if SDSUPPORT
+    //power to SD reader
+#if SDPOWER > -1
+    SET_OUTPUT(SDPOWER);
+    WRITE(SDPOWER,HIGH);
+#endif
+#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+    SET_INPUT(SDCARDDETECT);
+    PULLUP(SDCARDDETECT,HIGH);
+#endif
+#endif
 
     //Initialize Step Pins
     SET_OUTPUT(X_STEP_PIN);
@@ -561,22 +572,22 @@ void Printer::setup()
     //Steppers default to disabled.
 #if X_ENABLE_PIN > -1
     SET_OUTPUT(X_ENABLE_PIN);
-    if(!X_ENABLE_ON) WRITE(X_ENABLE_PIN,HIGH);
+    WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
 #endif
 #if Y_ENABLE_PIN > -1
     SET_OUTPUT(Y_ENABLE_PIN);
-    if(!Y_ENABLE_ON) WRITE(Y_ENABLE_PIN,HIGH);
+    WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
 #endif
 #if Z_ENABLE_PIN > -1
     SET_OUTPUT(Z_ENABLE_PIN);
-    if(!Z_ENABLE_ON) WRITE(Z_ENABLE_PIN,HIGH);
+    WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER
     SET_OUTPUT(X2_STEP_PIN);
     SET_OUTPUT(X2_DIR_PIN);
 #if X2_ENABLE_PIN > -1
     SET_OUTPUT(X2_ENABLE_PIN);
-    if(!X_ENABLE_ON) WRITE(X2_ENABLE_PIN,HIGH);
+    WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
 #endif
 #endif
 
@@ -585,7 +596,7 @@ void Printer::setup()
     SET_OUTPUT(Y2_DIR_PIN);
 #if Y2_ENABLE_PIN > -1
     SET_OUTPUT(Y2_ENABLE_PIN);
-    if(!Y_ENABLE_ON) WRITE(Y2_ENABLE_PIN,HIGH);
+    WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
 #endif
 #endif
 
@@ -594,7 +605,7 @@ void Printer::setup()
     SET_OUTPUT(Z2_DIR_PIN);
 #if X2_ENABLE_PIN > -1
     SET_OUTPUT(Z2_ENABLE_PIN);
-    if(!Z_ENABLE_ON) WRITE(Z2_ENABLE_PIN,HIGH);
+    WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
 #endif
 #endif
 
