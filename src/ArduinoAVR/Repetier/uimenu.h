@@ -17,7 +17,14 @@
 */
 #if !defined(_UI_MENU_H)
 #define _UI_MENU_H
-#if UI_DISPLAY_TYPE!=0
+
+#define cUP "\001"  
+#define cDEG "\002"  
+#define cSEL "\003"  
+#define cUNSEL "\004"  
+#define cTEMP "\005"  
+#define cFOLD "\006"  
+#define cARROW "\176"  
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -27,7 +34,35 @@ A placeholder always has 3 chars. It starts with a % followed by 2 characters
 defining the value. You can use any placeholder in any position, also it doesn't
 always make sense.
 
+Special Characters
+ constant   description
+ cUP        Folder up arrow 
+ cDEG       Degree mark  
+ cSEL       Selected  
+ cUNSEL     Unselected  
+ cTEMP      Thermometer symbol
+ cFOLD      Folder symbol  
+
 List of placeholder:
+%%% : The % char
+
+acceleration
+%ax : X acceleration during print moves
+%ay : Y acceleration during print moves
+%az : Z acceleration during print moves
+%aX : X acceleration during travel moves
+%aY : Y acceleration during travel moves
+%aZ : Z acceleration during travel moves
+%aj : Max. jerk
+%aJ : Max. Z-jerk
+
+debug
+%do : Debug echo state.
+%di : Debug info state.
+%de : Debug error state.
+%dd : Debug dry run state.
+
+extruder
 %ec : Current extruder temperature
 %eb : Current heated bed temperature
 %e0..9 : Temp. of extruder 0..9
@@ -35,6 +70,22 @@ List of placeholder:
 %Ec : Target temperature of current extruder
 %Eb : Target temperature of heated bed
 %E0-9 : Target temperature of extruder 0..9
+
+feed rate
+%fx : Max. feedrate x direction
+%fy : Max. feedrate y direction
+%fz : Max. feedrate z direction
+%fe : Max. feedrate current extruder
+%fX : Homing feedrate x direction
+%fY : Homing feedrate y direction
+%fZ : Homing feedrate z direction
+%Fs : Fan speed
+
+inactivity
+%is : Stepper inactive time in seconds
+%ip : Max. inactive time in seconds
+
+random stuff
 %os : Status message
 %oe : Error message
 %oB : Buffer length
@@ -44,53 +95,33 @@ List of placeholder:
 %o0..9 : Output level extruder 0..9 is % including %sign.
 %oC : Output level current extruder
 %ob : Output level heated bed
-%%% : The % char
-%x0 : X position
-%x1 : Y position
-%x2 : Z position
-%x3 : Current extruder position
+%PN : Printer name
+
+stops
 %sx : State of x min endstop.
 %sX : State of x max endstop.
 %sy : State of y min endstop.
 %sY : State of y max endstop.
 %sz : State of z min endstop.
 %sZ : State of z max endstop.
-%do : Debug echo state.
-%di : Debug info state.
-%de : Debug error state.
-%dd : Debug dry run state.
-%O0 : OPS mode = 0
-%O1 : OPS mode = 1
-%O2 : OPS mode = 2
-%Or : OPS retract distance
-%Ob : OPS backslash distance
-%Od : OPS min distance
-%Oa : OPS move after
-%ax : X acceleration during print moves
-%ay : Y acceleration during print moves
-%az : Z acceleration during print moves
-%aX : X acceleration during travel moves
-%aY : Y acceleration during travel moves
-%aZ : Z acceleration during travel moves
-%aj : Max. jerk
-%aJ : Max. Z-jerk
-%fx : Max. feedrate x direction
-%fy : Max. feedrate y direction
-%fz : Max. feedrate z direction
-%fe : Max. feedrate current extruder
-%fX : Homing feedrate x direction
-%fY : Homing feedrate y direction
-%fZ : Homing feedrate z direction
-%Fs : Fan speed
-%PN : Printer name
+
+steps
 %Sx : Steps per mm x direction
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
 %Se : Steps per mm current extruder
+
+totals
 %Ut : Shows printing time
 %Uf : Shows total filament usage
-%is : Stepper inactive time in seconds
-%ip : Max. inactive time in seconds
+
+extruder position
+%x0 : X position
+%x1 : Y position
+%x2 : Z position
+%x3 : Current extruder position
+
+extruder parameters
 %X0..9 : Extruder selected marker
 %Xi : PID I gain
 %Xp : PID P gain
@@ -107,7 +138,23 @@ List of placeholder:
 %Xf : Extruder max. start feedrate
 %XF : Extruder max. feedrate
 %XA : Extruder max. acceleration
+
+delta stuff
+%y0-3 : same as %y0-3 back calculated from delta position steps
+%Y0-3 : raw delta position steps (no round off error to display it)
+%yD : delta printer low tower distance
+%YL : delta print envelope radius Limit
+%yx : low towers x offset mm
+%yy : low towers y offset mm
+%Yx : low towers x offset steps
+%Yy : low towers y offset steps
+%yX : high (Z) tower x offset mm
+%yY : high (Z) tower y offset mm
+%YX : high (Z) tower x offset steps
+%YY : high (Z) tower y offset steps
 */
+
+#if UI_DISPLAY_TYPE != NO_DISPLAY
 
 
 // Define precision for temperatures. With small displays only integer values fit.
@@ -133,7 +180,7 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 
-#if UI_ROWS>=6 && UI_DISPLAY_TYPE==5
+#if UI_ROWS>=6 && UI_DISPLAY_TYPE == DISPLAY_U8G
 
  //graphic main status
 
@@ -168,7 +215,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 #elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
-   UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2","Mul:%om Buf:%oB","%os");
+   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2","Mul:%om Buf:%oB","%os");
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
@@ -299,7 +346,7 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast_notest,UI_TEXT_Z_POS_FAST,ui_menu_zpos_f
 #define UI_SPEED_Z_NOTEST ,&ui_menu_go_zpos_notest
 #endif
 
-#if DRIVE_SYSTEM!=DELTA     //Positioning menu for non-delta
+#if DRIVE_SYSTEM != DELTA     //Positioning menu for non-delta
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT);
 #else                   //Positioning menu for delta (removes individual x,y,z homing)
@@ -463,7 +510,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_debug_dryrun, UI_TEXT_DBG_DRYRUN, UI_ACTION_DEBUG_
 UI_MENU(ui_menu_debugging,UI_MENU_DEBUGGING,4 + UI_MENU_BACKCNT);
 
 // **** Acceleration settings
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
 UI_MENU_CHANGEACTION(ui_menu_accel_printx,  UI_TEXT_PRINT_X,UI_ACTION_PRINT_ACCEL_X);
 UI_MENU_CHANGEACTION(ui_menu_accel_printy,  UI_TEXT_PRINT_Y,UI_ACTION_PRINT_ACCEL_Y);
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,  UI_TEXT_PRINT_Z,UI_ACTION_PRINT_ACCEL_Z);
@@ -609,7 +656,7 @@ which assigns the menu stored in ui_menu_conf_feed to the action UI_ACTION_SHOW_
 
 When do you need this? You might want a fast button to change the temperature. In the default menu you have no menu
 to change the temperature and view it the same time. So you need to make an action menu for this like:
-UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,"Temp. 0  :%E0\002C","","","");
+UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,"Temp. 0  :%E0" cDEG,"","","");
 Then you assign this menu to a usermenu:
 #define UI_USERMENU2 ui_menu_extrtemp
 

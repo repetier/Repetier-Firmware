@@ -21,6 +21,25 @@
 
 #include "gcode.h"
 
+#define NO_DISPLAY  0
+#define DISPLAY_4BIT 1
+#define DISPLAY_8BIT 2
+#define DISPLAY_I2C   3
+#define DISPLAY_ARDUINO_LIB  4
+#define DISPLAY_U8G  5
+
+/**
+What display type do you use?
+0 = No display
+1 = LCD Display with 4 bit data bus
+2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
+3 = LCD Display with I2C connection, 4 bit mode
+4 = Use the slower LiquiedCrystal library bundled with arduino.
+    IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
+               If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
+5 = U8G supported display
+*/
+
 // ----------------------------------------------------------------------------
 //                          Action codes
 // 1-999     : Autorepeat
@@ -332,7 +351,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 // reprapdiscount smartcontroller has a sd card buildin
-#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 || FEATURE_CONTROLLER==13
+#if FEATURE_CONTROLLER == CONTROLLER_SMART || FEATURE_CONTROLLER == CONTROLLER_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAP || FEATURE_CONTROLLER == CONTROLLER_RAMBO
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -343,15 +362,16 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #define MAX_COLS 28
+#define UI_MENU_MAXLEVEL 5
 
 class UIDisplay {
   public:
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    uint8_t menuPos[5]; // Positions in menu
-    void *menu[5]; // Menus active
-    uint8_t menuTop[5]; // Top row in menu
+    uint8_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
+    void *menu[UI_MENU_MAXLEVEL]; // Menus active
+    uint8_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
     int8_t shift; // Display shift for scrolling text
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
@@ -370,21 +390,22 @@ class UIDisplay {
     uint8_t encoderStartScreen;
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
     void addLong(long value,char digits);
+    inline void addLong(long value) {addLong(value, -11);};
     void addFloat(float number, char fixdigits,uint8_t digits);
+    inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
     void okAction();
     void nextPreviousAction(int8_t next);
-    char statusMsg[17];
+    char statusMsg[MAX_COLS+1];
     int8_t encoderPos;
     int8_t encoderLast;
-    PGM_P statusText;
     UIDisplay();
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
     void waitForKey();
     void printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
-    void parse(char *txt,bool ram); /// Parse output and write to printCols;
+    void parse(const char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
     void executeAction(int action);
     void finishAction(int action);
@@ -394,11 +415,11 @@ class UIDisplay {
     void pushMenu(void *men,bool refresh);
     void adjustMenuPos();
     void setStatusP(PGM_P txt,bool error = false);
-    void setStatus(char *txt,bool error = false);
+    void setStatus(const char *txt,bool error = false);
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
     void updateSDFileCount();
-    //void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1]);
+    //void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
@@ -407,12 +428,13 @@ class UIDisplay {
 extern UIDisplay uid;
 
 
-#if FEATURE_CONTROLLER==1
+#if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"
 #endif
-#if FEATURE_CONTROLLER==0 // No controller at all
+// No controller at all
+#if FEATURE_CONTROLLER == NO_CONTROLLER 
 #define UI_HAS_KEYS 0
-#define UI_DISPLAY_TYPE 0
+#define UI_DISPLAY_TYPE NO_DISPLAY
 #if UI_MAIN
 void ui_init_keys() {}
 void ui_check_keys(int &action) {}
@@ -420,11 +442,11 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif
-#if FEATURE_CONTROLLER==2 || FEATURE_CONTROLLER==10 || FEATURE_CONTROLLER==11 // reprapdiscount smartcontroller (2) gadgets3d (10)
+#if FEATURE_CONTROLLER == CONTROLLER_SMART || FEATURE_CONTROLLER == CONTROLLER_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAP 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#if FEATURE_CONTROLLER==11
-#define UI_DISPLAY_TYPE 5
+#if FEATURE_CONTROLLER == CONTROLLER_REPRAP
+#define UI_DISPLAY_TYPE DISPLAY_U8G
 #define U8GLIB_ST7920
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
@@ -446,13 +468,13 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_CHARSET 3
 #else
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
 #endif
 #define BEEPER_TYPE 1
-#if FEATURE_CONTROLLER==10 // Gadgets3d shield
+#if FEATURE_CONTROLLER == CONTROLLER_SHIELD // Gadgets3d shield
 #define BEEPER_PIN             33
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1
@@ -524,10 +546,10 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 2 and 10
 
-#if FEATURE_CONTROLLER==3 // Adafruit RGB controller
+#if FEATURE_CONTROLLER == CONTROLLER_ADAFRUIT
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_TYPE DISPLAY_I2C
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 16
 #define UI_ROWS 2
@@ -581,10 +603,10 @@ void ui_check_slow_keys(int &action) {
 #endif
 #endif // Controller 3
 
-#if FEATURE_CONTROLLER==4 // Foltyn 3D Master
+#if FEATURE_CONTROLLER == CONTROLLER_FOLTYN
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 2
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -622,7 +644,7 @@ void ui_check_slow_keys(int &action) {}
 #endif // Controller 4
 
 
-#if FEATURE_CONTROLLER==5 // Viki Lcd
+#if FEATURE_CONTROLLER == CONTROLLER_VIKI // Viki Lcd
 
 // You need to change these 3 button according to the positions
 // where you put them into your board!
@@ -637,7 +659,7 @@ void ui_check_slow_keys(int &action) {}
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_TYPE DISPLAY_I2C
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -700,10 +722,10 @@ void ui_check_slow_keys(int &action) {
 #endif
 #endif // Controller 5
 
-#if FEATURE_CONTROLLER==6 // ReprapWorld Keypad / LCD
+#if FEATURE_CONTROLLER == CONTROLLER_MEGATRONIC
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 0
 #define UI_COLS 20
 #define UI_ROWS 2
@@ -788,10 +810,10 @@ void ui_check_slow_keys(int &action) {
 }
 #endif
 #endif // Controller 6
-#if FEATURE_CONTROLLER==7 // RADDS pin assignment for displays
+#if FEATURE_CONTROLLER == CONTROLLER_RADDS
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define BEEPER_TYPE 1
 #define UI_COLS 20
@@ -828,11 +850,11 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 7
 
-#if FEATURE_CONTROLLER==8 || FEATURE_CONTROLLER==9 // PiBot Expansion Port
+#if FEATURE_CONTROLLER == CONTROLLER_PIBOT20X4 || FEATURE_CONTROLLER == CONTROLLER_PIBOT16X2
 
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION 1
@@ -841,7 +863,7 @@ void ui_check_slow_keys(int &action) {}
 #define BEEPER_TYPE 1
 #define BEEPER_TYPE_INVERTING 0
 
-#if FEATURE_CONTROLLER==9   // 16x02 Display
+#if FEATURE_CONTROLLER == CONTROLLER_PIBOT16X2
  #define UI_COLS 16
  #define UI_ROWS 2
 #else  ////20x04 Display
@@ -917,10 +939,10 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif
 
-#if FEATURE_CONTROLLER==12 // FELIXPrinters Controller
+#if FEATURE_CONTROLLER == CONTROLLER_FELIX
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -957,10 +979,10 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 12
 
-#if FEATURE_CONTROLLER==13 // SeeMeCNC LCD + Rambo
+#if FEATURE_CONTROLLER == CONTROLLER_RAMBO // SeeMeCNC LCD + Rambo
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -999,12 +1021,12 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 13
 
-#if FEATURE_CONTROLLER == 14
+#if FEATURE_CONTROLLER == CONTROLLER_OPENHARDWARE
 #define SDSUPPORT 1
 #define SDCARDDETECT -1
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
-#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_TYPE DISPLAY_I2C
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -1062,10 +1084,10 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
  /*
  	Sanguinololu + panelolu2
  */
-#if FEATURE_CONTROLLER == 15
+#if FEATURE_CONTROLLER == CONTROLLER_SANGUINOLOLU
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#define UI_DISPLAY_TYPE 3
+#define UI_DISPLAY_TYPE DISPLAY_I2C
 #define UI_DISPLAY_CHARSET 2
 #define UI_COLS 20
 #define UI_ROWS 4
@@ -1118,7 +1140,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 15
 
-#if FEATURE_CONTROLLER>0
+#if FEATURE_CONTROLLER != NO_CONTROLLER
 #if UI_ROWS==4
 #if UI_COLS==16
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
@@ -1140,10 +1162,10 @@ void ui_check_slow_keys(int &action) {}
 #define COMPILE_I2C_DRIVER
 #endif
 
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
 
 
-#if UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
 #define COMPILE_I2C_DRIVER
 #endif
 

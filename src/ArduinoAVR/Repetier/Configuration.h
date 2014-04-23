@@ -1121,7 +1121,7 @@ is always running and is not hung up for some unknown reason. */
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
-#define Z_PROBE_WAIT_BEFORE_TEST true
+#define Z_PROBE_WAIT_BEFORE_TEST 1
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
@@ -1203,7 +1203,24 @@ The following settings override uiconfig.h!
 14 = OpenHardware.co.za LCD2004 V2014
 15 = Sanguinololu + Panelolu2
 */
-#define FEATURE_CONTROLLER 13
+
+#define NO_CONTROLLER 0
+#define UICONFIG_CONTROLLER 1
+#define CONTROLLER_SMARTRAMPS 2
+#define CONTROLLER_ADAFRUIT 3
+#define CONTROLLER_FOLTYN 4
+#define CONTROLLER_VIKI 5
+#define CONTROLLER_MEGATRONIC 6
+#define CONTROLLER_RADDS 7
+#define CONTROLLER_PIBOT20X4 8
+#define CONTROLLER_PIBOT16X2 9
+#define CONTROLLER_SHIELD 10
+#define CONTROLLER_REPRAP 11
+#define CONTROLLER_FELIX 12
+#define CONTROLLER_RAMBO 13
+#define CONTROLLER_OPENHARDWARE 14
+#define CONTROLLER_SANGUINOLOLU 15
+#define FEATURE_CONTROLLER CONTROLLER_RAMBO
 
 /**
 Select the language to use.

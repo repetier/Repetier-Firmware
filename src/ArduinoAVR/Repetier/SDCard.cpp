@@ -45,7 +45,7 @@ void SDCard::automount()
         if(sdactive)   // Card removed
         {
             Com::printFLN(PSTR("SD card removed"));
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
             uid.executeAction(UI_ACTION_TOP_MENU);
 #endif
             unmount();
@@ -60,7 +60,7 @@ void SDCard::automount()
             Com::printFLN(PSTR("SD card inserted"));
             Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
             initsd();
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
                 Printer::setAutomount(true);
                 uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
@@ -110,7 +110,7 @@ void SDCard::unmount()
     savetosd = false;
     Printer::setAutomount(false);
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
-#if UI_DISPLAY_TYPE!=0 && SDSUPPORT
+#if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
     uid.cwd[0]='/';
     uid.cwd[1]=0;
     uid.folderLevel=0;
