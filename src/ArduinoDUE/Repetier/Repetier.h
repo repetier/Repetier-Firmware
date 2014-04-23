@@ -122,8 +122,25 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
 
+#define NO_CONTROLLER 0
+#define UICONFIG_CONTROLLER 1
+#define CONTROLLER_SMARTRAMPS 2
+#define CONTROLLER_ADAFRUIT 3
+#define CONTROLLER_FOLTYN 4
+#define CONTROLLER_VIKI 5
+#define CONTROLLER_MEGATRONIC 6
+#define CONTROLLER_RADDS 7
+#define CONTROLLER_PIBOT20X4 8
+#define CONTROLLER_PIBOT16X2 9
+#define CONTROLLER_GADGETS3D_SHIELD 10
+#define CONTROLLER_REPRAPDISCOUNT_GLCD 11
+#define CONTROLLER_FELIX 12
+#define CONTROLLER_RAMBO 13
+#define CONTROLLER_OPENHARDWARE_LCD2004 14
+#define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
+
 // add pid control
-#define TEMP_PID 1 
+#define TEMP_PID 1
 
 
 #include "Configuration.h"
@@ -146,7 +163,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD 
+#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD
 #define NONLINEAR_SYSTEM 1
 #else
 #define NONLINEAR_SYSTEM 0

@@ -27,7 +27,7 @@ class GCode   // 52 uint8_ts per command needed
 public:
     unsigned int M;
     unsigned int G;
-    long int N; // Line numbers are MUCH bigger than 16 bit
+    uint16_t N; // Line numbers are only checked for the first 16 bit!
     float X;
     float Y;
     float Z;
@@ -38,7 +38,7 @@ public:
     float I;
     float J;
     float R;
-    char *text; //text[17];
+    char *text;
     //moved the byte to the end and aligned ints on short boundary
     // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
     // Otherwise, the compiler adds padding, wasted space.

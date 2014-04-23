@@ -25,21 +25,25 @@ class GCode   // 52 uint8_ts per command needed
     unsigned int params;
     unsigned int params2;
 public:
-    unsigned int N; // Line number
     unsigned int M;
     unsigned int G;
+    uint16_t N; // Line numbers are only checked for the first 16 bit!
     float X;
     float Y;
     float Z;
     float E;
     float F;
-    uint8_t T;
     long S;
     long P;
     float I;
     float J;
     float R;
-    char *text; //text[17];
+    char *text;
+    //moved the byte to the end and aligned ints on short boundary
+    // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
+    // Otherwise, the compiler adds padding, wasted space.
+    uint8_t T; // This may not matter on any of these controllers, but it can't hurt
+
     inline bool hasM()
     {
         return ((params & 2)!=0);

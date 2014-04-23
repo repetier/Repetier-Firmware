@@ -351,7 +351,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 // reprapdiscount smartcontroller has a sd card buildin
-#if FEATURE_CONTROLLER == CONTROLLER_SMART || FEATURE_CONTROLLER == CONTROLLER_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAP || FEATURE_CONTROLLER == CONTROLLER_RAMBO
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD || FEATURE_CONTROLLER == CONTROLLER_RAMBO
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -369,9 +369,9 @@ class UIDisplay {
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    uint8_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
+    uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
     void *menu[UI_MENU_MAXLEVEL]; // Menus active
-    uint8_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
+    uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
     int8_t shift; // Display shift for scrolling text
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
@@ -419,7 +419,6 @@ class UIDisplay {
     inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
     inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
     void updateSDFileCount();
-    //void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1]);
     void goDir(char *name);
     bool isDirname(char *name);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
@@ -432,7 +431,7 @@ extern UIDisplay uid;
 #include "uiconfig.h"
 #endif
 // No controller at all
-#if FEATURE_CONTROLLER == NO_CONTROLLER 
+#if FEATURE_CONTROLLER == NO_CONTROLLER
 #define UI_HAS_KEYS 0
 #define UI_DISPLAY_TYPE NO_DISPLAY
 #if UI_MAIN
@@ -440,12 +439,14 @@ void ui_init_keys() {}
 void ui_check_keys(int &action) {}
 inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
-#endif
-#endif
-#if FEATURE_CONTROLLER == CONTROLLER_SMART || FEATURE_CONTROLLER == CONTROLLER_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAP 
+#endif // UI_MAIN
+#endif // NO_CONTROLLER
+
+#if (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS) || (FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD) || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)
+
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
-#if FEATURE_CONTROLLER == CONTROLLER_REPRAP
+#if FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD
 #define UI_DISPLAY_TYPE DISPLAY_U8G
 #define U8GLIB_ST7920
 #define UI_LCD_WIDTH 128
@@ -474,7 +475,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ROWS 4
 #endif
 #define BEEPER_TYPE 1
-#if FEATURE_CONTROLLER == CONTROLLER_SHIELD // Gadgets3d shield
+#if FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD // Gadgets3d shield
 #define BEEPER_PIN             33
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1
@@ -1021,7 +1022,7 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 13
 
-#if FEATURE_CONTROLLER == CONTROLLER_OPENHARDWARE
+#if FEATURE_CONTROLLER == CONTROLLER_OPENHARDWARE_LCD2004
 #define SDSUPPORT 1
 #define SDCARDDETECT -1
 #define UI_HAS_KEYS 1
@@ -1084,7 +1085,7 @@ UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
  /*
  	Sanguinololu + panelolu2
  */
-#if FEATURE_CONTROLLER == CONTROLLER_SANGUINOLOLU
+#if FEATURE_CONTROLLER == CONTROLLER_SANGUINOLOLU_PANELOLU2
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE DISPLAY_I2C

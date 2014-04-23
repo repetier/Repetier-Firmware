@@ -1424,11 +1424,10 @@ void UIDisplay::updateSDFileCount()
 #endif
 }
 
-void getSDFilenameAt(byte filePos,char *filename)
+void getSDFilenameAt(uint16_t filePos,char *filename)
 {
 #if SDSUPPORT
     dir_t* p;
-    byte c=0;
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -1480,21 +1479,21 @@ void UIDisplay::goDir(char *name)
     #endif
 }
 
-void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
+void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 {
 #if SDSUPPORT
     dir_t* p = NULL;
-    byte offset = uid.menuTop[uid.menuLevel];
+    uint16_t offset = uid.menuTop[uid.menuLevel];
     SdBaseFile *root;
-    byte length, skip;
+    uint16_t length, skip;
 
     sd.fat.chdir(uid.cwd);
     root = sd.fat.vwd();
     root->rewind();
 
-    skip = (offset>0?offset-1:0);
+    skip = (offset > 0 ? offset - 1 : 0);
 
-    while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
+    while (r + offset < nFilesOnCard + 1 && r < UI_ROWS && (p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
         HAL::pingWatchdog();
         // done if past last used entry
@@ -1504,12 +1503,12 @@ void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
         {
             if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
                 continue;
-            if(skip>0)
+            if(skip > 0)
             {
                 skip--;
                 continue;
             }
-            uid.col=0;
+            uid.col = 0;
             if(r+offset == uid.menuPos[uid.menuLevel])
                 printCols[uid.col++] = CHAR_SELECTOR;
             else
@@ -1529,7 +1528,7 @@ void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
-    long r;
+    uint16_t r;
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
@@ -1541,10 +1540,10 @@ void UIDisplay::refreshPage()
     encoderStartScreen = uid.encoderLast;
 
     // Copy result into cache
-    if(menuLevel==0)
+    if(menuLevel == 0)
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
-        uint8_t nr = pgm_read_word_near(&(men->numEntries));
+        uint16_t nr = pgm_read_word_near(&(men->numEntries));
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
         for(r=0; r<nr && r<UI_ROWS; r++)
         {
@@ -1557,9 +1556,9 @@ void UIDisplay::refreshPage()
     else
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        uint8_t nr = pgm_read_word_near((void*)&(men->numEntries));
+        uint16_t nr = pgm_read_word_near((void*)&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));
-        uint8_t offset = menuTop[menuLevel];
+        uint16_t offset = menuTop[menuLevel];
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
         for(r=0; r+offset<nr && r<UI_ROWS; )
         {
@@ -1569,12 +1568,12 @@ void UIDisplay::refreshPage()
                 offset++;
                 continue;
             }
-            unsigned char entType = pgm_read_byte(&(ent->menuType));
-            unsigned int entAction = pgm_read_word(&(ent->action));
+            uint8_t entType = pgm_read_byte(&(ent->menuType));
+            uint16_t entAction = pgm_read_word(&(ent->action));
             col=0;
-            if(entType>=2 && entType<=4)
+            if(entType >= 2 && entType <= 4)
             {
-                if(r+offset==menuPos[menuLevel] && activeAction!=entAction)
+                if(r + offset == menuPos[menuLevel] && activeAction!=entAction)
                     printCols[col++]=CHAR_SELECTOR;
                 else if(activeAction==entAction)
                     printCols[col++]=CHAR_SELECTED;
@@ -1582,7 +1581,7 @@ void UIDisplay::refreshPage()
                     printCols[col++]=' ';
             }
             parse((char*)pgm_read_word(&(ent->text)),false);
-            if(entType==2)   // Draw submenu marker at the right side
+            if(entType == 2)   // Draw submenu marker at the right side
             {
                 while(col<UI_COLS-1) printCols[col++]=' ';
                 if(col>UI_COLS)
@@ -1598,13 +1597,13 @@ void UIDisplay::refreshPage()
         }
     }
 #if SDSUPPORT
-    if(mtype==1)
+    if(mtype == 1)
     {
         sdrefresh(r,cache);
     }
 #endif
     printCols[0]=0;
-    while(r<UI_ROWS)
+    while(r < UI_ROWS)
         strcpy(cache[r++],printCols);
     // Compute transition
     uint8_t transition = 0; // 0 = display, 1 = up, 2 = down, 3 = left, 4 = right

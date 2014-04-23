@@ -689,7 +689,7 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-#define ALWAYS_CHECK_ENDSTOPS true
+#define ALWAYS_CHECK_ENDSTOPS 1
 
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
@@ -806,7 +806,7 @@ you can also change the values online and autoleveling will store the results he
 #define SOFTWARE_LEVELING (1 && (DRIVE_SYSTEM==DELTA))
 
 #endif
-#if DRIVE_SYSTEM==TUGA 
+#if DRIVE_SYSTEM==TUGA
 // ========== Tuga special settings =============
 /* Radius of the long arm in mm. */
 #define DELTA_DIAGONAL_ROD 240
@@ -814,7 +814,7 @@ you can also change the values online and autoleveling will store the results he
 
 /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
 Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-will be allocated for the delta buffer. 
+will be allocated for the delta buffer.
 PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
 Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
 or 16 * (200 + (7*22=154) = 354) = 5664 bytes!!!!!!!1
@@ -933,9 +933,9 @@ Overridden if EEPROM activated.
 
 /** \brief Number of moves we can cache in advance.
 
-This number of moves can be cached in advance. If you wan't to cache more, increase this. 
-Even with very small moves, 0.1mm, each line can do at least 1mm in moves with 10 delta segments, 
-or 5mm overall for min line cache of 5. 
+This number of moves can be cached in advance. If you wan't to cache more, increase this.
+Even with very small moves, 0.1mm, each line can do at least 1mm in moves with 10 delta segments,
+or 5mm overall for min line cache of 5.
 At 200mm/sec this is 5/200 25 milliseconds, which is abundant time to refil the cache from
 more gcode commands. It should not be possible to every exhast the cache.
 The minimum value is 5.
@@ -1184,43 +1184,27 @@ For the most common available combinations you can set the controller type here,
 you don't need to configure uicong.h at all. Controller settings > 1 disable usage
 of uiconfig.h
 
-0 = no display
-1 = Manual definition of display and keys parameter in uiconfig.h
+0 or NO_CONTROLLER = no display
+1 or UICONFIG_CONTROLLER = Manual definition of display and keys parameter in uiconfig.h
 
 The following settings override uiconfig.h!
-2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
-3 = Adafruit RGB controller
-4 = Foltyn 3DMaster with display attached
-5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
-6 = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
-7 = RADDS Extension Port
-8 = PiBot Display/Controller extension with 20x4 character display
-9 = PiBot Display/Controller extension with 16x2 character display
-10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
-11 = RepRapDiscount Full Graphic Smart Controller
-12 = FELIXPrinters Controller
-13 = SeeMeCNC Display on Rambo (ORION)
-14 = OpenHardware.co.za LCD2004 V2014
-15 = Sanguinololu + Panelolu2
+2 or CONTROLLER_SMARTRAMPS = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
+3 or CONTROLLER_ADAFRUIT = Adafruit RGB controller
+4 or CONTROLLER_FOLTYN = Foltyn 3DMaster with display attached
+5 or CONTROLLER_VIKI = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
+6 or CONTROLLER_MEGATRONIC = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
+7 or CONTROLLER_RADDS = RADDS Extension Port
+8 or CONTROLLER_PIBOT20X4 = PiBot Display/Controller extension with 20x4 character display
+9 or CONTROLLER_PIBOT16X2 = PiBot Display/Controller extension with 16x2 character display
+10 or CONTROLLER_GADGETS3D_SHIELD = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
+11 or CONTROLLER_REPRAPDISCOUNT_GLCD = RepRapDiscount Full Graphic Smart Controller
+12 or CONTROLLER_FELIX = FELIXPrinters Controller
+13 or CONTROLLER_RAMBO = SeeMeCNC Display on Rambo (ORION)
+14 or CONTROLLER_OPENHARDWARE_LCD2004 = OpenHardware.co.za LCD2004 V2014
+15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
 */
 
-#define NO_CONTROLLER 0
-#define UICONFIG_CONTROLLER 1
-#define CONTROLLER_SMARTRAMPS 2
-#define CONTROLLER_ADAFRUIT 3
-#define CONTROLLER_FOLTYN 4
-#define CONTROLLER_VIKI 5
-#define CONTROLLER_MEGATRONIC 6
-#define CONTROLLER_RADDS 7
-#define CONTROLLER_PIBOT20X4 8
-#define CONTROLLER_PIBOT16X2 9
-#define CONTROLLER_SHIELD 10
-#define CONTROLLER_REPRAP 11
-#define CONTROLLER_FELIX 12
-#define CONTROLLER_RAMBO 13
-#define CONTROLLER_OPENHARDWARE 14
-#define CONTROLLER_SANGUINOLOLU 15
-#define FEATURE_CONTROLLER CONTROLLER_RAMBO
+#define FEATURE_CONTROLLER NO_CONTROLLER
 
 /**
 Select the language to use.
