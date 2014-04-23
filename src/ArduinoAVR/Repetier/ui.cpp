@@ -124,7 +124,7 @@ bool UIMenuEntry::showEntry() const
     return ret;
 }
 
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
 UIDisplay uid;
 char displayCache[UI_ROWS][MAX_COLS+1];
 
@@ -263,7 +263,7 @@ static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
 static const char versionString[] PROGMEM = UI_VERSION_STRING;
 
 
-#if UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
 
 // ============= I2C LCD Display driver ================
 inline void lcdStartWrite()
@@ -373,7 +373,7 @@ void initializeLCD()
     lcdStopWrite();
 }
 #endif
-#if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2
+#if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT
 
 void lcdWriteNibble(uint8_t value)
 {
@@ -538,14 +538,16 @@ void initializeLCD()
 }
 // ----------- end direct LCD driver
 #endif
-#if UI_DISPLAY_TYPE<4
+
+// does this < really mean less than, or shpould it be !=
+#if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
     changeAtCol = RMath::min(UI_COLS,changeAtCol);
     uint8_t col=0;
 // Set row
     if(r >= UI_ROWS) return;
-#if UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
     lcdStartWrite();
 #endif
     lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
@@ -575,7 +577,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
             col++;
         }
     }
-#if UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
     lcdStopWrite();
 #endif
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
@@ -584,7 +586,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 }
 #endif
 
-#if UI_DISPLAY_TYPE==4
+#if UI_DISPLAY_TYPE == DISPLAY_ARDUINO_LIB
 // Use LiquidCrystal library instead
 #include <LiquidCrystal.h>
 
@@ -648,9 +650,9 @@ void initializeLCD()
     uid.createChar(4,character_unselected);
 }
 // ------------------ End LiquidCrystal library as LCD driver
-#endif // UI_DISPLAY_TYPE==4
+#endif // UI_DISPLAY_TYPE == DISPLAY_ARDUINO_LIB
 
-#if UI_DISPLAY_TYPE==5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
 //u8glib
 #ifdef U8GLIB_ST7920
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
@@ -753,7 +755,7 @@ void initializeLCD()
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
 }
 // ------------------ End u8GLIB library as LCD driver
-#endif // UI_DISPLAY_TYPE==5
+#endif // UI_DISPLAY_TYPE == DISPLAY_U8G
 
 char printCols[MAX_COLS+1];
 UIDisplay::UIDisplay()
@@ -816,9 +818,9 @@ void UIDisplay::initialize()
     cwd[1]=0;
     folderLevel=0;
     UI_STATUS(UI_TEXT_PRINTER_READY);
-#if UI_DISPLAY_TYPE>0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
     initializeLCD();
-#if UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
     // I don't know why but after power up the lcd does not come up
     // but if I reinitialize i2c and the lcd again here it works.
     HAL::delayMilliseconds(10);
@@ -837,8 +839,8 @@ void UIDisplay::initialize()
     HAL::i2cStop();
     initializeLCD();
 #endif
-#if UI_ANIMATION==false || UI_DISPLAY_TYPE==5
-#if UI_DISPLAY_TYPE == 5
+#if UI_ANIMATION==false || UI_DISPLAY_TYPE == DISPLAY_U8G
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
     //u8g picture loop
     u8g_FirstPage(&u8g);
     do
@@ -850,7 +852,7 @@ void UIDisplay::initialize()
 #if UI_ROWS>2
         printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
 #endif
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
     }
     while( u8g_NextPage(&u8g) );  //end picture loop
 #endif
@@ -873,7 +875,7 @@ void UIDisplay::initialize()
     HAL::i2cStop();
 #endif
 }
-#if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2 || UI_DISPLAY_TYPE==3
+#if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT || UI_DISPLAY_TYPE == DISPLAY_I2C
 void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
@@ -941,6 +943,8 @@ void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
 void UIDisplay::addLong(long value,char digits)
 {
     uint8_t dig = 0,neg=0;
+    byte addspaces = digits>0;
+    if (digits<0) digits = -digits;
     if(value<0)
     {
         neg=1;
@@ -961,7 +965,7 @@ void UIDisplay::addLong(long value,char digits)
     while(value);
     if(neg)
         printCols[col++]='-';
-    if(digits<=11)
+    if(addspaces && digits<=11)
         while(dig<digits)
         {
             *--str = ' ';
@@ -1027,7 +1031,7 @@ UI_STRING(ui_selected,UI_TEXT_SEL);
 UI_STRING(ui_unselected,UI_TEXT_NOSEL);
 UI_STRING(ui_action,UI_TEXT_STRING_ACTION);
 
-void UIDisplay::parse(char *txt,bool ram)
+void UIDisplay::parse(const char *txt,bool ram)
 {
     int ivalue=0;
     float fvalue=0;
@@ -1385,11 +1389,11 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
     if(error)
         Printer::setUIErrorMessage(true);
 }
-void UIDisplay::setStatus(char *txt,bool error)
+void UIDisplay::setStatus(const char *txt,bool error)
 {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
-    while(*txt && i<16)
+    while(*txt && i<=MAX_COLS)
         statusMsg[i++] = *txt++;
     statusMsg[i]=0;
     if(error)
@@ -1476,7 +1480,7 @@ void UIDisplay::goDir(char *name)
     #endif
 }
 
-void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
+void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
 {
 #if SDSUPPORT
     dir_t* p = NULL;
@@ -1525,7 +1529,7 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
-    uint8_t r;
+    long r;
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
@@ -1663,7 +1667,7 @@ void UIDisplay::refreshPage()
             scroll = 200;
         }
         scroll += dt;
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
 #define drawHProgressBar(x,y,width,height,progress) \
      {u8g_DrawFrame(&u8g,x,y, width, height);  \
      int p = ceil((width-2) * progress / 100); \
@@ -1674,7 +1678,7 @@ void UIDisplay::refreshPage()
      {u8g_DrawFrame(&u8g,x,y, width, height);  \
      int p = height-1 - ceil((height-2) * progress / 100); \
      u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
 #if SDSUPPORT
         unsigned long sdPercent;
 #endif
@@ -1737,7 +1741,7 @@ void UIDisplay::refreshPage()
 #endif
             if(transition == 0)
             {
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
 
                 if(menuLevel==0 && menuPos[0] == 0 )
                 {
@@ -1785,7 +1789,7 @@ void UIDisplay::refreshPage()
 #endif
                     for(y=0; y<UI_ROWS; y++)
                         printRow(y,&cache[y][off[y]],NULL,UI_COLS);
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
                 }
 #endif
             }
@@ -1856,7 +1860,7 @@ void UIDisplay::refreshPage()
                 HAL::pingWatchdog();
             }
 #endif
-#if UI_DISPLAY_TYPE == 5
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
         }
         while( u8g_NextPage(&u8g) );  //end picture loop
         Printer::toggleAnimation();

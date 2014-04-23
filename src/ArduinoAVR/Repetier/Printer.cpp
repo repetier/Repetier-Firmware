@@ -504,7 +504,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 void Printer::setup()
 {
     HAL::stopWatchdog();
-#if FEATURE_CONTROLLER==5
+#if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
@@ -1311,7 +1311,7 @@ void Printer::waitForZProbeStart()
 {
 #if Z_PROBE_WAIT_BEFORE_TEST
     if(isZProbeHit()) return;
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
     uid.setStatusP(Com::tHitZProbe);
     uid.refreshPage();
 #endif
