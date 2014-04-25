@@ -1693,6 +1693,9 @@ STEPPER_CURRENT_CONTROL
 
 #define SDPOWER -1
 #define SDSS 16
+#define SCK_PIN 10
+#define MISO_PIN 12
+#define MOSI_PIN 11
 #define LED_PIN 46
 
 #define ORIG_FAN_PIN 9
