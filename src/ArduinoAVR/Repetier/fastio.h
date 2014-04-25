@@ -3046,10 +3046,10 @@ pins
 #define	TXD					DIO1
 
 // SPI
-#define	SCK					DIO10
+#define	SCK					10
 #define	MISO				DIO12
 #define	MOSI				DIO11
-#define	SS					DIO16
+#define	SS					16
 
 // TWI (I2C)
 #define	SCL					DIO17
