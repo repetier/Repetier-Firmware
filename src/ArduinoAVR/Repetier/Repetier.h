@@ -482,5 +482,10 @@ extern int debugWaitLoop;
 #define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
 #endif
 
+#ifdef FAST_INTEGER_SQRT
+#define SQRT(x) (Printer::isLargeMachine()?floor(0.5+sqrt(x)) : HAL::integerSqrt(x) )
+#else
+#define SQRT(x) sqrt(x) 
+#endif
 
 #endif

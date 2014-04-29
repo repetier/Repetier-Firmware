@@ -871,44 +871,12 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 */
 uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[])
 {
-    if(Printer::isLargeMachine())
-    {
-        float temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
-        float opt = Printer::deltaDiagonalStepsSquaredA.f - temp * temp;
-        float temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
-        if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[A_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
-        else
-            return 0;
-
-        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
-        opt = Printer::deltaDiagonalStepsSquaredB.f - temp * temp;
-        temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
-        if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[B_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
-        else
-            return 0;
-
-        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
-        opt = Printer::deltaDiagonalStepsSquaredC.f - temp * temp;
-        temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
-        if ((temp = opt - temp2*temp2) >= 0)
-            deltaPosSteps[C_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
-        else
-            return 0;
-        return 1;
-    }
-    else
-    {
+// Repetier.h defines SQRT, which contains logic to handle fast integer sqrt, and large machine
         long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         long opt = Printer::deltaDiagonalStepsSquaredA.l - temp * temp;
         long temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
-#ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[A_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
-#else
-            deltaPosSteps[A_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-#endif
+            deltaPosSteps[A_TOWER] = SQRT(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
 
@@ -916,11 +884,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         opt = Printer::deltaDiagonalStepsSquaredB.l - temp * temp;
         temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
-#ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[B_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
-#else
-            deltaPosSteps[B_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-#endif
+            deltaPosSteps[B_TOWER] = SQRT(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
 
@@ -928,14 +892,10 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         opt = Printer::deltaDiagonalStepsSquaredC.l - temp * temp;
         temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
-#ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[C_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
-#else
-            deltaPosSteps[C_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
-#endif
+            deltaPosSteps[C_TOWER] = SQRT(temp) + cartesianPosSteps[Z_AXIS];
         else
             return 0;
-    }
+
     return 1;
 }
 #endif

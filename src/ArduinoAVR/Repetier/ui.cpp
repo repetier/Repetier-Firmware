@@ -1449,7 +1449,7 @@ void UIDisplay::goDir(char *name)
     #endif
 }
 
-void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
+void sdrefresh(int &r,char cache[UI_ROWS][MAX_COLS+1])
 {
 #if SDSUPPORT
     dir_t* p = NULL;
@@ -1498,7 +1498,7 @@ void sdrefresh(long &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
-    long r;
+    int r;
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
