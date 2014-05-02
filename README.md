@@ -57,6 +57,7 @@ Supported boards:
 The following boards are supported by setting the proper motherboard type.Other boards
 require a matching pin definition.
 
+
 * MEGA/RAMPS up to 1.2       = 3
 * RAMPS 1.3/RAMPS 1.4        = 33
 * Azteeg X3                  = 34
@@ -74,6 +75,8 @@ require a matching pin definition.
 * Megatronics 2.0            = 701
 * RUMBA                      = 80  // Get it from reprapdiscount
 * Rambo                      = 301
+* RADDS (Arduino Due)        = 402
+* RAMPS-FD (Arduino Due)     = 403
 
 ## Features
 
