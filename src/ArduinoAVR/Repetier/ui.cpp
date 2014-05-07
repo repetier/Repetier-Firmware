@@ -108,10 +108,10 @@ bool UIMenuEntry::showEntry() const
 {
     bool ret = true;
     uint8_t f,f2;
-    f = HAL::readFlashByte((const prog_char*)&filter);
+    f = HAL::readFlashByte((PGM_P)&filter);
     if(f!=0)
         ret = (f & Printer::menuMode) != 0;
-    f2 = HAL::readFlashByte((const prog_char*)&nofilter);
+    f2 = HAL::readFlashByte((PGM_P)&nofilter);
     if(ret && f2!=0)
     {
         ret = (f2 & Printer::menuMode) == 0;

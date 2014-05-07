@@ -287,7 +287,7 @@ public:
     {
         return flags & FLAG_NOMINAL;
     }
-    inline bool setNominalMove()
+    inline void setNominalMove()
     {
         flags |= FLAG_NOMINAL;
     }

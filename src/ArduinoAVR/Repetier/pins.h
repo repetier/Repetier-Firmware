@@ -297,6 +297,10 @@ STEPPER_CURRENT_CONTROL
 #define MOTHERBOARD 3
 #define RAMPS_V_1_3
 #define AZTEEG_X3
+#elif MOTHERBOARD == 35
+#define MOTHERBOARD 3
+#define RAMPS_V_1_3
+#define AZTEEG_X3_PRO
 #endif
 #if MOTHERBOARD == 3
 #define KNOWN_BOARD 1
@@ -429,19 +433,65 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_STEP_PIN         27  // Only available with X3 shield
 #define ORIG_E2_DIR_PIN          29  // Only available with X3 shield
 #define ORIG_E2_ENABLE_PIN       41  // Only available with X3 shield
-#define E3_STEP_PIN         23  // Only available with X3 shield
-#define E3_DIR_PIN          25  // Only available with X3 shield
-#define E3_ENABLE_PIN       40  // Only available with X3 shield
+#define ORIG_E3_STEP_PIN         23  // Only available with X3 shield
+#define ORIG_E3_DIR_PIN          25  // Only available with X3 shield
+#define ORIG_E3_ENABLE_PIN       40  // Only available with X3 shield
 #define HEATER_3_PIN        17  // Only available with X3 shield
 #define TEMP_3_PIN          12  // Only available with X3 shield
 #define HEATER_4_PIN        16  // Only available with X3 shield
 #define TEMP_4_PIN          5 //11  // Only available with X3 shield
+
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 #define E3_PINS E3_STEP_PIN,E3_DIR_PIN,E3_ENABLE_PIN,
 
 #endif
+
+#ifdef AZTEEG_X3_PRO
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
+#define SDCARDDETECT 49
+#define SDSS               53
+#define ORIG_FAN_PIN           5
+#define ORIG_FAN2_PIN          6
+#define LIGHT_PIN         11
+#define BEEPER_PIN        33  // Activate beeper on extension shield
+#define BEEPER_TYPE        1
+
+#define ORIG_E2_STEP_PIN         23
+#define ORIG_E2_DIR_PIN          25
+#define ORIG_E2_ENABLE_PIN       40
+#define ORIG_E3_STEP_PIN         27
+#define ORIG_E3_DIR_PIN          29
+#define ORIG_E3_ENABLE_PIN       41
+#define ORIG_E4_STEP_PIN         43
+#define ORIG_E4_DIR_PIN          37
+#define ORIG_E4_ENABLE_PIN       42
+#define HEATER_0_PIN       10
+#define HEATER_1_PIN       8  // bed
+#define HEATER_2_PIN       9
+#define HEATER_3_PIN       16
+#define HEATER_4_PIN       17
+#define HEATER_5_PIN       4
+#define TEMP_0_PIN         13   // ANALOG NUMBERING
+#define TEMP_1_PIN         14   // BED , ANALOG NUMBERING
+#define TEMP_2_PIN         15
+#define TEMP_4_PIN         12   // ANALOG NUMBERING
+#define TEMP_5_PIN         11   // ANALOG NUMBERING
+#define TEMP_6_PIN         10
+
+#define TEMP_7_PIN         4   // Thermocouple 1
+#define TEMP_8_PIN         5   // Thermocouple 2
+
+
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
+#define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
+#define E4_PINS ORIG_E4_STEP_PIN,ORIG_E4_DIR_PIN,ORIG_E4_ENABLE_PIN,
+
+#endif
+
 #endif
 
 /****************************************************************************************
