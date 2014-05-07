@@ -429,13 +429,16 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_STEP_PIN         27  // Only available with X3 shield
 #define ORIG_E2_DIR_PIN          29  // Only available with X3 shield
 #define ORIG_E2_ENABLE_PIN       41  // Only available with X3 shield
-#define E3_STEP_PIN         23  // Only available with X3 shield
-#define E3_DIR_PIN          25  // Only available with X3 shield
-#define E3_ENABLE_PIN       40  // Only available with X3 shield
+#define ORIG_E3_STEP_PIN         23  // Only available with X3 shield
+#define ORIG_E3_DIR_PIN          25  // Only available with X3 shield
+#define ORIG_E3_ENABLE_PIN       40  // Only available with X3 shield
 #define HEATER_3_PIN        17  // Only available with X3 shield
 #define TEMP_3_PIN          12  // Only available with X3 shield
 #define HEATER_4_PIN        16  // Only available with X3 shield
 #define TEMP_4_PIN          5 //11  // Only available with X3 shield
+
+// X3 Pro additional pins
+
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
