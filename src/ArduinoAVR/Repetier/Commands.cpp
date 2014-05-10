@@ -172,7 +172,6 @@ void Commands::printTemperatures(bool showRaw)
     {
         Com::printF(Com::tSpaceT,(int)i);
         Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
-        Com::printF(Com::tTColon,temp);
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
 #ifdef TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
