@@ -1706,7 +1706,7 @@ STEPPER_CURRENT_CONTROL
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
-#define E1_PINS
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,E1_MS1_PIN,E1_MS2_PIN,
 
 #define SCK_PIN          52
 #define MISO_PIN         50
@@ -1931,7 +1931,8 @@ STEPPER_CURRENT_CONTROL
 
 
 
-#ifndef CPU_ARCH  // Set default architecture
+#ifndef CPU_ARCH  
+// Set default architecture
 #define CPU_ARCH ARCH_AVR
 #endif
 
@@ -1939,7 +1940,8 @@ STEPPER_CURRENT_CONTROL
 #define SDSSORIG -1
 #endif
 
-#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
+#ifndef STEPPER_CURRENT_CONTROL 
+// Set default stepper current control if not set yet.
 #define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_MANUAL
 #endif
 
@@ -1947,11 +1949,11 @@ STEPPER_CURRENT_CONTROL
 #define FAN_BOARD_PIN -1
 #endif
 
-#if NUM_EXTRUDER==1
+//Insure these symbols compile
+#ifndef E1_PINS
 #define E1_PINS
 #endif
-
-#if NUM_EXTRUDER<3
+#ifndef E2_PINS
 #define E2_PINS
 #endif
 
@@ -1994,7 +1996,7 @@ STEPPER_CURRENT_CONTROL
 #define FAN2_PIN ORIG_FAN2_PIN
 
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, ORIG_X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
+#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
                         HEATER_0_PIN, HEATER_1_PIN, ORIG_FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
 
