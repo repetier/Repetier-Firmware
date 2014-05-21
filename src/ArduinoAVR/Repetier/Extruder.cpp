@@ -458,6 +458,12 @@ void Extruder::disableCurrentExtruderMotor()
     }
 #endif
 }
+void Extruder::disableAllExtruderMotors() {
+    for(byte i=0;i<NUM_EXTRUDER;i++) {
+        if(extruder[i].enablePin > -1)
+            digitalWrite(extruder[i].enablePin,!extruder[i].enableOn);
+    }
+}
 #define NUMTEMPS_1 28
 // Epcos B57560G0107F000
 const short temptable_1[NUMTEMPS_1][2] PROGMEM =

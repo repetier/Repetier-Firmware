@@ -53,6 +53,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MEGA/RAMPS up to 1.2       = 3
 // RAMPS 1.3/RAMPS 1.4        = 33
 // Azteeg X3                  = 34
+// Azteeg X3 Pro              = 35
 // Ultimaker Shield 1.5.7     = 37
 // Gen6                       = 5
 // Gen6 deluxe                = 51
