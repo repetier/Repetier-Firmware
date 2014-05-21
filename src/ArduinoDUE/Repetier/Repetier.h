@@ -493,4 +493,16 @@ extern int debugWaitLoop;
 #include "Commands.h"
 #include "Eeprom.h"
 
+#if CPU_ARCH == ARCH_AVR
+#define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#else
+#define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
+#endif
+
+#ifdef FAST_INTEGER_SQRT
+#define SQRT(x) ( HAL::integerSqrt(x) )
+#else
+#define SQRT(x) sqrt(x) 
+#endif
+
 #endif

@@ -13,7 +13,7 @@ HAL::~HAL()
     //dtor
 }
 
-uint16_t HAL::integerSqrt(long a)
+uint16_t HAL::integerSqrt(uint32_t a)
 {
 // http://www.mikrocontroller.net/articles/AVR_Arithmetik#32_Bit_.2F_32_Bit
 //-----------------------------------------------------------

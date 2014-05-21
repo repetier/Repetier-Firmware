@@ -900,6 +900,54 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
     }
     else
     {
+      // As we are right on the edge of many printers arm lengths, this is rewrittent to use unsigned long
+      // This allows 52% longer arms to be used without performance penalty
+      // the code is a bit longer, because we cannot use negative to test for invalid conditions
+      // Also, previous code did not check for overflow of squared result
+      // Overflow is also detected as a fault condition
+
+        const unsigned long LIMIT = 65534; // Largest squarable int without overflow;
+
+        // A TOWER height
+        unsigned long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
+        if (temp > LIMIT) return 0;
+        temp *= temp;
+        unsigned long opt = Printer::deltaDiagonalStepsSquaredA.l;
+        if (opt < temp) return 0;
+        opt -= temp;
+        temp = Printer::deltaAPosXSteps - cartesianPosSteps[A_TOWER];
+        if (temp > LIMIT) return 0;
+        temp *= temp;
+        if ( opt < temp ) return 0;
+        deltaPosSteps[A_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
+
+        // B TOWER height
+        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
+        if (temp > LIMIT) return 0;
+        temp *= temp;
+        opt = Printer::deltaDiagonalStepsSquaredB.l;
+        if (opt < temp) return 0;
+        opt -= temp;
+
+        temp = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
+        if (temp > LIMIT) return 0;
+        temp *= temp;
+        if ( opt < temp ) return 0;
+        deltaPosSteps[B_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
+
+        // C TOWER height
+        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
+        if (temp > LIMIT) return 0;
+        temp = temp * temp;
+        opt = Printer::deltaDiagonalStepsSquaredC.l ;
+        if ( opt < temp ) return 0;
+
+        temp = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
+        if (temp > LIMIT) return 0;
+        temp = temp * temp;
+        if ( opt < temp ) return 0;
+        deltaPosSteps[C_TOWER] = SQRT(opt - temp) + cartesianPosSteps[Z_AXIS];
+/*
         long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         long opt = Printer::deltaDiagonalStepsSquaredA.l - temp * temp;
         long temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
@@ -934,7 +982,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
             deltaPosSteps[C_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 #endif
         else
-            return 0;
+            return 0;*/
     }
     return 1;
 }
