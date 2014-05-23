@@ -715,8 +715,6 @@ ISR(TIMER1_COMPA_vect)
     insideTimer1 = 0;
 }
 
-#define HEATER_PWM_SPEED 2 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
-
 #if !defined(HEATER_PWM_SPEED)
 #define HEATER_PWM_SPEED 0
 #endif
