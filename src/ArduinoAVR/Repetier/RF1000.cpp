@@ -12,6 +12,7 @@
 char			g_nDirectionX	= 0;
 char			g_nDirectionY	= 0;
 char			g_nDirectionZ	= 0;
+char			g_nBlockZ		= 0;
 char			g_nDirectionE	= 0;
 unsigned long	g_lastTime		= 0;
 
@@ -54,6 +55,7 @@ char			g_debugLevel				= 0;
 //short			g_debugCounter[10]			= { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 short			g_nHeatBedScanZ				= 0;
 short			g_nLastHeatBedScanZ			= 0;
+unsigned long	g_uStopTime					= 0;
 
 // configurable scan parameters - the proper default values are set by restoreDefaultScanParameters()
 unsigned short	g_nScanXStartSteps			= 0;
@@ -81,6 +83,8 @@ short			g_nScanPressureTolerance	= 0;
 // other configurable parameters
 unsigned short	g_nManualZSteps				= DEFAULT_MANUAL_Z_STEPS;
 unsigned short	g_nManualExtruderSteps		= DEFAULT_MANUAL_EXTRUDER_STEPS;
+
+#if FEATURE_PAUSE_PRINTING
 short			g_nPauseStepsX				= DEFAULT_PAUSE_STEPS_X;
 short			g_nPauseStepsY				= DEFAULT_PAUSE_STEPS_Y;
 short			g_nPauseStepsZ				= DEFAULT_PAUSE_STEPS_Z;
@@ -91,6 +95,13 @@ short			g_nContinueStepsZ			= 0;
 short			g_nContinueStepsExtruder	= 0;
 char			g_pausePrint				= 0;
 char			g_printingPaused			= 0;
+unsigned long	g_uPauseTime				= 0;
+char			g_pauseBeepDone				= 0;
+#endif // FEATURE_PAUSE_PRINTING
+
+unsigned short	g_nNextZSteps				= DEFAULT_MANUAL_Z_STEPS;
+unsigned long	g_uLastHeatBedUpTime		= 0;
+unsigned long	g_uLastHeadBedDownTime		= 0;
 
 #if FEATURE_PARK
 short			g_nParkPositionX			= PARK_POSITION_X;
@@ -99,10 +110,22 @@ short			g_nParkPositionZ			= PARK_POSITION_Z;
 #endif // FEATURE_PARK
 
 #if FEATURE_OUTPUT_PRINTED_OBJECT
-short			g_nOutputOffsetX			= OUTPUT_OFFSET_X;
-short			g_nOutputOffsetY			= OUTPUT_OFFSET_Y;
-short			g_nOutputOffsetZ			= OUTPUT_OFFSET_Z;
+long			g_nOutputOffsetX			= OUTPUT_OFFSET_X;
+long			g_nOutputOffsetY			= OUTPUT_OFFSET_Y;
+long			g_nOutputOffsetZ			= OUTPUT_OFFSET_Z;
 #endif // FEATURE_OUTPUT_PRINTED_OBJECT
+
+#if FEATURE_EMERGENCY_PAUSE
+unsigned long	g_uLastPressureTime			= 0;
+long			g_nPressureSum				= 0;
+char			g_nPressureChecks			= 0;
+#endif // FEATURE_EMERGENCY_PAUSE
+
+#if FEATURE_EMERGENCY_Z_STOP
+unsigned long	g_uLastZPressureTime		= 0;
+long			g_nZPressureSum				= 0;
+char			g_nZPressureChecks			= 0;
+#endif // FEATURE_EMERGENCY_Z_STOP
 
 
 void initRF1000( void )
@@ -241,7 +264,8 @@ void scanHeatBed( void )
 			Com::printFLN( PSTR( "scanHeatBed(): the scan has been aborted" ) );
 		}
 
-		UI_STATUS_UPD(UI_TEXT_IDLE);
+		UI_STATUS_UPD(UI_TEXT_HEAT_BED_SCAN_ABORTED);
+		BEEP_ABORT_HEAT_BED_SCAN
 
 		// restore the compensation values from the EEPROM
 		restoreCompensationMatrix();
@@ -249,7 +273,7 @@ void scanHeatBed( void )
 	}
 
 	// show that we are active
-	previousMillisCmd = millis();
+	previousMillisCmd = HAL::timeInMilliseconds();
 
 	if( g_nHeatBedScanStatus )
 	{
@@ -266,7 +290,7 @@ void scanHeatBed( void )
 		{
 			case 1:
 			{
-				g_scanStartTime   = millis();
+				g_scanStartTime   = HAL::timeInMilliseconds();
 				g_abortScan		  = 0;
 				nContactPressure  = 0;
 				g_nLastZDirection = 0;
@@ -299,12 +323,12 @@ void scanHeatBed( void )
 				Printer::disableYStepper();
 				Printer::disableZStepper();
 				g_nHeatBedScanStatus = 15;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 15:
 			{
-				if( (millis() - g_lastScanTime) < 1000 )
+				if( (HAL::timeInMilliseconds() - g_lastScanTime) < 1000 )
 				{
 					// do not check too often
 					break;
@@ -313,16 +337,16 @@ void scanHeatBed( void )
 				if( testExtruderTemperature() )
 				{
 					// we did not reach the proper temperature
-					g_lastScanTime = millis();
+					g_lastScanTime = HAL::timeInMilliseconds();
 					break;
 				}
 				g_nHeatBedScanStatus = 20;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 20:
 			{
-				if( (millis() - g_lastScanTime) < 1000 )
+				if( (HAL::timeInMilliseconds() - g_lastScanTime) < 1000 )
 				{
 					// do not check too often
 					break;
@@ -331,11 +355,11 @@ void scanHeatBed( void )
 				if( testHeatBedTemperature() )
 				{
 					// we did not reach the proper temperature
-					g_lastScanTime = millis();
+					g_lastScanTime = HAL::timeInMilliseconds();
 					break;
 				}
 				g_nHeatBedScanStatus = 25;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 25:
@@ -346,12 +370,12 @@ void scanHeatBed( void )
 				PrintLine::moveRelativeDistanceInSteps( 0, g_nScanYStartSteps, 0, 0, MAX_FEEDRATE_Y, true, true );
 
 				g_nHeatBedScanStatus = 30;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 30:
 			{
-				if( (millis() - g_lastScanTime) < 1000 )
+				if( (HAL::timeInMilliseconds() - g_lastScanTime) < 1000 )
 				{
 					// do not check too early
 					break;
@@ -364,7 +388,7 @@ void scanHeatBed( void )
 				}
 
 				g_nHeatBedScanStatus = 35;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 35:
@@ -434,7 +458,7 @@ void scanHeatBed( void )
 					g_HeatBedCompensation[nIndexX][0] = nX;
 
 					g_nHeatBedScanStatus = 49;
-					g_lastScanTime		 = millis();
+					g_lastScanTime		 = HAL::timeInMilliseconds();
 					break;
 				}
 
@@ -451,7 +475,7 @@ void scanHeatBed( void )
 				g_nHeatBedScanZ		 = 0;
 				nZ					 = 0;
 				g_nHeatBedScanStatus = 50;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 49:
@@ -462,7 +486,7 @@ void scanHeatBed( void )
 			}
 			case 50:
 			{
-				if( (millis() - g_lastScanTime) < g_nScanIdleDelay )
+				if( (HAL::timeInMilliseconds() - g_lastScanTime) < g_nScanIdleDelay )
 				{
 					// do not check too early
 					break;
@@ -588,7 +612,7 @@ void scanHeatBed( void )
 				}
 		
 				g_nHeatBedScanStatus = 49;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 60:
@@ -630,7 +654,7 @@ void scanHeatBed( void )
 				if( Printer::debugInfo() )
 				{
 					// output the pure scan time
-					Com::printF( PSTR( "scanHeatBed(): total scan time: " ), long((millis() - g_scanStartTime) / 1000) );
+					Com::printF( PSTR( "scanHeatBed(): total scan time: " ), long((HAL::timeInMilliseconds() - g_scanStartTime) / 1000) );
 					Com::printFLN( PSTR( " [s]" ) );
 				}
 
@@ -668,12 +692,12 @@ void scanHeatBed( void )
 				}
 
 				g_nHeatBedScanStatus = 80;
-				g_lastScanTime		 = millis();
+				g_lastScanTime		 = HAL::timeInMilliseconds();
 				break;
 			}
 			case 80:
 			{
-				if( (millis() - g_lastScanTime) < 1000 )
+				if( (HAL::timeInMilliseconds() - g_lastScanTime) < 1000 )
 				{
 					// do not check too early
 					break;
@@ -697,7 +721,9 @@ void scanHeatBed( void )
 				{
 					Com::printFLN( PSTR( "scanHeatBed(): the scan has been completed" ) );
 				}
-				UI_STATUS_UPD(UI_TEXT_IDLE);
+				UI_STATUS_UPD(UI_TEXT_HEAT_BED_SCAN_DONE);
+				BEEP_STOP_HEAT_BED_SCAN
+
 				g_nHeatBedScanStatus = 0;
 				break;
 			}
@@ -752,6 +778,7 @@ short testExtruderTemperature( void )
 
 short testHeatBedTemperature( void )
 {
+#if HAVE_HEATED_BED
 	if( heatedBedController.targetTemperatureC > 40 )
 	{
 		// we have to wait until the target temperature is reached
@@ -783,6 +810,7 @@ short testHeatBedTemperature( void )
 			return -1;
 		}
 	}
+#endif // HAVE_HEATED_BED
 
 	// at this point we have reached the proper temperature
 	return 0;
@@ -839,7 +867,7 @@ short readIdlePressure( short* pnIdlePressure )
 		Com::printFLN( PSTR( "readIdlePressure(): idle pressure: " ), *pnIdlePressure );
 	}
 
-	if( *pnIdlePressure < -2000 || *pnIdlePressure > 2000 )
+	if( *pnIdlePressure < SCAN_IDLE_PRESSURE_MIN || *pnIdlePressure > SCAN_IDLE_PRESSURE_MAX )
 	{
 		// the idle pressure is out of range
 		if( Printer::debugErrors() )
@@ -1304,7 +1332,7 @@ int moveZ( int nSteps )
 	// Warning: this function does not check any end stops
 /*	if( g_nDirectionZ )
 	{
-		// this function must not move the z-axis in case the "main" interrupt (bresenham_step()) is running at the moment
+		// this function must not move the z-axis in case the "main" interrupt (bresenhamStep()) is running at the moment
 		return 0;
 	}			
 */
@@ -1937,6 +1965,46 @@ void outputPressureMatrix( void )
 } // outputPressureMatrix
 #endif // FEATURE_Z_COMPENSATION
 
+
+char clearExternalEEPROM( void )
+{
+	unsigned short	i;
+	unsigned short	uMax = 32768;
+	unsigned short	uTemp;
+	unsigned short	uLast = 0;
+
+
+	if( Printer::debugInfo() )
+	{
+		Com::printFLN( PSTR( "clearExternalEEPROM(): erasing external memory ..." ) );
+	}
+
+	for( i=0; i<uMax; i++ )
+	{
+		HAL::delayMilliseconds( EEPROM_DELAY );
+		writeByte24C256( 0x50, i, 0 );
+
+		if( Printer::debugInfo() )
+		{
+			uTemp = i / 1000;
+			if( uTemp != uLast )
+			{
+				Com::printF( PSTR( "clearExternalEEPROM(): " ), (int)i );
+				Com::printFLN( PSTR( " / " ), (int)uMax );
+				uLast = uTemp;
+			}
+		}
+	}
+
+	if( Printer::debugInfo() )
+	{
+		Com::printFLN( PSTR( "clearExternalEEPROM(): erasing complete" ) );
+	}
+	return 0;
+
+} // clearExternalEEPROM
+
+
 void writeByte24C256( int addressI2C, unsigned int addressEEPROM, unsigned char data )
 {
     Wire.beginTransmission( addressI2C );
@@ -2012,7 +2080,7 @@ void loopRF1000( void )
 	}
 	nEntered ++;
 
-	uTime = millis();
+	uTime = HAL::timeInMilliseconds();
 
 #if FEATURE_Z_COMPENSATION
 	if( g_nHeatBedScanStatus )
@@ -2021,28 +2089,177 @@ void loopRF1000( void )
 	}
 #endif // FEATURE_Z_COMPENSATION
 
+#if FEATURE_PAUSE_PRINTING
+	if( g_uPauseTime )
+	{
+		if( !g_pauseBeepDone )
+		{
+			BEEP_PAUSE
+			g_pauseBeepDone = 1;
+		}
+
+		if( g_pausePrint )
+		{
+			if( (uTime - g_uPauseTime) > EXTRUDER_CURRENT_PAUSE_DELAY )
+			{
+				// we have paused a few moments ago - reduce the current of the extruder motor in order to avoid unwanted heating of the filament for use cases where the printing is paused for several minutes
+/*				Com::printF( PSTR( "loopRF1000(): PauseTime = " ), g_uPauseTime );
+				Com::printF( PSTR( ", Time = " ), uTime );
+				Com::printFLN( PSTR( ", Diff = " ), uTime - g_uPauseTime );
+*/
+				setExtruderCurrent( EXTRUDER_CURRENT_PAUSED );
+				g_uPauseTime = 0;
+			}
+		}
+		else
+		{
+			// we are not paused any more
+			g_uPauseTime = 0;
+		}
+	}
+#endif // FEATURE_PAUSE_PRINTING
+
+#if FEATURE_EMERGENCY_PAUSE
+	if( (uTime - g_uLastPressureTime) > EMERGENCY_PAUSE_INTERVAL )
+	{
+		g_uLastPressureTime = uTime;
+
+		if( g_pausePrint == 0 && PrintLine::linesCount > 5 )
+		{
+			// this check shall be done only during the printing (for example, it shall not be done in case filament is extruded manually)
+			g_nPressureSum	  += readStrainGauge( SCAN_STRAIN_GAUGE );
+			g_nPressureChecks += 1;
+
+			if( g_nPressureChecks == EMERGENCY_PAUSE_CHECKS )
+			{
+				nPressure		 = g_nPressureSum / g_nPressureChecks;
+
+//				Com::printF( PSTR( "loopRF1000(): average = " ), nPressure );
+//				Com::printFLN( PSTR( " / " ), g_nPressureChecks );
+
+				g_nPressureSum	  = 0;
+				g_nPressureChecks = 0;
+
+				if( (nPressure < EMERGENCY_PAUSE_DIGITS_MIN) ||
+					(nPressure > EMERGENCY_PAUSE_DIGITS_MAX) )
+				{
+					// the pressure is outside the allowed range, we must perform the emergency pause
+					if( Printer::debugErrors() )
+					{
+						Com::printF( PSTR( "loopRF1000(): emergency pause: " ), nPressure );
+						Com::printFLN( PSTR( " / " ), PrintLine::linesCount );
+					}
+
+					pausePrint();
+				}
+			}
+		}
+		else
+		{
+			g_nPressureSum	  = 0;
+			g_nPressureChecks = 0;
+		}
+	}
+#endif // FEATURE_EMERGENCY_PAUSE
+
+#if FEATURE_EMERGENCY_Z_STOP
+	if( (uTime - g_uLastZPressureTime) > EMERGENCY_Z_STOP_INTERVAL )
+	{
+		g_uLastZPressureTime = uTime;
+
+		if( g_nDirectionZ && !g_nDirectionE )
+		{
+			// this check shall be done only when there is some moving into z-direction in progress and the extruder is not doing anything
+			g_nZPressureSum	   += readStrainGauge( SCAN_STRAIN_GAUGE );
+			g_nZPressureChecks += 1;
+
+			if( g_nZPressureChecks == EMERGENCY_Z_STOP_CHECKS )
+			{
+				nPressure		 = g_nZPressureSum / g_nZPressureChecks;
+
+//				Com::printF( PSTR( "loopRF1000(): average = " ), nPressure );
+//				Com::printFLN( PSTR( " / " ), g_nZPressureChecks );
+
+				g_nZPressureSum	   = 0;
+				g_nZPressureChecks = 0;
+
+				if( (nPressure < EMERGENCY_Z_STOP_DIGITS_MIN) ||
+					(nPressure > EMERGENCY_Z_STOP_DIGITS_MAX) )
+				{
+					// the pressure is outside the allowed range, we must perform the emergency z-stop
+					if( Printer::debugErrors() )
+					{
+						Com::printFLN( PSTR( "loopRF1000(): emergency z-stop: " ), nPressure );
+					}
+
+					// block any further movement into the z-direction
+					g_nBlockZ	  = 1;
+					g_nDirectionZ = 0;
+				}
+			}
+		}
+		else
+		{
+			g_nZPressureSum	   = 0;
+			g_nZPressureChecks = 0;
+		}
+	}
+#endif // FEATURE_EMERGENCY_Z_STOP
+
+	if( g_uStopTime )
+	{
+		if( (uTime - g_uStopTime) > CLEAN_UP_DELAY_AFTER_STOP_PRINT )
+		{
+			// we have stopped the printing a few moments ago, output the object now
+
+			if( PrintLine::linesCount )
+			{
+				// wait until all moves are done
+				g_uStopTime = uTime;
+			}
+			else
+			{
+				// there is no printing in progress any more, do all clean-up now
+				g_uStopTime = 0;
+
+				// disable all heaters
+				Extruder::setHeatedBedTemperature(0,false);
+				Extruder::setTemperatureForExtruder(0,0,false);
+
+#if FEATURE_OUTPUT_PRINTED_OBJECT
+				// output the object
+				outputObject();
+#endif // FEATURE_OUTPUT_PRINTED_OBJECT
+
+#if FAN_PIN>-1
+				// disable the fan
+				Commands::setFanSpeed(0,false);
+#endif // FAN_PIN>-1
+
+				// disable all steppers
+				Printer::setAllSteppersDisabled();
+				Printer::disableXStepper();
+				Printer::disableYStepper();
+				Printer::disableZStepper();
+				Extruder::disableCurrentExtruderMotor();
+			}
+		}
+	}
+	
+#if FEATURE_ABORT_PRINT_AFTER_TEMPERATURE_ERROR
+	if( Printer::isAnyTempsensorDefect() && sd.sdmode && PrintLine::linesCount )
+	{
+		// we are printing from the SD card and a temperature sensor got defect - abort the current printing
+		Com::printFLN( PSTR( "loopRF1000(): aborting print because of a temperature sensor defect" ) );
+
+		sd.abortPrint();
+	}
+#endif // FEATURE_ABORT_PRINT_AFTER_TEMPERATURE_ERROR
+
 	if( (uTime - g_lastTime) > LOOP_INTERVAL )
 	{
 		// it is time for another processing
 		g_lastTime = uTime;
-
-#if FEATURE_EMERGENCY_PAUSE
-	if( g_pausePrint == 0 &&  PrintLine::linesCount )
-	{
-		nPressure = readStrainGauge( SCAN_STRAIN_GAUGE );
-		if( (EMERGENCY_PAUSE_DIGITS < 0 && nPressure < EMERGENCY_PAUSE_DIGITS) ||
-			(EMERGENCY_PAUSE_DIGITS > 0 && nPressure > EMERGENCY_PAUSE_DIGITS) )
-		{
-			// the pressure is outside the allowed range, we must perform the emergency pause
-			if( Printer::debugErrors() )
-			{
-				Com::printFLN( PSTR( "loopRF1000(): emergency pause" ) );
-			}
-
-			pausePrint();
-		}
-	}
-#endif // FEATURE_EMERGENCY_PAUSE
 
 #if FEATURE_Z_COMPENSATION
 		if( g_debugLevel && Printer::debugInfo() )
@@ -2115,6 +2332,7 @@ void loopRF1000( void )
 			}
 */		}
 #endif // FEATURE_Z_COMPENSATION
+
 	}
 
 	nEntered --;
@@ -2149,11 +2367,11 @@ void startHeatBedScan( void )
 		{
 			// start the heat bed scan
 			g_nHeatBedScanStatus = 1;
+			BEEP_START_HEAT_BED_SCAN
 
 			// when the heat bed is scanned, the z-compensation must be disabled
 			if( Printer::doZCompensation )
 			{
-				// there is some printing in progress at the moment - do not start the heat bed scan in this case
 				if( Printer::debugInfo() )
 				{
 					Com::printFLN( PSTR( "startHeatBedScan(): the z compensation has been disabled" ) );
@@ -2181,10 +2399,37 @@ void outputObject( void )
 		return;
 	}
 
+	if( !Printer::isHomed() )
+	{
+		// the printer does not know its home position, thus we can not output the object
+		if( Printer::debugErrors() )
+		{
+			Com::printFLN( PSTR( "outputObject(): the object can not be output because the home position is unknown" ) );
+		}
+		return;
+	}
+
 	if( Printer::debugInfo() )
 	{
 		Com::printFLN( PSTR( "outputObject()" ) );
 	}
+
+#if FAN_PIN>-1
+	// disable the fan
+    Commands::setFanSpeed(0,false);
+#endif // FAN_PIN>-1
+
+#if FEATURE_WATCHDOG
+    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+	PrintLine::moveRelativeDistanceInSteps( 0,
+											0,
+											g_nOutputOffsetZ * ZAXIS_STEPS_PER_MM,
+											0,
+											Printer::homingFeedrate[Z_AXIS],
+											true,
+											ALWAYS_CHECK_ENDSTOPS);
 
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
@@ -2192,11 +2437,18 @@ void outputObject( void )
 
 	PrintLine::moveRelativeDistanceInSteps( g_nOutputOffsetX * XAXIS_STEPS_PER_MM,
 											g_nOutputOffsetY * YAXIS_STEPS_PER_MM,
-											g_nOutputOffsetZ * ZAXIS_STEPS_PER_MM,
 											0,
-											Printer::homingFeedrate[0],
+											0,
+											Printer::homingFeedrate[X_AXIS],
 											true,
 											ALWAYS_CHECK_ENDSTOPS);
+
+	// disable all steppers
+	Printer::setAllSteppersDisabled();
+	Printer::disableXStepper();
+	Printer::disableYStepper();
+	Printer::disableZStepper();
+	Extruder::disableCurrentExtruderMotor();
 
 } // outputObject
 #endif // FEATURE_OUTPUT_PRINTED_OBJECT
@@ -2247,7 +2499,14 @@ void pausePrint( void )
 			while( !g_printingPaused )
 			{
 				HAL::delayMilliseconds( 1 );
+				Commands::checkForPeriodicalActions();
 			}
+
+#if EXTRUDER_CURRENT_PAUSE_DELAY
+			// remember the pause time only in case we shall lower the extruder current
+			g_uPauseTime	= HAL::timeInMilliseconds();
+			g_pauseBeepDone	= 0;
+#endif // EXTRUDER_CURRENT_PAUSE_DELAY
 
 			if( Printer::debugInfo() )
 			{
@@ -2406,6 +2665,7 @@ void pausePrint( void )
 		{
 			HAL::delayMilliseconds( 1 );
 			loopRF1000();
+			Commands::checkForPeriodicalActions();
 
 			// NOTE: do not run runStandardTasks() within this loop
 			//runStandardTasks();
@@ -2448,8 +2708,13 @@ void pausePrint( void )
 void continuePrint( void )
 {
 #if FEATURE_PAUSE_PRINTING
+	const unsigned short	uMotorCurrents[] =  MOTOR_CURRENT;
+
+
 	if( g_pausePrint )
 	{
+		BEEP_CONTINUE
+
 		if( g_pausePrint == 2 )
 		{
 			// move the the continue position
@@ -2457,6 +2722,8 @@ void continuePrint( void )
 			{
 				Com::printFLN( PSTR( "continuePrint(): moving to the continue position" ) );
 			}
+
+			setExtruderCurrent( uMotorCurrents[E_AXIS] );
 
 			if( g_nContinueStepsY )			Printer::targetPositionStepsY += g_nContinueStepsY;
 			if( g_nContinueStepsX )			Printer::targetPositionStepsX += g_nContinueStepsX;
@@ -2478,6 +2745,7 @@ void continuePrint( void )
 			{
 				HAL::delayMilliseconds( 1 );
 				loopRF1000();
+				Commands::checkForPeriodicalActions();
 
 				// NOTE: do not run runStandardTasks() within this loop
 				//runStandardTasks();
@@ -2485,6 +2753,8 @@ void continuePrint( void )
 		}
 		else if( g_pausePrint == 1 )
 		{
+			setExtruderCurrent( uMotorCurrents[E_AXIS] );
+
 			if( g_nContinueStepsExtruder )	Printer::targetPositionStepsE -= g_nContinueStepsExtruder;
 
 			// wait until the continue position has been reached
@@ -2497,6 +2767,7 @@ void continuePrint( void )
 			{
 				HAL::delayMilliseconds( 1 );
 				loopRF1000();
+				Commands::checkForPeriodicalActions();
 
 				// NOTE: do not run runStandardTasks() within this loop
 				//runStandardTasks();
@@ -2518,6 +2789,7 @@ void continuePrint( void )
 			}
 			HAL::delayMilliseconds( 1 );
 			loopRF1000();
+			Commands::checkForPeriodicalActions();
 
 			// NOTE: do not run runStandardTasks() within this loop
 			//runStandardTasks();
@@ -2543,9 +2815,23 @@ void continuePrint( void )
 } // continuePrint
 
 
+void setExtruderCurrent( unsigned short level )
+{
+	// set the current for the extruder motor
+	setMotorCurrent( 4, level );
+
+	if( Printer::debugInfo() )
+	{
+		Com::printFLN( PSTR( "setExtruderCurrent(): new extruder current level: " ), (unsigned long)level );
+	}
+	return;
+
+} // setExtruderCurrent
+
+
 void processCommand( GCode* pCommand )
 {
-	long	nTemp;
+  	long	nTemp;
 
 
 	if( pCommand->hasM() )
@@ -2555,12 +2841,24 @@ void processCommand( GCode* pCommand )
 #if FEATURE_Z_COMPENSATION
 			case 3000: // M3000 - turn off the Z compensation
 			{
+				Com::printFLN( PSTR( "M3000: disabling z compensation" ) );
 				PrintLine::queueTask( TASK_DISABLE_Z_COMPENSATION );
 				break;
 			}
 			case 3001: // M3001 - turn on the Z compensation
 			{
-				PrintLine::queueTask( TASK_ENABLE_Z_COMPENSATION );
+				if( g_HeatBedCompensation[0][0] == COMPENSATION_VERSION )
+				{
+					// enable the z compensation only in case we have valid compensation values
+					Com::printFLN( PSTR( "M3001: enabling z compensation" ) );
+					PrintLine::queueTask( TASK_ENABLE_Z_COMPENSATION );
+				}
+				else
+				{
+					Com::printF( PSTR( "M3001: the z compensation can not be enabled because the compensation matrix is not valid ( " ), g_HeatBedCompensation[0][0] );
+					Com::printF( PSTR( " / " ), COMPENSATION_VERSION );
+					Com::printFLN( PSTR( " )" ) );
+				}
 				break;
 			}
 			case 3002: // M3002 - configure the no compensation steps
@@ -3247,6 +3545,7 @@ void processCommand( GCode* pCommand )
 			}
 #endif // FEATURE_PARK
 
+#if FEATURE_WATCHDOG
 			case 3090: // M3090 - test the watchdog (this command resets the firmware)
 			{
 				if( Printer::debugInfo() )
@@ -3255,6 +3554,13 @@ void processCommand( GCode* pCommand )
 				}
 				HAL::delayMilliseconds( 100 );
 				HAL::testWatchdog();
+				break;
+			}
+#endif // FEATURE_WATCHDOG
+
+			case 3091: // M3091 - erase the external EEPROM
+			{
+				clearExternalEEPROM();
 				break;
 			}
 
@@ -3266,7 +3572,7 @@ void processCommand( GCode* pCommand )
 					// test and take over the specified value
 					nTemp = pCommand->S;
 					if( nTemp < 1 )							nTemp = 1;
-					if( nTemp > (ZAXIS_STEPS_PER_MM *10) )	nTemp = ZAXIS_STEPS_PER_MM *10;
+					if( nTemp > MAXIMAL_MANUAL_Z_STEPS )	nTemp = MAXIMAL_MANUAL_Z_STEPS;
 
 					g_nManualZSteps = nTemp;
 					if( Printer::debugInfo() )
@@ -3462,7 +3768,7 @@ void processCommand( GCode* pCommand )
 						if( nTemp < 0 )				nTemp = 0;
 						if( nTemp > X_MAX_LENGTH )	nTemp = X_MAX_LENGTH;
 
-						g_nOutputOffsetX = (short)nTemp;
+						g_nOutputOffsetX = nTemp;
 						if( Printer::debugInfo() )
 						{
 							Com::printF( PSTR( "M3104: new x output offset: " ), (int)g_nOutputOffsetX );
@@ -3476,7 +3782,7 @@ void processCommand( GCode* pCommand )
 						if( nTemp < 0 )				nTemp = 0;
 						if( nTemp > Y_MAX_LENGTH )	nTemp = Y_MAX_LENGTH;
 
-						g_nOutputOffsetY = (short)nTemp;
+						g_nOutputOffsetY = nTemp;
 						if( Printer::debugInfo() )
 						{
 							Com::printF( PSTR( "M3104: new y output offset: " ), (int)g_nOutputOffsetY );
@@ -3488,9 +3794,9 @@ void processCommand( GCode* pCommand )
 						// test and take over the specified value
 						nTemp = pCommand->Z;
 						if( nTemp < 0 )				nTemp = 0;
-						if( nTemp > Z_MAX_LENGTH )	nTemp = Y_MAX_LENGTH;
+						if( nTemp > Z_MAX_LENGTH )	nTemp = Z_MAX_LENGTH;
 
-						g_nOutputOffsetZ = (short)nTemp;
+						g_nOutputOffsetZ = nTemp;
 						if( Printer::debugInfo() )
 						{
 							Com::printF( PSTR( "M3104: new z output offset: " ), (int)g_nOutputOffsetZ );
@@ -3502,6 +3808,62 @@ void processCommand( GCode* pCommand )
 			}
 #endif // FEATURE_OUTPUT_PRINTED_OBJECT
 
+#if FEATURE_CONTROLLER == 4 || FEATURE_CONTROLLER == 33
+			case 3110:	// M3110 - force a status text
+			{
+				if( pCommand->hasS() )
+				{
+					// take over the specified value
+					if( pCommand->S )
+					{
+						// ensure that the current text won't be overwritten
+						Com::printFLN( PSTR( "M3110: lock" ) );
+						uid.lock();
+					}
+					else
+					{
+						// allow to overwrite the current string again
+						uid.unlock();
+						Com::printFLN( PSTR( "M3110: unlock" ) );
+					}
+				}
+				break;
+			}
+#endif // FEATURE_CONTROLLER == 4 || FEATURE_CONTROLLER == 33
+
+			case 3200: // M3200 - reserved for test and debug
+			{
+/*				// simulate a temp sensor error
+				Com::printFLN( PSTR( "M3200: simulating a defect temperature sensor" ) );
+                Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+                reportTempsensorError();
+*/
+/*				if( pCommand->hasS() )
+				{
+					switch( pCommand->S )
+					{
+						case  1:	BEEP_SHORT					break;
+						case  2:	BEEP_LONG					break;
+						case  3:	BEEP_START_PRINTING			break;
+						case  4:	BEEP_ABORT_PRINTING			break;
+						case  5:	BEEP_STOP_PRINTING			break;
+						case  6:	BEEP_PAUSE					break;
+						case  7:	BEEP_CONTINUE				break;
+						case  8:	BEEP_START_HEAT_BED_SCAN	break;
+						case  9:	BEEP_ABORT_HEAT_BED_SCAN	break;
+						case 10:	BEEP_STOP_HEAT_BED_SCAN		break;
+
+						case 11:
+						{
+							Com::printFLN( PSTR( "M3200: block" ) );
+							g_nBlockZ = 1;
+							break;
+						}
+					}
+				}
+*/
+				break;
+			}
 		}
 	}
 
@@ -3579,14 +3941,52 @@ extern void processButton( int nAction )
 #endif // FEATURE_ENABLE_MANUAL_Z_SAFETY
 			{
 				// in case the user moves the z-axis manually, we also must allow the endstop violation for the rest of the firmware
+				if( g_uLastHeadBedDownTime )
+				{
+					g_uLastHeadBedDownTime = 0;
+					g_nNextZSteps = g_nManualZSteps;
+				}
+
+				if( g_uLastHeatBedUpTime )
+				{
+					if( (HAL::timeInMilliseconds() - g_uLastHeatBedUpTime) < 500 )
+					{
+						// the user keeps the button pressed - we shall move faster and faster
+						g_nNextZSteps *= 2;
+						if( g_nNextZSteps > MAXIMAL_MANUAL_Z_STEPS )	g_nNextZSteps = MAXIMAL_MANUAL_Z_STEPS;
+					}
+					else
+					{
+						// this is the first movement after some time
+						g_nNextZSteps = g_nManualZSteps;
+					}
+				}
+				g_uLastHeatBedUpTime = HAL::timeInMilliseconds();
+
+				if( (long(Printer::targetPositionStepsZ) - long(g_nNextZSteps)) < -32767 )
+				{
+					if( Printer::targetPositionStepsZ == -32767 )
+					{
+						// we can not allow to move up forever
+						if( Printer::debugInfo() )
+						{
+							Com::printFLN( PSTR( "processButton(): heat bed up: aborted (the topmost manual position has been reached)" ) );
+						}
+						break;
+					}
+
+					// move the last path until the topmost manual position
+					g_nNextZSteps = 32767 + Printer::targetPositionStepsZ;
+				}
+
 				if( Printer::debugInfo() )
 				{
-					Com::printF( PSTR( "processButton(): heat bed up: " ), (int)g_nManualZSteps );
+					Com::printF( PSTR( "processButton(): heat bed up: " ), (int)g_nNextZSteps );
 					Com::printFLN( PSTR( " [steps]" ) );
 				}
 
 				Printer::enableZStepper();
-				Printer::targetPositionStepsZ -= g_nManualZSteps;
+				Printer::targetPositionStepsZ -= g_nNextZSteps;
 
 				if( Printer::debugInfo() )
 				{
@@ -3613,14 +4013,52 @@ extern void processButton( int nAction )
 #endif // FEATURE_ENABLE_MANUAL_Z_SAFETY
 			{
 				// in case the user moves the z-axis manually, we also must allow the endstop violation for the rest of the firmware
+				if( g_uLastHeatBedUpTime )
+				{
+					g_uLastHeatBedUpTime = 0;
+					g_nNextZSteps = g_nManualZSteps;
+				}
+
+				if( g_uLastHeadBedDownTime )
+				{
+					if( (HAL::timeInMilliseconds() - g_uLastHeadBedDownTime) < 500 )
+					{
+						// the user keeps the button pressed - we shall move faster and faster
+						g_nNextZSteps *= 2;
+						if( g_nNextZSteps > MAXIMAL_MANUAL_Z_STEPS )	g_nNextZSteps = MAXIMAL_MANUAL_Z_STEPS;
+					}
+					else
+					{
+						// this is the first movement after some time
+						g_nNextZSteps = g_nManualZSteps;
+					}
+				}
+				g_uLastHeadBedDownTime = HAL::timeInMilliseconds();
+
+				if( (long(Printer::targetPositionStepsZ) + long(g_nNextZSteps)) > 32767 )
+				{
+					if( Printer::targetPositionStepsZ == 32767 )
+					{
+						// we can not allow to move down forever
+						if( Printer::debugInfo() )
+						{
+							Com::printFLN( PSTR( "processButton(): heat bed down: moving aborted (the bottommost manual position has been reached)" ) );
+						}
+						break;
+					}
+
+					// move the last path until the bottommost manual position
+					g_nNextZSteps = 32767 - Printer::targetPositionStepsZ;
+				}
+
 				if( Printer::debugInfo() )
 				{
-					Com::printF( PSTR( "processButton(): heat bed down: " ), (int)g_nManualZSteps );
+					Com::printF( PSTR( "processButton(): heat bed down: " ), (int)g_nNextZSteps );
 					Com::printFLN( PSTR( " [steps]" ) );
 				}
 
 				Printer::enableZStepper();
-				Printer::targetPositionStepsZ += g_nManualZSteps;
+				Printer::targetPositionStepsZ += g_nNextZSteps;
 
 				if( Printer::debugInfo() )
 				{
@@ -3700,11 +4138,13 @@ extern void processButton( int nAction )
 		}
 #endif // FEATURE_EXTENDED_BUTTONS
 
+#if FEATURE_Z_COMPENSATION
 		case UI_ACTION_RF1000_DO_HEAT_BED_SCAN:
 		{
 			startHeatBedScan();
 			break;
 		}
+#endif // FEATURE_Z_COMPENSATION
 
 #if FEATURE_OUTPUT_PRINTED_OBJECT
 		case UI_ACTION_RF1000_OUTPUT_OBJECT:
@@ -3755,6 +4195,67 @@ void CalculateAllowedZStepsAfterEndStop( void )
 	Printer::allowedZStepsAfterEndstop = nTemp;
 
 } // CalculateAllowedZStepsAfterEndStop
+
+
+#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
+
+void setMotorCurrent( uint8_t channel, unsigned short level )
+{
+    const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
+    if(channel>LTC2600_NUM_CHANNELS) return;
+    uint8_t address = ltc_channels[channel];
+    char i;
+
+
+    // NOTE: Do not increase the current endlessly. In case the engine reaches its current saturation, the engine and the driver can heat up and loss power.
+    // When the saturation is reached, more current causes more heating and more power loss.
+    // In case of engines with lower quality, the saturation current may be reached before the nominal current.
+
+    // configure the pins
+    WRITE( LTC2600_CS_PIN, HIGH );
+    SET_OUTPUT( LTC2600_CS_PIN );
+    WRITE( LTC2600_SCK_PIN, LOW );
+    SET_OUTPUT( LTC2600_SCK_PIN );
+    WRITE( LTC2600_SDI_PIN, LOW );
+    SET_OUTPUT( LTC2600_SDI_PIN );
+
+    // enable the command interface of the LTC2600
+    WRITE( LTC2600_CS_PIN, LOW );
+
+    // transfer command and address
+    for( i=7; i>=0; i-- )
+    {
+        WRITE( LTC2600_SDI_PIN, address & (0x01 << i));
+        WRITE( LTC2600_SCK_PIN, 1 );
+        WRITE( LTC2600_SCK_PIN, 0 );
+    }
+
+    // transfer the data word
+    for( i=15; i>=0; i-- )
+    {
+        WRITE( LTC2600_SDI_PIN, level & (0x01 << i));
+        WRITE( LTC2600_SCK_PIN, 1 );
+        WRITE( LTC2600_SCK_PIN, 0 );
+    }
+
+    // disable the command interface of the LTC2600 -
+    // this carries out the specified command
+    WRITE( LTC2600_CS_PIN, HIGH );
+
+} // setMotorCurrent
+
+
+void motorCurrentControlInit( void )
+{
+    const unsigned int ltc_current[] =  MOTOR_CURRENT;
+    uint8_t i;
+    for(i=0; i<LTC2600_NUM_CHANNELS; i++)
+    {
+        setMotorCurrent(i, ltc_current[i] );
+    }
+}
+
+#endif // CURRENT_CONTROL_LTC2600
 
 
 #if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_DRV8711
@@ -3885,8 +4386,14 @@ void drv8711Init( void )
   
 
   // configure the pins
-  WRITE( DRV_RESET, LOW );
-  SET_OUTPUT( DRV_RESET );
+  WRITE( DRV_RESET1, LOW );
+  SET_OUTPUT( DRV_RESET1 );
+
+#if DRV_RESET2
+  WRITE( DRV_RESET2, LOW );
+  SET_OUTPUT( DRV_RESET2 );
+#endif // DRV_RESET2
+
   WRITE( DRV_SCLK, LOW );
   SET_OUTPUT( DRV_SCLK );
   WRITE( DRV_SDATI, LOW );
@@ -3902,9 +4409,19 @@ void drv8711Init( void )
   WRITE( O1_STALL_PIN, HIGH );
 
   // reset all DRV8711 (active high)
-  WRITE( DRV_RESET, HIGH );
+  WRITE( DRV_RESET1, HIGH );
+
+#if DRV_RESET2
+  WRITE( DRV_RESET2, HIGH );
+#endif // DRV_RESET2
+
   HAL::delayMicroseconds( 5000 );
-  WRITE( DRV_RESET, LOW );
+  WRITE( DRV_RESET1, LOW );
+
+#if DRV_RESET2
+  WRITE( DRV_RESET2, LOW );
+#endif // DRV_RESET2
+
   HAL::delayMicroseconds( 5000 );
   
   // configure all registers except the motor current (= register 01)
@@ -3972,7 +4489,7 @@ void setMotorCurrent( unsigned char driver, unsigned short level )
 } // setMotorCurrent
 
 
-void motorCurrentControlInit()
+void motorCurrentControlInit( void )
 {
   const unsigned short	drv_current[] =  MOTOR_CURRENT;
   unsigned char			i;

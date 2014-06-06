@@ -22,12 +22,12 @@
 #include "Repetier.h"
 
 #if DRIVE_SYSTEM==3
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/RF1000/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
 #if DRIVE_SYSTEM==0
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/RF1000/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/RF1000/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #endif
 #endif
 FSTRINGVALUE(Com::tDebug,"Debug:");
@@ -82,6 +82,7 @@ FSTRINGVALUE(Com::tSpaceBAtColon," B@:")
 FSTRINGVALUE(Com::tSpaceRaw," RAW")
 FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
+FSTRINGVALUE(Com::tSpaceSlash," /")
 FSTRINGVALUE(Com::tSpeedMultiply,"SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply,"FlowMultiply:")
 FSTRINGVALUE(Com::tFanspeed,"Fanspeed:")
@@ -227,11 +228,12 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
 #if FEATURE_Z_PROBE
-FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height")
-FSTRINGVALUE(Com::tZProbeOffsetX,"Z-probe offset x")
-FSTRINGVALUE(Com::tZProbeOffsetY,"Z-probe offset y")
-FSTRINGVALUE(Com::tZProbeSpeed,"Z-probe speed")
-FSTRINGVALUE(Com::tZProbeSpeedXY,"Z-probe x-y-speed")
+FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height [mm]")
+FSTRINGVALUE(Com::tZProbeBedDistance,"Max. z-probe - bed dist. [mm]")
+FSTRINGVALUE(Com::tZProbeOffsetX,"Z-probe offset x [mm]")
+FSTRINGVALUE(Com::tZProbeOffsetY,"Z-probe offset y [mm]")
+FSTRINGVALUE(Com::tZProbeSpeed,"Z-probe speed [mm/s]")
+FSTRINGVALUE(Com::tZProbeSpeedXY,"Z-probe x-y-speed [mm/s]")
 FSTRINGVALUE(Com::tZProbeX1,"Z-probe X1")
 FSTRINGVALUE(Com::tZProbeY1,"Z-probe Y1")
 FSTRINGVALUE(Com::tZProbeX2,"Z-probe X2")
@@ -281,6 +283,11 @@ FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerZOffset,"Tower Z endstop offset [steps]")
+
+FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max. radius [mm]")
+FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA,"Corr. diagonal A [mm]")
+FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB,"Corr. diagonal B [mm]")
+FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
 
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
@@ -405,11 +412,11 @@ void Com::printF(FSTRINGPARAM(text),int value) {
     printF(text);
     print(value);
 }
-void Com::printF(FSTRINGPARAM(text),long value) {
+void Com::printF(FSTRINGPARAM(text),int32_t value) {
     printF(text);
     print(value);
 }
-void Com::printF(FSTRINGPARAM(text),unsigned long value) {
+void Com::printF(FSTRINGPARAM(text),uint32_t value) {
     printF(text);
     printNumber(value);
 }
@@ -418,12 +425,12 @@ void Com::printFLN(FSTRINGPARAM(text),int value) {
     print(value);
     println();
 }
-void Com::printFLN(FSTRINGPARAM(text),long value) {
+void Com::printFLN(FSTRINGPARAM(text),int32_t value) {
     printF(text);
     print(value);
     println();
 }
-void Com::printFLN(FSTRINGPARAM(text),unsigned long value) {
+void Com::printFLN(FSTRINGPARAM(text),uint32_t value) {
     printF(text);
     printNumber(value);
     println();
@@ -451,7 +458,7 @@ void Com::print(long value) {
     printNumber(value);
 }
 
-void Com::printNumber(unsigned long n) {
+void Com::printNumber(uint32_t n) {
   char buf[11]; // Assumes 8-bit chars plus zero byte.
   char *str = &buf[10];
   *str = '\0';
@@ -469,7 +476,7 @@ void Com::printArrayFLN(FSTRINGPARAM(text),float *arr,uint8_t n,uint8_t digits) 
         printF(Com::tSpace,arr[i],digits);
     println();
 }
-void Com::printArrayFLN(FSTRINGPARAM(text),long *arr,uint8_t n) {
+void Com::printArrayFLN(FSTRINGPARAM(text),int32_t *arr,uint8_t n) {
     printF(text);
     for(uint8_t i=0; i<n; i++)
         printF(Com::tSpace,arr[i]);

@@ -1,3 +1,73 @@
+V 0.91.34 (2014-06-06)
+- Enabling of the EEPROM_MODE.
+- Review of menu texts.
+- Disabling of the "Debugging" menu.
+  - SHOW_DEBUGGING_MENU can be used in order to toggle this menu between "shown" and "hidden".
+- Disabling of the "Configuration" -> "Extruder" menu.
+  - SHOW_EXTRUDER_MENU can be used in order to toggle this menu between "shown" and "hidden".
+- Increasing of the motor driver currents.
+- Switching from UI_MENU_ACTIONCOMMAND_FILTER to UI_MENU_ACTIONCOMMAND for all menu entries which used MENU_MODE_PRINTING.
+- The menu entry "Configuration" -> "General" -> "Lights" can be used now in order to turn the lights (Arduino pin 25) on or off.
+- Improved scrolling of long menu entries.
+- Merging of the changes from the repetier firmware V 0.91.7 from 2014-03-15:
+  - Adding of M99.
+  - Adding of support for FEATURE_BABYSTEPPING.
+    - This feature allows change the z-position via the menu.
+  - Adding of support for HEATER_PWM_SPEED.
+    - This feature allows to configure the update speed for the heater PWMs.
+  - Adding of one retry before a SD card error is detected.
+  - Adding of the menu mode MENU_MODE_PRINTING.
+  - Improved delta moves.
+  - Several minor clean-ups and improvements.
+  - Additions for improvded debugging capabilities.
+- Calling of "Stop Print" while the printing was paused could hang the firmware.
+- In case the printing is aborted because of any reason, also the fan is turned off now.
+- In case there is a printing from the SD card going on and a temperature sensor becomes defect, the printing is aborted.
+  - This functionality can be turned on and off via the FEATURE_ABORT_PRINT_AFTER_TEMPERATURE_ERROR switch.
+  - A printing via the PC is not affected by this functionality and the printer continues to run in dry mode like it did until now already.
+- Adding of additional beeper outputs for various changes of the printer state:
+  - start/abort/stop printing via the SD card
+  - pause/continue printing
+  - start/abort/stop heat bed scan
+- The beeper can be turned on and off via the menu "Configuration" -> "General" -> "Beeper".
+  - BEEPER_MODE from Configuration.h can be used in order to define whether the beeper shall be on or off by default.
+  - The beeper mode also can be stored to/restored from the EEPROM.
+- Optional emergency z-stop in order to detect a possible collision (extruder against heat bed).
+  - This feature can be turned on via FEATURE_EMERGENCY_Z_STOP.
+  - This feature can be configured via EMERGENCY_Z_STOP_DIGITS_MIN, EMERGENCY_Z_STOP_DIGITS_MAX, EMERGENCY_Z_STOP_INTERVAL and EMERGENCY_Z_STOP_CHECKS.
+- Removing of a possible value overflow in case very big values were assigned to OUTPUT_OFFSET_Z.
+- Homing of an axis always sets previousMillisCmd to the current time in order to avoid that all steppers are disabled again directly after the homing.
+  - In case of an operation like "Home all" via the menu of the printer, all steppers could become disabled before this change.
+  - As a result, "Output Object" could not work (because per definition, it can work only in case the steppers are enabled and there was a homing since the last enabling of the steppers).
+- Improved clean-up and output of the object after a stop of the printing from the SD card.
+- Moving of the z-axis via the hardware buttons supports acceleration and allows faster speeds now.
+- Manual outputting of filament (via the Host software and/or via the hardware button) could cause an unwanted emergency pause.
+- When the printing is paused, the extruder current is lowered now.
+  - EXTRUDER_CURRENT_PAUSED can be used in order to configure the to-be-used current while the printing is paused.
+  - EXTRUDER_CURRENT_PAUSE_DELAY can be used in order to configure after which time interval in status "paused" the extruder current shall be lowered.
+- Output object has been changed so that it moves into z-direction first and into x and y direction afterwards.
+- The entry "Bed Temp" has been removed from the quick settings.
+- In case the printing via the SD card is active, the quick menu provides the "Stop Print" entry now which can be used in order to cancel the print.
+- The order of the entries within the quick settings menu has been changed.
+- Stopping of the print via the menu now also disables all heaters, outputs the object and disables all steppers.
+  - All steppers are disabled also after a manual "Output Object".
+- Improved initialization of the display.
+- Correcting of the comments about the DRV8711 register settings.
+- Adding of averaging to the pressure measurement for the emergency pause.
+  - EMERGENCY_PAUSE_INTERVAL can be used in order to configure the interval at which the emergency pause functionality shall determine the current pressure
+  - EMERGENCY_PAUSE_CHECKS can be used in order to configure the number of measurements which shall be averaged
+- The minimal and maximal allowed pause pressure can be configured separately now.
+  - See EMERGENCY_PAUSE_DIGITS_MIN and EMERGENCY_PAUSE_DIGITS_MAX.
+- Changing of the configuration of the DRV8711 drivers in order to achieve a more precise stepping.
+- Adding of a configurable delay after enabling of the x/y/z/extruder steppers.
+  - STEPPER_ON_DELAY can be used in order to configure the to-be-used delay.
+- Adding of M3110, which allows to lock the currently shown status text.
+- All acceleration values within the "Configuration" -> "Acceleration" menu can be increased by 100 now.
+- At the end of the heat bed scan, the status display provides information about whether the scan was successful or whether it had to be aborted.
+- The menu option "Set to Origin" has been disabled (via the FEATURE_SET_TO_ORIGIN definition).
+- The "Quick Settings" -> "Home All" operation has been disabled during the print.
+- "M3070 S2" (= pause print and move away) has been corrected so that the printing can be continued properly again.
+
 V 0.91.08 (2014-02-04)
 - Minor adaptations for the hardware support.
 

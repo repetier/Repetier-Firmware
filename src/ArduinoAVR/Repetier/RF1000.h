@@ -65,47 +65,18 @@
 - M3080 - park the printer
 
 - M3090 - test the watchdog (this command resets the firmware)
+- M3091 - erase the external EEPROM
 
 - M3100 - configure the number of manual z steps after the "Heat Bed up" or "Heat Bed down" button has been pressed
 - M3101 - configure the number of manual extruder steps after the "Extruder output" or "Extruder retract" button has been pressed
 - M3102 - configure the offset in x, y and z direction as well as the extruder retract which shall be applied in case the "Pause Printing" button has been pressed
 - M3103 - configure the x, y and z position which shall set when the printer is parked
 - M3104 - configure the x, y and z position which shall set when the printed object is output
+
+- M3110 - lock the current status text
+
+- M3200 - reserved for test and debug
 */
-
-
-#define SCAN_X_START_MM					15																// [mm]
-#define SCAN_X_START_STEPS				long(XAXIS_STEPS_PER_MM * SCAN_X_START_MM)						// [steps]
-#define SCAN_X_END_MM					5																// [mm]
-#define SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * SCAN_X_END_MM)						// [steps]
-#define SCAN_X_STEP_SIZE_MM				20																// [mm]
-#define SCAN_X_STEP_SIZE_STEPS			long(XAXIS_STEPS_PER_MM * SCAN_X_STEP_SIZE_MM)					// [steps]
-#define SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH * XAXIS_STEPS_PER_MM - SCAN_X_END_STEPS)		// [steps]
-
-#define	SCAN_Y_START_MM					30																// [mm]
-#define	SCAN_Y_START_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_START_MM)						// [steps]
-#define	SCAN_Y_END_MM					5																// [mm]
-#define	SCAN_Y_END_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_END_MM)						// [steps]
-#define SCAN_Y_STEP_SIZE_MM				20																// [mm]
-#define	SCAN_Y_STEP_SIZE_STEPS			long(YAXIS_STEPS_PER_MM * SCAN_Y_STEP_SIZE_MM)					// [steps]
-#define SCAN_Y_MAX_POSITION_STEPS		long(Y_MAX_LENGTH * YAXIS_STEPS_PER_MM - SCAN_Y_END_STEPS)		// [steps]
-
-#define SCAN_HEAT_BED_UP_FAST_STEPS		-20																// [steps]
-#define SCAN_HEAT_BED_UP_SLOW_STEPS		-4																// [steps]
-#define SCAN_HEAT_BED_DOWN_SLOW_STEPS	10																// [steps]
-#define SCAN_HEAT_BED_DOWN_FAST_STEPS	long(ZAXIS_STEPS_PER_MM / 4)									// [steps]
-#define	SCAN_FAST_STEP_DELAY_MS			5																// [ms]
-#define	SCAN_SLOW_STEP_DELAY_MS			100																// [ms]
-#define SCAN_IDLE_DELAY_MS				250																// [ms]
-
-#define SCAN_CONTACT_PRESSURE_DELTA		10																// [digits]
-#define SCAN_RETRY_PRESSURE_DELTA		5																// [digits]
-#define SCAN_IDLE_PRESSURE_DELTA		0																// [digits]
-
-#define SCAN_RETRIES					3																// [-]
-#define	SCAN_PRESSURE_READS				15																// [-]
-#define SCAN_PRESSURE_TOLERANCE			15																// [digits]
-#define SCAN_PRESSURE_READ_DELAY_MS		15																// [ms]
 
 #define	SCAN_STRAIN_GAUGE				ACTIVE_STRAIN_GAUGE
 #define	HEAT_BED_COMPENSATION_X			long((X_MAX_LENGTH - SCAN_X_START_MM - SCAN_X_END_MM) / SCAN_X_STEP_SIZE_MM + 4)
@@ -123,15 +94,6 @@
 #define EXTRUDER_STEPPER_HIGH_DELAY		40000															// [µs]
 #define EXTRUDER_STEPPER_LOW_DELAY		250																// [µs]
 #define	LOOP_INTERVAL					1000															// [ms]
-#define REMEMBER_PRESSURE				0
-#define	Z_COMPENSATION_INTERVAL			18
-
-#define DEFAULT_MANUAL_Z_STEPS			16
-#define DEFAULT_MANUAL_EXTRUDER_STEPS	(EXT0_STEPS_PER_MM /2)
-#define	DEFAULT_PAUSE_STEPS_X			(XAXIS_STEPS_PER_MM *50)
-#define	DEFAULT_PAUSE_STEPS_Y			(YAXIS_STEPS_PER_MM *50)
-#define DEFAULT_PAUSE_STEPS_Z			(ZAXIS_STEPS_PER_MM *2)
-#define	DEFAULT_PAUSE_STEPS_EXTRUDER	(EXT0_STEPS_PER_MM *10)
 
 #define	TASK_ENABLE_Z_COMPENSATION		1
 #define	TASK_DISABLE_Z_COMPENSATION		2
@@ -144,6 +106,7 @@ extern	char			g_nDirectionX;
 extern	char			g_nDirectionY;
 extern	char			g_nDirectionZ;
 extern	char			g_nDirectionE;
+extern	char			g_nBlockZ;
 
 #if FEATURE_Z_COMPENSATION
 extern	char			g_abortScan;
@@ -166,6 +129,7 @@ extern	long			g_recalculatedCompensation;
 extern	char			g_debugLevel;
 //extern	short			g_debugCounter[10];
 extern	short			g_nHeatBedScanZ;
+extern	unsigned long	g_uStopTime;
 
 // other configurable parameters
 #if FEATURE_EXTENDED_BUTTONS
@@ -184,6 +148,8 @@ extern	short			g_nContinueStepsZ;
 extern	short			g_nContinueStepsExtruder;
 extern	char			g_pausePrint;
 extern	char			g_printingPaused;
+extern	unsigned long	g_uPauseTime;
+extern	char			g_pauseBeepDone;
 #endif // FEATURE_PAUSE_PRINTING
 
 
@@ -272,6 +238,9 @@ extern void clearCompensationMatrix( void );
 extern void outputPressureMatrix( void );
 #endif // FEATURE_Z_COMPENSATION
 
+// clearExternalEEPROM()
+extern char clearExternalEEPROM( void );
+
 // writeByte24C256()
 extern void writeByte24C256( int addressI2C, unsigned int addressEEPROM, unsigned char data );
 
@@ -308,6 +277,9 @@ extern void pausePrint( void );
 // continuePrint()
 extern void continuePrint( void );
 
+// setExtruderCurrent()
+extern void setExtruderCurrent( unsigned short level );
+
 // processCommand()
 extern void processCommand( GCode* pCommand );
 
@@ -322,12 +294,25 @@ extern void processButton( int nAction );
 
 // CalculateAllowedZStepsAfterEndStop()
 extern void CalculateAllowedZStepsAfterEndStop( void );
+
+
+#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
+
+// setMotorCurrent()
+void setMotorCurrent( uint8_t channel, unsigned short level );
+
+// motorCurrentControlInit()
+void motorCurrentControlInit( void );
+
+#endif // CURRENT_CONTROL_LTC2600
+
+
 #if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_DRV8711
 
 // setMotorCurrent()
 void setMotorCurrent( unsigned char driver, unsigned short level );
 
 // motorCurrentControlInit()
-void motorCurrentControlInit();
+void motorCurrentControlInit( void );
 
 #endif // CURRENT_CONTROL_DRV8711

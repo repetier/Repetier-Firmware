@@ -134,6 +134,7 @@ public:
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static uint8_t computeBinarySize(char *ptr);
+	static void resetBuffer();
 
     friend class SDCard;
     friend class UIDisplay;

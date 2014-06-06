@@ -98,6 +98,10 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
 
+#if STEPPER_ON_DELAY
+	char	enabled;
+#endif // STEPPER_ON_DELAY
+	
     /** \brief Sends the high-signal to the stepper for next extruder step.
     Call this function only, if interrupts are disabled.
     */
@@ -293,6 +297,13 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         }
 #endif
 #endif
+#if STEPPER_ON_DELAY
+		if( !Extruder::current->enabled )
+		{
+			Extruder::current->enabled = 1;
+			HAL::delayMilliseconds( STEPPER_ON_DELAY );
+		}
+#endif // STEPPER_ON_DELAY
     }
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();

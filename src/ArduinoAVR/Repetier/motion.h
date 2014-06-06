@@ -59,56 +59,56 @@
 class PrintLine;
 typedef struct
 {
-    uint8_t dir; 									///< Direction of delta movement.
+    flag8_t dir; 									///< Direction of delta movement.
     uint16_t deltaSteps[3];   				    ///< Number of steps in move.
     inline void checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
-        dir&=~16;
+        dir &= ~16;
     }
     inline void setYMoveFinished()
     {
-        dir&=~32;
+        dir &= ~32;
     }
     inline void setZMoveFinished()
     {
-        dir&=~64;
+        dir &= ~64;
     }
     inline void setXYMoveFinished()
     {
-        dir&=~48;
+        dir &= ~48;
     }
     inline bool isXPositiveMove()
     {
-        return (dir & 17)==17;
+        return (dir & 17) == 17;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & 17)==16;
+        return (dir & 17) == 16;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & 34)==34;
+        return (dir & 34) == 34;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & 34)==32;
+        return (dir & 34) == 32;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & 68)==68;
+        return (dir & 68) == 68;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & 68)==64;
+        return (dir & 68) == 64;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & 136)==136;
+        return (dir & 136) == 136;
     }
     inline bool isENegativeMove()
     {
-        return (dir & 136)==128;
+        return (dir & 136) == 128;
     }
     inline bool isXMove()
     {
@@ -168,15 +168,15 @@ public:
     static uint8_t linesPos; // Position for executing line movement
     static PrintLine lines[];
     static uint8_t linesWritePos; // Position where we write the next cached line move
-    uint8_t joinFlags;
-    volatile uint8_t flags;
+    flag8_t joinFlags;
+    volatile flag8_t flags;
 private:
-    uint8_t primaryAxis;
-    long timeInTicks;
-    uint8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
-    uint8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
-    long delta[4];                  ///< Steps we want to move.
-    long error[4];                  ///< Error calculation for Bresenham algorithm
+    flag8_t primaryAxis;
+    int32_t timeInTicks;
+    flag8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
+    flag8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+    int32_t delta[4];                  ///< Steps we want to move.
+    int32_t error[4];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
     float speedY;                   ///< Speed in y direction at fullInterval in mm/s
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
@@ -192,36 +192,34 @@ private:
 #if NONLINEAR_SYSTEM
     uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
     uint8_t moveID;					///< ID used to identify moves which are all part of the same line
-    long numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
+    int32_t numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
     DeltaSegment segments[MAX_DELTA_SEGMENTS_PER_LINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
-    unsigned int accelSteps;        ///< How much steps does it take, to reach the plateau.
-    unsigned int decelSteps;        ///< How much steps does it take, to reach the end speed.
-    unsigned long accelerationPrim; ///< Acceleration along primary axis
-    unsigned long fAcceleration;    ///< accelerationPrim*262144/F_CPU
+    uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
+    uint16_t decelSteps;        ///< How much steps does it take, to reach the end speed.
+    uint32_t accelerationPrim; ///< Acceleration along primary axis
+    uint32_t fAcceleration;    ///< accelerationPrim*262144/F_CPU
     speed_t vMax;              ///< Maximum reached speed in steps/s.
     speed_t vStart;            ///< Starting speed in steps/s.
     speed_t vEnd;              ///< End speed in steps/s
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-    long advanceRate;               ///< Advance steps at full speed
-    long advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
-    long advanceStart;
-    long advanceEnd;
+    int32_t advanceRate;               ///< Advance steps at full speed
+    int32_t advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
+    int32_t advanceStart;
+    int32_t advanceEnd;
 #endif
-    unsigned int advanceL;         ///< Recomputated L value
+    uint16_t advanceL;         ///< Recomputated L value
 #endif
 #ifdef DEBUG_STEPCOUNT
-    long totalStepsRemaining;
+    int32_t totalStepsRemaining;
 #endif
 
-#ifdef FEATURE_Z_COMPENSATION
 	char task;
-#endif // FEATURE_Z_COMPENSATION
 
 public:
-    long stepsRemaining;            ///< Remaining steps, until move is finished
+    int32_t stepsRemaining;            ///< Remaining steps, until move is finished
     static PrintLine *cur;
     static volatile uint8_t linesCount; // Number of lines cached 0 = nothing to do
     inline bool areParameterUpToDate()
@@ -435,7 +433,7 @@ public:
         linesCount = 0;
         linesPos = linesWritePos;
     }
-    inline void updateAdvanceSteps(unsigned int v,uint8_t max_loops,bool accelerate)
+    inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
     {
 #ifdef USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
@@ -498,7 +496,7 @@ public:
     {
         return halfStep == 4;
     }
-    inline bool startXStep()
+    inline void startXStep()
     {
         ANALYZER_ON(ANALYZER_CH6);
 #if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
@@ -538,7 +536,7 @@ public:
 #endif
 
     }
-    inline bool startYStep()
+    inline void startYStep()
     {
         ANALYZER_ON(ANALYZER_CH7);
 #if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
@@ -618,11 +616,14 @@ public:
 #endif
         HAL::forbidInterrupts();
         --linesCount;
+        if(!linesCount)
+            Printer::setMenuMode(MENU_MODE_PRINTING,false);
     }
     static inline void pushLine()
     {
         linesWritePos++;
         if(linesWritePos>=MOVE_CACHE_SIZE) linesWritePos = 0;
+        Printer::setMenuMode(MENU_MODE_PRINTING,true);
         BEGIN_INTERRUPT_PROTECTED
         linesCount++;
         END_INTERRUPT_PROTECTED
@@ -640,6 +641,7 @@ public:
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
     static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
+    static void moveRelativeDistanceInStepsReal(long x,long y,long z,long e,float feedrate,bool waitEnd);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
@@ -649,7 +651,7 @@ public:
     }
     static inline void nextPlannerIndex(uint8_t& p)
     {
-        p = (p==MOVE_CACHE_SIZE-1?0:p+1);
+        p = (p == MOVE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 	static inline void queueTask( char task )
 	{
@@ -670,7 +672,7 @@ public:
     static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
-    static inline void calculateDirectionAndDelta(long difference[], uint8_t *dir, long delta[]);
+    static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #ifdef SOFTWARE_LEVELING && DRIVE_SYSTEM==3
     static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);

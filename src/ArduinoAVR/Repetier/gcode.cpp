@@ -280,6 +280,10 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
         // Send command into command buffer
         if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
         {
+#ifdef DEBUG_PRINT
+			debugWaitLoop = 7;
+#endif
+
             Commands::executeGCode(&code);
             Printer::defaultLoopActions();
         }
@@ -396,9 +400,18 @@ void GCode::readFromSerial()
         if(n==-1)
         {
             Com::printFLN(Com::tSDReadError);
-            sd.sdmode = false;
-            UI_STATUS("SD Read Error");
-            break;
+            UI_ERROR("SD Read Error");
+
+            // Second try in case of recoverable errors
+            sd.file.seekSet(sd.sdpos);
+            n = sd.file.read();
+            if(n==-1)
+            {
+                Com::printErrorFLN(PSTR("SD error did not recover!"));
+                sd.sdmode = false;
+                break;
+            }
+            UI_ERROR("SD error fixed");
         }
         sd.sdpos++; // = file.curPosition();
         commandReceiving[commandsReceivingWritePosition++] = (uint8_t)n;
@@ -456,6 +469,8 @@ void GCode::readFromSerial()
     commandsReceivingWritePosition = 0;
     commentDetected = false;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
+
+	BEEP_STOP_PRINTING
 #endif
 }
 
@@ -630,7 +645,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         text = sp;
         while(*sp)
         {
-            if(M != 117 && (*sp==' ' || *sp=='*')) break; // end of filename reached
+            if((M != 117 && *sp==' ') || *sp=='*') break; // end of filename reached
             sp++;
         }
         *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
@@ -811,3 +826,12 @@ void GCode::printCommand()
     }
     Com::println();
 }
+
+
+void GCode::resetBuffer()
+{
+	bufferLength	 = 0;
+	bufferWriteIndex = 0;
+	bufferReadIndex	 = 0;
+
+} // resetBuffer

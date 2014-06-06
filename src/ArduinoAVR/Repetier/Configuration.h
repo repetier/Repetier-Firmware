@@ -53,6 +53,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // MEGA/RAMPS up to 1.2       = 3
 // RAMPS 1.3/RAMPS 1.4        = 33
 // Azteeg X3                  = 34
+// Ultimaker Shield 1.5.7     = 37
 // Gen6                       = 5
 // Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
@@ -73,6 +74,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // PiBot for Repetier V1.0-1.3= 314
 // PiBot for Repetier V1.4    = 315
 // Sanguish Beta              = 501
+// Unique One rev. A          = 88
 // User layout defined in userpins.h = 999
 
 #define MOTHERBOARD		13
@@ -407,6 +409,9 @@ If your EXT0_PID_MAX is low, you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
+
+#define HEATER_PWM_SPEED 1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
+
 /** Temperature range for target temperature to hold in M109 command. 5 means +/-5 degC
 
 Uncomment define to force the temperature into the range for given watchperiod.
@@ -683,7 +688,7 @@ on this endstop.
 // and the platform when the printer is at its home position.
 // If EEPROM is enabled these values will be overidden with the values in the EEPROM
 #define X_MAX_LENGTH 245
-#define Y_MAX_LENGTH 240
+#define Y_MAX_LENGTH 245
 #define Z_MAX_LENGTH 202
 
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
@@ -705,7 +710,7 @@ on this endstop.
 #elif MOTHERBOARD==12
 #define MOTOR_CURRENT {53570,65535,53570,65535,53570} // Values 0-65535 (53570 = ~1.5A)
 #elif MOTHERBOARD==13
-#define MOTOR_CURRENT {160,160,126,160,126} // Values 0-255 (126 = ~2A), order: driver 1 (x), driver 2 (y), driver 3 (z), driver 4 (extruder 1), driver 5 (reserved)
+#define MOTOR_CURRENT {160,160,140,160,126} // Values 0-255 (126 = ~2A), order: driver 1 (x), driver 2 (y), driver 3 (z), driver 4 (extruder 1), driver 5 (reserved)
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move
@@ -747,6 +752,14 @@ on this endstop.
 #define DELTA_RADIUS_CORRECTION_A 0
 #define DELTA_RADIUS_CORRECTION_B 0
 #define DELTA_RADIUS_CORRECTION_C 0
+
+/** Correction of the default diagonal size. Value gets added.*/
+#define DELTA_DIAGONAL_CORRECTION_A 0
+#define DELTA_DIAGONAL_CORRECTION_B 0
+#define DELTA_DIAGONAL_CORRECTION_C 0
+
+/** Max. radius the printer should be able to reach. */
+#define DELTA_MAX_RADIUS 200
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
@@ -1012,7 +1025,7 @@ uncommented, you will see the last command executed. To be more specific: It is 
 execution. This helps tracking errors, because there may be 8 or more commands in the queue
 and it is elsewise difficult to know, what your reprap is currently doing.
 */
-#define ECHO_ON_EXECUTE
+#define ECHO_ON_EXECUTE 1
 
 /** \brief EEPROM storage mode
 
@@ -1025,7 +1038,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 0
+#define EEPROM_MODE 34
 
 
 /**************** duplicate motor driver ***************
@@ -1084,6 +1097,8 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_ON_HIGH true
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
+#define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
+
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
 #define Z_PROBE_WAIT_BEFORE_TEST true
@@ -1102,7 +1117,7 @@ is always running and is not hung up for some unknown reason. */
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
-#define FEATURE_AUTOLEVEL true
+#define FEATURE_AUTOLEVEL false
 #define Z_PROBE_X1 100
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160
@@ -1110,12 +1125,22 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_X3 20
 #define Z_PROBE_Y3 170
 
+/* Babystepping allows to change z height during print without changing official z height */
+#define FEATURE_BABYSTEPPING 0
+
+/* If you have a threaded rod, you want a higher multiplicator to see an effect. Limit value to 50 or you get easily overflows.*/
+#define BABYSTEP_MULTIPLICATOR 1
+
 /* Define a pin to turn light on/off */
-#if PROTOTYPE_PCB == 1 
+/*
+#if PROTOTYPE_PCB == 1
   #define CASE_LIGHTS_PIN 27
 #else
   #define CASE_LIGHTS_PIN -1
 #endif
+*/
+#define CASE_LIGHTS_PIN			25	// PINA.3, 75, OUT1
+#define CASE_LIGHTS_DEFAULT_ON	 0
 
 /** Set to false to disable SD support: */
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
@@ -1163,6 +1188,8 @@ The following settings override uiconfig.h!
 11 = RepRapDiscount Full Graphic Smart Controller
 12 = FELIXPrinters Controller
 13 = SeeMeCNC Display on Rambo (ORION)
+14 = OpenHardware.co.za LCD2004 V2014
+15 = Sanguinololu + Panelolu2
 33 = RF1000
 */
 #define FEATURE_CONTROLLER 33
@@ -1220,15 +1247,24 @@ same setting.
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER true
+#define FEATURE_BEEPER	true
+#define BEEPER_MODE		1	// 1 = on, 0 = off
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.
-Parameter is delay in microseconds and the secons is the number of repetitions.
+Parameter is delay in microseconds and the second is the number of repetitions.
 Values must be in range 1..255
 */
-#define BEEPER_SHORT_SEQUENCE 2,2
-#define BEEPER_LONG_SEQUENCE 8,8
+#define BEEPER_SHORT_SEQUENCE				2,2
+#define BEEPER_LONG_SEQUENCE				8,8
+#define BEEPER_START_PRINTING_SEQUENCE		100,2
+#define BEEPER_ABORT_PRINTING_SEQUENCE		250,5
+#define BEEPER_STOP_PRINTING_SEQUENCE		100,3
+#define BEEPER_PAUSE_SEQUENCE				50,3
+#define BEEPER_CONTINUE_SEQUENCE			50,2
+#define BEEPER_START_HEAT_BED_SCAN_SEQUENCE	100,2
+#define BEEPER_ABORT_HEAT_BED_SCAN_SEQUENCE	250,5
+#define BEEPER_STOP_HEAT_BED_SCAN_SEQUENCE	100,3
 
 // ###############################################################################
 // ##                         Values for menu settings                          ##
@@ -1239,6 +1275,7 @@ Values must be in range 1..255
 #define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
 #define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
+
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  55
 #define UI_SET_MAX_HEATED_BED_TEMP 200
@@ -1247,11 +1284,15 @@ Values must be in range 1..255
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
+#define	SHOW_DEBUGGING_MENU					0													// 1 = show, 0 = hide
+#define	SHOW_EXTRUDER_MENU					0													// 1 = show, 0 = hide
+
 /** \brief Allows to use 6 additional hardware buttons
 */
 #define FEATURE_EXTENDED_BUTTONS			1													// 1 = on, 0 = off
-#define EXTENDED_BUTTONS_COUNTER_NORMAL		10													// 39 ~ run 100 times per second, 4 ~ run 1000 times per second
+#define EXTENDED_BUTTONS_COUNTER_NORMAL		4													// 39 ~ run 100 times per second, 4 ~ run 1000 times per second
 #define EXTENDED_BUTTONS_COUNTER_FAST		4													// 39 ~ run 100 times per second, 4 ~ run 1000 times per second
+#define	EXTENDED_BUTTONS_BLOCK_INTERVAL		100													// [ms]
 
 /** \brief Allows to pause the processing of G-Codes
 */
@@ -1313,6 +1354,14 @@ the Cura PC application may fall over the debug outputs of the firmware.
 */
 #define	SUPPORT_CURA						1
 
+/** \brief Enables/disables the set to origin feature
+*/
+#define FEATURE_SET_TO_ORIGIN				0													// 1 = on, 0 = off
+
+/** \brief Configures the delay between the stop of a print and the clean-up like disabling of heaters, disabling of steppers and the outputting of the object
+*/
+#define	CLEAN_UP_DELAY_AFTER_STOP_PRINT		100													// [ms]
+
 /** \brief Enables/disables the output of the printed object feature
 */
 #define FEATURE_OUTPUT_PRINTED_OBJECT		1													// 1 = on, 0 = off
@@ -1322,7 +1371,7 @@ the Cura PC application may fall over the debug outputs of the firmware.
 #if FEATURE_OUTPUT_PRINTED_OBJECT
 #define OUTPUT_OFFSET_X						0
 #define	OUTPUT_OFFSET_Y						Y_MAX_LENGTH
-#define	OUTPUT_OFFSET_Z						20
+#define	OUTPUT_OFFSET_Z						Z_MAX_LENGTH
 #endif // FEATURE_OUTPUT_PRINTED_OBJECT
 
 /** \brief Enables/disables the park feature
@@ -1341,17 +1390,63 @@ the Cura PC application may fall over the debug outputs of the firmware.
 */
 #define	FEATURE_RESET_VIA_MENU				1													// 1 = on, 0 = off
 
+/** \brief Enables/diables the emergency z-stop in case of too high pressure
+*/
+#define FEATURE_EMERGENCY_Z_STOP			0													// 1 = on, 0 = off
+
+/** \brief Specifies the pressure at which the emergency z-stop shall be performed, in [digits]
+*/
+#define EMERGENCY_Z_STOP_DIGITS_MIN			-5000
+#define EMERGENCY_Z_STOP_DIGITS_MAX			5000
+
+/** \brief Specifies the interval at which the pressure check shall be performed, in [ms]
+*/
+#define	EMERGENCY_Z_STOP_INTERVAL			10
+
+/** \brief Specifies the number of pressure values which shall be averaged. The emergency z-stop can be detected each EMERGENCY_Z_STOP_INTERVAL * EMERGENCY_Z_STOP_CHECKS [ms]
+*/
+#define	EMERGENCY_Z_STOP_CHECKS				3
+
 /** \brief Enables/diables the emergency pause in case of too high pressure
 */
 #define FEATURE_EMERGENCY_PAUSE				1													// 1 = on, 0 = off
 
 /** \brief Specifies the pressure at which the emergency pause shall be performed, in [digits]
 */
-#define EMERGENCY_PAUSE_DIGITS				10000
+#define EMERGENCY_PAUSE_DIGITS_MIN			-15000
+#define EMERGENCY_PAUSE_DIGITS_MAX			15000
+
+/** \brief Specifies the interval at which the pressure check shall be performed, in [ms]
+*/
+#define	EMERGENCY_PAUSE_INTERVAL			100
+
+/** \brief Specifies the number of pressure values which shall be averaged. The emergency pause can be detected each EMERGENCY_PAUSE_INTERVAL * EMERGENCY_PAUSE_CHECKS [ms]
+*/
+#define	EMERGENCY_PAUSE_CHECKS				10
+
+/** \brief Specifies the time interval after the pausing of the print at which the extruder current is reduced
+*/
+#define EXTRUDER_CURRENT_PAUSE_DELAY	  5000	// [ms] or 0, in order to disable the lowering of the extruder current
+
+/** \brief Specifies the extruder current which shall be use after pausing of the print and before continuing of the print
+*/
+#if MOTHERBOARD==12
+#define	EXTRUDER_CURRENT_PAUSED			 18204	// ~0.5A
+#elif MOTHERBOARD==13
+#define	EXTRUDER_CURRENT_PAUSED				32	// ~0.5A
+#endif
+
+/** \brief Specifies whether the current print shall be aborted in case a temperature sensor is defect
+*/
+#define FEATURE_ABORT_PRINT_AFTER_TEMPERATURE_ERROR		1										// 1 = abort, 0 = do not abort
 
 /** \brief Configuration of the external watchdog
 */
 #define WATCHDOG_TIMEOUT					10	// [ms]
+
+/** \brief Specifies whether the firmware shall wait a short time after turning on of the stepper motors - this shall avoid that the first steps are sent to the stepper before it is ready
+*/
+#define	STEPPER_ON_DELAY					25	// [ms]
 
 #if MOTHERBOARD == 13
 
@@ -1359,26 +1454,78 @@ the Cura PC application may fall over the debug outputs of the firmware.
 */
 #define DRV8711_NUM_CHANNELS	5
 #define DRV8711_REGISTER_00		0x0E19	// 0000 1110 0001 1001: ENBL = 1, RDIR = 0, RSTEP = 0, MODE = 0011, EXSTALL = 0, ISGAIN = 10, DTIME = 11
-#define DRV8711_REGISTER_02		0x2028	// 0010 0000 0010 1000: TOFF = 00101000, PWMMODE = 0
-#define DRV8711_REGISTER_03		0x3096  // 0011 0000 1001 0110: TBLANK = 10010110, ABT = 0
-#define DRV8711_REGISTER_04		0x4414	// 0100 0100 0001 0100: TDECAY = 00010100, DECMOD = 100
+#define DRV8711_REGISTER_02		0x2097	// 0010 0000 1001 0111: TOFF = 10010111, PWMMODE = 0
+#define DRV8711_REGISTER_03		0x31D7  // 0011 0001 1101 0111: TBLANK = 11010111, ABT = 1
+#define DRV8711_REGISTER_04		0x4530	// 0100 0101 0011 0000: TDECAY = 00110000, DECMOD = 101
 #define DRV8711_REGISTER_05		0x583C	// 0101 1000 0011 1100: SDTHR = 00111100, SDCNT = 00, VDIV = 10
 #define DRV8711_REGISTER_06		0x60F0	// 0110 0000 1111 0000: OCPTH = 00, OCPDEG = 00, TDRIVEN = 11, TDRIVEP = 11, IDRIVEN = 00, IDRIVEP = 00
 #define DRV8711_REGISTER_07		0x7000	// 0111 0000 0000 0000: OTS = 0, AOCP = 0, BOCP = 0, UVLO = 0, APDF = 0, BPDF = 0, STD = 0, STDLAT = 0
 
 /** \brief Configuration of optional outputs
 */
-#define ENABLE_OUT1				true	// true = OUT1 is used as output, false = OUT1 is used as input
-#define	SET_OUT1				true	// true = OUT1 is high, false = OUT1 is low
+#define ENABLE_OUT1				false	// true = OUT1 is used as output, false = OUT1 is used as input
+#define	SET_OUT1				false	// true = OUT1 is high, false = OUT1 is low
 #define ENABLE_HZ2				true	// true = HZ2 is used as output, false = HZ2 is used as input
 #define	SET_HZ2					true	// true = HZ2 is high, false = HZ2 is low
 
 #endif // MOTHERBOARD == 13
 
+/** \brief Configuration of the heat bed scan
+*/
+#define SCAN_X_START_MM					15																// [mm]
+#define SCAN_X_START_STEPS				long(XAXIS_STEPS_PER_MM * SCAN_X_START_MM)						// [steps]
+#define SCAN_X_END_MM					5																// [mm]
+#define SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * SCAN_X_END_MM)						// [steps]
+#define SCAN_X_STEP_SIZE_MM				20																// [mm]
+#define SCAN_X_STEP_SIZE_STEPS			long(XAXIS_STEPS_PER_MM * SCAN_X_STEP_SIZE_MM)					// [steps]
+#define SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH * XAXIS_STEPS_PER_MM - SCAN_X_END_STEPS)		// [steps]
+
+#define	SCAN_Y_START_MM					30																// [mm]
+#define	SCAN_Y_START_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_START_MM)						// [steps]
+#define	SCAN_Y_END_MM					5																// [mm]
+#define	SCAN_Y_END_STEPS				long(YAXIS_STEPS_PER_MM * SCAN_Y_END_MM)						// [steps]
+#define SCAN_Y_STEP_SIZE_MM				20																// [mm]
+#define	SCAN_Y_STEP_SIZE_STEPS			long(YAXIS_STEPS_PER_MM * SCAN_Y_STEP_SIZE_MM)					// [steps]
+#define SCAN_Y_MAX_POSITION_STEPS		long(Y_MAX_LENGTH * YAXIS_STEPS_PER_MM - SCAN_Y_END_STEPS)		// [steps]
+
+#define SCAN_HEAT_BED_UP_FAST_STEPS		-20																// [steps]
+#define SCAN_HEAT_BED_UP_SLOW_STEPS		-4																// [steps]
+#define SCAN_HEAT_BED_DOWN_SLOW_STEPS	10																// [steps]
+#define SCAN_HEAT_BED_DOWN_FAST_STEPS	long(ZAXIS_STEPS_PER_MM / 4)									// [steps]
+#define	SCAN_FAST_STEP_DELAY_MS			5																// [ms]
+#define	SCAN_SLOW_STEP_DELAY_MS			100																// [ms]
+#define SCAN_IDLE_DELAY_MS				250																// [ms]
+
+#define SCAN_CONTACT_PRESSURE_DELTA		10																// [digits]
+#define SCAN_RETRY_PRESSURE_DELTA		5																// [digits]
+#define SCAN_IDLE_PRESSURE_DELTA		0																// [digits]
+#define SCAN_IDLE_PRESSURE_MIN			-3000															// [digits]
+#define SCAN_IDLE_PRESSURE_MAX			3000															// [digits]
+
+#define SCAN_RETRIES					3																// [-]
+#define	SCAN_PRESSURE_READS				15																// [-]
+#define SCAN_PRESSURE_TOLERANCE			15																// [digits]
+#define SCAN_PRESSURE_READ_DELAY_MS		15																// [ms]
+
+#define REMEMBER_PRESSURE				0
+
+/** \brief Configuration of the manual steps
+*/
+#define DEFAULT_MANUAL_Z_STEPS			16
+#define MAXIMAL_MANUAL_Z_STEPS			(ZAXIS_STEPS_PER_MM *10)
+#define DEFAULT_MANUAL_EXTRUDER_STEPS	(EXT0_STEPS_PER_MM /5)
+
+/** \brief Configuration of the pause steps
+*/
+#define	DEFAULT_PAUSE_STEPS_X			(XAXIS_STEPS_PER_MM *50)
+#define	DEFAULT_PAUSE_STEPS_Y			(YAXIS_STEPS_PER_MM *50)
+#define DEFAULT_PAUSE_STEPS_Z			(ZAXIS_STEPS_PER_MM *2)
+#define	DEFAULT_PAUSE_STEPS_EXTRUDER	(EXT0_STEPS_PER_MM *10)
+
 /** \brief Printer name and firmware version
 */
 #define UI_PRINTER_NAME "RF1000"
 #define UI_PRINTER_COMPANY "Conrad SE"
-#define UI_VERSION_STRING "V " REPETIER_VERSION ".08"
+#define UI_VERSION_STRING "V " REPETIER_VERSION ".34"
 
 #endif

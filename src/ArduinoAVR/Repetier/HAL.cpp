@@ -107,10 +107,10 @@ The result is used for timer calculation where small errors are ok. This
 function uses lookup tables to find a fast approximation of the result.
 
 */
-long HAL::CPUDivU2(unsigned int divisor)
+int32_t HAL::CPUDivU2(unsigned int divisor)
 {
 #if CPU_ARCH==ARCH_AVR
-    long res;
+    int32_t res;
     unsigned short table;
     if(divisor<8192)
     {
@@ -590,7 +590,7 @@ SIGNAL (TIMER3_COMPA_vect)
 This function sets the OCR1A compare counter  to get the next interrupt
 at delay ticks measured from the last interrupt. delay must be << 2^24
 */
-inline void setTimer(unsigned long delay)
+inline void setTimer(uint32_t delay)
 {
     __asm__ __volatile__ (
         "cli \n\t"
@@ -681,7 +681,12 @@ ISR(TIMER1_COMPA_vect)
     {
         setTimer(PrintLine::bresenhamStep());
     }
-    else
+    else if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing)
+	{
+        Printer::zBabystep();
+        setTimer(Printer::interval);
+    }
+	else
     {
         if(waitRelax == 0)
         {
@@ -709,6 +714,30 @@ ISR(TIMER1_COMPA_vect)
     insideTimer1 = 0;
 }
 
+#if !defined(HEATER_PWM_SPEED)
+#define HEATER_PWM_SPEED 0
+#endif
+#if HEATER_PWM_SPEED<0
+#define HEATER_PWM_SPEED 0
+#endif
+#if HEATER_PWM_SPEED>3
+#define HEATER_PWM_SPEED 3
+#endif
+
+#if HEATER_PWM_SPEED == 0
+#define HEATER_PWM_STEP 1
+#define HEATER_PWM_MASK 255
+#elif HEATER_PWM_SPEED == 1
+#define HEATER_PWM_STEP 2
+#define HEATER_PWM_MASK 254
+#elif HEATER_PWM_SPEED == 2
+#define HEATER_PWM_STEP 4
+#define HEATER_PWM_MASK 252
+#else
+#define HEATER_PWM_STEP 4
+#define HEATER_PWM_MASK 252
+#endif
+
 /**
 This timer is called 3906 timer per second. It is used to update pwm values for heater and some other frequent jobs.
 */
@@ -730,46 +759,66 @@ ISR(PWM_TIMER_VECTOR)
 	char			nDirectionX;
 	char			nDirectionY;
 	char			nDirectionZ;
+	unsigned long	uStartTime;
 #endif // FEATURE_EXTENDED_BUTTONS
   
     static uint8_t pwm_count = 0;
+    static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
     PWM_OCR += 64;
-    if(pwm_count==0)
+
+    if(pwm_count_heater == 0)
     {
 #if EXT0_HEATER_PIN>-1
-        if((pwm_pos_set[0] = pwm_pos[0])>0) WRITE(EXT0_HEATER_PIN,1);
-#if EXT0_EXTRUDER_COOLER_PIN>-1
-        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
-#endif
+        if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-        if((pwm_pos_set[1] = pwm_pos[1])>0) WRITE(EXT1_HEATER_PIN,1);
+        if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK))>0) WRITE(EXT1_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
+        if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK))>0) WRITE(EXT2_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
+        if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK))>0) WRITE(EXT3_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
+        if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK))>0) WRITE(EXT4_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
+        if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK))>0) WRITE(EXT5_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
+        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
+#endif
+    }
+
+	if(pwm_count==0)
+    {
+#if EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
+        if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
+#endif
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
 #if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
         if((pwm_cooler_pos_set[1] = extruder[1].coolerPWM)>0) WRITE(EXT1_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-        if((pwm_pos_set[2] = pwm_pos[2])>0) WRITE(EXT2_HEATER_PIN,1);
 #if EXT2_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[2] = extruder[2].coolerPWM)>0) WRITE(EXT2_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-        if((pwm_pos_set[3] = pwm_pos[3])>0) WRITE(EXT3_HEATER_PIN,1);
 #if EXT3_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[3] = extruder[3].coolerPWM)>0) WRITE(EXT3_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-        if((pwm_pos_set[4] = pwm_pos[4])>0) WRITE(EXT4_HEATER_PIN,1);
 #if EXT4_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[4] = pwm_pos[4].coolerPWM)>0) WRITE(EXT4_EXTRUDER_COOLER_PIN,1);
 #endif
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-        if((pwm_pos_set[5] = pwm_pos[5])>0) WRITE(EXT5_HEATER_PIN,1);
 #if EXT5_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN,1);
 #endif
@@ -780,42 +829,40 @@ ISR(PWM_TIMER_VECTOR)
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         if((pwm_pos_set[NUM_EXTRUDER+2] = pwm_pos[NUM_EXTRUDER+2])>0) WRITE(FAN_PIN,1);
 #endif
-#if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-        if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,1);
-#endif
     }
+
 #if EXT0_HEATER_PIN>-1
-    if(pwm_pos_set[0] == pwm_count && pwm_pos_set[0]!=255) WRITE(EXT0_HEATER_PIN,0);
+    if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT0_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0]!=255) WRITE(EXT0_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    if(pwm_pos_set[1] == pwm_count && pwm_pos_set[1]!=255) WRITE(EXT1_HEATER_PIN,0);
+    if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
     if(pwm_cooler_pos_set[1] == pwm_count && pwm_cooler_pos_set[1]!=255) WRITE(EXT1_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    if(pwm_pos_set[2] == pwm_count && pwm_pos_set[2]!=255) WRITE(EXT2_HEATER_PIN,0);
+    if(pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2]!=HEATER_PWM_MASK) WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT2_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[2] == pwm_count && pwm_cooler_pos_set[2]!=255) WRITE(EXT2_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    if(pwm_pos_set[3] == pwm_count && pwm_pos_set[3]!=255) WRITE(EXT3_HEATER_PIN,0);
+    if(pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3]!=HEATER_PWM_MASK) WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT3_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[3] == pwm_count && pwm_cooler_pos_set[3]!=255) WRITE(EXT3_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    if(pwm_pos_set[4] == pwm_count && pwm_pos_set[4]!=255) WRITE(EXT4_HEATER_PIN,0);
+    if(pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4]!=HEATER_PWM_MASK) WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT4_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[4] == pwm_count && pwm_cooler_pos_set[4]!=255) WRITE(EXT4_EXTRUDER_COOLER_PIN,0);
 #endif
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    if(pwm_pos_set[5] == pwm_count && pwm_pos_set[5]!=255) WRITE(EXT5_HEATER_PIN,0);
+    if(pwm_pos_set[5] == pwm_count_heater && pwm_pos_set[5]!=HEATER_PWM_MASK) WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT5_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[5] == pwm_count && pwm_cooler_pos_set[5]!=255) WRITE(EXT5_EXTRUDER_COOLER_PIN,0);
 #endif
@@ -827,8 +874,9 @@ ISR(PWM_TIMER_VECTOR)
     if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count && pwm_pos_set[NUM_EXTRUDER]!=255) WRITE(HEATED_BED_HEATER_PIN,0);
+    if(pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER]!=HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
+
     HAL::allowInterrupts();
     counterPeriodical++; // Appxoimate a 100ms timer
     if(counterPeriodical>=(int)(F_CPU/40960))
@@ -876,7 +924,7 @@ ISR(PWM_TIMER_VECTOR)
 
     UI_FAST; // Short timed user interface action
     pwm_count++;
-
+    pwm_count_heater += HEATER_PWM_STEP;
 
 #if FEATURE_Z_COMPENSATION
 	nCounterZCompensation --;
@@ -957,9 +1005,9 @@ ISR(PWM_TIMER_VECTOR)
 				}
 			}
 
-			if( g_nDirectionZ == 0 )
+			if( g_nDirectionZ == 0 && !g_nBlockZ )
 			{
-				// this interrupt shall move the z-axis only in case the "main" interrupt (bresenham_step()) is not running at the moment
+				// this interrupt shall move the z-axis only in case the "main" interrupt (bresenhamStep()) is not running at the moment
 				HAL::forbidInterrupts();
 				if( Printer::currentCompensationZ < Printer::targetCompensationZ )
 				{
@@ -1008,7 +1056,7 @@ ISR(PWM_TIMER_VECTOR)
 		{
 			if( g_nDirectionE <= 0 )
 			{
-				// this interrupt shall move the extruder only in case the "main" interrupt (bresenham_step()) is not running at the moment
+				// this interrupt shall move the extruder only in case the "main" interrupt (bresenhamStep()) is not running at the moment
 				
 				// we must retract filament
 				if( g_nDirectionE == 0 )
@@ -1026,11 +1074,13 @@ ISR(PWM_TIMER_VECTOR)
 				
 				Printer::currentPositionStepsE ++;
 
+#if FEATURE_PAUSE_PRINTING
 				if( g_printingPaused )
 				{
 					// we move faster while the printing is paused
 					nCounterExtendedButtons = EXTENDED_BUTTONS_COUNTER_FAST;
 				}
+#endif // FEATURE_PAUSE_PRINTING
 
 				if( Printer::currentPositionStepsE == Printer::targetPositionStepsE )
 				{
@@ -1098,7 +1148,7 @@ ISR(PWM_TIMER_VECTOR)
 				}
 			}
 
-			if( Printer::currentPositionStepsZ != Printer::targetPositionStepsZ )
+			if( Printer::currentPositionStepsZ != Printer::targetPositionStepsZ && !g_nBlockZ )
 			{
 				// we have to move into z-direction
 				if( Printer::currentPositionStepsZ < Printer::targetPositionStepsZ )
@@ -1123,6 +1173,7 @@ ISR(PWM_TIMER_VECTOR)
 				}
 			}
 
+			uStartTime = HAL::timeInMilliseconds();
 			while( nDirectionX || nDirectionY || nDirectionZ )
 			{
 #if FEATURE_WATCHDOG
@@ -1130,6 +1181,12 @@ ISR(PWM_TIMER_VECTOR)
 #endif // FEATURE_WATCHDOG
 
 				HAL::delayMicroseconds( 250 );
+
+				if( g_nBlockZ )
+				{
+					// (probably) paranoid check
+					nDirectionZ = 0;
+				}
 
 				if( nDirectionX )	WRITE( X_STEP_PIN, HIGH );
 				if( nDirectionY )	WRITE( Y_STEP_PIN, HIGH );
@@ -1167,6 +1224,12 @@ ISR(PWM_TIMER_VECTOR)
 						nDirectionZ = 0;
 					}
 				}
+
+				if( (HAL::timeInMilliseconds() - uStartTime) > EXTENDED_BUTTONS_BLOCK_INTERVAL )
+				{
+					// we shall not loop here too long - when we exit here, we will come back to here later and continue the remaining steps
+					break;
+				}
 			}
 		}
 		
@@ -1176,7 +1239,7 @@ ISR(PWM_TIMER_VECTOR)
 			{
 				if( g_nDirectionE >= 0 )
 				{
-					// this interrupt shall move the extruder only in case the "main" interrupt (bresenham_step()) is not running at the moment
+					// this interrupt shall move the extruder only in case the "main" interrupt (bresenhamStep()) is not running at the moment
 				
 					// we must output filament
 					if( g_nDirectionE == 0 )
@@ -1205,6 +1268,7 @@ ISR(PWM_TIMER_VECTOR)
 		HAL::allowInterrupts();
 	}
 #endif // FEATURE_EXTENDED_BUTTONS
+
 }
 #if defined(USE_ADVANCE)
 

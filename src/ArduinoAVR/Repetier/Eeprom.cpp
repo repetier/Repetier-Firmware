@@ -36,14 +36,14 @@ void EEPROM::update(GCode *com)
             if(com->hasS()) HAL::eprSetInt16(com->P,(int)com->S);
             break;
         case 2:
-            if(com->hasS()) HAL::eprSetInt32(com->P,(long)com->S);
+            if(com->hasS()) HAL::eprSetInt32(com->P,(int32_t)com->S);
             break;
         case 3:
             if(com->hasX()) HAL::eprSetFloat(com->P,com->X);
             break;
         }
     uint8_t newcheck = computeChecksum();
-    if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+    if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
     readDataFromEEPROM();
     Extruder::selectExtruderById(Extruder::current->id);
@@ -365,7 +365,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #if FEATURE_AUTOLEVEL
     HAL::eprSetByte(EPR_AUTOLEVEL_ACTIVE,Printer::isAutolevelActive());
     for(uint8_t i=0; i<9; i++)
-        HAL::eprSetFloat(EPR_AUTOLEVEL_MATRIX+((int)i)<<2,Printer::autolevelTransformation[i]);
+        HAL::eprSetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2),Printer::autolevelTransformation[i]);
 #endif
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
@@ -418,7 +418,16 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(EPR_PRINTING_DISTANCE,0);
         initalizeUncached();
     }
-    // Save version and build checksum
+
+#if FEATURE_BEEPER
+	HAL::eprSetByte( EPR_RF1000_BEEPER_MODE, Printer::enableBeeper );
+#endif // FEATURE_BEEPER
+
+#if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
+	HAL::eprSetByte( EPR_RF1000_LIGHTS_MODE, Printer::enableLights );
+#endif // CASE_LIGHTS_PIN >= 0
+
+	// Save version and build checksum
     HAL::eprSetByte(EPR_VERSION,EEPROM_PROTOCOL_VERSION);
     HAL::eprSetByte(EPR_INTEGRITY_BYTE,computeChecksum());
 #endif
@@ -436,6 +445,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+    HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
 #if DRIVE_SYSTEM==3
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
@@ -450,6 +460,10 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_A,DELTA_RADIUS_CORRECTION_A);
     HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
     HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
+    HAL::eprSetFloat(EPR_DELTA_MAX_RADIUS,DELTA_MAX_RADIUS);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_A,DELTA_DIAGONAL_CORRECTION_A);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_B,DELTA_DIAGONAL_CORRECTION_B);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_C,DELTA_DIAGONAL_CORRECTION_C);
 #endif
 }
 
@@ -508,9 +522,13 @@ void EEPROM::readDataFromEEPROM()
     if(version>2)
     {
         for(uint8_t i=0; i<9; i++)
-            Printer::autolevelTransformation[i] = HAL::eprGetFloat(EPR_AUTOLEVEL_MATRIX+((int)i)<<2);
+            Printer::autolevelTransformation[i] = HAL::eprGetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2));
+        if(isnan(Printer::autolevelTransformation[0])) { // a bug caused storage of matrix at the wrong place. Read from old position instead.
+            for(uint8_t i=0; i<9; i++)
+                Printer::autolevelTransformation[i] = HAL::eprGetFloat((EPR_AUTOLEVEL_MATRIX + (int)i) << 2);
+        }
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
-        //Com::printArrayFLN(Com::tInfo,Printer::autolevelTransformation,9,6);
+        Com::printArrayFLN(Com::tInfo,Printer::autolevelTransformation,9,6);
     }
 #endif
     // now the extruder
@@ -551,7 +569,16 @@ void EEPROM::readDataFromEEPROM()
         if(version>1)
             e->coolerSpeed = HAL::eprGetByte(o+EPR_EXTRUDER_COOLER_SPEED);
     }
-    if(version!=EEPROM_PROTOCOL_VERSION)
+
+#if FEATURE_BEEPER
+	Printer::enableBeeper = HAL::eprGetByte( EPR_RF1000_BEEPER_MODE );
+#endif // FEATURE_BEEPER
+
+#if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
+	Printer::enableLights = HAL::eprGetByte( EPR_RF1000_LIGHTS_MODE );
+#endif // CASE_LIGHTS_PIN >= 0
+
+	if(version!=EEPROM_PROTOCOL_VERSION)
     {
         Com::printInfoFLN(Com::tEPRProtocolChanged);
         if(version<3)
@@ -591,8 +618,18 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
             HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
         }
+        if(version<7) {
+            HAL::eprSetFloat(EPR_DELTA_MAX_RADIUS,DELTA_MAX_RADIUS);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_A,DELTA_DIAGONAL_CORRECTION_A);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_B,DELTA_DIAGONAL_CORRECTION_B);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_C,DELTA_DIAGONAL_CORRECTION_C);
+        }
 #endif
-        storeDataIntoEEPROM(false); // Store new fields for changed version
+        if(version<7) {
+            HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
+        }
+
+		storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
@@ -631,7 +668,7 @@ void EEPROM::updatePrinterUsage()
 {
 #if EEPROM_MODE!=0
     if(Printer::filamentPrinted==0) return; // No miles only enabled
-    unsigned long seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
+    uint32_t seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
     seconds += HAL::eprGetInt32(EPR_PRINTING_TIME);
     HAL::eprSetInt32(EPR_PRINTING_TIME,seconds);
     HAL::eprSetFloat(EPR_PRINTING_DISTANCE,HAL::eprGetFloat(EPR_PRINTING_DISTANCE)+Printer::filamentPrinted*0.001);
@@ -708,6 +745,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
     writeFloat(EPR_DELTA_HORIZONTAL_RADIUS,Com::tEPRHorizontalRadius);
+    writeFloat(EPR_DELTA_MAX_RADIUS,Com::tEPRDeltaMaxRadius);
     writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,Com::tEPRSegmentsPerSecondTravel);
     writeInt(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,Com::tEPRSegmentsPerSecondPrint);
     writeInt(EPR_DELTA_TOWERX_OFFSET_STEPS,Com::tEPRTowerXOffset);
@@ -719,6 +757,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_DELTA_RADIUS_CORR_A,Com::tDeltaRadiusCorrectionA);
     writeFloat(EPR_DELTA_RADIUS_CORR_B,Com::tDeltaRadiusCorrectionB);
     writeFloat(EPR_DELTA_RADIUS_CORR_C,Com::tDeltaRadiusCorrectionC);
+    writeFloat(EPR_DELTA_DIAGONAL_CORR_A,Com::tDeltaDiagonalCorrectionA);
+    writeFloat(EPR_DELTA_DIAGONAL_CORR_B,Com::tDeltaDiagonalCorrectionB);
+    writeFloat(EPR_DELTA_DIAGONAL_CORR_C,Com::tDeltaDiagonalCorrectionC);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
@@ -730,6 +771,7 @@ void EEPROM::writeSettings()
 #endif
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT,Com::tZProbeHeight);
+    writeFloat(EPR_Z_PROBE_BED_DISTANCE,Com::tZProbeBedDistance);
     writeFloat(EPR_Z_PROBE_SPEED,Com::tZProbeSpeed);
     writeFloat(EPR_Z_PROBE_XY_SPEED,Com::tZProbeSpeedXY);
     writeFloat(EPR_Z_PROBE_X_OFFSET,Com::tZProbeOffsetX);
@@ -788,6 +830,15 @@ void EEPROM::writeSettings()
         writeFloat(o+EPR_EXTRUDER_ADVANCE_L,Com::tEPRAdvanceL);
 #endif
     }
+
+#if FEATURE_BEEPER
+	HAL::eprSetByte( EPR_RF1000_BEEPER_MODE, Printer::enableBeeper );
+#endif // FEATURE_BEEPER
+
+#if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
+	HAL::eprSetByte( EPR_RF1000_LIGHTS_MODE, Printer::enableLights );
+#endif // CASE_LIGHTS_PIN >= 0
+
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
