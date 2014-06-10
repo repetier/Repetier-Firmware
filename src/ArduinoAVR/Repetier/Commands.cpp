@@ -1699,6 +1699,9 @@ void Commands::emergencyStop()
 #if FAN_PIN>-1
     WRITE(FAN_PIN,0);
 #endif
+#if FAN2_PIN>-1
+    WRITE(FAN2_PIN,0);
+#endif
 #if HEATED_BED_HEATER_PIN>-1
     WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif

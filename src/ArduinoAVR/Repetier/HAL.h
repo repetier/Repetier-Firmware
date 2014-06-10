@@ -444,6 +444,7 @@ public:
         return ((int32_t)a*b)>>16;
 #endif
     }
+    static inline void pulseDensityModulate(const uint8_t pin, const uint8_t density, uint8_t *error, const bool invert);
     static inline void digitalWrite(uint8_t pin,uint8_t value)
     {
         ::digitalWrite(pin,value);
