@@ -1218,11 +1218,11 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
             // Extruder output level
-            if(c2>='0' && c2<='9') ivalue=pwm_pos[c2-'0'];
+            if(c2>='0' && c2<='9') ivalue=pdm_target[c2-'0'];
 #if HAVE_HEATED_BED
-            else if(c2=='b') ivalue=pwm_pos[heatedBedController.pwmIndex];
+            else if(c2=='b') ivalue=pdm_target[heatedBedController.pdm_index];
 #endif
-            else if(c2=='C') ivalue=pwm_pos[Extruder::current->id];
+            else if(c2=='C') ivalue=pdm_target[Extruder::current->id];
             ivalue=(ivalue*100)/255;
             addInt(ivalue,3);
             if(col<MAX_COLS)

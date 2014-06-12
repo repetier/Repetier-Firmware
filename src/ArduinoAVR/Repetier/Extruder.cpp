@@ -83,15 +83,15 @@ void Extruder::manageTemperatures()
             if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
                 if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
                         tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
-                    extruder[0].coolerPWM = 0;
+                    extruder[0].coolerPDM = 0;
                 else
-                    extruder[0].coolerPWM = extruder[0].coolerSpeed;
+                    extruder[0].coolerPDM = extruder[0].coolerSpeed;
             if(controller>1)
 #endif // NUM_EXTRUDER
                 if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
-                    extruder[controller].coolerPWM = 0;
+                    extruder[controller].coolerPDM = 0;
                 else
-                    extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+                    extruder[controller].coolerPDM = extruder[controller].coolerSpeed;
         }
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
@@ -133,7 +133,7 @@ void Extruder::manageTemperatures()
 #endif
                 output = constrain((int)pidTerm, 0, act->pidMax);
             }
-            pwm_pos[act->pwmIndex] = output;
+            pdm_target[act->pdm_index] = output;
         }
         else if(act->heatManager == HTR_DEADTIME)     // dead-time control
         {
@@ -151,7 +151,7 @@ void Extruder::manageTemperatures()
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
             }
-            pwm_pos[act->pwmIndex] = output;
+            pdm_target[act->pdm_index] = output;
         }
         else
 #endif
@@ -160,17 +160,17 @@ void Extruder::manageTemperatures()
                 uint32_t time = HAL::timeInMilliseconds();
                 if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                 {
-                    pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                    pdm_target[act->pdm_index] = (on ? 255 : 0);
                     act->lastTemperatureUpdate = time;
                 }
             }
             else     // Fast Bang-Bang fallback
             {
-                pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                pdm_target[act->pdm_index] = (on ? 255 : 0);
             }
 #ifdef MAXTEMP
         if(act->currentTemperatureC>MAXTEMP) // Force heater off if MAXTEMP is exceeded
-            pwm_pos[act->pwmIndex] = 0;
+            pdm_target[act->pdm_index] = 0;
 #endif
 #if LED_PIN>-1
         if(act == &Extruder::current->tempControl)
@@ -183,7 +183,7 @@ void Extruder::manageTemperatures()
     {
         for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
         {
-            pwm_pos[tempController[i]->pwmIndex] = 0;
+            pdm_target[tempController[i]->pdm_index] = 0;
         }
         Printer::debugLevel |= 8; // Go into dry mode
     }
@@ -403,7 +403,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     tc->setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius>30)
         tc->setAlarm(true);
-    if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+    if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPDM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
 #if FEATURE_DITTO_PRINTING
@@ -411,7 +411,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     {
         TemperatureController *tc2 = tempController[1];
         tc2->setTargetTemperature(temperatureInCelsius);
-        if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
+        if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPDM = extruder[1].coolerSpeed;
     }
 #endif // FEATURE_DITTO_PRINTING
     bool alloff = true;
@@ -887,7 +887,7 @@ void Extruder::disableAllHeater()
         TemperatureController *c = tempController[i];
         c->targetTemperature = 0;
         c->targetTemperatureC = 0;
-        pwm_pos[c->pwmIndex] = 0;
+        pdm_target[c->pdm_index] = 0;
     }
     autotuneIndex = 255;
 }
@@ -915,11 +915,11 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
 
     Extruder::disableAllHeater(); // switch off all heaters.
     autotuneIndex = controllerId;
-    pwm_pos[pwmIndex] = pidMax;
+    pdm_target[pdm_index] = pidMax;
     if(controllerId<NUM_EXTRUDER)
     {
-        extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;
-        extruder[0].coolerPWM = extruder[0].coolerSpeed;
+        extruder[controllerId].coolerPDM = extruder[controllerId].coolerSpeed;
+        extruder[0].coolerPDM = extruder[0].coolerSpeed;
     }
     for(;;)
     {
@@ -937,7 +937,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
             if(time - t2 > (controllerId<NUM_EXTRUDER ? 2500 : 1500))
             {
                 heating=false;
-                pwm_pos[pwmIndex] = (bias - d);
+                pdm_target[pdm_index] = (bias - d);
                 t1=time;
                 t_high=t1 - t2;
                 maxTemp=temp;
@@ -993,7 +993,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
                         */
                     }
                 }
-                pwm_pos[pwmIndex] = (bias + d);
+                pdm_target[pdm_index] = (bias + d);
                 cycles++;
                 minTemp=temp;
             }
@@ -1046,7 +1046,7 @@ void writeMonitor()
     TemperatureController *act = tempController[manageMonitor];
     Com::printF(Com::tSpace,act->currentTemperatureC);
     Com::printF(Com::tSpace,act->targetTemperatureC,0);
-    Com::printFLN(Com::tSpace,pwm_pos[act->pwmIndex]);
+    Com::printFLN(Com::tSpace,pdm_target[act->pdm_index]);
 }
 
 bool reportTempsensorError()

@@ -306,7 +306,7 @@ void Printer::kill(uint8_t only_steppers)
     disableZStepper();
     Extruder::disableAllExtruderMotors();
 #if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER+1] = 0;
+    pdm_target[NUM_EXTRUDER+1] = 0;
 #endif // FAN_BOARD_PIN
     if(!only_steppers)
     {
@@ -778,7 +778,7 @@ void Printer::setup()
 #endif
     advanceStepsSet = 0;
 #endif
-    for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
+    for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pdm_target[i]=0;
     maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM!=DELTA
     maxZJerk = MAX_ZJERK;

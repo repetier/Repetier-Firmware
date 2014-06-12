@@ -236,9 +236,9 @@ void HAL::setupTimer()
     EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
     EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
 #endif
-    PWM_TCCR = 0;  // Setup PWM interrupt
-    PWM_OCR = 64;
-    PWM_TIMSK |= (1<<PWM_OCIE);
+    PDM_TCCR = 0;  // Setup PDM interrupt
+    PDM_OCR = 64;
+    PDM_TIMSK |= (1<<PDM_OCIE);
 
     TCCR1A = 0;  // Steup timer 1 interrupt to no prescale CTC mode
     TCCR1C = 0;
@@ -723,85 +723,60 @@ ISR(TIMER1_COMPA_vect)
     insideTimer1 = 0;
 }
 
-#if !defined(HEATER_PWM_SPEED)
-#define HEATER_PWM_SPEED 0
-#endif
-#if HEATER_PWM_SPEED<0
-#define HEATER_PWM_SPEED 0
-#endif
-#if HEATER_PWM_SPEED>3
-#define HEATER_PWM_SPEED 3
-#endif
-
-#if HEATER_PWM_SPEED == 0
-#define HEATER_PWM_STEP 1
-#define HEATER_PWM_MASK 255
-#elif HEATER_PWM_SPEED == 1
-#define HEATER_PWM_STEP 2
-#define HEATER_PWM_MASK 254
-#elif HEATER_PWM_SPEED == 2
-#define HEATER_PWM_STEP 4
-#define HEATER_PWM_MASK 252
-#else
-#define HEATER_PWM_STEP 4
-#define HEATER_PWM_MASK 252
-#endif
-
 /**
-This timer is called 3906 timer per second. It is used to update pwm values for heater and some other frequent jobs.
+This timer is called 3906 timer per second. It is used to update PDM values for heater and some other frequent jobs.
 */
-ISR(PWM_TIMER_VECTOR)
+ISR(PDM_TIMER_VECTOR)
 {
     static uint8_t pdm_error[NUM_EXTRUDER];
     static uint8_t pdm_error_cooler[NUM_EXTRUDER];
     static uint8_t pdm_error_fan[2];
-    PWM_OCR += 64;
+    PDM_OCR += 64;
 
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1 && NUM_EXTRUDER>0
-        HAL::pulseDensityModulate(EXT0_HEATER_PIN, pwm_pos[0], &pdm_error[0], HEATER_PINS_INVERTED);
+        HAL::pulseDensityModulate(EXT0_HEATER_PIN, pdm_target[0], &pdm_error[0], HEATER_PINS_INVERTED);
         #if EXT0_EXTRUDER_COOLER_PIN>-1
-            HAL::pulseDensityModulate(EXT0_EXTRUDER_COOLER_PIN, extruder[0].coolerPWM, &pdm_error_cooler[0]);
+            HAL::pulseDensityModulate(EXT0_EXTRUDER_COOLER_PIN, extruder[0].coolerPDM, &pdm_error_cooler[0]);
         #endif
-    #endif
 #endif
 
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-        HAL::pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], &pdm_error[1], HEATER_PINS_INVERTED);
+        HAL::pulseDensityModulate(EXT1_HEATER_PIN, pdm_target[1], &pdm_error[1], HEATER_PINS_INVERTED);
         #if EXT1_EXTRUDER_COOLER_PIN>-1
-            HAL::pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPWM, &pdm_error_cooler[1]);
+            HAL::pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPDM, &pdm_error_cooler[1]);
         #endif
 #endif
 
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-       HAL::pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], &pdm_error[2], HEATER_PINS_INVERTED);
+       HAL::pulseDensityModulate(EXT2_HEATER_PIN, pdm_target[2], &pdm_error[2], HEATER_PINS_INVERTED);
         #if EXT2_EXTRUDER_COOLER_PIN>-1
-           HAL::pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[2].coolerPWM, &pdm_error_cooler[2]);
+           HAL::pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[2].coolerPDM, &pdm_error_cooler[2]);
         #endif
 #endif
 
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-       HAL::pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], &pdm_error[3], HEATER_PINS_INVERTED);
+       HAL::pulseDensityModulate(EXT3_HEATER_PIN, pdm_target[3], &pdm_error[3], HEATER_PINS_INVERTED);
         #if EXT2_EXTRUDER_COOLER_PIN>-1
-           HAL::pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[3].coolerPWM, &pdm_error_cooler[3]);
+           HAL::pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[3].coolerPDM, &pdm_error_cooler[3]);
         #endif
 #endif
 
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-       HAL::pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], &pdm_error[4], HEATER_PINS_INVERTED);
+       HAL::pulseDensityModulate(EXT4_HEATER_PIN, pdm_target[4], &pdm_error[4], HEATER_PINS_INVERTED);
         #if EXT4_EXTRUDER_COOLER_PIN>-1
-           HAL::pulseDensityModulate(EXT4_EXTRUDER_COOLER_PIN, extruder[4].coolerPWM, &pdm_error_cooler[4]);
+           HAL::pulseDensityModulate(EXT4_EXTRUDER_COOLER_PIN, extruder[4].coolerPDM, &pdm_error_cooler[4]);
         #endif
 #endif
 
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-       HAL::pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], &pdm_error[5], HEATER_PINS_INVERTED);
+       HAL::pulseDensityModulate(EXT5_HEATER_PIN, pdm_target[5], &pdm_error[5], HEATER_PINS_INVERTED);
         #if EXT5_EXTRUDER_COOLER_PIN>-1
-           HAL::pulseDensityModulate(EXT5_EXTRUDER_COOLER_PIN, extruder[5].coolerPWM, &pdm_error_cooler[5]);
+           HAL::pulseDensityModulate(EXT5_EXTRUDER_COOLER_PIN, extruder[5].coolerPDM, &pdm_error_cooler[5]);
         #endif
 #endif
 
 #if HEATED_BED_HEATER_PIN>-1 && HAVE_HEATED_BED
-       HAL::pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER], &pdm_error[NUM_EXTRUDER], HEATER_PINS_INVERTED);
+       HAL::pulseDensityModulate(HEATED_BED_HEATER_PIN, pdm_target[NUM_EXTRUDER], &pdm_error[NUM_EXTRUDER], HEATER_PINS_INVERTED);
 #endif
 
 #if FAN_PIN==FAN_BOARD_PIN
@@ -809,11 +784,11 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 
 #if FAN_BOARD_PIN>-1
-       HAL::pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER+1], &pdm_error_fan[0]);
+       HAL::pulseDensityModulate(FAN_BOARD_PIN, pdm_target[NUM_EXTRUDER+1], &pdm_error_fan[0]);
 #endif
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-       HAL::pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER+2], &pdm_error_fan[1]);
+       HAL::pulseDensityModulate(FAN_PIN, pdm_target[NUM_EXTRUDER+2], &pdm_error_fan[1]);
 #endif
 
     HAL::allowInterrupts();
