@@ -15,9 +15,16 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#if !defined(_UI_MENU_H) && defined(UI_MAIN)
+#if !defined(_UI_MENU_H)
 #define _UI_MENU_H
 
+#define cUP "\001"
+#define cDEG "\002"
+#define cSEL "\003"
+#define cUNSEL "\004"
+#define cTEMP "\005"
+#define cFOLD "\006"
+#define cARROW "\176"
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -27,7 +34,35 @@ A placeholder always has 3 chars. It starts with a % followed by 2 characters
 defining the value. You can use any placeholder in any position, also it doesn't
 always make sense.
 
+Special Characters
+ constant   description
+ cUP        Folder up arrow
+ cDEG       Degree mark
+ cSEL       Selected
+ cUNSEL     Unselected
+ cTEMP      Thermometer symbol
+ cFOLD      Folder symbol
+
 List of placeholder:
+%%% : The % char
+
+acceleration
+%ax : X acceleration during print moves
+%ay : Y acceleration during print moves
+%az : Z acceleration during print moves
+%aX : X acceleration during travel moves
+%aY : Y acceleration during travel moves
+%aZ : Z acceleration during travel moves
+%aj : Max. jerk
+%aJ : Max. Z-jerk
+
+debug
+%do : Debug echo state.
+%di : Debug info state.
+%de : Debug error state.
+%dd : Debug dry run state.
+
+extruder
 %ec : Current extruder temperature
 %eb : Current heated bed temperature
 %e0..9 : Temp. of extruder 0..9
@@ -35,6 +70,22 @@ List of placeholder:
 %Ec : Target temperature of current extruder
 %Eb : Target temperature of heated bed
 %E0-9 : Target temperature of extruder 0..9
+
+feed rate
+%fx : Max. feedrate x direction
+%fy : Max. feedrate y direction
+%fz : Max. feedrate z direction
+%fe : Max. feedrate current extruder
+%fX : Homing feedrate x direction
+%fY : Homing feedrate y direction
+%fZ : Homing feedrate z direction
+%Fs : Fan speed
+
+inactivity
+%is : Stepper inactive time in seconds
+%ip : Max. inactive time in seconds
+
+random stuff
 %os : Status message
 %oe : Error message
 %oB : Buffer length
@@ -44,53 +95,33 @@ List of placeholder:
 %o0..9 : Output level extruder 0..9 is % including %sign.
 %oC : Output level current extruder
 %ob : Output level heated bed
-%%% : The % char
-%x0 : X position
-%x1 : Y position
-%x2 : Z position
-%x3 : Current extruder position
+%PN : Printer name
+
+stops
 %sx : State of x min endstop.
 %sX : State of x max endstop.
 %sy : State of y min endstop.
 %sY : State of y max endstop.
 %sz : State of z min endstop.
 %sZ : State of z max endstop.
-%do : Debug echo state.
-%di : Debug info state.
-%de : Debug error state.
-%dd : Debug dry run state.
-%O0 : OPS mode = 0
-%O1 : OPS mode = 1
-%O2 : OPS mode = 2
-%Or : OPS retract distance
-%Ob : OPS backslash distance
-%Od : OPS min distance
-%Oa : OPS move after
-%ax : X acceleration during print moves
-%ay : Y acceleration during print moves
-%az : Z acceleration during print moves
-%aX : X acceleration during travel moves
-%aY : Y acceleration during travel moves
-%aZ : Z acceleration during travel moves
-%aj : Max. jerk
-%aJ : Max. Z-jerk
-%fx : Max. feedrate x direction
-%fy : Max. feedrate y direction
-%fz : Max. feedrate z direction
-%fe : Max. feedrate current extruder
-%fX : Homing feedrate x direction
-%fY : Homing feedrate y direction
-%fZ : Homing feedrate z direction
-%Fs : Fan speed
-%PN : Printer name
+
+steps
 %Sx : Steps per mm x direction
 %Sy : Steps per mm y direction
 %Sz : Steps per mm z direction
 %Se : Steps per mm current extruder
+
+totals
 %Ut : Shows printing time
 %Uf : Shows total filament usage
-%is : Stepper inactive time in seconds
-%ip : Max. inactive time in seconds
+
+extruder position
+%x0 : X position
+%x1 : Y position
+%x2 : Z position
+%x3 : Current extruder position
+
+extruder parameters
 %X0..9 : Extruder selected marker
 %Xi : PID I gain
 %Xp : PID P gain
@@ -107,7 +138,23 @@ List of placeholder:
 %Xf : Extruder max. start feedrate
 %XF : Extruder max. feedrate
 %XA : Extruder max. acceleration
+
+delta stuff
+%y0-3 : same as %y0-3 back calculated from delta position steps
+%Y0-3 : raw delta position steps (no round off error to display it)
+%yD : delta printer low tower distance
+%YL : delta print envelope radius Limit
+%yx : low towers x offset mm
+%yy : low towers y offset mm
+%Yx : low towers x offset steps
+%Yy : low towers y offset steps
+%yX : high (Z) tower x offset mm
+%yY : high (Z) tower y offset mm
+%YX : high (Z) tower x offset steps
+%YY : high (Z) tower y offset steps
 */
+
+#if UI_DISPLAY_TYPE != NO_DISPLAY
 
 
 // Define precision for temperatures. With small displays only integer values fit.
@@ -133,7 +180,7 @@ UI_PAGE2(name,row1,row2);
 for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 
-#if UI_ROWS>=6 && UI_DISPLAY_TYPE==5
+#if UI_ROWS>=6 && UI_DISPLAY_TYPE == DISPLAY_U8G
 
  //graphic main status
 
@@ -168,25 +215,31 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 #elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
-   UI_PAGE4(ui_page1,"\005%ec/%Ec\002B%eB/%Eb\002","Z:%x2","Mul:%om Buf:%oB","%os");
+   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os");
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
  #endif
   UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
 //UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
-   UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1,
+   UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1
  #if NUM_EXTRUDER>1
-   UI_TEXT_PAGE_EXTRUDER2
- #else
-   ""
+   ,UI_TEXT_PAGE_EXTRUDER2
+ #endif
+ #if NUM_EXTRUDER>2
+  ,UI_TEXT_PAGE_EXTRUDER3
  #endif
  #if HAVE_HEATED_BED==true
-  ,UI_TEXT_PAGE_BED
- #else
-  ,""
+   ,UI_TEXT_PAGE_BED
  #endif
- ,"%os");
+ #if (NUM_EXTRUDER==3 && HAVE_HEATED_BED!=true) || (NUM_EXTRUDER==2 && HAVE_HEATED_BED==true)
+   ,"%os"
+ #elif NUM_EXTRUDER==2 || (NUM_EXTRUDER==1 && HAVE_HEATED_BED==true)
+   ,"","%os"
+ #elif NUM_EXTRUDER==1
+   ,"","","%os"
+ #endif
+ );
  #if EEPROM_MODE!=0
   UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
   #define UI_PRINTTIME_PAGES ,&ui_page4
@@ -299,7 +352,7 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast_notest,UI_TEXT_Z_POS_FAST,ui_menu_zpos_f
 #define UI_SPEED_Z_NOTEST ,&ui_menu_go_zpos_notest
 #endif
 
-#if DRIVE_SYSTEM!=3     //Positioning menu for non-delta
+#if DRIVE_SYSTEM != DELTA     //Positioning menu for non-delta
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT);
 #else                   //Positioning menu for delta (removes individual x,y,z homing)
@@ -315,7 +368,7 @@ UI_MENU(ui_menu_delta,UI_MENU_DELTA,2 + UI_SPEED + UI_MENU_BACKCNT);
 #endif
 
 // **** Bed leveling menu
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p1,UI_TEXT_SET_P1,UI_ACTION_SET_P1);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p2,UI_TEXT_SET_P2,UI_ACTION_SET_P2);
 UI_MENU_ACTIONCOMMAND(ui_menu_set_p3,UI_TEXT_SET_P3,UI_ACTION_SET_P3);
@@ -328,20 +381,26 @@ UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT);
 
 UI_MENU_CHANGEACTION(ui_menu_ext_temp0,UI_TEXT_EXTR0_TEMP,UI_ACTION_EXTRUDER0_TEMP);
 UI_MENU_CHANGEACTION(ui_menu_ext_temp1,UI_TEXT_EXTR1_TEMP,UI_ACTION_EXTRUDER1_TEMP);
+#if NUM_EXTRUDER>2
+UI_MENU_CHANGEACTION(ui_menu_ext_temp2,UI_TEXT_EXTR2_TEMP,UI_ACTION_EXTRUDER2_TEMP);
+#endif
 UI_MENU_CHANGEACTION(ui_menu_bed_temp, UI_TEXT_BED_TEMP,UI_ACTION_HEATED_BED_TEMP);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel0,UI_TEXT_EXTR0_SELECT,UI_ACTION_SELECT_EXTRUDER0);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel1,UI_TEXT_EXTR1_SELECT,UI_ACTION_SELECT_EXTRUDER1);
+#if NUM_EXTRUDER>2
+UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel2,UI_TEXT_EXTR2_SELECT,UI_ACTION_SELECT_EXTRUDER2);
+#endif
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_off0,UI_TEXT_EXTR0_OFF,UI_ACTION_EXTRUDER0_OFF);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_off1,UI_TEXT_EXTR1_OFF,UI_ACTION_EXTRUDER1_OFF);
+#if NUM_EXTRUDER>2
+UI_MENU_ACTIONCOMMAND(ui_menu_ext_off2,UI_TEXT_EXTR2_OFF,UI_ACTION_EXTRUDER2_OFF);
+#endif
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_origin,UI_TEXT_EXTR_ORIGIN,UI_ACTION_RESET_EXTRUDER);
 #if NUM_EXTRUDER==2
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_sel0,&ui_menu_ext_sel1,
 #define UI_MENU_EXTCNT 6
 #elif NUM_EXTRUDER>2
-UI_MENU_CHANGEACTION(ui_menu_ext_temp2,UI_TEXT_EXTR2_TEMP,UI_ACTION_EXTRUDER2_TEMP);
-UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel2,UI_TEXT_EXTR2_SELECT,UI_ACTION_SELECT_EXTRUDER2);
-UI_MENU_ACTIONCOMMAND(ui_menu_ext_off2,UI_TEXT_EXTR2_OFF,UI_ACTION_EXTRUDER2_OFF);
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel1,
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,
 #define UI_MENU_EXTCNT 9
 #else
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_off0,
@@ -424,7 +483,7 @@ UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan);
 
 // **** SD card menu
 
-#ifdef SDSUPPORT
+#if SDSUPPORT
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING);
@@ -433,7 +492,7 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT, UI_AC
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0);
 #define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,
 #define SD_PRINTFILE_ENTRY_CNT 1
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
 #else
@@ -467,7 +526,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_debug_dryrun, UI_TEXT_DBG_DRYRUN, UI_ACTION_DEBUG_
 UI_MENU(ui_menu_debugging,UI_MENU_DEBUGGING,4 + UI_MENU_BACKCNT);
 
 // **** Acceleration settings
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM != DELTA
 UI_MENU_CHANGEACTION(ui_menu_accel_printx,  UI_TEXT_PRINT_X,UI_ACTION_PRINT_ACCEL_X);
 UI_MENU_CHANGEACTION(ui_menu_accel_printy,  UI_TEXT_PRINT_Y,UI_ACTION_PRINT_ACCEL_Y);
 UI_MENU_CHANGEACTION(ui_menu_accel_printz,  UI_TEXT_PRINT_Z,UI_ACTION_PRINT_ACCEL_Z);
@@ -533,7 +592,7 @@ UI_MENU_CHANGEACTION(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K,UI_ACTION_ADVA
 #endif
 UI_MENU_CHANGEACTION(ui_menu_cext_advancel,UI_TEXT_EXTR_ADVANCE_L,UI_ACTION_ADVANCE_L);
 #endif
-#ifdef TEMP_PID
+#if TEMP_PID
 UI_MENU_CHANGEACTION(ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER, UI_ACTION_EXTR_HEATMANAGER);
 UI_MENU_CHANGEACTION(ui_menu_cext_pgain,   UI_TEXT_EXTR_PGAIN,   UI_ACTION_PID_PGAIN);
 UI_MENU_CHANGEACTION(ui_menu_cext_igain,   UI_TEXT_EXTR_IGAIN,   UI_ACTION_PID_IGAIN);
@@ -547,7 +606,12 @@ UI_MENU_CHANGEACTION(ui_menu_cext_pmax,    UI_TEXT_EXTR_PMAX,    UI_ACTION_PID_M
 #define UI_MENU_PIDCOND
 #define UI_MENU_PIDCNT 0
 #endif
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER>2
+UI_MENU_CHANGEACTION(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF,UI_ACTION_X_OFFSET);
+UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 5
+#elif NUM_EXTRUDER>1
 UI_MENU_CHANGEACTION(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF,UI_ACTION_X_OFFSET);
 UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
 #define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
@@ -575,7 +639,7 @@ UI_MENU_ACTION2C(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADED);
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
 #define UI_MENU_SL_COND ,&ui_menu_conf_level
 #define UI_MENU_SL_CNT 1
 UI_MENU_SUBMENU(ui_menu_conf_level, UI_TEXT_LEVEL, ui_menu_level);
@@ -613,7 +677,7 @@ which assigns the menu stored in ui_menu_conf_feed to the action UI_ACTION_SHOW_
 
 When do you need this? You might want a fast button to change the temperature. In the default menu you have no menu
 to change the temperature and view it the same time. So you need to make an action menu for this like:
-UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,"Temp. 0  :%E0\002C","","","");
+UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,"Temp. 0  :%E0" cDEG,"","","");
 Then you assign this menu to a usermenu:
 #define UI_USERMENU2 ui_menu_extrtemp
 
@@ -621,5 +685,5 @@ Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a k
 the change of temperature with the next/previous buttons.
 
 */
-
+#endif
 #endif // __UI_MENU_H
