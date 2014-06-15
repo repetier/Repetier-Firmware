@@ -341,6 +341,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         GCode::executeFString(Extruder::current->deselectCommands);
         executeSelect = true;
     }
+    Commands::waitUntilEndOfAllMoves();
 #endif
     Extruder::current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
     Extruder::current = &extruder[extruderId];

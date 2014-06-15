@@ -1174,12 +1174,12 @@ void Printer::zBabystep() {
         WRITE(X2_STEP_PIN,HIGH);
 #endif
         WRITE(Y_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #endif
         WRITE(Z_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,HIGH);
 #endif
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 2);
