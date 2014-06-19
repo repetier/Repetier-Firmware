@@ -751,7 +751,7 @@ ISR(PWM_TIMER_VECTOR)
     PWM_OCR += 64;
     if(pwm_count_heater == 0)
     {
-#if EXT0_HEATER_PIN>-1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
         if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
@@ -775,7 +775,7 @@ ISR(PWM_TIMER_VECTOR)
     }
     if(pwm_count==0)
     {
-#if EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
@@ -810,7 +810,7 @@ ISR(PWM_TIMER_VECTOR)
         if((pwm_pos_set[NUM_EXTRUDER+2] = pwm_pos[NUM_EXTRUDER+2])>0) WRITE(FAN_PIN,1);
 #endif
     }
-#if EXT0_HEATER_PIN>-1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
     if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0]!=HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #if EXT0_EXTRUDER_COOLER_PIN>-1
     if(pwm_cooler_pos_set[0] == pwm_count && pwm_cooler_pos_set[0]!=255) WRITE(EXT0_EXTRUDER_COOLER_PIN,0);
