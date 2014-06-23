@@ -76,6 +76,8 @@ floatLong Printer::deltaDiagonalStepsSquaredA;
 floatLong Printer::deltaDiagonalStepsSquaredB;
 floatLong Printer::deltaDiagonalStepsSquaredC;
 float Printer::deltaMaxRadiusSquared;
+float Printer::cartesianZMaxMM;
+long Printer::deltaFloorSafetyMarginSteps;
 long Printer::deltaAPosXSteps;
 long Printer::deltaAPosYSteps;
 long Printer::deltaBPosXSteps;
@@ -155,7 +157,7 @@ int debugWaitLoop = 0;
 #endif
 
 
-
+#if !NONLINEAR_SYSTEM
 void Printer::constrainDestinationCoords()
 {
     if(isNoDestinationCheck()) return;
@@ -179,6 +181,8 @@ void Printer::constrainDestinationCoords()
     if (destinationSteps[Z_AXIS] > Printer::zMaxSteps) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
 }
+#endif
+
 bool Printer::isPositionAllowed(float x,float y,float z) {
     if(isNoDestinationCheck())  return true;
     bool allowed = true;
@@ -231,11 +235,17 @@ void Printer::updateDerivedParameter()
     deltaMaxRadiusSquared = RMath::sqr(EEPROM::deltaMaxRadius());
     long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
     cart[X_AXIS] = cart[Y_AXIS] = 0;
-    cart[Z_AXIS] = zMaxSteps;
+    cart[Z_AXIS] = 0;
+    // Each tower has max steps of simply length*steps
+    // At 0,0,0 each tower height is the distance from floor to pivot top
+    // So each tower max steps - height = tower min steps, 
+    // the point of zero distance from surface
     transformCartesianStepsToDeltaSteps(cart, delta);
-    maxDeltaPositionSteps = delta[A_TOWER]; // Why?
+    maxDeltaPositionSteps = zMaxSteps+delta[A_TOWER]; // approximate as towers could differ
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
+    deltaFloorSafetyMarginSteps = DELTA_FLOOR_SAFETY_MARGIN_MM * axisStepsPerMM[Z_AXIS];
+    
 #elif DRIVE_SYSTEM==TUGA
     deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     if(deltaDiagonalStepsSquared>46000)
@@ -371,11 +381,10 @@ void Printer::moveToReal(float x,float y,float z,float e,float f)
         x += Printer::offsetX;
         y += Printer::offsetY;
     }
-    if(x != IGNORE_COORDINATE)
+    // There was conflicting use of IGNOR_COORDINATE
+    // At this point, x, y and z cannot be IGNORE_COORDINATE, they are assigned above
         destinationSteps[X_AXIS] = floor(x * axisStepsPerMM[X_AXIS] + 0.5);
-    if(y != IGNORE_COORDINATE)
         destinationSteps[Y_AXIS] = floor(y * axisStepsPerMM[Y_AXIS] + 0.5);
-    if(z != IGNORE_COORDINATE)
         destinationSteps[Z_AXIS] = floor(z * axisStepsPerMM[Z_AXIS] + 0.5);
     if(e != IGNORE_COORDINATE)
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
@@ -859,6 +868,10 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 
 
 #if DRIVE_SYSTEM==DELTA
+// this is used in homing and in several GCode command processing
+// An invariant is that it should leave steps remaining unchanged, so cannot move after
+// having reched end stops.
+// It should leave deltapositions set precisely
 void Printer::deltaMoveToTopEndstops(float feedrate)
 {
     for (uint8_t i=0; i<3; i++)
@@ -923,7 +936,7 @@ void Printer::homeZAxis() // Delta z homing
 #endif
     Extruder::selectExtruderById(Extruder::current->id);
 }
-
+// This home axis is for delta
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 {
     long steps;

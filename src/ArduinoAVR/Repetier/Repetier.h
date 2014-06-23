@@ -139,6 +139,26 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_OPENHARDWARE_LCD2004 14
 #define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
 
+//direction flags
+#define X_DIRPOS 1
+#define Y_DIRPOS 2
+#define Z_DIRPOS 4
+#define E_DIRPOS 8
+#define XYZ_DIRPOS 7
+//step flags
+#define XSTEP 16
+#define YSTEP 32
+#define ZSTEP 64
+#define ESTEP 128
+//combo's
+#define XYZ_STEP 112
+#define XY_STEP 48
+#define XYZE_STEP 240
+#define E_STEP_DIRPOS 136
+#define Y_STEP_DIRPOS 34
+#define X_STEP_DIRPOS 17
+#define Z_STEP_DIRPOS 68
+
 // add pid control
 #define TEMP_PID 1
 
@@ -319,7 +339,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-#define IGNORE_COORDINATE 99999
+// Added a 9 because we are seeing printers that have steps in the 100k range
+#define IGNORE_COORDINATE 999999
 
 #undef min
 #undef max
@@ -337,6 +358,10 @@ public:
     static inline long min(long a,long b) {
         if(a<b) return a;
         return b;
+    }
+    static inline long min(long a,long b, long c) {
+      if(a<b) return a<c ? a : c;
+      return b<c ? b : c;
     }
     static inline long max(long a,long b) {
         if(a<b) return b;
@@ -358,7 +383,9 @@ public:
         if(a<b) return b;
         return a;
     }
+    static inline unsigned long absLong(long a)          {return a >= 0 ? a : -a;}
     static inline long sqr(long a) {return a*a;}
+    static inline unsigned long sqr(unsigned long a) {return a*a;}
     static inline float sqr(float a) {return a*a;}
 };
 

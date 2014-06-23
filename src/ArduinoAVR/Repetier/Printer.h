@@ -24,7 +24,7 @@
 
 union floatLong {
     float f;
-    long l;
+    unsigned long l;
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
@@ -41,6 +41,17 @@ union floatLong {
 #define PRINTER_FLAG1_ALLKILLED             8
 #define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
+
+// define an integer number of steps more than large enough to get to endstop from anywhere
+#define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
+#define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
+// Some dfines to make clearer reading, as we overload these cartesion memory locations for delta
+#define towerAMaxSteps Printer::xMaxSteps
+#define towerBMaxSteps Printer::yMaxSteps
+#define towerCMaxSteps Printer::zMaxSteps
+#define towerAMinSteps Printer::xMinSteps
+#define towerBMinSteps Printer::yMinSteps
+#define towerCMinSteps Printer::zMinSteps
 
 class Printer
 {
@@ -87,6 +98,8 @@ public:
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
     static float deltaMaxRadiusSquared;
+    static float cartesianZMaxMM;
+    static long deltaFloorSafetyMarginSteps;
     static long deltaAPosXSteps;
     static long deltaAPosYSteps;
     static long deltaBPosXSteps;

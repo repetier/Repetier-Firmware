@@ -863,6 +863,9 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 
 
 #if DRIVE_SYSTEM==DELTA
+// pick one for verbose errors the other silent
+// #define RETURN_0 return 0
+#define RETURN_0(s) { Com::print(s);  return 0; }
 /**
   Calculate the delta tower position from a cartesian position
   @param cartesianPosSteps Array containing cartesian coordinates.
@@ -877,25 +880,32 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         float opt = Printer::deltaDiagonalStepsSquaredA.f - temp * temp;
         float temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[A_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+          deltaPosSteps[A_TOWER] = floor(0.5+sqrt(temp) 
+          + cartesianPosSteps[Z_AXIS] + towerAMinSteps);
         else
             return 0;
+        if (deltaPosSteps[A_TOWER]< towerAMinSteps + Printer::deltaFloorSafetyMarginSteps) return 0;
 
         temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
         opt = Printer::deltaDiagonalStepsSquaredB.f - temp * temp;
         temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[B_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+            deltaPosSteps[B_TOWER] = floor(0.5+sqrt(temp) 
+            + cartesianPosSteps[Z_AXIS] + towerBMinSteps);
         else
             return 0;
+        if (deltaPosSteps[B_TOWER]< towerBMinSteps + Printer::deltaFloorSafetyMarginSteps) return 0;
 
         temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
         opt = Printer::deltaDiagonalStepsSquaredC.f - temp * temp;
         temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
-            deltaPosSteps[C_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+            deltaPosSteps[C_TOWER] = floor(0.5+sqrt(temp) 
+            + cartesianPosSteps[Z_AXIS] + towerCMinSteps);
         else
             return 0;
+        if (deltaPosSteps[C_TOWER]< towerCMinSteps + Printer::deltaFloorSafetyMarginSteps) return 0;
+
         return 1;
     }
     else
@@ -909,44 +919,70 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         const unsigned long LIMIT = 65534; // Largest squarable int without overflow;
 
         // A TOWER height
-        unsigned long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
+        unsigned long temp = RMath::absLong(Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS]);
         unsigned long opt = Printer::deltaDiagonalStepsSquaredA.l;
-        if (opt < temp) return 0;
-        opt -= temp;
-        temp = Printer::deltaAPosXSteps - cartesianPosSteps[A_TOWER];
-        if (temp > LIMIT) return 0;
+
+        if (temp > LIMIT) 
+          RETURN_0("Apos y steps ");
         temp *= temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[A_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
+        if (opt < temp) 
+          RETURN_0("Apos y square ");
+        opt -= temp;
+
+        temp = RMath::absLong(Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS]);
+        if (temp > LIMIT)
+          RETURN_0("Apos x steps ");
+        temp *= temp;
+        if ( opt < temp ) 
+          RETURN_0("Apos x square ");
+
+        deltaPosSteps[A_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS] + towerAMinSteps;
+        if (deltaPosSteps[A_TOWER]< towerAMinSteps + Printer::deltaFloorSafetyMarginSteps) 
+          RETURN_0("A hit floor");
 
         // B TOWER height
-        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
+        temp = RMath::absLong(Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS]);
         opt = Printer::deltaDiagonalStepsSquaredB.l;
-        if (opt < temp) return 0;
+
+        if (temp > LIMIT) 
+          RETURN_0("Bpos y steps ");
+        temp *= temp;
+        if (opt < temp)     
+          RETURN_0("Bpos y square ");
         opt -= temp;
 
-        temp = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
-        if (temp > LIMIT) return 0;
+        temp = RMath::absLong(Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS]);
+        if (temp > LIMIT ) 
+          RETURN_0("Bpos x steps ");
         temp *= temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[B_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
+        if ( opt < temp )           
+          RETURN_0("Bpos x square ");
+
+        deltaPosSteps[B_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS] + towerBMinSteps;
+        if (deltaPosSteps[B_TOWER]< towerBMinSteps + Printer::deltaFloorSafetyMarginSteps) 
+          RETURN_0("B hit floor");
 
         // C TOWER height
-        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp = temp * temp;
+        temp = RMath::absLong(Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS]);
         opt = Printer::deltaDiagonalStepsSquaredC.l ;
-        if ( opt < temp ) return 0;
 
-        temp = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
-        if (temp > LIMIT) return 0;
+        if (temp > LIMIT)          
+          RETURN_0("Cpos y steps ");
         temp = temp * temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[C_TOWER] = SQRT(opt - temp) + cartesianPosSteps[Z_AXIS];
+        if ( opt < temp )           
+          RETURN_0("Cpos y square ");
+        opt -= temp;
+
+        temp = RMath::absLong(Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS]);
+        if (temp > LIMIT)  
+          RETURN_0("Cpos x steps ");
+        temp = temp * temp;
+        if ( opt < temp )         
+          RETURN_0("Cpos x square ");
+
+        deltaPosSteps[C_TOWER] = SQRT(opt - temp) + cartesianPosSteps[Z_AXIS] + towerCMinSteps;
+        if (deltaPosSteps[C_TOWER]< towerCMinSteps + Printer::deltaFloorSafetyMarginSteps) 
+          RETURN_0("C hit floor");
 /*
         long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         long opt = Printer::deltaDiagonalStepsSquaredA.l - temp * temp;
@@ -1146,13 +1182,13 @@ void PrintLine::calculateDirectionAndDelta(long difference[], flag8_t *dir, long
   @return The largest delta axis move in a single segment
   @param p The line to examine.
 */
-inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
+inline int32_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
 {
     uint8_t i;
     long delta,diff;
     long destinationSteps[Z_AXIS_ARRAY], destinationDeltaSteps[TOWER_ARRAY];
     // Save current position
-#if CPU_ARCH == ARCH_AVR && !defined(EXACT_DELTA_MOVES)
+#if (CPU_ARCH == ARCH_AVR) && !EXACT_DELTA_MOVES
     for(uint8_t i = 0; i < Z_AXIS_ARRAY; i++)
         destinationSteps[i] = Printer::currentPositionSteps[i];
 #else
@@ -1168,14 +1204,14 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
     uint16_t max_axis_move = 0;
     for (int s = numDeltaSegments; s > 0; s--)
     {
-#if !(CPU_ARCH == ARCH_AVR && !defined(EXACT_DELTA_MOVES))
-        float segment = static_cast<float>(numDeltaSegments-s+1);
-#endif
         DeltaSegment *d = &segments[s-1];
-        for(i=0; i < Z_AXIS_ARRAY; i++) // End of segment in cartesian steps
+
+#if (CPU_ARCH == ARCH_AVR) && !EXACT_DELTA_MOVES
+         for(i=0; i < Z_AXIS_ARRAY; i++) 
         {
-#if CPU_ARCH == ARCH_AVR && !defined(EXACT_DELTA_MOVES)
-            // This method generates small waves which get larger with increasing number of delta segments.
+            // End of segment in cartesian steps
+
+            // This method generates small waves which get larger with increasing number of delta segments. smaller??
             diff = Printer::destinationSteps[i] - destinationSteps[i];
             if(s == 1)
                 destinationSteps[i] += diff;
@@ -1187,11 +1223,13 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
                 destinationSteps[i] -= HAL::Div4U2U(-diff, s);
             else
                 destinationSteps[i] += HAL::Div4U2U(diff, s);
+         }
 #else
+        float segment = static_cast<float>(numDeltaSegments-s+1);
+        for(i=0; i < Z_AXIS_ARRAY; i++) // End of segment in cartesian steps
             // Perfect approximation, but slower, so we limit it to faster processors like arm
             destinationSteps[i] = static_cast<int32_t>(floor(0.5 + dx[i] * segment)) + Printer::currentPositionSteps[i];
 #endif
-        }
         // Verify that delta calc has a solution
         if (transformCartesianStepsToDeltaSteps(destinationSteps, destinationDeltaSteps))
         {
@@ -1230,9 +1268,17 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
         else
         {
             // Illegal position - ignore move
-            Com::printWarningFLN(Com::tInvalidDeltaCoordinate);
+            Com::printWarningF(Com::tInvalidDeltaCoordinate);
+            Com::print(" x:");
+            Com::print(destinationSteps[X_AXIS]);
+            Com::print("   y:");
+            Com::print(destinationSteps[Y_AXIS]);
+            Com::print("   z:");
+            Com::print(destinationSteps[Z_AXIS]);
+            Com::println();
             d->dir = 0;
             d->deltaSteps[A_TOWER] = d->deltaSteps[B_TOWER] = d->deltaSteps[C_TOWER] = 0;
+            return -1; // flag error
         }
     }
 #ifdef DEBUG_STEPCOUNT
@@ -1346,20 +1392,6 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
         axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
     }
     Printer::filamentPrinted += axis_diff[E_AXIS];
-#if max_software_endstop_r == true
-// TODO - Implement radius checking
-// I'm guessing I need the floats to prevent overflow. This is pretty horrible.
-// The NaN checking in the delta calculation routine should be enough
-//float a = difference[0] * difference[0] + difference[1] * difference[1];
-//float b = 2 * (difference[0] * printer_state.currentPositionSteps[X_AXIS] + difference[1] * printer_state.currentPositionSteps[Y_AXIS]);
-//float c = printer_state.currentPositionSteps[X_AXIS] * printer_state.currentPositionSteps[X_AXIS] + printer_state.currentPositionSteps[Y_AXIS] * printer_state.currentPositionSteps[Y_AXIS] - r * r;
-//float disc = b * b - 4 * a * c;
-//if (disc >= 0) {
-//    float t = (-b + (float)sqrt(disc)) / (2 * a);
-//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[X_AXIS] + difference[0] * t;
-//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[Y_AXIS] + difference[1] * t;
-// }
-#endif
 
     float cartesianDistance;
     flag8_t cartesianDir;

@@ -699,7 +699,6 @@ on this endstop.
 #define X_MAX_LENGTH 165
 #define Y_MAX_LENGTH 175
 #define Z_MAX_LENGTH 116.820
-
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
 #define X_MIN_POS 0
@@ -727,7 +726,7 @@ on this endstop.
 
 // Delta settings
 #if DRIVE_SYSTEM==DELTA
-/** \brief Delta rod length
+/** \brief Delta rod length (mm)
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
 
@@ -735,16 +734,16 @@ on this endstop.
 /*  =========== Parameter essential for delta calibration ===================
 
             C, Y-Axis
-            |                        |___| CARRIAGE_HORIZONTAL_OFFSET
-            |                        |   \
-            |_________ X-axis        |    \
-           / \                       |     \  DELTA_DIAGONAL_ROD
-          /   \                             \
-         /     \                             \    Carriage is at printer center!
-         A      B                             \_____/
-                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET
-                                         |----| DELTA_RADIUS
-                                     |-----------| PRINTER_RADIUS
+            |                        |___| CARRIAGE_HORIZONTAL_OFFSET (recommend set it to 0)
+            |                        |   \------------------------------------------
+            |_________ X-axis        |    \                                        |
+           / \                       |     \  DELTA_DIAGONAL_ROD (length)    Each move this Rod Height
+          /   \                             \                                 is calculated
+         /     \                             \    Carriage is at printer center!   |
+         A      B                             \_____/--------------------------------
+                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET (recommend set it to 0)
+                                         |----| DELTA_RADIUS (Horizontal rod pivot to pivot measure)
+                                     |-----------| PRINTER_RADIUS (recommend set it to DELTA_RADIUS)
 
     Column angles are measured from X-axis counterclockwise
     "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
@@ -768,21 +767,30 @@ on this endstop.
 /** Max. radius the printer should be able to reach. */
 #define DELTA_MAX_RADIUS 200
 
+// Margin (mm) to avoid above tower minimum (xMin xMinsteps)
+// If your printer can put its carriage low enough the rod is horizontal without hitting the floor
+// set this to zero. Otherwise, measure how high the carriage is from horizontal rod
+// Also, movement speeds are 10x to 20x cartesian speeds at tower bottom.
+// You may need to leave a few mm for safety. 
+// Hitting floor at high speed can damage your printer (motors, drives, etc)
+// THIS MAY NEED UPDATING IF THE HOT END HEIGHT CHANGES!
+#define DELTA_FLOOR_SAFETY_MARGIN_MM 15
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
-#define END_EFFECTOR_HORIZONTAL_OFFSET 33
+#define END_EFFECTOR_HORIZONTAL_OFFSET 0
 
 /** \brief Horizontal offset of the universal joints on the vertical carriages.
 */
-#define CARRIAGE_HORIZONTAL_OFFSET 18
+#define CARRIAGE_HORIZONTAL_OFFSET 0
 
 /** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
 */
-#define PRINTER_RADIUS 175
+#define PRINTER_RADIUS 124
 
-/** Remove comment for more precise delta moves. Needs a bit more computation time. */
-//#define EXACT_DELTA_MOVES
+/** 1 for more precise delta moves. 0 for faster computation.
+Needs a bit more computation time. */
+#define EXACT_DELTA_MOVES 1
 
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
@@ -818,7 +826,7 @@ Increasing this figure can use a lot of memory since 7 bytes * size of line buff
 will be allocated for the delta buffer.
 PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
 Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
-or 16 * (200 + (7*22=154) = 354) = 5664 bytes!!!!!!!1
+or 16 * (200 + (7*22=154) = 354) = 5664 bytes! !1
 min is 5 * (200 + (7*10=70) =270) = 1350
  This leaves ~1K free RAM on an Arduino which has only 8k
 Mega. Used only for nonlinear systems like delta or tuga. */

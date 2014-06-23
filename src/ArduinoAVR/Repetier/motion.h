@@ -654,7 +654,7 @@ public:
 #if NONLINEAR_SYSTEM
     static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
+    inline int32_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING
