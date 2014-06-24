@@ -1162,14 +1162,9 @@ is always running and is not hung up for some unknown reason. */
 #define CASE_LIGHTS_PIN -1
 #define CASE_LIGHT_DEFAULT_ON 1
 
-/** Set to false to disable SD support: */
-#ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
-#define SDSUPPORT 0
-// Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
-#define SDCARDDETECT -1
-// Change to true if you get a inserted message on removal.
-#define SDCARDDETECTINVERTED 0
-#endif
+//sdcarddetect moved to ui.h where it is set by feature_controller, or set to default, 
+// ui.h now always sets the flags.
+
 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_EXTENDED_DIR 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
