@@ -135,7 +135,7 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s))
     float x,y,z;
     Printer::realPosition(x,y,z);
     if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
-      Com::printErrorF(s); // flag where the error condition came from
+      Com::printErrorFLN(s); // flag where the error condition came from
     }
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];

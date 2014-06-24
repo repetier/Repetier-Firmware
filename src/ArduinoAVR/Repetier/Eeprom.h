@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 7
+#define EEPROM_PROTOCOL_VERSION 8
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */

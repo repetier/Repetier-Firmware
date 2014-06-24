@@ -351,9 +351,18 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 // reprapdiscount smartcontroller has a sd card buildin
-#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD || FEATURE_CONTROLLER == CONTROLLER_RAMBO
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED 0
+#undef SDSUPPORT
+#define SDSUPPORT 1
+#endif
+
+#if  FEATURE_CONTROLLER == CONTROLLER_RAMBO
+#undef SDCARDDETECT
+#define SDCARDDETECT 81
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED 0
 #undef SDSUPPORT
@@ -1216,6 +1225,15 @@ void ui_check_slow_keys(int &action) {}
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
 
+// The following must be defined for compilation, and default to not supported.
+// This was moved from configuration.h, as it created confusion where SDCARDDETECT etc are defined.
+#ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
+#define SDSUPPORT 0
+// Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
+#define SDCARDDETECT -1
+// Change to true if you get a inserted message on removal.
+#define SDCARDDETECTINVERTED 0
+#endif
 
 extern void beep(uint8_t duration,uint8_t count);
 

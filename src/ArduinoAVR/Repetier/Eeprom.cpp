@@ -610,7 +610,21 @@ void EEPROM::readDataFromEEPROM()
         if(version<7) {
             HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
         }
-
+        if (version<8) {
+#if DRIVE_SYSTEM==DELTA
+          // Prior to verion 8, the cartesian max was stored in the zmax
+          // Now, x,y and z max are used for tower a, b anc c
+          // Of tower min are all set at 0, tower max is larger than cartesian max
+          // by the height of any tower for coordinate 0,0,0
+          long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
+          cart[X_AXIS] = cart[Y_AXIS] = cart[Z_AXIS] = 0;
+          transformCartesianStepsToDeltaSteps(cart, delta);
+          // We can only count on ZLENGTH being set correctly, as it was used for all towers
+          Printer::xLength = Printer::zLength + delta[X_AXIS];
+          Printer::yLength = Printer::zLength + delta[Y_AXIS];
+          Printer::zLength += delta[Z_AXIS];
+#endif
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
