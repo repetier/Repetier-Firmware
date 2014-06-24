@@ -2125,7 +2125,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #else
     PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
 #endif
-    Commands::printCurrentPosition();
+    Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION "));
     break;
     case UI_ACTION_YPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
@@ -2140,7 +2140,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #else
     PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
 #endif
-    Commands::printCurrentPosition();
+    Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION "));
     break;
     case UI_ACTION_ZPOSITION:
 #if UI_SPEEDDEPENDENT_POSITIONING
@@ -2155,23 +2155,23 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #else
     PrintLine::moveRelativeDistanceInStepsReal(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true);
 #endif
-    Commands::printCurrentPosition();
+    Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
     break;
     case UI_ACTION_XPOSITION_FAST:
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS]*increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION_FAST "));
         break;
     case UI_ACTION_YPOSITION_FAST:
         PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS]*increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION_FAST "));
         break;
     case UI_ACTION_ZPOSITION_FAST:
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST "));
         break;
     case UI_ACTION_EPOSITION:
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[3]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
     case UI_ACTION_ZPOSITION_NOTEST:
         Printer::setNoDestinationCheck(true);
@@ -2187,13 +2187,13 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #else
     PrintLine::moveRelativeDistanceInStepsReal(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true);
 #endif
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_NOTEST "));
         Printer::setNoDestinationCheck(false);
     break;
     case UI_ACTION_ZPOSITION_FAST_NOTEST:
         Printer::setNoDestinationCheck(true);
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
-        Commands::printCurrentPosition();
+        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST_NOTEST "));
         Printer::setNoDestinationCheck(false);
         break;
     case UI_ACTION_Z_BABYSTEPS:
@@ -2479,19 +2479,19 @@ void UIDisplay::executeAction(int action)
             break;
         case UI_ACTION_HOME_ALL:
             Printer::homeAxis(true,true,true);
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
             break;
         case UI_ACTION_HOME_X:
             Printer::homeAxis(true,false,false);
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
             break;
         case UI_ACTION_HOME_Y:
             Printer::homeAxis(false,true,false);
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Y "));
             break;
         case UI_ACTION_HOME_Z:
             Printer::homeAxis(false,false,true);
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Z "));
             break;
         case UI_ACTION_SET_ORIGIN:
             Printer::setOrigin(0,0,0);
@@ -2827,7 +2827,7 @@ void UIDisplay::executeAction(int action)
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("UI_ACTION_SET_MEASURED_ORIGIN "));
         }
         break;
 #endif

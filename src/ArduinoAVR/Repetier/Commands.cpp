@@ -130,10 +130,13 @@ void Commands::waitUntilEndOfAllBuffers()
         UI_MEDIUM;
     }
 }
-void Commands::printCurrentPosition()
+void Commands::printCurrentPosition(FSTRINGPARAM(s))
 {
     float x,y,z;
     Printer::realPosition(x,y,z);
+    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
+      Com::printErrorF(s); // flag where the error condition came from
+    }
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];
     z += Printer::coordinateOffset[Z_AXIS];
@@ -446,7 +449,9 @@ void Commands::executeGCode(GCode *com)
                 Printer::setNoDestinationCheck(com->S!=0);
             if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
-                PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true);
+              if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true)){
+                Com::printWarningFLN(PSTR("executeGCode / queueDeltaMove returns error"));
+              }
 #else
                 PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS,true);
 #endif
@@ -648,7 +653,7 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS() && com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
             Printer::updateCurrentPosition(true);
-            printCurrentPosition();
+            printCurrentPosition(PSTR("G29 "));
         }
         break;
         case 30: // G30 single probe set Z0
@@ -659,7 +664,7 @@ void Commands::executeGCode(GCode *com)
             Printer::runZProbe(p & 1,p & 2);
             Printer::setAutolevelActive(oldAutolevel);
             Printer::updateCurrentPosition(p & 1);
-            printCurrentPosition();
+            printCurrentPosition(PSTR("G30 "));
         }
         break;
         case 31:  // G31 display hall sensor output
@@ -723,7 +728,7 @@ void Commands::executeGCode(GCode *com)
             Printer::setAutolevelActive(true);
             Printer::updateDerivedParameter();
             Printer::updateCurrentPosition(true);
-            printCurrentPosition();
+            printCurrentPosition(PSTR("G32 "));
 #if DRIVE_SYSTEM==DELTA
             Printer::homeAxis(true,true,true);
 #endif
@@ -768,10 +773,17 @@ void Commands::executeGCode(GCode *com)
         break;
         case 132: // Calibrate endstop offsets
         {
+// This has the probably unintended side effect of turning off leveling.
             Printer::setAutolevelActive(false); // don't let transformations change result!
             Printer::coordinateOffset[X_AXIS] = 0;
             Printer::coordinateOffset[Y_AXIS] = 0;
             Printer::coordinateOffset[Z_AXIS] = 0;
+// I think this is coded incorrectly, as it depends on the biginning position of the
+// of the hot end, and so should first move to x,y,z= 0,0,0, but as that may not
+// be possible if the printer is not in the homes/zeroed state, the printer
+// cannot safely move to 0 z coordinate without crashong into the print surface.
+// so other than commenting, I'm not meddling.
+// but you will always get different counts from different positions.
             Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
             int32_t m = RMath::max(Printer::stepsRemainingAtXHit,RMath::max(Printer::stepsRemainingAtYHit,Printer::stepsRemainingAtZHit));
             int32_t offx = m-Printer::stepsRemainingAtXHit;
@@ -797,18 +809,19 @@ void Commands::executeGCode(GCode *com)
             Printer::setAutolevelActive(false); // don't let transformations change result!
             Printer::currentPositionSteps[X_AXIS] = 0;
             Printer::currentPositionSteps[Y_AXIS] = 0;
-            Printer::currentPositionSteps[Z_AXIS] = Printer::zMaxSteps;
+            Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::coordinateOffset[X_AXIS] = 0;
             Printer::coordinateOffset[Y_AXIS] = 0;
             Printer::coordinateOffset[Z_AXIS] = 0;
             Printer::currentDeltaPositionSteps[A_TOWER] = 0;
             Printer::currentDeltaPositionSteps[B_TOWER] = 0;
-            Printer::currentDeltaPositionSteps[C_TOWER] = Printer::zMaxSteps;
+            Printer::currentDeltaPositionSteps[C_TOWER] = 0;
+// similar to comment above, this will get a different answer from any different starting point
+// so it is unclear how this is helpful. It must start at a well defined point.
             Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-            int32_t m = Printer::zMaxSteps*1.5;
-            int32_t offx = m-Printer::stepsRemainingAtXHit;
-            int32_t offy = m-Printer::stepsRemainingAtYHit;
-            int32_t offz = m-Printer::stepsRemainingAtZHit;
+            int32_t offx = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtXHit;
+            int32_t offy = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtYHit;
+            int32_t offz = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtZHit;
             Com::printFLN(Com::tTower1,offx);
             Com::printFLN(Com::tTower2,offy);
             Com::printFLN(Com::tTower3,offz);
@@ -827,7 +840,7 @@ void Commands::executeGCode(GCode *com)
 #endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
-            printCurrentPosition();
+            printCurrentPosition(PSTR("G134 "));
             break;
 */
 #endif // DRIVE_SYSTEM
@@ -1186,7 +1199,7 @@ void Commands::executeGCode(GCode *com)
             reportPrinterUsage();
             break;
         case 114: // M114
-            printCurrentPosition();
+            printCurrentPosition(PSTR("M114 "));
             break;
         case 117: // M117 message to lcd
             if(com->hasString())
@@ -1453,7 +1466,7 @@ void Commands::executeGCode(GCode *com)
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition();
+            Commands::printCurrentPosition(PSTR("M251 "));
             break;
 #endif
 #ifdef DEBUG_QUEUE_MOVE

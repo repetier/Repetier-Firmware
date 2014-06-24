@@ -276,7 +276,7 @@ FSTRINGVALUE(Com::tEPRZMaxFeedrate,"Max. feedrate [mm/s]")
 FSTRINGVALUE(Com::tEPRZHomingFeedrate,"Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Diagonal rod length [mm]")
-FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal radius [mm]")
+FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal rod radius at 0,0 [mm]")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 
@@ -284,7 +284,7 @@ FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerZOffset,"Tower Z endstop offset [steps]")
 
-FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max. radius [mm]")
+FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max printable radius [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA,"Corr. diagonal A [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB,"Corr. diagonal B [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")

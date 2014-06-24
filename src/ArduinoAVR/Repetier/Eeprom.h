@@ -103,9 +103,15 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_RADIUS_CORR_C   921
 #define EPR_DELTA_MAX_RADIUS      925
 #define EPR_Z_PROBE_BED_DISTANCE  929
-#define EPR_DELTA_DIAGONAL_CORR_A 933
-#define EPR_DELTA_DIAGONAL_CORR_B 937
-#define EPR_DELTA_DIAGONAL_CORR_C 941
+#define EPR_DELTA_DIAGONAL_CORRECTION_A 933
+#define EPR_DELTA_DIAGONAL_CORRECTION_B 937
+#define EPR_DELTA_DIAGONAL_CORRECTION_C 941
+
+#if EEPROM_MODE!=0
+#define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
+#else
+#define EEPROM_FLOAT(x) (x)
+#endif
 
 #define EEPROM_EXTRUDER_OFFSET 200
 // bytes per extruder needed, leave some space for future development
@@ -270,7 +276,7 @@ public:
 #if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #else
-        return DELTA_RADIUS;
+        return ROD_RADIUS;
 #endif
     }
     static inline int16_t deltaTowerXOffsetSteps() {
@@ -361,32 +367,16 @@ public:
 #endif
     }
     static inline float deltaDiagonalCorrectionA() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_A);
-#else
-        return DELTA_DIAGONAL_CORRECTION_A;
-#endif
+      return EEPROM_FLOAT(DELTA_DIAGONAL_CORRECTION_A);
     }
     static inline float deltaDiagonalCorrectionB() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_B);
-#else
-        return DELTA_DIAGONAL_CORRECTION_B;
-#endif
+      return EEPROM_FLOAT(DELTA_DIAGONAL_CORRECTION_B);
     }
     static inline float deltaDiagonalCorrectionC() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_CORR_C);
-#else
-        return DELTA_DIAGONAL_CORRECTION_C;
-#endif
+      return EEPROM_FLOAT(DELTA_DIAGONAL_CORRECTION_C);
     }
     static inline float deltaMaxRadius() {
-#if EEPROM_MODE!=0
-        return HAL::eprGetFloat(EPR_DELTA_MAX_RADIUS);
-#else
-        return DELTA_MAX_RADIUS;
-#endif
+      return EEPROM_FLOAT(DELTA_MAX_RADIUS);
     }
 
 #endif

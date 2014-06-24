@@ -379,9 +379,27 @@ static inline void print(int value) {print((int32_t)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
+static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
     protected:
     private:
 };
+
+#ifdef DEBUG
+#define SHOW(x) {Com::print(" " #x "="); Com::print(x); Com::println();}
+#define SHOWS(x) {Com::print(" " #x "="); Com::print(x); Com::print(" "); Com::print(x/80); Com::println();}
+#define SHOWM(x) {Com::print(" " #x "="); Com::print(x*80); Com::print(" "); Com::print(x); Com::println();}
+#define SHOT(x) Com::print(x " ")
+#define SHOWA(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWS(a[i]);}
+#define SHOWAM(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWM(a[i]);}
+
+#else
+#define SHOW(x)
+#define SHOT(x)
+#define SHOWS(x)
+#define SHOWM(x)
+#define SHOWA(t,a,n) 
+#define SHOWAM(t,a,n) 
+#endif
 
 #endif // COMMUNICATION_H

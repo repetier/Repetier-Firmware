@@ -93,7 +93,6 @@ public:
     static long destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
     static long currentDeltaPositionSteps[E_TOWER_ARRAY];
-    static long maxDeltaPositionSteps;
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
@@ -635,8 +634,8 @@ public:
     static void setup();
     static void defaultLoopActions();
     static uint8_t setDestinationStepsFromGCode(GCode *com);
-    static void moveTo(float x,float y,float z,float e,float f);
-    static void moveToReal(float x,float y,float z,float e,float f);
+    static uint8_t moveTo(float x,float y,float z,float e,float f);
+    static uint8_t moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);

@@ -27,7 +27,7 @@ class GCode   // 52 uint8_ts per command needed
 public:
     unsigned int M;
     unsigned int G;
-    uint16_t N; // Line numbers are only checked for the first 16 bit!
+    uint32_t N; // Line numbers are needed to report error line in large files
     float X;
     float Y;
     float Z;

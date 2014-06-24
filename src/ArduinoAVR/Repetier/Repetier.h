@@ -179,6 +179,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SPEED_MAX_MILLIS 50
 #define SPEED_MAGNIFICATION 100.0f
 
+#define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
+/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
+*/
+#define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
@@ -386,6 +391,7 @@ public:
     static inline unsigned long absLong(long a)          {return a >= 0 ? a : -a;}
     static inline long sqr(long a) {return a*a;}
     static inline unsigned long sqr(unsigned long a) {return a*a;}
+
     static inline float sqr(float a) {return a*a;}
 };
 

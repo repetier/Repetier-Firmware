@@ -742,8 +742,8 @@ on this endstop.
          /     \                             \    Carriage is at printer center!   |
          A      B                             \_____/--------------------------------
                                               |--| END_EFFECTOR_HORIZONTAL_OFFSET (recommend set it to 0)
-                                         |----| DELTA_RADIUS (Horizontal rod pivot to pivot measure)
-                                     |-----------| PRINTER_RADIUS (recommend set it to DELTA_RADIUS)
+                                         |----| ROD_RADIUS (Horizontal rod pivot to pivot measure)
+                                     |-----------| PRINTER_RADIUS (recommend set it to ROD_RADIUS)
 
     Column angles are measured from X-axis counterclockwise
     "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
@@ -764,7 +764,7 @@ on this endstop.
 #define DELTA_DIAGONAL_CORRECTION_B 0
 #define DELTA_DIAGONAL_CORRECTION_C 0
 
-/** Max. radius the printer should be able to reach. */
+/** Max. radius (mm) the printer should be able to reach. */
 #define DELTA_MAX_RADIUS 200
 
 // Margin (mm) to avoid above tower minimum (xMin xMinsteps)
@@ -784,7 +784,9 @@ on this endstop.
 */
 #define CARRIAGE_HORIZONTAL_OFFSET 0
 
-/** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
+/** \brief Printer radius in mm, 
+  measured from the center of the print area to the vertical smooth tower.
+  Alternatly set this to the pivot to pivot horizontal rod distance, when head is at (0,0)
 */
 #define PRINTER_RADIUS 124
 
@@ -792,9 +794,6 @@ on this endstop.
 Needs a bit more computation time. */
 #define EXACT_DELTA_MOVES 1
 
-/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
-*/
-#define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 /* ========== END Delta calibation data ==============*/
 
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
@@ -807,12 +806,6 @@ you can also change the values online and autoleveling will store the results he
 #define DELTA_X_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
-
-
-/** \brief Experimental calibration utility for delta printers
- * Change 1 to 0 to disable
-*/
-#define SOFTWARE_LEVELING (1 && (DRIVE_SYSTEM==DELTA))
 
 #endif
 #if DRIVE_SYSTEM==TUGA
@@ -1153,6 +1146,12 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_Y2 170
 #define Z_PROBE_X3 20
 #define Z_PROBE_Y3 170
+
+
+/** \brief Experimental calibration utility for delta printers
+ * Change 1 to 0 to disable
+*/
+#define FEATURE_SOFTWARE_LEVELING 0 
 
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 0

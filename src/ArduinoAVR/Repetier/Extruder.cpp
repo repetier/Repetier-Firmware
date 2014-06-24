@@ -1050,20 +1050,25 @@ void writeMonitor()
 
 bool reportTempsensorError()
 {
-    if(!Printer::isAnyTempsensorDefect()) return false;
     for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
     {
         int temp = tempController[i]->currentTemperatureC;
-        if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
-        else Com::printF(Com::tExtruderSpace,i);
         if(temp<MIN_DEFECT_TEMPERATURE || temp>MAX_DEFECT_TEMPERATURE)
         {
-            Com::printFLN(Com::tTempSensorDefect);
+            Com::printErrorFLN(Com::tTempSensorDefect);
         }
         else Com::printFLN(Com::tTempSensorWorking);
+        if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed );
+        else Com::printF(Com::tExtruderSpace,i);
+        Com::print(" Temperature reading is ");
+        Com::print(temp);
+        Com::println();
     }
-    Com::printErrorFLN(Com::tDryModeUntilRestart);
-    return true;
+    if(Printer::isAnyTempsensorDefect()) {
+        Com::printErrorFLN(Com::tDryModeUntilRestart);
+        return true;
+    }
+    return false;
 }
 
 #ifdef SUPPORT_MAX6675
