@@ -95,7 +95,7 @@ Move printer the given number of steps. Puts the move into the queue. Used by e.
 */
 void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool checkEndstop)
 {
-    SHOT("moveRelative "); SHOWS(x); SHOWS(y); SHOWS(z);
+    //SHOT("moveRelative "); SHOWS(x); SHOWS(y); SHOWS(z);
     //Com::printF(Com::tJerkColon,x);
     //Com::printF(Com::tComma,y);
     //Com::printFLN(Com::tComma,z);
@@ -868,14 +868,15 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 
 #if DRIVE_SYSTEM==DELTA
 // pick one for verbose the other silent
-// #define RETURN_0 return 0
-#define RETURN_0(s) { Com::print(s " "); SHOWS(temp); SHOWS(opt);\
+#define RETURN_0(s) { Com::printErrorFLN(PSTR(s)); return 0; }
+/*#define RETURN_0(s) { Com::print(s " "); SHOWS(temp); SHOWS(opt);\
    SHOWS(cartesianPosSteps[Z_AXIS]);\
    SHOWS(towerAMinSteps); ;\
    SHOWS(deltaPosSteps[A_TOWER]); \
    SHOWS(Printer::deltaAPosYSteps);\
    SHOWS(cartesianPosSteps[Y_AXIS]); \
    SHOW(Printer::deltaDiagonalStepsSquaredA.l);  return 0; }
+   */
 /**
   Calculate the delta tower position from a cartesian position
   @param cartesianPosSteps Array containing cartesian coordinates.
@@ -1031,7 +1032,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         else
             return 0;*/
     }
-    SHOWA("motion.c transformCart... delta post ",deltaPosSteps, 3);
+    //SHOWA("motion.c transformCart... delta post ",deltaPosSteps, 3);
     return 1;
 }
 #endif
@@ -1535,7 +1536,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
         int32_t max_delta_step = p->calculateDeltaSubSegments(softEndstop);
         if (max_delta_step <0) {
           // error was flagged.
-          SHOW(segmentCount);
+          /*SHOW(segmentCount);
           SHOW(DELTASEGMENTS_PER_PRINTLINE);
           SHOW(segmentsPerLine);
           SHOWS(Printer::destinationSteps[X_AXIS]);
@@ -1544,10 +1545,12 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
           SHOWS(Printer::currentPositionSteps[X_AXIS]);
           SHOWS(Printer::currentPositionSteps[Y_AXIS]);
           SHOWS(Printer::currentPositionSteps[Z_AXIS]);
-          Com::printWarningFLN(PSTR("in queueDeltaMove to calculateDeltaSubSegments returns error."));
           SHOW(check_endstops);
           SHOW(pathOptimize);
           SHOW(softEndstop);
+          */
+          Com::printWarningFLN(PSTR("in queueDeltaMove to calculateDeltaSubSegments returns error."));
+
           return false;
         }
 
@@ -1559,7 +1562,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
         {
           if (numLines!=1) {
             Com::printErrorFLN(Com::tDBGDeltaNoMoveinDSegment);
-            SHOW(numLines);
+            /*SHOW(numLines);
             SHOW(segmentCount);
             SHOW(DELTASEGMENTS_PER_PRINTLINE);
             SHOW(segmentsPerLine);
@@ -1571,7 +1574,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
             SHOWS(Printer::currentPositionSteps[Z_AXIS]);
             SHOW(check_endstops);
             SHOW(pathOptimize);
-            SHOW(softEndstop);
+            SHOW(softEndstop);*/
             return false;  // Line too short in low precision area
           }
         }
@@ -1785,7 +1788,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         }
         HAL::allowInterrupts();
         lastblk = -1;
-#ifdef INCLUDE_DEBUG_NO_MOVE
+#if INCLUDE_DEBUG_NO_MOVE
         if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
             //HAL::forbidInterrupts();
@@ -2202,7 +2205,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         }
         HAL::allowInterrupts();
         lastblk = -1;
-#ifdef INCLUDE_DEBUG_NO_MOVE
+#if INCLUDE_DEBUG_NO_MOVE
         if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
             removeCurrentLineForbidInterrupt();

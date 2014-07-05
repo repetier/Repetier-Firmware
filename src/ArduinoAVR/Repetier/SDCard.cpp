@@ -57,9 +57,8 @@ void SDCard::automount()
         if(!sdactive)
         {
             UI_STATUS(UI_TEXT_SD_INSERTED);
-            Com::printFLN(PSTR("SD card inserted"));
-            Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
-            initsd();
+            Com::printFLN(PSTR(UI_TEXT_SD_INSERTED));
+            initsd(); // sets menu mode
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
                 Printer::setAutomount(true);

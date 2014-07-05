@@ -76,6 +76,7 @@ floatLong Printer::deltaDiagonalStepsSquaredB;
 floatLong Printer::deltaDiagonalStepsSquaredC;
 float Printer::deltaMaxRadiusSquared;
 float Printer::cartesianZMaxMM;
+float Printer::radius0;
 long Printer::deltaFloorSafetyMarginSteps;
 long Printer::deltaAPosXSteps;
 long Printer::deltaAPosYSteps;
@@ -229,7 +230,6 @@ void Printer::updateDerivedParameter()
     towerBMinSteps = axisStepsPerMM[B_TOWER]*(yMin);
     towerCMinSteps = axisStepsPerMM[C_TOWER]*(zMin);
 
-    float radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
     float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
     float radiusC = radius0 + EEPROM::deltaRadiusCorrectionC();
@@ -365,7 +365,7 @@ void Printer::updateAdvanceFlags()
 // This is for untransformed move to coordinates in printers absolute cartesian space
 uint8_t Printer::moveTo(float x,float y,float z,float e,float f)
 {
-  SHOT("moveTo"); SHOWM(z); SHOW(f);
+    //SHOT("moveTo"); SHOWM(z); SHOW(f);
     if(x != IGNORE_COORDINATE)
         destinationSteps[X_AXIS] = (x + Printer::offsetX) * axisStepsPerMM[X_AXIS];
     if(y != IGNORE_COORDINATE)
@@ -466,8 +466,8 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
     //but otherwise is an error condition
     if (currentPosition[Z_AXIS] > cartesianZMaxMM) {
       Com::printArrayFLN(PSTR("updateCurrentPosition"),currentPosition,3,4);
-      SHOWS(currentPositionSteps[Z_AXIS]);
-      SHOWM(currentPosition[Z_AXIS]);
+      //SHOWS(currentPositionSteps[Z_AXIS]);
+      //SHOWM(currentPosition[Z_AXIS]);
     }
 #endif
 }
@@ -832,6 +832,7 @@ void Printer::setup()
     xMin = X_MIN_POS;
     yMin = Y_MIN_POS;
     zMin = Z_MIN_POS;
+    radius0 = ROD_RADIUS;
     wasLastHalfstepping = 0;
 #if ENABLE_BACKLASH_COMPENSATION
     backlashX = X_BACKLASH;
@@ -939,7 +940,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     Printer::currentDeltaPositionSteps[A_TOWER] = towerAMaxSteps;
     Printer::currentDeltaPositionSteps[B_TOWER] = towerBMaxSteps;
     Printer::currentDeltaPositionSteps[C_TOWER] = towerCMaxSteps;
-    SHOWA("deltaMoveToTopEndstop",currentDeltaPositionSteps,3);
+    //SHOWA("deltaMoveToTopEndstop",currentDeltaPositionSteps,3);
     // but only approximate position in cartesian space
     // The homing process will get this precisely, as long as we know where the delta towers are.
     // by doing any ABSOLUTE cartesian move at all driven by cartesian coordinates.
@@ -951,7 +952,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     Printer::currentPositionSteps[Y_AXIS] = 0; // approximation
     Printer::currentPositionSteps[Z_AXIS] = cartesianZMaxMM*axisStepsPerMM[Z_AXIS]; // approximation
     updateCurrentPosition();
-    SHOWA("deltaMoveToTopEndstop",currentPositionSteps,3);
+    //SHOWA("deltaMoveToTopEndstop",currentPositionSteps,3);
 }
 
 void Printer::homeXAxis()
@@ -982,11 +983,17 @@ void Printer::homeZAxis() // Delta z homing
     // move to a multiple of 10, so its easier to sync up with the HOST program
     long zMax = cartesianZMaxMM/10; // want floor not average! 
     // move to the largest multiple of 10 under cartesianZMaxMM
-    moveTo(0,0,zMax*10, IGNORE_COORDINATE, feedrate);
+    // moveTo prints position, which (usually) will get host back in sync
+    moveTo(0,0,zMax*10, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     // Here all delta and cartesion hardware and software positions match.
     // and we have tested the endstops at speed allowing maximum accuracy
+    // MoveTo does not set lastCmdPos, resulting in odd behavior, g1 z100 moves
+    // somewhere besides x0 y0, even though we just homed. 
+    // So next update lastCmdPos to home x,y. 
+    // Otherwise moves that dont specify all coordinates do the wonky.
+    updateCurrentPosition(true); 
 
-    // not sure if this is still needed, but it cannot cause aproblem
+    // not sure if below is still needed, but it cannot cause a problem
     Commands::waitUntilEndOfAllMoves();
     // get all software positions in sync.
     realDeltaPositionSteps[A_TOWER] = currentDeltaPositionSteps[A_TOWER];
@@ -1154,7 +1161,7 @@ void Printer::homeYAxis()
 }
 #endif
 
-void Printer::homeZAxis()
+void Printer::homeZAxis() // cartesian homing
 {
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1))

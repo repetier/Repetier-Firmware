@@ -22,7 +22,7 @@
 #include "Repetier.h"
 #include "pins_arduino.h"
 #include "ui.h"
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
 #include "Eeprom.h"
 #endif
 
@@ -112,7 +112,7 @@ void Extruder::manageTemperatures()
 #if TEMP_PID
         act->tempArray[act->tempPointer++] = act->currentTemperatureC;
         act->tempPointer &= 3;
-        if(act->heatManager == 1)
+        if(act->heatManager == HTR_PID)
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
@@ -135,7 +135,7 @@ void Extruder::manageTemperatures()
             }
             pwm_pos[act->pwmIndex] = output;
         }
-        else if(act->heatManager == 3)     // deat-time control
+        else if(act->heatManager == HTR_DEADTIME)     // dead-time control
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
@@ -149,13 +149,13 @@ void Extruder::manageTemperatures()
             {
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
-                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
+                output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
             }
             pwm_pos[act->pwmIndex] = output;
         }
         else
 #endif
-            if(act->heatManager == 2)    // Bang-bang with reduced change frequency to save relais life
+            if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relais life
             {
                 uint32_t time = HAL::timeInMilliseconds();
                 if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
@@ -318,7 +318,7 @@ void Extruder::initExtruder()
 void TemperatureController::updateTempControlVars()
 {
 #if TEMP_PID
-    if(heatManager==1 && pidIGain!=0)   // prevent division by zero
+    if(heatManager==HTR_PID && pidIGain!=0)   // prevent division by zero
     {
         tempIStateLimitMax = (float)pidDriveMax*10.0f/pidIGain;
         tempIStateLimitMin = (float)pidDriveMin*10.0f/pidIGain;
@@ -416,7 +416,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     bool alloff = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
-#if EEPROM_MODE != 0
+#if EEPROM_MODE == EEPROM_ON
     if(alloff && !alloffs) // All heaters are now switched off?
         EEPROM::updatePrinterUsage();
 #endif
@@ -1023,7 +1023,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
                 pidDGain = Kp;
                 pidIGain = Ki;
                 pidDGain = Kd;
-                heatManager = 1;
+                heatManager = HTR_PID;
                 EEPROM::storeDataIntoEEPROM();
             }
             return;
@@ -1162,7 +1162,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_P,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
@@ -1182,7 +1182,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_P,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
@@ -1202,7 +1202,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_P,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
@@ -1222,7 +1222,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_P,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
@@ -1242,7 +1242,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_P,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
@@ -1262,7 +1262,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
 #if TEMP_PID
-            ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_P,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
+            ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0}
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
@@ -1274,7 +1274,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
 TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
 #if TEMP_PID
-        ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
+        ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
                                             ,0};
 #else

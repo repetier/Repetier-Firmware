@@ -224,9 +224,10 @@ FSTRINGVALUE(Com::tZProbePrinterHeight,"Printer height:")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #endif // WAITING_IDENTIFIER
-#if EEPROM_MODE==0
+#if EEPROM_MODE != EEPROM_ON
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
-#else
+#endif
+#if EEPROM_MODE != NO_EEPROM
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height [mm]")
 FSTRINGVALUE(Com::tZProbeBedDitance,"Max. z-probe - bed dist. [mm]")
@@ -326,7 +327,9 @@ FSTRINGVALUE(Com::tEPRAcceleration,"acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRHeatManager,"heat manager [0-3]")
 FSTRINGVALUE(Com::tEPRDriveMax,"PID drive max")
 FSTRINGVALUE(Com::tEPRDriveMin,"PID drive min")
-FSTRINGVALUE(Com::tEPRPGain,"PID P-gain/dead-time")
+FSTRINGVALUE(Com::tEPRPGain,"PID P-gain")
+FSTRINGVALUE(Com::tEPRDead,"Heater dead-time")
+FSTRINGVALUE(Com::tEPRUnused,"na for dead time ctrl")
 FSTRINGVALUE(Com::tEPRIGain,"PID I-gain")
 FSTRINGVALUE(Com::tEPRDGain,"PID D-gain")
 FSTRINGVALUE(Com::tEPRPIDMaxValue,"PID max value [0-255]")

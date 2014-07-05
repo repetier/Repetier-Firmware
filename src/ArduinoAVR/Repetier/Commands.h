@@ -29,6 +29,9 @@ class Commands
 public:
     static void commandLoop();
     static void checkForPeriodicalActions();
+    static void processArc(GCode *com);
+    static void processGCode(GCode *com);
+    static void processMCode(GCode *com);
     static void executeGCode(GCode *com);
     static void waitUntilEndOfAllMoves();
     static void waitUntilEndOfAllBuffers();

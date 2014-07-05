@@ -18,6 +18,7 @@
 #if !defined(_UI_MENU_H)
 #define _UI_MENU_H
 
+/*moved to uilang.h
 #define cUP "\001"
 #define cDEG "\002"
 #define cSEL "\003"
@@ -25,6 +26,7 @@
 #define cTEMP "\005"
 #define cFOLD "\006"
 #define cARROW "\176"
+*/ 
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -45,6 +47,9 @@ Special Characters
 
 List of placeholder:
 %%% : The % char
+%% :  The % char (also)
+
+%?<c> : Conditional. Print c if current char is not c. Allows avoiding duplicate character, like space
 
 acceleration
 %ax : X acceleration during print moves
@@ -64,6 +69,7 @@ debug
 
 extruder
 %ec : Current extruder temperature
+%eIc : Current extruder temperature integer (shorter)
 %eb : Current heated bed temperature
 %e0..9 : Temp. of extruder 0..9
 %er : Extruder relative mode
@@ -197,7 +203,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #endif
    "Mul:%om", "Buf:%oB", "%os");
 
-  #if EEPROM_MODE!=0
+  #if EEPROM_MODE == EEPROM_ON
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
     #define UI_PRINTTIME_PAGES ,&ui_page2
     #define UI_PRINTTIME_COUNT 1
@@ -240,7 +246,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    ,"","","%os"
  #endif
  );
- #if EEPROM_MODE!=0
+ #if EEPROM_MODE == EEPROM_ON
   UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
   #define UI_PRINTTIME_PAGES ,&ui_page4
   #define UI_PRINTTIME_COUNT 1
@@ -310,7 +316,9 @@ UI_MENU_ACTION2C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSI
 UI_MENU_ACTION2C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST2);
 UI_MENU_ACTION2C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST2);
 #endif
-UI_MENU_ACTION2C(ui_menu_epos,UI_ACTION_EPOSITION,UI_TEXT_ACTION_EPOSITION_FAST2);
+// hack, sorry
+#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINT_FILAMENT
+UI_MENU_ACTION4C(ui_menu_epos,UI_ACTION_EPOSITION,EPOS_ROWS);
 
 /*
 Next step is to define submenus leading to the action.
@@ -628,7 +636,7 @@ UI_MENU_SUBMENU(ui_menu_conf_general, UI_TEXT_GENERAL,      ui_menu_general);
 UI_MENU_SUBMENU(ui_menu_conf_accel,   UI_TEXT_ACCELERATION, ui_menu_accel);
 UI_MENU_SUBMENU(ui_menu_conf_feed,    UI_TEXT_FEEDRATE,     ui_menu_feedrate);
 UI_MENU_SUBMENU(ui_menu_conf_extr,    UI_TEXT_EXTRUDER,     ui_menu_cextr);
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
 UI_MENU_ACTIONCOMMAND(ui_menu_conf_to_eeprom,UI_TEXT_STORE_TO_EEPROM,UI_ACTION_STORE_EEPROM);
 UI_MENU_ACTIONCOMMAND(ui_menu_conf_from_eeprom,UI_TEXT_LOAD_EEPROM,UI_ACTION_LOAD_EEPROM);
 #define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom

@@ -108,6 +108,7 @@ public:
     static long realDeltaPositionSteps[TOWER_ARRAY];
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
+    static float radius0;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
@@ -208,6 +209,15 @@ public:
     }
     static inline bool debugNoMoves() {
         return ((debugLevel & 32)!=0);
+    }
+    static inline bool debugFlag(unsigned long flags) {
+        return (debugLevel & flags);
+    }
+    static inline void debugSet(unsigned long flags) {
+        debugLevel |= flags;
+    }
+    static inline void debugReset(unsigned long flags) {
+        debugLevel &= ~flags;
     }
 
     /** \brief Disable stepper motor for x direction. */

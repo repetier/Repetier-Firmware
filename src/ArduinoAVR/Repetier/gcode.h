@@ -149,14 +149,14 @@ private:
     {
         char *endPtr;
         float f = (strtod(s, &endPtr));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) f=0.0; // treat empty string "x " as "x0"
         return f;
     }
     inline long parseLongValue(char *s)
     {
         char *endPtr;
         long l = (strtol(s, &endPtr, 10));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) l=0; // treat empty string argument "p " as "p0"
         return l;
     }
 
