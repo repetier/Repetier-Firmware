@@ -11,6 +11,10 @@
 // Toggels the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
 extern uint8_t manageMonitor;
+#define HTR_OFF 0
+#define HTR_PID 1
+#define HTR_SLOWBANG 2
+#define HTR_DEADTIME 3
 
 #define TEMPERATURE_CONTROLLER_FLAG_ALARM 1
 /** TemperatureController manages one heater-temperature sensore loop. You can have up to
@@ -33,6 +37,8 @@ class TemperatureController
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
     uint8_t pidDriveMin; ///< Used for windup in PID calculation.
+#define deadTime pidPGain
+    // deadTime is logically different value but physically overlays pidPGain for saving space
     float pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
     float pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
     float pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].

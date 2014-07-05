@@ -219,7 +219,7 @@ typedef struct {
   bool showEntry() const;
 } const UIMenuEntry;
 
-typedef struct {
+typedef struct UIMenu_struct {
   // 0 = info page
   // 1 = file selector
   // 2 = submenu
@@ -351,9 +351,18 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
 // reprapdiscount smartcontroller has a sd card buildin
-#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD || FEATURE_CONTROLLER == CONTROLLER_RAMBO
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED 0
+#undef SDSUPPORT
+#define SDSUPPORT 1
+#endif
+
+#if  FEATURE_CONTROLLER == CONTROLLER_RAMBO
+#undef SDCARDDETECT
+#define SDCARDDETECT 81
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED 0
 #undef SDSUPPORT
@@ -370,7 +379,7 @@ class UIDisplay {
     uint8_t col; // current col for buffer prefill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
     uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
-    void *menu[UI_MENU_MAXLEVEL]; // Menus active
+    const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active
     uint16_t menuTop[UI_MENU_MAXLEVEL]; // Top row in menu
     int8_t shift; // Display shift for scrolling text
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
@@ -394,6 +403,8 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,uint8_t digits);
     inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
+    void addChar(const char c);
+    void addGCode(GCode *code);
     void okAction();
     void nextPreviousAction(int8_t next);
     char statusMsg[MAX_COLS+1];
@@ -412,7 +423,7 @@ class UIDisplay {
     void slowAction();
     void fastAction();
     void mediumAction();
-    void pushMenu(void *men,bool refresh);
+    void pushMenu(const UIMenu *men,bool refresh);
     void adjustMenuPos();
     void setStatusP(PGM_P txt,bool error = false);
     void setStatus(const char *txt,bool error = false);
@@ -1003,8 +1014,8 @@ void ui_check_slow_keys(int &action) {}
 #define UI_ENCODER_B           77
 #define UI_ENCODER_CLICK       78
 #define UI_KILL_PIN            80
-#define UI_DELAYPERCHAR 320
-#define UI_INVERT_MENU_DIRECTION 1
+#define UI_DELAYPERCHAR       320
+#define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
 void ui_init_keys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
@@ -1216,6 +1227,15 @@ void ui_check_slow_keys(int &action) {}
 #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
 #endif
 
+// The following must be defined for compilation, and default to not supported.
+// This was moved from configuration.h, as it created confusion where SDCARDDETECT etc are defined.
+#ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
+#define SDSUPPORT 0
+// Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
+#define SDCARDDETECT -1
+// Change to true if you get a inserted message on removal.
+#define SDCARDDETECTINVERTED 0
+#endif
 
 extern void beep(uint8_t duration,uint8_t count);
 

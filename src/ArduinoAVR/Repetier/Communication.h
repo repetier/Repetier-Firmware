@@ -226,9 +226,10 @@ FSTRINGVAR(tZProbePrinterHeight)
 FSTRINGVAR(tWait)
 #endif // WAITING_IDENTIFIER
 
-#if EEPROM_MODE==0
+#if EEPROM_MODE != EEPROM_ON
 FSTRINGVAR(tNoEEPROMSupport)
-#else
+#endif
+#if EEPROM_MODE != NO_EEPROM
 #if FEATURE_Z_PROBE
 FSTRINGVAR(tZProbeHeight)
 FSTRINGVAR(tZProbeOffsetX)
@@ -315,6 +316,8 @@ FSTRINGVAR(tEPRHeatManager)
 FSTRINGVAR(tEPRDriveMax)
 FSTRINGVAR(tEPRDriveMin)
 FSTRINGVAR(tEPRPGain)
+FSTRINGVAR(tEPRDead)
+FSTRINGVAR(tEPRUnused)
 FSTRINGVAR(tEPRIGain)
 FSTRINGVAR(tEPRDGain)
 FSTRINGVAR(tEPRPIDMaxValue)
@@ -379,9 +382,27 @@ static inline void print(int value) {print((int32_t)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
+static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
     protected:
     private:
 };
+
+#ifdef DEBUG
+#define SHOW(x) {Com::print(" " #x "="); Com::print(x); Com::println();}
+#define SHOWS(x) {Com::print(" " #x "="); Com::print(x); Com::print(" steps  "); Com::print(x/80); Com::print(" mm"); Com::println();}
+#define SHOWM(x) {Com::print(" " #x "="); Com::print((long)x*80); Com::print(" steps  "); Com::print(x); Com::print(" mm"); Com::println();}
+#define SHOT(x) Com::print(x " ")
+#define SHOWA(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWS(a[i]);}
+#define SHOWAM(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWM(a[i]);}
+
+#else
+#define SHOW(x)
+#define SHOT(x)
+#define SHOWS(x)
+#define SHOWM(x)
+#define SHOWA(t,a,n) 
+#define SHOWAM(t,a,n) 
+#endif
 
 #endif // COMMUNICATION_H

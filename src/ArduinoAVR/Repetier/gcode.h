@@ -27,7 +27,7 @@ class GCode   // 52 uint8_ts per command needed
 public:
     unsigned int M;
     unsigned int G;
-    uint16_t N; // Line numbers are only checked for the first 16 bit!
+    uint32_t N; // Line numbers are needed to report error line in large files
     float X;
     float Y;
     float Z;
@@ -149,14 +149,14 @@ private:
     {
         char *endPtr;
         float f = (strtod(s, &endPtr));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) f=0.0; // treat empty string "x " as "x0"
         return f;
     }
     inline long parseLongValue(char *s)
     {
         char *endPtr;
         long l = (strtol(s, &endPtr, 10));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) l=0; // treat empty string argument "p " as "p0"
         return l;
     }
 

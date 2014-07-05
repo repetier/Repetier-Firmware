@@ -28,7 +28,7 @@ of the firmware at the same time. You have to disable some features to gain the
 ram needed. What should work:
 - No sd card - the sd card code is quite large.
 - No keys attached - The longest part is the menu handling.
-- EEPROM_MODE 0 .
+- EEPROM_MODE NO_EEPROM .
 
 Currently supported hardware:
 
@@ -216,7 +216,7 @@ Without a back key, you need to navigate to the back entry in the menu. Setting 
 If you set it to true, next will go to previous menu instead of the next menu.
 
 */
-#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_MENU_DIRECTION 0
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS

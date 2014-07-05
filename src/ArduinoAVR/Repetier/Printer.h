@@ -24,7 +24,7 @@
 
 union floatLong {
     float f;
-    long l;
+    unsigned long l;
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
@@ -41,6 +41,17 @@ union floatLong {
 #define PRINTER_FLAG1_ALLKILLED             8
 #define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
+
+// define an integer number of steps more than large enough to get to endstop from anywhere
+#define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
+#define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
+// Some dfines to make clearer reading, as we overload these cartesion memory locations for delta
+#define towerAMaxSteps Printer::xMaxSteps
+#define towerBMaxSteps Printer::yMaxSteps
+#define towerCMaxSteps Printer::zMaxSteps
+#define towerAMinSteps Printer::xMinSteps
+#define towerBMinSteps Printer::yMinSteps
+#define towerCMinSteps Printer::zMinSteps
 
 class Printer
 {
@@ -82,11 +93,12 @@ public:
     static long destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
     static long currentDeltaPositionSteps[E_TOWER_ARRAY];
-    static long maxDeltaPositionSteps;
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
     static float deltaMaxRadiusSquared;
+    static float cartesianZMaxMM;
+    static long deltaFloorSafetyMarginSteps;
     static long deltaAPosXSteps;
     static long deltaAPosYSteps;
     static long deltaBPosXSteps;
@@ -96,6 +108,7 @@ public:
     static long realDeltaPositionSteps[TOWER_ARRAY];
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
+    static float radius0;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static long stepsRemainingAtZHit;
@@ -196,6 +209,15 @@ public:
     }
     static inline bool debugNoMoves() {
         return ((debugLevel & 32)!=0);
+    }
+    static inline bool debugFlag(unsigned long flags) {
+        return (debugLevel & flags);
+    }
+    static inline void debugSet(unsigned long flags) {
+        debugLevel |= flags;
+    }
+    static inline void debugReset(unsigned long flags) {
+        debugLevel &= ~flags;
     }
 
     /** \brief Disable stepper motor for x direction. */
@@ -622,8 +644,8 @@ public:
     static void setup();
     static void defaultLoopActions();
     static uint8_t setDestinationStepsFromGCode(GCode *com);
-    static void moveTo(float x,float y,float z,float e,float f);
-    static void moveToReal(float x,float y,float z,float e,float f);
+    static uint8_t moveTo(float x,float y,float z,float e,float f);
+    static uint8_t moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);

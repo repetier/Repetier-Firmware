@@ -65,95 +65,99 @@ typedef struct
     inline void checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
-        dir &= ~16;
+        dir &= ~XSTEP;
     }
     inline void setYMoveFinished()
     {
-        dir &= ~32;
+        dir &= ~YSTEP;
     }
     inline void setZMoveFinished()
     {
-        dir &= ~64;
+        dir &= ~ZSTEP;
     }
     inline void setXYMoveFinished()
     {
-        dir &= ~48;
+        dir &= ~XY_STEP;
     }
     inline bool isXPositiveMove()
     {
-        return (dir & 17) == 17;
+        return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & 17) == 16;
+        return (dir & X_STEP_DIRPOS) == XSTEP;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & 34) == 34;
+        return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & 34) == 32;
+        return (dir & Y_STEP_DIRPOS) == YSTEP;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & 68) == 68;
+        return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & 68) == 64;
+        return (dir & Z_STEP_DIRPOS) == ZSTEP;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & 136) == 136;
+        return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
     inline bool isENegativeMove()
     {
-        return (dir & 136) == 128;
+        return (dir & E_STEP_DIRPOS) == ESTEP;
     }
     inline bool isXMove()
     {
-        return (dir & 16);
+        return (dir & XSTEP);
     }
     inline bool isYMove()
     {
-        return (dir & 32);
+        return (dir & YSTEP);
     }
     inline bool isXOrYMove()
     {
-        return dir & 48;
+        return dir & XY_STEP;
     }
     inline bool isZMove()
     {
-        return (dir & 64);
+        return (dir & ZSTEP);
     }
     inline bool isEMove()
     {
-        return (dir & 128);
+        return (dir & ESTEP);
     }
     inline bool isEOnlyMove()
     {
-        return (dir & 240)==128;
+        return (dir & XYZE_STEP)==ESTEP;
     }
     inline bool isNoMove()
     {
-        return (dir & 240)==0;
+        return (dir & XYZE_STEP)==0;
     }
     inline bool isXYZMove()
     {
-        return dir & 112;
+        return dir & XYZ_STEP;
     }
     inline bool isMoveOfAxis(uint8_t axis)
     {
-        return (dir & (16<<axis));
+        return (dir & (XSTEP<<axis));
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= 16<<axis;
+        dir |= XSTEP<<axis;
+    }
+    inline void setPositiveMoveOfAxis(uint8_t axis)
+    {
+        dir |= X_STEP_DIRPOS<<axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= 1<<axis;
+        dir |= X_DIRPOS<<axis;
     }
 } DeltaSegment;
 extern uint8_t lastMoveID;
@@ -266,7 +270,7 @@ public:
     }
     inline bool isExtruderForwardMove()
     {
-        return (dir & 136)==136;
+        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
     }
     inline void block()
     {
@@ -352,79 +356,79 @@ public:
     }
     inline bool isXPositiveMove()
     {
-        return (dir & 17)==17;
+        return (dir & X_STEP_DIRPOS)==X_STEP_DIRPOS;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & 17)==16;
+        return (dir & X_STEP_DIRPOS)==XSTEP;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & 34)==34;
+        return (dir & Y_STEP_DIRPOS)==Y_STEP_DIRPOS;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & 34)==32;
+        return (dir & Y_STEP_DIRPOS)==YSTEP;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & 68)==68;
+        return (dir & Z_STEP_DIRPOS)==Z_STEP_DIRPOS;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & 68)==64;
+        return (dir & Z_STEP_DIRPOS)==ZSTEP;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & 136)==136;
+        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
     }
     inline bool isENegativeMove()
     {
-        return (dir & 136)==128;
+        return (dir & E_STEP_DIRPOS)==ESTEP;
     }
     inline bool isXMove()
     {
-        return (dir & 16);
+        return (dir & XSTEP);
     }
     inline bool isYMove()
     {
-        return (dir & 32);
+        return (dir & YSTEP);
     }
     inline bool isXOrYMove()
     {
-        return dir & 48;
+        return dir & XY_STEP;
     }
     inline bool isZMove()
     {
-        return (dir & 64);
+        return (dir & ZSTEP);
     }
     inline bool isEMove()
     {
-        return (dir & 128);
+        return (dir & ESTEP);
     }
     inline bool isEOnlyMove()
     {
-        return (dir & 240)==128;
+        return (dir & XYZE_STEP)==ESTEP;
     }
     inline bool isNoMove()
     {
-        return (dir & 240)==0;
+        return (dir & XYZE_STEP)==0;
     }
     inline bool isXYZMove()
     {
-        return dir & 112;
+        return dir & XYZ_STEP;
     }
     inline bool isMoveOfAxis(uint8_t axis)
     {
-        return (dir & (16<<axis));
+        return (dir & (XSTEP<<axis));
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= 16<<axis;
+        dir |= XSTEP<<axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= 1<<axis;
+        dir |= X_DIRPOS<<axis;
     }
     inline static void resetPathPlanner()
     {
@@ -652,9 +656,9 @@ public:
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
-    static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
+    static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
+    inline int32_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING

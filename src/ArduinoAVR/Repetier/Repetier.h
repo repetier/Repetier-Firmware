@@ -27,15 +27,19 @@
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
+// These are run time sqitchable debug flags
+enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8, 
+                 DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
-#define INCLUDE_DEBUG_COMMUNICATION
+#define INCLUDE_DEBUG_COMMUNICATION 0
+
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
-#define INCLUDE_DEBUG_NO_MOVE
+#define INCLUDE_DEBUG_NO_MOVE 1
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
@@ -57,8 +61,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Find the maximum real jerk during a print
 //#define DEBUG_REAL_JERK
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
-//#define DEBUG
-
+//#define DEBUG 
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -139,6 +142,26 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_OPENHARDWARE_LCD2004 14
 #define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
 
+//direction flags
+#define X_DIRPOS 1
+#define Y_DIRPOS 2
+#define Z_DIRPOS 4
+#define E_DIRPOS 8
+#define XYZ_DIRPOS 7
+//step flags
+#define XSTEP 16
+#define YSTEP 32
+#define ZSTEP 64
+#define ESTEP 128
+//combo's
+#define XYZ_STEP 112
+#define XY_STEP 48
+#define XYZE_STEP 240
+#define E_STEP_DIRPOS 136
+#define Y_STEP_DIRPOS 34
+#define X_STEP_DIRPOS 17
+#define Z_STEP_DIRPOS 68
+
 // add pid control
 #define TEMP_PID 1
 
@@ -158,6 +181,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SPEED_MIN_MILLIS 300
 #define SPEED_MAX_MILLIS 50
 #define SPEED_MAGNIFICATION 100.0f
+
+#define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
+/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
+*/
+#define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
@@ -319,7 +347,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-#define IGNORE_COORDINATE 99999
+// Added a 9 because we are seeing printers that have steps in the 100k range
+#define IGNORE_COORDINATE 999999
 
 #undef min
 #undef max
@@ -337,6 +366,10 @@ public:
     static inline long min(long a,long b) {
         if(a<b) return a;
         return b;
+    }
+    static inline long min(long a,long b, long c) {
+      if(a<b) return a<c ? a : c;
+      return b<c ? b : c;
     }
     static inline long max(long a,long b) {
         if(a<b) return b;
@@ -358,7 +391,10 @@ public:
         if(a<b) return b;
         return a;
     }
+    static inline unsigned long absLong(long a)          {return a >= 0 ? a : -a;}
     static inline long sqr(long a) {return a*a;}
+    static inline unsigned long sqr(unsigned long a) {return a*a;}
+
     static inline float sqr(float a) {return a*a;}
 };
 

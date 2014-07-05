@@ -26,7 +26,7 @@
 
 void EEPROM::update(GCode *com)
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
     if(com->hasT() && com->hasP()) switch(com->T)
         {
         case 0:
@@ -54,7 +54,7 @@ void EEPROM::update(GCode *com)
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
     uint8_t version = EEPROM_PROTOCOL_VERSION;
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
@@ -86,7 +86,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     heatedBedController.pidDriveMax = HEATED_BED_PID_INTEGRAL_DRIVE_MAX;
     heatedBedController.pidDriveMin = HEATED_BED_PID_INTEGRAL_DRIVE_MIN;
-    heatedBedController.pidPGain = HEATED_BED_PID_PGAIN;
+    heatedBedController.pidPGain = HEATED_BED_PID_PGAIN_OR_DEAD_TIME;
     heatedBedController.pidIGain = HEATED_BED_PID_IGAIN;
     heatedBedController.pidDGain = HEATED_BED_PID_DGAIN;
     heatedBedController.pidMax = HEATED_BED_PID_MAX;
@@ -114,7 +114,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT0_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT0_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT0_PID_P;
+    e->tempControl.pidPGain = EXT0_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT0_PID_I;
     e->tempControl.pidDGain = EXT0_PID_D;
     e->tempControl.pidMax = EXT0_PID_MAX;
@@ -144,7 +144,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT1_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT1_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT1_PID_P;
+    e->tempControl.pidPGain = EXT1_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT1_PID_I;
     e->tempControl.pidDGain = EXT1_PID_D;
     e->tempControl.pidMax = EXT1_PID_MAX;
@@ -174,7 +174,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT2_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT2_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT2_PID_P;
+    e->tempControl.pidPGain = EXT2_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT2_PID_I;
     e->tempControl.pidDGain = EXT2_PID_D;
     e->tempControl.pidMax = EXT2_PID_MAX;
@@ -204,7 +204,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT3_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT3_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT3_PID_P;
+    e->tempControl.pidPGain = EXT3_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT3_PID_I;
     e->tempControl.pidDGain = EXT3_PID_D;
     e->tempControl.pidMax = EXT3_PID_MAX;
@@ -234,7 +234,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT4_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT4_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT4_PID_P;
+    e->tempControl.pidPGain = EXT4_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT4_PID_I;
     e->tempControl.pidDGain = EXT4_PID_D;
     e->tempControl.pidMax = EXT4_PID_MAX;
@@ -264,7 +264,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT5_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT5_PID_INTEGRAL_DRIVE_MIN;
-    e->tempControl.pidPGain = EXT5_PID_P;
+    e->tempControl.pidPGain = EXT5_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT5_PID_I;
     e->tempControl.pidDGain = EXT5_PID_D;
     e->tempControl.pidMax = EXT5_PID_MAX;
@@ -301,7 +301,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
-#if EEPROM_MODE!=0
+// Run if EEPROM is ON, or in INIT state.
+#if EEPROM_MODE != NO_EEPROM
     HAL::eprSetInt32(EPR_BAUDRATE,baudrate);
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
@@ -342,17 +343,19 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #else
     HAL::eprSetByte(EPR_BED_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MAX);
     HAL::eprSetByte(EPR_BED_DRIVE_MIN,HEATED_BED_PID_INTEGRAL_DRIVE_MIN);
-    HAL::eprSetFloat(EPR_BED_PID_PGAIN,HEATED_BED_PID_PGAIN);
+    HAL::eprSetFloat(EPR_BED_PID_PGAIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME);
     HAL::eprSetFloat(EPR_BED_PID_IGAIN,HEATED_BED_PID_IGAIN);
     HAL::eprSetFloat(EPR_BED_PID_DGAIN,HEATED_BED_PID_DGAIN);
     HAL::eprSetByte(EPR_BED_PID_MAX,HEATED_BED_PID_MAX);
 #endif
+    //SHOT("storeDataIntoEEPROM"); SHOWM(Printer::xMin);SHOWM(Printer::yMin);SHOWM(Printer::zMin);
     HAL::eprSetFloat(EPR_X_HOME_OFFSET,Printer::xMin);
     HAL::eprSetFloat(EPR_Y_HOME_OFFSET,Printer::yMin);
     HAL::eprSetFloat(EPR_Z_HOME_OFFSET,Printer::zMin);
     HAL::eprSetFloat(EPR_X_LENGTH,Printer::xLength);
     HAL::eprSetFloat(EPR_Y_LENGTH,Printer::yLength);
     HAL::eprSetFloat(EPR_Z_LENGTH,Printer::zLength);
+    HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, Printer::radius0);
 #if ENABLE_BACKLASH_COMPENSATION
     HAL::eprSetFloat(EPR_BACKLASH_X,Printer::backlashX);
     HAL::eprSetFloat(EPR_BACKLASH_Y,Printer::backlashY);
@@ -439,7 +442,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
 #if DRIVE_SYSTEM==DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
-    HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
+    HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,ROD_RADIUS);
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
     HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
@@ -452,16 +455,17 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
     HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
     HAL::eprSetFloat(EPR_DELTA_MAX_RADIUS,DELTA_MAX_RADIUS);
-    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_A,DELTA_DIAGONAL_CORRECTION_A);
-    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_B,DELTA_DIAGONAL_CORRECTION_B);
-    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_C,DELTA_DIAGONAL_CORRECTION_C);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_A,DELTA_DIAGONAL_CORRECTION_A);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_B,DELTA_DIAGONAL_CORRECTION_B);
+    HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_C,DELTA_DIAGONAL_CORRECTION_C);
 #endif
 }
 
 void EEPROM::readDataFromEEPROM()
 {
-#if EEPROM_MODE!=0
-    uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
+#if EEPROM_MODE == EEPROM_ON
+    // This is the saved version. Don't copy data not set in older versions!
+    uint8_t version = HAL::eprGetByte(EPR_VERSION); 
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
@@ -504,6 +508,7 @@ void EEPROM::readDataFromEEPROM()
     Printer::xLength = HAL::eprGetFloat(EPR_X_LENGTH);
     Printer::yLength = HAL::eprGetFloat(EPR_Y_LENGTH);
     Printer::zLength = HAL::eprGetFloat(EPR_Z_LENGTH);
+    Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::eprGetFloat(EPR_BACKLASH_X);
     Printer::backlashY = HAL::eprGetFloat(EPR_BACKLASH_Y);
@@ -581,7 +586,7 @@ void EEPROM::readDataFromEEPROM()
         {
 #if DRIVE_SYSTEM==DELTA
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
-            HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,DELTA_RADIUS);
+            HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,ROD_RADIUS);
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
             HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,DELTA_X_ENDSTOP_OFFSET_STEPS);
@@ -602,15 +607,29 @@ void EEPROM::readDataFromEEPROM()
         }
         if(version<7) {
             HAL::eprSetFloat(EPR_DELTA_MAX_RADIUS,DELTA_MAX_RADIUS);
-            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_A,DELTA_DIAGONAL_CORRECTION_A);
-            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_B,DELTA_DIAGONAL_CORRECTION_B);
-            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORR_C,DELTA_DIAGONAL_CORRECTION_C);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_A,DELTA_DIAGONAL_CORRECTION_A);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_B,DELTA_DIAGONAL_CORRECTION_B);
+            HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_C,DELTA_DIAGONAL_CORRECTION_C);
         }
 #endif
         if(version<7) {
             HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
         }
-
+        if (version<8) {
+#if DRIVE_SYSTEM==DELTA
+          // Prior to verion 8, the cartesian max was stored in the zmax
+          // Now, x,y and z max are used for tower a, b anc c
+          // Of tower min are all set at 0, tower max is larger than cartesian max
+          // by the height of any tower for coordinate 0,0,0
+          long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
+          cart[X_AXIS] = cart[Y_AXIS] = cart[Z_AXIS] = 0;
+          transformCartesianStepsToDeltaSteps(cart, delta);
+          // We can only count on ZLENGTH being set correctly, as it was used for all towers
+          Printer::xLength = Printer::zLength + delta[X_AXIS];
+          Printer::yLength = Printer::zLength + delta[Y_AXIS];
+          Printer::zLength += delta[Z_AXIS];
+#endif
+        }
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
@@ -620,17 +639,19 @@ void EEPROM::readDataFromEEPROM()
 
 void EEPROM::initBaudrate()
 {
-#if EEPROM_MODE!=0
+    // Invariant - baudrate is intitalized with or without eeprom!
+    baudrate = BAUDRATE;
+#if EEPROM_MODE == EEPROM_ON
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE)
     {
         baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
-    }
+    } 
 #endif
 }
 
 void EEPROM::init()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
     uint8_t check = computeChecksum();
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check)
@@ -643,12 +664,14 @@ void EEPROM::init()
         initalizeUncached();
         storeDataIntoEEPROM(storedcheck!=check);
     }
+#else
+    if (EEPROM_MODE == EEPROM_INIT) storeDataIntoEEPROM();
 #endif
 }
 
 void EEPROM::updatePrinterUsage()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
     if(Printer::filamentPrinted==0) return; // No miles only enabled
     uint32_t seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
     seconds += HAL::eprGetInt32(EPR_PRINTING_TIME);
@@ -677,7 +700,7 @@ With
 */
 void EEPROM::writeSettings()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE == EEPROM_ON
     writeLong(EPR_BAUDRATE,Com::tEPRBaudrate);
     writeFloat(EPR_PRINTING_DISTANCE,Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME,Com::tEPRPrinterActive);
@@ -739,9 +762,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_DELTA_RADIUS_CORR_A,Com::tDeltaRadiusCorrectionA);
     writeFloat(EPR_DELTA_RADIUS_CORR_B,Com::tDeltaRadiusCorrectionB);
     writeFloat(EPR_DELTA_RADIUS_CORR_C,Com::tDeltaRadiusCorrectionC);
-    writeFloat(EPR_DELTA_DIAGONAL_CORR_A,Com::tDeltaDiagonalCorrectionA);
-    writeFloat(EPR_DELTA_DIAGONAL_CORR_B,Com::tDeltaDiagonalCorrectionB);
-    writeFloat(EPR_DELTA_DIAGONAL_CORR_C,Com::tDeltaDiagonalCorrectionC);
+    writeFloat(EPR_DELTA_DIAGONAL_CORRECTION_A,Com::tDeltaDiagonalCorrectionA);
+    writeFloat(EPR_DELTA_DIAGONAL_CORRECTION_B,Com::tDeltaDiagonalCorrectionB);
+    writeFloat(EPR_DELTA_DIAGONAL_CORRECTION_C,Com::tDeltaDiagonalCorrectionC);
 #else
     writeFloat(EPR_X_MAX_ACCEL,Com::tEPRXAcceleration);
     writeFloat(EPR_Y_MAX_ACCEL,Com::tEPRYAcceleration);
@@ -772,10 +795,14 @@ void EEPROM::writeSettings()
     writeByte(EPR_BED_HEAT_MANAGER,Com::tEPRBedHeatManager);
 #if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX,Com::tEPRBedPIDDriveMax);
-    writeByte(EPR_BED_DRIVE_MIN,Com::tEPRBedPIDDriveMin);
-    writeFloat(EPR_BED_PID_PGAIN,Com::tEPRBedPGain);
-    writeFloat(EPR_BED_PID_IGAIN,Com::tEPRBedIGain);
-    writeFloat(EPR_BED_PID_DGAIN,Com::tEPRBedDGain);
+    if ( heatedBedController.heatManager == HTR_PID) {
+      writeByte(EPR_BED_DRIVE_MIN,Com::tEPRBedPIDDriveMin);
+      writeFloat(EPR_BED_PID_PGAIN,Com::tEPRBedPGain);
+      writeFloat(EPR_BED_PID_IGAIN,Com::tEPRBedIGain);
+      writeFloat(EPR_BED_PID_DGAIN,Com::tEPRBedDGain);
+    } else if ( heatedBedController.heatManager == HTR_DEADTIME) {
+      writeFloat(EPR_BED_PID_PGAIN,Com::tEPRDead);
+    }
     writeByte(EPR_BED_PID_MAX,Com::tEPRBedPISMaxValue);
 #endif
 #endif
@@ -791,10 +818,14 @@ void EEPROM::writeSettings()
         writeByte(o+EPR_EXTRUDER_HEAT_MANAGER,Com::tEPRHeatManager);
 #if TEMP_PID
         writeByte(o+EPR_EXTRUDER_DRIVE_MAX,Com::tEPRDriveMax);
-        writeByte(o+EPR_EXTRUDER_DRIVE_MIN,Com::tEPRDriveMin);
-        writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain,4);
-        writeFloat(o+EPR_EXTRUDER_PID_IGAIN,Com::tEPRIGain,4);
-        writeFloat(o+EPR_EXTRUDER_PID_DGAIN,Com::tEPRDGain,4);
+        if (e->tempControl.heatManager == HTR_PID) {
+          writeByte(o+EPR_EXTRUDER_DRIVE_MIN,Com::tEPRDriveMin);
+          writeFloat(o+EPR_EXTRUDER_PID_PGAIN,Com::tEPRPGain,4);
+          writeFloat(o+EPR_EXTRUDER_PID_IGAIN,Com::tEPRIGain,4);
+          writeFloat(o+EPR_EXTRUDER_PID_DGAIN,Com::tEPRDGain,4);
+        } else if (e->tempControl.heatManager == HTR_DEADTIME) {
+          writeFloat(o+EPR_EXTRUDER_DEADTIME,Com::tEPRDead,4);
+        }
         writeByte(o+EPR_EXTRUDER_PID_MAX,Com::tEPRPIDMaxValue);
 #endif
         writeLong(o+EPR_EXTRUDER_X_OFFSET,Com::tEPRXOffset);
@@ -817,7 +848,7 @@ void EEPROM::writeSettings()
 #endif
 }
 
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != NO_EEPROM
 
 uint8_t EEPROM::computeChecksum()
 {
