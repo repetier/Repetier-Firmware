@@ -226,7 +226,7 @@ public:
     static inline void hwSetup(void)
     {}
     // return val'val
-    static uint16_t integerSqrt(uint32_t a);
+    static uint16_t integerSqrt(int32_t a);
     /** \brief Optimized division
 
     Normally the C compiler will compute a long/long division, which takes ~670 Ticks.

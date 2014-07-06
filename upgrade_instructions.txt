@@ -10,8 +10,9 @@ http://www.repetier.com/firmware/v091/
 Once you have created a configuration with that tool, you can upload these
 configurations to the latest version and it will add all missing options and
 highlight them for inspections. Unfortuanetly this relies on a special comment
-containing configuration data, so uploading existing Configuration.h files
+conteining configuration data, so uploading existing Configuration.h files
 will not work.
+
 
 Upgrade to 0.80
 

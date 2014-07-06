@@ -140,7 +140,7 @@ void Commands::printCurrentPosition()
     Com::printF(Com::tXColon,x*(Printer::unitIsInches?0.03937:1),2);
     Com::printF(Com::tSpaceYColon,y*(Printer::unitIsInches?0.03937:1),2);
     Com::printF(Com::tSpaceZColon,z*(Printer::unitIsInches?0.03937:1),2);
-    Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]*(Printer::unitIsInches?0.03937:1),2);
+    Com::printFLN(Com::tSpaceEColon,Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3]*(Printer::unitIsInches?0.03937:1),2);
     //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
     //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
 }
@@ -164,7 +164,7 @@ void Commands::printTemperatures(bool showRaw)
     Com::printF(Com::tSpaceBAtColon,(pwm_pos[heatedBedController.pwmIndex])); // Show output of autotune when tuning!
 #endif
 #endif
-#if TEMP_PID
+#ifdef TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
 #if NUM_EXTRUDER>1
@@ -173,7 +173,7 @@ void Commands::printTemperatures(bool showRaw)
         Com::printF(Com::tSpaceT,(int)i);
         Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
-#if TEMP_PID
+#ifdef TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
@@ -455,11 +455,11 @@ void Commands::executeGCode(GCode *com)
         case 2: // CW Arc
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
         {
-            float position[Z_AXIS_ARRAY];
+            float position[3];
             Printer::realPosition(position[X_AXIS],position[Y_AXIS],position[Z_AXIS]);
             if(!Printer::setDestinationStepsFromGCode(com)) break; // For X Y Z E F
             float offset[2] = {Printer::convertToMM(com->hasI()?com->I:0),Printer::convertToMM(com->hasJ()?com->J:0)};
-            float target[E_AXIS_ARRAY] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]};
+            float target[4] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]};
             float r;
             if (com->hasR())
             {
@@ -627,7 +627,7 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == 3
                 Printer::updateCurrentPosition();
                 Printer::zLength += sum - Printer::currentPosition[Z_AXIS];
                 Printer::updateDerivedParameter();
@@ -672,7 +672,7 @@ void Commands::executeGCode(GCode *com)
         {
             GCode::executeFString(Com::tZProbeStartScript);
             //bool iterate = com->hasP() && com->P>0;
-            Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+            Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false); // iterate
             float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
@@ -698,11 +698,11 @@ void Commands::executeGCode(GCode *com)
             if(com->hasS() && com->S)
             {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
                 /* Printer::offsetX = 0;
                  Printer::offsetY = 0;
                  Printer::moveToReal(0,0,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-                     PrintLine::moveRelativeDistanceInSteps(Printer::offsetX-Printer::currentPositionSteps[X_AXIS],Printer::offsetY-Printer::currentPositionSteps[Y_AXIS],0,0,Printer::homingFeedrate[X_AXIS],true,ALWAYS_CHECK_ENDSTOPS);
+                     PrintLine::moveRelativeDistanceInSteps(Printer::offsetX-Printer::currentPositionSteps[0],Printer::offsetY-Printer::currentPositionSteps[1],0,0,Printer::homingFeedrate[0],true,ALWAYS_CHECK_ENDSTOPS);
                      Printer::offsetX = 0;
                      Printer::offsetY = 0;*/
                 Printer::zLength += (h3+z)-Printer::currentPosition[Z_AXIS];
@@ -712,7 +712,7 @@ void Commands::executeGCode(GCode *com)
 #endif
                 Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM!=3
                 Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
 #endif
 #endif
@@ -724,7 +724,7 @@ void Commands::executeGCode(GCode *com)
             Printer::updateDerivedParameter();
             Printer::updateCurrentPosition(true);
             printCurrentPosition();
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
             Printer::homeAxis(true,true,true);
 #endif
             Printer::feedrate = oldFeedrate;
@@ -753,7 +753,7 @@ void Commands::executeGCode(GCode *com)
             }
         }
         break;
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
         case 131: // Remove offset
         {
             float cx,cy,cz;
@@ -801,9 +801,9 @@ void Commands::executeGCode(GCode *com)
             Printer::coordinateOffset[X_AXIS] = 0;
             Printer::coordinateOffset[Y_AXIS] = 0;
             Printer::coordinateOffset[Z_AXIS] = 0;
-            Printer::currentDeltaPositionSteps[A_TOWER] = 0;
-            Printer::currentDeltaPositionSteps[B_TOWER] = 0;
-            Printer::currentDeltaPositionSteps[C_TOWER] = Printer::zMaxSteps;
+            Printer::currentDeltaPositionSteps[X_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Y_AXIS] = 0;
+            Printer::currentDeltaPositionSteps[Z_AXIS] = Printer::zMaxSteps;
             Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
             int32_t m = Printer::zMaxSteps*1.5;
             int32_t offx = m-Printer::stepsRemainingAtXHit;
@@ -817,13 +817,13 @@ void Commands::executeGCode(GCode *com)
             }
             break;
  /*       case 134:
-            Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
+            Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[X_AXIS]);
+            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[Y_AXIS]);
+            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
 #ifdef DEBUG_REAL_POSITION
-            Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[C_TOWER]);
+            Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[X_AXIS]);
+            Com::printF(Com::tComma,Printer::realDeltaPositionSteps[Y_AXIS]);
+            Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[Z_AXIS]);
 #endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
@@ -1132,9 +1132,9 @@ void Commands::executeGCode(GCode *com)
                 maxInactiveTime = 0;
             break;
         case 92: // M92
-            if(com->hasX()) Printer::axisStepsPerMM[X_AXIS] = com->X;
-            if(com->hasY()) Printer::axisStepsPerMM[Y_AXIS] = com->Y;
-            if(com->hasZ()) Printer::axisStepsPerMM[Z_AXIS] = com->Z;
+            if(com->hasX()) Printer::axisStepsPerMM[0] = com->X;
+            if(com->hasY()) Printer::axisStepsPerMM[1] = com->Y;
+            if(com->hasZ()) Printer::axisStepsPerMM[2] = com->Z;
             Printer::updateDerivedParameter();
             if(com->hasE())
             {
@@ -1228,19 +1228,19 @@ void Commands::executeGCode(GCode *com)
                 beep(com->S,com->P); // Beep test
             break;
 #endif
-#if RAMP_ACCELERATION
+#ifdef RAMP_ACCELERATION
         case 201: // M201
-            if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = com->X;
-            if(com->hasY()) Printer::maxAccelerationMMPerSquareSecond[Y_AXIS] = com->Y;
-            if(com->hasZ()) Printer::maxAccelerationMMPerSquareSecond[Z_AXIS] = com->Z;
-            if(com->hasE()) Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = com->E;
+            if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[0] = com->X;
+            if(com->hasY()) Printer::maxAccelerationMMPerSquareSecond[1] = com->Y;
+            if(com->hasZ()) Printer::maxAccelerationMMPerSquareSecond[2] = com->Z;
+            if(com->hasE()) Printer::maxAccelerationMMPerSquareSecond[3] = com->E;
             Printer::updateDerivedParameter();
             break;
         case 202: // M202
-            if(com->hasX()) Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS] = com->X;
-            if(com->hasY()) Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = com->Y;
-            if(com->hasZ()) Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = com->Z;
-            if(com->hasE()) Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = com->E;
+            if(com->hasX()) Printer::maxTravelAccelerationMMPerSquareSecond[0] = com->X;
+            if(com->hasY()) Printer::maxTravelAccelerationMMPerSquareSecond[1] = com->Y;
+            if(com->hasZ()) Printer::maxTravelAccelerationMMPerSquareSecond[2] = com->Z;
+            if(com->hasE()) Printer::maxTravelAccelerationMMPerSquareSecond[3] = com->E;
             Printer::updateDerivedParameter();
             break;
 #endif
@@ -1287,7 +1287,7 @@ void Commands::executeGCode(GCode *com)
                 Extruder::current->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(Extruder::current->id);
             }
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM!=3
             if(com->hasZ())
                 Printer::maxZJerk = com->Z;
             Com::printF(Com::tJerkColon,Printer::maxJerk);
@@ -1302,7 +1302,7 @@ void Commands::executeGCode(GCode *com)
         case 221: // M221 S<Extrusion flow multiplier in percent>
             changeFlowateMultiply(com->getS(100));
             break;
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
         case 223: // Extruder interrupt test
             if(com->hasS())
             {
@@ -1313,23 +1313,23 @@ void Commands::executeGCode(GCode *com)
             break;
         case 232:
             Com::printF(Com::tLinearStepsColon,maxadv2);
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
             Com::printF(Com::tQuadraticStepsColon,maxadv);
 #endif
             Com::printFLN(Com::tCommaSpeedEqual,maxadvspeed);
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
             maxadv=0;
 #endif
             maxadv2=0;
             maxadvspeed=0;
             break;
 #endif
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
         case 233:
             if(com->hasY())
                 Extruder::current->advanceL = com->Y;
             Com::printF(Com::tLinearLColon,Extruder::current->advanceL);
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
             if(com->hasX())
                 Extruder::current->advanceK = com->X;
             Com::printF(Com::tQuadraticKColon,Extruder::current->advanceK);
@@ -1501,9 +1501,9 @@ void Commands::executeGCode(GCode *com)
             Com::printF(Com::tComma,Printer::currentPositionSteps[Y_AXIS]);
             Com::printFLN(Com::tComma,Printer::currentPositionSteps[Z_AXIS]);
 #if NONLINEAR_SYSTEM
-            Com::printF(PSTR("Nonlin. position steps:"),Printer::currentDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
+            Com::printF(PSTR("Nonlin. position steps:"),Printer::currentDeltaPositionSteps[X_AXIS]);
+            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[Y_AXIS]);
+            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[Z_AXIS]);
 #endif // NONLINEAR_SYSTEM
             break;*/
         }

@@ -171,14 +171,14 @@ void GCode::checkAndPushCommand()
     {
         if((((lastLineNumber+1) & 0xffff)!=(actLineNumber&0xffff)))
         {
-            if(static_cast<uint16_t>(lastLineNumber - actLineNumber) < 40)
-            {
+            if(static_cast<uint16_t>(lastLineNumber - actLineNumber) < 40) {
                 // we have seen that line already. So we assume it is a repeated resend and we ignore it
                 commandsReceivingWritePosition = 0;
                 Com::printFLN(Com::tSkip,actLineNumber);
                 Com::printFLN(Com::tOk);
             }
-            else if(waitingForResend<0)  // after a resend, we have to skip the garbage in buffers, no message for this
+            else
+            if(waitingForResend<0)   // after a resend, we have to skip the garbage in buffers, no message for this
             {
                 if(Printer::debugErrors())
                 {
@@ -288,7 +288,7 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
         if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
         {
 #ifdef DEBUG_PRINT
-            debugWaitLoop = 7;
+    debugWaitLoop = 7;
 #endif
 
             Commands::executeGCode(&code);
@@ -623,167 +623,134 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 bool GCode::parseAscii(char *line,bool fromSerial)
 {
     bool has_checksum = false;
-    char *pos = line;
+    char *pos;
     params = 0;
     params2 = 0;
-    char c;
-    while (c = *(pos++))
+    if((pos = strchr(line,'N'))!=0)   // Line number detected
     {
-        switch(c)
+        actLineNumber = parseLongValue(++pos);
+        params |=1;
+        N = actLineNumber & 0xffff;
+    }
+    if((pos = strchr(line,'M'))!=0)   // M command
+    {
+        M = parseLongValue(++pos) & 0xffff;
+        params |= 2;
+        if(M>255) params |= 4096;
+    }
+    if(hasM() && (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117))
+    {
+        // after M command we got a filename for sd card management
+        char *sp = line;
+        while(*sp!='M') sp++; // Search M command
+        while(*sp!=' ') sp++; // search next whitespace
+        while(*sp==' ') sp++; // skip leading whitespaces
+        text = sp;
+        while(*sp)
         {
-        case 'N':
-        case 'n':
-        {
-            actLineNumber = parseLongValue(pos);
-            params |=1;
-            N = actLineNumber;
-            break;
+            if((M != 117 && *sp==' ') || *sp=='*') break; // end of filename reached
+            sp++;
         }
-        case 'G':
-        case 'g':
+        *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
+        waitUntilAllCommandsAreParsed = true; // don't risk string be deleted
+        params |= 32768;
+    }
+    else
+    {
+        if((pos = strchr(line,'G'))!=0)   // G command
         {
-            G = parseLongValue(pos) & 0xffff;
+            G = parseLongValue(++pos) & 0xffff;
             params |= 4;
-            if(G > 255) params |= 4096;
-            break;
+            if(G>255) params |= 4096;
         }
-        case 'M':
-        case 'm':
+        if((pos = strchr(line,'X'))!=0)
         {
-            M = parseLongValue(pos) & 0xffff;
-            params |=2;
-            if(M > 255) params |= 4096;
-            // handle non standard text arguments that some M codes have
-            if (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117)
-            {
-                // after M command we got a filename or text
-                char digit;
-                while( digit = *pos )
-                {
-                    if (digit < '0' || digit > '9') break;
-                    pos++;
-                }
-                while(digit = *pos)
-                {
-                    if (digit != ' ') break;
-                    pos++;
-                    // skip leading whitespaces (may be no white space)
-                }
-                text = pos;
-                while (*pos)
-                {
-                    if((M != 117 && *pos==' ') || *pos=='*') break;
-                    pos++; // find a space as file name end
-                }
-                *pos = 0; // truncate filename by erasing space with nul, also skips checksum
-                waitUntilAllCommandsAreParsed = true; // don't risk string be deleted
-                params |= 32768;
-            }
-            break;
-        }
-        case 'X':
-        case 'x':
-        {
-            X = parseFloatValue(pos);
+            X = parseFloatValue(++pos);
             params |= 8;
-            break;
         }
-        case 'Y':
-        case 'y':
+        if((pos = strchr(line,'Y'))!=0)
         {
-            Y = parseFloatValue(pos);
+            Y = parseFloatValue(++pos);
             params |= 16;
-            break;
         }
-        case 'Z':
-        case 'z':
+        if((pos = strchr(line,'Z'))!=0)
         {
-            Z = parseFloatValue(pos);
+            Z = parseFloatValue(++pos);
             params |= 32;
-            break;
         }
-        case 'E':
-        case 'e':
+        if((pos = strchr(line,'E'))!=0)
         {
-            E = parseFloatValue(pos);
+            E = parseFloatValue(++pos);
             params |= 64;
-            break;
         }
-        case 'F':
-        case 'f':
+        if((pos = strchr(line,'F'))!=0)
         {
-            F = parseFloatValue(pos);
+            F = parseFloatValue(++pos);
             params |= 256;
-            break;
         }
-        case 'T':
-        case 't':
+        if((pos = strchr(line,'T'))!=0)   // M command
         {
-            T = parseLongValue(pos) & 0xff;
+            T = parseLongValue(++pos) & 0xff;
             params |= 512;
-            break;
         }
-        case 'S':
-        case 's':
+        if((pos = strchr(line,'S'))!=0)   // M command
         {
-            S = parseLongValue(pos);
+            S = parseLongValue(++pos);
             params |= 1024;
-            break;
         }
-        case 'P':
-        case 'p':
+        if((pos = strchr(line,'P'))!=0)   // M command
         {
-            P = parseLongValue(pos);
+            P = parseLongValue(++pos);
             params |= 2048;
-            break;
         }
-        case 'I':
-        case 'i':
+        if((pos = strchr(line,'I'))!=0)
         {
-            I = parseFloatValue(pos);
+            I = parseFloatValue(++pos);
             params2 |= 1;
             params |= 4096; // Needs V2 for saving
-            break;
         }
-        case 'J':
-        case 'j':
+        if((pos = strchr(line,'J'))!=0)
         {
-            J = parseFloatValue(pos);
+            J = parseFloatValue(++pos);
             params2 |= 2;
             params |= 4096; // Needs V2 for saving
-            break;
         }
-        case 'R':
-        case 'r':
+        if((pos = strchr(line,'R'))!=0)
         {
-            R = parseFloatValue(pos);
+            R = parseFloatValue(++pos);
             params2 |= 4;
             params |= 4096; // Needs V2 for saving
-            break;
         }
-        case '*' : //checksum
-        {
-            uint8_t checksum_given = parseLongValue(pos);
-            uint8_t checksum = 0;
-            while(line != (pos-1)) checksum ^= *line++;
+    }
+    if((pos = strchr(line,'*'))!=0)   // checksum
+    {
+        uint8_t checksum_given = parseLongValue(pos+1);
+        uint8_t checksum = 0;
+        while(line!=pos) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
-            Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
+        Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
 #endif
-            if(checksum != checksum_given)
+        if(checksum!=checksum_given)
+        {
+            if(Printer::debugErrors())
             {
-                if(Printer::debugErrors())
-                {
-                    Com::printErrorFLN(Com::tWrongChecksum);
-                }
-                return false; // mismatch
+                Com::printErrorFLN(Com::tWrongChecksum);
             }
-            break;
+            return false; // mismatch
         }
-        default:
-            break;
-        }// end switch
-    }// end while
-
+    }
+#if FEATURE_CHECKSUM_FORCED
+    else
+    {
+        if(!fromSerial) return true;
+        if(hasM() && (M == 110 || hasString())) return true;
+        if(Printer::debugErrors())
+        {
+            Com::printErrorFLN(Com::tMissingChecksum);
+        }
+        return false;
+    }
+#endif
     if(hasFormatError() || (params & 518)==0)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;

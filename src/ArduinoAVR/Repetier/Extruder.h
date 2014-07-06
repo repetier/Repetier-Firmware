@@ -3,7 +3,7 @@
 
 #define CELSIUS_EXTRA_BITS 3
 
-//#if TEMP_PID
+//#ifdef TEMP_PID
 //extern uint8_t current_extruder_out;
 //#endif
 
@@ -29,7 +29,7 @@ class TemperatureController
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
     int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
-#if TEMP_PID
+#ifdef TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
     uint8_t pidDriveMin; ///< Used for windup in PID calculation.
@@ -49,7 +49,7 @@ class TemperatureController
     void updateTempControlVars();
     inline bool isAlarm() {return flags & TEMPERATURE_CONTROLLER_FLAG_ALARM;}
     inline void setAlarm(bool on) {if(on) flags |= TEMPERATURE_CONTROLLER_FLAG_ALARM; else flags &= ~TEMPERATURE_CONTROLLER_FLAG_ALARM;}
-#if TEMP_PID
+#ifdef TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,bool storeResult);
 #endif
 };
@@ -85,8 +85,8 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
     int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
     int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     float advanceK;         ///< Koefficient for advance algorithm. 0 = off
 #endif
     float advanceL;

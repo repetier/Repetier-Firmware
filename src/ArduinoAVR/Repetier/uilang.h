@@ -594,7 +594,7 @@
 #define UI_TEXT_OFF              "Off"
 #define UI_TEXT_NA               "N/A" // Output for not available
 #define UI_TEXT_YES              "Sim"
-#define UI_TEXT_NO               "Não"
+#define UI_TEXT_NO               "NÃ£o"
 #define UI_TEXT_SEL              "\003"
 #define UI_TEXT_NOSEL            "\004"
 #define UI_TEXT_PRINT_POS        "Imprimindo..."
@@ -1179,7 +1179,7 @@
 #define UI_TEXT_STRING_ACTION     "Aktion:%la"
 #define UI_TEXT_HEATING_EXTRUDER  "V" STR_auml "rmer Extruder"
 #define UI_TEXT_HEATING_BED       "V" STR_auml "rmer B" STR_auml "dd"
-#define UI_TEXT_KILLED            "D" STR_ouml "ödad"
+#define UI_TEXT_KILLED            "D" STR_ouml "Ã¶dad"
 #define UI_TEXT_STEPPER_DISABLED  "Stegmotorer av"
 #define UI_TEXT_EEPROM_STORED     "Konfiguration","sparad i EEPROM"
 #define UI_TEXT_EEPROM_LOADED     "Konfiguration","laddat fr. EEPROM"

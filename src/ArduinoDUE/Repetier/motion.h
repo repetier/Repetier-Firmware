@@ -53,15 +53,14 @@
 // Printing related data
 #if NONLINEAR_SYSTEM
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
-// DELTASEGMENTS_PER_PRINTLINE *
-#define DELTA_CACHE_SIZE (DELTASEGMENTS_PER_PRINTLINE * PRINTLINE_CACHE_SIZE)
+// MAX_DELTA_SEGMENTS_PER_LINE *
+#define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
 
 class PrintLine;
-
 typedef struct
 {
     flag8_t dir; 									///< Direction of delta movement.
-    uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
+    uint16_t deltaSteps[3];   				    ///< Number of steps in move.
     inline void checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
@@ -176,8 +175,8 @@ private:
     int32_t timeInTicks;
     flag8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
     flag8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
-    int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
-    int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
+    int32_t delta[4];                  ///< Steps we want to move.
+    int32_t error[4];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
     float speedY;                   ///< Speed in y direction at fullInterval in mm/s
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
@@ -194,7 +193,7 @@ private:
     uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
     uint8_t moveID;					///< ID used to identify moves which are all part of the same line
     int32_t numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
-    DeltaSegment segments[DELTASEGMENTS_PER_PRINTLINE];
+    DeltaSegment segments[MAX_DELTA_SEGMENTS_PER_LINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -204,8 +203,8 @@ private:
     speed_t vMax;              ///< Maximum reached speed in steps/s.
     speed_t vStart;            ///< Starting speed in steps/s.
     speed_t vEnd;              ///< End speed in steps/s
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     int32_t advanceRate;               ///< Advance steps at full speed
     int32_t advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
     int32_t advanceStart;
@@ -328,7 +327,7 @@ public:
     }
     inline void setXMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM==0 || NONLINEAR_SYSTEM
         dir&=~16;
 #else
         dir&=~48;
@@ -336,7 +335,7 @@ public:
     }
     inline void setYMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM==0 || NONLINEAR_SYSTEM
         dir&=~32;
 #else
         dir&=~48;
@@ -433,9 +432,9 @@ public:
     }
     inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
     {
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         long advanceTarget = Printer::advanceExecuted;
         if(accelerate)
         {
@@ -497,14 +496,14 @@ public:
     inline void startXStep()
     {
         ANALYZER_ON(ANALYZER_CH6);
-#if !(GANTRY)
+#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM==1
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -516,7 +515,7 @@ public:
             Printer::motorY--;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM==2
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -537,14 +536,14 @@ public:
     inline void startYStep()
     {
         ANALYZER_ON(ANALYZER_CH7);
-#if !(GANTRY)
+#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
         ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM==1
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -556,7 +555,7 @@ public:
             Printer::motorY++;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM==2
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -568,7 +567,7 @@ public:
             Printer::motorY--;
         }
 #endif
-#endif // GANTRY
+#endif // XY_GANTRY
 #ifdef DEBUG_STEPCOUNT
         totalStepsRemaining--;
 #endif
@@ -607,7 +606,7 @@ public:
     static inline void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
-        if(linesPos>=PRINTLINE_CACHE_SIZE) linesPos=0;
+        if(linesPos>=MOVE_CACHE_SIZE) linesPos=0;
         cur = NULL;
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
@@ -620,7 +619,7 @@ public:
     static inline void pushLine()
     {
         linesWritePos++;
-        if(linesWritePos>=PRINTLINE_CACHE_SIZE) linesWritePos = 0;
+        if(linesWritePos>=MOVE_CACHE_SIZE) linesWritePos = 0;
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
         BEGIN_INTERRUPT_PROTECTED
         linesCount++;
@@ -645,11 +644,11 @@ public:
 #endif
     static inline void previousPlannerIndex(uint8_t &p)
     {
-        p = (p ? p-1 : PRINTLINE_CACHE_SIZE-1);
+        p = (p ? p-1 : MOVE_CACHE_SIZE-1);
     }
     static inline void nextPlannerIndex(uint8_t& p)
     {
-        p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
+        p = (p == MOVE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
     static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
@@ -657,7 +656,7 @@ public:
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING
+#ifdef SOFTWARE_LEVELING && DRIVE_SYSTEM==3
     static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
     static float calcZOffset(long factors[], long pointX, long pointY);
 #endif

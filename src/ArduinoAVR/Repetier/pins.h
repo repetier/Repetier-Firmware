@@ -421,8 +421,8 @@ STEPPER_CURRENT_CONTROL
 #define MAX6675_SS       53
 
 #ifdef AZTEEG_X3
-#define SDSUPPORT 1
-#define SDCARDDETECTINVERTED 0
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
 #define SDCARDDETECT 49
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
@@ -440,6 +440,7 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_3_PIN          12  // Only available with X3 shield
 #define HEATER_4_PIN        16  // Only available with X3 shield
 #define TEMP_4_PIN          5 //11  // Only available with X3 shield
+
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
@@ -899,7 +900,7 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          7
 #define MISO_PIN         6
 #define MOSI_PIN         5
-#define SDSUPPORT 1  // sd card reader on board
+#define SDSUPPORT true  // sd card reader on board
 #define SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
@@ -1170,7 +1171,7 @@ STEPPER_CURRENT_CONTROL
 #define PS_ON_PIN 15
 
 #define LED_PIN -1
-#define SDSUPPORT 1  // sd card reader on board
+#define SDSUPPORT true  // sd card reader on board
 #define SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
@@ -1224,7 +1225,7 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
 
-#if !SDSUPPORT
+#ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1284,7 +1285,7 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 
-#if !SDSUPPORT
+#ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1339,7 +1340,7 @@ STEPPER_CURRENT_CONTROL
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
-#if !SDSUPPORT
+#ifndef SDSUPPORT
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          21
 #define MISO_PIN         23
@@ -1370,7 +1371,7 @@ STEPPER_CURRENT_CONTROL
 // On board beeper, so define values already here
 #define BEEPER_PIN 23
 #define BEEPER_TYPE 1
-#define SDSUPPORT 1  // sd card reader on board
+#define SDSUPPORT true  // sd card reader on board
 #define SDCARDDETECT -1
 
 // digital pin mappings
@@ -1491,7 +1492,7 @@ STEPPER_CURRENT_CONTROL
 
 #define BEEPER_PIN 33			// Beeper on AUX-4
 #define BEEPER_TYPE 1
-#define SDSUPPORT 1  // sd card reader on board
+#define SDSUPPORT true  // sd card reader on board
 #define SDCARDDETECT -1
 
 
@@ -1588,8 +1589,8 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER            1
 #define SDSS               53
 #define SDCARDDETECT 	   6
-#define SDSUPPORT 1            // already defined in config.h
-#define SDCARDDETECTINVERTED 1 // already defined in config.h
+#define SDSUPPORT true            // already defined in config.h
+#define SDCARDDETECTINVERTED true // already defined in config.h
 
 // these pins are defined in the SD library if building with SD support
 #define SCK_PIN          52	// PINB.1, 20, SCK
@@ -1977,7 +1978,7 @@ S3(ext)=9
 #endif
 #if MOTHERBOARD == 314
 #define KNOWN_BOARD 1
-#define PiBot 1
+#define PiBot true
 #ifndef __AVR_ATmega1280__
 #ifndef __AVR_ATmega2560__
 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
@@ -2099,8 +2100,8 @@ S3(ext)=9
 #define MISO_PIN         50
 #define MOSI_PIN         51
 
-#define SDSUPPORT 1
-#define SDCARDDETECTINVERTED 0
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED false
 
 #endif   ///////******end  PiBot for Repetier
 
@@ -2242,7 +2243,7 @@ S3(ext)=9
 #define FAN2_PIN ORIG_FAN2_PIN
 
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
+#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, ORIG_X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
                         HEATER_0_PIN, HEATER_1_PIN, ORIG_FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
 

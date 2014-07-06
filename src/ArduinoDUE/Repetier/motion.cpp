@@ -62,8 +62,8 @@
 #if EXT0_DIR_PIN<0 && NUM_EXTRUDER>0
 #error EXT0_DIR_PIN not set to a pin number.
 #endif
-#if PRINTLINE_CACHE_SIZE<4
-#error PRINTLINE_CACHE_SIZE must be at least 5
+#if MOVE_CACHE_SIZE<4
+#error MOVE_CACHE_SIZE must be at least 5
 #endif
 
 //Inactivity shutdown variables
@@ -71,8 +71,8 @@ millis_t previousMillisCmd = 0;
 millis_t maxInactiveTime = MAX_INACTIVE_TIME*1000L;
 millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
 long baudrate = BAUDRATE;         ///< Communication speed rate.
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
 int maxadv = 0;
 #endif
 int maxadv2 = 0;
@@ -81,7 +81,7 @@ float maxadvspeed = 0;
 uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
-PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE]; ///< Cache for print moves.
+PrintLine PrintLine::lines[MOVE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
 #if CPU_ARCH==ARCH_ARM
 volatile bool PrintLine::nlFlag = false;
@@ -180,7 +180,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
     {
         waitForXFreeLines(2);
         uint8_t wpos2 = linesWritePos+1;
-        if(wpos2>=PRINTLINE_CACHE_SIZE) wpos2 = 0;
+        if(wpos2>=MOVE_CACHE_SIZE) wpos2 = 0;
         PrintLine *p2 = &lines[wpos2];
         memcpy(p2,p,sizeof(PrintLine)); // Move current data to p2
         uint8_t changed = (p->dir & 7)^(Printer::backlashDir & 7);
@@ -235,9 +235,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
 {
 #if NONLINEAR_SYSTEM
-    long axisInterval[VIRTUAL_AXIS_ARRAY]; // shortest interval possible for that axis
+    long axisInterval[5]; // shortest interval possible for that axis
 #else
-    long axisInterval[E_AXIS_ARRAY];
+    long axisInterval[4];
 #endif
     float timeForMove = (float)(F_CPU)*distance / (isXOrYMove() ? RMath::max(Printer::minimumSpeed,Printer::feedrate): Printer::feedrate); // time is in ticks
     bool critical = Printer::isZProbingActive();
@@ -329,7 +329,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     fullSpeed = distance * inv_time_s;
     //long interval = axis_interval[primary_axis]; // time for every step in ticks with full speed
     //If acceleration is enabled, do some Bresenham calculations depending on which axis will lead it.
-#if RAMP_ACCELERATION
+#ifdef RAMP_ACCELERATION
     // slowest time to accelerate from v0 to limitInterval determines used acceleration
     // t = (v_end-v_start)/a
     float slowest_axis_plateau_time_repro = 1e15; // repro to reduce division Unit: 1/s
@@ -342,7 +342,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     }
     // Errors for delta move are initialized in timer (except extruder)
 #if !NONLINEAR_SYSTEM
-    error[X_AXIS] = error[Y_AXIS] = error[Z_AXIS] = delta[primaryAxis] >> 1;
+    error[0] = error[1] = error[2] = delta[primaryAxis] >> 1;
 #endif
 #if NONLINEAR_SYSTEM
     error[E_AXIS] = stepsRemaining >> 1;
@@ -361,10 +361,10 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     // if(p->vMax>46000)  // gets overflow in N computation
     //   p->vMax = 46000;
     //p->plateauN = (p->vMax*p->vMax/p->accelerationPrim)>>1;
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
     if(!isXYZMove() || !isEMove())
     {
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         advanceRate = 0; // No head move or E move only or sucking filament back
         advanceFull = 0;
 #endif
@@ -374,7 +374,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     {
         float advlin = fabs(speedE)*Extruder::current->advanceL*0.001*Printer::axisStepsPerMM[E_AXIS];
         advanceL = (uint16_t)((65536L*advlin)/vMax); //advanceLscaled = (65536*vE*k2)/vMax
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE;
         advanceFull = 65536*Extruder::current->advanceK * speedE * speedE; // Steps*65536 at full speed
         long steps = (HAL::U16SquaredToU32(vMax))/(accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
         advanceRate = advanceFull/steps;
@@ -396,8 +396,8 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     // how much steps on primary axis do we need to reach target feedrate
     //p->plateauSteps = (long) (((float)p->acceleration *0.5f / slowest_axis_plateau_time_repro + p->vMin) *1.01f/slowest_axis_plateau_time_repro);
 #else
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     advanceRate = 0; // No advance for constant speeds
     advanceFull = 0;
 #endif
@@ -461,7 +461,7 @@ void PrintLine::updateTrapezoids()
     // Now ignore enough segments to gain enough time for path planning
     int32_t timeleft = 0;
     // Skip as many stored moves as needed to gain enough time for computation
-    millis_t minTime = 4500L * RMath::min(PRINTLINE_CACHE_SIZE,10);
+    millis_t minTime = 4500L * RMath::min(MOVE_CACHE_SIZE,10);
     while(timeleft < minTime && maxfirst != linesWritePos)
     {
         timeleft += lines[maxfirst].timeInTicks;
@@ -491,7 +491,7 @@ void PrintLine::updateTrapezoids()
     uint8_t previousIndex = linesWritePos;
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != 3
     // filters z-move<->not z-move
     if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
     {
@@ -533,7 +533,7 @@ void PrintLine::updateTrapezoids()
 
 inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current)
 {
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
     if(Printer::isAdvanceActivated())
     {
         if(previous->isEMove() != current->isEMove() && (previous->isXOrYMove() || current->isXOrYMove()))
@@ -561,7 +561,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
     float dx = current->speedX-previous->speedX;
     float dy = current->speedY-previous->speedY;
     float factor = 1;
-#if (DRIVE_SYSTEM==DELTA) // No point computing Z Jerk separately for delta moves
+#if (DRIVE_SYSTEM == 3) // No point computing Z Jerk separately for delta moves
     float dz = current->speedZ-previous->speedZ;
     float jerk = sqrt(dx*dx + dy*dy + dz*dz);
 #else
@@ -569,7 +569,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous,PrintLine *cu
 #endif
     if(jerk>Printer::maxJerk)
         factor = Printer::maxJerk / jerk;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM!=3
     if((previous->dir | current->dir) & 64)
     {
         float dz = fabs(current->speedZ - previous->speedZ);
@@ -611,8 +611,8 @@ void PrintLine::updateStepsParameter()
     decelSteps = ((vmax2 - static_cast<uint64_t>(vEnd) * static_cast<uint64_t>(vEnd))  /(accelerationPrim<<1)) + 1;
 #endif
 
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     advanceStart = (float)advanceFull*startFactor * startFactor;
     advanceEnd   = (float)advanceFull*endFactor   * endFactor;
 #endif
@@ -772,7 +772,7 @@ void PrintLine::forwardPlanner(uint8_t first)
 inline float PrintLine::safeSpeed()
 {
     float safe(Printer::maxJerk * 0.5);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != 3
     if(isZMove())
     {
         if(primaryAxis == Z_AXIS)
@@ -843,8 +843,8 @@ void PrintLine::logLine()
     Com::printFLN(Com::tDBGAcceleration,accelerationDistance2);
     Com::printFLN(Com::tDBGAccelerationPrim,(long)accelerationPrim);
     Com::printFLN(Com::tDBGRemainingSteps,stepsRemaining);
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
     Com::printFLN(Com::tDBGAdvanceFull,advanceFull>>16);
     Com::printFLN(Com::tDBGAdvanceRate,advanceRate);
 #endif
@@ -854,7 +854,7 @@ void PrintLine::logLine()
 
 void PrintLine::waitForXFreeLines(uint8_t b)
 {
-    while(linesCount+b>PRINTLINE_CACHE_SIZE)   // wait for a free entry in movement cache
+    while(linesCount+b>MOVE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
         GCode::readFromSerial();
         Commands::checkForPeriodicalActions();
@@ -862,7 +862,7 @@ void PrintLine::waitForXFreeLines(uint8_t b)
 }
 
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == 3
 /**
   Calculate the delta tower position from a cartesian position
   @param cartesianPosSteps Array containing cartesian coordinates.
@@ -877,7 +877,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         float opt = Printer::deltaDiagonalStepsSquaredA.f - temp * temp;
         float temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[A_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+            deltaPosSteps[X_AXIS] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
         else
             return 0;
 
@@ -885,7 +885,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         opt = Printer::deltaDiagonalStepsSquaredB.f - temp * temp;
         temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
-            deltaPosSteps[B_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+            deltaPosSteps[Y_AXIS] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
         else
             return 0;
 
@@ -893,69 +893,21 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         opt = Printer::deltaDiagonalStepsSquaredC.f - temp * temp;
         temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
-            deltaPosSteps[C_TOWER] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
+            deltaPosSteps[Z_AXIS] = floor(0.5+sqrt(temp) + cartesianPosSteps[Z_AXIS]);
         else
             return 0;
         return 1;
     }
     else
     {
-      // As we are right on the edge of many printers arm lengths, this is rewrittent to use unsigned long
-      // This allows 52% longer arms to be used without performance penalty
-      // the code is a bit longer, because we cannot use negative to test for invalid conditions
-      // Also, previous code did not check for overflow of squared result
-      // Overflow is also detected as a fault condition
-
-        const unsigned long LIMIT = 65534; // Largest squarable int without overflow;
-
-        // A TOWER height
-        unsigned long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
-        unsigned long opt = Printer::deltaDiagonalStepsSquaredA.l;
-        if (opt < temp) return 0;
-        opt -= temp;
-        temp = Printer::deltaAPosXSteps - cartesianPosSteps[A_TOWER];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[A_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
-
-        // B TOWER height
-        temp = Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
-        opt = Printer::deltaDiagonalStepsSquaredB.l;
-        if (opt < temp) return 0;
-        opt -= temp;
-
-        temp = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
-        if (temp > LIMIT) return 0;
-        temp *= temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[B_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
-
-        // C TOWER height
-        temp = Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS];
-        if (temp > LIMIT) return 0;
-        temp = temp * temp;
-        opt = Printer::deltaDiagonalStepsSquaredC.l ;
-        if ( opt < temp ) return 0;
-
-        temp = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
-        if (temp > LIMIT) return 0;
-        temp = temp * temp;
-        if ( opt < temp ) return 0;
-        deltaPosSteps[C_TOWER] = SQRT(opt - temp) + cartesianPosSteps[Z_AXIS];
-/*
         long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         long opt = Printer::deltaDiagonalStepsSquaredA.l - temp * temp;
         long temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2 * temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[A_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[X_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
 #else
-            deltaPosSteps[A_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[X_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 #endif
         else
             return 0;
@@ -965,9 +917,9 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         temp2 = Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[B_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[Y_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
 #else
-            deltaPosSteps[B_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[Y_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 #endif
         else
             return 0;
@@ -977,18 +929,18 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         temp2 = Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS];
         if ((temp = opt - temp2*temp2) >= 0)
 #ifdef FAST_INTEGER_SQRT
-            deltaPosSteps[C_TOWER] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[Z_AXIS] = HAL::integerSqrt(temp) + cartesianPosSteps[Z_AXIS];
 #else
-            deltaPosSteps[C_TOWER] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
+            deltaPosSteps[Z_AXIS] = sqrt(temp) + cartesianPosSteps[Z_AXIS];
 #endif
         else
-            return 0;*/
+            return 0;
     }
     return 1;
 }
 #endif
 
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM==4
 
 /**
   Calculate the delta tower position from a cartesian position
@@ -1052,7 +1004,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             return;
         }
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
         if(isZPositiveMove() && isXPositiveMove() && isYPositiveMove() && (Printer::isXMaxEndstopHit() || Printer::isYMaxEndstopHit() || Printer::isZMaxEndstopHit()))
 #else
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
@@ -1070,7 +1022,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     {
         if(isXPositiveMove() && Printer::isXMaxEndstopHit())
         {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
             Printer::stepsRemainingAtXHit = cur->stepsRemaining;
 #endif
             setXMoveFinished();
@@ -1078,7 +1030,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
         }
         if(isYPositiveMove() && Printer::isYMaxEndstopHit())
         {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM==3
             Printer::stepsRemainingAtYHit = cur->stepsRemaining;
 #endif
             setYMoveFinished();
@@ -1094,7 +1046,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setYMoveFinished();
             cur->setYMoveFinished();
         }
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM!=3
         if(isXNegativeMove() && Printer::isXMinEndstopHit())
         {
             setXMoveFinished();
@@ -1150,10 +1102,10 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
 {
     uint8_t i;
     long delta,diff;
-    long destinationSteps[Z_AXIS_ARRAY], destinationDeltaSteps[TOWER_ARRAY];
+    long destinationSteps[3], destinationDeltaSteps[3];
     // Save current position
 #if CPU_ARCH == ARCH_AVR && !defined(EXACT_DELTA_MOVES)
-    for(uint8_t i = 0; i < Z_AXIS_ARRAY; i++)
+    for(uint8_t i = 0; i < NUM_AXIS - 1; i++)
         destinationSteps[i] = Printer::currentPositionSteps[i];
 #else
     float dx[3];
@@ -1172,7 +1124,7 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
         float segment = static_cast<float>(numDeltaSegments-s+1);
 #endif
         DeltaSegment *d = &segments[s-1];
-        for(i=0; i < Z_AXIS_ARRAY; i++) // End of segment in cartesian steps
+        for(i=0; i < NUM_AXIS - 1; i++) // End of segment in cartesian steps
         {
 #if CPU_ARCH == ARCH_AVR && !defined(EXACT_DELTA_MOVES)
             // This method generates small waves which get larger with increasing number of delta segments.
@@ -1196,7 +1148,7 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
         if (transformCartesianStepsToDeltaSteps(destinationSteps, destinationDeltaSteps))
         {
             d->dir = 0;
-            for(i=0; i < TOWER_ARRAY; i++)
+            for(i=0; i < NUM_AXIS - 1; i++)
             {
                 if (softEndstop && destinationDeltaSteps[i] > Printer::maxDeltaPositionSteps)
                     destinationDeltaSteps[i] = Printer::maxDeltaPositionSteps;
@@ -1232,11 +1184,11 @@ inline uint16_t PrintLine::calculateDeltaSubSegments(uint8_t softEndstop)
             // Illegal position - ignore move
             Com::printWarningFLN(Com::tInvalidDeltaCoordinate);
             d->dir = 0;
-            d->deltaSteps[A_TOWER] = d->deltaSteps[B_TOWER] = d->deltaSteps[C_TOWER] = 0;
+            d->deltaSteps[X_AXIS] = d->deltaSteps[Y_AXIS] = d->deltaSteps[Z_AXIS] = 0;
         }
     }
 #ifdef DEBUG_STEPCOUNT
-//		out.println_long_P(PSTR("initial StepsRemaining:"), p->totalStepsRemaining);
+//		out.println_long_P(PSTR("totalStepsRemaining:"), p->totalStepsRemaining);
 #endif
     return max_axis_move;
 }
@@ -1269,7 +1221,7 @@ uint8_t PrintLine::calculateDistance(float axisDiff[], uint8_t dir, float *dista
     }
 }
 
-#if SOFTWARE_LEVELING
+#ifdef SOFTWARE_LEVELING && DRIVE_SYSTEM==3
 void PrintLine::calculatePlane(long factors[], long p1[], long p2[], long p3[])
 {
     factors[0] = p1[1] * (p2[2] - p3[2]) + p2[1] * (p3[2] - p1[2]) + p3[1] * (p1[2] - p2[2]);
@@ -1280,7 +1232,7 @@ void PrintLine::calculatePlane(long factors[], long p1[], long p2[], long p3[])
 
 float PrintLine::calcZOffset(long factors[], long pointX, long pointY)
 {
-    return (factors[3] - factors[X_AXIS] * pointX - factors[Y_AXIS] * pointY) / (float) factors[2];
+    return (factors[3] - factors[0] * pointX - factors[1] * pointY) / (float) factors[2];
 }
 #endif
 
@@ -1313,6 +1265,7 @@ inline void PrintLine::queueEMove(long extrudeDiff,uint8_t check_endstops,uint8_
     }
     if(Printer::extrudeMultiply != 100)
     {
+        //p->delta[3]=(p->delta[3]*printer_state.extrudeMultiply)/100;
         p->delta[E_AXIS]=(long)((p->delta[E_AXIS]*(float)Printer::extrudeMultiply)*0.01f);
     }
     Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS];
@@ -1328,7 +1281,7 @@ inline void PrintLine::queueEMove(long extrudeDiff,uint8_t check_endstops,uint8_
 }
 
 /**
-  Split a line up into a series of lines with at most DELTASEGMENTS_PER_PRINTLINE delta segments.
+  Split a line up into a series of lines with at most MAX_DELTA_SEGMENTS_PER_LINE delta segments.
   @param check_endstops Check endstops during the move.
   @param pathOptimize Run the path optimizer.
   @param delta_step_rate delta step rate in segments per second for the move.
@@ -1336,9 +1289,9 @@ inline void PrintLine::queueEMove(long extrudeDiff,uint8_t check_endstops,uint8_
 void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop)
 {
     //if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0; // now constrained at entry level including cylinder test
-    long difference[E_AXIS_ARRAY];
-    float axis_diff[VIRTUAL_AXIS_ARRAY]; // Axis movement in mm. Virtual axis in 4;
-    for(uint8_t axis = 0; axis < E_AXIS_ARRAY; axis++)
+    long difference[NUM_AXIS];
+    float axis_diff[5]; // Axis movement in mm. Virtual axis in 4;
+    for(uint8_t axis = 0; axis < NUM_AXIS; axis++)
     {
         difference[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
         if(axis == E_AXIS && Printer::extrudeMultiply != 100)
@@ -1351,13 +1304,13 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
 // I'm guessing I need the floats to prevent overflow. This is pretty horrible.
 // The NaN checking in the delta calculation routine should be enough
 //float a = difference[0] * difference[0] + difference[1] * difference[1];
-//float b = 2 * (difference[0] * printer_state.currentPositionSteps[X_AXIS] + difference[1] * printer_state.currentPositionSteps[Y_AXIS]);
-//float c = printer_state.currentPositionSteps[X_AXIS] * printer_state.currentPositionSteps[X_AXIS] + printer_state.currentPositionSteps[Y_AXIS] * printer_state.currentPositionSteps[Y_AXIS] - r * r;
+//float b = 2 * (difference[0] * printer_state.currentPositionSteps[0] + difference[1] * printer_state.currentPositionSteps[1]);
+//float c = printer_state.currentPositionSteps[0] * printer_state.currentPositionSteps[0] + printer_state.currentPositionSteps[1] * printer_state.currentPositionSteps[1] - r * r;
 //float disc = b * b - 4 * a * c;
 //if (disc >= 0) {
 //    float t = (-b + (float)sqrt(disc)) / (2 * a);
-//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[X_AXIS] + difference[0] * t;
-//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[Y_AXIS] + difference[1] * t;
+//    printer_state.destinationSteps[0] = (long) printer_state.currentPositionSteps[0] + difference[0] * t;
+//    printer_state.destinationSteps[1] = (long) printer_state.currentPositionSteps[1] + difference[1] * t;
 // }
 #endif
 
@@ -1407,7 +1360,7 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
         segmentCount = (cartesianDeltaSteps[Z_AXIS] + (uint32_t)65534) / (uint32_t)65535;
     }
     // Now compute the number of lines needed
-    int numLines = (segmentCount + DELTASEGMENTS_PER_PRINTLINE - 1)/DELTASEGMENTS_PER_PRINTLINE;
+    int numLines = (segmentCount + MAX_DELTA_SEGMENTS_PER_LINE - 1)/MAX_DELTA_SEGMENTS_PER_LINE;
     // There could be some error here but it doesn't matter since the number of segments will just be reduced slightly
     int segmentsPerLine = segmentCount / numLines;
 
@@ -1429,7 +1382,7 @@ void PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint
 
     // Insert dummy moves if necessary
     // Nead to leave at least one slot open for the first split move
-    uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, RMath::min(PRINTLINE_CACHE_SIZE-4,numLines));
+    uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, RMath::min(MOVE_CACHE_SIZE-4,numLines));
 
     for (int lineNumber=1; lineNumber < numLines + 1; lineNumber++)
     {
@@ -1602,7 +1555,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     //arc_target[axis_linear] = position[axis_linear];
 
     // Initialize the extruder axis
-    arc_target[E_AXIS] = Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
+    arc_target[3] = Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
 
     for (i = 1; i<segments; i++)
     {
@@ -1635,14 +1588,14 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
         }
 
         // Update arc_target location
-        arc_target[X_AXIS] = center_axis0 + r_axis0;
-        arc_target[Y_AXIS] = center_axis1 + r_axis1;
+        arc_target[0] = center_axis0 + r_axis0;
+        arc_target[1] = center_axis1 + r_axis1;
         //arc_target[axis_linear] += linear_per_segment;
-        arc_target[E_AXIS] += extruder_per_segment;
-        Printer::moveToReal(arc_target[X_AXIS],arc_target[Y_AXIS],IGNORE_COORDINATE,arc_target[E_AXIS],IGNORE_COORDINATE);
+        arc_target[3] += extruder_per_segment;
+        Printer::moveToReal(arc_target[0],arc_target[1],IGNORE_COORDINATE,arc_target[3],IGNORE_COORDINATE);
     }
     // Ensure last segment arrives at target location.
-    Printer::moveToReal(target[X_AXIS],target[Y_AXIS],IGNORE_COORDINATE,target[E_AXIS],IGNORE_COORDINATE);
+    Printer::moveToReal(target[0],target[1],IGNORE_COORDINATE,target[3],IGNORE_COORDINATE);
 }
 #endif
 
@@ -1776,8 +1729,8 @@ long PrintLine::bresenhamStep() // Version for delta printer
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
 #endif
         cur->updateAdvanceSteps(cur->vStart,0,false);
@@ -1838,12 +1791,12 @@ long PrintLine::bresenhamStep() // Version for delta printer
                 // Take delta steps
                 if(curd->isXMove())
                 {
-                    if((cur->error[X_AXIS] -= curd->deltaSteps[A_TOWER]) < 0)
+                    if((cur->error[X_AXIS] -= curd->deltaSteps[X_AXIS]) < 0)
                     {
                         cur->startXStep();
                         cur->error[X_AXIS] += curd_errupd;
 #ifdef DEBUG_REAL_POSITION
-                        Printer::realDeltaPositionSteps[A_TOWER] += curd->isXPositiveMove() ? 1 : -1;
+                        Printer::realDeltaPositionSteps[X_AXIS] += curd->isXPositiveMove() ? 1 : -1;
 #endif
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
@@ -1853,12 +1806,12 @@ long PrintLine::bresenhamStep() // Version for delta printer
 
                 if(curd->isYMove())
                 {
-                    if((cur->error[Y_AXIS] -= curd->deltaSteps[B_TOWER]) < 0)
+                    if((cur->error[Y_AXIS] -= curd->deltaSteps[Y_AXIS]) < 0)
                     {
                         cur->startYStep();
                         cur->error[Y_AXIS] += curd_errupd;
 #ifdef DEBUG_REAL_POSITION
-                        Printer::realDeltaPositionSteps[B_TOWER] += curd->isYPositiveMove() ? 1 : -1;
+                        Printer::realDeltaPositionSteps[Y_AXIS] += curd->isYPositiveMove() ? 1 : -1;
 #endif
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
@@ -1868,11 +1821,11 @@ long PrintLine::bresenhamStep() // Version for delta printer
 
                 if(curd->isZMove())
                 {
-                    if((cur->error[Z_AXIS] -= curd->deltaSteps[C_TOWER]) < 0)
+                    if((cur->error[Z_AXIS] -= curd->deltaSteps[Z_AXIS]) < 0)
                     {
                         cur->startZStep();
                         cur->error[Z_AXIS] += curd_errupd;
-                        Printer::realDeltaPositionSteps[C_TOWER] += curd->isZPositiveMove() ? 1 : -1;
+                        Printer::realDeltaPositionSteps[Z_AXIS] += curd->isZPositiveMove() ? 1 : -1;
 #ifdef DEBUG_STEPCOUNT
                         cur->totalStepsRemaining--;
 #endif
@@ -1963,7 +1916,7 @@ long PrintLine::bresenhamStep() // Version for delta printer
         if(doOdd)
         {
             HAL::allowInterrupts(); // Allow interrupts for other types, timer1 is still disabled
-#if RAMP_ACCELERATION
+#ifdef RAMP_ACCELERATION
             //If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
             if (cur->moveAccelerating())
             {
@@ -2130,7 +2083,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             return(wait); // waste some time for path optimization to fill up
         } // End if WARMUP
         //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
-#if GANTRY
+#ifdef XY_GANTRY
         if(cur->isXOrYMove())
         {
             Printer::enableXStepper();
@@ -2157,16 +2110,16 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         Printer::timer = 0;
         HAL::forbidInterrupts();
         //Determine direction of movement,check if endstop was hit
-#if !(GANTRY)
+#if !defined(XY_GANTRY)
         Printer::setXDirection(cur->isXPositiveMove());
         Printer::setYDirection(cur->isYPositiveMove());
 #else
         long gdx = (cur->dir & 1 ? cur->delta[0] : -cur->delta[0]); // Compute signed difference in steps
         long gdy = (cur->dir & 2 ? cur->delta[1] : -cur->delta[1]);
         Printer::setXDirection(gdx+gdy>=0);
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM==1
         Printer::setYDirection(gdx>gdy);
-#elif DRIVE_SYSTEM==YX_GANTRY
+#elif DRIVE_SYSTEM==2
         Printer::setYDirection(gdx<=gdy);
 #endif
 #endif
@@ -2175,8 +2128,8 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
 #endif
         cur->updateAdvanceSteps(cur->vStart,0,false);
@@ -2245,7 +2198,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                     cur->error[Y_AXIS] += cur_errupd;
                 }
             }
-#if (GANTRY)
+#if defined(XY_GANTRY)
             Printer::executeXYGantrySteps();
 #endif
 
@@ -2270,7 +2223,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         if(doOdd)  // Update timings
         {
             HAL::allowInterrupts(); // Allow interrupts for other types, timer1 is still disabled
-#if RAMP_ACCELERATION
+#ifdef RAMP_ACCELERATION
             //If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
             if (cur->moveAccelerating())   // we are accelerating
             {

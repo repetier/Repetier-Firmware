@@ -85,17 +85,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Z_AXIS 2
 #define E_AXIS 3
 #define VIRTUAL_AXIS 4
-// How big an array to hold X_AXIS..<MAX_AXIS>
-#define Z_AXIS_ARRAY 3
-#define E_AXIS_ARRAY 4
-#define VIRTUAL_AXIS_ARRAY 5
-
-
-#define A_TOWER 0
-#define B_TOWER 1
-#define C_TOWER 2
-#define TOWER_ARRAY 3
-#define E_TOWER_ARRAY 4
 
 
 // Bits of the ADC converter
@@ -122,25 +111,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
 
-#define NO_CONTROLLER 0
-#define UICONFIG_CONTROLLER 1
-#define CONTROLLER_SMARTRAMPS 2
-#define CONTROLLER_ADAFRUIT 3
-#define CONTROLLER_FOLTYN 4
-#define CONTROLLER_VIKI 5
-#define CONTROLLER_MEGATRONIC 6
-#define CONTROLLER_RADDS 7
-#define CONTROLLER_PIBOT20X4 8
-#define CONTROLLER_PIBOT16X2 9
-#define CONTROLLER_GADGETS3D_SHIELD 10
-#define CONTROLLER_REPRAPDISCOUNT_GLCD 11
-#define CONTROLLER_FELIX 12
-#define CONTROLLER_RAMBO 13
-#define CONTROLLER_OPENHARDWARE_LCD2004 14
-#define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
-
-// add pid control
-#define TEMP_PID 1
+#define TEMP_PID true // add pid control
 
 
 #include "Configuration.h"
@@ -163,17 +134,19 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD
-#define NONLINEAR_SYSTEM 1
+#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4 || DRIVE_SYSTEM==5 || DRIVE_SYSTEM==6
+#define NONLINEAR_SYSTEM true
 #else
-#define NONLINEAR_SYSTEM 0
+#define NONLINEAR_SYSTEM false
 #endif
 
 #ifdef FEATURE_Z_PROBE
-#define MANUAL_CONTROL 1
+#define MANUAL_CONTROL true
 #endif
 
-#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY)
+#if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
+#define XY_GANTRY
+#endif
 
 //Step to split a cirrcle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
@@ -257,7 +230,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT5_ANALOG_CHANNEL
 #endif
 
-#if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE<101
+#if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<101
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
@@ -298,17 +271,20 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "ui.h"
 #include "Communication.h"
 
-#ifndef SDCARDDETECT
-#define SDCARDDETECT       -1
+#ifndef SDSUPPORT
+#define SDSUPPORT false
+#endif
+#if SDSUPPORT
+#include "SdFat.h"
 #endif
 #ifndef SDSUPPORT
-#define SDSUPPORT 0
+#define SDSUPPORT false
 #endif
 #if SDSUPPORT
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=CARTESIAN
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=0
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -368,8 +344,8 @@ extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef USE_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
 #endif
 extern int maxadv2;
@@ -384,7 +360,7 @@ void manage_inactivity(uint8_t debug);
 extern void finishNextSegment();
 #if NONLINEAR_SYSTEM
 extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#if SOFTWARE_LEVELING
+#ifdef SOFTWARE_LEVELING
 extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
 extern float calcZOffset(long factors[], long pointX, long pointY);
 #endif
@@ -488,21 +464,13 @@ extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 extern int debugWaitLoop;
 #endif
 
+#if NONLINEAR_SYSTEM
+#define NUM_AXIS 4
+#endif
+
 #define STR(s) #s
 #define XSTR(s) STR(s)
 #include "Commands.h"
 #include "Eeprom.h"
-
-#if CPU_ARCH == ARCH_AVR
-#define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
-#else
-#define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
-#endif
-
-#ifdef FAST_INTEGER_SQRT
-#define SQRT(x) ( HAL::integerSqrt(x) )
-#else
-#define SQRT(x) sqrt(x) 
-#endif
 
 #endif

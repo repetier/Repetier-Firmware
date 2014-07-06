@@ -86,11 +86,21 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 #define COMPILE_I2C_DRIVER  // We need the I2C driver as we are using i2c
 #endif
 
-// see ui.h for definitons of display type.
-// moved from here because this file is not always included.
-#define UI_DISPLAY_TYPE NO_DISPLAY
 
-#if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
+/**
+What display type do you use?
+0 = No display
+1 = LCD Display with 4 bit data bus
+2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
+3 = LCD Display with I2C connection, 4 bit mode
+4 = Use the slower LiquiedCrystal library bundled with arduino.
+    IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
+               If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
+5 = U8G supported display
+*/
+#define UI_DISPLAY_TYPE 0
+
+#if UI_DISPLAY_TYPE == 5 // Special case for graphic displays
 
 #define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
 #define UI_LCD_WIDTH 128
@@ -145,7 +155,7 @@ A MCP23017 can run also with 400000 Hz */
 /**
 Define the pin
 */
-#if UI_DISPLAY_TYPE == DISPLAY_I2C // I2C Pin configuration
+#if UI_DISPLAY_TYPE==3 // I2C Pin configuration
 #define UI_DISPLAY_RS_PIN _BV(4)
 #define UI_DISPLAY_RW_PIN _BV(5)
 #define UI_DISPLAY_ENABLE_PIN _BV(6)
@@ -229,7 +239,7 @@ If you set it to true, next will go to previous menu instead of the next menu.
 #define UI_I2C_KEY_ADDRESS 0x40
 
 
-#if UI_MAIN
+#ifdef UI_MAIN
 /* #######################################################################
                       Key definitions
 

@@ -215,14 +215,26 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 #elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
+ #if NUM_EXTRUDER>0
    UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os");
+#else
+   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os");
+#endif
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
+ #if NUM_EXTRUDER>0
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+   #else
+   UI_PAGE4(ui_page1,"","Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+   #endif
  #endif
   UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
 //UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
-   UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1
+ #if NUM_EXTRUDER>0
+    UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1
+ #else
+    UI_PAGE4(ui_page3
+ #endif
  #if NUM_EXTRUDER>1
    ,UI_TEXT_PAGE_EXTRUDER2
  #endif
@@ -236,8 +248,10 @@ for 2 row displays. You can add additional pages or change the default pages lik
    ,"%os"
  #elif NUM_EXTRUDER==2 || (NUM_EXTRUDER==1 && HAVE_HEATED_BED==true)
    ,"","%os"
- #elif NUM_EXTRUDER==1
+ #elif NUM_EXTRUDER==1 || (NUM_EXTRUDER==0 &&  HAVE_HEATED_BED==true)
    ,"","","%os"
+ #elif NUM_EXTRUDER==0
+   ,"","","","%os"
  #endif
  );
  #if EEPROM_MODE!=0
@@ -582,10 +596,10 @@ UI_MENU_CHANGEACTION(ui_menu_ext_wait_temp,       UI_TEXT_EXTR_WAIT_RETRACT_TEMP
 UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UNITS, UI_ACTION_EXTR_WAIT_RETRACT_UNITS);
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
-#if USE_ADVANCE
+#ifdef USE_ADVANCE
 #define UI_MENU_ADV_CNT 1
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
-#if ENABLE_QUADRATIC_ADVANCE
+#ifdef ENABLE_QUADRATIC_ADVANCE
 #define UI_MENU_ADV_CNT 2
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K,UI_ACTION_ADVANCE_K);
