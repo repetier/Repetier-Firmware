@@ -317,7 +317,7 @@ void Printer::kill(uint8_t only_steppers)
 void Printer::updateAdvanceFlags()
 {
     Printer::setAdvanceActivated(false);
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         if(extruder[i].advanceL!=0)
