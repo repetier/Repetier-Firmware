@@ -141,8 +141,8 @@ float Printer::memoryZ;
 float Printer::memoryE;
 #endif
 #ifdef XY_GANTRY
-char Printer::motorX;
-char Printer::motorY;
+int8_t Printer::motorX;
+int8_t Printer::motorY;
 #endif
 #ifdef DEBUG_SEGMENT_LENGTH
     float Printer::maxRealSegmentLength = 0;
