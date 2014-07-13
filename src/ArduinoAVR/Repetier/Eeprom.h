@@ -107,7 +107,7 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
 
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
 #else
 #define EEPROM_FLOAT(x) (x)
@@ -146,7 +146,7 @@ have problems with other modules using the eeprom */
 
 class EEPROM
 {
-#if EEPROM_MODE != NO_EEPROM
+#if EEPROM_MODE!=0
     static uint8_t computeChecksum();
     static void writeExtruderPrefix(uint pos);
     static void writeFloat(uint pos,PGM_P text,uint8_t digits=3);
@@ -166,84 +166,84 @@ public:
     static void updatePrinterUsage();
 
     static inline float zProbeSpeed() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);
 #else
         return Z_PROBE_SPEED;
 #endif
     }
     static inline float zProbeXYSpeed() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_XY_SPEED);
 #else
         return Z_PROBE_XY_SPEED;
 #endif
     }
     static inline float zProbeXOffset() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X_OFFSET);
 #else
         return Z_PROBE_X_OFFSET;
 #endif
     }
     static inline float zProbeYOffset() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y_OFFSET);
 #else
         return Z_PROBE_Y_OFFSET;
 #endif
     }
     static inline float zProbeHeight() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_HEIGHT);
 #else
         return Z_PROBE_HEIGHT;
 #endif
     }
     static inline float zProbeX1() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X1);
 #else
         return Z_PROBE_X1;
 #endif
     }
     static inline float zProbeY1() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y1);
 #else
         return Z_PROBE_Y1;
 #endif
     }
     static inline float zProbeX2() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X2);
 #else
         return Z_PROBE_X2;
 #endif
     }
     static inline float zProbeY2() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y2);
 #else
         return Z_PROBE_Y2;
 #endif
     }
     static inline float zProbeX3() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_X3);
 #else
         return Z_PROBE_X3;
 #endif
     }
     static inline float zProbeY3() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_Y3);
 #else
         return Z_PROBE_Y3;
 #endif
     }
     static inline float zProbeBedDistance() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_Z_PROBE_BED_DISTANCE);
 #else
         return Z_PROBE_BED_DISTANCE;
@@ -251,21 +251,21 @@ public:
     }
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE);
 #else
         return DELTA_SEGMENTS_PER_SECOND_MOVE;
 #endif
     }
     static inline float deltaDiagonalRodLength() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH);
 #else
         return DELTA_DIAGONAL_ROD;
 #endif
     }
     static inline int16_t deltaSegmentsPerSecondPrint() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT);
 #else
         return DELTA_SEGMENTS_PER_SECOND_PRINT;
@@ -274,28 +274,28 @@ public:
 #endif
 #if DRIVE_SYSTEM==DELTA
     static inline float deltaHorizontalRadius() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #else
         return ROD_RADIUS;
 #endif
     }
     static inline int16_t deltaTowerXOffsetSteps() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS);
 #else
         return DELTA_X_ENDSTOP_OFFSET_STEPS;
 #endif
     }
     static inline int16_t deltaTowerYOffsetSteps() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS);
 #else
         return DELTA_Y_ENDSTOP_OFFSET_STEPS;
 #endif
     }
     static inline int16_t deltaTowerZOffsetSteps() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS);
 #else
         return DELTA_Z_ENDSTOP_OFFSET_STEPS;
@@ -306,7 +306,7 @@ public:
 #if DRIVE_SYSTEM==DELTA
       Printer::radius0=mm;
       Printer::updateDerivedParameter();
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
       //This is an odd situation, the radius can only be changed if eeprom is on.
       // The radius is not saved to printer variablke now, it is all derived parameters of 
       // fetching the radius, which if EEProm is off returns the Configuration constant.
@@ -326,7 +326,7 @@ public:
       Printer::xMin = newZ;
       Printer::updateDerivedParameter();
       Com::printFLN(PSTR("X (A) tower floor set to: "),Printer::xMin,3);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
         HAL::eprSetFloat(EPR_X_HOME_OFFSET,Printer::xMin);
         uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
@@ -339,7 +339,7 @@ static inline void setTowerYFloor(float newZ) {
       Printer::yMin = newZ;
       Printer::updateDerivedParameter();
       Com::printFLN(PSTR("Y (B) tower floor set to: "),Printer::yMin,3);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
 
         HAL::eprSetFloat(EPR_Y_HOME_OFFSET,Printer::yMin);
         uint8_t newcheck = computeChecksum();
@@ -353,7 +353,7 @@ static inline void setTowerZFloor(float newZ) {
       Printer::zMin = newZ;
       Printer::updateDerivedParameter();
       Com::printFLN(PSTR("Z (C) tower floor set to: "),Printer::zMin,3);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
       HAL::eprSetFloat(EPR_Z_HOME_OFFSET,Printer::zMin);
       uint8_t newcheck = computeChecksum();
       if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
@@ -362,7 +362,7 @@ static inline void setTowerZFloor(float newZ) {
 #endif
     }
     static inline void setDeltaTowerXOffsetSteps(int16_t steps) {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
@@ -370,7 +370,7 @@ static inline void setTowerZFloor(float newZ) {
 #endif
     }
     static inline void setDeltaTowerYOffsetSteps(int16_t steps) {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
@@ -378,7 +378,7 @@ static inline void setTowerZFloor(float newZ) {
 #endif
     }
     static inline void setDeltaTowerZOffsetSteps(int16_t steps) {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
         uint8_t newcheck = computeChecksum();
         if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
@@ -386,42 +386,42 @@ static inline void setTowerZFloor(float newZ) {
 #endif
     }
     static inline float deltaAlphaA() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_ALPHA_A);
 #else
         return DELTA_ALPHA_A;
 #endif
     }
     static inline float deltaAlphaB() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_ALPHA_B);
 #else
         return DELTA_ALPHA_B;
 #endif
     }
     static inline float deltaAlphaC() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_ALPHA_C);
 #else
         return DELTA_ALPHA_C;
 #endif
     }
     static inline float deltaRadiusCorrectionA() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_A);
 #else
         return DELTA_RADIUS_CORRECTION_A;
 #endif
     }
     static inline float deltaRadiusCorrectionB() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_B);
 #else
         return DELTA_RADIUS_CORRECTION_B;
 #endif
     }
     static inline float deltaRadiusCorrectionC() {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         return HAL::eprGetFloat(EPR_DELTA_RADIUS_CORR_C);
 #else
         return DELTA_RADIUS_CORRECTION_C;

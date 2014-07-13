@@ -143,8 +143,8 @@ float Printer::memoryZ;
 float Printer::memoryE;
 #endif
 #if GANTRY
-char Printer::motorX;
-char Printer::motorY;
+int8_t Printer::motorX;
+int8_t Printer::motorY;
 #endif
 #ifdef DEBUG_SEGMENT_LENGTH
     float Printer::maxRealSegmentLength = 0;
@@ -348,7 +348,7 @@ void Printer::kill(uint8_t only_steppers)
 void Printer::updateAdvanceFlags()
 {
     Printer::setAdvanceActivated(false);
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
         if(extruder[i].advanceL!=0)
@@ -365,7 +365,6 @@ void Printer::updateAdvanceFlags()
 // This is for untransformed move to coordinates in printers absolute cartesian space
 uint8_t Printer::moveTo(float x,float y,float z,float e,float f)
 {
-    //SHOT("moveTo"); SHOWM(z); SHOW(f);
     if(x != IGNORE_COORDINATE)
         destinationSteps[X_AXIS] = (x + Printer::offsetX) * axisStepsPerMM[X_AXIS];
     if(y != IGNORE_COORDINATE)
@@ -741,7 +740,7 @@ void Printer::setup()
     SET_OUTPUT(FAN_BOARD_PIN);
     WRITE(FAN_BOARD_PIN,LOW);
 #endif
-#if EXT0_HEATER_PIN>-1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
     SET_OUTPUT(EXT0_HEATER_PIN);
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
@@ -765,7 +764,7 @@ void Printer::setup()
     SET_OUTPUT(EXT5_HEATER_PIN);
     WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if EXT0_EXTRUDER_COOLER_PIN>-1
+#if defined(EXT0_EXTRUDER_COOLER_PIN) && EXT0_EXTRUDER_COOLER_PIN>-1
     SET_OUTPUT(EXT0_EXTRUDER_COOLER_PIN);
     WRITE(EXT0_EXTRUDER_COOLER_PIN,LOW);
 #endif
@@ -832,7 +831,9 @@ void Printer::setup()
     xMin = X_MIN_POS;
     yMin = Y_MIN_POS;
     zMin = Z_MIN_POS;
+#if NONLINEAR_SYSTEM
     radius0 = ROD_RADIUS;
+#endif
     wasLastHalfstepping = 0;
 #if ENABLE_BACKLASH_COMPENSATION
     backlashX = X_BACKLASH;
@@ -1036,7 +1037,6 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
            Com::printWarningFLN(PSTR("homeAxis / queueDeltaMove returns error"));
         }
     }
-    UI_CLEAR_STATUS
 
     Commands::printCurrentPosition(PSTR("homeAxis "));
     setAutolevelActive(autoLevel);
@@ -1264,12 +1264,12 @@ void Printer::zBabystep() {
         WRITE(X2_STEP_PIN,HIGH);
 #endif
         WRITE(Y_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #endif
         WRITE(Z_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,HIGH);
 #endif
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 2);

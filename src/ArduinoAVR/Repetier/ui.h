@@ -350,7 +350,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
 
-// reprapdiscount smartcontroller has a sd card buildin
 #if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
@@ -1047,18 +1046,18 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DISPLAY_I2C_OUTPUT_START_MASK 0
 #define UI_DISPLAY_I2C_PULLUP 31
 #define UI_I2C_CLOCKSPEED 400000L
-#define UI_DISPLAY_RS_PIN BV(15)
-#define UIDISPLAY_RW_PIN BV(14)
-#define UIDISPLAY_ENABLE_PIN BV(13)
-#define UIDISPLAY_D0_PIN BV(12)
-#define UIDISPLAY_D1_PIN BV(11)
-#define UIDISPLAY_D2_PIN BV(10)
-#define UIDISPLAY_D3_PIN BV(9)
-#define UIDISPLAY_D4_PIN BV(12)
-#define UIDISPLAY_D5_PIN BV(11)
-#define UIDISPLAY_D6_PIN BV(10)
-#define UIDISPLAY_D7_PIN BV(9)
-#define UIINVERT_MENU_DIRECTION 0
+#define UI_DISPLAY_RS_PIN _BV(15)
+#define UI_DISPLAY_RW_PIN _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN _BV(12)
+#define UI_DISPLAY_D1_PIN _BV(11)
+#define UI_DISPLAY_D2_PIN _BV(10)
+#define UI_DISPLAY_D3_PIN _BV(9)
+#define UI_DISPLAY_D4_PIN _BV(12)
+#define UI_DISPLAY_D5_PIN _BV(11)
+#define UI_DISPLAY_D6_PIN _BV(10)
+#define UI_DISPLAY_D7_PIN _BV(9)
+#define UI_INVERT_MENU_DIRECTION false
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
@@ -1083,11 +1082,11 @@ HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_READ);
 unsigned int keymask = HAL::i2cReadAck();
 keymask = keymask + (HAL::i2cReadNak()<<8);
 HAL::i2cStop();
-UI_KEYS_I2C_BUTTON_LOW(BV(4),UIACTION_OK); // push button, connects gnd to pin
-UI_KEYS_I2C_BUTTON_LOW(BV(1),UIACTION_BACK); // push button, connects gnd to pin
-UI_KEYS_I2C_BUTTON_LOW(BV(0),UIACTION_SD_PRINT); // push button, connects gnd to pin
-UI_KEYS_I2C_BUTTON_LOW(BV(3),UIACTION_PREVIOUS); // Up button
-UI_KEYS_I2C_BUTTON_LOW(BV(2),UIACTION_NEXT); // down button
+UI_KEYS_I2C_BUTTON_LOW(_BV(4),UI_ACTION_OK); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(_BV(1),UI_ACTION_BACK); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(_BV(0),UI_ACTION_SD_PRINT); // push button, connects gnd to pin
+UI_KEYS_I2C_BUTTON_LOW(_BV(3),UI_ACTION_PREVIOUS); // Up button
+UI_KEYS_I2C_BUTTON_LOW(_BV(2),UI_ACTION_NEXT); // down button
 }
 #endif
 #endif // Controller 14

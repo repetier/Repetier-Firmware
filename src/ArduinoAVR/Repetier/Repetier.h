@@ -63,6 +63,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG 
 
+#define CARTESIAN 0
+#define XY_GANTRY 1
+#define YX_GANTRY 2
+#define DELTA 3
+#define TUGA 4
+#define BIPOD 5
+
 // Uncomment if no analyzer is connected
 //#define ANALYZER
 // Channel->pin assignments
@@ -347,7 +354,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-// Added a 9 because we are seeing printers that have steps in the 100k range
 #define IGNORE_COORDINATE 999999
 
 #undef min
@@ -368,6 +374,10 @@ public:
         return b;
     }
     static inline long min(long a,long b, long c) {
+      if(a<b) return a<c ? a : c;
+      return b<c ? b : c;
+    }
+    static inline float min(float a,float b, float c) {
       if(a<b) return a<c ? a : c;
       return b<c ? b : c;
     }
@@ -522,6 +532,10 @@ extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 
 #ifdef DEBUG_PRINT
 extern int debugWaitLoop;
+#endif
+
+#if NONLINEAR_SYSTEM
+#define NUM_AXIS 4
 #endif
 
 #define STR(s) #s

@@ -26,7 +26,7 @@
 
 void EEPROM::update(GCode *com)
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     if(com->hasT() && com->hasP()) switch(com->T)
         {
         case 0:
@@ -54,7 +54,7 @@ void EEPROM::update(GCode *com)
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     uint8_t version = EEPROM_PROTOCOL_VERSION;
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
@@ -301,8 +301,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
-// Run if EEPROM is ON, or in INIT state.
-#if EEPROM_MODE != NO_EEPROM
+#if EEPROM_MODE!=0
     HAL::eprSetInt32(EPR_BAUDRATE,baudrate);
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
@@ -355,7 +354,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_X_LENGTH,Printer::xLength);
     HAL::eprSetFloat(EPR_Y_LENGTH,Printer::yLength);
     HAL::eprSetFloat(EPR_Z_LENGTH,Printer::zLength);
+#if NONLINEAR_SYSTEM
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, Printer::radius0);
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
     HAL::eprSetFloat(EPR_BACKLASH_X,Printer::backlashX);
     HAL::eprSetFloat(EPR_BACKLASH_Y,Printer::backlashY);
@@ -463,9 +464,8 @@ void EEPROM::initalizeUncached()
 
 void EEPROM::readDataFromEEPROM()
 {
-#if EEPROM_MODE == EEPROM_ON
-    // This is the saved version. Don't copy data not set in older versions!
-    uint8_t version = HAL::eprGetByte(EPR_VERSION); 
+#if EEPROM_MODE!=0
+    uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
@@ -508,7 +508,9 @@ void EEPROM::readDataFromEEPROM()
     Printer::xLength = HAL::eprGetFloat(EPR_X_LENGTH);
     Printer::yLength = HAL::eprGetFloat(EPR_Y_LENGTH);
     Printer::zLength = HAL::eprGetFloat(EPR_Z_LENGTH);
+#if NONLINEAR_SYSTEM
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
+#endif
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = HAL::eprGetFloat(EPR_BACKLASH_X);
     Printer::backlashY = HAL::eprGetFloat(EPR_BACKLASH_Y);
@@ -641,7 +643,7 @@ void EEPROM::initBaudrate()
 {
     // Invariant - baudrate is intitalized with or without eeprom!
     baudrate = BAUDRATE;
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE)
     {
         baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
@@ -649,14 +651,29 @@ void EEPROM::initBaudrate()
 #endif
 }
 
+#ifndef USE_CONFIGURATION_BAUD_RATE
+#define USE_CONFIGURATION_BAUD_RATE 0
+#endif // USE_CONFIGURATION_BAUD_RATE
 void EEPROM::init()
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     uint8_t check = computeChecksum();
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check)
     {
         readDataFromEEPROM();
+        if (USE_CONFIGURATION_BAUD_RATE) {
+          // Used if eeprom gets unusable baud rate set and communication wont work at all.
+          if(HAL::eprGetInt32(EPR_BAUDRATE) != BAUDRATE) {
+          HAL::eprSetInt32(EPR_BAUDRATE,BAUDRATE);
+          baudrate = BAUDRATE;
+          uint8_t newcheck = computeChecksum();
+          if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+          }
+          Com::printFLN(PSTR("EEprom baud rate restored from configuration."));
+          Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
+        }
     }
     else
     {
@@ -664,14 +681,12 @@ void EEPROM::init()
         initalizeUncached();
         storeDataIntoEEPROM(storedcheck!=check);
     }
-#else
-    if (EEPROM_MODE == EEPROM_INIT) storeDataIntoEEPROM();
 #endif
 }
 
 void EEPROM::updatePrinterUsage()
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     if(Printer::filamentPrinted==0) return; // No miles only enabled
     uint32_t seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
     seconds += HAL::eprGetInt32(EPR_PRINTING_TIME);
@@ -700,7 +715,7 @@ With
 */
 void EEPROM::writeSettings()
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     writeLong(EPR_BAUDRATE,Com::tEPRBaudrate);
     writeFloat(EPR_PRINTING_DISTANCE,Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME,Com::tEPRPrinterActive);
@@ -848,7 +863,7 @@ void EEPROM::writeSettings()
 #endif
 }
 
-#if EEPROM_MODE != NO_EEPROM
+#if EEPROM_MODE!=0
 
 uint8_t EEPROM::computeChecksum()
 {

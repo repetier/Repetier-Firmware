@@ -134,6 +134,9 @@
 #define UI_TEXT_EXTR0_TEMP       "Temp 1: %E0" cDEG "C (%eI0)" 
 #define UI_TEXT_EXTR1_TEMP       "Temp 2: %E1" cDEG "C (%eI1)" 
 #define UI_TEXT_EXTR2_TEMP       "Temp 3: %E2" cDEG "C (%eI2)" 
+// "Extruder 1 Off" is ambiguous, is it off and this turns it on? 
+// Other places display such as temperature 165 means that is current state
+// So if consistent "Extruder 1 off" would mean it is already off.
 #define UI_TEXT_EXTR0_OFF        "Turn Extruder 1 Off"
 #define UI_TEXT_EXTR1_OFF        "Turn Extruder 2 Off"
 #define UI_TEXT_EXTR2_OFF        "Turn Extruder 3 Off"
@@ -1190,7 +1193,7 @@
 #define UI_TEXT_STRING_ACTION     "Aktion:%la"
 #define UI_TEXT_HEATING_EXTRUDER  "V" STR_auml "rmer Extruder"
 #define UI_TEXT_HEATING_BED       "V" STR_auml "rmer B" STR_auml "dd"
-#define UI_TEXT_KILLED            "D" STR_ouml "ödad"
+#define UI_TEXT_KILLED            "D" STR_ouml "dad"
 #define UI_TEXT_STEPPER_DISABLED  "Stegmotorer av"
 #define UI_TEXT_EEPROM_STORED     "Konfiguration","sparad i EEPROM"
 #define UI_TEXT_EEPROM_LOADED     "Konfiguration","laddat fr. EEPROM"

@@ -95,7 +95,6 @@ Move printer the given number of steps. Puts the move into the queue. Used by e.
 */
 void PrintLine::moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool checkEndstop)
 {
-    //SHOT("moveRelative "); SHOWS(x); SHOWS(y); SHOWS(z);
     //Com::printF(Com::tJerkColon,x);
     //Com::printF(Com::tComma,y);
     //Com::printFLN(Com::tComma,z);
@@ -1032,7 +1031,6 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         else
             return 0;*/
     }
-    //SHOWA("motion.c transformCart... delta post ",deltaPosSteps, 3);
     return 1;
 }
 #endif

@@ -126,7 +126,8 @@ void Commands::waitUntilEndOfAllBuffers()
 #endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();
-        }        Commands::checkForPeriodicalActions();
+        }
+        Commands::checkForPeriodicalActions();
         UI_MEDIUM;
     }
 }
@@ -134,7 +135,8 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s))
 {
     float x,y,z;
     Printer::realPosition(x,y,z);
-    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
+    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z))
+    {
       Com::printErrorFLN(s); // flag where the error condition came from
     }
     x += Printer::coordinateOffset[X_AXIS];
@@ -218,7 +220,7 @@ void Commands::setFanSpeed(int speed,bool wait)
 }
 void Commands::reportPrinterUsage()
 {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     float dist = Printer::filamentPrinted*0.001+HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
     Com::printF(Com::tPrintedFilament,dist,2);
     Com::printF(Com::tSpacem);
@@ -425,7 +427,8 @@ void microstepInit()
   \brief Execute the Arc command stored in com.
 */
 #if ARC_SUPPORT
-void Commands::processArc(GCode *com) {
+void Commands::processArc(GCode *com)
+{
   float position[Z_AXIS_ARRAY];
   Printer::realPosition(position[X_AXIS],position[Y_AXIS],position[Z_AXIS]);
   if(!Printer::setDestinationStepsFromGCode(com)) return; // For X Y Z E F
@@ -557,7 +560,8 @@ switch(com->G)
     if(com->hasS()) Printer::setNoDestinationCheck(com->S!=0);
     if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
-      if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true)){
+            if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true))
+            {
         Com::printWarningFLN(PSTR("executeGCode / queueDeltaMove returns error"));
       }
 #else
@@ -759,18 +763,23 @@ switch(com->G)
       // G100 R[n] Add n to radius. Adjust to be above floor if necessary
       // G100 R[0] set radius based on current z measurement. Moves to (0,0,0)
     float currentZmm = Printer::currentPosition[Z_AXIS];
-    if (currentZmm/Printer::cartesianZMaxMM > 0.1) {
+        if (currentZmm/Printer::cartesianZMaxMM > 0.1)
+        {
       Com::printErrorFLN(PSTR("Calibration code is limited to bottom 10% of Z height"));
       break;
     }
-    if (com->hasR()) {
+        if (com->hasR())
+        {
       if (com->hasX() || com->hasY() || com->hasZ()) 
         Com::printErrorFLN(PSTR("Cannot set radius and floor at same time."));
-      else if (com->R != 0) {
+            else if (com->R != 0)
+            {
         //add r to radius
         if (abs(com->R) <= 10) EEPROM::incrementRodRadius(com->R);
         else Com::printErrorFLN(PSTR("Calibration movement is limited to 10mm."));
-      } else {
+            }
+            else
+            {
         // auto set radius. Head must be at 0,0 and touching
         // Z offset will be corrected for.
         if (Printer::currentPosition[X_AXIS] == 0 
@@ -794,7 +803,9 @@ switch(com->G)
         } else 
           Com::printErrorFLN(PSTR("First move to touch at x,y=0,0 to auto-set radius."));
       }
-    } else {
+        }
+        else
+        {
       bool tooBig = false;
       if (com->hasX()) if (abs(com->X) <= 10) 
         EEPROM::setTowerXFloor(com->X + currentZmm + Printer::xMin);
@@ -1056,7 +1067,8 @@ void Commands::processMCode(GCode *com)
 #ifdef DEBUG_PRINT
               debugWaitLoop = 2;
 #endif
-          while(wait-HAL::timeInMilliseconds() < 100000) {
+        while(wait-HAL::timeInMilliseconds() < 100000)
+        {
               Printer::defaultLoopActions();
           }
           if(com->hasX())
@@ -1187,7 +1199,8 @@ void Commands::processMCode(GCode *com)
       {
           bool allReached = false;
           codenum = HAL::timeInMilliseconds();
-          while(!allReached) {
+            while(!allReached)
+            {
               allReached = true;
               if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
               {
@@ -1195,7 +1208,8 @@ void Commands::processMCode(GCode *com)
                   codenum = HAL::timeInMilliseconds();
               }
               Commands::checkForPeriodicalActions();
-              for(uint8_t h=0;h<NUM_TEMPERATURE_LOOPS;h++) {
+                for(uint8_t h=0; h<NUM_TEMPERATURE_LOOPS; h++)
+                {
                   TemperatureController *act = tempController[h];
                   if(act->targetTemperatureC>30 && fabs(act->targetTemperatureC-act->currentTemperatureC)>1)
                       allReached = false;
@@ -1501,7 +1515,7 @@ void Commands::processMCode(GCode *com)
 
   case 500: // M500
   {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
       EEPROM::storeDataIntoEEPROM(false);
       Com::printInfoF(Com::tConfigStoredEEPROM);
 #else
@@ -1511,7 +1525,7 @@ void Commands::processMCode(GCode *com)
   break;
   case 501: // M501
   {
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
       EEPROM::readDataFromEEPROM();
       Extruder::selectExtruderById(Extruder::current->id);
       Com::printInfoF(Com::tConfigLoadedEEPROM);
@@ -1529,17 +1543,22 @@ void Commands::processMCode(GCode *com)
       Com::printF(PSTR("Buf:"),(int)PrintLine::linesCount);
       Com::printF(PSTR(",LP:"),(int)PrintLine::linesPos);
       Com::printFLN(PSTR(",WP:"),(int)PrintLine::linesWritePos);
-      if(PrintLine::cur == NULL) {
+        if(PrintLine::cur == NULL)
+        {
           Com::printFLN(PSTR("No move"));
-          if(PrintLine::linesCount>0) {
+            if(PrintLine::linesCount>0)
+            {
               PrintLine &cur = PrintLine::lines[PrintLine::linesPos];
               Com::printF(PSTR("JFlags:"),(int)cur.joinFlags);
               Com::printFLN(PSTR("Flags:"),(int)cur.flags);
-              if(cur.isWarmUp()) {
+                if(cur.isWarmUp())
+                {
                   Com::printFLN(PSTR("warmup:"),(int)cur.getWaitForXLinesFilled());
               }
           }
-      } else {
+        }
+        else
+        {
           Com::printF(PSTR("Rem:"),PrintLine::cur->stepsRemaining);
           Com::printFLN(PSTR("Int:"),Printer::interval);
       }
@@ -1601,7 +1620,8 @@ void Commands::processMCode(GCode *com)
 */
 void Commands::executeGCode(GCode *com)
 {
-  if (INCLUDE_DEBUG_COMMUNICATION) {
+    if (INCLUDE_DEBUG_COMMUNICATION)
+    {
     if(Printer::debugCommunication())
     {
         if(com->hasG() || (com->hasM() && com->M!=111))
@@ -1610,7 +1630,9 @@ void Commands::executeGCode(GCode *com)
             return;
         }
     }
-  } else {
+    }
+    else
+    {
     previousMillisCmd = HAL::timeInMilliseconds();
 
     if(com->hasG()) processGCode(com);

@@ -16,7 +16,6 @@
 
 */
 
-// Set flag to have ui.h define some display dependent low level functions
 #define UI_MAIN 1
 #include "Repetier.h"
 // The uimenu.h declares static variables of menus, which must be declared only once.
@@ -1478,7 +1477,7 @@ void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i=0;
-    while(i<16)
+    while(i<MAX_COLS)
     {
         uint8_t c = pgm_read_byte(txt++);
         if(!c) break;
@@ -2484,7 +2483,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_BAUDRATE:
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
     {
         char p=0;
         int32_t rate;
@@ -2761,7 +2760,7 @@ void UIDisplay::executeAction(int action)
             Extruder::selectExtruderById(2);
 #endif
             break;
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
         case UI_ACTION_STORE_EEPROM:
             EEPROM::storeDataIntoEEPROM(false);
             pushMenu(&ui_menu_eeprom_saved,false);
@@ -2967,7 +2966,7 @@ void UIDisplay::executeAction(int action)
 #endif
             Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif

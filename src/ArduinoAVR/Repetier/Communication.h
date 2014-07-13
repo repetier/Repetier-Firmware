@@ -226,10 +226,9 @@ FSTRINGVAR(tZProbePrinterHeight)
 FSTRINGVAR(tWait)
 #endif // WAITING_IDENTIFIER
 
-#if EEPROM_MODE != EEPROM_ON
+#if EEPROM_MODE==0
 FSTRINGVAR(tNoEEPROMSupport)
-#endif
-#if EEPROM_MODE != NO_EEPROM
+#else
 #if FEATURE_Z_PROBE
 FSTRINGVAR(tZProbeHeight)
 FSTRINGVAR(tZProbeOffsetX)
@@ -389,10 +388,10 @@ static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\
 };
 
 #ifdef DEBUG
-#define SHOW(x) {Com::print(" " #x "="); Com::print(x); Com::println();}
-#define SHOWS(x) {Com::print(" " #x "="); Com::print(x); Com::print(" steps  "); Com::print(x/80); Com::print(" mm"); Com::println();}
-#define SHOWM(x) {Com::print(" " #x "="); Com::print((long)x*80); Com::print(" steps  "); Com::print(x); Com::print(" mm"); Com::println();}
-#define SHOT(x) Com::print(x " ")
+#define SHOW(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::println();}
+#define SHOWS(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::print(" steps  "); Com::print(x/80); Com::printF(PSTR(" mm")); Com::println();}
+#define SHOWM(x) {Com::printF(PSTR(" " #x "=")); Com::print((long)x*80); Com::print(" steps  "); Com::print(x); Com::printF(PSTR(" mm")); Com::println();}
+#define SHOT(x) Com::printF(PSTR(x " "))
 #define SHOWA(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWS(a[i]);}
 #define SHOWAM(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWM(a[i]);}
 

@@ -203,7 +203,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #endif
    "Mul:%om", "Buf:%oB", "%os");
 
-  #if EEPROM_MODE == EEPROM_ON
+  #if EEPROM_MODE!=0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
     #define UI_PRINTTIME_PAGES ,&ui_page2
     #define UI_PRINTTIME_COUNT 1
@@ -221,14 +221,26 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 #elif UI_ROWS>=4
  #if HAVE_HEATED_BED==true
+ #if NUM_EXTRUDER>0
    UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os");
+#else
+   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os");
+#endif
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
+ #if NUM_EXTRUDER>0
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+   #else
+   UI_PAGE4(ui_page1,"","Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+   #endif
  #endif
   UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
 //UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
+ #if NUM_EXTRUDER>0
    UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1
+ #else
+    UI_PAGE4(ui_page3
+ #endif
  #if NUM_EXTRUDER>1
    ,UI_TEXT_PAGE_EXTRUDER2
  #endif
@@ -242,11 +254,13 @@ for 2 row displays. You can add additional pages or change the default pages lik
    ,"%os"
  #elif NUM_EXTRUDER==2 || (NUM_EXTRUDER==1 && HAVE_HEATED_BED==true)
    ,"","%os"
- #elif NUM_EXTRUDER==1
+ #elif NUM_EXTRUDER==1 || (NUM_EXTRUDER==0 &&  HAVE_HEATED_BED==true)
    ,"","","%os"
+ #elif NUM_EXTRUDER==0
+   ,"","","","%os"
  #endif
  );
- #if EEPROM_MODE == EEPROM_ON
+ #if EEPROM_MODE!=0
   UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
   #define UI_PRINTTIME_PAGES ,&ui_page4
   #define UI_PRINTTIME_COUNT 1
@@ -306,6 +320,8 @@ UI_MENU_ACTION4C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION4C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST4);
+#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINT_FILAMENT
+UI_MENU_ACTION4C(ui_menu_epos,UI_ACTION_EPOSITION,EPOS_ROWS);
 #else
 UI_MENU_ACTION2C(ui_menu_xpos,UI_ACTION_XPOSITION,UI_TEXT_ACTION_XPOSITION2);
 UI_MENU_ACTION2C(ui_menu_ypos,UI_ACTION_YPOSITION,UI_TEXT_ACTION_YPOSITION2);
@@ -315,10 +331,8 @@ UI_MENU_ACTION2C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION2C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST2);
 UI_MENU_ACTION2C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST2);
 UI_MENU_ACTION2C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST2);
+UI_MENU_ACTION2C(ui_menu_epos,UI_ACTION_EPOSITION,UI_TEXT_ACTION_EPOSITION_FAST2);
 #endif
-// hack, sorry
-#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINT_FILAMENT
-UI_MENU_ACTION4C(ui_menu_epos,UI_ACTION_EPOSITION,EPOS_ROWS);
 
 /*
 Next step is to define submenus leading to the action.
@@ -636,7 +650,7 @@ UI_MENU_SUBMENU(ui_menu_conf_general, UI_TEXT_GENERAL,      ui_menu_general);
 UI_MENU_SUBMENU(ui_menu_conf_accel,   UI_TEXT_ACCELERATION, ui_menu_accel);
 UI_MENU_SUBMENU(ui_menu_conf_feed,    UI_TEXT_FEEDRATE,     ui_menu_feedrate);
 UI_MENU_SUBMENU(ui_menu_conf_extr,    UI_TEXT_EXTRUDER,     ui_menu_cextr);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
 UI_MENU_ACTIONCOMMAND(ui_menu_conf_to_eeprom,UI_TEXT_STORE_TO_EEPROM,UI_ACTION_STORE_EEPROM);
 UI_MENU_ACTIONCOMMAND(ui_menu_conf_from_eeprom,UI_TEXT_LOAD_EEPROM,UI_ACTION_LOAD_EEPROM);
 #define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom

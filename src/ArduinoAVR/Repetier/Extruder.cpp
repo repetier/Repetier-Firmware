@@ -22,7 +22,7 @@
 #include "Repetier.h"
 #include "pins_arduino.h"
 #include "ui.h"
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE!=0
 #include "Eeprom.h"
 #endif
 
@@ -341,6 +341,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         GCode::executeFString(Extruder::current->deselectCommands);
         executeSelect = true;
     }
+    Commands::waitUntilEndOfAllMoves();
 #endif
     Extruder::current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
     Extruder::current = &extruder[extruderId];
@@ -416,7 +417,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     bool alloff = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC>15) alloff = false;
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
     if(alloff && !alloffs) // All heaters are now switched off?
         EEPROM::updatePrinterUsage();
 #endif
@@ -1060,7 +1061,7 @@ bool reportTempsensorError()
         else Com::printFLN(Com::tTempSensorWorking);
         if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed );
         else Com::printF(Com::tExtruderSpace,i);
-        Com::print(" Temperature reading is ");
+        Com::printF(PSTR(" Temperature reading is "));
         Com::print(temp);
         Com::println();
     }
