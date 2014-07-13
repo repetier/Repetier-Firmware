@@ -104,7 +104,7 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
-#define DRIVE_SYSTEM 0
+#define DRIVE_SYSTEM 3
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -112,7 +112,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -202,7 +202,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_INVERSE true
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON false
+#define EXT0_ENABLE_ON 0
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
@@ -244,7 +244,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain.  Overridden if EEPROM activated. */
-#define EXT0_PID_P   24
+#define EXT0_PID_PGAIN_OR_DEAD_TIME   24
 /** I-gain. Overridden if EEPROM activated.
 */
 #define EXT0_PID_I   0.88
@@ -357,7 +357,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define EXT1_PID_INTEGRAL_DRIVE_MIN 60
 /** P-gain.  Overridden if EEPROM activated. */
-#define EXT1_PID_P   24
+#define EXT1_PID_PGAIN_OR_DEAD_TIME   24
 /** I-gain.  Overridden if EEPROM activated.
 */
 #define EXT1_PID_I   0.88
@@ -534,7 +534,7 @@ Value is used for all generic tables created. */
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed conected to your board, false if not */
-#define HAVE_HEATED_BED true
+#define HAVE_HEATED_BED 1
 
 #define HEATED_BED_MAX_TEMP 115
 /** Skip M190 wait, if heated bed is already within x degrees. Fixed numbers only, 0 = off. */
@@ -572,7 +572,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
 /** P-gain.  Overridden if EEPROM activated. */
-#define HEATED_BED_PID_PGAIN   196
+#define HEATED_BED_PID_PGAIN_OR_DEAD_TIME   196
 /** I-gain  Overridden if EEPROM activated.*/
 #define HEATED_BED_PID_IGAIN   33.02
 /** Dgain.  Overridden if EEPROM activated.*/
@@ -683,7 +683,7 @@ on this endstop.
 // You can disable endstop checking for print moves. This is needed, if you get sometimes
 // false signals from your endstops. If your endstops don't give false signals, you
 // can set it on for safety.
-#define ALWAYS_CHECK_ENDSTOPS true
+#define ALWAYS_CHECK_ENDSTOPS 1
 
 // maximum positions in mm - only fixed numbers!
 // For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be set to the distance between the hotend
@@ -692,7 +692,6 @@ on this endstop.
 #define X_MAX_LENGTH 165
 #define Y_MAX_LENGTH 175
 #define Z_MAX_LENGTH 116.820
-
 // Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
 // of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values.
 #define X_MIN_POS 0
@@ -719,8 +718,8 @@ on this endstop.
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 // Delta settings
-#if DRIVE_SYSTEM==3
-/** \brief Delta rod length
+#if DRIVE_SYSTEM==DELTA
+/** \brief Delta rod length (mm)
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
 
@@ -728,16 +727,16 @@ on this endstop.
 /*  =========== Parameter essential for delta calibration ===================
 
             C, Y-Axis
-            |                        |___| CARRIAGE_HORIZONTAL_OFFSET
-            |                        |   \
-            |_________ X-axis        |    \
-           / \                       |     \  DELTA_DIAGONAL_ROD
-          /   \                             \
-         /     \                             \    Carriage is at printer center!
-         A      B                             \_____/
-                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET
-                                         |----| DELTA_RADIUS
-                                     |-----------| PRINTER_RADIUS
+            |                        |___| CARRIAGE_HORIZONTAL_OFFSET (recommend set it to 0)
+            |                        |   \------------------------------------------
+            |_________ X-axis        |    \                                        |
+           / \                       |     \  DELTA_DIAGONAL_ROD (length)    Each move this Rod Height
+          /   \                             \                                 is calculated
+         /     \                             \    Carriage is at printer center!   |
+         A      B                             \_____/--------------------------------
+                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET (recommend set it to 0)
+                                         |----| ROD_RADIUS (Horizontal rod pivot to pivot measure)
+                                     |-----------| PRINTER_RADIUS (recommend set it to ROD_RADIUS)
 
     Column angles are measured from X-axis counterclockwise
     "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
@@ -758,34 +757,42 @@ on this endstop.
 #define DELTA_DIAGONAL_CORRECTION_B 0
 #define DELTA_DIAGONAL_CORRECTION_C 0
 
-/** Max. radius the printer should be able to reach. */
+/** Max. radius (mm) the printer should be able to reach. */
 #define DELTA_MAX_RADIUS 200
 
+// Margin (mm) to avoid above tower minimum (xMin xMinsteps)
+// If your printer can put its carriage low enough the rod is horizontal without hitting the floor
+// set this to zero. Otherwise, measure how high the carriage is from horizontal rod
+// Also, movement speeds are 10x to 20x cartesian speeds at tower bottom.
+// You may need to leave a few mm for safety.
+// Hitting floor at high speed can damage your printer (motors, drives, etc)
+// THIS MAY NEED UPDATING IF THE HOT END HEIGHT CHANGES!
+#define DELTA_FLOOR_SAFETY_MARGIN_MM 15
 
 /** \brief Horizontal offset of the universal joints on the end effector (moving platform).
 */
-#define END_EFFECTOR_HORIZONTAL_OFFSET 33
+#define END_EFFECTOR_HORIZONTAL_OFFSET 0
 
 /** \brief Horizontal offset of the universal joints on the vertical carriages.
 */
-#define CARRIAGE_HORIZONTAL_OFFSET 18
+#define CARRIAGE_HORIZONTAL_OFFSET 0
 
-/** \brief Printer radius in mm, measured from the center of the print area to the vertical smooth rod.
+/** \brief Printer radius in mm,
+  measured from the center of the print area to the vertical smooth tower.
+  Alternatly set this to the pivot to pivot horizontal rod distance, when head is at (0,0)
 */
-#define PRINTER_RADIUS 175
+#define PRINTER_RADIUS 124
 
-/** Remove comment for more precise delta moves. Needs a bit more computation time. */
-//#define EXACT_DELTA_MOVES
+/** 1 for more precise delta moves. 0 for faster computation.
+Needs a bit more computation time. */
+#define EXACT_DELTA_MOVES 1
 
-/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
-*/
-#define DELTA_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 /* ========== END Delta calibation data ==============*/
 
 /** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
 If you don't do it, make sure to home first before your first move.
 */
-#define DELTA_HOME_ON_POWER false
+#define DELTA_HOME_ON_POWER 0
 
 /** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
 you can also change the values online and autoleveling will store the results here. */
@@ -793,22 +800,23 @@ you can also change the values online and autoleveling will store the results he
 #define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
 #define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
 
-
-/** \brief Experimental calibration utility for delta printers
-*/
-#define SOFTWARE_LEVELING
-
 #endif
-#if DRIVE_SYSTEM == 4 // ========== Tuga special settings =============
+#if DRIVE_SYSTEM==TUGA
+// ========== Tuga special settings =============
 /* Radius of the long arm in mm. */
 #define DELTA_DIAGONAL_ROD 240
 #endif
 
 /** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
 Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino
+will be allocated for the delta buffer.
+PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
+Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
+or 16 * (200 + (7*22=154) = 354) = 5664 bytes! !1
+min is 5 * (200 + (7*10=70) =270) = 1350
+ This leaves ~1K free RAM on an Arduino which has only 8k
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define MAX_DELTA_SEGMENTS_PER_LINE 22
+#define DELTASEGMENTS_PER_PRINTLINE 22
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -840,7 +848,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define HOMING_ORDER HOME_ORDER_ZXY
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
-#define ENABLE_BACKLASH_COMPENSATION false
+#define ENABLE_BACKLASH_COMPENSATION 0
 #define Z_BACKLASH 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
@@ -865,7 +873,7 @@ additional stepper interrupts with all it's overhead. As a result you can go as 
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
-#define ALLOW_QUADSTEPPING true
+#define ALLOW_QUADSTEPPING 1
 /** If you reach STEP_DOUBLER_FREQUENCY the firmware will do 2 or 4 steps with nearly no delay. That can be too fast
 for some printers causing an early stall.
 
@@ -923,7 +931,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 16
+#define PRINTLINE_CACHE_SIZE 16
 
 /** \brief Low filled cache size.
 
@@ -960,13 +968,13 @@ Without a correct adjusted advance algorithm, you get blobs at points, where acc
 effect increases with speed and acceleration difference. Using the advance method decreases this effect.
 For more informations, read the wiki.
 */
-#define USE_ADVANCE
+#define USE_ADVANCE 1
 
 /** \brief enables quadratic component.
 
-Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need
+Set 1 to allow, 0 disallow a quadratic advance dependency. Linear is the dominant value, so no real need
 to activate the quadratic term. Only adds lots of computations and storage usage. */
-#define ENABLE_QUADRATIC_ADVANCE
+#define ENABLE_QUADRATIC_ADVANCE 0
 
 
 // ##########################################################################################
@@ -999,7 +1007,7 @@ the power will be turned on without the need to call M80 if initially started.
 If you use an ATX power supply you need the power pin to work non inverting. For some special
 boards you might need to make it inverting.
 */
-#define POWER_INVERTING false
+#define POWER_INVERTING 0
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait forever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!
@@ -1050,17 +1058,17 @@ If you have an unused extruder stepper free, you could use it to drive the secon
 instead of driving both with a single stepper. The same works for the other axis if needed.
 */
 
-#define FEATURE_TWO_XSTEPPER false
+#define FEATURE_TWO_XSTEPPER 0
 #define X2_STEP_PIN   E1_STEP_PIN
 #define X2_DIR_PIN    E1_DIR_PIN
 #define X2_ENABLE_PIN E1_ENABLE_PIN
 
-#define FEATURE_TWO_YSTEPPER false
+#define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
 #define Y2_DIR_PIN    E1_DIR_PIN
 #define Y2_ENABLE_PIN E1_ENABLE_PIN
 
-#define FEATURE_TWO_ZSTEPPER false
+#define FEATURE_TWO_ZSTEPPER 0
 #define Z2_STEP_PIN   E1_STEP_PIN
 #define Z2_DIR_PIN    E1_DIR_PIN
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
@@ -1068,7 +1076,7 @@ instead of driving both with a single stepper. The same works for the other axis
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
-#define FEATURE_DITTO_PRINTING false
+#define FEATURE_DITTO_PRINTING 0
 
 /* Servos
 
@@ -1081,7 +1089,7 @@ Servos are controlled by a pulse width normally between 500 and 2500 with 1500ms
 WARNING: Servos can draw a considerable amount of current. Make sure your system can handle this or you may risk your hardware!
 */
 
-#define FEATURE_SERVO false
+#define FEATURE_SERVO 0
 // Servo pins on a RAMPS board are 11,6,5,4
 #define SERVO0_PIN 11
 #define SERVO1_PIN 6
@@ -1090,21 +1098,21 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
-#define FEATURE_WATCHDOG true
+#define FEATURE_WATCHDOG 1
 
 /* Z-Probing */
 
-#define FEATURE_Z_PROBE false
+#define FEATURE_Z_PROBE 1
 #define Z_PROBE_PIN 63
-#define Z_PROBE_PULLUP true
-#define Z_PROBE_ON_HIGH true
+#define Z_PROBE_PULLUP 1
+#define Z_PROBE_ON_HIGH 1
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
 #define Z_PROBE_BED_DISTANCE 5.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
-#define Z_PROBE_WAIT_BEFORE_TEST true
+#define Z_PROBE_WAIT_BEFORE_TEST 1
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
@@ -1120,13 +1128,19 @@ is always running and is not hung up for some unknown reason. */
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
-#define FEATURE_AUTOLEVEL false
+#define FEATURE_AUTOLEVEL 1
 #define Z_PROBE_X1 100
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160
 #define Z_PROBE_Y2 170
 #define Z_PROBE_X3 20
 #define Z_PROBE_Y3 170
+
+
+/** \brief Experimental calibration utility for delta printers
+ * Change 1 to 0 to disable
+*/
+#define FEATURE_SOFTWARE_LEVELING 0
 
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 0
@@ -1146,47 +1160,48 @@ is always running and is not hung up for some unknown reason. */
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
-#define SD_EXTENDED_DIR true
+#define SD_EXTENDED_DIR 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
-#define ARC_SUPPORT true
+#define ARC_SUPPORT 1
 
 /** You can store the current position with M401 and go back to it with M402.
    This works only if feature is set to true. */
-#define FEATURE_MEMORY_POSITION true
+#define FEATURE_MEMORY_POSITION 1
 
 /** If a checksum is sent, all future comamnds must also contain a checksum. Increases reliability especially for binary protocol. */
-#define FEATURE_CHECKSUM_FORCED false
+#define FEATURE_CHECKSUM_FORCED 0
 
 /** Should support for fan control be compiled in. If you enable this make sure
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
-#define FEATURE_FAN_CONTROL true
+#define FEATURE_FAN_CONTROL 1
 
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so
 you don't need to configure uicong.h at all. Controller settings > 1 disable usage
 of uiconfig.h
 
-0 = no display
-1 = Manual definition of display and keys parameter in uiconfig.h
+0 or NO_CONTROLLER = no display
+1 or UICONFIG_CONTROLLER = Manual definition of display and keys parameter in uiconfig.h
 
 The following settings override uiconfig.h!
-2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
-3 = Adafruit RGB controller
-4 = Foltyn 3DMaster with display attached
-5 = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
-6 = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
-7 = RADDS Extension Port
-8 = PiBot Display/Controller extension with 20x4 character display
-9 = PiBot Display/Controller extension with 16x2 character display
-10 = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
-11 = RepRapDiscount Full Graphic Smart Controller
-12 = FELIXPrinters Controller
-13 = SeeMeCNC Display on Rambo (ORION)
-14 = OpenHardware.co.za LCD2004 V2014
-15 = Sanguinololu + Panelolu2
+2 or CONTROLLER_SMARTRAMPS = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
+3 or CONTROLLER_ADAFRUIT = Adafruit RGB controller
+4 or CONTROLLER_FOLTYN = Foltyn 3DMaster with display attached
+5 or CONTROLLER_VIKI = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
+6 or CONTROLLER_MEGATRONIC = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
+7 or CONTROLLER_RADDS = RADDS Extension Port
+8 or CONTROLLER_PIBOT20X4 = PiBot Display/Controller extension with 20x4 character display
+9 or CONTROLLER_PIBOT16X2 = PiBot Display/Controller extension with 16x2 character display
+10 or CONTROLLER_GADGETS3D_SHIELD = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
+11 or CONTROLLER_REPRAPDISCOUNT_GLCD = RepRapDiscount Full Graphic Smart Controller
+12 or CONTROLLER_FELIX = FELIXPrinters Controller
+13 or CONTROLLER_RAMBO = SeeMeCNC Display on Rambo (ORION)
+14 or CONTROLLER_OPENHARDWARE_LCD2004 = OpenHardware.co.za LCD2004 V2014
+15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
 */
-#define FEATURE_CONTROLLER 0
+
+#define FEATURE_CONTROLLER NO_CONTROLLER
 
 /**
 Select the language to use.
@@ -1206,7 +1221,7 @@ Select the language to use.
 
 
 /** Animate switches between menus etc. */
-#define UI_ANIMATION true
+#define UI_ANIMATION 1
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1215,7 +1230,7 @@ Select the language to use.
 #define UI_START_SCREEN_DELAY 1000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
-#define UI_DISABLE_AUTO_PAGESWITCH true
+#define UI_DISABLE_AUTO_PAGESWITCH 1
 
 /** Time to return to info menu if x millisconds no key was pressed. Set to 0 to disable it. */
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
@@ -1234,7 +1249,7 @@ the move distance depending on the speed you turn the encoder. That way you can 
 same setting.
 
 */
-#define UI_SPEEDDEPENDENT_POSITIONING true
+#define UI_SPEEDDEPENDENT_POSITIONING 1
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -1246,7 +1261,7 @@ same setting.
 /** \brief Lowest repeat time. */
 #define UI_KEY_MIN_REPEAT 50
 
-#define FEATURE_BEEPER true
+#define FEATURE_BEEPER 1
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.

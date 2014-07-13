@@ -39,13 +39,13 @@ SDCard::SDCard()
 
 void SDCard::automount()
 {
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
         if(sdactive)   // Card removed
         {
             Com::printFLN(PSTR("SD card removed"));
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
             uid.executeAction(UI_ACTION_TOP_MENU);
 #endif
             unmount();
@@ -57,10 +57,9 @@ void SDCard::automount()
         if(!sdactive)
         {
             UI_STATUS(UI_TEXT_SD_INSERTED);
-            Com::printFLN(PSTR("SD card inserted"));
-            Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
+            Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
             initsd();
-#if UI_DISPLAY_TYPE!=0
+#if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
                 Printer::setAutomount(true);
                 uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
@@ -75,7 +74,7 @@ void SDCard::initsd()
 {
     sdactive = false;
 #if SDSS >- 1
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if SDCARDDETECT>-1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
@@ -110,7 +109,7 @@ void SDCard::unmount()
     savetosd = false;
     Printer::setAutomount(false);
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
-#if UI_DISPLAY_TYPE!=0 && SDSUPPORT
+#if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
     uid.cwd[0]='/';
     uid.cwd[1]=0;
     uid.folderLevel=0;
@@ -133,7 +132,7 @@ void SDCard::pausePrint(bool intern)
     if(intern) {
         Commands::waitUntilEndOfAllBuffers();
         Printer::MemoryPosition();
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
         Printer::moveToReal(0,0.9*EEPROM::deltaMaxRadius(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
 #else
         Printer::moveToReal(Printer::xMin,Printer::yMin+Printer::yLength,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);

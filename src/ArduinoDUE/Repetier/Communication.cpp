@@ -21,10 +21,10 @@
 
 #include "Repetier.h"
 
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
-#if DRIVE_SYSTEM==0
+#if DRIVE_SYSTEM==CARTESIAN
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 #else
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
@@ -119,7 +119,7 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
@@ -138,7 +138,7 @@ FSTRINGVALUE(Com::tDeltaRadiusCorrectionB,"Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC,"Delta Radius C(0):")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==4
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Long arm length [mm]")
@@ -268,7 +268,7 @@ FSTRINGVALUE(Com::tEPRXBacklash,"X backlash [mm]")
 FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZStepsPerMM,"Steps per mm")
@@ -276,7 +276,7 @@ FSTRINGVALUE(Com::tEPRZMaxFeedrate,"Max. feedrate [mm/s]")
 FSTRINGVALUE(Com::tEPRZHomingFeedrate,"Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Diagonal rod length [mm]")
-FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal radius [mm]")
+FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal rod radius at 0,0 [mm]")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 
@@ -284,7 +284,7 @@ FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerZOffset,"Tower Z endstop offset [steps]")
 
-FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max. radius [mm]")
+FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max printable radius [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA,"Corr. diagonal A [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB,"Corr. diagonal B [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
@@ -327,6 +327,8 @@ FSTRINGVALUE(Com::tEPRHeatManager,"heat manager [0-3]")
 FSTRINGVALUE(Com::tEPRDriveMax,"PID drive max")
 FSTRINGVALUE(Com::tEPRDriveMin,"PID drive min")
 FSTRINGVALUE(Com::tEPRPGain,"PID P-gain/dead-time")
+FSTRINGVALUE(Com::tEPRDead,"Heater dead-time")
+FSTRINGVALUE(Com::tEPRUnused,"na for dead time ctrl")
 FSTRINGVALUE(Com::tEPRIGain,"PID I-gain")
 FSTRINGVALUE(Com::tEPRDGain,"PID D-gain")
 FSTRINGVALUE(Com::tEPRPIDMaxValue,"PID max value [0-255]")

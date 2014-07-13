@@ -115,7 +115,7 @@ FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
 
-#if DRIVE_SYSTEM==3
+#if DRIVE_SYSTEM==DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
@@ -138,7 +138,7 @@ FSTRINGVAR(tDeltaDiagonalCorrectionC)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDeltaMaxRadius)
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==4
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVAR(tInvalidDeltaCoordinate)
 FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDiagonalRodLength)
@@ -274,7 +274,7 @@ FSTRINGVAR(tEPRZTravelAcceleration)
 FSTRINGVAR(tEPRZStepsPerMM)
 FSTRINGVAR(tEPRZMaxFeedrate)
 FSTRINGVAR(tEPRZHomingFeedrate)
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM!=DELTA
 FSTRINGVAR(tEPRMaxZJerk)
 FSTRINGVAR(tEPRXStepsPerMM)
 FSTRINGVAR(tEPRYStepsPerMM)
@@ -315,6 +315,8 @@ FSTRINGVAR(tEPRHeatManager)
 FSTRINGVAR(tEPRDriveMax)
 FSTRINGVAR(tEPRDriveMin)
 FSTRINGVAR(tEPRPGain)
+FSTRINGVAR(tEPRDead)
+FSTRINGVAR(tEPRUnused)
 FSTRINGVAR(tEPRIGain)
 FSTRINGVAR(tEPRDGain)
 FSTRINGVAR(tEPRPIDMaxValue)
@@ -379,9 +381,27 @@ static inline void print(int value) {print((int32_t)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
+static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
     protected:
     private:
 };
+
+#ifdef DEBUG
+#define SHOW(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::println();}
+#define SHOWS(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::print(" steps  "); Com::print(x/80); Com::printF(PSTR(" mm")); Com::println();}
+#define SHOWM(x) {Com::printF(PSTR(" " #x "=")); Com::print((long)x*80); Com::print(" steps  "); Com::print(x); Com::printF(PSTR(" mm")); Com::println();}
+#define SHOT(x) Com::printF(PSTR(x " "))
+#define SHOWA(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWS(a[i]);}
+#define SHOWAM(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWM(a[i]);}
+
+#else
+#define SHOW(x)
+#define SHOT(x)
+#define SHOWS(x)
+#define SHOWM(x)
+#define SHOWA(t,a,n)
+#define SHOWAM(t,a,n)
+#endif
 
 #endif // COMMUNICATION_H

@@ -53,106 +53,110 @@
 // Printing related data
 #if NONLINEAR_SYSTEM
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
-// MAX_DELTA_SEGMENTS_PER_LINE *
-#define DELTA_CACHE_SIZE (MAX_DELTA_SEGMENTS_PER_LINE * MOVE_CACHE_SIZE)
+// DELTASEGMENTS_PER_PRINTLINE *
+#define DELTA_CACHE_SIZE (DELTASEGMENTS_PER_PRINTLINE * PRINTLINE_CACHE_SIZE)
 
 class PrintLine;
 typedef struct
 {
     flag8_t dir; 									///< Direction of delta movement.
-    uint16_t deltaSteps[3];   				    ///< Number of steps in move.
+    uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
     inline void checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
-        dir &= ~16;
+        dir &= ~XSTEP;
     }
     inline void setYMoveFinished()
     {
-        dir &= ~32;
+        dir &= ~YSTEP;
     }
     inline void setZMoveFinished()
     {
-        dir &= ~64;
+        dir &= ~ZSTEP;
     }
     inline void setXYMoveFinished()
     {
-        dir &= ~48;
+        dir &= ~XY_STEP;
     }
     inline bool isXPositiveMove()
     {
-        return (dir & 17) == 17;
+        return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & 17) == 16;
+        return (dir & X_STEP_DIRPOS) == XSTEP;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & 34) == 34;
+        return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & 34) == 32;
+        return (dir & Y_STEP_DIRPOS) == YSTEP;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & 68) == 68;
+        return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & 68) == 64;
+        return (dir & Z_STEP_DIRPOS) == ZSTEP;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & 136) == 136;
+        return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
     inline bool isENegativeMove()
     {
-        return (dir & 136) == 128;
+        return (dir & E_STEP_DIRPOS) == ESTEP;
     }
     inline bool isXMove()
     {
-        return (dir & 16);
+        return (dir & XSTEP);
     }
     inline bool isYMove()
     {
-        return (dir & 32);
+        return (dir & YSTEP);
     }
     inline bool isXOrYMove()
     {
-        return dir & 48;
+        return dir & XY_STEP;
     }
     inline bool isZMove()
     {
-        return (dir & 64);
+        return (dir & ZSTEP);
     }
     inline bool isEMove()
     {
-        return (dir & 128);
+        return (dir & ESTEP);
     }
     inline bool isEOnlyMove()
     {
-        return (dir & 240)==128;
+        return (dir & XYZE_STEP)==ESTEP;
     }
     inline bool isNoMove()
     {
-        return (dir & 240)==0;
+        return (dir & XYZE_STEP)==0;
     }
     inline bool isXYZMove()
     {
-        return dir & 112;
+        return dir & XYZ_STEP;
     }
     inline bool isMoveOfAxis(uint8_t axis)
     {
-        return (dir & (16<<axis));
+        return (dir & (XSTEP<<axis));
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= 16<<axis;
+        dir |= XSTEP<<axis;
+    }
+    inline void setPositiveMoveOfAxis(uint8_t axis)
+    {
+        dir |= X_STEP_DIRPOS<<axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= 1<<axis;
+        dir |= X_DIRPOS<<axis;
     }
 } DeltaSegment;
 extern uint8_t lastMoveID;
@@ -175,8 +179,8 @@ private:
     int32_t timeInTicks;
     flag8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
     flag8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
-    int32_t delta[4];                  ///< Steps we want to move.
-    int32_t error[4];                  ///< Error calculation for Bresenham algorithm
+    int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
+    int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
     float speedY;                   ///< Speed in y direction at fullInterval in mm/s
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
@@ -193,7 +197,7 @@ private:
     uint8_t numDeltaSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
     uint8_t moveID;					///< ID used to identify moves which are all part of the same line
     int32_t numPrimaryStepPerSegment;	///< Number of primary bresenham axis steps in each delta segment
-    DeltaSegment segments[MAX_DELTA_SEGMENTS_PER_LINE];
+    DeltaSegment segments[DELTASEGMENTS_PER_PRINTLINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
@@ -203,8 +207,8 @@ private:
     speed_t vMax;              ///< Maximum reached speed in steps/s.
     speed_t vStart;            ///< Starting speed in steps/s.
     speed_t vEnd;              ///< End speed in steps/s
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
     int32_t advanceRate;               ///< Advance steps at full speed
     int32_t advanceFull;               ///< Maximum advance at fullInterval [steps*65536]
     int32_t advanceStart;
@@ -265,7 +269,7 @@ public:
     }
     inline bool isExtruderForwardMove()
     {
-        return (dir & 136)==136;
+        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
     }
     inline void block()
     {
@@ -327,7 +331,7 @@ public:
     }
     inline void setXMoveFinished()
     {
-#if DRIVE_SYSTEM==0 || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
         dir&=~16;
 #else
         dir&=~48;
@@ -335,7 +339,7 @@ public:
     }
     inline void setYMoveFinished()
     {
-#if DRIVE_SYSTEM==0 || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
         dir&=~32;
 #else
         dir&=~48;
@@ -351,79 +355,79 @@ public:
     }
     inline bool isXPositiveMove()
     {
-        return (dir & 17)==17;
+        return (dir & X_STEP_DIRPOS)==X_STEP_DIRPOS;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & 17)==16;
+        return (dir & X_STEP_DIRPOS)==XSTEP;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & 34)==34;
+        return (dir & Y_STEP_DIRPOS)==Y_STEP_DIRPOS;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & 34)==32;
+        return (dir & Y_STEP_DIRPOS)==YSTEP;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & 68)==68;
+        return (dir & Z_STEP_DIRPOS)==Z_STEP_DIRPOS;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & 68)==64;
+        return (dir & Z_STEP_DIRPOS)==ZSTEP;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & 136)==136;
+        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
     }
     inline bool isENegativeMove()
     {
-        return (dir & 136)==128;
+        return (dir & E_STEP_DIRPOS)==ESTEP;
     }
     inline bool isXMove()
     {
-        return (dir & 16);
+        return (dir & XSTEP);
     }
     inline bool isYMove()
     {
-        return (dir & 32);
+        return (dir & YSTEP);
     }
     inline bool isXOrYMove()
     {
-        return dir & 48;
+        return dir & XY_STEP;
     }
     inline bool isZMove()
     {
-        return (dir & 64);
+        return (dir & ZSTEP);
     }
     inline bool isEMove()
     {
-        return (dir & 128);
+        return (dir & ESTEP);
     }
     inline bool isEOnlyMove()
     {
-        return (dir & 240)==128;
+        return (dir & XYZE_STEP)==ESTEP;
     }
     inline bool isNoMove()
     {
-        return (dir & 240)==0;
+        return (dir & XYZE_STEP)==0;
     }
     inline bool isXYZMove()
     {
-        return dir & 112;
+        return dir & XYZ_STEP;
     }
     inline bool isMoveOfAxis(uint8_t axis)
     {
-        return (dir & (16<<axis));
+        return (dir & (XSTEP<<axis));
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= 16<<axis;
+        dir |= XSTEP<<axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= 1<<axis;
+        dir |= X_DIRPOS<<axis;
     }
     inline static void resetPathPlanner()
     {
@@ -432,9 +436,9 @@ public:
     }
     inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
     {
-#ifdef USE_ADVANCE
+#if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
         long advanceTarget = Printer::advanceExecuted;
         if(accelerate)
         {
@@ -496,14 +500,14 @@ public:
     inline void startXStep()
     {
         ANALYZER_ON(ANALYZER_CH6);
-#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
+#if !(GANTRY)
         ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==1
+#if DRIVE_SYSTEM==XY_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -515,7 +519,7 @@ public:
             Printer::motorY--;
         }
 #endif
-#if DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==YX_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
@@ -536,14 +540,14 @@ public:
     inline void startYStep()
     {
         ANALYZER_ON(ANALYZER_CH7);
-#if DRIVE_SYSTEM==0 || !defined(XY_GANTRY)
+#if !(GANTRY)
         ANALYZER_ON(ANALYZER_CH3);
         WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==1
+#if DRIVE_SYSTEM==XY_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -555,7 +559,7 @@ public:
             Printer::motorY++;
         }
 #endif
-#if DRIVE_SYSTEM==2
+#if DRIVE_SYSTEM==YX_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -567,7 +571,7 @@ public:
             Printer::motorY--;
         }
 #endif
-#endif // XY_GANTRY
+#endif // GANTRY
 #ifdef DEBUG_STEPCOUNT
         totalStepsRemaining--;
 #endif
@@ -606,7 +610,7 @@ public:
     static inline void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
-        if(linesPos>=MOVE_CACHE_SIZE) linesPos=0;
+        if(linesPos>=PRINTLINE_CACHE_SIZE) linesPos=0;
         cur = NULL;
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
@@ -619,7 +623,7 @@ public:
     static inline void pushLine()
     {
         linesWritePos++;
-        if(linesWritePos>=MOVE_CACHE_SIZE) linesWritePos = 0;
+        if(linesWritePos>=PRINTLINE_CACHE_SIZE) linesWritePos = 0;
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
         BEGIN_INTERRUPT_PROTECTED
         linesCount++;
@@ -644,19 +648,19 @@ public:
 #endif
     static inline void previousPlannerIndex(uint8_t &p)
     {
-        p = (p ? p-1 : MOVE_CACHE_SIZE-1);
+        p = (p ? p-1 : PRINTLINE_CACHE_SIZE-1);
     }
     static inline void nextPlannerIndex(uint8_t& p)
     {
-        p = (p == MOVE_CACHE_SIZE - 1 ? 0 : p + 1);
+        p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
-    static void queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
+    static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
+    inline int32_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#ifdef SOFTWARE_LEVELING && DRIVE_SYSTEM==3
+#if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
     static void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
     static float calcZOffset(long factors[], long pointX, long pointY);
 #endif

@@ -18,6 +18,7 @@
 #if !defined(_UI_MENU_H)
 #define _UI_MENU_H
 
+/*moved to uilang.h
 #define cUP "\001"
 #define cDEG "\002"
 #define cSEL "\003"
@@ -25,6 +26,7 @@
 #define cTEMP "\005"
 #define cFOLD "\006"
 #define cARROW "\176"
+*/
 /*
 The menu configuration uses dynamic strings. These dynamic strings can contain
 a placeholder for special values. During print these placeholder are exchanged
@@ -45,6 +47,9 @@ Special Characters
 
 List of placeholder:
 %%% : The % char
+%% :  The % char (also)
+
+%?<c> : Conditional. Print c if current char is not c. Allows avoiding duplicate character, like space
 
 acceleration
 %ax : X acceleration during print moves
@@ -64,6 +69,7 @@ debug
 
 extruder
 %ec : Current extruder temperature
+%eIc : Current extruder temperature integer (shorter)
 %eb : Current heated bed temperature
 %e0..9 : Temp. of extruder 0..9
 %er : Extruder relative mode
@@ -314,6 +320,8 @@ UI_MENU_ACTION4C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION4C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST4);
+#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINT_FILAMENT
+UI_MENU_ACTION4C(ui_menu_epos,UI_ACTION_EPOSITION,EPOS_ROWS);
 #else
 UI_MENU_ACTION2C(ui_menu_xpos,UI_ACTION_XPOSITION,UI_TEXT_ACTION_XPOSITION2);
 UI_MENU_ACTION2C(ui_menu_ypos,UI_ACTION_YPOSITION,UI_TEXT_ACTION_YPOSITION2);
@@ -323,8 +331,8 @@ UI_MENU_ACTION2C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION2C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST2);
 UI_MENU_ACTION2C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST2);
 UI_MENU_ACTION2C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST2);
-#endif
 UI_MENU_ACTION2C(ui_menu_epos,UI_ACTION_EPOSITION,UI_TEXT_ACTION_EPOSITION_FAST2);
+#endif
 
 /*
 Next step is to define submenus leading to the action.
@@ -596,10 +604,10 @@ UI_MENU_CHANGEACTION(ui_menu_ext_wait_temp,       UI_TEXT_EXTR_WAIT_RETRACT_TEMP
 UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UNITS, UI_ACTION_EXTR_WAIT_RETRACT_UNITS);
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
-#ifdef USE_ADVANCE
+#if USE_ADVANCE
 #define UI_MENU_ADV_CNT 1
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
 #define UI_MENU_ADV_CNT 2
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K,UI_ACTION_ADVANCE_K);

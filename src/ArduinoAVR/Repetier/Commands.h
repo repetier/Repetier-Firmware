@@ -29,10 +29,13 @@ class Commands
 public:
     static void commandLoop();
     static void checkForPeriodicalActions();
+    static void processArc(GCode *com);
+    static void processGCode(GCode *com);
+    static void processMCode(GCode *com);
     static void executeGCode(GCode *com);
     static void waitUntilEndOfAllMoves();
     static void waitUntilEndOfAllBuffers();
-    static void printCurrentPosition();
+    static void printCurrentPosition(FSTRINGPARAM(s));
     static void printTemperatures(bool showRaw = false);
     static void setFanSpeed(int speed,bool wait); /// Set fan speed 0..255
     static void changeFeedrateMultiply(int factorInPercent);

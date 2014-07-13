@@ -33,13 +33,17 @@ public:
     float Z;
     float E;
     float F;
-    uint8_t T;
     long S;
     long P;
     float I;
     float J;
     float R;
     char *text; //text[17];
+    //moved the byte to the end and aligned ints on short boundary
+    // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
+    // Otherwise, the compiler adds padding, wasted space.
+    uint8_t T; // This may not matter on any of these controllers, but it can't hurt
+
     inline bool hasM()
     {
         return ((params & 2)!=0);
@@ -145,14 +149,14 @@ private:
     {
         char *endPtr;
         float f = (strtod(s, &endPtr));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) f=0.0; // treat empty string "x " as "x0"
         return f;
     }
     inline long parseLongValue(char *s)
     {
         char *endPtr;
         long l = (strtol(s, &endPtr, 10));
-        if(s == endPtr) setFormatError();
+        if(s == endPtr) l=0; // treat empty string argument "p " as "p0"
         return l;
     }
 

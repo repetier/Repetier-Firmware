@@ -27,15 +27,18 @@
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
+// These are run time sqitchable debug flags
+enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8,
+                 DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
-#define INCLUDE_DEBUG_COMMUNICATION
+#define INCLUDE_DEBUG_COMMUNICATION 0
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
-#define INCLUDE_DEBUG_NO_MOVE
+#define INCLUDE_DEBUG_NO_MOVE 1
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
 usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
@@ -59,6 +62,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 
+#define CARTESIAN 0
+#define XY_GANTRY 1
+#define YX_GANTRY 2
+#define DELTA 3
+#define TUGA 4
+#define BIPOD 5
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -85,6 +94,17 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Z_AXIS 2
 #define E_AXIS 3
 #define VIRTUAL_AXIS 4
+// How big an array to hold X_AXIS..<MAX_AXIS>
+#define Z_AXIS_ARRAY 3
+#define E_AXIS_ARRAY 4
+#define VIRTUAL_AXIS_ARRAY 5
+
+
+#define A_TOWER 0
+#define B_TOWER 1
+#define C_TOWER 2
+#define TOWER_ARRAY 3
+#define E_TOWER_ARRAY 4
 
 
 // Bits of the ADC converter
@@ -111,7 +131,45 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
 
-#define TEMP_PID true // add pid control
+#define NO_CONTROLLER 0
+#define UICONFIG_CONTROLLER 1
+#define CONTROLLER_SMARTRAMPS 2
+#define CONTROLLER_ADAFRUIT 3
+#define CONTROLLER_FOLTYN 4
+#define CONTROLLER_VIKI 5
+#define CONTROLLER_MEGATRONIC 6
+#define CONTROLLER_RADDS 7
+#define CONTROLLER_PIBOT20X4 8
+#define CONTROLLER_PIBOT16X2 9
+#define CONTROLLER_GADGETS3D_SHIELD 10
+#define CONTROLLER_REPRAPDISCOUNT_GLCD 11
+#define CONTROLLER_FELIX 12
+#define CONTROLLER_RAMBO 13
+#define CONTROLLER_OPENHARDWARE_LCD2004 14
+#define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
+
+//direction flags
+#define X_DIRPOS 1
+#define Y_DIRPOS 2
+#define Z_DIRPOS 4
+#define E_DIRPOS 8
+#define XYZ_DIRPOS 7
+//step flags
+#define XSTEP 16
+#define YSTEP 32
+#define ZSTEP 64
+#define ESTEP 128
+//combo's
+#define XYZ_STEP 112
+#define XY_STEP 48
+#define XYZE_STEP 240
+#define E_STEP_DIRPOS 136
+#define Y_STEP_DIRPOS 34
+#define X_STEP_DIRPOS 17
+#define Z_STEP_DIRPOS 68
+
+// add pid control
+#define TEMP_PID 1
 
 
 #include "Configuration.h"
@@ -130,23 +188,26 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SPEED_MAX_MILLIS 50
 #define SPEED_MAGNIFICATION 100.0f
 
+#define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
+/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
+*/
+#define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==3 || DRIVE_SYSTEM==4 || DRIVE_SYSTEM==5 || DRIVE_SYSTEM==6
-#define NONLINEAR_SYSTEM true
+#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD
+#define NONLINEAR_SYSTEM 1
 #else
-#define NONLINEAR_SYSTEM false
+#define NONLINEAR_SYSTEM 0
 #endif
 
 #ifdef FEATURE_Z_PROBE
-#define MANUAL_CONTROL true
+#define MANUAL_CONTROL 1
 #endif
 
-#if DRIVE_SYSTEM==1 || DRIVE_SYSTEM==2
-#define XY_GANTRY
-#endif
+#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY)
 
 //Step to split a cirrcle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
@@ -230,7 +291,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT5_ANALOG_CHANNEL
 #endif
 
-#if HAVE_HEATED_BED==true && HEATED_BED_SENSOR_TYPE<101
+#if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE<101
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
@@ -284,7 +345,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=0
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=CARTESIAN
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -295,7 +356,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-#define IGNORE_COORDINATE 99999
+#define IGNORE_COORDINATE 999999
 
 #undef min
 #undef max
@@ -313,6 +374,14 @@ public:
     static inline long min(long a,long b) {
         if(a<b) return a;
         return b;
+    }
+    static inline long min(long a,long b, long c) {
+      if(a<b) return a<c ? a : c;
+      return b<c ? b : c;
+    }
+    static inline float min(float a,float b, float c) {
+      if(a<b) return a<c ? a : c;
+      return b<c ? b : c;
     }
     static inline long max(long a,long b) {
         if(a<b) return b;
@@ -334,7 +403,10 @@ public:
         if(a<b) return b;
         return a;
     }
+    static inline unsigned long absLong(long a)          {return a >= 0 ? a : -a;}
     static inline long sqr(long a) {return a*a;}
+    static inline unsigned long sqr(unsigned long a) {return a*a;}
+
     static inline float sqr(float a) {return a*a;}
 };
 
@@ -344,8 +416,8 @@ extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
-#ifdef USE_ADVANCE
-#ifdef ENABLE_QUADRATIC_ADVANCE
+#if USE_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
 #endif
 extern int maxadv2;
@@ -360,7 +432,7 @@ void manage_inactivity(uint8_t debug);
 extern void finishNextSegment();
 #if NONLINEAR_SYSTEM
 extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
 extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
 extern float calcZOffset(long factors[], long pointX, long pointY);
 #endif
@@ -472,5 +544,17 @@ extern int debugWaitLoop;
 #define XSTR(s) STR(s)
 #include "Commands.h"
 #include "Eeprom.h"
+
+#if CPU_ARCH == ARCH_AVR
+#define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#else
+#define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
+#endif
+
+#ifdef FAST_INTEGER_SQRT
+#define SQRT(x) ( HAL::integerSqrt(x) )
+#else
+#define SQRT(x) sqrt(x)
+#endif
 
 #endif

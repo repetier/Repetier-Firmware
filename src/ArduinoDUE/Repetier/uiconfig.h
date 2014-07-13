@@ -98,9 +98,9 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE 0
+#define UI_DISPLAY_TYPE NO_DISPLAY
 
-#if UI_DISPLAY_TYPE == 5 // Special case for graphic displays
+#if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
 #define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
 #define UI_LCD_WIDTH 128
@@ -155,7 +155,7 @@ A MCP23017 can run also with 400000 Hz */
 /**
 Define the pin
 */
-#if UI_DISPLAY_TYPE==3 // I2C Pin configuration
+#if UI_DISPLAY_TYPE == DISPLAY_I2C // I2C Pin configuration
 #define UI_DISPLAY_RS_PIN _BV(4)
 #define UI_DISPLAY_RW_PIN _BV(5)
 #define UI_DISPLAY_ENABLE_PIN _BV(6)
@@ -226,7 +226,7 @@ Without a back key, you need to navigate to the back entry in the menu. Setting 
 If you set it to true, next will go to previous menu instead of the next menu.
 
 */
-#define UI_INVERT_MENU_DIRECTION false
+#define UI_INVERT_MENU_DIRECTION 0
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
