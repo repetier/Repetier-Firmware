@@ -926,7 +926,7 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 #if DRIVE_SYSTEM==DELTA
 // this is used in homing and in several GCode command processing
 // An invariant is that it should leave steps remaining unchanged, so cannot move after
-// having reched end stops.
+// having reached end stops.
 // It should leave deltapositions set precisely
 void Printer::deltaMoveToTopEndstops(float feedrate)
 {

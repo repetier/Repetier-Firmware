@@ -785,22 +785,38 @@ switch(com->G)
         if (Printer::currentPosition[X_AXIS] == 0 
           && Printer::currentPosition[Y_AXIS] == 0) 
         {
+                    if(Printer::isLargeMachine())
+                    {
+                        // calculate radius assuming we are at surface
+                        // If Z is greater than 0 it will get calculated out for correct radius
+                        // Use either A or B tower as they acnhor x cartesian axis and always have
+                        // Radius distance to center in simplest set up.
+                        float h = Printer::deltaDiagonalStepsSquaredB.f;
+                        unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
+                        // The correct Rod Radius would put us here at z==0 and B height is
+                        // square root (rod length squared minus rod radius squared)
+                        // Reverse that to get calculated Rod Radius given B height
+                        h -= RMath::sqr((float)bSteps);
+                        h = sqrt(h);
+                        EEPROM::setRodRadius(h*Printer::invAxisStepsPerMM[Z_AXIS]);
+                    }
+                    else
+                    {
           // calculate radius assuming we are at surface
           // If Z is greater than 0 it will get calculated out for correct radius
           // Use either A or B tower as they acnhor x cartesian axis and always have
           // Radius distance to center in simplest set up.
           unsigned long h = Printer::deltaDiagonalStepsSquaredB.l;
           unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
-          // subtract Z steps, because head is physically at 0,0,0
-          // The Z reading is an error due to incorrect Rod Radius, its what we are correcting.
-          bSteps -= Printer::yMinSteps; 
           // The correct Rod Radius would put us here at z==0 and B height is
           // square root (rod length squared minus rod radius squared)
           // Reverse that to get calculated Rod Radius given B height
           h -= RMath::sqr(bSteps);
           h = SQRT(h);
           EEPROM::setRodRadius(h*Printer::invAxisStepsPerMM[Z_AXIS]);
-        } else 
+        }
+      }
+      else
           Com::printErrorFLN(PSTR("First move to touch at x,y=0,0 to auto-set radius."));
       }
         }
