@@ -71,7 +71,6 @@ long Printer::advanceExecuted;             ///< Executed advance steps
 int Printer::advanceStepsSet;
 #endif
 #if NONLINEAR_SYSTEM
-long Printer::maxDeltaPositionSteps;
 floatLong Printer::deltaDiagonalStepsSquaredA;
 floatLong Printer::deltaDiagonalStepsSquaredB;
 floatLong Printer::deltaDiagonalStepsSquaredC;
@@ -190,7 +189,6 @@ bool Printer::isPositionAllowed(float x,float y,float z) {
     bool allowed = true;
 #if DRIVE_SYSTEM==DELTA
     allowed &= (z >= 0) && (z <= zLength+0.05+ENDSTOP_Z_BACK_ON_HOME);
-    //allowed &= (z >= 0) && (z <= cartesianZMaxMM);
     allowed &= (x * x + y * y <= deltaMaxRadiusSquared);
 #endif // DRIVE_SYSTEM
     if(!allowed) {
@@ -209,7 +207,10 @@ void Printer::updateDerivedParameter()
     homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
     maxFeedrate[X_AXIS] = maxFeedrate[Y_AXIS] = maxFeedrate[Z_AXIS];
     maxTravelAccelerationMMPerSquareSecond[X_AXIS] = maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
-    zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength - zMin);
+    zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength);
+    towerAMinSteps = axisStepsPerMM[A_TOWER]*(xMin);
+    towerBMinSteps = axisStepsPerMM[B_TOWER]*(yMin);
+    towerCMinSteps = axisStepsPerMM[C_TOWER]*(zMin);
     //radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
     float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
@@ -244,14 +245,14 @@ void Printer::updateDerivedParameter()
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
 #elif DRIVE_SYSTEM==TUGA
-    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
-    if(deltaDiagonalStepsSquared>46000)
+    deltaDiagonalStepsSquared.l = uint32_t(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
+    if(deltaDiagonalStepsSquared.l>65534)
     {
         setLargeMachine(true);
-        deltaDiagonalStepsSquaredF = float(deltaDiagonalStepsSquared)*float(deltaDiagonalStepsSquared);
+        deltaDiagonalStepsSquared.f = float(deltaDiagonalStepsSquared.l)*float(deltaDiagonalStepsSquared.l);
     }
     else
-        deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
+        deltaDiagonalStepsSquared.l = deltaDiagonalStepsSquared.l*deltaDiagonalStepsSquared.l;
     deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     xMaxSteps = (long)(axisStepsPerMM[X_AXIS]*(xMin+xLength));
     yMaxSteps = (long)(axisStepsPerMM[Y_AXIS]*yLength);

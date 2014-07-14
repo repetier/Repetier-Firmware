@@ -24,7 +24,7 @@
 
 union floatLong {
     float f;
-    unsigned long l;
+    uint32_t l;
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
@@ -93,7 +93,6 @@ public:
     static long destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
     static long currentDeltaPositionSteps[E_TOWER_ARRAY];
-    static long maxDeltaPositionSteps;
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;

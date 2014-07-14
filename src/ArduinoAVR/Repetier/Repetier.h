@@ -332,14 +332,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "ui.h"
 #include "Communication.h"
 
-#ifndef SDSUPPORT
-#define SDSUPPORT false
-#endif
-#if SDSUPPORT
-#include "SdFat.h"
+#ifndef SDCARDDETECT
+#define SDCARDDETECT       -1
 #endif
 #ifndef SDSUPPORT
-#define SDSUPPORT false
+#define SDSUPPORT 0
 #endif
 #if SDSUPPORT
 #include "SdFat.h"
