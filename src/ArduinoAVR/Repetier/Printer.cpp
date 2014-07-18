@@ -157,6 +157,7 @@ int debugWaitLoop = 0;
 #endif
 
 
+
 #if !NONLINEAR_SYSTEM
 void Printer::constrainDestinationCoords()
 {
@@ -396,12 +397,14 @@ uint8_t Printer::moveToReal(float x,float y,float z,float e,float f)
     if(y == IGNORE_COORDINATE)
         y = currentPosition[Y_AXIS];
     if(z == IGNORE_COORDINATE)
-        z = currentPosition[Z_AXIS];
+        z = currentPosition[Z_AXIS];   
+#if NONLINEAR_SYSTEM
     if (z<0 || z>cartesianZMaxMM) {
       SHOT("movetoreal ");
       SHOWM(x); SHOWM(y); SHOWM(z); SHOW(e); SHOW(f);
       return 0;
     }
+#endif
     currentPosition[X_AXIS] = x;
     currentPosition[Y_AXIS] = y;
     currentPosition[Z_AXIS] = z;
@@ -923,7 +926,7 @@ void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 #endif
 
 
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 // this is used in homing and in several GCode command processing
 // An invariant is that it should leave steps remaining unchanged, so cannot move after
 // having reached end stops.
@@ -955,7 +958,6 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     updateCurrentPosition();
     //SHOWA("deltaMoveToTopEndstop",currentPositionSteps,3);
 }
-
 void Printer::homeXAxis()
 {
     destinationSteps[X_AXIS] = 0;
@@ -1014,12 +1016,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     setHomed(true);
     bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
     
-    if (!(X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 
-          && MAX_HARDWARE_ENDSTOP_X && MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z)) 
+    if (!(X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1
+          && MAX_HARDWARE_ENDSTOP_X && MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z))
     {
         Com::printErrorFLN(PSTR("Hardware setup inconsistent. Delta cannot home wihtout max endstops."));
     }
-    // The delta has to have home capability to zero and set position, 
+    // The delta has to have home capability to zero and set position,
     // so the redundant check is only an opportunity to
     // gratuitously fail due to incorrect settings.
     // The following movements would be meaningless unless it was zeroed for example.
