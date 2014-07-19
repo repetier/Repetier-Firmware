@@ -241,7 +241,7 @@ void Printer::updateDerivedParameter()
     cart[X_AXIS] = cart[Y_AXIS] = 0;
     cart[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(cart, delta);
-    maxDeltaPositionSteps = delta[0];
+    //maxDeltaPositionSteps = delta[0];
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
 #elif DRIVE_SYSTEM==TUGA
@@ -377,7 +377,7 @@ uint8_t Printer::moveToReal(float x,float y,float z,float e,float f)
     currentPosition[X_AXIS] = x;
     currentPosition[Y_AXIS] = y;
     currentPosition[Z_AXIS] = z;
-#if FEATURE_AUTOLEVEL 
+#if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformToPrinter(x + Printer::offsetX,y + Printer::offsetY,z,x,y,z);
     else
@@ -960,10 +960,10 @@ void Printer::homeZAxis() // Delta z homing
     realDeltaPositionSteps[A_TOWER] = currentDeltaPositionSteps[A_TOWER];
     realDeltaPositionSteps[B_TOWER] = currentDeltaPositionSteps[B_TOWER];
     realDeltaPositionSteps[C_TOWER] = currentDeltaPositionSteps[C_TOWER];
-    maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
+    //maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
-    if(ENDSTOP_Z_BACK_ON_HOME > 0)
-        maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME;
+    //if(ENDSTOP_Z_BACK_ON_HOME > 0)
+    //    maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME;
 #endif
     Extruder::selectExtruderById(Extruder::current->id);
 }
@@ -1400,6 +1400,8 @@ void Printer::waitForZProbeStart()
     UI_CLEAR_STATUS;
 #endif
 }
+#endif
+
 #if FEATURE_AUTOLEVEL
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ)
 {
@@ -1458,4 +1460,3 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
 }
 #endif
 
-#endif
