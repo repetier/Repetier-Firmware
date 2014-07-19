@@ -667,12 +667,14 @@ public:
 #if FEATURE_Z_PROBE
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
+#endif
+    // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
+    // system without Z-probe
 #if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
-#endif
 #endif
 #if FEATURE_MEMORY_POSITION
     static void MemoryPosition();

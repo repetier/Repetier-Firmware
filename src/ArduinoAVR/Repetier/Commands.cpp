@@ -1465,7 +1465,6 @@ void Commands::processMCode(GCode *com)
     }
     break;
 
-#if FEATURE_Z_PROBE
 #if FEATURE_AUTOLEVEL
     case 320: // M320 Activate autolevel
         Printer::setAutolevelActive(true);
@@ -1491,7 +1490,6 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif // FEATURE_AUTOLEVEL
-#endif // FEATURE_Z_PROBE
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P<4 && com->P>=0)

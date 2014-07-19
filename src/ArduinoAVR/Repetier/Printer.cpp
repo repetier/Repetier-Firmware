@@ -377,7 +377,7 @@ uint8_t Printer::moveToReal(float x,float y,float z,float e,float f)
     currentPosition[X_AXIS] = x;
     currentPosition[Y_AXIS] = y;
     currentPosition[Z_AXIS] = z;
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL 
     if(isAutolevelActive())
         transformToPrinter(x + Printer::offsetX,y + Printer::offsetY,z,x,y,z);
     else
@@ -420,7 +420,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
     currentPosition[X_AXIS] = (float)(currentPositionSteps[X_AXIS])*invAxisStepsPerMM[X_AXIS];
     currentPosition[Y_AXIS] = (float)(currentPositionSteps[Y_AXIS])*invAxisStepsPerMM[Y_AXIS];
     currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
 #endif // FEATURE_AUTOLEVEL
@@ -471,7 +471,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
         if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
     }
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=DELTA
+#if FEATURE_AUTOLEVEL //&& DRIVE_SYSTEM!=DELTA
     if(isAutolevelActive())
     {
         transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS], x, y, z);
