@@ -763,7 +763,7 @@ void Commands::processGCode(GCode *com)
         // G100 R[n] Add n to radius. Adjust to be above floor if necessary
         // G100 R[0] set radius based on current z measurement. Moves to (0,0,0)
         float currentZmm = Printer::currentPosition[Z_AXIS];
-        if (currentZmm/Printer::cartesianZMaxMM > 0.1)
+        if (currentZmm/Printer::zLength > 0.1)
         {
             Com::printErrorFLN(PSTR("Calibration code is limited to bottom 10% of Z height"));
             break;

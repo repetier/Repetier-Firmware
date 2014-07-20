@@ -949,7 +949,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
           RETURN_0("Apos x square ");
 
         deltaPosSteps[A_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS];
-        if (deltaPosSteps[A_TOWER] < Printer::deltaFloorSafetyMarginSteps)
+        if (deltaPosSteps[A_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
           RETURN_0("A hit floor");
 
         // B TOWER height
@@ -971,7 +971,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
           RETURN_0("Bpos x square ");
 
         deltaPosSteps[B_TOWER] = SQRT(opt-temp) + cartesianPosSteps[Z_AXIS] ;
-        if (deltaPosSteps[B_TOWER] < Printer::deltaFloorSafetyMarginSteps)
+        if (deltaPosSteps[B_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
           RETURN_0("B hit floor");
 
         // C TOWER height
@@ -993,7 +993,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
           RETURN_0("Cpos x square ");
 
         deltaPosSteps[C_TOWER] = SQRT(opt - temp) + cartesianPosSteps[Z_AXIS];
-        if (deltaPosSteps[C_TOWER] < Printer::deltaFloorSafetyMarginSteps)
+        if (deltaPosSteps[C_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
           RETURN_0("C hit floor");
 /*
         long temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];

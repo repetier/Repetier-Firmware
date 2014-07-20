@@ -76,9 +76,8 @@ floatLong Printer::deltaDiagonalStepsSquaredA;
 floatLong Printer::deltaDiagonalStepsSquaredB;
 floatLong Printer::deltaDiagonalStepsSquaredC;
 float Printer::deltaMaxRadiusSquared;
-float Printer::cartesianZMaxMM;
 float Printer::radius0;
-int32_t Printer::deltaFloorSafetyMarginSteps;
+int32_t Printer::deltaFloorSafetyMarginSteps = 0;
 int32_t Printer::deltaAPosXSteps;
 int32_t Printer::deltaAPosYSteps;
 int32_t Printer::deltaBPosXSteps;
@@ -246,6 +245,7 @@ void Printer::updateDerivedParameter()
     maxDeltaPositionSteps = delta[0];
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
+    deltaFloorSafetyMarginSteps = DELTA_FLOOR_SAFETY_MARGIN_MM * axisStepsPerMM[Z_AXIS];
 #elif DRIVE_SYSTEM == TUGA
     deltaDiagonalStepsSquared.l = uint32_t(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     if(deltaDiagonalStepsSquared.l>65534)
@@ -433,15 +433,6 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
         lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS];
         lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
     }
-#if( DRIVE_SYSTEM==DELTA) && defined(DEBUG)
-    //This can occur when we are homing and deliberately move past z max
-    //but otherwise is an error condition
-    if (currentPosition[Z_AXIS] > cartesianZMaxMM) {
-      Com::printArrayFLN(PSTR("updateCurrentPosition"),currentPosition,3,4);
-      //SHOWS(currentPositionSteps[Z_AXIS]);
-      //SHOWM(currentPosition[Z_AXIS]);
-    }
-#endif
 }
 
 /**

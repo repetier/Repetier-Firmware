@@ -98,7 +98,6 @@ public:
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
     static float deltaMaxRadiusSquared;
-    static float cartesianZMaxMM;
     static int32_t deltaFloorSafetyMarginSteps;
     static int32_t deltaAPosXSteps;
     static int32_t deltaAPosYSteps;
