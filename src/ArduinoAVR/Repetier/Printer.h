@@ -83,44 +83,45 @@ public:
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t stepsPerTimerCall;
-    static unsigned long interval;    ///< Last step duration in ticks.
-    static unsigned long timer;              ///< used for acceleration/deceleration timing
-    static unsigned long stepNumber;         ///< Step number in current move.
+    static uint32_t interval;    ///< Last step duration in ticks.
+    static uint32_t timer;              ///< used for acceleration/deceleration timing
+    static uint32_t stepNumber;         ///< Step number in current move.
     static float coordinateOffset[Z_AXIS_ARRAY];
-    static long currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
+    static int32_t currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
-    static long destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
+    static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
 #if NONLINEAR_SYSTEM
-    static long currentDeltaPositionSteps[E_TOWER_ARRAY];
+    static int32_t maxDeltaPositionSteps;
+    static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
     static float deltaMaxRadiusSquared;
     static float cartesianZMaxMM;
-    static long deltaFloorSafetyMarginSteps;
-    static long deltaAPosXSteps;
-    static long deltaAPosYSteps;
-    static long deltaBPosXSteps;
-    static long deltaBPosYSteps;
-    static long deltaCPosXSteps;
-    static long deltaCPosYSteps;
-    static long realDeltaPositionSteps[TOWER_ARRAY];
+    static int32_t deltaFloorSafetyMarginSteps;
+    static int32_t deltaAPosXSteps;
+    static int32_t deltaAPosYSteps;
+    static int32_t deltaBPosXSteps;
+    static int32_t deltaBPosYSteps;
+    static int32_t deltaCPosXSteps;
+    static int32_t deltaCPosYSteps;
+    static int32_t realDeltaPositionSteps[TOWER_ARRAY];
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
-    static long stepsRemainingAtZHit;
+    static int32_t stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==DELTA
-    static long stepsRemainingAtXHit;
-    static long stepsRemainingAtYHit;
+    static int32_t stepsRemainingAtXHit;
+    static int32_t stepsRemainingAtYHit;
 #endif
 #if SOFTWARE_LEVELING
-    static long levelingP1[3];
-    static long levelingP2[3];
-    static long levelingP3[3];
+    static int32_t levelingP1[3];
+    static int32_t levelingP2[3];
+    static int32_t levelingP3[3];
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
@@ -128,12 +129,12 @@ public:
     static signed char zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
-    static long xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    static long yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    static long zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-    static long xMinSteps;                   ///< For software endstops, limit of move in negative direction.
-    static long yMinSteps;                   ///< For software endstops, limit of move in negative direction.
-    static long zMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static int32_t yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static int32_t zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+    static int32_t xMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static int32_t yMinSteps;                   ///< For software endstops, limit of move in negative direction.
+    static int32_t zMinSteps;                   ///< For software endstops, limit of move in negative direction.
     static float xLength;
     static float xMin;
     static float yLength;
@@ -150,7 +151,7 @@ public:
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
     static speed_t vMaxReached;         ///< Maximumu reached speed
-    static unsigned long msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
+    static uint32_t msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;            ///< mm of filament printed since counting started
     static uint8_t wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION

@@ -911,7 +911,7 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
     }
     break;
-    /*       case 134: // G134
+    case 134: // G134
           Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
           Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
           Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
@@ -924,7 +924,7 @@ void Commands::processGCode(GCode *com)
           Com::printF(PSTR("PosFromSteps:"));
           printCurrentPosition(PSTR("G134 "));
           break;
-    */
+
 #endif // DRIVE_SYSTEM
     default:
         if(Printer::debugErrors())

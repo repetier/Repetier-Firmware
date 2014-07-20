@@ -368,11 +368,11 @@ public:
         if(a<b) return b;
         return a;
     }
-    static inline long min(long a,long b) {
+    static inline int32_t min(int32_t a,int32_t b) {
         if(a<b) return a;
         return b;
     }
-    static inline long min(long a,long b, long c) {
+    static inline int32_t min(int32_t a,int32_t b, int32_t c) {
       if(a<b) return a<c ? a : c;
       return b<c ? b : c;
     }
@@ -380,7 +380,7 @@ public:
       if(a<b) return a<c ? a : c;
       return b<c ? b : c;
     }
-    static inline long max(long a,long b) {
+    static inline int32_t max(int32_t a,int32_t b) {
         if(a<b) return b;
         return a;
     }
@@ -388,15 +388,15 @@ public:
         if(a<b) return a;
         return b;
     }
-    static inline int max(int a,int b) {
-        if(a<b) return b;
-        return a;
-    }
-    static inline unsigned int min(unsigned int a,unsigned int b) {
+    static inline uint16_t min(uint16_t a,uint16_t b) {
         if(a<b) return a;
         return b;
     }
-    static inline unsigned int max(unsigned int a,unsigned int b) {
+    static inline int16_t max(int16_t a,int16_t b) {
+        if(a<b) return b;
+        return a;
+    }
+    static inline uint16_t max(uint16_t a,uint16_t b) {
         if(a<b) return b;
         return a;
     }

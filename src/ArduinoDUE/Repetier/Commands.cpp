@@ -911,7 +911,7 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
     }
     break;
-    /*       case 134: // G134
+    case 134: // G134
           Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
           Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
           Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
@@ -924,7 +924,7 @@ void Commands::processGCode(GCode *com)
           Com::printF(PSTR("PosFromSteps:"));
           printCurrentPosition(PSTR("G134 "));
           break;
-    */
+
 #endif // DRIVE_SYSTEM
     default:
         if(Printer::debugErrors())
@@ -1465,7 +1465,6 @@ void Commands::processMCode(GCode *com)
     }
     break;
 
-#if FEATURE_Z_PROBE
 #if FEATURE_AUTOLEVEL
     case 320: // M320 Activate autolevel
         Printer::setAutolevelActive(true);
@@ -1491,7 +1490,6 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif // FEATURE_AUTOLEVEL
-#endif // FEATURE_Z_PROBE
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P<4 && com->P>=0)

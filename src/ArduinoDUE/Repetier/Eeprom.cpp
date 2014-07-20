@@ -284,7 +284,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->advanceL = EXT5_ADVANCE_L;
 #endif
 #endif // NUM_EXTRUDER > 5
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
     Printer::setAutolevelActive(false);
     Printer::resetTransformationMatrix(true);
 #endif
@@ -464,7 +464,7 @@ void EEPROM::initalizeUncached()
 
 void EEPROM::readDataFromEEPROM()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);

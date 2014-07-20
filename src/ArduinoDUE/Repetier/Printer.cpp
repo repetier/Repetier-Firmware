@@ -61,54 +61,54 @@ uint8_t Printer::menuMode = 0;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
-unsigned long Printer::interval;           ///< Last step duration in ticks.
-unsigned long Printer::timer;              ///< used for acceleration/deceleration timing
-unsigned long Printer::stepNumber;         ///< Step number in current move.
+uint32_t Printer::interval;           ///< Last step duration in ticks.
+uint32_t Printer::timer;              ///< used for acceleration/deceleration timing
+uint32_t Printer::stepNumber;         ///< Step number in current move.
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
-long Printer::advanceExecuted;             ///< Executed advance steps
+int32_t Printer::advanceExecuted;             ///< Executed advance steps
 #endif
 int Printer::advanceStepsSet;
 #endif
 #if NONLINEAR_SYSTEM
-long Printer::maxDeltaPositionSteps;
+int32_t Printer::maxDeltaPositionSteps;
 floatLong Printer::deltaDiagonalStepsSquaredA;
 floatLong Printer::deltaDiagonalStepsSquaredB;
 floatLong Printer::deltaDiagonalStepsSquaredC;
 float Printer::deltaMaxRadiusSquared;
 float Printer::cartesianZMaxMM;
 float Printer::radius0;
-long Printer::deltaFloorSafetyMarginSteps;
-long Printer::deltaAPosXSteps;
-long Printer::deltaAPosYSteps;
-long Printer::deltaBPosXSteps;
-long Printer::deltaBPosYSteps;
-long Printer::deltaCPosXSteps;
-long Printer::deltaCPosYSteps;
-long Printer::realDeltaPositionSteps[TOWER_ARRAY];
+int32_t Printer::deltaFloorSafetyMarginSteps;
+int32_t Printer::deltaAPosXSteps;
+int32_t Printer::deltaAPosYSteps;
+int32_t Printer::deltaBPosXSteps;
+int32_t Printer::deltaBPosYSteps;
+int32_t Printer::deltaCPosXSteps;
+int32_t Printer::deltaCPosYSteps;
+int32_t Printer::realDeltaPositionSteps[TOWER_ARRAY];
 int16_t Printer::travelMovesPerSecond;
 int16_t Printer::printMovesPerSecond;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
-long Printer::stepsRemainingAtZHit;
+int32_t Printer::stepsRemainingAtZHit;
 #endif
 #if DRIVE_SYSTEM==DELTA
-long Printer::stepsRemainingAtXHit;
-long Printer::stepsRemainingAtYHit;
+int32_t Printer::stepsRemainingAtXHit;
+int32_t Printer::stepsRemainingAtYHit;
 #endif
 #if SOFTWARE_LEVELING
-long Printer::levelingP1[3];
-long Printer::levelingP2[3];
-long Printer::levelingP3[3];
+int32_t Printer::levelingP1[3];
+int32_t Printer::levelingP2[3];
+int32_t Printer::levelingP3[3];
 #endif
 float Printer::minimumSpeed;               ///< lowest allowed speed to keep integration error small
 float Printer::minimumZSpeed;
-long Printer::xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-long Printer::yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-long Printer::zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
-long Printer::xMinSteps;                   ///< For software endstops, limit of move in negative direction.
-long Printer::yMinSteps;                   ///< For software endstops, limit of move in negative direction.
-long Printer::zMinSteps;                   ///< For software endstops, limit of move in negative direction.
+int32_t Printer::xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+int32_t Printer::yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+int32_t Printer::zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
+int32_t Printer::xMinSteps;                   ///< For software endstops, limit of move in negative direction.
+int32_t Printer::yMinSteps;                   ///< For software endstops, limit of move in negative direction.
+int32_t Printer::zMinSteps;                   ///< For software endstops, limit of move in negative direction.
 float Printer::xLength;
 float Printer::xMin;
 float Printer::yLength;
@@ -124,8 +124,8 @@ float Printer::maxZJerk;                   ///< Maximum allowed jerk in z direct
 #endif
 float Printer::offsetX;                     ///< X-offset for different extruder positions.
 float Printer::offsetY;                     ///< Y-offset for different extruder positions.
-unsigned int Printer::vMaxReached;         ///< Maximumu reached speed
-unsigned long Printer::msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
+speed_t Printer::vMaxReached;         ///< Maximumu reached speed
+uint32_t Printer::msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;            ///< mm of filament printed since counting started
 uint8_t Printer::wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
@@ -135,7 +135,7 @@ float Printer::backlashZ;
 uint8_t Printer::backlashDir;
 #endif
 #ifdef DEBUG_STEPCOUNT
-long Printer::totalStepsRemaining;
+int32_t Printer::totalStepsRemaining;
 #endif
 #if FEATURE_MEMORY_POSITION
 float Printer::memoryX;
@@ -188,9 +188,8 @@ void Printer::constrainDestinationCoords()
 bool Printer::isPositionAllowed(float x,float y,float z) {
     if(isNoDestinationCheck())  return true;
     bool allowed = true;
-#if DRIVE_SYSTEM==DELTA
-    allowed &= (z >= 0) && (z <= zLength+0.05+ENDSTOP_Z_BACK_ON_HOME);
-    //allowed &= (z >= 0) && (z <= cartesianZMaxMM);
+#if DRIVE_SYSTEM == DELTA
+    allowed &= (z >= 0) && (z <= zLength + 0.05 + ENDSTOP_Z_BACK_ON_HOME);
     allowed &= (x * x + y * y <= deltaMaxRadiusSquared);
 #endif // DRIVE_SYSTEM
     if(!allowed) {
@@ -201,7 +200,7 @@ bool Printer::isPositionAllowed(float x,float y,float z) {
 }
 void Printer::updateDerivedParameter()
 {
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     travelMovesPerSecond = EEPROM::deltaSegmentsPerSecondMove();
     printMovesPerSecond = EEPROM::deltaSegmentsPerSecondPrint();
     axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
@@ -209,7 +208,10 @@ void Printer::updateDerivedParameter()
     homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
     maxFeedrate[X_AXIS] = maxFeedrate[Y_AXIS] = maxFeedrate[Z_AXIS];
     maxTravelAccelerationMMPerSquareSecond[X_AXIS] = maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
-    zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength - zMin);
+    zMaxSteps = axisStepsPerMM[Z_AXIS]*(zLength);
+    towerAMinSteps = axisStepsPerMM[A_TOWER]*(xMin);
+    towerBMinSteps = axisStepsPerMM[B_TOWER]*(yMin);
+    towerCMinSteps = axisStepsPerMM[C_TOWER]*(zMin);
     //radius0 = EEPROM::deltaHorizontalRadius();
     float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
     float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
@@ -231,6 +233,7 @@ void Printer::updateDerivedParameter()
         deltaDiagonalStepsSquaredC.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredC.l));
     }
     else {
+        setLargeMachine(false);
         deltaDiagonalStepsSquaredA.l = RMath::sqr(deltaDiagonalStepsSquaredA.l);
         deltaDiagonalStepsSquaredB.l = RMath::sqr(deltaDiagonalStepsSquaredB.l);
         deltaDiagonalStepsSquaredC.l = RMath::sqr(deltaDiagonalStepsSquaredC.l);
@@ -243,15 +246,15 @@ void Printer::updateDerivedParameter()
     maxDeltaPositionSteps = delta[0];
     xMaxSteps = yMaxSteps = zMaxSteps;
     xMinSteps = yMinSteps = zMinSteps = 0;
-#elif DRIVE_SYSTEM==TUGA
-    deltaDiagonalStepsSquared = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
-    if(deltaDiagonalStepsSquared>46000)
+#elif DRIVE_SYSTEM == TUGA
+    deltaDiagonalStepsSquared.l = uint32_t(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
+    if(deltaDiagonalStepsSquared.l>65534)
     {
         setLargeMachine(true);
-        deltaDiagonalStepsSquaredF = float(deltaDiagonalStepsSquared)*float(deltaDiagonalStepsSquared);
+        deltaDiagonalStepsSquared.f = float(deltaDiagonalStepsSquared.l)*float(deltaDiagonalStepsSquared.l);
     }
     else
-        deltaDiagonalStepsSquared = deltaDiagonalStepsSquared*deltaDiagonalStepsSquared;
+        deltaDiagonalStepsSquared.l = deltaDiagonalStepsSquared.l*deltaDiagonalStepsSquared.l;
     deltaBPosXSteps = long(EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[X_AXIS]);
     xMaxSteps = (long)(axisStepsPerMM[X_AXIS]*(xMin+xLength));
     yMaxSteps = (long)(axisStepsPerMM[Y_AXIS]*yLength);
@@ -274,7 +277,7 @@ void Printer::updateDerivedParameter()
     if(backlashZ!=0) backlashDir |= 32;
 #endif
 #endif
-    for(uint8_t i=0; i<4; i++)
+    for(uint8_t i=0; i<E_AXIS_ARRAY; i++)
     {
         invAxisStepsPerMM[i] = 1.0f/axisStepsPerMM[i];
 #ifdef RAMP_ACCELERATION
@@ -376,7 +379,7 @@ uint8_t Printer::moveToReal(float x,float y,float z,float e,float f)
     currentPosition[X_AXIS] = x;
     currentPosition[Y_AXIS] = y;
     currentPosition[Z_AXIS] = z;
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformToPrinter(x + Printer::offsetX,y + Printer::offsetY,z,x,y,z);
     else
@@ -419,7 +422,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
     currentPosition[X_AXIS] = (float)(currentPositionSteps[X_AXIS])*invAxisStepsPerMM[X_AXIS];
     currentPosition[Y_AXIS] = (float)(currentPositionSteps[Y_AXIS])*invAxisStepsPerMM[Y_AXIS];
     currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
 #endif // FEATURE_AUTOLEVEL
@@ -470,7 +473,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
         if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
     }
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE //&& DRIVE_SYSTEM!=DELTA
+#if FEATURE_AUTOLEVEL //&& DRIVE_SYSTEM!=DELTA
     if(isAutolevelActive())
     {
         transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS], x, y, z);
@@ -822,7 +825,7 @@ void Printer::setup()
     Extruder::initExtruder();
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
-    for(uint8_t i=0; i<=E_AXIS+3; i++) {
+    for(uint8_t i=0; i<E_AXIS_ARRAY; i++) {
       currentPositionSteps[i] = 0;
       currentPosition[i] = 0.0;
     }
@@ -834,6 +837,7 @@ void Printer::setup()
     HAL::setupTimer();
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+
 #if DELTA_HOME_ON_POWER
     homeAxis(true,true,true);
 #endif
@@ -935,9 +939,10 @@ void Printer::homeZAxis() // Delta z homing
     long dy = -yMinSteps-EEPROM::deltaTowerYOffsetSteps();
     long dz = -zMinSteps-EEPROM::deltaTowerZOffsetSteps();
     long dm = RMath::min(dx,dy,dz);
-    //Com::printFLN(Com::tTower1,dx);
-    //Com::printFLN(Com::tTower2,dy);
-    //Com::printFLN(Com::tTower3,dz);
+    Com::printFLN(Com::tTower1,dx);
+    Com::printFLN(Com::tTower2,dy);
+    Com::printFLN(Com::tTower2,dy);
+    Com::printFLN(Com::tTower3,dz);
     dx -= dm; // now all dxyz are positive
     dy -= dm;
     dz -= dm;
@@ -945,6 +950,8 @@ void Printer::homeZAxis() // Delta z homing
     currentPositionSteps[Y_AXIS] = 0;
     currentPositionSteps[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(currentPositionSteps,currentDeltaPositionSteps);
+    Com::printArrayFLN(PSTR("cps"),currentPositionSteps);
+    Com::printArrayFLN(PSTR("cpds"),currentDeltaPositionSteps);
     currentDeltaPositionSteps[A_TOWER] -= dx;
     currentDeltaPositionSteps[B_TOWER] -= dy;
     currentDeltaPositionSteps[C_TOWER] -= dz;
@@ -959,7 +966,7 @@ void Printer::homeZAxis() // Delta z homing
     realDeltaPositionSteps[A_TOWER] = currentDeltaPositionSteps[A_TOWER];
     realDeltaPositionSteps[B_TOWER] = currentDeltaPositionSteps[B_TOWER];
     realDeltaPositionSteps[C_TOWER] = currentDeltaPositionSteps[C_TOWER];
-    maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
+    //maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
     if(ENDSTOP_Z_BACK_ON_HOME > 0)
         maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME;
@@ -1399,6 +1406,8 @@ void Printer::waitForZProbeStart()
     UI_CLEAR_STATUS;
 #endif
 }
+#endif
+
 #if FEATURE_AUTOLEVEL
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ)
 {
@@ -1457,4 +1466,3 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
 }
 #endif
 
-#endif

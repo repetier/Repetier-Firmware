@@ -634,15 +634,15 @@ public:
         return &lines[linesWritePos];
     }
     static inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current);
-    static long bresenhamStep();
+    static int32_t bresenhamStep();
     static void waitForXFreeLines(uint8_t b=1);
     static inline void forwardPlanner(uint8_t p);
     static inline void backwardPlanner(uint8_t p,uint8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
-    static void moveRelativeDistanceInSteps(long x,long y,long z,long e,float feedrate,bool waitEnd,bool check_endstop);
-    static void moveRelativeDistanceInStepsReal(long x,long y,long z,long e,float feedrate,bool waitEnd);
+    static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop);
+    static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
@@ -657,7 +657,7 @@ public:
 #if NONLINEAR_SYSTEM
     static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(long e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline int32_t calculateDeltaSubSegments(uint8_t softEndstop);
+    inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(long difference[], flag8_t *dir, long delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
