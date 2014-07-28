@@ -57,7 +57,7 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
-#if MOTHERBOARD==8 || MOTHERBOARD==9 || CPU_ARCH!=ARCH_AVR
+#if MOTHERBOARD==8 || MOTHERBOARD==88 || MOTHERBOARD==9 || CPU_ARCH!=ARCH_AVR
 #define EXTERNALSERIAL
 #endif
 //#define EXTERNALSERIAL  // Force using arduino serial
