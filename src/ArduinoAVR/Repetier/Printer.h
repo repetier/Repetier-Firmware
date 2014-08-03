@@ -474,7 +474,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER+1] = 255;
+    pdm_target[NUM_EXTRUDER+1] = 255;
 #endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()
@@ -650,7 +650,7 @@ public:
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed() {
-        return (int)pwm_pos[NUM_EXTRUDER+2];
+        return (int)pdm_target[NUM_EXTRUDER+2];
     }
 #if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)

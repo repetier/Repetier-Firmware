@@ -24,7 +24,7 @@ extern uint8_t manageMonitor;
 class TemperatureController
 {
     public:
-    uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
+    uint8_t pdm_index; ///< PDM index for output control.
     uint8_t sensorType; ///< Type of temperature sensor.
     uint8_t sensorPin; ///< Pin to read extruder temperature.
     int16_t currentTemperature; ///< Currenttemperature value read from sensor.
@@ -42,7 +42,7 @@ class TemperatureController
     float pidPGain; ///< Pgain (proportional gain) for PID temperature control [0,01 Units].
     float pidIGain; ///< Igain (integral) for PID temperature control [0,01 Units].
     float pidDGain;  ///< Dgain (damping) for PID temperature control [0,01 Units].
-    uint8_t pidMax; ///< Maximum PWM value, the heater should be set.
+    uint8_t pidMax; ///< Maximum PDM value, the heater should be set.
     float tempIStateLimitMax;
     float tempIStateLimitMin;
     uint8_t tempPointer;
@@ -102,7 +102,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
-    uint8_t coolerPWM; ///< current PWM setting
+    uint8_t coolerPDM; ///< current PDM setting
 
     /** \brief Sends the high-signal to the stepper for next extruder step.
     Call this function only, if interrupts are disabled.

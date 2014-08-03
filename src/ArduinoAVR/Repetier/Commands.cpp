@@ -166,11 +166,11 @@ void Commands::printTemperatures(bool showRaw)
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023<<(2-ANALOG_REDUCE_BITS))-heatedBedController.currentTemperature);
     }
-    Com::printF(Com::tSpaceBAtColon,(pwm_pos[heatedBedController.pwmIndex])); // Show output of autotune when tuning!
+    Com::printF(Com::tSpaceBAtColon,(pdm_target[heatedBedController.pdm_index])); // Show output of autotune when tuning!
 #endif
 #endif
 #if TEMP_PID
-    Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
+    Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pdm_target[Extruder::current->id]:pdm_target[autotuneIndex])); // Show output of autotune when tuning!
 #endif
 #if NUM_EXTRUDER>1
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
@@ -180,7 +180,7 @@ void Commands::printTemperatures(bool showRaw)
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
 #if TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
-        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
+        Com::printF(Com::tColon,(pdm_target[extruder[i].tempControl.pdm_index])); // Show output of autotune when tuning!
 #endif
         if(showRaw)
         {
@@ -213,9 +213,9 @@ void Commands::setFanSpeed(int speed,bool wait)
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
-    if(speed!=pwm_pos[NUM_EXTRUDER+2])
+    if(speed!=pdm_target[NUM_EXTRUDER+2])
         Com::printFLN(Com::tFanspeed,speed);
-    pwm_pos[NUM_EXTRUDER+2] = speed;
+    pdm_target[NUM_EXTRUDER+2] = speed;
 #endif
 }
 void Commands::reportPrinterUsage()
@@ -1676,8 +1676,8 @@ void Commands::emergencyStop()
     Printer::kill(false);
     Extruder::manageTemperatures();
     for(uint8_t i=0; i<NUM_EXTRUDER+3; i++)
-        pwm_pos[i] = 0;
-    pwm_pos[0] = pwm_pos[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER+1] = pwm_pos[NUM_EXTRUDER+2]=0;
+        pdm_target[i] = 0;
+    pdm_target[0] = pdm_target[NUM_EXTRUDER] = pdm_target[NUM_EXTRUDER+1] = pdm_target[NUM_EXTRUDER+2]=0;
 #if EXT0_HEATER_PIN>-1
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
@@ -1698,6 +1698,9 @@ void Commands::emergencyStop()
 #endif
 #if FAN_PIN>-1
     WRITE(FAN_PIN,0);
+#endif
+#if FAN2_PIN>-1
+    WRITE(FAN2_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1
     WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
