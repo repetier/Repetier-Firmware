@@ -1053,7 +1053,7 @@ void Commands::executeGCode(GCode *com)
             break;
 #if FEATURE_DITTO_PRINTING
         case 280:
-            if(com->hasS())   // Set ditto mode S: 0 = off, 1 = on
+            if(com->hasS())   // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
             {
                 Extruder::dittoMode = com->S;
             }

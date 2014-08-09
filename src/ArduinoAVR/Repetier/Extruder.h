@@ -114,6 +114,16 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if FEATURE_DITTO_PRINTING
             if(Extruder::dittoMode) {
                 WRITE(EXT1_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 2
+                if(Extruder::dittoMode > 1) {
+                    WRITE(EXT2_STEP_PIN,HIGH);
+                }
+#endif
+#if NUM_EXTRUDER > 3
+                if(Extruder::dittoMode > 2) {
+                    WRITE(EXT3_STEP_PIN,HIGH);
+                }
+#endif
             }
 #endif
 #endif
@@ -163,6 +173,16 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if FEATURE_DITTO_PRINTING
             if(Extruder::dittoMode) {
                 WRITE(EXT1_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 2
+            if(Extruder::dittoMode > 1) {
+                WRITE(EXT2_STEP_PIN,LOW);
+            }
+#endif
+#if NUM_EXTRUDER > 3
+            if(Extruder::dittoMode > 2) {
+                WRITE(EXT3_STEP_PIN,LOW);
+            }
+#endif
             }
 #endif
 #endif
@@ -278,6 +298,14 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
         if(Extruder::dittoMode) {
             if(extruder[1].enablePin > -1)
                 digitalWrite(extruder[1].enablePin,extruder[1].enableOn);
+#if NUM_EXTRUDER > 2
+        if(Extruder::dittoMode > 1 && extruder[2].enablePin > -1)
+                digitalWrite(extruder[2].enablePin,extruder[2].enableOn);
+#endif
+#if NUM_EXTRUDER > 3
+        if(Extruder::dittoMode > 2 && extruder[3].enablePin > -1)
+                digitalWrite(extruder[3].enablePin,extruder[3].enableOn);
+#endif
         }
 #endif
 #endif
