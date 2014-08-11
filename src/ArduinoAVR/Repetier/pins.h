@@ -477,12 +477,12 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
 #define TEMP_1_PIN         14   // BED , ANALOG NUMBERING
 #define TEMP_2_PIN         15
-#define TEMP_4_PIN         12   // ANALOG NUMBERING
-#define TEMP_5_PIN         11   // ANALOG NUMBERING
-#define TEMP_6_PIN         10
+#define TEMP_3_PIN         12   // ANALOG NUMBERING
+#define TEMP_4_PIN         11   // ANALOG NUMBERING
+#define TEMP_5_PIN         10
 
-#define TEMP_7_PIN         4   // Thermocouple 1
-#define TEMP_8_PIN         5   // Thermocouple 2
+#define TEMP_6_PIN         4   // Thermocouple 1
+#define TEMP_7_PIN         5   // Thermocouple 2
 
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
