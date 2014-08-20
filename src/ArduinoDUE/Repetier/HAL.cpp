@@ -32,6 +32,7 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
+char HAL::virtualEeprom[EEPROM_BYTES];  
 volatile uint8_t HAL::insideTimer1=0;
 #ifndef DUE_SOFTWARE_SPI
     int spiDueDividors[] = {10,21,42,84,168,255,255};

@@ -606,7 +606,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            13
 
 #define ORIG_FAN_PIN            7
-#define FAN1 PIN  8 // (e.g. useful for electronics fan or light on/off) on PIN 8
+#define ORIG_FAN2_PIN     8 // (e.g. useful for electronics fan or light on/off) on PIN 8
 
 #define PS_ON_PIN          45
 

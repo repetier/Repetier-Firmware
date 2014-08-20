@@ -139,6 +139,7 @@ float Printer::memoryX;
 float Printer::memoryY;
 float Printer::memoryZ;
 float Printer::memoryE;
+float Printer::memoryF;
 #endif
 #ifdef XY_GANTRY
 int8_t Printer::motorX;
@@ -842,18 +843,18 @@ void Printer::MemoryPosition()
     updateCurrentPosition(false);
     realPosition(memoryX,memoryY,memoryZ);
     memoryE = currentPositionSteps[E_AXIS]*axisStepsPerMM[E_AXIS];
+    memoryF = feedrate;
 }
 
 void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 {
     bool all = !(x || y || z);
-    float oldFeedrate = feedrate;
     moveToReal((all || x ? (lastCmdPos[X_AXIS] = memoryX) : IGNORE_COORDINATE)
                ,(all || y ?(lastCmdPos[Y_AXIS] = memoryY) : IGNORE_COORDINATE)
                ,(all || z ? (lastCmdPos[Z_AXIS] = memoryZ) : IGNORE_COORDINATE)
                ,(e ? memoryE:IGNORE_COORDINATE),
                feed);
-    feedrate = oldFeedrate;
+    feedrate = memoryF;
 }
 #endif
 

@@ -154,6 +154,7 @@ public:
     static float memoryY;
     static float memoryZ;
     static float memoryE;
+    static float memoryF;
 #endif
 #ifdef XY_GANTRY
     static int8_t motorX;
