@@ -483,6 +483,7 @@ void GCode::readFromSerial()
 */
 bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 {
+    internalCommand = !fromSerial;
     unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
@@ -626,6 +627,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     char *pos = line;
     params = 0;
     params2 = 0;
+    internalCommand = !fromSerial;
     char c;
     while (c = *(pos++))
     {

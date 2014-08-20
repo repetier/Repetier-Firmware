@@ -43,7 +43,9 @@ public:
     // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
     // Otherwise, the compiler adds padding, wasted space.
     uint8_t T; // This may not matter on any of these controllers, but it can't hurt
-
+    // True if origin did not come from serial console. That way we can send status messages to
+    // a host only if he would normally not know about the mode switch.
+    bool internalCommand;
     inline bool hasM()
     {
         return ((params & 2)!=0);

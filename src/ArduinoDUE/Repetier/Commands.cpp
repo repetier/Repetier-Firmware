@@ -734,9 +734,13 @@ void Commands::processGCode(GCode *com)
 #endif
     case 90: // G90
         Printer::relativeCoordinateMode = false;
+        if(com->internalCommand)
+            Com::printInfoFLN("Absolute positioning");
         break;
     case 91: // G91
         Printer::relativeCoordinateMode = true;
+        if(com->internalCommand)
+            Com::printInfoFLN("Relative positioning");
         break;
     case 92: // G92
     {
@@ -1432,7 +1436,7 @@ void Commands::processMCode(GCode *com)
 #endif
 #if FEATURE_DITTO_PRINTING
     case 280: // M280
-        if(com->hasS())   // Set ditto mode S: 0 = off, 1 = on
+        if(com->hasS())   // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
         {
             Extruder::dittoMode = com->S;
         }

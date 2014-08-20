@@ -57,6 +57,7 @@ uint8_t Printer::flag1 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
+float Printer::extrudeMultiplyError = 0;
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
@@ -141,6 +142,7 @@ float Printer::memoryX;
 float Printer::memoryY;
 float Printer::memoryZ;
 float Printer::memoryE;
+float Printer::memoryF;
 #endif
 #if GANTRY
 int8_t Printer::motorX;
@@ -765,7 +767,7 @@ void Printer::setup()
     motorCurrentControlInit(); // Set current if it is firmware controlled
 #endif
     microstepInit();
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if FEATURE_AUTOLEVEL
     resetTransformationMatrix(true);
 #endif // FEATURE_AUTOLEVEL
     feedrate = 50; ///< Current feedrate in mm/s.
@@ -872,18 +874,18 @@ void Printer::MemoryPosition()
     updateCurrentPosition(false);
     realPosition(memoryX,memoryY,memoryZ);
     memoryE = currentPositionSteps[E_AXIS]*axisStepsPerMM[E_AXIS];
+    memoryF = feedrate;
 }
 
 void Printer::GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed)
 {
     bool all = !(x || y || z);
-    float oldFeedrate = feedrate;
-    moveToReal((all || x ? memoryX : IGNORE_COORDINATE)
-               ,(all || y ? memoryY : IGNORE_COORDINATE)
-               ,(all || z ? memoryZ : IGNORE_COORDINATE)
+    moveToReal((all || x ? (lastCmdPos[X_AXIS] = memoryX) : IGNORE_COORDINATE)
+               ,(all || y ?(lastCmdPos[Y_AXIS] = memoryY) : IGNORE_COORDINATE)
+               ,(all || z ? (lastCmdPos[Z_AXIS] = memoryZ) : IGNORE_COORDINATE)
                ,(e ? memoryE:IGNORE_COORDINATE),
                feed);
-    feedrate = oldFeedrate;
+    feedrate = memoryF;
 }
 #endif
 
@@ -930,10 +932,9 @@ void Printer::homeZAxis() // Delta z homing
     long dy = -yMinSteps-EEPROM::deltaTowerYOffsetSteps();
     long dz = -zMinSteps-EEPROM::deltaTowerZOffsetSteps();
     long dm = RMath::min(dx,dy,dz);
-    Com::printFLN(Com::tTower1,dx);
-    Com::printFLN(Com::tTower2,dy);
-    Com::printFLN(Com::tTower2,dy);
-    Com::printFLN(Com::tTower3,dz);
+    //Com::printFLN(Com::tTower1,dx);
+    //Com::printFLN(Com::tTower2,dy);
+    //Com::printFLN(Com::tTower3,dz);
     dx -= dm; // now all dxyz are positive
     dy -= dm;
     dz -= dm;
@@ -941,8 +942,6 @@ void Printer::homeZAxis() // Delta z homing
     currentPositionSteps[Y_AXIS] = 0;
     currentPositionSteps[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(currentPositionSteps,currentDeltaPositionSteps);
-    Com::printArrayFLN(PSTR("cps"),currentPositionSteps);
-    Com::printArrayFLN(PSTR("cpds"),currentDeltaPositionSteps);
     currentDeltaPositionSteps[A_TOWER] -= dx;
     currentDeltaPositionSteps[B_TOWER] -= dy;
     currentDeltaPositionSteps[C_TOWER] -= dz;
@@ -997,7 +996,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
         }
     }
 
-    moveToReal(0,0,Printer::zMin+Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
+    moveToReal(0,0,Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     updateCurrentPosition(true);
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));

@@ -107,7 +107,7 @@ Custom M Codes
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
-- M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = on
+- M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M303 P<extruder/bed> S<printTemerature> X0 - Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM.
 - M320 - Activate autolevel

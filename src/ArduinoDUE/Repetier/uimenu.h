@@ -194,12 +194,12 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #if NUM_EXTRUDER>1
      "\xa %e1/%E1\xb0 Y:%x1",
   #else
-     "\xa -----/---\xb0 Y:%x1",
+     "             Y:%x1",
    #endif
    #if HAVE_HEATED_BED==true
      "\xe %eb/%Eb\xb0 Z:%x2",
    #else
-     "\xb -----/---\xb0 Z:%x2",
+     "Fan %Fs%%%     Z:%x2",
    #endif
    "Mul:%om", "Buf:%oB", "%os");
 
