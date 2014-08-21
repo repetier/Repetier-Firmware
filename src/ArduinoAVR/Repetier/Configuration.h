@@ -101,6 +101,8 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
 4 = Tuga printer (Scott-Russell mechanism)
 5 = Bipod system (not implemented)
+8 = y axis + xz H-gantry (x_motor = x+z, z_motor = x-z)
+9 = y axis + xz H-gantry (x_motor = x+z, z_motor = z-x)
 Cases 1 and 2 cover all needed xy H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */

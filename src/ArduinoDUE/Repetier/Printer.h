@@ -22,7 +22,8 @@
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
-union floatLong {
+union floatLong
+{
     float f;
     uint32_t l;
 };
@@ -172,7 +173,7 @@ public:
 #endif
 #if GANTRY
     static int8_t motorX;
-    static int8_t motorY;
+    static int8_t motorYorZ;
 #endif
 #ifdef DEBUG_SEGMENT_LENGTH
     static float maxRealSegmentLength;
@@ -180,13 +181,15 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
-    static inline void setMenuMode(uint8_t mode,bool on) {
+    static inline void setMenuMode(uint8_t mode,bool on)
+    {
         if(on)
             menuMode |= mode;
         else
             menuMode &= ~mode;
     }
-    static inline bool isMenuMode(uint8_t mode) {
+    static inline bool isMenuMode(uint8_t mode)
+    {
         return (menuMode & mode)==mode;
     }
     static inline bool debugEcho()
@@ -209,16 +212,20 @@ public:
     {
         return ((debugLevel & 16)!=0);
     }
-    static inline bool debugNoMoves() {
+    static inline bool debugNoMoves()
+    {
         return ((debugLevel & 32)!=0);
     }
-    static inline bool debugFlag(unsigned long flags) {
+    static inline bool debugFlag(unsigned long flags)
+    {
         return (debugLevel & flags);
     }
-    static inline void debugSet(unsigned long flags) {
+    static inline void debugSet(unsigned long flags)
+    {
         debugLevel |= flags;
     }
-    static inline void debugReset(unsigned long flags) {
+    static inline void debugReset(unsigned long flags)
+    {
         debugLevel &= ~flags;
     }
 
@@ -409,7 +416,8 @@ public:
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
     }
-    static inline void toggleAnimation() {
+    static inline void toggleAnimation()
+    {
         setAnimation(!isAnimation());
     }
     static inline float convertToMM(float x)
@@ -476,7 +484,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER+1] = 255;
+        pwm_pos[NUM_EXTRUDER+1] = 255;
 #endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()
@@ -517,7 +525,6 @@ public:
 #if (GANTRY)
         if(motorX <= -2)
         {
-            ANALYZER_ON(ANALYZER_CH2);
             WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
             WRITE(X2_STEP_PIN,HIGH);
@@ -526,30 +533,66 @@ public:
         }
         else if(motorX >= 2)
         {
-            ANALYZER_ON(ANALYZER_CH2);
             WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
             WRITE(X2_STEP_PIN,HIGH);
 #endif
             motorX -= 2;
         }
-        if(motorY <= -2)
+        if(motorYorZ <= -2)
         {
-            ANALYZER_ON(ANALYZER_CH3);
             WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
             WRITE(Y2_STEP_PIN,HIGH);
 #endif
-            motorY += 2;
+            motorYorZ += 2;
         }
-        else if(motorY >= 2)
+        else if(motorYorZ >= 2)
         {
-            ANALYZER_ON(ANALYZER_CH3);
             WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
             WRITE(Y2_STEP_PIN,HIGH);
 #endif
-            motorY -= 2;
+            motorYorZ -= 2;
+        }
+#endif
+    }
+    static inline void executeXZGantrySteps()
+    {
+#if (GANTRY)
+        if(motorX <= -2)
+        {
+            WRITE(X_STEP_PIN,HIGH);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_STEP_PIN,HIGH);
+#endif
+            motorX += 2;
+        }
+        else if(motorX >= 2)
+        {
+            WRITE(X_STEP_PIN,HIGH);
+#if FEATURE_TWO_XSTEPPER
+            WRITE(X2_STEP_PIN,HIGH);
+#endif
+            motorX -= 2;
+        }
+        if(motorYorZ <= -2)
+        {
+            //ANALYZER_ON(ANALYZER_CH3); // I dont think i can use these as they are for the y - possible bug area though
+            WRITE(Z_STEP_PIN,HIGH);
+#if FEATURE_TWO_ZSTEPPER
+            WRITE(Z2_STEP_PIN,HIGH);
+#endif
+            motorYorZ += 2;
+        }
+        else if(motorYorZ >= 2)
+        {
+            //ANALYZER_ON(ANALYZER_CH3); // I dont think i can use these as they are for the y - possible bug area though
+            WRITE(Z_STEP_PIN,HIGH);
+#if FEATURE_TWO_ZSTEPPER
+            WRITE(Z2_STEP_PIN,HIGH);
+#endif
+            motorYorZ -= 2;
         }
 #endif
     }
@@ -567,11 +610,6 @@ public:
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,LOW);
 #endif
-        ANALYZER_OFF(ANALYZER_CH1);
-        ANALYZER_OFF(ANALYZER_CH2);
-        ANALYZER_OFF(ANALYZER_CH3);
-        ANALYZER_OFF(ANALYZER_CH6);
-        ANALYZER_OFF(ANALYZER_CH7);
     }
     static inline speed_t updateStepsPerTimerCall(speed_t vbase)
     {
@@ -601,6 +639,14 @@ public:
     }
     static inline void disableAllowedStepper()
     {
+#if DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY
+        if(DISABLE_X && DISABLE_Z)
+        {
+            disableXStepper();
+            disableZStepper();
+        }
+        if(DISABLE_Y) disableYStepper();
+#else
 #if GANTRY
         if(DISABLE_X && DISABLE_Y)
         {
@@ -612,6 +658,7 @@ public:
         if(DISABLE_Y) disableYStepper();
 #endif
         if(DISABLE_Z) disableZStepper();
+#endif
     }
     static inline float realXPosition()
     {
@@ -633,7 +680,8 @@ public:
         yp = currentPosition[Y_AXIS];
         zp = currentPosition[Z_AXIS];
     }
-    static inline void insertStepperHighDelay() {
+    static inline void insertStepperHighDelay()
+    {
 #if STEPPER_HIGH_DELAY>0
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
@@ -651,7 +699,8 @@ public:
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
     static void setOrigin(float xOff,float yOff,float zOff);
     static bool isPositionAllowed(float x,float y,float z);
-    static inline int getFanSpeed() {
+    static inline int getFanSpeed()
+    {
         return (int)pwm_pos[NUM_EXTRUDER+2];
     }
 #if NONLINEAR_SYSTEM

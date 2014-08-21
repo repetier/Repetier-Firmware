@@ -163,7 +163,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
         if(axis == E_AXIS && Printer::extrudeMultiply!=100)
         {
-            Printer::extrudeMultiplyError += ((p_>delta[E_AXIS] * (float)Printer::extrudeMultiply) * 0.01f);
+            Printer::extrudeMultiplyError += ((p->delta[E_AXIS] * (float)Printer::extrudeMultiply) * 0.01f);
             p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
             Printer::extrudeMultiplyError -= axis_diff[E_AXIS];
         }
@@ -2230,19 +2230,26 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
         } // End if WARMUP
         //Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
 #if GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY
         if(cur->isXOrYMove())
         {
             Printer::enableXStepper();
             Printer::enableYStepper();
         }
+        if(cur->isZMove()) Printer::enableZStepper();
+#else // XZ / ZX Gantry
+        if(cur->isXOrZMove())
+        {
+            Printer::enableXStepper();
+            Printer::enableZStepper();
+        }
+        if(cur->isYMove()) Printer::enableYStepper();
+#endif
 #else
         if(cur->isXMove()) Printer::enableXStepper();
         if(cur->isYMove()) Printer::enableYStepper();
+        if(cur->isZMove()) Printer::enableZStepper();
 #endif
-        if(cur->isZMove())
-        {
-            Printer::enableZStepper();
-        }
         if(cur->isEMove()) Extruder::enable();
         cur->fixStartAndEndSpeed();
         HAL::allowInterrupts();
@@ -2260,15 +2267,25 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
         Printer::setXDirection(cur->isXPositiveMove());
         Printer::setYDirection(cur->isYPositiveMove());
 #else
-        long gdx = (cur->dir & X_DIRPOS ? cur->delta[0] : -cur->delta[0]); // Compute signed difference in steps
-        long gdy = (cur->dir & Y_DIRPOS ? cur->delta[1] : -cur->delta[1]);
+        long gdx = (cur->dir & X_DIRPOS ? cur->delta[X_AXIS] : -cur->delta[X_AXIS]); // Compute signed difference in steps
+#if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY
+        long gdy = (cur->dir & Y_DIRPOS ? cur->delta[Y_AXIS] : -cur->delta[Y_AXIS]);
         Printer::setXDirection(gdx+gdy>=0);
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY
         Printer::setYDirection(gdx>gdy);
-#elif DRIVE_SYSTEM==YX_GANTRY
+#else
         Printer::setYDirection(gdx<=gdy);
 #endif
+#else // XZ or ZX core
+        long gdz = (cur->dir & Z_DIRPOS ? cur->delta[Z_AXIS] : -cur->delta[Z_AXIS]);
+        Printer::setXDirection(gdx+gdz>=0);
+#if DRIVE_SYSTEM == XZ_GANTRY
+        Printer::setZDirection(gdx>gdz);
+#else
+        Printer::setZDirection(gdx<=gdz);
 #endif
+#endif
+#endif // GANTRY
         Printer::setZDirection(cur->isZPositiveMove());
 #if defined(USE_ADVANCE)
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
@@ -2305,7 +2322,6 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
     {
         for(uint8_t loop=0; loop<max_loops; loop++)
         {
-            ANALYZER_ON(ANALYZER_CH1);
 #if STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY > 0
             if(loop>0)
                 HAL::delayMicroseconds(STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY);
@@ -2344,10 +2360,6 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
                     cur->error[Y_AXIS] += cur_errupd;
                 }
             }
-#if (GANTRY)
-            Printer::executeXYGantrySteps();
-#endif
-
             if(cur->isZMove())
             {
                 if((cur->error[Z_AXIS] -= cur->delta[Z_AXIS]) < 0)
@@ -2359,6 +2371,13 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
                 }
             }
+#if (GANTRY)
+#if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY
+            Printer::executeXYGantrySteps();
+#else
+            Printer::executeXZGantrySteps();
+#endif
+#endif
             Printer::insertStepperHighDelay();
 #if defined(USE_ADVANCE)
             if(!Printer::isAdvanceActivated()) // Use interrupt for movement

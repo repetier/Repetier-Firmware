@@ -397,6 +397,10 @@ public:
     {
         return dir & XY_STEP;
     }
+    inline bool isXOrZMove()
+    {
+        return dir & (XSTEP | YSTEP);
+    }
     inline bool isZMove()
     {
         return (dir & ZSTEP);
@@ -499,36 +503,34 @@ public:
     }
     inline void startXStep()
     {
-        ANALYZER_ON(ANALYZER_CH6);
 #if !(GANTRY)
-        ANALYZER_ON(ANALYZER_CH2);
         WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
-            Printer::motorY++;
+            Printer::motorYorZ++;
         }
         else
         {
             Printer::motorX--;
-            Printer::motorY--;
+            Printer::motorYorZ--;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == ZX_GANTRY
         if(isXPositiveMove())
         {
             Printer::motorX++;
-            Printer::motorY--;
+            Printer::motorYorZ--;
         }
         else
         {
             Printer::motorX--;
-            Printer::motorY++;
+            Printer::motorYorZ++;
         }
 #endif
 #endif
@@ -539,9 +541,7 @@ public:
     }
     inline void startYStep()
     {
-        ANALYZER_ON(ANALYZER_CH7);
-#if !(GANTRY)
-        ANALYZER_ON(ANALYZER_CH3);
+#if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
         WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN,HIGH);
@@ -551,24 +551,24 @@ public:
         if(isYPositiveMove())
         {
             Printer::motorX++;
-            Printer::motorY--;
+            Printer::motorYorZ--;
         }
         else
         {
             Printer::motorX--;
-            Printer::motorY++;
+            Printer::motorYorZ++;
         }
 #endif
 #if DRIVE_SYSTEM==YX_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
-            Printer::motorY++;
+            Printer::motorYorZ++;
         }
         else
         {
             Printer::motorX--;
-            Printer::motorY--;
+            Printer::motorYorZ--;
         }
 #endif
 #endif // GANTRY
@@ -578,9 +578,36 @@ public:
     }
     inline void startZStep()
     {
+#if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY
         WRITE(Z_STEP_PIN,HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,HIGH);
+#endif
+#else
+#if DRIVE_SYSTEM==XZ_GANTRY
+        if(isYPositiveMove())
+        {
+            Printer::motorX++;
+            Printer::motorYorZ--;
+        }
+        else
+        {
+            Printer::motorX--;
+            Printer::motorYorZ++;
+        }
+#endif
+#if DRIVE_SYSTEM==ZX_GANTRY
+        if(isYPositiveMove())
+        {
+            Printer::motorX++;
+            Printer::motorYorZ++;
+        }
+        else
+        {
+            Printer::motorX--;
+            Printer::motorYorZ--;
+        }
+#endif
 #endif
     }
     void updateStepsParameter();

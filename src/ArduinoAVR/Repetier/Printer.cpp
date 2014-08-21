@@ -146,7 +146,7 @@ float Printer::memoryF;
 #endif
 #if GANTRY
 int8_t Printer::motorX;
-int8_t Printer::motorY;
+int8_t Printer::motorYorZ;
 #endif
 #ifdef DEBUG_SEGMENT_LENGTH
     float Printer::maxRealSegmentLength = 0;
@@ -760,7 +760,7 @@ void Printer::setup()
 #endif // CASE_LIGHTS_PIN
 #if GANTRY
     Printer::motorX = 0;
-    Printer::motorY = 0;
+    Printer::motorYorZ = 0;
 #endif
 
 #if STEPPER_CURRENT_CONTROL!=CURRENT_CONTROL_MANUAL

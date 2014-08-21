@@ -68,6 +68,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define DELTA 3
 #define TUGA 4
 #define BIPOD 5
+#define XZ_GANTRY 8
+#define ZX_GANTRY 9
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -207,7 +209,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MANUAL_CONTROL 1
 #endif
 
-#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY)
+#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
 
 //Step to split a cirrcle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
