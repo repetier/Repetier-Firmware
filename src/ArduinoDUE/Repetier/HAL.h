@@ -152,9 +152,9 @@ typedef char prog_char;
 #define LOW         0
 #define HIGH        1
 
-#define BEGIN_INTERRUPT_PROTECTED __disable_irq(); //noInterrupts();
-#define END_INTERRUPT_PROTECTED __enable_irq(); //interrupts();
-#define ESCAPE_INTERRUPT_PROTECTED  __enable_irq(); //interrupts();
+#define BEGIN_INTERRUPT_PROTECTED {uint32_t oldInt = __get_PRIMASK();__disable_irq();
+#define END_INTERRUPT_PROTECTED __set_PRIMASK(oldInt);} //__enable_irq();
+#define ESCAPE_INTERRUPT_PROTECTED  __set_PRIMASK(oldInt);//__enable_irq();
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
@@ -429,11 +429,11 @@ public:
 
     static inline void allowInterrupts()
     {
-//        __enable_irq();
+        __enable_irq();
     }
     static inline void forbidInterrupts()
     {
-//        __disable_irq();
+        __disable_irq();
     }
     static inline unsigned long timeInMilliseconds()
     {
