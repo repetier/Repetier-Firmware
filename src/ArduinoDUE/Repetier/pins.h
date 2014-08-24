@@ -185,7 +185,7 @@ STEPPER_CURRENT_CONTROL
 /****************************************************************************/
 // RAMPS-FD Board
 // 
-#if MOTHERBOARD == 403
+#if MOTHERBOARD == 403 || MOTHERBOARD == 404
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
 #endif
@@ -193,7 +193,11 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD
 #define CPU_ARCH ARCH_ARM
 
-#define HEATER_PINS_INVERTED 1
+#if MOTHERBOARD == 403
+#define HEATER_PINS_INVERTED 1  // only old boards had the output inverted
+#else
+#define HEATER_PINS_INVERTED 0
+#endif
 
 /*****************************************************************
 * Arduino Due Pin Assignments
