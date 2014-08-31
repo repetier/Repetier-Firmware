@@ -1162,6 +1162,8 @@ Select the language to use.
 4 = Italian
 5 = Spanish
 6 = Swedish
+7 = French
+8 = Czech
 */
 #define UI_LANGUAGE 1
 
