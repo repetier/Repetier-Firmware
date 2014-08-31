@@ -491,6 +491,10 @@ public:
     {
         return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
     }
+    static inline void setAnyTempsensorDefect()
+    {
+        flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+    }
     static inline bool isManualMoveMode()
     {
         return (flag0 & PRINTER_FLAG0_MANUAL_MOVE_MODE);

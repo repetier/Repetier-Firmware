@@ -199,7 +199,7 @@ void GCode::checkAndPushCommand()
         lastLineNumber = actLineNumber;
     }
     pushCommand();
-#ifdef ACK_WITH_LINENUMBER
+#if ACK_WITH_LINENUMBER
     Com::printFLN(Com::tOkSpace,actLineNumber);
 #else
     Com::printFLN(Com::tOk);
@@ -211,7 +211,7 @@ void GCode::pushCommand()
 {
     bufferWriteIndex = (bufferWriteIndex+1) % GCODE_BUFFER_SIZE;
     bufferLength++;
-#ifndef ECHO_ON_EXECUTE
+#if !ECHO_ON_EXECUTE
     echoCommand();
 #endif
 }
@@ -228,7 +228,7 @@ GCode *GCode::peekCurrentCommand()
 void GCode::popCurrentCommand()
 {
     if(!bufferLength) return; // Should not happen, but safety first
-#ifdef ECHO_ON_EXECUTE
+#if ECHO_ON_EXECUTE
     echoCommand();
 #endif
     if(++bufferReadIndex == GCODE_BUFFER_SIZE) bufferReadIndex = 0;

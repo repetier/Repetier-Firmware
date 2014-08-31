@@ -50,7 +50,7 @@ void Commands::commandLoop()
                 {
                     sd.finishWrite();
                 }
-#ifdef ECHO_ON_EXECUTE
+#if ECHO_ON_EXECUTE
                 code->echoCommand();
 #endif
             }
@@ -118,7 +118,7 @@ void Commands::waitUntilEndOfAllBuffers()
                 {
                     sd.finishWrite();
                 }
-#ifdef ECHO_ON_EXECUTE
+#if ECHO_ON_EXECUTE
                 code->echoCommand();
 #endif
             }

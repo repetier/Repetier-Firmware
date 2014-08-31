@@ -2,10 +2,20 @@
 
 ## Installation
 
-Please use your new at [http://www.repetier.com/firmware/v091](http://www.repetier.com/firmware/v091)
-for easy and fast configuration. You get the complete sources you need to compile back.
+Please use your new at [http://www.repetier.com/firmware/v092](http://www.repetier.com/firmware/v092)
+for easy and fast configuration. You get the complete sources you need to compile from
+the online configurator.
 This system also allows it to upload configurations created with this tool and modify
 the configuration.
+
+<div style="background:orange;padding:10px;">
+0.92 is the current development version, so expect greater changes in time without
+version number changes.</div>
+
+## Version 0.92
+  Cleaner code base.
+  Optional pulse dense modulation for heater and fans.
+  Decoupling test for heater and sensor for more safety.
 
 ## Version 0.91 released 2013-12-30
 

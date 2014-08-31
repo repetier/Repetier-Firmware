@@ -167,6 +167,26 @@ Overridden if EEPROM activated.*/
 // ##                           Extruder configuration                                     ##
 // ##########################################################################################
 
+// You can use either PWM (pulse width modulation) or PDM (pulse density modulation) for
+// extruders or coolers. PDM will give more signal changes per second, so on average it gives
+// the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
+// then PWM.
+#define PDM_FOR_EXTRUDER 1
+#define PDM_FOR_COOLER 1
+
+// The firmware checks if the heater and sensor got decoupled, which is dangerous. SInce it will never reach target
+// temperature, the heater will stay on for every which can burn your printe ror house.
+// As an additional barrier to your smoke detectors (I hope you have one above your printer) we now
+// do some more checks to detect if something got wrong.
+
+// If the temp. is on hold target, it may not sway more then this degrees celsius, or we mark
+// sensor as defect.
+#define DECOUPLING_TEST_MAX_HOLD_VARIANCE 15
+// Minimum temp. rise we expect after the set duration of full heating is over.
+// Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
+// because at startup you already need 7 seconds until heater starts to rise temp. for sensor
+// then you have 3 seconds of increased heating to reach 1°„C.
+#define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
 
@@ -282,7 +302,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
-
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+#define EXT0_DECOUPLE_TEST_PERIOD 12000
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 10
@@ -387,6 +408,8 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+#define EXT1_DECOUPLE_TEST_PERIOD 12000
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -581,6 +604,9 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define HEATED_BED_PID_DGAIN 290
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
+// Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
+// beds need some time to get the temp. to the sensor. Time is in milliseconds!
+#define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
 
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
@@ -1003,7 +1029,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 Some boards like Gen7 have a power on pin, to enable the atx power supply. If this is defined,
 the power will be turned on without the need to call M80 if initially started.
 */
-#define ENABLE_POWER_ON_STARTUP
+#define ENABLE_POWER_ON_STARTUP 1
 
 /**
 If you use an ATX power supply you need the power pin to work non inverting. For some special
@@ -1023,7 +1049,7 @@ execution.
 */
 #define GCODE_BUFFER_SIZE 2
 /** Appends the linenumber after every ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this */
-#define ACK_WITH_LINENUMBER
+#define ACK_WITH_LINENUMBER 1
 /** Communication errors can swollow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
 second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
@@ -1038,7 +1064,7 @@ uncommented, you will see the last command executed. To be more specific: It is 
 execution. This helps tracking errors, because there may be 8 or more commands in the queue
 and it is elsewise difficult to know, what your reprap is currently doing.
 */
-#define ECHO_ON_EXECUTE
+#define ECHO_ON_EXECUTE 1
 
 /** \brief EEPROM storage mode
 
@@ -1215,6 +1241,7 @@ Select the language to use.
 5 = Spanish
 6 = Swedish
 7 = French
+8 = Czech
 */
 #define UI_LANGUAGE 1
 

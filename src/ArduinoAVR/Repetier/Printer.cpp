@@ -559,7 +559,7 @@ void Printer::setup()
 #endif
 #endif
 
-#if defined(ENABLE_POWER_ON_STARTUP) && PS_ON_PIN>-1
+#if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP && (PS_ON_PIN>-1)
     SET_OUTPUT(PS_ON_PIN); //GND
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif

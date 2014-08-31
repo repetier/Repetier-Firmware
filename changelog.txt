@@ -1,3 +1,12 @@
+Version 0.92
+  Cleaner code base.
+  Pulse dense modulation for heater and fans.
+  Decoupling test for heater and sensor for more safety.
+
+Version 0.91.8
+  New languages french and Czech
+  Ditto printing with up to 4 extruder.
+  
 Version 0.91.7 15-03-2014
   Babystepping.
   Z-Calib allows Z < 0.
