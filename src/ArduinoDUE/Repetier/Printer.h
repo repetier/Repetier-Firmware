@@ -26,6 +26,9 @@ union floatLong
 {
     float f;
     uint32_t l;
+#ifdef SUPPORT_64_BIT_MATH
+    uint64_t L;
+#endif
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1

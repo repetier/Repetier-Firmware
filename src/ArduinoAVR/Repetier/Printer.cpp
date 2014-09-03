@@ -226,12 +226,18 @@ void Printer::updateDerivedParameter()
     deltaDiagonalStepsSquaredA.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionA() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
     deltaDiagonalStepsSquaredB.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionB() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
     deltaDiagonalStepsSquaredC.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionC() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
-    if(deltaDiagonalStepsSquaredA.l>65534 || 2 * radius0*axisStepsPerMM[Z_AXIS]>65534)
+    if(true || deltaDiagonalStepsSquaredA.l>65534 || 2 * radius0*axisStepsPerMM[Z_AXIS]>65534)
     {
         setLargeMachine(true);
+#ifdef SUPPORT_64_BIT_MATH
+        deltaDiagonalStepsSquaredA.L = RMath::sqr(deltaDiagonalStepsSquaredA.l);
+        deltaDiagonalStepsSquaredB.L = RMath::sqr(deltaDiagonalStepsSquaredB.l);
+        deltaDiagonalStepsSquaredC.L = RMath::sqr(deltaDiagonalStepsSquaredC.l);
+#else
         deltaDiagonalStepsSquaredA.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredA.l));
         deltaDiagonalStepsSquaredB.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredB.l));
         deltaDiagonalStepsSquaredC.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredC.l));
+#endif
     }
     else {
         setLargeMachine(false);

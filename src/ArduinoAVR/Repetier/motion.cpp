@@ -894,6 +894,61 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
     //SHOWA("motion.c transformCart... cartesian ",cartesianPosSteps, 3);
     if(Printer::isLargeMachine())
     {
+#ifdef SUPPORT_64_BIT_MATH
+      // 64 bit is better for precision, so we use that if available.
+     // A TOWER height
+        uint64_t temp = RMath::absLong(Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS]);
+        uint64_t opt = Printer::deltaDiagonalStepsSquaredA.L;
+
+        temp *= temp;
+        if (opt < temp)
+            RETURN_0("Apos y square ");
+        opt -= temp;
+
+        temp = RMath::absLong(Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS]);
+        temp *= temp;
+        if (opt < temp)
+            RETURN_0("Apos x square ");
+
+        deltaPosSteps[A_TOWER] = HAL::integer64Sqrt(opt-temp) + cartesianPosSteps[Z_AXIS];
+        if (deltaPosSteps[A_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
+            RETURN_0("A hit floor");
+
+        // B TOWER height
+        temp = RMath::absLong(Printer::deltaBPosYSteps - cartesianPosSteps[Y_AXIS]);
+        opt = Printer::deltaDiagonalStepsSquaredB.L;
+        temp *= temp;
+        if (opt < temp)
+            RETURN_0("Bpos y square ");
+        opt -= temp;
+
+        temp = RMath::absLong(Printer::deltaBPosXSteps - cartesianPosSteps[X_AXIS]);
+        temp *= temp;
+        if (opt < temp)
+            RETURN_0("Bpos x square ");
+
+        deltaPosSteps[B_TOWER] = HAL::integer64Sqrt(opt-temp) + cartesianPosSteps[Z_AXIS] ;
+        if (deltaPosSteps[B_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
+            RETURN_0("B hit floor");
+
+        // C TOWER height
+        temp = RMath::absLong(Printer::deltaCPosYSteps - cartesianPosSteps[Y_AXIS]);
+        opt = Printer::deltaDiagonalStepsSquaredC.L ;
+
+        temp = temp * temp;
+        if ( opt < temp )
+            RETURN_0("Cpos y square ");
+        opt -= temp;
+
+        temp = RMath::absLong(Printer::deltaCPosXSteps - cartesianPosSteps[X_AXIS]);
+        temp = temp * temp;
+        if ( opt < temp )
+            RETURN_0("Cpos x square ");
+
+        deltaPosSteps[C_TOWER] = HAL::integer64Sqrt(opt - temp) + cartesianPosSteps[Z_AXIS];
+        if (deltaPosSteps[C_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
+            RETURN_0("C hit floor");
+#else
         float temp = Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS];
         float opt = Printer::deltaDiagonalStepsSquaredA.f - temp * temp;
         float temp2 = Printer::deltaAPosXSteps - cartesianPosSteps[X_AXIS];
@@ -925,6 +980,7 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         if (deltaPosSteps[C_TOWER]< Printer::deltaFloorSafetyMarginSteps) return 0;
 
         return 1;
+#endif
     }
     else
     {
@@ -934,11 +990,11 @@ uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long delta
         // Also, previous code did not check for overflow of squared result
         // Overflow is also detected as a fault condition
 
-        const unsigned long LIMIT = 65534; // Largest squarable int without overflow;
+        const uint32_t LIMIT = 65534; // Largest squarable int without overflow;
 
         // A TOWER height
-        unsigned long temp = RMath::absLong(Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS]);
-        unsigned long opt = Printer::deltaDiagonalStepsSquaredA.l;
+        uint32_t temp = RMath::absLong(Printer::deltaAPosYSteps - cartesianPosSteps[Y_AXIS]);
+        uint32_t opt = Printer::deltaDiagonalStepsSquaredA.l;
 
         if (temp > LIMIT)
             RETURN_0("Apos y steps ");

@@ -830,8 +830,7 @@ ISR(PWM_TIMER_VECTOR)
 #else
     if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#else
-#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
+#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPWM, pwm_cooler_pos_set[1], false);
 #else

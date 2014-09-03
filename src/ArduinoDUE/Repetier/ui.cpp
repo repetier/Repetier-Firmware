@@ -1416,7 +1416,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2>='0' && c2<='3') fvalue = (float)Printer::currentDeltaPositionSteps[c2-'0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
-
+            break;
       }
     }
     printCols[col] = 0;

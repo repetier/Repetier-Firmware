@@ -227,6 +227,32 @@ void HAL::resetHardware() {
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
+// from http://medialab.freaknet.org/martin/src/sqrt/sqrt.c
+uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
+    uint64_t op  = a_nInput;
+    uint64_t res = 0;
+    uint64_t one = 1uLL << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
+
+    // "one" starts at the highest power of four <= than the argument.
+    while (one > op)
+        one >>= 2;
+    while (one != 0)
+    {
+        if (op >= res + one)
+        {
+            op = op - (res + one);
+            res = res +  2 * one;
+        }
+        res >>= 1;
+        one >>= 2;
+    }
+    if (op > res) // Do arithmetic rounding to nearest integer
+    {
+        res++;
+    }
+    return res;
+}
+
 
 #ifndef DUE_SOFTWARE_SPI
    // hardware SPI
@@ -847,8 +873,7 @@ void PWM_TIMER_VECTOR ()
 #else
     if(pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1]!=HEATER_PWM_MASK) WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#else
-#if EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
+#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN>-1 && EXT1_EXTRUDER_COOLER_PIN!=EXT0_EXTRUDER_COOLER_PIN
 #if PDM_FOR_COOLER
     pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPWM, pwm_cooler_pos_set[1], false);
 #else

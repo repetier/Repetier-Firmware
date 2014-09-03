@@ -42,6 +42,7 @@
 #define F_CPU       21000000        // should be factor of F_CPU_TRUE
 #define F_CPU_TRUE  84000000        // actual CPU clock frequency
 #define EEPROM_BYTES 4096  // bytes of eeprom we simulate
+#define SUPPORT_64_BIT_MATH  // Gives better results with high resultion deltas
 
 // another hack to keep AVR code happy (i.e. SdFat.cpp)
 #define SPR0    0
@@ -245,6 +246,7 @@ public:
 #endif
     }
 
+    static uint32_t integer64Sqrt(uint64_t a);
     // return val'val
     static inline unsigned long U16SquaredToU32(unsigned int val)
     {
