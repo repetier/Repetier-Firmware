@@ -116,7 +116,7 @@ void Extruder::manageTemperatures()
 
         // Run test if heater and sensor are decoupled
         bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod;
-        if(decoupleTestRequired && act->isDecoupleFullOrHold()) {
+        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) {
             if(act->isDecoupleFull()) {
                 if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE) { // failed test
                     Printer::setAnyTempsensorDefect();
@@ -813,6 +813,7 @@ void TemperatureController::updateCurrentTemperature()
 void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
+    stopDecouple();
     int temp = TEMP_FLOAT_TO_INT(target);
     uint8_t type = sensorType;
     switch(sensorType)

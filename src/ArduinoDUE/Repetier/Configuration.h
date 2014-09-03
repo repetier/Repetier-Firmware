@@ -802,6 +802,7 @@ you can also change the values online and autoleveling will store the results he
 
 #endif
 // ========== Tuga special settings =============
+#if DRIVE_SYSTEM==TUGA
 /* Radius of the long arm in mm. */
 #define DELTA_DIAGONAL_ROD 240
 #endif
@@ -930,7 +931,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define MOVE_CACHE_SIZE 32
+#define PRINTLINE_CACHE_SIZE 32
 
 /** \brief Low filled cache size.
 

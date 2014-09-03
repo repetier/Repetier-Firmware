@@ -519,14 +519,23 @@ void EEPROM::readDataFromEEPROM()
 #if FEATURE_AUTOLEVEL
     if(version>2)
     {
+        float sum = 0;
         for(uint8_t i=0; i<9; i++)
             Printer::autolevelTransformation[i] = HAL::eprGetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2));
         if(isnan(Printer::autolevelTransformation[0])) { // a bug caused storage of matrix at the wrong place. Read from old position instead.
             for(uint8_t i=0; i<9; i++)
                 Printer::autolevelTransformation[i] = HAL::eprGetFloat((EPR_AUTOLEVEL_MATRIX + (int)i) << 2);
         }
+        for(uint8_t i=0;i<9;i++) {
+            if(isnan(Printer::autolevelTransformation[i]))
+                sum += 10;
+            else
+                sum += RMath::sqr(Printer::autolevelTransformation[i]);
+        }
+        if(sum < 2.7 || sum > 3.3)
+            Printer::resetTransformationMatrix(false);
         Printer::setAutolevelActive(HAL::eprGetByte(EPR_AUTOLEVEL_ACTIVE));
-        Com::printArrayFLN(Com::tInfo,Printer::autolevelTransformation,9,6);
+        Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation,9,6);
     }
 #endif
     // now the extruder

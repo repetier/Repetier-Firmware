@@ -326,6 +326,7 @@ void Printer::kill(uint8_t only_steppers)
         //pinMode(PS_ON_PIN,INPUT);
         SET_OUTPUT(PS_ON_PIN); //GND
         WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
+        Printer::setPowerOn(false);
 #endif
         Printer::setAllKilled(true);
     }
@@ -568,6 +569,13 @@ void Printer::setup()
 #if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP && (PS_ON_PIN>-1)
     SET_OUTPUT(PS_ON_PIN); //GND
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
+    Printer::setPowerOn(true);
+#else
+#if PS_ON_PIN>-1
+    Printer::setPowerOn(false);
+#else
+    Printer::setPowerOn(true);
+#endif
 #endif
 #if SDSUPPORT
     //power to SD reader
@@ -1458,7 +1466,7 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     len = sqrt(autolevelTransformation[4]*autolevelTransformation[4]+autolevelTransformation[5]*autolevelTransformation[5]);
     autolevelTransformation[4] /= len;
     autolevelTransformation[5] /= len;
-    Com::printArrayFLN(Com::tInfo,autolevelTransformation,9,5);
+    Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation,9,6);
 }
 #endif
 

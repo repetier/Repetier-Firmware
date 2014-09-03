@@ -1028,6 +1028,7 @@ void Commands::processMCode(GCode *com)
         Commands::waitUntilEndOfAllMoves();
         previousMillisCmd = HAL::timeInMilliseconds();
         SET_OUTPUT(PS_ON_PIN); //GND
+        Printer::setPowerOn(true);
         WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
         break;
@@ -1035,6 +1036,7 @@ void Commands::processMCode(GCode *com)
 #if PS_ON_PIN>-1
         Commands::waitUntilEndOfAllMoves();
         SET_OUTPUT(PS_ON_PIN); //GND
+        Printer::setPowerOn(false);
         WRITE(PS_ON_PIN,(POWER_INVERTING ? LOW : HIGH));
 #endif
         break;
