@@ -226,7 +226,7 @@ void Printer::updateDerivedParameter()
     deltaDiagonalStepsSquaredA.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionA() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
     deltaDiagonalStepsSquaredB.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionB() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
     deltaDiagonalStepsSquaredC.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionC() + EEPROM::deltaDiagonalRodLength())*axisStepsPerMM[Z_AXIS]);
-    if(true || deltaDiagonalStepsSquaredA.l>65534 || 2 * radius0*axisStepsPerMM[Z_AXIS]>65534)
+    if(deltaDiagonalStepsSquaredA.l>65534 || 2 * radius0*axisStepsPerMM[Z_AXIS]>65534)
     {
         setLargeMachine(true);
 #ifdef SUPPORT_64_BIT_MATH
