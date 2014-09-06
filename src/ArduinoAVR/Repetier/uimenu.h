@@ -191,19 +191,19 @@ for 2 row displays. You can add additional pages or change the default pages lik
  //graphic main status
 
    UI_PAGE6(ui_page1,"\xa %e0/%E0\xb0 X:%x0",
-   #if NUM_EXTRUDER>1
+   #if NUM_EXTRUDER > 1
      "\xa %e1/%E1\xb0 Y:%x1",
   #else
      "             Y:%x1",
    #endif
-   #if HAVE_HEATED_BED==true
+   #if HAVE_HEATED_BED == true
      "\xe %eb/%Eb\xb0 Z:%x2",
    #else
      "Fan %Fs%%%     Z:%x2",
    #endif
    "Mul:%om", "Buf:%oB", "%os");
 
-  #if EEPROM_MODE!=0
+  #if EEPROM_MODE != 0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m");
     #define UI_PRINTTIME_PAGES ,&ui_page2
     #define UI_PRINTTIME_COUNT 1
@@ -320,7 +320,7 @@ UI_MENU_ACTION4C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION4C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST4);
-#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINT_FILAMENT
+#define EPOS_ROWS UI_TEXT_ACTION_EPOSITION_FAST2,UI_TEXT_PAGE_EXTRUDER,"%Uf m " UI_TEXT_PRINTED
 UI_MENU_ACTION4C(ui_menu_epos,UI_ACTION_EPOSITION,EPOS_ROWS);
 #else
 UI_MENU_ACTION2C(ui_menu_xpos,UI_ACTION_XPOSITION,UI_TEXT_ACTION_XPOSITION2);
@@ -442,7 +442,7 @@ UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU
 // **** SD card menu
 
 // **** Quick menu
-#if PS_ON_PIN>=0
+#if PS_ON_PIN > -1
 UI_MENU_ACTIONCOMMAND(ui_menu_quick_power,UI_TEXT_POWER,UI_ACTION_POWER);
 #define MENU_PSON_COUNT 1
 #define MENU_PSON_ENTRY ,&ui_menu_quick_power

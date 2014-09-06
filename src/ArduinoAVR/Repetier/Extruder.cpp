@@ -22,7 +22,7 @@
 #include "Repetier.h"
 #include "pins_arduino.h"
 #include "ui.h"
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
 #include "Eeprom.h"
 #endif
 

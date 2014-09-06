@@ -75,7 +75,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS		   53 // 10 if using HW SPI. 53 if using SW SPI
 #define LED_PIN 	   13
 #define ORIG_FAN_PIN 	   -1
-#define PS_ON_PIN      12
+#define ORIG_PS_ON_PIN      12
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
@@ -159,7 +159,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN 	   -1
 #define ORIG_FAN_PIN 	   9 
 #define ORIG_FAN2_PIN           8 
-#define PS_ON_PIN          40
+#define ORIG_PS_ON_PIN          40
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
@@ -257,7 +257,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN 	   -1
 #define ORIG_FAN_PIN 	   12 
 #define ORIG_FAN2_PIN       2
-#define PS_ON_PIN      53
+#define ORIG_PS_ON_PIN      53
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
@@ -370,8 +370,9 @@ STEPPER_CURRENT_CONTROL
 
 #define FAN_PIN ORIG_FAN_PIN
 #define FAN2_PIN ORIG_FAN2_PIN
+#define PS_ON_PIN ORIG_PS_ON_PIN
 
-#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
+#define SENSITIVE_PINS {0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, ORIG_PS_ON_PIN, \
 						HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
 

@@ -177,6 +177,7 @@ What display type do you use?
 #define UI_ACTION_ZPOSITION_FAST_NOTEST 1110
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
+#define UI_ACTION_TEMP_DEFECT           1113
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -210,6 +211,11 @@ What display type do you use?
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
 
+#define UI_MENU_TYPE_INFO 0
+#define UI_MENU_TYPE_FILE_SELECTOR 1
+#define UI_MENU_TYPE_SUBMENU 2
+#define UI_MENU_TYPE_MODIFICATION_MENU 3
+
 typedef struct {
   const char *text; // Menu text
   uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
@@ -224,7 +230,7 @@ typedef struct UIMenu_struct {
   // 1 = file selector
   // 2 = submenu
   // 3 = modififaction menu
-  unsigned char menuType;
+  uint8_t menuType;
   int id; // Type of modification
   int numEntries;
   const UIMenuEntry * const * entries;
@@ -842,8 +848,8 @@ void ui_check_slow_keys(int &action) {
 #define UI_DISPLAY_D5_PIN      45
 #define UI_DISPLAY_D6_PIN      46
 #define UI_DISPLAY_D7_PIN      47
-#define UI_ENCODER_A           52
-#define UI_ENCODER_B           50
+#define UI_ENCODER_A           50
+#define UI_ENCODER_B           52
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
 #define UI_DELAYPERCHAR 40
@@ -856,7 +862,7 @@ void ui_init_keys() {
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
 }
 void ui_check_keys(int &action) {
- UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK);
 }

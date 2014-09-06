@@ -26,7 +26,7 @@
 
 void EEPROM::update(GCode *com)
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     if(com->hasT() && com->hasP()) switch(com->T)
         {
         case 0:
@@ -54,7 +54,7 @@ void EEPROM::update(GCode *com)
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     uint8_t version = EEPROM_PROTOCOL_VERSION;
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
@@ -70,7 +70,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::homingFeedrate[Y_AXIS] = HOMING_FEEDRATE_Y;
     Printer::homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
     Printer::maxJerk = MAX_JERK;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     Printer::maxZJerk = MAX_ZJERK;
 #endif
 #if RAMP_ACCELERATION
@@ -301,7 +301,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     HAL::eprSetInt32(EPR_BAUDRATE,baudrate);
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
@@ -316,7 +316,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_Y_HOMING_FEEDRATE,Printer::homingFeedrate[Y_AXIS]);
     HAL::eprSetFloat(EPR_Z_HOMING_FEEDRATE,Printer::homingFeedrate[Z_AXIS]);
     HAL::eprSetFloat(EPR_MAX_JERK,Printer::maxJerk);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     HAL::eprSetFloat(EPR_MAX_ZJERK,Printer::maxZJerk);
 #endif
 #if RAMP_ACCELERATION
@@ -652,7 +652,7 @@ void EEPROM::initBaudrate()
 {
     // Invariant - baudrate is intitalized with or without eeprom!
     baudrate = BAUDRATE;
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE)
     {
         baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
@@ -665,7 +665,7 @@ void EEPROM::initBaudrate()
 #endif // USE_CONFIGURATION_BAUD_RATE
 void EEPROM::init()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     uint8_t check = computeChecksum();
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
     if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check)
@@ -695,7 +695,7 @@ void EEPROM::init()
 
 void EEPROM::updatePrinterUsage()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     if(Printer::filamentPrinted==0) return; // No miles only enabled
     uint32_t seconds = (HAL::timeInMilliseconds()-Printer::msecondsPrinting)/1000;
     seconds += HAL::eprGetInt32(EPR_PRINTING_TIME);
@@ -724,30 +724,30 @@ With
 */
 void EEPROM::writeSettings()
 {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
     writeLong(EPR_BAUDRATE,Com::tEPRBaudrate);
     writeFloat(EPR_PRINTING_DISTANCE,Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME,Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME,Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME,Com::tEPRStopAfterInactivty);
 //#define EPR_ACCELERATION_TYPE 1
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM,Com::tEPRXStepsPerMM,4);
     writeFloat(EPR_YAXIS_STEPS_PER_MM,Com::tEPRYStepsPerMM,4);
 #endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM,Com::tEPRZStepsPerMM,4);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_X_MAX_FEEDRATE,Com::tEPRXMaxFeedrate);
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
 #endif
     writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_X_HOMING_FEEDRATE,Com::tEPRXHomingFeedrate);
     writeFloat(EPR_Y_HOMING_FEEDRATE,Com::tEPRYHomingFeedrate);
 #endif
     writeFloat(EPR_Z_HOMING_FEEDRATE,Com::tEPRZHomingFeedrate);
     writeFloat(EPR_MAX_JERK,Com::tEPRMaxJerk);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_MAX_ZJERK,Com::tEPRMaxZJerk);
 #endif
     writeFloat(EPR_X_HOME_OFFSET,Com::tEPRXHomePos);
@@ -766,10 +766,10 @@ void EEPROM::writeSettings()
     //epr_out_float(EPR_X_MAX_START_SPEED,PSTR("X-axis start speed [mm/s]"));
     //epr_out_float(EPR_Y_MAX_START_SPEED,PSTR("Y-axis start speed [mm/s]"));
     //epr_out_float(EPR_Z_MAX_START_SPEED,PSTR("Z-axis start speed [mm/s]"));
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     writeFloat(EPR_Z_MAX_ACCEL,Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL,Com::tEPRZTravelAcceleration);
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,Com::tEPRDiagonalRodLength);
@@ -864,7 +864,7 @@ void EEPROM::writeSettings()
 #endif
 }
 
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
 
 uint8_t EEPROM::computeChecksum()
 {

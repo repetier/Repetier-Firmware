@@ -77,7 +77,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS          -1
 #define LED_PIN            -1
 #define ORIG_FAN_PIN            -1
-#define PS_ON_PIN          15
+#define ORIG_PS_ON_PIN          15
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -149,7 +149,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS          -1
 #define LED_PIN             0
 #define ORIG_FAN_PIN            -1
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define HEATER_0_PIN       14
 #define TEMP_0_PIN          4 //D27   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -213,7 +213,7 @@ STEPPER_CURRENT_CONTROL
 #define RX_ENABLE_PIN	13
 
 //pin for controlling the PSU.
-#define PS_ON_PIN       14
+#define ORIG_PS_ON_PIN       14
 
 #define ORIG_FAN_PIN         -1
 
@@ -280,7 +280,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN          -1
 
 //pin for controlling the PSU.
-#define PS_ON_PIN       14
+#define ORIG_PS_ON_PIN       14
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
 #endif
@@ -350,7 +350,7 @@ STEPPER_CURRENT_CONTROL
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN            9
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 
 #define HEATER_0_PIN       10
 #define HEATER_1_PIN       8
@@ -389,7 +389,7 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER            48
 #define SDSS               53
 #define LED_PIN            13
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 //#define SCL                21
 //#define SDA                20
 
@@ -546,7 +546,7 @@ STEPPER_CURRENT_CONTROL
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN            7
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 #define KILL_PIN           -1
 #define SUICIDE_PIN        54  //PIN that has to be turned on right after start, to keep power flowing.
 
@@ -608,7 +608,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN            7
 #define ORIG_FAN2_PIN     8 // (e.g. useful for electronics fan or light on/off) on PIN 8
 
-#define PS_ON_PIN          45
+#define ORIG_PS_ON_PIN          45
 
 #define HEATER_0_PIN       2    // EXTRUDER 1
 #define HEATER_2_PIN       3    // EXTRUDER 2
@@ -671,7 +671,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS          -1
 #define LED_PIN            -1
 #define ORIG_FAN_PIN             5
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define HEATER_0_PIN        6
 #define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
@@ -734,7 +734,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSS          16 // SCL pin of I2C header
 #define LED_PIN         -1    //changed @ rkoeppl 20110410
 #define ORIG_FAN_PIN         -1    //changed @ rkoeppl 20110410
-#define PS_ON_PIN       -1    //changed @ rkoeppl 20110410
+#define ORIG_PS_ON_PIN       -1    //changed @ rkoeppl 20110410
 //our pin for debugging.
 
 #define DEBUG_PIN        0
@@ -794,7 +794,7 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_FAN_PIN            -1
 
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define HEATER_0_PIN       13 // (extruder)
 
@@ -877,7 +877,7 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_FAN_PIN            4
 
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define HEATER_0_PIN       13 // (extruder)
 #define HEATER_2_PIN       -1
@@ -955,7 +955,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN         -1
 
 #define ORIG_FAN_PIN         31
-#define PS_ON_PIN       15
+#define ORIG_PS_ON_PIN       15
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
 
@@ -1022,7 +1022,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN         -1
 
 #define ORIG_FAN_PIN         -1
-#define PS_ON_PIN       15
+#define ORIG_PS_ON_PIN       15
 //our pin for debugging.
 
 #define DEBUG_PIN        0
@@ -1089,7 +1089,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN         -1
 
 #define ORIG_FAN_PIN         31
-#define PS_ON_PIN       15
+#define ORIG_PS_ON_PIN       15
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
 
@@ -1166,7 +1166,7 @@ STEPPER_CURRENT_CONTROL
 #define MOSI_PIN 5
 
 #define ORIG_FAN_PIN 21 //FAN and ATX Power Supply Control Pins
-#define PS_ON_PIN 15
+#define ORIG_PS_ON_PIN 15
 
 #define LED_PIN -1
 #define SDSUPPORT 1  // sd card reader on board
@@ -1217,7 +1217,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            -1
 
 #define ORIG_FAN_PIN            16 // Fan
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
@@ -1276,7 +1276,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            -1
 
 #define ORIG_FAN_PIN            16 // Fan
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
@@ -1331,7 +1331,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            -1
 
 #define ORIG_FAN_PIN            16 // Fan
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
@@ -1401,7 +1401,7 @@ STEPPER_CURRENT_CONTROL
 #define LED_PIN            13	// PINB.7, 26, LED13
 #define ORIG_FAN_PIN            25	// OUT1 PINA.3, 75, OUT1
 #define FAN_BOARD_PIN      27   // OUT2
-#define PS_ON_PIN          -1
+#define ORIG_PS_ON_PIN          -1
 
 #define HEATER_0_PIN       10	// PINB.4, 23, HZ1
 #define HEATER_1_PIN        9	// PINH.6, 18, HZ2
@@ -1472,7 +1472,7 @@ STEPPER_CURRENT_CONTROL
 
 
 #define ORIG_FAN_PIN            7 // IO pin. Buffer needed
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 
 #define HEATER_0_PIN       9    // EXTRUDER 1
 #define HEATER_1_PIN       8    // EXTRUDER 2 (FAN On Sprinter)
@@ -1567,7 +1567,7 @@ STEPPER_CURRENT_CONTROL
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN            9
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       10
@@ -1651,7 +1651,7 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_FAN_PIN            7
 #define ORIG_FAN2_PIN           6
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 
 #define HEATER_0_PIN       9    // EXTRUDER 1
 #define HEATER_2_PIN       8    // Heated bed
@@ -1745,7 +1745,7 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_FAN_PIN 9
 #define ORIG_FAN2_PIN -1
-#define PS_ON_PIN -1
+#define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
 
 #define HEATER_0_PIN 7 // EXTRUDER 1
@@ -1822,7 +1822,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN 6
 #define ORIG_FAN2_PIN 7
 
-#define PS_ON_PIN 12
+#define ORIG_PS_ON_PIN 12
 //#define KILL_PIN -1
 
 #define HEATER_0_PIN 9 // EXTRUDER 1
@@ -1946,7 +1946,7 @@ S3(ext)=9
 #define SDSS           53
 #define LED_PIN        13
 #define ORIG_FAN_PIN        8
-#define PS_ON_PIN      4
+#define ORIG_PS_ON_PIN      4
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
@@ -2021,7 +2021,7 @@ S3(ext)=9
 #define ORIG_FAN_PIN            7        ////*****fan0
 //uncomment when the 2nd fan used - works only without heated bed!
 #define ORIG_FAN2_PIN           2
-#define PS_ON_PIN          30
+#define ORIG_PS_ON_PIN          30
 
 #define HEATER_0_PIN       3    ////**** Extuder1
 #define HEATER_1_PIN       12   ////***Extuder2
@@ -2074,7 +2074,7 @@ S3(ext)=9
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN            7        ////*****fan
-#define PS_ON_PIN          12
+#define ORIG_PS_ON_PIN          12
 
 #define HEATER_0_PIN       8    ////**** Extuder1
 #define HEATER_1_PIN       10    ////***Extuder2
@@ -2147,7 +2147,7 @@ S3(ext)=9
 #define LED_PIN -1
 
 #define ORIG_FAN_PIN -1
-#define PS_ON_PIN 0
+#define ORIG_PS_ON_PIN 0
 //our pin for debugging.
 
 #define DEBUG_PIN -1
@@ -2247,11 +2247,11 @@ S3(ext)=9
 
 #define FAN_PIN ORIG_FAN_PIN
 #define FAN2_PIN ORIG_FAN2_PIN
-
+#define PS_ON_PIN ORIG_PS_ON_PIN
 
 #define SENSITIVE_PINS {0, 1, ORIG_X_STEP_PIN, ORIG_X_DIR_PIN, ORIG_X_ENABLE_PIN, ORIG_X_MIN_PIN, ORIG_X_MAX_PIN, \
         ORIG_Y_STEP_PIN, ORIG_Y_DIR_PIN, ORIG_Y_ENABLE_PIN, ORIG_Y_MIN_PIN, ORIG_Y_MAX_PIN, ORIG_Z_STEP_PIN,\
-        ORIG_Z_DIR_PIN, ORIG_Z_ENABLE_PIN, ORIG_Z_MIN_PIN, ORIG_Z_MAX_PIN, LED_PIN, PS_ON_PIN, \
+        ORIG_Z_DIR_PIN, ORIG_Z_ENABLE_PIN, ORIG_Z_MIN_PIN, ORIG_Z_MAX_PIN, LED_PIN, ORIG_PS_ON_PIN, \
         HEATER_0_PIN, HEATER_1_PIN, ORIG_FAN_PIN, E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN,SDSS }
 #endif
 

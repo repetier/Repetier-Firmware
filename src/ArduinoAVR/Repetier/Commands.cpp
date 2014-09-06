@@ -878,7 +878,7 @@ void Commands::processGCode(GCode *com)
         Com::printFLN(Com::tTower1,offx);
         Com::printFLN(Com::tTower2,offy);
         Com::printFLN(Com::tTower3,offz);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
         if(com->hasS() && com->S>0)
         {
             EEPROM::setDeltaTowerXOffsetSteps(offx);
@@ -1429,7 +1429,7 @@ void Commands::processMCode(GCode *com)
 #endif
         Printer::updateCurrentPosition();
         Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
-#if EEPROM_MODE == EEPROM_ON
+#if EEPROM_MODE != 0
         EEPROM::storeDataIntoEEPROM(false);
         Com::printFLN(Com::tEEPROMUpdated);
 #endif
@@ -1535,7 +1535,7 @@ void Commands::processMCode(GCode *com)
 
     case 500: // M500
     {
-#if EEPROM_MODE!=0
+#if EEPROM_MODE != 0
         EEPROM::storeDataIntoEEPROM(false);
         Com::printInfoF(Com::tConfigStoredEEPROM);
 #else

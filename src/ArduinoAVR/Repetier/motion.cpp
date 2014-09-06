@@ -98,6 +98,10 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_
     //Com::printF(Com::tJerkColon,x);
     //Com::printF(Com::tComma,y);
     //Com::printFLN(Com::tComma,z);
+#if NUM_EXTRUDER > 0
+    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP))
+        e = 0; // should not be allowed for current temperature
+#endif
     float savedFeedrate = Printer::feedrate;
     Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS] + x;
     Printer::destinationSteps[Y_AXIS] = Printer::currentPositionSteps[Y_AXIS] + y;
@@ -128,6 +132,10 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,in
     {
         return; // ignore move
     }
+#if NUM_EXTRUDER > 0
+    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP))
+        e = 0; // should not be allowed for current temperature
+#endif
     Printer::moveToReal(Printer::lastCmdPos[X_AXIS],Printer::lastCmdPos[Y_AXIS],Printer::lastCmdPos[Z_AXIS],
                         (Printer::currentPositionSteps[E_AXIS] + e) * Printer::invAxisStepsPerMM[E_AXIS],feedrate);
     Printer::updateCurrentPosition();
