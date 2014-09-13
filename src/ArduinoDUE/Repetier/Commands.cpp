@@ -1444,7 +1444,17 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif
-
+    case 281: // Trigger watchdog
+#if FEATURE_WATCHDOG
+        Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
+        Printer::kill(false);
+        HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
+        HAL::forbidInterrupts();
+        while(1) {} // Endless loop
+#else
+        Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"))
+#endif
+        break;
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0
     case 300: // M300
     {

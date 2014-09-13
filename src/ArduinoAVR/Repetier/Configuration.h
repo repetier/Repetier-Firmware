@@ -413,7 +413,7 @@ cog. Direct drive extruder need 0. */
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
-#define RETRACT_DURING_HEATUP true
+#define RETRACT_DURING_HEATUP 1
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
