@@ -106,7 +106,7 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_A 933
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
-
+#define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
 #else
@@ -147,12 +147,13 @@ have problems with other modules using the eeprom */
 class EEPROM
 {
 #if EEPROM_MODE != 0
-    static uint8_t computeChecksum();
     static void writeExtruderPrefix(uint pos);
     static void writeFloat(uint pos,PGM_P text,uint8_t digits=3);
     static void writeLong(uint pos,PGM_P text);
     static void writeInt(uint pos,PGM_P text);
     static void writeByte(uint pos,PGM_P text);
+public:
+    static uint8_t computeChecksum();
 #endif
 public:
 

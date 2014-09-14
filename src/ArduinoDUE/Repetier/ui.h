@@ -27,6 +27,7 @@
 #define DISPLAY_I2C   3
 #define DISPLAY_ARDUINO_LIB  4
 #define DISPLAY_U8G  5
+#define DISPLAY_GAMEDUINO2 6
 
 /**
 What display type do you use?
@@ -375,7 +376,11 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #endif
 
 // Maximum size of a row - if row is larger, text gets scrolled
+#if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
+#define MAX_COLS 50
+#else
 #define MAX_COLS 28
+#endif
 #define UI_MENU_MAXLEVEL 5
 
 class UIDisplay {
@@ -402,6 +407,7 @@ class UIDisplay {
     int repeatDuration; // Time beween to actions if autorepeat is enabled
     int8_t oldMenuLevel;
     uint8_t encoderStartScreen;
+    char printCols[MAX_COLS+1];
     void addInt(int value,uint8_t digits,char fillChar=' '); // Print int into printCols
     void addLong(long value,char digits);
     inline void addLong(long value) {addLong(value, -11);};
@@ -451,10 +457,10 @@ extern UIDisplay uid;
 #define UI_HAS_KEYS 0
 #define UI_DISPLAY_TYPE NO_DISPLAY
 #if UI_MAIN
-void ui_init_keys() {}
-void ui_check_keys(int &action) {}
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+void uiInitKeys() {}
+void uiCheckKeys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif // UI_MAIN
 #endif // NO_CONTROLLER
 #if (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS) || (FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD) || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)
@@ -546,18 +552,18 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller 2 and 10
 
@@ -590,9 +596,9 @@ void ui_check_slow_keys(int &action) {}
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
 #ifdef UI_MAIN
-void ui_init_keys() {}
-void ui_check_keys(int &action) {}
-inline void ui_check_slow_encoder() {
+void uiInitKeys() {}
+void uiCheckKeys(int &action) {}
+inline void uiCheckSlowEncoder() {
   HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
   HAL::i2cWrite(0x12); // GIOA
   HAL::i2cStop();
@@ -601,7 +607,7 @@ inline void ui_check_slow_encoder() {
   keymask = keymask + (HAL::i2cReadNak()<<8);
   HAL::i2cStop();
 }
-void ui_check_slow_keys(int &action) {
+void uiCheckSlowKeys(int &action) {
   HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
   HAL::i2cWrite(0x12); // GPIOA
   HAL::i2cStop();
@@ -639,22 +645,22 @@ void ui_check_slow_keys(int &action) {
 #define UI_DELAYPERCHAR		   320
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(5);
   UI_KEYS_INIT_BUTTON_LOW(6);
   UI_KEYS_INIT_BUTTON_LOW(11);
   UI_KEYS_INIT_BUTTON_LOW(42);
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller 4
 
@@ -710,16 +716,16 @@ void ui_check_slow_keys(int &action) {}
 #define UI_HAS_I2C_ENCODER 0
 #define UI_I2C_KEY_ADDRESS 0x40
 #ifdef UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
   UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on real pins
   UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
 }
-inline void ui_check_slow_encoder() { }// not used in Viki
-void ui_check_slow_keys(int &action) {
+inline void uiCheckSlowEncoder() { }// not used in Viki
+void uiCheckSlowKeys(int &action) {
   HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
   HAL::i2cWrite(0x12); // GPIOA
   HAL::i2cStop();
@@ -781,7 +787,7 @@ void ui_check_slow_keys(int &action) {
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION 1
 #if UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
     UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
     UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
 
@@ -793,14 +799,14 @@ void ui_init_keys() {
     WRITE(UI_SHIFT_LD,HIGH);
 }
 
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
     UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
     UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
 }
 
-inline void ui_check_slow_encoder() {} // not used
+inline void uiCheckSlowEncoder() {} // not used
 
-void ui_check_slow_keys(int &action) {
+void uiCheckSlowKeys(int &action) {
 
     WRITE(UI_SHIFT_LD,LOW);
     WRITE(UI_SHIFT_LD,HIGH);
@@ -856,18 +862,18 @@ void ui_check_slow_keys(int &action) {
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 #ifdef UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK);
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller 7
 
@@ -941,22 +947,22 @@ void ui_check_slow_keys(int &action) {}
 #endif
 
 #ifdef UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_OK); // push button, connects gnd to pin
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_NEXT);
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_PREVIOUS);
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_BACK);
   UI_KEYS_INIT_BUTTON_LOW(UI_BUTTON_SD_PRINT);
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_BUTTON_LOW(UI_BUTTON_OK,UI_ACTION_OK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_NEXT,UI_ACTION_NEXT); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_PREVIOUS,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_BACK,UI_ACTION_BACK); // push button, connects gnd to pin
  UI_KEYS_BUTTON_LOW(UI_BUTTON_SD_PRINT,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif
 
@@ -987,16 +993,16 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DELAYPERCHAR 320
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller 12
 
@@ -1027,18 +1033,18 @@ void ui_check_slow_keys(int &action) {}
 #define UI_DELAYPERCHAR       320
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
   UI_KEYS_INIT_BUTTON_LOW(UI_KILL_PIN);
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
  UI_KEYS_BUTTON_LOW(UI_KILL_PIN,UI_ACTION_KILL);
 }
-inline void ui_check_slow_encoder() {}
-void ui_check_slow_keys(int &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller 13
 
@@ -1074,9 +1080,9 @@ void ui_check_slow_keys(int &action) {}
 #define UI_I2C_KEY_ADDRESS 0x40
 
 #ifdef UI_MAIN
-void ui_init_keys() {}
-void ui_check_keys(int &action) {}
-inline void ui_check_slow_encoder() {
+void uiInitKeys() {}
+void uiCheckKeys(int &action) {}
+inline void uiCheckSlowEncoder() {
 HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
 HAL::i2cWrite(0x12); // GIOA
 HAL::i2cStop();
@@ -1085,7 +1091,7 @@ unsigned int keymask = HAL::i2cReadAck();
 keymask = keymask + (HAL::i2cReadNak()<<8);
 HAL::i2cStop();
 }
-void ui_check_slow_keys(int &action) {
+void uiCheckSlowKeys(int &action) {
 HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
 HAL::i2cWrite(0x12); // GPIOA
 HAL::i2cStop();
@@ -1145,21 +1151,39 @@ UI_KEYS_I2C_BUTTON_LOW(_BV(2),UI_ACTION_NEXT); // down button
 #define UI_I2C_FAN_LED        _BV(6)
 
 #ifdef UI_MAIN
-void ui_init_keys() {
+void uiInitKeys() {
 	UI_KEYS_INIT_CLICKENCODER_LOW(10,11); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 	UI_KEYS_INIT_BUTTON_LOW(30); // push button, connects gnd to pin
 }
 
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
 	 UI_KEYS_CLICKENCODER_LOW_REV(10,11); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 	 UI_KEYS_BUTTON_LOW(30,UI_ACTION_OK); // push button, connects gnd to pin
 }
 
-inline void ui_check_slow_encoder() {}
+inline void uiCheckSlowEncoder() {}
 
-void ui_check_slow_keys(int &action) {}
-#endif
+void uiCheckSlowKeys(int &action) {}
+#endif // UI_MAIN
 #endif // Controller 15
+
+#if FEATURE_CONTROLLER == CONTROLLER_GAMEDUINO2
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_GAMEDUINO2
+#define UI_DISPLAY_CHARSET 0
+#define UI_COLS 30
+#define UI_ROWS 4
+#define UI_INVERT_MENU_DIRECTION 0
+
+#define BEEPER_TYPE 0
+#define BEEPER_TYPE_INVERTING 0
+
+#define UI_DISPLAY_CS 49  // Pin for SPI select on gameduino 2 - depends on board and choice
+
+#endif // Controller 16
+
+
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 #if UI_ROWS==4
@@ -1169,7 +1193,11 @@ void ui_check_slow_keys(int &action) {}
 //#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
 #define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
 #else
+#if UI_DISPLAY_TYPE!=DISPLAY_GAMEDUINO2
 #error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
+#else
+#define UI_LINE_OFFSETS {} // dummy never used
+#endif
 #endif
 #else
 #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24

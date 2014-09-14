@@ -108,9 +108,9 @@ void Extruder::manageTemperatures()
             }
         }
         if(Printer::isAnyTempsensorDefect()) continue;
-        uint8_t on = act->currentTemperature>=act->targetTemperature ? LOW : HIGH;
+        uint8_t on = act->currentTemperatureC >= act->targetTemperatureC ? LOW : HIGH;
         if(!on && act->isAlarm()) {
-            beep(50*(controller+1),3);
+            beep(50 * (controller + 1), 3);
             act->setAlarm(false);  //reset alarm
         }
 

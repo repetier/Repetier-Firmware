@@ -1077,7 +1077,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 2
 
 
 /**************** duplicate motor driver ***************
@@ -1227,6 +1227,7 @@ The following settings override uiconfig.h!
 13 or CONTROLLER_RAMBO = SeeMeCNC Display on Rambo (ORION)
 14 or CONTROLLER_OPENHARDWARE_LCD2004 = OpenHardware.co.za LCD2004 V2014
 15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
+16 or CONTROLLER_GAMEDUINO2 (in development)
 */
 
 #define FEATURE_CONTROLLER NO_CONTROLLER

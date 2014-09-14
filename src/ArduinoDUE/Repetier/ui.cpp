@@ -546,7 +546,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
     lcdStopWrite();
 #endif
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
-    ui_check_slow_encoder();
+    uiCheckSlowEncoder();
 #endif
 }
 #endif
@@ -601,7 +601,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
         }
     }
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
-    ui_check_slow_encoder();
+    uiCheckSlowEncoder();
 #endif
 }
 
@@ -696,7 +696,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
     }
 
 #if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
-    ui_check_slow_encoder();
+    uiCheckSlowEncoder();
 #endif
 }
 
@@ -722,7 +722,10 @@ void initializeLCD()
 // ------------------ End u8GLIB library as LCD driver
 #endif // UI_DISPLAY_TYPE == DISPLAY_U8G
 
-char printCols[MAX_COLS+1];
+#if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
+#include "gameduino2.h"
+#endif
+
 UIDisplay::UIDisplay()
 {
 
@@ -734,10 +737,10 @@ void slideIn(uint8_t row,FSTRINGPARAM(text))
     int8_t i = 0;
     uid.col=0;
     uid.addStringP(text);
-    printCols[uid.col]=0;
+    uid.printCols[uid.col]=0;
     for(i=UI_COLS-1; i>=0; i--)
     {
-        uid.printRow(row,empty,printCols,i);
+        uid.printRow(row,empty,uid.printCols,i);
         HAL::pingWatchdog();
         HAL::delayMilliseconds(10);
     }
@@ -778,7 +781,7 @@ void UIDisplay::initialize()
     lastButtonAction = 0;
     activeAction = 0;
     statusMsg[0] = 0;
-    ui_init_keys();
+    uiInitKeys();
     cwd[0]='/';
     cwd[1]=0;
     folderLevel=0;
@@ -804,6 +807,9 @@ void UIDisplay::initialize()
     HAL::i2cStop();
     initializeLCD();
 #endif
+#if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
+    GD2::startScreen();
+#else
 #if UI_ANIMATION==false || UI_DISPLAY_TYPE == DISPLAY_U8G
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
     //u8g picture loop
@@ -823,14 +829,15 @@ void UIDisplay::initialize()
 #endif
 #else
     slideIn(0, versionString);
-    strcpy(displayCache[0], printCols);
+    strcpy(displayCache[0], uid.printCols);
     slideIn(1, PSTR(UI_PRINTER_NAME));
-    strcpy(displayCache[1], printCols);
+    strcpy(displayCache[1], uid.printCols);
 #if UI_ROWS>2
     slideIn(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
-    strcpy(displayCache[UI_ROWS-1], printCols);
+    strcpy(displayCache[UI_ROWS-1], uid.printCols);
 #endif
 #endif
+#endif // gameduino2
     HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
 #endif
 #if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
@@ -858,7 +865,7 @@ void  UIDisplay::waitForKey()
     lastButtonAction = 0;
     while(lastButtonAction==nextAction)
     {
-        ui_check_slow_keys(nextAction);
+        uiCheckSlowKeys(nextAction);
     }
 }
 
@@ -867,8 +874,8 @@ void UIDisplay::printRowP(uint8_t r,PGM_P txt)
     if(r >= UI_ROWS) return;
     col = 0;
     addStringP(txt);
-    printCols[col] = 0;
-    printRow(r,printCols,NULL,UI_COLS);
+    uid.printCols[col] = 0;
+    printRow(r,uid.printCols,NULL,UI_COLS);
 }
 void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
 {
@@ -892,7 +899,7 @@ void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
     }
     while(value);
     if(neg)
-        printCols[col++]='-';
+        uid.printCols[col++]='-';
     if(digits<6)
         while(dig<digits)
         {
@@ -901,7 +908,7 @@ void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
         }
     while(*str && col<MAX_COLS)
     {
-        printCols[col++] = *str;
+        uid.printCols[col++] = *str;
         str++;
     }
 }
@@ -929,7 +936,7 @@ void UIDisplay::addLong(long value,char digits)
     }
     while(value);
     if(neg)
-        printCols[col++]='-';
+        uid.printCols[col++]='-';
     if(addspaces && digits<=11)
         while(dig<digits)
         {
@@ -938,7 +945,7 @@ void UIDisplay::addLong(long value,char digits)
         }
     while(*str && col<MAX_COLS)
     {
-        printCols[col++] = *str;
+        uid.printCols[col++] = *str;
         str++;
     }
 }
@@ -948,7 +955,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
     // Handle negative numbers
     if (number < 0.0)
     {
-        printCols[col++]='-';
+        uid.printCols[col++]='-';
         if(col>=MAX_COLS) return;
         number = -number;
         fixdigits--;
@@ -964,7 +971,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
     // Print the decimal point, but only if there are digits beyond
     if (digits > 0)
     {
-        printCols[col++]='.';
+        uid.printCols[col++]='.';
     }
 
     // Extract digits from the remainder one at a time
@@ -972,7 +979,7 @@ void UIDisplay::addFloat(float number, char fixdigits,uint8_t digits)
     {
         remainder *= 10.0;
         uint8_t toPrint = uint8_t(remainder);
-        printCols[col++] = '0'+toPrint;
+        uid.printCols[col++] = '0'+toPrint;
         remainder -= toPrint;
     }
 }
@@ -982,12 +989,12 @@ void UIDisplay::addStringP(FSTRINGPARAM(text))
     {
         uint8_t c = HAL::readFlashByte(text++);
         if(c==0) return;
-        printCols[col++]=c;
+        uid.printCols[col++]=c;
     }
 }
 void UIDisplay::addChar(const char c) {
   if(col<UI_COLS) {
-    printCols[col++]=c;
+    uid.printCols[col++]=c;
   }
 }
 void UIDisplay::addGCode(GCode *code) {
@@ -1068,7 +1075,7 @@ void UIDisplay::parse(const char *txt,bool ram)
         if(c==0) break; // finished
         if(c!='%')
         {
-            printCols[col++]=c;
+            uid.printCols[col++]=c;
             continue;
         }
         // dynamic parameter, parse meaning and replace
@@ -1078,7 +1085,7 @@ void UIDisplay::parse(const char *txt,bool ram)
         {
         case '%':
           { // print % for input '%%' or '%%%'
-            if(col<UI_COLS) printCols[col++]='%'; // if data = '%%?' escaped percent, with left over ? char
+            if(col<UI_COLS) uid.printCols[col++]='%'; // if data = '%%?' escaped percent, with left over ? char
             if (c2 != '%') txt--; // Be flexible and accept 2 or 3 chars
             break;
           } // case '%'
@@ -1089,7 +1096,7 @@ void UIDisplay::parse(const char *txt,bool ram)
           // if not, append c2.
           // otherwise do nothing.
           if (col>0 && col<UI_COLS) {
-            if (printCols[col-1] != c2) printCols[col++]=c2;
+            if (uid.printCols[col-1] != c2) uid.printCols[col++]=c2;
           }
           break;
         }
@@ -1185,7 +1192,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                     else percent = (sd.sdpos>>8)*100/(sd.filesize>>8);
                     addInt((int)percent,3);
                     if(col<MAX_COLS)
-                        printCols[col++]='%';
+                        uid.printCols[col++]='%';
                 }
                 else
 #endif
@@ -1226,7 +1233,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             ivalue=(ivalue*100)/255;
             addInt(ivalue,3);
             if(col<MAX_COLS)
-                printCols[col++]='%';
+                uid.printCols[col++]='%';
             break;
         case 's': // Endstop positions
             if(c2=='x')
@@ -1419,7 +1426,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
       }
     }
-    printCols[col] = 0;
+    uid.printCols[col] = 0;
 }
 void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
@@ -1556,17 +1563,17 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
             }
             uid.col = 0;
             if(r + offset == uid.menuPos[uid.menuLevel])
-                printCols[uid.col++] = CHAR_SELECTOR;
+                uid.printCols[uid.col++] = CHAR_SELECTOR;
             else
-                printCols[uid.col++] = ' ';
+                uid.printCols[uid.col++] = ' ';
             // print file name with possible blank fill
             if(DIR_IS_SUBDIR(p))
-                printCols[uid.col++] = bFOLD; // Prepend folder symbol
+                uid.printCols[uid.col++] = bFOLD; // Prepend folder symbol
             length = RMath::min((int)strlen(tempLongFilename), MAX_COLS - uid.col);
-            memcpy(printCols + uid.col, tempLongFilename, length);
+            memcpy(uid.printCols + uid.col, tempLongFilename, length);
             uid.col += length;
-            printCols[uid.col] = 0;
-            strcpy(cache[r++],printCols);
+            uid.printCols[uid.col] = 0;
+            strcpy(cache[r++],uid.printCols);
         }
     }
     #endif
@@ -1575,6 +1582,9 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
+    #if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
+    GD2::refresh();
+    #else
     uint16_t r;
     uint8_t mtype;
     char cache[UI_ROWS][MAX_COLS+1];
@@ -1597,7 +1607,7 @@ void UIDisplay::refreshPage()
             UIMenuEntry *ent = (UIMenuEntry *)pgm_read_word(&(entries[r]));
             col = 0;
             parse((char*)pgm_read_word(&(ent->text)),false);
-            strcpy(cache[r],printCols);
+            strcpy(cache[r],uid.printCols);
         }
     }
     else
@@ -1621,25 +1631,25 @@ void UIDisplay::refreshPage()
             if(entType >= 2 && entType <= 4)
             {
                 if(r + offset == menuPos[menuLevel] && activeAction != entAction)
-                    printCols[col++] = CHAR_SELECTOR;
+                    uid.printCols[col++] = CHAR_SELECTOR;
                 else if(activeAction == entAction)
-                    printCols[col++] = CHAR_SELECTED;
+                    uid.printCols[col++] = CHAR_SELECTED;
                 else
-                    printCols[col++]=' ';
+                    uid.printCols[col++]=' ';
             }
             parse((char*)pgm_read_word(&(ent->text)),false);
             if(entType == 2)   // Draw submenu marker at the right side
             {
-                while(col<UI_COLS-1) printCols[col++]=' ';
+                while(col<UI_COLS-1) uid.printCols[col++]=' ';
                 if(col>UI_COLS)
                 {
-                    printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
+                    uid.printCols[RMath::min(UI_COLS-1,col)] = CHAR_RIGHT;
                 }
                 else
-                    printCols[col] = CHAR_RIGHT; // Arrow right
-                printCols[++col] = 0;
+                    uid.printCols[col] = CHAR_RIGHT; // Arrow right
+                uid.printCols[++col] = 0;
             }
-            strcpy(cache[r],printCols);
+            strcpy(cache[r],uid.printCols);
             r++;
         }
     }
@@ -1650,9 +1660,9 @@ void UIDisplay::refreshPage()
     }
 #endif
 
-    printCols[0] = 0;
+    uid.printCols[0] = 0;
     while(r < UI_ROWS) // delete trailing empty rows
-        strcpy(cache[r++],printCols);
+        strcpy(cache[r++],uid.printCols);
     // cache now contains the data to show
     // Compute transition
     uint8_t transition = 0; // 0 = display, 1 = up, 2 = down, 3 = left, 4 = right
@@ -1928,6 +1938,7 @@ void UIDisplay::refreshPage()
             strcpy(displayCache[y],cache[y]);
     oldMenuLevel = menuLevel;
 #endif
+#endif
 }
 
 void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
@@ -1987,24 +1998,6 @@ void UIDisplay::okAction()
     UIMenuEntry *ent;
     unsigned char entType;
     int action;
-    if(mtype == UI_MENU_TYPE_MODIFICATION_MENU)   // action menu
-    {
-        action = pgm_read_word(&(men->id));
-        finishAction(action);
-        executeAction(UI_ACTION_BACK);
-        return;
-    }
-    if(mtype == UI_MENU_TYPE_SUBMENU && entType == 4)   // Modify action
-    {
-        if(activeAction)   // finish action
-        {
-            finishAction(action);
-            activeAction = 0;
-        }
-        else
-            activeAction = action;
-        return;
-    }
 #if SDSUPPORT
     if(mtype == UI_MENU_TYPE_FILE_SELECTOR)
     {
@@ -2076,6 +2069,24 @@ void UIDisplay::okAction()
     ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     entType = pgm_read_byte(&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action
     action = pgm_read_word(&(ent->action));
+    if(mtype == UI_MENU_TYPE_MODIFICATION_MENU)   // action menu
+    {
+        action = pgm_read_word(&(men->id));
+        finishAction(action);
+        executeAction(UI_ACTION_BACK);
+        return;
+    }
+    if(mtype == UI_MENU_TYPE_SUBMENU && entType == 4)   // Modify action
+    {
+        if(activeAction)   // finish action
+        {
+            finishAction(action);
+            activeAction = 0;
+        }
+        else
+            activeAction = action;
+        return;
+    }
     if(entType==2)   // Enter submenu
     {
         pushMenu((UIMenu*)action,false);
@@ -3031,7 +3042,7 @@ void UIDisplay::executeAction(int action)
 void UIDisplay::mediumAction()
 {
 #if UI_HAS_I2C_ENCODER>0
-    ui_check_slow_encoder();
+    uiCheckSlowEncoder();
 #endif
 }
 void UIDisplay::slowAction()
@@ -3063,7 +3074,7 @@ void UIDisplay::slowAction()
         }
 #endif
         int nextAction = 0;
-        ui_check_slow_keys(nextAction);
+        uiCheckSlowKeys(nextAction);
         if(lastButtonAction!=nextAction)
         {
             lastButtonStart = time;
@@ -3178,7 +3189,7 @@ void UIDisplay::fastAction()
         flags |= 8;
         HAL::allowInterrupts();
         int nextAction = 0;
-        ui_check_keys(nextAction);
+        uiCheckKeys(nextAction);
         if(lastButtonAction!=nextAction)
         {
             lastButtonStart = HAL::timeInMilliseconds();

@@ -249,10 +249,10 @@ is available, you can add you c-code for mapping directly into the keyboard
 routines. The predefined macros do the same, just hiding the code behind it.
 
 For each key, two seperate parts must be defined. The first is the initialization
-which must be added inside ui_init_keys() and the second ist a testing routine.
-These come into ui_check_keys() or ui_check_slow_keys() depending on the time needed
-for testing. If you are in doubt, put it in ui_check_slow_keys().
-ui_init_keys() is called from an interrupt controlling the extruder, so only
+which must be added inside uiInitKeys() and the second ist a testing routine.
+These come into uiCheckKeys() or uiCheckSlowKeys() depending on the time needed
+for testing. If you are in doubt, put it in uiCheckSlowKeys().
+uiInitKeys() is called from an interrupt controlling the extruder, so only
 fast tests should be put there.
 The detect methods need an action identifier. A list of supported ids is found
 at the beginning of ui.h It's best to use the symbol name, in case the value changes.
@@ -291,7 +291,7 @@ at the beginning of ui.h It's best to use the symbol name, in case the value cha
 ------- Keys connected via I2C -------------
 
 All keys and the buzzer if present must be on a connected to a single PCF8574 chip!
-As all I2C request take time, they belong all in ui_check_slow_keys.
+As all I2C request take time, they belong all in uiCheckSlowKeys.
 Dont use the pin ids but instead _BV(pinNumber0_7) as pin id. 0 = First pin
 
 6. Click encoder, A/B connected to gnd if closed.
@@ -335,7 +335,7 @@ Type 3: Show menu action. These actions have a _MENU_ in their name. If they are
 const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 #endif
 
-void ui_init_keys() {
+void uiInitKeys() {
 #if UI_HAS_KEYS!=0
   //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
@@ -349,7 +349,7 @@ void ui_init_keys() {
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 #endif
 }
-void ui_check_keys(int &action) {
+void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
 
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
@@ -362,7 +362,7 @@ void ui_check_keys(int &action) {
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif
 }
-inline void ui_check_slow_encoder() {
+inline void uiCheckSlowEncoder() {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
   HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
@@ -377,11 +377,11 @@ inline void ui_check_slow_encoder() {
     keymask = keymask + (HAL::i2cReadNak()<<8);
 #endif
   HAL::i2cStop();
-  // Add I2C click encoder tests here, all other i2c tests and a copy of the encoder test belog in ui_check_slow_keys
+  // Add I2C click encoder tests here, all other i2c tests and a copy of the encoder test belog in uiCheckSlowKeys
   UI_KEYS_I2C_CLICKENCODER_LOW_REV(_BV(2),_BV(0)); // click encoder on pins 0 and 2. Phase is connected with gnd for signals.
 #endif
 }
-void ui_check_slow_keys(int &action) {
+void uiCheckSlowKeys(int &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS!=0
 #if UI_DISPLAY_I2C_CHIPTYPE==0
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_READ);
