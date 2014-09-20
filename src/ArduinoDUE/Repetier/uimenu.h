@@ -191,7 +191,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
  //graphic main status
 
    UI_PAGE6(ui_page1,"\xa %e0/%E0\xb0 X:%x0",
-   #if NUM_EXTRUDER > 1
+   #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
      "\xa %e1/%E1\xb0 Y:%x1",
   #else
      "             Y:%x1",
@@ -241,20 +241,20 @@ for 2 row displays. You can add additional pages or change the default pages lik
  #else
     UI_PAGE4(ui_page3
  #endif
- #if NUM_EXTRUDER>1
+ #if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
    ,UI_TEXT_PAGE_EXTRUDER2
  #endif
- #if NUM_EXTRUDER>2
+ #if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
   ,UI_TEXT_PAGE_EXTRUDER3
  #endif
  #if HAVE_HEATED_BED==true
    ,UI_TEXT_PAGE_BED
  #endif
- #if (NUM_EXTRUDER==3 && HAVE_HEATED_BED!=true) || (NUM_EXTRUDER==2 && HAVE_HEATED_BED==true)
+ #if (NUM_EXTRUDER == 3 && MIXING_EXTRUDER == 0 && HAVE_HEATED_BED!=true) || (NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0 && HAVE_HEATED_BED==true)
    ,"%os"
- #elif NUM_EXTRUDER==2 || (NUM_EXTRUDER==1 && HAVE_HEATED_BED==true)
+ #elif (NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0) || ((NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) && HAVE_HEATED_BED==true)
    ,"","%os"
- #elif NUM_EXTRUDER==1 || (NUM_EXTRUDER==0 &&  HAVE_HEATED_BED==true)
+ #elif (NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) || (NUM_EXTRUDER == 0 &&  HAVE_HEATED_BED==true)
    ,"","","%os"
  #elif NUM_EXTRUDER==0
    ,"","","","%os"
@@ -403,25 +403,25 @@ UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT);
 
 UI_MENU_CHANGEACTION(ui_menu_ext_temp0,UI_TEXT_EXTR0_TEMP,UI_ACTION_EXTRUDER0_TEMP);
 UI_MENU_CHANGEACTION(ui_menu_ext_temp1,UI_TEXT_EXTR1_TEMP,UI_ACTION_EXTRUDER1_TEMP);
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION(ui_menu_ext_temp2,UI_TEXT_EXTR2_TEMP,UI_ACTION_EXTRUDER2_TEMP);
 #endif
 UI_MENU_CHANGEACTION(ui_menu_bed_temp, UI_TEXT_BED_TEMP,UI_ACTION_HEATED_BED_TEMP);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel0,UI_TEXT_EXTR0_SELECT,UI_ACTION_SELECT_EXTRUDER0);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel1,UI_TEXT_EXTR1_SELECT,UI_ACTION_SELECT_EXTRUDER1);
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_sel2,UI_TEXT_EXTR2_SELECT,UI_ACTION_SELECT_EXTRUDER2);
 #endif
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_off0,UI_TEXT_EXTR0_OFF,UI_ACTION_EXTRUDER0_OFF);
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_off1,UI_TEXT_EXTR1_OFF,UI_ACTION_EXTRUDER1_OFF);
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_off2,UI_TEXT_EXTR2_OFF,UI_ACTION_EXTRUDER2_OFF);
 #endif
 UI_MENU_ACTIONCOMMAND(ui_menu_ext_origin,UI_TEXT_EXTR_ORIGIN,UI_ACTION_RESET_EXTRUDER);
-#if NUM_EXTRUDER==2
+#if NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_sel0,&ui_menu_ext_sel1,
 #define UI_MENU_EXTCNT 6
-#elif NUM_EXTRUDER>2
+#elif NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,
 #define UI_MENU_EXTCNT 9
 #else
@@ -628,12 +628,12 @@ UI_MENU_CHANGEACTION(ui_menu_cext_pmax,    UI_TEXT_EXTR_PMAX,    UI_ACTION_PID_M
 #define UI_MENU_PIDCOND
 #define UI_MENU_PIDCNT 0
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF,UI_ACTION_X_OFFSET);
 UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
 #define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
 #define UI_MENU_CONFEXTCNT 5
-#elif NUM_EXTRUDER>1
+#elif NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF,UI_ACTION_X_OFFSET);
 UI_MENU_CHANGEACTION(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF,UI_ACTION_Y_OFFSET);
 #define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,

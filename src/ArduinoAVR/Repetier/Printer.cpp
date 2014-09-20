@@ -842,6 +842,7 @@ void Printer::setup()
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
+
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
 
@@ -851,6 +852,7 @@ void Printer::setup()
     Commands::printCurrentPosition(PSTR("Printer::setup "));
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
+
 #if SDSUPPORT
     sd.initsd();
 #endif
@@ -1194,21 +1196,21 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif
     if(xaxis)
     {
-        if(X_HOME_DIR<0) startX = Printer::xMin;
+        if(X_HOME_DIR < 0) startX = Printer::xMin;
         else startX = Printer::xMin+Printer::xLength;
     }
     if(yaxis)
     {
-        if(Y_HOME_DIR<0) startY = Printer::yMin;
+        if(Y_HOME_DIR < 0) startY = Printer::yMin;
         else startY = Printer::yMin+Printer::yLength;
     }
     if(zaxis)
     {
-        if(Z_HOME_DIR<0) startZ = Printer::zMin;
+        if(Z_HOME_DIR < 0) startZ = Printer::zMin;
         else startZ = Printer::zMin+Printer::zLength;
     }
     updateCurrentPosition(true);
-    moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homingFeedrate[X_AXIS]);
+    moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
 }

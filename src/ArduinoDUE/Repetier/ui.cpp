@@ -2367,6 +2367,19 @@ void UIDisplay::nextPreviousAction(int8_t next)
     }
 #endif
     break;
+    case UI_ACTION_EXTRUDER2_TEMP:
+#if NUM_EXTRUDER>2
+    {
+        int tmp = (int)extruder[2].tempControl.targetTemperatureC;
+        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+        tmp += increment;
+        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+        Extruder::setTemperatureForExtruder(tmp,2);
+    }
+#endif
+    break;
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;

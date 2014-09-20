@@ -1,0 +1,64 @@
+Mixing extruder 
+
+Definition
+===============
+
+A combination of exactly one nozzle with inputs 2 - 6 filaments driven by
+their own filament driver build a mixing extruder. It is not required that this 
+combination in deed mixes the colors. It could also be used to put only one
+of the colors through the nozzle.
+
+This combination gives us one real extruder that can in theory print many
+different color combinations. Through the M163 command, it is possible to
+change the mixing ratio at any time. Since slicers do not support this,
+the firmware also introduces the concept of virtual extruders. The mixing
+extruders can simulate 16 extruders (reachable over T0 until T15) with a preset
+mixing ratio. The current mixing ratio can be stored as a virtual extruder
+with the M164 command.
+
+Configuration
+=============
+
+Set NUM_EXTRUDER to the number of filament drives. In addition set
+MIXING_EXTRUDER to 1 in your Configuration.h. Now the steps per mm and
+heater control settings are taken from extruder 0. The corresponding
+settings in higher extruder numbers are ignored.
+
+
+Theory
+===========
+
+All N extruders get a weight Wx and steps are executed to preserve the weights
+in optimum number. Therefore each extruder has a error counter Ex which is
+initalized with Wx and we also Compute the sum S of all weights.
+
+Then for each extrusion step:
+ Make step with highest value and subtract S from that value, then add Wx to Ex
+ Extruders with weight 0 are not considered.
+
+Example 1: 3 Extruders with weight 20 / 30 / 50
+
+Step 1:  E1 = 20,  E2 = 30,  E3 = 50   => E3
+Step 2:  E1 = 40,  E2 = 60,  E3 = 0    => E2
+Step 3:  E1 = 60,  E2 = -10, E3 = 50   => E1
+Step 4:  E1 = -20, E2 = 20,  E3 = 100  => E3
+Step 5:  E1 = 0,   E2 = 50,  E3 = 50   => E2
+Step 6:  E1 = 20,  E2 = -20, E3 = 100  => E3
+Step 7:  E1 = 40,  E2 = 10,  E3 = 50   => E3
+Step 8:  E1 = 60,  E2 = 40,  E3 = 0    => E1
+Step 9:  E1 = -20, E2 = 70,  E3 = 50   => E2
+Step 10: E1 = 0,   E2 = 0,   E3 = 100  => E3
+
+Result: E1 = 2 steps, E2 = 3 steps, E5 = 5 steps 
+
+Reverse stepping
+----------------
+Take the lowest error value of an extruder with weight > 0. Add S to that value.
+Then subtract Wx to Ex for all.
+
+Commands:
+=============
+
+M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
+
+M164 S<0..15> - Save current mixing ratio as visrtual extruder S.

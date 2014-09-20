@@ -2,6 +2,7 @@
 #define EXTRUDER_H_INCLUDED
 
 #define CELSIUS_EXTRA_BITS 3
+#define VIRTUAL_EXTRUDER 16 // don't change this to more then 16 without modifying the eeprom positions
 
 //#if TEMP_PID
 //extern uint8_t current_extruder_out;
@@ -103,6 +104,10 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #if FEATURE_DITTO_PRINTING
     static uint8_t dittoMode;
 #endif
+#if MIXING_EXTRUDER > 0
+    static int mixingS; ///< Sum of all weights
+    static uint8_t mixingDir; ///< Direction flag
+#endif
     uint8_t id;
     int32_t xOffset;
     int32_t yOffset;
@@ -126,12 +131,24 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
     float advanceL;
     int16_t advanceBacklash;
 #endif
+#if MIXING_EXTRUDER > 0
+    int mixingW;   ///< Weight for this extruder when mixing steps
+    int mixingE;   ///< Cumulated error for this step.
+    int virtualWeights[VIRTUAL_EXTRUDER]; // Virtual extruder weights
+#endif
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
 
+#if MIXING_EXTRUDER > 0
+    static void setMixingWeight(uint8_t extr,int weight);
+    static void step();
+    static void unstep();
+    static void setDirection(uint8_t dir);
+    static void enable();
+#else
     /** \brief Sends the high-signal to the stepper for next extruder step.
     Call this function only, if interrupts are disabled.
     */
@@ -344,6 +361,7 @@ class Extruder   // Size: 12*1 Byte+12*4 Byte+4*2Byte = 68 Byte
 #endif
 #endif
     }
+#endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();

@@ -1182,7 +1182,58 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_DISPLAY_CS 49  // Pin for SPI select on gameduino 2 - depends on board and choice
 
 #endif // Controller 16
+#if FEATURE_CONTROLLER == CONTROLLER_MIREGLI // Miregli
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_KILL_PIN            76
+#define UI_ENCODER_A           80
+#define UI_ENCODER_B           73
+#define UI_ENCODER_CLICK       63
+#define UI_DELAYPERCHAR 320
+#define MIREGLI
+#define SDCARDDETECT -1 //53
+#define BEEPER 78
+#define LCD_CONTRAST 62
+#define UI_DISPLAY_TYPE 14
+#define LCD_PIN_BL 15
+#define DOGLCD_A0  38
+#define DOGLCD_CS  14
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+#define U8GLIB_ST7920
 
+#define UI_INVERT_MENU_DIRECTION false
+
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION false  // Animations are too slow
+#endif
+
+#ifdef UI_MAIN
+void ui_init_keys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
+  UI_KEYS_INIT_BUTTON_LOW(UI_KILL_PIN);
+}
+void ui_check_keys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+ UI_KEYS_BUTTON_LOW(UI_KILL_PIN,UI_ACTION_KILL);
+}
+inline void ui_check_slow_encoder() {}
+void ui_check_slow_keys(int &action) {}
+#endif
+#endif // Controller 17
 
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER

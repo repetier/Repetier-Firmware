@@ -288,6 +288,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::setAutolevelActive(false);
     Printer::resetTransformationMatrix(true);
 #endif
+#if MIXING_EXTRUDER
+    restoreMixingRatios();
+#endif
     initalizeUncached();
     Printer::updateDerivedParameter();
     Extruder::selectExtruderById(Extruder::current->id);
@@ -375,7 +378,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
 #if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
+        HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
@@ -416,6 +419,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(o+EPR_EXTRUDER_ADVANCE_L,0);
 #endif
     }
+#if MIXING_EXTRUDER
+    storeMixingRatios(false);
+#endif
     if(corrupted)
     {
         HAL::eprSetInt32(EPR_PRINTING_TIME,0);
@@ -522,11 +528,13 @@ void EEPROM::readDataFromEEPROM()
         float sum = 0;
         for(uint8_t i=0; i<9; i++)
             Printer::autolevelTransformation[i] = HAL::eprGetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2));
-        if(isnan(Printer::autolevelTransformation[0])) { // a bug caused storage of matrix at the wrong place. Read from old position instead.
+        if(isnan(Printer::autolevelTransformation[0]))   // a bug caused storage of matrix at the wrong place. Read from old position instead.
+        {
             for(uint8_t i=0; i<9; i++)
                 Printer::autolevelTransformation[i] = HAL::eprGetFloat((EPR_AUTOLEVEL_MATRIX + (int)i) << 2);
         }
-        for(uint8_t i=0;i<9;i++) {
+        for(uint8_t i=0; i<9; i++)
+        {
             if(isnan(Printer::autolevelTransformation[i]))
                 sum += 10;
             else
@@ -538,11 +546,14 @@ void EEPROM::readDataFromEEPROM()
         Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation,9,6);
     }
 #endif
+#if MIXING_EXTRUDER
+    readMixingRatios();
+#endif
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
 #if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
+        HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
@@ -606,41 +617,52 @@ void EEPROM::readDataFromEEPROM()
 #endif
         }
 #if DRIVE_SYSTEM==DELTA
-        if(version<5) {
+        if(version<5)
+        {
             HAL::eprSetFloat(EPR_DELTA_ALPHA_A,DELTA_ALPHA_A);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_B,DELTA_ALPHA_B);
             HAL::eprSetFloat(EPR_DELTA_ALPHA_C,DELTA_ALPHA_C);
         }
-        if(version<6) {
+        if(version<6)
+        {
             HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_A,DELTA_RADIUS_CORRECTION_A);
             HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_B,DELTA_RADIUS_CORRECTION_B);
             HAL::eprSetFloat(EPR_DELTA_RADIUS_CORR_C,DELTA_RADIUS_CORRECTION_C);
         }
-        if(version<7) {
+        if(version<7)
+        {
             HAL::eprSetFloat(EPR_DELTA_MAX_RADIUS,DELTA_MAX_RADIUS);
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_A,DELTA_DIAGONAL_CORRECTION_A);
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_B,DELTA_DIAGONAL_CORRECTION_B);
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_C,DELTA_DIAGONAL_CORRECTION_C);
         }
 #endif
-        if(version<7) {
+        if(version<7)
+        {
             HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
         }
-/*        if (version<8) {
-#if DRIVE_SYSTEM==DELTA
-          // Prior to verion 8, the cartesian max was stored in the zmax
-          // Now, x,y and z max are used for tower a, b anc c
-          // Of tower min are all set at 0, tower max is larger than cartesian max
-          // by the height of any tower for coordinate 0,0,0
-          long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
-          cart[X_AXIS] = cart[Y_AXIS] = cart[Z_AXIS] = 0;
-          transformCartesianStepsToDeltaSteps(cart, delta);
-          // We can only count on ZLENGTH being set correctly, as it was used for all towers
-          Printer::xLength = Printer::zLength + delta[X_AXIS];
-          Printer::yLength = Printer::zLength + delta[Y_AXIS];
-          Printer::zLength += delta[Z_AXIS];
+        if(version < 9)
+        {
+#if MIXING_EXTRUDER
+            storeMixingRatios(false);
 #endif
-        }*/
+        }
+        /*        if (version<8) {
+        #if DRIVE_SYSTEM==DELTA
+                  // Prior to verion 8, the cartesian max was stored in the zmax
+                  // Now, x,y and z max are used for tower a, b anc c
+                  // Of tower min are all set at 0, tower max is larger than cartesian max
+                  // by the height of any tower for coordinate 0,0,0
+                  long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
+                  cart[X_AXIS] = cart[Y_AXIS] = cart[Z_AXIS] = 0;
+                  transformCartesianStepsToDeltaSteps(cart, delta);
+                  // We can only count on ZLENGTH being set correctly, as it was used for all towers
+                  Printer::xLength = Printer::zLength + delta[X_AXIS];
+                  Printer::yLength = Printer::zLength + delta[Y_AXIS];
+                  Printer::zLength += delta[Z_AXIS];
+        #endif
+                }*/
+
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::updateDerivedParameter();
@@ -668,27 +690,29 @@ void EEPROM::init()
 #if EEPROM_MODE != 0
     uint8_t check = computeChecksum();
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
-    if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE && storedcheck==check)
+    if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE && storedcheck == check)
     {
         readDataFromEEPROM();
-        if (USE_CONFIGURATION_BAUD_RATE) {
-          // Used if eeprom gets unusable baud rate set and communication wont work at all.
-          if(HAL::eprGetInt32(EPR_BAUDRATE) != BAUDRATE) {
-            HAL::eprSetInt32(EPR_BAUDRATE,BAUDRATE);
-            baudrate = BAUDRATE;
-            uint8_t newcheck = computeChecksum();
-            if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-                HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
-          }
-          Com::printFLN(PSTR("EEprom baud rate restored from configuration."));
-          Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
+        if (USE_CONFIGURATION_BAUD_RATE)
+        {
+            // Used if eeprom gets unusable baud rate set and communication wont work at all.
+            if(HAL::eprGetInt32(EPR_BAUDRATE) != BAUDRATE)
+            {
+                HAL::eprSetInt32(EPR_BAUDRATE,BAUDRATE);
+                baudrate = BAUDRATE;
+                uint8_t newcheck = computeChecksum();
+                if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+                    HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+            }
+            Com::printFLN(PSTR("EEprom baud rate restored from configuration."));
+            Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
         }
     }
     else
     {
         HAL::eprSetByte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
         initalizeUncached();
-        storeDataIntoEEPROM(storedcheck!=check);
+        storeDataIntoEEPROM(storedcheck != check);
     }
 #endif
 }
@@ -703,9 +727,7 @@ void EEPROM::updatePrinterUsage()
     HAL::eprSetFloat(EPR_PRINTING_DISTANCE,HAL::eprGetFloat(EPR_PRINTING_DISTANCE)+Printer::filamentPrinted*0.001);
     Printer::filamentPrinted = 0;
     Printer::msecondsPrinting = HAL::timeInMilliseconds();
-    uint8_t newcheck = computeChecksum();
-    if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-        HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+    updateChecksum();
     Commands::reportPrinterUsage();
 #endif
 }
@@ -858,6 +880,18 @@ void EEPROM::writeSettings()
 #endif
         writeFloat(o+EPR_EXTRUDER_ADVANCE_L,Com::tEPRAdvanceL);
 #endif
+#if MIXING_EXTRUDER
+        for(uint8_t v = 0; v < VIRTUAL_EXTRUDER; v++)
+        {
+            uint16_t pos = EEPROM_EXTRUDER_OFFSET + i * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * v;
+            Com::printF(Com::tEPR1,(int)pos);
+            Com::print(' ');
+            Com::print(HAL::eprGetInt16(pos));
+            Com::print(' ');
+            writeExtruderPrefix(pos);
+            Com::printFLN(PSTR("Weight "),(int)(v+1));
+        }
+#endif
     }
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
@@ -876,6 +910,13 @@ uint8_t EEPROM::computeChecksum()
         checksum += HAL::eprGetByte(i);
     }
     return checksum;
+}
+
+void EEPROM::updateChecksum()
+{
+    uint8_t newcheck = computeChecksum();
+    if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
 }
 
 void EEPROM::writeExtruderPrefix(uint pos)
@@ -925,5 +966,42 @@ void EEPROM::writeByte(uint pos,PGM_P text)
     writeExtruderPrefix(pos);
     Com::printFLN(text);
 }
+
+#if MIXING_EXTRUDER
+void EEPROM::storeMixingRatios(bool _updateChecksum)
+{
+    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
+    {
+        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
+        {
+            HAL::eprSetInt16(EEPROM_EXTRUDER_OFFSET + e * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * i, extruder[e].virtualWeights[i]);
+        }
+    }
+    if(_updateChecksum)
+        updateChecksum();
+}
+void EEPROM::readMixingRatios()
+{
+    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
+    {
+        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
+        {
+            extruder[e].virtualWeights[i] = HAL::eprGetInt16(EEPROM_EXTRUDER_OFFSET + e * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * i);
+        }
+    }
+}
+void EEPROM::restoreMixingRatios()
+{
+    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
+    {
+        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
+        {
+            extruder[e].virtualWeights[i] = 10;
+        }
+    }
+}
+
+#endif
+
 #endif
 

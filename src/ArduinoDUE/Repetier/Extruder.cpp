@@ -34,7 +34,10 @@ uint8_t counter250ms=25;
 #if FEATURE_DITTO_PRINTING
 uint8_t Extruder::dittoMode = 0;
 #endif
-
+#if MIXING_EXTRUDER > 0
+int Extruder::mixingS;
+uint8_t Extruder::mixingDir;
+#endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
 extern int16_t read_max6675(uint8_t ss_pin);
 #endif
@@ -74,6 +77,9 @@ void Extruder::manageTemperatures()
     for(uint8_t controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
     {
         if(controller == autotuneIndex) continue;
+#if MIXING_EXTRUDER
+        if(controller > 0 && controller < NUM_EXTRUDER) continue; // Mixing extruder only test for ext 0
+#endif
         TemperatureController *act = tempController[controller];
 
         // Get Temperature
@@ -109,28 +115,39 @@ void Extruder::manageTemperatures()
         }
         if(Printer::isAnyTempsensorDefect()) continue;
         uint8_t on = act->currentTemperatureC >= act->targetTemperatureC ? LOW : HIGH;
-        if(!on && act->isAlarm()) {
+        if(!on && act->isAlarm())
+        {
             beep(50 * (controller + 1), 3);
             act->setAlarm(false);  //reset alarm
         }
 
         // Run test if heater and sensor are decoupled
         bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod;
-        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) {
-            if(act->isDecoupleFull()) {
-                if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE) { // failed test
+        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn())
+        {
+            if(act->isDecoupleFull())
+            {
+                if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE)   // failed test
+                {
                     Printer::setAnyTempsensorDefect();
                     UI_ERROR("Heater decoupled");
                     Com::printErrorFLN(PSTR("One heater seems decoupled from thermistor - disabling all for safety!"));
-                } else {
+                }
+                else
+                {
                     act->startFullDecouple(time);
                 }
-            } else { // hold
-                if(fabs(act->currentTemperatureC - act->lastDecoupleTemp) > DECOUPLING_TEST_MAX_HOLD_VARIANCE) { // failed test
+            }
+            else     // hold
+            {
+                if(fabs(act->currentTemperatureC - act->lastDecoupleTemp) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
+                {
                     Printer::setAnyTempsensorDefect();
                     UI_ERROR("Heater decoupled");
                     Com::printErrorFLN(PSTR("One heater seems decoupled from thermistor - disabling all for safety!"));
-                } else {
+                }
+                else
+                {
                     act->lastDecoupleTest = time - act->decoupleTestPeriod + 1000; // once running test every second
                 }
             }
@@ -143,13 +160,17 @@ void Extruder::manageTemperatures()
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
-            if(act->targetTemperatureC<20.0f) {
+            if(act->targetTemperatureC<20.0f)
+            {
                 output = 0; // off is off, even if damping term wants a heat peak!
                 act->stopDecouple();
-            } else if(error>PID_CONTROL_RANGE) {
+            }
+            else if(error>PID_CONTROL_RANGE)
+            {
                 output = act->pidMax;
                 act->startFullDecouple(time);
-            } else if(error<-PID_CONTROL_RANGE)
+            }
+            else if(error<-PID_CONTROL_RANGE)
                 output = 0;
             else
             {
@@ -170,13 +191,17 @@ void Extruder::manageTemperatures()
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
-            if(act->targetTemperatureC<20.0f) {
+            if(act->targetTemperatureC<20.0f)
+            {
                 output = 0; // off is off, even if damping term wants a heat peak!
                 act->stopDecouple();
-            } else if(error>PID_CONTROL_RANGE) {
+            }
+            else if(error>PID_CONTROL_RANGE)
+            {
                 output = act->pidMax;
                 act->startFullDecouple(time);
-            } else if(error < -PID_CONTROL_RANGE)
+            }
+            else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
@@ -195,13 +220,15 @@ void Extruder::manageTemperatures()
                 {
                     pwm_pos[act->pwmIndex] = (on ? 255 : 0);
                     act->lastTemperatureUpdate = time;
-                    if(on) act->startFullDecouple(time); else act->stopDecouple();
+                    if(on) act->startFullDecouple(time);
+                    else act->stopDecouple();
                 }
             }
             else     // Fast Bang-Bang fallback
             {
                 pwm_pos[act->pwmIndex] = (on ? 255 : 0);
-                if(on) act->startFullDecouple(time); else act->stopDecouple();
+                if(on) act->startFullDecouple(time);
+                else act->stopDecouple();
             }
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
@@ -369,7 +396,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 {
     if(extruderId>=NUM_EXTRUDER)
         extruderId = 0;
-#if NUM_EXTRUDER>1
+#if MIXING_EXTRUDER
+    for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+       Extruder::setMixingWeight(i,extruder[i].virtualWeights[extruderId]);
+    extruderId = 0;
+#endif
+#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
     if(extruderId!=Extruder::current->id)
     {
@@ -418,7 +450,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
     if(executeSelect) // Run only when changing
         GCode::executeFString(Extruder::current->selectCommands);
 #endif
@@ -426,19 +458,22 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr,bool beep)
 {
+#if MIXING_EXTRUDER
+    extr = 0; // map any virtual extruder number to 0
+#endif // MIXING_EXTRUDER
     bool alloffs = true;
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
-        if(tempController[i]->targetTemperatureC>15) alloffs = false;
+        if(tempController[i]->targetTemperatureC > 15) alloffs = false;
 #ifdef MAXTEMP
-    if(temperatureInCelsius>MAXTEMP) temperatureInCelsius = MAXTEMP;
+    if(temperatureInCelsius > MAXTEMP) temperatureInCelsius = MAXTEMP;
 #endif
-    if(temperatureInCelsius<0) temperatureInCelsius=0;
+    if(temperatureInCelsius < 0) temperatureInCelsius = 0;
     TemperatureController *tc = tempController[extr];
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temperatureInCelsius);
-    if(beep && temperatureInCelsius>30)
+    if(beep && temperatureInCelsius > 30)
         tc->setAlarm(true);
-    if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+    if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
 #if FEATURE_DITTO_PRINTING
@@ -498,8 +533,179 @@ float Extruder::getHeatedBedTemperature()
 #endif
 }
 
+#if MIXING_EXTRUDER > 0
+void Extruder::setMixingWeight(uint8_t extr,int weight)
+{
+    uint8_t i;
+    mixingS = 0;
+    extruder[extr].mixingW = weight;
+    for(i=0; i<NUM_EXTRUDER; i++)
+    {
+        extruder[i].mixingE = extruder[i].mixingW;
+        mixingS += extruder[i].mixingW;
+    }
+}
+void Extruder::step()
+{
+    uint8_t best = 255,i;
+    int bestError;
+    if(mixingDir)
+    {
+        bestError = -10000;
+        for(i=0; i<NUM_EXTRUDER; i++)
+        {
+            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingE > bestError)
+            {
+                bestError = extruder[i].mixingE;
+                best = i;
+            }
+            extruder[i].mixingE += extruder[i].mixingW;
+        }
+        if(best == 255) return; // no extruder has weight!
+        extruder[best].mixingE -= mixingS;
+    }
+    else
+    {
+        bestError = 10000;
+        for(i=0; i<NUM_EXTRUDER; i++)
+        {
+            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingE < bestError)
+            {
+                bestError = extruder[i].mixingE;
+                best = i;
+            }
+            extruder[i].mixingE -= extruder[i].mixingW;
+        }
+        if(best == 255) return; // no extruder has weight!
+        extruder[best].mixingE += mixingS;
+    }
+#if NUM_EXTRUDER>0
+    if(best == 0) WRITE(EXT0_STEP_PIN,HIGH);
+#endif
+#if NUM_EXTRUDER>1
+    if(best == 1) WRITE(EXT1_STEP_PIN,HIGH);
+#endif
+#if NUM_EXTRUDER>2
+    if(best == 2) WRITE(EXT2_STEP_PIN,HIGH);
+#endif
+#if NUM_EXTRUDER>3
+    if(best == 3) WRITE(EXT3_STEP_PIN,HIGH);
+#endif
+#if NUM_EXTRUDER>4
+    if(best == 4) WRITE(EXT4_STEP_PIN,HIGH);
+#endif
+#if NUM_EXTRUDER>5
+    if(best == 5) WRITE(EXT5_STEP_PIN,HIGH);
+#endif
+}
+void Extruder::unstep()
+{
+#if NUM_EXTRUDER>0
+    WRITE(EXT0_STEP_PIN,LOW);
+#endif
+#if NUM_EXTRUDER>1
+    WRITE(EXT1_STEP_PIN,LOW);
+#endif
+#if NUM_EXTRUDER>2
+    WRITE(EXT2_STEP_PIN,LOW);
+#endif
+#if NUM_EXTRUDER>3
+    WRITE(EXT3_STEP_PIN,LOW);
+#endif
+#if NUM_EXTRUDER>4
+    WRITE(EXT4_STEP_PIN,LOW);
+#endif
+#if NUM_EXTRUDER>5
+    WRITE(EXT5_STEP_PIN,LOW);
+#endif
+}
+void Extruder::setDirection(uint8_t dir)
+{
+    mixingDir = dir;
+#if NUM_EXTRUDER>0
+    if(dir)
+        WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+    else
+        WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+#endif
+#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
+    if(dir)
+        WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
+    else
+        WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
+#endif
+#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER>2
+    if(dir)
+        WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
+    else
+        WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
+#endif
+#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER>3
+    if(dir)
+        WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
+    else
+        WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
+#endif
+#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER>4
+    if(dir)
+        WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
+    else
+        WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
+#endif
+#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER>5
+    if(dir)
+        WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
+    else
+        WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
+#endif
+}
+void Extruder::enable()
+{
+#if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
+    WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN>-1
+    WRITE(EXT1_ENABLE_PIN,EXT1_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN>-1
+    WRITE(EXT2_ENABLE_PIN,EXT2_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN>-1
+    WRITE(EXT3_ENABLE_PIN,EXT3_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN>-1
+    WRITE(EXT4_ENABLE_PIN,EXT4_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN>-1
+    WRITE(EXT5_ENABLE_PIN,EXT5_ENABLE_ON );
+#endif
+}
+#endif  // MIXING_EXTRUDER
+
 void Extruder::disableCurrentExtruderMotor()
 {
+#if MIXING_EXTRUDER
+#if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
+    WRITE(EXT0_ENABLE_PIN,!EXT0_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN>-1
+    WRITE(EXT1_ENABLE_PIN,!EXT1_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN>-1
+    WRITE(EXT2_ENABLE_PIN,!EXT2_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN>-1
+    WRITE(EXT3_ENABLE_PIN,!EXT3_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN>-1
+    WRITE(EXT4_ENABLE_PIN,!EXT4_ENABLE_ON );
+#endif
+#if NUM_EXTRUDER>5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN>-1
+    WRITE(EXT5_ENABLE_PIN,!EXT5_ENABLE_ON );
+#endif
+#else
     if(Extruder::current->enablePin > -1)
         digitalWrite(Extruder::current->enablePin,!Extruder::current->enableOn);
 #if FEATURE_DITTO_PRINTING
@@ -517,9 +723,12 @@ void Extruder::disableCurrentExtruderMotor()
 #endif
     }
 #endif
+#endif // MIXING_EXTRUDER
 }
-void Extruder::disableAllExtruderMotors() {
-    for(byte i=0;i<NUM_EXTRUDER;i++) {
+void Extruder::disableAllExtruderMotors()
+{
+    for(byte i=0; i<NUM_EXTRUDER; i++)
+    {
         if(extruder[i].enablePin > -1)
             digitalWrite(extruder[i].enablePin,!extruder[i].enableOn);
     }
@@ -1218,12 +1427,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
+        }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1238,12 +1451,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
+        }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1258,12 +1475,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
+        }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1278,12 +1499,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD
+        }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1298,12 +1523,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD
+        }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1318,12 +1547,16 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
 #endif
+#if MIXING_EXTRUDER > 0
+        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
+#endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
 #if TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD}
+            ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD
+        }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
     }
 #endif
@@ -1335,7 +1568,8 @@ TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-                                            ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD};
+        ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD
+                                            };
 #else
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif

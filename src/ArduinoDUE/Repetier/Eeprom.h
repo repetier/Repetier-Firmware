@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 7
+#define EEPROM_PROTOCOL_VERSION 9
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -139,7 +139,8 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #define EPR_EXTRUDER_COOLER_SPEED       54
-
+// 55-57 free for byte sized parameter
+#define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 5.0
 #endif
@@ -154,6 +155,7 @@ class EEPROM
     static void writeByte(uint pos,PGM_P text);
 public:
     static uint8_t computeChecksum();
+    static void updateChecksum();
 #endif
 public:
 
@@ -443,5 +445,10 @@ static inline void setTowerZFloor(float newZ) {
 
 #endif
     static void initalizeUncached();
+#if MIXING_EXTRUDER
+    static void storeMixingRatios(bool updateChecksums = true);
+    static void readMixingRatios();
+    static void restoreMixingRatios();
+#endif
 };
 #endif

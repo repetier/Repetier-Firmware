@@ -48,6 +48,10 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 /** Number of extruders. Maximum 6 extruders. */
 #define NUM_EXTRUDER 1
 
+/** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. In that case only
+setpe per mm and heater manager settings in extruder 0 are used! */
+#define MIXING_EXTRUDER 0
+
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // Gen3 PLUS for RepRap Motherboard V1.2 = 21
 // MEGA/RAMPS up to 1.2       = 3
