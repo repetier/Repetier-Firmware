@@ -88,10 +88,10 @@ void Extruder::manageTemperatures()
         // Handle automatic cooling of extruders
         if(controller<NUM_EXTRUDER)
         {
-#if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
-            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
-                if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
-                        tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+#if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
+            if(controller == 0 && autotuneIndex != 0 && autotuneIndex != 1)
+                if(tempController[0]->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP &&
+                        tempController[1]->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
                     extruder[0].coolerPWM = 0;
                 else
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
@@ -394,13 +394,15 @@ This function changes and initalizes a new extruder. This is also called, after 
 */
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
-    if(extruderId>=NUM_EXTRUDER)
-        extruderId = 0;
 #if MIXING_EXTRUDER
+    if(extruderId >= VIRTUAL_EXTRUDER)
+        extruderId = 0;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
        Extruder::setMixingWeight(i,extruder[i].virtualWeights[extruderId]);
     extruderId = 0;
 #endif
+    if(extruderId >= NUM_EXTRUDER)
+        extruderId = 0;
 #if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
     if(extruderId!=Extruder::current->id)
@@ -423,7 +425,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 //   max_start_speed_units_per_second[E_AXIS] = Extruder::current->maxStartFeedrate;
     Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
     Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxAccelerationMMPerSquareSecond[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     Printer::minExtruderSpeed = (uint8_t)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxStartFeedrate*Extruder::current->stepsPerMM));
     Printer::maxExtruderSpeed = (uint8_t)floor(HAL::maxExtruderTimerFrequency()/(Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
     if(Printer::maxExtruderSpeed>15) Printer::maxExtruderSpeed = 15;
@@ -450,6 +452,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
+#if USE_ADVANCE
+    HAL::resetExtruderDirection();
+#endif
+
 #if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
     if(executeSelect) // Run only when changing
         GCode::executeFString(Extruder::current->selectCommands);
@@ -469,6 +475,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
 #endif
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
     TemperatureController *tc = tempController[extr];
+    if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius > 30)
@@ -848,6 +855,9 @@ void TemperatureController::updateCurrentTemperature()
     // get raw temperature
     switch(type)
     {
+    case 0:
+        currentTemperature = 25;
+        break;
 #if ANALOG_INPUTS>0
     case 1:
     case 2:
@@ -891,6 +901,9 @@ void TemperatureController::updateCurrentTemperature()
     //OUT_P_I_LN("OC for raw ",raw_temp);
     switch(type)
     {
+    case 0:
+        currentTemperatureC = 25;
+        break;
     case 1:
     case 2:
     case 3:
@@ -1027,6 +1040,9 @@ void TemperatureController::setTargetTemperature(float target)
     uint8_t type = sensorType;
     switch(sensorType)
     {
+    case 0:
+        targetTemperature = 0;
+        break;
     case 1:
     case 2:
     case 3:
@@ -1203,7 +1219,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         minTemp=RMath::min(minTemp,currentTemp);
         if(heating == true && currentTemp > temp)   // switch heating -> off
         {
-            if(time - t2 > (controllerId<NUM_EXTRUDER ? 2500 : 1500))
+            if(time - t2 > (controllerId < NUM_EXTRUDER ? 2500 : 1500))
             {
                 heating=false;
                 pwm_pos[pwmIndex] = (bias - d);
@@ -1214,7 +1230,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         }
         if(heating == false && currentTemp < temp)
         {
-            if(time - t1 > (controllerId<NUM_EXTRUDER ? 5000 : 3000))
+            if(time - t1 > (controllerId < NUM_EXTRUDER ? 5000 : 3000))
             {
                 heating=true;
                 t2=time;
@@ -1267,7 +1283,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
                 minTemp=temp;
             }
         }
-        if(currentTemp > (temp + 20))
+        if(currentTemp > (temp + 40))
         {
             Com::printErrorFLN(Com::tAPIDFailedHigh);
             Extruder::disableAllHeater();

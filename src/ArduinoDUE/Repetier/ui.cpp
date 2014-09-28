@@ -3058,21 +3058,23 @@ void UIDisplay::mediumAction()
     uiCheckSlowEncoder();
 #endif
 }
+
+// Gets calles from main tread
 void UIDisplay::slowAction()
 {
     unsigned long time = HAL::timeInMilliseconds();
-    uint8_t refresh=0;
+    uint8_t refresh = 0;
 #if UI_HAS_KEYS==1
     // Update key buffer
-    HAL::forbidInterrupts();
-    if((flags & 9)==0)
+    InterruptProtectedBlock noInts;
+    if((flags & (UI_FLAG_FAST_KEY_ACTION + UI_FLAG_KEY_TEST_RUNNING)) == 0)
     {
-        flags|=8;
-        HAL::allowInterrupts();
+        flags |= UI_FLAG_KEY_TEST_RUNNING;
+        noInts.unprotect();
 #if defined(UI_I2C_HOTEND_LED) || defined(UI_I2C_HEATBED_LED) || defined(UI_I2C_FAN_LED)
         {
             // check temps and set appropriate leds
-            int led= 0;
+            int led = 0;
 #if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
@@ -3088,48 +3090,48 @@ void UIDisplay::slowAction()
 #endif
         int nextAction = 0;
         uiCheckSlowKeys(nextAction);
-        if(lastButtonAction!=nextAction)
+        if(lastButtonAction != nextAction)
         {
             lastButtonStart = time;
             lastButtonAction = nextAction;
-            HAL::forbidInterrupts();
-            flags|=2; // Mark slow action
+            noInts.protect();
+            flags |= UI_FLAG_SLOW_KEY_ACTION; // Mark slow action
         }
-        HAL::forbidInterrupts();
-        flags-=8;
+        noInts.protect();
+        flags &= ~UI_FLAG_KEY_TEST_RUNNING;
     }
-    HAL::forbidInterrupts();
-    if((flags & 4)==0)
+    noInts.protect();
+    if((flags & UI_FLAG_SLOW_ACTION_RUNNING) == 0)
     {
-        flags |= 4;
+        flags |= UI_FLAG_SLOW_ACTION_RUNNING;
         // Reset click encoder
-        HAL::forbidInterrupts();
+        noInts.protect();
         int8_t epos = encoderPos;
-        encoderPos=0;
-        HAL::allowInterrupts();
+        encoderPos = 0;
+        noInts.unprotect();
         if(epos)
         {
             nextPreviousAction(epos);
             BEEP_SHORT
             refresh=1;
         }
-        if(lastAction!=lastButtonAction)
+        if(lastAction != lastButtonAction)
         {
-            if(lastButtonAction==0)
+            if(lastButtonAction == 0)
             {
-                if(lastAction>=2000 && lastAction<3000)
+                if(lastAction >= 2000 && lastAction < 3000)
                 {
                     statusMsg[0] = 0;
                 }
                 lastAction = 0;
-                HAL::forbidInterrupts();
-                flags &= ~3;
+                noInts.protect();
+                flags &= ~(UI_FLAG_FAST_KEY_ACTION + UI_FLAG_SLOW_KEY_ACTION);
             }
-            else if(time-lastButtonStart>UI_KEY_BOUNCETIME)     // New key pressed
+            else if(time - lastButtonStart > UI_KEY_BOUNCETIME)     // New key pressed
             {
                 lastAction = lastButtonAction;
                 executeAction(lastAction);
-                nextRepeat = time+UI_KEY_FIRST_REPEAT;
+                nextRepeat = time + UI_KEY_FIRST_REPEAT;
                 repeatDuration = UI_KEY_FIRST_REPEAT;
             }
         }
@@ -3139,43 +3141,43 @@ void UIDisplay::slowAction()
             {
                 executeAction(lastAction);
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
-                if(repeatDuration<UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
-                nextRepeat = time+repeatDuration;
+                if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
+                nextRepeat = time + repeatDuration;
             }
         }
-        HAL::forbidInterrupts();
-        flags -=4;
+        noInts.protect();
+        flags &= ~UI_FLAG_SLOW_ACTION_RUNNING;
     }
-    HAL::allowInterrupts();
+    noInts.unprotect();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-    if(menuLevel>0 && ui_autoreturn_time<time)
+    if(menuLevel > 0 && ui_autoreturn_time < time)
     {
         lastSwitch = time;
-        menuLevel=0;
+        menuLevel = 0;
         activeAction = 0;
     }
 #endif
-    if(menuLevel==0 && time>4000)
+    if(menuLevel == 0 && time>4000)
     {
-        if(time-lastSwitch>UI_PAGES_DURATION)
+        if(time - lastSwitch>UI_PAGES_DURATION)
         {
             lastSwitch = time;
 #if !defined(UI_DISABLE_AUTO_PAGESWITCH) || !UI_DISABLE_AUTO_PAGESWITCH
             menuPos[0]++;
-            if(menuPos[0]>=UI_NUM_PAGES)
-                menuPos[0]=0;
+            if(menuPos[0] >= UI_NUM_PAGES)
+                menuPos[0] = 0;
 #endif
             refresh = 1;
         }
-        else if(time-lastRefresh>=1000) refresh=1;
+        else if(time - lastRefresh >= 1000) refresh = 1;
     }
-    else if(time-lastRefresh>=800)
+    else if(time - lastRefresh >= 800)
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
         //if(mtype!=1)
-        refresh=1;
+        refresh = 1;
     }
     if(refresh)
     {
@@ -3192,28 +3194,27 @@ void UIDisplay::slowAction()
         lastRefresh = time;
     }
 }
+
+
+// Gets called from inside an interrupt with interrupts allowed!
 void UIDisplay::fastAction()
 {
 #if UI_HAS_KEYS==1
     // Check keys
-    HAL::forbidInterrupts();
-    if((flags & 10)==0)
+    InterruptProtectedBlock noInts;
+    if((flags & (UI_FLAG_KEY_TEST_RUNNING + UI_FLAG_SLOW_KEY_ACTION)) == 0)
     {
-        flags |= 8;
-        HAL::allowInterrupts();
+        flags |= UI_FLAG_KEY_TEST_RUNNING;
         int nextAction = 0;
         uiCheckKeys(nextAction);
-        if(lastButtonAction!=nextAction)
+        if(lastButtonAction != nextAction)
         {
             lastButtonStart = HAL::timeInMilliseconds();
             lastButtonAction = nextAction;
-            HAL::forbidInterrupts();
-            flags|=1;
+            flags |= UI_FLAG_FAST_KEY_ACTION;
         }
-        HAL::forbidInterrupts();
-        flags-=8;
+        flags &= ~UI_FLAG_KEY_TEST_RUNNING;
     }
-    HAL::allowInterrupts();
 #endif
 }
 #if UI_ENCODER_SPEED==0

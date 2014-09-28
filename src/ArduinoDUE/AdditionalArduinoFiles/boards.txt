@@ -41,7 +41,7 @@ arduino_due_x.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
 arduino_due_x.build.vid=0x2341
 arduino_due_x.build.pid=0x003e
 
-arduino_due_repetier_dbg.name=Arduino Due for Repetier
+arduino_due_repetier_dbg.name=Arduino Due for Repetier (Programming port)
 arduino_due_repetier_dbg.vid.0=0x2341
 arduino_due_repetier_dbg.pid.1=0x003d
 arduino_due_repetier_dbg.upload.tool=bossac
@@ -61,4 +61,25 @@ arduino_due_repetier_dbg.build.variant=arduino_due_repetier
 arduino_due_repetier_dbg.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
 arduino_due_repetier_dbg.build.vid=0x2341
 arduino_due_repetier_dbg.build.pid=0x003e
+
+arduino_due_repetier.name=Arduino Due for Repetier (Native USB port)
+arduino_due_repetier.vid.0=0x2341
+arduino_due_repetier.pid.1=0x003e
+arduino_due_repetier.upload.tool=bossac
+arduino_due_repetier.upload.protocol=sam-ba
+arduino_due_repetier.upload.maximum_size=524288
+arduino_due_repetier.upload.use_1200bps_touch=true
+arduino_due_repetier.upload.wait_for_upload_port=true
+arduino_due_repetier.upload.native_usb=true
+arduino_due_repetier.build.mcu=cortex-m3
+arduino_due_repetier.build.f_cpu=84000000L
+arduino_due_repetier.build.usb_product="Arduino Due"
+arduino_due_repetier.build.board=SAM_DUE
+arduino_due_repetier.build.core=arduino
+arduino_due_repetier.build.extra_flags=-D__SAM3X8E__ -mthumb {build.usb_flags}
+arduino_due_repetier.build.ldscript=linker_scripts/gcc/flash.ld
+arduino_due_repetier.build.variant=arduino_due_repetier
+arduino_due_repetier.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
+arduino_due_repetier.build.vid=0x2341
+arduino_due_repetier.build.pid=0x003e
 

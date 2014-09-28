@@ -438,6 +438,7 @@ public:
         linesCount = 0;
         linesPos = linesWritePos;
     }
+    // Only called from bresenham -> inside interrupt handle
     inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
     {
 #if USE_ADVANCE
@@ -634,10 +635,11 @@ public:
         PrintLine::nlFlag = true;
 #endif
     }
+    // Only called from within interrupts
     static inline void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
-        if(linesPos>=PRINTLINE_CACHE_SIZE) linesPos=0;
+        if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos=0;
         cur = NULL;
 #if CPU_ARCH==ARCH_ARM
         nlFlag = false;
@@ -650,11 +652,10 @@ public:
     static inline void pushLine()
     {
         linesWritePos++;
-        if(linesWritePos>=PRINTLINE_CACHE_SIZE) linesWritePos = 0;
+        if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
         Printer::setMenuMode(MENU_MODE_PRINTING,true);
-        BEGIN_INTERRUPT_PROTECTED
+        InterruptProtectedBlock noInts;
         linesCount++;
-        END_INTERRUPT_PROTECTED
     }
     static PrintLine *getNextWriteLine()
     {

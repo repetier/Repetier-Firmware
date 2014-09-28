@@ -82,9 +82,32 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #define	SET_OUTPUT(IO)  pinMode(IO, OUTPUT)
 #endif
 
-#define BEGIN_INTERRUPT_PROTECTED {uint8_t sreg=SREG;__asm volatile( "cli" ::: "memory" );
-#define END_INTERRUPT_PROTECTED SREG=sreg;}
-#define ESCAPE_INTERRUPT_PROTECTED SREG=sreg;
+class InterruptProtectedBlock
+{
+    uint8_t sreg;
+public:
+    inline void protect()
+    {
+        cli();
+    }
+
+    inline void unprotect()
+    {
+        SREG = sreg;
+    }
+
+    inline InterruptProtectedBlock(bool later = false)
+    {
+        sreg = SREG;
+        if(!later)
+            cli();
+    }
+
+    inline ~InterruptProtectedBlock()
+    {
+        SREG = sreg;
+    }
+};
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
@@ -507,10 +530,18 @@ public:
         eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
         return v;
     }
+
+    // Faster version of InterruptProtectedBlock.
+    // For safety it ma yonly be called from within an
+    // interrupt handler.
     static inline void allowInterrupts()
     {
         sei();
     }
+
+    // Faster version of InterruptProtectedBlock.
+    // For safety it ma yonly be called from within an
+    // interrupt handler.
     static inline void forbidInterrupts()
     {
         cli();
@@ -674,6 +705,9 @@ public:
     static void servoMicroseconds(uint8_t servo,int ms);
 #endif
     static void analogStart();
+#if USE_ADVANCE
+    static void resetExtruderDirection();
+#endif
 protected:
 private:
 };

@@ -916,18 +916,18 @@ void Commands::processGCode(GCode *com)
     }
     break;
     case 134: // G134
-          Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
-          Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
-          Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
-    #ifdef DEBUG_REAL_POSITION
-          Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
-          Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
-          Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[C_TOWER]);
-    #endif
-          Printer::updateCurrentPosition();
-          Com::printF(PSTR("PosFromSteps:"));
-          printCurrentPosition(PSTR("G134 "));
-          break;
+        Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
+        Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
+        Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
+#ifdef DEBUG_REAL_POSITION
+        Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
+        Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
+        Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[C_TOWER]);
+#endif
+        Printer::updateCurrentPosition();
+        Com::printF(PSTR("PosFromSteps:"));
+        printCurrentPosition(PSTR("G134 "));
+        break;
 
 #endif // DRIVE_SYSTEM
     default:
@@ -1256,7 +1256,7 @@ void Commands::processMCode(GCode *com)
         {
             Extruder::setTemperatureForExtruder(0,0);
 #if NUM_EXTRUDER>1
-            for(uint8_t i=0;i<NUM_EXTRUDER;i++)
+            for(uint8_t i=0; i<NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0,i);
 #else
             Extruder::setTemperatureForExtruder(0,0);
@@ -1320,7 +1320,8 @@ void Commands::processMCode(GCode *com)
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
-        for(uint8_t i = 0;i < NUM_EXTRUDER; i++) {
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+        {
             extruder[i].virtualWeights[com->S] = extruder[i].mixingW;
         }
 #if EEPROM_MODE != 0
@@ -1406,9 +1407,8 @@ void Commands::processMCode(GCode *com)
     case 223: // M223 Extruder interrupt test
         if(com->hasS())
         {
-            BEGIN_INTERRUPT_PROTECTED
+            InterruptProtectedBlock noInts;
             Printer::extruderStepsNeeded += com->S;
-            END_INTERRUPT_PROTECTED
         }
         break;
     case 232: // M232
@@ -1465,15 +1465,17 @@ void Commands::processMCode(GCode *com)
 #endif
     case 281: // Trigger watchdog
 #if FEATURE_WATCHDOG
+    {
         Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
         Printer::kill(false);
         HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
-        HAL::forbidInterrupts();
+        InterruptProtectedBlock noInts;
         while(1) {} // Endless loop
+    }
 #else
-        Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
+    Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif
-        break;
+    break;
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0
     case 300: // M300
     {
@@ -1487,6 +1489,9 @@ void Commands::processMCode(GCode *com)
     }
     break;
 #endif
+    case 302: // M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
+        Printer::setColdExtrusionAllowed(!com->hasS() || (com->hasS() && com->S != 0));
+        break;
     case 303: // M303
     {
 #if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS>0
@@ -1706,7 +1711,6 @@ void Commands::emergencyStop()
 #if defined(KILL_METHOD) && KILL_METHOD==1
     HAL::resetHardware();
 #else
-    BEGIN_INTERRUPT_PROTECTED
     //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
     Printer::kill(false);
     Extruder::manageTemperatures();
@@ -1737,8 +1741,9 @@ void Commands::emergencyStop()
 #if HEATED_BED_HEATER_PIN>-1
     WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
+    HAL::delayMilliseconds(200);
+    InterruptProtectedBlock noInts;
     while(1) {}
-    END_INTERRUPT_PROTECTED
 #endif
 }
 

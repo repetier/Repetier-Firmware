@@ -383,6 +383,11 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #endif
 #define UI_MENU_MAXLEVEL 5
 
+#define UI_FLAG_FAST_KEY_ACTION 1
+#define UI_FLAG_SLOW_KEY_ACTION 2
+#define UI_FLAG_SLOW_ACTION_RUNNING 4
+#define UI_FLAG_KEY_TEST_RUNNING 8
+
 class UIDisplay {
   public:
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running

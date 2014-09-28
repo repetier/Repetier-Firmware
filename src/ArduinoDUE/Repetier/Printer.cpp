@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
 uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
 uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -230,9 +230,9 @@ void Printer::updateDerivedParameter()
     {
         setLargeMachine(true);
 #ifdef SUPPORT_64_BIT_MATH
-        deltaDiagonalStepsSquaredA.L = RMath::sqr(deltaDiagonalStepsSquaredA.l);
-        deltaDiagonalStepsSquaredB.L = RMath::sqr(deltaDiagonalStepsSquaredB.l);
-        deltaDiagonalStepsSquaredC.L = RMath::sqr(deltaDiagonalStepsSquaredC.l);
+        deltaDiagonalStepsSquaredA.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredA.l));
+        deltaDiagonalStepsSquaredB.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredB.l));
+        deltaDiagonalStepsSquaredC.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredC.l));
 #else
         deltaDiagonalStepsSquaredA.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredA.l));
         deltaDiagonalStepsSquaredB.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredB.l));
@@ -498,7 +498,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         {
             if(
 #if MIN_EXTRUDER_TEMP > 30
-                Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP ||
+                (Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
                 fabs(com->E)>EXTRUDE_MAXLENGTH)
                 p = 0;
@@ -821,7 +821,7 @@ void Printer::setup()
     backlashZ = Z_BACKLASH;
     backlashDir = 0;
 #endif
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     extruderStepsNeeded = 0;
 #endif
     EEPROM::initBaudrate();
@@ -852,7 +852,6 @@ void Printer::setup()
     Commands::printCurrentPosition(PSTR("Printer::setup "));
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
-
 #if SDSUPPORT
     sd.initsd();
 #endif

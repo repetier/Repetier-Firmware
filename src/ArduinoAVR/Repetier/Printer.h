@@ -46,6 +46,7 @@ union floatLong
 #define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
 #define PRINTER_FLAG1_POWER_ON              64
+#define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
 
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
@@ -61,7 +62,7 @@ union floatLong
 class Printer
 {
 public:
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
     static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
@@ -428,6 +429,16 @@ public:
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_POWER_ON : flag1 & ~PRINTER_FLAG1_POWER_ON);
     }
+    static inline uint8_t isColdExtrusionAllowed()
+    {
+        return flag1 & PRINTER_FLAG1_ALLOW_COLD_EXTRUSION;
+    }
+    static inline void setColdExtrusionAllowed(uint8_t b)
+    {
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
+    }
+
+
     static inline void toggleAnimation()
     {
         setAnimation(!isAnimation());

@@ -849,7 +849,7 @@ void EEPROM::writeSettings()
 #endif
 #endif
     // now the extruder
-    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
@@ -883,13 +883,13 @@ void EEPROM::writeSettings()
 #if MIXING_EXTRUDER
         for(uint8_t v = 0; v < VIRTUAL_EXTRUDER; v++)
         {
-            uint16_t pos = EEPROM_EXTRUDER_OFFSET + i * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * v;
+            uint16_t pos = o + EPR_EXTRUDER_MIXING_RATIOS + 2 * v;
             Com::printF(Com::tEPR1,(int)pos);
             Com::print(' ');
             Com::print(HAL::eprGetInt16(pos));
             Com::print(' ');
             writeExtruderPrefix(pos);
-            Com::printFLN(PSTR("Weight "),(int)(v+1));
+            Com::printFLN(PSTR("Weight "),(int)(v + 1));
         }
 #endif
     }

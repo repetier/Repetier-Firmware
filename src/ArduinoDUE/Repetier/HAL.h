@@ -130,7 +130,7 @@ typedef char prog_char;
 #define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
-#define WATCHDOG_INTERVAL       512u  // 2sec  (~16 seconds max)
+#define WATCHDOG_INTERVAL       512u  // 4sec  (~16 seconds max)
 
 
 
@@ -153,9 +153,50 @@ typedef char prog_char;
 #define LOW         0
 #define HIGH        1
 
-#define BEGIN_INTERRUPT_PROTECTED {uint32_t oldInt = __get_PRIMASK();__disable_irq();
-#define END_INTERRUPT_PROTECTED __set_PRIMASK(oldInt);} //__enable_irq();
-#define ESCAPE_INTERRUPT_PROTECTED  __set_PRIMASK(oldInt);//__enable_irq();
+// Protects a variable scope for interrupts. Uses RAII to force clearance of 
+// Interrupt block at the end resp. sets them to previous state.
+// Uses ABSEPRI to allow higher level interrupts then the one changing firmware data
+class InterruptProtectedBlock {
+    public:
+    inline void protect() {
+        __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
+    }
+    
+    inline void unprotect() {
+        __set_BASEPRI(0);
+    }
+    
+    inline InterruptProtectedBlock(bool later = false) {
+        if(!later)
+        __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
+    }
+    
+    inline ~InterruptProtectedBlock() {
+        __set_BASEPRI(0);
+    }
+};
+/*class InterruptProtectedBlock {
+    uint32_t mask;
+    public:
+    inline void protect() {
+        mask = __get_PRIMASK();;
+        __disable_irq();
+    }
+    
+    inline void unprotect() {
+        __set_PRIMASK(mask);
+    }
+    
+    inline InterruptProtectedBlock(bool later = false) {
+        mask = __get_PRIMASK();
+        if(!later)
+        __disable_irq();
+    }
+    
+    inline ~InterruptProtectedBlock() {
+        __set_PRIMASK(mask);
+    }
+};*/
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
@@ -188,7 +229,10 @@ typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
 typedef int flag8_t;
 
-#define RFSERIAL Serial
+#ifndef RFSERIAL
+#define RFSERIAL Serial   // Programming port of the due
+//#define RFSERIAL SerialUSB  // Native USB Port of the due
+#endif
 
 #define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
 #define OUT_P_I_LN(p,i) //Com::printFLN(PSTR(p),(int)(i))
@@ -236,12 +280,17 @@ public:
         TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | 
                      TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
-#if EEPROM_AVAILABLE
+#if EEPROM_AVAILABLE && EEPROM_MODE != 0
         // Copy eeprom to ram for faster access
         int i,n = EEPROM_BYTES;
         for(i=0;i<EEPROM_BYTES;i+=4) {
           eeval_t v = eprGetValue(i, 4);
           *(int*)(&virtualEeprom[i]) = v.i;
+        }
+#else
+        int i,n = EEPROM_BYTES;
+        for(i=0;i<EEPROM_BYTES;i+=4) {
+          *(int*)(&virtualEeprom[i]) = 0;
         }
 #endif
     }
@@ -438,11 +487,11 @@ public:
 
     static inline void allowInterrupts()
     {
-        __enable_irq();
+        //__enable_irq();
     }
     static inline void forbidInterrupts()
     {
-        __disable_irq();
+        //__disable_irq();
     }
     static inline unsigned long timeInMilliseconds()
     {
@@ -616,6 +665,9 @@ public:
 
 #if ANALOG_INPUTS>0
     static void analogStart(void);
+#endif
+#if USE_ADVANCE
+    static void resetExtruderDirection();
 #endif
     static void microsecondsWait(uint32_t us);
     static volatile uint8_t insideTimer1;

@@ -224,7 +224,7 @@ int32_t HAL::CPUDivU2(unsigned int divisor)
 
 void HAL::setupTimer()
 {
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
     EXTRUDER_TIMSK |= (1<<EXTRUDER_OCIE); // Activate compa interrupt on timer 0
 #endif
@@ -282,13 +282,12 @@ void HAL::showStartReason()
 int HAL::getFreeRam()
 {
     int freeram = 0;
-    BEGIN_INTERRUPT_PROTECTED
+    InterruptProtectedBlock noInts;
     uint8_t * heapptr, * stackptr;
     heapptr = (uint8_t *)malloc(4);          // get heap pointer
     free(heapptr);      // free up the memory again (sets heapptr to 0)
     stackptr =  (uint8_t *)(SP);           // save value of stack pointer
     freeram = (int)stackptr-(int)heapptr;
-    END_INTERRUPT_PROTECTED
     return freeram;
 }
 
@@ -701,7 +700,7 @@ ISR(TIMER1_COMPA_vect)
                 Printer::advanceStepsSet = 0;
             }
 #endif
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
             if(!Printer::extruderStepsNeeded) if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
 #else
             if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
@@ -964,8 +963,12 @@ ISR(PWM_TIMER_VECTOR)
     pwm_count++;
     pwm_count_heater += HEATER_PWM_STEP;
 }
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
 
+    static int8_t extruderLastDirection = 0;
+void HAL::resetExtruderDirection() {
+    extruderLastDirection = 0;
+}
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optima result,
@@ -977,16 +980,15 @@ allowable speed for the extruder.
 */
 ISR(EXTRUDER_TIMER_VECTOR)
 {
-    static int8_t extruderLastDirection = 0;
     uint8_t timer = EXTRUDER_OCR;
     if(!Printer::isAdvanceActivated()) return; // currently no need
-    if(Printer::extruderStepsNeeded > 0 && extruderLastDirection!=1)
+    if(Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1)
     {
         Extruder::setDirection(true);
         extruderLastDirection = 1;
         timer += 40; // Add some more wait time to prevent blocking
     }
-    else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection!=-1)
+    else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1)
     {
         Extruder::setDirection(false);
         extruderLastDirection = -1;

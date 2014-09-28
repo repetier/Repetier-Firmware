@@ -57,13 +57,13 @@ void HAL::setupTimer() {
 
     pmc_set_writeprotect(false);
 
-    // set 3 bits for interrupt group priority, 2 bits for sub-priority
+    // set 3 bits for interrupt group priority, 1 bits for sub-priority
     NVIC_SetPriorityGrouping(4);
 
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     // Timer for extruder control
     pmc_enable_periph_clk(EXTRUDER_TIMER_IRQ);  // enable power to timer
-    NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 1, 1));
+    NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 4, 1));
 
     // count up to value in RC register using given clock
     TC_Configure(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK4);
@@ -81,7 +81,7 @@ void HAL::setupTimer() {
 #endif
     // Regular interrupts for heater control etc
     pmc_enable_periph_clk(PWM_TIMER_IRQ);
-    NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 3, 0));
+    NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
    
     TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);  
     TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
@@ -95,7 +95,7 @@ void HAL::setupTimer() {
 
     // Timer for stepper motor control
     pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
-    NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 1, 0));
+    NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 4, 0));
       
     TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | 
                  TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -126,7 +126,7 @@ void HAL::setupTimer() {
     WRITE(SERVO3_PIN,LOW);
 #endif
     pmc_enable_periph_clk(SERVO_TIMER_IRQ );
-    NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 2, 0));
+    NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
       
     TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | 
                  TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -614,6 +614,7 @@ void HAL::servoMicroseconds(uint8_t servo,int microsec) {
 // Servo timer Interrupt handler
 void SERVO_COMPA_VECTOR ()
 {
+    InterruptProtectedBlock noInt;
     static uint32_t     interval;
 
   // apparently have to read status register
@@ -714,9 +715,10 @@ inline void setTimer(unsigned long delay)
 */
 void TIMER1_COMPA_VECTOR ()
 {
+    InterruptProtectedBlock noInt;
     // apparently have to read status register
     TC_GetStatus(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
-    if(HAL::insideTimer1) return;
+    if(HAL::insideTimer1) {return;}
     HAL::insideTimer1 = 1;
     if(PrintLine::hasLines())
     {
@@ -784,6 +786,7 @@ pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR ()
 {
+    InterruptProtectedBlock noInt;
     // apparently have to read status register
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
@@ -1016,15 +1019,21 @@ interrupt, one step is executed. This will keep the extruder
 moving, until the total wanted movement is achieved. This will 
 be done with the maximum allowable speed for the extruder. 
 */
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
+    static int extruderLastDirection = 0;
+void HAL::resetExtruderDirection() {
+    extruderLastDirection = 0;
+}
 // EXTRUDER_TIMER IRQ handler
 void EXTRUDER_TIMER_VECTOR ()
 {
-    static int8_t extruderLastDirection = 0;
-    // apparently have to read status register
+    InterruptProtectedBlock noInt;
+     // apparently have to read status register
     TC_GetStatus(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);
 
-    if(!Printer::isAdvanceActivated()) return; // currently no need
+    if(!Printer::isAdvanceActivated()) {
+        return; // currently no need
+    }
     // get current extruder timer count value
     uint32_t timer = EXTRUDER_TIMER->TC_CHANNEL[EXTRUDER_TIMER_CHANNEL].TC_RC;
 

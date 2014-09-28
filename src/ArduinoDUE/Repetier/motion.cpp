@@ -83,7 +83,7 @@ volatile int waitRelax = 0; // Delay filament relax at the end of print, could b
 
 PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE]; ///< Cache for print moves.
 PrintLine *PrintLine::cur = 0;               ///< Current printing line
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
 volatile bool PrintLine::nlFlag = false;
 #endif
 uint8_t PrintLine::linesWritePos = 0;            ///< Position where we write the next cached line move.
@@ -99,7 +99,7 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_
     //Com::printF(Com::tComma,y);
     //Com::printFLN(Com::tComma,z);
 #if NUM_EXTRUDER > 0
-    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP))
+    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
         e = 0; // should not be allowed for current temperature
 #endif
     float savedFeedrate = Printer::feedrate;
@@ -133,7 +133,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,in
         return; // ignore move
     }
 #if NUM_EXTRUDER > 0
-    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP))
+    if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC<MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
         e = 0; // should not be allowed for current temperature
 #endif
     Printer::moveToReal(Printer::lastCmdPos[X_AXIS],Printer::lastCmdPos[Y_AXIS],Printer::lastCmdPos[Z_AXIS],
@@ -472,7 +472,7 @@ void PrintLine::updateTrapezoids()
     uint8_t first = linesWritePos;
     PrintLine *firstLine;
     PrintLine *act = &lines[linesWritePos];
-    BEGIN_INTERRUPT_PROTECTED;
+    InterruptProtectedBlock noInts;
     uint8_t maxfirst = linesPos; // first non fixed segment
     if(maxfirst != linesWritePos)
         nextPlannerIndex(maxfirst); // don't touch the line printing
@@ -493,7 +493,7 @@ void PrintLine::updateTrapezoids()
     if(first == linesWritePos)   // Nothing to plan
     {
         act->block();
-        ESCAPE_INTERRUPT_PROTECTED
+        noInts.unprotect();
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
         act->unblock();
@@ -505,7 +505,7 @@ void PrintLine::updateTrapezoids()
     // anyhow, the start speed of first is fixed
     firstLine = &lines[first];
     firstLine->block(); // don't let printer touch this or following segments during update
-    END_INTERRUPT_PROTECTED;
+    noInts.unprotect();
     uint8_t previousIndex = linesWritePos;
     previousPlannerIndex(previousIndex);
     PrintLine *previous = &lines[previousIndex];
@@ -538,11 +538,11 @@ void PrintLine::updateTrapezoids()
     do
     {
         lines[first].updateStepsParameter();
-        BEGIN_INTERRUPT_PROTECTED;
+        noInts.protect();
         lines[first].unblock();  // Flying block to release next used segment as early as possible
         nextPlannerIndex(first);
         lines[first].block();
-        END_INTERRUPT_PROTECTED;
+        noInts.unprotect();
     }
     while(first!=linesWritePos);
     act->updateStepsParameter();
@@ -1626,9 +1626,9 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
         }
 
 #ifdef DEBUG_SPLIT
-        Com::printFLN(Com::tDBGDeltaMaxDS, maxDeltaStep);
+        Com::printFLN(Com::tDBGDeltaMaxDS, (int32_t)maxDeltaStep);
 #endif
-        int32_t virtual_axis_move = maxDeltaStep * segmentsPerLine;
+        int32_t virtual_axis_move = (int32_t)maxDeltaStep * segmentsPerLine;
         if (virtual_axis_move == 0 && p->delta[E_AXIS] == 0)
         {
             if (numLines!=1)
@@ -1941,7 +1941,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             Printer::setYDirection(curd->isYPositiveMove());
             Printer::setZDirection(curd->isZPositiveMove());
         }
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
@@ -1988,7 +1988,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0)
                 {
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
                     if(Printer::isAdvanceActivated())   // Use interrupt for movement
                     {
                         if(cur->isEPositiveMove())
@@ -2121,7 +2121,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 Printer::insertStepperHighDelay();
                 Printer::endXYZSteps();
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
                 if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
                     Extruder::unstep();
@@ -2226,7 +2226,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if CPU_ARCH != ARCH_AVR
     Printer::insertStepperHighDelay();
     Printer::endXYZSteps();
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
     if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
         Extruder::unstep();
@@ -2351,7 +2351,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
 #endif // GANTRY
         Printer::setZDirection(cur->isZPositiveMove());
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
@@ -2394,7 +2394,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
             {
                 if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0)
                 {
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
                     if(Printer::isAdvanceActivated())   // Use interrupt for movement
                     {
                         if(cur->isEPositiveMove())
@@ -2443,7 +2443,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
 #endif
             Printer::insertStepperHighDelay();
-#if defined(USE_ADVANCE)
+#if USE_ADVANCE
             if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
                 Extruder::unstep();

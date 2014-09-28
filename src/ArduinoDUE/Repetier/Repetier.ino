@@ -93,6 +93,8 @@ Custom M Codes
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
 - M140 S<temp> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
+- M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
+- M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
@@ -110,6 +112,7 @@ Custom M Codes
 - M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
 - M281 Test if watchdog is running and working.
 - M300 S<Frequency> P<DurationMillis> play frequency
+- M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 - Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM.
 - M320 - Activate autolevel
 - M321 - Deactivate autolevel
