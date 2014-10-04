@@ -209,11 +209,11 @@ void GCode::checkAndPushCommand()
 }
 void GCode::pushCommand()
 {
+#ifndef ECHO_ON_EXECUTE
+    commandsBuffered[bufferWriteIndex].echoCommand();
+#endif
     bufferWriteIndex = (bufferWriteIndex+1) % GCODE_BUFFER_SIZE;
     bufferLength++;
-#ifndef ECHO_ON_EXECUTE
-    echoCommand();
-#endif
 }
 /**
   Get the next buffered command. Returns 0 if no more commands are buffered. For each

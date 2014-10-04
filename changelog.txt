@@ -1,3 +1,6 @@
+Version 0.91.8
+  New languages french and Czech
+  
 Version 0.91.7 15-03-2014
   Babystepping.
   Z-Calib allows Z < 0.

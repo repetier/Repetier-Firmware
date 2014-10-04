@@ -1271,7 +1271,7 @@
 #define UI_TEXT_OPS_RETRACT      "Retract. :%Or"
 #define UI_TEXT_OPS_BACKSLASH    "Backsl. :%Ob"
 #define UI_TEXT_OPS_MINDIST      "Min.dist:%Od"
-#define UI_TEXT_OPS_MOVE_AFTER   "Déplac. Apres:%Oa"
+#define UI_TEXT_OPS_MOVE_AFTER   "DÃ©plac. Apres:%Oa"
 #define UI_TEXT_ANTI_OOZE        "Anti Ooze"
 #define UI_TEXT_PRINT_FILE       "Imprim. fichier"
 #define UI_TEXT_PAUSE_PRINT      "Pause Impress."
@@ -1365,11 +1365,9 @@
 
 #endif
 
-
 // *************** Czech translation ****************
 // ***************      By Majkl     ****************
 // version: 2014/08/27
-
 #if UI_LANGUAGE==8
 
 #define UI_TEXT_ON               "Zap"
