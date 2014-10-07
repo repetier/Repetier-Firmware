@@ -339,10 +339,10 @@ void SDCard::ls()
     Com::printFLN(Com::tEndFileList);
 }
 
-bool SDCard::selectFile(char *filename, bool silent)
+bool SDCard::selectFile(const char *filename, bool silent)
 {
     SdBaseFile parent;
-    char *oldP = filename;
+    const char *oldP = filename;
     boolean bFound;
 
     if(!sdactive) return false;

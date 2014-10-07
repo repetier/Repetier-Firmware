@@ -208,13 +208,13 @@ void Commands::changeFlowateMultiply(int factor)
 }
 void Commands::setFanSpeed(int speed,bool wait)
 {
-#if FAN_PIN>=0
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     speed = constrain(speed,0,255);
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed != pwm_pos[NUM_EXTRUDER + 2])
-        Com::printFLN(Com::tFanspeed,speed);
+        Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
     pwm_pos[NUM_EXTRUDER + 2] = speed;
 #endif
 }
@@ -1250,8 +1250,10 @@ void Commands::processMCode(GCode *com)
 #endif
     case 111: // M111 enable/disable run time debug flags
         if(com->hasS()) Printer::debugLevel = com->S;
-        if(com->hasP()) if (com->P > 0) Printer::debugLevel |= com->P;
+        if(com->hasP()) {
+            if (com->P > 0) Printer::debugLevel |= com->P;
             else Printer::debugLevel &= ~(-com->P);
+        }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
             Extruder::setTemperatureForExtruder(0,0);
@@ -1735,7 +1737,7 @@ void Commands::emergencyStop()
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
     WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if FAN_PIN>-1
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     WRITE(FAN_PIN,0);
 #endif
 #if HEATED_BED_HEATER_PIN>-1

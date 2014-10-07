@@ -2,6 +2,9 @@ Version 0.92
   Cleaner code base.
   Pulse dense modulation for heater and fans.
   Decoupling test for heater and sensor for more safety.
+  Mixing extruder support.
+  Test for watchdog.
+  Allow cold extrusion.
 
 Version 0.91.8
   New languages french and Czech

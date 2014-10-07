@@ -1155,7 +1155,7 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
             addFloat(fvalue,3,0 /*UI_TEMP_PRECISION*/);
             break;
-#if FAN_PIN > -1
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         case 'F': // FAN speed
             if(c2=='s') addInt(Printer::getFanSpeed()*100/255,3);
             break;
@@ -1314,7 +1314,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 
         case 'x':
-            if(c2>='0' && c2<='3')
+            if(c2>='0' && c2<='3') {
                 if(c2=='0')
                     fvalue = Printer::realXPosition();
                 else if(c2=='1')
@@ -1323,6 +1323,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
+            }
             addFloat(fvalue,4,2);
             break;
 
@@ -1818,6 +1819,7 @@ void UIDisplay::refreshPage()
                             printU8GRow(0,py,cache[r]);
                         py+=10;
                     }
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
                     //fan
                     if(u8g_IsBBXIntersection(&u8g, 0, 30-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(117,30,fanString);
@@ -1826,7 +1828,7 @@ void UIDisplay::refreshPage()
                         printU8GRow(0,43,cache[3]); //mul
                     if(u8g_IsBBXIntersection(&u8g, 0, 52-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(0,52,cache[4]); //buf
-
+#endif
 #if SDSUPPORT
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 70, 48-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -2800,7 +2802,7 @@ void UIDisplay::executeAction(int action)
             pushMenu(&ui_menu_sd,false);
             break;
 #endif
-#if FAN_PIN>-1
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         case UI_ACTION_FAN_OFF:
             Commands::setFanSpeed(0,false);
             break;

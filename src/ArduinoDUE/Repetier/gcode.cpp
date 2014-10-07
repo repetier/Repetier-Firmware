@@ -209,11 +209,11 @@ void GCode::checkAndPushCommand()
 }
 void GCode::pushCommand()
 {
+#if !ECHO_ON_EXECUTE
+    commandsBuffered[bufferWriteIndex].echoCommand();
+#endif
     bufferWriteIndex = (bufferWriteIndex+1) % GCODE_BUFFER_SIZE;
     bufferLength++;
-#if !ECHO_ON_EXECUTE
-    echoCommand();
-#endif
 }
 /**
   Get the next buffered command. Returns 0 if no more commands are buffered. For each
@@ -629,7 +629,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     params2 = 0;
     internalCommand = !fromSerial;
     char c;
-    while (c = *(pos++))
+    while ( (c = *(pos++)) )
     {
         switch(c)
         {
@@ -660,12 +660,12 @@ bool GCode::parseAscii(char *line,bool fromSerial)
             {
                 // after M command we got a filename or text
                 char digit;
-                while( digit = *pos )
+                while( (digit = *pos) )
                 {
                     if (digit < '0' || digit > '9') break;
                     pos++;
                 }
-                while(digit = *pos)
+                while( (digit = *pos) )
                 {
                     if (digit != ' ') break;
                     pos++;
@@ -800,6 +800,11 @@ bool GCode::parseAscii(char *line,bool fromSerial)
 /** \brief Print command on serial console */
 void GCode::printCommand()
 {
+    if(hasN()) {
+        Com::print('N');
+        Com::print((long)N);
+        Com::print(' ');
+    }
     if(hasM())
     {
         Com::print('M');

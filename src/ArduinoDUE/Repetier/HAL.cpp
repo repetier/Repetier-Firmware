@@ -299,24 +299,24 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
    }
     // Write single byte to SPI
    void HAL::spiSend(byte b) {
-        // wait for transmit register empty
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
         // write byte with address and end transmission flag
         SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+        // wait for transmit register empty
+        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
         // wait for receive register 
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+        //while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
         // clear status
-        SPI0->SPI_RDR;
+        //SPI0->SPI_RDR;
     }
    void HAL::spiSend(const uint8_t* buf , size_t n)
    {
        if (n == 0) return;
        for (int i=0; i<n-1; i++)
        {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
            SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
-           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-           SPI0->SPI_RDR;
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           //while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           //SPI0->SPI_RDR;
        }
        spiSend(buf[n-1]);
    }
@@ -324,10 +324,10 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
     // Read single byte from SPI
    uint8_t HAL::spiReceive()
    {
-        // wait for transmit register empty
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
         // write dummy byte with address and end transmission flag
         SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
+        // wait for transmit register empty
+        //while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
 
         // wait for receive register 
         while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
@@ -341,7 +341,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
        for (int i=0; i<nbyte; i++)
         {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           //while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
            SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN);
            while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
            buf[i] = SPI0->SPI_RDR;
@@ -353,16 +353,16 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
    void HAL::spiSendBlock(uint8_t token, const uint8_t* buf)
    {
-       while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
        SPI0->SPI_TDR = (uint32_t)token | SPI_PCS(SPI_CHAN);
-       while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-       SPI0->SPI_RDR;
+       while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+       //while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+       //SPI0->SPI_RDR;
        for (int i=0; i<511; i++)
        {
-           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
            SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
-           while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-           SPI0->SPI_RDR;
+           while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
+           //while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
+           //SPI0->SPI_RDR;
        }
        spiSend(buf[511]);
    }
@@ -389,7 +389,7 @@ void HAL::i2cInit(unsigned long clockSpeedHz)
     // Set to Master mode with known state                               
     TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;                                 
     TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;                                
-    TWI_INTERFACE->TWI_RHR;                                              
+    //TWI_INTERFACE->TWI_RHR;  // no action???                                              
     TWI_INTERFACE->TWI_IMR = 0;                                          
                                                                          
     TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;                                
@@ -792,7 +792,7 @@ void PWM_TIMER_VECTOR ()
 
     static uint8_t pwm_count = 0;
     static uint8_t pwm_count_heater = 0;
-    static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
+    static uint8_t pwm_pos_set[NUM_EXTRUDER + 3];
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
 
     if(pwm_count_heater == 0 && !PDM_FOR_EXTRUDER)
@@ -819,7 +819,7 @@ void PWM_TIMER_VECTOR ()
         if((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER])>0) WRITE(HEATED_BED_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
     }
-    if(pwm_count==0 && !PDM_FOR_EXTRUDER)
+    if(pwm_count==0 && !PDM_FOR_COOLER)
     {
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1 && EXT0_EXTRUDER_COOLER_PIN>-1
         if((pwm_cooler_pos_set[0] = extruder[0].coolerPWM)>0) WRITE(EXT0_EXTRUDER_COOLER_PIN,1);
@@ -942,14 +942,14 @@ void PWM_TIMER_VECTOR ()
 #endif
 #if FAN_BOARD_PIN>-1
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER+1], pwm_cooler_pos_set[NUM_EXTRUDER+1], false);
+    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER+1], pwm_pos_set[NUM_EXTRUDER+1], false);
 #else
     if(pwm_pos_set[NUM_EXTRUDER+1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1]!=255) WRITE(FAN_BOARD_PIN,0);
 #endif
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER+2], pwm_cooler_pos_set[NUM_EXTRUDER+2], false);
+    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER+2], pwm_pos_set[NUM_EXTRUDER+2], false);
 #else
     if(pwm_pos_set[NUM_EXTRUDER+2] == pwm_count && pwm_pos_set[NUM_EXTRUDER+2]!=255) WRITE(FAN_PIN,0);
 #endif

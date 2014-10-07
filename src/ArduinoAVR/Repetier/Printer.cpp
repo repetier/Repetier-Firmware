@@ -712,7 +712,7 @@ void Printer::setup()
     PULLUP(Z_PROBE_PIN,HIGH);
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
-#if FAN_PIN>-1
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     SET_OUTPUT(FAN_PIN);
     WRITE(FAN_PIN,LOW);
 #endif
