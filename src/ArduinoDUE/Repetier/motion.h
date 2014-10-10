@@ -437,6 +437,7 @@ public:
     {
         linesCount = 0;
         linesPos = linesWritePos;
+        Printer::setMenuMode(MENU_MODE_PRINTING,false);
     }
     // Only called from bresenham -> inside interrupt handle
     inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
