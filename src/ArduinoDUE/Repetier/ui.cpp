@@ -343,18 +343,18 @@ void initializeLCD()
 #if UI_DISPLAY_I2C_CHIPTYPE==1
     HAL::i2cWrite(uid.outputMask >> 8);
 #endif
-    HAL::delayMicroseconds(10);
+    HAL::delayMicroseconds(20);
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    HAL::delayMicroseconds(6000); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150); // wait
+    HAL::delayMicroseconds(180); // wait
     // third go!
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
     lcdCommand(LCD_CLEAR);					//-	Clear Screen
@@ -477,16 +477,16 @@ void initializeLCD()
     WRITE(UI_DISPLAY_RS_PIN, LOW);
     HAL::delayMicroseconds(10);
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150); // wait
+    HAL::delayMicroseconds(180); // wait
     // third go!
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(150);
+    HAL::delayMicroseconds(180);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
 

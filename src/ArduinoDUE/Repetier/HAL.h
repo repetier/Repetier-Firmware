@@ -336,9 +336,15 @@ public:
     static long CPUDivU2(speed_t divisor) {
       return F_CPU/divisor;
     }
-    static inline void delayMicroseconds(unsigned int delayUs)
+    static inline void delayMicroseconds(uint32_t usec)
     {
-        microsecondsWait(delayUs);
+        uint32_t n = usec * (F_CPU_TRUE / 3000000);
+        asm volatile(
+            "L2_%=_delayMicroseconds:"       "\n\t"
+            "subs   %0, #1"                 "\n\t"
+            "bge    L2_%=_delayMicroseconds" "\n"
+            : "+r" (n) :  
+        );
     }
     static inline void delayMilliseconds(unsigned int delayMs)
     {
@@ -669,10 +675,7 @@ public:
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif
-    static void microsecondsWait(uint32_t us);
-    static volatile uint8_t insideTimer1;
-        
-protected:
+    static volatile uint8_t insideTimer1;        
 };
 
 #endif // HAL_H
