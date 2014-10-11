@@ -547,29 +547,6 @@ unsigned char HAL::i2cReadNak(void)
     return data;
 }
 
-
-// Wait for X microseconds 
-// this could be simpler but its used inside interrupts so must be reentrant
-void HAL::microsecondsWait(uint32_t us) 
-{
-    uint32_t usStart, goal;
-
-    // get the current count
-    usStart =  TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL);
-
-    // funny math here to give good accuracy with no overflow 
-    goal = usStart + 10*us-5; //((F_CPU_TRUE / (DELAY_TIMER_PRESCALE * 100000)) * us) / 10;
-
-    // goal may have wrapped, if so wait for counter to catch up
-    if(goal < usStart) {
-        while(goal < TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL));
-    }   
-    // wait for counter to reach requested value
-    while(goal > TC_ReadCV(DELAY_TIMER, DELAY_TIMER_CHANNEL));
-}
-
-
-
 #if FEATURE_SERVO
 // may need further restrictions here in the future
 #if defined (__SAM3X8E__)
