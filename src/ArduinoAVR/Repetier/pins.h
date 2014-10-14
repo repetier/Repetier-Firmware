@@ -1915,9 +1915,6 @@ S3(ext)=9
 #define Z_MS1_PIN      68
 #define Z_MS2_PIN      67
 
-#define HEATER_BED_PIN 3
-#define TEMP_BED_PIN   2
-
 #define HEATER_0_PIN   9
 #define TEMP_0_PIN     0
 

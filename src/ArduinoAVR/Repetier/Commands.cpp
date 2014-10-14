@@ -1162,13 +1162,13 @@ void Commands::processMCode(GCode *com)
             }
             Commands::checkForPeriodicalActions();
             //gcode_read_serial();
-            if (RETRACT_DURING_HEATUP)
+ #if RETRACT_DURING_HEATUP
                 if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
                 {
                     PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
                     retracted = 1;
                 }
-
+#endif
             if((waituntil == 0 &&
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
@@ -1181,11 +1181,12 @@ void Commands::processMCode(GCode *com)
             }
         }
         while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-currentTime)<2000000000UL));
-        if (RETRACT_DURING_HEATUP)
+#if RETRACT_DURING_HEATUP
             if (retracted && actExtruder==Extruder::current)
             {
                 PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
             }
+#endif
     }
     UI_CLEAR_STATUS;
 #endif
