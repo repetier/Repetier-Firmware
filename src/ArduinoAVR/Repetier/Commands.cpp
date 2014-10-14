@@ -735,12 +735,12 @@ void Commands::processGCode(GCode *com)
     case 90: // G90
         Printer::relativeCoordinateMode = false;
         if(com->internalCommand)
-            Com::printInfoFLN("Absolute positioning");
+            Com::printInfoFLN(PSTR("Absolute positioning"));
         break;
     case 91: // G91
         Printer::relativeCoordinateMode = true;
         if(com->internalCommand)
-            Com::printInfoFLN("Relative positioning");
+            Com::printInfoFLN(PSTR("Relative positioning"));
         break;
     case 92: // G92
     {
