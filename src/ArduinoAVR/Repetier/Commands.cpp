@@ -708,9 +708,7 @@ void Commands::processGCode(GCode *com)
             Printer::zLength += (h3+z)-Printer::currentPosition[Z_AXIS];
 #else
             int32_t zBottom = Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
-            //Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
-			Printer::zLength = zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
-
+            Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
 #endif
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
