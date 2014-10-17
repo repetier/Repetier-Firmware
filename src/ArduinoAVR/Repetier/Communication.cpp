@@ -242,6 +242,12 @@ FSTRINGVALUE(Com::tZProbeY2,"Z-probe Y2")
 FSTRINGVALUE(Com::tZProbeX3,"Z-probe X3")
 FSTRINGVALUE(Com::tZProbeY3,"Z-probe Y3")
 #endif
+#if FEATURE_AXISCOMP
+FSTRINGVALUE(Com::tAxisCompTanXY,"tanXY Axis Compensation")
+FSTRINGVALUE(Com::tAxisCompTanYZ,"tanYZ Axis Compensation")
+FSTRINGVALUE(Com::tAxisCompTanXZ,"tanXZ Axis Compensation")
+#endif
+
 #if FEATURE_AUTOLEVEL
 FSTRINGVALUE(Com::tAutolevelActive,"Autolevel active (1/0)")
 #endif
