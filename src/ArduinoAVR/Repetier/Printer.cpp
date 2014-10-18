@@ -1433,8 +1433,8 @@ void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &
     transZ = x*autolevelTransformation[6]+y*autolevelTransformation[7]+z*autolevelTransformation[8];
 #if FEATURE_AXISCOMP
     // Axis compensation:
-    y = y - z * EEPROM::axisCompTanYZ();
-    x = x - y * EEPROM::axisCompTanXY() - z * EEPROM::axisCompTanXZ();
+    transY = transY - transZ * EEPROM::axisCompTanYZ();
+    transX = transX - transY * EEPROM::axisCompTanXY() - transZ * EEPROM::axisCompTanXZ();
 #endif
 }
 
