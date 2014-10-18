@@ -155,7 +155,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 {
     Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
-    uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, 0);
+    uint8_t newPath = insertWaitMovesIfNeeded(pathOptimize, 0);
     PrintLine *p = getNextWriteLine();
 
     float axis_diff[E_AXIS_ARRAY]; // Axis movement in mm
@@ -169,11 +169,11 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
     for(uint8_t axis=0; axis < 4; axis++)
     {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
-        if(axis == E_AXIS && Printer::extrudeMultiply!=100)
+        if(axis == E_AXIS && Printer::extrudeMultiply != 100)
         {
             Printer::extrudeMultiplyError += ((p->delta[E_AXIS] * (float)Printer::extrudeMultiply) * 0.01f);
             p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
-            Printer::extrudeMultiplyError -= axis_diff[E_AXIS];
+            Printer::extrudeMultiplyError -= p->delta[E_AXIS];
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -1945,6 +1945,9 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
+#if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
+        HAL::delayMicroseconds(DIRECTION_DELAY);
+#endif
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
@@ -2066,6 +2069,9 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                         Printer::setXDirection(curd->dir & X_DIRPOS);
                         Printer::setYDirection(curd->dir & Y_DIRPOS);
                         Printer::setZDirection(curd->dir & Z_DIRPOS);
+#if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
+                        HAL::delayMicroseconds(DIRECTION_DELAY);
+#endif
 
                         if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing && curd
                                 && (curd->dir & XYZ_STEP) == XYZ_STEP)
@@ -2334,19 +2340,19 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
         long gdx = (cur->dir & X_DIRPOS ? cur->delta[X_AXIS] : -cur->delta[X_AXIS]); // Compute signed difference in steps
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY
         long gdy = (cur->dir & Y_DIRPOS ? cur->delta[Y_AXIS] : -cur->delta[Y_AXIS]);
-        Printer::setXDirection(gdx+gdy>=0);
+        Printer::setXDirection(gdx + gdy >= 0);
 #if DRIVE_SYSTEM == XY_GANTRY
-        Printer::setYDirection(gdx>gdy);
+        Printer::setYDirection(gdx > gdy);
 #else
-        Printer::setYDirection(gdx<=gdy);
+        Printer::setYDirection(gdx <= gdy);
 #endif
 #else // XZ or ZX core
         long gdz = (cur->dir & Z_DIRPOS ? cur->delta[Z_AXIS] : -cur->delta[Z_AXIS]);
-        Printer::setXDirection(gdx+gdz>=0);
+        Printer::setXDirection(gdx + gdz >= 0);
 #if DRIVE_SYSTEM == XZ_GANTRY
-        Printer::setZDirection(gdx>gdz);
+        Printer::setZDirection(gdx > gdz);
 #else
-        Printer::setZDirection(gdx<=gdz);
+        Printer::setZDirection(gdx <= gdz);
 #endif
 #endif
 #endif // GANTRY
@@ -2355,11 +2361,14 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
+#if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
+        HAL::delayMicroseconds(DIRECTION_DELAY);
+#endif
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
 #endif
-        cur->updateAdvanceSteps(cur->vStart,0,false);
+        cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {
@@ -2378,17 +2387,17 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
        time used per loop. */
     uint8_t doEven = cur->halfStep & 6;
     uint8_t doOdd = cur->halfStep & 5;
-    if(cur->halfStep!=4) cur->halfStep = 3-(cur->halfStep);
+    if(cur->halfStep != 4) cur->halfStep = 3 - (cur->halfStep);
     HAL::forbidInterrupts();
     if(doEven) cur->checkEndstops();
     uint8_t max_loops = RMath::min((long)Printer::stepsPerTimerCall,cur->stepsRemaining);
-    if(cur->stepsRemaining>0)
+    if(cur->stepsRemaining > 0)
     {
-        for(uint8_t loop=0; loop<max_loops; loop++)
+        for(uint8_t loop = 0; loop < max_loops; loop++)
         {
-#if STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY > 0
-            if(loop>0)
-                HAL::delayMicroseconds(STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY);
+#if STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY > 0
+            if(loop > 0)
+                HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY);
 #endif
             if(cur->isEMove())
             {

@@ -103,6 +103,7 @@ void Extruder::manageTemperatures()
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
 
+        // Check for obvious sensor errors
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
             extruderTempErrors++;
@@ -130,8 +131,8 @@ void Extruder::manageTemperatures()
                 if(act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE)   // failed test
                 {
                     Printer::setAnyTempsensorDefect();
-                    UI_ERROR("Heater decoupled");
-                    Com::printErrorFLN(PSTR("One heater seems decoupled from thermistor - disabling all for safety!"));
+                    UI_ERROR_P(Com::tHeaterDecoupled);
+                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
                 }
                 else
                 {
@@ -143,8 +144,8 @@ void Extruder::manageTemperatures()
                 if(fabs(act->currentTemperatureC - act->lastDecoupleTemp) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
                 {
                     Printer::setAnyTempsensorDefect();
-                    UI_ERROR("Heater decoupled");
-                    Com::printErrorFLN(PSTR("One heater seems decoupled from thermistor - disabling all for safety!"));
+                    UI_ERROR_P(Com::tHeaterDecoupled);
+                    Com::printErrorFLN(Com::tHeaterDecoupledWarning);
                 }
                 else
                 {

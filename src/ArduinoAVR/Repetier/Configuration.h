@@ -118,7 +118,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -185,7 +185,7 @@ Overridden if EEPROM activated.*/
 
 // If the temp. is on hold target, it may not sway more then this degrees celsius, or we mark
 // sensor as defect.
-#define DECOUPLING_TEST_MAX_HOLD_VARIANCE 15
+#define DECOUPLING_TEST_MAX_HOLD_VARIANCE 20
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
@@ -308,7 +308,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-#define EXT0_DECOUPLE_TEST_PERIOD 12000
+#define EXT0_DECOUPLE_TEST_PERIOD 18000
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 10
@@ -415,7 +415,7 @@ cog. Direct drive extruder need 0. */
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
-#define EXT1_DECOUPLE_TEST_PERIOD 12000
+#define EXT1_DECOUPLE_TEST_PERIOD 18000
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -673,7 +673,8 @@ on this endstop.
 #define DISABLE_Z false
 #define DISABLE_E false
 
-// Inverting axis direction
+// Inverting motor direction. Only in case of pure cartesian printers, this
+// is also the axis you invert!
 #define INVERT_X_DIR true
 #define INVERT_Y_DIR true
 #define INVERT_Z_DIR true
@@ -897,6 +898,12 @@ included delay is already enough.
 */
 #define STEPPER_HIGH_DELAY 0
 
+/** If your driver needs some additional delay between setting direction and first step signal,
+ you can set this here. There are some commands between direction and signal, but some drivers
+ might be even slower or you are using a fast arduino board with slow driver. Normally 0 works.
+ If you get skewed print, you might try 1 microsecond here.
+ */
+#define DIRECTION_DELAY 0
 /** The firmware can only handle 16000Hz interrupt frequency cleanly. If you need higher speeds
 a faster solution is needed, and this is to double/quadruple the steps in one interrupt call.
 This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheaper then 1 or 3

@@ -515,7 +515,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
     lcdStartWrite();
 #endif
-    lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]),0); // Position cursor
+    lcdWriteByte(128 + HAL::readFlashByte((const char *)&LCDLineOffsets[r]), 0); // Position cursor
     char c;
     while((c = *txt) != 0x00 && col < changeAtCol)
     {
@@ -530,7 +530,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
     }
     if(txt2 != NULL)
     {
-        while((c = *txt2) != 0x00 && col<UI_COLS)
+        while((c = *txt2) != 0x00 && col < UI_COLS)
         {
             txt2++;
             lcdPutChar(c);

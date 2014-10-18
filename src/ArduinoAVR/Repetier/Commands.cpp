@@ -677,43 +677,43 @@ void Commands::processGCode(GCode *com)
         float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(h1<0) break;
+        if(h1 < 0) break;
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
-        if(h2<0) break;
+        if(h2 < 0) break;
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
-        if(h3<0) break;
+        if(h3 < 0) break;
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
         // z = z-deviation from origin due to bed transformation
-        float z = -((Printer::autolevelTransformation[0]*Printer::autolevelTransformation[5]-
-                     Printer::autolevelTransformation[2]*Printer::autolevelTransformation[3])*
-                    (float)Printer::currentPositionSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS]+
-                    (Printer::autolevelTransformation[2]*Printer::autolevelTransformation[4]-
-                     Printer::autolevelTransformation[1]*Printer::autolevelTransformation[5])*
-                    (float)Printer::currentPositionSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS])/
-                  (Printer::autolevelTransformation[1]*Printer::autolevelTransformation[3]-Printer::autolevelTransformation[0]*Printer::autolevelTransformation[4]);
+        float z = -((Printer::autolevelTransformation[0] * Printer::autolevelTransformation[5] -
+                     Printer::autolevelTransformation[2] * Printer::autolevelTransformation[3]) *
+                    (float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS] +
+                    (Printer::autolevelTransformation[2] * Printer::autolevelTransformation[4] -
+                     Printer::autolevelTransformation[1] * Printer::autolevelTransformation[5]) *
+                    (float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS]) /
+                  (Printer::autolevelTransformation[1] * Printer::autolevelTransformation[3] - Printer::autolevelTransformation[0] * Printer::autolevelTransformation[4]);
         Printer::zMin = 0;
         if(com->hasS() && com->S)
         {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             /* Printer::offsetX = 0;
              Printer::offsetY = 0;
              Printer::moveToReal(0,0,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
                  PrintLine::moveRelativeDistanceInSteps(Printer::offsetX-Printer::currentPositionSteps[X_AXIS],Printer::offsetY-Printer::currentPositionSteps[Y_AXIS],0,0,Printer::homingFeedrate[X_AXIS],true,ALWAYS_CHECK_ENDSTOPS);
                  Printer::offsetX = 0;
                  Printer::offsetY = 0;*/
-            Printer::zLength += (h3+z)-Printer::currentPosition[Z_AXIS];
+            Printer::zLength += (h3 + z) - Printer::currentPosition[Z_AXIS];
 #else
-            int32_t zBottom = Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
-            Printer::zLength = Printer::runZMaxProbe()+zBottom*Printer::invAxisStepsPerMM[2]-ENDSTOP_Z_BACK_ON_HOME;
+            int32_t zBottom = Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
+            Printer::zLength = Printer::runZMaxProbe() + zBottom * Printer::invAxisStepsPerMM[Z_AXIS] - ENDSTOP_Z_BACK_ON_HOME;
 #endif
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
-#else
-#if DRIVE_SYSTEM!=DELTA
-            Printer::currentPositionSteps[Z_AXIS] = (h3+z)*Printer::axisStepsPerMM[Z_AXIS];
+#else // max hardware endstop
+#if DRIVE_SYSTEM != DELTA
+            Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
 #endif
 #endif
             Printer::setAutolevelActive(true);
@@ -937,6 +937,7 @@ void Commands::processGCode(GCode *com)
             com->printCommand();
         }
     }
+    previousMillisCmd = HAL::timeInMilliseconds();
 }
 /**
   \brief Execute the G command stored in com.
@@ -1154,7 +1155,7 @@ void Commands::processMCode(GCode *com)
         millis_t currentTime;
         do
         {
-            currentTime = HAL::timeInMilliseconds();
+            previousMillisCmd = currentTime = HAL::timeInMilliseconds();
             if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
             {
                 printTemperatures();
@@ -1208,7 +1209,7 @@ void Commands::processMCode(GCode *com)
             if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
             {
                 printTemperatures();
-                codenum = HAL::timeInMilliseconds();
+                codenum = previousMillisCmd = HAL::timeInMilliseconds();
             }
             Commands::checkForPeriodicalActions();
         }
@@ -1690,8 +1691,6 @@ void Commands::executeGCode(GCode *com)
     }
     else
     {
-        previousMillisCmd = HAL::timeInMilliseconds();
-
         if(com->hasG()) processGCode(com);
         else if(com->hasM()) processMCode(com);
         else if(com->hasT())      // Process T code

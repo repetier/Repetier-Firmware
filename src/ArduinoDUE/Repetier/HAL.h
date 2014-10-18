@@ -156,6 +156,7 @@ typedef char prog_char;
 // Protects a variable scope for interrupts. Uses RAII to force clearance of 
 // Interrupt block at the end resp. sets them to previous state.
 // Uses ABSEPRI to allow higher level interrupts then the one changing firmware data
+#if 1
 class InterruptProtectedBlock {
     public:
     inline void protect() {
@@ -175,7 +176,8 @@ class InterruptProtectedBlock {
         __set_BASEPRI(0);
     }
 };
-/*class InterruptProtectedBlock {
+#else
+class InterruptProtectedBlock {
     uint32_t mask;
     public:
     inline void protect() {
@@ -196,7 +198,8 @@ class InterruptProtectedBlock {
     inline ~InterruptProtectedBlock() {
         __set_PRIMASK(mask);
     }
-};*/
+};
+#endif
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
@@ -337,7 +340,7 @@ public:
       return F_CPU/divisor;
     }
     static inline void delayMicroseconds(uint32_t usec)
-    {
+    {//usec += 3;
         uint32_t n = usec * (F_CPU_TRUE / 3000000);
         asm volatile(
             "L2_%=_delayMicroseconds:"       "\n\t"

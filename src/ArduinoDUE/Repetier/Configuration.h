@@ -867,6 +867,13 @@ included delay is already enough.
 */
 #define STEPPER_HIGH_DELAY 0
 
+/** If your driver needs some additional delay between setting direction and first step signal,
+ you can set this here. There are some commands between direction and signal, but some drivers
+ might be even slower or you are using a fast arduino board with slow driver. Normally 0 works.
+ If you get skewed print, you might try 1 microsecond here.
+ */
+#define DIRECTION_DELAY 0
+
 /** The firmware can only handle 16000Hz interrupt frequency cleanly. If you need higher speeds
 a faster solution is needed, and this is to double/quadruple the steps in one interrupt call.
 This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheaper then 1 or 3

@@ -164,24 +164,24 @@ int debugWaitLoop = 0;
 void Printer::constrainDestinationCoords()
 {
     if(isNoDestinationCheck()) return;
-#if min_software_endstop_x == true
+#if min_software_endstop_x
     if (destinationSteps[X_AXIS] < xMinSteps) Printer::destinationSteps[X_AXIS] = Printer::xMinSteps;
 #endif
-#if min_software_endstop_y == true
+#if min_software_endstop_y
     if (destinationSteps[Y_AXIS] < yMinSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMinSteps;
 #endif
-#if min_software_endstop_z == true
-    if (destinationSteps[Z_AXIS] < zMinSteps) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
+#if min_software_endstop_z
+    if (destinationSteps[Z_AXIS] < zMinSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
 #endif
 
-#if max_software_endstop_x == true
+#if max_software_endstop_x
     if (destinationSteps[X_AXIS] > Printer::xMaxSteps) Printer::destinationSteps[X_AXIS] = Printer::xMaxSteps;
 #endif
-#if max_software_endstop_y == true
+#if max_software_endstop_y
     if (destinationSteps[Y_AXIS] > Printer::yMaxSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMaxSteps;
 #endif
-#if max_software_endstop_z == true
-    if (destinationSteps[Z_AXIS] > Printer::zMaxSteps) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
+#if max_software_endstop_z
+    if (destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
 }
 #endif
@@ -428,9 +428,9 @@ void Printer::setOrigin(float xOff,float yOff,float zOff)
 
 void Printer::updateCurrentPosition(bool copyLastCmd)
 {
-    currentPosition[X_AXIS] = (float)(currentPositionSteps[X_AXIS])*invAxisStepsPerMM[X_AXIS];
-    currentPosition[Y_AXIS] = (float)(currentPositionSteps[Y_AXIS])*invAxisStepsPerMM[Y_AXIS];
-    currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
+    currentPosition[X_AXIS] = (float)(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
+    currentPosition[Y_AXIS] = (float)(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
+    currentPosition[Z_AXIS] = (float)(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS];
 #if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformFromPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS],currentPosition[X_AXIS],currentPosition[Y_AXIS],currentPosition[Z_AXIS]);
@@ -1234,6 +1234,11 @@ void Printer::zBabystep() {
         Printer::setYDirection(dir);
 #endif
         Printer::setZDirection(dir);
+#if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
+        HAL::delayMicroseconds(DIRECTION_DELAY);
+#else
+        HAL::delayMicroseconds(1);
+#endif
 #if DRIVE_SYSTEM == 3
         WRITE(X_STEP_PIN,HIGH);
 #if FEATURE_TWO_XSTEPPER
@@ -1255,6 +1260,9 @@ void Printer::zBabystep() {
         Printer::setYDirection(yDir);
 #endif
         Printer::setZDirection(zDir);
+#if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
+        HAL::delayMicroseconds(DIRECTION_DELAY);
+#endif
         //HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 1);
 }
 
@@ -1282,7 +1290,7 @@ float Printer::runZMaxProbe()
     stepsRemainingAtZHit = -1;
     setZProbingActive(true);
     PrintLine::moveRelativeDistanceInSteps(0,0,probeDepth,0,EEPROM::zProbeSpeed(),true,true);
-    if(stepsRemainingAtZHit<0)
+    if(stepsRemainingAtZHit < 0)
     {
         Com::printErrorFLN(Com::tZProbeFailed);
         return -1;
@@ -1294,7 +1302,7 @@ float Printer::runZMaxProbe()
 #else
     probeDepth -= stepsRemainingAtZHit;
 #endif
-    float distance = (float)probeDepth*invAxisStepsPerMM[Z_AXIS];
+    float distance = (float)probeDepth * invAxisStepsPerMM[Z_AXIS];
     Com::printF(Com::tZProbeMax,distance);
     Com::printF(Com::tSpaceXColon,realXPosition());
     Com::printFLN(Com::tSpaceYColon,realYPosition());
@@ -1318,13 +1326,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
                                                (Printer::offsetY - oldOffY) * Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
     }
     Commands::waitUntilEndOfAllMoves();
-    int32_t sum = 0,probeDepth,shortMove = (int32_t)((float)Z_PROBE_SWITCHING_DISTANCE*axisStepsPerMM[Z_AXIS]);
+    int32_t sum = 0,probeDepth,shortMove = (int32_t)((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]);
     int32_t lastCorrection = currentPositionSteps[Z_AXIS];
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
     int32_t updateZ = 0;
-    for(uint8_t r=0; r<repeat; r++)
+    for(uint8_t r = 0; r < repeat; r++)
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
         stepsRemainingAtZHit = -1;
@@ -1334,7 +1342,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         waitForZProbeStart();
         setZProbingActive(true);
         PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
-        if(stepsRemainingAtZHit<0)
+        if(stepsRemainingAtZHit < 0)
         {
             Com::printErrorFLN(Com::tZProbeFailed);
             return -1;
@@ -1343,7 +1351,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 #if NONLINEAR_SYSTEM
         stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentDeltaPositionSteps[C_TOWER];
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
         currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit;
         currentDeltaPositionSteps[B_TOWER] += stepsRemainingAtZHit;
         currentDeltaPositionSteps[C_TOWER] += stepsRemainingAtZHit;
@@ -1365,7 +1373,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     Com::printF(Com::tSpaceXColon,realXPosition());
     Com::printFLN(Com::tSpaceYColon,realYPosition());
     // Go back to start position
-    PrintLine::moveRelativeDistanceInSteps(0,0,lastCorrection-currentPositionSteps[Z_AXIS],0,EEPROM::zProbeSpeed(),true,false);
+    PrintLine::moveRelativeDistanceInSteps(0,0,lastCorrection - currentPositionSteps[Z_AXIS],0,EEPROM::zProbeSpeed(),true,false);
     //PrintLine::moveRelativeDistanceInSteps(offx,offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
 
     if(last)
