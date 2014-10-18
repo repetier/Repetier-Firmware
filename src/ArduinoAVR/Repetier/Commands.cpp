@@ -728,6 +728,10 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
 #endif
         Printer::feedrate = oldFeedrate;
+    } else {
+#if DRIVE_SYSTEM != DELTA
+        Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
+#endif
     }
     break;
 #endif
