@@ -469,6 +469,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_B,DELTA_DIAGONAL_CORRECTION_B);
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_CORRECTION_C,DELTA_DIAGONAL_CORRECTION_C);
 #endif
+    HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
+    HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
+    HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
 }
 
 void EEPROM::readDataFromEEPROM()
@@ -649,6 +652,11 @@ void EEPROM::readDataFromEEPROM()
 #if MIXING_EXTRUDER
             storeMixingRatios(false);
 #endif
+        }
+        if(version < 10) {
+            HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
+            HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
+            HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
         }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA

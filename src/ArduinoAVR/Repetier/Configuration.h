@@ -189,7 +189,7 @@ Overridden if EEPROM activated.*/
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
-// then you have 3 seconds of increased heating to reach 1ï¿½ï¿½C.
+// then you have 3 seconds of increased heating to reach 1¡ãC.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
@@ -1169,7 +1169,7 @@ is always running and is not hung up for some unknown reason. */
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
 */
-#define FEATURE_AUTOLEVEL 1
+#define FEATURE_AUTOLEVEL 0
 #define Z_PROBE_X1 100
 #define Z_PROBE_Y1 20
 #define Z_PROBE_X2 160
@@ -1177,17 +1177,23 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_X3 20
 #define Z_PROBE_Y3 170
 
+/* If your printer is not exactly square but is more like a parallelogramm, you can
+use this to compensate the effect of printing squares like parallelogramms. Set the
+parameter to then tangens of the deviation from 90¡ã when you print a square object.
+E.g. if you angle is 91¡ã enter tan(1) = 0.017. If error doubles you have the wrong sign.
+Always hard to say since the other angle is 89¡ã in this case!
+*/
+#define FEATURE_AXISCOMP 0
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
+
+
 
 /** \brief Experimental calibration utility for delta printers
  * Change 1 to 0 to disable
 */
 #define FEATURE_SOFTWARE_LEVELING 0
-
-// ################## Axis Compensation ################## 
-#define FEATURE_AXISCOMP 1
-#define AXISCOMP_TANXY 0
-#define AXISCOMP_TANYZ 0
-#define AXISCOMP_TANXZ 0
 
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 0
@@ -1339,3 +1345,4 @@ Values must be in range 1..255
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
 
 #endif
+

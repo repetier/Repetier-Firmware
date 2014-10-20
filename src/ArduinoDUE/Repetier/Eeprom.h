@@ -20,11 +20,10 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 9
+#define EEPROM_PROTOCOL_VERSION 10
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
-
 
 #define EPR_MAGIC_BYTE              0
 #define EPR_ACCELERATION_TYPE       1
@@ -107,6 +106,12 @@ have problems with other modules using the eeprom */
 #define EPR_DELTA_DIAGONAL_CORRECTION_B 937
 #define EPR_DELTA_DIAGONAL_CORRECTION_C 941
 #define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
+
+// Axis compensation
+#define EPR_AXISCOMP_TANXY			976
+#define EPR_AXISCOMP_TANYZ			980
+#define EPR_AXISCOMP_TANXZ			984
+
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
 #else
@@ -252,6 +257,30 @@ public:
         return Z_PROBE_BED_DISTANCE;
 #endif
     }
+
+    static inline float axisCompTanXY() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_AXISCOMP_TANXY);
+#else
+        return AXISCOMP_TANXY;
+#endif
+    }
+    static inline float axisCompTanYZ() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_AXISCOMP_TANYZ);
+#else
+        return AXISCOMP_TANYZ;
+#endif
+    }
+        static inline float axisCompTanXZ() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_AXISCOMP_TANXZ);
+#else
+        return AXISCOMP_TANXZ;
+#endif
+    }
+
+
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
 #if EEPROM_MODE != 0

@@ -20,10 +20,10 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 9
+#define EEPROM_PROTOCOL_VERSION 10
 
-/** Whe sing the eeprom */
-
+/** Where to start with our datablock in memory. Can be moved if you
+have problems with other modules using the eeprom */
 
 #define EPR_MAGIC_BYTE              0
 #define EPR_ACCELERATION_TYPE       1
@@ -257,30 +257,30 @@ public:
         return Z_PROBE_BED_DISTANCE;
 #endif
     }
-    
+
     static inline float axisCompTanXY() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_AXISCOMP_TANXY);
 #else
         return AXISCOMP_TANXY;
 #endif
-    }    
+    }
     static inline float axisCompTanYZ() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_AXISCOMP_TANYZ);
 #else
         return AXISCOMP_TANYZ;
 #endif
-    }   
+    }
         static inline float axisCompTanXZ() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_AXISCOMP_TANXZ);
 #else
         return AXISCOMP_TANXZ;
 #endif
-    }   
-    
-    
+    }
+
+
 #if NONLINEAR_SYSTEM
     static inline int16_t deltaSegmentsPerSecondMove() {
 #if EEPROM_MODE != 0

@@ -695,7 +695,7 @@ void Commands::processGCode(GCode *com)
                     (float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS]) /
                   (Printer::autolevelTransformation[1] * Printer::autolevelTransformation[3] - Printer::autolevelTransformation[0] * Printer::autolevelTransformation[4]);
         Printer::zMin = 0;
-        if(com->hasS() && com->S)
+        if(com->hasS() && com->S < 3 && com->S > 0)
         {
 #if MAX_HARDWARE_ENDSTOP_Z
 #if DRIVE_SYSTEM == DELTA
@@ -720,6 +720,14 @@ void Commands::processGCode(GCode *com)
             if(com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
         }
+        else
+        {
+#if DRIVE_SYSTEM != DELTA
+            Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
+#endif
+            if(com->hasS() && com->S == 3)
+                EEPROM::storeDataIntoEEPROM();
+        }
         Printer::setAutolevelActive(true);
         Printer::updateDerivedParameter();
         Printer::updateCurrentPosition(true);
@@ -728,10 +736,6 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
 #endif
         Printer::feedrate = oldFeedrate;
-    } else {
-#if DRIVE_SYSTEM != DELTA
-        Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
-#endif
     }
     break;
 #endif
@@ -1167,12 +1171,12 @@ void Commands::processMCode(GCode *com)
             }
             Commands::checkForPeriodicalActions();
             //gcode_read_serial();
- #if RETRACT_DURING_HEATUP
-                if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
-                {
-                    PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
-                    retracted = 1;
-                }
+#if RETRACT_DURING_HEATUP
+            if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
+            {
+                PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
+                retracted = 1;
+            }
 #endif
             if((waituntil == 0 &&
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
@@ -1187,10 +1191,10 @@ void Commands::processMCode(GCode *com)
         }
         while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-currentTime)<2000000000UL));
 #if RETRACT_DURING_HEATUP
-            if (retracted && actExtruder==Extruder::current)
-            {
-                PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
-            }
+        if (retracted && actExtruder==Extruder::current)
+        {
+            PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
+        }
 #endif
     }
     UI_CLEAR_STATUS;
@@ -1256,7 +1260,8 @@ void Commands::processMCode(GCode *com)
 #endif
     case 111: // M111 enable/disable run time debug flags
         if(com->hasS()) Printer::debugLevel = com->S;
-        if(com->hasP()) {
+        if(com->hasP())
+        {
             if (com->P > 0) Printer::debugLevel |= com->P;
             else Printer::debugLevel &= ~(-com->P);
         }

@@ -22,7 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.92 Develop"
+#define REPETIER_VERSION "0.92"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
