@@ -1424,6 +1424,11 @@ void Printer::waitForZProbeStart()
 #if FEATURE_AUTOLEVEL
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ)
 {
+#if FEATURE_AXISCOMP
+    // Axis compensation:
+    x = x + y * EEPROM::axisCompTanXY() + z * EEPROM::axisCompTanXZ();
+    y = y + z * EEPROM::axisCompTanYZ();
+#endif
     transX = x*autolevelTransformation[0]+y*autolevelTransformation[3]+z*autolevelTransformation[6];
     transY = x*autolevelTransformation[1]+y*autolevelTransformation[4]+z*autolevelTransformation[7];
     transZ = x*autolevelTransformation[2]+y*autolevelTransformation[5]+z*autolevelTransformation[8];
@@ -1434,6 +1439,11 @@ void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &
     transX = x*autolevelTransformation[0]+y*autolevelTransformation[1]+z*autolevelTransformation[2];
     transY = x*autolevelTransformation[3]+y*autolevelTransformation[4]+z*autolevelTransformation[5];
     transZ = x*autolevelTransformation[6]+y*autolevelTransformation[7]+z*autolevelTransformation[8];
+#if FEATURE_AXISCOMP
+    // Axis compensation:
+    transY = transY - transZ * EEPROM::axisCompTanYZ();
+    transX = transX - transY * EEPROM::axisCompTanXY() - transZ * EEPROM::axisCompTanXZ();
+#endif
 }
 
 void Printer::resetTransformationMatrix(bool silent)

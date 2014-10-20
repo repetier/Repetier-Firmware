@@ -446,6 +446,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+    HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
+    HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
+    HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
 #if DRIVE_SYSTEM==DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
@@ -837,6 +840,14 @@ void EEPROM::writeSettings()
 #if FEATURE_AUTOLEVEL
     writeByte(EPR_AUTOLEVEL_ACTIVE,Com::tAutolevelActive);
 #endif
+
+#if FEATURE_AXISCOMP
+    writeFloat(EPR_AXISCOMP_TANXY,Com::tAxisCompTanXY);
+    writeFloat(EPR_AXISCOMP_TANYZ,Com::tAxisCompTanYZ);
+    writeFloat(EPR_AXISCOMP_TANXZ,Com::tAxisCompTanXZ);
+#endif
+
+
 #if HAVE_HEATED_BED
     writeByte(EPR_BED_HEAT_MANAGER,Com::tEPRBedHeatManager);
 #if TEMP_PID
