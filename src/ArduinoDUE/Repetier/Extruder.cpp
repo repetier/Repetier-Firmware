@@ -67,6 +67,7 @@ short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 Is called every 100ms.
 */
 static uint8_t extruderTempErrors = 0;
+
 void Extruder::manageTemperatures()
 {
 #if FEATURE_WATCHDOG
@@ -74,7 +75,7 @@ void Extruder::manageTemperatures()
 #endif // FEATURE_WATCHDOG
     uint8_t errorDetected = 0;
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
-    for(uint8_t controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
+    for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
         if(controller == autotuneIndex) continue;
 #if MIXING_EXTRUDER
@@ -97,7 +98,7 @@ void Extruder::manageTemperatures()
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
             if(controller>1)
 #endif // NUM_EXTRUDER
-                if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
+                if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
                     extruder[controller].coolerPWM = 0;
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
@@ -123,8 +124,8 @@ void Extruder::manageTemperatures()
         }
 
         // Run test if heater and sensor are decoupled
-        bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod;
-        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn())
+        bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
+        if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
         {
             if(act->isDecoupleFull())
             {
@@ -133,19 +134,26 @@ void Extruder::manageTemperatures()
                     Printer::setAnyTempsensorDefect();
                     UI_ERROR_P(Com::tHeaterDecoupled);
                     Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                    Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
+                    Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
+                    Com::printFLN(PSTR(" ms"));
                 }
                 else
                 {
+                    act->stopDecouple();
                     act->startFullDecouple(time);
                 }
             }
             else     // hold
             {
-                if(fabs(act->currentTemperatureC - act->lastDecoupleTemp) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
+                if(fabs(act->currentTemperatureC - act->targetTemperatureC) > DECOUPLING_TEST_MAX_HOLD_VARIANCE)   // failed test
                 {
                     Printer::setAnyTempsensorDefect();
                     UI_ERROR_P(Com::tHeaterDecoupled);
                     Com::printErrorFLN(Com::tHeaterDecoupledWarning);
+                    Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
+                    Com::printF(PSTR(" measured "),act->currentTemperatureC);
+                    Com::printFLN(PSTR(" deg. C"));
                 }
                 else
                 {
@@ -161,28 +169,28 @@ void Extruder::manageTemperatures()
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
-            if(act->targetTemperatureC<20.0f)
+            if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
                 act->stopDecouple();
             }
-            else if(error>PID_CONTROL_RANGE)
+            else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
                 act->startFullDecouple(time);
             }
-            else if(error<-PID_CONTROL_RANGE)
+            else if(error < -PID_CONTROL_RANGE)
                 output = 0;
             else
             {
                 act->startHoldDecouple(time);
                 float pidTerm = act->pidPGain * error;
-                act->tempIState = constrain(act->tempIState+error,act->tempIStateLimitMin,act->tempIStateLimitMax);
-                pidTerm += act->pidIGain * act->tempIState*0.1;
-                float dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC)*3.333f;
+                act->tempIState = constrain(act->tempIState + error, act->tempIStateLimitMin, act->tempIStateLimitMax);
+                pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
+                float dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC) * 3.333f;
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX==1
-                pidTerm = (pidTerm*act->pidMax)*0.0039062;
+                pidTerm = (pidTerm * act->pidMax) * 0.0039062;
 #endif
                 output = constrain((int)pidTerm, 0, act->pidMax);
             }
@@ -192,12 +200,12 @@ void Extruder::manageTemperatures()
         {
             uint8_t output;
             float error = act->targetTemperatureC - act->currentTemperatureC;
-            if(act->targetTemperatureC<20.0f)
+            if(act->targetTemperatureC < 20.0f)
             {
                 output = 0; // off is off, even if damping term wants a heat peak!
                 act->stopDecouple();
             }
-            else if(error>PID_CONTROL_RANGE)
+            else if(error > PID_CONTROL_RANGE)
             {
                 output = act->pidMax;
                 act->startFullDecouple(time);
@@ -1070,7 +1078,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp < temp)
             {
-                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -1084,9 +1092,9 @@ void TemperatureController::setTargetTemperature(float target)
     case 51:
     case 52:
     {
-        type-=46;
-        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
-        uint8_t i=2;
+        type -= 46;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -1097,7 +1105,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp > temp)
             {
-                targetTemperature = oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -1338,19 +1346,15 @@ void writeMonitor()
 bool reportTempsensorError()
 {
     if(!Printer::isAnyTempsensorDefect()) return false;
-    for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+    for(uint8_t i = 0; i<NUM_TEMPERATURE_LOOPS; i++)
     {
-        int temp = tempController[i]->currentTemperatureC;
-        if(temp<MIN_DEFECT_TEMPERATURE || temp>MAX_DEFECT_TEMPERATURE)
-        {
-            Com::printErrorFLN(Com::tTempSensorDefect);
-        }
-        else Com::printFLN(Com::tTempSensorWorking);
-        if(i==NUM_EXTRUDER) Com::printF(Com::tHeatedBed );
+        if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
         else Com::printF(Com::tExtruderSpace,i);
-        Com::printF(PSTR(" Temperature reading is "));
-        Com::print(temp);
-        Com::println();
+        int temp = tempController[i]->currentTemperatureC;
+        if(temp < MIN_DEFECT_TEMPERATURE || temp > MAX_DEFECT_TEMPERATURE)
+            Com::printFLN(Com::tTempSensorDefect);
+        else
+            Com::printFLN(Com::tTempSensorWorking);
     }
     Com::printErrorFLN(Com::tDryModeUntilRestart);
     return true;

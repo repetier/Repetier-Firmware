@@ -1698,22 +1698,19 @@ void Commands::executeGCode(GCode *com)
             }
         }
     }
+    if(com->hasG()) processGCode(com);
+    else if(com->hasM()) processMCode(com);
+    else if(com->hasT())      // Process T code
+    {
+        Commands::waitUntilEndOfAllMoves();
+        Extruder::selectExtruderById(com->T);
+    }
     else
     {
-        if(com->hasG()) processGCode(com);
-        else if(com->hasM()) processMCode(com);
-        else if(com->hasT())      // Process T code
+        if(Printer::debugErrors())
         {
-            Commands::waitUntilEndOfAllMoves();
-            Extruder::selectExtruderById(com->T);
-        }
-        else
-        {
-            if(Printer::debugErrors())
-            {
-                Com::printF(Com::tUnknownCommand);
-                com->printCommand();
-            }
+            Com::printF(Com::tUnknownCommand);
+            com->printCommand();
         }
     }
 }
