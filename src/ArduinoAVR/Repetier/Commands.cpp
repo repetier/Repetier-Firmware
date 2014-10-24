@@ -835,15 +835,21 @@ void Commands::processGCode(GCode *com)
         else
         {
             bool tooBig = false;
-            if (com->hasX()) if (abs(com->X) <= 10)
+            if (com->hasX()) {
+                if (abs(com->X) <= 10)
                     EEPROM::setTowerXFloor(com->X + currentZmm + Printer::xMin);
                 else tooBig = true;
-            if (com->hasY()) if (abs(com->Y) <= 10)
+            }
+            if (com->hasY()) {
+                if (abs(com->Y) <= 10)
                     EEPROM::setTowerYFloor(com->Y + currentZmm + Printer::yMin);
                 else tooBig = true;
-            if (com->hasZ()) if (abs(com->Z) <= 10)
+            }
+            if (com->hasZ()) {
+                if (abs(com->Z) <= 10)
                     EEPROM::setTowerZFloor(com->Z + currentZmm + Printer::zMin);
                 else tooBig = true;
+            }
             if (tooBig)
                 Com::printErrorFLN(PSTR("Calibration movement is limited to 10mm."));
         }

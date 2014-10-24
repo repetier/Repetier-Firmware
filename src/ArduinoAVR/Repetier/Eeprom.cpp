@@ -55,7 +55,6 @@ void EEPROM::update(GCode *com)
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 #if EEPROM_MODE != 0
-    uint8_t version = EEPROM_PROTOCOL_VERSION;
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME*1000L;
     stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
@@ -870,8 +869,7 @@ void EEPROM::writeSettings()
     // now the extruder
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
-        int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
-        Extruder *e = &extruder[i];
+        int o = i * EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         writeFloat(o+EPR_EXTRUDER_STEPS_PER_MM,Com::tEPRStepsPerMM);
         writeFloat(o+EPR_EXTRUDER_MAX_FEEDRATE,Com::tEPRMaxFeedrate);
         writeFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,Com::tEPRStartFeedrate);

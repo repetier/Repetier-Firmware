@@ -57,7 +57,7 @@ void beep(uint8_t duration,uint8_t count)
     HAL::i2cWrite( 0x14); // Start at port a
 #endif
 #endif
-    for(uint8_t i=0; i<count; i++)
+    for(uint8_t i=0; i < count; i++)
     {
 #if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
@@ -2111,7 +2111,7 @@ void UIDisplay::adjustMenuPos()
     if(menuLevel == 0) return;
     UIMenu *men = (UIMenu*)menu[menuLevel];
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
-    uint8_t mtype = HAL::readFlashByte((const prog_char*)&(men->menuType));
+    uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType));
     if(mtype != 2) return;
     while(menuPos[menuLevel]>0)
     {
@@ -2178,12 +2178,12 @@ void UIDisplay::nextPreviousAction(int8_t next)
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     uint8_t nr = pgm_read_word_near(&(men->numEntries));
-    uint8_t mtype = HAL::readFlashByte((const prog_char*)&(men->menuType));
+    uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType));
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     UIMenuEntry *testEnt;
     // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
-    uint8_t entType = HAL::readFlashByte((const prog_char*)&(ent->menuType));
+    uint8_t entType = HAL::readFlashByte((PGM_P)&(ent->menuType));
     int action = pgm_read_word(&(ent->action));
     if(mtype == UI_MENU_TYPE_SUBMENU && activeAction == 0)   // browse through menu items
     {

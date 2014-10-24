@@ -2188,10 +2188,12 @@ S3(ext)=9
 #endif
 
 #if NUM_EXTRUDER==1
+#undef E1_PINS
 #define E1_PINS
 #endif
 
 #if NUM_EXTRUDER<3
+#undef E2_PINS
 #define E2_PINS
 #endif
 

@@ -189,7 +189,7 @@ Overridden if EEPROM activated.*/
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is e.g. 10 seconds
 // because at startup you already need 7 seconds until heater starts to rise temp. for sensor
-// then you have 3 seconds of increased heating to reach 1▲C.
+// then you have 3 seconds of increased heating to reach 1째C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // for each extruder, fan will stay on until extruder temperature is below this value
 #define EXTRUDER_FAN_COOL_TEMP 50
@@ -1179,9 +1179,9 @@ is always running and is not hung up for some unknown reason. */
 
 /* If your printer is not exactly square but is more like a parallelogramm, you can
 use this to compensate the effect of printing squares like parallelogramms. Set the
-parameter to then tangens of the deviation from 90▲ when you print a square object.
-E.g. if you angle is 91▲ enter tan(1) = 0.017. If error doubles you have the wrong sign.
-Always hard to say since the other angle is 89▲ in this case!
+parameter to then tangens of the deviation from 90째 when you print a square object.
+E.g. if you angle is 91째 enter tan(1) = 0.017. If error doubles you have the wrong sign.
+Always hard to say since the other angle is 89째 in this case!
 */
 #define FEATURE_AXISCOMP 0
 #define AXISCOMP_TANXY 0
@@ -1208,6 +1208,7 @@ Always hard to say since the other angle is 89▲ in this case!
 #ifndef SDSUPPORT  // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT false
 // Uncomment to enable or change card detection pin. With card detection the card is mounted on insertion.
+#undef SDCARDDETECT
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
 #define SDCARDDETECTINVERTED false

@@ -32,7 +32,7 @@
 
 #include <avr/pgmspace.h>
 #include <avr/io.h>
-#if CPU_ARCH==ARCH_AVR
+#if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
 #else
 #define PROGMEM
@@ -618,7 +618,7 @@ public:
     static inline uint8_t spiReceive(uint8_t send=0xff)
     {
         SPDR = send;
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
         return SPDR;
     }
     static inline void spiReadBlock(uint8_t*buf,size_t nbyte)
@@ -627,17 +627,17 @@ public:
         SPDR = 0XFF;
         for (size_t i = 0; i < nbyte; i++)
         {
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             buf[i] = SPDR;
             SPDR = 0XFF;
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
         buf[nbyte] = SPDR;
     }
     static inline void spiSend(uint8_t b)
     {
         SPDR = b;
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
@@ -649,13 +649,13 @@ public:
             size_t i = 2;
             while (1)
             {
-                while (!(SPSR & (1 << SPIF)));
+                while (!(SPSR & (1 << SPIF))) {}
                 SPDR = b;
                 if (i == n) break;
                 b = buf[i++];
             }
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
 
     static inline __attribute__((always_inline))
@@ -664,12 +664,12 @@ public:
         SPDR = token;
         for (uint16_t i = 0; i < 512; i += 2)
         {
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             SPDR = buf[i];
-            while (!(SPSR & (1 << SPIF)));
+            while (!(SPSR & (1 << SPIF))) {}
             SPDR = buf[i + 1];
         }
-        while (!(SPSR & (1 << SPIF)));
+        while (!(SPSR & (1 << SPIF))) {}
     }
 
     // I2C Support

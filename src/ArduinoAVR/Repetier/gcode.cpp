@@ -623,7 +623,6 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 */
 bool GCode::parseAscii(char *line,bool fromSerial)
 {
-    bool has_checksum = false;
     char *pos = line;
     params = 0;
     params2 = 0;

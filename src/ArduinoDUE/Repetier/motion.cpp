@@ -1563,7 +1563,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
 
     // Insert dummy moves if necessary
     // Nead to leave at least one slot open for the first split move
-    uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, RMath::min(PRINTLINE_CACHE_SIZE-4,numLines));
+    insertWaitMovesIfNeeded(pathOptimize, RMath::min(PRINTLINE_CACHE_SIZE - 4,numLines));
 
     for (int lineNumber=1; lineNumber < numLines + 1; lineNumber++)
     {
@@ -1698,11 +1698,11 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     float r_axis1 = -offset[1];
     float rt_axis0 = target[0] - center_axis0;
     float rt_axis1 = target[1] - center_axis1;
-    long xtarget = Printer::destinationSteps[X_AXIS];
+    /*long xtarget = Printer::destinationSteps[X_AXIS];
     long ytarget = Printer::destinationSteps[Y_AXIS];
     long ztarget = Printer::destinationSteps[Z_AXIS];
     long etarget = Printer::destinationSteps[E_AXIS];
-
+*/
     // CCW angle between position and target from circle center. Only one atan2() trig computation required.
     float angular_travel = atan2(r_axis0*rt_axis1-r_axis1*rt_axis0, r_axis0*rt_axis0+r_axis1*rt_axis1);
     if (angular_travel < 0)
@@ -1730,7 +1730,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
       if (invert_feed_rate) { feed_rate *= segments; }
     */
     float theta_per_segment = angular_travel/segments;
-    float linear_per_segment = linear_travel/segments;
+    //float linear_per_segment = linear_travel/segments;
     float extruder_per_segment = extruder_travel/segments;
 
     /* Vector rotation by transformation matrix: r is the original vector, r_T is the rotated vector,

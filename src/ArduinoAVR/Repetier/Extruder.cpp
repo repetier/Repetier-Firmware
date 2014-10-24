@@ -217,7 +217,7 @@ void Extruder::manageTemperatures()
                 act->startHoldDecouple(time);
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
-                output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
+                output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             pwm_pos[act->pwmIndex] = output;
         }
@@ -1071,7 +1071,7 @@ void TemperatureController::setTargetTemperature(float target)
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -1098,7 +1098,7 @@ void TemperatureController::setTargetTemperature(float target)
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -1190,20 +1190,20 @@ void Extruder::disableAllHeater()
 void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool storeValues)
 {
     float currentTemp;
-    int cycles=0;
+    int cycles = 0;
     bool heating = true;
 
     uint32_t temp_millis = HAL::timeInMilliseconds();
-    uint32_t t1=temp_millis;
-    uint32_t t2=temp_millis;
-    int32_t t_high;
+    uint32_t t1 = temp_millis;
+    uint32_t t2 = temp_millis;
+    int32_t t_high = 0;
     int32_t t_low;
 
-    int32_t bias=pidMax>>1;
-    int32_t d = pidMax>>1;
+    int32_t bias = pidMax >> 1;
+    int32_t d = pidMax >> 1;
     float Ku, Tu;
-    float Kp, Ki, Kd;
-    float maxTemp=20, minTemp=20;
+    float Kp = 0, Ki = 0, Kd = 0;
+    float maxTemp = 20, minTemp = 20;
 
     Com::printInfoFLN(Com::tPIDAutotuneStart);
 
@@ -1224,16 +1224,16 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
         unsigned long time = HAL::timeInMilliseconds();
-        maxTemp=RMath::max(maxTemp,currentTemp);
-        minTemp=RMath::min(minTemp,currentTemp);
+        maxTemp = RMath::max(maxTemp,currentTemp);
+        minTemp = RMath::min(minTemp,currentTemp);
         if(heating == true && currentTemp > temp)   // switch heating -> off
         {
             if(time - t2 > (controllerId < NUM_EXTRUDER ? 2500 : 1500))
             {
                 heating=false;
                 pwm_pos[pwmIndex] = (bias - d);
-                t1=time;
-                t_high=t1 - t2;
+                t1 = time;
+                t_high = t1 - t2;
                 maxTemp=temp;
             }
         }
@@ -1241,13 +1241,13 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         {
             if(time - t1 > (controllerId < NUM_EXTRUDER ? 5000 : 3000))
             {
-                heating=true;
-                t2=time;
+                heating = true;
+                t2 = time;
                 t_low=t2 - t1; // half wave length
                 if(cycles > 0)
                 {
                     bias += (d*(t_high - t_low))/(t_low + t_high);
-                    bias = constrain(bias, 20 ,pidMax-20);
+                    bias = constrain(bias, 20 ,pidMax - 20);
                     if(bias > pidMax/2) d = pidMax - 1 - bias;
                     else d = bias;
 
@@ -1258,7 +1258,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
                     if(cycles > 2)
                     {
                         // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
-                        Ku = (4.0*d)/(3.14159*(maxTemp-minTemp));
+                        Ku = (4.0 * d) / (3.14159*(maxTemp-minTemp));
                         Tu = ((float)(t_low + t_high)/1000.0);
                         Com::printF(Com::tAPIDKu,Ku);
                         Com::printFLN(Com::tAPIDTu,Tu);
