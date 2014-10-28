@@ -658,13 +658,17 @@ public:
         InterruptProtectedBlock noInts;
         linesCount++;
     }
+    static uint8_t getLinesCount() {
+        InterruptProtectedBlock noInts;
+        return linesCount;
+    }
     static PrintLine *getNextWriteLine()
     {
         return &lines[linesWritePos];
     }
     static inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current);
     static int32_t bresenhamStep();
-    static void waitForXFreeLines(uint8_t b=1);
+    static void waitForXFreeLines(uint8_t b=1, bool allowMoves = false);
     static inline void forwardPlanner(uint8_t p);
     static inline void backwardPlanner(uint8_t p,uint8_t last);
     static void updateTrapezoids();

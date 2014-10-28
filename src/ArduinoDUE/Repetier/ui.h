@@ -308,7 +308,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_KEYS_I2C_CLICKENCODER_HIGH_REV(pinA,pinB)  uid.encoderLast = (uid.encoderLast << 2) & 0x0F;if (keymask & pinA) uid.encoderLast |=2;if (keymask & pinB) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&encoder_table[uid.encoderLast]);
 #define UI_KEYS_I2C_BUTTON_HIGH(pin,action_) if((pin & keymask)!=0) action=action_;
 
-#define UI_STRING(name,text) const char PROGMEM name[] = text;
+#define UI_STRING(name,text) const char PROGMEM name[] = text
 
 #define UI_PAGE6(name,row1,row2,row3,row4,row5,row6) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
    UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
@@ -354,8 +354,8 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter};
 #define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
 #define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
-#define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries}
-#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries}
+#define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
+#define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
 
 #if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD
 #undef SDCARDDETECT
@@ -401,6 +401,7 @@ class UIDisplay {
     void *errorMsg;
     uint16_t activeAction; // action for ok/next/previous
     uint16_t lastAction;
+    uint16_t delayedAction;
     millis_t lastSwitch; // Last time display switched pages
     millis_t lastRefresh;
     uint16_t lastButtonAction;
@@ -421,30 +422,30 @@ class UIDisplay {
     void addStringP(PGM_P text);
     void addChar(const char c);
     void addGCode(GCode *code);
-    void okAction();
-    void nextPreviousAction(int8_t next);
+    bool okAction(bool allowMoves);
+    bool nextPreviousAction(int8_t next, bool allowMoves);
     char statusMsg[21];
     int8_t encoderPos;
     int8_t encoderLast;
     UIDisplay();
-    void createChar(uint8_t location,const uint8_t charmap[]);
+    void createChar(uint8_t location, const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
     void waitForKey();
-    void printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol); // Print row on display
+    void printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
     void parse(const char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
-    void executeAction(int action);
+    bool executeAction(int action, bool allowMoves);
     void finishAction(int action);
-    void slowAction();
+    void slowAction(bool allowMoves);
     void fastAction();
     void mediumAction();
-    void pushMenu(const UIMenu *men,bool refresh);
+    void pushMenu(const UIMenu *men, bool refresh);
     void adjustMenuPos();
-    void setStatusP(PGM_P txt,bool error = false);
-    void setStatus(const char *txt,bool error = false);
-    inline void setOutputMaskBits(unsigned int bits) {outputMask|=bits;}
-    inline void unsetOutputMaskBits(unsigned int bits) {outputMask&=~bits;}
+    void setStatusP(PGM_P txt, bool error = false);
+    void setStatus(const char *txt, bool error = false);
+    inline void setOutputMaskBits(unsigned int bits) {outputMask |= bits;}
+    inline void unsetOutputMaskBits(unsigned int bits) {outputMask &= ~bits;}
     void updateSDFileCount();
     void goDir(char *name);
     bool isDirname(char *name);
@@ -1285,7 +1286,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_INITIALIZE uid.initialize();
 #define UI_FAST if(pwm_count & 4) {uid.fastAction();}
 #define UI_MEDIUM uid.mediumAction();
-#define UI_SLOW uid.slowAction();
+#define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
@@ -1301,7 +1302,7 @@ void ui_check_slow_keys(int &action) {}
 #define UI_INITIALIZE {}
 #define UI_FAST {}
 #define UI_MEDIUM {}
-#define UI_SLOW {}
+#define UI_SLOW(allowMoves) {}
 #define UI_STATUS(status) {}
 #define UI_STATUS_RAM(status) {}
 #define UI_STATUS_UPD(status) {}

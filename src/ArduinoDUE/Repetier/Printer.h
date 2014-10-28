@@ -169,13 +169,11 @@ public:
 #ifdef DEBUG_STEPCOUNT
     static long totalStepsRemaining;
 #endif
-#if FEATURE_MEMORY_POSITION
     static float memoryX;
     static float memoryY;
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#endif
 #if GANTRY
     static int8_t motorX;
     static int8_t motorYorZ;
@@ -507,7 +505,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN>-1
-        pwm_pos[NUM_EXTRUDER+1] = 255;
+        pwm_pos[NUM_EXTRUDER + 1] = 255;
 #endif // FAN_BOARD_PIN
     }
     static inline bool isAnyTempsensorDefect()
@@ -701,7 +699,7 @@ public:
     {
         return currentPosition[Z_AXIS];
     }
-    static inline void realPosition(float &xp,float &yp,float &zp)
+    static inline void realPosition(float &xp, float &yp, float &zp)
     {
         xp = currentPosition[X_AXIS];
         yp = currentPosition[Y_AXIS];
@@ -754,10 +752,8 @@ public:
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
-#if FEATURE_MEMORY_POSITION
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
-#endif
     static void zBabystep();
 private:
     static void homeXAxis();

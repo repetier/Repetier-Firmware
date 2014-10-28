@@ -5,6 +5,7 @@ Version 0.92
   Mixing extruder support.
   Test for watchdog.
   Allow cold extrusion.
+  Fixed pause sd print issues.
 
 Version 0.91.8
   New languages french and Czech

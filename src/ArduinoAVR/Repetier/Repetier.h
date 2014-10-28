@@ -32,7 +32,7 @@ enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8,
                  DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
-//#define DEBUG_QUEUE_MOVE
+#define DEBUG_QUEUE_MOVE
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION 1
@@ -497,7 +497,7 @@ public:
   //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
   char *shortname; // Pointer to start of filename itself
   char *pathend; // File to char where pathname in fullname ends
-  bool sdmode;  // true if we are printing from sd card
+  uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
   bool sdactive;
   //int16_t n;
   bool savetosd;

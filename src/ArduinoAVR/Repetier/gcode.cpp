@@ -140,6 +140,7 @@ void GCode::requestResend()
     Com::printFLN(Com::tResend,lastLineNumber+1);
     Com::printFLN(Com::tOk);
 }
+
 /**
   Check if result is plausible. If it is, an ok is send and the command is stored in queue.
   If not, a resend and ok is send.
@@ -148,19 +149,19 @@ void GCode::checkAndPushCommand()
 {
     if(hasM())
     {
-        if(M==110)   // Reset line number
+        if(M == 110)   // Reset line number
         {
             lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
             waitingForResend = -1;
             return;
         }
-        if(M==112)   // Emergency kill - freeze printer
+        if(M == 112)   // Emergency kill - freeze printer
         {
             Commands::emergencyStop();
         }
 #ifdef DEBUG_COM_ERRORS
-        if(M==666)
+        if(M == 666) // force an communication error
         {
             lastLineNumber++;
             return;
@@ -169,7 +170,7 @@ void GCode::checkAndPushCommand()
     }
     if(hasN())
     {
-        if((((lastLineNumber+1) & 0xffff)!=(actLineNumber&0xffff)))
+        if((((lastLineNumber + 1) & 0xffff) != (actLineNumber&0xffff)))
         {
             if(static_cast<uint16_t>(lastLineNumber - actLineNumber) < 40)
             {
@@ -178,12 +179,12 @@ void GCode::checkAndPushCommand()
                 Com::printFLN(Com::tSkip,actLineNumber);
                 Com::printFLN(Com::tOk);
             }
-            else if(waitingForResend<0)  // after a resend, we have to skip the garbage in buffers, no message for this
+            else if(waitingForResend < 0)  // after a resend, we have to skip the garbage in buffers, no message for this
             {
                 if(Printer::debugErrors())
                 {
-                    Com::printF(Com::tExpectedLine,lastLineNumber+1);
-                    Com::printFLN(Com::tGot,actLineNumber);
+                    Com::printF(Com::tExpectedLine, lastLineNumber + 1);
+                    Com::printFLN(Com::tGot, actLineNumber);
                 }
                 requestResend(); // Line missing, force resend
             }
@@ -191,7 +192,7 @@ void GCode::checkAndPushCommand()
             {
                 --waitingForResend;
                 commandsReceivingWritePosition = 0;
-                Com::printFLN(Com::tSkip,actLineNumber);
+                Com::printFLN(Com::tSkip, actLineNumber);
                 Com::printFLN(Com::tOk);
             }
             return;
@@ -200,30 +201,33 @@ void GCode::checkAndPushCommand()
     }
     pushCommand();
 #if ACK_WITH_LINENUMBER
-    Com::printFLN(Com::tOkSpace,actLineNumber);
+    Com::printFLN(Com::tOkSpace, actLineNumber);
 #else
     Com::printFLN(Com::tOk);
 #endif
     wasLastCommandReceivedAsBinary = sendAsBinary;
     waitingForResend = -1; // everything is ok.
 }
+
 void GCode::pushCommand()
 {
 #if !ECHO_ON_EXECUTE
     commandsBuffered[bufferWriteIndex].echoCommand();
 #endif
-    bufferWriteIndex = (bufferWriteIndex+1) % GCODE_BUFFER_SIZE;
+    bufferWriteIndex = (bufferWriteIndex + 1) % GCODE_BUFFER_SIZE;
     bufferLength++;
 }
+
 /**
   Get the next buffered command. Returns 0 if no more commands are buffered. For each
   returned command, the gcode_command_finished() function must be called.
 */
 GCode *GCode::peekCurrentCommand()
 {
-    if(bufferLength==0) return NULL; // No more data
+    if(bufferLength == 0) return NULL; // No more data
     return &commandsBuffered[bufferReadIndex];
 }
+
 /** \brief Removes the last returned command from cache. */
 void GCode::popCurrentCommand()
 {
@@ -243,13 +247,14 @@ void GCode::echoCommand()
         printCommand();
     }
 }
+
 void GCode::debugCommandBuffer()
 {
     Com::printF(PSTR("CommandBuffer"));
-    for(int i=0; i<commandsReceivingWritePosition; i++)
+    for(int i = 0; i < commandsReceivingWritePosition; i++)
         Com::printF(Com::tColon,(int)commandReceiving[i]);
     Com::println();
-    Com::printFLN(PSTR("Binary:"),(int)sendAsBinary);
+    Com::printFLN(PSTR("Binary:"), (int)sendAsBinary);
     if(!sendAsBinary)
     {
         Com::print((char*)commandReceiving);
@@ -297,6 +302,7 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
     }
     while(c);
 }
+
 /** \brief Read from serial console or sdcard.
 
 This function is the main function to read the commands from serial console or from sdcard.
@@ -304,19 +310,19 @@ It must be called frequently to empty the incoming buffer.
 */
 void GCode::readFromSerial()
 {
-    if(bufferLength>=GCODE_BUFFER_SIZE) return; // all buffers full
+    if(bufferLength >= GCODE_BUFFER_SIZE) return; // all buffers full
     if(waitUntilAllCommandsAreParsed && bufferLength) return;
-    waitUntilAllCommandsAreParsed=false;
+    waitUntilAllCommandsAreParsed = false;
     millis_t time = HAL::timeInMilliseconds();
     if(!HAL::serialByteAvailable())
     {
-        if((waitingForResend>=0 || commandsReceivingWritePosition>0) && time-timeOfLastDataPacket>200)
+        if((waitingForResend >= 0 || commandsReceivingWritePosition>0) && time - timeOfLastDataPacket > 200)
         {
             requestResend(); // Something is wrong, a started line was not continued in the last second
             timeOfLastDataPacket = time;
         }
 #ifdef WAITING_IDENTIFIER
-        else if(bufferLength == 0 && time-timeOfLastDataPacket>1000)   // Don't do it if buffer is not empty. It may be a slow executing command.
+        else if(bufferLength == 0 && time - timeOfLastDataPacket > 1000)   // Don't do it if buffer is not empty. It may be a slow executing command.
         {
             Com::printFLN(Com::tWait); // Unblock communication in case the last ok was not received correct.
             timeOfLastDataPacket = time;
@@ -328,9 +334,9 @@ void GCode::readFromSerial()
         timeOfLastDataPacket = time; //HAL::timeInMilliseconds();
         commandReceiving[commandsReceivingWritePosition++] = HAL::serialReadByte();
         // first lets detect, if we got an old type ascii command
-        if(commandsReceivingWritePosition==1)
+        if(commandsReceivingWritePosition == 1)
         {
-            if(waitingForResend>=0 && wasLastCommandReceivedAsBinary)
+            if(waitingForResend >= 0 && wasLastCommandReceivedAsBinary)
             {
                 if(!commandReceiving[0])
                     waitingForResend--;   // Skip 30 zeros to get in sync
@@ -344,7 +350,7 @@ void GCode::readFromSerial()
                 commandsReceivingWritePosition = 0;
                 continue;
             }
-            sendAsBinary = (commandReceiving[0] & 128)!=0;
+            sendAsBinary = (commandReceiving[0] & 128) != 0;
         }
         if(sendAsBinary)
         {
@@ -364,19 +370,19 @@ void GCode::readFromSerial()
         }
         else     // Ascii command
         {
-            char ch = commandReceiving[commandsReceivingWritePosition-1];
+            char ch = commandReceiving[commandsReceivingWritePosition - 1];
             if(ch == 0 || ch == '\n' || ch == '\r' || (!commentDetected && ch == ':'))  // complete line read
             {
                 //Com::printF(PSTR("Parse ascii"));Com::print((char*)commandReceiving);Com::println();
-                commandReceiving[commandsReceivingWritePosition-1]=0;
+                commandReceiving[commandsReceivingWritePosition - 1] = 0;
                 commentDetected = false;
-                if(commandsReceivingWritePosition==1)   // empty line ignore
+                if(commandsReceivingWritePosition == 1)   // empty line ignore
                 {
                     commandsReceivingWritePosition = 0;
                     continue;
                 }
                 GCode *act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseAscii((char *)commandReceiving,true))   // Success
+                if(act->parseAscii((char *)commandReceiving, true))   // Success
                     act->checkAndPushCommand();
                 else
                     requestResend();
@@ -396,13 +402,13 @@ void GCode::readFromSerial()
         }
     }
 #if SDSUPPORT
-    if(!sd.sdmode || commandsReceivingWritePosition!=0)   // not reading or incoming serial command
+    if(sd.sdmode == 0 || commandsReceivingWritePosition != 0)   // not reading or incoming serial command
         return;
     while( sd.filesize > sd.sdpos && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
         timeOfLastDataPacket = HAL::timeInMilliseconds();
         int n = sd.file.read();
-        if(n==-1)
+        if(n == -1)
         {
             Com::printFLN(Com::tSDReadError);
             UI_ERROR("SD Read Error");
@@ -410,10 +416,10 @@ void GCode::readFromSerial()
             // Second try in case of recoverable errors
             sd.file.seekSet(sd.sdpos);
             n = sd.file.read();
-            if(n==-1)
+            if(n == -1)
             {
                 Com::printErrorFLN(PSTR("SD error did not recover!"));
-                sd.sdmode = false;
+                sd.sdmode = 0;
                 break;
             }
             UI_ERROR("SD error fixed");
@@ -422,21 +428,23 @@ void GCode::readFromSerial()
         commandReceiving[commandsReceivingWritePosition++] = (uint8_t)n;
 
         // first lets detect, if we got an old type ascii command
-        if(commandsReceivingWritePosition==1)
+        if(commandsReceivingWritePosition == 1)
         {
-            sendAsBinary = (commandReceiving[0] & 128)!=0;
+            sendAsBinary = (commandReceiving[0] & 128) != 0;
         }
         if(sendAsBinary)
         {
             if(commandsReceivingWritePosition < 2 ) continue;
             if(commandsReceivingWritePosition == 4 || commandsReceivingWritePosition == 5)
                 binaryCommandSize = computeBinarySize((char*)commandReceiving);
-            if(commandsReceivingWritePosition==binaryCommandSize)
+            if(commandsReceivingWritePosition == binaryCommandSize)
             {
                 GCode *act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving,false))   // Success, silently ignore illegal commands
+                if(act->parseBinary(commandReceiving, false))   // Success, silently ignore illegal commands
                     pushCommand();
                 commandsReceivingWritePosition = 0;
+                if(sd.sdmode == 2)
+                    sd.sdmode = 0;
                 return;
             }
         }
@@ -447,19 +455,21 @@ void GCode::readFromSerial()
             if(returnChar || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
                 if(returnChar || ch == ':')
-                    commandReceiving[commandsReceivingWritePosition-1]=0;
+                    commandReceiving[commandsReceivingWritePosition - 1] = 0;
                 else
-                    commandReceiving[commandsReceivingWritePosition]=0;
+                    commandReceiving[commandsReceivingWritePosition] = 0;
                 commentDetected = false;
-                if(commandsReceivingWritePosition==1)   // empty line ignore
+                if(commandsReceivingWritePosition == 1)   // empty line ignore
                 {
                     commandsReceivingWritePosition = 0;
                     continue;
                 }
                 GCode *act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseAscii((char *)commandReceiving,false))   // Success
+                if(act->parseAscii((char *)commandReceiving, false))   // Success
                     pushCommand();
                 commandsReceivingWritePosition = 0;
+                if(sd.sdmode == 2)
+                    sd.sdmode = 0;
                 return;
             }
             else
@@ -469,11 +479,11 @@ void GCode::readFromSerial()
             }
         }
     }
-    sd.sdmode = false;
+    sd.sdmode = 0;
     Com::printFLN(Com::tDonePrinting);
     commandsReceivingWritePosition = 0;
     commentDetected = false;
-    Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
+    Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
 #endif
 }
 

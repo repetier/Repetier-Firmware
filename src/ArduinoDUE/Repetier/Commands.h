@@ -28,7 +28,7 @@ class Commands
 {
 public:
     static void commandLoop();
-    static void checkForPeriodicalActions();
+    static void checkForPeriodicalActions(bool allowNewMoves);
     static void processArc(GCode *com);
     static void processGCode(GCode *com);
     static void processMCode(GCode *com);

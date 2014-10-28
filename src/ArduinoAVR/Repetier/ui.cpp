@@ -111,15 +111,12 @@ void beep(uint8_t duration,uint8_t count)
 bool UIMenuEntry::showEntry() const
 {
     bool ret = true;
-    uint8_t f,f2;
+    uint8_t f, f2;
     f = HAL::readFlashByte((PGM_P)&filter);
-    if(f!=0)
+    if(f != 0)
         ret = (f & Printer::menuMode) != 0;
-    f2 = HAL::readFlashByte((PGM_P)&nofilter);
-    if(ret && f2!=0)
-    {
+    if(ret && (f2 = HAL::readFlashByte((PGM_P)&nofilter)) != 0)
         ret = (f2 & Printer::menuMode) == 0;
-    }
     return ret;
 }
 
@@ -728,7 +725,6 @@ void initializeLCD()
 
 UIDisplay::UIDisplay()
 {
-
 }
 #if UI_ANIMATION
 void slideIn(uint8_t row,FSTRINGPARAM(text))
@@ -778,6 +774,7 @@ void UIDisplay::initialize()
     shift = -2;
     menuPos[0] = 0;
     lastAction = 0;
+    delayedAction = 0;
     lastButtonAction = 0;
     activeAction = 0;
     statusMsg[0] = 0;
@@ -1764,7 +1761,7 @@ void UIDisplay::refreshPage()
             else
 #endif
                 cache[1][0] = '\x0a'; //off
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
 
             //heatbed animated icons
             if(heatedBedController.targetTemperatureC > 0)
@@ -1952,11 +1949,11 @@ void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
     }
     if(menuLevel == 4) return; // Max. depth reached. No more memory to down further.
     menuLevel++;
-    menu[menuLevel]=men;
+    menu[menuLevel] = men;
     menuTop[menuLevel] = menuPos[menuLevel] = 0;
 #if SDSUPPORT
     UIMenu *men2 = (UIMenu*)menu[menuLevel];
-    if(pgm_read_byte(&(men2->menuType))==1) {
+    if(pgm_read_byte(&(men2->menuType)) == 1) {
       // Menu is Open files list
       updateSDFileCount();
       // Keep menu positon in file list, more user friendly.
@@ -1977,13 +1974,14 @@ void UIDisplay::pushMenu(const UIMenu *men,bool refresh)
     if(refresh)
         refreshPage();
 }
-void UIDisplay::okAction()
+
+bool UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return;
+        return true;
     }
-#if UI_HAS_KEYS==1
+#if UI_HAS_KEYS == 1
     if(menuLevel == 0)   // Enter menu
     {
         menuLevel = 1;
@@ -1991,7 +1989,7 @@ void UIDisplay::okAction()
         menuPos[1] =  UI_MENU_BACKCNT; // if top entry is back, default to next useful item
         menu[1] = &ui_menu_main;
         BEEP_SHORT
-        return;
+        return true;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
@@ -2005,12 +2003,12 @@ void UIDisplay::okAction()
     {
         if(menuPos[menuLevel] == 0)   // Selected back instead of file
         {
-            executeAction(UI_ACTION_BACK);
-            return;
+            executeAction(UI_ACTION_BACK, allowMoves);
+            return true;
         }
 
         if(!sd.sdactive)
-            return;
+            return true;
         uint8_t filePos = menuPos[menuLevel] - 1;
         char filename[LONG_FILENAME_LENGTH + 1];
 
@@ -2022,7 +2020,7 @@ void UIDisplay::okAction()
             menuPos[menuLevel] = 1;
             refreshPage();
             oldMenuLevel = -1;
-            return;
+            return true;
         }
 
         int16_t shortAction; // renamed to avoid scope confusion
@@ -2050,7 +2048,7 @@ void UIDisplay::okAction()
         case UI_ACTION_SD_DELETE:
             if(sd.sdactive)
             {
-                sd.sdmode = false;
+                sd.sdmode = 0;
                 sd.file.close();
                 if(sd.fat.remove(filename))
                 {
@@ -2064,7 +2062,7 @@ void UIDisplay::okAction()
             }
             break;
         }
-        return;
+        return true;
     }
 #endif
     entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -2075,8 +2073,8 @@ void UIDisplay::okAction()
     {
         action = pgm_read_word(&(men->id));
         finishAction(action);
-        executeAction(UI_ACTION_BACK);
-        return;
+        executeAction(UI_ACTION_BACK, true);
+        return true;
     }
     if(mtype == UI_MENU_TYPE_SUBMENU && entType == 4)   // Modify action
     {
@@ -2087,20 +2085,19 @@ void UIDisplay::okAction()
         }
         else
             activeAction = action;
-        return;
+        return true;
     }
-    if(entType==2)   // Enter submenu
+    if(entType == 2)   // Enter submenu
     {
-        pushMenu((UIMenu*)action,false);
+        pushMenu((UIMenu*)action, false);
         BEEP_SHORT
-        return;
+        return true;
     }
-    if(entType==3)
+    if(entType == 3)
     {
-        executeAction(action);
-        return;
+        return executeAction(action, allowMoves);
     }
-    executeAction(UI_ACTION_BACK);
+    return executeAction(UI_ACTION_BACK, allowMoves);
 #endif
 }
 
@@ -2112,13 +2109,32 @@ void UIDisplay::adjustMenuPos()
     UIMenu *men = (UIMenu*)menu[menuLevel];
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType));
+    int numEntries = pgm_read_word(&(men->numEntries));
     if(mtype != 2) return;
-    while(menuPos[menuLevel]>0)
+    UIMenuEntry *entry;
+    while(menuPos[menuLevel] > 0) // Go up until we reach visible position
     {
-        if(((UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]])))->showEntry())
+        entry = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+        if(pgm_read_byte((void*)&(entry->menuType)) == 1) // skip headlines
+            menuPos[menuLevel]--;
+        else if(entry->showEntry())
             break;
-        menuPos[menuLevel]--;
+        else
+            menuPos[menuLevel]--;
     }
+
+    // with bad luck the only visible option was in the opposite direction
+    while(menuPos[menuLevel] < numEntries - 1) // Go down until we reach visible position
+    {
+        entry = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+        if(pgm_read_byte((void*)&(entry->menuType)) == 1) // skip headlines
+            menuPos[menuLevel]++;
+        else if(entry->showEntry())
+            break;
+        else
+            menuPos[menuLevel]++;
+    }
+
     uint8_t skipped = 0;
     bool modified;
     if(menuTop[menuLevel] > menuPos[menuLevel])
@@ -2127,9 +2143,9 @@ void UIDisplay::adjustMenuPos()
     {
         skipped = 0;
         modified = false;
-        for(uint8_t r = menuTop[menuLevel]; r<menuPos[menuLevel]; r++)
+        for(uint8_t r = menuTop[menuLevel]; r < menuPos[menuLevel]; r++)
         {
-            UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[r]));
+            UIMenuEntry *ent = (UIMenuEntry *)pgm_read_word(&(entries[r]));
             if(!ent->showEntry())
                 skipped++;
         }
@@ -2141,15 +2157,15 @@ void UIDisplay::adjustMenuPos()
     while(modified);
 }
 
-void UIDisplay::nextPreviousAction(int8_t next)
+bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
 {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return;
+        return true;
     }
     millis_t actTime = HAL::timeInMilliseconds();
     millis_t dtReal;
-    millis_t dt = dtReal = actTime-lastNextPrev;
+    millis_t dt = dtReal = actTime - lastNextPrev;
     lastNextPrev = actTime;
     if(dt<SPEED_MAX_MILLIS) dt = SPEED_MAX_MILLIS;
     if(dt>SPEED_MIN_MILLIS)
@@ -2157,8 +2173,8 @@ void UIDisplay::nextPreviousAction(int8_t next)
         dt = SPEED_MIN_MILLIS;
         lastNextAccumul = 1;
     }
-    float f = (float)(SPEED_MIN_MILLIS-dt)/(float)(SPEED_MIN_MILLIS-SPEED_MAX_MILLIS);
-    lastNextAccumul = 1.0f+(float)SPEED_MAGNIFICATION*f*f*f;
+    float f = (float)(SPEED_MIN_MILLIS - dt) / (float)(SPEED_MIN_MILLIS - SPEED_MAX_MILLIS);
+    lastNextAccumul = 1.0f + (float)SPEED_MAGNIFICATION * f * f * f;
 
 #if UI_HAS_KEYS==1
     if(menuLevel == 0)
@@ -2172,9 +2188,9 @@ void UIDisplay::nextPreviousAction(int8_t next)
         }
         else
         {
-            menuPos[0] = (menuPos[0]==0 ? UI_NUM_PAGES-1 : menuPos[0]-1);
+            menuPos[0] = (menuPos[0] == 0 ? UI_NUM_PAGES - 1 : menuPos[0] - 1);
         }
-        return;
+        return true;
     }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     uint8_t nr = pgm_read_word_near(&(men->numEntries));
@@ -2209,7 +2225,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         }
         shift = -2; // reset shift position
         adjustMenuPos();
-        return;
+        return true;
     }
 #if SDSUPPORT
     if(mtype == UI_MENU_TYPE_FILE_SELECTOR)   // SD listing
@@ -2223,9 +2239,9 @@ void UIDisplay::nextPreviousAction(int8_t next)
         if(menuTop[menuLevel] > menuPos[menuLevel])
             menuTop[menuLevel] = menuPos[menuLevel];
         else if(menuTop[menuLevel] + UI_ROWS - 1 < menuPos[menuLevel])
-            menuTop[menuLevel] = menuPos[menuLevel] + 1-UI_ROWS;
+            menuTop[menuLevel] = menuPos[menuLevel] + 1 - UI_ROWS;
         shift = -2; // reset shift position
-        return;
+        return true;
     }
 #endif
     if(mtype == UI_MENU_TYPE_MODIFICATION_MENU) action = pgm_read_word(&(men->id));
@@ -2237,11 +2253,12 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3,false);
         break;
     case UI_ACTION_XPOSITION:
+        if(!allowMoves) return false;
 #if UI_SPEEDDEPENDENT_POSITIONING
     {
         float d = 0.01*(float)increment * lastNextAccumul;
         if(fabs(d) * 2000 > Printer::maxFeedrate[X_AXIS] * dtReal)
-            d *= Printer::maxFeedrate[X_AXIS]*dtReal / (2000*fabs(d));
+            d *= Printer::maxFeedrate[X_AXIS]*dtReal / (2000 * fabs(d));
         long steps = (long)(d * Printer::axisStepsPerMM[X_AXIS]);
         steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
         PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],true);
@@ -2252,6 +2269,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION "));
     break;
     case UI_ACTION_YPOSITION:
+        if(!allowMoves) return false;
 #if UI_SPEEDDEPENDENT_POSITIONING
     {
         float d = 0.01 * (float)increment * lastNextAccumul;
@@ -2267,6 +2285,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION "));
     break;
     case UI_ACTION_ZPOSITION:
+        if(!allowMoves) return false;
 #if UI_SPEEDDEPENDENT_POSITIONING
     {
         float d = 0.01*(float)increment*lastNextAccumul;
@@ -2282,22 +2301,27 @@ void UIDisplay::nextPreviousAction(int8_t next)
     Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
     break;
     case UI_ACTION_XPOSITION_FAST:
+        if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS]*increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
         Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION_FAST "));
         break;
     case UI_ACTION_YPOSITION_FAST:
+        if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS]*increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
         Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION_FAST "));
         break;
     case UI_ACTION_ZPOSITION_FAST:
+        if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
         Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST "));
         break;
     case UI_ACTION_EPOSITION:
+        if(!allowMoves) return false;
         PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
     case UI_ACTION_ZPOSITION_NOTEST:
+        if(!allowMoves) return false;
         Printer::setNoDestinationCheck(true);
 #if UI_SPEEDDEPENDENT_POSITIONING
     {
@@ -2333,7 +2357,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
         }
         break;
     case UI_ACTION_HEATED_BED_TEMP:
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
     {
         int tmp = (int)heatedBedController.targetTemperatureC;
         if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
@@ -2565,9 +2589,10 @@ void UIDisplay::nextPreviousAction(int8_t next)
 #endif
     }
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-    ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
+    ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
+    return true;
 }
 
 void UIDisplay::finishAction(int action)
@@ -2575,16 +2600,17 @@ void UIDisplay::finishAction(int action)
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
-void UIDisplay::executeAction(int action)
+bool UIDisplay::executeAction(int action, bool allowMoves)
 {
-#if UI_HAS_KEYS==1
+    bool ret = true;
+#if UI_HAS_KEYS == 1
     bool skipBeep = false;
     if(action & UI_ACTION_TOPMENU)   // Go to start menu
     {
         action -= UI_ACTION_TOPMENU;
         menuLevel = 0;
     }
-    if(action>=2000 && action<3000)
+    if(action >= 2000 && action < 3000)
     {
         setStatusP(ui_action);
     }
@@ -2592,22 +2618,22 @@ void UIDisplay::executeAction(int action)
         switch(action)
         {
         case UI_ACTION_OK:
-            okAction();
-            skipBeep=true; // Prevent double beep
+            ret = okAction(allowMoves);
+            skipBeep = true; // Prevent double beep
             break;
         case UI_ACTION_BACK:
-            if(menuLevel>0) menuLevel--;
+            if(menuLevel > 0) menuLevel--;
             Printer::setAutomount(false);
             activeAction = 0;
             break;
         case UI_ACTION_NEXT:
-            nextPreviousAction(1);
+            ret = nextPreviousAction(1, allowMoves);
             break;
         case UI_ACTION_PREVIOUS:
-            nextPreviousAction(-1);
+            ret = nextPreviousAction(-1, allowMoves);
             break;
         case UI_ACTION_MENU_UP:
-            if(menuLevel>0) menuLevel--;
+            if(menuLevel > 0) menuLevel--;
             break;
         case UI_ACTION_TOP_MENU:
             menuLevel = 0;
@@ -2616,51 +2642,56 @@ void UIDisplay::executeAction(int action)
             Commands::emergencyStop();
             break;
         case UI_ACTION_HOME_ALL:
+            if(!allowMoves) return false;
             Printer::homeAxis(true,true,true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
             break;
         case UI_ACTION_HOME_X:
+            if(!allowMoves) return false;
             Printer::homeAxis(true,false,false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
             break;
         case UI_ACTION_HOME_Y:
+            if(!allowMoves) return false;
             Printer::homeAxis(false,true,false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Y "));
             break;
         case UI_ACTION_HOME_Z:
+            if(!allowMoves) return false;
             Printer::homeAxis(false,false,true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Z "));
             break;
         case UI_ACTION_SET_ORIGIN:
-            Printer::setOrigin(0,0,0);
+            if(!allowMoves) return false;
+            Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
-            Printer::debugLevel^=1;
+            Printer::debugLevel ^= 1;
             break;
         case UI_ACTION_DEBUG_INFO:
-            Printer::debugLevel^=2;
+            Printer::debugLevel ^= 2;
             break;
         case UI_ACTION_DEBUG_ERROR:
-            Printer::debugLevel^=4;
+            Printer::debugLevel ^= 4;
             break;
         case UI_ACTION_DEBUG_DRYRUN:
-            Printer::debugLevel^=8;
+            Printer::debugLevel ^= 8;
             if(Printer::debugDryrun())   // simulate movements without printing
             {
-                Extruder::setTemperatureForExtruder(0,0);
-#if NUM_EXTRUDER>1
-                Extruder::setTemperatureForExtruder(0,1);
+                Extruder::setTemperatureForExtruder(0, 0);
+#if NUM_EXTRUDER > 1
+                Extruder::setTemperatureForExtruder(0, 1);
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
                 Extruder::setTemperatureForExtruder(0,2);
 #endif
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
                 Extruder::setHeatedBedTemperature(0);
 #endif
             }
             break;
         case UI_ACTION_POWER:
-#if PS_ON_PIN>=0 // avoid compiler errors when the power supply pin is disabled
+#if PS_ON_PIN >= 0 // avoid compiler errors when the power supply pin is disabled
             Commands::waitUntilEndOfAllMoves();
             SET_OUTPUT(PS_ON_PIN); //GND
             TOGGLE(PS_ON_PIN);
@@ -2675,44 +2706,44 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_PREHEAT_PLA:
             UI_STATUS(UI_TEXT_PREHEAT_PLA);
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
 #endif
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
 #endif
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
 #endif
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif
             break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS(UI_TEXT_COOLDOWN);
             Extruder::setTemperatureForExtruder(0,0);
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
             Extruder::setTemperatureForExtruder(0,1);
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(0,2);
 #endif
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
 #endif
             break;
         case UI_ACTION_HEATED_BED_OFF:
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
 #endif
             break;
@@ -2720,7 +2751,7 @@ void UIDisplay::executeAction(int action)
             Extruder::setTemperatureForExtruder(0,0);
             break;
         case UI_ACTION_EXTRUDER1_OFF:
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
             Extruder::setTemperatureForExtruder(0,1);
 #endif
             break;
@@ -2739,15 +2770,20 @@ void UIDisplay::executeAction(int action)
             Printer::relativeExtruderCoordinateMode=!Printer::relativeExtruderCoordinateMode;
             break;
         case UI_ACTION_SELECT_EXTRUDER0:
+#if NUM_EXTRUDER > 0
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(0);
+#endif
             break;
         case UI_ACTION_SELECT_EXTRUDER1:
 #if NUM_EXTRUDER > 1
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(1);
 #endif
             break;
         case UI_ACTION_SELECT_EXTRUDER2:
 #if NUM_EXTRUDER > 2
+            if(!allowMoves) return false;
             Extruder::selectExtruderById(2);
 #endif
             break;
@@ -2784,13 +2820,18 @@ void UIDisplay::executeAction(int action)
             }
             break;
         case UI_ACTION_SD_PAUSE:
-            sd.pausePrint(true);
+            if(!allowMoves)
+                ret = false;
+            else
+                sd.pausePrint(true);
             break;
         case UI_ACTION_SD_CONTINUE:
-            sd.continuePrint();
+            if(!allowMoves) ret = false;
+            else sd.continuePrint(true);
             break;
         case UI_ACTION_SD_STOP:
-            sd.stopPrint();
+            if(!allowMoves) ret = false;
+            else sd.stopPrint();
             break;
         case UI_ACTION_SD_UNMOUNT:
             sd.unmount();
@@ -2897,27 +2938,35 @@ void UIDisplay::executeAction(int action)
             break;
 #endif
         case UI_ACTION_X_UP:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_X_DOWN:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(-Printer::axisStepsPerMM[X_AXIS],0,0,0,Printer::homingFeedrate[X_AXIS],false);
             break;
         case UI_ACTION_Y_UP:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Y_DOWN:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,-Printer::axisStepsPerMM[Y_AXIS],0,0,Printer::homingFeedrate[Y_AXIS],false);
             break;
         case UI_ACTION_Z_UP:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_Z_DOWN:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,-Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],false);
             break;
         case UI_ACTION_EXTRUDER_UP:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_DOWN:
+            if(!allowMoves) return false;
             PrintLine::moveRelativeDistanceInStepsReal(0,0,0,-Printer::axisStepsPerMM[E_AXIS],UI_SET_EXTRUDER_FEEDRATE,false);
             break;
         case UI_ACTION_EXTRUDER_TEMP_UP:
@@ -2936,7 +2985,7 @@ void UIDisplay::executeAction(int action)
         }
         break;
         case UI_ACTION_HEATED_BED_UP:
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC+1;
             if(tmp==1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
@@ -3000,7 +3049,7 @@ void UIDisplay::executeAction(int action)
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:
-#if HAVE_HEATED_BED==true
+#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC-1;
             if(tmp<UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
@@ -3050,9 +3099,10 @@ void UIDisplay::executeAction(int action)
     if(!skipBeep)
         BEEP_SHORT
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-        ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
+        ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
+    return ret;
 }
 void UIDisplay::mediumAction()
 {
@@ -3062,11 +3112,17 @@ void UIDisplay::mediumAction()
 }
 
 // Gets calles from main tread
-void UIDisplay::slowAction()
+void UIDisplay::slowAction(bool allowMoves)
 {
     unsigned long time = HAL::timeInMilliseconds();
     uint8_t refresh = 0;
 #if UI_HAS_KEYS==1
+    // delayed action open?
+    if(allowMoves && delayedAction != 0) {
+        executeAction(delayedAction, true);
+        delayedAction = 0;
+    }
+
     // Update key buffer
     InterruptProtectedBlock noInts;
     if((flags & (UI_FLAG_FAST_KEY_ACTION + UI_FLAG_KEY_TEST_RUNNING)) == 0)
@@ -3087,7 +3143,7 @@ void UIDisplay::slowAction()
             led |= (Printer::getFanSpeed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds
-            uid.outputMask= ~led&(UI_I2C_HEATBED_LED|UI_I2C_HOTEND_LED|UI_I2C_FAN_LED);
+            uid.outputMask= ~led & (UI_I2C_HEATBED_LED | UI_I2C_HOTEND_LED | UI_I2C_FAN_LED);
         }
 #endif
         int nextAction = 0;
@@ -3111,20 +3167,18 @@ void UIDisplay::slowAction()
         int8_t epos = encoderPos;
         encoderPos = 0;
         noInts.unprotect();
-        if(epos)
+        if(epos) // encoder changed
         {
-            nextPreviousAction(epos);
+            nextPreviousAction(epos, allowMoves);
             BEEP_SHORT
-            refresh=1;
+            refresh = 1;
         }
         if(lastAction != lastButtonAction)
         {
             if(lastButtonAction == 0)
             {
                 if(lastAction >= 2000 && lastAction < 3000)
-                {
                     statusMsg[0] = 0;
-                }
                 lastAction = 0;
                 noInts.protect();
                 flags &= ~(UI_FLAG_FAST_KEY_ACTION + UI_FLAG_SLOW_KEY_ACTION);
@@ -3132,16 +3186,23 @@ void UIDisplay::slowAction()
             else if(time - lastButtonStart > UI_KEY_BOUNCETIME)     // New key pressed
             {
                 lastAction = lastButtonAction;
-                executeAction(lastAction);
-                nextRepeat = time + UI_KEY_FIRST_REPEAT;
-                repeatDuration = UI_KEY_FIRST_REPEAT;
+                if(executeAction(lastAction, allowMoves)) {
+                    nextRepeat = time + UI_KEY_FIRST_REPEAT;
+                    repeatDuration = UI_KEY_FIRST_REPEAT;
+                } else {
+                    if(delayedAction == 0)
+                        delayedAction = lastAction;
+                }
             }
         }
-        else if(lastAction<1000 && lastAction)     // Repeatable key
+        else if(lastAction < 1000 && lastAction)     // Repeatable key
         {
-            if(time-nextRepeat<10000)
+            if(time - nextRepeat < 10000)
             {
-                executeAction(lastAction);
+                if(!executeAction(lastAction, allowMoves)) {
+                    if(delayedAction == 0)
+                        delayedAction = lastAction;
+                }
                 repeatDuration -= UI_KEY_REDUCE_REPEAT;
                 if(repeatDuration < UI_KEY_MIN_REPEAT) repeatDuration = UI_KEY_MIN_REPEAT;
                 nextRepeat = time + repeatDuration;
@@ -3153,16 +3214,16 @@ void UIDisplay::slowAction()
     noInts.unprotect();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-    if(menuLevel > 0 && ui_autoreturn_time < time)
+    if(menuLevel > 0 && ui_autoreturn_time < time) // Go to top menu after x seoonds
     {
         lastSwitch = time;
         menuLevel = 0;
         activeAction = 0;
     }
 #endif
-    if(menuLevel == 0 && time>4000)
+    if(menuLevel == 0 && time > 4000) // Top menu refresh/switch
     {
-        if(time - lastSwitch>UI_PAGES_DURATION)
+        if(time - lastSwitch > UI_PAGES_DURATION)
         {
             lastSwitch = time;
 #if !defined(UI_DISABLE_AUTO_PAGESWITCH) || !UI_DISABLE_AUTO_PAGESWITCH
@@ -3181,7 +3242,7 @@ void UIDisplay::slowAction()
         //if(mtype!=1)
         refresh = 1;
     }
-    if(refresh)
+    if(refresh) // does lcd need a refresh?
     {
         if (menuLevel > 1 || Printer::isAutomount())
         {
@@ -3201,7 +3262,7 @@ void UIDisplay::slowAction()
 // Gets called from inside an interrupt with interrupts allowed!
 void UIDisplay::fastAction()
 {
-#if UI_HAS_KEYS==1
+#if UI_HAS_KEYS == 1
     // Check keys
     InterruptProtectedBlock noInts;
     if((flags & (UI_FLAG_KEY_TEST_RUNNING + UI_FLAG_SLOW_KEY_ACTION)) == 0)

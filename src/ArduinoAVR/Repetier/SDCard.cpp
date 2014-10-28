@@ -24,14 +24,14 @@
 
 #if SDSUPPORT
 
-char tempLongFilename[LONG_FILENAME_LENGTH+1];
-char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1];
+char tempLongFilename[LONG_FILENAME_LENGTH + 1];
+char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 
 SDCard sd;
 
 SDCard::SDCard()
 {
-    sdmode = false;
+    sdmode = 0;
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
@@ -46,7 +46,7 @@ void SDCard::automount()
         {
             Com::printFLN(PSTR("SD card removed"));
 #if UI_DISPLAY_TYPE != NO_DISPLAY
-            uid.executeAction(UI_ACTION_TOP_MENU);
+            uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
             unmount();
             UI_STATUS(UI_TEXT_SD_REMOVED);
@@ -62,7 +62,7 @@ void SDCard::automount()
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive) {
                 Printer::setAutomount(true);
-                uid.executeAction(UI_ACTION_SD_PRINT+UI_ACTION_TOPMENU);
+                uid.executeAction(UI_ACTION_SD_PRINT + UI_ACTION_TOPMENU, true);
             }
 #endif
         }
@@ -80,16 +80,16 @@ void SDCard::initsd()
 #endif
     /*if(dir[0].isOpen())
         dir[0].close();*/
-    if(!fat.begin(SDSS,SPI_FULL_SPEED))
+    if(!fat.begin(SDSS, SPI_FULL_SPEED))
     {
         Com::printFLN(Com::tSDInitFail);
         return;
     }
     sdactive = true;
-    Printer::setMenuMode(MENU_MODE_SD_MOUNTED,true);
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
 
     fat.chdir();
-    if(selectFile("init.g",true))
+    if(selectFile("init.g", true))
     {
         startPrint();
     }
@@ -98,64 +98,72 @@ void SDCard::initsd()
 
 void SDCard::mount()
 {
-    sdmode = false;
+    sdmode = 0;
     initsd();
 }
 
 void SDCard::unmount()
 {
-    sdmode = false;
+    sdmode = 0;
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
-    Printer::setMenuMode(MENU_MODE_SD_MOUNTED+MENU_MODE_SD_PAUSED+MENU_MODE_SD_PRINTING,false);
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_SD_PAUSED + MENU_MODE_SD_PRINTING, false);
 #if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
-    uid.cwd[0]='/';
-    uid.cwd[1]=0;
-    uid.folderLevel=0;
+    uid.cwd[0] = '/';
+    uid.cwd[1] = 0;
+    uid.folderLevel = 0;
 #endif
 }
 
 void SDCard::startPrint()
 {
     if(!sdactive) return;
-    sdmode = true;
-    Printer::setMenuMode(MENU_MODE_SD_PRINTING,true);
-    Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+    sdmode = 1;
+    Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED, false);
 }
 void SDCard::pausePrint(bool intern)
 {
     if(!sd.sdactive) return;
-    sdmode = false;
-    Printer::setMenuMode(MENU_MODE_SD_PAUSED,true);
-#if FEATURE_MEMORY_POSITION
+    sdmode = 2; // finish running line
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED, true);
     if(intern) {
         Commands::waitUntilEndOfAllBuffers();
+        sdmode = 0;
         Printer::MemoryPosition();
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
+                            Printer::memoryE - RETRACT_ON_PAUSE,
+                            Printer::maxFeedrate[E_AXIS] / 2);
 #if DRIVE_SYSTEM == DELTA
-        Printer::moveToReal(0,0.9*EEPROM::deltaMaxRadius(),IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
+        Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #else
-        Printer::moveToReal(Printer::xMin,Printer::yMin + Printer::yLength,IGNORE_COORDINATE,IGNORE_COORDINATE,Printer::maxFeedrate[X_AXIS]);
+        Printer::moveToReal(Printer::xMin, Printer::yMin + Printer::yLength, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
 #endif
+        Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
+        Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
+        Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
+        GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
-#endif
 }
+
 void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
-    Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
-#if FEATURE_MEMORY_POSITION
     if(intern) {
-        Printer::GoToMemoryPosition(true,true,false,true,Printer::maxFeedrate[X_AXIS]);
-        Printer::GoToMemoryPosition(false,false,true,false,Printer::maxFeedrate[Z_AXIS]);
+        GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
+        Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
+        Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
+        Printer::GoToMemoryPosition(false, false, false, true, Printer::maxFeedrate[E_AXIS] / 2.0f);
     }
-#endif
-    sdmode = true;
+    Printer::setMenuMode(MENU_MODE_SD_PAUSED, false);
+    sdmode = 1;
 }
+
 void SDCard::stopPrint()
 {
     if(!sd.sdactive) return;
-    sdmode = false;
+    sdmode = 0;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
     Com::printFLN(PSTR("SD print stopped by user."));
@@ -314,6 +322,7 @@ int8_t RFstricmp(const char* s1, const char* s2)
         s1++,s2++;
     return (const uint8_t)tolower(*s1)-(const uint8_t)tolower(*s2);
 }
+
 int8_t RFstrnicmp(const char* s1, const char* s2, size_t n)
 {
     while(n--)
@@ -325,7 +334,6 @@ int8_t RFstrnicmp(const char* s1, const char* s2, size_t n)
     }
     return 0;
 }
-
 
 void SDCard::ls()
 {
@@ -346,7 +354,7 @@ bool SDCard::selectFile(const char *filename, bool silent)
     boolean bFound;
 
     if(!sdactive) return false;
-    sdmode = false;
+    sdmode = 0;
 
     file.close();
 
@@ -380,19 +388,20 @@ void SDCard::printStatus()
 {
     if(sdactive)
     {
-        Com::printF(Com::tSDPrintingByte,sdpos);
-        Com::printFLN(Com::tSlash,filesize);
+        Com::printF(Com::tSDPrintingByte, sdpos);
+        Com::printFLN(Com::tSlash, filesize);
     }
     else
     {
         Com::printFLN(Com::tNotSDPrinting);
     }
 }
+
 void SDCard::startWrite(char *filename)
 {
     if(!sdactive) return;
     file.close();
-    sdmode = false;
+    sdmode = 0;
     fat.chdir();
     if(!file.open(filename, O_CREAT | O_APPEND | O_WRITE | O_TRUNC))
     {
@@ -405,6 +414,7 @@ void SDCard::startWrite(char *filename)
         Com::printFLN(Com::tWritingToFile,filename);
     }
 }
+
 void SDCard::finishWrite()
 {
     if(!savetosd) return; // already closed or never opened
@@ -414,10 +424,11 @@ void SDCard::finishWrite()
     Com::printFLN(Com::tDoneSavingFile);
     UI_CLEAR_STATUS;
 }
+
 void SDCard::deleteFile(char *filename)
 {
     if(!sdactive) return;
-    sdmode = false;
+    sdmode = 0;
     file.close();
     if(fat.remove(filename))
     {
@@ -431,10 +442,11 @@ void SDCard::deleteFile(char *filename)
             Com::printFLN(Com::tDeletionFailed);
     }
 }
+
 void SDCard::makeDirectory(char *filename)
 {
     if(!sdactive) return;
-    sdmode = false;
+    sdmode = 0;
     file.close();
     if(fat.mkdir(filename))
     {
