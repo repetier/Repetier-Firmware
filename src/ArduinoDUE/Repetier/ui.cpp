@@ -1271,6 +1271,12 @@ void UIDisplay::parse(const char *txt,bool ram)
 #else
                 addStringP(ui_text_na);
 #endif
+                if(c2=='P')
+#if (Z_PROBE_PIN > -1) 
+                addStringP(Printer::isZProbeHit()?ui_text_on:ui_text_off);
+#else
+                addStringP(ui_text_na);
+#endif
             break;
         case 'S':
             if(c2=='x') addFloat(Printer::axisStepsPerMM[X_AXIS],3,1);

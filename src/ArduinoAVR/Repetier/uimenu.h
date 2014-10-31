@@ -110,6 +110,7 @@ stops
 %sY : State of y max endstop.
 %sz : State of z min endstop.
 %sZ : State of z max endstop.
+%sP : State of z probe.
 
 steps
 %Sx : Steps per mm x direction
