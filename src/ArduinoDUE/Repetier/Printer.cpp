@@ -1315,19 +1315,8 @@ float Printer::runZMaxProbe()
 #endif
 
 #if FEATURE_Z_PROBE
-float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript)
+float Printer::runZProbe(bool first,bool last,uint8_t repeat)
 {
-    float oldOffX =  Printer::offsetX;
-    float oldOffY =  Printer::offsetY;
-    if(first)
-    {
-        if(runStartScript)
-            GCode::executeFString(Com::tZProbeStartScript);
-        Printer::offsetX = -EEPROM::zProbeXOffset();
-        Printer::offsetY = -EEPROM::zProbeYOffset();
-        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
-                                               (Printer::offsetY - oldOffY) * Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
-    }
     Commands::waitUntilEndOfAllMoves();
     int32_t sum = 0,probeDepth,shortMove = (int32_t)((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]);
     int32_t lastCorrection = currentPositionSteps[Z_AXIS];
@@ -1339,9 +1328,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
         stepsRemainingAtZHit = -1;
-        int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
-        int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
-        //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
         waitForZProbeStart();
         setZProbingActive(true);
         PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
@@ -1377,21 +1363,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     Com::printFLN(Com::tSpaceYColon,realYPosition());
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0,0,lastCorrection - currentPositionSteps[Z_AXIS],0,EEPROM::zProbeSpeed(),true,false);
-    //PrintLine::moveRelativeDistanceInSteps(offx,offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
 
-    if(last)
-    {
-        oldOffX = Printer::offsetX;
-        oldOffY = Printer::offsetY;
-        GCode::executeFString(Com::tZProbeEndScript);
-        if(Extruder::current)
-        {
-            Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
-            Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
-        }
-        PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX)*Printer::axisStepsPerMM[X_AXIS],
-                                               (Printer::offsetY - oldOffY)*Printer::axisStepsPerMM[Y_AXIS],0,0,EEPROM::zProbeXYSpeed(),true,ALWAYS_CHECK_ENDSTOPS);
-    }
     return distance;
 }
 

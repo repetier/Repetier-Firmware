@@ -621,14 +621,14 @@ void Commands::processGCode(GCode *com)
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
         float sum = 0,last,oldFeedrate = Printer::feedrate;
-        Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-        sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+        Printer::moveTo(EEPROM::zProbeX1()-EEPROM::zProbeXOffset(),EEPROM::zProbeY1()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS);
         if(sum<0) break;
-        Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        Printer::moveTo(EEPROM::zProbeX2()-EEPROM::zProbeXOffset(),EEPROM::zProbeY2()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
         if(last<0) break;
         sum+= last;
-        Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        Printer::moveTo(EEPROM::zProbeX3()-EEPROM::zProbeXOffset(),EEPROM::zProbeY3()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
         if(last<0) break;
         sum+= last;
@@ -659,17 +659,27 @@ void Commands::processGCode(GCode *com)
             EEPROM::storeDataIntoEEPROM();
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G29 "));
+        GCode::executeFString(Com::tZProbeEndScript);
+        Printer::feedrate = oldFeedrate;
     }
     break;
     case 30: // G30 single probe set Z0
     {
         uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
+        if ( p&1 )
+        {
+            GCode::executeFString(Com::tZProbeStartScript);
+        }
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
         Printer::runZProbe(p & 1,p & 2);
         Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
         printCurrentPosition(PSTR("G30 "));
+        if ( p&2 )
+        {
+            GCode::executeFString(Com::tZProbeEndScript);
+        }
     }
     break;
     case 31:  // G31 display hall sensor output
@@ -685,14 +695,14 @@ void Commands::processGCode(GCode *com)
         Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
         Printer::setAutolevelActive(false); // iterate
         float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
-        Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-        h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+        Printer::moveTo(EEPROM::zProbeX1()-EEPROM::zProbeXOffset(),EEPROM::zProbeY1()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS);
         if(h1 < 0) break;
-        Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-        h2 = Printer::runZProbe(false,false);
+        Printer::moveTo(EEPROM::zProbeX2()-EEPROM::zProbeXOffset(),EEPROM::zProbeY2()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        h2 = Printer::runZProbe(false,false,Z_PROBE_REPETITIONS);
         if(h2 < 0) break;
-        Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-        h3 = Printer::runZProbe(false,true);
+        Printer::moveTo(EEPROM::zProbeX3()-EEPROM::zProbeXOffset(),EEPROM::zProbeY3()-EEPROM::zProbeYOffset(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        h3 = Printer::runZProbe(false,true,Z_PROBE_REPETITIONS);
         if(h3 < 0) break;
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
@@ -742,6 +752,7 @@ void Commands::processGCode(GCode *com)
         Printer::updateDerivedParameter();
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G32 "));
+        GCode::executeFString(Com::tZProbeEndScript);
 #if DRIVE_SYSTEM==DELTA
         Printer::homeAxis(true,true,true);
 #endif
