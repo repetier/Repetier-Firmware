@@ -429,6 +429,7 @@
 				<Option compiler="avrgcc" />
 				<Compiler>
 					<Add option="-Os" />
+					<Add option="-pedantic" />
 					<Add option="-W" />
 					<Add option="-Wall" />
 					<Add option="-mmcu=$(MCU)" />
@@ -552,7 +553,10 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-pedantic" />
 			<Add option="-w" />
+			<Add option="-W" />
+			<Add option="-Wall" />
 			<Add directory="." />
 		</Compiler>
 		<Unit filename="Commands.cpp">

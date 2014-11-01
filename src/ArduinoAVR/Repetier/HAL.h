@@ -599,7 +599,9 @@ public:
     }
     static inline void spiInit(uint8_t spiRate)
     {
-        spiRate = spiRate > 12 ? 6 : spiRate/2;
+         uint8_t r = 0;
+         for (uint8_t b = 2; spiRate > b && r < 6; b <<= 1, r++);
+
         SET_OUTPUT(SS);
         WRITE(SS,HIGH);
         SET_OUTPUT(SCK);
@@ -611,8 +613,8 @@ public:
         PRR0 &= ~(1<<PRSPI);
 #endif
         // See avr processor documentation
-        SPCR = (1 << SPE) | (1 << MSTR) | (spiRate >> 1);
-        SPSR = spiRate & 1 || spiRate == 6 ? 0 : 1 << SPI2X;
+        SPCR = (1 << SPE) | (1 << MSTR) | (r >> 1);
+        SPSR = (r & 1 || r == 6 ? 0 : 1) << SPI2X;
 
     }
     static inline uint8_t spiReceive(uint8_t send=0xff)
