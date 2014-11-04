@@ -86,6 +86,7 @@ void Extruder::manageTemperatures()
         // Get Temperature
         act->updateCurrentTemperature();
 
+#ifdef EXTRUDER_FAN_COOL_TEMP
         // Handle automatic cooling of extruders
         if(controller<NUM_EXTRUDER)
         {
@@ -103,6 +104,7 @@ void Extruder::manageTemperatures()
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
         }
+#endif
 
         // Check for obvious sensor errors
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
@@ -472,6 +474,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 }
 
+#ifdef EXTRUDER_FAN_COOL_TEMP
+#define UPDATE_FAN(FAN,TEMP)   do { if(TEMP >= EXTRUDER_FAN_COOL_TEMP) extruder[FAN].coolerPWM = extruder[FAN].coolerSpeed; } while(0)
+#else
+#define UPDATE_FAN(FAN,TEMP)   do {} while(0)
+#endif
+
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr,bool beep)
 {
 #if MIXING_EXTRUDER
@@ -490,7 +498,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     tc->setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius > 30)
         tc->setAlarm(true);
-    if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+    UPDATE_FAN(extr,temperatureInCelsius);
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
 #if FEATURE_DITTO_PRINTING
@@ -498,13 +506,13 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     {
         TemperatureController *tc2 = tempController[1];
         tc2->setTargetTemperature(temperatureInCelsius);
-        if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
+        UPDATE_FAN(1,temperatureInCelsius);
 #if NUM_EXTRUDER > 2
         if(Extruder::dittoMode > 1 && extr == 0)
         {
             TemperatureController *tc2 = tempController[2];
             tc2->setTargetTemperature(temperatureInCelsius);
-            if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[2].coolerPWM = extruder[2].coolerSpeed;
+            UPDATE_FAN(2,temperatureInCelsius);
         }
 #endif
 #if NUM_EXTRUDER > 3
@@ -512,7 +520,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
         {
             TemperatureController *tc2 = tempController[3];
             tc2->setTargetTemperature(temperatureInCelsius);
-            if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[3].coolerPWM = extruder[3].coolerSpeed;
+            UPDATE_FAN(3,temperatureInCelsius);
         }
 #endif
     }
