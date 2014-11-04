@@ -1183,6 +1183,21 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_X3 20
 #define Z_PROBE_Y3 170
 
+/* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
+ * assumes that the floor is plain (i.e. glass plate) 
+ *     and that it is perpendicular to the towers
+ *     and that the (0,0) is in center
+ * requires z-probe
+ * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * and compensate the distortion
+ * more points means better compensation, but consumes more memory and takes more time
+ * DISTORTION_CORRECTION_R is the distance of last row or collumn from center
+ */
+ 
+#define DISTORTION_CORRECTION         false
+#define DISTORTION_CORRECTION_POINTS  5
+#define DISTORTION_CORRECTION_R       80
+
 /* If your printer is not exactly square but is more like a parallelogramm, you can
 use this to compensate the effect of printing squares like parallelogramms. Set the
 parameter to then tangens of the deviation from 90° when you print a square object.

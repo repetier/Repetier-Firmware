@@ -150,7 +150,19 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s))
     Com::printFLN(Com::tSpaceEColon, Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
     //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
     //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
+#if 0
+    Com::printF(PSTR("Steps: X="), Printer::currentPositionSteps[X_AXIS]);
+    Com::printF(PSTR(" Y="), Printer::currentPositionSteps[Y_AXIS]);
+    Com::printF(PSTR(" Z="), Printer::currentPositionSteps[Z_AXIS]);
+#if DRIVE_SYSTEM==DELTA
+    Com::printF(PSTR(" delta A="), Printer::currentDeltaPositionSteps[0]);
+    Com::printF(PSTR(" B="), Printer::currentDeltaPositionSteps[1]);
+    Com::printF(PSTR(" C="), Printer::currentDeltaPositionSteps[2]);
+#endif
+    Com::println();
+#endif
 }
+
 
 void Commands::printTemperatures(bool showRaw)
 {
@@ -606,17 +618,30 @@ void Commands::processGCode(GCode *com)
         break;
     case 28:  //G28 Home all Axis one at a time
     {
+#if DISTORTION_CORRECTION
+        Printer::distortion.disable();
+#endif
         uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
         if(com->hasE())
             Printer::currentPositionSteps[E_AXIS] = 0;
         if(homeAllAxis || !com->hasNoXYZ())
             Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
         Printer::updateCurrentPosition();
+#if DISTORTION_CORRECTION
+        Printer::distortion.enable();
+#endif
     }
     break;
 #if FEATURE_Z_PROBE
-    case 29: // G29 3 points, build average
+    case 29: // G29 3 points, build average or distortion compensation
     {
+#if DISTORTION_CORRECTION
+        float oldFeedrate = Printer::feedrate;
+        GCode::executeFString(Com::tZProbeStartScript);
+        Printer::distortion_measure();
+        GCode::executeFString(Com::tZProbeEndScript);
+        Printer::feedrate = oldFeedrate;
+#else
         GCode::executeFString(Com::tZProbeStartScript);
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
@@ -661,6 +686,7 @@ void Commands::processGCode(GCode *com)
         printCurrentPosition(PSTR("G29 "));
         GCode::executeFString(Com::tZProbeEndScript);
         Printer::feedrate = oldFeedrate;
+#endif // DISTORTION_CORRECTION
     }
     break;
     case 30: // G30 single probe set Z0

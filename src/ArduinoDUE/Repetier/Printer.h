@@ -59,6 +59,30 @@ union floatLong
 #define towerBMinSteps Printer::yMinSteps
 #define towerCMinSteps Printer::zMinSteps
 
+#if DISTORTION_CORRECTION
+class Distortion
+{
+public:
+  Distortion();
+  void init(void);
+  void enable(void) { enabled=true; }
+  void disable(void) { enabled=false; }
+  void measure(void);
+  float correct(float x, float y) const;
+
+private:
+  bool isCorner(int i, int j) const;
+  inline float extrapolatePoint(int x1, int y1, int x2, int y2) const;
+  void extrapolateCorner(int x, int y, int dx, int dy);
+  void extrapolateCorners();
+
+// attributes
+  float step;
+  float matrix[DISTORTION_CORRECTION_POINTS][DISTORTION_CORRECTION_POINTS];
+  bool enabled;
+};
+#endif //DISTORTION_CORRECTION
+
 class Printer
 {
 public:
@@ -751,6 +775,10 @@ public:
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
+#endif
+#if DISTORTION_CORRECTION
+    static void distortion_measure(void);
+    static Distortion distortion; 
 #endif
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
