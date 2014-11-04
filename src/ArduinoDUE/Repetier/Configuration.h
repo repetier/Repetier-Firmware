@@ -1155,6 +1155,17 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
 
+/* If your printer is not exactly square but is more like a parallelogramm, you can
+use this to compensate the effect of printing squares like parallelogramms. Set the
+parameter to then tangens of the deviation from 90° when you print a square object.
+E.g. if you angle is 91° enter tan(1) = 0.017. If error doubles you have the wrong sign.
+Always hard to say since the other angle is 89° in this case!
+*/
+#define FEATURE_AXISCOMP 0
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
+
 /** \brief Experimental calibration utility for delta printers
  * Change 1 to 0 to disable
 */
