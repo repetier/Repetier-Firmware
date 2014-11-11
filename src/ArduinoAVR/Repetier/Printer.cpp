@@ -398,9 +398,6 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f)
         x += Printer::offsetX;
         y += Printer::offsetY;
     }
-#if DISTORTION_CORRECTION
-    z+=distortion.correct(x, y);
-#endif
     // There was conflicting use of IGNOR_COORDINATE
     destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
     destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
@@ -438,9 +435,6 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
     currentPosition[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
     currentPosition[Y_AXIS] = static_cast<float>(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
     currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS];
-#if DISTORTION_CORRECTION
-    currentPosition[Z_AXIS]-=distortion.correct(currentPosition[X_AXIS], currentPosition[Y_AXIS]);
-#endif
 #if FEATURE_AUTOLEVEL
     if(isAutolevelActive())
         transformFromPrinter(currentPosition[X_AXIS] - Printer::offsetX, currentPosition[Y_AXIS] - Printer::offsetY, currentPosition[Z_AXIS],
@@ -495,9 +489,6 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         y = lastCmdPos[Y_AXIS] + Printer::offsetY;
         z = lastCmdPos[Z_AXIS];
     }
-#if DISTORTION_CORRECTION
-    z+=distortion.correct(x, y);
-#endif
     destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
     destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
     destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
@@ -1485,6 +1476,9 @@ void Printer::distortion_measure(void)
 Distortion::Distortion() 
 {
   step=2*(DISTORTION_CORRECTION_R)/(DISTORTION_CORRECTION_POINTS-1.0f);
+  step_in_steps=floor(step*Printer::axisStepsPerMM[Z_AXIS]+0.5f);
+  correct_x_offset=floor((EEPROM::zProbeXOffset()+DISTORTION_CORRECTION_R)*Printer::axisStepsPerMM[X_AXIS]+0.5f);
+  correct_y_offset=floor((EEPROM::zProbeYOffset()+DISTORTION_CORRECTION_R)*Printer::axisStepsPerMM[Y_AXIS]+0.5f);
   init();
   enabled=false;
 }
@@ -1500,9 +1494,9 @@ bool Distortion::isCorner(int i, int j) const
       && (j==0 || j==DISTORTION_CORRECTION_POINTS-1);
 }
 
-inline float Distortion::extrapolatePoint(int x1, int y1, int x2, int y2) const
+inline int16_t Distortion::extrapolatePoint(int x1, int y1, int x2, int y2) const
 {
-  return 2*matrix[y2][x2]-matrix[y1][x1];
+  return (matrix[y2][x2]<<1)-matrix[y1][x1];
 }
 
 void Distortion::extrapolateCorner(int x, int y, int dx, int dy)
@@ -1531,7 +1525,11 @@ void Distortion::measure(void)
     float mty=j*step-DISTORTION_CORRECTION_R-EEPROM::zProbeYOffset();
     Printer::moveTo(mtx, mty, z, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     z=IGNORE_COORDINATE;
-    matrix[j][j&1?DISTORTION_CORRECTION_POINTS-1-i:i] = Printer::currentPosition[Z_AXIS]-Printer::runZProbe(false,false,Z_PROBE_REPETITIONS);
+    matrix[j][j&1?DISTORTION_CORRECTION_POINTS-1-i:i] = 
+      floor(
+            (Printer::currentPosition[Z_AXIS]-Printer::runZProbe(false,false,Z_PROBE_REPETITIONS))
+            *Printer::axisStepsPerMM[Z_AXIS]+0.5f
+      );
   }
 
   extrapolateCorners();
@@ -1540,11 +1538,16 @@ void Distortion::measure(void)
   Com::printInfoFLN(PSTR("Distortion correction matrix:"));
   for (j=DISTORTION_CORRECTION_POINTS-1; j>=0; j--) 
   {
-    Com::printArrayFLN(PSTR(""), matrix[j], DISTORTION_CORRECTION_POINTS);
+    for (i=0; i<DISTORTION_CORRECTION_POINTS; i++) 
+    {
+      Com::printF(PSTR("  "), matrix[j][i]*Printer::invAxisStepsPerMM[Z_AXIS]);
+    }
+    Com::println();
   }
   enable();
 }
 
+#if 0
 float Distortion::correct(float x, float y) const
 {
   if (!enabled) return 0.0f;
@@ -1576,6 +1579,29 @@ float Distortion::correct(float x, float y) const
 */  
   return correction_z;
 }
+#endif
 
+int32_t Distortion::correct(int32_t x, int32_t y) const // in steps
+{
+  if (!enabled) return 0;
+  x+=correct_x_offset;
+  y+=correct_y_offset;
+  int ix=x/step_in_steps;
+  int iy=y/step_in_steps;
+  if (ix < 0) ix=0;
+  if (iy < 0) iy=0;
+  if (ix > DISTORTION_CORRECTION_POINTS-2) ix=DISTORTION_CORRECTION_POINTS-2;
+  if (iy > DISTORTION_CORRECTION_POINTS-2) iy=DISTORTION_CORRECTION_POINTS-2;
+
+// position between cells of matrix, range=0 to step_in_steps - outside of the matrix the value will be outside this range and the value will be extrapolated
+  int fx=x-ix*step_in_steps;
+  int fy=y-iy*step_in_steps;
+
+  int zx1=(int)matrix[iy][ix]+((int)matrix[iy][ix+1]-(int)matrix[iy][ix])*fx/step_in_steps;
+  int zx2=(int)matrix[iy+1][ix]+((int)matrix[iy+1][ix+1]-(int)matrix[iy+1][ix])*fx/step_in_steps;
+  int correction_z=zx1+(zx2-zx1)*fy/step_in_steps;
+  
+  return correction_z;
+}
 
 #endif // DISTORTION_CORRECTION

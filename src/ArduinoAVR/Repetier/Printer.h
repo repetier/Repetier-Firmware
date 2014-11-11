@@ -69,16 +69,22 @@ public:
   void disable(void) { enabled=false; }
   void measure(void);
   float correct(float x, float y) const;
+  int32_t correct(int32_t x, int32_t y) const; // in steps
 
 private:
   bool isCorner(int i, int j) const;
-  inline float extrapolatePoint(int x1, int y1, int x2, int y2) const;
+  inline int extrapolatePoint(int x1, int y1, int x2, int y2) const;
   void extrapolateCorner(int x, int y, int dx, int dy);
   void extrapolateCorners();
 
 // attributes
   float step;
-  float matrix[DISTORTION_CORRECTION_POINTS][DISTORTION_CORRECTION_POINTS];
+  int step_in_steps;
+  int correct_x_offset;
+  int correct_y_offset;
+
+  int16_t matrix[DISTORTION_CORRECTION_POINTS][DISTORTION_CORRECTION_POINTS];
+//  float matrix[DISTORTION_CORRECTION_POINTS][DISTORTION_CORRECTION_POINTS];
   bool enabled;
 };
 #endif //DISTORTION_CORRECTION
