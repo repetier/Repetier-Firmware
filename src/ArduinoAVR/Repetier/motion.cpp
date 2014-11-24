@@ -143,10 +143,6 @@ void PrintLine::moveRelativeDistanceInStepsReal(long x,long y,long z,long e,floa
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 {
-#if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 	Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
     uint8_t newPath=insertWaitMovesIfNeeded(pathOptimize, 0);
@@ -471,6 +467,10 @@ void PrintLine::updateTrapezoids()
     millis_t minTime = 4500L * RMath::min(MOVE_CACHE_SIZE,10);
     while(timeleft < minTime && maxfirst != linesWritePos)
     {
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         timeleft += lines[maxfirst].timeInTicks;
         nextPlannerIndex(maxfirst);
     }
@@ -1561,6 +1561,10 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
 
     for (i = 1; i<segments; i++)
     {
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         // Increment (segments-1)
 
         if((count & 4) == 0)
@@ -1647,7 +1651,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
 #ifdef INCLUDE_DEBUG_NO_MOVE
         if(Printer::debugNoMoves())   // simulate a move, but do nothing in reality
         {
-            //HAL::forbidInterrupts();
             //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
             removeCurrentLineForbidInterrupt();
             if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
@@ -2015,7 +2018,6 @@ long PrintLine::bresenhamStep() // Version for delta printer
             Com::printFLN(PSTR("HS:"), (int) cur->halfStep);
         }
 #endif
-        //HAL::forbidInterrupts();
         //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
@@ -2046,9 +2048,6 @@ int lastblk=-1;
 long cur_errupd;
 long PrintLine::bresenhamStep() // version for cartesian printer
 {
-	long	Temp;
-
-
 #if CPU_ARCH==ARCH_ARM
     if(!PrintLine::nlFlag)
 #else
@@ -2116,11 +2115,8 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 
 					g_pausePrint = 1;
 
-#if EXTRUDER_CURRENT_PAUSE_DELAY
-					// remember the pause time only in case we shall lower the extruder current
 					g_uPauseTime	= HAL::timeInMilliseconds();
 					g_pauseBeepDone	= 0;
-#endif // EXTRUDER_CURRENT_PAUSE_DELAY
 				}
                 
                 nextPlannerIndex(linesPos);
@@ -2144,7 +2140,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
                 // the printing shall be paused and the printer head shall be moved away
                 if( linesCount )
                 {
-                    g_nContinueStepsX		 = 0;
+					g_nContinueStepsX		 = 0;
                     g_nContinueStepsY		 = 0;
                     g_nContinueStepsZ		 = 0;
 					g_nContinueStepsExtruder = 0;
@@ -2161,81 +2157,10 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 
                     g_pausePrint = 2;
 
-#if EXTRUDER_CURRENT_PAUSE_DELAY
-					// remember the pause time only in case we shall lower the extruder current
 					g_uPauseTime	= HAL::timeInMilliseconds();
 					g_pauseBeepDone	= 0;
-#endif // EXTRUDER_CURRENT_PAUSE_DELAY
 
-					if( g_nPauseStepsZ )
-                    {
-						Temp = g_nPauseStepsZ;
-
-#if FEATURE_Z_COMPENSATION
-						Temp += Printer::nonCompensatedPositionStepsZ;
-						Temp += Printer::currentCompensationZ;
-#endif // FEATURE_Z_COMPENSATION
-
-#if FEATURE_EXTENDED_BUTTONS
-						Temp += Printer::targetPositionStepsZ;
-#endif // FEATURE_EXTENDED_BUTTONS
-
-                        if( Temp <= (Z_MAX_LENGTH * ZAXIS_STEPS_PER_MM - ZAXIS_STEPS_PER_MM) )
-                        {
-                            Printer::targetPositionStepsZ += g_nPauseStepsZ;
-                            g_nContinueStepsZ			  =  -g_nPauseStepsZ;
-
-                            CalculateAllowedZStepsAfterEndStop();
-                        }
-                    }
-                    if( g_nPauseStepsX )
-                    {
-						Temp = g_nPauseStepsX;
-
-#if FEATURE_Z_COMPENSATION
-						Temp += Printer::nonCompensatedPositionStepsX;
-#endif // FEATURE_Z_COMPENSATION
-
-                        if( g_nPauseStepsX < 0 &&
-                            (Temp < (XAXIS_STEPS_PER_MM *5)) )
-                        {
-                            // do not allow to drive the heat bed into the left border
-                        }
-                        else if( g_nPauseStepsX > 0 &&
-                                (Temp > (X_MAX_LENGTH * XAXIS_STEPS_PER_MM - XAXIS_STEPS_PER_MM *5)) )
-                        {
-                            // do not allow to drive the heat bed into the right border
-                        }
-                        else
-                        {
-                            Printer::targetPositionStepsX += g_nPauseStepsX;
-                            g_nContinueStepsX			  =  -g_nPauseStepsX;
-                        }
-                    }
-                    if( g_nPauseStepsY )
-                    {
-						Temp = g_nPauseStepsY;
-
-#if FEATURE_Z_COMPENSATION
-						Temp += Printer::nonCompensatedPositionStepsY;
-#endif // FEATURE_Z_COMPENSATION
-
-                        if( g_nPauseStepsY < 0 &&
-                            (Temp < (YAXIS_STEPS_PER_MM *5)) )
-                        {
-                            // do not allow to drive the heat bed into the front border
-                        }
-                        else if( g_nPauseStepsY > 0 &&
-                                 (Temp > (Y_MAX_LENGTH * YAXIS_STEPS_PER_MM - YAXIS_STEPS_PER_MM *5)) )
-                        {
-                            // do not allow to drive the heat bed into the back border
-                        }
-                        else
-                        {
-                            Printer::targetPositionStepsY += g_nPauseStepsY;
-                            g_nContinueStepsY			  =  -g_nPauseStepsY;
-                        }
-                    }
+					determinePausePosition();
                 }
                 
                 nextPlannerIndex(linesPos);
@@ -2261,6 +2186,7 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 					Printer::currentCompensationZ = 0;
 					g_recalculatedCompensation	  = 0;
 				
+#if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 					Printer::targetPositionStepsX	= 
 					Printer::targetPositionStepsY	= 
 					Printer::targetPositionStepsZ	= 
@@ -2269,8 +2195,9 @@ long PrintLine::bresenhamStep() // version for cartesian printer
 					Printer::currentPositionStepsY	= 
 					Printer::currentPositionStepsZ	= 
 					Printer::currentPositionStepsE	= 0;
+#endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
-					CalculateAllowedZStepsAfterEndStop();
+					calculateAllowedZStepsAfterEndStop();
 				}
 			
 				nextPlannerIndex(linesPos);
@@ -2364,11 +2291,13 @@ long PrintLine::bresenhamStep() // version for cartesian printer
         if(cur->isZMove())
         {
             Printer::enableZStepper();
+			Printer::unsetAllSteppersDisabled();
         }
         if(cur->isEMove()) Extruder::enable();
         cur->fixStartAndEndSpeed();
-        HAL::allowInterrupts();
-        cur_errupd = (cur->isFullstepping() ? cur->delta[cur->primaryAxis] : cur->delta[cur->primaryAxis]<<1);;
+
+		HAL::allowInterrupts();
+        cur_errupd = (cur->isFullstepping() ? cur->delta[cur->primaryAxis] : cur->delta[cur->primaryAxis]<<1);
         if(!cur->areParameterUpToDate())  // should never happen, but with bad timings???
         {
             cur->updateStepsParameter();
@@ -2427,6 +2356,10 @@ long PrintLine::bresenhamStep() // version for cartesian printer
     {
         for(uint8_t loop=0; loop<max_loops; loop++)
         {
+#if FEATURE_WATCHDOG
+			HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
             ANALYZER_ON(ANALYZER_CH1);
 
 #if STEPPER_HIGH_DELAY+DOUBLE_STEP_DELAY > 0
@@ -2525,22 +2458,22 @@ long PrintLine::bresenhamStep() // version for cartesian printer
             Printer::endXYZSteps();
         } // for loop
 
-		if( !(cur->dir & 128) )
+		if( !cur->isEMove() )
 		{
 			g_nDirectionE = 0;
 		}
 
-		if( !(cur->dir & 16) )
+		if( !cur->isXMove() )
 		{
 			g_nDirectionX = 0;
 		}
 
-		if( !(cur->dir & 32) )
+		if( !cur->isYMove() )
 		{
 			g_nDirectionY = 0;
 		}
 
-		if( !(cur->dir & 64) )
+		if( !cur->isZMove() )
 		{
 			g_nDirectionZ = 0;
 		}

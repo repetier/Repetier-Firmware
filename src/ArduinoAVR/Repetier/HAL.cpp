@@ -579,7 +579,7 @@ SIGNAL (TIMER3_COMPA_vect)
         servoIndex = 0;
 }
 #else
-#error No servo support for your board, please diable FEATURE_SERVO
+#error No servo support for your board, please disable FEATURE_SERVO
 #endif
 #endif
 
@@ -648,6 +648,10 @@ long stepperWait = 0;
 */
 ISR(TIMER1_COMPA_vect)
 {
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
     if(insideTimer1) return;
     uint8_t doExit;
     __asm__ __volatile__ (
@@ -744,12 +748,6 @@ This timer is called 3906 timer per second. It is used to update pwm values for 
 ISR(PWM_TIMER_VECTOR)
 {
 #if FEATURE_Z_COMPENSATION
-	short			i;
-	short			nXLeft;
-	short			nXRight;
-	short			nYFront;
-	short			nYBack;
-	long			nTemp;
 	static char		nCounterZCompensation	= Z_COMPENSATION_COUNTER;
 #endif // FEATURE_Z_COMPENSATION
 
@@ -759,7 +757,7 @@ ISR(PWM_TIMER_VECTOR)
 	char			nDirectionX;
 	char			nDirectionY;
 	char			nDirectionZ;
-	unsigned long	uStartTime;
+	unsigned long	uIterations;
 #endif // FEATURE_EXTENDED_BUTTONS
   
     static uint8_t pwm_count = 0;
@@ -768,7 +766,12 @@ ISR(PWM_TIMER_VECTOR)
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
     PWM_OCR += 64;
 
-    if(pwm_count_heater == 0)
+
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+	if(pwm_count_heater == 0)
     {
 #if EXT0_HEATER_PIN>-1
         if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK))>0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
@@ -878,7 +881,12 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 
     HAL::allowInterrupts();
-    counterPeriodical++; // Appxoimate a 100ms timer
+
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+	counterPeriodical++; // Approximate a 100ms timer
     if(counterPeriodical>=(int)(F_CPU/40960))
     {
         counterPeriodical=0;
@@ -935,76 +943,6 @@ ISR(PWM_TIMER_VECTOR)
 
 		if( Printer::doZCompensation && !g_printingPaused )
 		{
-			// the z-compensation must be on and the printing must not be paused
-			if( Printer::nonCompensatedPositionStepsZ )								// we do not perform a compensation in case z is 0
-			{
-				// check whether we have to perform a compensation in z-direction
-				if( Printer::nonCompensatedPositionStepsZ < g_maxZCompensationSteps )
-				{
-					// we are doing the first rows at the moment - check which compensation is necessary
-					if( Printer::nonCompensatedPositionStepsX < g_minX ||
-						Printer::nonCompensatedPositionStepsX > g_maxX ||
-						Printer::nonCompensatedPositionStepsY < g_minY ||
-						Printer::nonCompensatedPositionStepsY > g_maxY )
-					{
-						// we went outside the last used compensation rectangle - we have to find the new compensation value
-						g_recalculatedCompensation ++;
-					
-						// find the rectangle first which covers the current position of the extruder
-						nXLeft = 1;
-						for( i=1; i<g_uHeatBedMaxX; i++ )
-						{
-							if( Printer::nonCompensatedPositionStepsX <= g_HeatBedCompensation[i][0] )
-							{
-								nXRight = i;
-								break;
-							}
-							nXLeft = i;
-						}
-					
-						nYFront = 1;
-						for( i=1; i<g_uHeatBedMaxY; i++ )
-						{
-							if( Printer::nonCompensatedPositionStepsY <= g_HeatBedCompensation[0][i] )
-							{
-								nYBack = i;
-								break;
-							}
-							nYFront = i;
-						}
-
-						// remember where we are
-						g_minX = g_HeatBedCompensation[nXLeft][0];
-						g_maxX = g_HeatBedCompensation[nXRight][0];
-						g_minY = g_HeatBedCompensation[0][nYFront];
-						g_maxY = g_HeatBedCompensation[0][nYBack];
-					
-						if( Printer::nonCompensatedPositionStepsZ <= g_noZCompensationSteps )
-						{
-							// the printer is very close to the surface - we shall print a layer of exactly the desired thickness
-							Printer::targetCompensationZ = g_HeatBedCompensation[nXLeft][nYFront] + g_manualCompensationSteps;
-						}
-						else
-						{
-							// the printer is already a bit away from the surface - do the actual compensation
-							// determine the current, non-compensated z position without the no-compensation range
-							nTemp  = Printer::nonCompensatedPositionStepsZ - g_noZCompensationSteps;
-							nTemp  = 128 - (128 * nTemp / g_diffZCompensationSteps);
-							nTemp *= (g_HeatBedCompensation[nXLeft][nYFront] - g_offsetHeatBedCompensation);
-							nTemp >>= 8;
-							nTemp += g_offsetHeatBedCompensation;
-						
-							Printer::targetCompensationZ = nTemp + g_manualCompensationSteps;
-						}
-					}
-				}
-				else
-				{	
-					// after the first layers, only the static offset to the surface must be compensated
-					Printer::targetCompensationZ = g_offsetHeatBedCompensation + g_manualCompensationSteps;
-				}
-			}
-
 			if( g_nDirectionZ == 0 && !g_nBlockZ )
 			{
 				// this interrupt shall move the z-axis only in case the "main" interrupt (bresenhamStep()) is not running at the moment
@@ -1043,7 +981,7 @@ ISR(PWM_TIMER_VECTOR)
 	}
 #endif // FEATURE_Z_COMPENSATION
 
-#if FEATURE_EXTENDED_BUTTONS
+#if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 	nCounterExtendedButtons --;
 	
 	if( !nCounterExtendedButtons )
@@ -1173,14 +1111,14 @@ ISR(PWM_TIMER_VECTOR)
 				}
 			}
 
-			uStartTime = HAL::timeInMilliseconds();
+			uIterations = EXTENDED_BUTTONS_COUNTER_NORMAL;
 			while( nDirectionX || nDirectionY || nDirectionZ )
 			{
 #if FEATURE_WATCHDOG
 				HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
-				HAL::delayMicroseconds( 250 );
+				HAL::delayMicroseconds( EXTENDED_BUTTONS_STEPPER_DELAY );
 
 				if( g_nBlockZ )
 				{
@@ -1192,7 +1130,7 @@ ISR(PWM_TIMER_VECTOR)
 				if( nDirectionY )	WRITE( Y_STEP_PIN, HIGH );
 				if( nDirectionZ )	WRITE( Z_STEP_PIN, HIGH );
 
-				HAL::delayMicroseconds( 250 );
+				HAL::delayMicroseconds( EXTENDED_BUTTONS_STEPPER_DELAY );
 
 				if( nDirectionX )
 				{
@@ -1225,7 +1163,8 @@ ISR(PWM_TIMER_VECTOR)
 					}
 				}
 
-				if( (HAL::timeInMilliseconds() - uStartTime) > EXTENDED_BUTTONS_BLOCK_INTERVAL )
+				uIterations --;
+				if( !uIterations )
 				{
 					// we shall not loop here too long - when we exit here, we will come back to here later and continue the remaining steps
 					break;
@@ -1267,7 +1206,7 @@ ISR(PWM_TIMER_VECTOR)
 		}
 		HAL::allowInterrupts();
 	}
-#endif // FEATURE_EXTENDED_BUTTONS
+#endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
 }
 #if defined(USE_ADVANCE)

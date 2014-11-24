@@ -462,7 +462,7 @@ public:
     }
     static inline void delayMilliseconds(unsigned int delayMs)
     {
-#if WATCHDOG_PIN>-1
+#if FEATURE_WATCHDOG
 		// external watchdog
 		unsigned int	doneMs = 0;
 		unsigned int	tempMs;
@@ -479,7 +479,7 @@ public:
 #else
 		// internal watchdog
         ::delay(delayMs);
-#endif // WATCHDOG_PIN>-1
+#endif // FEATURE_WATCHDOG
     }
     static inline void tone(uint8_t pin,int duration)
     {
@@ -557,11 +557,19 @@ public:
     }
     static inline void allowInterrupts()
     {
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         sei();
     }
     static inline void forbidInterrupts()
     {
         cli();
+
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
     }
     static inline unsigned long timeInMilliseconds()
     {
@@ -703,34 +711,34 @@ public:
 
     inline static void startWatchdog()
     {
-#if WATCHDOG_PIN>-1
+#if FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 		// external watchdog
 		SET_OUTPUT(WATCHDOG_PIN);
 		pingWatchdog();
 #else
 		// internal watchdog
-        wdt_enable(WDTO_1S);
-#endif // WATCHDOG_PIN>-1
+        //wdt_enable(WDTO_1S);
+#endif // FEATURE_WATCHDOG && WATCHDOG_PIN>-1
     };
     inline static void stopWatchdog()
     {
-#if WATCHDOG_PIN>-1
+#if FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 		// external watchdog
 		SET_INPUT(WATCHDOG_PIN);
 #else
 		// internal watchdog
-        wdt_disable();
-#endif // WATCHDOG_PIN>-1
+        //wdt_disable();
+#endif // FEATURE_WATCHDOG && WATCHDOG_PIN>-1
     }
     inline static void pingWatchdog()
     {
-#if WATCHDOG_PIN>-1
+#if FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 		// external watchdog
 		WRITE(WATCHDOG_PIN,READ(WATCHDOG_PIN) ? 0 : 1);
 #else
 		// internal watchdog
-        wdt_reset();
-#endif // WATCHDOG_PIN>-1
+        //wdt_reset();
+#endif // FEATURE_WATCHDOG && WATCHDOG_PIN>-1
     };
     inline static void testWatchdog()
     {
@@ -738,7 +746,7 @@ public:
 		startWatchdog();
 
 		// force the watchdog to fire
-		cli();
+		HAL::forbidInterrupts();
 		while( 1 )
 		{
 		}

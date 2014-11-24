@@ -1,3 +1,60 @@
+V 0.91.48 (2014-11-24)
+- Adding of M3105, which allows to specify the movement after pause in [mm].
+  - M3102 remains available and allows to specify the movement after pause in [steps].
+- After the heat bed scan the heating bed is moved down a little bit in order to avoid accidental collisions with the extruder during the next homing.
+- In case the hardware button "Pause" was pressed during the homing of the printer, the firmware could end up in a hang.
+- All heaters are turned off after the heat bed scan automatically.
+- In case the current movement after pause is bigger than the remaining distance in x/y/z direction, the printer moves until the min/max position.
+  - Before this version, no movement into the according direction was performed in such a case.
+- Cleanup of the delays for the external EEPROM.
+- The calculation of the z-compensation has been moved from the previously used interrupt routine to the main loop.
+- The homing-order at the beginning of the heat bed scan has been changed to the standard homing order.
+- The automatic object output now can be configured via the OUTPUT_OBJECT_SCRIPT script.
+  - M3104 has been removed because all of its functionality is replaced through the OUTPUT_OBJECT_SCRIPT script now.
+- Adding of FEATURE_ALLOW_UNKNOWN_POSITIONS.
+  - In case this #define is not 1, the "Position X/Y/Z" menu allows to move into the x/y/z direction only when the homing position is known.
+- In case the "Position X/Y/Z" menu is used in order to change the position manually, the displayed position does not change anymore when the printer has reached its minimal/maximal position.
+- There was a chance that the temperature management was disabled while the firmware waited for the continue/pause position. As a result, the real temperatures could go above or drop below the desired temperatures.
+- There was a chance that the x/y/z steppers were moved while the "Output Filament" or "Input Filament" operations were in progress.
+- Increasing of the access delay for the external EEPROM.
+  - At some printers the previous delay was too short and as a result the z-compensation values could not be read/written properly.
+- Adding of the "Load Filament" menu entry to the "Quick Settings" menu.
+  - This operation can be used in order to load new filament to the extruder.
+  - MOUNT_FILAMENT_SCRIPT can be used in order to define the exact command sequence for the load of the filament.
+- Adding of the "Unload Filament" menu entry to the "Quick Settings" menu.
+  - This operation can be used in order to output the filament from the extruder.
+  - UNMOUNT_FILAMENT_SCRIPT can be used in order to define the exact command sequence for the unload of the filament.
+- Fine tunning of various settings within Configuration.h:
+  - new PID values for the extruder
+  - new motor currents
+  - correction of a DRV8711 register for better support of higher feedrates
+  - ...
+- Adding of RF1000_MICRO_STEPS which allows to switch the to-be-used micro steps between 4, 8, 16, 32 and 64.
+  - The default value has been set to 32. This is different to the 8 micro steps which were used so far.
+  - Most position variables have been changed from short to long in order to support also the higher number of steps.
+- The format of the compensation matrix has been changed so that the same compensation matrix can be used for different micro step settings.
+  - There is no need anymore to perform a rescan after the to-be-used micro steps have been changed.
+- In case the z-stepper was enabled via the hardware buttons it might not have been disabled ever.
+- Redefinition of the hardware buttons for the z-direction:
+  - In case printing is in progress, these hardware buttons can be used in order to fine-tune the z-position. There is no automatic increasing of the z-speed in case of this mode.
+  - In case there is no printing in progress, these hardware buttons behave like the "Position Z" menu.
+  - FEATURE_ENABLE_MANUAL_Z_SAFETY has been enabled in order to avoid an accidental overrun of the z-min endstop.
+- There was a chance that not all steppers were disabled properly during the restart/reset of the firmware.
+- The case lights were not turned on/off when they were switched via the menu.
+  - Removing of ENABLE_OUT1 (this pin is used for the case lights).
+- Adding of support for the case fan.
+  - The case fan is enabled automatically when the extruder heater is on.
+  - Removing of ENABLE_HZ2 (this pin is used for the case fan now).
+  - CASE_FAN_ON_TEMPERATURE can be used in order to configure the temperature at which the case fan shall be turned on.
+  - CASE_FAN_OFF_DELAY can be used in order to configure the delay after which the case fan shall be turned off.
+- Adding of M3120, which allows to turn the case fan on.
+- Adding of M3121, which allows to turn the case fan off.
+  - In case the S parameter is passed it is used in order to configure the new delay after which the case fan shall be turned off.
+- When the SD card is unmounted, the menu item selector is set correctly in front of the "Mount Card" menu item.
+- Avoiding of a value overflow which could cause a printing error around a z-height of 51 mm.
+- Improvements for the EEPROM_MODE.
+- Review of menu texts.
+
 V 0.91.34 (2014-06-06)
 - Enabling of the EEPROM_MODE.
 - Review of menu texts.

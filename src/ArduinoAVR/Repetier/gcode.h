@@ -133,6 +133,7 @@ public:
     static void readFromSerial();
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
+    static void executeString(char *cmd);
     static uint8_t computeBinarySize(char *ptr);
 	static void resetBuffer();
 

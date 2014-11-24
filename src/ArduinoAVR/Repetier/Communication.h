@@ -57,6 +57,7 @@ FSTRINGVAR(tGot)
 FSTRINGVAR(tSkip)
 FSTRINGVAR(tBLK)
 FSTRINGVAR(tStart)
+FSTRINGVAR(tStartWatchdog)
 FSTRINGVAR(tPowerUp)
 FSTRINGVAR(tExternalReset)
 FSTRINGVAR(tBrownOut)
@@ -350,7 +351,9 @@ FSTRINGVAR(tCreationFailed)
 FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
 
-
+FSTRINGVAR(tOutputObject)
+FSTRINGVAR(tUnmountFilament)
+FSTRINGVAR(tMountFilament)
 
 static void printNumber(uint32_t n);
 static void printWarningF(FSTRINGPARAM(text));

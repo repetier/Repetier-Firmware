@@ -140,5 +140,9 @@ void setup()
 
 void loop()
 {
+#if FEATURE_WATCHDOG
+	HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
     Commands::commandLoop();
 }

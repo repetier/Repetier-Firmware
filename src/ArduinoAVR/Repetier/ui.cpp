@@ -59,6 +59,10 @@ void beep(uint8_t duration,uint8_t count)
 #endif
     for(uint8_t i=0; i<count; i++)
     {
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
 #if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
         WRITE(BEEPER_PIN,LOW);
@@ -740,8 +744,12 @@ void slideIn(uint8_t row,FSTRINGPARAM(text))
     for(i=UI_COLS-1; i>=0; i--)
     {
         uid.printRow(row,empty,printCols,i);
-        HAL::pingWatchdog();
-        HAL::delayMilliseconds(10);
+
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		HAL::delayMilliseconds(10);
     }
 }
 #endif // UI_ANIMATION
@@ -993,7 +1001,11 @@ void UIDisplay::parse(char *txt,bool ram)
     float fvalue=0;
     while(col<MAX_COLS)
     {
-        char c=(ram ? *(txt++) : pgm_read_byte(txt++));
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		char c=(ram ? *(txt++) : pgm_read_byte(txt++));
         if(c==0) break; // finished
         if(c!='%')
         {
@@ -1435,7 +1447,11 @@ void UIDisplay::updateSDFileCount()
     nFilesOnCard = 0;
     while ((p = root->getLongFilename(p, NULL, 0, NULL)))
     {
-        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
             continue;
         if (folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
             continue;
@@ -1454,7 +1470,10 @@ void getSDFilenameAt(byte filePos,char *filename)
     root->rewind();
     while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
-        HAL::pingWatchdog();
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
         if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
         if (filePos--)
@@ -1512,8 +1531,11 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
 
     while (r+offset<nFilesOnCard+1 && r<UI_ROWS && (p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
-        HAL::pingWatchdog();
-        // done if past last used entry
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		// done if past last used entry
         // skip deleted entry and entries for . and  ..
         // only list subdirectories and files
         if ((DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
@@ -1626,7 +1648,8 @@ void UIDisplay::refreshPage()
                 offset++;
                 continue;
             }
-            unsigned char entType = pgm_read_byte(&(ent->menuType));
+
+			unsigned char entType = pgm_read_byte(&(ent->menuType));
             unsigned int entAction = pgm_read_word(&(ent->action));
 /*            col=0;
             if(entType>=2 && entType<=4)
@@ -1706,6 +1729,7 @@ void UIDisplay::refreshPage()
             r++;
         }
     }
+
 #if SDSUPPORT
     if(mtype==1)
     {
@@ -1967,7 +1991,10 @@ void UIDisplay::refreshPage()
 #if DISPLAY_TYPE != 5
                 HAL::delayMilliseconds(transition<3 ? 200 : 70);
 #endif
-                HAL::pingWatchdog();
+
+#if FEATURE_WATCHDOG
+				HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
             }
 #endif
 #if UI_DISPLAY_TYPE == 5
@@ -2138,7 +2165,15 @@ void UIDisplay::adjustMenuPos()
     {
         if(((UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]])))->showEntry())
             break;
+
         menuPos[menuLevel]--;
+    }
+    while(1)
+    {
+        if(((UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]])))->showEntry())
+            break;
+
+        menuPos[menuLevel]++;
     }
     uint8_t skipped = 0;
     bool modified;
@@ -2219,13 +2254,22 @@ void UIDisplay::nextPreviousAction(int8_t next)
         }
         else if(menuPos[menuLevel]>0)
         {
+			uint8_t	temp = menuPos[menuLevel];
             while(menuPos[menuLevel]>0)
             {
                 menuPos[menuLevel]--;
-                testEnt = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+
+				testEnt = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
                 if(testEnt->showEntry())
                     break;
             }
+
+			testEnt = (UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
+            if(!testEnt->showEntry())
+			{
+				// this new chosen menu item shall not be displayed - revert the so-far used menu item
+				menuPos[menuLevel] = temp;
+			}
         }
         adjustMenuPos();
 		return;
@@ -2238,7 +2282,12 @@ void UIDisplay::nextPreviousAction(int8_t next)
             if(menuPos[menuLevel]<nFilesOnCard) menuPos[menuLevel]++;
         }
         else if(menuPos[menuLevel]>0)
+		{
             menuPos[menuLevel]--;
+
+			Com::printF( PSTR( "SD listing: " ), menuPos[menuLevel] );
+			Com::printFLN( PSTR( " / " ), menuLevel );
+		}
         if(menuTop[menuLevel]>menuPos[menuLevel])
             menuTop[menuLevel]=menuPos[menuLevel];
         else if(menuTop[menuLevel]+UI_ROWS-1<menuPos[menuLevel])
@@ -2261,50 +2310,152 @@ void UIDisplay::nextPreviousAction(int8_t next)
         Commands::setFanSpeed(Printer::getFanSpeed()+increment*3,false);
         break;
     case UI_ACTION_XPOSITION:
+	{
+		long	steps;
+
 #if UI_SPEEDDEPENDENT_POSITIONING
-    {
         float d = 0.01*(float)increment*lastNextAccumul;
         if(fabs(d)*2000>Printer::maxFeedrate[X_AXIS]*dtReal)
             d *= Printer::maxFeedrate[X_AXIS]*dtReal/(2000*fabs(d));
-        long steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
+        steps = (long)(d*Printer::axisStepsPerMM[X_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],true);
-    }
 #else
-    PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
+		steps = increment;
 #endif
-    Commands::printCurrentPosition();
-    break;
+
+#if	!FEATURE_ALLOW_UNKNOWN_POSITIONS
+		if(!Printer::isHomed())
+		{
+			// we do not allow unknown positions and the printer is not homed, thus we do not move
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_XPOSITION: moving x aborted (not homed)" ) );
+			}
+			return;
+		}
+#endif // !FEATURE_ALLOW_UNKNOWN_POSITIONS
+
+		if(steps<0 && Printer::isXMinEndstopHit())
+		{
+			// we shall move to the left but the x-min-endstop is hit already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_XPOSITION: moving x aborted (min reached)" ) );
+			}
+			return;
+		}
+		if(steps>0 && Printer::lastCmdPos[X_AXIS] >= X_MAX_LENGTH)
+		{
+			// we shall move to the right but the end of the x-axis has been reached already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_XPOSITION: moving x aborted (max reached)" ) );
+			}
+			return;
+		}
+
+		PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],true);
+		Commands::printCurrentPosition();
+	    break;
+	}
     case UI_ACTION_YPOSITION:
+	{
+		long	steps;
+
 #if UI_SPEEDDEPENDENT_POSITIONING
-    {
         float d = 0.01*(float)increment*lastNextAccumul;
         if(fabs(d)*2000>Printer::maxFeedrate[Y_AXIS]*dtReal)
             d *= Printer::maxFeedrate[Y_AXIS]*dtReal/(2000*fabs(d));
-        long steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
+        steps = (long)(d*Printer::axisStepsPerMM[Y_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],true);
-    }
 #else
-    PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
+		steps = increment;
 #endif
-    Commands::printCurrentPosition();
-    break;
+
+#if	!FEATURE_ALLOW_UNKNOWN_POSITIONS
+		if(!Printer::isHomed())
+		{
+			// we do not allow unknown positions and the printer is not homed, thus we do not move
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_YPOSITION: moving y aborted (not homed)" ) );
+			}
+			return;
+		}
+#endif // !FEATURE_ALLOW_UNKNOWN_POSITIONS
+
+		if(steps<0 && Printer::isYMinEndstopHit())
+		{
+			// we shall move to the back but the y-min-endstop is hit already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_YPOSITION: moving y aborted (min reached)" ) );
+			}
+			return;
+		}
+		if(steps>0 && Printer::lastCmdPos[Y_AXIS] >= Y_MAX_LENGTH)
+		{
+			// we shall move to the front but the end of the y-axis has been reached already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_YPOSITION: moving y aborted (max reached)" ) );
+			}
+			return;
+		}
+
+		PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],true);
+		Commands::printCurrentPosition();
+		break;
+	}
     case UI_ACTION_ZPOSITION:
+	{
+		long	steps;
+
 #if UI_SPEEDDEPENDENT_POSITIONING
-    {
         float d = 0.01*(float)increment*lastNextAccumul;
         if(fabs(d)*2000>Printer::maxFeedrate[Z_AXIS]*dtReal)
             d *= Printer::maxFeedrate[Z_AXIS]*dtReal/(2000*fabs(d));
-        long steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
+        steps = (long)(d*Printer::axisStepsPerMM[Z_AXIS]);
         steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-        PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
-    }
 #else
-    PrintLine::moveRelativeDistanceInStepsReal(0,0,increment,0,Printer::homingFeedrate[Z_AXIS],true);
+		steps = increment;
 #endif
-    Commands::printCurrentPosition();
-    break;
+
+#if	!FEATURE_ALLOW_UNKNOWN_POSITIONS
+		if(!Printer::isHomed())
+		{
+			// we do not allow unknown positions and the printer is not homed, thus we do not move
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_ZPOSITION: moving z aborted (not homed)" ) );
+			}
+			return;
+		}
+#endif // !FEATURE_ALLOW_UNKNOWN_POSITIONS
+
+		if(steps<0 && Printer::isZMinEndstopHit())
+		{
+			// we shall move upwards but the z-min-endstop is hit already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_ZPOSITION: moving z aborted (min reached)" ) );
+			}
+			return;
+		}
+		if(steps>0 && Printer::lastCmdPos[Z_AXIS] >= Z_MAX_LENGTH)
+		{
+			// we shall move downwards but the end of the z-axis has been reached already, so we do nothing
+			if( Printer::debugErrors() )
+			{
+				Com::printFLN( PSTR( "UI_ACTION_ZPOSITION: moving z aborted (max reached)" ) );
+			}
+			return;
+		}
+
+		PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
+		Commands::printCurrentPosition();
+		break;
+	}
     case UI_ACTION_XPOSITION_FAST:
         PrintLine::moveRelativeDistanceInStepsReal(Printer::axisStepsPerMM[X_AXIS]*increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
         Commands::printCurrentPosition();
@@ -2699,6 +2850,7 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_LIGHTS_ONOFF:
 			if( Printer::enableLights )	Printer::enableLights = 0;
             else						Printer::enableLights = 1;
+			WRITE(CASE_LIGHTS_PIN, Printer::enableLights);
             break;
 #endif
         case UI_ACTION_PREHEAT_PLA:
@@ -2761,6 +2913,32 @@ void UIDisplay::executeAction(int action)
         case UI_ACTION_DISABLE_STEPPER:
             Printer::kill(true);
             break;
+		case UI_ACTION_UNMOUNT_FILAMENT:
+			if( Extruder::current->tempControl.targetTemperatureC < UI_SET_MIN_EXTRUDER_TEMP )
+			{
+				// we do not allow to move the extruder in case it is not heated up enough
+				if( Printer::debugErrors() )
+				{
+					Com::printFLN( PSTR( "Unload Filament: extruder output: aborted" ) );
+				}
+				break;
+			}
+
+			GCode::executeFString(Com::tUnmountFilament);
+			break;
+		case UI_ACTION_MOUNT_FILAMENT:
+			if( Extruder::current->tempControl.targetTemperatureC < UI_SET_MIN_EXTRUDER_TEMP )
+			{
+				// we do not allow to move the extruder in case it is not heated up enough
+				if( Printer::debugErrors() )
+				{
+					Com::printFLN( PSTR( "Load Filament: aborted" ) );
+				}
+				break;
+			}
+
+			GCode::executeFString(Com::tMountFilament);
+			break;
         case UI_ACTION_RESET_EXTRUDER:
             Printer::currentPositionSteps[E_AXIS] = 0;
             break;

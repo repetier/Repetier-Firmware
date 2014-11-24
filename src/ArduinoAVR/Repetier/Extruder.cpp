@@ -66,12 +66,13 @@ Is called every 100ms.
 static uint8_t extruderTempErrors = 0;
 void Extruder::manageTemperatures()
 {
-#if FEATURE_WATCHDOG
-    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
     uint8_t errorDetected = 0;
     for(uint8_t controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
     {
+#if FEATURE_WATCHDOG
+	    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
         if(controller == autotuneIndex) continue;
         TemperatureController *act = tempController[controller];
         // Get Temperature
@@ -222,6 +223,7 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
+
         float t = maxTemp-i*delta;
         float r = exp(beta/(t+272.65))*k;
         float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
@@ -410,6 +412,31 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     if(temperatureInCelsius>=EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
+
+#if CASE_FAN_PIN >= 0 && !defined CASE_FAN_ALWAYS_ON
+	if( temperatureInCelsius >= CASE_FAN_ON_TEMPERATURE )
+	{
+		// enable the case fan in case the extruder is turned on
+		Printer::prepareFanOff = 0;
+		WRITE(CASE_FAN_PIN, 1);
+	}
+	else
+	{
+		// disable the case fan in case the extruder is turned off
+		if( Printer::fanOffDelay )
+		{
+			// we are going to disable the case fan after the delay
+			Printer::prepareFanOff = HAL::timeInMilliseconds();
+		}
+		else
+		{
+			// we are going to disable the case fan now
+			Printer::prepareFanOff = 0;
+			WRITE(CASE_FAN_PIN, 0);
+		}
+	}
+#endif // CASE_FAN_PIN >= 0
+
 #if FEATURE_DITTO_PRINTING
     if(Extruder::dittoMode && extr == 0)
     {
@@ -465,6 +492,8 @@ void Extruder::disableCurrentExtruderMotor()
 #if STEPPER_ON_DELAY
 	Extruder::current->enabled = 0;
 #endif // STEPPER_ON_DELAY
+
+	cleanupEPositions();
 }
 #define NUMTEMPS_1 28
 // Epcos B57560G0107F000
@@ -781,6 +810,10 @@ void TemperatureController::setTargetTemperature(float target)
         short newraw,newtemp;
         while(i<num)
         {
+#if FEATURE_WATCHDOG
+		    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
             newraw = pgm_read_word(&temptable[i++]);
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp < temp)
@@ -808,6 +841,10 @@ void TemperatureController::setTargetTemperature(float target)
         short newraw,newtemp;
         while(i<num)
         {
+#if FEATURE_WATCHDOG
+		    HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
             newraw = pgm_read_word(&temptable[i++]);
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp > temp)

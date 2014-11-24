@@ -1347,6 +1347,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN            25	// PINA.3, 75, OUT1
 #define FAN_BOARD_PIN			27  // OUT2
 #define PS_ON_PIN				-1
+#define KILL_PIN				-1
+#define WATCHDOG_PIN			84	// PINJ.7
 
 #define HEATER_0_PIN			10	// PINB.4, 23, HZ1
 #define HEATER_1_PIN			 9	// PINH.6, 18, HZ2
@@ -1431,7 +1433,7 @@ STEPPER_CURRENT_CONTROL
 #define WATCHDOG_PIN		    37	// PINC.0
 
 #define HEATER_0_PIN		    10	// PINB.4, 23, HZ1
-#define HEATER_1_PIN		     9	// PINH.6, 18, HZ2
+#define HEATER_1_PIN		    -1
 #define HEATER_2_PIN		     8	// PINH.5, 17, HZ3
 
 // analog pin mappings
@@ -1477,10 +1479,6 @@ STEPPER_CURRENT_CONTROL
 #define ENABLE_KEY_4		    83	// PINJ.6, 69, TAST_E4
 #define ENABLE_KEY_5		    85	// PINH.7, 27, TAST_E5
 #define ENABLE_KEY_6		    86	// PINH.2, 14, TAST_E6
-
-// other pin mappings
-#define RF1000_HZ3_PIN		     8	// PINH.5, 17, HZ3
-//#define	RF1000_OUT1_PIN		    25	// PINA.3, 75, OUT1
 
 #endif // MOTHERBOARD == 13
 

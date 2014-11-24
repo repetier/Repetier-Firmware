@@ -662,8 +662,11 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
 
     while ((p = parent->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
-        HAL::pingWatchdog();
-        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
         if (strcmp(tempLongFilename, "..") == 0) continue;
         if( DIR_IS_SUBDIR(p))
         {
@@ -1140,8 +1143,11 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
 
   while ((p = dirFile->getLongFilename(p, tempLongFilename, cVFATNeeded, &wIndexPos)))
     {
-        HAL::pingWatchdog();
-        index = (0XF & ((dirFile->curPosition_-31) >> 5));
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		index = (0XF & ((dirFile->curPosition_-31) >> 5));
         if (RFstricmp(tempLongFilename, (char *)dname) == 0)
           {
 #ifdef GLENN_DEBUG
@@ -1970,7 +1976,10 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
 
     while (1)
       {
-       HAL::pingWatchdog();
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
 #ifdef GLENN_DEBUG
       Commands::checkFreeMemory();
       Commands::writeLowestFreeRAM();
@@ -2062,9 +2071,13 @@ bool SdBaseFile::findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, 
 
   rewind();
 
-  while (1) {
-        HAL::pingWatchdog();
-    dir = readDirCache();
+  while (1)
+  {
+#if FEATURE_WATCHDOG
+		HAL::pingWatchdog();
+#endif // FEATURE_WATCHDOG
+
+		dir = readDirCache();
     if (!dir) return false;
     // last entry if DIR_NAME_FREE
     if (dir->name[0] == DIR_NAME_FREE) return 0;
@@ -3358,6 +3371,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_CMD0);
       goto fail;
     }
+
 #if FEATURE_WATCHDOG
 	HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -3383,6 +3397,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_CMD8);
       goto fail;
     }
+
 #if FEATURE_WATCHDOG
 	HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -3396,6 +3411,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       error(SD_CARD_ERROR_ACMD41);
       goto fail;
     }
+
 #if FEATURE_WATCHDOG
 	HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -3468,6 +3484,7 @@ bool Sd2Card::readData(uint8_t* dst, size_t count) {
       error(SD_CARD_ERROR_READ_TIMEOUT);
       goto fail;
     }
+
 #if FEATURE_WATCHDOG
 	HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -3584,8 +3601,10 @@ bool Sd2Card::setSckRate(uint8_t sckRateID) {
 // wait for card to go not busy
 bool Sd2Card::waitNotBusy(uint16_t timeoutMillis) {
   uint16_t t0 = HAL::timeInMilliseconds();
-  while (spiRec() != 0XFF) {
+  while (spiRec() != 0XFF)
+  {
     if (((uint16_t)HAL::timeInMilliseconds() - t0) >= timeoutMillis) goto fail;
+
 #if FEATURE_WATCHDOG
 	HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG

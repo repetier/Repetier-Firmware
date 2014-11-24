@@ -167,24 +167,24 @@ public:
 #endif
 
 #if FEATURE_Z_COMPENSATION
-    static short nonCompensatedPositionStepsX;
-    static short nonCompensatedPositionStepsY;
-    static short nonCompensatedPositionStepsZ;
-    static short targetCompensationZ;
-    static short currentCompensationZ;
+    static long nonCompensatedPositionStepsX;
+    static long nonCompensatedPositionStepsY;
+    static long	nonCompensatedPositionStepsZ;
+    static long targetCompensationZ;
+    static long currentCompensationZ;
     static char	doZCompensation;
 #endif // FEATURE_Z_COMPENSATION
 
-#if FEATURE_EXTENDED_BUTTONS
-    static short targetPositionStepsX;
-    static short targetPositionStepsY;
-    static short targetPositionStepsZ;
-    static short targetPositionStepsE;
-    static short currentPositionStepsX;
-    static short currentPositionStepsY;
-    static short currentPositionStepsZ;
-    static short currentPositionStepsE;
-#endif // FEATURE_EXTENDED_BUTTONS
+#if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
+    static long targetPositionStepsX;
+    static long targetPositionStepsY;
+    static long targetPositionStepsZ;
+    static long targetPositionStepsE;
+    static long currentPositionStepsX;
+    static long currentPositionStepsY;
+    static long currentPositionStepsZ;
+    static long currentPositionStepsE;
+#endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
 #if STEPPER_ON_DELAY
 	static char	enabledX;
@@ -197,11 +197,16 @@ public:
 #endif // FEATURE_BEEPER
 
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
-	static char	enableLights;
+	static char				enableLights;
 #endif // CASE_LIGHTS_PIN >= 0
 
-	static short allowedZStepsAfterEndstop;
-    static short currentZStepsAfterEndstop;
+#if defined(CASE_FAN_PIN) && CASE_FAN_PIN >= 0
+	static unsigned long	prepareFanOff;
+	static unsigned long	fanOffDelay;
+#endif // CASE_FAN_PIN >= 0
+
+	static long allowedZStepsAfterEndstop;
+    static long currentZStepsAfterEndstop;
 
 
 	static inline void setMenuMode(uint8_t mode,bool on)
@@ -255,6 +260,7 @@ public:
 
 		// when the stepper is disabled we loose our home position because somebody else can move our mechanical parts
 		setHomed(false);
+		cleanupXPositions();
 	}
     /** \brief Disable stepper motor for y direction. */
     static inline void disableYStepper()
@@ -272,6 +278,7 @@ public:
 
 		// when the stepper is disabled we loose our home position because somebody else can move our mechanical parts
 		setHomed(false);
+		cleanupYPositions();
 	}
     /** \brief Disable stepper motor for z direction. */
     static inline void disableZStepper()
@@ -289,6 +296,7 @@ public:
 
 		// when the stepper is disabled we loose our home position because somebody else can move our mechanical parts
 		setHomed(false);
+		cleanupZPositions();
 	}
     /** \brief Enable stepper motor for x direction. */
     static inline void  enableXStepper()

@@ -60,7 +60,8 @@ FSTRINGVALUE(Com::tExpectedLine,"Error:expected line ")
 FSTRINGVALUE(Com::tGot," got ")
 FSTRINGVALUE(Com::tSkip,"skip ")
 FSTRINGVALUE(Com::tBLK,"BLK ")
-FSTRINGVALUE(Com::tStart,"start")
+FSTRINGVALUE(Com::tStart,"Start")
+FSTRINGVALUE(Com::tStartWatchdog,"Start Watchdog")
 FSTRINGVALUE(Com::tPowerUp,"PowerUp")
 FSTRINGVALUE(Com::tExternalReset,"External Reset")
 FSTRINGVALUE(Com::tBrownOut,"Brown out Reset")
@@ -362,6 +363,10 @@ FSTRINGVALUE(Com::tDirectoryCreated,"Directory created")
 FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
+
+FSTRINGVALUE(Com::tOutputObject,OUTPUT_OBJECT_SCRIPT)
+FSTRINGVALUE(Com::tUnmountFilament,UNMOUNT_FILAMENT_SCRIPT)
+FSTRINGVALUE(Com::tMountFilament,MOUNT_FILAMENT_SCRIPT)
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
