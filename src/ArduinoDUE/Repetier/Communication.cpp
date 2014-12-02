@@ -373,6 +373,10 @@ FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")
+#if DISTORTION_CORRECTION
+FSTRINGVALUE(Com::tZCorrectionEnabled,"Z correction enabled")
+FSTRINGVALUE(Com::tZCorrectionDisabled,"Z correction disabled")
+#endif
 
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);

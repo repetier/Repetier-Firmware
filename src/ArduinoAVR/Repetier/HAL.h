@@ -136,6 +136,7 @@ typedef uint16_t speed_t;
 typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
 typedef uint8_t flag8_t;
+typedef int8_t fast8_t;
 
 #define FAST_INTEGER_SQRT
 

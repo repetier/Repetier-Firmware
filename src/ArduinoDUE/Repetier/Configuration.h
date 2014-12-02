@@ -1155,6 +1155,41 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
 
+/* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
+ * assumes that the floor is plain (i.e. glass plate)
+ *     and that it is perpendicular to the towers
+ *     and that the (0,0) is in center
+ * requires z-probe
+ * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * and compensate the distortion
+ * more points means better compensation, but consumes more memory and takes more time
+ * DISTORTION_CORRECTION_R is the distance of last row or collumn from center
+ */
+
+#define DISTORTION_CORRECTION         0
+#define DISTORTION_CORRECTION_POINTS  5
+#define DISTORTION_CORRECTION_R       80
+/** Uses eeprom instead of ram. Allows bigger matrix (up to 22x22) without any ram cost.
+  Especially on arm based systems with cached eeprom it is good, on AVR it has a small
+  performance penalty.
+*/
+#define DISTORTION_PERMANENT          1
+/** Correction computation is not a cheap operation and changes are only small. So it
+is not necessary to update it for every subline computed. For example lets take DELTA_SEGMENTS_PER_SECOND_PRINT = 150
+and fastest print speed 100 mm/s. So we have a maximum segment length of 100/150 = 0.66 mm.
+Now lats say our point field is 200 x 200 mm with 9 x 9 points. So between 2 points we have
+200 / (9-1) = 25 mm. So we need at least 25 / 0.66 = 37 lines to move to the next measuring
+point. So updting correction every 15 calls gives us at least 2 updates between the
+measured points.
+NOTE: Explicit z changes will always trigger an update!
+*/
+#define DISTORTION_UPDATE_FREQUENCY   15
+/** z distortion degrades to 0 from this height on. You should start after the first layer to get
+best bonding with surface. */
+#define DISTORTION_START_DEGRADE 0.5
+/** z distortion correction gets down to 0 at this height. */
+#define DISTORTION_END_HEIGHT 1.5
+
 /* If your printer is not exactly square but is more like a parallelogramm, you can
 use this to compensate the effect of printing squares like parallelogramms. Set the
 parameter to then tangens of the deviation from 90° when you print a square object.
@@ -1190,6 +1225,11 @@ Always hard to say since the other angle is 89° in this case!
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_EXTENDED_DIR 1
+/** The gcodes in this line get executed, when you stop a sd print befor it was ended.
+Separate commands by \n */
+#define SD_RUN_ON_STOP ""
+/** Disable motors and heaters when print was stopped. */
+#define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT 1
 

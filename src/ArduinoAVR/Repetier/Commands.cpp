@@ -615,23 +615,28 @@ void Commands::processGCode(GCode *com)
     }
     break;
 #if FEATURE_Z_PROBE
-    case 29: // G29 3 points, build average
+    case 29: // G29 3 points, build average or distortion compensation
     {
+#if DISTORTION_CORRECTION
+        float oldFeedrate = Printer::feedrate;
+        Printer::measureDistortion();
+        Printer::feedrate = oldFeedrate;
+#else
         GCode::executeFString(Com::tZProbeStartScript);
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
-        float sum = 0,last,oldFeedrate = Printer::feedrate;
+        float sum = 0, last,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(sum<0) break;
+        if(sum < 0) break;
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
-        if(last<0) break;
+        if(last < 0) break;
         sum+= last;
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
-        if(last<0) break;
-        sum+= last;
+        if(last < 0) break;
+        sum += last;
         sum *= 0.33333333333333;
         Com::printFLN(Com::tZProbeAverage,sum);
         if(com->hasS() && com->S)
@@ -659,17 +664,20 @@ void Commands::processGCode(GCode *com)
             EEPROM::storeDataIntoEEPROM();
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G29 "));
+        GCode::executeFString(Com::tZProbeEndScript);
+        Printer::feedrate = oldFeedrate;
+#endif // DISTORTION_CORRECTION
     }
     break;
     case 30: // G30 single probe set Z0
     {
         uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-        bool oldAutolevel = Printer::isAutolevelActive();
-        Printer::setAutolevelActive(false);
+        //bool oldAutolevel = Printer::isAutolevelActive();
+        //Printer::setAutolevelActive(false);
         Printer::runZProbe(p & 1,p & 2);
-        Printer::setAutolevelActive(oldAutolevel);
+        //Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
-        printCurrentPosition(PSTR("G30 "));
+        //printCurrentPosition(PSTR("G30 "));
     }
     break;
     case 31:  // G31 display hall sensor output
@@ -743,7 +751,7 @@ void Commands::processGCode(GCode *com)
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G32 "));
 #if DRIVE_SYSTEM==DELTA
-        Printer::homeAxis(true,true,true);
+        Printer::homeAxis(true, true, true);
 #endif
         Printer::feedrate = oldFeedrate;
     }
@@ -1546,7 +1554,7 @@ void Commands::processMCode(GCode *com)
         Printer::setAutolevelActive(false);
         if(com->hasS() && com->S)
         {
-            if(com->S==3)
+            if(com->S == 3)
                 Printer::resetTransformationMatrix(false);
             EEPROM::storeDataIntoEEPROM();
         }
@@ -1559,6 +1567,18 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif // FEATURE_AUTOLEVEL
+#if DISTORTION_CORRECTION
+    case 323: // M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
+        if(com->hasS()) {
+        if(com->S > 0)
+            Printer::distortion.enable(!com->hasP() || com->P == 1);
+        else
+            Printer::distortion.disable(!com->hasP() || com->P == 1);
+        } else {
+            Printer::distortion.reportStatus();
+        }
+        break;
+#endif // DISTORTION_CORRECTION
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P<4 && com->P>=0)

@@ -1,11 +1,17 @@
 Version 0.92
   Cleaner code base.
   Pulse dense modulation for heater and fans.
+  Bed bump correction for delta printer.
+  Correction of parallelogram distortions.
   Decoupling test for heater and sensor for more safety.
   Mixing extruder support.
   Test for watchdog.
   Allow cold extrusion.
   Fixed pause sd print issues.
+  Commands on sd stop.
+  Disable heaters/extruders on sd stop.
+  Safety question for sd stop.
+  Many minor corrections and improvements.
 
 Version 0.91.8
   New languages french and Czech

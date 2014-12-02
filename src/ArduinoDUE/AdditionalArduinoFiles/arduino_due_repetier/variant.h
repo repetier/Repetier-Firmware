@@ -56,6 +56,36 @@ extern "C"{
 
 // Number of pins defined in PinDescription array
 #define PINS_COUNT           (79u)
+#define NUM_DIGITAL_PINS     (54u)
+#define NUM_ANALOG_INPUTS    (12u)
+
+#define digitalPinToPort(P)        ( g_APinDescription[P].pPort )
+#define digitalPinToBitMask(P)     ( g_APinDescription[P].ulPin )
+//#define analogInPinToBit(P)        ( )
+#define portOutputRegister(port)   ( &(port->PIO_ODSR) )
+#define portInputRegister(port)    ( &(port->PIO_PDSR) )
+#define digitalPinHasPWM(P)        ( g_APinDescription[P].ulPWMChannel != NOT_ON_PWM || g_APinDescription[P].ulTCChannel != NOT_ON_TIMER )
+
+/*
+ * portModeRegister(..) should return a register to set pin mode
+ * INPUT or OUTPUT by setting the corresponding bit to 0 or 1.
+ * Unfortunately on SAM architecture the PIO_OSR register is
+ * read-only and can be set only through the enable/disable registers
+ * pair PIO_OER/PIO_ODR.
+ */
+// #define portModeRegister(port)   ( &(port->PIO_OSR) )
+
+/*
+ * digitalPinToTimer(..) is AVR-specific and is not defined for SAM
+ * architecture. If you need to check if a pin supports PWM you must
+ * use digitalPinHasPWM(..).
+ *
+ * https://github.com/arduino/Arduino/issues/1833
+ */
+// #define digitalPinToTimer(P)
+
+// Interrupts
+#define digitalPinToInterrupt(p)  ((p) < NUM_DIGITAL_PINS ? (p) : -1)
 
 // LEDs
 #define PIN_LED_13           (13u)
@@ -64,6 +94,7 @@ extern "C"{
 #define PIN_LED              PIN_LED_13
 #define PIN_LED2             PIN_LED_RXL
 #define PIN_LED3             PIN_LED_TXL
+#define LED_BUILTIN          13
 
 /*
  * SPI Interfaces
@@ -113,12 +144,14 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define WIRE_INTERFACE       TWI1
 #define WIRE_INTERFACE_ID    ID_TWI1
 #define WIRE_ISR_HANDLER     TWI1_Handler
+#define WIRE_ISR_ID          TWI1_IRQn
 
 #define PIN_WIRE1_SDA        (70u)
 #define PIN_WIRE1_SCL        (71u)
 #define WIRE1_INTERFACE      TWI0
 #define WIRE1_INTERFACE_ID   ID_TWI0
 #define WIRE1_ISR_HANDLER    TWI0_Handler
+#define WIRE1_ISR_ID         TWI0_IRQn
 
 /*
  * UART/USART Interfaces
@@ -215,6 +248,31 @@ extern USARTClass Serial2;
 extern USARTClass Serial3;
 
 #endif
+
+// These serial port names are intended to allow libraries and architecture-neutral
+// sketches to automatically default to the correct port name for a particular type
+// of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
+// the first hardware serial port whose RX/TX pins are not dedicated to another use.
+//
+// SERIAL_PORT_MONITOR        Port which normally prints to the Arduino Serial Monitor
+//
+// SERIAL_PORT_USBVIRTUAL     Port which is USB virtual serial
+//
+// SERIAL_PORT_LINUXBRIDGE    Port which connects to a Linux system via Bridge library
+//
+// SERIAL_PORT_HARDWARE       Hardware serial port, physical RX & TX pins.
+//
+// SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
+//                            pins are NOT connected to anything by default.
+#define SERIAL_PORT_MONITOR         Serial
+#define SERIAL_PORT_USBVIRTUAL      SerialUSB
+#define SERIAL_PORT_HARDWARE_OPEN   Serial1
+#define SERIAL_PORT_HARDWARE_OPEN1  Serial2
+#define SERIAL_PORT_HARDWARE_OPEN2  Serial3
+#define SERIAL_PORT_HARDWARE        Serial
+#define SERIAL_PORT_HARDWARE1       Serial1
+#define SERIAL_PORT_HARDWARE2       Serial2
+#define SERIAL_PORT_HARDWARE3       Serial3
 
 #endif /* _VARIANT_ARDUINO_DUE_X_ */
 

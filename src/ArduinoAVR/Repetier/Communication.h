@@ -359,7 +359,10 @@ FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
-
+#if DISTORTION_CORRECTION
+FSTRINGVAR(tZCorrectionEnabled)
+FSTRINGVAR(tZCorrectionDisabled)
+#endif
 
 static void printNumber(uint32_t n);
 static void printWarningF(FSTRINGPARAM(text));

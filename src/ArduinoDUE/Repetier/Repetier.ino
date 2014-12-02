@@ -117,6 +117,7 @@ Custom M Codes
 - M320 - Activate autolevel
 - M321 - Deactivate autolevel
 - M322 - Reset autolevel matrix
+- M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M400 - Wait until move buffers empty.

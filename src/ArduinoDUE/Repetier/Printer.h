@@ -19,6 +19,26 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+/**
+
+Coordinate system transformations:
+
+Level 1: G-code => Coordinates like send via g-codes.
+
+Level 2: Real coordinates => Coordinates corrected by coordinate shift via G92
+         currentPosition and lastCmdPos are from this level.
+Level 3: Transformed and shifter => Include extruder offset and bed rotation.
+         These variables are only stored temporary.
+
+Level 4: Step position => Level 3 converted into steps for motor position
+        currentPositionSteps and destinationPositionSteps are from this level.
+
+Level 5: Nonlinear motor step position, only for nonlinear drive systems
+         destinationDeltaSteps
+
+
+*/
+
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
@@ -58,6 +78,38 @@ union floatLong
 #define towerAMinSteps Printer::xMinSteps
 #define towerBMinSteps Printer::yMinSteps
 #define towerCMinSteps Printer::zMinSteps
+
+#if DISTORTION_CORRECTION
+class Distortion
+{
+public:
+    Distortion();
+    void init();
+    void enable(bool permanent = true);
+    void disable(bool permanent = true);
+    void measure(void);
+    int32_t correct(int32_t x, int32_t y, int32_t z) const;
+    void updateDerived();
+    void reportStatus();
+private:
+    inline int matrixIndex(fast8_t x, fast8_t y) const;
+    inline int32_t getMatrix(int index) const;
+    inline void setMatrix(int32_t val, int index);
+    bool isCorner(fast8_t i, fast8_t j) const;
+    inline int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
+    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
+    void extrapolateCorners();
+    void resetCorrection();
+// attributes
+    int32_t step;
+    int32_t radiusCorrectionSteps;
+    int32_t zStart,zEnd;
+#if !DISTORTION_PERMANENT
+    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
+#endif
+    bool enabled;
+};
+#endif //DISTORTION_CORRECTION
 
 class Printer
 {
@@ -434,6 +486,10 @@ public:
     static inline void setColdExtrusionAllowed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
+        if(b)
+            Com::printFLN(PSTR("Cold extrusion allowed"));
+        else
+            Com::printFLN(PSTR("Cold extrusion disallowed"));
     }
 
 
@@ -751,6 +807,10 @@ public:
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void resetTransformationMatrix(bool silent);
     static void buildTransformationMatrix(float h1,float h2,float h3);
+#endif
+#if DISTORTION_CORRECTION
+    static void measureDistortion(void);
+    static Distortion distortion;
 #endif
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);

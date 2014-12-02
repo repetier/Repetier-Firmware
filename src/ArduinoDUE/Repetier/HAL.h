@@ -231,6 +231,7 @@ typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
 typedef int flag8_t;
+typedef int fast8_t;
 
 #ifndef RFSERIAL
 #define RFSERIAL Serial   // Programming port of the due

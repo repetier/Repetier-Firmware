@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 10
+#define EEPROM_PROTOCOL_VERSION 11
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -111,6 +111,8 @@ have problems with other modules using the eeprom */
 #define EPR_AXISCOMP_TANXY			976
 #define EPR_AXISCOMP_TANYZ			980
 #define EPR_AXISCOMP_TANXZ			984
+
+#define EPR_DISTORTION_CORRECTION_ENABLED 988
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -479,5 +481,26 @@ static inline void setTowerZFloor(float newZ) {
     static void readMixingRatios();
     static void restoreMixingRatios();
 #endif
+
+    static void setZCorrection(int32_t c,int index);
+    static inline int32_t getZCorrection(int index) {
+        return HAL::eprGetInt32(2048 + (index << 2));
+    }
+    static inline void setZCorrectionEnabled(int8_t on) {
+#if EEPROM_MODE != 0
+        if(isZCorrectionEnabled() == on) return;
+        HAL::eprSetInt16(EPR_DISTORTION_CORRECTION_ENABLED, on);
+        uint8_t newcheck = computeChecksum();
+        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
+            HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
+#endif
+    }
+    static inline int8_t isZCorrectionEnabled() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_DISTORTION_CORRECTION_ENABLED);
+#else
+        return 0;
+#endif
+    }
 };
 #endif

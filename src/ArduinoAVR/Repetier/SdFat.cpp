@@ -3350,7 +3350,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
 #endif  // SOFTWARE_SPI
 
   // must supply min of 74 clock cycles with CS high.
-  for (uint8_t i = 0; i < 10; i++) spiSend(0XFF);
+  for (uint8_t i = 0; i < 20; i++) spiSend(0XFF);
 
   // command to go idle in SPI mode
   while (cardCommand(CMD0, 0) != R1_IDLE_STATE) {
