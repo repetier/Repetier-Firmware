@@ -1055,7 +1055,40 @@ void Commands::processMCode(GCode *com)
             }
         }
         break;
-
+    case 44: // M44 - Change pin status via gcode or get pin state
+		if ( com->hasP() ) 
+		{
+			int pin_number = com->P;
+			for(uint8_t i = 0; i < (uint8_t)sizeof(sensitive_pins); i++)
+			{
+				if (pgm_read_byte(&sensitive_pins[i]) == pin_number)
+				{
+					pin_number = -1;
+					break;
+				}
+			}
+			if (pin_number > -1)
+			{
+				if (com->hasS() && com->S>=0 && com->S<=255)
+				{
+					pinMode(pin_number, OUTPUT);
+					analogWrite(pin_number, com->S);
+					Com::printF(Com::tSetOutputSpace,pin_number);
+					Com::printFLN(Com::tSpaceToSpace,(int)com->S);
+				}
+				else 
+				{
+					pinMode(pin_number, INPUT_PULLUP);
+					Com::printF(Com::tSpaceToSpace,pin_number);
+					Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
+				}
+			}
+			else
+			{
+				 Com::printErrorFLN(PSTR("Pin can not be set by M44, may in invalid or in use. "));
+			}
+		} 
+        break;
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
         Commands::waitUntilEndOfAllMoves();
