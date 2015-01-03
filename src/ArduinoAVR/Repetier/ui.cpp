@@ -379,7 +379,7 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
 	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    HAL::delayMicroseconds(40);
+    HAL::delayMicroseconds(50);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 }
 
@@ -423,7 +423,7 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
 	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(40);
+    HAL::delayMicroseconds(50);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
@@ -2414,7 +2414,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(Printer::extrudeMultiply,1,25,500);
-        Com::printFLN(Com::tFlowMultiply,(int)Printer::extrudeMultiply);
+        Com::printFLN(Com::tFlowMultiply, static_cast<int>(Printer::extrudeMultiply));
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:

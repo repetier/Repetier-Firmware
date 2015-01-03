@@ -1487,7 +1487,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
 
     float cartesianDistance;
     flag8_t cartesianDir;
-    long cartesianDeltaSteps[E_AXIS_ARRAY];
+    int32_t cartesianDeltaSteps[E_AXIS_ARRAY];
     calculateDirectionAndDelta(difference, &cartesianDir, cartesianDeltaSteps);
     if (!calculateDistance(axis_diff, cartesianDir, &cartesianDistance))
     {
@@ -1498,7 +1498,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
 
     if (!(cartesianDir & XYZ_STEP))
     {
-        queueEMove(difference[E_AXIS],check_endstops,pathOptimize);
+        queueEMove(difference[E_AXIS], check_endstops,pathOptimize);
         return true;
     }
 
@@ -1769,7 +1769,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     // Initialize the extruder axis
     arc_target[E_AXIS] = Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
 
-    for (i = 1; i<segments; i++)
+    for (i = 1; i < segments; i++)
     {
         // Increment (segments-1)
 
@@ -1783,8 +1783,8 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
         if (count < N_ARC_CORRECTION)  //25 pieces
         {
             // Apply vector rotation matrix
-            r_axisi = r_axis0*sin_T + r_axis1*cos_T;
-            r_axis0 = r_axis0*cos_T - r_axis1*sin_T;
+            r_axisi = r_axis0 * sin_T + r_axis1 * cos_T;
+            r_axis0 = r_axis0 * cos_T - r_axis1 * sin_T;
             r_axis1 = r_axisi;
             count++;
         }
@@ -1792,10 +1792,10 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
         {
             // Arc correction to radius vector. Computed only every N_ARC_CORRECTION increments.
             // Compute exact location by applying transformation matrix from initial radius vector(=-offset).
-            cos_Ti  = cos(i*theta_per_segment);
-            sin_Ti  = sin(i*theta_per_segment);
-            r_axis0 = -offset[0]*cos_Ti + offset[1]*sin_Ti;
-            r_axis1 = -offset[0]*sin_Ti - offset[1]*cos_Ti;
+            cos_Ti  = cos(i * theta_per_segment);
+            sin_Ti  = sin(i * theta_per_segment);
+            r_axis0 = -offset[0] * cos_Ti + offset[1] * sin_Ti;
+            r_axis1 = -offset[0] * sin_Ti - offset[1] * cos_Ti;
             count = 0;
         }
 
@@ -2240,7 +2240,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 
   Normal non delta algorithm
 */
-int lastblk=-1;
+int lastblk = -1;
 int32_t cur_errupd;
 int32_t PrintLine::bresenhamStep() // version for cartesian printer
 {
