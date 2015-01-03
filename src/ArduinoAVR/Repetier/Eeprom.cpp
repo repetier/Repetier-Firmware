@@ -294,9 +294,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::updateDerivedParameter();
     Extruder::selectExtruderById(Extruder::current->id);
     Extruder::initHeatedBed();
-    Com::printInfoF(Com::tEPRConfigResetDefaults);
+    Com::printInfoFLN(Com::tEPRConfigResetDefaults);
 #else
-    Com::printErrorF(Com::tNoEEPROMSupport);
+    Com::printErrorFLN(Com::tNoEEPROMSupport);
 #endif
 
 }

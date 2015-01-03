@@ -99,31 +99,31 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 {
     uint8_t s = 4; // include checksum and bitfield
     uint16_t bitfield = *(uint16_t*)ptr;
-    if(bitfield & 1) s+=2;
-    if(bitfield & 8) s+=4;
-    if(bitfield & 16) s+=4;
-    if(bitfield & 32) s+=4;
-    if(bitfield & 64) s+=4;
-    if(bitfield & 256) s+=4;
-    if(bitfield & 512) s+=1;
-    if(bitfield & 1024) s+=4;
-    if(bitfield & 2048) s+=4;
+    if(bitfield & 1) s += 2;
+    if(bitfield & 8) s += 4;
+    if(bitfield & 16) s += 4;
+    if(bitfield & 32) s += 4;
+    if(bitfield & 64) s += 4;
+    if(bitfield & 256) s += 4;
+    if(bitfield & 512) s += 1;
+    if(bitfield & 1024) s += 4;
+    if(bitfield & 2048) s += 4;
     if(bitfield & 4096)   // Version 2 or later
     {
-        s+=2; // for bitfield 2
-        uint16_t bitfield2 = *(uint16_t*)(ptr+2);
-        if(bitfield & 2) s+=2;
-        if(bitfield & 4) s+=2;
-        if(bitfield2 & 1) s+= 4;
-        if(bitfield2 & 2) s+= 4;
-        if(bitfield2 & 4) s+= 4;
-        if(bitfield & 32768) s+=RMath::min(80,(uint8_t)ptr[4]+1);
+        s += 2; // for bitfield 2
+        uint16_t bitfield2 = *(uint16_t*)(ptr + 2);
+        if(bitfield & 2) s += 2;
+        if(bitfield & 4) s += 2;
+        if(bitfield2 & 1) s += 4;
+        if(bitfield2 & 2) s += 4;
+        if(bitfield2 & 4) s += 4;
+        if(bitfield & 32768) s += RMath::min(80,(uint8_t)ptr[4] + 1);
     }
     else
     {
-        if(bitfield & 2) s+=1;
-        if(bitfield & 4) s+=1;
-        if(bitfield & 32768) s+=16;
+        if(bitfield & 2) s += 1;
+        if(bitfield & 4) s += 1;
+        if(bitfield & 32768) s += 16;
     }
     return s;
 }
@@ -131,13 +131,13 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 void GCode::requestResend()
 {
     HAL::serialFlush();
-    commandsReceivingWritePosition=0;
+    commandsReceivingWritePosition = 0;
     if(sendAsBinary)
         waitingForResend = 30;
     else
         waitingForResend = 14;
     Com::println();
-    Com::printFLN(Com::tResend,lastLineNumber+1);
+    Com::printFLN(Com::tResend,lastLineNumber + 1);
     Com::printFLN(Com::tOk);
 }
 
@@ -170,7 +170,7 @@ void GCode::checkAndPushCommand()
     }
     if(hasN())
     {
-        if((((lastLineNumber + 1) & 0xffff) != (actLineNumber&0xffff)))
+        if((((lastLineNumber + 1) & 0xffff) != (actLineNumber & 0xffff)))
         {
             if(static_cast<uint16_t>(lastLineNumber - actLineNumber) < 40)
             {

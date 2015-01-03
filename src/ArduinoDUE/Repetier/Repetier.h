@@ -552,8 +552,10 @@ extern int debugWaitLoop;
 
 #if CPU_ARCH == ARCH_AVR
 #define DELAY1MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
+#define DELAY2MICROSECOND        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\tnop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t")
 #else
 #define DELAY1MICROSECOND     HAL::delayMicroseconds(1);
+#define DELAY2MICROSECOND     HAL::delayMicroseconds(2);
 #endif
 
 #ifdef FAST_INTEGER_SQRT

@@ -1820,7 +1820,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
   cartesian axis steps may be less than the changing dominant delta axis.
 */
 #if NONLINEAR_SYSTEM
-int lastblk=-1;
+int lastblk =- 1;
 int32_t cur_errupd;
 //#define DEBUG_DELTA_TIMER
 // Current delta segment
@@ -1842,7 +1842,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 HAL::allowInterrupts();
                 lastblk = (int)cur;
-                Com::printFLN(Com::tBLK,linesCount);
+                Com::printFLN(Com::tBLK, linesCount);
             }
             cur = NULL;
 #if CPU_ARCH==ARCH_ARM
@@ -1946,7 +1946,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if ENABLE_QUADRATIC_ADVANCE
         Printer::advanceExecuted = cur->advanceStart;
 #endif
-        cur->updateAdvanceSteps(cur->vStart,0,false);
+        cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
         if(Printer::wasLastHalfstepping && cur->isFullstepping())   // Switch halfstepping -> full stepping
         {
@@ -1973,7 +1973,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
     }
     int maxLoops = (Printer::stepsPerTimerCall <= cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
     HAL::forbidInterrupts();
-    if(cur->stepsRemaining>0)
+    if(cur->stepsRemaining > 0)
     {
         for(int loop = 0; loop<maxLoops; loop++)
         {
@@ -2137,24 +2137,24 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             //If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
             if (cur->moveAccelerating())
             {
-                Printer::vMaxReached = HAL::ComputeV(Printer::timer,cur->fAcceleration) + cur->vStart;
-                if(Printer::vMaxReached>cur->vMax) Printer::vMaxReached = cur->vMax;
+                Printer::vMaxReached = HAL::ComputeV(Printer::timer, cur->fAcceleration) + cur->vStart;
+                if(Printer::vMaxReached > cur->vMax) Printer::vMaxReached = cur->vMax;
                 speed_t v = Printer::updateStepsPerTimerCall(Printer::vMaxReached);
                 Printer::interval = HAL::CPUDivU2(v);
                 Printer::timer += Printer::interval;
-                cur->updateAdvanceSteps(Printer::vMaxReached,maxLoops,true);
+                cur->updateAdvanceSteps(Printer::vMaxReached, maxLoops, true);
             }
             else if (cur->moveDecelerating())     // time to slow down
             {
-                speed_t v = HAL::ComputeV(Printer::timer,cur->fAcceleration);
+                speed_t v = HAL::ComputeV(Printer::timer, cur->fAcceleration);
                 if (v > Printer::vMaxReached)   // if deceleration goes too far it can become too large
                     v = cur->vEnd;
                 else
                 {
-                    v=Printer::vMaxReached - v;
+                    v = Printer::vMaxReached - v;
                     if (v<cur->vEnd) v = cur->vEnd; // extra steps at the end of desceleration due to rounding erros
                 }
-                cur->updateAdvanceSteps(v,maxLoops,false);
+                cur->updateAdvanceSteps(v, maxLoops, false);
                 v = Printer::updateStepsPerTimerCall(v);
                 Printer::interval = HAL::CPUDivU2(v);
                 Printer::timer += Printer::interval;
@@ -2163,25 +2163,25 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 // If we had acceleration, we need to use the latest vMaxReached and interval
                 // If we started full speed, we need to use cur->fullInterval and vMax
-                cur->updateAdvanceSteps((!cur->accelSteps ? cur->vMax : Printer::vMaxReached),0,true);
+                cur->updateAdvanceSteps((!cur->accelSteps ? cur->vMax : Printer::vMaxReached), 0, true);
                 if(!cur->accelSteps)
                 {
-                    if(cur->vMax>STEP_DOUBLER_FREQUENCY)
+                    if(cur->vMax > STEP_DOUBLER_FREQUENCY)
                     {
 #if ALLOW_QUADSTEPPING
-                        if(cur->vMax>STEP_DOUBLER_FREQUENCY*2)
+                        if(cur->vMax > STEP_DOUBLER_FREQUENCY * 2)
                         {
                             Printer::stepsPerTimerCall = 4;
-                            Printer::interval = cur->fullInterval<<2;
+                            Printer::interval = cur->fullInterval << 2;
                         }
                         else
                         {
                             Printer::stepsPerTimerCall = 2;
-                            Printer::interval = cur->fullInterval<<1;
+                            Printer::interval = cur->fullInterval << 1;
                         }
 #else
                         Printer::stepsPerTimerCall = 2;
-                        Printer::interval = cur->fullInterval<<1;
+                        Printer::interval = cur->fullInterval << 1;
 #endif
                     }
                     else

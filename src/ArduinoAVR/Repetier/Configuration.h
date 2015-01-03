@@ -1220,6 +1220,7 @@ best bonding with surface. */
 /** If your corners measurement points are not measureable with given radius, you can
 set this to 1. It then omits the outer measurement points allowing a larger correction area.*/
 #define DISTORTION_EXTRAPOLATE_CORNERS 0
+
 /* If your printer is not exactly square but is more like a parallelogramm, you can
 use this to compensate the effect of printing squares like parallelogramms. Set the
 parameter to then tangens of the deviation from 90° when you print a square object.

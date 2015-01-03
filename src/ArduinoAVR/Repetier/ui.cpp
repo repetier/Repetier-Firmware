@@ -377,18 +377,15 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D5_PIN,value & 2);
     WRITE(UI_DISPLAY_D6_PIN,value & 4);
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-	DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(40);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-	DELAY1MICROSECOND;
-
 }
+
 void lcdWriteByte(uint8_t c,uint8_t rs)
 {
-#if UI_DISPLAY_RW_PIN<0
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
-#else
+#if false && UI_DISPLAY_RW_PIN >= 0 // not really needed
     SET_INPUT(UI_DISPLAY_D4_PIN);
     SET_INPUT(UI_DISPLAY_D5_PIN);
     SET_INPUT(UI_DISPLAY_D6_PIN);
@@ -402,13 +399,13 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
 		DELAY1MICROSECOND;
         busy = READ(UI_DISPLAY_D7_PIN);
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-		DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);
-		DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
         WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-		DELAY1MICROSECOND;
+		DELAY2MICROSECOND;
 
     }
     while (busy);
@@ -424,22 +421,19 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-	DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(40);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-	DELAY1MICROSECOND;
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
+	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-	DELAY1MICROSECOND;
-
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
-	DELAY1MICROSECOND;
-
 }
 void initializeLCD()
 {

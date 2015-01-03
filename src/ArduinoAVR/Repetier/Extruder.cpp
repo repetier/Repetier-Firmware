@@ -579,7 +579,7 @@ void Extruder::step()
     if(mixingDir)
     {
         bestError = -10000;
-        for(i=0; i<NUM_EXTRUDER; i++)
+        for(i = 0; i < NUM_EXTRUDER; i++)
         {
             if(extruder[i].mixingW == 0) continue;
             if(extruder[i].mixingE > bestError)
@@ -608,131 +608,134 @@ void Extruder::step()
         if(best == 255) return; // no extruder has weight!
         extruder[best].mixingE += mixingS;
     }
-#if NUM_EXTRUDER>0
-    if(best == 0) WRITE(EXT0_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 0
+    if(best == 0) WRITE(EXT0_STEP_PIN, HIGH);
 #endif
-#if NUM_EXTRUDER>1
-    if(best == 1) WRITE(EXT1_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 1
+    if(best == 1) WRITE(EXT1_STEP_PIN, HIGH);
 #endif
-#if NUM_EXTRUDER>2
-    if(best == 2) WRITE(EXT2_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 2
+    if(best == 2) WRITE(EXT2_STEP_PIN, HIGH);
 #endif
-#if NUM_EXTRUDER>3
-    if(best == 3) WRITE(EXT3_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 3
+    if(best == 3) WRITE(EXT3_STEP_PIN, HIGH);
 #endif
-#if NUM_EXTRUDER>4
-    if(best == 4) WRITE(EXT4_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 4
+    if(best == 4) WRITE(EXT4_STEP_PIN, HIGH);
 #endif
-#if NUM_EXTRUDER>5
-    if(best == 5) WRITE(EXT5_STEP_PIN,HIGH);
+#if NUM_EXTRUDER > 5
+    if(best == 5) WRITE(EXT5_STEP_PIN, HIGH);
 #endif
 }
+
 void Extruder::unstep()
 {
-#if NUM_EXTRUDER>0
-    WRITE(EXT0_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 0
+    WRITE(EXT0_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>1
-    WRITE(EXT1_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 1
+    WRITE(EXT1_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>2
-    WRITE(EXT2_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 2
+    WRITE(EXT2_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>3
-    WRITE(EXT3_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 3
+    WRITE(EXT3_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>4
-    WRITE(EXT4_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 4
+    WRITE(EXT4_STEP_PIN, LOW);
 #endif
-#if NUM_EXTRUDER>5
-    WRITE(EXT5_STEP_PIN,LOW);
+#if NUM_EXTRUDER > 5
+    WRITE(EXT5_STEP_PIN, LOW);
 #endif
 }
-/*void Extruder::setDirection(uint8_t dir)
+
+void Extruder::setDirection(uint8_t dir)
 {
     mixingDir = dir;
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
     if(dir)
         WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
     else
         WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
 #endif
-#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
+#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER > 1
     if(dir)
         WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
     else
         WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
 #endif
-#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER>2
+#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER > 2
     if(dir)
         WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
     else
         WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
 #endif
-#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER>3
+#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER > 3
     if(dir)
         WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
     else
         WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
 #endif
-#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER>4
+#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER > 4
     if(dir)
         WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
     else
         WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
 #endif
-#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER>5
+#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER > 5
     if(dir)
         WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
     else
         WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
 #endif
-}*/
+}
+
 void Extruder::enable()
 {
-#if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
-    WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON );
+#if NUM_EXTRUDER > 0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN > -1
+    WRITE(EXT0_ENABLE_PIN, EXT0_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN>-1
-    WRITE(EXT1_ENABLE_PIN,EXT1_ENABLE_ON );
+#if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
+    WRITE(EXT1_ENABLE_PIN, EXT1_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN>-1
-    WRITE(EXT2_ENABLE_PIN,EXT2_ENABLE_ON );
+#if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1
+    WRITE(EXT2_ENABLE_PIN, EXT2_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN>-1
-    WRITE(EXT3_ENABLE_PIN,EXT3_ENABLE_ON );
+#if NUM_EXTRUDER > 3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN > -1
+    WRITE(EXT3_ENABLE_PIN, EXT3_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN>-1
-    WRITE(EXT4_ENABLE_PIN,EXT4_ENABLE_ON );
+#if NUM_EXTRUDER > 4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN > -1
+    WRITE(EXT4_ENABLE_PIN, EXT4_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN>-1
-    WRITE(EXT5_ENABLE_PIN,EXT5_ENABLE_ON );
+#if NUM_EXTRUDER > 5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN > -1
+    WRITE(EXT5_ENABLE_PIN, EXT5_ENABLE_ON );
 #endif
 }
-#endif  // MIXING_EXTRUDER
+#endif  // MIXING_EXTRUDER > 0
 
 void Extruder::disableCurrentExtruderMotor()
 {
 #if MIXING_EXTRUDER
-#if NUM_EXTRUDER>0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN>-1
-    WRITE(EXT0_ENABLE_PIN,!EXT0_ENABLE_ON );
+#if NUM_EXTRUDER > 0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN > -1
+    WRITE(EXT0_ENABLE_PIN, !EXT0_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN>-1
-    WRITE(EXT1_ENABLE_PIN,!EXT1_ENABLE_ON );
+#if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
+    WRITE(EXT1_ENABLE_PIN, !EXT1_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN>-1
-    WRITE(EXT2_ENABLE_PIN,!EXT2_ENABLE_ON );
+#if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1
+    WRITE(EXT2_ENABLE_PIN, !EXT2_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN>-1
-    WRITE(EXT3_ENABLE_PIN,!EXT3_ENABLE_ON );
+#if NUM_EXTRUDER > 3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN > -1
+    WRITE(EXT3_ENABLE_PIN, !EXT3_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN>-1
-    WRITE(EXT4_ENABLE_PIN,!EXT4_ENABLE_ON );
+#if NUM_EXTRUDER > 4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN > -1
+    WRITE(EXT4_ENABLE_PIN, !EXT4_ENABLE_ON );
 #endif
-#if NUM_EXTRUDER>5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN>-1
-    WRITE(EXT5_ENABLE_PIN,!EXT5_ENABLE_ON );
+#if NUM_EXTRUDER > 5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN > -1
+    WRITE(EXT5_ENABLE_PIN, !EXT5_ENABLE_ON );
 #endif
-#else
+#else // MIXING_EXTRUDER
     if(Extruder::current->enablePin > -1)
         digitalWrite(Extruder::current->enablePin,!Extruder::current->enableOn);
 #if FEATURE_DITTO_PRINTING
@@ -754,10 +757,10 @@ void Extruder::disableCurrentExtruderMotor()
 }
 void Extruder::disableAllExtruderMotors()
 {
-    for(byte i=0; i<NUM_EXTRUDER; i++)
+    for(byte i = 0; i < NUM_EXTRUDER; i++)
     {
         if(extruder[i].enablePin > -1)
-            digitalWrite(extruder[i].enablePin,!extruder[i].enableOn);
+            digitalWrite(extruder[i].enablePin, !extruder[i].enableOn);
     }
 }
 #define NUMTEMPS_1 28

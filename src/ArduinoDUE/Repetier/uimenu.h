@@ -250,7 +250,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
  #if HAVE_HEATED_BED
    ,UI_TEXT_PAGE_BED
  #endif
- #if (NUM_EXTRUDER == 3 && MIXING_EXTRUDER == 0 && !HAVE_HEATED_BED) || (NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0 && HAVE_HEATED_BED==true)
+ #if (NUM_EXTRUDER >= 3 && MIXING_EXTRUDER == 0 && !HAVE_HEATED_BED) || (NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0 && HAVE_HEATED_BED==true)
    ,"%os"
  #elif (NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0) || ((NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) && HAVE_HEATED_BED)
    ,"","%os"
