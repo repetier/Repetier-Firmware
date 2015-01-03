@@ -157,12 +157,12 @@ public:
 #endif
     float advanceL;
     int16_t advanceBacklash;
-#endif
+#endif // USE_ADVANCE
 #if MIXING_EXTRUDER > 0
     int mixingW;   ///< Weight for this extruder when mixing steps
     int mixingE;   ///< Cumulated error for this step.
     int virtualWeights[VIRTUAL_EXTRUDER]; // Virtual extruder weights
-#endif
+#endif // MIXING_EXTRUDER > 0
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
@@ -173,7 +173,7 @@ public:
     static void setMixingWeight(uint8_t extr,int weight);
     static void step();
     static void unstep();
-    //static void setDirection(uint8_t dir);
+    static void setDirection(uint8_t dir);
     static void enable();
 #else
     /** \brief Sends the high-signal to the stepper for next extruder step.
@@ -243,13 +243,13 @@ public:
     */
     static inline void unstep()
     {
-#if NUM_EXTRUDER==1
+#if NUM_EXTRUDER == 1
         WRITE(EXT0_STEP_PIN,LOW);
 #else
         switch(Extruder::current->id)
         {
         case 0:
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
             WRITE(EXT0_STEP_PIN,LOW);
 #if FEATURE_DITTO_PRINTING
             if(Extruder::dittoMode)
@@ -266,32 +266,32 @@ public:
                 {
                     WRITE(EXT3_STEP_PIN,LOW);
                 }
-#endif
+#endif // NUM_EXTRUDER > 3
             }
-#endif
-#endif
+#endif // FEATURE_DITTO_PRINTING
+#endif // NUM_EXTRUDER > 0
             break;
-#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER>1
+#if defined(EXT1_STEP_PIN) && NUM_EXTRUDER > 1
         case 1:
             WRITE(EXT1_STEP_PIN,LOW);
             break;
 #endif
-#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER>2
+#if defined(EXT2_STEP_PIN) && NUM_EXTRUDER > 2
         case 2:
             WRITE(EXT2_STEP_PIN,LOW);
             break;
 #endif
-#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER>3
+#if defined(EXT3_STEP_PIN) && NUM_EXTRUDER > 3
         case 3:
             WRITE(EXT3_STEP_PIN,LOW);
             break;
 #endif
-#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER>4
+#if defined(EXT4_STEP_PIN) && NUM_EXTRUDER > 4
         case 4:
             WRITE(EXT4_STEP_PIN,LOW);
             break;
 #endif
-#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER>5
+#if defined(EXT5_STEP_PIN) && NUM_EXTRUDER > 5
         case 5:
             WRITE(EXT5_STEP_PIN,LOW);
             break;
@@ -305,15 +305,15 @@ public:
 #if MIXING_EXTRUDER > 0
         mixingDir = dir;
 #endif
-#if NUM_EXTRUDER==1
+#if NUM_EXTRUDER == 1
         if(dir)
-            WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
+            WRITE(EXT0_DIR_PIN, !EXT0_INVERSE);
         else
-            WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+            WRITE(EXT0_DIR_PIN, EXT0_INVERSE);
 #else
         switch(Extruder::current->id)
         {
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
         case 0:
             if(dir)
                 WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
@@ -348,7 +348,7 @@ public:
 #endif
             break;
 #endif
-#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER>1
+#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER > 1
         case 1:
             if(dir)
                 WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
@@ -356,7 +356,7 @@ public:
                 WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
             break;
 #endif
-#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER>2
+#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER > 2
         case 2:
             if(dir)
                 WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
@@ -364,7 +364,7 @@ public:
                 WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
             break;
 #endif
-#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER>3
+#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER > 3
         case 3:
             if(dir)
                 WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
@@ -372,7 +372,7 @@ public:
                 WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
             break;
 #endif
-#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER>4
+#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER > 4
         case 4:
             if(dir)
                 WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
@@ -380,7 +380,7 @@ public:
                 WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
             break;
 #endif
-#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER>5
+#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER > 5
         case 5:
             if(dir)
                 WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
@@ -391,10 +391,11 @@ public:
         }
 #endif
     }
+
     static inline void enable()
     {
-#if NUM_EXTRUDER==1
-#if EXT0_ENABLE_PIN>-1
+#if NUM_EXTRUDER == 1
+#if EXT0_ENABLE_PIN > -1
         WRITE(EXT0_ENABLE_PIN,EXT0_ENABLE_ON );
 #endif
 #else

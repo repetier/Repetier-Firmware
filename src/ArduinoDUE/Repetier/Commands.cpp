@@ -911,7 +911,7 @@ void Commands::processGCode(GCode *com)
         Com::printFLN(Com::tTower2,offy);
         Com::printFLN(Com::tTower3,offz);
 #if EEPROM_MODE != 0
-        if(com->hasS() && com->S>0)
+        if(com->hasS() && com->S > 0)
         {
             EEPROM::setDeltaTowerXOffsetSteps(offx);
             EEPROM::setDeltaTowerYOffsetSteps(offy);
@@ -1034,7 +1034,7 @@ void Commands::processMCode(GCode *com)
         break;
 #endif
     case 42: //M42 -Change pin status via gcode
-        if (com->hasS() && com->hasP() && com->S>=0 && com->S<=255)
+        if (com->hasP())
         {
             int pin_number = com->P;
             for(uint8_t i = 0; i < (uint8_t)sizeof(sensitive_pins); i++)
@@ -1047,11 +1047,22 @@ void Commands::processMCode(GCode *com)
             }
             if (pin_number > -1)
             {
-                pinMode(pin_number, OUTPUT);
-                digitalWrite(pin_number, com->S);
-                analogWrite(pin_number, com->S);
-                Com::printF(Com::tSetOutputSpace,pin_number);
-                Com::printFLN(Com::tSpaceToSpace,(int)com->S);
+                if(com->hasS()) {
+                    if(com->S >= 0 && com->S <= 255) {
+                        pinMode(pin_number, OUTPUT);
+                        digitalWrite(pin_number, com->S);
+                        analogWrite(pin_number, com->S);
+                        Com::printF(Com::tSetOutputSpace, pin_number);
+                        Com::printFLN(Com::tSpaceToSpace,(int)com->S);
+                    } else
+                        Com::printErrorFLN(PSTR("Illegal S value for M42"));
+                } else {
+					pinMode(pin_number, INPUT_PULLUP);
+					Com::printF(Com::tSpaceToSpace, pin_number);
+					Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
+                }
+            } else {
+                Com::printErrorFLN(PSTR("Pin can not be set by M42, may in invalid or in use. "));
             }
         }
         break;
@@ -1617,9 +1628,9 @@ void Commands::processMCode(GCode *com)
     {
 #if EEPROM_MODE != 0
         EEPROM::storeDataIntoEEPROM(false);
-        Com::printInfoF(Com::tConfigStoredEEPROM);
+        Com::printInfoFLN(Com::tConfigStoredEEPROM);
 #else
-        Com::printErrorF(Com::tNoEEPROMSupport);
+        Com::printErrorFLN(Com::tNoEEPROMSupport);
 #endif
     }
     break;
@@ -1628,9 +1639,9 @@ void Commands::processMCode(GCode *com)
 #if EEPROM_MODE != 0
         EEPROM::readDataFromEEPROM();
         Extruder::selectExtruderById(Extruder::current->id);
-        Com::printInfoF(Com::tConfigLoadedEEPROM);
+        Com::printInfoFLN(Com::tConfigLoadedEEPROM);
 #else
-        Com::printErrorF(Com::tNoEEPROMSupport);
+        Com::printErrorFLN(Com::tNoEEPROMSupport);
 #endif
     }
     break;
