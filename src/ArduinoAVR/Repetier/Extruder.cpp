@@ -81,7 +81,7 @@ void Extruder::manageTemperatures()
         // Handle automatic cooling of extruders
         if(controller < NUM_EXTRUDER)
         {
-#if !SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
+#if SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
             if(controller == 0) {
                 bool enable = false;
                 for(uint8_t j = 0; j < NUM_EXTRUDER; j++) {
