@@ -379,7 +379,7 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
 	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    HAL::delayMicroseconds(50);
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 }
 
@@ -423,7 +423,7 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
 	DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(50);
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);

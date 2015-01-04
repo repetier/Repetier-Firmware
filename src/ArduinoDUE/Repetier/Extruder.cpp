@@ -77,32 +77,37 @@ void Extruder::manageTemperatures()
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
+        TemperatureController *act = tempController[controller];
+        // Handle automatic cooling of extruders
+        if(controller < NUM_EXTRUDER)
+        {
+#if !SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
+            if(controller == 0) {
+                bool enable = false;
+                for(uint8_t j = 0; j < NUM_EXTRUDER; j++) {
+                    if(tempController[j]->currentTemperatureC >= EXTRUDER_FAN_COOL_TEMP || tempController[j]->targetTemperatureC >= EXTRUDER_FAN_COOL_TEMP) {
+                        enable = true;
+                        break;
+                    }
+                }
+                extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
+            }
+#else
+            if(act->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
+                 extruder[controller].coolerPWM = 0;
+             else
+                 extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+#endif // NUM_EXTRUDER
+        }
+
         if(controller == autotuneIndex) continue;
 #if MIXING_EXTRUDER
         if(controller > 0 && controller < NUM_EXTRUDER) continue; // Mixing extruder only test for ext 0
 #endif
-        TemperatureController *act = tempController[controller];
 
         // Get Temperature
         act->updateCurrentTemperature();
 
-        // Handle automatic cooling of extruders
-        if(controller < NUM_EXTRUDER)
-        {
-#if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
-            if(controller == 0 && autotuneIndex != 0 && autotuneIndex != 1)
-                if(tempController[0]->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP &&
-                        tempController[1]->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
-                    extruder[0].coolerPWM = 0;
-                else
-                    extruder[0].coolerPWM = extruder[0].coolerSpeed;
-            if(controller>1)
-#endif // NUM_EXTRUDER
-                if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
-                    extruder[controller].coolerPWM = 0;
-                else
-                    extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
-        }
 
         // Check for obvious sensor errors
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
