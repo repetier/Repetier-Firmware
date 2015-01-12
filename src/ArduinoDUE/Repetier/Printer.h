@@ -149,7 +149,8 @@ public:
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
-    static float extrudeMultiplyError;
+    static float extrudeMultiplyError; ///< Accumulated error during extrusion
+    static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
     static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];

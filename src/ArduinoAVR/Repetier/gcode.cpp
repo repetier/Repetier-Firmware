@@ -28,21 +28,21 @@
 #endif
 
 GCode    GCode::commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
-uint8_t  GCode::bufferReadIndex=0; ///< Read position in gcode_buffer.
-uint8_t  GCode::bufferWriteIndex=0; ///< Write position in gcode_buffer.
+uint8_t  GCode::bufferReadIndex = 0; ///< Read position in gcode_buffer.
+uint8_t  GCode::bufferWriteIndex = 0; ///< Write position in gcode_buffer.
 uint8_t  GCode::commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
-uint8_t  GCode::commandsReceivingWritePosition=0; ///< Writing position in gcode_transbuffer.
+uint8_t  GCode::commandsReceivingWritePosition = 0; ///< Writing position in gcode_transbuffer.
 uint8_t  GCode::sendAsBinary; ///< Flags the command as binary input.
-uint8_t  GCode::wasLastCommandReceivedAsBinary=0; ///< Was the last successful command in binary mode?
-uint8_t  GCode::commentDetected=false; ///< Flags true if we are reading the comment part of a command.
+uint8_t  GCode::wasLastCommandReceivedAsBinary = 0; ///< Was the last successful command in binary mode?
+uint8_t  GCode::commentDetected = false; ///< Flags true if we are reading the comment part of a command.
 uint8_t  GCode::binaryCommandSize; ///< Expected size of the incoming binary command.
-bool     GCode::waitUntilAllCommandsAreParsed=false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
-uint32_t GCode::lastLineNumber=0; ///< Last line number received.
+bool     GCode::waitUntilAllCommandsAreParsed = false; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
+uint32_t GCode::lastLineNumber = 0; ///< Last line number received.
 uint32_t GCode::actLineNumber; ///< Line number of current command.
-int8_t   GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no wait.
-volatile uint8_t GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
-millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
-uint8_t  GCode::formatErrors=0;
+int8_t   GCode::waitingForResend = -1; ///< Waiting for line to be resend. -1 = no wait.
+volatile uint8_t GCode::bufferLength = 0; ///< Number of commands stored in gcode_buffer
+millis_t GCode::timeOfLastDataPacket = 0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
+uint8_t  GCode::formatErrors = 0;
 
 /** \page Repetier-protocol
 
@@ -94,6 +94,14 @@ Second word if V2:
 - I : Bit 0 : 32-Bit float
 - J : Bit 1 : 32-Bit float
 - R : Bit 2 : 32-Bit float
+- D : Bit 3 : 32-Bit float
+- C : Bit 4 : 32-Bit float
+- H : Bit 5 : 32-Bit float
+- A : Bit 6 : 32-Bit float
+- B : Bit 7 : 32-Bit float
+- K : Bit 8 : 32-Bit float
+- L : Bit 9 : 32-Bit float
+- O : Bit 0 : 32-Bit float
 */
 uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 {
@@ -117,6 +125,19 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
         if(bitfield2 & 1) s += 4;
         if(bitfield2 & 2) s += 4;
         if(bitfield2 & 4) s += 4;
+        if(bitfield2 & 8) s += 4;
+        if(bitfield2 & 16) s += 4;
+        if(bitfield2 & 32) s += 4;
+        if(bitfield2 & 64) s += 4;
+        if(bitfield2 & 128) s += 4;
+        if(bitfield2 & 256) s += 4;
+        if(bitfield2 & 512) s += 4;
+        if(bitfield2 & 1024) s += 4;
+        if(bitfield2 & 2048) s += 4;
+        if(bitfield2 & 4096) s += 4;
+        if(bitfield2 & 8192) s += 4;
+        if(bitfield2 & 16384) s += 4;
+        if(bitfield2 & 32768) s += 4;
         if(bitfield & 32768) s += RMath::min(80,(uint8_t)ptr[4] + 1);
     }
     else
@@ -214,7 +235,7 @@ void GCode::pushCommand()
 #if !ECHO_ON_EXECUTE
     commandsBuffered[bufferWriteIndex].echoCommand();
 #endif
-    bufferWriteIndex = (bufferWriteIndex + 1) % GCODE_BUFFER_SIZE;
+    if(++bufferWriteIndex >= GCODE_BUFFER_SIZE) bufferWriteIndex = 0;
     bufferLength++;
 }
 
@@ -273,7 +294,7 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
     {
         // Wait for a free place in command buffer
         // Scan next command from string
-        uint8_t comment=0;
+        uint8_t comment = 0;
         buflen = 0;
         do
         {
@@ -283,12 +304,10 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
             if(comment) continue;
             buf[buflen++] = c;
         }
-        while(buflen<79);
-        if(buflen==0)   // empty line ignore
-        {
+        while(buflen < 79);
+        if(buflen == 0)   // empty line ignore
             continue;
-        }
-        buf[buflen]=0;
+        buf[buflen] = 0;
         // Send command into command buffer
         if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
         {
@@ -316,7 +335,7 @@ void GCode::readFromSerial()
     millis_t time = HAL::timeInMilliseconds();
     if(!HAL::serialByteAvailable())
     {
-        if((waitingForResend >= 0 || commandsReceivingWritePosition>0) && time - timeOfLastDataPacket > 200)
+        if((waitingForResend >= 0 || commandsReceivingWritePosition > 0) && time - timeOfLastDataPacket > 200)
         {
             requestResend(); // Something is wrong, a started line was not continued in the last second
             timeOfLastDataPacket = time;
@@ -360,7 +379,7 @@ void GCode::readFromSerial()
             if(commandsReceivingWritePosition == binaryCommandSize)
             {
                 GCode *act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving,true))   // Success
+                if(act->parseBinary(commandReceiving, true))   // Success
                     act->checkAndPushCommand();
                 else
                     requestResend();
@@ -494,11 +513,11 @@ void GCode::readFromSerial()
 bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 {
     internalCommand = !fromSerial;
-    unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
+    unsigned int sum1 = 0,sum2 = 0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
     uint8_t *p = buffer;
-    uint8_t len = binaryCommandSize-2;
+    uint8_t len = binaryCommandSize - 2;
     while (len)
     {
         uint8_t tlen = len > 21 ? 21 : len;
@@ -506,9 +525,9 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
         do
         {
             sum1 += *p++;
-            if(sum1>=255) sum1-=255;
+            if(sum1 >= 255) sum1 -= 255;
             sum2 += sum1;
-            if(sum2>=255) sum2-=255;
+            if(sum2 >= 255) sum2 -= 255;
         }
         while (--tlen);
     }
@@ -524,8 +543,8 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     }
     p = buffer;
     params = *(unsigned int *)p;
-    p+=2;
-    uint8_t textlen=16;
+    p += 2;
+    uint8_t textlen = 16;
     if(isV2())
     {
         params2 = *(unsigned int *)p;
@@ -536,87 +555,127 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     else params2 = 0;
     if(params & 1)
     {
-        actLineNumber=N=*(uint16_t *)p;
+        actLineNumber = N = *(uint16_t *)p;
         p+=2;
     }
     if(isV2())   // Read G,M as 16 bit value
     {
         if(params & 2)
         {
-            M=*(uint16_t *)p;
-            p+=2;
+            M = *(uint16_t *)p;
+            p += 2;
         }
         if(params & 4)
         {
-            G=*(uint16_t *)p;
-            p+=2;
+            G = *(uint16_t *)p;
+            p += 2;
         }
     }
     else
     {
         if(params & 2)
         {
-            M=*p++;
+            M = *p++;
         }
         if(params & 4)
         {
-            G=*p++;
+            G = *p++;
         }
     }
     //if(code->params & 8) {memcpy(&code->X,p,4);p+=4;}
     if(params & 8)
     {
-        X=*(float *)p;
-        p+=4;
+        X = *(float *)p;
+        p += 4;
     }
     if(params & 16)
     {
-        Y=*(float *)p;
-        p+=4;
+        Y = *(float *)p;
+        p += 4;
     }
     if(params & 32)
     {
-        Z =*(float *)p;
-        p+=4;
+        Z = *(float *)p;
+        p += 4;
     }
     if(params & 64)
     {
-        E=*(float *)p;
-        p+=4;
+        E = *(float *)p;
+        p += 4;
     }
     if(params & 256)
     {
-        F=*(float *)p;
-        p+=4;
+        F = *(float *)p;
+        p += 4;
     }
     if(params & 512)
     {
-        T=*p++;
+        T = *p++;
     }
     if(params & 1024)
     {
-        S=*(int32_t*)p;
-        p+=4;
+        S = *(int32_t*)p;
+        p += 4;
     }
     if(params & 2048)
     {
-        P=*(int32_t*)p;
-        p+=4;
+        P = *(int32_t*)p;
+        p += 4;
     }
     if(hasI())
     {
-        I=*(float *)p;
-        p+=4;
+        I = *(float *)p;
+        p += 4;
     }
     if(hasJ())
     {
-        J=*(float *)p;
-        p+=4;
+        J = *(float *)p;
+        p += 4;
     }
     if(hasR())
     {
-        R=*(float *)p;
-        p+=4;
+        R = *(float *)p;
+        p += 4;
+    }
+    if(hasD())
+    {
+        D = *(float *)p;
+        p += 4;
+    }
+    if(hasC())
+    {
+        C = *(float *)p;
+        p += 4;
+    }
+    if(hasH())
+    {
+        H = *(float *)p;
+        p += 4;
+    }
+    if(hasA())
+    {
+        A = *(float *)p;
+        p += 4;
+    }
+    if(hasB())
+    {
+        B = *(float *)p;
+        p += 4;
+    }
+    if(hasK())
+    {
+        K = *(float *)p;
+        p += 4;
+    }
+    if(hasL())
+    {
+        L = *(float *)p;
+        p += 4;
+    }
+    if(hasO())
+    {
+        O = *(float *)p;
+        p += 4;
     }
     if(hasString())   // set text pointer to string
     {
@@ -769,6 +828,14 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         {
             R = parseFloatValue(pos);
             params2 |= 4;
+            params |= 4096; // Needs V2 for saving
+            break;
+        }
+        case 'D':
+        case 'd':
+        {
+            D = parseFloatValue(pos);
+            params2 |= 8;
             params |= 4096; // Needs V2 for saving
             break;
         }

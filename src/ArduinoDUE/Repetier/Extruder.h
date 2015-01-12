@@ -168,7 +168,7 @@ public:
     const char * PROGMEM deselectCommands;
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
-
+    float diameter;
 #if MIXING_EXTRUDER > 0
     static void setMixingWeight(uint8_t extr,int weight);
     static void step();

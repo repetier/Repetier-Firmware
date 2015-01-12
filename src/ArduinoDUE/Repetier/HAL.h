@@ -120,8 +120,8 @@ typedef char prog_char;
 #define SERVO2500US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
 #define SERVO5000US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
 
-#define AD_PRESCALE_FACTOR      41  // 1 MHz ADC clock 
-#define AD_TRACKING_CYCLES      0   // 0 - 15     + 1 adc clock cycles
+#define AD_PRESCALE_FACTOR      168  // 250 kHz ADC clock 
+#define AD_TRACKING_CYCLES      4   // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
 #define ADC_ISR_EOC(channel)    (0x1u << channel) 

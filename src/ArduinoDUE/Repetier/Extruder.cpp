@@ -473,6 +473,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     float oldfeedrate = Printer::feedrate;
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
+    Commands::changeFeedrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
     if(Printer::isHomed())
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
@@ -1477,7 +1478,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
         }
-        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0
+        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>1
@@ -1501,7 +1502,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
         }
-        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0
+        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>2
@@ -1525,7 +1526,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
         }
-        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0
+        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>3
@@ -1549,7 +1550,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD
         }
-        ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0
+        ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>4
@@ -1573,7 +1574,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD
         }
-        ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0
+        ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 #if NUM_EXTRUDER>5
@@ -1597,7 +1598,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD
         }
-        ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0
+        ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0
     }
 #endif
 };

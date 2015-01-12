@@ -1166,9 +1166,9 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'O': // ops related stuff
             break;
         case 'l':
-            if(c2=='a') addInt(lastAction,4);
-#if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN>=0
-            else if(c2=='o') addStringP(READ(CASE_LIGHTS_PIN)?ui_text_on:ui_text_off);        // Lights on/off
+            if(c2 == 'a') addInt(lastAction,4);
+#if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
+            else if(c2 == 'o') addStringP(READ(CASE_LIGHTS_PIN) ? ui_text_on : ui_text_off);        // Lights on/off
 #endif
             break;
         case 'o':
@@ -2315,7 +2315,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
         break;
     case UI_ACTION_EPOSITION:
         if(!allowMoves) return false;
-        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment,UI_SET_EXTRUDER_FEEDRATE,true,false);
+        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
     case UI_ACTION_ZPOSITION_NOTEST:
@@ -2414,7 +2414,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(Printer::extrudeMultiply,1,25,500);
-        Com::printFLN(Com::tFlowMultiply, static_cast<int>(Printer::extrudeMultiply));
+        Commands::changeFlowrateMultiply(Printer::extrudeMultiply);
     }
     break;
     case UI_ACTION_STEPPER_INACTIVE:
@@ -2450,7 +2450,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_Z:
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
 #else
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
@@ -2460,7 +2460,7 @@ bool UIDisplay::nextPreviousAction(int8_t next, bool allowMoves)
     case UI_ACTION_MAX_JERK:
         INCREMENT_MIN_MAX(Printer::maxJerk,0.1,1,99.9);
         break;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     case UI_ACTION_MAX_ZJERK:
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
@@ -2697,7 +2697,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             TOGGLE(PS_ON_PIN);
 #endif
             break;
-#if CASE_LIGHTS_PIN > 0
+#if CASE_LIGHTS_PIN >= 0
         case UI_ACTION_LIGHTS_ONOFF:
             TOGGLE(CASE_LIGHTS_PIN);
             UI_STATUS(UI_TEXT_LIGHTS_ONOFF);

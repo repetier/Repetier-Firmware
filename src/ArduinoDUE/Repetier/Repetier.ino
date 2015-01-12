@@ -96,6 +96,7 @@ Custom M Codes
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
+- M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 - M203 - Set temperture monitor to Sx

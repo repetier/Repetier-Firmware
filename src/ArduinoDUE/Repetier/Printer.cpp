@@ -58,6 +58,7 @@ uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
+float Printer::extrusionFactor = 1.0;
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
@@ -510,7 +511,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 20
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
-                fabs(com->E) > EXTRUDE_MAXLENGTH)
+                fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
                 p = 0;
             destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
         }
@@ -520,7 +521,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if MIN_EXTRUDER_TEMP > 20
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP  && !Printer::isColdExtrusionAllowed()) ||
 #endif
-                fabs(p - currentPositionSteps[E_AXIS]) > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                fabs(p - currentPositionSteps[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
             destinationSteps[E_AXIS] = p;
         }
@@ -779,7 +780,7 @@ void Printer::setup()
     SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
     WRITE(EXT5_EXTRUDER_COOLER_PIN,LOW);
 #endif
-#if CASE_LIGHTS_PIN>=0
+#if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
     WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
 #endif // CASE_LIGHTS_PIN
@@ -788,7 +789,7 @@ void Printer::setup()
     Printer::motorYorZ = 0;
 #endif
 
-#if STEPPER_CURRENT_CONTROL!=CURRENT_CONTROL_MANUAL
+#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
     motorCurrentControlInit(); // Set current if it is firmware controlled
 #endif
     microstepInit();
@@ -807,7 +808,7 @@ void Printer::setup()
 #endif
     for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
     maxJerk = MAX_JERK;
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     maxZJerk = MAX_ZJERK;
 #endif
     offsetX = offsetY = 0;

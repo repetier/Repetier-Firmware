@@ -38,6 +38,15 @@ public:
     float I;
     float J;
     float R;
+    float D;
+    float C;
+    float H;
+    float A;
+    float B;
+    float K;
+    float L;
+    float O;
+
     char *text; //text[17];
     //moved the byte to the end and aligned ints on short boundary
     // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
@@ -113,6 +122,38 @@ public:
     inline bool hasR()
     {
         return ((params2 & 4)!=0);
+    }
+    inline bool hasD()
+    {
+        return ((params2 & 8)!=0);
+    }
+    inline bool hasC()
+    {
+        return ((params2 & 16)!=0);
+    }
+    inline bool hasH()
+    {
+        return ((params2 & 32)!=0);
+    }
+    inline bool hasA()
+    {
+        return ((params2 & 64)!=0);
+    }
+    inline bool hasB()
+    {
+        return ((params2 & 128)!=0);
+    }
+    inline bool hasK()
+    {
+        return ((params2 & 256)!=0);
+    }
+    inline bool hasL()
+    {
+        return ((params2 & 512)!=0);
+    }
+    inline bool hasO()
+    {
+        return ((params2 & 1024)!=0);
     }
     inline long getS(long def)
     {

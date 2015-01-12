@@ -953,7 +953,7 @@ void PWM_TIMER_VECTOR ()
         executePeriodical=1;
     }
 // read analog values -- only read one per interrupt
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
         
     // conversion finished?
     //if(ADC->ADC_ISR & ADC_ISR_EOC(adcChannel[osAnalogInputPos])) 

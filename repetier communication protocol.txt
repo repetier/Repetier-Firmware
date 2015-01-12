@@ -62,6 +62,13 @@ I : Bit 0 : 32-Bit float
 J : Bit 1 : 32-Bit float
 R : Bit 2 : 32-Bit float
 D : Bit 3 : 32-Bit float (V3)
+C : Bit 4 : 32-bit float (V3)
+H : Bit 5 : 32-Bit float (V3)
+A : Bit 6 : 32-Bit float (V3)
+B : Bit 7 : 32-Bit float (V3)
+K : Bit 8 : 32-Bit float (V3)
+L : Bit 9 : 32-Bit float (V3)
+O : Bit 10 : 32-Bit float (V3)
 
 Bit 2-15 reserved
 If Text bit is set in V2, the text length is send as byte 5 Text follows at

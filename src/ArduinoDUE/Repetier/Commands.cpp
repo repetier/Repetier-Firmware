@@ -208,6 +208,10 @@ void Commands::changeFlowrateMultiply(int factor)
     if(factor < 25) factor = 25;
     if(factor > 200) factor = 200;
     Printer::extrudeMultiply = factor;
+    if(Extruder::current->diameter <= 0)
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor);
+    else
+        Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
@@ -215,7 +219,7 @@ void Commands::setFanSpeed(int speed,bool wait)
 {
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     speed = constrain(speed,0,255);
-    Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
+    Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed != 0);
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed != pwm_pos[NUM_EXTRUDER + 2])
@@ -273,7 +277,7 @@ void motorCurrentControlInit() //Initialize Digipot Motor Current
 
     HAL::spiInit(0); //SPI.begin();
     SET_OUTPUT(DIGIPOTSS_PIN);
-    for(int i=0; i<=4; i++)
+    for(int i = 0; i <= 4; i++)
         //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
         setMotorCurrent(i,digipot_motor_current[i]);
 #endif
@@ -285,7 +289,7 @@ void motorCurrentControlInit() //Initialize Digipot Motor Current
 void setMotorCurrent( uint8_t channel, unsigned short level )
 {
     const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
-    if(channel>LTC2600_NUM_CHANNELS) return;
+    if(channel > LTC2600_NUM_CHANNELS) return;
     uint8_t address = ltc_channels[channel];
     char i;
 
@@ -306,7 +310,7 @@ void setMotorCurrent( uint8_t channel, unsigned short level )
     WRITE( LTC2600_CS_PIN, LOW );
 
     // transfer command and address
-    for( i=7; i>=0; i-- )
+    for( i = 7; i >= 0; i-- )
     {
         WRITE( LTC2600_SDI_PIN, address & (0x01 << i));
         WRITE( LTC2600_SCK_PIN, 1 );
@@ -314,7 +318,7 @@ void setMotorCurrent( uint8_t channel, unsigned short level )
     }
 
     // transfer the data word
-    for( i=15; i>=0; i-- )
+    for( i = 15; i >= 0; i-- )
     {
         WRITE( LTC2600_SDI_PIN, level & (0x01 << i));
         WRITE( LTC2600_SCK_PIN, 1 );
@@ -438,7 +442,7 @@ void Commands::processArc(GCode *com)
     float position[Z_AXIS_ARRAY];
     Printer::realPosition(position[X_AXIS],position[Y_AXIS],position[Z_AXIS]);
     if(!Printer::setDestinationStepsFromGCode(com)) return; // For X Y Z E F
-    float offset[2] = {Printer::convertToMM(com->hasI()?com->I:0),Printer::convertToMM(com->hasJ()?com->J:0)};
+    float offset[2] = {Printer::convertToMM(com->hasI() ? com->I : 0),Printer::convertToMM(com->hasJ() ? com->J : 0)};
     float target[E_AXIS_ARRAY] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]};
     float r;
     if (com->hasR())
@@ -1378,6 +1382,27 @@ void Commands::processMCode(GCode *com)
 #endif
         break;
 #endif // MIXING_EXTRUDER
+    case 200: // M200 T<extruder> D<diameter>
+        {
+            uint8_t extruderId = Extruder::current->id;
+            if(com->hasT() && com->T < NUM_EXTRUDER)
+                extruderId = com->T;
+            float d = 0;
+            if(com->hasR())
+                d = com->R;
+            if(com->hasD())
+                d = com->D;
+            extruder[extruderId].diameter = d;
+            if(extruderId == Extruder::current->id)
+                changeFlowrateMultiply(Printer::extrudeMultiply);
+            if(d == 0) {
+                Com::printFLN(PSTR("Disabled volumetric extrusion for extruder "),static_cast<int>(extruderId));
+            } else {
+                Com::printF(PSTR("Set volumetric extrusion for extruder "),static_cast<int>(extruderId));
+                Com::printFLN(PSTR(" to "),d);
+            }
+        }
+        break;
 #if RAMP_ACCELERATION
     case 201: // M201
         if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = com->X;
