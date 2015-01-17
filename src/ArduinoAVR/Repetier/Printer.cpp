@@ -1580,6 +1580,15 @@ void Printer::showConfiguration() {
 #if DRIVE_SYSTEM != DELTA
     Com::config(PSTR("JerkZ:"),maxZJerk);
 #endif
+#if FEATURE_RETRACTION
+    Com::config(PSTR("RetractionLength:"),EEPROM_FLOAT(RETRACTION_LENGTH));
+    Com::config(PSTR("RetractionLongLength:"),EEPROM_FLOAT(RETRACTION_LONG_LENGTH));
+    Com::config(PSTR("RetractionSpeed:"),EEPROM_FLOAT(RETRACTION_SPEED));
+    Com::config(PSTR("RetractionZLift:"),EEPROM_FLOAT(RETRACTION_Z_LIFT));
+    Com::config(PSTR("RetractionUndoExtraLength:"),EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH));
+    Com::config(PSTR("RetractionUndoExtraLongLength:"),EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH));
+    Com::config(PSTR("RetractionUndoSpeed:"),EEPROM_FLOAT(RETRACTION_UNDO_SPEED));
+#endif // FEATURE_RETRACTION
     Com::config(PSTR("XMin:"),xMin);
     Com::config(PSTR("YMin:"),yMin);
     Com::config(PSTR("ZMin:"),zMin);
