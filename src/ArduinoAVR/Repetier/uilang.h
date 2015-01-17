@@ -268,6 +268,11 @@
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 #define UI_TEXT_STOP_PRINT "Stop Print"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babystepping"
+#define UI_TEXT_CHANGE_FILAMENT "Change filament"
+#define UI_TEXT_WIZ_CH_FILAMENT1 "Change filament"
+#define UI_TEXT_WIZ_CH_FILAMENT2 "Rotate to move"
+#define UI_TEXT_WIZ_CH_FILAMENT3 "filament up/down"
+#define UI_TEXT_CLICK_DONE "Click when done"
 
 // *************** German translation ****************
 

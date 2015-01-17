@@ -47,6 +47,7 @@ What display type do you use?
 // 1000-1999 : Execute
 // 2000-2999 : Write code
 // 4000-4999 : Show menu
+// 5000-5999 : Wizard pages
 // Add UI_ACTION_TOPMENU to show a menu as top menu
 // ----------------------------------------------------------------------------
 
@@ -209,6 +210,8 @@ What display type do you use?
 #define UI_ACTION_SHOW_USERMENU9        4109
 #define UI_ACTION_SHOW_USERMENU10       4110
 
+#define UI_ACTION_WIZARD_FILAMENTCHANGE  5000
+
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
 
@@ -216,10 +219,11 @@ What display type do you use?
 #define UI_MENU_TYPE_FILE_SELECTOR 1
 #define UI_MENU_TYPE_SUBMENU 2
 #define UI_MENU_TYPE_MODIFICATION_MENU 3
+#define UI_MENU_TYPE_WIZARD 5
 
 typedef struct {
   const char *text; // Menu text
-  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command
+  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command,
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
@@ -231,6 +235,7 @@ typedef struct UIMenu_struct {
   // 1 = file selector
   // 2 = submenu
   // 3 = modififaction menu
+  // 5 = Wizard menu
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -331,6 +336,18 @@ extern const int8_t encoder_table[16] PROGMEM ;
   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {0,0,2,name ## _entries};
+#define UI_WIZARD4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+#define UI_WIZARD2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenu name PROGMEM = {5,action,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows) UI_MENU_ACTION4(name,action,rows)
 #define UI_MENU_ACTION2C(name,action,rows) UI_MENU_ACTION2(name,action,rows)
 #define UI_MENU_ACTION4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
@@ -350,6 +367,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0};
 #define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
 #define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
+#define UI_MENU_WIZARD(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,5,(unsigned int)&entries,0,0};
 #define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,filter,nofilter};
 #define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter};
 #define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
@@ -441,6 +459,7 @@ class UIDisplay {
     void fastAction();
     void mediumAction();
     void pushMenu(const UIMenu *men, bool refresh);
+    void popMenu(bool refresh);
     void adjustMenuPos();
     void setStatusP(PGM_P txt, bool error = false);
     void setStatus(const char *txt, bool error = false);
@@ -449,6 +468,7 @@ class UIDisplay {
     void updateSDFileCount();
     void goDir(char *name);
     bool isDirname(char *name);
+    bool isWizardActive();
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };

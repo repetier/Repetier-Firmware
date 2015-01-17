@@ -54,6 +54,7 @@ long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0,0,0};
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
+uint8_t Printer::flag2 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
@@ -156,6 +157,8 @@ float Printer::maxRealJerk = 0;
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif
+fast8_t Printer::wizardStackPos;
+wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
 
 
@@ -475,6 +478,15 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register int32_t p;
     float x, y, z;
+    if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into autoretract
+        if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
+            Extruder::current->retract(com->E < 0,false);
+        } else {
+            p = convertToMM(com->E * axisStepsPerMM[E_AXIS]); // current position
+            Extruder::current->retract(com->E < p,false);
+        }
+        return 0; // Fake no move so nothing gets added
+    }
     if(!relativeCoordinateMode)
     {
         if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
@@ -806,7 +818,7 @@ void Printer::setup()
 #endif
     advanceStepsSet = 0;
 #endif
-    for(uint8_t i=0; i<NUM_EXTRUDER+3; i++) pwm_pos[i]=0;
+    for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++) pwm_pos[i] = 0;
     maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM != DELTA
     maxZJerk = MAX_ZJERK;
@@ -844,7 +856,7 @@ void Printer::setup()
     Extruder::initExtruder();
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
-    for(uint8_t i=0; i<E_AXIS_ARRAY; i++)
+    for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
         currentPosition[i] = 0.0;
@@ -866,6 +878,7 @@ void Printer::setup()
 #if DELTA_HOME_ON_POWER
     homeAxis(true,true,true);
 #endif
+    setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
     Commands::printCurrentPosition(PSTR("Printer::setup "));
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
@@ -954,20 +967,20 @@ void Printer::homeZAxis() // Delta z homing
 {
     SHOT("homeZAxis ");
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-    PrintLine::moveRelativeDistanceInSteps(0,0,2*axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_MOVE,0,Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
     if(ENDSTOP_Z_BACK_ON_HOME > 0)
-        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
 #endif
     // Correct different endstop heights
     // These can be adjusted by two methods. You can use offsets stored by determining the center
     // or you can use the xyzMinSteps from G100 calibration. Both have the same effect but only one
     // should be measuredas both have the same effect.
-    long dx = -xMinSteps-EEPROM::deltaTowerXOffsetSteps();
-    long dy = -yMinSteps-EEPROM::deltaTowerYOffsetSteps();
-    long dz = -zMinSteps-EEPROM::deltaTowerZOffsetSteps();
-    long dm = RMath::min(dx,dy,dz);
+    long dx = -xMinSteps - EEPROM::deltaTowerXOffsetSteps();
+    long dy = -yMinSteps - EEPROM::deltaTowerYOffsetSteps();
+    long dz = -zMinSteps - EEPROM::deltaTowerZOffsetSteps();
+    long dm = RMath::min(dx, dy, dz);
     //Com::printFLN(Com::tTower1,dx);
     //Com::printFLN(Com::tTower2,dy);
     //Com::printFLN(Com::tTower3,dz);
@@ -1524,6 +1537,83 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
 #endif
+
+void Printer::setCaseLight(bool on) {
+#if CASE_LIGHTS_PIN > -1
+    WRITE(CASE_LIGHTS_PIN,on);
+    reportCaseLightStatus();
+#endif
+}
+
+void Printer::reportCaseLightStatus() {
+#if CASE_LIGHTS_PIN > -1
+    if(READ(CASE_LIGHTS_PIN))
+        Com::printInfoFLN(PSTR("Case lights on"));
+    else
+        Com::printInfoFLN(PSTR("Case lights off"));
+#else
+    Com::printInfoFLN(PSTR("No case lights"));
+#endif
+}
+#define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
+void Printer::showConfiguration() {
+    Com::config(PSTR("Baudrate:"),baudrate);
+    Com::config(PSTR("InputBuffer:"),SERIAL_BUFFER_SIZE - 1);
+    Com::config(PSTR("NumExtruder:"),NUM_EXTRUDER);
+    Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
+    Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
+    Com::config(PSTR("SDCard:"),SDSUPPORT);
+    Com::config(PSTR("Fan:"),FAN_PIN > -1);
+    Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
+    Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
+    Com::config(PSTR("XHomeDir:"),X_HOME_DIR);
+    Com::config(PSTR("YHomeDir:"),Y_HOME_DIR);
+    Com::config(PSTR("ZHomeDir:"),Z_HOME_DIR);
+    Com::config(PSTR("SupportG10G11:"),FEATURE_RETRACTION);
+    Com::config(PSTR("SupportLocalFilamentchange:"),FEATURE_RETRACTION);
+    Com::config(PSTR("CaseLights:"),CASE_LIGHTS_PIN > -1);
+    Com::config(PSTR("ZProbe:"),FEATURE_Z_PROBE);
+    Com::config(PSTR("Autolevel:"),FEATURE_AUTOLEVEL);
+    Com::config(PSTR("EEPROM:"),EEPROM_MODE != 0);
+    Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
+    Com::config(PSTR("JerkXY:"),maxJerk);
+#if DRIVE_SYSTEM != DELTA
+    Com::config(PSTR("JerkZ:"),maxZJerk);
+#endif
+    Com::config(PSTR("XMin:"),xMin);
+    Com::config(PSTR("YMin:"),yMin);
+    Com::config(PSTR("ZMin:"),zMin);
+    Com::config(PSTR("XMax:"),xMin + xLength);
+    Com::config(PSTR("YMax:"),yMin + yLength);
+    Com::config(PSTR("ZMax:"),zMin + zLength);
+    Com::config(PSTR("XSize:"), xLength);
+    Com::config(PSTR("YSize:"), yLength);
+    Com::config(PSTR("ZSize:"), zLength);
+    Com::config(PSTR("XPrintAccel:"), maxAccelerationMMPerSquareSecond[X_AXIS]);
+    Com::config(PSTR("YPrintAccel:"), maxAccelerationMMPerSquareSecond[Y_AXIS]);
+    Com::config(PSTR("ZPrintAccel:"), maxAccelerationMMPerSquareSecond[Z_AXIS]);
+    Com::config(PSTR("XTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
+    Com::config(PSTR("YTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
+    Com::config(PSTR("ZTravelAccel:"), maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
+#if DRIVE_SYSTEM == DELTA
+    Com::config(PSTR("PrinterType:Delta"));
+#else
+    Com::config(PSTR("PrinterType:Cartesian"));
+#endif // DRIVE_SYSTEM
+    Com::config(PSTR("MaxBedTemp:"), HEATED_BED_MAX_TEMP);
+    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Jerk:"),extruder[i].maxStartFeedrate);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("MaxSpeed:"),extruder[i].maxFeedrate);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Acceleration:"),extruder[i].maxAcceleration);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("Diameter:"),extruder[i].diameter);
+        START_EXTRUDER_CONFIG(i)
+        Com::printFLN(PSTR("MaxTemp:"),MAXTEMP);
+    }
+}
 
 #if DISTORTION_CORRECTION
 

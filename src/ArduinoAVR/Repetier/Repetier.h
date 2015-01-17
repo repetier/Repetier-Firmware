@@ -22,7 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.92"
+#define REPETIER_VERSION "0.92.2"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -70,6 +70,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
+
+#define WIZARD_STACK_SIZE 8
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER

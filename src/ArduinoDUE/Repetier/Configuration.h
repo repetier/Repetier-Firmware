@@ -401,6 +401,37 @@ cog. Direct drive extruder need 0. */
 M140 command, after a given temperature is reached. */
 #define RETRACT_DURING_HEATUP true
 
+/** Allow retraction with G10/G11 removing requirement for retraction setting in slicer. Also allows filament change if lcd is configured. */
+#define FEATURE_RETRACTION 1
+/** autoretract converts pure axtrusion moves into retractions. Beware that 
+ simple extrusion e.g. over Repetier-Host will then not work! */
+#define AUTORETRACT_ENABLED 0
+#define RETRACTION_LENGTH 3
+#define RETRACTION_LONG_LENGTH 13
+#define RETRACTION_SPEED 40
+#define RETRACTION_Z_LIFT 0
+#define RETRACTION_UNDO_EXTRA_LENGTH 0
+#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
+#define RETRACTION_UNDO_SPEED 20
+
+/**
+If you have a lcd display, you can do a filament switch with M600.
+It will change the current extruders filament and temperature must already be high enough.
+*/
+#define FILAMENTCHANGE_X_POS 0
+#define FILAMENTCHANGE_Y_POS 0
+#define FILAMENTCHANGE_Z_ADD 1
+/** Does a homing procedure after a filament change. This is good in case
+you moved the extruder while changing filament during print.
+0 = no homing, 1 = xy homing, 2 = xyz homing
+*/
+#define FILAMENTCHANGE_REHOME 1
+/** Will first retract short distance, go to change position and then retract longretract.
+Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
+*/
+#define FILAMENTCHANGE_SHORTRETRACT 30
+#define FILAMENTCHANGE_LONGRETRACT 30
+
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
 need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15.

@@ -227,7 +227,7 @@ FSTRINGVALUE(Com::tZProbePrinterHeight,"Printer height:")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #endif // WAITING_IDENTIFIER
-#if EEPROM_MODE==0
+#if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
 #if FEATURE_Z_PROBE
@@ -257,7 +257,6 @@ FSTRINGVALUE(Com::tConfigStoredEEPROM,"Configuration stored to EEPROM.")
 FSTRINGVALUE(Com::tConfigLoadedEEPROM,"Configuration loaded from EEPROM.")
 FSTRINGVALUE(Com::tEPRConfigResetDefaults,"Configuration reset to defaults.")
 FSTRINGVALUE(Com::tEPRProtocolChanged,"Protocol version changed, upgrading")
-FSTRINGVALUE(Com::tExtrDot,"Extr.")
 FSTRINGVALUE(Com::tEPR0,"EPR:0 ")
 FSTRINGVALUE(Com::tEPR1,"EPR:1 ")
 FSTRINGVALUE(Com::tEPR2,"EPR:2 ")
@@ -379,7 +378,45 @@ FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from therm
 FSTRINGVALUE(Com::tZCorrectionEnabled,"Z correction enabled")
 FSTRINGVALUE(Com::tZCorrectionDisabled,"Z correction disabled")
 #endif
+#if FEATURE_RETRACTION
+FSTRINGVALUE(Com::tEPRAutoretractEnabled,"Enable retraction conversion [0/1]")
+FSTRINGVALUE(Com::tEPRRetractionLength,"Retraction length [mm]")
+FSTRINGVALUE(Com::tEPRRetractionLongLength,"Retraction length extruder switch [mm]")
+FSTRINGVALUE(Com::tEPRRetractionSpeed,"Retraction speed [mm/s]")
+FSTRINGVALUE(Com::tEPRRetractionZLift,"Retraction z-lift [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoExtraLength,"Extra extrusion on undo retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoExtraLongLength,"Extra extrusion on undo switch retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionUndoSpeed,"Retraction undo speed")
+#endif
+FSTRINGVALUE(Com::tConfig,"Config:")
+FSTRINGVALUE(Com::tExtrDot,"Extr.")
 
+void Com::config(FSTRINGPARAM(text)) {
+    printF(tConfig);
+    printFLN(text);
+}
+void Com::config(FSTRINGPARAM(text),int value) {
+    printF(tConfig);
+    printFLN(text,value);
+}
+void Com::config(FSTRINGPARAM(text),const char *msg) {
+    printF(tConfig);
+    printF(text);
+    print(msg);
+    println();
+}
+void Com::config(FSTRINGPARAM(text),int32_t value){
+    printF(tConfig);
+    printFLN(text,value);
+}
+void Com::config(FSTRINGPARAM(text),uint32_t value){
+    printF(tConfig);
+    printFLN(text,value);
+}
+void Com::config(FSTRINGPARAM(text),float value,uint8_t digits){
+    printF(tConfig);
+    printFLN(text,value,digits);
+}
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
     printF(text);

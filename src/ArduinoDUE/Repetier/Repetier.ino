@@ -39,6 +39,8 @@ Implemented Codes
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
 - G4  - Dwell S<seconds> or P<milliseconds>
+- G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+- G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
@@ -104,6 +106,7 @@ Custom M Codes
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
+- M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
@@ -121,12 +124,15 @@ Custom M Codes
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
+- M355 S<0/1> - Turn case light on/off, no S = report status
+- M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
+- M600 Change filament
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
 

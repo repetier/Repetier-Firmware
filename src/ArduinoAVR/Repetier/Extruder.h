@@ -119,6 +119,8 @@ public:
 class Extruder;
 extern Extruder extruder[];
 
+#define EXTRUDER_FLAG_RETRACTED 1
+
 /** \brief Data to drive one extruder.
 
 This structure contains all definitions for an extruder and all
@@ -169,6 +171,7 @@ public:
     uint8_t coolerSpeed; ///< Speed to use when enabled
     uint8_t coolerPWM; ///< current PWM setting
     float diameter;
+    uint8_t flags;
 #if MIXING_EXTRUDER > 0
     static void setMixingWeight(uint8_t extr,int weight);
     static void step();
@@ -418,6 +421,14 @@ public:
 #endif
 #endif
     }
+#endif
+#if FEATURE_RETRACTION
+    inline bool isRetracted() {return (flags & EXTRUDER_FLAG_RETRACTED) != 0;}
+    inline void setRetracted(bool on) {
+        flags = (flags & (255 - EXTRUDER_FLAG_RETRACTED)) | (on ? EXTRUDER_FLAG_RETRACTED : 0);
+    }
+    void retract(bool isRetract,bool isLong);
+    void retractDistance(float dist);
 #endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();

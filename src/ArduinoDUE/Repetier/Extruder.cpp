@@ -20,17 +20,11 @@
 */
 
 #include "Repetier.h"
-#include "pins_arduino.h"
-#include "ui.h"
-#if EEPROM_MODE != 0
-#include "Eeprom.h"
-#endif
-
 
 uint8_t manageMonitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 unsigned int counterPeriodical = 0;
 volatile uint8_t executePeriodical = 0;
-uint8_t counter250ms=25;
+uint8_t counter250ms = 25;
 #if FEATURE_DITTO_PRINTING
 uint8_t Extruder::dittoMode = 0;
 #endif
@@ -45,7 +39,7 @@ extern int16_t read_max6675(uint8_t ss_pin);
 extern int16_t read_max31855(uint8_t ss_pin);
 #endif
 
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
 uint8 osAnalogInputCounter[ANALOG_INPUTS];
 uint osAnalogInputBuildup[ANALOG_INPUTS];
@@ -267,7 +261,7 @@ void Extruder::manageTemperatures()
         extruderTempErrors--;
     if(Printer::isAnyTempsensorDefect())
     {
-        for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+        for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
         {
             pwm_pos[tempController[i]->pwmIndex] = 0;
         }
@@ -289,8 +283,8 @@ void Extruder::initHeatedBed()
 #if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
 void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,short maxTemp,float beta,float r0,float t0,float r1,float r2)
 {
-    t0+=273.15f;
-    float rs,vs;
+    t0 += 273.15f;
+    float rs, vs;
     if(r1==0)
     {
         rs = r2;
@@ -298,24 +292,24 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
     }
     else
     {
-        vs =(float)(GENERIC_THERM_VREF*r1)/(r1+r2);
-        rs = (r2*r1)/(r1+r2);
+        vs =static_cast<float>((GENERIC_THERM_VREF * r1) / (r1 + r2));
+        rs = (r2 * r1) / (r1 + r2);
     }
-    float k = r0*exp(-beta/t0);
-    float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
-    for(uint8_t i=0; i<GENERIC_THERM_NUM_ENTRIES; i++)
+    float k = r0 * exp(-beta / t0);
+    float delta = (maxTemp-minTemp) / (GENERIC_THERM_NUM_ENTRIES - 1.0f);
+    for(uint8_t i = 0; i < GENERIC_THERM_NUM_ENTRIES; i++)
     {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
-        float t = maxTemp-i*delta;
-        float r = exp(beta/(t+272.65))*k;
-        float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
-        int adc = (int)(v);
+        float t = maxTemp - i * delta;
+        float r = exp(beta / (t + 272.65)) * k;
+        float v = 4092 * r * vs / ((rs + r) * GENERIC_THERM_VREF);
+        int adc = static_cast<int>(v);
         t *= 8;
-        if(adc>4092) adc=4092;
-        table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
-        table[i][1] = (int)t;
+        if(adc > 4092) adc = 4092;
+        table[i][0] = (adc >> (ANALOG_REDUCE_BITS));
+        table[i][1] = static_cast<int>(t);
 #ifdef DEBUG_GENERIC
         Com::printF(Com::tGenTemp,table[i][0]);
         Com::printFLN(Com::tComma,table[i][1]);
@@ -1086,8 +1080,8 @@ void TemperatureController::setTargetTemperature(float target)
     case 12:
     {
         type--;
-        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
-        uint8_t i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -1098,7 +1092,7 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp < temp)
             {
-                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
+                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp - newtemp);
                 return;
             }
             oldtemp = newtemp;
@@ -1428,6 +1422,41 @@ int16_t read_max31855(uint8_t ss_pin)
     return temperature;
 }
 #endif
+
+#if FEATURE_RETRACTION
+void Extruder::retractDistance(float dist) {
+    float oldFeedrate = Printer::feedrate;
+    int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
+    int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
+    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance,distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED), false, false);
+    Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
+    Printer::feedrate = oldFeedrate;
+}
+
+void Extruder::retract(bool isRetract,bool isLong) {
+    float oldFeedrate = Printer::feedrate;
+    float distance = (isLong ? EEPROM_FLOAT( RETRACTION_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_LENGTH));
+    int32_t zlift = static_cast<int32_t>(EEPROM_FLOAT(RETRACTION_Z_LIFT) * Printer::axisStepsPerMM[Z_AXIS]);
+    int32_t oldZPos = Printer::currentPositionSteps[Z_AXIS];
+    float oldZPosF = Printer::currentPosition[Z_AXIS];
+    if(isRetract && !isRetracted()) {
+        retractDistance(distance);
+        setRetracted(true);
+        if(zlift > 0)
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,zlift,0,Printer::maxFeedrate[Z_AXIS], false);
+    } else if(!isRetract && isRetracted()) {
+        distance += (isLong ? EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH) );
+        if(zlift > 0)
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,-zlift,0,Printer::maxFeedrate[Z_AXIS], false);
+        retractDistance(-distance);
+        setRetracted(false);
+    }
+    Printer::currentPositionSteps[Z_AXIS] = oldZPos; // z lift should have no visible impact
+    Printer::currentPosition[Z_AXIS] = oldZPosF;
+    Printer::feedrate = oldFeedrate;
+}
+#endif
+
 Extruder *Extruder::current;
 
 #if NUM_EXTRUDER>0
@@ -1457,7 +1486,7 @@ const char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
 
 Extruder extruder[NUM_EXTRUDER] =
 {
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
     {
         0,EXT0_X_OFFSET,EXT0_Y_OFFSET,EXT0_STEPS_PER_MM,EXT0_ENABLE_PIN,EXT0_ENABLE_ON,
         EXT0_MAX_FEEDRATE,EXT0_MAX_ACCELERATION,EXT0_MAX_START_FEEDRATE,0,EXT0_WATCHPERIOD
@@ -1478,10 +1507,10 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
         }
-        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0
+        ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
     ,{
         1,EXT1_X_OFFSET,EXT1_Y_OFFSET,EXT1_STEPS_PER_MM,EXT1_ENABLE_PIN,EXT1_ENABLE_ON,
         EXT1_MAX_FEEDRATE,EXT1_MAX_ACCELERATION,EXT1_MAX_START_FEEDRATE,0,EXT1_WATCHPERIOD
@@ -1502,10 +1531,10 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
         }
-        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0
+        ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
     ,{
         2,EXT2_X_OFFSET,EXT2_Y_OFFSET,EXT2_STEPS_PER_MM,EXT2_ENABLE_PIN,EXT2_ENABLE_ON,
         EXT2_MAX_FEEDRATE,EXT2_MAX_ACCELERATION,EXT2_MAX_START_FEEDRATE,0,EXT2_WATCHPERIOD
@@ -1526,10 +1555,10 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
         }
-        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0
+        ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
-#if NUM_EXTRUDER>3
+#if NUM_EXTRUDER > 3
     ,{
         3,EXT3_X_OFFSET,EXT3_Y_OFFSET,EXT3_STEPS_PER_MM,EXT3_ENABLE_PIN,EXT3_ENABLE_ON,
         EXT3_MAX_FEEDRATE,EXT3_MAX_ACCELERATION,EXT3_MAX_START_FEEDRATE,0,EXT3_WATCHPERIOD
@@ -1550,10 +1579,10 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD
         }
-        ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0
+        ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
-#if NUM_EXTRUDER>4
+#if NUM_EXTRUDER > 4
     ,{
         4,EXT4_X_OFFSET,EXT4_Y_OFFSET,EXT4_STEPS_PER_MM,EXT4_ENABLE_PIN,EXT4_ENABLE_ON,
         EXT4_MAX_FEEDRATE,EXT4_MAX_ACCELERATION,EXT4_MAX_START_FEEDRATE,0,EXT4_WATCHPERIOD
@@ -1574,10 +1603,10 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD
         }
-        ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0
+        ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
-#if NUM_EXTRUDER>5
+#if NUM_EXTRUDER > 5
     ,{
         5,EXT5_X_OFFSET,EXT5_Y_OFFSET,EXT5_STEPS_PER_MM,EXT5_ENABLE_PIN,EXT5_ENABLE_ON,
         EXT5_MAX_FEEDRATE,EXT5_MAX_ACCELERATION,EXT5_MAX_START_FEEDRATE,0,EXT5_WATCHPERIOD
@@ -1598,7 +1627,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
             ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD
         }
-        ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0
+        ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
     }
 #endif
 };

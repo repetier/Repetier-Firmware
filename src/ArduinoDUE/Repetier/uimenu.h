@@ -219,9 +219,9 @@ for 2 row displays. You can add additional pages or change the default pages lik
   // How many pages do you want to have. Minimum is 1.
   #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT
 
-#elif UI_ROWS>=4
+#elif UI_ROWS >= 4
  #if HAVE_HEATED_BED
- #if NUM_EXTRUDER>0
+ #if NUM_EXTRUDER > 0
    UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os")
 #else
    UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os")
@@ -309,9 +309,19 @@ ok sets the value if not already done and goes back to previous menu.
 
 UI_MENU_ACTION2(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR,"%oe")
 
+// Filament change wizard
+
+#if FEATURE_RETRACTION
+#if UI_ROWS >= 4
+UI_WIZARD4(ui_wiz_filamentchange, UI_ACTION_WIZARD_FILAMENTCHANGE, UI_TEXT_WIZ_CH_FILAMENT1, UI_TEXT_WIZ_CH_FILAMENT2, UI_TEXT_WIZ_CH_FILAMENT3, UI_TEXT_CLICK_DONE)
+#else
+UI_WIZARD2(ui_wiz_filamentchange, UI_ACTION_WIZARD_FILAMENTCHANGE, UI_TEXT_WIZ_CH_FILAMENT1, UI_TEXT_CLICK_DONE)
+#endif
+#endif
+
 // **** Positions submenus
 
-#if UI_ROWS>=4
+#if UI_ROWS >= 4
 UI_MENU_ACTION4C(ui_menu_xpos,UI_ACTION_XPOSITION,UI_TEXT_ACTION_XPOSITION4)
 UI_MENU_ACTION4C(ui_menu_ypos,UI_ACTION_YPOSITION,UI_TEXT_ACTION_YPOSITION4)
 UI_MENU_ACTION4C(ui_menu_zpos,UI_ACTION_ZPOSITION,UI_TEXT_ACTION_ZPOSITION4)
@@ -481,8 +491,17 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug,"Write Debug",UI_ACTION_WRITE_DEBUG)
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all BABY_ENTRY ,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+BABY_CNT+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT)
+#if FEATURE_RETRACTION
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT,UI_ACTION_WIZARD_FILAMENTCHANGE)
+#define UI_CHANGE_FIL_CNT 1
+#define UI_CHANGE_FIL_ENT ,&ui_menu_quick_changefil
+#else
+#define UI_CHANGE_FIL_CNT 0
+#define UI_CHANGE_FIL_ENT
+#endif
+
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all BABY_ENTRY ,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_CHANGE_FIL_ENT,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+BABY_CNT+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT+UI_CHANGE_FIL_CNT)
 
 // **** Fan menu
 

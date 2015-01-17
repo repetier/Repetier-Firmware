@@ -257,7 +257,6 @@ FSTRINGVAR(tConfigStoredEEPROM)
 FSTRINGVAR(tConfigLoadedEEPROM)
 FSTRINGVAR(tEPRConfigResetDefaults)
 FSTRINGVAR(tEPRProtocolChanged)
-FSTRINGVAR(tExtrDot)
 FSTRINGVAR(tEPR0)
 FSTRINGVAR(tEPR1)
 FSTRINGVAR(tEPR2)
@@ -365,7 +364,25 @@ FSTRINGVAR(tHeaterDecoupledWarning)
 FSTRINGVAR(tZCorrectionEnabled)
 FSTRINGVAR(tZCorrectionDisabled)
 #endif
+#if FEATURE_RETRACTION
+FSTRINGVAR(tEPRAutoretractEnabled)
+FSTRINGVAR(tEPRRetractionLength)
+FSTRINGVAR(tEPRRetractionLongLength)
+FSTRINGVAR(tEPRRetractionSpeed)
+FSTRINGVAR(tEPRRetractionZLift)
+FSTRINGVAR(tEPRRetractionUndoExtraLength)
+FSTRINGVAR(tEPRRetractionUndoExtraLongLength)
+FSTRINGVAR(tEPRRetractionUndoSpeed)
+#endif
+FSTRINGVAR(tConfig)
+FSTRINGVAR(tExtrDot)
 
+static void config(FSTRINGPARAM(text));
+static void config(FSTRINGPARAM(text),int value);
+static void config(FSTRINGPARAM(text),const char *msg);
+static void config(FSTRINGPARAM(text),int32_t value);
+static void config(FSTRINGPARAM(text),uint32_t value);
+static void config(FSTRINGPARAM(text),float value,uint8_t digits=2);
 static void printNumber(uint32_t n);
 static void printWarningF(FSTRINGPARAM(text));
 static void printInfoF(FSTRINGPARAM(text));

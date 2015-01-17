@@ -51,6 +51,25 @@ union floatLong
 #endif
 };
 
+union wizardVar {
+    float f;
+    int32_t l;
+    uint32_t ul;
+    int16_t i;
+    uint16_t ui;
+    int8_t c;
+    uint8_t uc;
+
+    wizardVar():i(0) {}
+    wizardVar(float _f):f(_f) {}
+    wizardVar(int32_t _f):l(_f) {}
+    wizardVar(uint32_t _f):ul(_f) {}
+    wizardVar(int16_t _f):i(_f) {}
+    wizardVar(uint16_t _f):ui(_f) {}
+    wizardVar(int8_t _f):c(_f) {}
+    wizardVar(uint8_t _f):uc(_f) {}
+};
+
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT     4
@@ -67,6 +86,8 @@ union floatLong
 #define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
 #define PRINTER_FLAG1_POWER_ON              64
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
+#define PRINTER_FLAG2_BLOCK_RECEIVING       1
+#define PRINTER_FLAG2_AUTORETRACT           2
 
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
@@ -140,6 +161,7 @@ public:
 
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2;
     static uint8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -237,6 +259,9 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
+    static fast8_t wizardStackPos;
+    static wizardVar wizardStack[WIZARD_STACK_SIZE];
+
     static inline void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -491,6 +516,23 @@ public:
             Com::printFLN(PSTR("Cold extrusion allowed"));
         else
             Com::printFLN(PSTR("Cold extrusion disallowed"));
+    }
+    static inline uint8_t isBlockingReceive()
+    {
+        return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
+    }
+    static inline void setBlockingReceive(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
+    }
+    static inline uint8_t isAutoretract()
+    {
+        return flag2 & PRINTER_FLAG2_AUTORETRACT;
+    }
+    static inline void setAutoretract(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
+        Com::printFLN(PSTR("Autoretract:"),b);
     }
 
 
@@ -783,7 +825,7 @@ public:
     static bool isPositionAllowed(float x,float y,float z);
     static inline int getFanSpeed()
     {
-        return (int)pwm_pos[NUM_EXTRUDER+2];
+        return (int)pwm_pos[NUM_EXTRUDER + 2];
     }
 #if NONLINEAR_SYSTEM
     static inline void setDeltaPositions(long xaxis, long yaxis, long zaxis)
@@ -816,6 +858,13 @@ public:
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
     static void zBabystep();
+
+    static inline void resetWizardStack() {wizardStackPos = 0;}
+    static inline void pushWizardVar(wizardVar v) {wizardStack[wizardStackPos++] = v;}
+    static inline wizardVar popWizardVar() {wizardStack[--wizardStackPos];}
+    static void showConfiguration();
+    static void setCaseLight(bool on);
+    static void reportCaseLightStatus();
 private:
     static void homeXAxis();
     static void homeYAxis();
