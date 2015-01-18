@@ -517,6 +517,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
+
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
         {
             if(
@@ -1563,7 +1564,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
-    Com::config(PSTR("Fan:"),FAN_PIN > -1);
+    Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
     Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
     Com::config(PSTR("XHomeDir:"),X_HOME_DIR);

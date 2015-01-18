@@ -861,7 +861,7 @@ public:
 
     static inline void resetWizardStack() {wizardStackPos = 0;}
     static inline void pushWizardVar(wizardVar v) {wizardStack[wizardStackPos++] = v;}
-    static inline wizardVar popWizardVar() {wizardStack[--wizardStackPos];}
+    static inline wizardVar popWizardVar() {return wizardStack[--wizardStackPos];}
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
