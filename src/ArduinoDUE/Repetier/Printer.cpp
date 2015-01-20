@@ -478,6 +478,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register int32_t p;
     float x, y, z;
+#if FEATURE_RETRACTION
     if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into autoretract
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
             Extruder::current->retract(com->E < 0,false);
@@ -487,6 +488,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         }
         return 0; // Fake no move so nothing gets added
     }
+#endif
     if(!relativeCoordinateMode)
     {
         if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];

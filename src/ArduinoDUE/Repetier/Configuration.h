@@ -403,7 +403,7 @@ M140 command, after a given temperature is reached. */
 
 /** Allow retraction with G10/G11 removing requirement for retraction setting in slicer. Also allows filament change if lcd is configured. */
 #define FEATURE_RETRACTION 1
-/** autoretract converts pure axtrusion moves into retractions. Beware that 
+/** autoretract converts pure extrusion moves into retractions. Beware that 
  simple extrusion e.g. over Repetier-Host will then not work! */
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
