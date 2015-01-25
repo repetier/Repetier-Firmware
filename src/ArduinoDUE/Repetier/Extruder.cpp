@@ -897,14 +897,14 @@ void TemperatureController::updateCurrentTemperature()
     case 97:
     case 98:
     case 99:
-        currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-(osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS)); // Convert to 10 bit result
+        currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS)); // Convert to 10 bit result
         break;
     case 50: // User defined PTC table
     case 51:
     case 52:
     case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
     case 100: // AD595
-        currentTemperature = (osAnalogInputValues[sensorPin]>>(ANALOG_REDUCE_BITS));
+        currentTemperature = (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS));
         break;
 #endif
 #ifdef SUPPORT_MAX6675
@@ -994,20 +994,20 @@ void TemperatureController::updateCurrentTemperature()
         break;
     }
     case 60: // AD8495 (Delivers 5mV/degC vs the AD595's 10mV)
-        currentTemperatureC = ((float)currentTemperature * 1000.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
+        currentTemperatureC = ((float)currentTemperature * 1000.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
         break;
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
-        currentTemperatureC = ((float)currentTemperature * 500.0f/(1024<<(2-ANALOG_REDUCE_BITS)));
+        currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
         break;
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperatureC = (float)currentTemperature /4.0;
+        currentTemperatureC = (float)currentTemperature / 4.0;
         break;
 #endif
 #ifdef SUPPORT_MAX31855
     case 102: // MAX31855
-        currentTemperatureC = (float)currentTemperature /4.0;
+        currentTemperatureC = (float)currentTemperature / 4.0;
         break;
 #endif
 #if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
@@ -1130,10 +1130,10 @@ void TemperatureController::setTargetTemperature(float target)
         break;
     }
     case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
-        targetTemperature = (int)((int32_t)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 1000);
+        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 1000);
         break;
     case 100: // HEATER_USES_AD595
-        targetTemperature = (int)((int32_t)temp * (1024<<(2-ANALOG_REDUCE_BITS))/ 500);
+        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 500);
         break;
 #ifdef SUPPORT_MAX6675
     case 101:  // defined HEATER_USES_MAX6675
@@ -1150,7 +1150,7 @@ void TemperatureController::setTargetTemperature(float target)
     case 98:
     case 99:
     {
-        uint8_t i=2;
+        uint8_t i = 2;
         const short *temptable;
 #ifdef USE_GENERIC_THERMISTORTABLE_1
         if(type == 97)
@@ -1173,14 +1173,14 @@ void TemperatureController::setTargetTemperature(float target)
             newtemp = temptable[i++];
             if (newtemp < temp)
             {
-                targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp-temp)*(int32_t)(oldraw-newraw)/(oldtemp-newtemp);
+                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;
             oldraw = newraw;
         }
         // Overflow: Set to last value in the table
-        targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-newraw;
+        targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - newraw;
         break;
     }
 #endif
@@ -1353,14 +1353,14 @@ void writeMonitor()
     Com::printF(Com::tMTEMPColon,(long)HAL::timeInMilliseconds());
     TemperatureController *act = tempController[manageMonitor];
     Com::printF(Com::tSpace,act->currentTemperatureC);
-    Com::printF(Com::tSpace,act->targetTemperatureC,0);
+    Com::printF(Com::tSpace,act->targetTemperatureC, 0);
     Com::printFLN(Com::tSpace,pwm_pos[act->pwmIndex]);
 }
 
 bool reportTempsensorError()
 {
     if(!Printer::isAnyTempsensorDefect()) return false;
-    for(uint8_t i = 0; i<NUM_TEMPERATURE_LOOPS; i++)
+    for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
         if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
         else Com::printF(Com::tExtruderSpace,i);

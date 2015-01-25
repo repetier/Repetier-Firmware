@@ -451,6 +451,11 @@
 #define UI_TEXT_STRING_HM_SLOWBANG     "Langs.BB"
 #define UI_TEXT_STOP_PRINT "Druck abbrechen"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babyschritte"
+#define UI_TEXT_CHANGE_FILAMENT "Filamentwechsel"
+#define UI_TEXT_WIZ_CH_FILAMENT1 "Filamentwechsel:"
+#define UI_TEXT_WIZ_CH_FILAMENT2 "Zum man. f" STR_ouml "rdern"
+#define UI_TEXT_WIZ_CH_FILAMENT3 "Men" STR_uuml "knopf drehen"
+#define UI_TEXT_CLICK_DONE "Weiter mit Klick"
 
 #endif
 

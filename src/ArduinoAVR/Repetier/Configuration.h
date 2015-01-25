@@ -1092,12 +1092,6 @@ boards you might need to make it inverting.
 */
 #define KILL_METHOD 1
 
-/** \brief Cache size for incoming commands.
-
-There should be no reason to increase this cache. Commands are nearly immediately sent to
-execution.
-*/
-#define GCODE_BUFFER_SIZE 2
 /** Appends the linenumber after every ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this */
 #define ACK_WITH_LINENUMBER 1
 /** Communication errors can swollow part of the ok, which tells the host software to send

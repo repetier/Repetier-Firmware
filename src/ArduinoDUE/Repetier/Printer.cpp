@@ -1360,6 +1360,9 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     {
         if(runStartScript)
             GCode::executeFString(Com::tZProbeStartScript);
+        if(currentPosition[Z_AXIS] > EEPROM::zProbeBedDistance()) {
+            moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeBedDistance(),IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
+        }
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
         PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
@@ -1367,16 +1370,17 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
                                                0, 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);
     }
     Commands::waitUntilEndOfAllMoves();
-    int32_t sum = 0,probeDepth,shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]);
-    int32_t lastCorrection = currentPositionSteps[Z_AXIS];
+    int32_t sum = 0, probeDepth;
+    int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
+    int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
     int32_t updateZ = 0;
-    for(uint8_t r = 0; r < repeat; r++)
+    for(int8_t r = 0; r < repeat; r++)
     {
-        probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
-        stepsRemainingAtZHit = -1;
+        probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
+        stepsRemainingAtZHit = -1; // Marker that we did not hit z probe
         int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
         int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
@@ -1390,25 +1394,28 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         }
         setZProbingActive(false);
 #if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentDeltaPositionSteps[C_TOWER];
+        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentDeltaPositionSteps[C_TOWER]; // nonlinear moves may split z so stepsRemainingAtZHit is only what is left from last segment not total move. This corrects the problem.
 #endif
 #if DRIVE_SYSTEM == DELTA
-        currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit;
+        currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
         currentDeltaPositionSteps[B_TOWER] += stepsRemainingAtZHit;
         currentDeltaPositionSteps[C_TOWER] += stepsRemainingAtZHit;
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
-        if(r == 0 && first)  // Modify start z position on first probe hit to speed the ZProbe process
+      /*  if(r == 0 && first)  // Modify start z position on first probe hit to speed the ZProbe process
         {
             int32_t newLastCorrection = currentPositionSteps[Z_AXIS] + (int32_t)((float)EEPROM::zProbeBedDistance() * axisStepsPerMM[Z_AXIS]);
-            if(newLastCorrection < lastCorrection)
+            if(newLastCorrection < lastCorrection) // don't want to go all the way up again, fix discrepancy and retest
             {
                 updateZ = lastCorrection - newLastCorrection;
                 lastCorrection = newLastCorrection;
+                first = false;
+                PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, EEPROM::zProbeSpeed(), true, false);
+                r--;
             }
-        }
+        }*/
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
-        if(r + 1 < repeat)
+        if(r + 1 < repeat) // go only shortes possible move up for repetitions
             PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, EEPROM::zProbeSpeed(), true, false);
     }
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
