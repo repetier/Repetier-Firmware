@@ -176,9 +176,9 @@ void Commands::printTemperatures(bool showRaw)
 #endif
 #endif
 #if TEMP_PID
-    Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
+    Com::printF(Com::tSpaceAtColon,(autotuneIndex == 255 ? pwm_pos[Extruder::current->id] : pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
-#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
         Com::printF(Com::tSpaceT,(int)i);

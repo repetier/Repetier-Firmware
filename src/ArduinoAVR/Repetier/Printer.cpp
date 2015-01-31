@@ -1568,7 +1568,9 @@ void Printer::reportCaseLightStatus() {
 #define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
 void Printer::showConfiguration() {
     Com::config(PSTR("Baudrate:"),baudrate);
+#ifndef EXTERNALSERIAL
     Com::config(PSTR("InputBuffer:"),SERIAL_BUFFER_SIZE - 1);
+#endif
     Com::config(PSTR("NumExtruder:"),NUM_EXTRUDER);
     Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);

@@ -265,7 +265,7 @@ static const char versionString[] PROGMEM = UI_VERSION_STRING;
 inline void lcdStartWrite()
 {
     HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS+I2C_WRITE);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     HAL::i2cWrite( 0x14); // Start at port a
 #endif
 }
@@ -276,7 +276,7 @@ inline void lcdStopWrite()
 void lcdWriteNibble(uint8_t value)
 {
 #if UI_DISPLAY_I2C_CHIPTYPE==0
-    value|=uid.outputMask;
+    value |= uid.outputMask;
 #if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
@@ -379,8 +379,9 @@ void lcdWriteNibble(uint8_t value)
     WRITE(UI_DISPLAY_D7_PIN,value & 8);
     DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);// enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
 }
 
 void lcdWriteByte(uint8_t c,uint8_t rs)
@@ -423,18 +424,20 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
     DELAY1MICROSECOND;
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
     WRITE(UI_DISPLAY_D5_PIN, c & 0x02);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x04);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x08);
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+    HAL::delayMicroseconds(100);
 }
+
 void initializeLCD()
 {
 
@@ -442,13 +445,13 @@ void initializeLCD()
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(235);
+    HAL::delayMilliseconds(335);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
     SET_OUTPUT(UI_DISPLAY_D7_PIN);
     SET_OUTPUT(UI_DISPLAY_RS_PIN);
-#if UI_DISPLAY_RW_PIN>-1
+#if UI_DISPLAY_RW_PIN > -1
     SET_OUTPUT(UI_DISPLAY_RW_PIN);
 #endif
     SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
@@ -466,33 +469,33 @@ void initializeLCD()
     // interface 4 pins are dangling unconnected and the values
     // on them don't matter for these instructions.
     WRITE(UI_DISPLAY_RS_PIN, LOW);
-    HAL::delayMicroseconds(10);
+    HAL::delayMicroseconds(20);
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(5500); // I have one LCD for which 4500 here was not long enough.
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
     // second try
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180); // wait
+    HAL::delayMicroseconds(5000); // wait
     // third go!
     lcdWriteNibble(0x03);
-    HAL::delayMicroseconds(180);
+    HAL::delayMicroseconds(160);
     // finally, set to 4-bit interface
     lcdWriteNibble(0x02);
-    HAL::delayMicroseconds(180);
+    HAL::delayMicroseconds(160);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
 
     lcdCommand(LCD_CLEAR);					//-	Clear Screen
-    HAL::delayMilliseconds(2); // clear is slow operation
+    HAL::delayMilliseconds(3); // clear is slow operation
     lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
     lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
-    uid.createChar(1,character_back);
-    uid.createChar(2,character_degree);
-    uid.createChar(3,character_selected);
-    uid.createChar(4,character_unselected);
-    uid.createChar(5,character_temperature);
-    uid.createChar(6,character_folder);
-    uid.createChar(7,character_ready);
+    uid.createChar(1, character_back);
+    uid.createChar(2, character_degree);
+    uid.createChar(3, character_selected);
+    uid.createChar(4, character_unselected);
+    uid.createChar(5, character_temperature);
+    uid.createChar(6, character_folder);
+    uid.createChar(7, character_ready);
 }
 // ----------- end direct LCD driver
 #endif

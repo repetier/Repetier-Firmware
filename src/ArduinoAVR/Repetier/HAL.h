@@ -111,6 +111,9 @@ public:
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_INPUT_SAMPLE 5
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 10
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
@@ -697,7 +700,9 @@ public:
     }
     inline static void pingWatchdog()
     {
+#if FEATURE_WATCHDOG
         wdt_reset();
+#endif
     };
     inline static float maxExtruderTimerFrequency()
     {

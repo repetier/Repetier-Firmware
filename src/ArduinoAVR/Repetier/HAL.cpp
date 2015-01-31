@@ -1,6 +1,12 @@
 #include "Repetier.h"
 #include <compat/twi.h>
 
+#if ANALOG_INPUTS > 0
+uint8 osAnalogInputCounter[ANALOG_INPUTS];
+uint osAnalogInputBuildup[ANALOG_INPUTS];
+uint8 osAnalogInputPos = 0; // Current sampling position
+#endif
+
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL()

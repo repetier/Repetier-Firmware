@@ -110,15 +110,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define TOWER_ARRAY 3
 #define E_TOWER_ARRAY 4
 
-
-// Bits of the ADC converter
-#define ANALOG_INPUT_BITS 10
-// Build median from 2^ANALOG_INPUT_SAMPLE samples
-#if CPU_ARCH == ARCH_AVR
-#define ANALOG_INPUT_SAMPLE 5
-#else
-#define ANALOG_INPUT_SAMPLE 4
-#endif
 #define ANALOG_REF_AREF 0
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
@@ -157,6 +148,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
 #define CONTROLLER_GAMEDUINO2 16
 #define CONTROLLER_MIREGLI 17
+#define CONTROLLER_GATE_3NOVATICA 18
 
 //direction flags
 #define X_DIRPOS 1
@@ -440,9 +432,9 @@ public:
 };
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
-extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
-extern uint osAnalogInputBuildup[ANALOG_INPUTS];
-extern uint8 osAnalogInputPos; // Current sampling position
+//extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
+//extern uint osAnalogInputBuildup[ANALOG_INPUTS];
+//extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #if USE_ADVANCE
