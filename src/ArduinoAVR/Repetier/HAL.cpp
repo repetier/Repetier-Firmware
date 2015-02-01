@@ -501,12 +501,14 @@ unsigned char HAL::i2cReadNak(void)
 #define SERVO2500US F_CPU/3200
 #define SERVO5000US F_CPU/1600
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
+unsigned int servoAutoOff[4] = {0,0,0,0}; 
 static uint8_t servoIndex = 0;
-void HAL::servoMicroseconds(uint8_t servo,int ms)
+void HAL::servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff)
 {
     if(ms<500) ms = 0;
     if(ms>2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
+    servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0; 
 }
 SIGNAL (TIMER3_COMPA_vect)
 {
@@ -580,6 +582,15 @@ SIGNAL (TIMER3_COMPA_vect)
 #endif
         OCR3A = SERVO5000US;
         break;
+    }
+    if(servoIndex & 1)
+    {
+        uint8_t nr = servoIndex >> 1;
+	if(servoAutoOff[nr])
+	{
+		servoAutoOff[nr]--;
+		if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
+	}
     }
     servoIndex++;
     if(servoIndex>7)
@@ -907,11 +918,14 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+if(fanKickstart == 0)
+{
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER + 2], false);
 #else
     if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count && pwm_pos_set[NUM_EXTRUDER + 2] != 255) WRITE(FAN_PIN,0);
 #endif
+}
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER
@@ -926,6 +940,7 @@ ISR(PWM_TIMER_VECTOR)
     {
         counterPeriodical = 0;
         executePeriodical = 1;
+        if(fanKickstart) fanKickstart--;
     }
 // read analog values
 #if ANALOG_INPUTS > 0

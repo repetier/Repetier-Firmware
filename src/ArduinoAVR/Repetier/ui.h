@@ -180,6 +180,9 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_SD_PRI_PAU_CONT       1200 
+#define UI_ACTION_FAN_SUSPEND           1201
+#define UI_ACTION_AUTOLEVEL_ONOFF       1202
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -441,7 +444,7 @@ class UIDisplay {
     void addChar(const char c);
     void addGCode(GCode *code);
     int okAction(bool allowMoves);
-    bool nextPreviousAction(int8_t next, bool allowMoves);
+    bool nextPreviousAction(int16_t next, bool allowMoves);
     char statusMsg[21];
     int8_t encoderPos;
     int8_t encoderLast;
@@ -1394,6 +1397,21 @@ void uiCheckSlowKeys(int &action) {}
 
 
 extern void beep(uint8_t duration,uint8_t count);
+
+static void ui_check_Ukeys(int &action) {
+#if USER_KEY1_PIN>0 && defined(USER_KEY1_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY1_PIN, USER_KEY1_ACTION);
+#endif    
+#if USER_KEY2_PIN>0 && defined(USER_KEY2_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY2_PIN, USER_KEY2_ACTION);
+#endif
+#if USER_KEY3_PIN>0 && defined(USER_KEY3_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY3_PIN, USER_KEY3_ACTION);
+#endif    
+#if USER_KEY4_PIN>0 && defined(USER_KEY4_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
+#endif    
+}
 
 #endif
 

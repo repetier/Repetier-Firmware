@@ -17,6 +17,7 @@ copy ArduinoAVR\Repetier\uiconfig.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\uilang.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\uimenu.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\u8*.h  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\logo.h  ArduinoDue\Repetier
 
 echo Copying finished. DUE tree is now up to date.
 REM pause

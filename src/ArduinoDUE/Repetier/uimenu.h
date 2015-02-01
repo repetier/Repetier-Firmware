@@ -102,6 +102,7 @@ random stuff
 %oC : Output level current extruder
 %ob : Output level heated bed
 %PN : Printer name
+%on : current extruder number (1,2,3...)
 
 stops
 %sx : State of x min endstop.
@@ -126,6 +127,7 @@ extruder position
 %x1 : Y position
 %x2 : Z position
 %x3 : Current extruder position
+%x4 : Current extruder position in meters (for filament usage)
 
 extruder parameters
 %X0..9 : Extruder selected marker
@@ -201,7 +203,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #else
      "Fan %Fs%%%     Z:%x2",
    #endif
-   "Mul:%om", "Buf:%oB", "%os")
+   "Mul:%om       E%on:%x4m", "Buf:%oB", "%os")
 
   #if EEPROM_MODE != 0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m")
@@ -222,9 +224,9 @@ for 2 row displays. You can add additional pages or change the default pages lik
 #elif UI_ROWS >= 4
  #if HAVE_HEATED_BED
  #if NUM_EXTRUDER > 0
-   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os")
+   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
 #else
-   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2     Buf:%oB","Mul: %om   Flow: %of","%os")
+   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
 #endif
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
@@ -618,8 +620,16 @@ UI_MENU_ACTION2C(ui_menu_maxinactive2,UI_ACTION_MAX_INACTIVE,UI_TEXT_POWER_INACT
 UI_MENU_CHANGEACTION(ui_menu_general_baud,UI_TEXT_BAUDRATE,UI_ACTION_BAUDRATE)
 UI_MENU_ACTIONSELECTOR(ui_menu_general_stepper_inactive,UI_TEXT_STEPPER_INACTIVE,ui_menu_stepper2)
 UI_MENU_ACTIONSELECTOR(ui_menu_general_max_inactive,UI_TEXT_POWER_INACTIVE,ui_menu_maxinactive2)
-#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive}
-UI_MENU(ui_menu_general,UI_MENU_GENERAL,3+UI_MENU_BACKCNT)
+#if FEATURE_AUTOLEVEL
+ UI_MENU_ACTIONCOMMAND(ui_menu_toggle_autolevel,UI_TEXT_AUTOLEVEL_ONOFF,UI_ACTION_AUTOLEVEL_ONOFF)
+ #define UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_toggle_autolevel
+ #define UI_TOGGLE_AUTOLEVEL_COUNT 1
+#else
+ #define UI_TOOGLE_AUTOLEVEL_ENTRY
+ #define UI_TOGGLE_AUTOLEVEL_COUNT 0
+#endif
+#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY}
+UI_MENU(ui_menu_general,UI_MENU_GENERAL,3+UI_MENU_BACKCNT+UI_TOGGLE_AUTOLEVEL_COUNT)
 
 // **** Extruder configuration
 

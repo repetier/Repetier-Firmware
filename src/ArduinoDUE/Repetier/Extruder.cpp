@@ -1200,7 +1200,7 @@ void Extruder::disableAllHeater()
 }
 
 #if TEMP_PID
-void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool storeValues)
+void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeValues)
 {
     float currentTemp;
     int cycles = 0;
@@ -1217,7 +1217,10 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
     float Ku, Tu;
     float Kp = 0, Ki = 0, Kd = 0;
     float maxTemp = 20, minTemp = 20;
-
+    if(maxCycles < 5)
+        maxCycles = 5;
+    if(maxCycles > 20)
+        maxCycles = 20;
     Com::printInfoFLN(Com::tPIDAutotuneStart);
 
     Extruder::disableAllHeater(); // switch off all heaters.
@@ -1322,7 +1325,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
             Extruder::disableAllHeater();
             return;
         }
-        if(cycles > 5)
+        if(cycles > maxCycles)
         {
             Com::printInfoFLN(Com::tAPIDFinished);
             Extruder::disableAllHeater();

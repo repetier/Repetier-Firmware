@@ -891,6 +891,20 @@ void Printer::setup()
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
+#if FEATURE_SERVO                   // set servos to neutral positions at power_up
+  #if defined(SERVO0_NEUTRAL_POS) && SERVO0_NEUTRAL_POS >= 500
+    HAL::servoMicroseconds(0,SERVO0_NEUTRAL_POS, 1000);
+  #endif
+  #if defined(SERVO1_NEUTRAL_POS) && SERVO1_NEUTRAL_POS >= 500
+    HAL::servoMicroseconds(1,SERVO1_NEUTRAL_POS, 1000);
+  #endif
+  #if defined(SERVO2_NEUTRAL_POS) && SERVO2_NEUTRAL_POS >= 500
+    HAL::servoMicroseconds(2,SERVO2_NEUTRAL_POS, 1000);
+  #endif
+  #if defined(SERVO3_NEUTRAL_POS) && SERVO3_NEUTRAL_POS >= 500
+    HAL::servoMicroseconds(3,SERVO3_NEUTRAL_POS, 1000);
+  #endif
+#endif  
 }
 
 void Printer::defaultLoopActions()

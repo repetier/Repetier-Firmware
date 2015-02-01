@@ -677,7 +677,7 @@ public:
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(uint8_t servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff);
 #endif
 
 #if ANALOG_INPUTS > 0
