@@ -804,6 +804,7 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
+		<Unit filename="logo.h" />
 		<Unit filename="motion.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />

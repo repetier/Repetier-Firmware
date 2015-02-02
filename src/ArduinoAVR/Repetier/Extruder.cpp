@@ -107,6 +107,7 @@ void Extruder::manageTemperatures()
             errorDetected = 1;
             if(extruderTempErrors > 10)   // Ignore short temporary failures
             {
+                act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
                 Printer::setAnyTempsensorDefect();
                 reportTempsensorError();
             }
@@ -131,6 +132,7 @@ void Extruder::manageTemperatures()
                     errorDetected = 1;
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
+                        act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
                         Printer::setAnyTempsensorDefect();
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -153,6 +155,7 @@ void Extruder::manageTemperatures()
                     errorDetected = 1;
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
+                        act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
                         Printer::setAnyTempsensorDefect();
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);

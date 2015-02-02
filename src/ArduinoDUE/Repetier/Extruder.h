@@ -18,8 +18,10 @@ extern uint8_t manageMonitor;
 #define HTR_DEADTIME 3
 
 #define TEMPERATURE_CONTROLLER_FLAG_ALARM 1
-#define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL 2 //< Full heating enabled
+#define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL 2  //< Full heating enabled
 #define TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD 4  //< Holding target temperature
+#define TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT    8  //< Indicating sensor defect
+#define TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED 16 //< Indicating sensor decoupling
 
 /** TemperatureController manages one heater-temperature sensore loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.

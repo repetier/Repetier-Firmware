@@ -824,22 +824,22 @@ void UIDisplay::initialize()
     u8g_FirstPage(&u8g);
     do
     {
-	u8g_DrawBitmapP(&u8g, 66,0,8,64,logo);
-        for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
-        printRowP(0, PSTR(" Repetier"));
-        printRow(1, "ver ",REPETIER_VERSION,4);
-        printRowP(3, PSTR(" Machine:"));
+        u8g_DrawBitmapP(&u8g, 127 - LOGO_WIDTH, 0, ((LOGO_WIDTH + 8) / 8), LOGO_HEIGHT, logo);
+        for(uint8_t y = 0; y < UI_ROWS; y++) displayCache[y][0] = 0;
+        printRowP(0, PSTR("Repetier"));
+        printRowP(1, PSTR("Ver " REPETIER_VERSION));
+        printRowP(3, PSTR("Machine:"));
         printRowP(4, PSTR(UI_PRINTER_NAME));
         printRowP(5, PSTR(UI_PRINTER_COMPANY));
     }
     while( u8g_NextPage(&u8g) );  //end picture loop
-  #else // not DISPLAY_U8G
-        for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
-        printRowP(0, versionString);
-        printRowP(1, PSTR(UI_PRINTER_NAME));
+#else // not DISPLAY_U8G
+    for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
+    printRowP(0, versionString);
+    printRowP(1, PSTR(UI_PRINTER_NAME));
 #if UI_ROWS>2
-        printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
-    #endif
+    printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
+#endif
 #endif
 #else
     slideIn(0, versionString);
@@ -1175,8 +1175,20 @@ void UIDisplay::parse(const char *txt,bool ram)
             }
             if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
             {
-                addStringP(PSTR(" def "));
-                break;
+                uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
+                if(c2=='c') eid = Extruder::current->id;
+                else if(c2>='0' && c2<='9') eid = c2-'0';
+
+                if(tempController[eid]->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT)
+                {
+                    addStringP(PSTR(" def "));
+                    break;
+                }
+                else if(tempController[eid]->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED)
+                {
+                    addStringP(PSTR(" dec "));
+                    break;
+                }
             }
             if(c2=='c') fvalue=Extruder::current->tempControl.currentTemperatureC;
             else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
@@ -1379,7 +1391,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
-                if(c2=='4')  addFloat(fvalue/1000,3,2);
+                if(c2=='4')  addFloat(fvalue/1000,2,2);
                 else         addFloat(fvalue,4,2);
             }
             break;
@@ -3015,7 +3027,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
                 Commands::setFanSpeed(0,false);
             }
         }
-            break;
+        break;
 #endif
         case UI_ACTION_MENU_XPOS:
             pushMenu(&ui_menu_xpos, false);
