@@ -204,6 +204,8 @@ class InterruptProtectedBlock {
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 #define ANALOG_INPUT_SAMPLE 6
+#define ANALOG_INPUT_MEDIAN 10
+
 // Bits of the ADC converter
 #define ANALOG_INPUT_BITS 12
 #define ANALOG_REDUCE_BITS 0
