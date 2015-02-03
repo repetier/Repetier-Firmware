@@ -176,9 +176,9 @@ void Commands::printTemperatures(bool showRaw)
 #endif
 #endif
 #if TEMP_PID
-    Com::printF(Com::tSpaceAtColon,(autotuneIndex==255?pwm_pos[Extruder::current->id]:pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
+    Com::printF(Com::tSpaceAtColon,(autotuneIndex == 255 ? pwm_pos[Extruder::current->id] : pwm_pos[autotuneIndex])); // Show output of autotune when tuning!
 #endif
-#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
         Com::printF(Com::tSpaceT,(int)i);
@@ -218,6 +218,7 @@ void Commands::changeFlowrateMultiply(int factor)
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
+uint8_t fanKickstart;
 void Commands::setFanSpeed(int speed,bool wait)
 {
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
@@ -226,7 +227,12 @@ void Commands::setFanSpeed(int speed,bool wait)
     if(wait)
         Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
     if(speed != pwm_pos[NUM_EXTRUDER + 2])
+    {
         Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
+        #if FAN_KICKSTART_TIME
+          if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
+        #endif
+    }
     pwm_pos[NUM_EXTRUDER + 2] = speed;
 #endif
 }
@@ -1607,10 +1613,12 @@ void Commands::processMCode(GCode *com)
 #if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS>0
         int temp = 150;
         int cont = 0;
+        int cycles = 5;
         if(com->hasS()) temp = com->S;
         if(com->hasP()) cont = com->P;
+        if(com->hasR()) cycles = static_cast<int>(com->R);
         if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
-        tempController[cont]->autotunePID(temp,cont,com->hasX());
+        tempController[cont]->autotunePID(temp,cont,cycles,com->hasX());
 #endif
     }
     break;
@@ -1662,7 +1670,10 @@ void Commands::processMCode(GCode *com)
             int s = 0;
             if(com->hasS())
                 s = com->S;
-            HAL::servoMicroseconds(com->P,s);
+            uint16_t r = 0;
+            if(com->hasR())    // auto off time in ms
+                r = com->R;
+            HAL::servoMicroseconds(com->P,s,r);
         }
         break;
 #endif // FEATURE_SERVO

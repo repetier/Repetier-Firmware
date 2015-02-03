@@ -429,7 +429,7 @@ M140 command, after a given temperature is reached. */
 
 /** Allow retraction with G10/G11 removing requirement for retraction setting in slicer. Also allows filament change if lcd is configured. */
 #define FEATURE_RETRACTION 1
-/** autoretract converts pure extrusion moves into retractions. Beware that 
+/** autoretract converts pure extrusion moves into retractions. Beware that
  simple extrusion e.g. over Repetier-Host will then not work! */
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
@@ -1167,6 +1167,15 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define SERVO1_PIN 6
 #define SERVO2_PIN 5
 #define SERVO3_PIN 4
+/* for set servo(s) at designed neutral position at power-up. Values < 500 mean no start position */
+#define SERVO0_NEUTRAL_POS  -1
+#define SERVO1_NEUTRAL_POS  -1
+#define SERVO2_NEUTRAL_POS  -1
+#define SERVO3_NEUTRAL_POS  -1
+
+/** Some fans won't start for low values, but would run if started with higher power at the beginning.
+This defines the full power duration before returning to set value. Time is in milliseconds */
+#define FAN_KICKSTART_TIME  200
 
 /* A watchdog resets the printer, if a signal is not send within predifined time limits. That way we can be sure that the board
 is always running and is not hung up for some unknown reason. */
@@ -1329,6 +1338,8 @@ The following settings override uiconfig.h!
 14 or CONTROLLER_OPENHARDWARE_LCD2004 = OpenHardware.co.za LCD2004 V2014
 15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
 16 or CONTROLLER_GAMEDUINO2 (in development)
+17 or CONTROLLER_MIREGLI 17
+18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 */
 
 #define FEATURE_CONTROLLER NO_CONTROLLER
@@ -1344,12 +1355,13 @@ Select the language to use.
 6 = Swedish
 7 = French
 8 = Czech
+9 = Polish
 */
 #define UI_LANGUAGE 1
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_PRINTER_NAME "Ordbot"
-#define UI_PRINTER_COMPANY "RepRapDiscount"
+#define UI_PRINTER_NAME "MyPrinter"
+#define UI_PRINTER_COMPANY "Self Made"
 
 
 /** Animate switches between menus etc. */
@@ -1382,6 +1394,10 @@ same setting.
 
 */
 #define UI_SPEEDDEPENDENT_POSITIONING 1
+
+/** If set to 1 faster turning the wheel makes larger jumps. Helps for faster navgation. */
+#define UI_DYNAMIC_ENCODER_SPEED 1          // enable dynamic rotary encoder speed
+
 
 /** \brief bounce time of keys in milliseconds */
 #define UI_KEY_BOUNCETIME 10
@@ -1419,6 +1435,17 @@ Values must be in range 1..255
 #define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
+
+/*
+#define USER_KEY1_PIN     UI_DISPLAY_D5_PIN      // D5 to display (not used for graphics controller), change to other pin if you use character LCD !
+#define USER_KEY1_ACTION  UI_ACTION_FAN_SUSPEND
+#define USER_KEY2_PIN     UI_DISPLAY_D6_PIN      // D6 to display (not used for graphics controller)...
+#define USER_KEY2_ACTION  UI_ACTION_SD_PRI_PAU_CONT
+#define USER_KEY3_PIN     UI_DISPLAY_D7_PIN      // D7 to display (not used for graphics controller)...
+#define USER_KEY3_ACTION  UI_ACTION_LIGHTS_ONOFF
+#define USER_KEY4_PIN     -1
+#define USER_KEY4_ACTION  UI_ACTION_DUMMY
+*/
 
 #endif
 

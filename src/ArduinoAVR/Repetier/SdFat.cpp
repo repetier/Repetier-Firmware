@@ -3216,7 +3216,8 @@ uint8_t Sd2Card::cardCommand(uint8_t cmd, uint32_t arg) {
   // send CRC - correct for CMD0 with arg zero or CMD8 with arg 0X1AA
   spiSend(cmd == CMD0 ? 0X95 : 0X87);
 #endif  // USE_SD_CRC
-
+  // additional delay for CMD0
+  if (cmd == CMD0) delay(100);
   // skip stuff byte for stop read
   if (cmd == CMD12) spiRec();
 
@@ -3359,12 +3360,6 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
       goto fail;
     }
   }
-#if USE_SD_CRC
-  if (cardCommand(CMD59, 1) != R1_IDLE_STATE) {
-    error(SD_CARD_ERROR_CMD59);
-    goto fail;
-  }
-#endif  // USE_SD_CRC
   // check SD version
   while (1) {
     if (cardCommand(CMD8, 0x1AA) == (R1_ILLEGAL_COMMAND | R1_IDLE_STATE)) {
@@ -3400,7 +3395,13 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
     if ((spiRec() & 0XC0) == 0XC0) type(SD_CARD_TYPE_SDHC);
     // discard rest of ocr - contains allowed voltage range
     for (uint8_t i = 0; i < 3; i++) spiRec();
+  }  
+#if USE_SD_CRC
+  if (cardCommand(CMD59, 1) > 1) {
+    error(SD_CARD_ERROR_CMD59);
+    goto fail;
   }
+#endif  // USE_SD_CRC
   chipSelectHigh();
 
 #ifndef SOFTWARE_SPI

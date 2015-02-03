@@ -32,6 +32,16 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
+#define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
+#if ANALOG_INPUTS > 0
+int32_t osAnalogInputBuildup[ANALOG_INPUTS];
+#endif
+
+static int32_t adcSamplesMin[ANALOG_INPUTS];
+static int32_t adcSamplesMax[ANALOG_INPUTS];
+static int adcCounter = 0;
+static   uint32_t  adcEnable = 0;
+
 char HAL::virtualEeprom[EEPROM_BYTES];  
 volatile uint8_t HAL::insideTimer1=0;
 #ifndef DUE_SOFTWARE_SPI
@@ -109,19 +119,19 @@ void HAL::setupTimer() {
 
     // Servo control
 #if FEATURE_SERVO
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
     SET_OUTPUT(SERVO0_PIN);
     WRITE(SERVO0_PIN,LOW);
 #endif
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
     SET_OUTPUT(SERVO1_PIN);
     WRITE(SERVO1_PIN,LOW);
 #endif
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
     SET_OUTPUT(SERVO2_PIN);
     WRITE(SERVO2_PIN,LOW);
 #endif
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
     SET_OUTPUT(SERVO3_PIN);
     WRITE(SERVO3_PIN,LOW);
 #endif
@@ -142,26 +152,23 @@ void HAL::setupTimer() {
 
 
 
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
 // Initialize ADC channels
 void HAL::analogStart(void)
 {
-  uint32_t  adcEnable = 0;
+
 
   // ensure we can write to ADC registers
-  ADC->ADC_WPMR = ADC_WPMR_WPKEY(0);
+  ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
   pmc_enable_periph_clk(ID_ADC);  // enable adc clock
 
-  for(int i=0; i<ANALOG_INPUTS; i++)
+  for(int i = 0; i < ANALOG_INPUTS; i++)
   {
-      osAnalogInputCounter[i] = 0;
       osAnalogInputValues[i] = 0;
-
-  // osAnalogInputChannels
-      //adcEnable |= (0x1u << adcChannel[i]);
+      adcSamplesMin[i] = 100000;
+      adcSamplesMax[i] = 0;
       adcEnable |= (0x1u << osAnalogInputChannels[i]);
   }
-
   // enable channels
   ADC->ADC_CHER = adcEnable;
   ADC->ADC_CHDR = !adcEnable;
@@ -174,7 +181,7 @@ void HAL::analogStart(void)
   // set prescaler rate  MCK/((PRESCALE+1) * 2)
   // set tracking time  (TRACKTIM+1) * clock periods
   // set transfer period  (TRANSFER * 2 + 3) 
-  ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_10 |
+  ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_12 |
             ADC_MR_SLEEP_NORMAL | ADC_MR_FWUP_OFF | ADC_MR_FREERUN_OFF |
             ADC_MR_STARTUP_SUT64 | ADC_MR_SETTLING_AST17 | ADC_MR_ANACH_NONE |
             ADC_MR_USEQ_NUM_ORDER |
@@ -290,7 +297,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
    // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
     void HAL::spiInit(uint8_t spiClock) 
    {
-        if(spiClock>4) spiClock = 1;
+        if(spiClock > 4) spiClock = 1;
         // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
         SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
                          SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | 
@@ -585,11 +592,13 @@ unsigned char HAL::i2cReadNak(void)
 #if defined (__SAM3X8E__)
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
-void HAL::servoMicroseconds(uint8_t servo,int microsec) {
-    if(microsec<500) microsec = 0;
-    if(microsec>2500) microsec = 2500;
+unsigned int servoAutoOff[4] = {0,0,0,0}; 
+void HAL::servoMicroseconds(uint8_t servo,int microsec, uint16_t autoOff) {
+    if(microsec < 500) microsec = 0;
+    if(microsec > 2500) microsec = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 
                                          1000000) * microsec);
+    servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0; 
 }
  
 
@@ -607,7 +616,7 @@ void SERVO_COMPA_VECTOR ()
   switch(servoIndex) {
   case 0:
       if(HAL::servoTimings[0]) {
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
           WRITE(SERVO0_PIN,HIGH);
 #endif  
           interval =  HAL::servoTimings[0];
@@ -616,7 +625,7 @@ void SERVO_COMPA_VECTOR ()
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
       break;
   case 1:
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
       WRITE(SERVO0_PIN,LOW);
 #endif
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
@@ -624,7 +633,7 @@ void SERVO_COMPA_VECTOR ()
     break;
   case 2:
       if(HAL::servoTimings[1]) {
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
         WRITE(SERVO1_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[1];
@@ -633,7 +642,7 @@ void SERVO_COMPA_VECTOR ()
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 3:
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
       WRITE(SERVO1_PIN,LOW);
 #endif
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
@@ -641,7 +650,7 @@ void SERVO_COMPA_VECTOR ()
     break;
   case 4:
       if(HAL::servoTimings[2]) {
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
         WRITE(SERVO2_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[2];
@@ -650,7 +659,7 @@ void SERVO_COMPA_VECTOR ()
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 5:
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
       WRITE(SERVO2_PIN,LOW);
 #endif
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
@@ -658,7 +667,7 @@ void SERVO_COMPA_VECTOR ()
     break;
   case 6:
       if(HAL::servoTimings[3]) {
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
         WRITE(SERVO3_PIN,HIGH);
 #endif
         interval =  HAL::servoTimings[3];
@@ -667,15 +676,24 @@ void SERVO_COMPA_VECTOR ()
     TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
     break;
   case 7:
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
       WRITE(SERVO3_PIN,LOW);
 #endif
       TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, 
                SERVO5000US - interval);
     break;
   }
+  if(servoIndex & 1)
+  {
+     uint8_t nr = servoIndex >> 1;
+	   if(servoAutoOff[nr])
+	   {
+		    servoAutoOff[nr]--;
+		    if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
+	   }
+  }
   servoIndex++;
-  if(servoIndex>7) servoIndex = 0;
+  if(servoIndex > 7) servoIndex = 0;
 }
 #else
 #error No servo support for your board, please diable FEATURE_SERVO
@@ -931,12 +949,15 @@ void PWM_TIMER_VECTOR ()
     if(pwm_pos_set[NUM_EXTRUDER + 1] == pwm_count && pwm_pos_set[NUM_EXTRUDER+1] != 255) WRITE(FAN_BOARD_PIN, 0);
 #endif
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    if(fanKickstart == 0)
+    {
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER+2], false);
 #else
     if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count && pwm_pos_set[NUM_EXTRUDER + 2] != 255) WRITE(FAN_PIN, 0);
 #endif
+    }
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER
@@ -949,45 +970,49 @@ void PWM_TIMER_VECTOR ()
     counterPeriodical++; // Appxoimate a 100ms timer
     if(counterPeriodical >= 390) //  (int)(F_CPU/40960))
     {
-        counterPeriodical=0;
-        executePeriodical=1;
+        counterPeriodical = 0;
+        executePeriodical = 1;
+        if(fanKickstart) fanKickstart--;
     }
 // read analog values -- only read one per interrupt
-#if ANALOG_INPUTS > 0
-        
+#if ANALOG_INPUTS > 0        
     // conversion finished?
-    //if(ADC->ADC_ISR & ADC_ISR_EOC(adcChannel[osAnalogInputPos])) 
-    if(ADC->ADC_ISR & ADC_ISR_EOC(osAnalogInputChannels[osAnalogInputPos])) 
-    {                
-      //osAnalogInputChannels
-        //osAnalogInputBuildup[osAnalogInputPos] += ADC->ADC_CDR[adcChannel[osAnalogInputPos]]; 
-        osAnalogInputBuildup[osAnalogInputPos] += ADC->ADC_CDR[osAnalogInputChannels[osAnalogInputPos]]; 
-        if(++osAnalogInputCounter[osAnalogInputPos] >= (1 << ANALOG_INPUT_SAMPLE))
+    if((ADC->ADC_ISR & adcEnable) == adcEnable) 
+    {          
+      adcCounter++;
+      for(int i = 0; i < ANALOG_INPUTS; i++) {
+        int32_t cur = ADC->ADC_CDR[osAnalogInputChannels[i]];
+        osAnalogInputBuildup[i] += cur;
+        adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
+        adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
+        if(adcCounter >= NUM_ADC_SAMPLES)
         {
+          // Strip biggest and smallest value and round correctly
+          osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
+          adcSamplesMin[i] = 100000;
+          adcSamplesMax[i] = 0;
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE < 12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] <<
-                (12-ANALOG_INPUT_BITS-ANALOG_INPUT_SAMPLE);
+            osAnalogInputValues[i] =
+                osAnalogInputBuildup[i] <<
+                (12 - ANALOG_INPUT_BITS - ANALOG_INPUT_SAMPLE);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE > 12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] >>
-                (ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE-12);
+            osAnalogInputValues[i] =
+                osAnalogInputBuildup[i] >>
+                (ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE - 12);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE == 12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos];
+            osAnalogInputValues[i] =
+                osAnalogInputBuildup[i];
 #endif
-            osAnalogInputBuildup[osAnalogInputPos] = 0;
-            osAnalogInputCounter[osAnalogInputPos] = 0;
-        }
-        // Start next conversion cycle
-        if(++osAnalogInputPos>=ANALOG_INPUTS) { 
-            osAnalogInputPos = 0;
-            ADC->ADC_CR = ADC_CR_START;
-        }
+            osAnalogInputBuildup[i] = 0;
+        } // adcCounter >= NUM_ADC_SAMPLES
+      } // for i
+      if(adcCounter >= NUM_ADC_SAMPLES)
+          adcCounter = 0;
+      ADC->ADC_CR = ADC_CR_START; // reread values
     }
-#endif
+#endif // ANALOG_INPUTS > 0
     UI_FAST; // Short timed user interface action
     pwm_count++;
     pwm_count_heater += HEATER_PWM_STEP;

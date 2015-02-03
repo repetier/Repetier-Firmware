@@ -6526,7 +6526,7 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 	digitalWrite(u8g_data_pin, LOW);
 #endif
     val <<= 1;
-    //u8g_MicroDelay();
+    u8g_MicroDelay();
 #ifdef UI_SPI_SCK
     WRITE(UI_SPI_SCK,LOW);
 #else
@@ -6567,10 +6567,10 @@ static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint
     u8g_com_arduino_do_shift_out_msb_first(*ptr << 4);
     ptr++;
     len--;
-    u8g_10MicroDelay();
+//    u8g_10MicroDelay();
   }
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 }
 
@@ -6592,7 +6592,7 @@ static void u8g_com_arduino_st7920_write_byte(uint8_t rs, uint8_t val)
   u8g_com_arduino_do_shift_out_msb_first(val & 0x0f0);
   u8g_com_arduino_do_shift_out_msb_first(val << 4);
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 
 }

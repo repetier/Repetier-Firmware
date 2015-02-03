@@ -180,6 +180,9 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_SD_PRI_PAU_CONT       1200 
+#define UI_ACTION_FAN_SUSPEND           1201
+#define UI_ACTION_AUTOLEVEL_ONOFF       1202
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -441,7 +444,7 @@ class UIDisplay {
     void addChar(const char c);
     void addGCode(GCode *code);
     int okAction(bool allowMoves);
-    bool nextPreviousAction(int8_t next, bool allowMoves);
+    bool nextPreviousAction(int16_t next, bool allowMoves);
     char statusMsg[21];
     int8_t encoderPos;
     int8_t encoderLast;
@@ -1260,6 +1263,54 @@ inline void ui_check_slow_encoder() {}
 void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 17
+#if FEATURE_CONTROLLER == CONTROLLER_GATE_3NOVATICA
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_4BIT
+#define UI_DISPLAY_CHARSET 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define BEEPER_TYPE 1
+#define BEEPER_PIN             -1
+#define UI_DISPLAY_RS_PIN      1
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  3
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      0
+#define UI_DISPLAY_D5_PIN      2
+#define UI_DISPLAY_D6_PIN      4
+#define UI_DISPLAY_D7_PIN      6
+#define UI_ENCODER_A           5
+#define UI_ENCODER_B           7
+#define UI_ENCODER_CLICK       39
+#define UI_KILL_PIN            -1
+#define UI_DELAYPERCHAR       320 // bylo 50
+#define UI_INVERT_MENU_DIRECTION 1 // bylo 0
+#define USER_KEY1_PIN     36
+#define USER_KEY1_ACTION  UI_ACTION_LIGHTS_ONOFF
+#define USER_KEY2_PIN     40
+#define USER_KEY2_ACTION  UI_ACTION_PREHEAT_ABS
+#define USER_KEY3_PIN     41
+#define USER_KEY3_ACTION  UI_ACTION_WIZARD_FILAMENTCHANGE
+#define USER_KEY4_PIN     -1
+#define USER_KEY4_ACTION  UI_ACTION_DUMMY
+
+#if UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B);
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK);
+}
+void uiCheckKeys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B);
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
+#endif
+#endif // CONTROLLER_GATE_3NOVATICA
 
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
@@ -1346,6 +1397,21 @@ void ui_check_slow_keys(int &action) {}
 
 
 extern void beep(uint8_t duration,uint8_t count);
+
+static void ui_check_Ukeys(int &action) {
+#if USER_KEY1_PIN>0 && defined(USER_KEY1_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY1_PIN, USER_KEY1_ACTION);
+#endif    
+#if USER_KEY2_PIN>0 && defined(USER_KEY2_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY2_PIN, USER_KEY2_ACTION);
+#endif
+#if USER_KEY3_PIN>0 && defined(USER_KEY3_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY3_PIN, USER_KEY3_ACTION);
+#endif    
+#if USER_KEY4_PIN>0 && defined(USER_KEY4_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
+#endif    
+}
 
 #endif
 

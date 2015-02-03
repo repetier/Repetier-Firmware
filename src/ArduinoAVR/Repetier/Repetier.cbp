@@ -443,6 +443,7 @@
 				<Linker>
 					<Add option="-mmcu=$(MCU)" />
 					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+					<Add option="-mrelax" />
 				</Linker>
 				<ExtraCommands>
 					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
@@ -555,7 +556,6 @@
 		<Compiler>
 			<Add option="-pedantic" />
 			<Add option="-w" />
-			<Add option="-W" />
 			<Add option="-Wall" />
 			<Add directory="." />
 		</Compiler>
@@ -804,6 +804,7 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
+		<Unit filename="logo.h" />
 		<Unit filename="motion.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />

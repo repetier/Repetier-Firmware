@@ -110,15 +110,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define TOWER_ARRAY 3
 #define E_TOWER_ARRAY 4
 
-
-// Bits of the ADC converter
-#define ANALOG_INPUT_BITS 10
-// Build median from 2^ANALOG_INPUT_SAMPLE samples
-#if CPU_ARCH == ARCH_AVR
-#define ANALOG_INPUT_SAMPLE 5
-#else
-#define ANALOG_INPUT_SAMPLE 4
-#endif
 #define ANALOG_REF_AREF 0
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
@@ -157,6 +148,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
 #define CONTROLLER_GAMEDUINO2 16
 #define CONTROLLER_MIREGLI 17
+#define CONTROLLER_GATE_3NOVATICA 18
 
 //direction flags
 #define X_DIRPOS 1
@@ -246,6 +238,14 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SHARED_COOLER 0
 #endif
 
+// Test for shared coolers between extruders and mainboard
+#if EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == FAN_BOARD_PIN
+ #define SHARED_COOLER_BOARD_EXT 1
+ #undef FAN_BOARD_PIN
+ #define FAN_BOARD_PIN 0
+#else
+ #define SHARED_COOLER_BOARD_EXT 0
+#endif
 
 #if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<101
 #define EXT0_ANALOG_INPUTS 1
@@ -360,6 +360,14 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "ui.h"
 #include "Communication.h"
 
+
+#if UI_DISPLAY_TYPE != DISPLAY_U8G
+  #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
+    #error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
+  #endif
+#endif
+
+
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
 #endif
@@ -440,9 +448,9 @@ public:
 };
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
-extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
-extern uint osAnalogInputBuildup[ANALOG_INPUTS];
-extern uint8 osAnalogInputPos; // Current sampling position
+//extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
+//extern uint osAnalogInputBuildup[ANALOG_INPUTS];
+//extern uint8 osAnalogInputPos; // Current sampling position
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #if USE_ADVANCE
@@ -498,7 +506,7 @@ extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
 extern uint8_t counter250ms;
 extern void writeMonitor();
-
+extern uint8_t fanKickstart;
 
 
 #if SDSUPPORT

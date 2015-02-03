@@ -111,6 +111,9 @@ public:
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_INPUT_SAMPLE 5
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 10
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
@@ -689,7 +692,12 @@ public:
 
     inline static void startWatchdog()
     {
+#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)	
+        WDTCSR = (1<<WDCE) | (1<<WDE);								// wdt FIX for arduino mega boards
+        WDTCSR = (1<<WDIE) | (1<<WDP3);
+#else
         wdt_enable(WDTO_1S);
+#endif
     };
     inline static void stopWatchdog()
     {
@@ -697,7 +705,9 @@ public:
     }
     inline static void pingWatchdog()
     {
+#if FEATURE_WATCHDOG
         wdt_reset();
+#endif
     };
     inline static float maxExtruderTimerFrequency()
     {
@@ -705,7 +715,7 @@ public:
     }
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(uint8_t servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff);
 #endif
     static void analogStart();
 #if USE_ADVANCE

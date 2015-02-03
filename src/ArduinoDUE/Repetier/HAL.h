@@ -120,7 +120,7 @@ typedef char prog_char;
 #define SERVO2500US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
 #define SERVO5000US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
 
-#define AD_PRESCALE_FACTOR      168  // 250 kHz ADC clock 
+#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock 
 #define AD_TRACKING_CYCLES      4   // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
@@ -130,7 +130,7 @@ typedef char prog_char;
 #define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
-#define WATCHDOG_INTERVAL       512u  // 4sec  (~16 seconds max)
+#define WATCHDOG_INTERVAL       1024u  // 8sec  (~16 seconds max)
 
 
 
@@ -203,6 +203,9 @@ class InterruptProtectedBlock {
 
 #define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
+#define ANALOG_INPUT_SAMPLE 6
+// Bits of the ADC converter
+#define ANALOG_INPUT_BITS 12
 #define ANALOG_REDUCE_BITS 0
 #define ANALOG_REDUCE_FACTOR 1
 
@@ -665,15 +668,19 @@ public:
     // Watchdog support
     inline static void startWatchdog() {  WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);WDT->WDT_CR = 0xA5000001;};
     inline static void stopWatchdog() {}
-    inline static void pingWatchdog() {WDT->WDT_CR = 0xA5000001;};
+    inline static void pingWatchdog() {
+#if FEATURE_WATCHDOG
+    WDT->WDT_CR = 0xA5000001;
+#endif
+    };
 
     inline static float maxExtruderTimerFrequency() {return (float)F_CPU/TIMER0_PRESCALE;}
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
-    static void servoMicroseconds(uint8_t servo,int ms);
+    static void servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff);
 #endif
 
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
     static void analogStart(void);
 #endif
 #if USE_ADVANCE

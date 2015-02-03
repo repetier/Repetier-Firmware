@@ -117,12 +117,12 @@ Custom M Codes
 - M281 Test if watchdog is running and working.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
-- M303 P<extruder/bed> S<printTemerature> X0 - Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM.
+- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
 - M320 - Activate autolevel
 - M321 - Deactivate autolevel
 - M322 - Reset autolevel matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
-- M340 P<servoId> S<pulseInUS> : servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
+- M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M355 S<0/1> - Turn case light on/off, no S = report status
 - M360 - show configuration

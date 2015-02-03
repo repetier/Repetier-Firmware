@@ -41,9 +41,6 @@ extern int16_t read_max31855(uint8_t ss_pin);
 
 #if ANALOG_INPUTS > 0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
-uint8 osAnalogInputCounter[ANALOG_INPUTS];
-uint osAnalogInputBuildup[ANALOG_INPUTS];
-uint8 osAnalogInputPos=0; // Current sampling position
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
 #endif
 
@@ -110,6 +107,7 @@ void Extruder::manageTemperatures()
             errorDetected = 1;
             if(extruderTempErrors > 10)   // Ignore short temporary failures
             {
+                act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
                 Printer::setAnyTempsensorDefect();
                 reportTempsensorError();
             }
@@ -134,6 +132,7 @@ void Extruder::manageTemperatures()
                     errorDetected = 1;
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
+                        act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
                         Printer::setAnyTempsensorDefect();
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -156,6 +155,7 @@ void Extruder::manageTemperatures()
                     errorDetected = 1;
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
+                        act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
                         Printer::setAnyTempsensorDefect();
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -362,7 +362,7 @@ void Extruder::initExtruder()
     SET_OUTPUT(EXT5_STEP_PIN);
 #endif
 
-    for(i=0; i<NUM_EXTRUDER; ++i)
+    for(i = 0; i < NUM_EXTRUDER; ++i)
     {
         Extruder *act = &extruder[i];
         if(act->enablePin > -1)
@@ -412,6 +412,7 @@ This function changes and initalizes a new extruder. This is also called, after 
 */
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
+#if NUM_EXTRUDER > 0
 #if MIXING_EXTRUDER
     if(extruderId >= VIRTUAL_EXTRUDER)
         extruderId = 0;
@@ -421,7 +422,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
     if(extruderId >= NUM_EXTRUDER)
         extruderId = 0;
-#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
     if(extruderId != Extruder::current->id)
     {
@@ -476,9 +477,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     HAL::resetExtruderDirection();
 #endif
 
-#if NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     if(executeSelect) // Run only when changing
         GCode::executeFString(Extruder::current->selectCommands);
+#endif
 #endif
 }
 
@@ -595,7 +597,7 @@ void Extruder::step()
     else
     {
         bestError = 10000;
-        for(i=0; i<NUM_EXTRUDER; i++)
+        for(i = 0; i < NUM_EXTRUDER; i++)
         {
             if(extruder[i].mixingW == 0) continue;
             if(extruder[i].mixingE < bestError)
@@ -836,27 +838,27 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
     {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
     {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
-#if NUM_TEMPS_USERTHERMISTOR0>0
+#if NUM_TEMPS_USERTHERMISTOR0 > 0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
-#if NUM_TEMPS_USERTHERMISTOR1>0
+#if NUM_TEMPS_USERTHERMISTOR1 > 0
 const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORTABLE1 ;
 #endif
-#if NUM_TEMPS_USERTHERMISTOR2>0
+#if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
 const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
-#if NUM_TEMPS_USERTHERMISTOR0>0
+#if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
         ,0
 #endif
-#if NUM_TEMPS_USERTHERMISTOR1>0
+#if NUM_TEMPS_USERTHERMISTOR1 > 0
         ,(short int *)&temptable_6[0][0]
 #else
         ,0
 #endif
-#if NUM_TEMPS_USERTHERMISTOR2>0
+#if NUM_TEMPS_USERTHERMISTOR2 > 0
         ,(short int *)&temptable_7[0][0]
 #else
         ,0
@@ -1032,7 +1034,7 @@ void TemperatureController::updateCurrentTemperature()
         short oldraw = temptable[0];
         short oldtemp = temptable[1];
         short newraw,newtemp;
-        currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-currentTemperature;
+        currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - currentTemperature;
         while(i<GENERIC_THERM_NUM_ENTRIES*2)
         {
             newraw = temptable[i++];
@@ -1201,7 +1203,7 @@ void Extruder::disableAllHeater()
 }
 
 #if TEMP_PID
-void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool storeValues)
+void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeValues)
 {
     float currentTemp;
     int cycles = 0;
@@ -1218,7 +1220,10 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
     float Ku, Tu;
     float Kp = 0, Ki = 0, Kd = 0;
     float maxTemp = 20, minTemp = 20;
-
+    if(maxCycles < 5)
+        maxCycles = 5;
+    if(maxCycles > 20)
+        maxCycles = 20;
     Com::printInfoFLN(Com::tPIDAutotuneStart);
 
     Extruder::disableAllHeater(); // switch off all heaters.
@@ -1323,7 +1328,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
             Extruder::disableAllHeater();
             return;
         }
-        if(cycles > 5)
+        if(cycles > maxCycles)
         {
             Com::printInfoFLN(Com::tAPIDFinished);
             Extruder::disableAllHeater();

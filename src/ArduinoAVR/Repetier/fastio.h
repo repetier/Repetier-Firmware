@@ -2054,7 +2054,7 @@ pins
 #define	MOSI				DIO10
 #define	SS					8
 
-#if MOTHERBOARD!=8 && MOTHERBOARD!=9
+#if MOTHERBOARD != 8 && MOTHERBOARD != 9 && MOTHERBOARD != 88
 // change for your board
 #define	DEBUG_LED		DIO31 /* led D5 red */
 
