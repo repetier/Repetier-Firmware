@@ -1376,6 +1376,9 @@ void UIDisplay::parse(const char *txt,bool ram)
 #if EEPROM_MODE
                 float dist = Printer::filamentPrinted * 0.001 + HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
                 addFloat(dist, 6, 1);
+#else
+                float dist = Printer::filamentPrinted * 0.001;
+                addFloat(dist, 6, 1);
 #endif
             }
             break;
@@ -1389,9 +1392,11 @@ void UIDisplay::parse(const char *txt,bool ram)
                     fvalue = Printer::realYPosition();
                 else if(c2=='2')
                     fvalue = Printer::realZPosition();
-                else
+                else if(c2=='3')
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS];
-                if(c2=='4')  addFloat(fvalue/1000,2,2);
+                else
+                    fvalue = Printer::filamentPrinted * 0.001;
+                if(c2=='4')  addFloat(fvalue,3,2);
                 else         addFloat(fvalue,4,2);
             }
             break;

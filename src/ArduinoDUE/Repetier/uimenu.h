@@ -127,7 +127,7 @@ extruder position
 %x1 : Y position
 %x2 : Z position
 %x3 : Current extruder position
-%x4 : Current extruder position in meters (for filament usage)
+%x4 : Printed since temperature on in meters (for filament usage)
 
 extruder parameters
 %X0..9 : Extruder selected marker
@@ -203,7 +203,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #else
      "Fan %Fs%%%     Z:%x2",
    #endif
-   "Mul:%om       E%on:%x4m", "Buf:%oB", "%os")
+   "Mul:%om       E:%x4m", "Buf:%oB", "%os")
 
   #if EEPROM_MODE != 0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m")
@@ -224,13 +224,15 @@ for 2 row displays. You can add additional pages or change the default pages lik
 #elif UI_ROWS >= 4
  #if HAVE_HEATED_BED
  #if NUM_EXTRUDER > 0
-   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
+//   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
+   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   E:%x4","%os")
 #else
-   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
+//   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
+   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   E:%x4","%os")
 #endif
    //UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
  #else
- #if NUM_EXTRUDER>0
+ #if NUM_EXTRUDER > 0
    UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os")
    #else
    UI_PAGE4(ui_page1,"","Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os")
@@ -258,11 +260,11 @@ for 2 row displays. You can add additional pages or change the default pages lik
    ,"","%os"
  #elif (NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) || (NUM_EXTRUDER == 0 &&  HAVE_HEATED_BED)
    ,"","","%os"
- #elif NUM_EXTRUDER==0
+ #elif NUM_EXTRUDER == 0
    ,"","","","%os"
  #endif
  )
- #if EEPROM_MODE!=0
+ #if EEPROM_MODE != 0
   UI_PAGE4(ui_page4,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m")
   #define UI_PRINTTIME_PAGES ,&ui_page4
   #define UI_PRINTTIME_COUNT 1
@@ -274,7 +276,7 @@ for 2 row displays. You can add additional pages or change the default pages lik
 Merge pages together. Use the following pattern:
 #define UI_PAGES {&name1,&name2,&name3}
 */
- #define UI_PAGES {&ui_page1,&ui_page2,&ui_page3 UI_PRINTTIME_PAGES}
+ #define UI_PAGES {&ui_page1, &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
 // How many pages do you want to have. Minimum is 1.
  #define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
 #else
