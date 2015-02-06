@@ -422,7 +422,7 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
-    DELAY1MICROSECOND;
+    HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
     HAL::delayMicroseconds(2);
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
@@ -440,12 +440,11 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
 
 void initializeLCD()
 {
-
     // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(335);
+    HAL::delayMilliseconds(235);
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);

@@ -398,10 +398,10 @@ void Extruder::initExtruder()
 void TemperatureController::updateTempControlVars()
 {
 #if TEMP_PID
-    if(heatManager==HTR_PID && pidIGain!=0)   // prevent division by zero
+    if(heatManager == HTR_PID && pidIGain != 0)   // prevent division by zero
     {
-        tempIStateLimitMax = (float)pidDriveMax*10.0f/pidIGain;
-        tempIStateLimitMin = (float)pidDriveMin*10.0f/pidIGain;
+        tempIStateLimitMax = (float)pidDriveMax * 10.0f / pidIGain;
+        tempIStateLimitMin = (float)pidDriveMin * 10.0f / pidIGain;
     }
 #endif
 }
@@ -417,7 +417,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     if(extruderId >= VIRTUAL_EXTRUDER)
         extruderId = 0;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
-        Extruder::setMixingWeight(i,extruder[i].virtualWeights[extruderId]);
+        Extruder::setMixingWeight(i, extruder[i].virtualWeights[extruderId]);
     extruderId = 0;
 #endif
     if(extruderId >= NUM_EXTRUDER)
@@ -490,7 +490,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     extr = 0; // map any virtual extruder number to 0
 #endif // MIXING_EXTRUDER
     bool alloffs = true;
-    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+    for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC > 15) alloffs = false;
 #ifdef MAXTEMP
     if(temperatureInCelsius > MAXTEMP) temperatureInCelsius = MAXTEMP;
@@ -500,6 +500,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
     tc->setTargetTemperature(temperatureInCelsius);
+    tc->updateTempControlVars();
     if(beep && temperatureInCelsius > 30)
         tc->setAlarm(true);
     if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
@@ -536,8 +537,11 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius,uint8_t extr
     if(alloff && !alloffs) // All heaters are now switched off?
         EEPROM::updatePrinterUsage();
 #endif
-    if(alloffs && !alloff) // heaters are turned on, start measuring printing time
+    if(alloffs && !alloff) { // heaters are turned on, start measuring printing time
         Printer::msecondsPrinting = HAL::timeInMilliseconds();
+        Printer::filamentPrinted = 0;  // new print, new counter
+        Printer::flag2 &= ~PRINTER_FLAG2_RESET_FILAMENT_USAGE;
+    }
 }
 
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)

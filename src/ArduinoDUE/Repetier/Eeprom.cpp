@@ -754,12 +754,12 @@ void EEPROM::init()
 void EEPROM::updatePrinterUsage()
 {
 #if EEPROM_MODE != 0
-    if(Printer::filamentPrinted == 0) return; // No miles only enabled
+    if(Printer::filamentPrinted == 0 || (Printer::flag2 & PRINTER_FLAG2_RESET_FILAMENT_USAGE) != 0) return; // No miles only enabled
     uint32_t seconds = (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000;
     seconds += HAL::eprGetInt32(EPR_PRINTING_TIME);
     HAL::eprSetInt32(EPR_PRINTING_TIME,seconds);
     HAL::eprSetFloat(EPR_PRINTING_DISTANCE,HAL::eprGetFloat(EPR_PRINTING_DISTANCE) + Printer::filamentPrinted * 0.001);
-    Printer::filamentPrinted = 0;
+    Printer::flag2 |= PRINTER_FLAG2_RESET_FILAMENT_USAGE;
     Printer::msecondsPrinting = HAL::timeInMilliseconds();
     updateChecksum();
     Commands::reportPrinterUsage();

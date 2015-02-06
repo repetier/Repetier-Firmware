@@ -88,6 +88,7 @@ union wizardVar {
 #define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
 #define PRINTER_FLAG2_BLOCK_RECEIVING       1
 #define PRINTER_FLAG2_AUTORETRACT           2
+#define PRINTER_FLAG2_RESET_FILAMENT_USAGE  4
 
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
@@ -737,22 +738,22 @@ public:
     }
     static inline speed_t updateStepsPerTimerCall(speed_t vbase)
     {
-        if(vbase>STEP_DOUBLER_FREQUENCY)
+        if(vbase > STEP_DOUBLER_FREQUENCY)
         {
 #if ALLOW_QUADSTEPPING
-            if(vbase>STEP_DOUBLER_FREQUENCY*2)
+            if(vbase > STEP_DOUBLER_FREQUENCY * 2)
             {
                 Printer::stepsPerTimerCall = 4;
-                return vbase>>2;
+                return vbase >> 2;
             }
             else
             {
                 Printer::stepsPerTimerCall = 2;
-                return vbase>>1;
+                return vbase >> 1;
             }
 #else
             Printer::stepsPerTimerCall = 2;
-            return vbase>>1;
+            return vbase >> 1;
 #endif
         }
         else

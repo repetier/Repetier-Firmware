@@ -904,7 +904,7 @@ void Printer::setup()
   #if defined(SERVO3_NEUTRAL_POS) && SERVO3_NEUTRAL_POS >= 500
     HAL::servoMicroseconds(3,SERVO3_NEUTRAL_POS, 1000);
   #endif
-#endif  
+#endif
 }
 
 void Printer::defaultLoopActions()
@@ -1004,15 +1004,15 @@ void Printer::homeZAxis() // Delta z homing
     dx -= dm; // now all dxyz are positive
     dy -= dm;
     dz -= dm;
-    currentPositionSteps[X_AXIS] = 0;
+    currentPositionSteps[X_AXIS] = 0; // here we should be
     currentPositionSteps[Y_AXIS] = 0;
     currentPositionSteps[Z_AXIS] = zMaxSteps;
     transformCartesianStepsToDeltaSteps(currentPositionSteps,currentDeltaPositionSteps);
     currentDeltaPositionSteps[A_TOWER] -= dx;
     currentDeltaPositionSteps[B_TOWER] -= dy;
     currentDeltaPositionSteps[C_TOWER] -= dz;
-    PrintLine::moveRelativeDistanceInSteps(0,0,dm,0,homingFeedrate[Z_AXIS],true,false);
-    currentPositionSteps[X_AXIS] = 0;
+    PrintLine::moveRelativeDistanceInSteps(0, 0, dm, 0, homingFeedrate[Z_AXIS], true, false);
+    currentPositionSteps[X_AXIS] = 0; // now we are really here
     currentPositionSteps[Y_AXIS] = 0;
     currentPositionSteps[Z_AXIS] = zMaxSteps; // Extruder is now exactly in the delta center
     coordinateOffset[X_AXIS] = 0;

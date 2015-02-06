@@ -163,7 +163,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
     p->dir = 0;
     Printer::constrainDestinationCoords();
     //Find direction
-    for(uint8_t axis=0; axis < 4; axis++)
+    for(uint8_t axis = 0; axis < 4; axis++)
     {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
         if(axis == E_AXIS)
@@ -171,6 +171,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
             p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
             Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+            Printer::filamentPrinted += delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -186,7 +187,6 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             resetPathPlanner();
         return; // No steps included
     }
-    Printer::filamentPrinted += axis_diff[E_AXIS];
     float xydist2;
 #if ENABLE_BACKLASH_COMPENSATION
     if((p->isXYZMove()) && ((p->dir & XYZ_DIRPOS)^(Printer::backlashDir & XYZ_DIRPOS)) & (Printer::backlashDir >> 3))   // We need to compensate backlash, add a move
@@ -1481,10 +1481,12 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
             Printer::extrudeMultiplyError += (static_cast<float>(difference[E_AXIS]) * Printer::extrusionFactor);
             difference[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
             Printer::extrudeMultiplyError -= difference[E_AXIS];
-        }
-        axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
+            axis_diff[E_AXIS] = difference[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+            Printer::filamentPrinted += axis_diff[E_AXIS];
+            axis_diff[E_AXIS] = fabs(axis_diff[E_AXIS]);
+        } else
+            axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
     }
-    Printer::filamentPrinted += axis_diff[E_AXIS];
 
     float cartesianDistance;
     flag8_t cartesianDir;
