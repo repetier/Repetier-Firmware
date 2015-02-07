@@ -56,8 +56,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 #if EEPROM_MODE != 0
     baudrate = BAUDRATE;
-    maxInactiveTime = MAX_INACTIVE_TIME*1000L;
-    stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
+    maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
+    stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
     Printer::axisStepsPerMM[X_AXIS] = XAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Y_AXIS] = YAXIS_STEPS_PER_MM;
     Printer::axisStepsPerMM[Z_AXIS] = ZAXIS_STEPS_PER_MM;

@@ -241,13 +241,16 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // Test for shared coolers between extruders and mainboard
 #if EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == FAN_BOARD_PIN
  #define SHARED_COOLER_BOARD_EXT 1
- #undef FAN_BOARD_PIN
- #define FAN_BOARD_PIN 0
 #else
  #define SHARED_COOLER_BOARD_EXT 0
 #endif
 
-#if NUM_EXTRUDER>0 && EXT0_TEMPSENSOR_TYPE<101
+#if defined(UI_SERVO_CONTROL) && UI_SERVO_CONTROL > FEATURE_SERVO
+ #undef UI_SERVO_CONTROL
+ #define UI_SERVO_CONTROL FEATURE_SERVO
+#endif
+
+#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE < 101
 #define EXT0_ANALOG_INPUTS 1
 #define EXT0_SENSOR_INDEX 0
 #define EXT0_ANALOG_CHANNEL EXT0_TEMPSENSOR_PIN

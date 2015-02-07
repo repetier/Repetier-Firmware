@@ -72,7 +72,7 @@ void Extruder::manageTemperatures()
         // Handle automatic cooling of extruders
         if(controller < NUM_EXTRUDER)
         {
-#if SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN >= 0
+#if ((SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN) || SHARED_COOLER_BOARD_EXT) && EXT0_EXTRUDER_COOLER_PIN > -1
             if(controller == 0) {
                 bool enable = false;
                 for(uint8_t j = 0; j < NUM_EXTRUDER; j++) {
@@ -81,6 +81,9 @@ void Extruder::manageTemperatures()
                         break;
                     }
                 }
+#if SHARED_COOLER_BOARD_EXT
+                if(pwm_pos[NUM_EXTRUDER + 1]) enable = true;
+#endif                 
                 extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
             }
 #else
@@ -553,6 +556,10 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
     heatedBedController.setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
+    if(temperatureInCelsius > 15)
+        pwm_pos[NUM_EXTRUDER + 1] = 255;    // turn on the mainboard cooling fan
+    else if(Printer::areAllSteppersDisabled())
+        pwm_pos[NUM_EXTRUDER + 1] = 0;      // turn off the mainboard cooling fan only if steppers disabled
 #endif
 }
 

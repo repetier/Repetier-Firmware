@@ -274,6 +274,7 @@
 #define UI_TEXT_WIZ_CH_FILAMENT3 "filament up/down"
 #define UI_TEXT_CLICK_DONE "Click when done"
 #define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
+#define UI_TEXT_SERVOPOS "Servo pos.: %oS"
 
 // *************** German translation ****************
 
@@ -457,6 +458,8 @@
 #define UI_TEXT_WIZ_CH_FILAMENT2 "Zum man. f" STR_ouml "rdern"
 #define UI_TEXT_WIZ_CH_FILAMENT3 "Men" STR_uuml "knopf drehen"
 #define UI_TEXT_CLICK_DONE "Weiter mit Klick"
+#define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
+#define UI_TEXT_SERVOPOS "Servo Pos.: %oS"
 
 #endif
 
@@ -1737,6 +1740,7 @@
 #define UI_TEXT_WIZ_CH_FILAMENT3 "filament w gore/dol"
 #define UI_TEXT_CLICK_DONE       "Kliknij jak gotowe"
 #define UI_TEXT_AUTOLEVEL_ONOFF  "Autopoziomow.: %ll"
+#define UI_TEXT_SERVOPOS "Pozycja Serwa: %oS"
 
 #endif
 

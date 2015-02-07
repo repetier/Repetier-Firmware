@@ -1142,7 +1142,8 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define SERVO1_NEUTRAL_POS  -1
 #define SERVO2_NEUTRAL_POS  -1
 #define SERVO3_NEUTRAL_POS  -1
-
+/** Set to servo number +1 to control that servo in ui menu. 0 disables ui control. */
+#define UI_SERVO_CONTROL 0
 /** Some fans won't start for low values, but would run if started with higher power at the beginning.
 This defines the full power duration before returning to set value. Time is in milliseconds */
 #define FAN_KICKSTART_TIME  200

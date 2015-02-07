@@ -99,6 +99,7 @@ void Commands::waitUntilEndOfAllMoves()
         GCode::readFromSerial();
         checkForPeriodicalActions(false);
         UI_MEDIUM;
+        UI_SLOW(false);
     }
 }
 
@@ -1200,9 +1201,9 @@ void Commands::processMCode(GCode *com)
         if (com->hasS())
         {
             if(com->hasT())
-                Extruder::setTemperatureForExtruder(com->S,com->T,com->hasF() && com->F>0);
+                Extruder::setTemperatureForExtruder(com->S, com->T, com->hasF() && com->F > 0);
             else
-                Extruder::setTemperatureForExtruder(com->S,Extruder::current->id,com->hasF() && com->F>0);
+                Extruder::setTemperatureForExtruder(com->S, Extruder::current->id, com->hasF() && com->F > 0);
         }
 #endif
         break;
@@ -1210,13 +1211,13 @@ void Commands::processMCode(GCode *com)
         if(reportTempsensorError()) break;
         previousMillisCmd = HAL::timeInMilliseconds();
         if(Printer::debugDryrun()) break;
-        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F>0);
+        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
         break;
     case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         printTemperatures(com->hasX());
         break;
     case 109: // M109 - Wait for extruder heater to reach target.
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
     {
         if(reportTempsensorError()) break;
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -1224,10 +1225,10 @@ void Commands::processMCode(GCode *com)
         UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
         Commands::waitUntilEndOfAllMoves();
         Extruder *actExtruder = Extruder::current;
-        if(com->hasT() && com->T<NUM_EXTRUDER) actExtruder = &extruder[com->T];
-        if (com->hasS()) Extruder::setTemperatureForExtruder(com->S,actExtruder->id,com->hasF() && com->F>0);
+        if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
+        if (com->hasS()) Extruder::setTemperatureForExtruder(com->S,actExtruder->id,com->hasF() && com->F > 0);
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN > 0
-        if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)<(SKIP_M109_IF_WITHIN)) break; // Already in range
+        if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC) < (SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
         bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
         millis_t printedTime = HAL::timeInMilliseconds();
@@ -1255,18 +1256,18 @@ void Commands::processMCode(GCode *com)
 #endif
             if((waituntil == 0 &&
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
-                     : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC+1))
+                     : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
 #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
                     || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
 #endif
               )
             {
-                waituntil = currentTime+1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
             }
         }
-        while(waituntil==0 || (waituntil!=0 && (millis_t)(waituntil-currentTime)<2000000000UL));
+        while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil-currentTime) < 2000000000UL));
 #if RETRACT_DURING_HEATUP
-        if (retracted && actExtruder==Extruder::current)
+        if (retracted && actExtruder == Extruder::current)
         {
             PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
         }
@@ -1282,9 +1283,9 @@ void Commands::processMCode(GCode *com)
         UI_STATUS_UPD(UI_TEXT_HEATING_BED);
         Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
-        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F>0);
+        if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
-        if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC)<SKIP_M190_IF_WITHIN) break;
+        if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
         codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC)

@@ -171,7 +171,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
             Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
             p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
             Printer::extrudeMultiplyError -= p->delta[E_AXIS];
-            Printer::filamentPrinted += delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
+            Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);

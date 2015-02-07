@@ -103,6 +103,7 @@ random stuff
 %ob : Output level heated bed
 %PN : Printer name
 %on : current extruder number (1,2,3...)
+%oS : servo position
 
 stops
 %sx : State of x min endstop.
@@ -387,13 +388,21 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast_notest,UI_TEXT_Z_POS_FAST,ui_menu_zpos_f
 #define UI_SPEED_Z ,&ui_menu_go_zpos
 #define UI_SPEED_Z_NOTEST ,&ui_menu_go_zpos_notest
 #endif
+#if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
+  UI_MENU_CHANGEACTION(ui_menu_servopos, UI_TEXT_SERVOPOS, UI_ACTION_SERVOPOS)
+  #define SERVOPOS_COUNT 1
+  #define SERVOPOS_ENTRY ,&ui_menu_servopos
+#else
+  #define SERVOPOS_COUNT 0
+  #define SERVOPOS_ENTRY
+#endif
 
 #if DRIVE_SYSTEM != DELTA     //Positioning menu for non-delta
-#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
-UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT)
+#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos SERVOPOS_ENTRY}
+UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT + SERVOPOS_COUNT)
 #else                   //Positioning menu for delta (removes individual x,y,z homing)
-#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all  UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
-UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,2 + 3 * UI_SPEED + UI_MENU_BACKCNT)
+#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all  UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos SERVOPOS_ENTRY}
+UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,2 + 3 * UI_SPEED + UI_MENU_BACKCNT + SERVOPOS_COUNT)
 #endif
 
 // **** Delta calibration menu
