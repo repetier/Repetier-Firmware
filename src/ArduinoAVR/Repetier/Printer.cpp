@@ -1399,8 +1399,9 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     {
         if(runStartScript)
             GCode::executeFString(Com::tZProbeStartScript);
-        if(currentPosition[Z_AXIS] > EEPROM::zProbeBedDistance()) {
-            moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeBedDistance(),IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
+        float maxStartHeight = EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight() + 0.1;
+        if(currentPosition[Z_AXIS] > maxStartHeight) {
+            moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
         }
         Printer::offsetX = -EEPROM::zProbeXOffset();
         Printer::offsetY = -EEPROM::zProbeYOffset();
@@ -1735,6 +1736,7 @@ void Distortion::reportStatus() {
 
 void Distortion::resetCorrection(void)
 {
+    Com::printInfoFLN(PSTR("Resetting Z correction"));
     for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
         setMatrix(0, i);
 }

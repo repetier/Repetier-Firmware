@@ -67,6 +67,7 @@ typedef char prog_char;
 #define pgm_read_word_near(addr) pgm_read_word(addr)
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
+#define _BV(x) (1 << (x))
 
 #define FSTRINGVALUE(var,value) const char var[] PROGMEM = value;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;

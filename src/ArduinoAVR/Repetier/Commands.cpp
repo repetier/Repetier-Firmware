@@ -718,6 +718,16 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
     {
+#if DISTORTION_CORRECTION
+        Printer::distortion.disable(true); // if level has changed, distortion is also invalid
+#endif
+#if DRIVE_SYSTEM == DELTA
+        // It is not possible to go to the edges at the top, also users try
+        // it often and wonder why the coordinate system is then wrong.
+        // For that reason we ensure a correct behaviour by code.
+        Printer::homeAxis(true, true, true);
+        Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+#endif
         GCode::executeFString(Com::tZProbeStartScript);
         //bool iterate = com->hasP() && com->P>0;
         Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
@@ -1653,9 +1663,9 @@ void Commands::processMCode(GCode *com)
         if(com->hasS())
         {
             if(com->S > 0)
-                Printer::distortion.enable(!com->hasP() || com->P == 1);
+                Printer::distortion.enable(com->hasP() && com->P == 1);
             else
-                Printer::distortion.disable(!com->hasP() || com->P == 1);
+                Printer::distortion.disable(com->hasP() && com->P == 1);
         }
         else
         {
