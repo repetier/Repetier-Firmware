@@ -795,6 +795,31 @@ void Printer::setup()
     SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
     WRITE(EXT5_EXTRUDER_COOLER_PIN,LOW);
 #endif
+// Initalize jam sensors
+#if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
+    SET_INPUT(EXT0_JAM_PIN);
+    PULLUP(EXT0_JAM_PIN, EXT0_JAM_PULLUP);
+#endif // defined
+#if defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
+    SET_INPUT(EXT1_JAM_PIN);
+    PULLUP(EXT1_JAM_PIN, EXT1_JAM_PULLUP);
+#endif // defined
+#if defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
+    SET_INPUT(EXT2_JAM_PIN);
+    PULLUP(EXT2_JAM_PIN, EXT2_JAM_PULLUP);
+#endif // defined
+#if defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
+    SET_INPUT(EXT3_JAM_PIN);
+    PULLUP(EXT3_JAM_PIN, EXT3_JAM_PULLUP);
+#endif // defined
+#if defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
+    SET_INPUT(EXT4_JAM_PIN);
+    PULLUP(EXT4_JAM_PIN, EXT4_JAM_PULLUP);
+#endif // defined
+#if defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
+    SET_INPUT(EXT5_JAM_PIN);
+    PULLUP(EXT5_JAM_PIN, EXT5_JAM_PULLUP);
+#endif // defined
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
     WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);

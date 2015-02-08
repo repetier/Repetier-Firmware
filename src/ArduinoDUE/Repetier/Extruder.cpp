@@ -83,7 +83,7 @@ void Extruder::manageTemperatures()
                 }
 #if SHARED_COOLER_BOARD_EXT
                 if(pwm_pos[NUM_EXTRUDER + 1]) enable = true;
-#endif                 
+#endif
                 extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
             }
 #else
@@ -260,6 +260,21 @@ void Extruder::manageTemperatures()
             WRITE(LED_PIN,on);
 #endif
     }
+
+#if EXTRUDER_JAM_CONTROL
+    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+        if(extruder[i].jamStepsSinceLastSignal > JAM_ERROR_STEPS) {
+            if(!extruder[i].isWaitJamStartcount())
+                extruder[i].tempControl.setJammed(true);
+            else {
+                extruder[i].jamStepsSinceLastSignal = 0;
+                extruder[i].setWaitJamStartcount(false);
+            }
+        }
+    }
+#endif // EXTRUDER_JAM_CONTROL
+
+
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;
     if(Printer::isAnyTempsensorDefect())
@@ -1524,6 +1539,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 #if NUM_EXTRUDER > 1
@@ -1548,6 +1566,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 #if NUM_EXTRUDER > 2
@@ -1572,6 +1593,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 #if NUM_EXTRUDER > 3
@@ -1596,6 +1620,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 #if NUM_EXTRUDER > 4
@@ -1620,6 +1647,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 #if NUM_EXTRUDER > 5
@@ -1644,6 +1674,9 @@ Extruder extruder[NUM_EXTRUDER] =
             ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
+#if EXTRUDER_JAM_CONTROL
+        ,0,0
+#endif
     }
 #endif
 };

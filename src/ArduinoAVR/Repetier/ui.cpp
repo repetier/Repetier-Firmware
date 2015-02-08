@@ -30,9 +30,9 @@ extern const int8_t encoder_table[16] PROGMEM ;
 
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
 #if defined(SERVO0_NEUTRAL_POS)
- uint16_t servoPosition = SERVO0_NEUTRAL_POS;
+uint16_t servoPosition = SERVO0_NEUTRAL_POS;
 #else
- uint16_t servoPosition = 1500;
+uint16_t servoPosition = 1500;
 #endif
 #endif
 
@@ -1157,14 +1157,14 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 
         case 'd':
-            if(c2=='o') addStringP(Printer::debugEcho()?ui_text_on:ui_text_off);
-            else if(c2=='i') addStringP(Printer::debugInfo()?ui_text_on:ui_text_off);
-            else if(c2=='e') addStringP(Printer::debugErrors()?ui_text_on:ui_text_off);
-            else if(c2=='d') addStringP(Printer::debugDryrun()?ui_text_on:ui_text_off);
+            if(c2 == 'o') addStringP(Printer::debugEcho()?ui_text_on:ui_text_off);
+            else if(c2 == 'i') addStringP(Printer::debugInfo()?ui_text_on:ui_text_off);
+            else if(c2 == 'e') addStringP(Printer::debugErrors()?ui_text_on:ui_text_off);
+            else if(c2 == 'd') addStringP(Printer::debugDryrun()?ui_text_on:ui_text_off);
             break;
 
         case 'e': // Extruder temperature
-            if(c2=='I')
+            if(c2 == 'I')
             {
                 //give integer display
                 char c2=(ram ? *(txt++) : pgm_read_byte(txt++));
@@ -1172,37 +1172,44 @@ void UIDisplay::parse(const char *txt,bool ram)
             }
             else ivalue = UI_TEMP_PRECISION;
 
-            if(c2=='r')   // Extruder relative mode
+            if(c2 == 'r')   // Extruder relative mode
             {
-                addStringP(Printer::relativeExtruderCoordinateMode?ui_yes:ui_no);
+                addStringP(Printer::relativeExtruderCoordinateMode ? ui_yes : ui_no);
                 break;
             }
-            if(Printer::flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT)
             {
                 uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
-                if(c2=='c') eid = Extruder::current->id;
-                else if(c2>='0' && c2<='9') eid = c2-'0';
+                if(c2 == 'c') eid = Extruder::current->id;
+                else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
+                if(Printer::isAnyTempsensorDefect())
+                {
 
-                if(tempController[eid]->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT)
+                    if(tempController[eid]->isSensorDefect())
+                    {
+                        addStringP(PSTR(" def "));
+                        break;
+                    }
+                    else if(tempController[eid]->isSensorDecoupled())
+                    {
+                        addStringP(PSTR(" dec "));
+                        break;
+                    }
+                }
+                if(tempController[eid]->isJammed())
                 {
-                    addStringP(PSTR(" def "));
+                    addStringP(PSTR(" jam "));
                     break;
                 }
-                else if(tempController[eid]->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED)
+                if(c2=='c') fvalue=Extruder::current->tempControl.currentTemperatureC;
+                else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
+                else if(c2=='b') fvalue=Extruder::getHeatedBedTemperature();
+                else if(c2=='B')
                 {
-                    addStringP(PSTR(" dec "));
-                    break;
+                    ivalue=0;
+                    fvalue=Extruder::getHeatedBedTemperature();
                 }
+                addFloat(fvalue,3,ivalue);
             }
-            if(c2=='c') fvalue=Extruder::current->tempControl.currentTemperatureC;
-            else if(c2>='0' && c2<='9') fvalue=extruder[c2-'0'].tempControl.currentTemperatureC;
-            else if(c2=='b') fvalue=Extruder::getHeatedBedTemperature();
-            else if(c2=='B')
-            {
-                ivalue=0;
-                fvalue=Extruder::getHeatedBedTemperature();
-            }
-            addFloat(fvalue,3,ivalue);
             break;
         case 'E': // Target extruder temperature
             if(c2=='c') fvalue=Extruder::current->tempControl.targetTemperatureC;
@@ -2544,44 +2551,44 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     case UI_ACTION_EXTRUDER0_TEMP:
         num = 0;
 EXTR_TEMP:
-    {
-        int tmp = (int)extruder[num].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        if(tmp == 0 && increment > 0) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        else tmp += increment;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp, num);
-    }
-    break;
-/*
-    case UI_ACTION_EXTRUDER1_TEMP:
-#if NUM_EXTRUDER>1
-    {
-        int tmp = (int)extruder[1].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp,1);
-    }
-#endif
-    break;
-    case UI_ACTION_EXTRUDER2_TEMP:
-#if NUM_EXTRUDER>2
-    {
-        int tmp = (int)extruder[2].tempControl.targetTemperatureC;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        tmp += increment;
-        if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
-        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
-        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
-        Extruder::setTemperatureForExtruder(tmp,2);
-    }
-#endif
-    break;
-*/
+        {
+            int tmp = (int)extruder[num].tempControl.targetTemperatureC;
+            if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+            if(tmp == 0 && increment > 0) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+            else tmp += increment;
+            if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+            else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+            Extruder::setTemperatureForExtruder(tmp, num);
+        }
+        break;
+        /*
+            case UI_ACTION_EXTRUDER1_TEMP:
+        #if NUM_EXTRUDER>1
+            {
+                int tmp = (int)extruder[1].tempControl.targetTemperatureC;
+                if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+                tmp += increment;
+                if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+                if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+                else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+                Extruder::setTemperatureForExtruder(tmp,1);
+            }
+        #endif
+            break;
+            case UI_ACTION_EXTRUDER2_TEMP:
+        #if NUM_EXTRUDER>2
+            {
+                int tmp = (int)extruder[2].tempControl.targetTemperatureC;
+                if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+                tmp += increment;
+                if(tmp == 1) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+                if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
+                else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+                Extruder::setTemperatureForExtruder(tmp,2);
+            }
+        #endif
+            break;
+        */
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -2620,24 +2627,24 @@ UI_P_ACCEL:
 #endif
         Printer::updateDerivedParameter();
         break;
-/*
-    case UI_ACTION_PRINT_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_PRINT_ACCEL_Y:
-#if DRIVE_SYSTEM!=DELTA
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
-#else
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
-#endif
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_PRINT_ACCEL_Z:
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
-*/
+        /*
+            case UI_ACTION_PRINT_ACCEL_X:
+                INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_PRINT_ACCEL_Y:
+        #if DRIVE_SYSTEM!=DELTA
+                INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],1,0,10000);
+        #else
+                INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
+        #endif
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_PRINT_ACCEL_Z:
+                INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
+                Printer::updateDerivedParameter();
+                break;
+        */
     case UI_ACTION_MOVE_ACCEL_X:
         num = X_AXIS;
         goto UI_M_ACCEL;
@@ -2655,24 +2662,24 @@ UI_M_ACCEL:
         Printer::updateDerivedParameter();
         break;
 
-/*
-    case UI_ACTION_MOVE_ACCEL_X:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_MOVE_ACCEL_Y:
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_MOVE_ACCEL_Z:
-#if DRIVE_SYSTEM != DELTA
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
-#else
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
-#endif
-        Printer::updateDerivedParameter();
-        break;
-*/
+        /*
+            case UI_ACTION_MOVE_ACCEL_X:
+                INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS],100,0,10000);
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_MOVE_ACCEL_Y:
+                INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS],100,0,10000);
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_MOVE_ACCEL_Z:
+        #if DRIVE_SYSTEM != DELTA
+                INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],1,0,10000);
+        #else
+                INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS],100,0,10000);
+        #endif
+                Printer::updateDerivedParameter();
+                break;
+        */
     case UI_ACTION_MAX_JERK:
         INCREMENT_MIN_MAX(Printer::maxJerk,0.1,1,99.9);
         break;
@@ -2717,38 +2724,38 @@ UI_MSTEPS:
         INCREMENT_MIN_MAX(Printer::axisStepsPerMM[num],0.1,0,999);
         Printer::updateDerivedParameter();
         break;
-/*
-    case UI_ACTION_HOMING_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[X_AXIS],1,5,1000);
-        break;
-    case UI_ACTION_HOMING_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[Y_AXIS],1,5,1000);
-        break;
-    case UI_ACTION_HOMING_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::homingFeedrate[Z_AXIS],1,1,1000);
-        break;
-    case UI_ACTION_MAX_FEEDRATE_X:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[X_AXIS],1,1,1000);
-        break;
-    case UI_ACTION_MAX_FEEDRATE_Y:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[Y_AXIS],1,1,1000);
-        break;
-    case UI_ACTION_MAX_FEEDRATE_Z:
-        INCREMENT_MIN_MAX(Printer::maxFeedrate[Z_AXIS],1,1,1000);
-        break;
-    case UI_ACTION_STEPS_X:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[X_AXIS],0.1,0,999);
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_STEPS_Y:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Y_AXIS],0.1,0,999);
-        Printer::updateDerivedParameter();
-        break;
-    case UI_ACTION_STEPS_Z:
-        INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Z_AXIS],0.1,0,999);
-        Printer::updateDerivedParameter();
-        break;
-*/
+        /*
+            case UI_ACTION_HOMING_FEEDRATE_X:
+                INCREMENT_MIN_MAX(Printer::homingFeedrate[X_AXIS],1,5,1000);
+                break;
+            case UI_ACTION_HOMING_FEEDRATE_Y:
+                INCREMENT_MIN_MAX(Printer::homingFeedrate[Y_AXIS],1,5,1000);
+                break;
+            case UI_ACTION_HOMING_FEEDRATE_Z:
+                INCREMENT_MIN_MAX(Printer::homingFeedrate[Z_AXIS],1,1,1000);
+                break;
+            case UI_ACTION_MAX_FEEDRATE_X:
+                INCREMENT_MIN_MAX(Printer::maxFeedrate[X_AXIS],1,1,1000);
+                break;
+            case UI_ACTION_MAX_FEEDRATE_Y:
+                INCREMENT_MIN_MAX(Printer::maxFeedrate[Y_AXIS],1,1,1000);
+                break;
+            case UI_ACTION_MAX_FEEDRATE_Z:
+                INCREMENT_MIN_MAX(Printer::maxFeedrate[Z_AXIS],1,1,1000);
+                break;
+            case UI_ACTION_STEPS_X:
+                INCREMENT_MIN_MAX(Printer::axisStepsPerMM[X_AXIS],0.1,0,999);
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_STEPS_Y:
+                INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Y_AXIS],0.1,0,999);
+                Printer::updateDerivedParameter();
+                break;
+            case UI_ACTION_STEPS_Z:
+                INCREMENT_MIN_MAX(Printer::axisStepsPerMM[Z_AXIS],0.1,0,999);
+                Printer::updateDerivedParameter();
+                break;
+        */
     case UI_ACTION_BAUDRATE:
 #if EEPROM_MODE != 0
     {
@@ -2775,7 +2782,7 @@ UI_MSTEPS:
         INCREMENT_MIN_MAX(servoPosition, 5, 500, 2500);
         HAL::servoMicroseconds(UI_SERVO_CONTROL - 1, servoPosition, 500);
 #endif
-    break;
+        break;
 #if TEMP_PID
     case UI_ACTION_PID_PGAIN:
         INCREMENT_MIN_MAX(Extruder::current->tempControl.pidPGain,0.1,0,200);

@@ -55,6 +55,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_DELTA_OVERFLOW
 //#define DEBUG_DELTA_REALPOS
 //#define DEBUG_SPLIT
+//#define DEBUG_JAM
 // Find the longest segment length during a print
 //#define DEBUG_SEGMENT_LENGTH
 // Find the maximum real jerk during a print
@@ -248,6 +249,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #if defined(UI_SERVO_CONTROL) && UI_SERVO_CONTROL > FEATURE_SERVO
  #undef UI_SERVO_CONTROL
  #define UI_SERVO_CONTROL FEATURE_SERVO
+#endif
+
+#if (defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1) || (defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1) || (defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1) || (defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1) || (defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1) || (defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1)
+#define EXTRUDER_JAM_CONTROL 1
+#else
+#define EXTRUDER_JAM_CONTROL 0
 #endif
 
 #if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE < 101

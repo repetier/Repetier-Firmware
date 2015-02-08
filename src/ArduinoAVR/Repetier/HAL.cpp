@@ -501,14 +501,14 @@ unsigned char HAL::i2cReadNak(void)
 #define SERVO2500US F_CPU/3200
 #define SERVO5000US F_CPU/1600
 unsigned int HAL::servoTimings[4] = {0,0,0,0};
-unsigned int servoAutoOff[4] = {0,0,0,0}; 
+unsigned int servoAutoOff[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
 void HAL::servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff)
 {
     if(ms<500) ms = 0;
     if(ms>2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
-    servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0; 
+    servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0;
 }
 SIGNAL (TIMER3_COMPA_vect)
 {
@@ -947,26 +947,23 @@ if(fanKickstart == 0)
     if((ADCSRA & _BV(ADSC)) == 0)   // Conversion finished?
     {
         osAnalogInputBuildup[osAnalogInputPos] += ADCW;
-        if(++osAnalogInputCounter[osAnalogInputPos]>=_BV(ANALOG_INPUT_SAMPLE))
+        if(++osAnalogInputCounter[osAnalogInputPos] >= _BV(ANALOG_INPUT_SAMPLE))
         {
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE < 12
             osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] <<
-                (12-ANALOG_INPUT_BITS-ANALOG_INPUT_SAMPLE);
+                osAnalogInputBuildup[osAnalogInputPos] << (12 - ANALOG_INPUT_BITS - ANALOG_INPUT_SAMPLE);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE > 12
             osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos] >>
-                (ANALOG_INPUT_BITS+ANALOG_INPUT_SAMPLE-12);
+                osAnalogInputBuildup[osAnalogInputPos] >> (ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE - 12);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE == 12
-            osAnalogInputValues[osAnalogInputPos] =
-                osAnalogInputBuildup[osAnalogInputPos];
+            osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
 #endif
             osAnalogInputBuildup[osAnalogInputPos] = 0;
             osAnalogInputCounter[osAnalogInputPos] = 0;
             // Start next conversion
-            if(++osAnalogInputPos>=ANALOG_INPUTS) osAnalogInputPos = 0;
+            if(++osAnalogInputPos >= ANALOG_INPUTS) osAnalogInputPos = 0;
             uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
             if(channel & 8)  // Reading channel 0-7 or 8-15?

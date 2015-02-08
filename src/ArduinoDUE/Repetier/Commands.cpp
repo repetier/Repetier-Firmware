@@ -99,7 +99,6 @@ void Commands::waitUntilEndOfAllMoves()
         GCode::readFromSerial();
         checkForPeriodicalActions(false);
         UI_MEDIUM;
-        UI_SLOW(false);
     }
 }
 
@@ -1734,7 +1733,11 @@ void Commands::processMCode(GCode *com)
     case 502: // M502
         EEPROM::restoreEEPROMSettingsFromConfiguration();
         break;
-
+#ifdef DEBUG_JAM
+    case 512:
+        Com::printFLN(PSTR("Jam signal:"),(int16_t)READ(EXT0_JAM_PIN));
+        break;
+#endif // DEBUG_JAM
 #ifdef DEBUG_QUEUE_MOVE
     case 533: // M533 Write move data
         Com::printF(PSTR("Buf:"),(int)PrintLine::linesCount);
