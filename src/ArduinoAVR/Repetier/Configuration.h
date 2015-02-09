@@ -92,6 +92,19 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
+/* 
+We can connect BlueTooth to serial converter module directly to boards based on AtMega2560 or AtMega1280 and some boards based on AtMega2561, AtMega1281 or AtMega1284p
+- On RUMBA boards connect BT to pin 11 and 12 of X3 connector, then set BLUETOOTH_SERIAL to 3
+- On RAMBO boards connect BT to pins 5,6 or 7,8 or 9,10 on Serial connector, then accordingly set BLUETOOTH_SERIAL to 1,2 or 3
+- On RAMPS we must remap Y_ENDSTOPS pins or Z_ENDSTOPZ pins or LCD_ENABLE and LCD_RS pins to another pins, and connect BT to:
+  a) signals of Y_MIN, Y_MAX, then set BLUETOOTH_SERIAL to 3 (RX from BT to Y_MIN, TX from BT to Y_MAX)
+  b) signals of Z_MIN, Z_MAX, then set BLUETOOTH_SERIAL to 1 (RX from BT to Z_MIN, TX from BT to Z_MAX)
+  c) pin 17 and 18 of AUX4 connector, then set BLUETOOTH_SERIAL to 2 (RX from BT to AUX4 p18, TX from BT to AUX4 p17)
+  Comment out or set the BLUETOOTH_SERIAL to 0 or -1 to disable this feature.
+*/
+#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RUMBA use 3
+#define BLUETOOTH_BAUD     115200                 // communication speed
+
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
 //#define COMPAT_PRE1
@@ -1195,11 +1208,11 @@ is always running and is not hung up for some unknown reason. */
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
-#define Z_PROBE_WAIT_BEFORE_TEST 1
+#define Z_PROBE_WAIT_BEFORE_TEST 0
 /** Speed of z-axis in mm/s when probing */
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe
+#define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 39.91

@@ -138,7 +138,6 @@ class Printer
 public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-    static uint8_t minExtruderSpeed;            ///< Timer delay for start extruder speed
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;

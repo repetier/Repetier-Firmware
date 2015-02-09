@@ -543,7 +543,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
 #else  // Smartcontroller
-#if MOTHERBOARD==80 // Rumba has different pins as RAMPS!
+#if MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1
@@ -560,7 +560,30 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           11
 #define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
-#else
+#elif MOTHERBOARD == 301 // Rambo has own pins layout
+#define BEEPER_PIN             79
+#define UI_DISPLAY_RS_PIN      70
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  71
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      72
+#define UI_DISPLAY_D5_PIN      73
+#define UI_DISPLAY_D6_PIN      74
+#define UI_DISPLAY_D7_PIN      75
+#define UI_ENCODER_A           76
+#define UI_ENCODER_B           77
+#define UI_ENCODER_CLICK       78
+#define UI_RESET_PIN           80
+#undef SDCARDDETECT
+#define SDCARDDETECT           81
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED   0
+#undef SDSUPPORT
+#define SDSUPPORT              1 
+#else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1

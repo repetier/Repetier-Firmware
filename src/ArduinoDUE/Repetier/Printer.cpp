@@ -19,7 +19,6 @@
 #include "Repetier.h"
 
 #if USE_ADVANCE
-uint8_t Printer::minExtruderSpeed;            ///< Timer delay for start extruder speed
 uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases

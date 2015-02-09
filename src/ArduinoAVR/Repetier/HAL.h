@@ -444,7 +444,7 @@ public:
 // Multiply two 16 bit values and return 32 bit result
     static inline unsigned int mulu6xu16shift16(unsigned int a,unsigned int b)
     {
-#if CPU_ARCH==ARCH_AVR
+#if CPU_ARCH == ARCH_AVR
         unsigned int res;
         // 18 Ticks = 1.125 us
         __asm__ __volatile__ ( // 0 = res, 1 = timer, 2 = accel %D2=0 ,%A1 are unused is free
@@ -586,7 +586,7 @@ public:
     // SPI related functions
     static void spiBegin()
     {
-#if SDSS>=0
+#if SDSS >= 0
         SET_INPUT(MISO_PIN);
         SET_OUTPUT(MOSI_PIN);
         SET_OUTPUT(SCK_PIN);
@@ -692,7 +692,7 @@ public:
 
     inline static void startWatchdog()
     {
-#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)	
+#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
         WDTCSR = (1<<WDCE) | (1<<WDE);								// wdt FIX for arduino mega boards
         WDTCSR = (1<<WDIE) | (1<<WDP3);
 #else

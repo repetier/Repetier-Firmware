@@ -854,8 +854,8 @@ void PWM_TIMER_VECTOR ()
         if((pwm_cooler_pos_set[5] = extruder[5].coolerPWM)>0) WRITE(EXT5_EXTRUDER_COOLER_PIN, 1);
 #endif
 #endif
-#if FAN_BOARD_PIN>-1
-        if((pwm_pos_set[NUM_EXTRUDER + 1] = pwm_pos[NUM_EXTRUDER+1]) > 0) WRITE(FAN_BOARD_PIN, 1);
+#if FAN_BOARD_PIN > -1 && !defined(SHARED_COOLER_BOARD_EXT)
+        if((pwm_pos_set[NUM_EXTRUDER + 1] = pwm_pos[NUM_EXTRUDER + 1]) > 0) WRITE(FAN_BOARD_PIN, 1);
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         if((pwm_pos_set[NUM_EXTRUDER + 2] = pwm_pos[NUM_EXTRUDER + 2]) > 0) WRITE(FAN_PIN, 1);
@@ -945,7 +945,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if FAN_BOARD_PIN > -1
+#if FAN_BOARD_PIN > -1 && !defined(SHARED_COOLER_BOARD_EXT)
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER + 1], pwm_pos_set[NUM_EXTRUDER + 1], false);
 #else
