@@ -1358,7 +1358,7 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 */
 
-#define FEATURE_CONTROLLER NO_CONTROLLER
+#define FEATURE_CONTROLLER 1
 
 /**
 Select the language to use.
@@ -1373,7 +1373,7 @@ Select the language to use.
 8 = Czech
 9 = Polish
 */
-#define UI_LANGUAGE 1
+#define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_PRINTER_NAME "Portal Delta v1.3x00"
