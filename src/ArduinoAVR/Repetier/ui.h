@@ -184,6 +184,7 @@ What display type do you use?
 #define UI_ACTION_FAN_SUSPEND           1201
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
 #define UI_ACTION_SERVOPOS              1203
+#define UI_ACTION_PREHEAT_PET           1913
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

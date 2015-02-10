@@ -2996,6 +2996,19 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif
             break;
+		case UI_ACTION_PREHEAT_PET:
+			UI_STATUS(UI_TEXT_PREHEAT_PET);
+			Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PET,0);
+#if NUM_EXTRUDER > 1
+			Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PET,1);
+#endif
+#if NUM_EXTRUDER > 2
+			Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PET,2);
+#endif
+#if HAVE_HEATED_BED
+			Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PET);
+#endif
+break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS(UI_TEXT_COOLDOWN);
             Extruder::setTemperatureForExtruder(0, 0);

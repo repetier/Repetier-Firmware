@@ -119,6 +119,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
+#define UI_TEXT_PREHEAT_PET      "Preheat PET"
 #define UI_TEXT_LIGHTS_ONOFF     "Lights :%lo"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
