@@ -721,6 +721,15 @@ void Commands::processGCode(GCode *com)
 #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
 #endif
+		//Suspend heating of bed during probing to avoid interference with inductive sensors
+#if HAVE_HEATED_BED
+		float lastBedTemp = 0;
+		if(!Printer::debugDryrun()) {
+			Commands::waitUntilEndOfAllMoves();
+			lastBedTemp = heatedBedController.targetTemperatureC;
+			Extruder::setHeatedBedTemperature(0);
+		}
+#endif
 #if DRIVE_SYSTEM == DELTA
         // It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
@@ -742,6 +751,15 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         if(h3 < 0) break;
+#if DRIVE_SYSTEM == DELTA
+		//Allows additional offset for each probe point to compensate head slanting at maximum dimensions
+		if(com->hasX())
+			h1 += com->X;
+		if(com->hasY())
+			h2 += com->Y;
+		if(com->hasZ())
+			h3 += com->Z;	
+#endif		
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
         // z = z-deviation from origin due to bed transformation
@@ -753,7 +771,11 @@ void Commands::processGCode(GCode *com)
                     (float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS]) /
                   (Printer::autolevelTransformation[1] * Printer::autolevelTransformation[3] - Printer::autolevelTransformation[0] * Printer::autolevelTransformation[4]);
         Printer::zMin = 0;
-        if(com->hasS() && com->S < 3 && com->S > 0)
+		//Parameter for compensating total height. E.g. in case of blue tape.
+		if(com->hasI())
+			Printer::zLength += com->I;
+			
+        if(com->hasS() && com->S < 4 && com->S > 0)
         {
 #if MAX_HARDWARE_ENDSTOP_Z
 #if DRIVE_SYSTEM == DELTA
@@ -794,6 +816,14 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true, true, true);
 #endif
         Printer::feedrate = oldFeedrate;
+//Resume bed heating
+#if HAVE_HEATED_BED
+		if(!Printer::debugDryrun()) {
+			UI_STATUS_UPD(UI_TEXT_HEATING_BED);
+			Commands::waitUntilEndOfAllMoves();
+			Extruder::setHeatedBedTemperature(lastBedTemp);
+		}
+#endif
     }
     break;
 #endif
