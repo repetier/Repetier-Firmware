@@ -143,7 +143,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 /** \brief Pitch in mm of drive belt. GT2 = 2mm */
 #define BELT_PITCH 2
 /** \brief Number of teeth on X, Y and Z tower pulleys */
-#define PULLEY_TEETH 20
+#define PULLEY_TEETH 16
 #define PULLEY_CIRCUMFERENCE (BELT_PITCH * PULLEY_TEETH)
 #elif DELTA_DRIVE_TYPE == 1
 /** \brief Filament pulley diameter in milimeters */
@@ -188,8 +188,8 @@ Overridden if EEPROM activated.*/
 // extruders or coolers. PDM will give more signal changes per second, so on average it gives
 // the cleaner signal. The only advantage of PWM is giving signals at a fixed rate and never more
 // then PWM.
-#define PDM_FOR_EXTRUDER 1
-#define PDM_FOR_COOLER 1
+#define PDM_FOR_EXTRUDER 0
+#define PDM_FOR_COOLER 0
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. SInce it will never reach target
 // temperature, the heater will stay on for every which can burn your printe ror house.
@@ -298,7 +298,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 /** Dgain.  Overridden if EEPROM activated.*/
 #define EXT0_PID_D   44.72//120//76.4
 // maximum time the heater is can be switched on. Max = 255.  Overridden if EEPROM activated.
-#define EXT0_PID_MAX 255
+#define EXT0_PID_MAX 200
 /** \brief Faktor for the advance algorithm. 0 disables the algorithm.  Overridden if EEPROM activated.
 K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use
 the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined.
@@ -460,12 +460,12 @@ It will change the current extruders filament and temperature must already be hi
 */
 #define FILAMENTCHANGE_X_POS 0
 #define FILAMENTCHANGE_Y_POS 0
-#define FILAMENTCHANGE_Z_ADD 1
+#define FILAMENTCHANGE_Z_ADD 0
 /** Does a homing procedure after a filament change. This is good in case
 you moved the extruder while changing filament during print.
 0 = no homing, 1 = xy homing, 2 = xyz homing
 */
-#define FILAMENTCHANGE_REHOME 1
+#define FILAMENTCHANGE_REHOME 2
 /** Will first retract short distance, go to change position and then retract longretract.
 Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 */
@@ -554,7 +554,7 @@ The capacitor is for reducing noise from long thermistor cable. If you don't hav
 
 If you need the generic table, uncomment the following define.
 */
-//#define USE_GENERIC_THERMISTORTABLE_1
+#define USE_GENERIC_THERMISTORTABLE_1
 
 /* Some examples for different thermistors:
 
@@ -574,11 +574,11 @@ Honeywell 100K Thermistor (135-104LAG-J01)  : R0 = 100000  T0 = 25  Beta = 3974
 You can use the beta from the datasheet or compute it yourself.
 See http://reprap.org/wiki/MeasuringThermistorBeta for more details.
 */
-#define GENERIC_THERM1_BETA 4036
+#define GENERIC_THERM1_BETA 3590
 /** Start temperature for generated thermistor table */
 #define GENERIC_THERM1_MIN_TEMP -20
 /** End Temperature for generated thermistor table */
-#define GENERIC_THERM1_MAX_TEMP 300
+#define GENERIC_THERM1_MAX_TEMP 150
 #define GENERIC_THERM1_R1 0
 #define GENERIC_THERM1_R2 4700
 
@@ -624,7 +624,7 @@ Value is used for all generic tables created. */
 
 // Select type of your heated bed. It's the same as for EXT0_TEMPSENSOR_TYPE
 // set to 0 if you don't have a heated bed
-#define HEATED_BED_SENSOR_TYPE 1
+#define HEATED_BED_SENSOR_TYPE 97
 /** Analog pin of analog sensor to read temperature of heated bed.  */
 #define HEATED_BED_SENSOR_PIN TEMP_1_PIN
 /** \brief Pin to enable heater for bed. */
@@ -644,7 +644,7 @@ Heat manager for heated bed:
 The precise values may differ for different nozzle/resistor combination.
  Overridden if EEPROM activated.
 */
-#define HEATED_BED_PID_INTEGRAL_DRIVE_MAX 255
+#define HEATED_BED_PID_INTEGRAL_DRIVE_MAX 210
 /** \brief lower value for integral part
 
 The I state should converge to the exact heater output needed for the target temperature.
@@ -660,7 +660,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 /** Dgain.  Overridden if EEPROM activated.*/
 #define HEATED_BED_PID_DGAIN 290
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
-#define HEATED_BED_PID_MAX 255
+#define HEATED_BED_PID_MAX 180
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
 // beds need some time to get the temp. to the sensor. Time is in milliseconds!
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
@@ -844,7 +844,7 @@ on this endstop.
 #define DELTA_DIAGONAL_CORRECTION_C 0
 
 /** Max. radius (mm) the printer should be able to reach. */
-#define DELTA_MAX_RADIUS 105
+#define DELTA_MAX_RADIUS 100
 
 // Margin (mm) to avoid above tower minimum (xMin xMinsteps)
 // If your printer can put its carriage low enough the rod is horizontal without hitting the floor
@@ -1214,7 +1214,7 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_SPEED 30
 #define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_SWITCHING_DISTANCE 10.0 // Distance to safely switch off probe
-#define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
+#define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
 #define Z_PROBE_HEIGHT 0.5
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
@@ -1313,7 +1313,7 @@ Always hard to say since the other angle is 89° in this case!
 Separate commands by \n */
 #define SD_RUN_ON_STOP "G28"
 /** Disable motors and heaters when print was stopped. */
-#define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
+#define SD_STOP_HEATER_AND_MOTORS_ON_STOP 0
 
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT 1
