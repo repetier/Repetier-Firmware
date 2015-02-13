@@ -601,7 +601,7 @@ void HAL::servoMicroseconds(uint8_t servo,int microsec, uint16_t autoOff) {
     if(microsec > 2500) microsec = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 
                                          1000000) * microsec);
-    servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0; 
+    servoAutoOff[servo] = (microsec) ? (autoOff / 20) : 0; 
 }
  
 

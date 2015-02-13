@@ -202,8 +202,8 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
         back_diff[X_AXIS] = (changed & 1 ? (p->isXPositiveMove() ? Printer::backlashX : -Printer::backlashX) : 0);
         back_diff[Y_AXIS] = (changed & 2 ? (p->isYPositiveMove() ? Printer::backlashY : -Printer::backlashY) : 0);
         back_diff[Z_AXIS] = (changed & 4 ? (p->isZPositiveMove() ? Printer::backlashZ : -Printer::backlashZ) : 0);
-        p->dir &=XYZ_DIRPOS; // x,y and z are already correct
-        for(uint8_t i=0; i < 4; i++)
+        p->dir &= XYZ_DIRPOS; // x,y and z are already correct
+        for(uint8_t i = 0; i < 4; i++)
         {
             float f = back_diff[i]*Printer::axisStepsPerMM[i];
             p->delta[i] = abs((long)f);
@@ -247,14 +247,14 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
 }
 #endif
 
-void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
+void PrintLine::calculateMove(float axis_diff[], uint8_t pathOptimize)
 {
 #if NONLINEAR_SYSTEM
     long axisInterval[VIRTUAL_AXIS_ARRAY]; // shortest interval possible for that axis
 #else
     long axisInterval[E_AXIS_ARRAY];
 #endif
-    float timeForMove = (float)(F_CPU)*distance / (isXOrYMove() ? RMath::max(Printer::minimumSpeed,Printer::feedrate): Printer::feedrate); // time is in ticks
+    float timeForMove = (float)(F_CPU)*distance / (isXOrYMove() ? RMath::max(Printer::minimumSpeed, Printer::feedrate) : Printer::feedrate); // time is in ticks
     bool critical = Printer::isZProbingActive();
     if(linesCount < MOVE_CACHE_LOW && timeForMove < LOW_TICKS_PER_MOVE)   // Limit speed to keep cache full.
     {
@@ -421,7 +421,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
 #endif
 
     // Correct integers for fixed point math used in bresenham_step
-    if(fullInterval<MAX_HALFSTEP_INTERVAL || critical)
+    if(fullInterval < MAX_HALFSTEP_INTERVAL || critical)
         halfStep = 4;
     else
     {
@@ -678,7 +678,7 @@ inline void PrintLine::backwardPlanner(uint8_t start,uint8_t last)
 #if NONLINEAR_SYSTEM
         if (previous->moveID == act->moveID && lastJunctionSpeed == previous->maxJunctionSpeed)
         {
-            act->startSpeed = RMath::max(act->minSpeed,previous->endSpeed = lastJunctionSpeed);
+            act->startSpeed = RMath::max(act->minSpeed, previous->endSpeed = lastJunctionSpeed);
             previous->invalidateParameter();
             act->invalidateParameter();
         }
@@ -822,7 +822,7 @@ processing.
 */
 uint8_t PrintLine::insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines)
 {
-    if(linesCount==0 && waitRelax==0 && pathOptimize)   // First line after some time - warmup needed
+    if(linesCount == 0 && waitRelax == 0 && pathOptimize)   // First line after some time - warmup needed
     {
 #if NONLINEAR_SYSTEM
         uint8_t w = 3;
@@ -847,6 +847,7 @@ uint8_t PrintLine::insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExt
     }
     return 0;
 }
+
 void PrintLine::logLine()
 {
 #ifdef DEBUG_QUEUE_MOVE
@@ -2223,7 +2224,7 @@ int lastblk = -1;
 int32_t cur_errupd;
 int32_t PrintLine::bresenhamStep() // version for cartesian printer
 {
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
     if(!PrintLine::nlFlag)
 #else
     if(cur == NULL)
@@ -2262,7 +2263,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
             if(linesCount<=cur->getWaitForXLinesFilled())
             {
                 cur = NULL;
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
                 PrintLine::nlFlag = false;
 #endif
                 return 2000;
@@ -2309,9 +2310,11 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #if !(GANTRY)
         Printer::setXDirection(cur->isXPositiveMove());
         Printer::setYDirection(cur->isYPositiveMove());
-#else
+        Printer::setZDirection(cur->isZPositiveMove());
+#else // Any gantry type
         long gdx = (cur->dir & X_DIRPOS ? cur->delta[X_AXIS] : -cur->delta[X_AXIS]); // Compute signed difference in steps
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY
+        Printer::setZDirection(cur->isZPositiveMove());
         long gdy = (cur->dir & Y_DIRPOS ? cur->delta[Y_AXIS] : -cur->delta[Y_AXIS]);
         Printer::setXDirection(gdx + gdy >= 0);
 #if DRIVE_SYSTEM == XY_GANTRY
@@ -2320,6 +2323,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
         Printer::setYDirection(gdx <= gdy);
 #endif
 #else // XZ or ZX core
+        Printer::setYDirection(cur->isYPositiveMove());
         long gdz = (cur->dir & Z_DIRPOS ? cur->delta[Z_AXIS] : -cur->delta[Z_AXIS]);
         Printer::setXDirection(gdx + gdz >= 0);
 #if DRIVE_SYSTEM == XZ_GANTRY
@@ -2327,9 +2331,8 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #else
         Printer::setZDirection(gdx <= gdz);
 #endif
-#endif
+#endif // YZ or ZY Gantry
 #endif // GANTRY
-        Printer::setZDirection(cur->isZPositiveMove());
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
 #endif
