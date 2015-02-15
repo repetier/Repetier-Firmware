@@ -2596,7 +2596,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #if DRIVE_SYSTEM!=DELTA
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],((action == UI_ACTION_PRINT_ACCEL_Z) ? 1 : 100),0,10000);
 #else
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[num],100,0,10000);
+        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],100,0,10000);
 #endif
         Printer::updateDerivedParameter();
         break;
