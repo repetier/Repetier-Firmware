@@ -1860,23 +1860,28 @@ void Commands::processMCode(GCode *com)
         break;
 #endif
 	case 880: //M880 print all settings for auto-updater
-		Com::print("HARDWARE_VERSION: "); 	Com::println(HARDWARE_VERSION);
-		Com::print("REPETIER_VERSION: ");	Com::println(REPETIER_VERSION);
 		Com::print("UI_PRINTER_COMPANY: ");	Com::println(UI_PRINTER_COMPANY);
 		Com::print("UI_PRINTER_NAME: ");	Com::println(UI_PRINTER_NAME);
+		Com::print("HARDWARE_VERSION: ");	Com::println(HARDWARE_VERSION);
+		Com::print("FIRMWARE_VERSION: ");	Com::println(FIRMWARE_VERSION);
+		Com::print("PRINTER_ID: ");			Com::print((int)Printer::PrinterId);	Com::println();
 		break;
-	case 881://M881 print HARDWARE_VERSION
+	case 881://M881 print UI_PRINTER_COMPANY
+		Com::print("UI_PRINTER_COMPANY: ");	Com::println(UI_PRINTER_COMPANY);
+		break;
+	case 882://M882 print UI_PRINTER_NAME
+		Com::print("UI_PRINTER_NAME: ");	Com::println(UI_PRINTER_NAME);
+		break;
+	case 883://M883 print HARDWARE_VERSION
 		Com::print("HARDWARE_VERSION: ");	Com::println(HARDWARE_VERSION);
 		break;
-	case 882://M882 print REPETIER_VERSION
-		Com::print("REPETIER_VERSION: ");	Com::println(REPETIER_VERSION);
+	case 884://M884 print FIRMWARE_VERSION
+		Com::print("FIRMWARE_VERSION: ");	Com::println(FIRMWARE_VERSION);
 		break;
-	case 883://M883 print UI_PRINTER_COMPANY
-		Com::print("UI_PRINTER_COMPANY: ");	Com::println(UI_PRINTER_COMPANY);
+	case 885://M885 print PRINTER_ID
+		Com::print("PRINTER_ID: ");			Com::print((int)Printer::PrinterId);	Com::println();
 		break;
-	case 884://M884 print UI_PRINTER_NAME
-		Com::print("UI_PRINTER_NAME: ");	Com::println(UI_PRINTER_NAME);
-		break;
+
     case 908: // M908 Control digital trimpot directly.
     {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL

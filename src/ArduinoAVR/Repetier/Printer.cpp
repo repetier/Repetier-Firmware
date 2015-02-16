@@ -18,6 +18,7 @@
 
 #include "Repetier.h"
 
+long Printer::PrinterId = 0;
 #if USE_ADVANCE
 uint8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder speed
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.

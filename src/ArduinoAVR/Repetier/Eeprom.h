@@ -162,6 +162,8 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_COOLER_SPEED       54
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
+#define EPR_PRINTER_ID				   3210
+
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 5.0
 #endif
@@ -189,6 +191,13 @@ public:
     static void update(GCode *com);
     static void updatePrinterUsage();
 
+	static inline int PrinterId() {
+#if EEPROM_MODE != 0
+		return HAL::eprGetInt32(EPR_PRINTER_ID);
+#else
+		return 0;
+#endif
+	}
     static inline float zProbeSpeed() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);

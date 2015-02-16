@@ -25,6 +25,7 @@
 class Com
 {
     public:
+FSTRINGVAR(tPrinterId)
 FSTRINGVAR(tDebug)
 FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)

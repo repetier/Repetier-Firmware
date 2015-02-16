@@ -21,6 +21,7 @@
 
 #include "Repetier.h"
 
+FSTRINGVALUE(Com::tPrinterId, "Printer ID")
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 #else

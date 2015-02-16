@@ -23,7 +23,6 @@
 #define _REPETIER_H
 
 #define REPETIER_VERSION "0.92.2"
-#define HARDWARE_VERSION "1.1.1"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##

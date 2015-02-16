@@ -136,6 +136,7 @@ private:
 class Printer
 {
 public:
+	static long PrinterId;
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
     static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
