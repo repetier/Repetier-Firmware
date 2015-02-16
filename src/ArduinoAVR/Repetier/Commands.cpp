@@ -652,6 +652,13 @@ void Commands::processGCode(GCode *com)
         Printer::measureDistortion();
         Printer::feedrate = oldFeedrate;
 #else
+#if DRIVE_SYSTEM == DELTA
+		// It is not possible to go to the edges at the top, also users try
+		// it often and wonder why the coordinate system is then wrong.
+		// For that reason we ensure a correct behaviour by code.
+		Printer::homeAxis(true, true, true);
+		Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+#endif
         GCode::executeFString(Com::tZProbeStartScript);
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
@@ -813,13 +820,12 @@ void Commands::processGCode(GCode *com)
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G32 "));
 #if DRIVE_SYSTEM == DELTA
-        Printer::homeAxis(true, true, true);
+		Printer::homeAxis(true, true, true);
 #endif
         Printer::feedrate = oldFeedrate;
 //Resume bed heating
 #if HAVE_HEATED_BED
 		if(!Printer::debugDryrun()) {
-			UI_STATUS_UPD(UI_TEXT_HEATING_BED);
 			Commands::waitUntilEndOfAllMoves();
 			Extruder::setHeatedBedTemperature(lastBedTemp);
 		}

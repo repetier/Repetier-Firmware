@@ -290,7 +290,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 */
 #define EXT0_PID_INTEGRAL_DRIVE_MIN 10
 /** P-gain.  Overridden if EEPROM activated. */
-#define EXT0_PID_P   13//4.44//24//27.1
+#define EXT0_PID_P   3//4.44//24//27.1
 /** I-gain. Overridden if EEPROM activated.
 */
 #define EXT0_PID_PGAIN_OR_DEAD_TIME 13
@@ -1214,9 +1214,9 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_SPEED 30
 #define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_SWITCHING_DISTANCE 10.0 // Distance to safely switch off probe
-#define Z_PROBE_REPETITIONS 2 // Repetitions for probing at one point.
+#define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
-#define Z_PROBE_HEIGHT 0.5
+#define Z_PROBE_HEIGHT 3.8
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
@@ -1376,7 +1376,7 @@ Select the language to use.
 #define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_PRINTER_NAME "Portal Delta v1.3x00"
+#define UI_PRINTER_NAME "Pharaoh v1.4x000"
 #define UI_PRINTER_COMPANY "MASS PORTAL"
 
 
