@@ -412,6 +412,7 @@ static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
 static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
+static inline void println(const char *text) { print(text); println(); }
     protected:
     private:
 };
