@@ -216,6 +216,8 @@ FSTRINGVAR(tHitZProbe)
 FSTRINGVAR(tZProbeAverage)
 FSTRINGVAR(tZProbeZReset)
 FSTRINGVAR(tZProbeBedDitance)
+FSTRINGVAR(tProbeActionScript)
+FSTRINGVAR(tProbeWoffsetActionScript)
 #endif
 FSTRINGVAR(tAutolevelReset)
 FSTRINGVAR(tAutolevelEnabled)

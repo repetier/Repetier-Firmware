@@ -276,6 +276,14 @@
 #define UI_TEXT_CLICK_DONE "Click when done"
 #define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
 #define UI_TEXT_SERVOPOS "Servo pos.: %oS"
+#define UI_TEXT_CALIBRATED_FOR "Calibrated for",""
+#define UI_TEXT_CALIBRATING "Calibrating...",""
+#define UI_TEXT_CALIBRATION "Calibration"
+#define UI_TEXT_NOCOATING "No coating"
+#define UI_TEXT_KAPTON "Kapton"
+#define UI_TEXT_BLUETAPE "Blue paper tape"
+#define UI_TEXT_PETTAPE "Green PET tape"
+#define UI_TEXT_GLUESTICK "Glue stick"
 
 // *************** German translation ****************
 

@@ -3303,6 +3303,27 @@ break;
 		    //just for the reference- this was used to pause RepetierHost
 		    //Com::printFLN(PSTR("RequestPause:"));
             break;
+			
+		case UI_ACTION_PROBE:
+			pushMenu(&ui_menu_probing, false);
+			GCode::executeFString(Com::tProbeActionScript);
+			menuLevel = 0;
+			activeAction = 0;
+			pushMenu(&ui_menu_kapton_action, false);
+			BEEP_SHORT;
+			skipBeep = true;
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+			break;
+		case UI_ACTION_PROBE_WOFFSET:
+			pushMenu(&ui_menu_probing, false);
+			GCode::executeFString(Com::tProbeWoffsetActionScript);
+			menuLevel = 0;
+			activeAction = 0;
+			pushMenu(&ui_menu_bluetape_action, false);
+			BEEP_SHORT;
+			skipBeep = true;
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+			break;
 #if FEATURE_AUTOLEVEL
         case UI_ACTION_AUTOLEVEL_ONOFF:
             Printer::setAutolevelActive(!Printer::isAutolevelActive());
