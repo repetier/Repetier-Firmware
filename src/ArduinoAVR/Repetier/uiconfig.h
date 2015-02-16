@@ -348,6 +348,13 @@ void uiInitKeys() {
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 #endif
+
+  //PAUSE BUTTON, digital pin 47, on AUX3, NO button, connects to GND
+  UI_KEYS_INIT_BUTTON_LOW(47);
+
+  //Illumination LED for pause button, connected to E2 screw terminals
+  SET_OUTPUT(HEATER_2_PIN);
+  WRITE(HEATER_2_PIN, 1);
 }
 void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
@@ -360,6 +367,9 @@ void uiCheckKeys(int &action) {
     UI_KEYS_BUTTON_LOW(33,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
     // UI_KEYS_CLICKENCODER_LOW_REV(45,44); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
+    
+    //pause button- when connected to GND, sends pause request to host
+    UI_KEYS_BUTTON_LOW(47,UI_ACTION_PAUSE);
 #endif
 }
 inline void uiCheckSlowEncoder() {

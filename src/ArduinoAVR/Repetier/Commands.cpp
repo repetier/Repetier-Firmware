@@ -38,6 +38,11 @@ void Commands::commandLoop()
             GCode *code = GCode::peekCurrentCommand();
             //UI_SLOW; // do longer timed user interface action
             UI_MEDIUM; // do check encoder
+			
+			if (!code && Printer::isPaused && !PrintLine::hasLines()) {
+				Printer::moveToPausePosition();
+			}
+
             if(code)
             {
 #if SDSUPPORT
@@ -642,6 +647,7 @@ void Commands::processGCode(GCode *com)
         if(homeAllAxis || !com->hasNoXYZ())
             Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
         Printer::updateCurrentPosition();
+		Printer::canMoveToPausePosition = true;
     }
     break;
 #if FEATURE_Z_PROBE

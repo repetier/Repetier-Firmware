@@ -3289,7 +3289,19 @@ break;
             HAL::resetHardware();
             break;
         case UI_ACTION_PAUSE:
-            Com::printFLN(PSTR("RequestPause:"));
+		    if (Printer::isPaused) {
+			    Com::print("info: resume requested\n");
+			    UI_STATUS_UPD_RAM("");
+			    Printer::resumePrinting();
+			    WRITE(HEATER_2_PIN, 1);
+			    } else {
+			    Printer::isPaused = true;
+			    Com::print("info: pause requested\n");
+			    UI_STATUS_UPD_RAM("Pause requested");
+			    WRITE(HEATER_2_PIN, 0);
+		    }
+		    //just for the reference- this was used to pause RepetierHost
+		    //Com::printFLN(PSTR("RequestPause:"));
             break;
 #if FEATURE_AUTOLEVEL
         case UI_ACTION_AUTOLEVEL_ONOFF:

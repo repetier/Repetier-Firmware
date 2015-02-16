@@ -59,6 +59,10 @@ uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
+bool Printer::isPaused = false;
+bool Printer::hasMovedToPausePosition = false;
+bool Printer::canMoveToPausePosition = false;
+float Printer::positionBeforePause[3] = {0, 0, 0};
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
@@ -1344,6 +1348,28 @@ void Printer::zBabystep()
     //HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 1);
 }
 
+void Printer::moveToPausePosition() {
+	if (!hasMovedToPausePosition) {
+		Commands::waitUntilEndOfAllMoves();
+		if (canMoveToPausePosition) {
+			positionBeforePause[0] = currentPosition[0];
+			positionBeforePause[1] = currentPosition[1];
+			positionBeforePause[2] = currentPosition[2];
+			Printer::moveTo(0, 0, Printer::zLength - 10, IGNORE_COORDINATE, 9000);
+		}
+		hasMovedToPausePosition = true;
+		Commands::waitUntilEndOfAllMoves();
+		UI_STATUS_UPD_RAM("Printer paused");
+	}
+}
+
+void Printer::resumePrinting() {
+	if (canMoveToPausePosition && hasMovedToPausePosition)
+	Printer::moveTo(positionBeforePause[0],positionBeforePause[1], positionBeforePause[2], IGNORE_COORDINATE, 9000);
+
+	Printer::isPaused = false;
+	Printer::hasMovedToPausePosition = false;
+}
 
 void Printer::setAutolevelActive(bool on)
 {
