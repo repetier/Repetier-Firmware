@@ -262,7 +262,7 @@ void Extruder::manageTemperatures()
     }
 
 #if EXTRUDER_JAM_CONTROL
-    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+/*    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
         if(extruder[i].jamStepsSinceLastSignal > JAM_ERROR_STEPS) {
             if(!extruder[i].isWaitJamStartcount())
                 extruder[i].tempControl.setJammed(true);
@@ -271,7 +271,7 @@ void Extruder::manageTemperatures()
                 extruder[i].setWaitJamStartcount(false);
             }
         }
-    }
+    }*/
 #endif // EXTRUDER_JAM_CONTROL
 
 
@@ -288,6 +288,13 @@ void Extruder::manageTemperatures()
 
 }
 
+#if EXTRUDER_JAM_CONTROL
+void Extruder::markAllUnjammed() {
+    for(fast8_t i = 0; i < NUM_EXTRUDER; i++)
+        extruder[i].tempControl.setJammed(false);
+    Com::printInfoFLN(PSTR("Marked all extruders as unjammed."));
+}
+#endif
 
 void Extruder::initHeatedBed()
 {
@@ -651,21 +658,39 @@ void Extruder::unstep()
 {
 #if NUM_EXTRUDER > 0
     WRITE(EXT0_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(0)
+#endif
 #endif
 #if NUM_EXTRUDER > 1
     WRITE(EXT1_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(1)
+#endif
 #endif
 #if NUM_EXTRUDER > 2
     WRITE(EXT2_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(2)
+#endif
 #endif
 #if NUM_EXTRUDER > 3
     WRITE(EXT3_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(3)
+#endif
 #endif
 #if NUM_EXTRUDER > 4
     WRITE(EXT4_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(4)
+#endif
 #endif
 #if NUM_EXTRUDER > 5
     WRITE(EXT5_STEP_PIN, LOW);
+#if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
+    TEST_EXTRUDER_JAM(5)
+#endif
 #endif
 }
 
@@ -677,36 +702,42 @@ void Extruder::setDirection(uint8_t dir)
         WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
     else
         WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
+    RESET_EXTRUDER_JAM(0)
 #endif
 #if defined(EXT1_DIR_PIN) && NUM_EXTRUDER > 1
     if(dir)
         WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
     else
         WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
+    RESET_EXTRUDER_JAM(1)
 #endif
 #if defined(EXT2_DIR_PIN) && NUM_EXTRUDER > 2
     if(dir)
         WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
     else
         WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
+    RESET_EXTRUDER_JAM(2)
 #endif
 #if defined(EXT3_DIR_PIN) && NUM_EXTRUDER > 3
     if(dir)
         WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
     else
         WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
+    RESET_EXTRUDER_JAM(3)
 #endif
 #if defined(EXT4_DIR_PIN) && NUM_EXTRUDER > 4
     if(dir)
         WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
     else
         WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
+    RESET_EXTRUDER_JAM(4)
 #endif
 #if defined(EXT5_DIR_PIN) && NUM_EXTRUDER > 5
     if(dir)
         WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
     else
         WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
+    RESET_EXTRUDER_JAM(5)
 #endif
 }
 

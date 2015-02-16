@@ -428,7 +428,9 @@
 				<Option type="1" />
 				<Option compiler="avrgcc" />
 				<Compiler>
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-Os" />
+					<Add option="-O3" />
 					<Add option="-pedantic" />
 					<Add option="-W" />
 					<Add option="-Wall" />

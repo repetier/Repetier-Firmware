@@ -132,6 +132,7 @@ Custom M Codes
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
+- M513 - Clear all jam marker.
 - M600 Change filament
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */

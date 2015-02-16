@@ -104,6 +104,7 @@ random stuff
 %PN : Printer name
 %on : current extruder number (1,2,3...)
 %oS : servo position
+%oY : babysteps counter
 
 stops
 %sx : State of x min endstop.
