@@ -118,6 +118,11 @@ void Commands::waitUntilEndOfAllBuffers()
         GCode::readFromSerial();
         code = GCode::peekCurrentCommand();
         UI_MEDIUM; // do check encoder
+			
+			if (!code && Printer::isPaused && !PrintLine::hasLines()) {
+				Printer::moveToPausePosition();
+			}
+
         if(code)
         {
 #if SDSUPPORT
