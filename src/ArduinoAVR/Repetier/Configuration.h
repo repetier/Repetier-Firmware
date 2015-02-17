@@ -1391,7 +1391,7 @@ Select the language to use.
 #define UI_ANIMATION 0
 
 /** Animate only the bootup screen */
-#define UI_ANIMATE_BOOT true
+#define UI_ANIMATE_BOOT false
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

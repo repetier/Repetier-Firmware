@@ -848,8 +848,12 @@ void UIDisplay::initialize()
     printRowP(0, PSTR(UI_PRINTER_NAME));
     printRowP(1, PSTR("HW: " HARDWARE_VERSION));
 #if UI_ROWS>2
-	//TODO: Display printer ID
-	//printRowP(2, PSTR(Printer::PrinterId));
+	//TODO: Rewrite cleaner
+	String stringOne = "";
+	stringOne += EEPROM::PrinterId();
+	char charBuf[11]; //11=max length of long. eg. -1234567890 
+	stringOne.toCharArray(charBuf, 11);
+	printRow(2, "SER:", charBuf,4);
     printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
 #endif
 #endif
