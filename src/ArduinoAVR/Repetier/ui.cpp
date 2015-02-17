@@ -3309,25 +3309,29 @@ break;
 		    //Com::printFLN(PSTR("RequestPause:"));
             break;
 			
-		case UI_ACTION_PROBE:
-			pushMenu(&ui_menu_probing, false);
-			GCode::executeFString(Com::tProbeActionScript);
-			menuLevel = 0;
-			activeAction = 0;
-			pushMenu(&ui_menu_kapton_action, false);
-			BEEP_SHORT;
-			skipBeep = true;
-			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+		case UI_ACTION_NOCOATING:
+			menuCommand(&ui_menu_nocoating_action,Com::tProbeActionScript);
 			break;
-		case UI_ACTION_PROBE_WOFFSET:
-			pushMenu(&ui_menu_probing, false);
-			GCode::executeFString(Com::tProbeWoffsetActionScript);
+		case UI_ACTION_KAPTON:
+			menuCommand(&ui_menu_kapton_action,Com::tProbeActionScript);
+			break;
+		case UI_ACTION_GLUESTICK:
+			menuCommand(&ui_menu_gluestick_action,Com::tProbeActionScript);
+			break;
+		case UI_ACTION_BLUETAPE:
+			menuCommand(&ui_menu_bluetape_action, Com::tCalBluetapeScript);
+			break;
+		case UI_ACTION_PETTAPE:
+			menuCommand(&ui_menu_pettape_action, Com::tCalPettapeScript);
+			break;
+		case UI_ACTION_RESET_MATRIX:
+			Printer::resetTransformationMatrix(false);
+			EEPROM::storeDataIntoEEPROM();
 			menuLevel = 0;
 			activeAction = 0;
-			pushMenu(&ui_menu_bluetape_action, false);
+			pushMenu(&ui_menu_reset_action, false);
 			BEEP_SHORT;
-			skipBeep = true;
-			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);;
 			break;
 #if FEATURE_AUTOLEVEL
         case UI_ACTION_AUTOLEVEL_ONOFF:
@@ -3559,6 +3563,16 @@ const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; //
 //const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
 const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // Quart speed
 #endif
+
+void UIDisplay::menuCommand(const UIMenu *men,FSTRINGPARAM(cmd)){
+	pushMenu(&ui_menu_probing, false);
+	GCode::executeFString(cmd);
+	menuLevel = 0;
+	activeAction = 0;
+	pushMenu(men, false);
+	BEEP_SHORT;
+	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);;
+}
 
 #endif
 

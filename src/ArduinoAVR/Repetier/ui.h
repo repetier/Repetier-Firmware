@@ -185,8 +185,12 @@ What display type do you use?
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
 #define UI_ACTION_SERVOPOS              1203
 #define UI_ACTION_PREHEAT_PET           1913
-#define UI_ACTION_PROBE					1914
-#define UI_ACTION_PROBE_WOFFSET			1915
+#define UI_ACTION_KAPTON				1914
+#define UI_ACTION_BLUETAPE				1915
+#define UI_ACTION_NOCOATING				1916
+#define UI_ACTION_PETTAPE				1917
+#define UI_ACTION_GLUESTICK				1918
+#define UI_ACTION_RESET_MATRIX			1919
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -476,6 +480,7 @@ class UIDisplay {
     void goDir(char *name);
     bool isDirname(char *name);
     bool isWizardActive();
+	void menuCommand(const UIMenu *men,FSTRINGPARAM(cmd));
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };
@@ -1439,6 +1444,5 @@ static void ui_check_Ukeys(int &action) {
     UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
 #endif
 }
-
 #endif
 

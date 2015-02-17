@@ -284,6 +284,8 @@
 #define UI_TEXT_BLUETAPE "Blue paper tape"
 #define UI_TEXT_PETTAPE "Green PET tape"
 #define UI_TEXT_GLUESTICK "Glue stick"
+#define UI_TEXT_RESET_MATRIX "Reset calibration"
+#define UI_TEXT_RESET_READY "Calibration has been", "reset"
 
 // *************** German translation ****************
 

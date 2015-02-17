@@ -1221,7 +1221,8 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define PROBE_ACTION_SCRIPT "G32 S2"
-#define PROBE_WOFFSET_ACTION_SCRIPT "G32 S2 I0.15"
+#define BLUETAPE_OFFSET_SCRIPT "G32 S2 I0.15"
+#define PETTAPE_OFFSET_SCRIPT "G32 S2 I0.09"
 
 /* Autoleveling allows it to z-probe 3 points to compute the inclination and compensates the error for the print.
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
