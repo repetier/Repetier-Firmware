@@ -1389,11 +1389,14 @@ Select the language to use.
 /** Animate switches between menus etc. */
 #define UI_ANIMATION 0
 
+/** Animate only the bootup screen */
+#define UI_ANIMATE_BOOT true
+
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
 
 /** Delay of start screen in milliseconds */
-#define UI_START_SCREEN_DELAY 1000
+#define UI_START_SCREEN_DELAY 2000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH 1
@@ -1425,7 +1428,7 @@ same setting.
 #define UI_KEY_BOUNCETIME 10
 
 /** \brief First time in ms until repeat of action. */
-#define UI_KEY_FIRST_REPEAT 500
+#define UI_KEY_FIRST_REPEAT 250
 /** \brief Reduction of repeat time until next execution. */
 #define UI_KEY_REDUCE_REPEAT 50
 /** \brief Lowest repeat time. */

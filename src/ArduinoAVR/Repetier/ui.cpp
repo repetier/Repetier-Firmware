@@ -735,7 +735,7 @@ void initializeLCD()
 UIDisplay::UIDisplay()
 {
 }
-#if UI_ANIMATION
+#if UI_ANIMATION || UI_ANIMATE_BOOT
 void slideIn(uint8_t row,FSTRINGPARAM(text))
 {
     char *empty="";
@@ -828,7 +828,7 @@ void UIDisplay::initialize()
 #if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::startScreen();
 #else
-#if UI_ANIMATION==false || UI_DISPLAY_TYPE == DISPLAY_U8G
+#if (UI_ANIMATION==false || UI_DISPLAY_TYPE == DISPLAY_U8G) && UI_ANIMATE_BOOT==false
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
     //u8g picture loop
     u8g_FirstPage(&u8g);
@@ -845,18 +845,23 @@ void UIDisplay::initialize()
     while( u8g_NextPage(&u8g) );  //end picture loop
 #else // not DISPLAY_U8G
     for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
-    printRowP(0, versionString);
-    printRowP(1, PSTR(UI_PRINTER_NAME));
+    printRowP(0, PSTR(UI_PRINTER_NAME));
+    printRowP(1, PSTR("HW: " HARDWARE_VERSION));
 #if UI_ROWS>2
+	//TODO: Display printer ID
+	//printRowP(2, PSTR(Printer::PrinterId));
     printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
 #endif
 #endif
 #else
-    slideIn(0, versionString);
+    slideIn(0, PSTR(UI_PRINTER_NAME));
     strcpy(displayCache[0], uid.printCols);
-    slideIn(1, PSTR(UI_PRINTER_NAME));
+    slideIn(1, PSTR("HW: " HARDWARE_VERSION));
     strcpy(displayCache[1], uid.printCols);
 #if UI_ROWS>2
+	//TODO: Display printer ID
+	//slideIn(2, Printer::PrinterId);
+	strcpy(displayCache[2], uid.printCols);
     slideIn(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
     strcpy(displayCache[UI_ROWS-1], uid.printCols);
 #endif
