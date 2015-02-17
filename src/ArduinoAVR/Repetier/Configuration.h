@@ -1378,11 +1378,7 @@ Select the language to use.
 #define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
-<<<<<<< HEAD
 #define UI_PRINTER_NAME "Portal Delta"
-=======
-#define UI_PRINTER_NAME "Pharaoh v1.4x000"
->>>>>>> d0077b26ec35016da25ce8743b7620825445d5f3
 #define UI_PRINTER_COMPANY "MASS PORTAL"
 #define HARDWARE_VERSION "v1.3"
 #define FIRMWARE_VERSION "1.1.1"
