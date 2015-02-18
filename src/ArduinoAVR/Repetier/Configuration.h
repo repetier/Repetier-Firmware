@@ -1205,6 +1205,7 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_ON_HIGH 0
 #define Z_PROBE_X_OFFSET -23
 #define Z_PROBE_Y_OFFSET -13
+#define Z_PROBE_Z_OFFSET 0
 #define Z_PROBE_BED_DISTANCE 10.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
@@ -1235,6 +1236,9 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_Y2 -39.5
 #define Z_PROBE_X3 0.0
 #define Z_PROBE_Y3 79.0
+#define Z_PROBE_XY1_OFFSET 0.0
+#define Z_PROBE_XY2_OFFSET 0.0
+#define Z_PROBE_XY3_OFFSET 0.0
 
 /* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
  * assumes that the floor is plain (i.e. glass plate)
