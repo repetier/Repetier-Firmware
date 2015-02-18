@@ -423,16 +423,21 @@ UI_MENU_ACTIONCOMMAND(ui_menu_calculate_leveling,UI_TEXT_CALCULATE_LEVELING,UI_A
 UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT)
 #endif
 
-// **** Adjust bed menu
+// **** Calibration menu
+UI_MENU_ACTIONCOMMAND(ui_menu_calibrate_bed,UI_TEXT_CALIBRATE_BED, UI_ACTION_CALIBRATE);
+UI_MENU_ACTIONCOMMAND(ui_menu_reset_matrix,UI_TEXT_RESET_MATRIX, UI_ACTION_RESET_MATRIX);
+#define UI_MENU_CALIBRATE {UI_MENU_ADDCONDBACK &ui_menu_calibrate_bed,&ui_menu_reset_matrix}
+UI_MENU(ui_menu_calibrate,UI_MENU_CALIBRATE,2+UI_MENU_BACKCNT);
+
+// **** Adjust bed coating menu
 
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_nocoating,UI_TEXT_NOCOATING, UI_ACTION_NOCOATING);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_kapton,UI_TEXT_KAPTON, UI_ACTION_KAPTON);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_bluetape,UI_TEXT_BLUETAPE, UI_ACTION_BLUETAPE);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_pettape,UI_TEXT_PETTAPE, UI_ACTION_PETTAPE);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_gluestick,UI_TEXT_GLUESTICK, UI_ACTION_GLUESTICK);
-UI_MENU_ACTIONCOMMAND(ui_menu_reset_matrix,UI_TEXT_RESET_MATRIX, UI_ACTION_RESET_MATRIX);
-#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick,&ui_menu_reset_matrix}
-UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,6+UI_MENU_BACKCNT);
+#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick}
+UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,5+UI_MENU_BACKCNT);
 
 // **** Extruder menu
 
@@ -740,14 +745,19 @@ UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_ZCALIB, ui_menu_delta)
 #define UI_MENU_DELTA_CNT 0
 #endif
 
-UI_MENU_SUBMENU(ui_menu_prepare, UI_TEXT_CALIBRATION, ui_menu_adjust);
-UI_MENU_ACTION2C(ui_menu_nocoating_action,  UI_ACTION_DUMMY, UI_TEXT_CALIBRATED_FOR UI_TEXT_NOCOATING)
-UI_MENU_ACTION2C(ui_menu_kapton_action,  UI_ACTION_DUMMY, UI_TEXT_CALIBRATED_FOR UI_TEXT_KAPTON)
-UI_MENU_ACTION2C(ui_menu_bluetape_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED_FOR UI_TEXT_BLUETAPE)
-UI_MENU_ACTION2C(ui_menu_pettape_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED_FOR UI_TEXT_PETTAPE)
-UI_MENU_ACTION2C(ui_menu_gluestick_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED_FOR UI_TEXT_GLUESTICK)
+
+UI_MENU_SUBMENU(ui_menu_prepare, UI_TEXT_BED_COATING, ui_menu_adjust)
+UI_MENU_ACTION2C(ui_menu_nocoating_action,  UI_ACTION_DUMMY,UI_TEXT_BED_COATING_SET UI_TEXT_NOCOATING )
+UI_MENU_ACTION2C(ui_menu_kapton_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_KAPTON)
+UI_MENU_ACTION2C(ui_menu_bluetape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_BLUETAPE)
+UI_MENU_ACTION2C(ui_menu_pettape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_PETTAPE)
+UI_MENU_ACTION2C(ui_menu_gluestick_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_GLUESTICK)
+
+UI_MENU_SUBMENU(ui_menu_calibration, UI_TEXT_CALIBRATION, ui_menu_calibrate)
+UI_MENU_ACTION2C(ui_menu_calibrate_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED)
 UI_MENU_ACTION2C(ui_menu_reset_action, UI_ACTION_DUMMY, UI_TEXT_RESET_READY)
 UI_MENU_ACTION2C(ui_menu_probing, UI_ACTION_DUMMY, UI_TEXT_CALIBRATING)
+
 //#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
 //UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
 // Main menu
@@ -756,7 +766,7 @@ UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY &ui_menu_main2,&ui_menu_main3, &ui_menu_prepare, UI_MENU_FAN_COND UI_MENU_SD_COND }
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY &ui_menu_main2,&ui_menu_main3,&ui_menu_calibration,&ui_menu_prepare, UI_MENU_FAN_COND UI_MENU_SD_COND }
 UI_MENU(ui_menu_main,UI_MENU_MAIN,3+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands

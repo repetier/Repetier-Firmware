@@ -191,6 +191,7 @@ What display type do you use?
 #define UI_ACTION_PETTAPE				1917
 #define UI_ACTION_GLUESTICK				1918
 #define UI_ACTION_RESET_MATRIX			1919
+#define UI_ACTION_CALIBRATE				1920
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -481,6 +482,7 @@ class UIDisplay {
     bool isDirname(char *name);
     bool isWizardActive();
 	void menuCommand(const UIMenu *men,FSTRINGPARAM(cmd));
+	void menuAdjustHeight(const UIMenu *men,float offset);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };

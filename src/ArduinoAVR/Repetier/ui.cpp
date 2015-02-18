@@ -853,7 +853,7 @@ void UIDisplay::initialize()
 	stringOne += EEPROM::PrinterId();
 	char charBuf[11]; //11=max length of long. eg. -1234567890 
 	stringOne.toCharArray(charBuf, 11);
-	printRow(2, "SER:", charBuf,4);
+	printRow(2, "ID:", charBuf,4);
     printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
 #endif
 #endif
@@ -3312,21 +3312,23 @@ break;
 		    //just for the reference- this was used to pause RepetierHost
 		    //Com::printFLN(PSTR("RequestPause:"));
             break;
-			
+		case UI_ACTION_CALIBRATE:
+			menuCommand(&ui_menu_calibrate_action,Com::tProbeActionScript);
+			break;			
 		case UI_ACTION_NOCOATING:
-			menuCommand(&ui_menu_nocoating_action,Com::tProbeActionScript);
+			menuAdjustHeight(&ui_menu_nocoating_action,0);
 			break;
 		case UI_ACTION_KAPTON:
-			menuCommand(&ui_menu_kapton_action,Com::tProbeActionScript);
+			menuAdjustHeight(&ui_menu_kapton_action,0.04);
 			break;
 		case UI_ACTION_GLUESTICK:
-			menuCommand(&ui_menu_gluestick_action,Com::tProbeActionScript);
+			menuAdjustHeight(&ui_menu_gluestick_action,0.04);
 			break;
 		case UI_ACTION_BLUETAPE:
-			menuCommand(&ui_menu_bluetape_action, Com::tCalBluetapeScript);
+			menuAdjustHeight(&ui_menu_bluetape_action,0.15);
 			break;
 		case UI_ACTION_PETTAPE:
-			menuCommand(&ui_menu_pettape_action, Com::tCalPettapeScript);
+			menuAdjustHeight(&ui_menu_pettape_action,0.09);
 			break;
 		case UI_ACTION_RESET_MATRIX:
 			Printer::resetTransformationMatrix(false);
@@ -3575,7 +3577,34 @@ void UIDisplay::menuCommand(const UIMenu *men,FSTRINGPARAM(cmd)){
 	activeAction = 0;
 	pushMenu(men, false);
 	BEEP_SHORT;
-	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);;
+	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+}
+
+void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
+	//If there is something to change
+	if (EEPROM::zProbeZOffset()!=offset) {
+		//If the offset has been previously set, reset the height
+		if (EEPROM::zProbeZOffset()!=0.0)
+			Printer::zLength += EEPROM::zProbeZOffset();
+		//Subtract the new offset (if any)
+		if (offset!=0.0)
+			Printer::zLength -= offset;
+		//Set the new offset
+		HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, offset);
+		HAL::eprSetFloat(EPR_Z_LENGTH, Printer::zLength);
+		Com::print("\nThe new zLength: ");
+		Com::printFloat(Printer::zLength, 4);
+		EEPROM::storeDataIntoEEPROM(false);
+		Com::print(" has been stored into EEPROM.\n");
+	}
+	//Display message
+	pushMenu(men, false);
+	BEEP_SHORT;	
+	Printer::homeAxis(true, true, true);
+	Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
+	menuLevel = 0;
+	activeAction = 0;
+	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
 }
 
 #endif
