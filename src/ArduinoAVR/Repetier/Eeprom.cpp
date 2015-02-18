@@ -305,7 +305,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 {
 #if EEPROM_MODE != 0
-	HAL::eprSetInt32(EPR_PRINTER_ID, 0);
     HAL::eprSetInt32(EPR_BAUDRATE,baudrate);
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
@@ -441,12 +440,16 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
     HAL::eprSetFloat(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
     HAL::eprSetFloat(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
+	HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
     HAL::eprSetFloat(EPR_Z_PROBE_X1,Z_PROBE_X1);
     HAL::eprSetFloat(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
     HAL::eprSetFloat(EPR_Z_PROBE_X2,Z_PROBE_X2);
     HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
     HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
     HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+	HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET,Z_PROBE_XY1_OFFSET);
+	HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
+	HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -616,12 +619,16 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetFloat(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
             HAL::eprSetFloat(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
             HAL::eprSetFloat(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
             HAL::eprSetFloat(EPR_Z_PROBE_X1,Z_PROBE_X1);
             HAL::eprSetFloat(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
             HAL::eprSetFloat(EPR_Z_PROBE_X2,Z_PROBE_X2);
             HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
             HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET,Z_PROBE_XY1_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
         }
         if(version < 4)
         {
@@ -866,12 +873,16 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_PROBE_XY_SPEED, Com::tZProbeSpeedXY);
     writeFloat(EPR_Z_PROBE_X_OFFSET, Com::tZProbeOffsetX);
     writeFloat(EPR_Z_PROBE_Y_OFFSET, Com::tZProbeOffsetY);
+	writeFloat(EPR_Z_PROBE_Z_OFFSET, Com::tZProbeOffsetZ);
     writeFloat(EPR_Z_PROBE_X1, Com::tZProbeX1);
     writeFloat(EPR_Z_PROBE_Y1, Com::tZProbeY1);
     writeFloat(EPR_Z_PROBE_X2, Com::tZProbeX2);
     writeFloat(EPR_Z_PROBE_Y2, Com::tZProbeY2);
     writeFloat(EPR_Z_PROBE_X3, Com::tZProbeX3);
     writeFloat(EPR_Z_PROBE_Y3, Com::tZProbeY3);
+	writeFloat(EPR_Z_PROBE_XY1_OFFSET, Com::tZProbeXY1offset);
+	writeFloat(EPR_Z_PROBE_XY2_OFFSET, Com::tZProbeXY2offset);
+	writeFloat(EPR_Z_PROBE_XY3_OFFSET, Com::tZProbeXY3offset);
 #endif
 #if FEATURE_AUTOLEVEL
     writeByte(EPR_AUTOLEVEL_ACTIVE, Com::tAutolevelActive);

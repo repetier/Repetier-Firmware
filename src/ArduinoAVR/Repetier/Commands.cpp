@@ -714,13 +714,109 @@ void Commands::processGCode(GCode *com)
     break;
     case 30: // G30 single probe set Z0
     {
-        uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
+        /*
+		uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
         //bool oldAutolevel = Printer::isAutolevelActive();
         //Printer::setAutolevelActive(false);
         Printer::runZProbe(p & 1,p & 2);
         //Printer::setAutolevelActive(oldAutolevel);
         Printer::updateCurrentPosition(p & 1);
         //printCurrentPosition(PSTR("G30 "));
+		*/
+		/*
+		Have a P parameter which is used after init probing with G30 T.
+		It calculates the the Z-probe height and saves it into EEPROM
+		*/
+		if (com->hasP()){
+			UI_STATUS_UPD("Adj. probe height");
+			float probeHeight;
+			/*
+			Assume that the current zProbeHeight contains deviation offset from total length + actuation
+			height of the Z-probe.
+			The actual zProbeHeight = the previous value - deviation offset.
+			*/
+			probeHeight = EEPROM::zProbeHeight() - (Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			Com::print("\nThe new Z probe height: ");
+			Com::printFloat(probeHeight,4);
+			HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT, probeHeight);
+			EEPROM::storeDataIntoEEPROM(false);
+			Com::print(" has been stored into EEPROM\n");
+		}
+
+#if DRIVE_SYSTEM == DELTA
+		Printer::homeAxis(true, true, true);
+		Printer::updateCurrentPosition();
+#endif
+        bool oldAutolevel = Printer::isAutolevelActive();
+        float oldFeedrate = Printer::feedrate;
+
+        Printer::setAutolevelActive(false);
+
+        if (com->hasI()) {
+			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, com->I);
+        }
+		//Move to safe distance above the bed
+		Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+		//Move to P1
+		Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+		float deviation;
+		UI_STATUS_UPD("Probing...");
+		//Run probe and get the deviation
+        deviation = Printer::runZProbe(true, true);
+		//Move to the bed center
+        Printer::moveTo(0.0, 0.0, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+		BEEP_SHORT
+		/*
+		Initialization parameter T moves the nozzle safe distance above the bed and Y-10 to prepare
+		for manual height measurement.
+		*/
+		if (com->hasT()){
+			UI_STATUS_UPD("Measuring...");
+			Printer::homeAxis(true, true, true);
+			Printer::moveTo(0, 0, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+			Printer::moveTo(EEPROM::zProbeX1()-EEPROM::zProbeXOffset(), EEPROM::zProbeY1()-EEPROM::zProbeYOffset(), EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+			transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+			Printer::updateCurrentPosition(true);
+			printCurrentPosition(PSTR("M114 "));
+			//Store the deviation offset temporarily as Z-probe height
+			HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT, EEPROM::zProbeBedDistance() - deviation + EEPROM::zProbeXY1offset());
+			EEPROM::storeDataIntoEEPROM(false);
+			UI_STATUS_UPD("Please adjust 0:");
+		}
+
+		/*
+		If there are no additional parameters for pre-setup	then we are ready to change the zLength.
+		(Assuming we have made the zProbeHeight and "0"-ing measurement with "G30 T", adjusting to 0,
+		and THEN "G30 P" to store the new zProbeHeight value.)
+		*/
+		if (!com->hasT()) {
+			if (com->hasString())
+				UI_STATUS_UPD("Adjusting...");
+			float newLength;
+			newLength = Printer::zLength - (EEPROM::zProbeBedDistance() - deviation);
+			Com::print("\nThe new zLength: ");
+			Com::printFloat(newLength, 4);
+
+			/*
+			If this is the second phase of init-calibration (parameter P) or simply G30 R (single probe),
+			then store the adjusted height in EEPROM.
+			*/
+			if (com->hasR() || com->hasP()) {
+				Printer::zLength = newLength;
+				HAL::eprSetFloat(EPR_Z_LENGTH, newLength);
+				EEPROM::storeDataIntoEEPROM(false);
+				Com::print(" has been stored into EEPROM.\n");
+				EEPROM::update(com);
+				Printer::homeAxis(true, true, true);
+			}
+				
+			Printer::updateCurrentPosition(true);
+			UI_CLEAR_STATUS
+			UI_STATUS_UPD_RAM("Calibration complete");
+		}
+        Commands::waitUntilEndOfAllMoves();
+        Printer::feedrate = oldFeedrate;
+        Printer::setAutolevelActive(oldAutolevel);		
     }
     break;
     case 31:  // G31 display hall sensor output
