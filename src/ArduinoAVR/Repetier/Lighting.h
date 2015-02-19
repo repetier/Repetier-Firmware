@@ -28,14 +28,15 @@ class Lighting
 #define PIXEL_DDR DDRL // Port of the pin the pixels are connected to
 #define PIXEL_BIT 3 // Bit of the pin the pixels are connected to
 
-#define T1H  2000    // Width of a 1 bit in ns
-#define T1L  600    // Width of a 1 bit in ns
 
-#define T0H  350    // Width of a 0 bit in ns
-#define T0L  800    // Width of a 0 bit in ns
+#define T0H  250    // Width of a 0 bit in ns//
+#define T1H  800    // Width of a 1 bit in ns
+#define T0L  700    // Width of a 0 bit in ns
+#define T1L  600   // Width of a 1 bit in ns
+	
+#define ITB 0    // Width of the low gap between bits to cause a frame to latch
 
-#define RES 50000    // Width of the low gap between bits to cause a frame to latch
-
+#define RES 3000   // Width of the low gap between bits to cause a frame to latch
 	// Here are some convenience defines for using nanoseconds specs to generate actual CPU delays
 
 #define NS_PER_SEC (1000000000L) // Note that this has to be SIGNED since we want to be able to check for negative values of derivatives
@@ -78,12 +79,13 @@ class Lighting
 			// **************************************************************************
 			bitClear(PIXEL_PORT, PIXEL_BIT);
 
+			
+			DELAY_CYCLES(NS_TO_CYCLES(T0L) - 10); // 0-bit gap less overhead of the loop
+			DELAY_CYCLES(NS_TO_CYCLES(ITB));
 			sei();
 
-			DELAY_CYCLES(NS_TO_CYCLES(T0L) - 10); // 0-bit gap less overhead of the loop
-
 		}
-
+		
 		// Note that the inter-bit gap can be as long as you want as long as it doesn't exceed the 5us reset timeout (which is A long time)
 		// Here I have been generous and not tried to squeeze the gap tight but instead erred on the side of lots of extra time.
 		// This has thenice side effect of avoid glitches on very long strings becuase
@@ -110,23 +112,23 @@ class Lighting
 
 	// Set the specified pin up as digital out
 
-	static void ledsetup()__attribute__((optimize(0))) {
+	static volatile void ledsetup()__attribute__((optimize(0))) {
 
 		bitSet(PIXEL_DDR, PIXEL_BIT);
 
 	}
 
-	static void sendPixel(unsigned char r, unsigned char g, unsigned char b)__attribute__((optimize(0))) {
-
+	static volatile void sendPixel(unsigned char r, unsigned char g, unsigned char b)__attribute__((optimize(0))) {
+		
 		sendByte(g); // Neopixel wants colors in green-then-red-then-blue order
 		sendByte(r);
 		sendByte(b);
-
+		show();
 	}
 
 	// Just wait long enough without sending any bots to cause the pixels to latch and display the last sent frame
 
-	static void show()__attribute__((optimize(0))) {
+	static volatile void show()__attribute__((optimize(0))) {
 		DELAY_CYCLES(NS_TO_CYCLES(RES));
 	}
 
@@ -147,13 +149,16 @@ class Lighting
 
 	 static void init() 
 	 {
+		 noInterrupts();
 		 ledsetup();
 		 //factoryTest();
+		 
 		 for (int k = 0; k < NUM_LEDS; k++)
 		 {
 			 sendPixel(0, 0, 0);
 		 }
 		 show();
+		 interrupts();
 		 //int i = 0;
 
 		 //for (int k = 0; k < 100; k++)
@@ -198,6 +203,7 @@ class Lighting
 
 	 }
 	 static void factoryTest(){
+		 noInterrupts();
 		 for (int i = 0; i < 250; i += 1)
 		 {
 			 for (int k = 0; k < NUM_LEDS; k++)
@@ -205,7 +211,7 @@ class Lighting
 				 sendPixel(i, 0, 0);
 			 }
 			 show();
-			 delay(10);
+			 delay(100);
 		 }
 		 for (int i = 0; i < 250; i+=1)
 		 {
@@ -234,7 +240,7 @@ class Lighting
 			 show();
 			 delay(10);
 		 }
-		 
+		 interrupts();
 	 }
 	 //void loop()
 	 //{
