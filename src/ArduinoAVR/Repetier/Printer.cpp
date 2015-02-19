@@ -569,6 +569,7 @@ void Printer::setup()
 #endif // FEATURE_CONTROLLER
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
     HAL::hwSetup();
+	Lighting::init();
 #ifdef ANALYZER
 // Channel->pin assignments
 #if ANALYZER_CH0>=0

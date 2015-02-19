@@ -1977,7 +1977,9 @@ void Commands::processMCode(GCode *com)
 	case 885://M885 print PRINTER_ID
 		Com::print("PRINTER_ID: ");			Com::print((int)Printer::PrinterId);	Com::println();
 		break;
-
+	case 890://M890 factory led test
+		Lighting::factoryTest();
+		break;
     case 908: // M908 Control digital trimpot directly.
     {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
