@@ -762,12 +762,12 @@ UI_MENU_ACTION2C(ui_menu_probing, UI_ACTION_DUMMY, UI_TEXT_CALIBRATING)
 //UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
 // Main menu
 UI_MENU_SUBMENU(ui_menu_main1, UI_TEXT_QUICK_SETTINGS,ui_menu_quick)
-UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
+//UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY &ui_menu_main2,&ui_menu_main3,&ui_menu_calibration,&ui_menu_prepare, UI_MENU_FAN_COND UI_MENU_SD_COND }
-UI_MENU(ui_menu_main,UI_MENU_MAIN,3+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY UI_MENU_SD_COND &ui_menu_main3, UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration }
+UI_MENU(ui_menu_main,UI_MENU_MAIN,4+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands
 

@@ -226,7 +226,7 @@ Without a back key, you need to navigate to the back entry in the menu. Setting 
 If you set it to true, next will go to previous menu instead of the next menu.
 
 */
-#define UI_INVERT_MENU_DIRECTION 0
+#define UI_INVERT_MENU_DIRECTION 1
 
 /** Uncomment this, if you have keys connected via i2c to a PCF8574 chip. */
 //#define UI_HAS_I2C_KEYS
@@ -355,16 +355,21 @@ void uiInitKeys() {
   //Illumination LED for pause button, connected to E2 screw terminals
   SET_OUTPUT(HEATER_2_PIN);
   WRITE(HEATER_2_PIN, 1);
+  
+  //Bed LED signal LOW
+  SET_OUTPUT(BED_LED_PIN);
+  WRITE(BED_LED_PIN, 0);
+
 }
 void uiCheckKeys(int &action) {
 #if UI_HAS_KEYS!=0
 
  //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
     UI_KEYS_BUTTON_LOW(35,UI_ACTION_OK); // push button, connects gnd to pin
-    UI_KEYS_BUTTON_LOW(34,UI_ACTION_NEXT); // push button, connects gnd to pin
-    UI_KEYS_BUTTON_LOW(43,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(34,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(43,UI_ACTION_NEXT); // push button, connects gnd to pin
     UI_KEYS_BUTTON_LOW(44,UI_ACTION_BACK); // push button, connects gnd to pin
-    UI_KEYS_BUTTON_LOW(33,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(33,UI_ACTION_MENU_QUICKSETTINGS ); // push button, connects gnd to pin
     // UI_KEYS_CLICKENCODER_LOW_REV(45,44); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
     

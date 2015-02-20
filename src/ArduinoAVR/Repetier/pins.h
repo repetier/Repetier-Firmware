@@ -1867,6 +1867,7 @@ S3(ext)=9
 ////encoder A 59
 ////encoder B 64
 ////encoder click 33 //the click
+#define BED_LED_PIN 49
 
 #define SCK_PIN 52
 #define MISO_PIN 50

@@ -1217,7 +1217,7 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_SWITCHING_DISTANCE 10.0 // Distance to safely switch off probe
 #define Z_PROBE_REPETITIONS 1 // Repetitions for probing at one point.
 /** The height is the difference between activated probe position and nozzle height. */
-#define Z_PROBE_HEIGHT 3.8
+#define Z_PROBE_HEIGHT 0.0
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
@@ -1318,7 +1318,7 @@ Always hard to say since the other angle is 89° in this case!
 #define SD_EXTENDED_DIR 1
 /** The gcodes in this line get executed, when you stop a sd print befor it was ended.
 Separate commands by \n */
-#define SD_RUN_ON_STOP "G28"
+#define SD_RUN_ON_STOP ""
 /** Disable motors and heaters when print was stopped. */
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 0
 
@@ -1383,9 +1383,9 @@ Select the language to use.
 #define UI_LANGUAGE 0
 
 // This is line 2 of the status display at startup. Change to your like.
-#define UI_PRINTER_NAME "Portal Delta"
+#define UI_PRINTER_NAME "Pharaoh ED"
 #define UI_PRINTER_COMPANY "MASS PORTAL"
-#define HARDWARE_VERSION "v1.3"
+#define HARDWARE_VERSION "v1.4"
 #define FIRMWARE_VERSION "1.1.1"
 
 
