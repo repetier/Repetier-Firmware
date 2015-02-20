@@ -741,6 +741,9 @@ void Commands::processGCode(GCode *com)
 			HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT, probeHeight);
 			EEPROM::storeDataIntoEEPROM(false);
 			Com::print(" has been stored into EEPROM\n");
+			Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+			//Move to the bed center
+			Printer::moveTo(0.0, 0.0, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
 		}
 
 #if DRIVE_SYSTEM == DELTA
