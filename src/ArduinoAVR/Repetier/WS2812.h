@@ -56,6 +56,7 @@
 
 class WS2812 {
 public: 
+	WS2812();
 	WS2812(uint16_t num_led);
 	~WS2812();
 	
@@ -67,6 +68,7 @@ public:
 	
 	cRGB get_crgb_at(uint16_t index);
 	uint8_t set_crgb_at(uint16_t index, cRGB px_value);
+	uint8_t set_crgb_at(uint16_t index, uint8_t r, uint8_t g, uint8_t b);
 	uint8_t set_subpixel_at(uint16_t index, uint8_t offset, uint8_t px_value);
 
 	void sync();
