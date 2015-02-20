@@ -867,7 +867,14 @@ void Commands::processGCode(GCode *com)
 		if(com->hasY())
 			h2 += com->Y;
 		if(com->hasZ())
-			h3 += com->Z;	
+			h3 += com->Z;
+		//Head slanting compensation for each measurement point
+		if (EEPROM::zProbeXY1offset() != 0.0)
+			h1 += EEPROM::zProbeXY1offset();
+		if (EEPROM::zProbeXY2offset() != 0.0)
+			h2 += EEPROM::zProbeXY2offset();
+		if (EEPROM::zProbeXY3offset() != 0.0)
+			h3 += EEPROM::zProbeXY3offset();	
 #endif		
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
