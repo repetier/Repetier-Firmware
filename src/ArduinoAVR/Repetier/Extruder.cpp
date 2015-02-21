@@ -566,7 +566,6 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 	
     if(temperatureInCelsius>HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius<0) temperatureInCelsius = 0;
-	if (temperatureInCelsius>0) Light.BedTarget = temperatureInCelsius;
     if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);

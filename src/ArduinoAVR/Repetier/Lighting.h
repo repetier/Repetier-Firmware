@@ -7,9 +7,11 @@
 #include "WS2812.h"
 //#include "Extruder.h"
 
-//#define LED_PIN	46    // Digital IO pin connected to the NeoPixels.
 #define LED_COUNT 12
-#define LED_MAX_RELATIVE_BRIGHTNESS 0.3
+#define LED_LOOP_DEVIDER 30
+#define LED_EXTRUDER 5
+
+#define LED_MAX_RELATIVE_BRIGHTNESS 0.25
 #define LED_BASE_TEMP 30
 
 class Lighting
@@ -24,18 +26,25 @@ class Lighting
 		 SolidBlue,
 		 SolidGreen,
 		 FixedRGB,
-		 BedTempDynamic
+		 ShowTemperatures
 	 };
+	 int  ThisStep;
 	 int  CurrentShow;
 	 int  CurrentShowStep;
 	 bool UpdateNeeded;
 	 float BedTarget;
 	 float BedCurrent;
+	 float ExtruderTarget;
+	 float ExtruderCurrent;
 	 void init();
 	 void SetAllLeds(uint8_t r, uint8_t g, uint8_t b);
-	  void factoryTest();
+	 void SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b);
+	 void SetLed(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+	 void SetLedInstantly(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+	 void CommitLeds();
+	 void factoryTest();
 	 void loop();
-	 void ShowBedTemp();
+	 void ShowTemps();
 	 void SetShowType(ShowType SType);
 	
 };

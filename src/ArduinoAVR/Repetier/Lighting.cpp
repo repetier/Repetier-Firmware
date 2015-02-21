@@ -3,89 +3,76 @@
 
 Lighting::Lighting()
 {
-	//LED =  WS2812();
-	CurrentShow=0;
-	CurrentShowStep=0;
-	UpdateNeeded=false;
-	BedTarget=0;
-	BedCurrent=0;
+	CurrentShow		= 0;
+	CurrentShowStep	= 0;
+	UpdateNeeded	= false;
+	BedTarget		= 200; //we initialize this to some temerature to be considered hot, to detect hot-to-touch bed right after boot
+	BedCurrent		= 0;
+	ExtruderTarget	= 240;
+	ExtruderCurrent	= 0;
+	ThisStep		= 0;
 }
-//enum ShowType {
-//	Off,
-//	SolidRed,
-//	SolidBlue,
-//	SolidGreen,
-//	FixedRGB,
-//	BedTempDynamic
-//};
 void Lighting::init()
 {
-	
 	//factoryTest();
-	
 	LED.setOutput(BED_LED_PIN); 
 	LED.setColorOrderGRB(); 
 
-
+	//smooth fade in to blue to avoid instant turn-on. total time of this blocking code is 250ms. worth it.
+	//slower/longer fade would cause problems to boot and/or connect host software
 	SetAllLeds(0, 0, 0);
-}
-void Lighting::SetAllLeds(uint8_t r, uint8_t g, uint8_t b)
-{
-	WS2812 LED = WS2812(LED_COUNT); LED.setOutput(BED_LED_PIN); LED.setColorOrderGRB(); //todo: fix this asap
-
-	for (int i = 0; i < LED_COUNT; i++)
+	for (int i = 0; i < 255; i++)
 	{
-		LED.set_crgb_at(i, r, g, b);
-		LED.sync(); // Sends the data to the LEDs
+		SetAllLeds(0, 0, i);
+		delay(1);
 	}
 }
+
 void Lighting::factoryTest(){
-	WS2812 LED = WS2812(LED_COUNT); LED.setOutput(BED_LED_PIN); LED.setColorOrderGRB(); //todo: fix this asap
-
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		LED.set_crgb_at(i, 0, 0, 0);
+		SetLedInstantly(i, 0, 0, 0);
 		delay(20); // Wait (ms)
-		LED.sync(); // Sends the data to the LEDs
 	}
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		LED.set_crgb_at(i, 255, 0, 0);
+		SetLedInstantly(i, 255, 0, 0);
 		delay(20); // Wait (ms)
-		LED.sync(); // Sends the data to the LEDs
 	}
 	delay(400); // Wait (ms)
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		LED.set_crgb_at(i, 0, 255, 0);
+		SetLedInstantly(i, 0, 255, 0);
 		delay(20); // Wait (ms)
-		LED.sync(); // Sends the data to the LEDs
 	}
 	delay(400); // Wait (ms)
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		LED.set_crgb_at(i, 0, 0, 255);
+		SetLedInstantly(i, 0, 0, 255);
 		delay(20); // Wait (ms)
-		LED.sync(); // Sends the data to the LEDs
 	}
 	delay(400); // Wait (ms)
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		LED.set_crgb_at(i, 255, 255, 255);
+		SetLedInstantly(i, 255, 255, 255);
 		delay(20); // Wait (ms)
-		LED.sync(); // Sends the data to the LEDs
 	}
 	delay(400); // Wait (ms)
-	for (int i = 0; i < LED_COUNT; i++)
-	{
-		LED.set_crgb_at(i, 0, 0, 0);
-
-	}
-	LED.sync(); // Sends the data to the LEDs
+	SetAllLeds(0, 0, 0);
 }
 void Lighting::loop()
 {
-	SetShowType(BedTempDynamic); //temorary - to test bed heating with leds
+	ThisStep++;
+	if (ThisStep <LED_LOOP_DEVIDER) return; //only update leds every x loops
+	ThisStep = 0;
+
+	if (!(LED_MAX_RELATIVE_BRIGHTNESS>0)) //avoid processing if relative brightness set to 0
+	{
+		SetAllLeds(0, 0, 0);
+		return;
+	}
+
+	SetShowType(ShowTemperatures); //temorary - to test bed heating with leds
 	
 	switch (CurrentShow) {
 	case Off:
@@ -100,26 +87,35 @@ void Lighting::loop()
 	case SolidBlue:
 		SetAllLeds(0, 0, 255);
 		break;
-	case BedTempDynamic:
-		//ShowBedTemp(Extruder::getHeatedBedTargetTemperature(), Extruder::getHeatedBedTemperature());
-		//ShowBedTemp();
+	case ShowTemperatures:
+		ShowTemps();
 		break;
 	}
 }
-void Lighting::ShowBedTemp()
+void Lighting::ShowTemps()
 {
-	BedCurrent = Extruder::getHeatedBedTemperature();
-	
+	BedCurrent			= Extruder::getHeatedBedTemperature();
+	ExtruderCurrent		= Extruder::current->tempControl.currentTemperatureC;
 
-	int r = (BedCurrent) * 255 / (BedTarget);
-	if (r>255) r = 255;
-	for (int i = 0; i < LED_COUNT; i++)
-	{
-		LED.set_crgb_at(i, r*LED_MAX_RELATIVE_BRIGHTNESS, 0, (255 - r)*LED_MAX_RELATIVE_BRIGHTNESS);
-		LED.sync(); // Sends the data to the LEDs
-	}
+	//these checks for 0 enable non-interupted correct-colored lighting throughout cooldown process
+	if (Extruder::getHeatedBedTargetTemperature()>0) 
+		BedTarget		= Extruder::getHeatedBedTargetTemperature();
+	if (Extruder::current->tempControl.targetTemperatureC>0)
+		ExtruderTarget	= Extruder::current->tempControl.targetTemperatureC;
 
+	//bed leds (all except middle one (5th)
+	int b = (BedCurrent) * 255 / (BedTarget);
+	if (b>255) b = 255;
+	if (b<0) b = 0;
 
+	//extruder led (5th)
+	int e = (ExtruderCurrent)* 255 / (ExtruderTarget);
+	if (e>255) e = 255;
+	if (e<0) e = 0;
+
+	SetAllBedLeds(b, 0, (255 - b));
+	SetLed(LED_EXTRUDER, e, 0, (255 - e));
+	CommitLeds();
 
 }
 void Lighting::SetShowType(ShowType SType)
@@ -127,6 +123,40 @@ void Lighting::SetShowType(ShowType SType)
 	CurrentShow = SType;
 	CurrentShowStep = 0;
 	UpdateNeeded = true;
+}
+
+void Lighting::SetAllLeds(uint8_t r, uint8_t g, uint8_t b)
+{
+	for (int i = 0; i < LED_COUNT; i++)
+	{
+		SetLed(i, r, g, b);
+	}
+	CommitLeds();
+}
+void Lighting::SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b)
+{
+	for (int i = 0; i < LED_COUNT; i++)
+	{
+		if (!(i==LED_EXTRUDER))SetLed(i, r, g, b);
+	}
+}
+
+//Low level wrappers
+void Lighting::SetLed(uint8_t i, uint8_t r, uint8_t g, uint8_t b)
+{
+	LED.set_crgb_at(i,
+		r*LED_MAX_RELATIVE_BRIGHTNESS,
+		g*LED_MAX_RELATIVE_BRIGHTNESS,
+		b*LED_MAX_RELATIVE_BRIGHTNESS);
+}
+void Lighting::SetLedInstantly(uint8_t i, uint8_t r, uint8_t g, uint8_t b)
+{
+	SetLed(i, r, g, b);
+	CommitLeds();
+}
+void Lighting::CommitLeds()
+{
+	LED.sync(); // Sends the data to the LEDs
 }
 
 Lighting Light = Lighting();

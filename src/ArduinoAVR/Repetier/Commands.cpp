@@ -61,6 +61,7 @@ void Commands::commandLoop()
                     Commands::executeGCode(code);
                 code->popCurrentCommand();
             }
+
         }
         else
         {
@@ -75,6 +76,8 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     if(!executePeriodical) return;
     executePeriodical = 0;
     Extruder::manageTemperatures();
+	Light.loop();
+
     if(--counter250ms == 0)
     {
         if(manageMonitor <= 1 + NUM_EXTRUDER)
@@ -85,7 +88,6 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     // would invalidate old computation resulting in unpredicted behaviour.
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
-	Light.loop();
     UI_SLOW(allowNewMoves);
 }
 
