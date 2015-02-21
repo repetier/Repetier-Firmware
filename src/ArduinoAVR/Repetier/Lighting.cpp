@@ -6,11 +6,11 @@ Lighting::Lighting()
 	CurrentShow		= 0;
 	CurrentShowStep	= 0;
 	UpdateNeeded	= false;
-	BedTarget		= 200; //we initialize this to some temerature to be considered hot, to detect hot-to-touch bed right after boot
+	BedTarget		= 70; //we initialize this to some temerature to be considered hot, to detect hot-to-touch bed right after boot
 	BedCurrent		= 0;
-	ExtruderTarget	= 240;
+	ExtruderTarget	= 160;
 	ExtruderCurrent	= 0;
-	ThisStep		= 0;
+	ThisStep = LED_LOOP_DEVIDER+1;
 }
 void Lighting::init()
 {
@@ -62,9 +62,17 @@ void Lighting::factoryTest(){
 }
 void Lighting::loop()
 {
+	///===This part is ment to avoid pausing interrupts when it could cause problems
 	ThisStep++;
 	if (ThisStep <LED_LOOP_DEVIDER) return; //only update leds every x loops
 	ThisStep = 0;
+
+	if (LastPositionHash != Printer::stepNumber)//do not update leds if there has been any head movement since last loop
+	{
+		LastPositionHash != Printer::stepNumber;
+		return;
+	}
+	///===
 
 	if (!(LED_MAX_RELATIVE_BRIGHTNESS>0)) //avoid processing if relative brightness set to 0
 	{

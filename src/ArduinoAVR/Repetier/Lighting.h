@@ -8,7 +8,7 @@
 //#include "Extruder.h"
 
 #define LED_COUNT 12
-#define LED_LOOP_DEVIDER 30
+#define LED_LOOP_DEVIDER 100
 #define LED_EXTRUDER 5
 
 #define LED_MAX_RELATIVE_BRIGHTNESS 0.25
@@ -36,6 +36,7 @@ class Lighting
 	 float BedCurrent;
 	 float ExtruderTarget;
 	 float ExtruderCurrent;
+	 int LastPositionHash;
 	 void init();
 	 void SetAllLeds(uint8_t r, uint8_t g, uint8_t b);
 	 void SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b);
