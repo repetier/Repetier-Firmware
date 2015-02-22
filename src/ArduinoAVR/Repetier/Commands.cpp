@@ -20,10 +20,7 @@
 */
 
 #include "Repetier.h"
-#include "WS2812.h"
-#define LEDCount 12
-WS2812 LED(LEDCount);
-cRGB value;
+
 const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
@@ -64,6 +61,7 @@ void Commands::commandLoop()
                     Commands::executeGCode(code);
                 code->popCurrentCommand();
             }
+
         }
         else
         {
@@ -78,6 +76,8 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     if(!executePeriodical) return;
     executePeriodical = 0;
     Extruder::manageTemperatures();
+	Light.loop();
+
     if(--counter250ms == 0)
     {
         if(manageMonitor <= 1 + NUM_EXTRUDER)
@@ -2033,67 +2033,7 @@ void Commands::processMCode(GCode *com)
 		Com::print("PRINTER_ID: ");			Com::print((int)Printer::PrinterId);	Com::println();
 		break;
 	case 890://M890 factory led test
-		//Lighting::factoryTest();
-		LED.setOutput(BED_LED_PIN);
-		LED.setColorOrderGRB();
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 0;
-			value.g = 0;
-			value.r = 0; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			delay(20); // Wait (ms)
-			LED.sync(); // Sends the data to the LEDs
-		}
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 255;
-			value.g = 0;
-			value.r = 0; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			delay(20); // Wait (ms)
-			LED.sync(); // Sends the data to the LEDs
-		}
-		delay(400); // Wait (ms)
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 0;
-			value.g = 255;
-			value.r = 0; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			delay(20); // Wait (ms)
-			LED.sync(); // Sends the data to the LEDs
-		}
-		delay(400); // Wait (ms)
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 0;
-			value.g = 0;
-			value.r = 255; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			delay(20); // Wait (ms)
-			LED.sync(); // Sends the data to the LEDs
-		}
-		delay(400); // Wait (ms)
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 255;
-			value.g = 255;
-			value.r = 255; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			delay(20); // Wait (ms)
-			LED.sync(); // Sends the data to the LEDs
-		}
-		delay(400); // Wait (ms)
-		for(int i = 0; i < LEDCount; i++)
-		{
-			value.b = 0;
-			value.g = 0;
-			value.r = 0; // RGB Value -> Red Only
-			LED.set_crgb_at(i, value);
-			
-		}
-		LED.sync(); // Sends the data to the LEDs
+		Light.factoryTest();
 		break;
     case 908: // M908 Control digital trimpot directly.
     {

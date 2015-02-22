@@ -14,7 +14,17 @@
 
 #include "WS2812.h"
 #include <stdlib.h>
+WS2812::WS2812()
+{
+	count_led = 12;
 
+	pixels = (uint8_t*)malloc(count_led * 3);
+#ifdef RGB_ORDER_ON_RUNTIME	
+	offsetGreen = 0;
+	offsetRed = 1;
+	offsetBlue = 2;
+#endif
+}
 WS2812::WS2812(uint16_t num_leds) {
 	count_led = num_leds;
 	
@@ -57,7 +67,20 @@ uint8_t WS2812::set_crgb_at(uint16_t index, cRGB px_value) {
 	} 
 	return 1;
 }
+uint8_t WS2812::set_crgb_at(uint16_t index, uint8_t r, uint8_t g, uint8_t b) {
 
+	if (index < count_led) {
+
+		uint16_t tmp;
+		tmp = index * 3;
+
+		pixels[OFFSET_R(tmp)] = r;
+		pixels[OFFSET_G(tmp)] = g;
+		pixels[OFFSET_B(tmp)] = b;
+		return 0;
+	}
+	return 1;
+}
 uint8_t WS2812::set_subpixel_at(uint16_t index, uint8_t offset, uint8_t px_value) {
 	if (index < count_led) {
 		uint16_t tmp;
