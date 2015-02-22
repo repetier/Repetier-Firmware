@@ -446,13 +446,13 @@ M140 command, after a given temperature is reached. */
 /** autoretract converts pure extrusion moves into retractions. Beware that 
  simple extrusion e.g. over Repetier-Host will then not work! */
 #define AUTORETRACT_ENABLED 0
-#define RETRACTION_LENGTH 3
-#define RETRACTION_LONG_LENGTH 13
-#define RETRACTION_SPEED 40
+#define RETRACTION_LENGTH 10
+#define RETRACTION_LONG_LENGTH 50
+#define RETRACTION_SPEED 30
 #define RETRACTION_Z_LIFT 0
 #define RETRACTION_UNDO_EXTRA_LENGTH 0
 #define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
-#define RETRACTION_UNDO_SPEED 20
+#define RETRACTION_UNDO_SPEED 25
 
 /**
 If you have a lcd display, you can do a filament switch with M600.
@@ -470,7 +470,7 @@ you moved the extruder while changing filament during print.
 Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 */
 #define FILAMENTCHANGE_SHORTRETRACT 30
-#define FILAMENTCHANGE_LONGRETRACT 30
+#define FILAMENTCHANGE_LONGRETRACT 500
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you
@@ -1389,7 +1389,7 @@ Select the language to use.
 #define FIRMWARE_VERSION "1.1.1"
 
 
-
+#define DEBUG false
 
 /** Animate switches between menus etc. */
 #define UI_ANIMATION 0
@@ -1401,7 +1401,7 @@ Select the language to use.
 #define UI_PAGES_DURATION 4000
 
 /** Delay of start screen in milliseconds */
-#define UI_START_SCREEN_DELAY 2000
+#define UI_START_SCREEN_DELAY 1000
 /** Uncomment if you don't want automatic page switching. You can still switch the
 info pages with next/previous button/click-encoder */
 #define UI_DISABLE_AUTO_PAGESWITCH 1

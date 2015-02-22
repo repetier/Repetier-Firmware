@@ -1012,7 +1012,9 @@ void Printer::homeYAxis()
 }
 void Printer::homeZAxis() // Delta z homing
 {
-    SHOT("homeZAxis ");
+#if DEBUG
+    SHOT("\nhomeZAxis ");
+#endif
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
     PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
@@ -1062,7 +1064,9 @@ void Printer::homeZAxis() // Delta z homing
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 {
-    SHOT("homeAxis ");
+#if DEBUG
+    SHOT("\nhomeAxis ");
+#endif
     bool autoLevel = isAutolevelActive();
     setAutolevelActive(false);
     long steps;

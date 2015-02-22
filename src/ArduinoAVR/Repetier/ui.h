@@ -481,7 +481,7 @@ class UIDisplay {
     void goDir(char *name);
     bool isDirname(char *name);
     bool isWizardActive();
-	void menuCommand(const UIMenu *men,FSTRINGPARAM(cmd));
+	void menuCommand(const UIMenu *doing, const UIMenu *men, FSTRINGPARAM(cmd));
 	void menuAdjustHeight(const UIMenu *men,float offset);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;

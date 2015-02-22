@@ -2749,6 +2749,11 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     return true;
 }
 
+#if DRIVE_SYSTEM==DELTA
+	float oldZHeight = 0.0;
+	float newZHeight = 0.0;
+#endif
+
 void UIDisplay::finishAction(int action)
 {
 }
@@ -3132,6 +3137,9 @@ break;
             pushMenu(&ui_wiz_filamentchange, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
+			//If the printer has not been initialized (moved to home position previously)
+			if (Printer::currentPosition[Z_AXIS] == 0.0)
+				Printer::homeAxis(true, true, true); //Home to avoid hitting the surface
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
@@ -3313,7 +3321,16 @@ break;
 		    //Com::printFLN(PSTR("RequestPause:"));
             break;
 		case UI_ACTION_CALIBRATE:
-			menuCommand(&ui_menu_calibrate_action,Com::tProbeActionScript);
+			oldZHeight = Printer::zLength;
+			Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
+			menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
+			Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
+			newZHeight = fabs(oldZHeight - Printer::zLength);
+			Com::printFLN(PSTR(" ABS Zh:"),newZHeight);
+			if (newZHeight > 0.03) {
+				menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);	
+				Com::printFLN(PSTR(" New Zh2:"),Printer::zLength);
+			}
 			break;			
 		case UI_ACTION_NOCOATING:
 			menuAdjustHeight(&ui_menu_nocoating_action,0);
@@ -3570,8 +3587,8 @@ const int8_t encoder_table[16] PROGMEM = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0}; //
 const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // Quart speed
 #endif
 
-void UIDisplay::menuCommand(const UIMenu *men,FSTRINGPARAM(cmd)){
-	pushMenu(&ui_menu_probing, false);
+void UIDisplay::menuCommand(const UIMenu *doing,const UIMenu *men,FSTRINGPARAM(cmd)){
+	pushMenu(doing, false);
 	GCode::executeFString(cmd);
 	menuLevel = 0;
 	activeAction = 0;
