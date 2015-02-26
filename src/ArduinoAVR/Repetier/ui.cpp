@@ -2749,10 +2749,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     return true;
 }
 
-#if DRIVE_SYSTEM==DELTA
-	float oldZHeight = 0.0;
-	float newZHeight = 0.0;
-#endif
+
 
 void UIDisplay::finishAction(int action)
 {
@@ -2761,6 +2758,8 @@ void UIDisplay::finishAction(int action)
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
 int UIDisplay::executeAction(int action, bool allowMoves)
 {
+	float oldZHeight = 0.0f;
+	float newZHeight = 0.0f;
     int ret = 0;
 #if UI_HAS_KEYS == 1
     bool skipBeep = false;
@@ -3318,19 +3317,23 @@ break;
 			    WRITE(HEATER_2_PIN, 0);
 		    }
 		    //just for the reference- this was used to pause RepetierHost
-		    //Com::printFLN(PSTR("RequestPause:"));
+		    //Com::printFLN(PSTR("RequestPause:"));	.
             break;
 		case UI_ACTION_CALIBRATE:
 			oldZHeight = Printer::zLength;
-			Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
 			menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
-			Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
 			newZHeight = fabs(oldZHeight - Printer::zLength);
+#if DEBUG
+			Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
+			Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
 			Com::printFLN(PSTR(" ABS Zh:"),newZHeight);
-			if (newZHeight > 0.03) {
-				menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);	
+#endif
+			if (newZHeight > 0.03f) {
+				menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);
+#if DEBUG
 				Com::printFLN(PSTR(" New Zh2:"),Printer::zLength);
-			}
+#endif
+			}	   
 			break;			
 		case UI_ACTION_NOCOATING:
 			menuAdjustHeight(&ui_menu_nocoating_action,0);
@@ -3595,6 +3598,7 @@ void UIDisplay::menuCommand(const UIMenu *doing,const UIMenu *men,FSTRINGPARAM(c
 	pushMenu(men, false);
 	BEEP_SHORT;
 	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
+	Commands::waitUntilEndOfAllMoves();
 }
 
 void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){

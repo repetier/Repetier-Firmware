@@ -1389,7 +1389,7 @@ Select the language to use.
 #define FIRMWARE_VERSION "1.1.1"
 
 
-#define DEBUG false
+#define DEBUG true
 
 /** Animate switches between menus etc. */
 #define UI_ANIMATION 0

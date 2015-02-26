@@ -877,38 +877,29 @@ void Commands::processGCode(GCode *com)
 		//Head slanting compensation for each measurement point
 		if (EEPROM::zProbeXY1offset() != 0.0) {
 #if DEBUG
-			Com::print("XY1 offset: ");
-			Com::printFloat(EEPROM::zProbeXY1offset(),3);
+			Com::printFLN(PSTR("XY1 offset: "),EEPROM::zProbeXY1offset());
 #endif
 			h1 += EEPROM::zProbeXY1offset();
 		}
 
 		if (EEPROM::zProbeXY2offset() != 0.0) {
 #if DEBUG
-			Com::print("XY2 offset: ");
-			Com::printFloat(EEPROM::zProbeXY2offset(),3);
+			Com::printFLN(PSTR("XY2 offset: "),EEPROM::zProbeXY2offset());
 #endif
 			h2 += EEPROM::zProbeXY2offset();
 		}
-
 		if (EEPROM::zProbeXY3offset() != 0.0) {
 #if DEBUG
-			Com::print("XY3 offset: ");
-			Com::printFloat(EEPROM::zProbeXY3offset(),3);
+			Com::printFLN(PSTR("XY3 offset: "),EEPROM::zProbeXY3offset());
 #endif
-			h3 += EEPROM::zProbeXY3offset();	
-		}
+			h3 += EEPROM::zProbeXY3offset();
+		}			
+
 #if DEBUG
-			Com::print(" h1: ");
-			Com::printFloat(h1,3);
-			Com::println();
-			Com::print(" h2: ");
-			Com::printFloat(h2,3);
-			Com::println();
-			Com::print(" h3: ");
-			Com::printFloat(h3,3);
-			Com::println();
-#endif	
+		Com::printFLN(PSTR("h1: "),h1);
+		Com::printFLN(PSTR("h2: "),h2);
+		Com::printFLN(PSTR("h3: "),h3);
+#endif	  
 #endif	
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
@@ -922,16 +913,17 @@ void Commands::processGCode(GCode *com)
                   (Printer::autolevelTransformation[1] * Printer::autolevelTransformation[3] - Printer::autolevelTransformation[0] * Printer::autolevelTransformation[4]);
         Printer::zMin = 0;
 #if DEBUG
-		Com::print("\nZ: ");
-		Com::printFloat(z,3);
-		Com::println();
+		Com::printFLN(PSTR("Z: "),z);
 #endif
 		//Parameter for compensating total height. E.g. in case of blue tape.		
 		if(com->hasI())
 			Printer::zLength += com->I;
-			
-        if(com->hasS() && com->S < 4 && com->S > 0)
-        {
+ 		//Z-length compensation. NB! Inverted contrary to I!
+ 		if (EEPROM::zProbeZOffset() != 0.0) {
+	 		Printer::zLength -= EEPROM::zProbeZOffset();
+ 		} 
+		if(com->hasS() && com->S < 4 && com->S > 0) 
+		{
 #if MAX_HARDWARE_ENDSTOP_Z
 #if DRIVE_SYSTEM == DELTA
             /* Printer::offsetX = 0;
@@ -941,9 +933,7 @@ void Commands::processGCode(GCode *com)
                  Printer::offsetX = 0;
                  Printer::offsetY = 0;*/
 #if DEBUG
-			Com::print(" Current pos. Z: ");
-			Com::printFloat(Printer::currentPosition[Z_AXIS],3);
-			Com::println();
+			Com::printFLN(PSTR(" Current pos. Z: "),Printer::currentPosition[Z_AXIS]);
 #endif
             Printer::zLength += (h3 + z) - Printer::currentPosition[Z_AXIS];					
 #else
@@ -969,7 +959,7 @@ void Commands::processGCode(GCode *com)
         }
 #if DEBUG
 		printCurrentPosition(PSTR("G32 "));
-#endif
+#endif 
         Printer::setAutolevelActive(true);
         Printer::updateDerivedParameter();
         Printer::updateCurrentPosition(true);
