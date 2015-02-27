@@ -135,7 +135,7 @@ void Lighting::SetShowType(ShowType SType)
 
 void Lighting::SetAllLeds(uint8_t r, uint8_t g, uint8_t b)
 {
-	for (int i = 0; i < LED_COUNT-1; i++)
+	for (int i = 0; i < LED_COUNT; i++)
 	{
 		SetLed(i, r, g, b);
 	}
@@ -143,7 +143,7 @@ void Lighting::SetAllLeds(uint8_t r, uint8_t g, uint8_t b)
 }
 void Lighting::SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b)
 {
-	for (int i = 0; i < LED_COUNT-1; i++)
+	for (int i = 0; i < LED_COUNT; i++)
 	{
 		if (!(i==LED_EXTRUDER))SetLed(i, r, g, b);
 	}

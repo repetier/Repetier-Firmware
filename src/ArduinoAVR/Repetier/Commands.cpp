@@ -876,26 +876,26 @@ void Commands::processGCode(GCode *com)
 			h3 += com->Z;
 		//Head slanting compensation for each measurement point
 		if (EEPROM::zProbeXY1offset() != 0.0) {
-#if DEBUG
+#if DEBUGGING
 			Com::printFLN(PSTR("XY1 offset: "),EEPROM::zProbeXY1offset());
 #endif
 			h1 += EEPROM::zProbeXY1offset();
 		}
 
 		if (EEPROM::zProbeXY2offset() != 0.0) {
-#if DEBUG
+#if DEBUGGING
 			Com::printFLN(PSTR("XY2 offset: "),EEPROM::zProbeXY2offset());
 #endif
 			h2 += EEPROM::zProbeXY2offset();
 		}
 		if (EEPROM::zProbeXY3offset() != 0.0) {
-#if DEBUG
+#if DEBUGGING
 			Com::printFLN(PSTR("XY3 offset: "),EEPROM::zProbeXY3offset());
 #endif
 			h3 += EEPROM::zProbeXY3offset();
 		}			
 
-#if DEBUG
+#if DEBUGGING
 		Com::printFLN(PSTR("h1: "),h1);
 		Com::printFLN(PSTR("h2: "),h2);
 		Com::printFLN(PSTR("h3: "),h3);
@@ -912,7 +912,7 @@ void Commands::processGCode(GCode *com)
                     (float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS]) /
                   (Printer::autolevelTransformation[1] * Printer::autolevelTransformation[3] - Printer::autolevelTransformation[0] * Printer::autolevelTransformation[4]);
         Printer::zMin = 0;
-#if DEBUG
+#if DEBUGGING
 		Com::printFLN(PSTR("Z: "),z);
 #endif
 		//Parameter for compensating total height. E.g. in case of blue tape.		
@@ -932,7 +932,7 @@ void Commands::processGCode(GCode *com)
                  PrintLine::moveRelativeDistanceInSteps(Printer::offsetX-Printer::currentPositionSteps[X_AXIS],Printer::offsetY-Printer::currentPositionSteps[Y_AXIS],0,0,Printer::homingFeedrate[X_AXIS],true,ALWAYS_CHECK_ENDSTOPS);
                  Printer::offsetX = 0;
                  Printer::offsetY = 0;*/
-#if DEBUG
+#if DEBUGGING
 			Com::printFLN(PSTR(" Current pos. Z: "),Printer::currentPosition[Z_AXIS]);
 #endif
             Printer::zLength += (h3 + z) - Printer::currentPosition[Z_AXIS];					
@@ -957,13 +957,13 @@ void Commands::processGCode(GCode *com)
             if(com->hasS() && com->S == 3)
                 EEPROM::storeDataIntoEEPROM();
         }
-#if DEBUG
+#if DEBUGGING
 		printCurrentPosition(PSTR("G32 "));
 #endif 
         Printer::setAutolevelActive(true);
         Printer::updateDerivedParameter();
         Printer::updateCurrentPosition(true);
-#if DEBUG
+#if DEBUGGING
         printCurrentPosition(PSTR("G32 "));
 #endif
 #if DRIVE_SYSTEM == DELTA

@@ -3323,14 +3323,14 @@ break;
 			oldZHeight = Printer::zLength;
 			menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
 			newZHeight = fabs(oldZHeight - Printer::zLength);
-#if DEBUG
+#if DEBUGGING
 			Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
 			Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
 			Com::printFLN(PSTR(" ABS Zh:"),newZHeight);
 #endif
 			if (newZHeight > 0.03f) {
 				menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);
-#if DEBUG
+#if DEBUGGING
 				Com::printFLN(PSTR(" New Zh2:"),Printer::zLength);
 #endif
 			}	   
