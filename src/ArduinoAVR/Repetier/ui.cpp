@@ -2875,6 +2875,9 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
 #endif
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " PLA");
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
@@ -2888,6 +2891,9 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
 #endif
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " ABS");
             break;
 		case UI_ACTION_PREHEAT_PET:
 			UI_STATUS(UI_TEXT_PREHEAT_PET);
@@ -2900,7 +2906,10 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif
 #if HAVE_HEATED_BED
 			Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PET);
-#endif
+#endif 
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " PET");			
 break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS(UI_TEXT_COOLDOWN);
@@ -2914,27 +2923,45 @@ break;
 #if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
 #endif
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
             break;
         case UI_ACTION_HEATED_BED_OFF:
 #if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
 #endif
             break;
         case UI_ACTION_EXTRUDER0_OFF:
             Extruder::setTemperatureForExtruder(0, 0);
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
             break;
         case UI_ACTION_EXTRUDER1_OFF:
 #if NUM_EXTRUDER > 1
             Extruder::setTemperatureForExtruder(0, 1);
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
 #endif
             break;
         case UI_ACTION_EXTRUDER2_OFF:
 #if NUM_EXTRUDER>2
             Extruder::setTemperatureForExtruder(0, 2);
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
 #endif
             break;
         case UI_ACTION_DISABLE_STEPPER:
             Printer::kill(true);
+			menuLevel = 0;
+			activeAction = 0;
+			UI_STATUS_UPD_RAM(UI_TEXT_DISABLE_STEPPER);
             break;
         case UI_ACTION_RESET_EXTRUDER:
             Printer::currentPositionSteps[E_AXIS] = 0;

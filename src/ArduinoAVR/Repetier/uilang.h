@@ -292,6 +292,7 @@
 #define UI_TEXT_GLUESTICK "Glue stick"
 #define UI_TEXT_RESET_MATRIX "Reset calibration"
 #define UI_TEXT_RESET_READY "Calibration has been", "reset"
+#define UI_TEXT_PREHEATING "Preheating"
 
 // *************** German translation ****************
 
