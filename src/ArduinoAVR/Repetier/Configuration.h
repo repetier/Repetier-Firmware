@@ -900,9 +900,9 @@ PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
 Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
 or 16 * (200 + (7*22=154) = 354) = 5664 bytes! !1
 min is 5 * (200 + (7*10=70) =270) = 1350
- This leaves ~1K free RAM on an Arduino which has only 8k
+ 22 leaves ~1K free RAM on an Arduino which has only 8k
 Mega. Used only for nonlinear systems like delta or tuga. */
-#define DELTASEGMENTS_PER_PRINTLINE 22
+#define DELTASEGMENTS_PER_PRINTLINE 20
 
 /** After x seconds of inactivity, the stepper motors are disabled.
     Set to 0 to leave them enabled.
@@ -1023,7 +1023,7 @@ Overridden if EEPROM activated.
 This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
-#define PRINTLINE_CACHE_SIZE 16
+#define PRINTLINE_CACHE_SIZE 14
 
 /** \brief Low filled cache size.
 
