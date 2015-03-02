@@ -253,6 +253,7 @@ FSTRINGVAR(tZProbeX3)
 FSTRINGVAR(tZProbeY3)
 FSTRINGVAR(tZProbeXY3offset)
 #endif
+FSTRINGVAR(tEPRBedLedBrightness)
 #if FEATURE_AUTOLEVEL
 FSTRINGVAR(tAutolevelActive)
 #endif

@@ -450,6 +450,7 @@ void EEPROM::initalizeUncached()
 	HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET,Z_PROBE_XY1_OFFSET);
 	HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
 	HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
+	HAL::eprSetFloat(EPR_BED_LED_BRIGHTNESS,LED_MAX_RELATIVE_BRIGHTNESS);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXY,AXISCOMP_TANXY);
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
@@ -619,16 +620,12 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetFloat(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
             HAL::eprSetFloat(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
             HAL::eprSetFloat(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
-			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
             HAL::eprSetFloat(EPR_Z_PROBE_X1,Z_PROBE_X1);
             HAL::eprSetFloat(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
             HAL::eprSetFloat(EPR_Z_PROBE_X2,Z_PROBE_X2);
             HAL::eprSetFloat(EPR_Z_PROBE_Y2,Z_PROBE_Y2);
             HAL::eprSetFloat(EPR_Z_PROBE_X3,Z_PROBE_X3);
             HAL::eprSetFloat(EPR_Z_PROBE_Y3,Z_PROBE_Y3);
-			HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET,Z_PROBE_XY1_OFFSET);
-			HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
-			HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
         }
         if(version < 4)
         {
@@ -691,6 +688,14 @@ void EEPROM::readDataFromEEPROM()
             HAL::eprSetFloat(EPR_RETRACTION_UNDO_SPEED,RETRACTION_UNDO_SPEED);
             HAL::eprSetByte(EPR_AUTORETRACT_ENABLED,AUTORETRACT_ENABLED);
         }
+		
+		if(version < 13) {
+			HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET,Z_PROBE_XY1_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
+			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
+			HAL::eprSetFloat(EPR_BED_LED_BRIGHTNESS,LED_MAX_RELATIVE_BRIGHTNESS);
+		}
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to verion 8, the cartesian max was stored in the zmax
@@ -897,6 +902,7 @@ void EEPROM::writeSettings()
 
 #if HAVE_HEATED_BED
     writeByte(EPR_BED_HEAT_MANAGER, Com::tEPRBedHeatManager);
+	writeFloat(EPR_BED_LED_BRIGHTNESS, Com::tEPRBedLedBrightness);
 #if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX, Com::tEPRBedPIDDriveMax);
     writeByte(EPR_BED_DRIVE_MIN, Com::tEPRBedPIDDriveMin);

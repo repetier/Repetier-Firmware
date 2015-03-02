@@ -21,6 +21,11 @@ void Lighting::init()
 	//smooth fade in to blue to avoid instant turn-on. total time of this blocking code is 250ms. worth it.
 	//slower/longer fade would cause problems to boot and/or connect host software
 	SetAllLeds(0, 0, 0);
+	if (EEPROM_MODE > 0)
+		LedBrightness = EEPROM::bedLedBrightness();
+	else
+		LedBrightness = LED_MAX_RELATIVE_BRIGHTNESS;
+	if (LedBrightness>0.0)
 	for (int i = 0; i < 255; i++)
 	{
 		SetAllLeds(0, 0, i);
@@ -73,8 +78,12 @@ void Lighting::loop()
 		return;
 	}
 	///===
-
-	if (!(LED_MAX_RELATIVE_BRIGHTNESS>0)) //avoid processing if relative brightness set to 0
+	if (EEPROM_MODE > 0)
+		LedBrightness = EEPROM::bedLedBrightness();
+	else
+		LedBrightness = LED_MAX_RELATIVE_BRIGHTNESS;
+		
+	if (!(LedBrightness>0.0)) //avoid processing if relative brightness set to 0
 	{
 		SetAllLeds(0, 0, 0);
 		return;
@@ -153,9 +162,9 @@ void Lighting::SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b)
 void Lighting::SetLed(uint8_t i, uint8_t r, uint8_t g, uint8_t b)
 {
 	LED.set_crgb_at(i,
-		r*LED_MAX_RELATIVE_BRIGHTNESS,
-		g*LED_MAX_RELATIVE_BRIGHTNESS,
-		b*LED_MAX_RELATIVE_BRIGHTNESS);
+		r*LedBrightness,
+		g*LedBrightness,
+		b*LedBrightness);
 }
 void Lighting::SetLedInstantly(uint8_t i, uint8_t r, uint8_t g, uint8_t b)
 {

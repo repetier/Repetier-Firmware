@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 13
+#define EEPROM_PROTOCOL_VERSION 14
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -167,6 +167,7 @@ have problems with other modules using the eeprom */
 #define EPR_Z_PROBE_XY1_OFFSET		   3222
 #define EPR_Z_PROBE_XY2_OFFSET		   3226
 #define EPR_Z_PROBE_XY3_OFFSET		   3230
+#define EPR_BED_LED_BRIGHTNESS		   3234
 
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 5.0
@@ -307,6 +308,13 @@ public:
 	    return EPR_Z_PROBE_XY3_OFFSET;
 #endif
     }
+	static inline float bedLedBrightness() {
+#if EEPROM_MODE != 0
+		return HAL::eprGetFloat(EPR_BED_LED_BRIGHTNESS);
+#else
+		return EPR_BED_LED_BRIGHTNESS;
+#endif
+	}
     static inline float zProbeBedDistance() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_Z_PROBE_BED_DISTANCE);

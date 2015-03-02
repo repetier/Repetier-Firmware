@@ -1389,7 +1389,8 @@ Select the language to use.
 #define FIRMWARE_VERSION "1.1.1"
 
 
-#define DEBUGGING true
+#define DEBUGGING false
+#define LED_MAX_RELATIVE_BRIGHTNESS 0.25
 
 /** Animate switches between menus etc. */
 #define UI_ANIMATION 0

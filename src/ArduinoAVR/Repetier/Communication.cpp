@@ -304,6 +304,7 @@ FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max printable radius [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA,"Corr. diagonal A [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB,"Corr. diagonal B [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
+FSTRINGVALUE(Com::tEPRBedLedBrightness,"Bed LED brightness [0.0-1.0]")
 
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
