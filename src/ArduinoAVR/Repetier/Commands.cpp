@@ -846,11 +846,12 @@ void Commands::processGCode(GCode *com)
 		}
 #endif
 #if DRIVE_SYSTEM == DELTA
-        // It is not possible to go to the edges at the top, also users try
+        EEPROM::readDataFromEEPROM();
+		// It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
         // For that reason we ensure a correct behaviour by code.
         Printer::homeAxis(true, true, true);
-        Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+        Printer::moveTo(0, 0, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #endif
         GCode::executeFString(Com::tZProbeStartScript);
         //bool iterate = com->hasP() && com->P>0;
@@ -920,7 +921,7 @@ void Commands::processGCode(GCode *com)
 			Printer::zLength += com->I;
  		//Z-length compensation. NB! Inverted contrary to I!
  		if (EEPROM::zProbeZOffset() != 0.0) {
-	 		Printer::zLength -= EEPROM::zProbeZOffset();
+	 		h3 -= EEPROM::zProbeZOffset();
  		} 
 		if(com->hasS() && com->S < 4 && com->S > 0) 
 		{
@@ -935,7 +936,10 @@ void Commands::processGCode(GCode *com)
 #if DEBUGGING
 			Com::printFLN(PSTR(" Current pos. Z: "),Printer::currentPosition[Z_AXIS]);
 #endif
-            Printer::zLength += (h3 + z) - Printer::currentPosition[Z_AXIS];					
+			float tempfl = Printer::currentPosition[Z_AXIS];
+			if (EEPROM::zProbeXY3offset() != 0.0)
+				tempfl += EEPROM::zProbeXY3offset();
+            Printer::zLength += (h3 + z) - tempfl;					
 #else
             int32_t zBottom = Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
             Printer::zLength = Printer::runZMaxProbe() + zBottom * Printer::invAxisStepsPerMM[Z_AXIS] - ENDSTOP_Z_BACK_ON_HOME;
