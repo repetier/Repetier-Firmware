@@ -106,7 +106,7 @@
 #define UI_TEXT_NOSDCARD         "No SD Card"
 #define UI_TEXT_ERROR            "**** ERROR ****"
 #define UI_TEXT_BACK             "Back " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
+#define UI_TEXT_QUICK_SETTINGS   "Control"
 #define UI_TEXT_CONFIGURATION    "Configuration"
 #define UI_TEXT_POSITION         "Position"
 #define UI_TEXT_EXTRUDER         "Extruder"
@@ -293,6 +293,9 @@
 #define UI_TEXT_RESET_MATRIX "Reset calibration"
 #define UI_TEXT_RESET_READY "Calibration has been", "reset"
 #define UI_TEXT_PREHEATING "Preheating"
+#define UI_TEXT_PREHEAT "Preheat"
+#define UI_TEXT_CONTROL "Control"
+#define UI_TEXT_PERFORM "Perform"
 
 // *************** German translation ****************
 

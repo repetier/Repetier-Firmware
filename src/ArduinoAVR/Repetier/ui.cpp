@@ -2354,21 +2354,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #endif
 
 #if UI_HAS_KEYS == 1
-    if(menuLevel == 0)
-    {
-        lastSwitch = HAL::timeInMilliseconds();
-        if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
-        {
-            menuPos[0]++;
-            if(menuPos[0] >= UI_NUM_PAGES)
-                menuPos[0] = 0;
-        }
-        else
-        {
-            menuPos[0] = (menuPos[0] == 0 ? UI_NUM_PAGES - 1 : menuPos[0] - 1);
-        }
-        return true;
-    }
     UIMenu *men = (UIMenu*)menu[menuLevel];
     uint8_t nr = pgm_read_word_near(&(men->numEntries));
     uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType));
@@ -2378,6 +2363,23 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
     uint8_t entType = HAL::readFlashByte((PGM_P)&(ent->menuType));
     int action = pgm_read_word(&(ent->action));
+	if(menuLevel == 0)
+	{
+		lastSwitch = HAL::timeInMilliseconds();
+		if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
+		{
+			//menuPos[0]++;
+			pushMenu(&ui_menu_perform, false);
+			/*if(menuPos[0] >= UI_NUM_PAGES)
+				menuPos[0] = 0;*/
+		}
+		else
+		{
+			pushMenu(&ui_menu_quick, false);
+			//menuPos[0] = (menuPos[0] == 0 ? UI_NUM_PAGES - 1 : menuPos[0] - 1);
+		}
+		return true;
+	}
     if(mtype == UI_MENU_TYPE_SUBMENU && activeAction == 0)   // browse through menu items
     {
         if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
@@ -2781,7 +2783,11 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_BACK:
             if(uid.isWizardActive()) break; // wizards can not exit before finished
-            popMenu(false);
+			if(menuLevel == 0)
+			{
+				pushMenu(&ui_menu_preheat, false);
+			} else
+				popMenu(false);
             break;
         case UI_ACTION_NEXT:
             if(!nextPreviousAction(1, allowMoves))

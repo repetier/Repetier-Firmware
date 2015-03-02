@@ -207,14 +207,14 @@ for 2 row displays. You can add additional pages or change the default pages lik
    #endif
    "Mul:%om       E:%x4m", "Buf:%oB", "%os")
 
-  #if EEPROM_MODE != 0
+ /* #if EEPROM_MODE != 0
     UI_PAGE4(ui_page2,UI_TEXT_PRINT_TIME,"%Ut",UI_TEXT_PRINT_FILAMENT,"%Uf m")
     #define UI_PRINTTIME_PAGES ,&ui_page2
     #define UI_PRINTTIME_COUNT 1
-  #else
+  #else		*/
     #define UI_PRINTTIME_PAGES
     #define UI_PRINTTIME_COUNT 0
-  #endif
+  //#endif
   /*
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
@@ -295,7 +295,7 @@ Merge pages together. Use the following pattern:
 */
 #define UI_PAGES {&ui_page1,&ui_page2,&ui_page3}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3
+#define UI_NUM_PAGES 1
 #endif
 /* ============ MENU definition ================
 
@@ -479,7 +479,24 @@ UI_MENU_ACTIONCOMMAND(ui_menu_ext_origin,UI_TEXT_EXTR_ORIGIN,UI_ACTION_RESET_EXT
 #define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &ui_menu_go_epos}	//Removed "Set Origin"
 UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU_EXTCNT+1)
 
-// **** SD card menu
+// **** Fan menu
+
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+UI_MENU_CHANGEACTION(ui_menu_fan_fanspeed, UI_TEXT_ACTION_FANSPEED,UI_ACTION_FANSPEED)
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_fan_off,UI_TEXT_FAN_OFF,UI_ACTION_FAN_OFF,MENU_MODE_FAN_RUNNING,0)
+UI_MENU_ACTIONCOMMAND(ui_menu_fan_25,UI_TEXT_FAN_25,UI_ACTION_FAN_25)
+UI_MENU_ACTIONCOMMAND(ui_menu_fan_50,UI_TEXT_FAN_50,UI_ACTION_FAN_50)
+UI_MENU_ACTIONCOMMAND(ui_menu_fan_75,UI_TEXT_FAN_75,UI_ACTION_FAN_75)
+UI_MENU_ACTIONCOMMAND(ui_menu_fan_full,UI_TEXT_FAN_FULL,UI_ACTION_FAN_FULL)
+#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full}
+UI_MENU(ui_menu_fan,UI_MENU_FAN,6+UI_MENU_BACKCNT)
+UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan)
+#define UI_MENU_FAN_COND &ui_menu_fan_sub,
+#define UI_MENU_FAN_CNT 1
+#else
+#define UI_MENU_FAN_COND
+#define UI_MENU_FAN_CNT 0
+#endif
 
 // **** Quick menu
 #if PS_ON_PIN > -1
@@ -531,27 +548,15 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT,UI_ACTION_
 #define UI_CHANGE_FIL_ENT
 #endif
 
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_CHANGE_FIL_ENT,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_preheat_pet,&ui_menu_quick_cooldown,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
-UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+BABY_CNT+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT+UI_CHANGE_FIL_CNT)
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply, &ui_menu_fan_fanspeed, &ui_menu_ext_temp0, &ui_menu_bed_temp UI_TOOGLE_LIGHT_ENTRY UI_CHANGE_FIL_ENT,&ui_menu_quick_cooldown MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
+UI_MENU(ui_menu_quick,UI_MENU_QUICK,6+BABY_CNT+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT+UI_CHANGE_FIL_CNT)
 
-// **** Fan menu
+#define UI_MENU_PREHEAT {UI_MENU_ADDCONDBACK &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_preheat_pet,&ui_menu_quick_cooldown}
+UI_MENU(ui_menu_preheat,UI_MENU_PREHEAT,4+UI_MENU_BACKCNT)
 
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-UI_MENU_CHANGEACTION(ui_menu_fan_fanspeed, UI_TEXT_ACTION_FANSPEED,UI_ACTION_FANSPEED)
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_fan_off,UI_TEXT_FAN_OFF,UI_ACTION_FAN_OFF,MENU_MODE_FAN_RUNNING,0)
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_25,UI_TEXT_FAN_25,UI_ACTION_FAN_25)
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_50,UI_TEXT_FAN_50,UI_ACTION_FAN_50)
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_75,UI_TEXT_FAN_75,UI_ACTION_FAN_75)
-UI_MENU_ACTIONCOMMAND(ui_menu_fan_full,UI_TEXT_FAN_FULL,UI_ACTION_FAN_FULL)
-#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full}
-UI_MENU(ui_menu_fan,UI_MENU_FAN,6+UI_MENU_BACKCNT)
-UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan)
-#define UI_MENU_FAN_COND &ui_menu_fan_sub,
-#define UI_MENU_FAN_CNT 1
-#else
-#define UI_MENU_FAN_COND
-#define UI_MENU_FAN_CNT 0
-#endif
+#define UI_MENU_PERFORM {UI_MENU_ADDCONDBACK &ui_menu_home_all, &ui_menu_quick_changefil,&ui_menu_quick_stopstepper,&ui_menu_go_epos}
+UI_MENU(ui_menu_perform,UI_MENU_PERFORM,4+UI_MENU_BACKCNT)
+
 
 // **** SD card menu
 
@@ -762,13 +767,15 @@ UI_MENU_ACTION2C(ui_menu_verifying, UI_ACTION_DUMMY, UI_TEXT_VERIFYING)
 //#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
 //UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
 // Main menu
-UI_MENU_SUBMENU(ui_menu_main1, UI_TEXT_QUICK_SETTINGS,ui_menu_quick)
+UI_MENU_SUBMENU(ui_menu_main1, UI_TEXT_CONTROL,ui_menu_quick)
+UI_MENU_SUBMENU(ui_menu_preheat_sub, UI_TEXT_PREHEAT,ui_menu_preheat)
+UI_MENU_SUBMENU(ui_menu_perform_sub, UI_TEXT_PERFORM,ui_menu_perform)
 //UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY UI_MENU_SD_COND &ui_menu_main3, UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration }
-UI_MENU(ui_menu_main,UI_MENU_MAIN,4+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND &ui_menu_main3, UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration }
+UI_MENU(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands
 
