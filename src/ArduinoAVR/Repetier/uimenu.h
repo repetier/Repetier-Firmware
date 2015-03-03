@@ -564,13 +564,15 @@ UI_MENU_SUBMENU(ui_menu_preheat_cust_sub, UI_TEXT_PREHEAT " " UI_TEXT_CUSTOM ,ui
 #define UI_MENU_PREHEAT {UI_MENU_ADDCONDBACK &ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_preheat_pet,&ui_menu_preheat_cust_sub,&ui_menu_quick_cooldown}
 UI_MENU(ui_menu_preheat,UI_MENU_PREHEAT,5+UI_MENU_BACKCNT)
 
-//Utilities menu
-#define UI_MENU_PERFORM {UI_MENU_ADDCONDBACK &ui_menu_home_all, &ui_menu_quick_changefil,&ui_menu_quick_stopstepper,&ui_menu_go_epos,&ui_menu_quick_cooldown}
-UI_MENU(ui_menu_perform,UI_MENU_PERFORM,5+UI_MENU_BACKCNT)
-
 //Bed LED brightness menu
 #define UI_MENU_BEDLED {UI_MENU_ADDCONDBACK &ui_menu_led_brightness}
 UI_MENU(ui_menu_bed_led,UI_MENU_BEDLED,1+UI_MENU_BACKCNT)
+UI_MENU_SUBMENU(ui_menu_bed_led_sub, UI_TEXT_BED_LEDS ,ui_menu_bed_led)
+
+//Utilities/perform menu
+#define UI_MENU_PERFORM {UI_MENU_ADDCONDBACK &ui_menu_home_all, &ui_menu_quick_changefil,&ui_menu_quick_stopstepper,&ui_menu_go_epos,&ui_menu_quick_cooldown, &ui_menu_led_brightness }
+UI_MENU(ui_menu_perform,UI_MENU_PERFORM,6+UI_MENU_BACKCNT)
+
 
 // **** SD card menu
 
@@ -779,6 +781,7 @@ UI_MENU_ACTION2C(ui_menu_reset_action, UI_ACTION_DUMMY, UI_TEXT_RESET_READY)
 UI_MENU_ACTION2C(ui_menu_probing, UI_ACTION_DUMMY, UI_TEXT_CALIBRATING)
 UI_MENU_ACTION2C(ui_menu_verifying, UI_ACTION_DUMMY, UI_TEXT_VERIFYING)
 UI_MENU_ACTION2C(ui_menu_avoid, UI_ACTION_DUMMY, UI_TEXT_AVOID)
+UI_MENU_ACTION2C(ui_menu_avoid_hot, UI_ACTION_DUMMY, UI_TEXT_AVOID_HOT)
 
 //#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
 //UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
@@ -789,11 +792,11 @@ UI_MENU_SUBMENU(ui_menu_perform_sub, UI_TEXT_PERFORM,ui_menu_perform)
 //UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 //UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 UI_MENU_SUBMENU(ui_menu_about_sub, UI_TEXT_ABOUT,ui_page_about)
-UI_MENU_SUBMENU(ui_menu_bed_led_sub, UI_TEXT_BED_LEDS,ui_menu_bed_led)
+//UI_MENU_SUBMENU(ui_menu_bed_led_sub, UI_TEXT_BED_LEDS,ui_menu_bed_led)
 
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration, &ui_menu_bed_led_sub, &ui_menu_about_sub }
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration, &ui_menu_about_sub }
 UI_MENU(ui_menu_main,UI_MENU_MAIN,7+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands

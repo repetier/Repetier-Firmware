@@ -2512,12 +2512,12 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         break;
     case UI_ACTION_EPOSITION:
         if(!allowMoves) return false;
-        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
+        PrintLine::moveRelativeDistanceInSteps(0,0,0,Printer::axisStepsPerMM[E_AXIS]*increment*(-1) / Printer::extrusionFactor,UI_SET_EXTRUDER_FEEDRATE,true,false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_EPOSITION "));
         break;
 #if FEATURE_RETRACTION
     case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
-        Extruder::current->retractDistance(-increment);
+        Extruder::current->retractDistance(increment);
         Commands::waitUntilEndOfAllMoves();
         Extruder::current->disableCurrentExtruderMotor();
         break;
@@ -3389,6 +3389,8 @@ break;
 		case UI_ACTION_CALIBRATE:
 			if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || !allowMoves || PrintLine::hasLines())
 				pushMenu(&ui_menu_avoid, false);
+			else if (heatedBedController.targetTemperatureC > 35.0 || extruder[0].tempControl.currentTemperatureC > 40.0) 
+				pushMenu(&ui_menu_avoid_hot, false);
 			else {
 				oldZHeight = Printer::zLength;
 				menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
