@@ -44,6 +44,7 @@ public:
     static void emergencyStop();
     static void checkFreeMemory();
     static void writeLowestFreeRAM();
+	static void setBedLed(int light);
 private:
     static int lowestRAMValue;
     static int lowestRAMValueSend;

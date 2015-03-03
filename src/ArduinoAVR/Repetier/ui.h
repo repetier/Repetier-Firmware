@@ -192,6 +192,7 @@ What display type do you use?
 #define UI_ACTION_GLUESTICK				1918
 #define UI_ACTION_RESET_MATRIX			1919
 #define UI_ACTION_CALIBRATE				1920
+#define UI_ACTION_BED_LED_CHANGE		1921
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001

@@ -1316,6 +1316,11 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            addInt(EEPROM::PrinterId(), 5);
 	            break;
             }
+			if(c2=='L')	 //Bed LED brightness
+			{
+				addInt((int)(Light.LedBrightness*100.0), 3);
+				break;
+			}
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
             if(c2 == 'S')
             {
@@ -2590,6 +2595,13 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         INCREMENT_MIN_MAX(fr,1,25,500);
         Commands::changeFeedrateMultiply(fr);
     }
+	//Set bed LED brightness
+	case UI_ACTION_BED_LED_CHANGE:
+	{
+		int bl = (int)(Light.LedBrightness*100.0);
+		INCREMENT_MIN_MAX(bl,1,0,100);
+		Commands::setBedLed(bl);
+	}
     break;
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {

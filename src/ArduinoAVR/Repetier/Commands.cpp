@@ -245,6 +245,11 @@ void Commands::setFanSpeed(int speed,bool wait)
 #endif
 }
 
+void Commands::setBedLed(int light)
+{
+	Light.LedBrightness = (float)(light/100.0);
+}
+
 void Commands::reportPrinterUsage()
 {
 #if EEPROM_MODE != 0

@@ -1,5 +1,6 @@
 #include "Lighting.h"
 #include "Extruder.h"
+#include "Printer.h"
 
 Lighting::Lighting()
 {
@@ -78,17 +79,19 @@ void Lighting::loop()
 		return;
 	}
 	///===
-	if (EEPROM_MODE > 0)
-		LedBrightness = EEPROM::bedLedBrightness();
-	else
-		LedBrightness = LED_MAX_RELATIVE_BRIGHTNESS;
-		
+	
+	//Update EEPROM
+	if (LedBrightness != EEPROM::bedLedBrightness())
+	HAL::eprSetFloat(EPR_BED_LED_BRIGHTNESS, LedBrightness);
+	
 	if (!(LedBrightness>0.0)) //avoid processing if relative brightness set to 0
 	{
 		SetAllLeds(0, 0, 0);
 		return;
-	}
-
+	}	
+	//Avoid interruptions
+	Printer::setZProbingActive(true);
+		
 	SetShowType(ShowTemperatures); //temorary - to test bed heating with leds
 	
 	switch (CurrentShow) {
@@ -108,6 +111,7 @@ void Lighting::loop()
 		ShowTemps();
 		break;
 	}
+	Printer::setZProbingActive(false);
 }
 void Lighting::ShowTemps()
 {

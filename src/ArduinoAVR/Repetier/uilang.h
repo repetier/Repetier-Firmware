@@ -298,6 +298,8 @@
 #define UI_TEXT_PERFORM "Perform"
 #define UI_TEXT_ABOUT "About"
 #define UI_TEXT_AVOID "Please stop printing", "before this action"
+#define UI_TEXT_BED_LED_BRIGHTNESS "Bed LED : %oL%%%"
+#define UI_TEXT_BED_LEDS "Bed LEDs"
 
 // *************** German translation ****************
 
