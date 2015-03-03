@@ -296,6 +296,8 @@
 #define UI_TEXT_PREHEAT "Preheat"
 #define UI_TEXT_CONTROL "Control"
 #define UI_TEXT_PERFORM "Perform"
+#define UI_TEXT_ABOUT "About"
+#define UI_TEXT_AVOID "Please stop printing", "before this action"
 
 // *************** German translation ****************
 

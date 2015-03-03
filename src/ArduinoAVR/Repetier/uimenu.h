@@ -750,6 +750,7 @@ UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_ZCALIB, ui_menu_delta)
 #define UI_MENU_DELTA_CNT 0
 #endif
 
+UI_PAGE4(ui_page_about,UI_PRINTER_NAME,"by " UI_PRINTER_COMPANY,"HW: " HARDWARE_VERSION " ID: %oI","FW ver.: " FIRMWARE_VERSION)
 
 UI_MENU_SUBMENU(ui_menu_prepare, UI_TEXT_BED_COATING, ui_menu_adjust)
 UI_MENU_ACTION2C(ui_menu_nocoating_action,  UI_ACTION_DUMMY,UI_TEXT_BED_COATING_SET UI_TEXT_NOCOATING )
@@ -763,6 +764,7 @@ UI_MENU_ACTION2C(ui_menu_calibrate_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED)
 UI_MENU_ACTION2C(ui_menu_reset_action, UI_ACTION_DUMMY, UI_TEXT_RESET_READY)
 UI_MENU_ACTION2C(ui_menu_probing, UI_ACTION_DUMMY, UI_TEXT_CALIBRATING)
 UI_MENU_ACTION2C(ui_menu_verifying, UI_ACTION_DUMMY, UI_TEXT_VERIFYING)
+UI_MENU_ACTION2C(ui_menu_avoid, UI_ACTION_DUMMY, UI_TEXT_AVOID)
 
 //#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
 //UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
@@ -772,10 +774,11 @@ UI_MENU_SUBMENU(ui_menu_preheat_sub, UI_TEXT_PREHEAT,ui_menu_preheat)
 UI_MENU_SUBMENU(ui_menu_perform_sub, UI_TEXT_PERFORM,ui_menu_perform)
 //UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
+UI_MENU_SUBMENU(ui_menu_about_sub, UI_TEXT_ABOUT,ui_page_about)
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND &ui_menu_main3, UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration }
-UI_MENU(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND &ui_menu_main3, UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration, &ui_menu_about_sub }
+UI_MENU(ui_menu_main,UI_MENU_MAIN,7+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands
 

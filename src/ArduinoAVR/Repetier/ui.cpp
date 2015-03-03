@@ -1311,6 +1311,11 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addInt(Extruder::current->id + 1, 1);
                 break;
             }
+            if(c2 == 'I')
+            {
+	            addInt(EEPROM::PrinterId(), 5);
+	            break;
+            }
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
             if(c2 == 'S')
             {
@@ -3052,7 +3057,11 @@ break;
             else sd.stopPrint();
             break;
         case UI_ACTION_SD_UNMOUNT:
-            sd.unmount();
+			if (Printer::isMenuMode(MENU_MODE_SD_PRINTING))
+				pushMenu(&ui_menu_avoid, false);
+			else {
+				sd.unmount();
+			}
             break;
         case UI_ACTION_SD_MOUNT:
             sd.mount();
@@ -3353,22 +3362,26 @@ break;
 		    //Com::printFLN(PSTR("RequestPause:"));	.
             break;
 		case UI_ACTION_CALIBRATE:
-			oldZHeight = Printer::zLength;
-			menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
-			newZHeight = fabs(oldZHeight - Printer::zLength);
+			if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || !allowMoves || PrintLine::hasLines())
+				pushMenu(&ui_menu_avoid, false);
+			else {
+				oldZHeight = Printer::zLength;
+				menuCommand(&ui_menu_probing, &ui_menu_calibrate_action,Com::tProbeActionScript);
+				newZHeight = fabs(oldZHeight - Printer::zLength);
 #if DEBUGGING
-			Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
-			Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
-			Com::printFLN(PSTR(" ABS Zh:"),newZHeight);
+				Com::printFLN(PSTR(" Old Zh:"),oldZHeight);
+				Com::printFLN(PSTR(" New Zh:"),Printer::zLength);
+				Com::printFLN(PSTR(" ABS Zh:"),newZHeight);
 #endif
-			if (newZHeight > 0.03f) {
-				menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);
+				if (newZHeight > 0.03f) {
+					menuCommand(&ui_menu_verifying, &ui_menu_calibrate_action,Com::tProbeActionScript);
 #if DEBUGGING
 				Com::printFLN(PSTR(" New Zh2:"),Printer::zLength);
 #endif
+				}
 			}	   
 			break;			
-		case UI_ACTION_NOCOATING:
+		case UI_ACTION_NOCOATING:	
 			menuAdjustHeight(&ui_menu_nocoating_action,0);
 			break;
 		case UI_ACTION_KAPTON:
@@ -3635,30 +3648,34 @@ void UIDisplay::menuCommand(const UIMenu *doing,const UIMenu *men,FSTRINGPARAM(c
 }
 
 void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
-	//If there is something to change
-	if (EEPROM::zProbeZOffset()!=offset) {
-		//If the offset has been previously set, reset the height
-		if (EEPROM::zProbeZOffset()!=0.0)
-			Printer::zLength += EEPROM::zProbeZOffset();
-		//Subtract the new offset (if any)
-		if (offset!=0.0)
-			Printer::zLength -= offset;
-		//Set the new offset
-		HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, offset);
-		HAL::eprSetFloat(EPR_Z_LENGTH, Printer::zLength);
-		Com::print("\nThe new zLength: ");
-		Com::printFloat(Printer::zLength, 4);
-		EEPROM::storeDataIntoEEPROM(false);
-		Com::print(" has been stored into EEPROM.\n");
+	if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || PrintLine::hasLines())
+		pushMenu(&ui_menu_avoid, false);
+	else {
+		//If there is something to change
+		if (EEPROM::zProbeZOffset()!=offset) {
+			//If the offset has been previously set, reset the height
+			if (EEPROM::zProbeZOffset()!=0.0)
+				Printer::zLength += EEPROM::zProbeZOffset();
+			//Subtract the new offset (if any)
+			if (offset!=0.0)
+				Printer::zLength -= offset;
+			//Set the new offset
+			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, offset);
+			HAL::eprSetFloat(EPR_Z_LENGTH, Printer::zLength);
+			Com::print("\nThe new zLength: ");
+			Com::printFloat(Printer::zLength, 4);
+			EEPROM::storeDataIntoEEPROM(false);
+			Com::print(" has been stored into EEPROM.\n");
+		}
+		//Display message
+		pushMenu(men, false);
+		BEEP_SHORT;	
+		Printer::homeAxis(true, true, true);
+		Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
+		menuLevel = 0;
+		activeAction = 0;
+		UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
 	}
-	//Display message
-	pushMenu(men, false);
-	BEEP_SHORT;	
-	Printer::homeAxis(true, true, true);
-	Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
-	menuLevel = 0;
-	activeAction = 0;
-	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY);
 }
 
 #endif
