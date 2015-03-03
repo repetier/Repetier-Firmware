@@ -2568,6 +2568,10 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
         else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
         Extruder::setHeatedBedTemperature(tmp);
+		if (tmp > 0)
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING)
+		else
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY)
     }
 #endif
     break;
@@ -2587,6 +2591,10 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
                 if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = 0;
                 else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
         Extruder::setTemperatureForExtruder(tmp, action - UI_ACTION_EXTRUDER0_TEMP);
+		if (tmp > 0)
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING)
+		else
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY)
             }
             break;
     case UI_ACTION_FEEDRATE_MULTIPLY:
@@ -2900,7 +2908,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " PLA");
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_PLA);
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
@@ -2916,7 +2924,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " ABS");
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_ABS);
             break;
 		case UI_ACTION_PREHEAT_PET:
 			UI_STATUS(UI_TEXT_PREHEAT_PET);
@@ -2932,7 +2940,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif 
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " PET");			
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_PET);			
 break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS(UI_TEXT_COOLDOWN);
@@ -2984,7 +2992,7 @@ break;
             Printer::kill(true);
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(UI_TEXT_DISABLE_STEPPER);
+			UI_STATUS_UPD_RAM(UI_TEXT_STEPPER_DISABLED);
             break;
         case UI_ACTION_RESET_EXTRUDER:
             Printer::currentPositionSteps[E_AXIS] = 0;
@@ -3079,7 +3087,12 @@ break;
             sd.mount();
             break;
         case UI_ACTION_MENU_SDCARD:
-            pushMenu(&ui_menu_sd, false);
+			if (menuLevel == 0)
+				pushMenu(&ui_menu_sd, false);
+			else {
+				ret = okAction(allowMoves);
+				skipBeep = true; // Prevent double beep
+			}
             break;
 #endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
