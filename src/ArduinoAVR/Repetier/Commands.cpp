@@ -76,8 +76,9 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     if(!executePeriodical) return;
     executePeriodical = 0;
     Extruder::manageTemperatures();
+#if BED_LEDS
 	Light.loop();
-
+#endif
     if(--counter250ms == 0)
     {
         if(manageMonitor <= 1 + NUM_EXTRUDER)
@@ -2032,7 +2033,9 @@ void Commands::processMCode(GCode *com)
 		Com::print("PRINTER_ID: ");			Com::print((int)Printer::PrinterId);	Com::println();
 		break;
 	case 890://M890 factory led test
+#if BED_LEDS
 		Light.factoryTest();
+#endif
 		break;
     case 908: // M908 Control digital trimpot directly.
     {

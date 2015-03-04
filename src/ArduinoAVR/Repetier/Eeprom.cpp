@@ -497,6 +497,9 @@ void EEPROM::readDataFromEEPROM()
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
+#if BED_LEDS
+	Light.LedBrightness = HAL::eprGetFloat(EPR_BED_LED_BRIGHTNESS);
+#endif
 //#define EPR_ACCELERATION_TYPE 1
 	Printer::PrinterId = HAL::eprGetInt32(EPR_PRINTER_ID);
     Printer::axisStepsPerMM[X_AXIS] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
@@ -694,6 +697,8 @@ void EEPROM::readDataFromEEPROM()
 			HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET,Z_PROBE_XY2_OFFSET);
 			HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET,Z_PROBE_XY3_OFFSET);
 			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
+		}
+		if(version < 14) {
 			HAL::eprSetFloat(EPR_BED_LED_BRIGHTNESS,LED_MAX_RELATIVE_BRIGHTNESS);
 		}
         /*        if (version<8) {
