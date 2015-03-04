@@ -75,11 +75,12 @@ void Lighting::loop()
 
 	if (LastPositionHash != Printer::stepNumber)//do not update leds if there has been any head movement since last loop
 	{
-		LastPositionHash != Printer::stepNumber;
+		LastPositionHash = Printer::stepNumber;
 		return;
 	}
 	///===
-	
+	if (Printer::isZProbingActive())
+		return;
 	//Update EEPROM
 	if (LedBrightness != EEPROM::bedLedBrightness())
 	HAL::eprSetFloat(EPR_BED_LED_BRIGHTNESS, LedBrightness);
