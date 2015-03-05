@@ -59,7 +59,7 @@ uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 
 #if FEATURE_AUTOLEVEL
-float Printer::autolevelTransformation[9]; ///< Transformation matrix
+double Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
 unsigned long Printer::interval;           ///< Last step duration in ticks.
 unsigned long Printer::timer;              ///< used for acceleration/deceleration timing
@@ -1372,17 +1372,17 @@ void Printer::resetTransformationMatrix(bool silent)
 
 void Printer::buildTransformationMatrix(float h1,float h2,float h3)
 {
-    float ax = EEPROM::zProbeX2()-EEPROM::zProbeX1();
-    float ay = EEPROM::zProbeY2()-EEPROM::zProbeY1();
-    float az = h1-h2;
-    float bx = EEPROM::zProbeX3()-EEPROM::zProbeX1();
-    float by = EEPROM::zProbeY3()-EEPROM::zProbeY1();
-    float bz = h1-h3;
+    double ax = EEPROM::zProbeX2()-EEPROM::zProbeX1();
+    double ay = EEPROM::zProbeY2()-EEPROM::zProbeY1();
+    double az = h1-h2;
+    double bx = EEPROM::zProbeX3()-EEPROM::zProbeX1();
+    double by = EEPROM::zProbeY3()-EEPROM::zProbeY1();
+    double bz = h1-h3;
     // First z direction
     autolevelTransformation[6] = ay*bz-az*by;
     autolevelTransformation[7] = az*bx-ax*bz;
     autolevelTransformation[8] = ax*by-ay*bx;
-    float len = sqrt(autolevelTransformation[6]*autolevelTransformation[6]+autolevelTransformation[7]*autolevelTransformation[7]+autolevelTransformation[8]*autolevelTransformation[8]);
+    double len = sqrt(autolevelTransformation[6]*autolevelTransformation[6]+autolevelTransformation[7]*autolevelTransformation[7]+autolevelTransformation[8]*autolevelTransformation[8]);
     if(autolevelTransformation[8]<0) len = -len;
     autolevelTransformation[6] /= len;
     autolevelTransformation[7] /= len;

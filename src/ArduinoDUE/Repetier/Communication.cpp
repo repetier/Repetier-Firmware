@@ -476,6 +476,12 @@ void Com::printArrayFLN(FSTRINGPARAM(text),float *arr,uint8_t n,uint8_t digits) 
         printF(Com::tSpace,arr[i],digits);
     println();
 }
+void Com::printArrayFLN(FSTRINGPARAM(text),double *arr,uint8_t n,uint8_t digits) {
+    printF(text);
+    for(uint8_t i=0; i<n; i++)
+        printF(Com::tSpace,arr[i],digits);
+    println();
+}
 void Com::printArrayFLN(FSTRINGPARAM(text),int32_t *arr,uint8_t n) {
     printF(text);
     for(uint8_t i=0; i<n; i++)
