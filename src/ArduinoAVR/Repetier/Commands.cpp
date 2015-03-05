@@ -1595,7 +1595,9 @@ void Commands::processMCode(GCode *com)
         Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
         Printer::kill(false);
         HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
-        InterruptProtectedBlock noInts;
+#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)		
+        InterruptProtectedBlock noInts;			// don't disable interrupts on mega2560 and mega1280 because of bootloader bug
+#endif		
         while(1) {} // Endless loop
     }
 #else
@@ -1878,29 +1880,29 @@ void Commands::emergencyStop()
     Extruder::manageTemperatures();
     for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
         pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN>-1
+#if EXT0_HEATER_PIN > -1
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
-    WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+    WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
-    WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+    WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
-    WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
+    WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
-    WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+    WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
-    WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
+    WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-    WRITE(FAN_PIN,0);
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    WRITE(FAN_PIN, 0);
 #endif
-#if HEATED_BED_HEATER_PIN>-1
-    WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
+#if HEATED_BED_HEATER_PIN > -1
+    WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
@@ -1917,7 +1919,7 @@ void Commands::checkFreeMemory()
 
 void Commands::writeLowestFreeRAM()
 {
-    if(lowestRAMValueSend>lowestRAMValue)
+    if(lowestRAMValueSend > lowestRAMValue)
     {
         lowestRAMValueSend = lowestRAMValue;
         Com::printFLN(Com::tFreeRAM, lowestRAMValue);

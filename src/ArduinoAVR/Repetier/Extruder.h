@@ -200,6 +200,7 @@ public:
 #if MIXING_EXTRUDER > 0
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
+    static uint8_t activeMixingExtruder;
 #endif
     uint8_t id;
     int32_t xOffset;

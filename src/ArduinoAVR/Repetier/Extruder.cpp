@@ -31,6 +31,7 @@ uint8_t Extruder::dittoMode = 0;
 #if MIXING_EXTRUDER > 0
 int Extruder::mixingS;
 uint8_t Extruder::mixingDir;
+uint8_t Extruder::activeMixingExtruder = 0;
 #endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
 extern int16_t read_max6675(uint8_t ss_pin);
@@ -104,15 +105,19 @@ void Extruder::manageTemperatures()
 
 
         // Check for obvious sensor errors
-        if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
+        if(act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE)   // no temp sensor or short in sensor, disable heater
         {
-            extruderTempErrors++;
             errorDetected = 1;
-            if(extruderTempErrors > 10)   // Ignore short temporary failures
+            if(extruderTempErrors < 10)    // Ignore short temporary failures
+                extruderTempErrors++;
+            else
             {
                 act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
-                Printer::setAnyTempsensorDefect();
-                reportTempsensorError();
+                if(!Printer::isAnyTempsensorDefect())
+                {
+                    Printer::setAnyTempsensorDefect();
+                    reportTempsensorError();
+                }
             }
         }
         if(Printer::isAnyTempsensorDefect()) continue;
@@ -202,7 +207,7 @@ void Extruder::manageTemperatures()
                 float dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC) * 3.333f;
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX==1
-                pidTerm = (pidTerm * act->pidMax) * 0.0039062;
+                pidTerm = (pidTerm * act->pidMax) * 0.0039215;
 #endif
                 output = constrain((int)pidTerm, 0, act->pidMax);
             }
@@ -247,7 +252,7 @@ void Extruder::manageTemperatures()
             }
             else     // Fast Bang-Bang fallback
             {
-                pwm_pos[act->pwmIndex] = (on ? 255 : 0);
+                pwm_pos[act->pwmIndex] = (on ? act->pidMax : 0);
                 if(on) act->startFullDecouple(time);
                 else act->stopDecouple();
             }
@@ -277,12 +282,25 @@ void Extruder::manageTemperatures()
 
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;
-    if(Printer::isAnyTempsensorDefect())
+    if(Printer::isAnyTempsensorDefect()
+#if HAVE_HEATED_BED
+       || Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5
+#endif
+       )
     {
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
         {
             pwm_pos[tempController[i]->pwmIndex] = 0;
         }
+#if defined(KILL_IF_SENSOR_DEFECT) && KILL_IF_SENSOR_DEFECT > 0
+        if(!Printer::debugDryrun() && PrintLine::linesCount > 0)    // kill printer if actually printing
+        {
+#if SDSUPPORT
+            sd.stopPrint();
+#endif
+            Printer::kill(0);
+        }
+#endif
         Printer::debugLevel |= 8; // Go into dry mode
     }
 
@@ -420,6 +438,7 @@ void Extruder::initExtruder()
     HAL::analogStart();
 
 }
+
 void TemperatureController::updateTempControlVars()
 {
 #if TEMP_PID
@@ -441,6 +460,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if MIXING_EXTRUDER
     if(extruderId >= VIRTUAL_EXTRUDER)
         extruderId = 0;
+    activeMixingExtruder = extruderId;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setMixingWeight(i, extruder[i].virtualWeights[extruderId]);
     extruderId = 0;
