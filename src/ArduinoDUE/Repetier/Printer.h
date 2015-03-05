@@ -110,7 +110,7 @@ public:
     static long levelingP3[3];
 #endif
 #if FEATURE_AUTOLEVEL
-    static float autolevelTransformation[9]; ///< Transformation matrix
+    static double autolevelTransformation[9]; ///< Transformation matrix
 #endif
     static signed char zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
