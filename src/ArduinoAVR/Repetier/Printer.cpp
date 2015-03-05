@@ -66,6 +66,7 @@ bool Printer::hasMovedToPausePosition = false;
 bool Printer::canMoveToPausePosition = false;
 float Printer::positionBeforePause[3] = {0, 0, 0};
 float oldFeedrate = Printer::feedrate;
+float Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix

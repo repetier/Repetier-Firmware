@@ -166,6 +166,7 @@ public:
 	static void moveToPausePosition();
 	static void resumePrinting();
 	static float positionBeforePause[3]; //zPosition before pause
+	static float zBedOffset;
 
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed

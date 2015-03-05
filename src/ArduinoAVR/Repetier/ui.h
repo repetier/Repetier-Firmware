@@ -193,6 +193,7 @@ What display type do you use?
 #define UI_ACTION_RESET_MATRIX			1919
 #define UI_ACTION_CALIBRATE				1920
 #define UI_ACTION_BED_LED_CHANGE		1921
+#define UI_ACTION_COATING_CUSTOM		1922
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -484,6 +485,7 @@ class UIDisplay {
     bool isWizardActive();
 	void menuCommand(const UIMenu *doing, const UIMenu *men, FSTRINGPARAM(cmd));
 	void menuAdjustHeight(const UIMenu *men,float offset);
+	void startAction(int action);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };

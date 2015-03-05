@@ -301,6 +301,7 @@
 #define UI_TEXT_AVOID "Please stop printing", "before this action"
 #define UI_TEXT_AVOID_HOT "Please cool down", "before this action"
 #define UI_TEXT_BED_LED_BRIGHTNESS "Bed LED : %oL%%%"
+#define UI_TEXT_COATING_CUSTOM "Custom : %oCmm"
 #define UI_TEXT_BED_LEDS "Bed LEDs"
 #define UI_TEXT_ABS "ABS/HIPS"
 #define UI_TEXT_PET "PET"

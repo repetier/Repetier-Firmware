@@ -1321,6 +1321,11 @@ void UIDisplay::parse(const char *txt,bool ram)
 				addInt((int)(Light.LedBrightness*100.0), 3);
 				break;
 			}
+			if(c2=='C')	 //Custom coating
+			{
+				addFloat(Printer::zBedOffset, 3, 2);
+				break;
+			}
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
             if(c2 == 'S')
             {
@@ -2227,8 +2232,10 @@ int UIDisplay::okAction(bool allowMoves)
             finishAction(action);
             activeAction = 0;
         }
-        else
+        else {
+			startAction(action);
             activeAction = action;
+		}
         return 0;
     }
     if(mtype == UI_MENU_TYPE_WIZARD)
@@ -2610,7 +2617,13 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 		INCREMENT_MIN_MAX(bl,1,0,100);
 		Commands::setBedLed(bl);
 	}
-    break;
+	break;
+	case UI_ACTION_COATING_CUSTOM:
+		//float bl = Printer::zBedOffset;
+		INCREMENT_MIN_MAX(Printer::zBedOffset,0.01,-1.0,199.0);
+		//Commands::setBedLed(bl);
+	break;
+    
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(Printer::extrudeMultiply,1,25,500);
@@ -2776,10 +2789,18 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     return true;
 }
 
-
+void UIDisplay::startAction(int action)
+{
+	if (action == UI_ACTION_COATING_CUSTOM)
+		if (Printer::zBedOffset != EEPROM::zProbeZOffset())
+			Printer::zBedOffset = EEPROM::zProbeZOffset();	
+}
 
 void UIDisplay::finishAction(int action)
 {
+	if (action == UI_ACTION_COATING_CUSTOM)
+		menuAdjustHeight(&ui_menu_coating_custom,Printer::zBedOffset);
+			
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
@@ -2808,6 +2829,10 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         case UI_ACTION_BACK:
             if(uid.isWizardActive()) break; // wizards can not exit before finished
+			if (activeAction) {
+				startAction(activeAction);
+				Com::printFLN(PSTR("ACTIVE ACTION "),(int)activeAction);
+			}
 			if(menuLevel == 0)
 			{
 				pushMenu(&ui_menu_preheat, false);
@@ -3678,6 +3703,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
 	if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || PrintLine::hasLines())
 		pushMenu(&ui_menu_avoid, false);
 	else {
+		EEPROM::readDataFromEEPROM();
 		//If there is something to change
 		if (EEPROM::zProbeZOffset()!=offset) {
 			//If the offset has been previously set, reset the height
@@ -3687,6 +3713,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
 			if (offset!=0.0)
 				Printer::zLength -= offset;
 			//Set the new offset
+			Printer::zBedOffset = offset;
 			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, offset);
 			HAL::eprSetFloat(EPR_Z_LENGTH, Printer::zLength);
 			Com::print("\nThe new zLength: ");
@@ -3697,6 +3724,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
 		//Display message
 		pushMenu(men, false);
 		BEEP_SHORT;	
+		EEPROM::readDataFromEEPROM();
 		Printer::homeAxis(true, true, true);
 		Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
 		menuLevel = 0;

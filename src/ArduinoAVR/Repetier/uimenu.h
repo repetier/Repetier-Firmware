@@ -436,8 +436,9 @@ UI_MENU_ACTIONCOMMAND(ui_menu_adjust_kapton,UI_TEXT_KAPTON, UI_ACTION_KAPTON);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_bluetape,UI_TEXT_BLUETAPE, UI_ACTION_BLUETAPE);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_pettape,UI_TEXT_PETTAPE, UI_ACTION_PETTAPE);
 UI_MENU_ACTIONCOMMAND(ui_menu_adjust_gluestick,UI_TEXT_GLUESTICK, UI_ACTION_GLUESTICK);
-#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick}
-UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,5+UI_MENU_BACKCNT);
+UI_MENU_CHANGEACTION(ui_menu_adjust_custom,UI_TEXT_COATING_CUSTOM,UI_ACTION_COATING_CUSTOM)
+#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick,&ui_menu_adjust_custom}
+UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,6+UI_MENU_BACKCNT);
 
 // **** Extruder menu
 
@@ -781,6 +782,7 @@ UI_MENU_ACTION2C(ui_menu_kapton_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SE
 UI_MENU_ACTION2C(ui_menu_bluetape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_BLUETAPE)
 UI_MENU_ACTION2C(ui_menu_pettape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_PETTAPE)
 UI_MENU_ACTION2C(ui_menu_gluestick_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_GLUESTICK)
+UI_MENU_ACTION2C(ui_menu_coating_custom, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET " %oCmm")
 
 UI_MENU_SUBMENU(ui_menu_calibration, UI_TEXT_CALIBRATION, ui_menu_calibrate)
 UI_MENU_ACTION2C(ui_menu_calibrate_action, UI_ACTION_DUMMY, UI_TEXT_CALIBRATED)
