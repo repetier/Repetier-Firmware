@@ -1392,10 +1392,11 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     autolevelTransformation[5] = -autolevelTransformation[7];
     // cross(y,z)
     autolevelTransformation[0] = autolevelTransformation[4]*autolevelTransformation[8]-autolevelTransformation[5]*autolevelTransformation[7];
-    autolevelTransformation[1] = autolevelTransformation[5]*autolevelTransformation[6]-autolevelTransformation[3]*autolevelTransformation[8];
-    autolevelTransformation[2] = autolevelTransformation[3]*autolevelTransformation[7]-autolevelTransformation[4]*autolevelTransformation[6];
-    len = sqrt(autolevelTransformation[0]*autolevelTransformation[0]+autolevelTransformation[2]*autolevelTransformation[2]);
+    autolevelTransformation[1] = autolevelTransformation[5]*autolevelTransformation[6]/*-autolevelTransformation[3]*autolevelTransformation[8]*/; //autolevelTransformation[3] == 0 !
+    autolevelTransformation[2] = /*autolevelTransformation[3]*autolevelTransformation[7]*/-autolevelTransformation[4]*autolevelTransformation[6];
+    len = sqrt(autolevelTransformation[0]*autolevelTransformation[0]+autolevelTransformation[1]*autolevelTransformation[1]+autolevelTransformation[2]*autolevelTransformation[2]); //Shouldn't autolevelTransformation[1] also get normed?!?
     autolevelTransformation[0] /= len;
+    autolevelTransformation[1] /= len;
     autolevelTransformation[2] /= len;
     len = sqrt(autolevelTransformation[4]*autolevelTransformation[4]+autolevelTransformation[5]*autolevelTransformation[5]);
     autolevelTransformation[4] /= len;
