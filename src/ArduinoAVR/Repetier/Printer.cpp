@@ -65,6 +65,7 @@ bool Printer::isPaused = false;
 bool Printer::hasMovedToPausePosition = false;
 bool Printer::canMoveToPausePosition = false;
 float Printer::positionBeforePause[3] = {0, 0, 0};
+float oldFeedrate = Printer::feedrate;
 
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
@@ -1360,11 +1361,19 @@ void Printer::zBabystep()
 void Printer::moveToPausePosition() {
 	if (!hasMovedToPausePosition) {
 		Commands::waitUntilEndOfAllMoves();
+		oldFeedrate = Printer::feedrate;
 		if (canMoveToPausePosition) {
 			positionBeforePause[0] = currentPosition[0];
 			positionBeforePause[1] = currentPosition[1];
 			positionBeforePause[2] = currentPosition[2];
-			Printer::moveTo(0, 0, Printer::zLength - 10, IGNORE_COORDINATE, 9000);
+			if (currentPosition[Z_AXIS]< (Printer::zLength - 8)) {
+				//Move 3mm up
+				PrintLine::moveRelativeDistanceInSteps(0, 0, 3 * Printer::axisStepsPerMM[Z_AXIS], 0, oldFeedrate, true, true);
+				Printer::moveTo(0, 0, IGNORE_COORDINATE, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+				Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::zLength - 5, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+			}
+			else
+				homeAxis(true,true,true);
 		}
 		hasMovedToPausePosition = true;
 		Commands::waitUntilEndOfAllMoves();
@@ -1373,9 +1382,12 @@ void Printer::moveToPausePosition() {
 }
 
 void Printer::resumePrinting() {
-	if (canMoveToPausePosition && hasMovedToPausePosition)
-	Printer::moveTo(positionBeforePause[0],positionBeforePause[1], positionBeforePause[2], IGNORE_COORDINATE, 9000);
-
+	if (canMoveToPausePosition && hasMovedToPausePosition) {
+		if (positionBeforePause[Z_AXIS]< (Printer::zLength - 5))
+			Printer::moveTo(0, 0, positionBeforePause[2]+5, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+		Printer::moveTo(positionBeforePause[0],positionBeforePause[1], positionBeforePause[2], IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+	}
+	Printer::feedrate = oldFeedrate;
 	Printer::isPaused = false;
 	Printer::hasMovedToPausePosition = false;
 }
