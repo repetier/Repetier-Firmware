@@ -728,8 +728,6 @@ void Extruder::unstep()
 
 void Extruder::setDirection(uint8_t dir)
 {
-    if(mixingDir == dir)
-        return;
     mixingDir = dir;
 #if NUM_EXTRUDER > 0
     if(dir)

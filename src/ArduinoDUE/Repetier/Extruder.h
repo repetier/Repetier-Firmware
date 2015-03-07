@@ -141,13 +141,12 @@ extern Extruder extruder[];
 #if EXTRUDER_JAM_CONTROL
 #ifdef DEBUG_JAM
 #define _TEST_EXTRUDER_JAM(x,pin) {\
-        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal++;\
-        if(extruder[x].jamLastSignal != sig && extruder[x].jamStepsSinceLastSignal > JAM_MIN_STEPS) {\
-          if(!extruder[x].isWaitJamStartcount() /*extruder[x].jamStepsSinceLastSignal > 230*/) {Com::printFLN(PSTR("JS:"),(int32_t)extruder[x].jamStepsSinceLastSignal);}\
-          extruder[x].setWaitJamStartcount(false); \
+        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal+=extruder[x].jamLastDir;\
+        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal) > JAM_MIN_STEPS) {\
+          /*if(!extruder[x].isWaitJamStartcount())*/ {Com::printFLN(PSTR("JS:"),(int32_t)extruder[x].jamStepsSinceLastSignal);}\
           extruder[x].jamStepsSinceLastSignal = 0; \
           extruder[x].jamLastSignal = sig;\
-        } else if(!extruder[x].isWaitJamStartcount() && extruder[x].jamStepsSinceLastSignal > JAM_ERROR_STEPS) \
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS) \
             extruder[x].tempControl.setJammed(true);\
     }
 #else
@@ -163,19 +162,18 @@ extern Extruder extruder[];
             extruder[x].tempControl.setJammed(true);\
     }*/
 #define _TEST_EXTRUDER_JAM(x,pin) {\
-        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal++;\
-        if(extruder[x].jamLastSignal != sig && extruder[x].jamStepsSinceLastSignal > JAM_MIN_STEPS) {\
-          extruder[x].setWaitJamStartcount(false); \
+        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal+=extruder[x].jamLastDir;\
+        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal) > JAM_MIN_STEPS) {\
           extruder[x].jamStepsSinceLastSignal = 0; \
           extruder[x].jamLastSignal = sig;\
-        } else if(!extruder[x].isWaitJamStartcount() && extruder[x].jamStepsSinceLastSignal > JAM_ERROR_STEPS) \
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS) \
             extruder[x].tempControl.setJammed(true);\
     }
 #endif
 #define ___TEST_EXTRUDER_JAM(x,y) _TEST_EXTRUDER_JAM(x,y)
 #define __TEST_EXTRUDER_JAM(x) ___TEST_EXTRUDER_JAM(x,EXT ## x ## _JAM_PIN)
 #define TEST_EXTRUDER_JAM(x) __TEST_EXTRUDER_JAM(x)
-#define RESET_EXTRUDER_JAM(x,dir) if(extruder[x].jamLastDir != dir) {extruder[x].jamStepsSinceLastSignal = 0;extruder[x].jamLastDir = dir; extruder[x].setWaitJamStartcount(true);}
+#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
 #else
 #define TEST_EXTRUDER_JAM(x)
 #define RESET_EXTRUDER_JAM(x,dir)
@@ -237,9 +235,9 @@ public:
     float diameter;
     uint8_t flags;
 #if EXTRUDER_JAM_CONTROL
-    uint16_t jamStepsSinceLastSignal; // when wa sthe last signal
+    int16_t jamStepsSinceLastSignal; // when wa sthe last signal
     uint8_t jamLastSignal; // what was the last signal
-    uint8_t jamLastDir;
+    int8_t jamLastDir;
 #endif
 
     // Methods here
