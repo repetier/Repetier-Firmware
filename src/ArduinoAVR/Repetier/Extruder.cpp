@@ -30,7 +30,7 @@ uint8_t Extruder::dittoMode = 0;
 #endif
 #if MIXING_EXTRUDER > 0
 int Extruder::mixingS;
-uint8_t Extruder::mixingDir;
+uint8_t Extruder::mixingDir = 10;
 uint8_t Extruder::activeMixingExtruder = 0;
 #endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
@@ -206,7 +206,7 @@ void Extruder::manageTemperatures()
                 pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
                 float dgain = act->pidDGain * (act->tempArray[act->tempPointer]-act->currentTemperatureC) * 3.333f;
                 pidTerm += dgain;
-#if SCALE_PID_TO_MAX==1
+#if SCALE_PID_TO_MAX == 1
                 pidTerm = (pidTerm * act->pidMax) * 0.0039215;
 #endif
                 output = constrain((int)pidTerm, 0, act->pidMax);
@@ -655,22 +655,52 @@ void Extruder::step()
         extruder[best].mixingE += mixingS;
     }
 #if NUM_EXTRUDER > 0
-    if(best == 0) WRITE(EXT0_STEP_PIN, HIGH);
+    if(best == 0) {
+        WRITE(EXT0_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(0)
+#endif
+    }
 #endif
 #if NUM_EXTRUDER > 1
-    if(best == 1) WRITE(EXT1_STEP_PIN, HIGH);
+    if(best == 1) {
+        WRITE(EXT1_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(1)
+#endif
+    }
 #endif
 #if NUM_EXTRUDER > 2
-    if(best == 2) WRITE(EXT2_STEP_PIN, HIGH);
+    if(best == 2) {
+        WRITE(EXT2_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(2)
+#endif
+    }
 #endif
 #if NUM_EXTRUDER > 3
-    if(best == 3) WRITE(EXT3_STEP_PIN, HIGH);
+    if(best == 3) {
+        WRITE(EXT3_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(3)
+#endif
+    }
 #endif
 #if NUM_EXTRUDER > 4
-    if(best == 4) WRITE(EXT4_STEP_PIN, HIGH);
+    if(best == 4) {
+        WRITE(EXT4_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(4)
+#endif
+    }
 #endif
 #if NUM_EXTRUDER > 5
-    if(best == 5) WRITE(EXT5_STEP_PIN, HIGH);
+    if(best == 5) {
+        WRITE(EXT5_STEP_PIN, HIGH);
+#if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
+        TEST_EXTRUDER_JAM(5)
+#endif
+    }
 #endif
 }
 
@@ -678,86 +708,70 @@ void Extruder::unstep()
 {
 #if NUM_EXTRUDER > 0
     WRITE(EXT0_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(0)
-#endif
 #endif
 #if NUM_EXTRUDER > 1
     WRITE(EXT1_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(1)
-#endif
 #endif
 #if NUM_EXTRUDER > 2
     WRITE(EXT2_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(2)
-#endif
 #endif
 #if NUM_EXTRUDER > 3
     WRITE(EXT3_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(3)
-#endif
 #endif
 #if NUM_EXTRUDER > 4
     WRITE(EXT4_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(4)
-#endif
 #endif
 #if NUM_EXTRUDER > 5
     WRITE(EXT5_STEP_PIN, LOW);
-#if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-    TEST_EXTRUDER_JAM(5)
-#endif
 #endif
 }
 
 void Extruder::setDirection(uint8_t dir)
 {
+    if(mixingDir == dir)
+        return;
     mixingDir = dir;
 #if NUM_EXTRUDER > 0
     if(dir)
         WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
     else
         WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
-    RESET_EXTRUDER_JAM(0)
+    RESET_EXTRUDER_JAM(0, dir)
 #endif
 #if defined(EXT1_DIR_PIN) && NUM_EXTRUDER > 1
     if(dir)
         WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
     else
         WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
-    RESET_EXTRUDER_JAM(1)
+    RESET_EXTRUDER_JAM(1, dir)
 #endif
 #if defined(EXT2_DIR_PIN) && NUM_EXTRUDER > 2
     if(dir)
         WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
     else
         WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
-    RESET_EXTRUDER_JAM(2)
+    RESET_EXTRUDER_JAM(2, dir)
 #endif
 #if defined(EXT3_DIR_PIN) && NUM_EXTRUDER > 3
     if(dir)
         WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
     else
         WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
-    RESET_EXTRUDER_JAM(3)
+    RESET_EXTRUDER_JAM(3, dir)
 #endif
 #if defined(EXT4_DIR_PIN) && NUM_EXTRUDER > 4
     if(dir)
         WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
     else
         WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
-    RESET_EXTRUDER_JAM(4)
+    RESET_EXTRUDER_JAM(4, dir)
 #endif
 #if defined(EXT5_DIR_PIN) && NUM_EXTRUDER > 5
     if(dir)
         WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
     else
         WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
-    RESET_EXTRUDER_JAM(5)
+    RESET_EXTRUDER_JAM(5, dir)
 #endif
 }
 
@@ -1582,7 +1596,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif
@@ -1609,7 +1623,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif
@@ -1636,7 +1650,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif
@@ -1663,7 +1677,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif
@@ -1690,7 +1704,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif
@@ -1717,7 +1731,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0
+        ,0,0,10
 #endif
     }
 #endif

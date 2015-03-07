@@ -1916,7 +1916,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             Printer::setZDirection(curd->isZPositiveMove());
         }
 #if USE_ADVANCE
-        if(!Printer::isAdvanceActivated()) // Set direction if no advance/OPS enabled
+        if(!Printer::isAdvanceActivated()) // Set direction if no advance enabled
 #endif
             Extruder::setDirection(cur->isEPositiveMove());
 #if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
