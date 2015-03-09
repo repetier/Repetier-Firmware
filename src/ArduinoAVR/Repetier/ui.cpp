@@ -1301,6 +1301,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addInt(Printer::extrudeMultiply,3);
                 break;
             }
+			if(c2=='F')
+			{
+				for (int i=0; i<sizeof(shortFilename); i++)
+					addChar(shortFilename[i]);
+				break;
+			}
             if(c2=='m')
             {
                 addInt(Printer::feedrateMultiply, 3);
@@ -2190,7 +2196,8 @@ int UIDisplay::okAction(bool allowMoves)
         case UI_ACTION_SD_PRINT:
             if (sd.selectFile(filename, false))
             {
-                sd.startPrint();
+				strcpy(shortFilename,filename);
+				sd.startPrint();
                 BEEP_LONG;
                 menuLevel = 0;
             }

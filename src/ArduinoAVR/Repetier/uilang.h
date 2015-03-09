@@ -306,6 +306,7 @@
 #define UI_TEXT_ABS "ABS/HIPS"
 #define UI_TEXT_PET "PET"
 #define UI_TEXT_PLA "PLA"
+#define UI_TEXT_PRINTING_FILE "%oF"
 
 // *************** German translation ****************
 

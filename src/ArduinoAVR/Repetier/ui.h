@@ -384,6 +384,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU_WIZARD(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,5,(unsigned int)&entries,0,0};
 #define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,filter,nofilter};
 #define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter};
+#define UI_MENU_ACTIONCOMMAND_FILTER_NOSEL(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,1,action,filter,nofilter};
 #define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
 #define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
@@ -488,6 +489,7 @@ class UIDisplay {
 	void startAction(int action);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
+	char shortFilename[LONG_FILENAME_LENGTH+1];
 };
 extern UIDisplay uid;
 

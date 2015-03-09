@@ -592,6 +592,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_askstop_yes,      UI_TEXT_YES,     UI_AC
 #define UI_MENU_SD_ASKSTOP {&ui_menu_sd_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
 UI_MENU(ui_menu_sd_askstop,UI_MENU_SD_ASKSTOP,3)
 
+UI_MENU_ACTIONCOMMAND_FILTER_NOSEL(ui_menu_printing_file,UI_TEXT_PRINTING_FILE,UI_ACTION_DUMMY,MENU_MODE_SD_PRINTING,0)
+
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING)
@@ -612,8 +614,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MO
 #define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
 #endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING)
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_stop UI_MOUNT_CMD ,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd, UI_MENU_SD, UI_MENU_BACKCNT + 5 + UI_MOUNT_CNT)
+#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_stop UI_MOUNT_CMD ,&ui_menu_sd_delete, &ui_menu_printing_file}
+UI_MENU(ui_menu_sd, UI_MENU_SD, UI_MENU_BACKCNT + 6 + UI_MOUNT_CNT)
 UI_MENU_SUBMENU(ui_menu_sd_sub, UI_TEXT_SD_CARD, ui_menu_sd)
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,
