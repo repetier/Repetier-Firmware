@@ -592,6 +592,8 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_askstop_yes,      UI_TEXT_YES,     UI_AC
 #define UI_MENU_SD_ASKSTOP {&ui_menu_sd_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
 UI_MENU(ui_menu_sd_askstop,UI_MENU_SD_ASKSTOP,3)
 
+UI_MENU_ACTIONCOMMAND_FILTER_NOSEL(ui_menu_printing,UI_TEXT_PRINTING":",UI_ACTION_DUMMY,MENU_MODE_SD_PRINTING,MENU_MODE_SD_PAUSED)
+UI_MENU_ACTIONCOMMAND_FILTER_NOSEL(ui_menu_paused,UI_TEXT_PAUSED,UI_ACTION_DUMMY,MENU_MODE_SD_PAUSED,0)
 UI_MENU_ACTIONCOMMAND_FILTER_NOSEL(ui_menu_printing_file,UI_TEXT_PRINTING_FILE,UI_ACTION_DUMMY,MENU_MODE_SD_PRINTING,0)
 
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
@@ -608,14 +610,14 @@ UI_MENU_SUBMENU_FILTER(ui_menu_sd_stop, UI_TEXT_STOP_PRINT,ui_menu_sd_askstop, M
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
 #else
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_unmount,UI_TEXT_UNMOUNT_CARD,UI_ACTION_SD_UNMOUNT,MENU_MODE_SD_MOUNTED,0)
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_unmount,UI_TEXT_UNMOUNT_CARD,UI_ACTION_SD_UNMOUNT,MENU_MODE_SD_MOUNTED, MENU_MODE_SD_PRINTING | MENU_MODE_SD_PAUSED)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_mount,UI_TEXT_MOUNT_CARD,UI_ACTION_SD_MOUNT,0,MENU_MODE_SD_MOUNTED)
 #define UI_MOUNT_CNT 2
 #define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
 #endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_delete,UI_TEXT_DELETE_FILE,UI_ACTION_SD_DELETE,MENU_MODE_SD_MOUNTED,MENU_MODE_SD_PRINTING)
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_stop UI_MOUNT_CMD ,&ui_menu_sd_delete, &ui_menu_printing_file}
-UI_MENU(ui_menu_sd, UI_MENU_SD, UI_MENU_BACKCNT + 6 + UI_MOUNT_CNT)
+#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_printing, &ui_menu_paused, &ui_menu_printing_file, &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_stop UI_MOUNT_CMD ,&ui_menu_sd_delete}
+UI_MENU(ui_menu_sd, UI_MENU_SD, UI_MENU_BACKCNT + 8 + UI_MOUNT_CNT)
 UI_MENU_SUBMENU(ui_menu_sd_sub, UI_TEXT_SD_CARD, ui_menu_sd)
 
 #define UI_MENU_SD_COND &ui_menu_sd_sub,

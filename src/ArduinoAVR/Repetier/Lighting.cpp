@@ -117,6 +117,7 @@ void Lighting::loop()
 void Lighting::ShowTemps()
 {
 	BedCurrent			= Extruder::getHeatedBedTemperature();
+	if (BedCurrent<35) BedCurrent = 0;
 	ExtruderCurrent		= Extruder::current->tempControl.currentTemperatureC;
 
 	//these checks for 0 enable non-interupted correct-colored lighting throughout cooldown process

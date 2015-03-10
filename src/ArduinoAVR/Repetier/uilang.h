@@ -119,7 +119,7 @@
 #define UI_TEXT_HOME_Z           "Home Z"
 #define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
 #define UI_TEXT_PREHEAT_ABS      "Preheat ABS/HIPS"
-#define UI_TEXT_PREHEAT_PET      "Preheat PET"
+#define UI_TEXT_PREHEAT_PET      "Preheat PET/XT"
 #define UI_TEXT_LIGHTS_ONOFF     "Lights :%lo"
 #define UI_TEXT_COOLDOWN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
@@ -304,9 +304,10 @@
 #define UI_TEXT_COATING_CUSTOM "Custom : %oCmm"
 #define UI_TEXT_BED_LEDS "Bed LEDs"
 #define UI_TEXT_ABS "ABS/HIPS"
-#define UI_TEXT_PET "PET"
+#define UI_TEXT_PET "PET/XT"
 #define UI_TEXT_PLA "PLA"
 #define UI_TEXT_PRINTING_FILE "%oF"
+#define UI_TEXT_PAUSED "Paused"
 
 // *************** German translation ****************
 

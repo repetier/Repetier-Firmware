@@ -3085,8 +3085,10 @@ break;
         case UI_ACTION_SD_PAUSE:
             if(!allowMoves)
                 ret = UI_ACTION_SD_PAUSE;
-            else
+            else {
                 sd.pausePrint(true);
+				UI_STATUS_UPD_RAM(UI_TEXT_PAUSED);
+			}
             break;
         case UI_ACTION_SD_CONTINUE:
             if(!allowMoves) ret = UI_ACTION_SD_CONTINUE;

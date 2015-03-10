@@ -1378,7 +1378,7 @@ void Printer::moveToPausePosition() {
 		}
 		hasMovedToPausePosition = true;
 		Commands::waitUntilEndOfAllMoves();
-		UI_STATUS_UPD_RAM("Printer paused");
+		UI_STATUS_UPD_RAM(UI_TEXT_PAUSED);
 	}
 }
 

@@ -448,11 +448,11 @@ M140 command, after a given temperature is reached. */
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
 #define RETRACTION_LONG_LENGTH 10
-#define RETRACTION_SPEED 40
+#define RETRACTION_SPEED 15
 #define RETRACTION_Z_LIFT 0.1
 #define RETRACTION_UNDO_EXTRA_LENGTH 0
 #define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0
-#define RETRACTION_UNDO_SPEED 25
+#define RETRACTION_UNDO_SPEED 10
 
 /**
 If you have a lcd display, you can do a filament switch with M600.
@@ -1464,7 +1464,7 @@ Values must be in range 1..255
 #define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
 #define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
 #define UI_SET_PRESET_HEATED_BED_TEMP_PET 80
-#define UI_SET_PRESET_EXTRUDER_TEMP_PET   260
+#define UI_SET_PRESET_EXTRUDER_TEMP_PET   255
 // Extreme values
 #define UI_SET_MIN_HEATED_BED_TEMP  55
 #define UI_SET_MAX_HEATED_BED_TEMP 120
