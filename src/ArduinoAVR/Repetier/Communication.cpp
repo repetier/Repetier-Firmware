@@ -121,7 +121,9 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
-#if DRIVE_SYSTEM==DELTA
+FSTRINGVALUE(Com::tExtruderJam, UI_TEXT_EXTRUDER_JAM)
+FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")

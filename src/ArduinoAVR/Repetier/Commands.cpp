@@ -67,6 +67,7 @@ void Commands::commandLoop()
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves)
 {
+    Printer::handleInterruptEvent();
     if(!executePeriodical) return;
     executePeriodical = 0;
     Extruder::manageTemperatures();
@@ -229,9 +230,9 @@ void Commands::setFanSpeed(int speed,bool wait)
     if(speed != pwm_pos[NUM_EXTRUDER + 2])
     {
         Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
-        #if FAN_KICKSTART_TIME
-          if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
-        #endif
+#if FAN_KICKSTART_TIME
+        if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
+#endif
     }
     pwm_pos[NUM_EXTRUDER + 2] = speed;
 #endif
@@ -1267,7 +1268,7 @@ void Commands::processMCode(GCode *com)
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
 #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
-                    || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC))>TEMP_HYSTERESIS)
+                    || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
 #endif
               )
             {
@@ -1312,35 +1313,19 @@ void Commands::processMCode(GCode *com)
         previousMillisCmd = HAL::timeInMilliseconds();
         break;
     case 116: // Wait for temperatures to reach target temperature
-        if(Printer::debugDryrun()) break;
-        {
-            bool allReached = false;
-            codenum = HAL::timeInMilliseconds();
-            while(!allReached)
-            {
-                allReached = true;
-                if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
-                {
-                    printTemperatures();
-                    codenum = HAL::timeInMilliseconds();
-                }
-                Commands::checkForPeriodicalActions(true);
-                for(uint8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
-                {
-                    TemperatureController *act = tempController[h];
-                    if(act->targetTemperatureC > 30 && fabs(act->targetTemperatureC-act->currentTemperatureC) > 1)
-                        allReached = false;
-                }
-            }
-        }
+        for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
+            tempController[h]->waitForTargetTemperature();
         break;
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     case 106: // M106 Fan On
-        setFanSpeed(com->hasS()?com->S:255,com->hasP());
+        if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
+        {
+        setFanSpeed(com->hasS() ? com->S : 255, com->hasP());
+        }
         break;
     case 107: // M107 Fan Off
-        setFanSpeed(0,com->hasP());
+        setFanSpeed(0, com->hasP());
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
@@ -1352,12 +1337,12 @@ void Commands::processMCode(GCode *com)
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
-            Extruder::setTemperatureForExtruder(0,0);
+            Extruder::setTemperatureForExtruder(0, 0);
 #if NUM_EXTRUDER>1
-            for(uint8_t i=0; i<NUM_EXTRUDER; i++)
-                Extruder::setTemperatureForExtruder(0,i);
+            for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+                Extruder::setTemperatureForExtruder(0, i);
 #else
-            Extruder::setTemperatureForExtruder(0,0);
+            Extruder::setTemperatureForExtruder(0, 0);
 #endif
 #if HEATED_BED_TYPE!=0
             target_bed_raw = 0;
@@ -1408,13 +1393,13 @@ void Commands::processMCode(GCode *com)
 #if BEEPER_TYPE>0
     case 120: // M120 Test beeper function
         if(com->hasS() && com->hasP())
-            beep(com->S,com->P); // Beep test
+            beep(com->S, com->P); // Beep test
         break;
 #endif
 #if MIXING_EXTRUDER > 0
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
-            Extruder::setMixingWeight(com->S,com->P);
+            Extruder::setMixingWeight(com->S, com->P);
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
@@ -1595,9 +1580,9 @@ void Commands::processMCode(GCode *com)
         Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
         Printer::kill(false);
         HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
-#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)		
+#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
         InterruptProtectedBlock noInts;			// don't disable interrupts on mega2560 and mega1280 because of bootloader bug
-#endif		
+#endif
         while(1) {} // Endless loop
     }
 #else
@@ -1704,9 +1689,11 @@ void Commands::processMCode(GCode *com)
     }
     break;
     case 355: // M355 S<0/1> - Turn case light on/off, no S = report status
-        if(com->hasS()) {
+        if(com->hasS())
+        {
             Printer::setCaseLight(com->S);
-        } else
+        }
+        else
             Printer::reportCaseLightStatus();
         break;
     case 360: // M360 - show configuration
@@ -1763,33 +1750,33 @@ void Commands::processMCode(GCode *com)
         if(PrintLine::cur == NULL)
         {
             Com::printFLN(PSTR("No move"));
-            if(PrintLine::linesCount>0)
+            if(PrintLine::linesCount > 0)
             {
                 PrintLine &cur = PrintLine::lines[PrintLine::linesPos];
-                Com::printF(PSTR("JFlags:"),(int)cur.joinFlags);
-                Com::printFLN(PSTR("Flags:"),(int)cur.flags);
+                Com::printF(PSTR("JFlags:"), (int)cur.joinFlags);
+                Com::printFLN(PSTR("Flags:"), (int)cur.flags);
                 if(cur.isWarmUp())
                 {
-                    Com::printFLN(PSTR("warmup:"),(int)cur.getWaitForXLinesFilled());
+                    Com::printFLN(PSTR("warmup:"), (int)cur.getWaitForXLinesFilled());
                 }
             }
         }
         else
         {
-            Com::printF(PSTR("Rem:"),PrintLine::cur->stepsRemaining);
-            Com::printFLN(PSTR("Int:"),Printer::interval);
+            Com::printF(PSTR("Rem:"), PrintLine::cur->stepsRemaining);
+            Com::printFLN(PSTR("Int:"), Printer::interval);
         }
         break;
 #endif // DEBUG_QUEUE_MOVE
 #ifdef DEBUG_SEGMENT_LENGTH
     case 534: // M534
-        Com::printFLN(PSTR("Max. segment size:"),Printer::maxRealSegmentLength);
+        Com::printFLN(PSTR("Max. segment size:"), Printer::maxRealSegmentLength);
         if(com->hasS())
             Printer::maxRealSegmentLength = 0;
         break;
 #endif
 #ifdef DEBUG_REAL_JERK
-        Com::printFLN(PSTR("Max. jerk measured:"),Printer::maxRealJerk);
+        Com::printFLN(PSTR("Max. jerk measured:"), Printer::maxRealJerk);
         if(com->hasS())
             Printer::maxRealJerk = 0;
         break;
@@ -1819,6 +1806,20 @@ void Commands::processMCode(GCode *com)
         uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
         break;
 #endif
+    case 601:
+        if(com->hasS() && com->S > 0)
+            Extruder::pauseExtruders();
+        else
+            Extruder::unpauseExtruders();
+        break;
+    case 602:
+        Commands::waitUntilEndOfAllMoves();
+        if(com->hasS()) Printer::setDebugJam(com->S > 0);
+        if(com->hasP()) Printer::setJamcontrolDisabled(com->P > 0);
+        break;
+    case 603:
+        Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
+        break;
     case 908: // M908 Control digital trimpot directly.
     {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL

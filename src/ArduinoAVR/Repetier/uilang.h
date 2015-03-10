@@ -277,6 +277,12 @@
 #define UI_TEXT_CLICK_DONE "Click when done"
 #define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
 #define UI_TEXT_SERVOPOS "Servo pos.: %oS"
+#define UI_TEXT_IGNORE_M106      "Ignore M106 cmd %Fi"
+#define UI_TEXT_WIZ_REHEAT1 "Click to reheat"
+#define UI_TEXT_WIZ_REHEAT2 "extruders."
+#define UI_TEXT_WIZ_WAITTEMP1 "Wait for target"
+#define UI_TEXT_WIZ_WAITTEMP2 "temperatures ..."
+#define UI_TEXT_EXTRUDER_JAM "Extruder Jam"
 
 // *************** German translation ****************
 
@@ -1695,7 +1701,9 @@
 #define UI_TEXT_EXTR_ADVANCE_L    "Advance lin  :%Xl"
 #define UI_TEXT_EXTR_ADVANCE_K    "Advance quad :%Xa"
 #define UI_TEXT_EXTR_MANAGER      "Regulator:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P :%Xp"
+#define UI_TEXT_EXTR_DEADTIME     "Deadtime :%Xp"
+#define UI_TEXT_EXTR_DMAX_DT      "Max. PWM :%XD"
+#define UI_TEXT_EXTR_PGAIN        "PID P    :%Xp"
 #define UI_TEXT_EXTR_IGAIN        "PID I    :%Xi"
 #define UI_TEXT_EXTR_DGAIN        "PID D    :%Xd"
 #define UI_TEXT_EXTR_DMIN         "Min I war: %Xm"
@@ -1744,7 +1752,8 @@
 #define UI_TEXT_WIZ_CH_FILAMENT3 "filament w gore/dol"
 #define UI_TEXT_CLICK_DONE       "Kliknij jak gotowe"
 #define UI_TEXT_AUTOLEVEL_ONOFF  "Autopoziomow.: %ll"
-#define UI_TEXT_SERVOPOS "Pozycja Serwa: %oS"
+#define UI_TEXT_SERVOPOS         "Pozycja Serwa: %oS"
+#define UI_TEXT_IGNORE_M106      "Ignoruj kom. M106 %Fi"
 
 #endif
 

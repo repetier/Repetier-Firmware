@@ -59,7 +59,7 @@ uint8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
-
+uint8_t Printer::interruptEvent = 0;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
@@ -320,9 +320,6 @@ void Printer::kill(uint8_t only_steppers)
     disableYStepper();
     disableZStepper();
     Extruder::disableAllExtruderMotors();
-#if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER + 1] = 0;
-#endif // FAN_BOARD_PIN
     if(!only_steppers)
     {
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
@@ -338,6 +335,12 @@ void Printer::kill(uint8_t only_steppers)
         Printer::setAllKilled(true);
     }
     else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+#if FAN_BOARD_PIN>-1
+#if HAVE_HEATED_BED
+    if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
+#endif
+       pwm_pos[NUM_EXTRUDER + 1] = 0;
+#endif // FAN_BOARD_PIN
 }
 
 void Printer::updateAdvanceFlags()
@@ -933,9 +936,7 @@ void Printer::setup()
 
 void Printer::defaultLoopActions()
 {
-
     Commands::checkForPeriodicalActions(true);  //check heater every n milliseconds
-
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED))
@@ -1605,6 +1606,56 @@ void Printer::reportCaseLightStatus() {
     Com::printInfoFLN(PSTR("No case lights"));
 #endif
 }
+
+void Printer::handleInterruptEvent() {
+    if(interruptEvent == 0) return;
+    int event = interruptEvent;
+    interruptEvent = 0;
+    switch(event) {
+#if EXTRUDER_JAM_CONTROL
+    case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+        Com::printFLN(PSTR("important:Extruder jam detected"));
+        UI_ERROR_P(Com::tExtruderJam);
+#if JAM_ACTION == 1 // start dialog
+        Printer::setUIErrorMessage(false);
+        uid.executeAction(UI_ACTION_WIZARD_JAM_EOF, true);
+#elif JAM_ACTION == 2 // pause host/print
+#if SDSUPPORT
+        if(sd.sdmode == 2) {
+            sd.pausePrint(true);
+            break;
+        }
+#endif // SDSUPPORT
+        Com::printFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+#endif // JAM_ACTION
+        break;
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL1:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL2:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5:
+        {
+            if(isJamcontrolDisabled()) break;
+            fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
+            int16_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
+            if(steps > JAM_SLOWDOWN_STEPS && !extruder[extruderIndex].tempControl.isSlowedDown()) {
+                extruder[extruderIndex].tempControl.setSlowedDown(true);
+                Commands::changeFeedrateMultiply(JAM_SLOWDOWN_TO);
+                UI_ERROR_P(Com::tFilamentSlipping);
+            }
+            if(isDebugJam()) {
+                Com::printF(PSTR("Jam signal steps:"),steps);
+                int32_t percent =  static_cast<int32_t>(steps) * 100 / JAM_STEPS;
+                Com::printF(PSTR(" / "),percent);
+                Com::printFLN(PSTR("% on "),(int)extruderIndex);
+            }
+        }
+        break;
+#endif // EXTRUDER_JAM_CONTROL    case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+    }
+}
+
 #define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
 void Printer::showConfiguration() {
     Com::config(PSTR("Baudrate:"),baudrate);

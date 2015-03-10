@@ -330,6 +330,10 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT0_DECOUPLE_TEST_PERIOD 18000
+/** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
+#define EXT0_JAM_PIN -1
+/** Pullup resistor for jam pin? */
+#define EXT0_JAM_PULLUP false
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 10
@@ -437,6 +441,10 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
 /** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
 #define EXT1_DECOUPLE_TEST_PERIOD 18000
+/** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
+#define EXT1_JAM_PIN -1
+/** Pullup resistor for jam pin? */
+#define EXT1_JAM_PULLUP false
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -472,6 +480,25 @@ Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 */
 #define FILAMENTCHANGE_SHORTRETRACT 30
 #define FILAMENTCHANGE_LONGRETRACT 30
+
+// Steps normally needed for a full signal cycle.
+#define JAM_STEPS 220
+// Steps for reducing speed. Must be higher then JAM_STEPS
+#define JAM_SLOWDOWN_STEPS 380
+// New speed multiplier which gets set when slowdown is reached.
+#define JAM_SLOWDOWN_TO 70
+// Last fallback. If we slip this much, we want to pause.
+#define JAM_ERROR_STEPS 430
+/** To prevent signal bouncing, only consider changes if we are this much steps
+ away from last signal change. */ 
+#define JAM_MIN_STEPS 10
+/*
+Determine what should be done if a jam is detected
+0 : Nothing, just mark extruder as jammed.
+1 : Jam/out of filament dialog and block communication.
+2 : Message to host/server otherwise continue and mark extruder jammed
+*/
+#define JAM_ACTION 1
 
 /** PID control only works target temperature +/- PID_CONTROL_RANGE.
 If you get much overshoot at the first temperature set, because the heater is going full power too long, you

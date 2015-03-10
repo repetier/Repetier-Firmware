@@ -180,9 +180,9 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
-#define UI_ACTION_BED_HEATMANAGER       1114 
+#define UI_ACTION_BED_HEATMANAGER       1114
 #define UI_ACTION_BED_PGAIN             1115
-#define UI_ACTION_BED_IGAIN             1116 
+#define UI_ACTION_BED_IGAIN             1116
 #define UI_ACTION_BED_DGAIN             1117
 #define UI_ACTION_BED_DRIVE_MIN         1118
 #define UI_ACTION_BED_DRIVE_MAX         1119
@@ -191,6 +191,7 @@ What display type do you use?
 #define UI_ACTION_FAN_SUSPEND           1201
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
 #define UI_ACTION_SERVOPOS              1203
+#define UI_ACTION_IGNORE_M106           1204 
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -222,6 +223,9 @@ What display type do you use?
 #define UI_ACTION_SHOW_USERMENU10       4110
 
 #define UI_ACTION_WIZARD_FILAMENTCHANGE  5000
+#define UI_ACTION_WIZARD_JAM_REHEAT      5001
+#define UI_ACTION_WIZARD_JAM_WAITHEAT    5002
+#define UI_ACTION_WIZARD_JAM_EOF         5003
 
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
@@ -449,6 +453,7 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,uint8_t digits);
     inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
+    void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
     int okAction(bool allowMoves);
@@ -589,7 +594,7 @@ void uiCheckSlowKeys(int &action) {}
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED   0
 #undef SDSUPPORT
-#define SDSUPPORT              1 
+#define SDSUPPORT              1
 #else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
