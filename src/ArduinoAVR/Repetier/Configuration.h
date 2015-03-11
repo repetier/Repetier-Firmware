@@ -1322,6 +1322,9 @@ Separate commands by \n */
 #define SD_RUN_ON_STOP ""
 /** Disable motors and heaters when print was stopped. */
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 0
+/** Valid file extensions with which files are displayed on the LCD */
+#define VALID_EXT1 "gcode"
+#define VALID_EXT2 "gco"
 
 // If you want support for G2/G3 arc commands set to true, otherwise false.
 #define ARC_SUPPORT 1

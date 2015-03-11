@@ -489,11 +489,12 @@ class UIDisplay {
 	void startAction(int action);
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
-	char shortFilename[LONG_FILENAME_LENGTH+1];
 };
 extern UIDisplay uid;
-
-
+// Returns either the file name or just the extension
+String getFilePart(const char filename, boolean extension);
+// Compares file names' extension to the given one. Returns true if they match.
+bool hasExtension(char* filename, char* extension);
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"
 #endif

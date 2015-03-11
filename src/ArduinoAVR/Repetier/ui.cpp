@@ -23,6 +23,7 @@
 #include "uimenu.h"
 
 extern const int8_t encoder_table[16] PROGMEM ;
+char shortFilename[LONG_FILENAME_LENGTH+1] = {0};
 #include <math.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -271,6 +272,21 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
 static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
 static const char versionString[] PROGMEM = UI_VERSION_STRING;
 
+String getFilePart(char* filename, boolean extension) {
+	String fn = filename;
+	uint8_t ind = fn.lastIndexOf(".") ;
+	if (extension)
+		return fn.substring(ind+1,fn.length()).c_str();
+	else
+		return fn.substring(0,ind).c_str();
+}
+
+bool hasExtension(char* filename, char* extension) {
+	if (getFilePart(filename, true).compareTo(extension) == 0)
+		return true;
+	else
+		return false;
+}
 
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
 
@@ -1602,13 +1618,14 @@ void UIDisplay::updateSDFileCount()
 
     root->rewind();
     nFilesOnCard = 0;
-    while ((p = root->getLongFilename(p, NULL, 0, NULL)))
+    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
     {
         if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
             continue;
         if (folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
             continue;
-        nFilesOnCard++;
+		if( DIR_IS_SUBDIR(p) || ((DIR_IS_FILE(p) && (hasExtension(tempLongFilename,VALID_EXT1) || hasExtension(tempLongFilename,VALID_EXT2))))) 
+			nFilesOnCard++;
         if (nFilesOnCard > 5000) // Arbitrary maximum, limited only by how long someone would scroll
             return;
     }
@@ -1627,8 +1644,10 @@ void getSDFilenameAt(uint16_t filePos,char *filename)
         HAL::pingWatchdog();
         if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
         if(uid.folderLevel>=SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.')) continue;
-        if (filePos--)
-            continue;
+		if(DIR_IS_FILE(p) && (!hasExtension(tempLongFilename,VALID_EXT1) && !hasExtension(tempLongFilename,VALID_EXT2)))  
+			continue; 
+		if (filePos--)
+			continue;
         strcpy(filename, tempLongFilename);
         if(DIR_IS_SUBDIR(p)) strcat(filename, "/"); // Set marker for directory
         break;
@@ -1690,29 +1709,43 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
         // done if past last used entry
         // skip deleted entry and entries for . and  ..
         // only list subdirectories and files
-        if ((DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
-        {
+		if( DIR_IS_SUBDIR(p) || (DIR_IS_FILE(p) && (hasExtension(tempLongFilename,VALID_EXT1) || hasExtension(tempLongFilename,VALID_EXT2))))
+		{
             if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
                 continue;
-            if(skip > 0)
-            {
-                skip--;
-                continue;
-            }
-            uid.col = 0;
-            if(r + offset == uid.menuPos[uid.menuLevel])
-                uid.printCols[uid.col++] = CHAR_SELECTOR;
-            else
-                uid.printCols[uid.col++] = ' ';
-            // print file name with possible blank fill
-            if(DIR_IS_SUBDIR(p))
-                uid.printCols[uid.col++] = bFOLD; // Prepend folder symbol
-            length = RMath::min((int)strlen(tempLongFilename), MAX_COLS - uid.col);
-            memcpy(uid.printCols + uid.col, tempLongFilename, length);
-            uid.col += length;
-            uid.printCols[uid.col] = 0;
-            strcpy(cache[r++],uid.printCols);
-        }
+			if(skip > 0)
+			{
+				skip--;
+				continue;
+			}
+			uid.col = 0;
+			if(r + offset == uid.menuPos[uid.menuLevel])
+				uid.printCols[uid.col++] = CHAR_SELECTOR;
+			else
+				uid.printCols[uid.col++] = ' ';
+			// print file name with possible blank fill
+			if(DIR_IS_SUBDIR(p))
+				uid.printCols[uid.col++] = bFOLD; // Prepend folder symbol
+			// Remove file extension from the file name
+			uint8_t flen = getFilePart(tempLongFilename,false).length();
+			if (DIR_IS_FILE(p)) {
+				strcpy(shortFilename, getFilePart(tempLongFilename,false).c_str());
+			} else
+				strcpy(shortFilename, tempLongFilename);
+			length = RMath::min(flen, MAX_COLS - uid.col);
+			memcpy(uid.printCols + uid.col, shortFilename, length);
+			uid.col += length;
+			uid.printCols[uid.col] = 0;
+			strcpy(cache[r++],uid.printCols);	
+		} else {
+			if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0]=='.' && p->name[1]=='.'))
+				continue;
+			if(skip > 0)
+			{
+				skip--;
+				continue;
+			}
+		}
     }
 #endif
 }
@@ -2196,7 +2229,7 @@ int UIDisplay::okAction(bool allowMoves)
         case UI_ACTION_SD_PRINT:
             if (sd.selectFile(filename, false))
             {
-				strcpy(shortFilename,filename);
+				strcpy(shortFilename,getFilePart(filename,false).c_str());
 				sd.startPrint();
                 BEEP_LONG;
                 menuLevel = 0;
@@ -3087,7 +3120,7 @@ break;
                 ret = UI_ACTION_SD_PAUSE;
             else {
                 sd.pausePrint(true);
-				UI_STATUS_UPD_RAM(UI_TEXT_PAUSED);
+				UI_STATUS_UPD(UI_TEXT_PAUSED);
 			}
             break;
         case UI_ACTION_SD_CONTINUE:
