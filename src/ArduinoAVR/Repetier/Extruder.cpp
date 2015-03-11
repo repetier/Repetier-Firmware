@@ -1940,7 +1940,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif
@@ -1967,7 +1967,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif
@@ -1994,7 +1994,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif
@@ -2021,7 +2021,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif
@@ -2048,7 +2048,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif
@@ -2075,7 +2075,7 @@ Extruder extruder[NUM_EXTRUDER] =
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
-        ,0,0,10,0
+        ,0,0,10,0,0
 #endif
     }
 #endif

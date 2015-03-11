@@ -148,26 +148,14 @@ class Extruder;
 extern Extruder extruder[];
 
 #if EXTRUDER_JAM_CONTROL
-/*#ifdef DEBUG_JAM
 #define _TEST_EXTRUDER_JAM(x,pin) {\
-        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal+=extruder[x].jamLastDir;\
-        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal) > JAM_MIN_STEPS) {\
-          {Com::printFLN(PSTR("JS:"),(int32_t)extruder[x].jamStepsSinceLastSignal);}\
-          extruder[x].jamStepsSinceLastSignal = 0; \
-          extruder[x].jamLastSignal = sig;\
-        } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS) \
-            extruder[x].tempControl.setJammed(true);\
-    }
-#else*/
-#define _TEST_EXTRUDER_JAM(x,pin) {\
-        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal+=extruder[x].jamLastDir;\
-        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal) > JAM_MIN_STEPS) {\
+        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal += extruder[x].jamLastDir;\
+        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
           if(sig) {extruder[x].resetJamSteps();} \
-          extruder[x].jamLastSignal = sig;\
+          extruder[x].jamLastSignal = sig;extruder[x].jamLastChangeAt = extruder[x].jamStepsSinceLastSignal;\
         } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
             extruder[x].tempControl.setJammed(true);\
     }
-//#endif
 #define ___TEST_EXTRUDER_JAM(x,y) _TEST_EXTRUDER_JAM(x,y)
 #define __TEST_EXTRUDER_JAM(x) ___TEST_EXTRUDER_JAM(x,EXT ## x ## _JAM_PIN)
 #define TEST_EXTRUDER_JAM(x) __TEST_EXTRUDER_JAM(x)
@@ -237,6 +225,7 @@ public:
     uint8_t jamLastSignal; // what was the last signal
     int8_t jamLastDir;
     int16_t jamStepsOnSignal;
+    int16_t jamLastChangeAt;
 #endif
 
     // Methods here
