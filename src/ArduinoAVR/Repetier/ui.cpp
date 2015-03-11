@@ -2426,13 +2426,13 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 		if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
 		{
 			//menuPos[0]++;
-			pushMenu(&ui_menu_perform, false);
+			pushMenu(&ui_menu_quick, false);
 			/*if(menuPos[0] >= UI_NUM_PAGES)
 				menuPos[0] = 0;*/
 		}
 		else
 		{
-			pushMenu(&ui_menu_quick, false);
+			pushMenu(&ui_menu_perform, false);
 			//menuPos[0] = (menuPos[0] == 0 ? UI_NUM_PAGES - 1 : menuPos[0] - 1);
 		}
 		return true;

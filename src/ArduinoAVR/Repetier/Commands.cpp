@@ -858,6 +858,14 @@ void Commands::processGCode(GCode *com)
 			Extruder::setHeatedBedTemperature(0);
 		}
 #endif
+
+// Suspend fans
+static uint8_t lastFanSpeed = 255;
+if(Printer::getFanSpeed() != 0 ) {
+	lastFanSpeed = Printer::getFanSpeed();
+	Commands::setFanSpeed(0,false);
+}
+
 		// It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
         // For that reason we ensure a correct behaviour by code.
@@ -992,6 +1000,8 @@ void Commands::processGCode(GCode *com)
 			Extruder::setHeatedBedTemperature(lastBedTemp);
 		}
 #endif
+//Restore fan speed
+Commands::setFanSpeed(lastFanSpeed,false);
     }
     break;
 #endif
