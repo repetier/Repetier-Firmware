@@ -3454,8 +3454,15 @@ break;
 		    //Com::printFLN(PSTR("RequestPause:"));	.
             break;
 		case UI_ACTION_CALIBRATE:
-			if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || !allowMoves || PrintLine::hasLines())
-				pushMenu(&ui_menu_avoid, false);
+			// Check to see if the printer has been factory-calibrated
+			if (Printer::zLength < (Z_MAX_LENGTH - 200.0f) || Printer::zLength > Z_MAX_LENGTH) {
+				Com::printErrorFLN(PSTR("Corrupted Z-length!"));
+				pushMenu(&ui_menu_avoid_uninit, false);
+			}
+			else if (EEPROM::zProbeHeight() < 0.1 || EEPROM::zProbeHeight() > 4.0)
+				pushMenu(&ui_menu_avoid_uninit, false);
+			else if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || !allowMoves || PrintLine::hasLines())
+				pushMenu(&ui_menu_avoid_hot, false);
 			else if (heatedBedController.targetTemperatureC > 35.0 || extruder[0].tempControl.currentTemperatureC > 40.0) 
 				pushMenu(&ui_menu_avoid_hot, false);
 			else {
@@ -3742,6 +3749,11 @@ void UIDisplay::menuCommand(const UIMenu *doing,const UIMenu *men,FSTRINGPARAM(c
 }
 
 void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
+	if (Printer::zLength < (Z_MAX_LENGTH - 200.0f) || Printer::zLength > Z_MAX_LENGTH) {
+		Com::printErrorFLN(PSTR("Corrupted Z-length!"));
+		pushMenu(&ui_menu_avoid_uninit, false);
+		return;
+	}
 	if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || PrintLine::hasLines())
 		pushMenu(&ui_menu_avoid, false);
 	else {

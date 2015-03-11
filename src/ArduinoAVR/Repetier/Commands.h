@@ -49,5 +49,5 @@ private:
     static int lowestRAMValue;
     static int lowestRAMValueSend;
 };
-
+bool cmpf(float a, float b);
 #endif // COMMANDS_H_INCLUDED

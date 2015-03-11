@@ -842,6 +842,13 @@ void Commands::processGCode(GCode *com)
 #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
 #endif
+#if DRIVE_SYSTEM == DELTA
+	EEPROM::readDataFromEEPROM();
+	// Check to see if the printer has been factory-calibrated
+	if (cmpf(EEPROM::zProbeHeight(),Z_PROBE_HEIGHT)) {
+		Com::printErrorFLN(PSTR("The Z-probe height has not been measured!"));
+		break;	
+	}
 		//Suspend heating of bed during probing to avoid interference with inductive sensors
 #if HAVE_HEATED_BED
 		float lastBedTemp = 0;
@@ -851,8 +858,6 @@ void Commands::processGCode(GCode *com)
 			Extruder::setHeatedBedTemperature(0);
 		}
 #endif
-#if DRIVE_SYSTEM == DELTA
-        EEPROM::readDataFromEEPROM();
 		// It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
         // For that reason we ensure a correct behaviour by code.
@@ -2142,4 +2147,10 @@ void Commands::writeLowestFreeRAM()
         lowestRAMValueSend = lowestRAMValue;
         Com::printFLN(Com::tFreeRAM, lowestRAMValue);
     }
+}
+
+// Compare floating point variables
+bool cmpf(float a, float b)
+{
+	return (fabs(a - b) < 0.0001f);
 }
