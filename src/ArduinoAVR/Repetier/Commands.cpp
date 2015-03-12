@@ -249,6 +249,7 @@ void Commands::setFanSpeed(int speed,bool wait)
 void Commands::setBedLed(int light)
 {
 	Light.LedBrightness = (float)(light/100.0);
+	Light.ShowTemps();
 }
 
 void Commands::reportPrinterUsage()
@@ -859,12 +860,16 @@ void Commands::processGCode(GCode *com)
 		}
 #endif
 
-// Suspend fans
-static uint8_t lastFanSpeed = 255;
-if(Printer::getFanSpeed() != 0 ) {
-	lastFanSpeed = Printer::getFanSpeed();
-	Commands::setFanSpeed(0,false);
-}
+		// Suspend fans
+		static uint8_t lastFanSpeed = 0;
+		if(Printer::getFanSpeed() != 0 ) {
+			lastFanSpeed = Printer::getFanSpeed();
+			Commands::setFanSpeed(0,false);
+		}
+
+		//remember and reset horizontal rod radius
+		float oldRadius = Printer::radius0;
+		Printer::radius0 = ROD_RADIUS;
 
 		// It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
@@ -1000,8 +1005,11 @@ if(Printer::getFanSpeed() != 0 ) {
 			Extruder::setHeatedBedTemperature(lastBedTemp);
 		}
 #endif
-//Restore fan speed
-Commands::setFanSpeed(lastFanSpeed,false);
+	//Restore fan speed
+	Commands::setFanSpeed(lastFanSpeed,false);
+
+	//restore horizontal rod radius
+	Printer::radius0 = oldRadius;
     }
     break;
 #endif
@@ -1422,6 +1430,9 @@ void Commands::processMCode(GCode *com)
             else
                 Extruder::setTemperatureForExtruder(com->S, Extruder::current->id, com->hasF() && com->F > 0);
         }
+#if BED_LEDS
+		Light.ShowTemps();
+#endif
 #endif
         break;
     case 140: // M140 set bed temp
@@ -1429,6 +1440,9 @@ void Commands::processMCode(GCode *com)
         previousMillisCmd = HAL::timeInMilliseconds();
         if(Printer::debugDryrun()) break;
         if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
+#if BED_LEDS
+		Light.ShowTemps();
+#endif
         break;
     case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         printTemperatures(com->hasX());

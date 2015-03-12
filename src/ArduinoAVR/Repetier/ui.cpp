@@ -2617,8 +2617,11 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         Extruder::setHeatedBedTemperature(tmp);
 		if (tmp > 0)
 			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING)
-		else
+		else if (!extruder->tempControl.targetTemperatureC > 0)
 			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY)
+#if BED_LEDS
+		Light.ShowTemps();
+#endif
     }
 #endif
     break;
@@ -2640,8 +2643,11 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         Extruder::setTemperatureForExtruder(tmp, action - UI_ACTION_EXTRUDER0_TEMP);
 		if (tmp > 0)
 			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING)
-		else
+		else if (!heatedBedController.targetTemperatureC > 0)
 			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY)
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             }
             break;
     case UI_ACTION_FEEDRATE_MULTIPLY:
@@ -2871,7 +2877,6 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             if(uid.isWizardActive()) break; // wizards can not exit before finished
 			if (activeAction) {
 				startAction(activeAction);
-				Com::printFLN(PSTR("ACTIVE ACTION "),(int)activeAction);
 			}
 			if(menuLevel == 0)
 			{
@@ -2974,6 +2979,9 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_PLA);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS(UI_TEXT_PREHEAT_ABS);
@@ -2990,6 +2998,9 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_ABS);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             break;
 		case UI_ACTION_PREHEAT_PET:
 			UI_STATUS(UI_TEXT_PREHEAT_PET);
@@ -3005,7 +3016,10 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif 
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_PET);			
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING " " UI_TEXT_PET);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif			
 break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS(UI_TEXT_COOLDOWN);
@@ -3022,6 +3036,9 @@ break;
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             break;
         case UI_ACTION_HEATED_BED_OFF:
 #if HAVE_HEATED_BED
@@ -3029,6 +3046,9 @@ break;
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
 #endif
             break;
         case UI_ACTION_EXTRUDER0_OFF:
@@ -3036,6 +3056,9 @@ break;
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             break;
         case UI_ACTION_EXTRUDER1_OFF:
 #if NUM_EXTRUDER > 1

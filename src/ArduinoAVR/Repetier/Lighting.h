@@ -49,6 +49,7 @@ class Lighting
 	 void loop();
 	 void ShowTemps();
 	 void SetShowType(ShowType SType);
+	 int ary[12][3];
 	
 };
 

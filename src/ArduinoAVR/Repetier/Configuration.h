@@ -205,7 +205,7 @@ Overridden if EEPROM activated.*/
 // then you have 3 seconds of increased heating to reach 1°C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
 // for each extruder, fan will stay on until extruder temperature is below this value
-#define EXTRUDER_FAN_COOL_TEMP 50
+#define EXTRUDER_FAN_COOL_TEMP 40
 // Retraction for sd pause over lcd
 #define RETRACT_ON_PAUSE 2
 // These commands get executed after storing position and going to park position.
@@ -1469,11 +1469,11 @@ Values must be in range 1..255
 #define UI_SET_PRESET_HEATED_BED_TEMP_PET 80
 #define UI_SET_PRESET_EXTRUDER_TEMP_PET   255
 // Extreme values
-#define UI_SET_MIN_HEATED_BED_TEMP  55
+#define UI_SET_MIN_HEATED_BED_TEMP  45
 #define UI_SET_MAX_HEATED_BED_TEMP 120
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   300
-#define UI_SET_EXTRUDER_FEEDRATE 25 // mm/sec
+#define UI_SET_EXTRUDER_FEEDRATE 15 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 10 // mm
 
 /*

@@ -117,27 +117,76 @@ void Lighting::loop()
 void Lighting::ShowTemps()
 {
 	BedCurrent			= Extruder::getHeatedBedTemperature();
-	if (BedCurrent<35) BedCurrent = 0;
+	if (BedCurrent < 35 && Extruder::getHeatedBedTargetTemperature() < 35) BedCurrent = 0;
 	ExtruderCurrent		= Extruder::current->tempControl.currentTemperatureC;
+	if (ExtruderCurrent < 40 && Extruder::current->tempControl.targetTemperatureC < 40) ExtruderCurrent = 0;
 
 	//these checks for 0 enable non-interupted correct-colored lighting throughout cooldown process
 	if (Extruder::getHeatedBedTargetTemperature()>0) 
 		BedTarget		= Extruder::getHeatedBedTargetTemperature();
+	else
+		BedTarget		= 80;
 	if (Extruder::current->tempControl.targetTemperatureC>0)
 		ExtruderTarget	= Extruder::current->tempControl.targetTemperatureC;
+	else
+		ExtruderTarget	= 170;
 
 	//bed leds (all except middle one (5th)
 	int b = (BedCurrent) * 255 / (BedTarget);
+	const uint8_t reductor = 3;
 	if (b>255) b = 255;
 	if (b<0) b = 0;
+	int bg = 0;
+	int bb = 0;
+	//make blue more visible
+	if (b < 115) {
+		bg = (255 - b) / reductor;
+		bb = 255 - b;
+		b = b / reductor * 0.5;
+	}
+	else  {
+		bg = 255 - b;
+		bb = (255 - b) / reductor;
+	}
 
 	//extruder led (5th)
 	int e = (ExtruderCurrent)* 255 / (ExtruderTarget);
 	if (e>255) e = 255;
 	if (e<0) e = 0;
+	int eg = 0;
+	int eb = 0;
+	//make blue more visible
+	if (e < 100) {
+		eg = (255 - e) / reductor;
+		eb = 255 - e;
+		e = e / reductor * 0.5;
+	}
+	else  {
+		eg = 255 - e;
+		eb = (255 - e) / reductor;
+	}
 
-	SetAllBedLeds(b, 0, (255 - b));
-	SetLed(LED_EXTRUDER, e, 0, (255 - e));
+	ary[LED_EXTRUDER][0] = 255;
+	ary[LED_EXTRUDER][1] = 255;
+	ary[LED_EXTRUDER][2] = 255;
+	if (b < 1)
+		SetAllBedLeds(255, 255, 255);
+	else
+		SetAllBedLeds(b, bg, bb);
+		ary[LED_EXTRUDER][0] = b;
+		ary[LED_EXTRUDER][1] = bg;
+		ary[LED_EXTRUDER][2] = bb;
+	
+	if (e <  1)	 {
+		SetLed(LED_EXTRUDER, 255, 255, 255);
+	}
+	else 	   {
+		SetLed(LED_EXTRUDER, e, eg, eb);
+		ary[LED_EXTRUDER][0] = e;
+		ary[LED_EXTRUDER][1] = eg;
+		ary[LED_EXTRUDER][2] = eb;
+	}
+		
 	CommitLeds();
 
 }
@@ -153,6 +202,9 @@ void Lighting::SetAllLeds(uint8_t r, uint8_t g, uint8_t b)
 	for (int i = 0; i < LED_COUNT; i++)
 	{
 		SetLed(i, r, g, b);
+		ary[i][0] = r;
+		ary[i][1] = g;
+		ary[i][2] = b;
 	}
 	CommitLeds();
 }
@@ -160,7 +212,12 @@ void Lighting::SetAllBedLeds(uint8_t r, uint8_t g, uint8_t b)
 {
 	for (int i = 0; i < LED_COUNT; i++)
 	{
-		if (!(i==LED_EXTRUDER))SetLed(i, r, g, b);
+		if (!(i==LED_EXTRUDER)) {
+			SetLed(i, r, g, b);
+			ary[i][0] = r;
+			ary[i][1] = g;
+			ary[i][2] = b;
+		}
 	}
 }
 
