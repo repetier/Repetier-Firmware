@@ -352,6 +352,8 @@ void Extruder::markAllUnjammed()
         extruder[i].tempControl.setJammed(false);
         extruder[i].tempControl.setSlowedDown(false);
     }
+    if(Printer::feedrateMultiply == JAM_SLOWDOWN_TO)
+        Commands::changeFeedrateMultiply(100);
     Printer::unsetAnyTempsensorDefect(); // stop alarm
     Com::printInfoFLN(PSTR("Marked all extruders as unjammed."));
     Printer::setUIErrorMessage(false);

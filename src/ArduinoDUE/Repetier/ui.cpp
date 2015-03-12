@@ -2046,7 +2046,7 @@ void UIDisplay::refreshPage()
                         printRow(y, cache[y] + UI_COLS - scroll, &displayCache[y][off[y]], scroll);
                     }
                 }
-#if DISPLAY_TYPE != 5
+#if UI_DISPLAY_TYPE != DISPLAY_U8G
                 HAL::delayMilliseconds(transition < 3 ? 200 : 70);
 #endif
                 HAL::pingWatchdog();
@@ -2249,7 +2249,9 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
             Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
             Printer::setBlockingReceive(false);
+#if EXTRUDER_JAM_CONTROL
             Extruder::markAllUnjammed();
+#endif
             Printer::setJamcontrolDisabled(false);
             break;
 #if EXTRUDER_JAM_CONTROL

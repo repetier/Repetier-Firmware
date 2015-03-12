@@ -191,7 +191,7 @@ What display type do you use?
 #define UI_ACTION_FAN_SUSPEND           1201
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
 #define UI_ACTION_SERVOPOS              1203
-#define UI_ACTION_IGNORE_M106           1204 
+#define UI_ACTION_IGNORE_M106           1204
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -555,7 +555,20 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
 #else  // Smartcontroller
-#if MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
+#if MOTHERBOARD == 701 // Megatronics v2.0
+#define UI_DISPLAY_RS_PIN 14
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 15
+#define UI_DISPLAY_D4_PIN 30
+#define UI_DISPLAY_D5_PIN 31
+#define UI_DISPLAY_D6_PIN 32
+#define UI_DISPLAY_D7_PIN 33
+#define UI_ENCODER_A 61
+#define UI_ENCODER_B 59
+#define UI_ENCODER_CLICK 43
+#define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
+#define UI_INVERT_MENU_DIRECTION true
+#elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1
@@ -876,7 +889,7 @@ void uiCheckSlowKeys(int &action) {
     WRITE(UI_SHIFT_LD,LOW);
     WRITE(UI_SHIFT_LD,HIGH);
 
-    for(int8_t i=1;i<=8;i++) {
+    for(int8_t i = 1; i <= 8;i++) {
         if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
             switch (i) {
                 case 1: action = UI_ACTION_Z_DOWN; break; // F3
