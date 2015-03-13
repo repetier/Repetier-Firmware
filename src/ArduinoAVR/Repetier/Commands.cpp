@@ -859,13 +859,9 @@ void Commands::processGCode(GCode *com)
 			Extruder::setHeatedBedTemperature(0);
 		}
 #endif
-
 		// Suspend fans
-		static uint8_t lastFanSpeed = 0;
-		if(Printer::getFanSpeed() != 0 ) {
-			lastFanSpeed = Printer::getFanSpeed();
-			Commands::setFanSpeed(0,false);
-		}
+		static int lastFanSpeed = Printer::getFanSpeed();
+		Commands::setFanSpeed(0,false);
 
 		//remember and reset horizontal rod radius
 		float oldRadius = Printer::radius0;
@@ -891,40 +887,63 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         if(h3 < 0) break;
+#if DEBUGGING
+		Com::printFLN(PSTR("h1: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h1);
+		Com::printFLN(PSTR("h2: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h2);
+		Com::printFLN(PSTR("h3: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h3);
+#endif
 #if DRIVE_SYSTEM == DELTA
 		//Allows additional offset for each probe point to compensate head slanting at maximum dimensions
 		if(com->hasX())
-			h1 += com->X;
+			h1 = com->X;
 		if(com->hasY())
-			h2 += com->Y;
+			h2 = com->Y;
 		if(com->hasZ())
-			h3 += com->Z;
+			h3 = com->Z;
 		//Head slanting compensation for each measurement point
+		float foff =  EEPROM::zProbeXY1offset();
 		if (EEPROM::zProbeXY1offset() != 0.0) {
 #if DEBUGGING
 			Com::printFLN(PSTR("XY1 offset: "),EEPROM::zProbeXY1offset());
-#endif
-			h1 += EEPROM::zProbeXY1offset();
+#endif	
+			if (EEPROM::zProbeXY1offset() > EEPROM::zProbeHeight()) {
+				foff = EEPROM::zProbeXY1offset() - h1;
+				HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET, foff);
+				Com::printFLN(PSTR("XY1 offset after: "),EEPROM::zProbeXY1offset());
+			}
+			h1 += foff;
 		}
 
 		if (EEPROM::zProbeXY2offset() != 0.0) {
 #if DEBUGGING
 			Com::printFLN(PSTR("XY2 offset: "),EEPROM::zProbeXY2offset());
-#endif
-			h2 += EEPROM::zProbeXY2offset();
+#endif	
+			foff =  EEPROM::zProbeXY2offset();
+			if (EEPROM::zProbeXY2offset() > EEPROM::zProbeHeight()){
+				foff = EEPROM::zProbeXY2offset() - h2;
+				HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET, foff);
+				Com::printFLN(PSTR("XY2 offset after: "),EEPROM::zProbeXY2offset());
+			}
+			h2 += foff;
 		}
 		if (EEPROM::zProbeXY3offset() != 0.0) {
 #if DEBUGGING
 			Com::printFLN(PSTR("XY3 offset: "),EEPROM::zProbeXY3offset());
 #endif
-			h3 += EEPROM::zProbeXY3offset();
+			foff =  EEPROM::zProbeXY3offset();
+			if (EEPROM::zProbeXY3offset() > EEPROM::zProbeHeight()){
+				foff = EEPROM::zProbeXY3offset() - h3;
+				HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET, foff);
+				Com::printFLN(PSTR("XY3 offset after: "),EEPROM::zProbeXY3offset());
+			}
+			h3 += foff;
 		}			
 
 #if DEBUGGING
-		Com::printFLN(PSTR("h1: "),h1);
-		Com::printFLN(PSTR("h2: "),h2);
-		Com::printFLN(PSTR("h3: "),h3);
-#endif	  
+		Com::printFLN(PSTR("h1d: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h1);
+		Com::printFLN(PSTR("h2d: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h2);
+		Com::printFLN(PSTR("h3d: "),Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 2) - h3);
+#endif 
 #endif	
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
@@ -974,6 +993,8 @@ void Commands::processGCode(GCode *com)
             Printer::currentPositionSteps[Z_AXIS] = (h3 + z) * Printer::axisStepsPerMM[Z_AXIS];
 #endif
 #endif
+		//restore horizontal rod radius
+		Printer::radius0 = oldRadius;
             if(com->S == 2)
                 EEPROM::storeDataIntoEEPROM();
         }
@@ -1007,13 +1028,56 @@ void Commands::processGCode(GCode *com)
 #endif
 	//Restore fan speed
 	Commands::setFanSpeed(lastFanSpeed,false);
-
-	//restore horizontal rod radius
-	Printer::radius0 = oldRadius;
     }
     break;
 #endif
+	case 33: // G33
+		if (com->hasS()) {
+			Printer::setAutolevelActive(false);
+			Printer::zLength = Z_MAX_LENGTH;
+			HAL::eprSetFloat(EPR_Z_LENGTH, Z_MAX_LENGTH);
+			Printer::updateDerivedParameter();
+			Printer::homeAxis(true, true, true);
+			Printer::updateCurrentPosition(true);
+			Printer::moveTo(0, 0, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+			//Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+			Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+		}
+			Printer::updateCurrentPosition(true);
+			Printer::updateDerivedParameter();
+			printCurrentPosition(PSTR("M114 "));
+		if (com->hasX()) {
+			float xf = Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 1) - (Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			Com::printFLN(PSTR(" xf: "),xf);
+			Com::printFLN(PSTR(" xz: "),Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY1_OFFSET, xf);
+			Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+			Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+		}
+		if (com->hasY()) {
+			float yf = Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 1) - (Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			Com::printFLN(PSTR(" yf: "),yf);
+			Com::printFLN(PSTR(" yz: "),Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY2_OFFSET, yf);
+			Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+			Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+		}
+		if (com->hasZ()) {
+			float zf = Z_MAX_LENGTH - Printer::zLength + EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() * 1) - (Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			Com::printFLN(PSTR(" zf: "),zf);
+			Com::printFLN(PSTR(" zz: "),Printer::currentPositionSteps[Z_AXIS] / Printer::axisStepsPerMM[Z_AXIS]);
+			HAL::eprSetFloat(EPR_Z_PROBE_XY3_OFFSET, zf);
+			Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+			Printer::moveTo(0,0,IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+			Printer::homeAxis(true, true, true);
+		}
+			Printer::updateCurrentPosition(true);
+			Printer::updateDerivedParameter();
+			printCurrentPosition(PSTR("M114 "));
+
+	break;
 #endif
+
     case 90: // G90
         Printer::relativeCoordinateMode = false;
         if(com->internalCommand)

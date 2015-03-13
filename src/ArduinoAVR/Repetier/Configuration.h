@@ -1391,7 +1391,7 @@ Select the language to use.
 #define FIRMWARE_VERSION "113-"
 
 
-#define DEBUGGING true
+#define DEBUGGING false
 #define BED_LEDS true
 #if BED_LEDS
 #define LED_MAX_RELATIVE_BRIGHTNESS 0.25
