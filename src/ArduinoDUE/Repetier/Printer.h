@@ -343,10 +343,10 @@ public:
     static inline void disableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
-        WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
 
@@ -354,20 +354,20 @@ public:
     static inline void disableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
-        WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
     }
     /** \brief Disable stepper motor for z direction. */
     static inline void disableZStepper()
     {
 #if (Z_ENABLE_PIN > -1)
-        WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
     }
 
@@ -378,7 +378,7 @@ public:
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
 
@@ -389,7 +389,7 @@ public:
         WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, Y_ENABLE_ON);
 #endif
     }
     /** \brief Enable stepper motor for z direction. */
@@ -399,7 +399,7 @@ public:
         WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
@@ -425,16 +425,16 @@ public:
     {
         if(positive)
         {
-            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
 #endif
         }
         else
         {
-            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
 #endif
         }
     }
@@ -442,33 +442,33 @@ public:
     {
         if(positive)
         {
-            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
 #endif
         }
         else
         {
-            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
 
     static inline bool getZDirection()
     {
-        return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
+        return ((READ(Z_DIR_PIN) != 0) ^ INVERT_Z_DIR);
     }
 
     static inline bool getYDirection()
     {
-        return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
+        return((READ(Y_DIR_PIN) != 0) ^ INVERT_Y_DIR);
     }
 
     static inline bool getXDirection()
     {
-        return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
+        return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
 
     static inline uint8_t isLargeMachine()
