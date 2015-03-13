@@ -232,7 +232,7 @@ void Extruder::manageTemperatures()
                         act->lastTemperatureUpdate = time;
                         if(on) act->startFullDecouple(time);
                         else act->stopDecouple();
-                    }
+                    } else continue;
                 }
                 else     // Fast Bang-Bang fallback
                 {
@@ -250,7 +250,7 @@ void Extruder::manageTemperatures()
         if(act == &Extruder::current->tempControl)
             WRITE(LED_PIN,on);
 #endif
-    }
+    } // for controller
 
 #if EXTRUDER_JAM_CONTROL
     /*    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
