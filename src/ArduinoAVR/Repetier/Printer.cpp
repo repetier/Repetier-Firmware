@@ -346,6 +346,9 @@ void Printer::kill(uint8_t only_steppers)
         Printer::setAllKilled(true);
     }
     else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+#if BED_LEDS
+	Light.ShowTemps();
+#endif
 }
 
 void Printer::updateAdvanceFlags()
@@ -1107,6 +1110,9 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
     setAutolevelActive(autoLevel);
+#if BED_LEDS
+		Light.ShowTemps();
+#endif
 }
 #else
 #if DRIVE_SYSTEM==TUGA  // Tuga printer homing

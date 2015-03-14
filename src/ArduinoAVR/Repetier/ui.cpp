@@ -3081,6 +3081,9 @@ break;
 			menuLevel = 0;
 			activeAction = 0;
 			UI_STATUS_UPD_RAM(UI_TEXT_STEPPER_DISABLED);
+#if BED_LEDS
+			Light.ShowTemps();
+#endif
             break;
         case UI_ACTION_RESET_EXTRUDER:
             Printer::currentPositionSteps[E_AXIS] = 0;
