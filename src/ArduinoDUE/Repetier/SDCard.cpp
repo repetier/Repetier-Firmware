@@ -39,7 +39,7 @@ SDCard::SDCard()
 
 void SDCard::automount()
 {
-#if SDCARDDETECT>-1
+#if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
         if(sdactive)   // Card removed
@@ -73,8 +73,8 @@ void SDCard::automount()
 void SDCard::initsd()
 {
     sdactive = false;
-#if SDSS >- 1
-#if SDCARDDETECT>-1
+#if SDSS > -1
+#if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
@@ -163,10 +163,11 @@ void SDCard::continuePrint(bool intern)
 void SDCard::stopPrint()
 {
     if(!sd.sdactive) return;
+    if(sdmode)
+        Com::printFLN(PSTR("SD print stopped by user."));
     sdmode = 0;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
-    Com::printFLN(PSTR("SD print stopped by user."));
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();

@@ -22,14 +22,14 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.92.2"
+#define REPETIER_VERSION "0.92.3"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
 // These are run time sqitchable debug flags
-enum debugFlags {DEB_ECHO= 0x1, DEB_INFO=0x2, DEB_ERROR =0x4,DEB_DRYRUN=0x8,
-                 DEB_COMMUNICATION=0x10, DEB_NOMOVES=0x20, DEB_DEBUG=0x40};
+enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x8,
+                 DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40};
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
@@ -359,6 +359,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_SD_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
+#define MENU_MODE_FULL_PID 32
+#define MENU_MODE_DEADTIME 64
 
 #include "HAL.h"
 #include "gcode.h"
@@ -553,7 +555,7 @@ public:
   void unmount();
   void startPrint();
   void pausePrint(bool intern = false);
-  void continuePrint(bool intern=false);
+  void continuePrint(bool intern = false);
   void stopPrint();
   inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
   void printStatus();

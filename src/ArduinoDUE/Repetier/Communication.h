@@ -116,8 +116,9 @@ FSTRINGVAR(tCommaSpeedEqual)
 FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
-
-#if DRIVE_SYSTEM==DELTA
+FSTRINGVAR(tExtruderJam)
+FSTRINGVAR(tFilamentSlipping)
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)

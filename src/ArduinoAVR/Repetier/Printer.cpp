@@ -68,6 +68,7 @@ float Printer::positionBeforePause[3] = {0, 0, 0};
 float oldFeedrate = Printer::feedrate;
 float Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
 
+uint8_t Printer::interruptEvent = 0;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
@@ -328,9 +329,6 @@ void Printer::kill(uint8_t only_steppers)
     disableYStepper();
     disableZStepper();
     Extruder::disableAllExtruderMotors();
-#if FAN_BOARD_PIN>-1
-    pwm_pos[NUM_EXTRUDER + 1] = 0;
-#endif // FAN_BOARD_PIN
     if(!only_steppers)
     {
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
@@ -349,6 +347,12 @@ void Printer::kill(uint8_t only_steppers)
 #if BED_LEDS
 	Light.ShowTemps();
 #endif
+#if FAN_BOARD_PIN>-1
+#if HAVE_HEATED_BED
+    if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
+#endif
+       pwm_pos[NUM_EXTRUDER + 1] = 0;
+#endif // FAN_BOARD_PIN
 }
 
 void Printer::updateAdvanceFlags()
@@ -611,7 +615,7 @@ void Printer::setup()
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
     Printer::setPowerOn(true);
 #else
-#if PS_ON_PIN>-1
+#if PS_ON_PIN > -1
     Printer::setPowerOn(false);
 #else
     Printer::setPowerOn(true);
@@ -621,11 +625,11 @@ void Printer::setup()
     //power to SD reader
 #if SDPOWER > -1
     SET_OUTPUT(SDPOWER);
-    WRITE(SDPOWER,HIGH);
+    WRITE(SDPOWER, HIGH);
 #endif
-#if defined(SDCARDDETECT) && SDCARDDETECT>-1
+#if defined(SDCARDDETECT) && SDCARDDETECT > -1
     SET_INPUT(SDCARDDETECT);
-    PULLUP(SDCARDDETECT,HIGH);
+    PULLUP(SDCARDDETECT, HIGH);
 #endif
 #endif
 
@@ -635,35 +639,35 @@ void Printer::setup()
     SET_OUTPUT(Z_STEP_PIN);
 
     //Initialize Dir Pins
-#if X_DIR_PIN>-1
+#if X_DIR_PIN > -1
     SET_OUTPUT(X_DIR_PIN);
 #endif
-#if Y_DIR_PIN>-1
+#if Y_DIR_PIN > -1
     SET_OUTPUT(Y_DIR_PIN);
 #endif
-#if Z_DIR_PIN>-1
+#if Z_DIR_PIN > -1
     SET_OUTPUT(Z_DIR_PIN);
 #endif
 
     //Steppers default to disabled.
 #if X_ENABLE_PIN > -1
     SET_OUTPUT(X_ENABLE_PIN);
-    WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
+    WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #if Y_ENABLE_PIN > -1
     SET_OUTPUT(Y_ENABLE_PIN);
-    WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+    WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #if Z_ENABLE_PIN > -1
     SET_OUTPUT(Z_ENABLE_PIN);
-    WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
+    WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER
     SET_OUTPUT(X2_STEP_PIN);
     SET_OUTPUT(X2_DIR_PIN);
 #if X2_ENABLE_PIN > -1
     SET_OUTPUT(X2_ENABLE_PIN);
-    WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
+    WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #endif
 
@@ -672,65 +676,65 @@ void Printer::setup()
     SET_OUTPUT(Y2_DIR_PIN);
 #if Y2_ENABLE_PIN > -1
     SET_OUTPUT(Y2_ENABLE_PIN);
-    WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
+    WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #endif
 
 #if FEATURE_TWO_ZSTEPPER
     SET_OUTPUT(Z2_STEP_PIN);
     SET_OUTPUT(Z2_DIR_PIN);
-#if X2_ENABLE_PIN > -1
+#if Z2_ENABLE_PIN > -1
     SET_OUTPUT(Z2_ENABLE_PIN);
-    WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+    WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #endif
 
     //endstop pullups
 #if MIN_HARDWARE_ENDSTOP_X
-#if X_MIN_PIN>-1
+#if X_MIN_PIN > -1
     SET_INPUT(X_MIN_PIN);
 #if ENDSTOP_PULLUP_X_MIN
-    PULLUP(X_MIN_PIN,HIGH);
+    PULLUP(X_MIN_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware x min endstop without pin assignment. Set pin number for X_MIN_PIN
 #endif
 #endif
 #if MIN_HARDWARE_ENDSTOP_Y
-#if Y_MIN_PIN>-1
+#if Y_MIN_PIN > -1
     SET_INPUT(Y_MIN_PIN);
 #if ENDSTOP_PULLUP_Y_MIN
-    PULLUP(Y_MIN_PIN,HIGH);
+    PULLUP(Y_MIN_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware y min endstop without pin assignment. Set pin number for Y_MIN_PIN
 #endif
 #endif
 #if MIN_HARDWARE_ENDSTOP_Z
-#if Z_MIN_PIN>-1
+#if Z_MIN_PIN > -1
     SET_INPUT(Z_MIN_PIN);
 #if ENDSTOP_PULLUP_Z_MIN
-    PULLUP(Z_MIN_PIN,HIGH);
+    PULLUP(Z_MIN_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware z min endstop without pin assignment. Set pin number for Z_MIN_PIN
 #endif
 #endif
 #if MAX_HARDWARE_ENDSTOP_X
-#if X_MAX_PIN>-1
+#if X_MAX_PIN > -1
     SET_INPUT(X_MAX_PIN);
 #if ENDSTOP_PULLUP_X_MAX
-    PULLUP(X_MAX_PIN,HIGH);
+    PULLUP(X_MAX_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware x max endstop without pin assignment. Set pin number for X_MAX_PIN
 #endif
 #endif
 #if MAX_HARDWARE_ENDSTOP_Y
-#if Y_MAX_PIN>-1
+#if Y_MAX_PIN > -1
     SET_INPUT(Y_MAX_PIN);
 #if ENDSTOP_PULLUP_Y_MAX
-    PULLUP(Y_MAX_PIN,HIGH);
+    PULLUP(Y_MAX_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware y max endstop without pin assignment. Set pin number for Y_MAX_PIN
@@ -740,7 +744,7 @@ void Printer::setup()
 #if Z_MAX_PIN>-1
     SET_INPUT(Z_MAX_PIN);
 #if ENDSTOP_PULLUP_Z_MAX
-    PULLUP(Z_MAX_PIN,HIGH);
+    PULLUP(Z_MAX_PIN, HIGH);
 #endif
 #else
 #error You have defined hardware z max endstop without pin assignment. Set pin number for Z_MAX_PIN
@@ -749,64 +753,64 @@ void Printer::setup()
 #if FEATURE_Z_PROBE && Z_PROBE_PIN>-1
     SET_INPUT(Z_PROBE_PIN);
 #if Z_PROBE_PULLUP
-    PULLUP(Z_PROBE_PIN,HIGH);
+    PULLUP(Z_PROBE_PIN, HIGH);
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     SET_OUTPUT(FAN_PIN);
-    WRITE(FAN_PIN,LOW);
+    WRITE(FAN_PIN, LOW);
 #endif
 #if FAN_BOARD_PIN>-1
     SET_OUTPUT(FAN_BOARD_PIN);
-    WRITE(FAN_BOARD_PIN,LOW);
+    WRITE(FAN_BOARD_PIN, LOW);
 #endif
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN>-1
     SET_OUTPUT(EXT0_HEATER_PIN);
-    WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN>-1 && NUM_EXTRUDER>1
     SET_OUTPUT(EXT1_HEATER_PIN);
-    WRITE(EXT1_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN>-1 && NUM_EXTRUDER>2
     SET_OUTPUT(EXT2_HEATER_PIN);
-    WRITE(EXT2_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER>3
     SET_OUTPUT(EXT3_HEATER_PIN);
-    WRITE(EXT3_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN>-1 && NUM_EXTRUDER>4
     SET_OUTPUT(EXT4_HEATER_PIN);
-    WRITE(EXT4_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER>5
     SET_OUTPUT(EXT5_HEATER_PIN);
-    WRITE(EXT5_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT0_EXTRUDER_COOLER_PIN) && EXT0_EXTRUDER_COOLER_PIN>-1
     SET_OUTPUT(EXT0_EXTRUDER_COOLER_PIN);
-    WRITE(EXT0_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT0_EXTRUDER_COOLER_PIN, LOW);
 #endif
-#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN>-1 && NUM_EXTRUDER>1
+#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 1
     SET_OUTPUT(EXT1_EXTRUDER_COOLER_PIN);
-    WRITE(EXT1_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT1_EXTRUDER_COOLER_PIN, LOW);
 #endif
-#if defined(EXT2_EXTRUDER_COOLER_PIN) && EXT2_EXTRUDER_COOLER_PIN>-1 && NUM_EXTRUDER>2
+#if defined(EXT2_EXTRUDER_COOLER_PIN) && EXT2_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 2
     SET_OUTPUT(EXT2_EXTRUDER_COOLER_PIN);
-    WRITE(EXT2_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT2_EXTRUDER_COOLER_PIN, LOW);
 #endif
-#if defined(EXT3_EXTRUDER_COOLER_PIN) && EXT3_EXTRUDER_COOLER_PIN>-1 && NUM_EXTRUDER>3
+#if defined(EXT3_EXTRUDER_COOLER_PIN) && EXT3_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 3
     SET_OUTPUT(EXT3_EXTRUDER_COOLER_PIN);
-    WRITE(EXT3_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT3_EXTRUDER_COOLER_PIN, LOW);
 #endif
-#if defined(EXT4_EXTRUDER_COOLER_PIN) && EXT4_EXTRUDER_COOLER_PIN>-1 && NUM_EXTRUDER>4
+#if defined(EXT4_EXTRUDER_COOLER_PIN) && EXT4_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 4
     SET_OUTPUT(EXT4_EXTRUDER_COOLER_PIN);
-    WRITE(EXT4_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT4_EXTRUDER_COOLER_PIN, LOW);
 #endif
-#if defined(EXT5_EXTRUDER_COOLER_PIN) && EXT5_EXTRUDER_COOLER_PIN>-1 && NUM_EXTRUDER>5
+#if defined(EXT5_EXTRUDER_COOLER_PIN) && EXT5_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 5
     SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
-    WRITE(EXT5_EXTRUDER_COOLER_PIN,LOW);
+    WRITE(EXT5_EXTRUDER_COOLER_PIN, LOW);
 #endif
 // Initalize jam sensors
 #if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
@@ -947,9 +951,7 @@ void Printer::setup()
 
 void Printer::defaultLoopActions()
 {
-
     Commands::checkForPeriodicalActions(true);  //check heater every n milliseconds
-
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED))
@@ -1629,10 +1631,11 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3)
     autolevelTransformation[5] = -autolevelTransformation[7];
     // cross(y,z)
     autolevelTransformation[0] = autolevelTransformation[4] * autolevelTransformation[8] - autolevelTransformation[5] * autolevelTransformation[7];
-    autolevelTransformation[1] = autolevelTransformation[5] * autolevelTransformation[6] - autolevelTransformation[3] * autolevelTransformation[8];
-    autolevelTransformation[2] = autolevelTransformation[3] * autolevelTransformation[7] - autolevelTransformation[4] * autolevelTransformation[6];
-    len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[2] * autolevelTransformation[2]);
+    autolevelTransformation[1] = autolevelTransformation[5] * autolevelTransformation[6];// - autolevelTransformation[3] * autolevelTransformation[8];
+    autolevelTransformation[2] = /*autolevelTransformation[3] * autolevelTransformation[7]*/ - autolevelTransformation[4] * autolevelTransformation[6];
+    len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[1] * autolevelTransformation[1] + autolevelTransformation[2] * autolevelTransformation[2]);
     autolevelTransformation[0] /= len;
+    autolevelTransformation[1] /= len;
     autolevelTransformation[2] /= len;
     len = sqrt(autolevelTransformation[4] * autolevelTransformation[4] + autolevelTransformation[5] * autolevelTransformation[5]);
     autolevelTransformation[4] /= len;
@@ -1658,6 +1661,56 @@ void Printer::reportCaseLightStatus() {
     Com::printInfoFLN(PSTR("No case lights"));
 #endif
 }
+
+void Printer::handleInterruptEvent() {
+    if(interruptEvent == 0) return;
+    int event = interruptEvent;
+    interruptEvent = 0;
+    switch(event) {
+#if EXTRUDER_JAM_CONTROL
+    case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+        Com::printFLN(PSTR("important:Extruder jam detected"));
+        UI_ERROR_P(Com::tExtruderJam);
+#if JAM_ACTION == 1 // start dialog
+        Printer::setUIErrorMessage(false);
+        uid.executeAction(UI_ACTION_WIZARD_JAM_EOF, true);
+#elif JAM_ACTION == 2 // pause host/print
+#if SDSUPPORT
+        if(sd.sdmode == 2) {
+            sd.pausePrint(true);
+            break;
+        }
+#endif // SDSUPPORT
+        Com::printFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+#endif // JAM_ACTION
+        break;
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL1:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL2:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4:
+    case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5:
+        {
+            if(isJamcontrolDisabled()) break;
+            fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
+            int16_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
+            if(steps > JAM_SLOWDOWN_STEPS && !extruder[extruderIndex].tempControl.isSlowedDown()) {
+                extruder[extruderIndex].tempControl.setSlowedDown(true);
+                Commands::changeFeedrateMultiply(JAM_SLOWDOWN_TO);
+                UI_ERROR_P(Com::tFilamentSlipping);
+            }
+            if(isDebugJam()) {
+                Com::printF(PSTR("Jam signal steps:"),steps);
+                int32_t percent =  static_cast<int32_t>(steps) * 100 / JAM_STEPS;
+                Com::printF(PSTR(" / "),percent);
+                Com::printFLN(PSTR("% on "),(int)extruderIndex);
+            }
+        }
+        break;
+#endif // EXTRUDER_JAM_CONTROL    case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+    }
+}
+
 #define START_EXTRUDER_CONFIG(i)     Com::printF(Com::tConfig);Com::printF(Com::tExtrDot,i+1);Com::print(':');
 void Printer::showConfiguration() {
     Com::config(PSTR("Baudrate:"),baudrate);

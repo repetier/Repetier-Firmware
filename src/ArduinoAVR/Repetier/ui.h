@@ -96,7 +96,9 @@ What display type do you use?
 #define UI_ACTION_HOME_X                1022
 #define UI_ACTION_HOME_Y                1023
 #define UI_ACTION_HOME_Z                1024
-#define UI_ACTION_SELECT_EXTRUDER1      1025
+#define UI_ACTION_SELECT_EXTRUDER0      1025
+#define UI_ACTION_SELECT_EXTRUDER1      1026
+#define UI_ACTION_SELECT_EXTRUDER2      1027
 #define UI_ACTION_STORE_EEPROM          1030
 #define UI_ACTION_LOAD_EEPROM           1031
 #define UI_ACTION_PRINT_ACCEL_X         1032
@@ -150,16 +152,16 @@ What display type do you use?
 #define UI_ACTION_HEATED_BED_OFF        1081
 #define UI_ACTION_EXTRUDER0_OFF         1082
 #define UI_ACTION_EXTRUDER1_OFF         1083
-#define UI_ACTION_HEATED_BED_TEMP       1084
-#define UI_ACTION_EXTRUDER0_TEMP        1085
-#define UI_ACTION_EXTRUDER1_TEMP        1086
-#define UI_ACTION_OPS_OFF               1087
-#define UI_ACTION_OPS_CLASSIC           1088
-#define UI_ACTION_OPS_FAST              1089
-#define UI_ACTION_DISABLE_STEPPER       1090
-#define UI_ACTION_RESET_EXTRUDER        1091
-#define UI_ACTION_EXTRUDER_RELATIVE     1092
-#define UI_ACTION_SELECT_EXTRUDER0      1093
+#define UI_ACTION_EXTRUDER2_OFF         1184
+#define UI_ACTION_HEATED_BED_TEMP       1085
+#define UI_ACTION_EXTRUDER0_TEMP        1086
+#define UI_ACTION_EXTRUDER1_TEMP        1087
+#define UI_ACTION_OPS_OFF               1088
+#define UI_ACTION_OPS_CLASSIC           1089
+#define UI_ACTION_OPS_FAST              1090
+#define UI_ACTION_DISABLE_STEPPER       1091
+#define UI_ACTION_RESET_EXTRUDER        1092
+#define UI_ACTION_EXTRUDER_RELATIVE     1093
 #define UI_ACTION_ADVANCE_L             1094
 #define UI_ACTION_PREHEAT_ABS           1095
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
@@ -168,9 +170,7 @@ What display type do you use?
 #define UI_ACTION_PAUSE                 1099
 #define UI_ACTION_EXTR_WAIT_RETRACT_TEMP 1100
 #define UI_ACTION_EXTR_WAIT_RETRACT_UNITS 1101
-#define UI_ACTION_EXTRUDER2_OFF         1102
 #define UI_ACTION_EXTRUDER2_TEMP        1103
-#define UI_ACTION_SELECT_EXTRUDER2      1104
 #define UI_ACTION_WRITE_DEBUG           1105
 #define UI_ACTION_FANSPEED              1106
 #define UI_ACTION_LIGHTS_ONOFF          1107
@@ -180,10 +180,18 @@ What display type do you use?
 #define UI_ACTION_Z_BABYSTEPS           1111
 #define UI_ACTION_MAX_INACTIVE          1112
 #define UI_ACTION_TEMP_DEFECT           1113
+#define UI_ACTION_BED_HEATMANAGER       1114
+#define UI_ACTION_BED_PGAIN             1115
+#define UI_ACTION_BED_IGAIN             1116
+#define UI_ACTION_BED_DGAIN             1117
+#define UI_ACTION_BED_DRIVE_MIN         1118
+#define UI_ACTION_BED_DRIVE_MAX         1119
+#define UI_ACTION_BED_MAX               1120
 #define UI_ACTION_SD_PRI_PAU_CONT       1200
 #define UI_ACTION_FAN_SUSPEND           1201
 #define UI_ACTION_AUTOLEVEL_ONOFF       1202
 #define UI_ACTION_SERVOPOS              1203
+#define UI_ACTION_IGNORE_M106           1204
 #define UI_ACTION_PREHEAT_PET           1913
 #define UI_ACTION_KAPTON				1914
 #define UI_ACTION_BLUETAPE				1915
@@ -225,6 +233,9 @@ What display type do you use?
 #define UI_ACTION_SHOW_USERMENU10       4110
 
 #define UI_ACTION_WIZARD_FILAMENTCHANGE  5000
+#define UI_ACTION_WIZARD_JAM_REHEAT      5001
+#define UI_ACTION_WIZARD_JAM_WAITHEAT    5002
+#define UI_ACTION_WIZARD_JAM_EOF         5003
 
 // Load basic language definition to make sure all values are defined
 #include "uilang.h"
@@ -453,6 +464,7 @@ class UIDisplay {
     void addFloat(float number, char fixdigits,uint8_t digits);
     inline void addFloat(float number) {addFloat(number, -9,2);};
     void addStringP(PGM_P text);
+    void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
     int okAction(bool allowMoves);
@@ -559,7 +571,20 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
 #else  // Smartcontroller
-#if MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
+#if MOTHERBOARD == 701 // Megatronics v2.0
+#define UI_DISPLAY_RS_PIN 14
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 15
+#define UI_DISPLAY_D4_PIN 30
+#define UI_DISPLAY_D5_PIN 31
+#define UI_DISPLAY_D6_PIN 32
+#define UI_DISPLAY_D7_PIN 33
+#define UI_ENCODER_A 61
+#define UI_ENCODER_B 59
+#define UI_ENCODER_CLICK 43
+#define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
+#define UI_INVERT_MENU_DIRECTION true
+#elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1
@@ -598,7 +623,7 @@ void uiCheckSlowKeys(int &action) {}
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED   0
 #undef SDSUPPORT
-#define SDSUPPORT              1 
+#define SDSUPPORT              1
 #else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
@@ -880,7 +905,7 @@ void uiCheckSlowKeys(int &action) {
     WRITE(UI_SHIFT_LD,LOW);
     WRITE(UI_SHIFT_LD,HIGH);
 
-    for(int8_t i=1;i<=8;i++) {
+    for(int8_t i = 1; i <= 8;i++) {
         if(!READ(UI_SHIFT_OUT)) { // pressed button = logical 0 (false)
             switch (i) {
                 case 1: action = UI_ACTION_Z_DOWN; break; // F3

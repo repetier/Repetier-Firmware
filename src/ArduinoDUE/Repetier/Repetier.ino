@@ -134,6 +134,8 @@ Custom M Codes
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
 - M513 - Clear all jam marker.
 - M600 Change filament
+- M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
+- M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 */
 

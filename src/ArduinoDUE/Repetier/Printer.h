@@ -89,7 +89,18 @@ union wizardVar {
 #define PRINTER_FLAG2_BLOCK_RECEIVING       1
 #define PRINTER_FLAG2_AUTORETRACT           2
 #define PRINTER_FLAG2_RESET_FILAMENT_USAGE  4
+#define PRINTER_FLAG2_IGNORE_M106_COMMAND   8
+#define PRINTER_FLAG2_DEBUG_JAM             16
+#define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 
+// List of possible interrupt events (1-255 allowed)
+#define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 2
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL1 3
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL2 4
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3 5
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
+#define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
@@ -226,6 +237,7 @@ public:
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
+    static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
 #if DRIVE_SYSTEM!=DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
@@ -262,6 +274,13 @@ public:
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
+    static void handleInterruptEvent();
+
+    static inline void setInterruptEvent(uint8_t evt, bool highPriority) {
+        if(highPriority || interruptEvent == 0)
+            interruptEvent = evt;
+    }
+
     static inline void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -269,42 +288,52 @@ public:
         else
             menuMode &= ~mode;
     }
+
     static inline bool isMenuMode(uint8_t mode)
     {
         return (menuMode & mode)==mode;
     }
+
     static inline bool debugEcho()
     {
         return ((debugLevel & 1)!=0);
     }
+
     static inline bool debugInfo()
     {
         return ((debugLevel & 2)!=0);
     }
+
     static inline bool debugErrors()
     {
         return ((debugLevel & 4)!=0);
     }
+
     static inline bool debugDryrun()
     {
         return ((debugLevel & 8)!=0);
     }
+
     static inline bool debugCommunication()
     {
         return ((debugLevel & 16)!=0);
     }
+
     static inline bool debugNoMoves()
     {
         return ((debugLevel & 32)!=0);
     }
+
     static inline bool debugFlag(unsigned long flags)
     {
         return (debugLevel & flags);
     }
+
     static inline void debugSet(unsigned long flags)
     {
         debugLevel |= flags;
     }
+
     static inline void debugReset(unsigned long flags)
     {
         debugLevel &= ~flags;
@@ -314,32 +343,34 @@ public:
     static inline void disableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
-        WRITE(X_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,!X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
+
     /** \brief Disable stepper motor for y direction. */
     static inline void disableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
-        WRITE(Y_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,!Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
     }
     /** \brief Disable stepper motor for z direction. */
     static inline void disableZStepper()
     {
 #if (Z_ENABLE_PIN > -1)
-        WRITE(Z_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,!Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
     }
+
     /** \brief Enable stepper motor for x direction. */
     static inline void  enableXStepper()
     {
@@ -347,9 +378,10 @@ public:
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
 #if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
-        WRITE(X2_ENABLE_PIN,X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
+
     /** \brief Enable stepper motor for y direction. */
     static inline void  enableYStepper()
     {
@@ -357,7 +389,7 @@ public:
         WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-        WRITE(Y2_ENABLE_PIN,Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, Y_ENABLE_ON);
 #endif
     }
     /** \brief Enable stepper motor for z direction. */
@@ -367,9 +399,10 @@ public:
         WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-        WRITE(Z2_ENABLE_PIN,Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
+
     static inline void setXDirection(bool positive)
     {
         if(positive)
@@ -387,20 +420,21 @@ public:
 #endif
         }
     }
+
     static inline void setYDirection(bool positive)
     {
         if(positive)
         {
-            WRITE(Y_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,!INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
 #endif
         }
         else
         {
-            WRITE(Y_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN,INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
 #endif
         }
     }
@@ -408,107 +442,130 @@ public:
     {
         if(positive)
         {
-            WRITE(Z_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,!INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
 #endif
         }
         else
         {
-            WRITE(Z_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z_DIR_PIN, INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN,INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
+
     static inline bool getZDirection()
     {
-        return ((READ(Z_DIR_PIN)!=0) ^ INVERT_Z_DIR);
+        return ((READ(Z_DIR_PIN) != 0) ^ INVERT_Z_DIR);
     }
+
     static inline bool getYDirection()
     {
-        return((READ(Y_DIR_PIN)!=0) ^ INVERT_Y_DIR);
+        return((READ(Y_DIR_PIN) != 0) ^ INVERT_Y_DIR);
     }
+
     static inline bool getXDirection()
     {
-        return((READ(X_DIR_PIN)!=0) ^ INVERT_X_DIR);
+        return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
+
     static inline uint8_t isLargeMachine()
     {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
+
     static inline void setLargeMachine(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
     }
+
     static inline uint8_t isAdvanceActivated()
     {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
+
     static inline void setAdvanceActivated(uint8_t b)
     {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
+
     static inline uint8_t isHomed()
     {
         return flag1 & PRINTER_FLAG1_HOMED;
     }
+
     static inline void setHomed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
     }
+
     static inline uint8_t isAllKilled()
     {
         return flag1 & PRINTER_FLAG1_ALLKILLED;
     }
+
     static inline void setAllKilled(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
     }
+
     static inline uint8_t isAutomount()
     {
         return flag1 & PRINTER_FLAG1_AUTOMOUNT;
     }
+
     static inline void setAutomount(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
     }
+
     static inline uint8_t isAnimation()
     {
         return flag1 & PRINTER_FLAG1_ANIMATION;
     }
+
     static inline void setAnimation(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
     }
+
     static inline uint8_t isUIErrorMessage()
     {
         return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
     }
+
     static inline void setUIErrorMessage(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
     }
+
     static inline uint8_t isNoDestinationCheck()
     {
         return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
     }
+
     static inline void setNoDestinationCheck(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
     }
+
     static inline uint8_t isPowerOn()
     {
         return flag1 & PRINTER_FLAG1_POWER_ON;
     }
+
     static inline void setPowerOn(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_POWER_ON : flag1 & ~PRINTER_FLAG1_POWER_ON);
     }
+
     static inline uint8_t isColdExtrusionAllowed()
     {
         return flag1 & PRINTER_FLAG1_ALLOW_COLD_EXTRUSION;
     }
+
     static inline void setColdExtrusionAllowed(uint8_t b)
     {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
@@ -517,24 +574,54 @@ public:
         else
             Com::printFLN(PSTR("Cold extrusion disallowed"));
     }
+
     static inline uint8_t isBlockingReceive()
     {
         return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
     }
+
     static inline void setBlockingReceive(uint8_t b)
     {
         flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
     }
+
     static inline uint8_t isAutoretract()
     {
         return flag2 & PRINTER_FLAG2_AUTORETRACT;
     }
+
     static inline void setAutoretract(uint8_t b)
     {
         flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         Com::printFLN(PSTR("Autoretract:"),b);
     }
 
+    static inline uint8_t isDebugJam()
+    {
+        return (flag2 & PRINTER_FLAG2_DEBUG_JAM) != 0;
+    }
+
+    static inline uint8_t isDebugJamOrDisabled()
+    {
+        return (flag2 & (PRINTER_FLAG2_DEBUG_JAM | PRINTER_FLAG2_JAMCONTROL_DISABLED)) != 0;
+    }
+
+    static inline void setDebugJam(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_DEBUG_JAM : flag2 & ~PRINTER_FLAG2_DEBUG_JAM);
+        Com::printFLN(PSTR("Jam debugging:"),b);
+    }
+
+    static inline uint8_t isJamcontrolDisabled()
+    {
+        return (flag2 & PRINTER_FLAG2_JAMCONTROL_DISABLED) != 0;
+    }
+
+    static inline void setJamcontrolDisabled(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
+        Com::printFLN(PSTR("Jam control disabled:"),b);
+    }
 
     static inline void toggleAnimation()
     {
@@ -614,6 +701,10 @@ public:
     static inline void setAnyTempsensorDefect()
     {
         flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+    }
+    static inline void unsetAnyTempsensorDefect()
+    {
+        flag0 &= ~PRINTER_FLAG0_TEMPSENSOR_DEFECT;
     }
     static inline bool isManualMoveMode()
     {
