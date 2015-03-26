@@ -740,6 +740,10 @@ void Printer::setup()
 #if Z_PROBE_PULLUP
     PULLUP(Z_PROBE_PIN, HIGH);
 #endif
+#ifdef Z_PROBE_IS_FSR
+    pinMode(42, OUTPUT);
+    digitalWrite(42, LOW);
+#endif
 #endif // FEATURE_FEATURE_Z_PROBE
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     SET_OUTPUT(FAN_PIN);
@@ -1516,6 +1520,14 @@ void Printer::waitForZProbeStart()
     }
     HAL::delayMilliseconds(30);
     UI_CLEAR_STATUS;
+#endif
+#ifdef Z_PROBE_IS_FSR
+    // Code to tell the FSR mcu to define zero level
+    HAL::delayMicroseconds(1);
+    digitalWrite(42, HIGH); //42 is hardcoded
+    HAL::delayMicroseconds(1);
+    digitalWrite(42, LOW); 
+    HAL::delayMicroseconds(100); // Give time to define new zero
 #endif
 }
 #endif
