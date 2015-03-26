@@ -1077,6 +1077,43 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif
+#ifdef Z_PROBE_IS_FSR
+    case 40: //M40 - Give pulse to fsr sensor
+       {
+	 int pin_number = 42;
+	 int pulses = 100; // Calibrate yourself
+	 if (com->hasP()) {
+	     pin_number = com->P;
+	 }
+	 if (com->hasS()) {
+	     pulses = com->S;
+	 }
+	 pinMode(pin_number, OUTPUT);
+	 for (int i=0; i < pulses; i++) { 
+	     // Hope I don't destroy anything with "delay"
+	     HAL::delayMilliseconds(1); 
+	     digitalWrite(pin_number, HIGH);   
+	     HAL::delayMilliseconds(1); 
+	     digitalWrite(pin_number, LOW);    
+	 }    
+	 delay(100); 
+       }
+       break;     
+     
+    case 41: //M41 view and optionally Set Z probe offset
+        Com::printF(PSTR("Z probe offset: "),Eeprom::zProbeHeight());
+	if (com->hasZ()) {
+#if EEPROM_MODE != 0	   
+	    HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT,com->Z);
+	    Com::printF(PSTR(" New Z probe offset: "),Eeprom::zProbeHeight());
+#else
+	    Com::println();
+	    Com::printF(PSTR("Requires EEPROM to change Z probe offset... "),Eeprom::zProbeHeight());
+#endif
+	}
+        Com::println();
+      break;
+#endif
     case 42: //M42 -Change pin status via gcode
         if (com->hasP())
         {
