@@ -1,7 +1,12 @@
 The Due implementation of the default arduino disables the watchdog feature at
 startup. Due to ARM limitation, it is not possible to enable a watchdog once it
 is disabled. For that reason, the watchdog feature does not work with default
-Arduino installation. To solve the problem copy the modified version as follows:
+Arduino installation. 
+
+Also some other boards like the Alligator board need their own variants, which can be
+copied and installed the same way.
+
+To solve the problem copy the modified version as follows:
 
 boards.txt needts to to to <ArduinoInstallPath>/hardware/arduino/sam
 

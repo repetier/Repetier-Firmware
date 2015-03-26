@@ -57,6 +57,8 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Arduino Due with RADDS     = 402
 // Arduino Due with RAMPS-FD  = 403
 // Arduino Due with RAMPS-FD V2 = 404
+// Alligator Board rev1 = 500
+// Alligator Board rev2 = 501
 
 #define MOTHERBOARD 402
 
@@ -784,6 +786,8 @@ on this endstop.
 #define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 #elif MOTHERBOARD==12
 #define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
+#define MOTOR_CURRENT {132,132,132,119,119}
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move
@@ -792,7 +796,7 @@ on this endstop.
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
 
 // Delta settings
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 /** \brief Delta rod length (mm)
 */
 #define DELTA_DIAGONAL_ROD 345 // mm

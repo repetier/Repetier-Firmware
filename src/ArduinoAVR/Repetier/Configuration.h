@@ -63,6 +63,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
+// Open Motion Controller     = 91
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Azteeg X1                  = 65
 // Gen7 1.1 till 1.3.x        = 7
@@ -80,6 +81,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Rambo                      = 301
 // PiBot for Repetier V1.0-1.3= 314
 // PiBot for Repetier V1.4    = 315
+// PiBot Controller V2.0      = 316
 // Sanguish Beta              = 501
 // Unique One rev. A          = 88
 // User layout defined in userpins.h = 999

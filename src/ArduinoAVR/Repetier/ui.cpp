@@ -2379,7 +2379,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         lastNextAccumul = 1;
     }
     float f = (float)(SPEED_MIN_MILLIS - dt) / (float)(SPEED_MIN_MILLIS - SPEED_MAX_MILLIS);
-    lastNextAccumul = 1.0f + (float)SPEED_MAGNIFICATION * f * f * f;
+    lastNextAccumul = 1.0f + (float)SPEED_MAGNIFICATION * f * f;
 #if UI_DYNAMIC_ENCODER_SPEED
     uint16_t dynSp = lastNextAccumul / 16;
     if(dynSp < 1)  dynSp = 1;
@@ -2474,14 +2474,14 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #if UI_SPEEDDEPENDENT_POSITIONING
         {
             float d = 0.01*(float)increment * lastNextAccumul;
-            if(fabs(d) * 2000 > Printer::maxFeedrate[X_AXIS] * dtReal)
-                d *= Printer::maxFeedrate[X_AXIS]*dtReal / (2000 * fabs(d));
+            if(fabs(d) * 1000 > Printer::maxFeedrate[X_AXIS] * dtReal)
+                d *= Printer::maxFeedrate[X_AXIS]*dtReal / (1000 * fabs(d));
             long steps = (long)(d * Printer::axisStepsPerMM[X_AXIS]);
             steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],true);
+            PrintLine::moveRelativeDistanceInStepsReal(steps,0,0,0,Printer::maxFeedrate[X_AXIS],false);
         }
 #else
-        PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],true);
+        PrintLine::moveRelativeDistanceInStepsReal(increment,0,0,0,Printer::homingFeedrate[X_AXIS],false);
 #endif
         Commands::printCurrentPosition(PSTR("UI_ACTION_XPOSITION "));
         break;
@@ -2490,31 +2490,37 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #if UI_SPEEDDEPENDENT_POSITIONING
         {
             float d = 0.01 * (float)increment * lastNextAccumul;
-            if(fabs(d) * 2000 > Printer::maxFeedrate[Y_AXIS] * dtReal)
-                d *= Printer::maxFeedrate[Y_AXIS] * dtReal / (2000 * fabs(d));
+            if(fabs(d) * 1000 > Printer::maxFeedrate[Y_AXIS] * dtReal)
+                d *= Printer::maxFeedrate[Y_AXIS] * dtReal / (1000 * fabs(d));
             long steps = (long)(d * Printer::axisStepsPerMM[Y_AXIS]);
             steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],false);
         }
 #else
-        PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
+        PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],false);
 #endif
         Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION "));
         break;
+    case UI_ACTION_ZPOSITION_NOTEST:
+        if(!allowMoves) return false;
+        Printer::setNoDestinationCheck(true);
+		goto ZPOS1;
     case UI_ACTION_ZPOSITION:
         if(!allowMoves) return false;
+ZPOS1:
 #if UI_SPEEDDEPENDENT_POSITIONING
         {
             float d = 0.01 * (float)increment * lastNextAccumul;
-            if(fabs(d) * 2000 > Printer::maxFeedrate[Z_AXIS] * dtReal)
-                d *= Printer::maxFeedrate[Z_AXIS] * dtReal / (2000 * fabs(d));
+            if(fabs(d) * 1000 > Printer::maxFeedrate[Z_AXIS] * dtReal)
+                d *= Printer::maxFeedrate[Z_AXIS] * dtReal / (1000 * fabs(d));
             long steps = (long)(d * Printer::axisStepsPerMM[Z_AXIS]);
             steps = ( increment<0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],true);
+            PrintLine::moveRelativeDistanceInStepsReal(0,0,steps,0,Printer::maxFeedrate[Z_AXIS],false);
         }
 #else
-        PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],true);
+        PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],false);
 #endif
+        Printer::setNoDestinationCheck(false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION "));
         break;
     case UI_ACTION_XPOSITION_FAST:
@@ -2527,9 +2533,15 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         PrintLine::moveRelativeDistanceInStepsReal(0,Printer::axisStepsPerMM[Y_AXIS] * increment,0,0,Printer::homingFeedrate[Y_AXIS],true);
         Commands::printCurrentPosition(PSTR("UI_ACTION_YPOSITION_FAST "));
         break;
+    case UI_ACTION_ZPOSITION_FAST_NOTEST:
+        if(!allowMoves) return false;
+        Printer::setNoDestinationCheck(true);
+		goto ZPOS2;
     case UI_ACTION_ZPOSITION_FAST:
         if(!allowMoves) return false;
+ZPOS2:
         PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment,0,Printer::homingFeedrate[Z_AXIS],true);
+        Printer::setNoDestinationCheck(false);
         Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST "));
         break;
     case UI_ACTION_EPOSITION:
@@ -2544,30 +2556,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         Extruder::current->disableCurrentExtruderMotor();
         break;
 #endif
-    case UI_ACTION_ZPOSITION_NOTEST:
-        if(!allowMoves) return false;
-        Printer::setNoDestinationCheck(true);
-#if UI_SPEEDDEPENDENT_POSITIONING
-        {
-            float d = 0.01 * (float)increment * lastNextAccumul;
-            if(fabs(d) * 2000>Printer::maxFeedrate[Z_AXIS] * dtReal)
-                d *= Printer::maxFeedrate[Z_AXIS] * dtReal / (2000 * fabs(d));
-            long steps = (long)(d * Printer::axisStepsPerMM[Z_AXIS]);
-            steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInStepsReal(0, 0, steps, 0, Printer::maxFeedrate[Z_AXIS], true);
-        }
-#else
-        PrintLine::moveRelativeDistanceInStepsReal(0, 0, increment, 0, Printer::homingFeedrate[Z_AXIS], true);
-#endif
-        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_NOTEST "));
-        Printer::setNoDestinationCheck(false);
-        break;
-    case UI_ACTION_ZPOSITION_FAST_NOTEST:
-        Printer::setNoDestinationCheck(true);
-        PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS]*increment,0,Printer::homingFeedrate[Z_AXIS],true);
-        Commands::printCurrentPosition(PSTR("UI_ACTION_ZPOSITION_FAST_NOTEST "));
-        Printer::setNoDestinationCheck(false);
-        break;
     case UI_ACTION_Z_BABYSTEPS:
 #if FEATURE_BABYSTEPPING
     {
@@ -2629,8 +2617,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         uint8_t inactT = stepperInactiveTime / 60000;
         INCREMENT_MIN_MAX(inactT,1,0,240);
         stepperInactiveTime = inactT * 60000;
-//        stepperInactiveTime -= stepperInactiveTime % 1000;
-//        INCREMENT_MIN_MAX(stepperInactiveTime,60000UL,0,10080000UL);
     }
     break;
     case UI_ACTION_MAX_INACTIVE:
@@ -2638,8 +2624,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         uint8_t inactT = maxInactiveTime / 60000;
         INCREMENT_MIN_MAX(inactT,1,0,240);
         maxInactiveTime = inactT * 60000;
-//        maxInactiveTime -= maxInactiveTime % 1000;
-//        INCREMENT_MIN_MAX(maxInactiveTime,60000UL,0,10080000UL);
     }
     break;
     case UI_ACTION_PRINT_ACCEL_X:
@@ -2704,8 +2688,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
         p += increment;
         if(p < 0) p = 0;
         if(p > sizeof(baudrates)/4 - 2) p = sizeof(baudrates)/4 - 2;
-//        rate = pgm_read_dword(&(baudrates[p]));
-//        if(rate == 0) p--;
         baudrate = pgm_read_dword(&(baudrates[p]));
     }
 #endif
@@ -2805,7 +2787,6 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 {
     int ret = 0;
 #if UI_HAS_KEYS == 1
-//    bool skipBeep = false;
     if(action & UI_ACTION_TOPMENU)   // Go to start menu
     {
         action -= UI_ACTION_TOPMENU;
@@ -2820,7 +2801,6 @@ int UIDisplay::executeAction(int action, bool allowMoves)
         {
         case UI_ACTION_OK:
             ret = okAction(allowMoves);
-//            skipBeep = true; // Prevent double beep
             break;
         case UI_ACTION_BACK:
             if(uid.isWizardActive()) break; // wizards can not exit before finished
@@ -2986,14 +2966,12 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             EEPROM::storeDataIntoEEPROM(false);
             pushMenu(&ui_menu_eeprom_saved, false);
             BEEP_LONG;
-//            skipBeep = true;
             break;
         case UI_ACTION_LOAD_EEPROM:
-            EEPROM::readDataFromEEPROM();
+            EEPROM::readDataFromEEPROM(true);
             Extruder::selectExtruderById(Extruder::current->id);
             pushMenu(&ui_menu_eeprom_loaded, false);
             BEEP_LONG;
-//            skipBeep = true;
             break;
 #endif
 #if SDSUPPORT
@@ -3353,8 +3331,6 @@ int UIDisplay::executeAction(int action, bool allowMoves)
             break;
         }
     refreshPage();
-//    if(!skipBeep)
-//        BEEP_SHORT
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif

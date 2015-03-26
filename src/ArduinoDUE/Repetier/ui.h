@@ -999,7 +999,9 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_BUTTON_PREVIOUS 47
 #define UI_BUTTON_BACK     46
 #define UI_BUTTON_SD_PRINT 29
-#else
+#endif
+
+#if PiBot_V_1_4==true || PiBot_V_1_6==true
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1
@@ -1022,6 +1024,33 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_BUTTON_PREVIOUS 5
 #define UI_BUTTON_BACK     11
 #define UI_BUTTON_SD_PRINT 42
+#endif
+
+#if PiBot_V_2_0
+#define BEEPER_PIN             16
+#define UI_DISPLAY_RS_PIN      43
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D0_PIN      19
+#define UI_DISPLAY_D1_PIN      18
+#define UI_DISPLAY_D2_PIN      38
+#define UI_DISPLAY_D3_PIN      41
+#define UI_DISPLAY_D4_PIN      19
+#define UI_DISPLAY_D5_PIN      18
+#define UI_DISPLAY_D6_PIN      38
+#define UI_DISPLAY_D7_PIN      41
+
+#define UI_ENCODER_A           37
+#define UI_ENCODER_B           36
+#define UI_ENCODER_CLICK       69   ////***Vick BTN
+#define UI_RESET_PIN           -1   ////**** if you want, you can get the CNC Pin used 11
+
+#define UI_DELAYPERCHAR        320
+#define UI_BUTTON_OK           47
+#define UI_BUTTON_NEXT         46
+#define UI_BUTTON_PREVIOUS     45
+#define UI_BUTTON_BACK         44
+#define UI_BUTTON_SD_PRINT     70   ////**** if you want, you can get the CNC Pin used 10
 #endif
 
 #ifdef UI_MAIN

@@ -170,7 +170,7 @@ class EEPROM
 {
 #if EEPROM_MODE != 0
     static void writeExtruderPrefix(uint pos);
-    static void writeFloat(uint pos,PGM_P text,uint8_t digits=3);
+    static void writeFloat(uint pos,PGM_P text,uint8_t digits = 3);
     static void writeLong(uint pos,PGM_P text);
     static void writeInt(uint pos,PGM_P text);
     static void writeByte(uint pos,PGM_P text);
@@ -182,8 +182,8 @@ public:
 
     static void init();
     static void initBaudrate();
-    static void storeDataIntoEEPROM(uint8_t corrupted=0);
-    static void readDataFromEEPROM();
+    static void storeDataIntoEEPROM(uint8_t corrupted = 0);
+    static void readDataFromEEPROM(bool includeExtruder);
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);
