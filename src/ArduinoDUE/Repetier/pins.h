@@ -356,7 +356,7 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_4_PIN     97 // PC20 on piggy
 #define TEMP_4_PIN       3  // PA6, analog on piggy
 
-#define ORIG_ENABLE_PIN  24  // PA15, motor RESET pin
+#define ORIG_MOTOR_RESET  24  // PA15, motor RESET pin
 
 #define ORIG_E0_STEP_PIN    5  // PC25
 #define ORIG_E0_DIR_PIN     4  // PC26
@@ -373,12 +373,12 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_STEP_PIN    11 // PD7 on piggy
 #define ORIG_E2_DIR_PIN     29 // PD6 on piggy
 #define ORIG_E2_ENABLE_PIN  -1
-//#define E2_MS_PIN         -1
+#define E2_MS_PIN         -1
 
 #define ORIG_E3_STEP_PIN    30 // PD9 on piggy
 #define ORIG_E3_DIR_PIN     12 // PD8 on piggy
 #define ORIG_E3_ENABLE_PIN  -1
-//#define E3_MS_PIN         -1
+#define E3_MS_PIN         -1
 
 #define SDSUPPORT      true
 #define SDPOWER 	   -1
@@ -400,14 +400,10 @@ STEPPER_CURRENT_CONTROL
 
 #define EXP_VOLTAGE_LEVEL_PIN 65 // PB20
 
-
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 #define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
-
-// Motor microstepping Mode selector
-
 
 //** DAC for motor vfref current
 #define DAC_SYNC   53 // PB14
@@ -433,7 +429,7 @@ STEPPER_CURRENT_CONTROL
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 0 //EEPROM_SPI_ALLIGATOR
+#define EEPROM_AVAILABLE EEPROM_SPI_ALLIGATOR //EEPROM_SPI_ALLIGATOR
 #endif
 // End Alligator Board
 
@@ -460,19 +456,19 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_X_DIR_PIN       2 // PB25
 #define ORIG_X_MIN_PIN      34 // PC2 
 #define ORIG_X_MAX_PIN      33 // PC1
-#define ORIG_X_ENABLE_PIN   24//24 // PA15, motor RESET pin
+#define ORIG_X_ENABLE_PIN   24 // PA15, motor RESET pin
 
 #define ORIG_Y_STEP_PIN      94 // PB22
 #define ORIG_Y_DIR_PIN       95 // PB23
 #define ORIG_Y_MIN_PIN      37 // PC5
 #define ORIG_Y_MAX_PIN      35 // PC3
-#define ORIG_Y_ENABLE_PIN   24//24 // PA15, motor RESET pin
+#define ORIG_Y_ENABLE_PIN   24 // PA15, motor RESET pin
 
 #define ORIG_Z_STEP_PIN     98 // PC27
 #define ORIG_Z_DIR_PIN       3 // PC28
 #define ORIG_Z_MIN_PIN      39 // PC7
 #define ORIG_Z_MAX_PIN      38 // PC6
-#define ORIG_Z_ENABLE_PIN   24//24 // PA15, motor RESET pin
+#define ORIG_Z_ENABLE_PIN   24 // PA15, motor RESET pin
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     68 // PA1 
@@ -521,10 +517,7 @@ STEPPER_CURRENT_CONTROL
 #define SDA_PIN 	-1  // i2c not used
 #define SCL_PIN 	-1  // i2c not used
 
-#define LED_RED_PIN  41//36//PC4
-#define LED_GREEN_PIN 40//40 //PC8
-#define CASE_LIGHTS_PIN 36//41//PC9
-
+#define CASE_LIGHTS_PIN 41//PC9
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,

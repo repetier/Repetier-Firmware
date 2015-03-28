@@ -60,7 +60,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Alligator Board rev1 = 500
 // Alligator Board rev2 = 501
 
-#define MOTHERBOARD 402
+#define MOTHERBOARD 501
 
 #include "pins.h"
 
@@ -1124,7 +1124,7 @@ matches, the stored values are used to overwrite the settings.
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM.
 */
-#define EEPROM_MODE 1
+#define EEPROM_MODE 2
 
 
 /**************** duplicate motor driver ***************
@@ -1343,7 +1343,7 @@ The following settings override uiconfig.h!
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 */
-#define FEATURE_CONTROLLER CONTROLLER_RADDS
+#define FEATURE_CONTROLLER NO_CONTROLLER
 
 /**
 Select the language to use.
