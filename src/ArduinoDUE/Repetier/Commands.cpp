@@ -355,12 +355,12 @@ void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
 void setMotorCurrent(uint8_t channel, unsigned short value)
 {
-    if(channel >= 4 && channel < 0)
+    if(channel >= 4 || channel < 0)
         return;
 
     uint8_t externalDac_buf[2] = {0x10, 0x00};
 
-    externalDac_buf[0] |= (channel << 6);
+    externalDac_buf[0] |= ( 3-channel << 6);
     externalDac_buf[0] |= (value >> 4);
     externalDac_buf[1] |= (value << 4);
 
@@ -408,7 +408,7 @@ void motorCurrentControlInit() //Initialize Motor Current
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
     
     for(uint8_t i=0; i<4; i++)
-        setMotorCurrent(3-i,digipot_motor_current[i]);         
+        setMotorCurrent(i,digipot_motor_current[i]);         
 }    
 #endif
 

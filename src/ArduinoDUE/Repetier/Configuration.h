@@ -787,8 +787,8 @@ on this endstop.
 #elif MOTHERBOARD==12
 #define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
-#define MOTOR_CURRENT {132,132,132,119,119}
-#endif
+#define MOTOR_CURRENT {130,130,130,110,110}
+#endif                  
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
