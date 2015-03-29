@@ -1708,13 +1708,13 @@ void UIDisplay::refreshPage()
     GD2::refresh();
 #else
     uint16_t r;
-    uint8_t mtype;
-    char cache[UI_ROWS][MAX_COLS+1];
+    uint8_t mtype = UI_MENU_TYPE_INFO;
+    char cache[UI_ROWS][MAX_COLS + 1];
     adjustMenuPos();
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     // Reset timeout on menu back when user active on menu
     if (uid.encoderLast != encoderStartScreen)
-        ui_autoreturn_time=HAL::timeInMilliseconds()+UI_AUTORETURN_TO_MENU_AFTER;
+        ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
 
