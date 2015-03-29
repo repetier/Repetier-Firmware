@@ -355,12 +355,12 @@ void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
 void setMotorCurrent(uint8_t channel, unsigned short value)
 {
-    if(channel >= 4)
+    if(channel >= 4 || channel < 0)
         return;
 
     uint8_t externalDac_buf[2] = {0x10, 0x00};
 
-    externalDac_buf[0] |= (channel << 6);
+    externalDac_buf[0] |= ( 3-channel << 6);
     externalDac_buf[0] |= (value >> 4);
     externalDac_buf[1] |= (value << 4);
 
@@ -393,7 +393,6 @@ void motorCurrentControlInit() //Initialize Motor Current
     WRITE(SPI_FLASH_CS, HIGH);
     WRITE(SDSS, HIGH);
     SET_OUTPUT(DAC_SYNC);
-    HAL::spiBegin();
 
     HAL::delayMicroseconds(1);
     HAL::delayMicroseconds(1);
@@ -405,7 +404,12 @@ void motorCurrentControlInit() //Initialize Motor Current
     WRITE(DAC_SYNC, LOW);
 
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
-}
+    
+    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
+    
+    for(uint8_t i=0; i<4; i++)
+        setMotorCurrent(i,digipot_motor_current[i]);         
+}    
 #endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1

@@ -566,7 +566,7 @@ void Printer::setup()
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
-#if EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
+#if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
 #endif
     HAL::hwSetup();
