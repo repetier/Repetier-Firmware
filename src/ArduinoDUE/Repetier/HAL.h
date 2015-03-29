@@ -467,54 +467,42 @@ public:
         
         /*write enable*/
         eeprom_temp[0] = 6;//WREN
-        digitalWrite( SPI_EEPROM1_CS , LOW );
-        //delayMilliseconds(1);
+        WRITE( SPI_EEPROM1_CS , LOW );
         spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 1);
-        digitalWrite( SPI_EEPROM1_CS , HIGH );
+        WRITE( SPI_EEPROM1_CS , HIGH );
         delayMilliseconds(1);
         
         /*write addr*/
         eeprom_temp[0] = 2;//WRITE
         eeprom_temp[1] = ((pos>>8) & 0xFF);//addrH
         eeprom_temp[2] = (pos& 0xFF);//addrL
-        //i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos); 
-        digitalWrite( SPI_EEPROM1_CS , LOW );
-        //delayMilliseconds(1);
+        WRITE( SPI_EEPROM1_CS , LOW );
         spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 3);        
         
-        //i2cWriting(newvalue.b[0]);        // write first byte
         spiSend(SPI_CHAN_EEPROM1 ,&(newvalue.b[0]) , 1);
         for (int i=1;i<size;i++) {
             pos++;
             // writes cannot cross page boundary
             if ((pos % EEPROM_PAGE_SIZE) == 0) {
                 // burn current page then address next one
-                //i2cStop();
-                digitalWrite( SPI_EEPROM1_CS , HIGH );
+                WRITE( SPI_EEPROM1_CS , HIGH );
                 delayMilliseconds(EEPROM_PAGE_WRITE_TIME); 
                 
                 /*write enable*/
                 eeprom_temp[0] = 6;//WREN
-                digitalWrite( SPI_EEPROM1_CS , LOW );
+                WRITE( SPI_EEPROM1_CS , LOW );
                 spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 1);
-                digitalWrite( SPI_EEPROM1_CS , HIGH );
-                //delayMilliseconds(1);
+                WRITE( SPI_EEPROM1_CS , HIGH );
                 
-                
-                // i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
                 eeprom_temp[0] = 2;//WRITE
                 eeprom_temp[1] = ((pos>>8) & 0xFF);//addrH
                 eeprom_temp[2] = (pos& 0xFF);//addrL
-                digitalWrite( SPI_EEPROM1_CS , LOW );
+                WRITE( SPI_EEPROM1_CS , LOW );
                 spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 3);
-            } //else {
-            //i2cTxFinished();      // wait for transmission register to empty
-            //}
-            //i2cWriting(newvalue.b[i]);
+            } 
             spiSend(SPI_CHAN_EEPROM1 ,&(newvalue.b[i]) , 1);
         }
-        // i2cStop();          // signal end of transaction
-        digitalWrite( SPI_EEPROM1_CS , HIGH );
+        WRITE( SPI_EEPROM1_CS , HIGH );
         delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
 #else
         i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);        
@@ -545,35 +533,22 @@ public:
         eeval_t v;
         uint8_t eeprom_temp[3];
         size--;
-        // set read location
-        // i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_READ, pos);
-        // begin transmission from device
-        //  i2cStartBit();
-        
-         /*eeprom_temp[0] = 5;//READ
-        digitalWrite( SPI_EEPROM1_CS , LOW );
-        delayMilliseconds(1);
-        spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 1);
-         delayMilliseconds(1);
-        v.b[i] = spiReceive(SPI_CHAN_EEPROM1); 
-        digitalWrite( SPI_EEPROM1_CS , HIGH );*/
-        
+                
         eeprom_temp[0] = 3;//READ
         eeprom_temp[1] = ((pos>>8) & 0xFF);//addrH
         eeprom_temp[2] = (pos& 0xFF);//addrL
-        digitalWrite( SPI_EEPROM1_CS , HIGH );
-        digitalWrite( SPI_EEPROM1_CS , LOW );
-        //delayMilliseconds(1);
+        WRITE( SPI_EEPROM1_CS , HIGH );
+        WRITE( SPI_EEPROM1_CS , LOW );
+        
         spiSend(SPI_CHAN_EEPROM1 ,eeprom_temp , 3);
-        //delayMilliseconds(1);
+        
         for (i=0;i<size;i++) {
             // read an incomming byte 
             v.b[i] = spiReceive(SPI_CHAN_EEPROM1); 
         }
         // read last byte 
         v.b[i] = spiReceive(SPI_CHAN_EEPROM1); 
-        digitalWrite( SPI_EEPROM1_CS , HIGH );
-        //delayMilliseconds(1);
+        WRITE( SPI_EEPROM1_CS , HIGH );
         return v;
 #else
         int i;

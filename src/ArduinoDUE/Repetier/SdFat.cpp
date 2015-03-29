@@ -3029,7 +3029,10 @@ void (*SdBaseFile::oldDateTime_)(uint16_t& date, uint16_t& time) = 0;  // NOLINT
  * initialize SPI pins
  */
 static void spiBegin() {
+ // Already spi init for EEPROM in Alligator boards
+#if EEPROM_AVAILABLE != EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
+#endif
 }
 //------------------------------------------------------------------------------
 /**
