@@ -1857,7 +1857,8 @@ void Extruder::retractDistance(float dist)
     float oldFeedrate = Printer::feedrate;
     int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
     int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
-    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance,distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED), false, false);
+    float speed = distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance, RMath::max(speed, 1.f), false, false);
     Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
     Printer::feedrate = oldFeedrate;
 }
