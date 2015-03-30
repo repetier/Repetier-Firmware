@@ -839,8 +839,8 @@ UI_MENU_SUBMENU(ui_menu_about_sub, UI_TEXT_ABOUT,ui_page_about)
 
 //UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 //UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_calibration, &ui_menu_about_sub }
-UI_MENU(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1, &ui_menu_preheat_sub, &ui_menu_perform_sub, SD_PRINTFILE_ENTRY UI_MENU_SD_COND UI_MENU_FAN_COND &ui_menu_prepare, &ui_menu_about_sub }
+UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
 
 /* Define menus accessible by action commands
 

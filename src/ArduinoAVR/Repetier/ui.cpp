@@ -3227,7 +3227,7 @@ break;
 				pushMenu(&ui_menu_sd, false);
 			else {
 				ret = okAction(allowMoves);
-				skipBeep = true; // Prevent double beep
+				//skipBeep = true; // Prevent double beep
 			}
             break;
 #endif
