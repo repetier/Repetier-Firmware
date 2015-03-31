@@ -1149,7 +1149,8 @@ ISR(USART_UDRE_vect)
  #error BlueTooth serial 2 or 3 can be used only with boards based on ATMega2560 or ATMega1280
 #endif
 #if (BLUETOOTH_SERIAL == 1)
- #define SIG_USARTx_RECV   SIG_USART1_RECV
+// #define SIG_USARTx_RECV   SIG_USART1_RECV
+ #define SIG_USARTx_RECV   USART1_RECV_vect
  #define USARTx_UDRE_vect  USART1_UDRE_vect
  #define UDRx              UDR1
  #define UCSRxA            UCSR1A
@@ -1161,7 +1162,8 @@ ISR(USART_UDRE_vect)
  #define UDRIEx            UDRIE1
  #define RXxPIN            19
 #elif (BLUETOOTH_SERIAL == 2)
- #define SIG_USARTx_RECV SIG_USART2_RECV
+// #define SIG_USARTx_RECV SIG_USART2_RECV
+ #define SIG_USARTx_RECV   USART2_RECV_vect
  #define USARTx_UDRE_vect  USART2_UDRE_vect
  #define UDRx              UDR2
  #define UCSRxA            UCSR2A
@@ -1173,7 +1175,8 @@ ISR(USART_UDRE_vect)
  #define UDRIEx            UDRIE2
  #define RXxPIN            17
 #elif (BLUETOOTH_SERIAL == 3)
- #define SIG_USARTx_RECV SIG_USART3_RECV
+// #define SIG_USARTx_RECV SIG_USART3_RECV
+ #define SIG_USARTx_RECV   USART3_RECV_vect
  #define USARTx_UDRE_vect  USART3_UDRE_vect
  #define UDRx              UDR3
  #define UCSRxA            UCSR3A
