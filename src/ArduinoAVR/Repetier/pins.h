@@ -2101,8 +2101,8 @@ S3(ext)=9
 #define SDCARDDETECT 	    49
 
 #define LED_PIN            13
-#define FAN_PIN            7        ////*****fan
-#define PS_ON_PIN          12
+#define ORIG_FAN_PIN       7        ////*****fan
+#define ORIG_PS_ON_PIN     12
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       8    ////**** Extuder1
@@ -2164,9 +2164,9 @@ S3(ext)=9
 #define SDCARDDETECT 	   10
 
 #define LED_PIN            30
-#define FAN_PIN            7        ////*****fan
+#define ORIG_FAN_PIN       7        ////*****fan
 //uncomment when the 2nd fan used - works only without heated bed!
-#define FAN2_PIN           2
+#define ORIG_FAN2_PIN      2
 #define PS_ON_PIN          40
 #define KILL_PIN           -1
 
@@ -2236,10 +2236,10 @@ S3(ext)=9
 
 #define LED_PIN            -1
 
-#define FAN_PIN            6     ////***** PWM6 fan1
-#define FAN2_PIN           7     ////***** PWM7 fan2
+#define ORIG_FAN_PIN        6     ////***** PWM6 fan1
+#define ORIG_FAN2_PIN       7     ////***** PWM7 fan2
 
-#define PS_ON_PIN          17    /////*****have hardware in PiBot HDV2.0
+#define ORIG_PS_ON_PIN          17    /////*****have hardware in PiBot HDV2.0
 #define KILL_PIN           -1
 
 #define HEATER_0_PIN       5     ////*** PWM5 Extuder1
