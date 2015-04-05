@@ -213,6 +213,9 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_2_PIN            -1
 #define TEMP_2_PIN               2
 
+#define SCK_PIN          7
+#define MISO_PIN         6
+#define MOSI_PIN         5
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 
