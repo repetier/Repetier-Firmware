@@ -404,12 +404,12 @@ void motorCurrentControlInit() //Initialize Motor Current
     WRITE(DAC_SYNC, LOW);
 
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
-    
+
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-    
+
     for(uint8_t i=0; i<4; i++)
-        setMotorCurrent(i,digipot_motor_current[i]);         
-}    
+        setMotorCurrent(i,digipot_motor_current[i]);
+}
 #endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
@@ -511,19 +511,19 @@ void microstepReadings()
     Com::printF(Com::tYColon,READ(Y_MS1_PIN));
     Com::printFLN(Com::tComma,READ(Y_MS2_PIN));
 #elif Y_MS1_PIN > -1
-    Com::printFLN(Com::tXColon,READ(Y_MS1_PIN));
+    Com::printFLN(Com::tYColon,READ(Y_MS1_PIN));
 #endif
 #if Z_MS1_PIN > -1 && Z_MS2_PIN > -1
     Com::printF(Com::tZColon,READ(Z_MS1_PIN));
     Com::printFLN(Com::tComma,READ(Z_MS2_PIN));
 #elif Z_MS1_PIN > -1
-    Com::printFLN(Com::tXColon,READ(Z_MS1_PIN));
+    Com::printFLN(Com::tZColon,READ(Z_MS1_PIN));
 #endif
 #if E0_MS1_PIN > -1 && E0_MS2_PIN > -1
     Com::printF(Com::tE0Colon,READ(E0_MS1_PIN));
     Com::printFLN(Com::tComma,READ(E0_MS2_PIN));
 #elif E0_MS1_PIN > -1
-    Com::printFLN(Com::tXColon,READ(E0_MS1_PIN));
+    Com::printFLN(Com::tE0Colon,READ(E0_MS1_PIN));
 #endif
 #if E1_MS1_PIN > -1 && E1_MS2_PIN > -1
     Com::printF(Com::tE1Colon,READ(E1_MS1_PIN));

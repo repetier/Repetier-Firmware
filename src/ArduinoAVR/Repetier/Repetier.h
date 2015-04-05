@@ -117,18 +117,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
 #define ANALOG_REF ANALOG_REF_AVCC
 
-// MS1 MS2 Stepper Driver Microstepping mode table
-#define MICROSTEP1 LOW,LOW
-#define MICROSTEP2 HIGH,LOW
-#define MICROSTEP4 LOW,HIGH
-#define MICROSTEP8 HIGH,HIGH
-#if (MOTHERBOARD == 501)
-#define MICROSTEP16 LOW,LOW
-#else
-#define MICROSTEP16 HIGH,HIGH
-#endif
-#define MICROSTEP32 HIGH,HIGH
-
 #define HOME_ORDER_XYZ 1
 #define HOME_ORDER_XZY 2
 #define HOME_ORDER_YXZ 3
@@ -181,6 +169,18 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #include "Configuration.h"
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#if (MOTHERBOARD == 501)
+#define MICROSTEP16 LOW,LOW
+#else
+#define MICROSTEP16 HIGH,HIGH
+#endif
+#define MICROSTEP32 HIGH,HIGH
 
 #define GCODE_BUFFER_SIZE 1
 

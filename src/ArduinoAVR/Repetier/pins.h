@@ -170,7 +170,7 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 91
 #define KNOWN_BOARD 1
 
-#ifndef __AVR_ATmega644P__
+#if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega1284P__) && !defined(__AVR_ATmega644__) && !defined(__AVR_ATmega1284__)
 #error Oops!  Make sure you have 'OMC with Atmega644 at 20 Mhz' selected from the 'Tools -> Boards' menu.
 #endif
 
@@ -189,8 +189,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_Z_STEP_PIN         23
 #define ORIG_Z_DIR_PIN          22
 #define ORIG_Z_ENABLE_PIN       10
-#define ORIG_Z_MIN_PIN          -2
-#define ORIG_Z_MAX_PIN           2
+#define ORIG_Z_MIN_PIN           2
+#define ORIG_Z_MAX_PIN          -1
 
 #define ORIG_E0_STEP_PIN        24
 #define ORIG_E0_DIR_PIN         21
