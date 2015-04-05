@@ -117,6 +117,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
 #define ANALOG_REF ANALOG_REF_AVCC
 
+#include "Configuration.h"
+
 // MS1 MS2 Stepper Driver Microstepping mode table
 #define MICROSTEP1 LOW,LOW
 #define MICROSTEP2 HIGH,LOW
@@ -179,8 +181,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
-
-#include "Configuration.h"
 
 #define GCODE_BUFFER_SIZE 1
 
