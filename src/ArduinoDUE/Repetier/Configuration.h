@@ -60,7 +60,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Alligator Board rev1 = 500
 // Alligator Board rev2 = 501
 
-#define MOTHERBOARD 501
+#define MOTHERBOARD 402
 
 #include "pins.h"
 
@@ -1343,7 +1343,7 @@ The following settings override uiconfig.h!
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 */
-#define FEATURE_CONTROLLER CONTROLLER_REPRAPDISCOUNT_GLCD
+#define FEATURE_CONTROLLER CONTROLLER_RADDS
 
 /**
 Select the language to use.
