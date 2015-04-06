@@ -60,7 +60,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Alligator Board rev1 = 500
 // Alligator Board rev2 = 501
 
-#define MOTHERBOARD 402
+#define MOTHERBOARD 501
 
 #include "pins.h"
 
@@ -1343,7 +1343,7 @@ The following settings override uiconfig.h!
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 */
-#define FEATURE_CONTROLLER CONTROLLER_RADDS
+#define FEATURE_CONTROLLER CONTROLLER_REPRAPDISCOUNT_GLCD
 
 /**
 Select the language to use.
@@ -1420,6 +1420,15 @@ Values must be in range 1..255
 */
 #define BEEPER_SHORT_SEQUENCE 2,2
 #define BEEPER_LONG_SEQUENCE 8,8
+
+
+/** Display Voltage Logic Selector like Alligator board
+ 0 = Voltage level 3.3V
+ 1 = Voltage level 5V
+ */
+#if MOTHERBOARD==501
+#define UI_VOLTAGE_LEVEL 1 // Set 5 o 3.3 V
+#endif
 
 // ###############################################################################
 // ##                         Values for menu settings                          ##
