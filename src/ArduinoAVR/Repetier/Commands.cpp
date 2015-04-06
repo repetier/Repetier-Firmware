@@ -1209,7 +1209,7 @@ void Commands::processMCode(GCode *com)
 #ifdef Z_PROBE_IS_FSR
     case 40: //M40 - Give pulse to fsr sensor
        {
-	 int pin_number = 42;
+	 int pin_number = FSR_PIN;
 	 int pulses = 100; // Calibrate yourself
 	 if (com->hasP()) {
 	     pin_number = com->P;
