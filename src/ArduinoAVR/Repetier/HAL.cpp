@@ -1142,7 +1142,7 @@ ISR(USART_UDRE_vect)
 #endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-#if !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284p__) || defined(__AVR_ATmega2561__) || defined(__AVR_ATmega1281__))
+#if !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega2561__) || defined(__AVR_ATmega1281__) defined (__AVR_ATmega644__) || defined (__AVR_ATmega644P__))
  #error BlueTooth option cannot be used with your mainboard
 #endif
 #if BLUETOOTH_SERIAL > 1 && !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
