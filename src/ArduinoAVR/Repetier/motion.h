@@ -332,58 +332,58 @@ public:
     inline void setXMoveFinished()
     {
 #if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
-        dir&=~16;
+        dir &= ~16;
 #else
-        dir&=~48;
+        dir &= ~48;
 #endif
     }
     inline void setYMoveFinished()
     {
 #if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
-        dir&=~32;
+        dir &= ~32;
 #else
-        dir&=~48;
+        dir &= ~48;
 #endif
     }
     inline void setZMoveFinished()
     {
-        dir&=~64;
+        dir &= ~64;
     }
     inline void setXYMoveFinished()
     {
-        dir&=~48;
+        dir &= ~48;
     }
     inline bool isXPositiveMove()
     {
-        return (dir & X_STEP_DIRPOS)==X_STEP_DIRPOS;
+        return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
     }
     inline bool isXNegativeMove()
     {
-        return (dir & X_STEP_DIRPOS)==XSTEP;
+        return (dir & X_STEP_DIRPOS) == XSTEP;
     }
     inline bool isYPositiveMove()
     {
-        return (dir & Y_STEP_DIRPOS)==Y_STEP_DIRPOS;
+        return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
     }
     inline bool isYNegativeMove()
     {
-        return (dir & Y_STEP_DIRPOS)==YSTEP;
+        return (dir & Y_STEP_DIRPOS) == YSTEP;
     }
     inline bool isZPositiveMove()
     {
-        return (dir & Z_STEP_DIRPOS)==Z_STEP_DIRPOS;
+        return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
     }
     inline bool isZNegativeMove()
     {
-        return (dir & Z_STEP_DIRPOS)==ZSTEP;
+        return (dir & Z_STEP_DIRPOS) == ZSTEP;
     }
     inline bool isEPositiveMove()
     {
-        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
+        return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
     inline bool isENegativeMove()
     {
-        return (dir & E_STEP_DIRPOS)==ESTEP;
+        return (dir & E_STEP_DIRPOS) == ESTEP;
     }
     inline bool isXMove()
     {
@@ -411,11 +411,11 @@ public:
     }
     inline bool isEOnlyMove()
     {
-        return (dir & XYZE_STEP)==ESTEP;
+        return (dir & XYZE_STEP) == ESTEP;
     }
     inline bool isNoMove()
     {
-        return (dir & XYZE_STEP)==0;
+        return (dir & XYZE_STEP) == 0;
     }
     inline bool isXYZMove()
     {
@@ -437,10 +437,10 @@ public:
     {
         linesCount = 0;
         linesPos = linesWritePos;
-        Printer::setMenuMode(MENU_MODE_PRINTING,false);
+        Printer::setMenuMode(MENU_MODE_PRINTING, false);
     }
     // Only called from bresenham -> inside interrupt handle
-    inline void updateAdvanceSteps(speed_t v,uint8_t max_loops,bool accelerate)
+    inline void updateAdvanceSteps(speed_t v, uint8_t max_loops, bool accelerate)
     {
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
@@ -448,14 +448,14 @@ public:
         long advanceTarget = Printer::advanceExecuted;
         if(accelerate)
         {
-            for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget += advanceRate;
-            if(advanceTarget>advanceFull)
+            for(uint8_t loop = 0; loop < max_loops; loop++) advanceTarget += advanceRate;
+            if(advanceTarget > advanceFull)
                 advanceTarget = advanceFull;
         }
         else
         {
-            for(uint8_t loop = 0; loop<max_loops; loop++) advanceTarget -= advanceRate;
-            if(advanceTarget<advanceEnd)
+            for(uint8_t loop = 0; loop < max_loops; loop++) advanceTarget -= advanceRate;
+            if(advanceTarget < advanceEnd)
                 advanceTarget = advanceEnd;
         }
         long h = HAL::mulu16xu16to32(v, advanceL);

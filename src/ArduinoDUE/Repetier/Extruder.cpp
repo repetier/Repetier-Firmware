@@ -433,27 +433,27 @@ void Extruder::initExtruder()
 #ifdef USE_GENERIC_THERMISTORTABLE_3
     createGenericTable(temptable_generic3,GENERIC_THERM3_MIN_TEMP,GENERIC_THERM3_MAX_TEMP,GENERIC_THERM3_BETA,GENERIC_THERM3_R0,GENERIC_THERM3_T0,GENERIC_THERM3_R1,GENERIC_THERM3_R2);
 #endif
-#if defined(EXT0_STEP_PIN) && EXT0_STEP_PIN>-1
+#if defined(EXT0_STEP_PIN) && EXT0_STEP_PIN > -1 && NUM_EXTRUDER > 0
     SET_OUTPUT(EXT0_DIR_PIN);
     SET_OUTPUT(EXT0_STEP_PIN);
 #endif
-#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN>-1 && NUM_EXTRUDER>1
+#if defined(EXT1_STEP_PIN) && EXT1_STEP_PIN > -1 && NUM_EXTRUDER > 1
     SET_OUTPUT(EXT1_DIR_PIN);
     SET_OUTPUT(EXT1_STEP_PIN);
 #endif
-#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN>-1 && NUM_EXTRUDER>2
+#if defined(EXT2_STEP_PIN) && EXT2_STEP_PIN > -1 && NUM_EXTRUDER > 2
     SET_OUTPUT(EXT2_DIR_PIN);
     SET_OUTPUT(EXT2_STEP_PIN);
 #endif
-#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN>-1 && NUM_EXTRUDER>3
+#if defined(EXT3_STEP_PIN) && EXT3_STEP_PIN > -1 && NUM_EXTRUDER > 3
     SET_OUTPUT(EXT3_DIR_PIN);
     SET_OUTPUT(EXT3_STEP_PIN);
 #endif
-#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN>-1 && NUM_EXTRUDER>4
+#if defined(EXT4_STEP_PIN) && EXT4_STEP_PIN > -1 && NUM_EXTRUDER > 4
     SET_OUTPUT(EXT4_DIR_PIN);
     SET_OUTPUT(EXT4_STEP_PIN);
 #endif
-#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN>-1 && NUM_EXTRUDER>5
+#if defined(EXT5_STEP_PIN) && EXT5_STEP_PIN > -1 && NUM_EXTRUDER > 5
     SET_OUTPUT(EXT5_DIR_PIN);
     SET_OUTPUT(EXT5_STEP_PIN);
 #endif
@@ -468,24 +468,24 @@ void Extruder::initExtruder()
         }
         act->tempControl.lastTemperatureUpdate = HAL::timeInMilliseconds();
 #if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
-        if(act->tempControl.sensorType==101 || act->tempControl.sensorType==102)
+        if(act->tempControl.sensorType == 101 || act->tempControl.sensorType == 102)
         {
-            WRITE(SCK_PIN,0);
+            WRITE(SCK_PIN, 0);
             SET_OUTPUT(SCK_PIN);
-            WRITE(MOSI_PIN,1);
+            WRITE(MOSI_PIN, 1);
             SET_OUTPUT(MOSI_PIN);
-            WRITE(MISO_PIN,1);
+            WRITE(MISO_PIN, 1);
             SET_INPUT(MISO_PIN);
             SET_OUTPUT(SS);
-            WRITE(SS,HIGH);
-            HAL::digitalWrite(act->tempControl.sensorPin,1);
-            HAL::pinMode(act->tempControl.sensorPin,OUTPUT);
+            WRITE(SS, HIGH);
+            HAL::digitalWrite(act->tempControl.sensorPin, 1);
+            HAL::pinMode(act->tempControl.sensorPin ,OUTPUT);
         }
 #endif
     }
-#if HEATED_BED_HEATER_PIN>-1
+#if HEATED_BED_HEATER_PIN > -1
     SET_OUTPUT(HEATED_BED_HEATER_PIN);
-    WRITE(HEATED_BED_HEATER_PIN,HEATER_PINS_INVERTED);
+    WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
     Extruder::initHeatedBed();
 #endif
     HAL::analogStart();
@@ -1857,7 +1857,8 @@ void Extruder::retractDistance(float dist)
     float oldFeedrate = Printer::feedrate;
     int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
     int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
-    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance,distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED), false, false);
+    float speed = distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance, RMath::max(speed, 1.f), false, false);
     Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
     Printer::feedrate = oldFeedrate;
 }

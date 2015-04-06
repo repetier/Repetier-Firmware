@@ -3029,7 +3029,10 @@ void (*SdBaseFile::oldDateTime_)(uint16_t& date, uint16_t& time) = 0;  // NOLINT
  * initialize SPI pins
  */
 static void spiBegin() {
+ // Already spi init for EEPROM in Alligator boards
+#if !defined(EEPROM_AVAILABLE) || !defined(EEPROM_SPI_ALLIGATOR) || EEPROM_AVAILABLE != EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
+#endif
 }
 //------------------------------------------------------------------------------
 /**
@@ -3395,7 +3398,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
     if ((spiRec() & 0XC0) == 0XC0) type(SD_CARD_TYPE_SDHC);
     // discard rest of ocr - contains allowed voltage range
     for (uint8_t i = 0; i < 3; i++) spiRec();
-  }  
+  }
 #if USE_SD_CRC
   if (cardCommand(CMD59, 1) > 1) {
     error(SD_CARD_ERROR_CMD59);

@@ -49,7 +49,8 @@ void EEPROM::update(GCode *com)
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
         HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
-    readDataFromEEPROM();
+    bool includesEeprom = com->P >= EEPROM_EXTRUDER_OFFSET && com->P < EEPROM_EXTRUDER_OFFSET + 6 * EEPROM_EXTRUDER_LENGTH;
+    readDataFromEEPROM(includesEeprom);
 #if MIXING_EXTRUDER
     Extruder::selectExtruderById(Extruder::activeMixingExtruder);
 #else
@@ -496,7 +497,7 @@ void EEPROM::initalizeUncached()
 
 }
 
-void EEPROM::readDataFromEEPROM()
+void EEPROM::readDataFromEEPROM(bool includeExtruder)
 {
 #if EEPROM_MODE != 0
     uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
@@ -551,7 +552,7 @@ void EEPROM::readDataFromEEPROM()
     Printer::backlashZ = HAL::eprGetFloat(EPR_BACKLASH_Z);
 #endif
 #if FEATURE_AUTOLEVEL
-    if(version>2)
+    if(version > 2)
     {
         float sum = 0;
         for(uint8_t i = 0; i < 9; i++)
@@ -574,46 +575,49 @@ void EEPROM::readDataFromEEPROM()
         Com::printArrayFLN(Com::tTransformationMatrix,Printer::autolevelTransformation, 9, 6);
     }
 #endif
-#if MIXING_EXTRUDER
-    readMixingRatios();
-#endif
-    // now the extruder
-    for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+    if(includeExtruder)
     {
+#if MIXING_EXTRUDER
+        readMixingRatios();
+#endif
+        // now the extruder
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+        {
 #if FEATURE_WATCHDOG
-        HAL::pingWatchdog();
+            HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
-        int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
-        Extruder *e = &extruder[i];
-        e->stepsPerMM = HAL::eprGetFloat(o+EPR_EXTRUDER_STEPS_PER_MM);
-        e->maxFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_FEEDRATE);
-        e->maxStartFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
-        e->maxAcceleration = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION);
-        e->tempControl.heatManager = HAL::eprGetByte(o+EPR_EXTRUDER_HEAT_MANAGER);
+            int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
+            Extruder *e = &extruder[i];
+            e->stepsPerMM = HAL::eprGetFloat(o+EPR_EXTRUDER_STEPS_PER_MM);
+            e->maxFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_FEEDRATE);
+            e->maxStartFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
+            e->maxAcceleration = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION);
+            e->tempControl.heatManager = HAL::eprGetByte(o+EPR_EXTRUDER_HEAT_MANAGER);
 #if TEMP_PID
-        e->tempControl.pidDriveMax = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MAX);
-        e->tempControl.pidDriveMin = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MIN);
-        e->tempControl.pidPGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_PGAIN);
-        e->tempControl.pidIGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_IGAIN);
-        e->tempControl.pidDGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_DGAIN);
-        e->tempControl.pidMax = HAL::eprGetByte(o+EPR_EXTRUDER_PID_MAX);
+            e->tempControl.pidDriveMax = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MAX);
+            e->tempControl.pidDriveMin = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MIN);
+            e->tempControl.pidPGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_PGAIN);
+            e->tempControl.pidIGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_IGAIN);
+            e->tempControl.pidDGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_DGAIN);
+            e->tempControl.pidMax = HAL::eprGetByte(o+EPR_EXTRUDER_PID_MAX);
 #endif
-        e->xOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_X_OFFSET);
-        e->yOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_Y_OFFSET);
-        e->watchPeriod = HAL::eprGetInt16(o+EPR_EXTRUDER_WATCH_PERIOD);
+            e->xOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_X_OFFSET);
+            e->yOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_Y_OFFSET);
+            e->watchPeriod = HAL::eprGetInt16(o+EPR_EXTRUDER_WATCH_PERIOD);
 #if RETRACT_DURING_HEATUP
-        e->waitRetractTemperature = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
-        e->waitRetractUnits = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
+            e->waitRetractTemperature = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP);
+            e->waitRetractUnits = HAL::eprGetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_UNITS);
 #endif
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
-        e->advanceK = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_K);
+            e->advanceK = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_K);
 #endif
-        e->advanceL = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_L);
+            e->advanceL = HAL::eprGetFloat(o+EPR_EXTRUDER_ADVANCE_L);
 #endif
-        if(version > 1)
-            e->coolerSpeed = HAL::eprGetByte(o+EPR_EXTRUDER_COOLER_SPEED);
+            if(version > 1)
+                e->coolerSpeed = HAL::eprGetByte(o+EPR_EXTRUDER_COOLER_SPEED);
+        }
     }
     if(version != EEPROM_PROTOCOL_VERSION)
     {
@@ -741,7 +745,7 @@ void EEPROM::init()
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
     if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE && storedcheck == check)
     {
-        readDataFromEEPROM();
+        readDataFromEEPROM(true);
         if (USE_CONFIGURATION_BAUD_RATE)
         {
             // Used if eeprom gets unusable baud rate set and communication wont work at all.

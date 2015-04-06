@@ -294,7 +294,7 @@ void motorCurrentControlInit() //Initialize Digipot Motor Current
 }
 #endif
 
-#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_LTC2600
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_LTC2600
 
 void setMotorCurrent( uint8_t channel, unsigned short level )
 {
@@ -352,43 +352,123 @@ void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 }
 #endif
 
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
+void setMotorCurrent(uint8_t channel, unsigned short value)
+{
+    if(channel >= 4 || channel < 0)
+        return;
+
+    uint8_t externalDac_buf[2] = {0x10, 0x00};
+
+    externalDac_buf[0] |= ( 3-channel << 6);
+    externalDac_buf[0] |= (value >> 4);
+    externalDac_buf[1] |= (value << 4);
+
+    WRITE(DAC_SYNC, HIGH);
+    WRITE(SPI_EEPROM1_CS, HIGH);
+    WRITE(SPI_EEPROM2_CS, HIGH);
+    WRITE(SPI_FLASH_CS, HIGH);
+    WRITE(SDSS, HIGH);
+
+    HAL::delayMicroseconds(1);
+    HAL::delayMicroseconds(1);
+
+    WRITE(DAC_SYNC, HIGH);
+    WRITE(DAC_SYNC, LOW);
+    HAL::delayMilliseconds(1);
+    WRITE(DAC_SYNC, HIGH);
+    HAL::delayMilliseconds(1);
+    WRITE(DAC_SYNC, LOW);
+
+    HAL::spiSend(SPI_CHAN_DAC, externalDac_buf, 2);
+}
+
+void motorCurrentControlInit() //Initialize Motor Current
+{
+    uint8_t externalDac_buf[2] = {0x20, 0x00};//all off
+
+    WRITE(DAC_SYNC, HIGH);
+    WRITE(SPI_EEPROM1_CS, HIGH);
+    WRITE(SPI_EEPROM2_CS, HIGH);
+    WRITE(SPI_FLASH_CS, HIGH);
+    WRITE(SDSS, HIGH);
+    SET_OUTPUT(DAC_SYNC);
+
+    HAL::delayMicroseconds(1);
+    HAL::delayMicroseconds(1);
+    WRITE(DAC_SYNC, HIGH);
+    WRITE(DAC_SYNC, LOW);
+    HAL::delayMilliseconds(1);
+    WRITE(DAC_SYNC, HIGH);
+    HAL::delayMilliseconds(1);
+    WRITE(DAC_SYNC, LOW);
+
+    HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
+
+    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
+
+    for(uint8_t i=0; i<4; i++)
+        setMotorCurrent(i,digipot_motor_current[i]);
+}
+#endif
+
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2)
 {
     if(ms1 > -1) switch(driver)
         {
         case 0:
+#if X_MS1_PIN > -1
             WRITE( X_MS1_PIN,ms1);
+#endif
             break;
         case 1:
+#if Y_MS1_PIN > -1
             WRITE( Y_MS1_PIN,ms1);
+#endif
             break;
         case 2:
+#if Z_MS1_PIN > -1
             WRITE( Z_MS1_PIN,ms1);
+#endif
             break;
         case 3:
+#if E0_MS1_PIN > -1
             WRITE(E0_MS1_PIN,ms1);
+#endif
             break;
         case 4:
+#if E1_MS1_PIN > -1
             WRITE(E1_MS1_PIN,ms1);
+#endif
             break;
         }
     if(ms2 > -1) switch(driver)
         {
         case 0:
+#if X_MS2_PIN > -1
             WRITE( X_MS2_PIN,ms2);
+#endif
             break;
         case 1:
+#if Y_MS2_PIN > -1
             WRITE( Y_MS2_PIN,ms2);
+#endif
             break;
         case 2:
+#if Z_MS2_PIN > -1
             WRITE( Z_MS2_PIN,ms2);
+#endif
             break;
         case 3:
+#if E0_MS2_PIN > -1
             WRITE(E0_MS2_PIN,ms2);
+#endif
             break;
         case 4:
+#if E1_MS2_PIN > -1
             WRITE(E1_MS2_PIN,ms2);
+#endif
             break;
         }
 }
@@ -412,21 +492,45 @@ void microstepMode(uint8_t driver, uint8_t stepping_mode)
     case 16:
         microstepMS(driver,MICROSTEP16);
         break;
+    case 32:
+        microstepMS(driver,MICROSTEP32);
+        break;
     }
 }
+
 void microstepReadings()
 {
     Com::printFLN(Com::tMS1MS2Pins);
+#if X_MS1_PIN > -1 && X_MS2_PIN > -1
     Com::printF(Com::tXColon,READ(X_MS1_PIN));
     Com::printFLN(Com::tComma,READ(X_MS2_PIN));
+#elif X_MS1_PIN > -1
+    Com::printFLN(Com::tXColon,READ(X_MS1_PIN));
+#endif
+#if Y_MS1_PIN > -1 && Y_MS2_PIN > -1
     Com::printF(Com::tYColon,READ(Y_MS1_PIN));
     Com::printFLN(Com::tComma,READ(Y_MS2_PIN));
+#elif Y_MS1_PIN > -1
+    Com::printFLN(Com::tYColon,READ(Y_MS1_PIN));
+#endif
+#if Z_MS1_PIN > -1 && Z_MS2_PIN > -1
     Com::printF(Com::tZColon,READ(Z_MS1_PIN));
     Com::printFLN(Com::tComma,READ(Z_MS2_PIN));
+#elif Z_MS1_PIN > -1
+    Com::printFLN(Com::tZColon,READ(Z_MS1_PIN));
+#endif
+#if E0_MS1_PIN > -1 && E0_MS2_PIN > -1
     Com::printF(Com::tE0Colon,READ(E0_MS1_PIN));
     Com::printFLN(Com::tComma,READ(E0_MS2_PIN));
+#elif E0_MS1_PIN > -1
+    Com::printFLN(Com::tE0Colon,READ(E0_MS1_PIN));
+#endif
+#if E1_MS1_PIN > -1 && E1_MS2_PIN > -1
     Com::printF(Com::tE1Colon,READ(E1_MS1_PIN));
     Com::printFLN(Com::tComma,READ(E1_MS2_PIN));
+#elif E1_MS1_PIN > -1
+    Com::printFLN(Com::tE1Colon,READ(E1_MS1_PIN));
+#endif
 }
 #endif
 
@@ -434,12 +538,37 @@ void microstepInit()
 {
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
     const uint8_t microstep_modes[] = MICROSTEP_MODES;
+#if X_MS1_PIN > -1
+    SET_OUTPUT(X_MS1_PIN);
+#endif
+#if Y_MS1_PIN > -1
+    SET_OUTPUT(Y_MS1_PIN);
+#endif
+#if Z_MS1_PIN > -1
+    SET_OUTPUT(Z_MS1_PIN);
+#endif
+#if E0_MS1_PIN > -1
+    SET_OUTPUT(E0_MS1_PIN);
+#endif
+#if E1_MS1_PIN > -1
+    SET_OUTPUT(E1_MS1_PIN);
+#endif
+#if X_MS2_PIN > -1
     SET_OUTPUT(X_MS2_PIN);
+#endif
+#if Y_MS2_PIN > -1
     SET_OUTPUT(Y_MS2_PIN);
+#endif
+#if Z_MS2_PIN > -1
     SET_OUTPUT(Z_MS2_PIN);
+#endif
+#if E0_MS2_PIN > -1
     SET_OUTPUT(E0_MS2_PIN);
+#endif
+#if E1_MS2_PIN > -1
     SET_OUTPUT(E1_MS2_PIN);
-    for(int i=0; i<=4; i++) microstepMode(i,microstep_modes[i]);
+#endif
+    for(int i = 0; i <= 4; i++) microstepMode(i, microstep_modes[i]);
 #endif
 }
 
@@ -1260,7 +1389,7 @@ void Commands::processMCode(GCode *com)
 #if RETRACT_DURING_HEATUP
             if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
             {
-                PrintLine::moveRelativeDistanceInSteps(0,0,0,-actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
+                PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
                 retracted = 1;
             }
 #endif
@@ -1268,18 +1397,18 @@ void Commands::processMCode(GCode *com)
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
 #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
-                    || (waituntil!=0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
+                    || (waituntil != 0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
 #endif
               )
             {
                 waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
             }
         }
-        while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil-currentTime) < 2000000000UL));
+        while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
 #if RETRACT_DURING_HEATUP
         if (retracted && actExtruder == Extruder::current)
         {
-            PrintLine::moveRelativeDistanceInSteps(0,0,0,actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS],actExtruder->maxFeedrate,false,false);
+            PrintLine::moveRelativeDistanceInSteps(0, 0, 0, actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
         }
 #endif
     }
@@ -1721,7 +1850,7 @@ void Commands::processMCode(GCode *com)
     case 501: // M501
     {
 #if EEPROM_MODE != 0
-        EEPROM::readDataFromEEPROM();
+        EEPROM::readDataFromEEPROM(true);
         Extruder::selectExtruderById(Extruder::current->id);
         Com::printInfoFLN(Com::tConfigLoadedEEPROM);
 #else

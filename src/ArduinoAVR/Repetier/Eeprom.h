@@ -120,7 +120,7 @@ have problems with other modules using the eeprom */
 #define EPR_RETRACTION_UNDO_EXTRA_LENGTH 1008
 #define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
 #define EPR_RETRACTION_UNDO_SPEED 1016
-#define EPR_AUTORETRACT_ENABLED 1018
+#define EPR_AUTORETRACT_ENABLED 1020
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -170,7 +170,7 @@ class EEPROM
 {
 #if EEPROM_MODE != 0
     static void writeExtruderPrefix(uint pos);
-    static void writeFloat(uint pos,PGM_P text,uint8_t digits=3);
+    static void writeFloat(uint pos,PGM_P text,uint8_t digits = 3);
     static void writeLong(uint pos,PGM_P text);
     static void writeInt(uint pos,PGM_P text);
     static void writeByte(uint pos,PGM_P text);
@@ -182,8 +182,8 @@ public:
 
     static void init();
     static void initBaudrate();
-    static void storeDataIntoEEPROM(uint8_t corrupted=0);
-    static void readDataFromEEPROM();
+    static void storeDataIntoEEPROM(uint8_t corrupted = 0);
+    static void readDataFromEEPROM(bool includeExtruder);
     static void restoreEEPROMSettingsFromConfiguration();
     static void writeSettings();
     static void update(GCode *com);

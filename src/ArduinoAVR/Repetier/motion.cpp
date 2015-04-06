@@ -93,7 +93,7 @@ uint8_t PrintLine::linesPos = 0;                 ///< Position for executing lin
 /**
 Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands.
 */
-void PrintLine::moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool checkEndstop)
+void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool checkEndstop)
 {
 #if NUM_EXTRUDER > 0
     if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
@@ -120,7 +120,7 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_
     previousMillisCmd = HAL::timeInMilliseconds();
 }
 
-void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd)
+void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd)
 {
     Printer::lastCmdPos[X_AXIS] += x * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::lastCmdPos[Y_AXIS] += y * Printer::invAxisStepsPerMM[Y_AXIS];
@@ -148,7 +148,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,in
   wait communication and temperature control is enabled.
   @param check_endstops Read endstop during move.
 */
-void PrintLine::queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize)
+void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 {
     Printer::unsetAllSteppersDisabled();
     waitForXFreeLines(1);
