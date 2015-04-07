@@ -557,7 +557,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     float oldfeedrate = Printer::feedrate;
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
-    Commands::changeFeedrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
+    Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
     if(Printer::isHomed())
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
