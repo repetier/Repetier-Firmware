@@ -1421,6 +1421,15 @@ Values must be in range 1..255
 #define BEEPER_SHORT_SEQUENCE 2,2
 #define BEEPER_LONG_SEQUENCE 8,8
 
+
+/** Display Voltage Logic Selector like Alligator board
+ 0 = Voltage level 3.3V
+ 1 = Voltage level 5V
+ */
+#if MOTHERBOARD==501
+#define UI_VOLTAGE_LEVEL 1 // Set 5 o 3.3 V
+#endif
+
 // ###############################################################################
 // ##                         Values for menu settings                          ##
 // ###############################################################################

@@ -608,6 +608,19 @@ void uiCheckSlowKeys(int &action) {}
 #define SDCARDDETECTINVERTED   0
 #undef SDSUPPORT
 #define SDSUPPORT              1
+#elif MOTHERBOARD == 501 // Alligator has own pins layout
+#define BEEPER_PIN             64
+#define UI_DISPLAY_RS_PIN      18
+#define UI_DISPLAY_ENABLE_PIN  15
+#define UI_DISPLAY_D4_PIN      19
+#define UI_ENCODER_A           14
+#define UI_ENCODER_B           16
+#define UI_ENCODER_CLICK       17
+#define UI_RESET_PIN           -1
+#undef SDCARDDETECT
+#define SDCARDDETECT           87
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED   0
 #else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
@@ -633,12 +646,16 @@ void uiCheckSlowKeys(int &action) {}
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
   UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
   UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+#endif
 }
 void uiCheckKeys(int &action) {
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
+#endif
 }
 inline void uiCheckSlowEncoder() {}
 void uiCheckSlowKeys(int &action) {}
