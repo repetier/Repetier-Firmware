@@ -1252,6 +1252,13 @@ is always running and is not hung up for some unknown reason. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 
+
+/** Z probe is a FSR probe. M40 and M41 functions are needed as support **/
+#define Z_PROBE_IS_FSR
+#ifdef Z_PROBE_IS_FSR
+#define FSR_PIN 42
+#endif
+
 /* Autoleveling allows it to z-probe 3 points to compute the inclination and compensates the error for the print.
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
