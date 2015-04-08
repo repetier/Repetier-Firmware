@@ -204,7 +204,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN            14
 #define ORIG_PS_ON_PIN          -1
 
-#define SDCARDDETECT 	        -1
+#define ORIG_SDCARDDETECT 	    -1
 
 #define HEATER_0_PIN             3
 #define TEMP_0_PIN               0
@@ -400,7 +400,7 @@ STEPPER_CURRENT_CONTROL
 
 #define SDPOWER            -1
 #define SDSS               53
-#define SDCARDDETECT 	    49
+#define ORIG_SDCARDDETECT 	    49
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN            9
@@ -477,7 +477,7 @@ STEPPER_CURRENT_CONTROL
 #ifdef AZTEEG_X3
 #define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
-#define SDCARDDETECT 49
+#define ORIG_SDCARDDETECT 49
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
 #define LIGHT_PIN         6
@@ -505,7 +505,7 @@ STEPPER_CURRENT_CONTROL
 #ifdef AZTEEG_X3_PRO
 #define SDSUPPORT true
 #define SDCARDDETECTINVERTED false
-#define SDCARDDETECT 49
+#define ORIG_SDCARDDETECT 49
 #define SDSS               53
 #define ORIG_FAN_PIN           5
 #define ORIG_FAN2_PIN          6
@@ -952,7 +952,7 @@ STEPPER_CURRENT_CONTROL
 #define MISO_PIN         6
 #define MOSI_PIN         5
 #define SDSUPPORT 1  // sd card reader on board
-#define SDCARDDETECT -1
+#define ORIG_SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
@@ -1223,7 +1223,7 @@ STEPPER_CURRENT_CONTROL
 
 #define LED_PIN -1
 #define SDSUPPORT 1  // sd card reader on board
-#define SDCARDDETECT -1
+#define ORIG_SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
@@ -1420,7 +1420,7 @@ STEPPER_CURRENT_CONTROL
 #define BEEPER_PIN 23
 #define BEEPER_TYPE 1
 #define SDSUPPORT 1  // sd card reader on board
-#define SDCARDDETECT -1
+#define ORIG_SDCARDDETECT -1
 
 // digital pin mappings
 #define ORIG_X_STEP_PIN         54	// PINF.0, 97, STP_DRV1
@@ -1541,7 +1541,7 @@ STEPPER_CURRENT_CONTROL
 #define BEEPER_PIN 33			// Beeper on AUX-4
 #define BEEPER_TYPE 1
 #define SDSUPPORT 1  // sd card reader on board
-#define SDCARDDETECT -1
+#define ORIG_SDCARDDETECT -1
 
 
 #ifdef ULTRA_LCD
@@ -1636,7 +1636,7 @@ STEPPER_CURRENT_CONTROL
 
 #define SDPOWER            1
 #define SDSS               53
-#define SDCARDDETECT 	   6
+#define ORIG_SDCARDDETECT 	   6
 #define SDSUPPORT 1            // already defined in config.h
 #define SDCARDDETECTINVERTED 1 // already defined in config.h
 
@@ -1695,7 +1695,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_DIR_PIN          24
 #define ORIG_E2_ENABLE_PIN       22
 
-#define SDCARDDETECT -1		// Ramps does not use this port
+#define ORIG_SDCARDDETECT -1		// Ramps does not use this port
 #define SDPOWER            -1
 #define SDSS               53
 
@@ -1815,7 +1815,7 @@ STEPPER_CURRENT_CONTROL
 
 #define BEEPER_PIN -1
 
-#define SDCARDDETECT -1 // Megatronics does not use this port
+#define ORIG_SDCARDDETECT -1 // Megatronics does not use this port
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS
@@ -1866,7 +1866,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E2_DIR_PIN 60
 #define ORIG_E2_ENABLE_PIN 23
 
-#define SDCARDDETECT -1	 // Ramps does not use this port
+#define ORIG_SDCARDDETECT -1	 // Ramps does not use this port
 #define SDPOWER -1
 #define SDSS 53
 
@@ -2101,7 +2101,7 @@ S3(ext)=9
 #define ORIG_E1_ENABLE_PIN       30
 
 #define SDPOWER            -1
-#define SDCARDDETECT 	    49
+#define ORIG_SDCARDDETECT 	    49
 
 #define LED_PIN            13
 #define ORIG_FAN_PIN       7        ////*****fan
@@ -2164,7 +2164,7 @@ S3(ext)=9
 #define ORIG_E3_ENABLE_PIN       13
 
 #define SDPOWER            -1
-#define SDCARDDETECT 	   10
+#define ORIG_SDCARDDETECT 	   10
 
 #define LED_PIN            30
 #define ORIG_FAN_PIN       7        ////*****fan
@@ -2316,7 +2316,7 @@ S3(ext)=9
 
 ///////*********ISP for TFcard
 #define SDPOWER           -1
-#define SDCARDDETECT 	  40
+#define ORIG_SDCARDDETECT 	  40
 #define SDSS              53
 #define SCK_PIN           52
 #define MISO_PIN          50
@@ -2479,6 +2479,11 @@ S3(ext)=9
 #define FAN_PIN ORIG_FAN_PIN
 #define FAN2_PIN ORIG_FAN2_PIN
 #define PS_ON_PIN ORIG_PS_ON_PIN
+
+#ifndef ORIG_SDCARDDETECT
+#define ORIG_SDCARDDETECT -1
+#endif
+#define SDCARDDETECT ORIG_SDCARDDETECT
 
 #define SENSITIVE_PINS {0, 1, ORIG_X_STEP_PIN, ORIG_X_DIR_PIN, ORIG_X_ENABLE_PIN, ORIG_X_MIN_PIN, ORIG_X_MAX_PIN, \
         ORIG_Y_STEP_PIN, ORIG_Y_DIR_PIN, ORIG_Y_ENABLE_PIN, ORIG_Y_MIN_PIN, ORIG_Y_MAX_PIN, ORIG_Z_STEP_PIN,\

@@ -6624,6 +6624,7 @@ uint8_t u8g_com_arduino_st7920_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, 
   switch(msg)
   {
     case U8G_COM_MSG_INIT:
+      u8g->pin_list[U8G_PI_CS2]=U8G_PIN_NONE;
       u8g_com_arduino_assign_pin_output_high(u8g);
 #ifdef UI_SPI_CS
       WRITE(UI_SPI_CS,LOW);
