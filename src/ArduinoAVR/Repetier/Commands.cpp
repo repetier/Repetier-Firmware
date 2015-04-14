@@ -246,12 +246,13 @@ void Commands::setFanSpeed(int speed,bool wait)
     pwm_pos[NUM_EXTRUDER + 2] = speed;
 #endif
 }
-
+#if BED_LEDS
 void Commands::setBedLed(int light)
 {
 	Light.LedBrightness = (float)(light/100.0);
 	Light.ShowTemps();
 }
+#endif
 
 void Commands::reportPrinterUsage()
 {
