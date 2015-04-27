@@ -94,7 +94,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -792,8 +792,8 @@ on this endstop.
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 600 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 600 // Less accurate setting for other moves
 
 // Delta settings
 #if DRIVE_SYSTEM == DELTA
@@ -950,7 +950,7 @@ This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheape
 additional stepper interrupts with all it's overhead. As a result you can go as high as
 40000Hz.
 */
-#define STEP_DOUBLER_FREQUENCY 12000
+#define STEP_DOUBLER_FREQUENCY 80000
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
@@ -960,12 +960,6 @@ for some printers causing an early stall.
 
 */
 #define DOUBLE_STEP_DELAY 1 // time in microseconds
-
-/** The firmware supports trajectory smoothing. To achieve this, it divides the stepsize by 2, resulting in
-the double computation cost. For slow movements this is not an issue, but for really fast moves this is
-too much. The value specified here is the number of clock cycles between a step on the driving axis.
-If the interval at full speed is below this value, smoothing is disabled for that line.*/
-#define MAX_HALFSTEP_INTERVAL 1999
 
 //// Acceleration settings
 
@@ -1358,6 +1352,13 @@ Select the language to use.
 8 = Czech
 */
 #define UI_LANGUAGE 1
+
+/* Some displays loose their settings from time to time. Try uncommenting the 
+autorepair function if this is the case. It is not supported for all display
+types. It creates a minimal flicker from time to time and also slows down
+computations, so do not enable it if your display works stable!
+*/
+//#define TRY_AUTOREPAIR_LCD_ERRORS
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_PRINTER_NAME "Ordbot"

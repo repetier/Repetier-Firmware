@@ -32,6 +32,10 @@
 
 #include <avr/pgmspace.h>
 #include <avr/io.h>
+
+
+#define INLINE __attribute__((always_inline))
+
 #if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
 #else
@@ -140,6 +144,7 @@ typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
 typedef uint8_t flag8_t;
 typedef int8_t fast8_t;
+typedef uint8_t ufast8_t;
 
 #define FAST_INTEGER_SQRT
 

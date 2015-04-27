@@ -231,7 +231,11 @@ void Commands::setFanSpeed(int speed,bool wait)
     {
         Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #if FAN_KICKSTART_TIME
-        if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
+        if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2] && speed < 85)
+        {
+            if(pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME/100;
+            else                          fanKickstart = FAN_KICKSTART_TIME/25;
+        }
 #endif
     }
     pwm_pos[NUM_EXTRUDER + 2] = speed;

@@ -1001,13 +1001,7 @@ enabling this may cause to stall your moves when 20000Hz is reached.
 for some printers causing an early stall.
 
 */
-#define DOUBLE_STEP_DELAY 1 // time in microseconds
-
-/** The firmware supports trajectory smoothing. To achieve this, it divides the stepsize by 2, resulting in
-the double computation cost. For slow movements this is not an issue, but for really fast moves this is
-too much. The value specified here is the number of clock cycles between a step on the driving axis.
-If the interval at full speed is below this value, smoothing is disabled for that line.*/
-#define MAX_HALFSTEP_INTERVAL 1999
+#define DOUBLE_STEP_DELAY 0 // time in microseconds
 
 //// Acceleration settings
 
@@ -1406,13 +1400,20 @@ Select the language to use.
 */
 #define UI_LANGUAGE 1
 
+/* Some displays loose their settings from time to time. Try uncommenting the 
+autorepair function if this is the case. It is not supported for all display
+types. It creates a minimal flicker from time to time and also slows down
+computations, so do not enable it if your display works stable!
+*/
+//#define TRY_AUTOREPAIR_LCD_ERRORS
+
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_PRINTER_NAME "MyPrinter"
 #define UI_PRINTER_COMPANY "Self Made"
 
 
 /** Animate switches between menus etc. */
-#define UI_ANIMATION 1
+#define UI_ANIMATION 0
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

@@ -128,7 +128,6 @@ float Printer::offsetY;                     ///< Y-offset for different extruder
 speed_t Printer::vMaxReached;         ///< Maximumu reached speed
 uint32_t Printer::msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;            ///< mm of filament printed since counting started
-uint8_t Printer::wasLastHalfstepping;         ///< Indicates if last move had halfstepping enabled
 #if ENABLE_BACKLASH_COMPENSATION
 float Printer::backlashX;
 float Printer::backlashY;
@@ -875,7 +874,6 @@ void Printer::setup()
 #if NONLINEAR_SYSTEM
     radius0 = ROD_RADIUS;
 #endif
-    wasLastHalfstepping = 0;
 #if ENABLE_BACKLASH_COMPENSATION
     backlashX = X_BACKLASH;
     backlashY = Y_BACKLASH;

@@ -1453,7 +1453,7 @@ void uiCheckSlowKeys(int &action) {}
 #endif
 
 #define UI_INITIALIZE uid.initialize();
-#define UI_FAST if(pwm_count & 4) {uid.fastAction();}
+#define UI_FAST if((counterPeriodical & 3) == 3) {uid.fastAction();}
 #define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));

@@ -1918,6 +1918,9 @@ const char ext5_select_cmd[] PROGMEM = EXT5_SELECT_COMMANDS;
 const char ext5_deselect_cmd[] PROGMEM = EXT5_DESELECT_COMMANDS;
 #endif
 
+#if NUM_EXTRUDER == 0
+Extruder extruder[1];
+#else
 Extruder extruder[NUM_EXTRUDER] =
 {
 #if NUM_EXTRUDER > 0
@@ -2083,6 +2086,7 @@ Extruder extruder[NUM_EXTRUDER] =
     }
 #endif
 };
+#endif // NUM_EXTRUDER
 
 #if HAVE_HEATED_BED
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1

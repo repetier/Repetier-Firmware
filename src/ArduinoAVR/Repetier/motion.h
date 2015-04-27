@@ -136,7 +136,7 @@ typedef struct
     }
     inline bool isNoMove()
     {
-        return (dir & XYZE_STEP)==0;
+        return (dir & XYZE_STEP) == 0;
     }
     inline bool isXYZMove()
     {
@@ -148,15 +148,15 @@ typedef struct
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= XSTEP<<axis;
+        dir |= XSTEP << axis;
     }
     inline void setPositiveMoveOfAxis(uint8_t axis)
     {
-        dir |= X_STEP_DIRPOS<<axis;
+        dir |= X_STEP_DIRPOS << axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= X_DIRPOS<<axis;
+        dir |= X_DIRPOS << axis;
     }
 } DeltaSegment;
 extern uint8_t lastMoveID;
@@ -169,16 +169,15 @@ class PrintLine   // RAM usage: 24*4+15 = 113 Byte
     static volatile bool nlFlag;
 #endif
 public:
-    static uint8_t linesPos; // Position for executing line movement
+    static ufast8_t linesPos; // Position for executing line movement
     static PrintLine lines[];
-    static uint8_t linesWritePos; // Position where we write the next cached line move
-    flag8_t joinFlags;
-    volatile flag8_t flags;
+    static ufast8_t linesWritePos; // Position where we write the next cached line move
+    ufast8_t joinFlags;
+    volatile ufast8_t flags;
 private:
-    flag8_t primaryAxis;
+    fast8_t primaryAxis;
     int32_t timeInTicks;
-    flag8_t halfStep;                  ///< 4 = disabled, 1 = halfstep, 2 = fulstep
-    flag8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+    ufast8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
     int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
     int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
@@ -222,7 +221,7 @@ private:
 public:
     int32_t stepsRemaining;            ///< Remaining steps, until move is finished
     static PrintLine *cur;
-    static volatile uint8_t linesCount; // Number of lines cached 0 = nothing to do
+    static volatile ufast8_t linesCount; // Number of lines cached 0 = nothing to do
     inline bool areParameterUpToDate()
     {
         return joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED;
@@ -301,10 +300,10 @@ public:
         {
             if(isXNegativeMove() && Printer::isXMinEndstopHit())
                 setXMoveFinished();
-            if(isYNegativeMove() && Printer::isYMinEndstopHit())
-                setYMoveFinished();
             if(isXPositiveMove() && Printer::isXMaxEndstopHit())
                 setXMoveFinished();
+            if(isYNegativeMove() && Printer::isYMinEndstopHit())
+                setYMoveFinished();
             if(isYPositiveMove() && Printer::isYMaxEndstopHit())
                 setYMoveFinished();
         }
@@ -326,12 +325,10 @@ public:
 #endif
             setZMoveFinished();
         }
-        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
-            setZMoveFinished();
     }
     inline void setXMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
         dir &= ~16;
 #else
         dir &= ~48;
@@ -339,7 +336,7 @@ public:
     }
     inline void setYMoveFinished()
     {
-#if DRIVE_SYSTEM==CARTESIAN || NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
         dir &= ~32;
 #else
         dir &= ~48;
@@ -499,10 +496,6 @@ public:
     {
         return Printer::stepNumber <= accelSteps;
     }
-    inline bool isFullstepping()
-    {
-        return halfStep == 4;
-    }
     inline void startXStep()
     {
 #if !(GANTRY)
@@ -549,7 +542,7 @@ public:
         WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XY_GANTRY
+#if DRIVE_SYSTEM == XY_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -561,7 +554,7 @@ public:
             Printer::motorYorZ++;
         }
 #endif
-#if DRIVE_SYSTEM==YX_GANTRY
+#if DRIVE_SYSTEM == YX_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -586,7 +579,7 @@ public:
         WRITE(Z2_STEP_PIN,HIGH);
 #endif
 #else
-#if DRIVE_SYSTEM==XZ_GANTRY
+#if DRIVE_SYSTEM == XZ_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -598,7 +591,7 @@ public:
             Printer::motorYorZ++;
         }
 #endif
-#if DRIVE_SYSTEM==ZX_GANTRY
+#if DRIVE_SYSTEM == ZX_GANTRY
         if(isYPositiveMove())
         {
             Printer::motorX++;
@@ -640,9 +633,9 @@ public:
     static inline void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
-        if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos=0;
+        if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos = 0;
         cur = NULL;
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
         nlFlag = false;
 #endif
         HAL::forbidInterrupts();
@@ -691,7 +684,7 @@ public:
     static uint8_t queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
     static inline void queueEMove(int32_t e_diff,uint8_t check_endstops,uint8_t pathOptimize);
     inline uint16_t calculateDeltaSubSegments(uint8_t softEndstop);
-    static inline void calculateDirectionAndDelta(int32_t difference[], flag8_t *dir, int32_t delta[]);
+    static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
 #if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
     static void calculatePlane(int32_t factors[], int32_t p1[], int32_t p2[], int32_t p3[]);

@@ -36,6 +36,7 @@
 #include <inttypes.h>
 #include "pins.h"
 #include "Print.h"
+#include "fastio.h"
 
 // Hack to make 84 MHz Due clock work without changes to pre-existing code
 // which would otherwise have problems with int overflow.
@@ -54,6 +55,8 @@
 
 // Some structures assume no padding, need to add this attribute on ARM
 #define PACK    __attribute__ ((packed))
+
+#define INLINE __attribute__((always_inline))
 
 // do not use program space memory with Due
 #define PROGMEM
@@ -142,9 +145,14 @@ typedef char prog_char;
 #define COMPAT_PRE1
 #endif
 
-#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
-//#define	WRITE(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
-#define	WRITE(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+//#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
+#define READ_VAR(pin) (g_APinDescription[pin].pPort->PIO_PDSR & g_APinDescription[pin].ulPin ? 1 : 0) // does return 0 or pin value
+#define _READ(pin) (DIO ##  pin ## _PORT->PIO_PDSR & DIO ##  pin ## _PIN ? 1 : 0) // does return 0 or pin value
+#define READ(pin) _READ(pin) 
+//#define	WRITE_VAR(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
+#define	WRITE_VAR(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+#define		_WRITE(port, v)			do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
+#define WRITE(pin,v) _WRITE(pin,v)
  
 #define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
     PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0) 
@@ -160,20 +168,20 @@ typedef char prog_char;
 #if 1
 class InterruptProtectedBlock {
     public:
-    inline void protect() {
+    INLINE void protect() {
         __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
     }
     
-    inline void unprotect() {
+    INLINE void unprotect() {
         __set_BASEPRI(0);
     }
     
-    inline InterruptProtectedBlock(bool later = false) {
+    INLINE InterruptProtectedBlock(bool later = false) {
         if(!later)
         __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
     }
     
-    inline ~InterruptProtectedBlock() {
+    INLINE ~InterruptProtectedBlock() {
         __set_BASEPRI(0);
     }
 };
@@ -230,14 +238,15 @@ class InterruptProtectedBlock {
 static uint32_t    tone_pin;
 
 /** Set max. frequency to 150000Hz */
-#define LIMIT_INTERVAL (F_CPU/150000)
+#define LIMIT_INTERVAL (F_CPU/500000)
 
 
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
-typedef int flag8_t;
+typedef unsigned int flag8_t;
 typedef int fast8_t;
+typedef unsigned int ufast8_t;
 
 #ifndef RFSERIAL
 #define RFSERIAL Serial   // Programming port of the due
@@ -293,13 +302,13 @@ public:
 #if EEPROM_AVAILABLE && EEPROM_MODE != 0
         // Copy eeprom to ram for faster access
         int i,n = EEPROM_BYTES;
-        for(i=0;i<EEPROM_BYTES;i+=4) {
+        for(i = 0;i < EEPROM_BYTES;i += 4) {
           eeval_t v = eprGetValue(i, 4);
           *(int*)(&virtualEeprom[i]) = v.i;
         }
 #else
         int i,n = EEPROM_BYTES;
-        for(i=0;i<EEPROM_BYTES;i+=4) {
+        for(i = 0;i < EEPROM_BYTES;i += 4) {
           *(int*)(&virtualEeprom[i]) = 0;
         }
 #endif
@@ -332,11 +341,11 @@ public:
     }
     static inline void digitalWrite(uint8_t pin,uint8_t value)
     {
-        WRITE(pin, value);
+        WRITE_VAR(pin, value);
     }
     static inline uint8_t digitalRead(uint8_t pin)
     {
-        return READ(pin);
+        return READ_VAR(pin);
     }
     static inline void pinMode(uint8_t pin,uint8_t mode)
     {
@@ -346,7 +355,7 @@ public:
     static long CPUDivU2(speed_t divisor) {
       return F_CPU/divisor;
     }
-    static inline void delayMicroseconds(uint32_t usec)
+    static INLINE void delayMicroseconds(uint32_t usec)
     {//usec += 3;
         uint32_t n = usec * (F_CPU_TRUE / 3000000);
         asm volatile(
@@ -389,7 +398,7 @@ public:
     }
     static inline void noTone(uint8_t pin) {
         TC_Stop(TC1, 0); 
-        WRITE(pin, LOW);
+        WRITE_VAR(pin, LOW);
     }
 
     static inline void eprSetByte(unsigned int pos,uint8_t value)

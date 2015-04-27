@@ -453,6 +453,52 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     HAL::delayMicroseconds(100);
 }
 
+#ifdef TRY_AUTOREPAIR_LCD_ERRORS
+#define HAS_AUTOREPAIR
+/* Fast repair function for displays loosing their settings.
+  Do not call this if your display has no problems.
+*/
+void repairLCD() {
+  // Now we pull both RS and R/W low to begin commands
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
+
+    //put the LCD into 4 bit mode
+    // this is according to the hitachi HD44780 datasheet
+    // figure 24, pg 46
+
+    // we start in 8bit mode, try to set 4 bit mode
+    // at this point we are in 8 bit mode but of course in this
+    // interface 4 pins are dangling unconnected and the values
+    // on them don't matter for these instructions.
+    WRITE(UI_DISPLAY_RS_PIN, LOW);
+    HAL::delayMicroseconds(20);
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    // second try
+    //lcdWriteNibble(0x03);
+    //HAL::delayMicroseconds(5000); // wait
+    // third go!
+    //lcdWriteNibble(0x03);
+    //HAL::delayMicroseconds(160);
+    // finally, set to 4-bit interface
+    lcdWriteNibble(0x02);
+    HAL::delayMicroseconds(160);
+    // finally, set # lines, font size, etc.
+    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
+    uid.createChar(1, character_back);
+    uid.createChar(2, character_degree);
+    uid.createChar(3, character_selected);
+    uid.createChar(4, character_unselected);
+    uid.createChar(5, character_temperature);
+    uid.createChar(6, character_folder);
+    uid.createChar(7, character_ready);
+}
+#endif
+
 void initializeLCD()
 {
     // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
@@ -3133,6 +3179,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #if FEATURE_RETRACTION
         case UI_ACTION_WIZARD_FILAMENTCHANGE:
         {
+            if(Printer::isBlockingReceive()) break;
             Printer::setJamcontrolDisabled(true);
             Com::printFLN(PSTR("important: Filament change required!"));
             Printer::setBlockingReceive(true);
@@ -3487,6 +3534,14 @@ void UIDisplay::slowAction(bool allowMoves)
     }
     if(refresh) // does lcd need a refresh?
     {
+#if defined(TRY_AUTOREPAIR_LCD_ERRORS)
+#if defined(HAS_AUTOREPAIR)
+        repairLCD();
+#else
+        #error TRY_AUTOREPAIR_LCD_ERRORS is not supported for your display type!
+#endif
+#endif
+
         if (menuLevel > 1 || Printer::isAutomount())
         {
             shift++;
