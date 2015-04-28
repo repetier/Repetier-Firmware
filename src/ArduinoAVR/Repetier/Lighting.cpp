@@ -1,4 +1,3 @@
-#if BED_LEDS
 #include "Lighting.h"
 #include "Extruder.h"
 #include "Printer.h"
@@ -241,7 +240,7 @@ void Lighting::CommitLeds()
 }
 
 Lighting Light = Lighting();
-#endif
+
 
 
 

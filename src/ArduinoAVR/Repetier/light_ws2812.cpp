@@ -10,7 +10,7 @@
 *
 * License: GNU GPL v2 (see License.txt)
 */
-#if BED_LEDS
+
 #include "WS2812.h"
 
 /*
@@ -154,4 +154,3 @@ w_nop16
   
   SREG=sreg_prev;
 }
-#endif

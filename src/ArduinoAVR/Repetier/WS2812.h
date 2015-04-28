@@ -16,7 +16,7 @@
 *
 * License: GNU GPL v2 (see License.txt)
 */
-#if BED_LEDS
+
 #ifndef WS2812_H_
 #define WS2812_H_
 
@@ -99,4 +99,3 @@ private:
 
 
 #endif /* WS2812_H_ */
-#endif

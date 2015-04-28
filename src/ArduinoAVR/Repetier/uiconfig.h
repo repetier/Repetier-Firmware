@@ -355,11 +355,10 @@ void uiInitKeys() {
   //Illumination LED for pause button, connected to E2 screw terminals
   SET_OUTPUT(HEATER_2_PIN);
   WRITE(HEATER_2_PIN, 1);
-#if BED_LEDS
+  
   //Bed LED signal LOW
   SET_OUTPUT(BED_LED_PIN);
   WRITE(BED_LED_PIN, 0);
-#endif
 
 }
 void uiCheckKeys(int &action) {

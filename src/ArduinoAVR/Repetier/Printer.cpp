@@ -17,9 +17,7 @@
 */
 
 #include "Repetier.h"
-#if BED_LEDS
 #include "Lighting.h"
-#endif
 
 long Printer::PrinterId = 0;
 #if USE_ADVANCE
