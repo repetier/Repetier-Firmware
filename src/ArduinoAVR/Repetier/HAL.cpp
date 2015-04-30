@@ -308,7 +308,7 @@ void HAL::analogStart()
 {
 #if ANALOG_INPUTS > 0
     ADMUX = ANALOG_REF; // refernce voltage
-    for(uint8_t i=0; i<ANALOG_INPUTS; i++)
+    for(uint8_t i = 0; i < ANALOG_INPUTS; i++)
     {
         osAnalogInputCounter[i] = 0;
         osAnalogInputBuildup[i] = 0;
@@ -1170,12 +1170,13 @@ ISR(USART_UDRE_vect)
  #error BlueTooth serial 2 or 3 can be used only with boards based on ATMega2560 or ATMega1280
 #endif
 #if (BLUETOOTH_SERIAL == 1)
-#if defined(USART1_RECV_vect)
- #define SIG_USARTx_RECV   USART1_RECV_vect
+#if defined(USART1_RX_vect)
+ #define SIG_USARTx_RECV   USART1_RX_vect
+ #define USARTx_UDRE_vect  USART1_UDRE_vect
 #else
  #define SIG_USARTx_RECV   SIG_USART1_RECV
+ #define USARTx_UDRE_vect  SIG_USART1_DATA
 #endif
- #define USARTx_UDRE_vect  USART1_UDRE_vect
  #define UDRx              UDR1
  #define UCSRxA            UCSR1A
  #define UCSRxB            UCSR1B
@@ -1186,12 +1187,13 @@ ISR(USART_UDRE_vect)
  #define UDRIEx            UDRIE1
  #define RXxPIN            19
 #elif (BLUETOOTH_SERIAL == 2)
-#if defined(USART2_RECV_vect)
- #define SIG_USARTx_RECV   USART2_RECV_vect
+#if defined(USART2_RX_vect)
+ #define SIG_USARTx_RECV   USART2_RX_vect
+ #define USARTx_UDRE_vect  USART2_UDRE_vect
 #else
  #define SIG_USARTx_RECV SIG_USART2_RECV
+ #define USARTx_UDRE_vect  SIG_USART2_DATA
 #endif
- #define USARTx_UDRE_vect  USART2_UDRE_vect
  #define UDRx              UDR2
  #define UCSRxA            UCSR2A
  #define UCSRxB            UCSR2B
@@ -1202,12 +1204,13 @@ ISR(USART_UDRE_vect)
  #define UDRIEx            UDRIE2
  #define RXxPIN            17
 #elif (BLUETOOTH_SERIAL == 3)
-#if defined(USART3_RECV_vect)
- #define SIG_USARTx_RECV   USART3_RECV_vect
+#if defined(USART3_RX_vect)
+ #define SIG_USARTx_RECV   USART3_RX_vect
+ #define USARTx_UDRE_vect  USART3_UDRE_vect
 #else
  #define SIG_USARTx_RECV SIG_USART3_RECV
+ #define USARTx_UDRE_vect  SIG_USART3_DATA
 #endif
- #define USARTx_UDRE_vect  USART3_UDRE_vect
  #define UDRx              UDR3
  #define UCSRxA            UCSR3A
  #define UCSRxB            UCSR3B
