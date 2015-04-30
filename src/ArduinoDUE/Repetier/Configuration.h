@@ -68,6 +68,17 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 
+
+/*
+We can connect BlueTooth to serial converter module directly to boards with a free serial port. Of course could you also
+use it to connect a second device like Raspberry PI internal connection. Just make sure only one port of the 2 supported
+gets used, or you will get probelms with checksums etc.
+- On RADDS board use the 4 extension pins new blue fuse with 1 = Serial1
+*/
+#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_BAUD     115200                 // communication speed
+
+
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
 //#define COMPAT_PRE1
