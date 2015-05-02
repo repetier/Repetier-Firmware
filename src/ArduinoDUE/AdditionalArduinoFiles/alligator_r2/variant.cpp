@@ -477,7 +477,7 @@ void init( void )
   }
 
   // Disable watchdog
-  WDT_Disable(WDT);
+  //WDT_Disable(WDT);
 
   // Initialize C library
   __libc_init_array();

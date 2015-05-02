@@ -316,6 +316,11 @@ class HAL
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
     {
+      #if !FEATURE_WATCHDOG
+        // Disable watchdog
+        WDT_Disable(WDT);
+      #endif
+  
       HAL::i2cInit(TWI_CLOCK_FREQ);
       // make debugging startup easier
       //Serial.begin(115200);

@@ -803,17 +803,20 @@ void SERVO_COMPA_VECTOR ()
 #endif
 
 TcChannel *stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
+#define STEPPERTIMER_EXIT_TICKS 105 // at least 2,5us pause between stepper calls
 /** \brief Sets the timer 1 compare value to delay ticks.
 */
 INLINE void setTimer(unsigned long delay)
 {
   // convert old AVR timer delay value for SAM timers
   uint32_t timer_count = (delay * TIMER1_PRESCALE);
-  if (timer_count < 210)
-    timer_count = 210;
-  stepperChannel->TC_RC = timer_count;
-  if ( stepperChannel->TC_CV > timer_count) {
-    stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
+  if (timer_count < 100)
+    timer_count = 100;
+  if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
+     stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
+    //stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
+  } else {
+     stepperChannel->TC_RC = timer_count;
   }
 }
 
@@ -823,6 +826,7 @@ void TIMER1_COMPA_VECTOR ()
 {
   // apparently have to read status register
   stepperChannel->TC_SR;
+  stepperChannel->TC_RC = 1000000;
   InterruptProtectedBlock noInt;
   if (PrintLine::hasLines())
   {
