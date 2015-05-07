@@ -244,6 +244,7 @@ public:
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
+    static float offsetZ;                     ///< Y-offset for different extruder positions.
     static speed_t vMaxReached;         ///< Maximumu reached speed
     static uint32_t msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;            ///< mm of filament printed since counting started

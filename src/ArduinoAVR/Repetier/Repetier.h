@@ -368,6 +368,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_DEADTIME 64
 
 #include "HAL.h"
+#include "Drivers.h"
 #include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
 /** Total size of the buffer used to store the long filenames */

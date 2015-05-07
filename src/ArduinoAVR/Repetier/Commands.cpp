@@ -1139,6 +1139,20 @@ void Commands::processGCode(GCode *com)
         break;
 
 #endif // DRIVE_SYSTEM
+#if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
+    case 201:
+        commandG201(*com);
+        break;
+    case 202:
+        commandG202(*com);
+        break;
+    case 203:
+        commandG203(*com);
+        break;
+    case 204:
+        commandG204(*com);
+        break;
+#endif // defined
     default:
         if(Printer::debugErrors())
         {

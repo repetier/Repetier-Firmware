@@ -410,6 +410,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #endif
         HAL::eprSetInt32(o+EPR_EXTRUDER_X_OFFSET,e->xOffset);
         HAL::eprSetInt32(o+EPR_EXTRUDER_Y_OFFSET,e->yOffset);
+        HAL::eprSetInt32(o+EPR_EXTRUDER_Z_OFFSET,e->zOffset);
         HAL::eprSetInt16(o+EPR_EXTRUDER_WATCH_PERIOD,e->watchPeriod);
 #if RETRACT_DURING_HEATUP
         HAL::eprSetInt16(o+EPR_EXTRUDER_WAIT_RETRACT_TEMP,e->waitRetractTemperature);
@@ -617,6 +618,10 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #endif
             if(version > 1)
                 e->coolerSpeed = HAL::eprGetByte(o+EPR_EXTRUDER_COOLER_SPEED);
+            if(version < 13) {
+                HAL::eprSetInt32(o+EPR_EXTRUDER_Z_OFFSET,e->zOffset);
+            }
+            e->zOffset = HAL::eprGetInt32(o + EPR_EXTRUDER_Z_OFFSET);
         }
     }
     if(version != EEPROM_PROTOCOL_VERSION)
@@ -942,6 +947,7 @@ void EEPROM::writeSettings()
 #endif
         writeLong(o + EPR_EXTRUDER_X_OFFSET, Com::tEPRXOffset);
         writeLong(o + EPR_EXTRUDER_Y_OFFSET, Com::tEPRYOffset);
+        writeLong(o + EPR_EXTRUDER_Z_OFFSET, Com::tEPRZOffset);
         writeInt(o + EPR_EXTRUDER_WATCH_PERIOD, Com::tEPRStabilizeTime);
 #if RETRACT_DURING_HEATUP
         writeInt(o + EPR_EXTRUDER_WAIT_RETRACT_TEMP, Com::tEPRRetractionWhenHeating);

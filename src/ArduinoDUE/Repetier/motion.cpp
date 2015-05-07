@@ -1930,7 +1930,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         if (curd)
         {
             // Take delta steps
-            if(cur->isXMove())
+            if(curd->isXMove())
                 if((cur->error[X_AXIS] -= curd->deltaSteps[A_TOWER]) < 0)
                 {
                     cur->startXStep();
@@ -1943,7 +1943,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 }
 
-            if(cur->isYMove())
+            if(curd->isYMove())
                 if((cur->error[Y_AXIS] -= curd->deltaSteps[B_TOWER]) < 0)
                 {
                     cur->startYStep();
@@ -1956,7 +1956,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 }
 
-            if(cur->isZMove())
+            if(curd->isZMove())
                 if((cur->error[Z_AXIS] -= curd->deltaSteps[C_TOWER]) < 0)
                 {
                     cur->startZStep();
