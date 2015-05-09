@@ -194,6 +194,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Z_PROBE_REPETITIONS 1
 #endif
 
+#ifndef MINMAX_HARDWARE_ENDSTOP_Z2
+#define MINMAX_HARDWARE_ENDSTOP_Z2 0
+#define Z2_MINMAX_PIN -1
+#endif
+
 #define SPEED_MIN_MILLIS 400
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f

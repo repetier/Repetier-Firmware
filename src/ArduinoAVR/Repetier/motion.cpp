@@ -1156,7 +1156,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     if(Printer::isZProbingActive())
     {
 #if FEATURE_Z_PROBE
-        if(isZNegativeMove() && Printer::isZProbeHit())
+        if(isZNegativeMove() && Endstops::zProbe())
         {
             cur->setXMoveFinished();
             cur->setYMoveFinished();
@@ -1167,10 +1167,10 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             return;
         }
 #endif
-#if DRIVE_SYSTEM==DELTA
-        if(isZPositiveMove() && isXPositiveMove() && isYPositiveMove() && (Printer::isXMaxEndstopHit() || Printer::isYMaxEndstopHit() || Printer::isZMaxEndstopHit()))
+#if DRIVE_SYSTEM == DELTA
+        if(isZPositiveMove() && isXPositiveMove() && isYPositiveMove() && Endstops::anyXYZMax())
 #else
-        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+        if(isZPositiveMove() && Endstops::zMax())
 #endif
         {
             cur->setXMoveFinished();
@@ -1183,7 +1183,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     }
     if(checkall)
     {
-        if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+        if(isXPositiveMove() && Endstops::xMax())
         {
 #if DRIVE_SYSTEM == DELTA
             Printer::stepsRemainingAtXHit = cur->stepsRemaining;
@@ -1191,7 +1191,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             setXMoveFinished();
             cur->setXMoveFinished();
         }
-        if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+        if(isYPositiveMove() && Endstops::yMax())
         {
 #if DRIVE_SYSTEM == DELTA
             Printer::stepsRemainingAtYHit = cur->stepsRemaining;
@@ -1200,18 +1200,18 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             cur->setYMoveFinished();
         }
 #if DRIVE_SYSTEM != DELTA
-        if(isXNegativeMove() && Printer::isXMinEndstopHit())
+        if(isXNegativeMove() && Endstops::xMin())
         {
             setXMoveFinished();
             cur->setXMoveFinished();
         }
-        if(isYNegativeMove() && Printer::isYMinEndstopHit())
+        if(isYNegativeMove() && Endstops::yMin())
         {
             setYMoveFinished();
             cur->setYMoveFinished();
         }
 #endif
-        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+        if(isZPositiveMove() && Endstops::zMax())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
             Printer::stepsRemainingAtZHit = cur->stepsRemaining;
@@ -1220,7 +1220,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
             cur->setZMoveFinished();
         }
     }
-    if(isZNegativeMove() && Printer::isZMinEndstopHit())
+    if(isZNegativeMove() && Endstops::zMin())
     {
         setZMoveFinished();
         cur->setZMoveFinished();
@@ -1902,6 +1902,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 
     if(curd != NULL)
     {
+        Endstops::update();
         curd->checkEndstops(cur,(cur->isCheckEndstops()));
     }
     int maxLoops = (Printer::stepsPerTimerCall <= cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
@@ -2281,6 +2282,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
+    Endstops::update();
     cur->checkEndstops();
     fast8_t max_loops = RMath::min((int32_t)Printer::stepsPerTimerCall,cur->stepsRemaining);
     for(fast8_t loop = 0; loop < max_loops; loop++)

@@ -845,8 +845,10 @@ void Commands::processGCode(GCode *com)
     }
     break;
     case 31:  // G31 display hall sensor output
+        Endstops::update();
+        Endstops::update();
         Com::printF(Com::tZProbeState);
-        Com::print(Printer::isZProbeHit() ? 'H' : 'L');
+        Com::print(Endstops::zProbe() ? Com::tHSpace : Com::tLSpace);
         Com::println();
         break;
 #if FEATURE_AUTOLEVEL
@@ -1511,31 +1513,9 @@ void Commands::processMCode(GCode *com)
         break;
     case 119: // M119
         Commands::waitUntilEndOfAllMoves();
-#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-        Com::printF(Com::tXMinColon);
-        Com::printF(Printer::isXMinEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-        Com::printF(Com::tXMaxColon);
-        Com::printF(Printer::isXMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
-        Com::printF(Com::tYMinColon);
-        Com::printF(Printer::isYMinEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-        Com::printF(Com::tYMaxColon);
-        Com::printF(Printer::isYMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-        Com::printF(Com::tZMinColon);
-        Com::printF(Printer::isZMinEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-        Com::printF(Com::tZMaxColon);
-        Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
-#endif
-        Com::println();
+        Endstops::update();
+        Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
+        Endstops::report();
         break;
 #if BEEPER_TYPE>0
     case 120: // M120 Test beeper function

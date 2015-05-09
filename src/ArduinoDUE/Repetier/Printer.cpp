@@ -159,7 +159,82 @@ int debugWaitLoop = 0;
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
+flag8_t Endstops::lastState = 0;
+flag8_t Endstops::lastRead = 0;
 
+void Endstops::update() {
+    flag8_t newRead = 0;
+#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
+        if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING)
+            newRead |= ENDSTOP_X_MIN_ID;
+#endif
+#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
+        if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING)
+            newRead |= ENDSTOP_X_MAX_ID;
+#endif
+#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
+        if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING)
+            newRead |= ENDSTOP_Y_MIN_ID;
+#endif
+#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
+        if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING)
+            newRead |= ENDSTOP_Y_MAX_ID;
+#endif
+#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
+        if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING)
+            newRead |= ENDSTOP_X_MIN_ID;
+#endif
+#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
+        if(READ(Z_MAX_PIN) != ENDSTOP_Z_MAX_INVERTING)
+            newRead |= ENDSTOP_Z_MAX_ID;
+#endif
+#if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
+        if(READ(Z2_MINMAX_PIN) != ENDSTOP_Z2_MINMAX_INVERTING)
+            newRead |= ENDSTOP_Z2_MINMAX_ID;
+#endif
+#if FEATURE_Z_PROBE
+    if(Z_PROBE_ON_HIGH ? READ(Z_PROBE_PIN) : !READ(Z_PROBE_PIN))
+        newRead |= ENDSTOP_Z_PROBE_ID;
+#endif
+    lastState = newRead & lastRead;
+    lastRead = newRead;
+}
+void Endstops::report() {
+    Com::printF(PSTR("endstops hit: "));
+#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
+        Com::printF(Com::tXMinColon);
+        Com::printF(xMin() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
+        Com::printF(Com::tXMaxColon);
+        Com::printF(xMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
+        Com::printF(Com::tYMinColon);
+        Com::printF(yMin() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
+        Com::printF(Com::tYMaxColon);
+        Com::printF(yMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
+        Com::printF(Com::tZMinColon);
+        Com::printF(zMin() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
+        Com::printF(Com::tZMaxColon);
+        Com::printF(zMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
+        Com::printF(Com::tZMinMaxColon);
+        Com::printF(z2MinMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if FEATURE_Z_PROBE
+        Com::printF(Com::tZProbeState);
+        Com::print(zProbe() ? Com::tHSpace : Com::tLSpace);
+#endif
+        Com::println();
+}
 
 #if !NONLINEAR_SYSTEM
 void Printer::constrainDestinationCoords()

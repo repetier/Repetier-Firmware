@@ -1394,44 +1394,44 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 'x')
             {
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMinEndstopHit());
+                addStringOnOff(Endstops::xMin());
 #else
                 addStringP(ui_text_na);
 #endif
             }
             if(c2 == 'X')
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-                addStringOnOff(Printer::isXMaxEndstopHit());
+                addStringOnOff(Endstops::xMax());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'y')
 #if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMinEndstopHit());
+                addStringOnOff(Endstops::yMin());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'Y')
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-                addStringOnOff(Printer::isYMaxEndstopHit());
+                addStringOnOff(Endstops::yMax());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2 == 'z')
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMinEndstopHit());
+                addStringOnOff(Endstops::zMin());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2=='Z')
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-                addStringOnOff(Printer::isZMaxEndstopHit());
+                addStringOnOff(Endstops::zMax());
 #else
                 addStringP(ui_text_na);
 #endif
             if(c2=='P')
 #if (Z_PROBE_PIN > -1)
-                addStringOnOff(Printer::isZProbeHit());
+                addStringOnOff(Endstops::zProbe());
 #else
                 addStringP(ui_text_na);
 #endif

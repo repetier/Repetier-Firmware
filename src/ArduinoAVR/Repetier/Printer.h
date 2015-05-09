@@ -145,6 +145,82 @@ private:
 };
 #endif //DISTORTION_CORRECTION
 
+#define ENDSTOP_X_MIN_ID 1
+#define ENDSTOP_X_MAX_ID 2
+#define ENDSTOP_Y_MIN_ID 4
+#define ENDSTOP_Y_MAX_ID 8
+#define ENDSTOP_Z_MIN_ID 16
+#define ENDSTOP_Z_MAX_ID 32
+#define ENDSTOP_Z2_MINMAX_ID 64
+#define ENDSTOP_Z_PROBE_ID 128
+
+class Endstops {
+    static flag8_t lastState;
+    static flag8_t lastRead;
+public:
+    static void update();
+    static void report();
+    static INLINE bool anyXYZMax() {
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
+    }
+    static INLINE bool xMin() {
+#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
+        return (lastState & ENDSTOP_X_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool xMax() {
+#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
+        return (lastState & ENDSTOP_X_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool yMin() {
+#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
+        return (lastState & ENDSTOP_Y_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool yMax() {
+#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
+        return (lastState & ENDSTOP_Y_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool zMin() {
+#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
+        return (lastState & ENDSTOP_Z_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool zMax() {
+#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
+        return (lastState & ENDSTOP_Z_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool z2MinMax() {
+#if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
+        return (lastState & ENDSTOP_Z2_MINMAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool zProbe() {
+#if FEATURE_Z_PROBE
+        return (lastState & ENDSTOP_Z_PROBE_ID) != 0;
+#else
+        return false;
+#endif
+    }
+};
+
 class Printer
 {
 public:
@@ -633,54 +709,6 @@ public:
     {
         return (unitIsInches ? x*25.4 : x);
     }
-    static INLINE bool isXMinEndstopHit()
-    {
-#if X_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_X
-        return READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool isYMinEndstopHit()
-    {
-#if Y_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Y
-        return READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool isZMinEndstopHit()
-    {
-#if Z_MIN_PIN>-1 && MIN_HARDWARE_ENDSTOP_Z
-        return READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool isXMaxEndstopHit()
-    {
-#if X_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_X
-        return READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool isYMaxEndstopHit()
-    {
-#if Y_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Y
-        return READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool isZMaxEndstopHit()
-    {
-#if Z_MAX_PIN>-1 && MAX_HARDWARE_ENDSTOP_Z
-        return READ(Z_MAX_PIN) != ENDSTOP_Z_MAX_INVERTING;
-#else
-        return false;
-#endif
-    }
     static INLINE bool areAllSteppersDisabled()
     {
         return flag0 & PRINTER_FLAG0_STEPPER_DISABLED;
@@ -728,14 +756,6 @@ public:
     static INLINE bool isZProbingActive()
     {
         return (flag0 & PRINTER_FLAG0_ZPROBEING);
-    }
-    static INLINE bool isZProbeHit()
-    {
-#if FEATURE_Z_PROBE
-        return (Z_PROBE_ON_HIGH ? READ(Z_PROBE_PIN) : !READ(Z_PROBE_PIN));
-#else
-        return false;
-#endif
     }
     static INLINE void executeXYGantrySteps()
     {

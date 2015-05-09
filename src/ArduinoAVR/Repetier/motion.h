@@ -298,17 +298,17 @@ public:
     {
         if(isCheckEndstops())
         {
-            if(isXNegativeMove() && Printer::isXMinEndstopHit())
+            if(isXNegativeMove() && Endstops::xMin())
                 setXMoveFinished();
-            if(isXPositiveMove() && Printer::isXMaxEndstopHit())
+            if(isXPositiveMove() && Endstops::xMax())
                 setXMoveFinished();
-            if(isYNegativeMove() && Printer::isYMinEndstopHit())
+            if(isYNegativeMove() && Endstops::yMin())
                 setYMoveFinished();
-            if(isYPositiveMove() && Printer::isYMaxEndstopHit())
+            if(isYPositiveMove() && Endstops::yMax())
                 setYMoveFinished();
         }
 #if FEATURE_Z_PROBE
-        if(Printer::isZProbingActive() && isZNegativeMove() && Printer::isZProbeHit())
+        if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
         {
             setZMoveFinished();
             Printer::stepsRemainingAtZHit = stepsRemaining;
@@ -316,9 +316,9 @@ public:
         else
 #endif
             // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
-            if(isZNegativeMove() && Printer::isZMinEndstopHit())
+            if(isZNegativeMove() && Endstops::zMin())
                 setZMoveFinished();
-        if(isZPositiveMove() && Printer::isZMaxEndstopHit())
+        if(isZPositiveMove() && Endstops::zMax())
         {
 #if MAX_HARDWARE_ENDSTOP_Z
             Printer::stepsRemainingAtZHit = stepsRemaining;
