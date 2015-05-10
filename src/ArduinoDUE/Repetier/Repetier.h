@@ -372,6 +372,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_FULL_PID 32
 #define MENU_MODE_DEADTIME 64
 
+#define uint uint16_t
+#define uint8 uint8_t
+#define int8 int8_t
+#define uint32 uint32_t
+#define int32 int32_t
+
 #include "HAL.h"
 #include "Drivers.h"
 #include "gcode.h"
@@ -401,16 +407,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=CARTESIAN
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
-
-#define uint uint16_t
-#define uint8 uint8_t
-#define int8 int8_t
-#define uint32 uint32_t
-#define int32 int32_t
 
 #define IGNORE_COORDINATE 999999
 

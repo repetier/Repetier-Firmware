@@ -89,7 +89,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 
 /**
 What display type do you use?
-0 = No display
+0 = No display - do not use here. Set FEATURE_CONTROLLER 0 instead
 1 = LCD Display with 4 bit data bus
 2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1)
 3 = LCD Display with I2C connection, 4 bit mode
@@ -98,7 +98,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE NO_DISPLAY
+#define UI_DISPLAY_TYPE 1
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
