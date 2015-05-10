@@ -351,6 +351,7 @@ void Extruder::markAllUnjammed()
     {
         extruder[i].tempControl.setJammed(false);
         extruder[i].tempControl.setSlowedDown(false);
+        extruder[i].resetJamSteps();
     }
     if(Printer::feedrateMultiply == JAM_SLOWDOWN_TO)
         Commands::changeFeedrateMultiply(100);
