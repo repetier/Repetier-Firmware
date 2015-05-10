@@ -221,6 +221,10 @@ void GCode::checkAndPushCommand()
         lastLineNumber = actLineNumber;
     }
     pushCommand();
+#ifdef DEBUG_COM_ERRORS
+    if(M == 667)
+        return; // omit ok
+#endif
 #if ACK_WITH_LINENUMBER
     Com::printFLN(Com::tOkSpace, actLineNumber);
 #else
