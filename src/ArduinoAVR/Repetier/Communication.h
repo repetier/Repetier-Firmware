@@ -380,6 +380,11 @@ FSTRINGVAR(tEPRRetractionUndoSpeed)
 FSTRINGVAR(tConfig)
 FSTRINGVAR(tExtrDot)
 
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVAR(tMCPEpromSettings)
+FSTRINGVAR(tMCPCurrentSettings)
+#endif
+
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);
 static void config(FSTRINGPARAM(text),const char *msg);

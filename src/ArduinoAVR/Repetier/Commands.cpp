@@ -416,6 +416,129 @@ void motorCurrentControlInit() //Initialize Motor Current
 }
 #endif
 
+
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+uint8_t   _intVref[]     = {MCP4728_VREF, MCP4728_VREF, MCP4728_VREF, MCP4728_VREF};
+uint8_t   _gain[]        = {MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN};
+uint8_t   _powerDown[]   = {0,0,0,0};
+int16_t   dac_motor_current[] =  {0,0,0,0};
+
+uint8_t   _intVrefEp[]   = {MCP4728_VREF, MCP4728_VREF, MCP4728_VREF, MCP4728_VREF};
+uint8_t   _gainEp[]      = {MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN};
+uint8_t   _powerDownEp[] = {0,0,0,0};
+int16_t    _valuesEp[]   = {0,0,0,0};
+
+uint8_t   dac_stepper_channel[] = MCP4728_STEPPER_ORDER;
+
+int dacSimpleCommand(uint8_t simple_command) {
+    HAL::i2cStartWait(MCP4728_GENERALCALL_ADDRESS + I2C_WRITE);
+    HAL::i2cWrite(simple_command);
+    HAL::i2cStop();
+}
+
+void dacReadStatus() {
+  HAL::delayMilliseconds(500);
+  HAL::i2cStartWait(MCP4728_I2C_ADDRESS | I2C_READ);
+
+  for (int i=0;i<8;i++) { // 2 sets of 4 Channels (1 EEPROM, 1 Runtime)
+    uint8_t deviceID = HAL::i2cReadAck();
+    uint8_t  hiByte  = HAL::i2cReadAck();
+    uint8_t  loByte  = ((i < 7) ? HAL::i2cReadAck() : HAL::i2cReadNak());
+
+    uint8_t isEEPROM = (deviceID & 0B00001000) >> 3;
+    uint8_t channel  = (deviceID & 0B00110000) >> 4;
+    if (isEEPROM == 1) {
+      _intVrefEp[channel] = (hiByte & 0B10000000) >> 7;
+      _gainEp[channel] = (hiByte & 0B00010000) >> 4;
+      _powerDownEp[channel] = (hiByte & 0B01100000) >> 5;
+      _valuesEp[channel] = word((hiByte & 0B00001111), loByte);
+    } else {
+      _intVref[channel] = (hiByte & 0B10000000) >> 7;
+      _gain[channel] = (hiByte & 0B00010000) >> 4;
+      _powerDown[channel] = (hiByte & 0B01100000) >> 5;
+      dac_motor_current[channel] = word((hiByte & 0B00001111), loByte);
+    }
+  }
+
+  HAL::i2cStop();
+}
+
+void dacAnalogUpdate(bool saveEEPROM = false) {
+  uint8_t dac_write_cmd = MCP4728_CMD_SEQ_WRITE;
+
+  HAL::i2cStartWait(MCP4728_I2C_ADDRESS + I2C_WRITE);
+  if (saveEEPROM) HAL::i2cWrite(dac_write_cmd);
+
+  for (int i=0;i<MCP4728_NUM_CHANNELS;i++){
+    uint16_t level = dac_motor_current[i];
+      
+    uint8_t highbyte = ( _intVref[i] << 7 | _gain[i] << 4 | (uint8_t)((level) >> 8) );
+    uint8_t lowbyte =  ( (uint8_t) ((level) & 0xff) );
+    dac_write_cmd = MCP4728_CMD_MULTI_WRITE | (i << 1);
+
+    if (!saveEEPROM) HAL::i2cWrite(dac_write_cmd);
+    HAL::i2cWrite(highbyte);
+    HAL::i2cWrite(lowbyte);
+  }
+
+  HAL::i2cStop();
+
+  // Instruct the MCP4728 to reflect our updated value(s) on its DAC Outputs
+  dacSimpleCommand((uint8_t)MCP4728_CMD_GC_UPDATE); // MCP4728 General Command Software Update (Update all DAC Outputs to reflect settings)
+
+  // if (saveEEPROM) dacReadStatus(); // Not necessary, just a read-back sanity check.
+}
+
+void dacCommitEeprom() {
+  dacAnalogUpdate(true);
+  dacReadStatus(); // Refresh EEPROM Values with values actually stored in EEPROM. .
+}
+
+void dacPrintSet(int dacChannelSettings[], const char* dacChannelPrefixes[]){
+  for (int i=0;i<MCP4728_NUM_CHANNELS;i++){
+    uint8_t dac_channel = dac_stepper_channel[i]; // DAC Channel is a mapped lookup.
+    Com::printF(dacChannelPrefixes[i], ((float)dacChannelSettings[dac_channel] *100 / MCP4728_VOUT_MAX));
+    Com::printF(Com::tSpaceRaw);
+    Com::printFLN(Com::tColon,dacChannelSettings[dac_channel]);
+  }
+}
+
+void dacPrintValues() {
+  const char* dacChannelPrefixes[] = {Com::tSpaceXColon,Com::tSpaceYColon,Com::tSpaceZColon,Com::tSpaceEColon};
+
+  Com::printFLN(Com::tMCPEpromSettings);
+  dacPrintSet(_valuesEp, dacChannelPrefixes); // Once for the EEPROM set
+
+  Com::printFLN(Com::tMCPCurrentSettings);
+  dacPrintSet(dac_motor_current, dacChannelPrefixes); // And another for the RUNTIME set
+}
+
+void setMotorCurrent( uint8_t xyz_channel, uint16_t level )
+{
+    if ((xyz_channel<0) || (xyz_channel >= MCP4728_NUM_CHANNELS)) return;
+    uint8_t stepper_channel = dac_stepper_channel[xyz_channel];
+    dac_motor_current[stepper_channel] = level;
+    dacAnalogUpdate();
+}
+
+void setMotorCurrentPercent( uint8_t channel, float level)
+{
+  uint16_t raw_level = ( level * MCP4728_VOUT_MAX / 100 );
+  setMotorCurrent(channel,raw_level);
+}
+
+void motorCurrentControlInit() //Initialize MCP4728 Motor Current
+{
+    HAL::i2cInit(400000); // Initialize the i2c bus.
+    dacSimpleCommand((uint8_t)MCP4728_CMD_GC_RESET); // MCP4728 General Command Reset
+    dacReadStatus(); // Load Values from EEPROM.
+
+    for(int i=0; i< MCP4728_NUM_CHANNELS; i++) {
+        setMotorCurrent(dac_stepper_channel[i], _valuesEp[i] ); // This is not strictly necessary, but serves as a good sanity check to ensure we're all on the same page.
+    }
+}
+#endif
+
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2)
 {
@@ -1947,6 +2070,23 @@ void Commands::processMCode(GCode *com)
     case 603:
         Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
         break;
+    case 907: // M907 Set digital trimpot/DAC motor current using axis codes.
+        {
+        #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+           // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.
+           if(com->hasS()) {
+             for(int i=0;i < MCP4728_NUM_CHANNELS;i++) {
+               setMotorCurrentPercent(i, com->S);
+             }
+           }
+
+           if(com->hasX()) setMotorCurrentPercent(0, (float)com->X);
+           if(com->hasY()) setMotorCurrentPercent(1, (float)com->Y);
+           if(com->hasZ()) setMotorCurrentPercent(2, (float)com->Z);
+           if(com->hasE()) setMotorCurrentPercent(3, (float)com->E);
+        #endif
+        }
+        break;
     case 908: // M908 Control digital trimpot directly.
     {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
@@ -1955,6 +2095,18 @@ void Commands::processMCode(GCode *com)
             setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
 #endif
     }
+    break;
+    case 909: // M909 Read digital trimpot settings.
+    {
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+    dacPrintValues();
+#endif
+    }
+    break;
+    case 910: // M910 - Commit digipot/DAC value to external EEPROM
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+    dacCommitEeprom();
+#endif
     break;
     default:
         if(Printer::debugErrors())
