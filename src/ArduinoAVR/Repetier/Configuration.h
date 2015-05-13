@@ -71,6 +71,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Sethi 3D_1                 = 72
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
+// Printrboard (at90usb) RevF = 92 // requires Teensyduino
 // Foltyn 3D Master           = 12
 // MegaTronics 1.0            = 70
 // Megatronics 2.0            = 701

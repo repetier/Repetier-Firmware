@@ -393,6 +393,11 @@ FSTRINGVALUE(Com::tEPRRetractionUndoSpeed,"Retraction undo speed")
 FSTRINGVALUE(Com::tConfig,"Config:")
 FSTRINGVALUE(Com::tExtrDot,"Extr.")
 
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
+FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
+#endif
+
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
     printFLN(text);
