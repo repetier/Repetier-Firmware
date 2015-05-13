@@ -2104,13 +2104,13 @@ void Commands::processMCode(GCode *com)
     break;
     case 909: // M909 Read digital trimpot settings.
     {
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
     dacPrintValues();
 #endif
     }
     break;
     case 910: // M910 - Commit digipot/DAC value to external EEPROM
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
     dacCommitEeprom();
 #endif
     break;
