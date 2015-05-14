@@ -119,6 +119,8 @@ FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
 FSTRINGVAR(tExtruderJam)
 FSTRINGVAR(tFilamentSlipping)
+FSTRINGVAR(tPauseCommunication)
+FSTRINGVAR(tContinueCommunication)
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)

@@ -124,6 +124,8 @@ FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
 FSTRINGVALUE(Com::tExtruderJam, UI_TEXT_EXTRUDER_JAM)
 FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
+FSTRINGVALUE(Com::tPauseCommunication,"// action:pause")
+FSTRINGVALUE(Com::tContinueCommunication,"// action:continue")
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
@@ -394,6 +396,11 @@ FSTRINGVALUE(Com::tEPRRetractionUndoSpeed,"Retraction undo speed")
 #endif
 FSTRINGVALUE(Com::tConfig,"Config:")
 FSTRINGVALUE(Com::tExtrDot,"Extr.")
+
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
+FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
+#endif
 
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);

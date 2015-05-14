@@ -124,6 +124,8 @@ FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
 FSTRINGVALUE(Com::tExtruderJam, UI_TEXT_EXTRUDER_JAM)
 FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
+FSTRINGVALUE(Com::tPauseCommunication,"// action:pause")
+FSTRINGVALUE(Com::tContinueCommunication,"// action:continue")
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")

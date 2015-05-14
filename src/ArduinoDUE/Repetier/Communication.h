@@ -119,6 +119,8 @@ FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
 FSTRINGVAR(tExtruderJam)
 FSTRINGVAR(tFilamentSlipping)
+FSTRINGVAR(tPauseCommunication)
+FSTRINGVAR(tContinueCommunication)
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
@@ -379,6 +381,11 @@ FSTRINGVAR(tEPRRetractionUndoSpeed)
 #endif
 FSTRINGVAR(tConfig)
 FSTRINGVAR(tExtrDot)
+
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVAR(tMCPEpromSettings)
+FSTRINGVAR(tMCPCurrentSettings)
+#endif
 
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);

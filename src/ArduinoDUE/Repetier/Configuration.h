@@ -796,11 +796,14 @@ on this endstop.
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #if MOTHERBOARD==301
-#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define MOTOR_CURRENT_PERCENT {53,53,53,53,53}
 #elif MOTHERBOARD==12
-#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+//#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+#define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
 #elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
-#define MOTOR_CURRENT {130,130,130,110,110}
+//#define MOTOR_CURRENT {130,130,130,110,110} // expired method
+#define MOTOR_CURRENT_PERCENT {51,51,51,44,44}
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move

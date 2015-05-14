@@ -71,7 +71,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Sethi 3D_1                 = 72
 // Teensylu (at90usb)         = 8 // requires Teensyduino
 // Printrboard (at90usb)      = 9 // requires Teensyduino
-// Printrboard (at90usb) RevF = 92 // requires Teensyduino
+// Printrboard Ref. F or newer= 92 // requires Teensyduino
 // Foltyn 3D Master           = 12
 // MegaTronics 1.0            = 70
 // Megatronics 2.0            = 701
@@ -827,10 +827,13 @@ on this endstop.
 #define MICROSTEP_MODES {8,8,8,8,8} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
+// Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #if MOTHERBOARD==301
-#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define MOTOR_CURRENT_PERCENT {53,53,53,53,53}
 #elif MOTHERBOARD==12
-#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+//#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+#define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move
