@@ -441,13 +441,12 @@ void motorCurrentControlInit() //Initialize Motor Current
 
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
 
-    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-
 #ifdef MOTOR_CURRENT_PERCENT
     const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
     for(int i = 0; i < 4; i++)
         setMotorCurrentPercent(i,digipot_motor_current[i]);
 #else
+    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
     for(uint8_t i = 0; i < 4; i++)
         setMotorCurrent(i,digipot_motor_current[i]);
 #endif
