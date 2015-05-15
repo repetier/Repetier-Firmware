@@ -198,7 +198,7 @@ void Extruder::manageTemperatures()
             output = act->pidMax;
             act->startFullDecouple(time);
         }
-        else if(error < -PID_CONTROL_RANGE) // control ramge left upper side!
+        else if(error < -PID_CONTROL_RANGE) // control range left upper side!
             output = 0;
         else // control range handle by heat manager
         {

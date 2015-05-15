@@ -186,6 +186,8 @@ void GCode::checkAndPushCommand()
         {
             lastLineNumber++;
             return;
+        } else if(M == 668) {
+            lastLineNumber = 0;  // simulate a reset so lines are out of resend buffer
         }
 #endif // DEBUG_COM_ERRORS
     }
