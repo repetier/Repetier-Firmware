@@ -334,7 +334,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
-/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! 
+ * 0 will disable decoupling test */
 #define EXT0_DECOUPLE_TEST_PERIOD 18000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
 #define EXT0_JAM_PIN -1
@@ -446,7 +447,8 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
-/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! */
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! 
+ * 0 will disable decoupling test */
 #define EXT1_DECOUPLE_TEST_PERIOD 18000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
 #define EXT1_JAM_PIN -1
@@ -697,7 +699,7 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // maximum time the heater can be switched on. Max = 255.  Overridden if EEPROM activated.
 #define HEATED_BED_PID_MAX 255
 // Time to see a temp. change when fully heating. Consider that beds at higher temp. need longer to rise and cold
-// beds need some time to get the temp. to the sensor. Time is in milliseconds!
+// beds need some time to get the temp. to the sensor. Time is in milliseconds! Set 0 to disable
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
 
 // When temperature exceeds max temp, your heater will be switched off.

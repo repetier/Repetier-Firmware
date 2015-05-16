@@ -74,6 +74,8 @@ We can connect BlueTooth to serial converter module directly to boards with a fr
 use it to connect a second device like Raspberry PI internal connection. Just make sure only one port of the 2 supported
 gets used, or you will get probelms with checksums etc.
 - On RADDS board use the 4 extension pins new blue fuse with 1 = Serial1
+- 100 is programming port on due
+- 101 is native port on due. Us eit to support both ports at the same time!
 */
 #define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
 #define BLUETOOTH_BAUD     115200                 // communication speed
@@ -1382,7 +1384,7 @@ computations, so do not enable it if your display works stable!
 
 
 /** Animate switches between menus etc. */
-#define UI_ANIMATION 1
+#define UI_ANIMATION 0
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

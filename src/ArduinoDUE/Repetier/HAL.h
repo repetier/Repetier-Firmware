@@ -260,6 +260,10 @@ typedef unsigned int ufast8_t;
 #define BT_SERIAL Serial2
 #elif BLUETOOTH_SERIAL == 3
 #define BT_SERIAL Serial3
+#elif BLUETOOTH_SERIAL == 100
+#define BT_SERIAL Serial
+#elif BLUETOOTH_SERIAL == 101
+#define BT_SERIAL SerialUSB
 #endif
 
 class RFDoubleSerial : public Print
