@@ -1584,7 +1584,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 void Printer::waitForZProbeStart()
 {
 #if Z_PROBE_WAIT_BEFORE_TEST
-    if(isZProbeHit()) return;
+    if(Endstops::zProbe()) return;
 #if UI_DISPLAY_TYPE != NO_DISPLAY
     uid.setStatusP(Com::tHitZProbe);
     uid.refreshPage();
@@ -1592,17 +1592,19 @@ void Printer::waitForZProbeStart()
 #ifdef DEBUG_PRINT
     debugWaitLoop = 3;
 #endif
-    while(!isZProbeHit())
+    while(!Endstops::zProbe())
     {
         defaultLoopActions();
+        Endstops::update();
     }
 #ifdef DEBUG_PRINT
     debugWaitLoop = 4;
 #endif
     HAL::delayMilliseconds(30);
-    while(isZProbeHit())
+    while(Endstops::zProbe())
     {
         defaultLoopActions();
+        Endstops::update();
     }
     HAL::delayMilliseconds(30);
     UI_CLEAR_STATUS;

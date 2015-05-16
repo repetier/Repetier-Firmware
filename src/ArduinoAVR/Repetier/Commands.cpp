@@ -270,6 +270,8 @@ void Commands::reportPrinterUsage()
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 int digitalPotWrite(int address, uint16_t value) // From Arduino DigitalPotControl example
 {
+    if(value > 255)
+        value = 255;
     WRITE(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
     HAL::spiSend(address); //  send in the address and value via SPI:
     HAL::spiSend(value);
@@ -360,6 +362,7 @@ void setMotorCurrent( uint8_t channel, unsigned short level )
 } // setLTC2600
 void setMotorCurrentPercent( uint8_t channel, float level)
 {
+    if(level > 100.0f) level = 100.0f;
   uint16_t raw_level = static_cast<uint16_t>( (long)level * 65535L / 100L );
   setMotorCurrent(channel,raw_level);
 }
@@ -387,10 +390,11 @@ void setMotorCurrent(uint8_t channel, unsigned short value)
 {
     if(channel >= 4)
         return;
-
+    if(value > 255)
+        value = 255;
     uint8_t externalDac_buf[2] = {0x10, 0x00};
 
-    externalDac_buf[0] |= ( 3-channel << 6);
+    externalDac_buf[0] |= ( 3 - channel << 6);
     externalDac_buf[0] |= (value >> 4);
     externalDac_buf[1] |= (value << 4);
 
@@ -554,7 +558,7 @@ void setMotorCurrent( uint8_t xyz_channel, uint16_t level )
 {
     if (xyz_channel >= MCP4728_NUM_CHANNELS) return;
     uint8_t stepper_channel = dac_stepper_channel[xyz_channel];
-    dac_motor_current[stepper_channel] = level;
+    dac_motor_current[stepper_channel] = level < MCP4728_VOUT_MAX ? level : MCP4728_VOUT_MAX;
     dacAnalogUpdate();
 }
 

@@ -133,7 +133,7 @@ void Extruder::manageTemperatures()
         }
 
         // Run test if heater and sensor are decoupled
-        bool decoupleTestRequired = (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
+        bool decoupleTestRequired = act->decoupleTestPeriod > 0 && (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
         if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
         {
             if(act->isDecoupleFull()) // Phase 1: Heating fully until target range is reached

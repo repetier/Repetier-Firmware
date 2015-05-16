@@ -673,7 +673,7 @@ void initializeLCD()
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
 //u8glib
-#ifdef U8GLIB_ST7920
+#if defined(U8GLIB_ST7920) || defined(U8GLIB_SSD1306_SW_SPI)
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
@@ -765,6 +765,12 @@ void initializeLCD()
 {
 #ifdef U8GLIB_ST7920
     u8g_InitSPI(&u8g,&u8g_dev_st7920_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
+#endif
+#ifdef U8GLIB_SSD1306_I2C
+    u8g_InitI2C(&u8g,&u8g_dev_ssd1306_128x64_2x_i2c,U8G_I2C_OPT_NONE);
+#endif
+#ifdef U8GLIB_SSD1306_SW_SPI
+    u8g_InitSPI(&u8g,&u8g_dev_ssd1306_128x64_2x_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
     u8g_Begin(&u8g);
     u8g_FirstPage(&u8g);

@@ -98,11 +98,24 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE 1
+#define UI_DISPLAY_TYPE 5
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
-#define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
+// You need to define which controller you use and set pins accodringly
+
+// For software spi assign these definitions
+// SCK Pin:  UI_DISPLAY_D4_PIN
+// Mosi Pin: UI_DISPLAY_ENABLE_PIN
+// CD Pin:   UI_DISPLAY_RS_PIN
+
+// ST7920 with software SPI
+#define U8GLIB_ST7920
+// SSD1306 with software SPI
+//#define U8GLIB_SSD1306_SW_SPI
+// SSD1306 over I2C using hardware I2C pins
+//#define U8GLIB_SSD1306_I2C
+
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
 
