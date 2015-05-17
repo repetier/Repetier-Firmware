@@ -2051,8 +2051,9 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
     return correction_z;
 }
 
+#endif // DISTORTION_CORRECTION
+
 #if defined(CUSTOM_EVENTS)
 #include "CustomEventsImpl.h"
 #endif
 
-#endif // DISTORTION_CORRECTION
