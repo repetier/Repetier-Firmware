@@ -56,9 +56,9 @@
 // Pattern Selection Table for defaults that must not be changed
 #define mtwled_nochange 	1	// Reserved for no change to LED Strip
 
-#ifndef INT8_MAX
-#define INT8_MAX 127
-#endif // INT8_MAX
+#ifndef UINT8_MAX
+#define UINT8_MAX 255
+#endif // UINT8_MAX
 
 
 union patterncode {  // access a pattern both as 32 bits and as array of 4 uint8_ts.
@@ -69,7 +69,7 @@ union patterncode {  // access a pattern both as 32 bits and as array of 4 uint8
 patterncode MTWLED_lastpattern;
 uint16_t MTWLED_timer;
 bool MTWLED_starup;
-int8_t waitingForHeaterIndex = INT8_MAX;
+uint8_t waitingForHeaterIndex = UINT8_MAX;
 float waitingForHeaterStartC;
 
 uint32_t MTWLEDConvert(uint8_t pattern, uint8_t red, uint8_t green, uint8_t blue) {
@@ -150,19 +150,21 @@ void MTWLED_WaitingHeater(int8_t id){
     waitingForHeaterIndex = id;
   } else {
    //Error
-   waitingForHeaterIndex = INT8_MAX;
+   waitingForHeaterIndex = UINT8_MAX;
   }
 
-  waitingForHeaterStartC = tempController[waitingForHeaterIndex]->currentTemperatureC;
+  if(waitingForHeaterIndex < NUM_TEMPERATURE_LOOPS){
+    waitingForHeaterStartC = tempController[waitingForHeaterIndex]->currentTemperatureC;
+  }
 }
 
 void MTWLED_HeatingFinished(int8_t id){
-  waitingForHeaterIndex = INT8_MAX;
+  waitingForHeaterIndex = UINT8_MAX;
 }
 
 //does percentile display between start temp and target temp while a heater is heating up
 bool MTWLEDTemp() {
-	if(waitingForHeaterIndex == INT8_MAX){
+	if(waitingForHeaterIndex >= NUM_TEMPERATURE_LOOPS){
     return false;
 	}
 
