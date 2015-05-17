@@ -619,4 +619,9 @@ extern int debugWaitLoop;
 #define SQRT(x) sqrt(x)
 #endif
 
+#include "Events.h"
+#if defined(CUSTOM_EVENTS)
+#include "CustomEvents.h"
+#endif
+
 #endif

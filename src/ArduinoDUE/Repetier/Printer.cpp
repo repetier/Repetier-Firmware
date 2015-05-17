@@ -388,6 +388,7 @@ void Printer::updateDerivedParameter()
 */
 void Printer::kill(uint8_t only_steppers)
 {
+    EVENT_KILL(only_steppers);
     if(areAllSteppersDisabled() && only_steppers) return;
     if(Printer::isAllKilled()) return;
     setAllSteppersDiabled();
@@ -1706,6 +1707,7 @@ void Printer::handleInterruptEvent() {
     switch(event) {
 #if EXTRUDER_JAM_CONTROL
     case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+        EVENT_JAM_DETECTED;
         Com::printFLN(PSTR("important:Extruder jam detected"));
         UI_ERROR_P(Com::tExtruderJam);
 #if JAM_ACTION == 1 // start dialog
@@ -1731,6 +1733,7 @@ void Printer::handleInterruptEvent() {
             if(isJamcontrolDisabled()) break;
             fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
             int16_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
+            EVENT_JAM_SIGNAL_CHANGED(extruderIndex,steps);
             if(steps > JAM_SLOWDOWN_STEPS && !extruder[extruderIndex].tempControl.isSlowedDown()) {
                 extruder[extruderIndex].tempControl.setSlowedDown(true);
                 Commands::changeFeedrateMultiply(JAM_SLOWDOWN_TO);
@@ -2048,5 +2051,8 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
     return correction_z;
 }
 
+#if defined(CUSTOM_EVENTS)
+#include "CustomEventsImpl.h"
+#endif
 
 #endif // DISTORTION_CORRECTION

@@ -68,14 +68,17 @@ void Commands::commandLoop()
 void Commands::checkForPeriodicalActions(bool allowNewMoves)
 {
     Printer::handleInterruptEvent();
+    EVENT_PERIODICAL;
     if(!executePeriodical) return;
     executePeriodical = 0;
+    EVENT_TIMER_100MS;
     Extruder::manageTemperatures();
     if(--counter250ms == 0)
     {
         if(manageMonitor <= 1 + NUM_EXTRUDER)
             writeMonitor();
         counter250ms = 5;
+        EVENT_TIMER_500MS;
     }
     // If called from queueDelta etc. it is an error to start a new move since it
     // would invalidate old computation resulting in unpredicted behaviour.
@@ -1553,6 +1556,7 @@ void Commands::processMCode(GCode *com)
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN > 0
         if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC) < (SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
+        EVENT_WAITING_HEATER(actExtruder->id);
         bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
         millis_t printedTime = HAL::timeInMilliseconds();
         millis_t waituntil = 0;
@@ -1595,6 +1599,7 @@ void Commands::processMCode(GCode *com)
             PrintLine::moveRelativeDistanceInSteps(0, 0, 0, actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
         }
 #endif
+        EVENT_HEATING_FINISHED(actExtruder->id);
     }
     UI_CLEAR_STATUS;
 #endif
@@ -1610,6 +1615,7 @@ void Commands::processMCode(GCode *com)
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
         if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
+        EVENT_WAITING_HEATER(-1);
         codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC)
         {
@@ -1621,13 +1627,17 @@ void Commands::processMCode(GCode *com)
             Commands::checkForPeriodicalActions(true);
         }
 #endif
+        EVENT_HEATING_FINISHED(-1);
 #endif
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
         break;
     case 116: // Wait for temperatures to reach target temperature
-        for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
+        for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++) {
+            EVENT_WAITING_HEATER(h < NUM_EXTRUDER ? h : -1);
             tempController[h]->waitForTargetTemperature();
+            EVENT_HEATING_FINISHED(h < NUM_EXTRUDER ? h : -1);
+        }
         break;
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL

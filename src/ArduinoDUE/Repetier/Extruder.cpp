@@ -121,6 +121,7 @@ void Extruder::manageTemperatures()
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
                 }
+                EVENT_HEATER_DEFECT(controller);
             }
         }
         if(Printer::isAnyTempsensorDefect()) continue;
@@ -151,6 +152,7 @@ void Extruder::manageTemperatures()
                         Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
                         Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
                         Com::printFLN(PSTR(" ms"));
+                        EVENT_HEATER_DECOUPLED(controller);
                     }
                 }
                 else
@@ -174,6 +176,7 @@ void Extruder::manageTemperatures()
                         Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
                         Com::printF(PSTR(" measured "),act->currentTemperatureC);
                         Com::printFLN(PSTR(" deg. C"));
+                        EVENT_HEATER_DECOUPLED(controller);
                     }
                 }
                 else

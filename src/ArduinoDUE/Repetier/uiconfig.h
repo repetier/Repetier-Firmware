@@ -114,7 +114,7 @@ What display type do you use?
 // SSD1306 with software SPI
 //#define U8GLIB_SSD1306_SW_SPI
 // SSD1306 over I2C using hardware I2C pins
-#define U8GLIB_SSD1306_I2C
+//#define U8GLIB_SSD1306_I2C
 
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
