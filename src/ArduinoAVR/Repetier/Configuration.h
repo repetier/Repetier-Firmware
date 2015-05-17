@@ -334,7 +334,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT0_EXTRUDER_COOLER_SPEED 255
-/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! 
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise!
  * 0 will disable decoupling test */
 #define EXT0_DECOUPLE_TEST_PERIOD 18000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
@@ -447,7 +447,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_EXTRUDER_COOLER_PIN -1
 /** PWM speed for the cooler fan. 0=off 255=full speed */
 #define EXT1_EXTRUDER_COOLER_SPEED 255
-/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise! 
+/** Time in ms between a heater action and test of success. Must be more then time between turning heater on and first temp. rise!
  * 0 will disable decoupling test */
 #define EXT1_DECOUPLE_TEST_PERIOD 18000
 /** Pin which toggles regualrly during extrusion allowing jam control. -1 = disabled */
@@ -1519,6 +1519,9 @@ Values must be in range 1..255
   Read Events.h for more informations. To activate, uncomment the following define.
 */
 //#define CUSTOM_EVENTS
+
+// For Makers Tool Works LED Strips
+//#define CUSTOM_EVENTS_MTWLED
 
 #endif
 
