@@ -231,7 +231,7 @@ void Endstops::report() {
 #endif
 #if FEATURE_Z_PROBE
         Com::printF(Com::tZProbeState);
-        Com::print(zProbe() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(zProbe() ? Com::tHSpace : Com::tLSpace);
 #endif
         Com::println();
 }

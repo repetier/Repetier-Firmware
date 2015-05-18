@@ -1354,7 +1354,7 @@ STEPPER_CURRENT_CONTROL
 *
 * On PrintrBoard, with Sense Resistors = 0.11 Ohms, and 2 Amps maximum current rating,
 * the Maximum VRef to send is calculated as:
-* 
+*
 *   2.00 Amps Maximum Output * (8 * 0.11 Ohms) = 1.76 Maximum VRef from MCP4728.
 *
 ****************************************************************************************/
@@ -1371,7 +1371,7 @@ STEPPER_CURRENT_CONTROL
 #define MCP4728_CMD_GC_UPDATE     0B00001000 // General Call Update - Update all DAC Outputs (Only way to update DAC Outputs on PrintrBoard Rev F because they tied /LDAC to VDD.
 #define MCP4728_CMD_GC_RESET      0B00000110 // General Call Reset
 #define MCP4728_VREF 		1 // From DataSheet. We will use MCP4728's internal 2.048V as Vref
-#define MCP4728_GAIN		0 // From DataSheet. Use 1x Gain Multiplier (0V - 2.048V); 
+#define MCP4728_GAIN		0 // From DataSheet. Use 1x Gain Multiplier (0V - 2.048V);
 #define MCP4728_NUM_CHANNELS    4 // Duh. Specified here in case there's a beefier chip used on some other board someday.
 #define MCP4728_STEPPER_ORDER 	{3,2,1,0} // PrintrBoard wired 'em up backwards. SMH.  X, Y, Z, E
 #define MCP4728_VOUT_MAX	3520 // 1.76 Volts * 2000. See DataSheets for the math. Value should be between 0-4095
@@ -2057,6 +2057,8 @@ S3(ext)=9
 #define HEATER_2_PIN   7
 #define TEMP_2_PIN     1
 
+#define TEMP_3_PIN     7
+
 #define ORIG_E0_STEP_PIN    34
 #define ORIG_E0_DIR_PIN     43
 #define ORIG_E0_ENABLE_PIN  26
@@ -2076,6 +2078,8 @@ S3(ext)=9
 #define SDSS           53
 #define LED_PIN        13
 #define ORIG_FAN_PIN        8
+#define ORIG_FAN2_PIN    6
+#define ORIG_FAN3_PIN    2
 #define ORIG_PS_ON_PIN      4
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 

@@ -1015,7 +1015,7 @@ void Commands::processGCode(GCode *com)
         Endstops::update();
         Endstops::update();
         Com::printF(Com::tZProbeState);
-        Com::print(Endstops::zProbe() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(Endstops::zProbe() ? Com::tHSpace : Com::tLSpace);
         Com::println();
         break;
 #if FEATURE_AUTOLEVEL
