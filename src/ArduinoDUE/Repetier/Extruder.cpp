@@ -1333,6 +1333,7 @@ void TemperatureController::updateCurrentTemperature()
     case 51:
     case 52:
     case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
+    case 61: // HEATER_USES_AD8495 (Delivers 5mV/degC) 1.25v offset
     case 100: // AD595
         currentTemperature = (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS));
         break;
@@ -1424,7 +1425,18 @@ void TemperatureController::updateCurrentTemperature()
         break;
     }
     case 60: // AD8495 (Delivers 5mV/degC vs the AD595's 10mV)
+#if CPU_ARCH == ARCH_AVR
         currentTemperatureC = ((float)currentTemperature * 1000.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
+#else
+        currentTemperatureC = ((float)currentTemperature * 660.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
+#endif
+        break;
+    case 61: // AD8495 1.25V Vref offset (like Adafruit 8495 breakout board)
+#if CPU_ARCH == ARCH_AVR
+        currentTemperatureC = ((float)currentTemperature * 1000.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 250.0f;
+#else
+        currentTemperatureC = ((float)currentTemperature * 660.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 250.0f;
+#endif
         break;
     case 100: // AD595
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));

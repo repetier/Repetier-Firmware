@@ -538,6 +538,8 @@ STEPPER_CURRENT_CONTROL
 
 #define TEMP_6_PIN         4   // Thermocouple 1
 #define TEMP_7_PIN         5   // Thermocouple 2
+#define THERMOCOUPLE_0_PIN         4   // Thermocouple 1
+#define THERMOCOUPLE_1_PIN         5   // Thermocouple 2
 
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
@@ -1611,6 +1613,7 @@ STEPPER_CURRENT_CONTROL
 #define HEATER_1_PIN       8    // EXTRUDER 2 (FAN On Sprinter)
 #define HEATER_2_PIN       10   // Heated bed
 
+#define THERMOCOUPLE_0_PIN 8
 #define TEMP_3_PIN         8   // Thermocouple 0 ANALOG NUMBERING
 #define TEMP_0_PIN         13   // ANALOG NUMBERING
 #define TEMP_1_PIN         15   // ANALOG NUMBERING
@@ -1795,6 +1798,8 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN         14   // Thermistor 2 for heated bed ANALOG NUMBERING
 #define TEMP_3_PIN         8    // Thermocouple 0
 #define TEMP_4_PIN         4    // Thermocouple 1
+#define THERMOCOUPLE_0_PIN 8
+#define THERMOCOUPLE_0_PIN 4
 
 #define BEEPER_PIN 64			// Beeper on AUX-4
 
@@ -1985,6 +1990,10 @@ S3(ext)=9
 #define TEMP_3_PIN 13 // Extruder 3
 #define TEMP_1_PIN 12 // Heated bed
 
+#define THERMOCOUPLE_0_PIN 11
+#define THERMOCOUPLE_1_PIN 10
+#define THERMOCOUPLE_2_PIN 8
+#define THERMOCOUPLE_3_PIN 9
 
 #define BEEPER_PIN 61	 // Beeper on AUX-4
 #define SDSUPPORT true // sd card reader on board

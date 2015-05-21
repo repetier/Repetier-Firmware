@@ -148,6 +148,8 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_3_PIN       5 // Due analog pin #56
 #define TEMP_4_PIN       4 // Due analog pin #57
 
+#define THERMOCOUPLE_0_PIN  2   // Dua analog pin #59 = A5 -> AD 2
+
 #define ORIG_E0_STEP_PIN    61 // A7
 #define ORIG_E0_DIR_PIN     60 // A6
 #define ORIG_E0_ENABLE_PIN  62 // A8

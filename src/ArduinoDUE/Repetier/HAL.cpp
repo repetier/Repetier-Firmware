@@ -1236,3 +1236,7 @@ size_t RFDoubleSerial::write(uint8_t c) {
 RFDoubleSerial BTAdapter;
 #endif
 
+// Dummy function to overload weak arduino function that always disables
+// watchdog. We do not need that as we do this our self.
+void watchdogSetup(void) {
+}
