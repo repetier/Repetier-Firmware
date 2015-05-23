@@ -9140,6 +9140,531 @@ uint8_t u8g_com_arduino_sw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void
 
 #endif /* ARDUINO */
 
+// ================ u8g_dev_ks0108_128x64.c ===================
 
+/*
+
+  u8g_dev_ks0108_128x64.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+  ADDRESS = 0   (Command Mode)
+    0x03f       Display On
+    0x0c0       Start Display at line 0
+    0x040 | y   write to y address (y:0..63)
+    0x0b8 | x   write to page [0..7]
+
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+*/
+
+#define WIDTH 128
+#define HEIGHT 64
+#define PAGE_HEIGHT 8
+
+static const uint8_t u8g_dev_ks0108_128x64_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip 1 */
+  0x03f,		                /* display on */
+  0x0c0,		                /* start at line 0 */
+  U8G_ESC_DLY(20),         /* delay 20 ms */
+  U8G_ESC_CS(2),             /* enable chip 2 */
+  0x03f,		                /* display on */
+  0x0c0,		                /* start at line 0 */
+  U8G_ESC_DLY(20),         /* delay 20 ms */
+  U8G_ESC_CS(0),             /* disable all chips */
+  U8G_ESC_END                /* end of sequence */
+};
+
+
+uint8_t u8g_dev_ks0108_128x64_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_NONE);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ks0108_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_SetAddress(u8g, dev, 0);           /* command mode */
+        u8g_SetChipSelect(u8g, dev, 2);
+        u8g_WriteByte(u8g, dev, 0x0b8 | pb->p.page); /* select current page (KS0108b) */
+        u8g_WriteByte(u8g, dev, 0x040 );		/* set address 0 */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        u8g_WriteSequence(u8g, dev, 64, (uint8_t*)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_SetAddress(u8g, dev, 0);           /* command mode */
+        u8g_SetChipSelect(u8g, dev, 1);
+        u8g_WriteByte(u8g, dev, 0x0b8 | pb->p.page); /* select current page (KS0108b) */
+        u8g_WriteByte(u8g, dev, 0x040 );		/* set address 0 */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        u8g_WriteSequence(u8g, dev, 64, 64+(uint8_t *)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+      }
+      break;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+U8G_PB_DEV(u8g_dev_ks0108_128x64, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ks0108_128x64_fn, U8G_COM_PARALLEL);
+U8G_PB_DEV(u8g_dev_ks0108_128x64_fast, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ks0108_128x64_fn, U8G_COM_FAST_PARALLEL);
+
+// ================= 8g_com_arduino_parallel.c ==================
+
+/*
+
+  u8g_com_arduino_parallel.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+  PIN_D0 8
+  PIN_D1 9
+  PIN_D2 10
+  PIN_D3 11
+  PIN_D4 4
+  PIN_D5 5
+  PIN_D6 6
+  PIN_D7 7
+
+  PIN_CS1 14
+  PIN_CS2 15
+  PIN_RW 16
+  PIN_DI 17
+  PIN_EN 18
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+*/
+
+#if  defined(ARDUINO)
+
+
+void u8g_com_arduino_parallel_write(u8g_t *u8g, uint8_t val)
+{
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D0, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D1, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D2, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D3, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D4, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D5, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D6, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D7, val&1);
+
+  /* EN cycle time must be 1 micro second, digitalWrite is slow enough to do this */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, HIGH);
+  u8g_MicroDelay(); /* delay by 1000ns, reference: ST7920: 140ns, SBN1661: 100ns */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, LOW);
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+}
+
+
+uint8_t u8g_com_arduino_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      /* setup the RW pin as output and force it to low */
+      if ( u8g->pin_list[U8G_PI_RW] != U8G_PIN_NONE )
+      {
+        pinMode(u8g->pin_list[U8G_PI_RW], OUTPUT);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RW, LOW);
+      }
+      /* set all pins (except RW pin) */
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      break;
+    case U8G_COM_MSG_STOP:
+      break;
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 1 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 2 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      break;
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_com_arduino_parallel_write(u8g, arg_val);
+      break;
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_parallel_write(u8g, *ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_parallel_write(u8g, u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_DI, arg_val);
+      break;
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+  }
+  return 1;
+}
+
+#else
+
+
+uint8_t u8g_com_arduino_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* ARDUINO */
+
+
+// =============== u8g_arduino_fast_parallel.c ================
+/*
+
+  u8g_arduino_fast_parallel.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  PIN_D0 8
+  PIN_D1 9
+  PIN_D2 10
+  PIN_D3 11
+  PIN_D4 4
+  PIN_D5 5
+  PIN_D6 6
+  PIN_D7 7
+
+  PIN_CS1 14
+  PIN_CS2 15
+  PIN_RW 16
+  PIN_DI 17
+  PIN_EN 18
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+  Update for ATOMIC operation done (01 Jun 2013)
+    U8G_ATOMIC_OR(ptr, val)
+    U8G_ATOMIC_AND(ptr, val)
+    U8G_ATOMIC_START();
+    U8G_ATOMIC_END();
+
+*/
+
+#if  defined(ARDUINO)
+
+#define PIN_D0 UI_DISPLAY_D0_PIN
+#define PIN_D1 UI_DISPLAY_D1_PIN
+#define PIN_D2 UI_DISPLAY_D2_PIN
+#define PIN_D3 UI_DISPLAY_D3_PIN
+#define PIN_D4 UI_DISPLAY_D4_PIN
+#define PIN_D5 UI_DISPLAY_D5_PIN
+#define PIN_D6 UI_DISPLAY_D6_PIN
+#define PIN_D7 UI_DISPLAY_D7_PIN
+
+#define PIN_CS1 UI_DISPLAY_CS1
+#define PIN_CS2 UI_DISPLAY_CS2
+#define PIN_RW UI_DISPLAY_RW_PIN
+#define PIN_DI UI_DISPLAY_DI
+#define PIN_EN UI_DISPLAY_ENABLE_PIN
+
+//#define PIN_RESET
+
+
+#if defined(__PIC32MX)
+/* CHIPKIT PIC32 */
+static volatile uint32_t *u8g_data_port[8];
+static uint32_t u8g_data_mask[8];
+#else
+static volatile uint8_t *u8g_data_port[8];
+static uint8_t u8g_data_mask[8];
+#endif
+
+
+
+static void u8g_com_arduino_fast_parallel_init(u8g_t *u8g)
+{
+  u8g_data_port[0] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D0]));
+  u8g_data_mask[0] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D0]);
+  u8g_data_port[1] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D1]));
+  u8g_data_mask[1] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D1]);
+  u8g_data_port[2] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D2]));
+  u8g_data_mask[2] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D2]);
+  u8g_data_port[3] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D3]));
+  u8g_data_mask[3] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D3]);
+
+  u8g_data_port[4] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D4]));
+  u8g_data_mask[4] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D4]);
+  u8g_data_port[5] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D5]));
+  u8g_data_mask[5] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D5]);
+  u8g_data_port[6] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D6]));
+  u8g_data_mask[6] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D6]);
+  u8g_data_port[7] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D7]));
+  u8g_data_mask[7] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D7]);
+}
+
+/* atomic protection must be done by calling function */
+static void u8g_com_arduino_fast_write_data_pin(uint8_t pin, uint8_t val)
+{
+  if ( val != 0 )
+    *u8g_data_port[pin] |= u8g_data_mask[pin];
+  else
+    *u8g_data_port[pin] &= ~u8g_data_mask[pin];
+}
+
+
+void u8g_com_arduino_fast_parallel_write(u8g_t *u8g, uint8_t val)
+{
+  U8G_ATOMIC_START();
+  u8g_com_arduino_fast_write_data_pin( 0, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 1, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 2, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 3, val&1 );
+  val >>= 1;
+
+  u8g_com_arduino_fast_write_data_pin( 4, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 5, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 6, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 7, val&1 );
+  val >>= 1;
+  U8G_ATOMIC_END();
+
+  /* EN cycle time must be 1 micro second */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, HIGH);
+  u8g_MicroDelay(); /* delay by 1000ns, reference: ST7920: 140ns, SBN1661: 100ns */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, LOW);
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+}
+
+
+uint8_t u8g_com_arduino_fast_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_fast_parallel_init(u8g);
+      /* setup the RW pin as output and force it to low */
+      if ( u8g->pin_list[U8G_PI_RW] != U8G_PIN_NONE )
+      {
+        pinMode(u8g->pin_list[U8G_PI_RW], OUTPUT);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RW, LOW);
+      }
+      /* set all pins (except RW pin) */
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      break;
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 1 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 2 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      break;
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_com_arduino_fast_parallel_write(u8g, arg_val);
+      break;
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_fast_parallel_write(u8g, *ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_fast_parallel_write(u8g, u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_DI, arg_val);
+      break;
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+  }
+  return 1;
+}
+
+#else
+
+
+uint8_t u8g_com_arduino_fast_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+
+#endif /* ARDUINO */
 
 

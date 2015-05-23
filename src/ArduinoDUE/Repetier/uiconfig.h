@@ -115,6 +115,12 @@ What display type do you use?
 //#define U8GLIB_SSD1306_SW_SPI
 // SSD1306 over I2C using hardware I2C pins
 //#define U8GLIB_SSD1306_I2C
+// For the 8 bit ks0108 display you need to set these pins
+// UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN
+// UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_CS1,UI_DISPLAY_CS2,
+// UI_DISPLAY_DI,UI_DISPLAY_RW_PIN,UI_DISPLAY_RESET_PIN
+//#define U8GLIB_KS0108
+//#define U8GLIB_KS0108_FAST
 
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
@@ -217,6 +223,13 @@ Define the pin
 #define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
 #define UI_DELAYPERCHAR		   50
 
+// Special pins for some u8g driven display
+
+#define UI_DISPLAY_CS1 59
+#define UI_DISPLAY_CS2 59
+#define UI_DISPLAY_DI 59
+#define UI_DISPLAY_RW_PIN 59
+#define UI_DISPLAY_RESET_PIN 59
 #endif
 
 
@@ -432,3 +445,6 @@ void uiCheckSlowKeys(int &action) {
 
 #endif
 #endif
+
+
+
