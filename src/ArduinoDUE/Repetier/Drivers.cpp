@@ -37,6 +37,10 @@ MotorDriverInterface *motorDrivers[NUM_MOTOR_DRIVERS] = {
 #endif
 };
 
+MotorDriverInterface *getMotorDriver(int idx) {
+    return motorDrivers[idx];
+}
+
 /**
 Run motor P until it is at position X
 */
@@ -87,6 +91,10 @@ void commandG204(GCode &code) {
 void disableAllMotorDrivers() {
     for(int i = 0; i < NUM_MOTOR_DRIVERS; i++)
         motorDrivers[i]->disable();
+}
+void initializeAllMotorDrivers() {
+    for(int i = 0; i < NUM_MOTOR_DRIVERS; i++)
+        motorDrivers[i]->initialize();
 }
 
 #endif // NUM_MOTOR_DRIVERS

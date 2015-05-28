@@ -972,8 +972,26 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 3
 
-/** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. */
+/** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. 
+ * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this
+ * case set HOME_ORDER_ZXYTZ and also define ZHOME_HEAT_HEIGHT and ZHOME_MIN_TEMPERATURE. It will do
+ * first a z home to get some reference, then raise to ZHOME_HEAT_HEIGHT do xy homing and then after
+ * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.   
+ * */
 #define HOMING_ORDER HOME_ORDER_ZXY
+// Used for homing order HOME_ORDER_ZXYTZ
+#define ZHOME_MIN_TEMPERATURE 0
+// needs to heat all extruders (1) or only current extruder (0)
+#define ZHOME_HEAT_ALL 1 
+// Z-height for heating extruder during homing
+#define ZHOME_HEAT_HEIGHT 20
+// If your bed might bend while probing, because your sensor is the extruder tip
+// you can define a predefined x,y position so beding is always the same and
+// can be compensated. Set coordinate to 999999 to ignore positions and just
+// use the position you are at.
+#define ZHOME_X_POS IGNORE_COORDINATE
+#define ZHOME_Y_POS IGNORE_COORDINATE
+
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
 #define ENABLE_BACKLASH_COMPENSATION 0

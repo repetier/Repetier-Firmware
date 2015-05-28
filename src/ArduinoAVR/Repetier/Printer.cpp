@@ -42,7 +42,7 @@ unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 long Printer::currentDeltaPositionSteps[E_TOWER_ARRAY];
 uint8_t lastMoveID = 0; // Last move ID
 #endif
-signed char Printer::zBabystepsMissing = 0;
+int8_t Printer::zBabystepsMissing = 0;
 uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
@@ -922,6 +922,9 @@ void Printer::setup()
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
     motorCurrentControlInit(); // Set current if it is firmware controlled
 #endif
+#if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
+    initializeAllMotorDrivers();
+#endif // defined
     microstepInit();
 #if FEATURE_AUTOLEVEL
     resetTransformationMatrix(true);
@@ -1331,46 +1334,112 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if !defined(HOMING_ORDER)
 #define HOMING_ORDER HOME_ORDER_XYZ
 #endif
-#if HOMING_ORDER==HOME_ORDER_XYZ
+#if HOMING_ORDER == HOME_ORDER_XYZ
     if(xaxis) homeXAxis();
     if(yaxis) homeYAxis();
     if(zaxis) homeZAxis();
-#elif HOMING_ORDER==HOME_ORDER_XZY
+#elif HOMING_ORDER == HOME_ORDER_XZY
     if(xaxis) homeXAxis();
     if(zaxis) homeZAxis();
     if(yaxis) homeYAxis();
-#elif HOMING_ORDER==HOME_ORDER_YXZ
+#elif HOMING_ORDER == HOME_ORDER_YXZ
     if(yaxis) homeYAxis();
     if(xaxis) homeXAxis();
     if(zaxis) homeZAxis();
-#elif HOMING_ORDER==HOME_ORDER_YZX
+#elif HOMING_ORDER == HOME_ORDER_YZX
     if(yaxis) homeYAxis();
     if(zaxis) homeZAxis();
     if(xaxis) homeXAxis();
-#elif HOMING_ORDER==HOME_ORDER_ZXY
+#elif HOMING_ORDER == HOME_ORDER_ZXY
     if(zaxis) homeZAxis();
     if(xaxis) homeXAxis();
     if(yaxis) homeYAxis();
-#elif HOMING_ORDER==HOME_ORDER_ZYX
+#elif HOMING_ORDER == HOME_ORDER_ZYX
     if(zaxis) homeZAxis();
     if(yaxis) homeYAxis();
     if(xaxis) homeXAxis();
+#elif HOMING_ORDER == HOME_ORDER_ZXYTZ
+{
+    float actTemp[NUM_EXTRUDER];
+    for(int i = 0;i < NUM_EXTRUDER; i++)
+        actTemp[i] = Extruder::current->tempControl.targetTemperatureC;
+    if(zaxis) {
+        homeZAxis();
+        Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
+        Commands::waitUntilEndOfAllMoves();
+#if ZHOME_HEAT_ALL
+        for(int i = 0; i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,false);
+        for(int i = 0; i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,true);
+#else
+        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZHOME_MIN_TEMPERATURE)),Extruder::current->id,false,true);
 #endif
+    }
+#if ZHOME_X_POS == IGNORE_COORDINATE
+    if(xaxis)
+#else
+    if(xaxis || zaxis)
+#endif
+    {
+        homeXAxis();
+#if ZHOME_X_POS == IGNORE_COORDINATE
+        if(X_HOME_DIR < 0) startX = Printer::xMin;
+        else startX = Printer::xMin + Printer::xLength;
+#else
+        startX = ZHOME_X_POS;
+#endif
+    }
+#if ZHOME_Y_POS == IGNORE_COORDINATE
+    if(yaxis)
+#else
+    if(yaxis || zaxis)
+#endif
+    {
+        homeYAxis();
+#if ZHOME_Y_POS == IGNORE_COORDINATE
+        if(Y_HOME_DIR < 0) startY = Printer::yMin;
+        else startY = Printer::yMin + Printer::yLength;
+#else
+        startY = ZHOME_Y_POS;
+#endif
+    }
+#if ZHOME_X_POS != IGNORE_COORDINATE || ZHOME_Y_POS != IGNORE_COORDINATE
+    moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[Y_AXIS]);
+    Commands::waitUntilEndOfAllMoves();
+#endif
+    if(zaxis) {
+        homeZAxis();
+#if ZHOME_HEAT_ALL
+        for(int i = 0;i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
+        for(int i = 0;i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(actTemp[i],i,false,true);
+#else
+        Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp > MAX_ROOM_TEMPERATURE);
+#endif
+        if(Z_HOME_DIR < 0) startZ = Printer::zMin;
+        else startZ = Printer::zMin + Printer::zLength;
+    }
+}
+#endif
+#if HOMING_ORDER != HOME_ORDER_ZXYTZ
     if(xaxis)
     {
         if(X_HOME_DIR < 0) startX = Printer::xMin;
-        else startX = Printer::xMin+Printer::xLength;
+        else startX = Printer::xMin + Printer::xLength;
     }
     if(yaxis)
     {
         if(Y_HOME_DIR < 0) startY = Printer::yMin;
-        else startY = Printer::yMin+Printer::yLength;
+        else startY = Printer::yMin + Printer::yLength;
     }
     if(zaxis)
     {
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
-        else startZ = Printer::zMin+Printer::zLength;
+        else startZ = Printer::zMin + Printer::zLength;
     }
+#endif
     updateCurrentPosition(true);
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
     UI_CLEAR_STATUS

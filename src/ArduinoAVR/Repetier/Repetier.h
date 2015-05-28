@@ -73,6 +73,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ZX_GANTRY 9
 
 #define WIZARD_STACK_SIZE 8
+#define IGNORE_COORDINATE 999999
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -123,6 +124,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_YZX 4
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
+#define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
 
 #define NO_CONTROLLER 0
 #define UICONFIG_CONTROLLER 1
@@ -169,6 +171,16 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #include "Configuration.h"
+
+#ifndef MAX_ROOM_TEMPERATURE
+#define MAX_ROOM_TEMPERATURE 50
+#endif
+#ifndef ZHOME_X_POS
+#define ZHOME_X_POS IGNORE_COORDINATE
+#endif
+#ifndef ZHOME_Y_POS
+#define ZHOME_Y_POS IGNORE_COORDINATE
+#endif
 
 // MS1 MS2 Stepper Driver Microstepping mode table
 #define MICROSTEP1 LOW,LOW
@@ -373,7 +385,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_DEADTIME 64
 
 #include "HAL.h"
-#include "Drivers.h"
 #include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
 /** Total size of the buffer used to store the long filenames */
@@ -412,7 +423,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-#define IGNORE_COORDINATE 999999
 
 #undef min
 #undef max
@@ -618,6 +628,8 @@ extern int debugWaitLoop;
 #else
 #define SQRT(x) sqrt(x)
 #endif
+
+#include "Drivers.h"
 
 #include "Events.h"
 #if defined(CUSTOM_EVENTS)

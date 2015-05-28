@@ -295,7 +295,7 @@ public:
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
-    static signed char zBabystepsMissing;
+    static int8_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.

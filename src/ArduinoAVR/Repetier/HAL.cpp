@@ -1109,9 +1109,9 @@ SIGNAL(SIG_UART_RECV)
 #endif
 {
 #if defined(UDR0)
-    unsigned char c  =  UDR0;
+    uint8_t c  =  UDR0;
 #elif defined(UDR)
-    unsigned char c  =  UDR;
+    uint8_t c  =  UDR;
 #else
 #error UDR not defined
 #endif
@@ -1226,7 +1226,7 @@ ISR(USART_UDRE_vect)
 
 SIGNAL(SIG_USARTx_RECV)
 {
-    unsigned char c  =  UDRx;
+    uint8_t c  =  UDRx;
     rf_store_char(c, &rx_buffer);
 }
 

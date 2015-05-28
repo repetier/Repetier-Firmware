@@ -12,6 +12,9 @@ Version 0.92
   Disable heaters/extruders on sd stop.
   Safety question for sd stop.
   Many minor corrections and improvements.
+  Extra motor drivers.
+  Event system for lights etc.
+  New homing sequence with preheat for nozzle based z sensors.
 
 Version 0.91.8
   New languages french and Czech

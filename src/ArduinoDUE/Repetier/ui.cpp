@@ -686,7 +686,7 @@ u8g_uint_t u8_tx = 0, u8_ty = 0;
 
 void u8PrintChar(char c)
 {
-    switch(c)
+    switch((uint8_t)c)
     {
     case 0x7E: // right arrow
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);

@@ -324,7 +324,7 @@ void setMotorCurrent( uint8_t channel, unsigned short level )
     const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
     if(channel > LTC2600_NUM_CHANNELS) return;
     uint8_t address = ltc_channels[channel];
-    char i;
+    fast8_t i;
 
 
     // NOTE: Do not increase the current endlessly. In case the engine reaches its current saturation, the engine and the driver can heat up and loss power.
@@ -957,23 +957,23 @@ void Commands::processGCode(GCode *com)
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
         float sum = 0, last,oldFeedrate = Printer::feedrate;
-        Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
         if(sum < 0) break;
-        Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
         if(last < 0) break;
         sum+= last;
-        Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+        Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
         if(last < 0) break;
         sum += last;
         sum *= 0.33333333333333;
-        Com::printFLN(Com::tZProbeAverage,sum);
+        Com::printFLN(Com::tZProbeAverage, sum);
         if(com->hasS() && com->S)
         {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
             Printer::updateCurrentPosition();
             Printer::zLength += sum - Printer::currentPosition[Z_AXIS];
             Printer::updateDerivedParameter();
@@ -1045,6 +1045,20 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         if(h3 < 0) break;
+#if defined(MOTORIZED_BED_LEVELING) && defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS >= 2
+        // h1 is reference heights, h2 => motor 0, h3 => motor 1
+        h2 -= h1;
+        h3 -= h1;
+        MotorDriverInterface *motor2 = getMotorDriver(0);
+        MotorDriverInterface *motor3 = getMotorDriver(1);
+        motor2->setCurrentAs(0);
+        motor3->setCurrentAs(0);
+        motor2->gotoPosition(h2);
+        motor3->gotoPosition(h3);
+        motor2->disable();
+        motor3->disable(); // now bed is even
+        Printer::currentPositionSteps[Z_AXIS] = h1 * Printer::axisStepsPerMM[Z_AXIS];
+#else // defined(MOTORIZED_BED_LEVELING)
         Printer::buildTransformationMatrix(h1,h2,h3);
         //-(Rxx*Ryz*y-Rxz*Ryx*y+(Rxz*Ryy-Rxy*Ryz)*x)/(Rxy*Ryx-Rxx*Ryy)
         // z = z-deviation from origin due to bed transformation
@@ -1090,6 +1104,7 @@ void Commands::processGCode(GCode *com)
                 EEPROM::storeDataIntoEEPROM();
         }
         Printer::setAutolevelActive(true);
+#endif // defined(MOTORIZED_BED_LEVELING)
         Printer::updateDerivedParameter();
         Printer::updateCurrentPosition(true);
         printCurrentPosition(PSTR("G32 "));
@@ -1548,11 +1563,11 @@ void Commands::processMCode(GCode *com)
         if(reportTempsensorError()) break;
         previousMillisCmd = HAL::timeInMilliseconds();
         if(Printer::debugDryrun()) break;
-        UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
         Commands::waitUntilEndOfAllMoves();
         Extruder *actExtruder = Extruder::current;
         if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
-        if (com->hasS()) Extruder::setTemperatureForExtruder(com->S,actExtruder->id,com->hasF() && com->F > 0);
+        if (com->hasS()) Extruder::setTemperatureForExtruder(com->S, actExtruder->id, com->hasF() && com->F > 0, true);
+/*        UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
 #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN > 0
         if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC) < (SKIP_M109_IF_WITHIN)) break; // Already in range
 #endif
@@ -1601,7 +1616,8 @@ void Commands::processMCode(GCode *com)
 #endif
         EVENT_HEATING_FINISHED(actExtruder->id);
     }
-    UI_CLEAR_STATUS;
+    UI_CLEAR_STATUS;*/
+    }
 #endif
     previousMillisCmd = HAL::timeInMilliseconds();
     break;
@@ -1612,14 +1628,14 @@ void Commands::processMCode(GCode *com)
         Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
         if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
-#if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN>0
-        if(abs(heatedBedController.currentTemperatureC-heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
+#if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN > 0
+        if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
         EVENT_WAITING_HEATER(-1);
         codenum = HAL::timeInMilliseconds();
-        while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC)
+        while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC && heatedBedController.targetTemperatureC > 25.0)
         {
-            if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
+            if( (HAL::timeInMilliseconds() - codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
             {
                 printTemperatures();
                 codenum = previousMillisCmd = HAL::timeInMilliseconds();

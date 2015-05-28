@@ -42,8 +42,8 @@
 #define PROGMEM
 #define PGM_P const char *
 #define PSTR(s) s
-#define pgm_read_byte_near(x) (*(char*)x)
-#define pgm_read_byte(x) (*(char*)x)
+#define pgm_read_byte_near(x) (*(uint8_t*)x)
+#define pgm_read_byte(x) (*(uint8_t*)x)
 #endif
 
 #define PACK
@@ -180,13 +180,13 @@ typedef uint8_t ufast8_t;
 
 struct ring_buffer
 {
-    unsigned char buffer[SERIAL_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
 struct ring_buffer_tx
 {
-    unsigned char buffer[SERIAL_TX_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_TX_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
@@ -685,13 +685,13 @@ public:
 
     // I2C Support
 
-    static void i2cInit(unsigned long clockSpeedHz);
-    static unsigned char i2cStart(unsigned char address);
-    static void i2cStartWait(unsigned char address);
+    static void i2cInit(uint32_t clockSpeedHz);
+    static unsigned char i2cStart(uint8_t address);
+    static void i2cStartWait(uint8_t address);
     static void i2cStop(void);
-    static unsigned char i2cWrite( unsigned char data );
-    static unsigned char i2cReadAck(void);
-    static unsigned char i2cReadNak(void);
+    static uint8_t i2cWrite( uint8_t data );
+    static uint8_t i2cReadAck(void);
+    static uint8_t i2cReadNak(void);
 
     // Watchdog support
 

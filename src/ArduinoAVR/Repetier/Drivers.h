@@ -21,6 +21,7 @@ the main code.
 class MotorDriverInterface
 {
 public:
+    virtual void initialize() = 0;
     virtual float getPosition() = 0;
     virtual void setCurrentAs(float newPos) = 0;
     virtual void gotoPosition(float newPos) = 0;
@@ -41,11 +42,13 @@ public:
     StepperDriver(float _stepsPerMM,float speed)
     {
         stepsPerMM = _stepsPerMM;
+        delayUS = 500000 / (speed * stepsPerMM);
+    }
+    void initialize() {
         HAL::pinMode(enablePin, OUTPUT);
-        HAL::digitalWrite(enablePin, !invertEnable);
         HAL::pinMode(stepPin, OUTPUT);
         HAL::pinMode(dirPin, OUTPUT);
-        delayUS = 500000 / (speed * stepsPerMM);
+        HAL::digitalWrite(enablePin, !invertEnable);
     }
     float getPosition()
     {
@@ -59,11 +62,10 @@ public:
     {
         enable();
         int32_t target = floor(newPos * stepsPerMM + 0.5f) - position;
+        position += target;
         if(target > 0) {
             HAL::digitalWrite(dirPin, !invertDir);
-            position += target;
         } else {
-            position += target;
             target = -target;
             HAL::digitalWrite(dirPin, invertDir);
         }
@@ -73,6 +75,9 @@ public:
             HAL::digitalWrite(stepPin, LOW);
             HAL::delayMicroseconds(delayUS);
             target--;
+            HAL::pingWatchdog();
+            if((target & 127) == 0)
+                Commands::checkForPeriodicalActions(false);
         }
     }
     void enable()
@@ -92,6 +97,8 @@ extern void commandG202(GCode &code);
 extern void commandG203(GCode &code);
 extern void commandG204(GCode &code);
 extern void disableAllMotorDrivers();
+extern MotorDriverInterface *getMotorDriver(int idx);
+extern void initializeAllMotorDrivers();
 #endif
 
 #endif // DRIVERS_H_INCLUDED
