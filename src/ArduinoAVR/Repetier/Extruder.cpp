@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-uint8_t manageMonitor = 255; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
+uint8_t manageMonitor = 0; ///< Temp. we want to monitor with our host. 1+NUM_EXTRUDER is heated bed
 unsigned int counterPeriodical = 0;
 volatile uint8_t executePeriodical = 0;
 uint8_t counter250ms = 25;
@@ -1855,11 +1855,7 @@ disabled, the function is not called.
 */
 void writeMonitor()
 {
-    Com::printF(Com::tMTEMPColon,(long)HAL::timeInMilliseconds());
-    TemperatureController *act = tempController[manageMonitor];
-    Com::printF(Com::tSpace,act->currentTemperatureC);
-    Com::printF(Com::tSpace,act->targetTemperatureC, 0);
-    Com::printFLN(Com::tSpace,pwm_pos[act->pwmIndex]);
+    Commands::printTemperatures(false);
 }
 
 bool reportTempsensorError()

@@ -75,7 +75,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves)
     Extruder::manageTemperatures();
     if(--counter250ms == 0)
     {
-        if(manageMonitor <= 1 + NUM_EXTRUDER)
+        if(manageMonitor)
             writeMonitor();
         counter250ms = 5;
         EVENT_TIMER_500MS;
@@ -1772,12 +1772,9 @@ void Commands::processMCode(GCode *com)
 #endif
     case 203: // M203 Temperature monitor
         if(com->hasS())
-        {
-            if(com->S<NUM_EXTRUDER) manageMonitor = com->S;
-#if HAVE_HEATED_BED
-            else manageMonitor=NUM_EXTRUDER; // Set 100 to heated bed
-#endif
-        }
+            manageMonitor = com->S != 255;
+        else
+            manageMonitor = 0;
         break;
     case 204: // M204
     {
