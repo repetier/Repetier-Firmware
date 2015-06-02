@@ -1096,14 +1096,44 @@ void Printer::homeYAxis()
 }
 void Printer::homeZAxis() // Delta z homing
 {
+	bool homingSuccess = false;
     SHOT("homeZAxis ");
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-    PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
+	// New safe homing routine by Kyrre Aalerud
+	// This method will safeguard against sticky endstops such as may be gotten cheaply from china.
+	// This can lead to headcrashes and even fire, thus a safer algorithm to ensure the endstops actually respond as expected.
+	//Endstops::report();
+	// Check that all endstoips (XYZ) were hit
+	if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
+		// Back off for retest
+		PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+		//Endstops::report();
+		// Check for proper release of all (XYZ) endstops
+		if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
+			// Rehome with reduced speed
+		    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
+			//Endstops::report();
+			// Check that all endstoips (XYZ) were hit again
+			if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
+				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
-    if(ENDSTOP_Z_BACK_ON_HOME > 0)
-        PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
+				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
+					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);	
+					//Endstops::report();
+					// Check for missing release of any (XYZ) endstop
+					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {
+						homingSuccess = false; // Reset success flag
+					}
+				}
 #endif
+			}
+		}
+	}
+	// Check if homing failed.  If so, request pause!
+	if (!homingSuccess) {
+		setHomed(false); // Clear the homed flag
+		Com::printFLN(PSTR("RequestPause:Homing failed!"));
+	}
     // Correct different endstop heights
     // These can be adjusted by two methods. You can use offsets stored by determining the center
     // or you can use the xyzMinSteps from G100 calibration. Both have the same effect but only one
