@@ -1072,10 +1072,24 @@ void Printer::GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed)
 #if DRIVE_SYSTEM == DELTA
 void Printer::deltaMoveToTopEndstops(float feedrate)
 {
-    for (uint8_t i = 0; i < 3; i++)
+    for (fast8_t i = 0; i < 3; i++)
         Printer::currentPositionSteps[i] = 0;
+#ifdef DEBUG_DELTA_HOME
+    Printer::debugLevel |= 1;
+    Com::printF(PSTR("deltaMoveToTopEndstops start:"),realDeltaPositionSteps[A_TOWER]);
+    Com::printF(Com::tComma,realDeltaPositionSteps[B_TOWER]);
+    Com::printFLN(Com::tComma,realDeltaPositionSteps[C_TOWER]);
+    Endstops::report();
+#endif
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
     PrintLine::moveRelativeDistanceInSteps(0, 0, zMaxSteps * 1.5, 0, feedrate, true, true);
+#ifdef DEBUG_DELTA_HOME
+    Printer::debugLevel &= 254;
+    Com::printF(PSTR("deltaMoveToTopEndstops end:"),realDeltaPositionSteps[A_TOWER]);
+    Com::printF(Com::tComma,realDeltaPositionSteps[B_TOWER]);
+    Com::printFLN(Com::tComma,realDeltaPositionSteps[C_TOWER]);
+    Endstops::report();
+#endif
     offsetX = offsetY = offsetZ = 0;
 }
 void Printer::homeXAxis()
@@ -1149,9 +1163,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     SHOT("homeAxis ");
     bool autoLevel = isAutolevelActive();
     setAutolevelActive(false);
-    long steps;
     setHomed(true);
-    bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
     if (!(X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1
             && MAX_HARDWARE_ENDSTOP_X && MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z))
     {
@@ -1163,20 +1175,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     // The following movements would be meaningless unless it was zeroed for example.
     UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
     // Homing Z axis means that you must home X and Y
-    if (homeallaxis || zaxis)
-    {
-        homeZAxis();
-    }
-    else
-    {
-        if (xaxis) Printer::destinationSteps[X_AXIS] = 0;
-        if (yaxis) Printer::destinationSteps[Y_AXIS] = 0;
-        if (!PrintLine::queueDeltaMove(true,false,false))
-        {
-            Com::printWarningFLN(PSTR("homeAxis / queueDeltaMove returns error"));
-        }
-    }
-
+    homeZAxis();
     moveToReal(0,0,Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     updateCurrentPosition(true);
     UI_CLEAR_STATUS

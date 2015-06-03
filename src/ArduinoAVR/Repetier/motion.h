@@ -420,15 +420,15 @@ public:
     }
     inline bool isMoveOfAxis(uint8_t axis)
     {
-        return (dir & (XSTEP<<axis));
+        return (dir & (XSTEP << axis));
     }
     inline void setMoveOfAxis(uint8_t axis)
     {
-        dir |= XSTEP<<axis;
+        dir |= XSTEP << axis;
     }
     inline void setPositiveDirectionForAxis(uint8_t axis)
     {
-        dir |= X_DIRPOS<<axis;
+        dir |= X_DIRPOS << axis;
     }
     inline static void resetPathPlanner()
     {
@@ -641,13 +641,13 @@ public:
         HAL::forbidInterrupts();
         --linesCount;
         if(!linesCount)
-            Printer::setMenuMode(MENU_MODE_PRINTING,false);
+            Printer::setMenuMode(MENU_MODE_PRINTING, false);
     }
     static inline void pushLine()
     {
         linesWritePos++;
         if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
-        Printer::setMenuMode(MENU_MODE_PRINTING,true);
+        Printer::setMenuMode(MENU_MODE_PRINTING, true);
         InterruptProtectedBlock noInts;
         linesCount++;
     }
@@ -662,8 +662,8 @@ public:
     static inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current);
     static int32_t bresenhamStep();
     static void waitForXFreeLines(uint8_t b=1, bool allowMoves = false);
-    static inline void forwardPlanner(uint8_t p);
-    static inline void backwardPlanner(uint8_t p,uint8_t last);
+    static inline void forwardPlanner(ufast8_t p);
+    static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
@@ -672,11 +672,11 @@ public:
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
-    static inline void previousPlannerIndex(uint8_t &p)
+    static inline void previousPlannerIndex(ufast8_t &p)
     {
-        p = (p ? p-1 : PRINTLINE_CACHE_SIZE-1);
+        p = (p ? p - 1 : PRINTLINE_CACHE_SIZE - 1);
     }
-    static inline void nextPlannerIndex(uint8_t& p)
+    static inline void nextPlannerIndex(ufast8_t& p)
     {
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }

@@ -169,20 +169,20 @@ typedef char prog_char;
 class InterruptProtectedBlock {
   public:
     INLINE void protect() {
-      __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
+      __disable_irq();
     }
 
     INLINE void unprotect() {
-      __set_BASEPRI(0);
+      __enable_irq();
     }
 
     INLINE InterruptProtectedBlock(bool later = false) {
       if (!later)
-        __set_BASEPRI(NVIC_EncodePriority(4, 3, 0));
+      __disable_irq();
     }
 
     INLINE ~InterruptProtectedBlock() {
-      __set_BASEPRI(0);
+      __enable_irq();
     }
 };
 #else

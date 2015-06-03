@@ -69,12 +69,13 @@ void HAL::setupTimer() {
   pmc_set_writeprotect(false);
 
   // set 3 bits for interrupt group priority, 1 bits for sub-priority
-  NVIC_SetPriorityGrouping(4);
+  //NVIC_SetPriorityGrouping(4);
 
 #if USE_ADVANCE
   // Timer for extruder control
   pmc_enable_periph_clk(EXTRUDER_TIMER_IRQ);  // enable power to timer
-  NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 4, 1));
+  //NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 4, 1));
+  NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, 6);
 
   // count up to value in RC register using given clock
   TC_Configure(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK4);
@@ -92,7 +93,8 @@ void HAL::setupTimer() {
 #endif
   // Regular interrupts for heater control etc
   pmc_enable_periph_clk(PWM_TIMER_IRQ);
-  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
+  //NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
+  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 10);
 
   TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
   TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
@@ -106,7 +108,8 @@ void HAL::setupTimer() {
 
   // Timer for stepper motor control
   pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
-  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 4, 0));
+  //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
+  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,1); // highest priority - no surprises here wanted
 
   TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
                TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -137,7 +140,8 @@ void HAL::setupTimer() {
   WRITE(SERVO3_PIN, LOW);
 #endif
   pmc_enable_periph_clk(SERVO_TIMER_IRQ );
-  NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
+  //NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
+  NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ,4);
 
   TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
                TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -810,8 +814,8 @@ INLINE void setTimer(unsigned long delay)
 {
   // convert old AVR timer delay value for SAM timers
   uint32_t timer_count = (delay * TIMER1_PRESCALE);
-  if (timer_count < 100)
-    timer_count = 100;
+  if (timer_count < 210) // max. 200 khz timer frequency
+    timer_count = 210;
   if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
      stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
     //stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
@@ -827,7 +831,7 @@ void TIMER1_COMPA_VECTOR ()
   // apparently have to read status register
   stepperChannel->TC_SR;
   stepperChannel->TC_RC = 1000000;
-  InterruptProtectedBlock noInt;
+  //InterruptProtectedBlock noInt;
   if (PrintLine::hasLines())
   {
     setTimer(PrintLine::bresenhamStep());
@@ -855,6 +859,7 @@ void TIMER1_COMPA_VECTOR ()
 #endif
     }
     else waitRelax--;
+    
     setTimer(10000);
   }
 }
