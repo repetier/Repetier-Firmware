@@ -390,7 +390,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
 
-#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE)
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -513,7 +513,6 @@ void uiCheckSlowKeys(int &action) {}
 #define U8GLIB_ST7920
 #define UI_LCD_WIDTH 128
 #define UI_LCD_HEIGHT 64
-
 //select font size
 #define UI_FONT_6X10 //default font
 #ifdef UI_FONT_6X10
@@ -530,14 +529,17 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_CHARSET 3
-#else
+#else // 40x4 char display
 #define UI_DISPLAY_TYPE DISPLAY_4BIT
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
 #endif
+
 #define BEEPER_TYPE 1
+
 #if FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD // Gadgets3d shield
+
 #define BEEPER_PIN             33
 #define UI_DISPLAY_RS_PIN      16
 #define UI_DISPLAY_RW_PIN      -1
@@ -554,8 +556,11 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           37
 #define UI_ENCODER_CLICK       31
 #define UI_RESET_PIN           41
+
 #else  // Smartcontroller
+
 #if MOTHERBOARD == 701 // Megatronics v2.0
+
 #define UI_DISPLAY_RS_PIN 14
 #define UI_DISPLAY_RW_PIN -1
 #define UI_DISPLAY_ENABLE_PIN 15
@@ -568,7 +573,9 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK 43
 #define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
 #define UI_INVERT_MENU_DIRECTION true
+
 #elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
+
 #define BEEPER_PIN             44
 #define UI_DISPLAY_RS_PIN      19
 #define UI_DISPLAY_RW_PIN      -1
@@ -585,7 +592,9 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           11
 #define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
+
 #elif MOTHERBOARD == 301 // Rambo has own pins layout
+
 #define BEEPER_PIN             79
 #define UI_DISPLAY_RS_PIN      70
 #define UI_DISPLAY_RW_PIN      -1
@@ -608,7 +617,9 @@ void uiCheckSlowKeys(int &action) {}
 #define SDCARDDETECTINVERTED   0
 #undef SDSUPPORT
 #define SDSUPPORT              1
+
 #elif MOTHERBOARD == 501 // Alligator has own pins layout
+
 #define BEEPER_PIN             64
 #define UI_DISPLAY_RS_PIN      18
 #define UI_DISPLAY_ENABLE_PIN  15
@@ -624,6 +635,18 @@ void uiCheckSlowKeys(int &action) {}
 #ifndef UI_VOLTAGE_LEVEL
 #define UI_VOLTAGE_LEVEL 1 // Set 1=5 o 0=3.3 V
 #endif
+
+#elif MOTHERBOARD == CONTROLLER_FELIX_DUE
+
+#define BEEPER_PIN             -1
+#define UI_DISPLAY_RS_PIN      42
+#define UI_DISPLAY_ENABLE_PIN  44
+#define UI_DISPLAY_D4_PIN      43
+#define UI_ENCODER_A           52
+#define UI_ENCODER_B           50
+#define UI_ENCODER_CLICK       48
+#define UI_RESET_PIN           -1
+
 #else  // RAMPS
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
@@ -642,7 +665,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       35
 #define UI_RESET_PIN           41
 #endif
-#endif
+#endif // smartcontroller
 #define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
 #if UI_MAIN

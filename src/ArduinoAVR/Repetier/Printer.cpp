@@ -1074,22 +1074,8 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
 {
     for (fast8_t i = 0; i < 3; i++)
         Printer::currentPositionSteps[i] = 0;
-#ifdef DEBUG_DELTA_HOME
-    Printer::debugLevel |= 1;
-    Com::printF(PSTR("deltaMoveToTopEndstops start:"),realDeltaPositionSteps[A_TOWER]);
-    Com::printF(Com::tComma,realDeltaPositionSteps[B_TOWER]);
-    Com::printFLN(Com::tComma,realDeltaPositionSteps[C_TOWER]);
-    Endstops::report();
-#endif
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
     PrintLine::moveRelativeDistanceInSteps(0, 0, zMaxSteps * 1.5, 0, feedrate, true, true);
-#ifdef DEBUG_DELTA_HOME
-    Printer::debugLevel &= 254;
-    Com::printF(PSTR("deltaMoveToTopEndstops end:"),realDeltaPositionSteps[A_TOWER]);
-    Com::printF(Com::tComma,realDeltaPositionSteps[B_TOWER]);
-    Com::printFLN(Com::tComma,realDeltaPositionSteps[C_TOWER]);
-    Endstops::report();
-#endif
     offsetX = offsetY = offsetZ = 0;
 }
 void Printer::homeXAxis()
@@ -1111,7 +1097,6 @@ void Printer::homeYAxis()
 void Printer::homeZAxis() // Delta z homing
 {
 	bool homingSuccess = false;
-    SHOT("homeZAxis ");
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
 	// New safe homing routine by Kyrre Aalerud
 	// This method will safeguard against sticky endstops such as may be gotten cheaply from china.
@@ -1132,7 +1117,7 @@ void Printer::homeZAxis() // Delta z homing
 				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
-					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);	
+					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
 					//Endstops::report();
 					// Check for missing release of any (XYZ) endstop
 					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {
@@ -1190,7 +1175,6 @@ void Printer::homeZAxis() // Delta z homing
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 {
-    SHOT("homeAxis ");
     bool autoLevel = isAutolevelActive();
     setAutolevelActive(false);
     setHomed(true);
@@ -1213,7 +1197,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     setAutolevelActive(autoLevel);
 }
 #else
-#if DRIVE_SYSTEM==TUGA  // Tuga printer homing
+#if DRIVE_SYSTEM == TUGA  // Tuga printer homing
 void Printer::homeXAxis()
 {
     long steps;

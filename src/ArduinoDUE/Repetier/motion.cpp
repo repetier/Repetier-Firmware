@@ -190,7 +190,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     {
         waitForXFreeLines(2);
         uint8_t wpos2 = linesWritePos + 1;
-        if(wpos2>=PRINTLINE_CACHE_SIZE) wpos2 = 0;
+        if(wpos2 >= PRINTLINE_CACHE_SIZE) wpos2 = 0;
         PrintLine *p2 = &lines[wpos2];
         memcpy(p2,p,sizeof(PrintLine)); // Move current data to p2
         uint8_t changed = (p->dir & XYZ_DIRPOS)^(Printer::backlashDir & XYZ_DIRPOS);
@@ -204,7 +204,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         {
             float f = back_diff[i]*Printer::axisStepsPerMM[i];
             p->delta[i] = abs((long)f);
-            if(p->delta[i]) p->dir |= XSTEP<<i;
+            if(p->delta[i]) p->dir |= XSTEP << i;
         }
         //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.
         if(p->delta[Y_AXIS] > p->delta[X_AXIS] && p->delta[Y_AXIS] > p->delta[Z_AXIS]) p->primaryAxis = Y_AXIS;
@@ -1813,7 +1813,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                 Com::printFLN(Com::tBLK, (int32_t)linesCount);
             }
             cur = NULL;
-#if CPU_ARCH==ARCH_ARM
+#if CPU_ARCH == ARCH_ARM
             PrintLine::nlFlag = false;
 #endif
             return 2000;
@@ -1847,6 +1847,8 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             return(wait); // waste some time for path optimization to fill up
         } // End if WARMUP
 #if FEATURE_Z_PROBE
+        // z move may consist of mroe then 1 z line segment, so we better ignore them
+        // if the probe was already hit.
         if(Printer::isZProbingActive() && Printer::stepsRemainingAtZHit >= 0)
         {
             removeCurrentLineForbidInterrupt();

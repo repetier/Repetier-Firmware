@@ -337,11 +337,11 @@ STEPPER_CURRENT_CONTROL
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     8
-#define TEMP_0_PIN       1 //6 // Due analog pin A1 = #55
+#define TEMP_0_PIN       6
 #define HEATER_1_PIN     7 
-#define TEMP_1_PIN       0 //7 // Due analog pin A0 = #54
+#define TEMP_1_PIN       7 
 #define HEATER_2_PIN     9
-#define TEMP_2_PIN       2 //5 // Due analog pin A2 = #55
+#define TEMP_2_PIN       5
 #define HEATER_3_PIN     -1
 #define TEMP_3_PIN       -1 // Due analog pin #56
 #define TEMP_4_PIN       -1 // Due analog pin #57

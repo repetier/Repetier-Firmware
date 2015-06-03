@@ -9516,22 +9516,22 @@ static uint8_t u8g_data_mask[8];
 
 static void u8g_com_arduino_fast_parallel_init(u8g_t *u8g)
 {
-  u8g_data_port[0] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D0]));
+  u8g_data_port[0] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D0]));// added conversion for due to compile
   u8g_data_mask[0] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D0]);
-  u8g_data_port[1] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D1]));
+  u8g_data_port[1] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D1]));// added conversion for due to compile
   u8g_data_mask[1] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D1]);
-  u8g_data_port[2] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D2]));
+  u8g_data_port[2] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D2]));// added conversion for due to compile
   u8g_data_mask[2] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D2]);
-  u8g_data_port[3] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D3]));
+  u8g_data_port[3] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D3]));// added conversion for due to compile
   u8g_data_mask[3] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D3]);
 
-  u8g_data_port[4] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D4]));
+  u8g_data_port[4] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D4])); // added conversion for due to compile
   u8g_data_mask[4] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D4]);
-  u8g_data_port[5] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D5]));
+  u8g_data_port[5] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D5]));// added conversion for due to compile
   u8g_data_mask[5] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D5]);
-  u8g_data_port[6] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D6]));
+  u8g_data_port[6] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D6]));// added conversion for due to compile
   u8g_data_mask[6] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D6]);
-  u8g_data_port[7] =  portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D7]));
+  u8g_data_port[7] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D7]));// added conversion for due to compile
   u8g_data_mask[7] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D7]);
 }
 
