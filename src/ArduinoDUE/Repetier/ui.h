@@ -559,8 +559,6 @@ void uiCheckSlowKeys(int &action) {}
 
 #else  // Smartcontroller
 
-#error glcd
-
 #if MOTHERBOARD == 701 // Megatronics v2.0
 
 #define UI_DISPLAY_RS_PIN 14
