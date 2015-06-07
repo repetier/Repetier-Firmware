@@ -1994,7 +1994,7 @@ void UIDisplay::refreshPage()
             if(transition == 0)
             {
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
-                if(menuLevel==0 && menuPos[0] == 0 )
+                if(menuLevel == 0 && menuPos[0] == 0 )
                 {
                     u8g_SetFont(&u8g,UI_FONT_SMALL);
                     uint8_t py = 8;

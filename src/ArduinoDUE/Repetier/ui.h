@@ -637,7 +637,7 @@ void uiCheckSlowKeys(int &action) {}
 #endif
 
 #elif MOTHERBOARD == CONTROLLER_FELIX_DUE
-#error ok
+
 #define BEEPER_PIN             -1
 #define UI_DISPLAY_RS_PIN      42
 #define UI_DISPLAY_ENABLE_PIN  44

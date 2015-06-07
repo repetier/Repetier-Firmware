@@ -1292,12 +1292,12 @@ void Commands::processGCode(GCode *com)
 // but you will always get different counts from different positions.
         Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
         int32_t m = RMath::max(Printer::stepsRemainingAtXHit,RMath::max(Printer::stepsRemainingAtYHit,Printer::stepsRemainingAtZHit));
-        int32_t offx = m-Printer::stepsRemainingAtXHit;
-        int32_t offy = m-Printer::stepsRemainingAtYHit;
-        int32_t offz = m-Printer::stepsRemainingAtZHit;
-        Com::printFLN(Com::tTower1,offx);
-        Com::printFLN(Com::tTower2,offy);
-        Com::printFLN(Com::tTower3,offz);
+        int32_t offx = m - Printer::stepsRemainingAtXHit;
+        int32_t offy = m - Printer::stepsRemainingAtYHit;
+        int32_t offz = m - Printer::stepsRemainingAtZHit;
+        Com::printFLN(Com::tTower1, offx);
+        Com::printFLN(Com::tTower2, offy);
+        Com::printFLN(Com::tTower3, offz);
 #if EEPROM_MODE != 0
         if(com->hasS() && com->S > 0)
         {
