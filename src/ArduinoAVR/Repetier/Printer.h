@@ -42,6 +42,8 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
+typedef flag16_t endstops_t;
+
 union floatLong
 {
     float f;
@@ -148,6 +150,7 @@ private:
 #define ENDSTOP_X_MIN_ID 1
 #define ENDSTOP_X_MAX_ID 2
 #define ENDSTOP_Y_MIN_ID 4
+#define ENDSTOP_Y2_MIN_ID 256
 #define ENDSTOP_Y_MAX_ID 8
 #define ENDSTOP_Z_MIN_ID 16
 #define ENDSTOP_Z_MAX_ID 32
@@ -155,8 +158,8 @@ private:
 #define ENDSTOP_Z_PROBE_ID 128
 
 class Endstops {
-    static flag8_t lastState;
-    static flag8_t lastRead;
+    static endstops_t lastState;
+    static endstops_t lastRead;
 public:
     static void update();
     static void report();
@@ -180,6 +183,13 @@ public:
     static INLINE bool yMin() {
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
         return (lastState & ENDSTOP_Y_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool y2Min() {
+#if (Y2_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y2
+        return (lastState & ENDSTOP_Y2_MIN_ID) != 0;
 #else
         return false;
 #endif

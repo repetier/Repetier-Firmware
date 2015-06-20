@@ -143,6 +143,7 @@ typedef uint16_t speed_t;
 typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
 typedef uint8_t flag8_t;
+typedef uint16_t flag16_t;
 typedef int8_t fast8_t;
 typedef uint8_t ufast8_t;
 

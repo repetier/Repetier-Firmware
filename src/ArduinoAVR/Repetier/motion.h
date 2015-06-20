@@ -303,7 +303,17 @@ public:
             if(isXPositiveMove() && Endstops::xMax())
                 setXMoveFinished();
             if(isYNegativeMove() && Endstops::yMin())
+#if MIN_HARDWARE_ENDSTOP_Y2 && FEATURE_TWO_YSTEPPER
+                setYFirstMotorFinished();
+#else
                 setYMoveFinished();
+#endif
+            if(isYNegativeMove() && Endstops::y2Min())
+#if MIN_HARDWARE_ENDSTOP_Y2 && FEATURE_TWO_YSTEPPER
+                setYSecondMotorFinished();
+#else
+                setYMoveFinished();
+#endif
             if(isYPositiveMove() && Endstops::yMax())
                 setYMoveFinished();
         }
@@ -342,6 +352,22 @@ public:
         dir &= ~48;
 #endif
     }
+    inline void setYFirstMotorFinished()
+    {
+        if ((dir & Y_STEP_KILL2) != 0)
+            // Already killed the second motor, so kill Y outright
+            setYMoveFinished();
+        else
+            dir |= Y_STEP_KILL1;
+    }
+    inline void setYSecondMotorFinished()
+    {
+        if ((dir & Y_STEP_KILL1) != 0)
+            // Already killed the first motor, so kill Y outright
+            setYMoveFinished();
+        else
+            dir |= Y_STEP_KILL2;
+    }
     inline void setZMoveFinished()
     {
         dir &= ~64;
@@ -365,6 +391,14 @@ public:
     inline bool isYNegativeMove()
     {
         return (dir & Y_STEP_DIRPOS) == YSTEP;
+    }
+    inline bool isYFirstMotorMove()
+    {
+        return isYMove() && (dir & Y_STEP_KILL1) == 0;
+    }
+    inline bool isYSecondMotorMove()
+    {
+        return isYMove() && (dir & Y_STEP_KILL2) == 0;
     }
     inline bool isZPositiveMove()
     {
@@ -537,9 +571,11 @@ public:
     inline void startYStep()
     {
 #if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
-        WRITE(Y_STEP_PIN,HIGH);
+        if (isYFirstMotorMove()) // TODO: Wrap this (and all the other first/second motor logic) in ifdefs
+            WRITE(Y_STEP_PIN,HIGH);
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_STEP_PIN,HIGH);
+        if (isYSecondMotorMove())
+            WRITE(Y2_STEP_PIN,HIGH);
 #endif
 #else
 #if DRIVE_SYSTEM == XY_GANTRY

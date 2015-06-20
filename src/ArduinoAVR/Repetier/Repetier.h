@@ -166,6 +166,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Y_STEP_DIRPOS 34
 #define X_STEP_DIRPOS 17
 #define Z_STEP_DIRPOS 68
+// Flags for dual motor gantry setups. Setting Y_STEP_KILL1 disables movement
+// of the first Y motor for the rest of the move, presumably because we hit
+// its endstop but haven't hit the endstop for the second motor yet.
+// Y_STEP_KILL2 is the converse.
+#define Y_STEP_KILL1 256
+#define Y_STEP_KILL2 512
 
 // add pid control
 #define TEMP_PID 1

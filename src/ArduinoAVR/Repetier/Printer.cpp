@@ -159,11 +159,11 @@ int debugWaitLoop = 0;
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
-flag8_t Endstops::lastState = 0;
-flag8_t Endstops::lastRead = 0;
+endstops_t Endstops::lastState = 0;
+endstops_t Endstops::lastRead = 0;
 
 void Endstops::update() {
-    flag8_t newRead = 0;
+    endstops_t newRead = 0;
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
         if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING)
             newRead |= ENDSTOP_X_MIN_ID;
@@ -175,6 +175,10 @@ void Endstops::update() {
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
         if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING)
             newRead |= ENDSTOP_Y_MIN_ID;
+#endif
+#if (Y2_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y2
+        if(READ(Y2_MIN_PIN) != ENDSTOP_Y2_MIN_INVERTING)
+            newRead |= ENDSTOP_Y2_MIN_ID;
 #endif
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
         if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING)
@@ -777,6 +781,16 @@ void Printer::setup()
 #endif
 #else
 #error You have defined hardware y min endstop without pin assignment. Set pin number for Y_MIN_PIN
+#endif
+#endif
+#if MIN_HARDWARE_ENDSTOP_Y2
+#if Y2_MIN_PIN > -1
+    SET_INPUT(Y2_MIN_PIN);
+#if ENDSTOP_PULLUP_Y2_MIN
+    PULLUP(Y2_MIN_PIN, HIGH);
+#endif
+#else
+#error You have defined hardware y2 min endstop without pin assignment. Set pin number for Y2_MIN_PIN
 #endif
 #endif
 #if MIN_HARDWARE_ENDSTOP_Z
