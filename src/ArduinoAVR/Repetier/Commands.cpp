@@ -986,14 +986,14 @@ void Commands::processGCode(GCode *com)
         float sum = 0, last,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(sum < 0) break;
+        if(sum < -1) break;
         Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
-        if(last < 0) break;
+        if(last < -2) break;
         sum+= last;
         Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
-        if(last < 0) break;
+        if(last < -3) break;
         sum += last;
         sum *= 0.33333333333333;
         Com::printFLN(Com::tZProbeAverage, sum);
@@ -1051,6 +1051,7 @@ void Commands::processGCode(GCode *com)
 #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
 #endif
+        Printer::setAutolevelActive(false); // iterate
 #if DRIVE_SYSTEM == DELTA
         // It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
@@ -1061,17 +1062,16 @@ void Commands::processGCode(GCode *com)
         GCode::executeFString(Com::tZProbeStartScript);
         //bool iterate = com->hasP() && com->P>0;
         Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
-        Printer::setAutolevelActive(false); // iterate
         float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(h1 < 0) break;
+        if(h1 < -1) break;
         Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h2 = Printer::runZProbe(false,false);
-        if(h2 < 0) break;
+        if(h2 < -1) break;
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
-        if(h3 < 0) break;
+        if(h3 < -1) break;
         // Zprobe with force feedback may bed bed differently for different points.
         // these settings allow correction of the bending distance so leveling is correct afterwards.
         // Values are normally negative with bending amount on trigger.
