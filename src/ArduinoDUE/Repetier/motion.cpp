@@ -927,7 +927,7 @@ uint8_t transformCartesianStepsToDeltaSteps(int32_t cartesianPosSteps[], int32_t
         if (opt < temp)
             RETURN_0("Apos x square ");
 
-        deltaPosSteps[A_TOWER] = HAL::integer64Sqrt(opt-temp) + zSteps;
+        deltaPosSteps[A_TOWER] = HAL::integer64Sqrt(opt - temp) + zSteps;
         if (deltaPosSteps[A_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
             RETURN_0("A hit floor");
 
@@ -944,7 +944,7 @@ uint8_t transformCartesianStepsToDeltaSteps(int32_t cartesianPosSteps[], int32_t
         if (opt < temp)
             RETURN_0("Bpos x square ");
 
-        deltaPosSteps[B_TOWER] = HAL::integer64Sqrt(opt-temp) + zSteps ;
+        deltaPosSteps[B_TOWER] = HAL::integer64Sqrt(opt - temp) + zSteps ;
         if (deltaPosSteps[B_TOWER] < Printer::deltaFloorSafetyMarginSteps && !Printer::isZProbingActive())
             RETURN_0("B hit floor");
 

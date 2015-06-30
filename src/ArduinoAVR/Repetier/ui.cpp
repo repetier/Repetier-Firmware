@@ -562,8 +562,8 @@ void initializeLCD()
 #if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
-    changeAtCol = RMath::min(UI_COLS,changeAtCol);
-    uint8_t col=0;
+    changeAtCol = RMath::min(UI_COLS, changeAtCol);
+    uint8_t col = 0;
 // Set row
     if(r >= UI_ROWS) return;
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
@@ -943,7 +943,7 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     lcdCommand(LCD_SETCGRAMADDR | (location << 3));
-    for (int i=0; i<8; i++)
+    for (int i = 0; i < 8; i++)
     {
         lcdPutChar(pgm_read_byte(&(charmap[i])));
     }
@@ -954,7 +954,7 @@ void  UIDisplay::waitForKey()
     int nextAction = 0;
 
     lastButtonAction = 0;
-    while(lastButtonAction==nextAction)
+    while(lastButtonAction == nextAction)
     {
         uiCheckSlowKeys(nextAction);
     }

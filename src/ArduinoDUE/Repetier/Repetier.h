@@ -145,6 +145,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_GAMEDUINO2 16
 #define CONTROLLER_MIREGLI 17
 #define CONTROLLER_GATE_3NOVATICA 18
+#define CONTROLLER_SPARKLCD 19
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
@@ -174,7 +175,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "Configuration.h"
 
 #ifndef MAX_ROOM_TEMPERATURE
-#define MAX_ROOM_TEMPERATURE 50
+#define MAX_ROOM_TEMPERATURE 40
 #endif
 #ifndef ZHOME_X_POS
 #define ZHOME_X_POS IGNORE_COORDINATE

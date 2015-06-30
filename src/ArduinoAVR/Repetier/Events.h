@@ -49,4 +49,21 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_START_UI_ACTION(shortAction) {}
 // Gets called if a nextPrevius actions gets executed.
 #define EVENT_START_NEXTPREVIOUS(action,increment) {}
+
+// Allow adding new G and M codes. To implement it create a function
+// bool eventUnhandledGCode(GCode *com)
+// that returns true if it handled the code, otherwise false.
+// Event define would then be
+// #define EVENT_UNHANDLED_G_CODE(c) eventUnhandledGCode(c)
+#define EVENT_UNHANDLED_G_CODE(c) false
+#define EVENT_UNHANDLED_M_CODE(c) false
+
+// This gets called every time the user has saved a value to eeprom
+// or any other reason why dependent values may need recomputation.
+#define EVENT_UPDATE_DERIVED {}
+
+// This gets called after the basic firmware functions have initialized.
+// Use this to initalize your hardware etc.
+#define EVENT_INITIALIZE {}
+
 #endif // EVENTS_H_INCLUDED

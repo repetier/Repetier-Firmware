@@ -1072,6 +1072,18 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         if(h3 < 0) break;
+        // Zprobe with force feedback may bed bed differently for different points.
+        // these settings allow correction of the bending distance so leveling is correct afterwards.
+        // Values are normally negative with bending amount on trigger.
+#ifdef ZPROBE_1_BENDING_CORRECTION
+        h1 += ZPROBE_1_BENDING_CORRECTION;
+#endif
+#ifdef ZPROBE_2_BENDING_CORRECTION
+        h2 += ZPROBE_2_BENDING_CORRECTION;
+#endif
+#ifdef ZPROBE_3_BENDING_CORRECTION
+        h3 += ZPROBE_3_BENDING_CORRECTION;
+#endif
 #if defined(MOTORIZED_BED_LEVELING) && defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS >= 2
         // h1 is reference heights, h2 => motor 0, h3 => motor 1
         h2 -= h1;
@@ -1365,7 +1377,7 @@ void Commands::processGCode(GCode *com)
         break;
 #endif // defined
     default:
-        if(Printer::debugErrors())
+        if(!EVENT_UNHANDLED_G_CODE(com) && Printer::debugErrors())
         {
             Com::printF(Com::tUnknownCommand);
             com->printCommand();
@@ -1568,7 +1580,7 @@ void Commands::processMCode(GCode *com)
 #endif
         if (com->hasS())
         {
-            if(com->hasT())
+            if(com->hasT() && com->T < NUM_EXTRUDER)
                 Extruder::setTemperatureForExtruder(com->S, com->T, com->hasF() && com->F > 0);
             else
                 Extruder::setTemperatureForExtruder(com->S, Extruder::current->id, com->hasF() && com->F > 0);
@@ -2214,7 +2226,7 @@ void Commands::processMCode(GCode *com)
 #endif
         break;
     default:
-        if(Printer::debugErrors())
+        if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors())
         {
             Com::printF(Com::tUnknownCommand);
             com->printCommand();

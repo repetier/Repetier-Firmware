@@ -1433,6 +1433,63 @@ void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // CONTROLLER_GATE_3NOVATICA
 
+#if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
+#if MOTHERBOARD != 402
+#error This config only works with RADDS motherboard!
+#endif
+#define UI_DISPLAY_CHARSET 3
+#define UI_DISPLAY_TYPE 5
+#define U8GLIB_ST7920 // Currently only this display from u8g lib is included.
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION false  // Animations are too slow
+#endif
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_RS_PIN		25		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	        27		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		-1		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		-1		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		-1		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		-1		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		29		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		-1		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		-1		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		-1		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   50
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_INVERT_MENU_DIRECTION 0
+#define UI_HAS_I2C_ENCODER 0
+#define UI_ENCODER_SPEED 1
+
+#ifdef UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(35,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(37); // push button, connects gnd to pin;
+}
+void uiCheckKeys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW(35,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(37,UI_ACTION_OK); // push button, connects gnd to pin
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
+#endif
+
+#endif // CONTROLLER_sparkLCD
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 #if UI_ROWS==4

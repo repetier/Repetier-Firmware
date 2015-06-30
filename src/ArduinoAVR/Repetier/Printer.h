@@ -93,6 +93,7 @@ union wizardVar
 #define PRINTER_FLAG2_IGNORE_M106_COMMAND   8
 #define PRINTER_FLAG2_DEBUG_JAM             16
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
+#define PRINTER_FLAG2_HOMING                64
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -151,12 +152,25 @@ private:
 #define ENDSTOP_Y_MAX_ID 8
 #define ENDSTOP_Z_MIN_ID 16
 #define ENDSTOP_Z_MAX_ID 32
-#define ENDSTOP_Z2_MINMAX_ID 64
+#define ENDSTOP_Z2_MIN_ID 64
 #define ENDSTOP_Z_PROBE_ID 128
+
+// These endstops are only used with EXTENDED_ENDSTOPS
+#define ENDSTOP_X2_MIN_ID 1
+#define ENDSTOP_X2_MAX_ID 2
+#define ENDSTOP_Y2_MIN_ID 4
+#define ENDSTOP_Y2_MAX_ID 8
+#define ENDSTOP_Z2_MAX_ID 16
+#define ENDSTOP_Z3_MIN_ID 32
+#define ENDSTOP_Z3_MAX_ID 64
 
 class Endstops {
     static flag8_t lastState;
     static flag8_t lastRead;
+#ifdef EXTENDED_ENDSTOPS
+    static flag8_t lastState2;
+    static flag8_t lastRead2;
+#endif
 public:
     static void update();
     static void report();
@@ -673,6 +687,15 @@ public:
     {
         flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         Com::printFLN(PSTR("Autoretract:"),b);
+    }
+    static INLINE uint8_t isHoming()
+    {
+        return flag2 & PRINTER_FLAG2_HOMING;
+    }
+
+    static INLINE void setHoming(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_HOMING : flag2 & ~PRINTER_FLAG2_HOMING);
     }
 
     static INLINE uint8_t isDebugJam()

@@ -300,32 +300,41 @@ public:
         {
             if(isXNegativeMove() && Endstops::xMin())
                 setXMoveFinished();
-            if(isXPositiveMove() && Endstops::xMax())
+            else if(isXPositiveMove() && Endstops::xMax())
                 setXMoveFinished();
             if(isYNegativeMove() && Endstops::yMin())
                 setYMoveFinished();
-            if(isYPositiveMove() && Endstops::yMax())
+            else if(isYPositiveMove() && Endstops::yMax())
                 setYMoveFinished();
+#if FEATURE_Z_PROBE
+            if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
+            {
+                setZMoveFinished();
+                Printer::stepsRemainingAtZHit = stepsRemaining;
+            }
+            else
+#endif
+                if(isZNegativeMove() && Endstops::zMin())
+                {
+                    setZMoveFinished();
+                }
+                else if(isZPositiveMove() && Endstops::zMax())
+                {
+#if MAX_HARDWARE_ENDSTOP_Z
+                    Printer::stepsRemainingAtZHit = stepsRemaining;
+#endif
+                    setZMoveFinished();
+                }
         }
 #if FEATURE_Z_PROBE
-        if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
+        else if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
         {
             setZMoveFinished();
             Printer::stepsRemainingAtZHit = stepsRemaining;
         }
-        else
 #endif
-            // Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
-            if(isZNegativeMove() && Endstops::zMin())
-                setZMoveFinished();
-        if(isZPositiveMove() && Endstops::zMax())
-        {
-#if MAX_HARDWARE_ENDSTOP_Z
-            Printer::stepsRemainingAtZHit = stepsRemaining;
-#endif
-            setZMoveFinished();
-        }
     }
+
     inline void setXMoveFinished()
     {
 #if DRIVE_SYSTEM == CARTESIAN || NONLINEAR_SYSTEM
@@ -651,7 +660,8 @@ public:
         InterruptProtectedBlock noInts;
         linesCount++;
     }
-    static uint8_t getLinesCount() {
+    static uint8_t getLinesCount()
+    {
         InterruptProtectedBlock noInts;
         return linesCount;
     }
