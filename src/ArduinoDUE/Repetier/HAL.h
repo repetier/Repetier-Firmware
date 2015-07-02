@@ -335,7 +335,7 @@ class HAL
       TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP |
                    TC_CMR_WAVE | DELAY_TIMER_CLOCK);
       TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
-#if EEPROM_AVAILABLE && EEPROM_MODE != 0
+#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE
       // Copy eeprom to ram for faster access
       int i, n = EEPROM_BYTES;
       for (i = 0; i < EEPROM_BYTES; i += 4) {

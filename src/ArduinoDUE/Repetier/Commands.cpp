@@ -986,14 +986,14 @@ void Commands::processGCode(GCode *com)
         float sum = 0, last,oldFeedrate = Printer::feedrate;
         Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         sum = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-        if(sum < 0) break;
+        if(sum < -1) break;
         Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,false);
-        if(last < 0) break;
+        if(last < -2) break;
         sum+= last;
         Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
         last = Printer::runZProbe(false,true);
-        if(last < 0) break;
+        if(last < -3) break;
         sum += last;
         sum *= 0.33333333333333;
         Com::printFLN(Com::tZProbeAverage, sum);
@@ -2301,6 +2301,7 @@ void Commands::emergencyStop()
 #if HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+    UI_STATUS_UPD(UI_TEXT_KILLED);
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
     while(1) {}

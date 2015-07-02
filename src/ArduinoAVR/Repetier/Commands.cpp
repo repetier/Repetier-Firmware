@@ -2301,6 +2301,7 @@ void Commands::emergencyStop()
 #if HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+    UI_STATUS_UPD(UI_TEXT_KILLED);
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
     while(1) {}

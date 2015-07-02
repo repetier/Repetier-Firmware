@@ -343,6 +343,7 @@ void GCode::readFromSerial()
     {
         if((waitingForResend >= 0 || commandsReceivingWritePosition > 0) && time - timeOfLastDataPacket > 200)
         {
+            // Com::printF(PSTR("WFR:"),waitingForResend);Com::printF(PSTR(" CRWP:"),commandsReceivingWritePosition);commandReceiving[commandsReceivingWritePosition] = 0;Com::printFLN(PSTR(" GOT:"),(char*)commandReceiving);
             requestResend(); // Something is wrong, a started line was not continued in the last second
             timeOfLastDataPacket = time;
         }
@@ -398,8 +399,8 @@ void GCode::readFromSerial()
             char ch = commandReceiving[commandsReceivingWritePosition - 1];
             if(ch == 0 || ch == '\n' || ch == '\r' || (!commentDetected && ch == ':'))  // complete line read
             {
-                //Com::printF(PSTR("Parse ascii"));Com::print((char*)commandReceiving);Com::println();
                 commandReceiving[commandsReceivingWritePosition - 1] = 0;
+                //Com::printF(PSTR("Parse ascii:"));Com::print((char*)commandReceiving);Com::println();
                 commentDetected = false;
                 if(commandsReceivingWritePosition == 1)   // empty line ignore
                 {
