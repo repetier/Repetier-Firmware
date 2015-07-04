@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-const int sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
+const uint8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
@@ -1483,7 +1483,7 @@ void Commands::processMCode(GCode *com)
             }
             else
             {
-                Com::printErrorFLN(PSTR("Pin can not be set by M42, may in invalid or in use. "));
+                Com::printErrorFLN(PSTR("Pin can not be set by M42, is in sensitive pins! "));
             }
         }
         break;
