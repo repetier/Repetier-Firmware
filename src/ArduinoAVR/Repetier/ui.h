@@ -390,7 +390,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
 
-#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE)
+#if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE)
 #undef SDCARDDETECT
 #define SDCARDDETECT 49
 #undef SDCARDDETECTINVERTED
@@ -505,7 +505,7 @@ inline void uiCheckSlowEncoder() {}
 void uiCheckSlowKeys(int &action) {}
 #endif // UI_MAIN
 #endif // NO_CONTROLLER
-#if (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS) || (FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD) || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)
+#if (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS) || (FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD) || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)  || (FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE)
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #if FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD
@@ -572,7 +572,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B 59
 #define UI_ENCODER_CLICK 43
 #define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
-#define UI_INVERT_MENU_DIRECTION true
+#define UI_INVERT_MENU_DIRECTION 1
 
 #elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 
@@ -667,7 +667,11 @@ void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // smartcontroller
 #define UI_DELAYPERCHAR 50
+#if FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE
+#define UI_ENCODER_SPEED 2
+#endif
 #define UI_INVERT_MENU_DIRECTION 0
+
 #if UI_MAIN
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
@@ -677,7 +681,11 @@ void uiInitKeys() {
 #endif
 }
 void uiCheckKeys(int &action) {
+#if FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_B,UI_ENCODER_A); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+#else
  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+#endif
  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
 #if UI_RESET_PIN > -1
  UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);

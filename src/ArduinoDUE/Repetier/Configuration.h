@@ -57,7 +57,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Arduino Due with RAMPS-FD    = 403
 // Arduino Due with RAMPS-FD V2 = 404
 // Felix Printers for arm       = 405
-// DAM&DICE DUE (only reserverd)= 406
+// DAM&DICE DUE                 = 406
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 
