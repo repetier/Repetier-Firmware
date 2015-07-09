@@ -175,6 +175,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
+#error You need to define Z_PROBE_PIN to use z probe!
+#endif
+
 #ifndef MAX_ROOM_TEMPERATURE
 #define MAX_ROOM_TEMPERATURE 40
 #endif
