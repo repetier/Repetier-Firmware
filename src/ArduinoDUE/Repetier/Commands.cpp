@@ -1487,7 +1487,6 @@ void Commands::processMCode(GCode *com)
             }
         }
         break;
-
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN>-1
         Commands::waitUntilEndOfAllMoves();

@@ -159,6 +159,7 @@ typedef char prog_char;
 #define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
                                       g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
+#define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
 #define LOW         0
 #define HIGH        1
 

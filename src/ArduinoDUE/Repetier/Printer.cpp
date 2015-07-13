@@ -715,6 +715,7 @@ void Printer::setup()
     Printer::setPowerOn(true);
 #else
 #if PS_ON_PIN > -1
+    SET_OUTPUT(PS_ON_PIN); //GND
     Printer::setPowerOn(false);
 #else
     Printer::setPowerOn(true);
