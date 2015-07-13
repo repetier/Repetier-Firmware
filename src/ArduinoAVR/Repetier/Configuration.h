@@ -1185,6 +1185,7 @@ The following settings override uiconfig.h!
 13 = SeeMeCNC Display on Rambo (ORION)
 14 = OpenHardware.co.za LCD2004 V2014
 15 = Sanguinololu + Panelolu2
+16 = RepRapDiscount Full Graphic Smart Controller on RAMBo
 */
 #define FEATURE_CONTROLLER 0
 

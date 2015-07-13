@@ -964,13 +964,37 @@ void ui_check_slow_keys(int &action) {}
 #endif
 #endif // Controller 12
 
-#if FEATURE_CONTROLLER==13 // SeeMeCNC LCD + Rambo
+#if FEATURE_CONTROLLER==13 || FEATURE_CONTROLLER==16 // SeeMeCNC LCD + Rambo
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
+#if FEATURE_CONTROLLER==13 
 #define UI_DISPLAY_TYPE 1
 #define UI_DISPLAY_CHARSET 1
 #define UI_COLS 20
 #define UI_ROWS 4
+#else
+#define UI_DISPLAY_TYPE 5
+#define U8GLIB_ST7920
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION false  // Animations are too slow
+#endif
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3  
+#endif
 #define BEEPER_TYPE 1
 #define BEEPER_PIN             79
 #define UI_DISPLAY_RS_PIN      70
