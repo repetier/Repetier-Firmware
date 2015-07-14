@@ -78,9 +78,9 @@ void HAL::setupTimer() {
   NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, 6);
 
   // count up to value in RC register using given clock
-  TC_Configure(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK4);
+  TC_Configure(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK3);
 
-  TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, (F_CPU_TRUE / TIMER0_PRESCALE) / EXTRUDER_CLOCK_FREQ); // set frequency
+  TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, (F_CPU_TRUE / 32) / EXTRUDER_CLOCK_FREQ); // set frequency 43 for 60000Hz
   TC_Start(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);           // start timer running
 
   // enable RC compare interrupt
@@ -1150,6 +1150,10 @@ moving, until the total wanted movement is achieved. This will
 be done with the maximum allowable speed for the extruder.
 */
 #if USE_ADVANCE
+TcChannel *extruderChannel = (EXTRUDER_TIMER->TC_CHANNEL + EXTRUDER_TIMER_CHANNEL);
+#define SLOW_EXTRUDER_TICKS  (F_CPU_TRUE / 32 / 2000) // 500us on direction change
+#define NORMAL_EXTRUDER_TICKS  (F_CPU_TRUE / 32 / EXTRUDER_CLOCK_FREQ) // 500us on direction change
+
 static int extruderLastDirection = 0;
 void HAL::resetExtruderDirection() {
   extruderLastDirection = 0;
@@ -1159,37 +1163,35 @@ void EXTRUDER_TIMER_VECTOR ()
 {
   InterruptProtectedBlock noInt;
   // apparently have to read status register
-  TC_GetStatus(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);
-
+  //TC_GetStatus(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL);
+  extruderChannel->TC_SR; // faster replacement for above line!
+  
   if (!Printer::isAdvanceActivated()) {
     return; // currently no need
   }
-  // get current extruder timer count value
-  uint32_t timer = EXTRUDER_TIMER->TC_CHANNEL[EXTRUDER_TIMER_CHANNEL].TC_RC;
 
   if (!Printer::isAdvanceActivated()) return; // currently no need
   if (Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1)
   {
     Extruder::setDirection(true);
     extruderLastDirection = 1;
-    timer += 40; // Add some more wait time to prevent blocking
+    extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
   }
 
   else if (Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1)
   {
     Extruder::setDirection(false);
     extruderLastDirection = -1;
-    timer += 40; // Add some more wait time to prevent blocking
+    extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
   }
   else if (Printer::extruderStepsNeeded != 0)
   {
     Extruder::step();
     Printer::extruderStepsNeeded -= extruderLastDirection;
+    extruderChannel->TC_RC = Printer::maxExtruderSpeed;
     Printer::insertStepperHighDelay();
     Extruder::unstep();
   }
-
-  TC_SetRC(EXTRUDER_TIMER, EXTRUDER_TIMER_CHANNEL, timer);
 }
 #endif
 

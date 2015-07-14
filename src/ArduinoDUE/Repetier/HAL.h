@@ -113,7 +113,7 @@ typedef char prog_char;
 #define TWI_ID  				ID_TWI1
 
 
-#define EXTRUDER_CLOCK_FREQ     244    // don't know what this should be
+#define EXTRUDER_CLOCK_FREQ     60000 // extruder stepper interrupt frequency
 #define PWM_CLOCK_FREQ          3906
 #define TIMER1_CLOCK_FREQ       244
 #define TIMER1_PRESCALE         2
@@ -822,7 +822,7 @@ class HAL
     };
 
     inline static float maxExtruderTimerFrequency() {
-      return (float)F_CPU / TIMER0_PRESCALE;
+      return (float)F_CPU_TRUE/32;
     }
 #if FEATURE_SERVO
     static unsigned int servoTimings[4];
