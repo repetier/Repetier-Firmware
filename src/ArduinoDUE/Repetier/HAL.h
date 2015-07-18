@@ -601,7 +601,7 @@ public:
 
 
     // Watchdog support
-    inline static void startWatchdog() { WDT_Enable(WDT, WDT_MR_WDRSTEN | WATCHDOG_INTERVAL );};
+    inline static void startWatchdog() { WDT_Enable(WDT, (WATCHDOG_INTERVAL<<16 ) | WDT_MR_WDRSTEN | WATCHDOG_INTERVAL );};
     inline static void stopWatchdog() {}
     inline static void pingWatchdog() {WDT_Restart(WDT);};
 
