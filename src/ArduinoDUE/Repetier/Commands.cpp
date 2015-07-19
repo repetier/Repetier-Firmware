@@ -392,12 +392,12 @@ void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 void setMotorCurrent(uint8_t channel, unsigned short value)
 {
     if(channel >= 7) // max channel (X,Y,Z,E0,E1,E2,E3)
-        return; 
+        return;
     if(value > 255)
         value=255;
 
     uint8_t externalDac_buf[2] = {0x10, 0x00};
-    
+
     if(channel > 3)
         externalDac_buf[0] |= ( 7 - channel << 6);
     else
@@ -413,7 +413,7 @@ void setMotorCurrent(uint8_t channel, unsigned short value)
     WRITE(SPI_EEPROM2_CS, HIGH);
     WRITE(SPI_FLASH_CS, HIGH);
     WRITE(SDSS, HIGH);
-    
+
     if(channel > 3) // DAC Piggy E1,E2,E3
     {
         WRITE(DAC1_SYNC,LOW);
@@ -459,10 +459,10 @@ void motorCurrentControlInit() //Initialize Motor Current
     WRITE(DAC0_SYNC, HIGH);
     HAL::delayMicroseconds(2);
     WRITE(DAC0_SYNC, LOW);
-    
+
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
     WRITE(DAC0_SYNC, HIGH);
-    
+
 #if NUM_EXTRUDER > 1
     // init Piggy DAC
     WRITE(DAC1_SYNC, LOW);
@@ -470,7 +470,7 @@ void motorCurrentControlInit() //Initialize Motor Current
     WRITE(DAC1_SYNC, HIGH);
     HAL::delayMicroseconds(2);
     WRITE(DAC1_SYNC, LOW);
-    
+
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
     WRITE(DAC1_SYNC, HIGH);
 #endif

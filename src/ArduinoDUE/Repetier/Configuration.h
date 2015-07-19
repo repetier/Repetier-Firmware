@@ -1376,7 +1376,9 @@ The following settings override uiconfig.h!
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
-
+20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
+21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
