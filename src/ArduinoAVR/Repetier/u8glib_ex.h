@@ -9668,3 +9668,1034 @@ uint8_t u8g_com_arduino_fast_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_va
 #endif /* ARDUINO */
 
 
+/*
+
+  u8g_dev_st7565_nhd_c12864.c
+
+  Support for the NHD-C12864A1Z-FSB-FBW (Newhaven Display)
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2012, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+#define WIDTH 128
+#define HEIGHT 64
+#define PAGE_HEIGHT 8
+
+const uint8_t u8g_dev_st7565_nhd_c12864_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(10),           /* do reset low pulse with (10*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x040,		                /* set display start line */
+  0x0a1,		                /* ADC set to reverse */
+  0x0c0,		                /* common output mode: set scan direction normal operation */
+  0x0a6,                           /* display normal, bit val 0: LCD pixel off. */
+  0x0a2,		                /* LCD bias 1/9 */
+  0x02f,		                /* all power  control circuits on */
+  0x0f8,		                /* set booster ratio to */
+  0x000,		                /* 4x */
+  0x027,		                /* set V0 voltage resistor ratio to large */
+  0x081,		                /* set contrast */
+  0x008,		                /* contrast: 0x008 is a good value for NHD C12864, Nov 2012: User reports that 0x1a is much better */
+  0x0ac,		                /* indicator */
+  0x000,		                /* disable */
+  0x0af,		                /* display on */
+
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  0x0a5,		                /* display all points, ST7565 */
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  0x0a4,		                /* normal display */
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_nhd_c12864_data_start[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x010,		/* set upper 4 bit of the col adr to 0 */
+  0x004,		/* set lower 4 bit of the col adr to 4 (NHD C12864) */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_c12864_sleep_on[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0ac,		/* static indicator off */
+  0x000,		                /* indicator register set (not sure if this is required) */
+  0x0ae,		/* display off */
+  0x0a5,		/* all points on */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_c12864_sleep_off[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0a4,		/* all points off */
+  0x0af,		/* display on */
+  U8G_ESC_DLY(50),       /* delay 50 ms */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+uint8_t u8g_dev_st7565_nhd_c12864_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | pb->p.page); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        if ( u8g_pb_WriteBuffer(pb, u8g, dev) == 0 )
+          return 0;
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_CONTRAST:
+      u8g_SetChipSelect(u8g, dev, 1);
+      u8g_SetAddress(u8g, dev, 0);          /* instruction mode */
+      u8g_WriteByte(u8g, dev, 0x081);
+      u8g_WriteByte(u8g, dev, (*(uint8_t *)arg) >> 2);
+      u8g_SetChipSelect(u8g, dev, 0);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+uint8_t u8g_dev_st7565_nhd_c12864_2x_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (2*pb->p.page)); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t*)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (2*pb->p.page+1)); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)(pb->buf)+pb->width);
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_CONTRAST:
+      u8g_SetChipSelect(u8g, dev, 1);
+      u8g_SetAddress(u8g, dev, 0);          /* instruction mode */
+      u8g_WriteByte(u8g, dev, 0x081);
+      u8g_WriteByte(u8g, dev, (*(uint8_t *)arg) >> 2);
+      u8g_SetChipSelect(u8g, dev, 0);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb16v1_base_fn(u8g, dev, msg, arg);
+}
+
+U8G_PB_DEV(u8g_dev_st7565_nhd_c12864_sw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_st7565_nhd_c12864_fn, U8G_COM_SW_SPI);
+U8G_PB_DEV(u8g_dev_st7565_nhd_c12864_hw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_st7565_nhd_c12864_fn, U8G_COM_HW_SPI);
+
+
+uint8_t u8g_dev_st7565_nhd_c12864_2x_buf[WIDTH*2] U8G_NOCOMMON ;
+u8g_pb_t u8g_dev_st7565_nhd_c12864_2x_pb = { {16, HEIGHT, 0, 0, 0},  WIDTH, u8g_dev_st7565_nhd_c12864_2x_buf};
+u8g_dev_t u8g_dev_st7565_nhd_c12864_2x_sw_spi = { u8g_dev_st7565_nhd_c12864_2x_fn, &u8g_dev_st7565_nhd_c12864_2x_pb, U8G_COM_SW_SPI };
+u8g_dev_t u8g_dev_st7565_nhd_c12864_2x_hw_spi = { u8g_dev_st7565_nhd_c12864_2x_fn, &u8g_dev_st7565_nhd_c12864_2x_pb, U8G_COM_HW_SPI };
+
+/*
+
+  u8g_com_arduino_hw_spi.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  SPI Clock Cycle Type
+
+  SSD1351	  50ns		20 MHz
+  SSD1322	300ns		  3.3 MHz
+  SSD1327	300ns
+  SSD1306	300ns
+  ST7565		400ns 		  2.5 MHz
+  ST7920		400ns
+
+  Arduino DUE
+
+  PA25	MISO
+  PA26	MOSI	75
+  PA27	SCLK	76
+
+
+typedef struct {
+  WoReg SPI_CR;        (Spi Offset: 0x00) Control Register
+  RwReg SPI_MR;        (Spi Offset: 0x04) Mode Register
+  RoReg SPI_RDR;       (Spi Offset: 0x08) Receive Data Register
+  WoReg SPI_TDR;       (Spi Offset: 0x0C) Transmit Data Register
+  RoReg SPI_SR;        (Spi Offset: 0x10) Status Register
+  WoReg SPI_IER;       (Spi Offset: 0x14) Interrupt Enable Register
+  WoReg SPI_IDR;       (Spi Offset: 0x18) Interrupt Disable Register
+  RoReg SPI_IMR;       (Spi Offset: 0x1C) Interrupt Mask Register
+  RoReg Reserved1[4];
+  RwReg SPI_CSR[4];    (Spi Offset: 0x30) Chip Select Register
+  RoReg Reserved2[41];
+  RwReg SPI_WPMR;      (Spi Offset: 0xE4) Write Protection Control Register
+  RoReg SPI_WPSR;      (Spi Offset: 0xE8) Write Protection Status Register
+} Spi;
+
+  Power Management Controller (PMC)
+  arduino-1.5.2/hardware/arduino/sam/system/CMSIS/Device/ATMEL/sam3xa/include/instance/instance_pmc.h
+    - enable PIO
+
+      REG_PMC_PCER0 = 1UL << ID_PIOA
+    - enable SPI
+      REG_PMC_PCER0 = 1UL << ID_SPI0
+
+
+    - enable PIOA and SPI0
+      REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+
+  Parallel Input/Output Controller (PIO)
+  arduino-1.5.2/hardware/arduino/sam/system/CMSIS/Device/ATMEL/sam3xa/include/instance/instance_pioa.h
+    - enable special function of the pin: disable PIO on A26 and A27:
+	REG_PIOA_PDR = 0x0c000000
+	PIOA->PIO_PDR = 0x0c000000
+
+  SPI
+    SPI0->SPI_CR = SPI_CR_SPIDIS
+    SPI0->SPI_CR = SPI_CR_SWRST ;
+    SPI0->SPI_CR = SPI_CR_SWRST ;
+    SPI0->SPI_CR = SPI_CR_SPIEN
+
+    Bit 0: Master Mode = 1 (active)
+    Bit 1: Peripheral Select = 0 (fixed)
+    Bit 2: Chip Select Decode Mode = 1 (4 to 16)
+    Bit 4: Mode Fault Detection = 1 (disabled)
+    Bit 5: Wait Data Read = 0 (disabled)
+    Bit 7: Loop Back Mode = 0 (disabled)
+    Bit 16-19: Peripheral Chip Select = 0 (chip select 0)
+    SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS
+
+    Bit 0: Clock Polarity = 0
+    Bit 1: Clock Phase = 0
+    Bit 4-7: Bits = 0 (8 Bit)
+    Bit 8-15: SCBR = 1
+    SPI0->SPI_CSR[0] = SPI_CSR_SCBR(x)	Serial Baud Rate
+	SCBR / 84000000 > 50 / 1000000000
+	SCBR / 84 > 5 / 100
+	SCBR  > 50 *84 / 1000 --> SCBR=5
+	SCBR  > 300*84 / 1000 --> SCBR=26
+	SCBR  > 400*84 / 1000 --> SCBR=34
+
+  Arduino Due test code:
+    REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+    REG_PIOA_PDR = 0x0c000000;
+    SPI0->SPI_CR = SPI_CR_SPIDIS;
+    SPI0->SPI_CR = SPI_CR_SWRST;
+    SPI0->SPI_CR = SPI_CR_SWRST;
+    SPI0->SPI_CR = SPI_CR_SPIEN;
+    SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS;
+    SPI0->SPI_CSR[0] = SPI_CSR_SCBR(30);
+
+    for(;;)
+    {
+      while( (SPI0->SPI_SR & SPI_SR_TDRE) == 0 )
+	;
+      SPI0->SPI_TDR = 0x050;
+    }
+
+*/
+
+#if defined(ARDUINO)
+
+#if defined(__AVR__)
+#define U8G_ARDUINO_ATMEGA_HW_SPI
+/* remove the definition for attiny */
+#if __AVR_ARCH__ == 2
+#undef U8G_ARDUINO_ATMEGA_HW_SPI
+#endif
+#if __AVR_ARCH__ == 25
+#undef U8G_ARDUINO_ATMEGA_HW_SPI
+#endif
+#endif
+
+#if defined(U8G_ARDUINO_ATMEGA_HW_SPI)
+
+//#include <avr/interrupt.h>
+//#include <avr/io.h>
+
+#if ARDUINO < 100
+
+/* fixed pins */
+#if defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__) // Sanguino.cc board
+#define PIN_SCK         7
+#define PIN_MISO        6
+#define PIN_MOSI        5
+#define PIN_CS          4
+#else                                   // Arduino Board
+#define PIN_SCK 13
+#define PIN_MISO  12
+#define PIN_MOSI 11
+#define PIN_CS 10
+#endif // (__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
+
+#else
+
+/* use Arduino pin definitions */
+#define PIN_SCK SCK
+#define PIN_MISO  MISO_PIN
+#define PIN_MOSI MOSI_PIN
+#define PIN_CS SS
+
+#endif
+
+
+
+//static uint8_t u8g_spi_out(uint8_t data) U8G_NOINLINE;
+static uint8_t u8g_spi_out(uint8_t data)
+{
+  /* unsigned char x = 100; */
+  /* send data */
+  SPDR = data;
+  /* wait for transmission */
+  while (!(SPSR & (1<<SPIF)))
+    ;
+  /* clear the SPIF flag by reading SPDR */
+  return  SPDR;
+}
+
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      pinMode(PIN_SCK, OUTPUT);
+      digitalWrite(PIN_SCK, LOW);
+      pinMode(PIN_MOSI, OUTPUT);
+      digitalWrite(PIN_MOSI, LOW);
+      /* pinMode(PIN_MISO, INPUT); */
+
+      pinMode(PIN_CS, OUTPUT);			/* system chip select for the atmega board */
+      digitalWrite(PIN_CS, HIGH);
+
+
+
+      /*
+        SPR1 SPR0
+            0	0		fclk/4
+            0	1		fclk/16
+            1	0		fclk/64
+            1	1		fclk/128
+      */
+      SPCR = 0;
+      SPCR =  (1<<SPE) | (1<<MSTR)|(0<<SPR1)|(0<<SPR0)|(0<<CPOL)|(0<<CPHA);
+#ifdef U8G_HW_SPI_2X
+      SPSR = (1 << SPI2X);  /* double speed, issue 89 */
+#else
+      if ( arg_val  <= U8G_SPI_CLK_CYCLE_50NS )
+      {
+	SPSR = (1 << SPI2X);  /* double speed, issue 89 */
+      }
+#endif
+
+
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_A0, arg_val);
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, LOW);
+      }
+      break;
+
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_spi_out(arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(*ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+  }
+  return 1;
+}
+
+/* #elif defined(__18CXX) || defined(__PIC32MX) */
+
+#elif defined(__SAM3X8E__)		// Arduino Due, maybe we should better check for __SAM3X8E__
+
+/* use Arduino pin definitions */
+#define PIN_SCK SCK
+#define PIN_MISO  MISO
+#define PIN_MOSI MOSI
+#define PIN_CS SS
+
+
+static uint8_t u8g_spi_out(uint8_t data)
+{
+  /* wait until tx register is empty */
+  while( (SPI0->SPI_SR & SPI_SR_TDRE) == 0 )
+    ;
+  /* send data */
+  SPI0->SPI_TDR = (uint32_t)data;
+  return  data;
+}
+
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+
+      /* Arduino Due specific code */
+
+      /* enable PIOA and SPI0 */
+      REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+
+      /* disable PIO on A26 and A27 */
+      REG_PIOA_PDR = 0x0c000000;
+
+      /* reset SPI0 (from sam lib) */
+      SPI0->SPI_CR = SPI_CR_SPIDIS;
+      SPI0->SPI_CR = SPI_CR_SWRST;
+      SPI0->SPI_CR = SPI_CR_SWRST;
+      SPI0->SPI_CR = SPI_CR_SPIEN;
+      u8g_MicroDelay();
+
+      /* master mode, no fault detection, chip select 0 */
+      SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS;
+
+      /* Polarity, Phase, 8 Bit data transfer, baud rate */
+      /* x * 1000 / 84 --> clock cycle in ns
+        5 * 1000 / 84 = 58 ns
+	SCBR  > 50 *84 / 1000 --> SCBR=5
+	SCBR  > 300*84 / 1000 --> SCBR=26
+	SCBR  > 400*84 / 1000 --> SCBR=34
+      */
+
+      if ( arg_val <= U8G_SPI_CLK_CYCLE_50NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(5) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_300NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(26) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_400NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(34) | 1;
+      }
+      else
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(84) | 1;
+      }
+
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_A0, arg_val);
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+	u8g_MicroDelay();		/* this delay is required to avoid that the display is switched off too early --> DOGS102 with DUE */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+	u8g_MicroDelay();
+      }
+      else
+      {
+        /* enable */
+        //u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, LOW);
+	u8g_MicroDelay();
+      }
+      break;
+
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_spi_out(arg_val);
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(*ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+  }
+  return 1;
+}
+
+
+
+#else /* U8G_ARDUINO_ATMEGA_HW_SPI */
+
+#endif /* U8G_ARDUINO_ATMEGA_HW_SPI */
+
+#else /* ARDUINO */
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* ARDUINO */
+
+/*
+
+  u8g_rot.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+uint8_t u8g_dev_rot90_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+uint8_t u8g_dev_rot180_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+uint8_t u8g_dev_rot270_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+
+uint8_t u8g_dev_rot_dummy_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  return 0;
+}
+
+u8g_dev_t u8g_dev_rot = { u8g_dev_rot_dummy_fn, NULL, NULL };
+
+
+void u8g_UndoRotation(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+    return;
+  u8g->dev = (u8g_dev_t*)u8g_dev_rot.dev_mem;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot90(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot90_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot180(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot180_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot270(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot270_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+uint8_t u8g_dev_rot90_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y, tmp;
+
+        /* transform the reference point */
+        y = bbx->x;
+        x = u8g->height;
+        /* x = u8g_GetWidthLL(u8g, rotation_chain); */
+        x -= bbx->y;
+        x--;
+
+        /* adjust point to be the uppler left corner again */
+        x -= bbx->h;
+        x++;
+
+        /* swap box dimensions */
+        tmp = bbx->w;
+        bbx->w = bbx->h;
+        bbx->h = tmp;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+	//new_box.x0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	//new_box.x1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+
+	new_box.x0 = ((u8g_box_t *)arg)->y0;
+	new_box.x1 = ((u8g_box_t *)arg)->y1;
+	new_box.y0 = ((u8g_box_t *)arg)->x0;
+	new_box.y1 = ((u8g_box_t *)arg)->x1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+        y = ((u8g_dev_arg_pixel_t *)arg)->x;
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+	//uint16_t x,y;
+        y = ((u8g_dev_arg_pixel_t *)arg)->x;
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=1;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+uint8_t u8g_dev_rot180_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y;
+
+        /* transform the reference point */
+        //y = u8g_GetHeightLL(u8g, rotation_chain);
+        y = u8g->height;
+        y -= bbx->y;
+        y--;
+
+        //x = u8g_GetWidthLL(u8g, rotation_chain);
+        x = u8g->width;
+        x -= bbx->x;
+        x--;
+
+        /* adjust point to be the uppler left corner again */
+        y -= bbx->h;
+        y++;
+
+        x -= bbx->w;
+        x++;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+
+	new_box.x0 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x1 - 1;
+	new_box.x1 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x0 - 1;
+	new_box.y0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	new_box.y1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        y--;
+
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        x--;
+
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        y--;
+
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        x--;
+
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=2;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+uint8_t u8g_dev_rot270_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y, tmp;
+
+        /* transform the reference point */
+        x = bbx->y;
+
+        y = u8g->width;
+        /* y = u8g_GetHeightLL(u8g, rotation_chain); */
+        y -= bbx->x;
+        y--;
+
+        /* adjust point to be the uppler left corner again */
+        y -= bbx->w;
+        y++;
+
+        /* swap box dimensions */
+        tmp = bbx->w;
+        bbx->w = bbx->h;
+        bbx->h = tmp;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+
+	new_box.x0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	new_box.x1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+	new_box.y0 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x1 - 1;
+	new_box.y1 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x0 - 1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+        x = ((u8g_dev_arg_pixel_t *)arg)->y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        y--;
+
+        /*
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        */
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+        x = ((u8g_dev_arg_pixel_t *)arg)->y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        y--;
+
+        /*
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        */
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=3;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+

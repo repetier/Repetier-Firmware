@@ -586,11 +586,11 @@ SIGNAL (TIMER3_COMPA_vect)
     if(servoIndex & 1)
     {
         uint8_t nr = servoIndex >> 1;
-	if(servoAutoOff[nr])
-	{
-		servoAutoOff[nr]--;
-		if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
-	}
+        if(servoAutoOff[nr])
+        {
+            servoAutoOff[nr]--;
+            if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
+        }
     }
     servoIndex++;
     if(servoIndex>7)
@@ -699,11 +699,12 @@ ISR(TIMER1_COMPA_vect)
     {
         setTimer(PrintLine::bresenhamStep());
     }
-    else
-    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing) {
+    else if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing)
+    {
         Printer::zBabystep();
         setTimer(Printer::interval);
-    } else
+    }
+    else
     {
         if(waitRelax == 0)
         {
@@ -939,14 +940,14 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-if(fanKickstart == 0)
-{
+    if(fanKickstart == 0)
+    {
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER + 2], false);
+        pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER + 2], false);
 #else
-    if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 2] != COOLER_PWM_MASK) WRITE(FAN_PIN,0);
+        if(pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 2] != COOLER_PWM_MASK) WRITE(FAN_PIN,0);
 #endif
-}
+    }
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER
@@ -1004,8 +1005,13 @@ if(fanKickstart == 0)
 }
 #if USE_ADVANCE
 
-    static int8_t extruderLastDirection = 0;
-void HAL::resetExtruderDirection() {
+static int8_t extruderLastDirection = 0;
+#ifndef ADVANCE_DIR_FILTER_STEPS
+#define ADVANCE_DIR_FILTER_STEPS 2
+#endif
+
+void HAL::resetExtruderDirection()
+{
     extruderLastDirection = 0;
 }
 /** \brief Timer routine for extruder stepper.
@@ -1023,15 +1029,21 @@ ISR(EXTRUDER_TIMER_VECTOR)
     if(!Printer::isAdvanceActivated()) return; // currently no need
     if(Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1)
     {
-        Extruder::setDirection(true);
-        extruderLastDirection = 1;
-        timer += 40; // Add some more wait time to prevent blocking
+        if(Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS)
+        {
+            Extruder::setDirection(true);
+            extruderLastDirection = 1;
+            timer += 40; // Add some more wait time to prevent blocking
+        }
     }
     else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1)
     {
-        Extruder::setDirection(false);
-        extruderLastDirection = -1;
-        timer += 40; // Add some more wait time to prevent blocking
+        if(-Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS)
+        {
+            Extruder::setDirection(false);
+            extruderLastDirection = -1;
+            timer += 40; // Add some more wait time to prevent blocking
+        }
     }
     else if(Printer::extruderStepsNeeded != 0)
     {
@@ -1164,64 +1176,64 @@ ISR(USART_UDRE_vect)
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
 #if !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega2561__) || defined(__AVR_ATmega1281__) || defined (__AVR_ATmega644__) || defined (__AVR_ATmega644P__))
- #error BlueTooth option cannot be used with your mainboard
+#error BlueTooth option cannot be used with your mainboard
 #endif
 #if BLUETOOTH_SERIAL > 1 && !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
- #error BlueTooth serial 2 or 3 can be used only with boards based on ATMega2560 or ATMega1280
+#error BlueTooth serial 2 or 3 can be used only with boards based on ATMega2560 or ATMega1280
 #endif
 #if (BLUETOOTH_SERIAL == 1)
 #if defined(USART1_RX_vect)
- #define SIG_USARTx_RECV   USART1_RX_vect
- #define USARTx_UDRE_vect  USART1_UDRE_vect
+#define SIG_USARTx_RECV   USART1_RX_vect
+#define USARTx_UDRE_vect  USART1_UDRE_vect
 #else
- #define SIG_USARTx_RECV   SIG_USART1_RECV
- #define USARTx_UDRE_vect  SIG_USART1_DATA
+#define SIG_USARTx_RECV   SIG_USART1_RECV
+#define USARTx_UDRE_vect  SIG_USART1_DATA
 #endif
- #define UDRx              UDR1
- #define UCSRxA            UCSR1A
- #define UCSRxB            UCSR1B
- #define UBRRxH            UBRR1H
- #define UBRRxL            UBRR1L
- #define U2Xx              U2X1
- #define UARTxENABLE       ((1<<RXEN1)|(1<<TXEN1)|(1<<RXCIE1)|(1<<UDRIE1))
- #define UDRIEx            UDRIE1
- #define RXxPIN            19
+#define UDRx              UDR1
+#define UCSRxA            UCSR1A
+#define UCSRxB            UCSR1B
+#define UBRRxH            UBRR1H
+#define UBRRxL            UBRR1L
+#define U2Xx              U2X1
+#define UARTxENABLE       ((1<<RXEN1)|(1<<TXEN1)|(1<<RXCIE1)|(1<<UDRIE1))
+#define UDRIEx            UDRIE1
+#define RXxPIN            19
 #elif (BLUETOOTH_SERIAL == 2)
 #if defined(USART2_RX_vect)
- #define SIG_USARTx_RECV   USART2_RX_vect
- #define USARTx_UDRE_vect  USART2_UDRE_vect
+#define SIG_USARTx_RECV   USART2_RX_vect
+#define USARTx_UDRE_vect  USART2_UDRE_vect
 #else
- #define SIG_USARTx_RECV SIG_USART2_RECV
- #define USARTx_UDRE_vect  SIG_USART2_DATA
+#define SIG_USARTx_RECV SIG_USART2_RECV
+#define USARTx_UDRE_vect  SIG_USART2_DATA
 #endif
- #define UDRx              UDR2
- #define UCSRxA            UCSR2A
- #define UCSRxB            UCSR2B
- #define UBRRxH            UBRR2H
- #define UBRRxL            UBRR2L
- #define U2Xx              U2X2
- #define UARTxENABLE       ((1<<RXEN2)|(1<<TXEN2)|(1<<RXCIE2)|(1<<UDRIE2))
- #define UDRIEx            UDRIE2
- #define RXxPIN            17
+#define UDRx              UDR2
+#define UCSRxA            UCSR2A
+#define UCSRxB            UCSR2B
+#define UBRRxH            UBRR2H
+#define UBRRxL            UBRR2L
+#define U2Xx              U2X2
+#define UARTxENABLE       ((1<<RXEN2)|(1<<TXEN2)|(1<<RXCIE2)|(1<<UDRIE2))
+#define UDRIEx            UDRIE2
+#define RXxPIN            17
 #elif (BLUETOOTH_SERIAL == 3)
 #if defined(USART3_RX_vect)
- #define SIG_USARTx_RECV   USART3_RX_vect
- #define USARTx_UDRE_vect  USART3_UDRE_vect
+#define SIG_USARTx_RECV   USART3_RX_vect
+#define USARTx_UDRE_vect  USART3_UDRE_vect
 #else
- #define SIG_USARTx_RECV SIG_USART3_RECV
- #define USARTx_UDRE_vect  SIG_USART3_DATA
+#define SIG_USARTx_RECV SIG_USART3_RECV
+#define USARTx_UDRE_vect  SIG_USART3_DATA
 #endif
- #define UDRx              UDR3
- #define UCSRxA            UCSR3A
- #define UCSRxB            UCSR3B
- #define UBRRxH            UBRR3H
- #define UBRRxL            UBRR3L
- #define U2Xx              U2X3
- #define UARTxENABLE       ((1<<RXEN3)|(1<<TXEN3)|(1<<RXCIE3)|(1<<UDRIE3))
- #define UDRIEx            UDRIE3
- #define RXxPIN            15
+#define UDRx              UDR3
+#define UCSRxA            UCSR3A
+#define UCSRxB            UCSR3B
+#define UBRRxH            UBRR3H
+#define UBRRxL            UBRR3L
+#define U2Xx              U2X3
+#define UARTxENABLE       ((1<<RXEN3)|(1<<TXEN3)|(1<<RXCIE3)|(1<<UDRIE3))
+#define UDRIEx            UDRIE3
+#define RXxPIN            15
 #else
- #error Wrong serial port number for BlueTooth
+#error Wrong serial port number for BlueTooth
 #endif
 
 SIGNAL(SIG_USARTx_RECV)
@@ -1336,7 +1348,7 @@ void RFHardwareSerial::end()
     bit_clear(*_ucsrb, _udrie);
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-	UCSRxB = 0;
+    UCSRxB = 0;
 #endif
     // clear a  ny received data
     _rx_buffer->head = _rx_buffer->tail;

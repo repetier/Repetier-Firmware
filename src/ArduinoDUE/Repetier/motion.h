@@ -467,7 +467,7 @@ public:
         long h = HAL::mulu16xu16to32(v, advanceL);
         int tred = ((advanceTarget + h) >> 16);
         HAL::forbidInterrupts();
-        Printer::extruderStepsNeeded += tred-Printer::advanceStepsSet;
+        Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
         if(tred > 0 && Printer::advanceStepsSet <= 0)
             Printer::extruderStepsNeeded += Extruder::current->advanceBacklash;
         else if(tred < 0 && Printer::advanceStepsSet >= 0)

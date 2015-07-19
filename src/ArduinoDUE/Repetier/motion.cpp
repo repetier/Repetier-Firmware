@@ -27,7 +27,7 @@
 #ifndef STEP_DOUBLER_FREQUENCY
 #error Please add new parameter STEP_DOUBLER_FREQUENCY to your configuration.
 #else
-#if STEP_DOUBLER_FREQUENCY<10000 || STEP_DOUBLER_FREQUENCY>20000
+#if STEP_DOUBLER_FREQUENCY < 10000 || STEP_DOUBLER_FREQUENCY > 20000
 #if CPU_ARCH==ARCH_AVR
 #error STEP_DOUBLER_FREQUENCY should be in range 10000-16000.
 #endif
@@ -513,14 +513,16 @@ void PrintLine::updateTrapezoids()
     }
 #endif // DRIVE_SYSTEM
 
-    computeMaxJunctionSpeed(previous, act); // Set maximum junction speed if we have a real move before
     if(previous->isEOnlyMove() != act->isEOnlyMove())
     {
+        previous->maxJunctionSpeed = previous->endSpeed;
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
         firstLine->unblock();
         return;
+    } else {
+        computeMaxJunctionSpeed(previous, act); // Set maximum junction speed if we have a real move before
     }
     // Increase speed if possible neglecting current speed
     backwardPlanner(linesWritePos,first);
@@ -542,22 +544,34 @@ void PrintLine::updateTrapezoids()
     act->unblock();
 }
 
+/* Computes the maximum junction speed of the newly added segment under
+optimal conditions. There is no guarantee that the previous move will be able to reach the
+speed at all, but if it could exceed it will never exceed this theoretical limit.
+
+if you define ALTERNATIVE_JERK teh new jerk computations are used. These
+use the cosine of the angle and the maximum speed
+Jerk = (1-cos(alpha))*min(v1,v2)
+This sets jerk to 0 on zero angle change.
+
+        Old               New
+0бу:       0               0
+30бу:     51,8             13.4
+45бу:     76.53            29.3
+90бу:    141               100
+180бу:   200               200
+
+
+von 100 auf 200
+        Old               New(min)   New(max)
+0бу:     100               0          0
+30бу:    123,9             13.4       26.8
+45бу:    147.3             29.3       58.6
+90бу:    223               100        200
+180бу:   300               200        400
+
+*/
 inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *current)
 {
-#if USE_ADVANCE
-    if(Printer::isAdvanceActivated())
-    {
-        if(previous->isEMove() != current->isEMove() && (previous->isXOrYMove() || current->isXOrYMove()))
-        {
-            previous->setEndSpeedFixed(true);
-            current->setStartSpeedFixed(true);
-            previous->endSpeed = current->startSpeed = previous->maxJunctionSpeed = RMath::min(previous->endSpeed, current->startSpeed);
-            previous->invalidateParameter();
-            current->invalidateParameter();
-            return;
-        }
-    }
-#endif // USE_ADVANCE
 #if NONLINEAR_SYSTEM
     if (previous->moveID == current->moveID)   // Avoid computing junction speed for split delta lines
     {
@@ -568,18 +582,48 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
         return;
     }
 #endif
+#if USE_ADVANCE
+    if(Printer::isAdvanceActivated())
+    {
+        // if we start/stop extrusion we need to do so with lowest possible end speed
+        // or advance would leave a drolling extruder and can not adjust fast enough.
+        if(previous->isEMove() != current->isEMove())
+        {
+            previous->setEndSpeedFixed(true);
+            current->setStartSpeedFixed(true);
+            previous->endSpeed = current->startSpeed = previous->maxJunctionSpeed = RMath::min(previous->endSpeed, current->startSpeed);
+            previous->invalidateParameter();
+            current->invalidateParameter();
+            return;
+        }
+    }
+#endif // USE_ADVANCE
+    // if we are here we have to identical move types
+    // either pure extrusion -> pure extrusion or
+    // move -> move (with or without extrusion)
     // First we compute the normalized jerk for speed 1
+    float factor = 1.0;
+    float maxJoinSpeed = RMath::min(current->fullSpeed,previous->fullSpeed);
+#if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
+#ifdef ALTERNATIVE_JERK
+    float jerk = maxJoinSpeed * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
+#else
     float dx = current->speedX - previous->speedX;
     float dy = current->speedY - previous->speedY;
-    float factor = 1;
-#if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
     float dz = current->speedZ - previous->speedZ;
     float jerk = sqrt(dx * dx + dy * dy + dz * dz);
+#endif // ALTERNATIVE_JERK
+#else // DELTA
+#ifdef ALTERNATIVE_JERK
+    float jerk = maxJoinSpeed * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
 #else
+    float dx = current->speedX - previous->speedX;
+    float dy = current->speedY - previous->speedY;
     float jerk = sqrt(dx * dx + dy * dy);
-#endif
+#endif // ALTERNATIVE_JERK
+#endif // DELTA
     if(jerk > Printer::maxJerk)
-        factor = Printer::maxJerk / jerk;
+        factor = Printer::maxJerk / jerk; // always < 1.0!
 #if DRIVE_SYSTEM != DELTA
     if((previous->dir | current->dir) & ZSTEP)
     {
@@ -591,7 +635,8 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
     float eJerk = fabs(current->speedE - previous->speedE);
     if(eJerk > Extruder::current->maxStartFeedrate)
         factor = RMath::min(factor, Extruder::current->maxStartFeedrate / eJerk);
-    previous->maxJunctionSpeed = RMath::min(previous->fullSpeed * factor, current->fullSpeed);
+
+    previous->maxJunctionSpeed = maxJoinSpeed * factor; // set speed limit
 #ifdef DEBUG_QUEUE_MOVE
     if(Printer::debugEcho())
     {
@@ -787,12 +832,13 @@ inline float PrintLine::safeSpeed()
 #if DRIVE_SYSTEM != DELTA
     if(isZMove())
     {
-        if(primaryAxis == Z_AXIS)
-        {
-            safe = Printer::maxZJerk*0.5*fullSpeed/fabs(speedZ);
+        float mz = Printer::maxZJerk * 0.5;
+        if(isXOrYMove()) {
+           if(fabs(speedZ) > mz)
+            safe = RMath::min(safe,mz * fullSpeed / fabs(speedZ));
+        } else {
+            safe = mz;
         }
-        else if(fabs(speedZ) > Printer::maxZJerk * 0.5)
-            safe = RMath::min(safe,Printer::maxZJerk * 0.5 * fullSpeed / fabs(speedZ));
     }
 #endif
     if(isEMove())
@@ -2013,7 +2059,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                         // execute a extra babystep
                         Printer::insertStepperHighDelay();
                         Printer::endXYZSteps();
-                        HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY+1);
+                        HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY + 1);
 
                         if(Printer::zBabystepsMissing > 0)
                         {

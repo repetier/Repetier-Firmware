@@ -399,6 +399,13 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define SDSUPPORT 1
 #endif
 
+#if FEATURE_CONTROLLER == CONTROLLER_VIKI2
+#undef SDCARDDETECT
+#define SDCARDDETECT -1
+#undef SDSUPPORT
+#define SDSUPPORT 1
+#endif
+
 #if  FEATURE_CONTROLLER == CONTROLLER_RAMBO
 #undef SDCARDDETECT
 #define SDCARDDETECT 81
@@ -407,6 +414,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #undef SDSUPPORT
 #define SDSUPPORT 1
 #endif
+
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
@@ -1483,21 +1491,141 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_ENCODER 0
 #define UI_ENCODER_SPEED 1
+#define UI_ENCODER_A 35
+#define UI_ENCODER_B 33
+#define UI_ENCODER_CLICK 37
 
 #ifdef UI_MAIN
 void uiInitKeys() {
-  UI_KEYS_INIT_CLICKENCODER_LOW(35,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(37); // push button, connects gnd to pin;
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin;
 }
 void uiCheckKeys(int &action) {
- UI_KEYS_CLICKENCODER_LOW(35,33); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(37,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
 }
 inline void uiCheckSlowEncoder() {}
 void uiCheckSlowKeys(int &action) {}
 #endif
 
 #endif // CONTROLLER_sparkLCD
+
+#if FEATURE_CONTROLLER == CONTROLLER_VIKI2
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_U8G
+//#define U8GLIB_ST7920
+#define U8GLIB_ST7565_NHD_C2832_HW_SPI
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+//select font size
+#define UI_FONT_6X10 //default font
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#define UI_ANIMATION 0  // Animations are too slow
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3
+#define UI_INVERT_MENU_DIRECTION 0
+#define UI_ENCODER_SPEED 2
+#define SDCARDDETECT        -1
+#define UI_DISPLAY_RW_PIN -1
+#define UI_ROTATE_180
+
+#define BEEPER_TYPE 1
+
+// SCK Pin:  UI_DISPLAY_D4_PIN
+// Mosi Pin: UI_DISPLAY_ENABLE_PIN
+// CD Pin:   UI_DISPLAY_RS_PIN
+
+#if MOTHERBOARD == 34 // Azteeg X3
+
+#define SDCARDDETECT 49 // sd card detect as shown on drawing
+#define BEEPER_PIN    33
+#define UI_DISPLAY_D5_PIN 31   // Display A0
+#define UI_DISPLAY_RS_PIN 32    // Display CS
+#define UI_ENCODER_A 22
+#define UI_ENCODER_B 7
+#define UI_ENCODER_CLICK 12
+#define UI_RESET_PIN -1
+#define RED_BLUE_STATUS_LEDS
+#define RED_STATUS_LED 64
+#define BLUE_STATUS_LED 63
+
+#elif MOTHERBOARD == 35 // Azteeg X3 Pro
+
+#undef SDCARDDETECT
+#define SDCARDDETECT      49 // sd card detect as shown on drawing
+#define BEEPER_PIN        47 // 33 is the on board beeper
+#define UI_DISPLAY_D5_PIN 44 // Display A0
+#define UI_DISPLAY_RS_PIN 45 // Display CS
+#define UI_ENCODER_A      22
+#define UI_ENCODER_B       7
+#define UI_ENCODER_CLICK  39
+#define UI_RESET_PIN      -1
+#define RED_BLUE_STATUS_LEDS
+#define RED_STATUS_LED    32
+#define BLUE_STATUS_LED   35
+
+#elif MOTHERBOARD == 301 // RAMBO
+
+#define SDCARDDETECT 72 // sd card detect as shown on drawing
+#define BEEPER_PIN         33
+#define UI_DISPLAY_D5_PIN 70   // Display A0
+#define UI_DISPLAY_RS_PIN 71    // Display CS
+#define UI_ENCODER_A 85
+#define UI_ENCODER_B 84
+#define UI_ENCODER_CLICK 83
+#define UI_RESET_PIN -1
+#define RED_BLUE_STATUS_LEDS
+#define RED_STATUS_LED 22
+#define BLUE_STATUS_LED 32
+
+#elif MOTHERBOARD == 9 || MOTHERBOARD == 92 // Printboard
+
+#define SDCARDDETECT 72 // sd card detect as shown on drawing
+#define SDSS          45
+#define BEEPER_PIN         32
+#define UI_DISPLAY_D5_PIN 42   // Display A0
+#define UI_DISPLAY_RS_PIN 43    // Display CS
+#define UI_ENCODER_A 26
+#define UI_ENCODER_B 27
+#define UI_ENCODER_CLICK 47
+#define UI_RESET_PIN -1
+#define RED_BLUE_STATUS_LEDS
+#define RED_STATUS_LED 12
+#define BLUE_STATUS_LED 10
+
+
+#else
+#error No predefined Viki 2 mapping for your board available
+#endif
+
+#if UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+#endif
+}
+void uiCheckKeys(int &action) {
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_B,UI_ENCODER_A);
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK);
+#if UI_RESET_PIN > -1
+ UI_KEYS_BUTTON_LOW(UI_RESET_PIN,UI_ACTION_RESET);
+#endif
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
+#endif
+#endif // Controller VIKI 2
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 #if UI_ROWS==4

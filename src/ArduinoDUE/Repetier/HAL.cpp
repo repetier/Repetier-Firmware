@@ -1151,8 +1151,11 @@ be done with the maximum allowable speed for the extruder.
 */
 #if USE_ADVANCE
 TcChannel *extruderChannel = (EXTRUDER_TIMER->TC_CHANNEL + EXTRUDER_TIMER_CHANNEL);
-#define SLOW_EXTRUDER_TICKS  (F_CPU_TRUE / 32 / 2000) // 500us on direction change
+#define SLOW_EXTRUDER_TICKS  (F_CPU_TRUE / 32 / 1000) // 250us on direction change
 #define NORMAL_EXTRUDER_TICKS  (F_CPU_TRUE / 32 / EXTRUDER_CLOCK_FREQ) // 500us on direction change
+#ifndef ADVANCE_DIR_FILTER_STEPS
+#define ADVANCE_DIR_FILTER_STEPS 2
+#endif
 
 static int extruderLastDirection = 0;
 void HAL::resetExtruderDirection() {
@@ -1173,17 +1176,22 @@ void EXTRUDER_TIMER_VECTOR ()
   if (!Printer::isAdvanceActivated()) return; // currently no need
   if (Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1)
   {
-    Extruder::setDirection(true);
-    extruderLastDirection = 1;
-    extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+    if(Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
+      Extruder::setDirection(true);
+      extruderLastDirection = 1;
+      extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+    } else 
+      extruderChannel->TC_RC = Printer::maxExtruderSpeed;
   }
-
   else if (Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1)
   {
-    Extruder::setDirection(false);
-    extruderLastDirection = -1;
-    extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
-  }
+    if(-Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
+      Extruder::setDirection(false);
+      extruderLastDirection = -1;
+      extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+   } else 
+      extruderChannel->TC_RC = Printer::maxExtruderSpeed;
+   }
   else if (Printer::extruderStepsNeeded != 0)
   {
     Extruder::step();

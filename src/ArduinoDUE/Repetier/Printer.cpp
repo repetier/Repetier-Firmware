@@ -949,7 +949,12 @@ void Printer::setup()
     Printer::motorX = 0;
     Printer::motorYorZ = 0;
 #endif
-
+#ifdef RED_BLUE_STATUS_LEDS
+    SET_OUTPUT(RED_STATUS_LED);
+    SET_OUTPUT(BLUE_STATUS_LED);
+    WRITE(BLUE_STATUS_LED,HIGH);
+    WRITE(RED_STATUS_LED,LOW);
+#endif // RED_BLUE_STATUS_LEDS
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
     motorCurrentControlInit(); // Set current if it is firmware controlled
 #endif
@@ -1464,8 +1469,10 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif
     }
 #if ZHOME_X_POS != IGNORE_COORDINATE || ZHOME_Y_POS != IGNORE_COORDINATE
-    moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[Y_AXIS]);
-    Commands::waitUntilEndOfAllMoves();
+    if(zaxis) { // only required for z axis
+        moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[Y_AXIS]);
+        Commands::waitUntilEndOfAllMoves();
+    }
 #endif
     if(zaxis) {
         homeZAxis();

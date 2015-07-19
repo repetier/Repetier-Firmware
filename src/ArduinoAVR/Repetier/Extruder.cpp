@@ -66,6 +66,7 @@ void Extruder::manageTemperatures()
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
     uint8_t errorDetected = 0;
+    bool hot = false;
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
@@ -124,6 +125,8 @@ void Extruder::manageTemperatures()
                 EVENT_HEATER_DEFECT(controller);
             }
         }
+        if(act->currentTemperatureC > 50)
+            hot = true;
         if(Printer::isAnyTempsensorDefect()) continue;
         uint8_t on = act->currentTemperatureC >= act->targetTemperatureC ? LOW : HIGH;
         // Make a sound if alarm was set on reaching target temperature
@@ -256,19 +259,15 @@ void Extruder::manageTemperatures()
 #endif
     } // for controller
 
-#if EXTRUDER_JAM_CONTROL
-    /*    for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
-            if(extruder[i].jamStepsSinceLastSignal > JAM_ERROR_STEPS) {
-                if(!extruder[i].isWaitJamStartcount())
-                    extruder[i].tempControl.setJammed(true);
-                else {
-                    extruder[i].jamStepsSinceLastSignal = 0;
-                    extruder[i].setWaitJamStartcount(false);
-                }
-            }
-        }*/
-#endif // EXTRUDER_JAM_CONTROL
-
+#ifdef RED_BLUE_STATUS_LEDS
+    if(Printer::isAnyTempsensorDefect()) {
+        WRITE(BLUE_STATUS_LED,HIGH);
+        WRITE(RED_STATUS_LED,HIGH);
+    } else {
+        WRITE(BLUE_STATUS_LED,!hot);
+        WRITE(RED_STATUS_LED,hot);
+    }
+#endif // RED_BLUE_STATUS_LEDS
 
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;

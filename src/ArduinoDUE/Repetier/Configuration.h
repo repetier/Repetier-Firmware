@@ -1375,6 +1375,8 @@ The following settings override uiconfig.h!
 15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
+19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
+
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 

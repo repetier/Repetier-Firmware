@@ -22,6 +22,8 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
+#include <math.h>
+
 #define REPETIER_VERSION "0.92.3"
 
 // ##########################################################################################
@@ -147,6 +149,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_GATE_3NOVATICA 18
 #define CONTROLLER_SPARKLCD 19
 #define CONTROLLER_BAM_DICE_DUE 20
+#define CONTROLLER_VIKI2 21
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
@@ -171,7 +174,6 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 // add pid control
 #define TEMP_PID 1
-
 
 #include "Configuration.h"
 
