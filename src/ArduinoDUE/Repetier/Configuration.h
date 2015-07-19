@@ -807,8 +807,8 @@ on this endstop.
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
 #elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
-//#define MOTOR_CURRENT {130,130,130,110,110} // expired method
-#define MOTOR_CURRENT_PERCENT {51,51,51,44,44}
+//#define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
+#define MOTOR_CURRENT_PERCENT {51,51,51,44,44,44,44}
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move

@@ -544,11 +544,11 @@ STEPPER_CURRENT_CONTROL
 #define TEMP_1_PIN       7  // PA16
 
 #define HEATER_2_PIN     8  // PC22 on piggy
-#define TEMP_2_PIN       5  // PA23 analog pin on piggy
+#define TEMP_2_PIN       3  // PA6, analog on piggy
 #define HEATER_3_PIN     9  // PC21 on piggy
 #define TEMP_3_PIN       4  // PA22, analog pin on piggy
 #define HEATER_4_PIN     97 // PC20 on piggy
-#define TEMP_4_PIN       3  // PA6, analog on piggy
+#define TEMP_4_PIN       5  // PA23 analog pin on piggy
 
 #define ORIG_MOTOR_RESET  24  // PA15, motor RESET pin
 
@@ -560,18 +560,18 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_E1_STEP_PIN    28 // PD3 on piggy
 #define ORIG_E1_DIR_PIN     27 // PD2 on piggy
-#define ORIG_E1_ENABLE_PIN  -1
+#define ORIG_E1_ENABLE_PIN  24 // PA15, motor RESET pin
 #define E1_MS1_PIN          -1
 #define E1_MS2_PIN          -1
 
 #define ORIG_E2_STEP_PIN    11 // PD7 on piggy
 #define ORIG_E2_DIR_PIN     29 // PD6 on piggy
-#define ORIG_E2_ENABLE_PIN  -1
+#define ORIG_E2_ENABLE_PIN  24 // PA15, motor RESET pin
 #define E2_MS_PIN         -1
 
 #define ORIG_E3_STEP_PIN    30 // PD9 on piggy
 #define ORIG_E3_DIR_PIN     12 // PD8 on piggy
-#define ORIG_E3_ENABLE_PIN  -1
+#define ORIG_E3_ENABLE_PIN  24 // PA15, motor RESET pin
 #define E3_MS_PIN         -1
 
 #define SDSUPPORT      true
@@ -600,7 +600,8 @@ STEPPER_CURRENT_CONTROL
 #define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
 
 //** DAC for motor vfref current
-#define DAC_SYNC   53 // PB14
+#define DAC0_SYNC   53 // PB14
+#define DAC1_SYNC    6 // PC24
 
 //** EEPROM **
 
@@ -719,7 +720,8 @@ STEPPER_CURRENT_CONTROL
 #define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
 
 //** DAC for motor vfref current
-#define DAC_SYNC   53 // PB14
+#define DAC0_SYNC   53 // PB14
+#define DAC1_SYNC   53 // PB14
 
 //** EEPROM **
 

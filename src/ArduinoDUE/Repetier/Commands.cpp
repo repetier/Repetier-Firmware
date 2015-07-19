@@ -391,32 +391,47 @@ void motorCurrentControlInit() //Initialize LTC2600 Motor Current
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
 void setMotorCurrent(uint8_t channel, unsigned short value)
 {
-    if(channel >= 4)
-        return;
+    if(channel >= 7) // max channel (X,Y,Z,E0,E1,E2,E3)
+        return; 
     if(value > 255)
-        value = 255;
-    uint8_t externalDac_buf[2] = {0x10, 0x00};
+        value=255;
 
-    externalDac_buf[0] |= ( 3 - channel << 6);
+    uint8_t externalDac_buf[2] = {0x10, 0x00};
+    
+    if(channel > 3)
+        externalDac_buf[0] |= ( 7 - channel << 6);
+    else
+        externalDac_buf[0] |= ( 3 - channel << 6);
+
     externalDac_buf[0] |= (value >> 4);
     externalDac_buf[1] |= (value << 4);
 
-    WRITE(DAC_SYNC, HIGH);
+    // All SPI chip-select HIGH
+    WRITE(DAC0_SYNC, HIGH);
+    WRITE(DAC1_SYNC, HIGH);
     WRITE(SPI_EEPROM1_CS, HIGH);
     WRITE(SPI_EEPROM2_CS, HIGH);
     WRITE(SPI_FLASH_CS, HIGH);
     WRITE(SDSS, HIGH);
+    
+    if(channel > 3) // DAC Piggy E1,E2,E3
+    {
+        WRITE(DAC1_SYNC,LOW);
+        HAL::delayMicroseconds(2);
+        WRITE(DAC1_SYNC,HIGH);
+        HAL::delayMicroseconds(2);
+        WRITE(DAC1_SYNC,LOW);
+    }
+    else // DAC onboard X,Y,Z,E0
+    {
+        WRITE(DAC0_SYNC,LOW);
+        HAL::delayMicroseconds(2);
+        WRITE(DAC0_SYNC,HIGH);
+        HAL::delayMicroseconds(2);
+        WRITE(DAC0_SYNC,LOW);
+    }
 
-    HAL::delayMicroseconds(1);
-    HAL::delayMicroseconds(1);
-
-    WRITE(DAC_SYNC, HIGH);
-    WRITE(DAC_SYNC, LOW);
-    HAL::delayMilliseconds(1);
-    WRITE(DAC_SYNC, HIGH);
-    HAL::delayMilliseconds(1);
-    WRITE(DAC_SYNC, LOW);
-
+    HAL::delayMicroseconds(2);
     HAL::spiSend(SPI_CHAN_DAC, externalDac_buf, 2);
 }
 
@@ -430,31 +445,43 @@ void motorCurrentControlInit() //Initialize Motor Current
 {
     uint8_t externalDac_buf[2] = {0x20, 0x00};//all off
 
-    WRITE(DAC_SYNC, HIGH);
+    // All SPI chip-select HIGH
+    WRITE(DAC0_SYNC, HIGH);
+    WRITE(DAC1_SYNC, HIGH);
     WRITE(SPI_EEPROM1_CS, HIGH);
     WRITE(SPI_EEPROM2_CS, HIGH);
     WRITE(SPI_FLASH_CS, HIGH);
     WRITE(SDSS, HIGH);
-    SET_OUTPUT(DAC_SYNC);
 
-    HAL::delayMicroseconds(1);
-    HAL::delayMicroseconds(1);
-    WRITE(DAC_SYNC, HIGH);
-    WRITE(DAC_SYNC, LOW);
-    HAL::delayMilliseconds(1);
-    WRITE(DAC_SYNC, HIGH);
-    HAL::delayMilliseconds(1);
-    WRITE(DAC_SYNC, LOW);
-
+    // init onboard DAC
+    WRITE(DAC0_SYNC, LOW);
+    HAL::delayMicroseconds(2);
+    WRITE(DAC0_SYNC, HIGH);
+    HAL::delayMicroseconds(2);
+    WRITE(DAC0_SYNC, LOW);
+    
     HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
+    WRITE(DAC0_SYNC, HIGH);
+    
+#if NUM_EXTRUDER > 1
+    // init Piggy DAC
+    WRITE(DAC1_SYNC, LOW);
+    HAL::delayMicroseconds(2);
+    WRITE(DAC1_SYNC, HIGH);
+    HAL::delayMicroseconds(2);
+    WRITE(DAC1_SYNC, LOW);
+    
+    HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
+    WRITE(DAC1_SYNC, HIGH);
+#endif
 
 #ifdef MOTOR_CURRENT_PERCENT
     const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < NUM_EXTRUDER+3; i++)
         setMotorCurrentPercent(i,digipot_motor_current[i]);
 #else
     const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-    for(uint8_t i = 0; i < 4; i++)
+    for(uint8_t i = 0; i < NUM_EXTRUDER+3; i++)
         setMotorCurrent(i,digipot_motor_current[i]);
 #endif
 }

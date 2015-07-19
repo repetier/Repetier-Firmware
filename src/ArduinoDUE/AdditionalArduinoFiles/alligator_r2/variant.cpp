@@ -305,8 +305,8 @@ extern const PinDescription g_APinDescription[]=
 
   // 92 , PA5
   { PIOA, PIO_PA5,          ID_PIOA, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // 92
-  // 93 , PB12 analog
-  { PIOB, PIO_PB12X1_AD8,   ID_PIOB, PIO_OUTPUT_0,    PIO_DEFAULT, PIN_ATTR_ANALOG,                  NO_ADC, ADC8,   NOT_ON_PWM,  NOT_ON_TIMER }, // AD8 - 93
+  // 93 , PB12
+  { PIOB, PIO_PB12,         ID_PIOB, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC,   NOT_ON_PWM,  NOT_ON_TIMER }, // 93
   // 94 , PB22
   { PIOB, PIO_PB22,          ID_PIOB, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // 94
   // 95 , PB23
