@@ -215,7 +215,9 @@ void Endstops::update() {
 #ifdef EXTENDED_ENDSTOPS
         lastState2 = lastRead2;
 #endif
+#ifdef DEBUG_ENDSTOPS
         report();
+#endif
     } else {
         lastState = lastRead;
 #ifdef EXTENDED_ENDSTOPS
