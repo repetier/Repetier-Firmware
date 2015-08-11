@@ -1045,12 +1045,12 @@ void Printer::setup()
     Commands::printCurrentPosition(PSTR("Printer::setup "));
 #endif // DRIVE_SYSTEM
     Extruder::selectExtruderById(0);
-#if SDSUPPORT
-    sd.initsd();
-#endif
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
+#if SDSUPPORT
+    sd.initsd();
+#endif
 #if FEATURE_SERVO                   // set servos to neutral positions at power_up
   #if defined(SERVO0_NEUTRAL_POS) && SERVO0_NEUTRAL_POS >= 500
     HAL::servoMicroseconds(0,SERVO0_NEUTRAL_POS, 1000);
