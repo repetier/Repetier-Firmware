@@ -453,6 +453,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_Z_PROBE_XY_SPEED,Z_PROBE_XY_SPEED);
     HAL::eprSetFloat(EPR_Z_PROBE_X_OFFSET,Z_PROBE_X_OFFSET);
     HAL::eprSetFloat(EPR_Z_PROBE_Y_OFFSET,Z_PROBE_Y_OFFSET);
+    HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
     HAL::eprSetFloat(EPR_Z_PROBE_X1,Z_PROBE_X1);
     HAL::eprSetFloat(EPR_Z_PROBE_Y1,Z_PROBE_Y1);
     HAL::eprSetFloat(EPR_Z_PROBE_X2,Z_PROBE_X2);
@@ -463,6 +464,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_AXISCOMP_TANYZ,AXISCOMP_TANYZ);
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
+    Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
 #if DRIVE_SYSTEM == DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,ROD_RADIUS);
@@ -705,6 +707,9 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             HAL::eprSetFloat(EPR_RETRACTION_UNDO_SPEED,RETRACTION_UNDO_SPEED);
             HAL::eprSetByte(EPR_AUTORETRACT_ENABLED,AUTORETRACT_ENABLED);
         }
+        if(version < 14) {
+            HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
+        }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to verion 8, the cartesian max was stored in the zmax
@@ -723,6 +728,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
+    Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
 #endif
@@ -878,6 +884,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
 #endif
 #endif
+    writeFloat(EPR_Z_PROBE_Z_OFFSET, Com::tZProbeOffsetZ);
 #if FEATURE_Z_PROBE
     writeFloat(EPR_Z_PROBE_HEIGHT, Com::tZProbeHeight);
     writeFloat(EPR_Z_PROBE_BED_DISTANCE, Com::tZProbeBedDitance);

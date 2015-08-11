@@ -193,6 +193,17 @@ What display type do you use?
 #define UI_ACTION_SERVOPOS              1203
 #define UI_ACTION_IGNORE_M106           1204
 
+#define UI_ACTION_KAPTON				1914
+#define UI_ACTION_BLUETAPE				1915
+#define UI_ACTION_NOCOATING				1916
+#define UI_ACTION_PETTAPE				1917
+#define UI_ACTION_GLUESTICK				1918
+#define UI_ACTION_RESET_MATRIX			1919
+#define UI_ACTION_CALIBRATE				1920
+#define UI_ACTION_BED_LED_CHANGE		1921
+#define UI_ACTION_COATING_CUSTOM		1922
+#define UI_ACTION_BUILDTAK				1923
+
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
 #define UI_ACTION_MENU_ZPOS             4002
@@ -493,6 +504,9 @@ class UIDisplay {
     void goDir(char *name);
     bool isDirname(char *name);
     bool isWizardActive();
+#if UI_BED_COATING
+    void menuAdjustHeight(const UIMenu *men,float offset);
+#endif
     char cwd[SD_MAX_FOLDER_DEPTH*LONG_FILENAME_LENGTH+2];
     uint8_t folderLevel;
 };
@@ -1626,6 +1640,50 @@ inline void uiCheckSlowEncoder() {}
 void uiCheckSlowKeys(int &action) {}
 #endif
 #endif // Controller VIKI 2
+
+#if FEATURE_CONTROLLER == CONTROLLER_LCD_MP_PHARAOH_DUE
+#define UI_DISPLAY_TYPE 1
+#define UI_COLS 20
+#define UI_ROWS 4
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_INVERT_MENU_DIRECTION 1
+#define UI_DISPLAY_CHARSET 1
+#define UI_DISPLAY_RS_PIN		42		// PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_ENABLE_PIN	43		// PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN		44		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN		45		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN		46		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN		47		// PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN		44		// PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN		45		// PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN		46		// PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN		47		// PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR		   50
+
+#if UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_BUTTON_LOW(33); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(31);
+  UI_KEYS_INIT_BUTTON_LOW(29);
+  UI_KEYS_INIT_BUTTON_LOW(37);
+  UI_KEYS_INIT_BUTTON_LOW(35);
+  UI_KEYS_INIT_BUTTON_LOW(X_MIN_PIN);
+}
+void uiCheckKeys(int &action) {
+    UI_KEYS_BUTTON_LOW(33,UI_ACTION_OK); //35 push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(35,UI_ACTION_PREVIOUS); //34 push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(31,UI_ACTION_NEXT); //43 push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(29,UI_ACTION_BACK); //44 push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(37,UI_ACTION_MENU_SDCARD ); //33 push button, connects gnd to pin
+    UI_KEYS_BUTTON_LOW(X_MIN_PIN,UI_ACTION_PAUSE);
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(int &action) {}
+
+#endif
+#endif CONTROLLER_LCD_MP_PHARAOH_DUE
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 #if UI_ROWS==4

@@ -106,6 +106,7 @@ random stuff
 %on : current extruder number (1,2,3...)
 %oS : servo position
 %oY : babysteps counter
+%oC : Bed coating thickness
 
 stops
 %sx : State of x min endstop.
@@ -524,6 +525,35 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT,UI_ACTION_
 #define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all BABY_ENTRY ,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY UI_CHANGE_FIL_ENT,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin,&ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
 UI_MENU(ui_menu_quick,UI_MENU_QUICK,8+BABY_CNT+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT+UI_CHANGE_FIL_CNT)
 
+// **** Bed Coating Menu
+
+#if UI_BED_COATING
+UI_MENU_ACTION2C(ui_menu_nocoating_action,  UI_ACTION_DUMMY,UI_TEXT_BED_COATING_SET UI_TEXT_NOCOATING )
+UI_MENU_ACTION2C(ui_menu_buildtak_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_BUILDTAK)
+UI_MENU_ACTION2C(ui_menu_kapton_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_KAPTON)
+UI_MENU_ACTION2C(ui_menu_bluetape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_BLUETAPE)
+UI_MENU_ACTION2C(ui_menu_pettape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_PETTAPE)
+UI_MENU_ACTION2C(ui_menu_gluestick_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET UI_TEXT_GLUESTICK)
+UI_MENU_ACTION2C(ui_menu_coating_custom, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET " %oCmm")
+
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_nocoating,UI_TEXT_NOCOATING, UI_ACTION_NOCOATING,0,MENU_MODE_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_buildtak,UI_TEXT_BUILDTAK, UI_ACTION_BUILDTAK,0,MENU_MODE_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_kapton,UI_TEXT_KAPTON, UI_ACTION_KAPTON,0,MENU_MODE_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_bluetape,UI_TEXT_BLUETAPE, UI_ACTION_BLUETAPE,0,MENU_MODE_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_pettape,UI_TEXT_PETTAPE, UI_ACTION_PETTAPE,0,MENU_MODE_PRINTING);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_adjust_gluestick,UI_TEXT_GLUESTICK, UI_ACTION_GLUESTICK,0,MENU_MODE_PRINTING);
+UI_MENU_CHANGEACTION_FILTER(ui_menu_adjust_custom,UI_TEXT_COATING_CUSTOM,UI_ACTION_COATING_CUSTOM,0,MENU_MODE_PRINTING)
+#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_nocoating,&ui_menu_adjust_buildtak,&ui_menu_adjust_kapton,&ui_menu_adjust_bluetape,&ui_menu_adjust_pettape,&ui_menu_adjust_gluestick,&ui_menu_adjust_custom}
+UI_MENU(ui_menu_adjust,UI_MENU_ADJUST,7+UI_MENU_BACKCNT);
+#define UI_MENU_COATING_CNT 1
+#define UI_MENU_COATING_COND &ui_menu_prepare,
+UI_MENU_SUBMENU_FILTER(ui_menu_prepare, UI_TEXT_BED_COATING, ui_menu_adjust,0,MENU_MODE_PRINTING)
+
+#else
+#define UI_MENU_COATING_CNT 0
+#define UI_MENU_COATING_COND
+#endif
+
 // **** Fan menu
 
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
@@ -764,8 +794,8 @@ UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
 UI_MENU_SUBMENU(ui_menu_main5, UI_TEXT_CONFIGURATION,ui_menu_configuration)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY &ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5}
-UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT)
+#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &ui_menu_main1,SD_PRINTFILE_ENTRY &ui_menu_main2,&ui_menu_main3,UI_MENU_FAN_COND UI_MENU_COATING_COND UI_MENU_SD_COND &ui_menu_main4,&ui_menu_main5}
+UI_MENU(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT+SD_PRINTFILE_ENTRY_CNT+UI_MENU_COATING_CNT)
 
 /* Define menus accessible by action commands
 

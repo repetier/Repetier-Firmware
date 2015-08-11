@@ -150,6 +150,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SPARKLCD 19
 #define CONTROLLER_BAM_DICE_DUE 20
 #define CONTROLLER_VIKI2 21
+#define CONTROLLER_LCD_MP_PHARAOH_DUE 22
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
@@ -306,7 +307,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT0_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE < 101
 #define EXT1_ANALOG_INPUTS 1
 #define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
 #define EXT1_ANALOG_CHANNEL ACCOMMA0 EXT1_TEMPSENSOR_PIN

@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 13
+#define EEPROM_PROTOCOL_VERSION 14
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -112,15 +112,16 @@ have problems with other modules using the eeprom */
 #define EPR_AXISCOMP_TANYZ			980
 #define EPR_AXISCOMP_TANXZ			984
 
-#define EPR_DISTORTION_CORRECTION_ENABLED 988
-#define EPR_RETRACTION_LENGTH 992
-#define EPR_RETRACTION_LONG_LENGTH 996
-#define EPR_RETRACTION_SPEED 1000
-#define EPR_RETRACTION_Z_LIFT 1004
-#define EPR_RETRACTION_UNDO_EXTRA_LENGTH 1008
+#define EPR_DISTORTION_CORRECTION_ENABLED      988
+#define EPR_RETRACTION_LENGTH                  992
+#define EPR_RETRACTION_LONG_LENGTH             996
+#define EPR_RETRACTION_SPEED                  1000
+#define EPR_RETRACTION_Z_LIFT                 1004
+#define EPR_RETRACTION_UNDO_EXTRA_LENGTH      1008
 #define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
-#define EPR_RETRACTION_UNDO_SPEED 1016
-#define EPR_AUTORETRACT_ENABLED 1020
+#define EPR_RETRACTION_UNDO_SPEED             1016
+#define EPR_AUTORETRACT_ENABLED               1020
+#define EPR_Z_PROBE_Z_OFFSET			      1024
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -189,7 +190,13 @@ public:
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
-
+    static inline float zProbeZOffset() {
+#if EEPROM_MODE != 0
+	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#else
+	    return Z_PROBE_Z_OFFSET;
+#endif
+    }
     static inline float zProbeSpeed() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);

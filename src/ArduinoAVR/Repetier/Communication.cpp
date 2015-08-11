@@ -235,6 +235,7 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
+FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height [mm]")
 FSTRINGVALUE(Com::tZProbeBedDitance,"Max. z-probe - bed dist. [mm]")

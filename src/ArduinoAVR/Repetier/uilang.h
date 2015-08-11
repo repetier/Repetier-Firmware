@@ -285,6 +285,17 @@
 #define UI_TEXT_EXTRUDER_JAM "Extruder Jam"
 #define UI_TEXT_STANDBY "Standby"
 
+#define UI_TEXT_BED_COATING "Bed Coating"
+#define UI_TEXT_BED_COATING_SET "Bed coating set to",""
+#define UI_TEXT_NOCOATING "No Coating"
+#define UI_TEXT_BUILDTAK "BuildTak"
+#define UI_TEXT_KAPTON "Kapton"
+#define UI_TEXT_BLUETAPE "Blue Paper Tape"
+#define UI_TEXT_PETTAPE "Green PET Tape"
+#define UI_TEXT_GLUESTICK "Glue Stick"
+#define UI_TEXT_CUSTOM "Custom"
+#define UI_TEXT_COATING_CUSTOM "Custom : %oCmm"
+
 // *************** German translation ****************
 
 #if UI_LANGUAGE==1

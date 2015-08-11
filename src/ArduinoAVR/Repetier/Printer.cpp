@@ -60,6 +60,11 @@ uint8_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
 uint8_t Printer::interruptEvent = 0;
+#if EEPROM_MODE != 0
+float Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#else
+float Printer::zBedOffset = Z_PROBE_Z_OFFSET;
+#endif
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
@@ -1201,7 +1206,7 @@ void Printer::homeZAxis() // Delta z homing
     PrintLine::moveRelativeDistanceInSteps(0, 0, dm, 0, homingFeedrate[Z_AXIS], true, false);
     currentPositionSteps[X_AXIS] = 0; // now we are really here
     currentPositionSteps[Y_AXIS] = 0;
-    currentPositionSteps[Z_AXIS] = zMaxSteps; // Extruder is now exactly in the delta center
+    currentPositionSteps[Z_AXIS] = zMaxSteps - zBedOffset * axisStepsPerMM[Z_AXIS]; // Extruder is now exactly in the delta center
     coordinateOffset[X_AXIS] = 0;
     coordinateOffset[Y_AXIS] = 0;
     coordinateOffset[Z_AXIS] = 0;
@@ -1212,7 +1217,7 @@ void Printer::homeZAxis() // Delta z homing
     //maxDeltaPositionSteps = currentDeltaPositionSteps[X_AXIS];
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
     if(ENDSTOP_Z_BACK_ON_HOME > 0)
-        maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME;
+        maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS] * ENDSTOP_Z_BACK_ON_HOME;
 #endif
     Extruder::selectExtruderById(Extruder::current->id);
 }
@@ -1234,7 +1239,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
     // Homing Z axis means that you must home X and Y
     homeZAxis();
-    moveToReal(0,0,Printer::zLength,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
+    moveToReal(0,0,Printer::zLength - zBedOffset,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     updateCurrentPosition(true);
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
@@ -1245,12 +1250,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 void Printer::homeXAxis()
 {
     long steps;
-    if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR==-1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) ||
-            (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR==1 && MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
+    if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR == -1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) ||
+            (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR == 1 && MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1))
     {
         long offX = 0,offY = 0;
 #if NUM_EXTRUDER>1
-        for(uint8_t i=0; i<NUM_EXTRUDER; i++)
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         {
 #if X_HOME_DIR < 0
             offX = RMath::max(offX,extruder[i].xOffset);
@@ -1334,7 +1339,7 @@ void Printer::homeXAxis()
 void Printer::homeYAxis()
 {
     long steps;
-    if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR==1))
+    if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1))
     {
         long offY = 0;
 #if NUM_EXTRUDER>1
@@ -1370,23 +1375,26 @@ void Printer::homeYAxis()
 void Printer::homeZAxis() // cartesian homing
 {
     long steps;
-    if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR==1))
+    if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1))
     {
         UI_STATUS_UPD(UI_TEXT_HOME_Z);
         steps = (zMaxSteps - zMinSteps) * Z_HOME_DIR;
         currentPositionSteps[Z_AXIS] = -steps;
         setHoming(true);
-        PrintLine::moveRelativeDistanceInSteps(0,0,2*steps,0,homingFeedrate[Z_AXIS],true,true);
+        PrintLine::moveRelativeDistanceInSteps(0,0,2 * steps,0,homingFeedrate[Z_AXIS],true,true);
         currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
-        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
-        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*2*ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS]/ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
+        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
+        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
         if(ENDSTOP_Z_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
 #endif
-        currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
-#if DRIVE_SYSTEM==TUGA
+#if Z_HOME_DIR < 0
+        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -Printer::zBedOffset * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+#endif
+        currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS];
+#if DRIVE_SYSTEM == TUGA
         currentDeltaPositionSteps[C_TOWER] = currentPositionSteps[Z_AXIS];
 #endif
     }
@@ -1395,7 +1403,7 @@ void Printer::homeZAxis() // cartesian homing
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta printer
 {
     float startX,startY,startZ;
-    realPosition(startX,startY,startZ);
+    realPosition(startX, startY, startZ);
     setHomed(true);
 #if !defined(HOMING_ORDER)
 #define HOMING_ORDER HOME_ORDER_XYZ
@@ -1505,7 +1513,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     if(zaxis)
     {
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
-        else startZ = Printer::zMin + Printer::zLength;
+        else startZ = Printer::zMin + Printer::zLength - Printer::zBedOffset;
     }
 #endif
     updateCurrentPosition(true);
@@ -1642,6 +1650,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
     int32_t updateZ = 0;
+    waitForZProbeStart();
     for(int8_t r = 0; r < repeat; r++)
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
@@ -1649,7 +1658,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
         int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
-        waitForZProbeStart();
         setZProbingActive(true);
         PrintLine::moveRelativeDistanceInSteps(0, 0, -probeDepth, 0, EEPROM::zProbeSpeed(), true, true);
         if(stepsRemainingAtZHit < 0)
@@ -1684,6 +1692,9 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
             PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, EEPROM::zProbeSpeed(), true, false);
     }
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
+#if Z_PROBE_Z_OFFSET_MODE == 1
+    distance += EEPROM::zProbeBedDistance();
+#endif
 #if DISTORTION_CORRECTION
     float zCorr = distortion.correct(currentPositionSteps[X_AXIS] + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS],currentPositionSteps[Y_AXIS]
                                      + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS],0) * invAxisStepsPerMM[Z_AXIS];
@@ -1722,6 +1733,8 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 void Printer::waitForZProbeStart()
 {
 #if Z_PROBE_WAIT_BEFORE_TEST
+    Endstops::update();
+    Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
     if(Endstops::zProbe()) return;
 #if UI_DISPLAY_TYPE != NO_DISPLAY
     uid.setStatusP(Com::tHitZProbe);
@@ -1734,6 +1747,7 @@ void Printer::waitForZProbeStart()
     {
         defaultLoopActions();
         Endstops::update();
+        Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
     }
 #ifdef DEBUG_PRINT
     debugWaitLoop = 4;
@@ -1743,6 +1757,7 @@ void Printer::waitForZProbeStart()
     {
         defaultLoopActions();
         Endstops::update();
+        Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
     }
     HAL::delayMilliseconds(30);
     UI_CLEAR_STATUS;

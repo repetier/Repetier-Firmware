@@ -1393,7 +1393,7 @@ void TemperatureController::updateCurrentTemperature()
     case 52:
     case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
     case 61: // HEATER_USES_AD8495 (Delivers 5mV/degC) 1.25v offset
-    case 100: // AD595
+    case 100: // AD595 / AD597
         currentTemperature = (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS));
         break;
 #endif
@@ -1497,12 +1497,16 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = ((float)currentTemperature * 660.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 250.0f;
 #endif
         break;
-    case 100: // AD595
+    case 100: // AD595 / AD597   10mV/°C
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
 #if CPU_ARCH == ARCH_AVR
         currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
 #else
+#if FEATURE_CONTROLLER == CONTROLLER_LCD_MP_PHARAOH_DUE
+        currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
+#else
         currentTemperatureC = ((float)currentTemperature * 330.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
+#endif
 #endif
         break;
 #ifdef SUPPORT_MAX6675
