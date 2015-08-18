@@ -552,7 +552,7 @@ class HAL
       }
       WRITE( SPI_EEPROM1_CS , HIGH );
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#else
+#elif EEPROM_AVAILABLE == EEPROM_I2C
       i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);
       i2cWriting(newvalue.b[0]);        // write first byte
       for (int i = 1; i < size; i++) {
@@ -598,7 +598,7 @@ class HAL
       v.b[i] = spiReceive(SPI_CHAN_EEPROM1);
       WRITE( SPI_EEPROM1_CS , HIGH );
       return v;
-#else
+#elif EEPROM_AVAILABLE == EEPROM_I2C
       int i;
       eeval_t v;
 

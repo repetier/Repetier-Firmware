@@ -493,6 +493,69 @@ STEPPER_CURRENT_CONTROL
 #define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 
+#if MOTHERBOARD == 408
+#ifndef __SAM3X8E__
+#erro oops! Be sure to have 'due Arduino' selected from the 'tools-> Boards menu.
+#endif
+ 
+#define KNOWN_BOARD
+#define CPU_ARCH ARCH_ARM
+/*****************************************************************
+* Arduino Due pin assignments
+******************************************************************/
+ 
+#define ORIG_X_STEP_PIN 54
+#define ORIG_X_DIR_PIN 55
+#define ORIG_X_MIN_PIN 3
+#define ORIG_X_MAX_PIN 2
+#define ORIG_X_ENABLE_PIN 38
+ 
+#define ORIG_Y_STEP_PIN 60 
+#define ORIG_Y_DIR_PIN 61
+#define ORIG_Y_MIN_PIN 14
+#define ORIG_Y_MAX_PIN 15
+#define ORIG_Y_ENABLE_PIN 56
+ 
+#define ORIG_Z_STEP_PIN 46
+#define ORIG_Z_DIR_PIN 48
+#define ORIG_Z_MIN_PIN 18
+#define ORIG_Z_MAX_PIN 19
+#define ORIG_Z_ENABLE_PIN 62
+ 
+//Note that in due A0 pins on the board is channel 2 on the ARM chip
+#define HEATER_0_PIN 10
+#define TEMP_0_PIN 11 // Because analog pin #
+#define HEATER_1_PIN 8
+#define TEMP_1_PIN 12 // Because analog pin #
+#define HEATER_2_PIN 9
+#define TEMP_2_PIN 13 // Because analog pin #
+ 
+#define ORIG_E0_STEP_PIN 26
+#define ORIG_E0_DIR_PIN 28
+#define ORIG_E0_ENABLE_PIN 24
+ 
+#define ORIG_E1_STEP_PIN 36
+#define ORIG_E1_DIR_PIN 34
+#define ORIG_E1_ENABLE_PIN 30
+ 
+#define sdpower   -1
+#define SDSS 53 // 10 if using HW spi. 53 if using SW SPI
+#define LED_PIN   13
+#define ORIG_FAN_PIN   9
+#define ORIG_PS_ON_PIN 12
+#define KILL_PIN   -1
+#define SUICIDE_PIN -1// Pin that has to be turned right after the start, to keep the power flowing.
+
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+
+#define TWI_CLOCK_FREQ          100000
+#define SDA_PIN 			-1 //	20 or 70
+#define SCL_PIN 			-1 // 21 or 71
+#define EEPROM_AVAILABLE EEPROM_NONE
+
+#endif
+
 /*****************************************************************
  * Alligator Board rev2
  * http://www.3dartists.org/

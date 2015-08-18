@@ -500,14 +500,18 @@ void HAL::i2cInit(unsigned long clockSpeedHz)
   pmc_enable_periph_clk(TWI_ID);
 
   // Configure pins
+#if SDA_PIN >= 0
   PIO_Configure(g_APinDescription[SDA_PIN].pPort,
                 g_APinDescription[SDA_PIN].ulPinType,
                 g_APinDescription[SDA_PIN].ulPin,
                 g_APinDescription[SDA_PIN].ulPinConfiguration);
+#endif
+#if SCL_PIN >= 0
   PIO_Configure(g_APinDescription[SCL_PIN].pPort,
                 g_APinDescription[SCL_PIN].ulPinType,
                 g_APinDescription[SCL_PIN].ulPin,
                 g_APinDescription[SCL_PIN].ulPinConfiguration);
+#endif
 
   // Set to Master mode with known state
   TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;
@@ -589,6 +593,7 @@ void HAL::i2cStartWait(unsigned char address_and_direction)
 *************************************************************************/
 void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
 {
+#if EEPROM_AVAILABLE == EEPROM_I2C
   uint32_t twiDirection = address_and_direction & 1;
   uint32_t address = address_and_direction >> 1;
 
@@ -607,6 +612,7 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos)
   // write internal address register
   TWI_INTERFACE->TWI_IADR = 0;
   TWI_INTERFACE->TWI_IADR = TWI_IADR_IADR(pos);
+#endif  
 }
 
 /*************************************************************************
