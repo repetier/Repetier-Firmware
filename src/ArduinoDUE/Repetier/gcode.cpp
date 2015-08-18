@@ -520,7 +520,7 @@ void GCode::readFromSerial()
 bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 {
     internalCommand = !fromSerial;
-    unsigned int sum1 = 0,sum2 = 0; // for fletcher-16 checksum
+    unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
     uint8_t *p = buffer;
@@ -549,13 +549,13 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
         return false;
     }
     p = buffer;
-    params = *(unsigned int *)p;
+    params = *(uint16_t *)p;
     p += 2;
     uint8_t textlen = 16;
     if(isV2())
     {
-        params2 = *(unsigned int *)p;
-        p+=2;
+        params2 = *(uint16_t *)p;
+        p += 2;
         if(hasString())
             textlen = *p++;
     }
@@ -563,7 +563,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     if(params & 1)
     {
         actLineNumber = N = *(uint16_t *)p;
-        p+=2;
+        p += 2;
     }
     if(isV2())   // Read G,M as 16 bit value
     {
@@ -688,7 +688,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     {
         text = (char*)p;
         text[textlen] = 0; // Terminate string overwriting checksum
-        waitUntilAllCommandsAreParsed=true; // Don't destroy string until executed
+        waitUntilAllCommandsAreParsed = true; // Don't destroy string until executed
     }
     formatErrors = 0;
     return true;
@@ -728,7 +728,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'm':
         {
             M = parseLongValue(pos) & 0xffff;
-            params |=2;
+            params |= 2;
             if(M > 255) params |= 4096;
             // handle non standard text arguments that some M codes have
             if (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117)
@@ -885,7 +885,7 @@ void GCode::printCommand()
 {
     if(hasN()) {
         Com::print('N');
-        Com::print((long)N);
+        Com::print((int32_t)N);
         Com::print(' ');
     }
     if(hasM())

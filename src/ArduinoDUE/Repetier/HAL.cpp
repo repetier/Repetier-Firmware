@@ -1184,8 +1184,9 @@ void EXTRUDER_TIMER_VECTOR ()
       Extruder::setDirection(true);
       extruderLastDirection = 1;
       extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
-    } else 
+    } else { 
       extruderChannel->TC_RC = Printer::maxExtruderSpeed;
+    }
   }
   else if (Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1)
   {
@@ -1193,10 +1194,10 @@ void EXTRUDER_TIMER_VECTOR ()
       Extruder::setDirection(false);
       extruderLastDirection = -1;
       extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
-   } else 
+   } else { 
       extruderChannel->TC_RC = Printer::maxExtruderSpeed;
    }
-  else if (Printer::extruderStepsNeeded != 0)
+  } else if (Printer::extruderStepsNeeded != 0)
   {
     Extruder::step();
     Printer::extruderStepsNeeded -= extruderLastDirection;

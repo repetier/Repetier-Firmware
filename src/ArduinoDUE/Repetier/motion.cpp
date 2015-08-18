@@ -482,7 +482,7 @@ void PrintLine::updateTrapezoids()
     // now first points to last segment before the end speed is fixed
     // so start speed is also fixed.
 
-    if(first == linesWritePos)   // Nothing to plan, only new element presend
+    if(first == linesWritePos)   // Nothing to plan, only new element present
     {
         act->block(); // Prevent steppe rinterrupt from using this
         noInts.unprotect();
@@ -554,20 +554,20 @@ Jerk = (1-cos(alpha))*min(v1,v2)
 This sets jerk to 0 on zero angle change.
 
         Old               New
-0▲:       0               0
-30▲:     51,8             13.4
-45▲:     76.53            29.3
-90▲:    141               100
-180▲:   200               200
+0째:       0               0
+30째:     51,8             13.4
+45째:     76.53            29.3
+90째:    141               100
+180째:   200               200
 
 
 von 100 auf 200
         Old               New(min)   New(max)
-0▲:     100               0          0
-30▲:    123,9             13.4       26.8
-45▲:    147.3             29.3       58.6
-90▲:    223               100        200
-180▲:   300               200        400
+0째:     100               0          0
+30째:    123,9             13.4       26.8
+45째:    147.3             29.3       58.6
+90째:    223               100        200
+180째:   300               200        400
 
 */
 inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *current)
@@ -2053,15 +2053,15 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                     HAL::delayMicroseconds(DIRECTION_DELAY);
 #endif
 
-                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing && curd
-                            && (curd->dir & XYZ_STEP) == XYZ_STEP)
+                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
+                            && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
                     {
                         // execute a extra babystep
                         Printer::insertStepperHighDelay();
                         Printer::endXYZSteps();
                         HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY + 1);
-
-                        if(Printer::zBabystepsMissing > 0)
+                        Printer::zBabystep();
+                       /* if(Printer::zBabystepsMissing > 0)
                         {
                             if(curd->dir & X_DIRPOS)
                                 cur->startXStep();
@@ -2094,6 +2094,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                             Printer::zBabystepsMissing++;
                         }
                         HAL::delayMicroseconds(1);
+                        */
                     }
                 }
                 else

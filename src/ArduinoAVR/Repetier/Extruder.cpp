@@ -260,10 +260,13 @@ void Extruder::manageTemperatures()
     } // for controller
 
 #ifdef RED_BLUE_STATUS_LEDS
-    if(Printer::isAnyTempsensorDefect()) {
+    if(Printer::isAnyTempsensorDefect())
+    {
         WRITE(BLUE_STATUS_LED,HIGH);
         WRITE(RED_STATUS_LED,HIGH);
-    } else {
+    }
+    else
+    {
         WRITE(BLUE_STATUS_LED,!hot);
         WRITE(RED_STATUS_LED,hot);
     }
@@ -775,7 +778,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 0
     if(best == 0)
     {
-        WRITE(EXT0_STEP_PIN, HIGH);
+        WRITE(EXT0_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
         TEST_EXTRUDER_JAM(0)
 #endif
@@ -784,7 +787,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 1
     if(best == 1)
     {
-        WRITE(EXT1_STEP_PIN, HIGH);
+        WRITE(EXT1_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
         TEST_EXTRUDER_JAM(1)
 #endif
@@ -793,7 +796,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 2
     if(best == 2)
     {
-        WRITE(EXT2_STEP_PIN, HIGH);
+        WRITE(EXT2_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
         TEST_EXTRUDER_JAM(2)
 #endif
@@ -802,7 +805,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 3
     if(best == 3)
     {
-        WRITE(EXT3_STEP_PIN, HIGH);
+        WRITE(EXT3_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
         TEST_EXTRUDER_JAM(3)
 #endif
@@ -811,7 +814,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 4
     if(best == 4)
     {
-        WRITE(EXT4_STEP_PIN, HIGH);
+        WRITE(EXT4_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
         TEST_EXTRUDER_JAM(4)
 #endif
@@ -820,7 +823,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 5
     if(best == 5)
     {
-        WRITE(EXT5_STEP_PIN, HIGH);
+        WRITE(EXT5_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
         TEST_EXTRUDER_JAM(5)
 #endif
@@ -831,22 +834,22 @@ void Extruder::step()
 void Extruder::unstep()
 {
 #if NUM_EXTRUDER > 0
-    WRITE(EXT0_STEP_PIN, LOW);
+    WRITE(EXT0_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 #if NUM_EXTRUDER > 1
-    WRITE(EXT1_STEP_PIN, LOW);
+    WRITE(EXT1_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 #if NUM_EXTRUDER > 2
-    WRITE(EXT2_STEP_PIN, LOW);
+    WRITE(EXT2_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 #if NUM_EXTRUDER > 3
-    WRITE(EXT3_STEP_PIN, LOW);
+    WRITE(EXT3_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 #if NUM_EXTRUDER > 4
-    WRITE(EXT4_STEP_PIN, LOW);
+    WRITE(EXT4_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 #if NUM_EXTRUDER > 5
-    WRITE(EXT5_STEP_PIN, LOW);
+    WRITE(EXT5_STEP_PIN, !START_STEP_WITH_HIGH);
 #endif
 }
 
@@ -925,7 +928,7 @@ Call this function only, if interrupts are disabled.
 void Extruder::step()
 {
 #if NUM_EXTRUDER == 1
-    WRITE(EXT0_STEP_PIN, HIGH);
+    WRITE(EXT0_STEP_PIN, START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
     TEST_EXTRUDER_JAM(0)
 #endif
@@ -934,21 +937,21 @@ void Extruder::step()
     {
     case 0:
 #if NUM_EXTRUDER > 0
-        WRITE(EXT0_STEP_PIN,HIGH);
+        WRITE(EXT0_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
         TEST_EXTRUDER_JAM(0)
 #endif
 #if FEATURE_DITTO_PRINTING
         if(Extruder::dittoMode)
         {
-            WRITE(EXT1_STEP_PIN,HIGH);
+            WRITE(EXT1_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
             TEST_EXTRUDER_JAM(1)
 #endif
 #if NUM_EXTRUDER > 2
             if(Extruder::dittoMode > 1)
             {
-                WRITE(EXT2_STEP_PIN,HIGH);
+                WRITE(EXT2_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
                 TEST_EXTRUDER_JAM(2)
 #endif
@@ -957,7 +960,7 @@ void Extruder::step()
 #if NUM_EXTRUDER > 3
             if(Extruder::dittoMode > 2)
             {
-                WRITE(EXT3_STEP_PIN,HIGH);
+                WRITE(EXT3_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
                 TEST_EXTRUDER_JAM(3)
 #endif
@@ -969,7 +972,7 @@ void Extruder::step()
         break;
 #if defined(EXT1_STEP_PIN) && NUM_EXTRUDER > 1
     case 1:
-        WRITE(EXT1_STEP_PIN,HIGH);
+        WRITE(EXT1_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
         TEST_EXTRUDER_JAM(1)
 #endif
@@ -977,7 +980,7 @@ void Extruder::step()
 #endif
 #if defined(EXT2_STEP_PIN) && NUM_EXTRUDER > 2
     case 2:
-        WRITE(EXT2_STEP_PIN,HIGH);
+        WRITE(EXT2_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
         TEST_EXTRUDER_JAM(2)
 #endif
@@ -985,7 +988,7 @@ void Extruder::step()
 #endif
 #if defined(EXT3_STEP_PIN) && NUM_EXTRUDER > 3
     case 3:
-        WRITE(EXT3_STEP_PIN,HIGH);
+        WRITE(EXT3_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
         TEST_EXTRUDER_JAM(3)
 #endif
@@ -993,7 +996,7 @@ void Extruder::step()
 #endif
 #if defined(EXT4_STEP_PIN) && NUM_EXTRUDER > 4
     case 4:
-        WRITE(EXT4_STEP_PIN,HIGH);
+        WRITE(EXT4_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
         TEST_EXTRUDER_JAM(4)
 #endif
@@ -1001,7 +1004,7 @@ void Extruder::step()
 #endif
 #if defined(EXT5_STEP_PIN) && NUM_EXTRUDER > 5
     case 5:
-        WRITE(EXT5_STEP_PIN,HIGH);
+        WRITE(EXT5_STEP_PIN,START_STEP_WITH_HIGH);
 #if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
         TEST_EXTRUDER_JAM(5)
 #endif
@@ -1019,27 +1022,27 @@ Call this function only, if interrupts are disabled.
 void Extruder::unstep()
 {
 #if NUM_EXTRUDER == 1
-    WRITE(EXT0_STEP_PIN,LOW);
+    WRITE(EXT0_STEP_PIN,!START_STEP_WITH_HIGH);
 #else
     switch(Extruder::current->id)
     {
     case 0:
 #if NUM_EXTRUDER > 0
-        WRITE(EXT0_STEP_PIN,LOW);
+        WRITE(EXT0_STEP_PIN,!START_STEP_WITH_HIGH);
 #if FEATURE_DITTO_PRINTING
         if(Extruder::dittoMode)
         {
-            WRITE(EXT1_STEP_PIN,LOW);
+            WRITE(EXT1_STEP_PIN,!START_STEP_WITH_HIGH);
 #if NUM_EXTRUDER > 2
             if(Extruder::dittoMode > 1)
             {
-                WRITE(EXT2_STEP_PIN,LOW);
+                WRITE(EXT2_STEP_PIN,!START_STEP_WITH_HIGH);
             }
 #endif
 #if NUM_EXTRUDER > 3
             if(Extruder::dittoMode > 2)
             {
-                WRITE(EXT3_STEP_PIN,LOW);
+                WRITE(EXT3_STEP_PIN,!START_STEP_WITH_HIGH);
             }
 #endif // NUM_EXTRUDER > 3
         }
@@ -1048,27 +1051,27 @@ void Extruder::unstep()
         break;
 #if defined(EXT1_STEP_PIN) && NUM_EXTRUDER > 1
     case 1:
-        WRITE(EXT1_STEP_PIN,LOW);
+        WRITE(EXT1_STEP_PIN,!START_STEP_WITH_HIGH);
         break;
 #endif
 #if defined(EXT2_STEP_PIN) && NUM_EXTRUDER > 2
     case 2:
-        WRITE(EXT2_STEP_PIN,LOW);
+        WRITE(EXT2_STEP_PIN,!START_STEP_WITH_HIGH);
         break;
 #endif
 #if defined(EXT3_STEP_PIN) && NUM_EXTRUDER > 3
     case 3:
-        WRITE(EXT3_STEP_PIN,LOW);
+        WRITE(EXT3_STEP_PIN,!START_STEP_WITH_HIGH);
         break;
 #endif
 #if defined(EXT4_STEP_PIN) && NUM_EXTRUDER > 4
     case 4:
-        WRITE(EXT4_STEP_PIN,LOW);
+        WRITE(EXT4_STEP_PIN,!START_STEP_WITH_HIGH);
         break;
 #endif
 #if defined(EXT5_STEP_PIN) && NUM_EXTRUDER > 5
     case 5:
-        WRITE(EXT5_STEP_PIN,LOW);
+        WRITE(EXT5_STEP_PIN,!START_STEP_WITH_HIGH);
         break;
 #endif
     }
@@ -1883,16 +1886,22 @@ bool reportTempsensorError()
 }
 
 #ifdef SUPPORT_MAX6675
+
 int16_t read_max6675(uint8_t ss_pin)
 {
-    int16_t max6675_temp = 0;
-    HAL::spiInit(2);
-    HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
-    HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
-    max6675_temp = HAL::spiReceive(0);
-    max6675_temp <<= 8;
-    max6675_temp |= HAL::spiReceive(0);
-    HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
+    static millis_t last_max6675_read = 0;
+    static int16_t max6675_temp = 0;
+    if (HAL::timeInMilliseconds() - last_max6675_read > 230)
+    {
+        HAL::spiInit(2);
+        HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
+        HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
+        max6675_temp = HAL::spiReceive(0);
+        max6675_temp <<= 8;
+        max6675_temp |= HAL::spiReceive(0);
+        HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
+        last_max6675_read = HAL::timeInMilliseconds();
+    }
     return max6675_temp & 4 ? 2000 : max6675_temp >> 3; // thermocouple open?
 }
 #endif

@@ -1677,7 +1677,7 @@ void uiCheckKeys(int &action) {
     UI_KEYS_BUTTON_LOW(31,UI_ACTION_NEXT); //43 push button, connects gnd to pin
     UI_KEYS_BUTTON_LOW(29,UI_ACTION_BACK); //44 push button, connects gnd to pin
     UI_KEYS_BUTTON_LOW(37,UI_ACTION_MENU_SDCARD ); //33 push button, connects gnd to pin
-    UI_KEYS_BUTTON_LOW(X_MIN_PIN,UI_ACTION_PAUSE);
+    UI_KEYS_BUTTON_LOW(X_MIN_PIN,UI_ACTION_RESET /*UI_ACTION_PAUSE*/);
 }
 inline void uiCheckSlowEncoder() {}
 void uiCheckSlowKeys(int &action) {}

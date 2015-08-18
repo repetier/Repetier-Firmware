@@ -24,7 +24,7 @@
 
 #include <math.h>
 
-#define REPETIER_VERSION "0.92.3"
+#define REPETIER_VERSION "0.92.4"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -275,6 +275,18 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SHARED_COOLER 1
 #else
 #define SHARED_COOLER 0
+#endif
+
+#ifndef START_STEP_WITH_HIGH
+#define START_STEP_WITH_HIGH 1
+#endif
+
+#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 101
+#define SUPPORT_MAX6675
+#endif
+
+#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 102
+#define SUPPORT_MAX31855
 #endif
 
 // Test for shared coolers between extruders and mainboard

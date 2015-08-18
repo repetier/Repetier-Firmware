@@ -42,7 +42,7 @@ unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 long Printer::currentDeltaPositionSteps[E_TOWER_ARRAY];
 uint8_t lastMoveID = 0; // Last move ID
 #endif
-int8_t Printer::zBabystepsMissing = 0;
+int16_t Printer::zBabystepsMissing = 0;
 uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
@@ -140,9 +140,6 @@ float Printer::backlashY;
 float Printer::backlashZ;
 uint8_t Printer::backlashDir;
 #endif
-#ifdef DEBUG_STEPCOUNT
-int32_t Printer::totalStepsRemaining;
-#endif
 float Printer::memoryX;
 float Printer::memoryY;
 float Printer::memoryZ;
@@ -166,9 +163,11 @@ wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
 flag8_t Endstops::lastState = 0;
 flag8_t Endstops::lastRead = 0;
+flag8_t Endstops::accumulator = 0;
 #ifdef EXTENDED_ENDSTOPS
 flag8_t Endstops::lastState2 = 0;
 flag8_t Endstops::lastRead2 = 0;
+flag8_t Endstops::accumulator2 = 0;
 #endif
 void Endstops::update() {
     flag8_t newRead = 0;
@@ -217,8 +216,10 @@ void Endstops::update() {
 #endif
        ) { // Report endstop hit changes
         lastState = lastRead;
+        accumulator |= lastState;
 #ifdef EXTENDED_ENDSTOPS
         lastState2 = lastRead2;
+        accumulator2 |= lastState2;
 #endif
 #ifdef DEBUG_ENDSTOPS
         report();
@@ -283,7 +284,7 @@ void Printer::constrainDestinationCoords()
     if (destinationSteps[Y_AXIS] < yMinSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMinSteps;
 #endif
 #if min_software_endstop_z
-    if (destinationSteps[Z_AXIS] < zMinSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
+    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] < zMinSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
 #endif
 
 #if max_software_endstop_x
@@ -293,7 +294,7 @@ void Printer::constrainDestinationCoords()
     if (destinationSteps[Y_AXIS] > Printer::yMaxSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMaxSteps;
 #endif
 #if max_software_endstop_z
-    if (destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
+    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
 }
 #endif
@@ -1146,12 +1147,14 @@ void Printer::homeYAxis()
 void Printer::homeZAxis() // Delta z homing
 {
 	bool homingSuccess = false;
+	Endstops::resetAccumulator();
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
 	// New safe homing routine by Kyrre Aalerud
 	// This method will safeguard against sticky endstops such as may be gotten cheaply from china.
 	// This can lead to headcrashes and even fire, thus a safer algorithm to ensure the endstops actually respond as expected.
 	//Endstops::report();
-	// Check that all endstoips (XYZ) were hit
+	// Check that all endstops (XYZ) were hit
+	Endstops::fillFromAccumulator();
 	if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 		// Back off for retest
 		PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
@@ -1159,7 +1162,9 @@ void Printer::homeZAxis() // Delta z homing
 		// Check for proper release of all (XYZ) endstops
 		if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
 			// Rehome with reduced speed
+			Endstops::resetAccumulator();
 		    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
+		    Endstops::fillFromAccumulator();
 			//Endstops::report();
 			// Check that all endstoips (XYZ) were hit again
 			if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
@@ -1528,18 +1533,19 @@ void Printer::zBabystep()
     bool dir = zBabystepsMissing > 0;
     if(dir) zBabystepsMissing--;
     else zBabystepsMissing++;
-#if DRIVE_SYSTEM == 3
+    Com::printFLN(PSTR("bsdir:"),dir);
+#if DRIVE_SYSTEM == DELTA
     Printer::enableXStepper();
     Printer::enableYStepper();
 #endif
     Printer::enableZStepper();
     Printer::unsetAllSteppersDisabled();
-#if DRIVE_SYSTEM == 3
+#if DRIVE_SYSTEM == DELTA
     bool xDir = Printer::getXDirection();
     bool yDir = Printer::getYDirection();
 #endif
     bool zDir = Printer::getZDirection();
-#if DRIVE_SYSTEM == 3
+#if DRIVE_SYSTEM == DELTA
     Printer::setXDirection(dir);
     Printer::setYDirection(dir);
 #endif
@@ -1547,24 +1553,16 @@ void Printer::zBabystep()
 #if defined(DIRECTION_DELAY) && DIRECTION_DELAY > 0
     HAL::delayMicroseconds(DIRECTION_DELAY);
 #else
-    HAL::delayMicroseconds(1);
+    HAL::delayMicroseconds(10);
 #endif
-#if DRIVE_SYSTEM == 3
-    WRITE(X_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
-    WRITE(X2_STEP_PIN,HIGH);
-#endif
-    WRITE(Y_STEP_PIN,HIGH);
-#if FEATURE_TWO_YSTEPPER
-    WRITE(Y2_STEP_PIN,HIGH);
-#endif
-#endif
-    WRITE(Z_STEP_PIN,HIGH);
-#if FEATURE_TWO_ZSTEPPER
-    WRITE(Z2_STEP_PIN,HIGH);
-#endif
+#if DRIVE_SYSTEM == DELTA
+    startXStep();
+    startYStep();
+#endif // Drive system 3
+    startZStep();
     HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 2);
     Printer::endXYZSteps();
+    HAL::delayMicroseconds(10);
 #if DRIVE_SYSTEM == 3
     Printer::setXDirection(xDir);
     Printer::setYDirection(yDir);

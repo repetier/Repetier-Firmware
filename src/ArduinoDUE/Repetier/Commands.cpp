@@ -1909,10 +1909,10 @@ void Commands::processMCode(GCode *com)
 #endif
         Com::printFLN(Com::tCommaSpeedEqual,maxadvspeed);
 #if ENABLE_QUADRATIC_ADVANCE
-        maxadv=0;
+        maxadv = 0;
 #endif
-        maxadv2=0;
-        maxadvspeed=0;
+        maxadv2 = 0;
+        maxadvspeed = 0;
         break;
 #endif
 #if USE_ADVANCE

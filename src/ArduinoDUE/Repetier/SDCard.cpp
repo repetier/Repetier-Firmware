@@ -176,27 +176,27 @@ void SDCard::stopPrint()
 
 void SDCard::writeCommand(GCode *code)
 {
-    unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
+    unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     uint8_t buf[100];
-    uint8_t p=2;
+    uint8_t p = 2;
     file.writeError = false;
     int params = 128 | (code->params & ~1);
     *(int*)buf = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
         *(int*)&buf[p] = code->params2;
-        p+=2;
+        p += 2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
             *(int*)&buf[p] = code->M;
-            p+=2;
+            p += 2;
         }
         if(code->hasG())
         {
             *(int*)&buf[p]= code->G;
-            p+=2;
+            p += 2;
         }
     }
     else
@@ -213,27 +213,27 @@ void SDCard::writeCommand(GCode *code)
     if(code->hasX())
     {
         *(float*)&buf[p] = code->X;
-        p+=4;
+        p += 4;
     }
     if(code->hasY())
     {
         *(float*)&buf[p] = code->Y;
-        p+=4;
+        p += 4;
     }
     if(code->hasZ())
     {
         *(float*)&buf[p] = code->Z;
-        p+=4;
+        p += 4;
     }
     if(code->hasE())
     {
         *(float*)&buf[p] = code->E;
-        p+=4;
+        p += 4;
     }
     if(code->hasF())
     {
         *(float*)&buf[p] = code->F;
-        p+=4;
+        p += 4;
     }
     if(code->hasT())
     {
@@ -241,23 +241,68 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-        *(long int*)&buf[p] = code->S;
-        p+=4;
+        *(int32_t*)&buf[p] = code->S;
+        p += 4;
     }
     if(code->hasP())
     {
-        *(long int*)&buf[p] = code->P;
-        p+=4;
+        *(int32_t*)&buf[p] = code->P;
+        p += 4;
     }
     if(code->hasI())
     {
         *(float*)&buf[p] = code->I;
-        p+=4;
+        p += 4;
     }
     if(code->hasJ())
     {
         *(float*)&buf[p] = code->J;
-        p+=4;
+        p += 4;
+    }
+    if(code->hasR())
+    {
+        *(float*)&buf[p] = code->R;
+        p += 4;
+    }
+    if(code->hasD())
+    {
+        *(float*)&buf[p] = code->D;
+        p += 4;
+    }
+    if(code->hasC())
+    {
+        *(float*)&buf[p] = code->C;
+        p += 4;
+    }
+    if(code->hasH())
+    {
+        *(float*)&buf[p] = code->H;
+        p += 4;
+    }
+    if(code->hasA())
+    {
+        *(float*)&buf[p] = code->A;
+        p += 4;
+    }
+    if(code->hasB())
+    {
+        *(float*)&buf[p] = code->B;
+        p += 4;
+    }
+    if(code->hasK())
+    {
+        *(float*)&buf[p] = code->K;
+        p += 4;
+    }
+    if(code->hasL())
+    {
+        *(float*)&buf[p] = code->L;
+        p += 4;
+    }
+    if(code->hasO())
+    {
+        *(float*)&buf[p] = code->O;
+        p += 4;
     }
     if(code->hasString())   // read 16 uint8_t into string
     {
@@ -269,7 +314,7 @@ void SDCard::writeCommand(GCode *code)
         }
         else
         {
-            for(uint8_t i=0; i<16; ++i) buf[p++] = *sp++;
+            for(uint8_t i = 0; i < 16; ++i) buf[p++] = *sp++;
         }
     }
     uint8_t *ptr = buf;
@@ -281,9 +326,9 @@ void SDCard::writeCommand(GCode *code)
         do
         {
             sum1 += *ptr++;
-            if(sum1>=255) sum1-=255;
+            if(sum1 >= 255) sum1 -= 255;
             sum2 += sum1;
-            if(sum2>=255) sum2-=255;
+            if(sum2 >= 255) sum2 -= 255;
         }
         while (--tlen);
     }

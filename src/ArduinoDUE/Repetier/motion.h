@@ -488,7 +488,7 @@ public:
 #endif
 #endif
     }
-    inline bool moveDecelerating()
+    INLINE bool moveDecelerating()
     {
         if(stepsRemaining <= decelSteps)
         {
@@ -501,17 +501,14 @@ public:
         }
         else return false;
     }
-    inline bool moveAccelerating()
+    INLINE bool moveAccelerating()
     {
         return Printer::stepNumber <= accelSteps;
     }
-    inline void startXStep()
+    INLINE void startXStep()
     {
 #if !(GANTRY)
-        WRITE(X_STEP_PIN,HIGH);
-#if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN,HIGH);
-#endif
+        Printer::startXStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
         if(isXPositiveMove())
@@ -541,15 +538,11 @@ public:
 #ifdef DEBUG_STEPCOUNT
         totalStepsRemaining--;
 #endif
-
     }
-    inline void startYStep()
+    INLINE void startYStep()
     {
 #if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
-        WRITE(Y_STEP_PIN,HIGH);
-#if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_STEP_PIN,HIGH);
-#endif
+        Printer::startYStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY
         if(isYPositiveMove())
@@ -579,14 +572,12 @@ public:
 #ifdef DEBUG_STEPCOUNT
         totalStepsRemaining--;
 #endif
+
     }
-    inline void startZStep()
+    INLINE void startZStep()
     {
 #if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY
-        WRITE(Z_STEP_PIN,HIGH);
-#if FEATURE_TWO_ZSTEPPER
-        WRITE(Z2_STEP_PIN,HIGH);
-#endif
+        Printer::startZStep();
 #else
 #if DRIVE_SYSTEM == XZ_GANTRY
         if(isYPositiveMove())
@@ -613,25 +604,28 @@ public:
         }
 #endif
 #endif
+#ifdef DEBUG_STEPCOUNT
+        totalStepsRemaining--;
+#endif
     }
     void updateStepsParameter();
-    inline float safeSpeed();
+    float safeSpeed();
     void calculateMove(float axis_diff[],uint8_t pathOptimize);
     void logLine();
-    inline long getWaitTicks()
+    INLINE long getWaitTicks()
     {
         return timeInTicks;
     }
-    inline void setWaitTicks(long wait)
+    INLINE void setWaitTicks(long wait)
     {
         timeInTicks = wait;
     }
 
-    static inline bool hasLines()
+    static INLINE bool hasLines()
     {
         return linesCount;
     }
-    static inline void setCurrentLine()
+    static INLINE void setCurrentLine()
     {
         cur = &lines[linesPos];
 #if CPU_ARCH==ARCH_ARM
@@ -639,7 +633,7 @@ public:
 #endif
     }
     // Only called from within interrupts
-    static inline void removeCurrentLineForbidInterrupt()
+    static INLINE void removeCurrentLineForbidInterrupt()
     {
         linesPos++;
         if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos = 0;
@@ -652,7 +646,7 @@ public:
         if(!linesCount)
             Printer::setMenuMode(MENU_MODE_PRINTING, false);
     }
-    static inline void pushLine()
+    static INLINE void pushLine()
     {
         linesWritePos++;
         if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
@@ -682,11 +676,11 @@ public:
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
-    static inline void previousPlannerIndex(ufast8_t &p)
+    static INLINE void previousPlannerIndex(ufast8_t &p)
     {
         p = (p ? p - 1 : PRINTLINE_CACHE_SIZE - 1);
     }
-    static inline void nextPlannerIndex(ufast8_t& p)
+    static INLINE void nextPlannerIndex(ufast8_t& p)
     {
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
