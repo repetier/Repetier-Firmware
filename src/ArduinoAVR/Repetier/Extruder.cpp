@@ -294,8 +294,7 @@ void Extruder::manageTemperatures()
         }
 #endif
         Printer::debugLevel |= 8; // Go into dry mode
-    }
-
+    } // any sensor defect
 }
 
 void TemperatureController::waitForTargetTemperature()
@@ -551,7 +550,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS] =
         Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS] = Printer::maxAccelerationMMPerSquareSecond[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
 #if USE_ADVANCE
-    Printer::maxExtruderSpeed = (uint8_t)floor(HAL::maxExtruderTimerFrequency() / (Extruder::current->maxFeedrate*Extruder::current->stepsPerMM));
+    Printer::maxExtruderSpeed = (ufast8_t)floor(HAL::maxExtruderTimerFrequency() / (Extruder::current->maxFeedrate * Extruder::current->stepsPerMM));
 #if CPU_ARCH == ARCH_ARM
     if(Printer::maxExtruderSpeed > 40) Printer::maxExtruderSpeed = 40;
 #else

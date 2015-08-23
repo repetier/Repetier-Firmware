@@ -1149,7 +1149,6 @@ void PWM_TIMER_VECTOR ()
   pwm_count_heater += HEATER_PWM_STEP;
 }
 
-
 /** \brief Timer routine for extruder stepper.
 
 Several methods need to move the extruder. To get a optimal
@@ -1182,14 +1181,14 @@ void EXTRUDER_TIMER_VECTOR ()
   if (!Printer::isAdvanceActivated()) {
     return; // currently no need
   }
-
   if (!Printer::isAdvanceActivated()) return; // currently no need
   if (Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1)
   {
     if(Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
       Extruder::setDirection(true);
       extruderLastDirection = 1;
-      extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+      //extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+      extruderChannel->TC_RC = Printer::maxExtruderSpeed;
     } else { 
       extruderChannel->TC_RC = Printer::maxExtruderSpeed;
     }
@@ -1199,11 +1198,13 @@ void EXTRUDER_TIMER_VECTOR ()
     if(-Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
       Extruder::setDirection(false);
       extruderLastDirection = -1;
-      extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+      //extruderChannel->TC_RC = SLOW_EXTRUDER_TICKS;
+      extruderChannel->TC_RC = Printer::maxExtruderSpeed;
    } else { 
       extruderChannel->TC_RC = Printer::maxExtruderSpeed;
    }
-  } else if (Printer::extruderStepsNeeded != 0)
+  } 
+  else if (Printer::extruderStepsNeeded != 0)
   {
     Extruder::step();
     Printer::extruderStepsNeeded -= extruderLastDirection;

@@ -254,7 +254,7 @@ class Printer
 public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-    static uint8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
+    static ufast8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
 #if ENABLE_QUADRATIC_ADVANCE
@@ -394,50 +394,50 @@ public:
 
     static INLINE bool isMenuMode(uint8_t mode)
     {
-        return (menuMode & mode)==mode;
+        return (menuMode & mode) == mode;
     }
 
     static INLINE bool debugEcho()
     {
-        return ((debugLevel & 1)!=0);
+        return ((debugLevel & 1) != 0);
     }
 
     static INLINE bool debugInfo()
     {
-        return ((debugLevel & 2)!=0);
+        return ((debugLevel & 2) != 0);
     }
 
     static INLINE bool debugErrors()
     {
-        return ((debugLevel & 4)!=0);
+        return ((debugLevel & 4) != 0);
     }
 
     static INLINE bool debugDryrun()
     {
-        return ((debugLevel & 8)!=0);
+        return ((debugLevel & 8) != 0);
     }
 
     static INLINE bool debugCommunication()
     {
-        return ((debugLevel & 16)!=0);
+        return ((debugLevel & 16) != 0);
     }
 
     static INLINE bool debugNoMoves()
     {
-        return ((debugLevel & 32)!=0);
+        return ((debugLevel & 32) != 0);
     }
 
-    static INLINE bool debugFlag(unsigned long flags)
+    static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);
     }
 
-    static INLINE void debugSet(unsigned long flags)
+    static INLINE void debugSet(uint8_t flags)
     {
         debugLevel |= flags;
     }
 
-    static INLINE void debugReset(unsigned long flags)
+    static INLINE void debugReset(uint8_t flags)
     {
         debugLevel &= ~flags;
     }
