@@ -1034,7 +1034,7 @@ void Commands::processGCode(GCode *com)
             Printer::homeAxis(true,true,true);
 #else
             Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
-            Printer::zLength = Printer::runZMaxProbe() + sum-ENDSTOP_Z_BACK_ON_HOME;
+            Printer::zLength = Printer::runZMaxProbe() + sum - ENDSTOP_Z_BACK_ON_HOME;
 #endif
             Com::printInfoFLN(Com::tZProbeZReset);
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
@@ -1364,13 +1364,14 @@ void Commands::processGCode(GCode *com)
 // similar to comment above, this will get a different answer from any different starting point
 // so it is unclear how this is helpful. It must start at a well defined point.
         Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-        int32_t offx = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtXHit;
-        int32_t offy = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtYHit;
-        int32_t offz = HOME_DISTANCE_STEPS-Printer::stepsRemainingAtZHit;
+        int32_t offx = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtXHit;
+        int32_t offy = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtYHit;
+        int32_t offz = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtZHit;
         Com::printFLN(Com::tTower1,offx);
         Com::printFLN(Com::tTower2,offy);
         Com::printFLN(Com::tTower3,offz);
         Printer::setAutolevelActive(oldAuto);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, Printer::axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
         Printer::homeAxis(true,true,true);
     }
     break;

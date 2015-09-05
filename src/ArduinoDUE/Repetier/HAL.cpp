@@ -44,6 +44,7 @@ static int adcCounter = 0, adcSamplePos = 0;
 static   uint32_t  adcEnable = 0;
 
 char HAL::virtualEeprom[EEPROM_BYTES];
+bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
 int spiDueDividors[] = {10, 21, 42, 84, 168, 255, 255};
@@ -924,7 +925,7 @@ pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR ()
 {
-  InterruptProtectedBlock noInt;
+  //InterruptProtectedBlock noInt;
   // apparently have to read status register
   TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
@@ -1102,7 +1103,7 @@ void PWM_TIMER_VECTOR ()
   if (pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #endif
-  HAL::allowInterrupts();
+  //noInt.unprotect();
   counterPeriodical++; // Appxoimate a 100ms timer
   if (counterPeriodical >= 390) //  (int)(F_CPU/40960))
   {
@@ -1144,9 +1145,15 @@ void PWM_TIMER_VECTOR ()
     ADC->ADC_CR = ADC_CR_START; // reread values
   }
 #endif // ANALOG_INPUTS > 0
-  UI_FAST; // Short timed user interface action
   pwm_count_cooler += COOLER_PWM_STEP;
   pwm_count_heater += HEATER_PWM_STEP;
+  UI_FAST; // Short timed user interface action
+#if FEATURE_WATCHDOG
+  if(HAL::wdPinged) {
+     WDT->WDT_CR = 0xA5000001;
+     HAL::wdPinged = false;
+  }
+#endif
 }
 
 /** \brief Timer routine for extruder stepper.

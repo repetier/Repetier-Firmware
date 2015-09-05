@@ -1124,7 +1124,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     Printer::stepsRemainingAtZHit = -1;
     setHoming(true);
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
-    PrintLine::moveRelativeDistanceInSteps(0, 0, zMaxSteps * 1.5, 0, feedrate, true, true);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, zMaxSteps * 2.0, 0, feedrate, true, true);
     offsetX = offsetY = offsetZ = 0;
     setHoming(false);
 }
@@ -1157,7 +1157,7 @@ void Printer::homeZAxis() // Delta z homing
 	Endstops::fillFromAccumulator();
 	if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 		// Back off for retest
-		PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+		PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
 		//Endstops::report();
 		// Check for proper release of all (XYZ) endstops
 		if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
@@ -1171,7 +1171,7 @@ void Printer::homeZAxis() // Delta z homing
 				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
-					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
+					PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
 					//Endstops::report();
 					// Check for missing release of any (XYZ) endstop
 					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {
@@ -1336,7 +1336,11 @@ void Printer::homeXAxis()
 #endif
         currentPositionSteps[X_AXIS] = (X_HOME_DIR == -1) ? xMinSteps - offX : xMaxSteps + offX;
 #if NUM_EXTRUDER > 1
+#if X_HOME_DIR < 0
         PrintLine::moveRelativeDistanceInSteps((Extruder::current->xOffset - offX) * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, true);
+#else
+        PrintLine::moveRelativeDistanceInSteps(-(Extruder::current->xOffset - offX) * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, true);
+#endif
 #endif
     }
 }
@@ -1347,9 +1351,9 @@ void Printer::homeYAxis()
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1))
     {
         long offY = 0;
-#if NUM_EXTRUDER>1
-        for(uint8_t i=0; i<NUM_EXTRUDER; i++)
-#if Y_HOME_DIR<0
+#if NUM_EXTRUDER > 1
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+#if Y_HOME_DIR < 0
             offY = RMath::max(offY,extruder[i].yOffset);
 #else
             offY = RMath::min(offY,extruder[i].yOffset);
@@ -1367,11 +1371,15 @@ void Printer::homeYAxis()
         setHoming(false);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
         if(ENDSTOP_Y_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS]*-ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+            PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
 #endif
-        currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps-offY : yMaxSteps+offY;
-#if NUM_EXTRUDER>1
-        PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset-offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+        currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps-offY : yMaxSteps + offY;
+#if NUM_EXTRUDER > 1
+#if Y_HOME_DIR < 0
+        PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset - offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+#else
+        PrintLine::moveRelativeDistanceInSteps(0,-(Extruder::current->yOffset - offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+#endif
 #endif
     }
 }
