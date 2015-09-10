@@ -1963,9 +1963,9 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_PS_ON_PIN 12
 //#define KILL_PIN -1
 
-#define HEATER_0_PIN 9 // EXTRUDER 1
-#define HEATER_2_PIN 8 // EXTRUDER 2
-#define HEATER_3_PIN 2 // EXTRUDER 3
+#define HEATER_0_PIN 2 // EXTRUDER 0 - changed 10-9-2015
+#define HEATER_2_PIN 9 // EXTRUDER 1 - changed 10-9-2015
+#define HEATER_3_PIN 8 // EXTRUDER 2 - changed 10-9-2015
 #define HEATER_1_PIN 10 // heater bed
 
 /*
