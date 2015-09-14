@@ -232,7 +232,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->advanceL = EXT3_ADVANCE_L;
 #endif
 #endif // NUM_EXTRUDER > 3
-#if NUM_EXTRUDER>4
+#if NUM_EXTRUDER > 4
     e = &extruder[4];
     e->stepsPerMM = EXT4_STEPS_PER_MM;
     e->maxFeedrate = EXT4_MAX_FEEDRATE;
@@ -262,7 +262,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->advanceL = EXT4_ADVANCE_L;
 #endif
 #endif // NUM_EXTRUDER > 4
-#if NUM_EXTRUDER>5
+#if NUM_EXTRUDER > 5
     e = &extruder[5];
     e->stepsPerMM = EXT5_STEPS_PER_MM;
     e->maxFeedrate = EXT5_MAX_FEEDRATE;

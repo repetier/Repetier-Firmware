@@ -1699,7 +1699,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     }
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
 #if Z_PROBE_Z_OFFSET_MODE == 1
-    distance += EEPROM::zProbeBedDistance();
+    distance += EEPROM::zProbeZOffset(); // We measued including coating, so we need to add coating thickness!
 #endif
 #if DISTORTION_CORRECTION
     float zCorr = distortion.correct(currentPositionSteps[X_AXIS] + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS],currentPositionSteps[Y_AXIS]
