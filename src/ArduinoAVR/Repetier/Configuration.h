@@ -232,6 +232,7 @@ Overridden if EEPROM activated.*/
 // 3 is mendel-parts thermistor (EPCOS G550)
 // 4 is 10k thermistor
 // 8 is ATC Semitec 104GT-2
+// 13 is PT100 for E3D/Ultimaker
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
@@ -1285,7 +1286,7 @@ to recalibrate z.
 #define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_SWITCHING_DISTANCE 1.5 // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
-/** The height is the difference between activated probe position and nozzle height. */
+/** Distance between nozzle and bed when probe triggers. */
 #define Z_PROBE_HEIGHT 39.91
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""

@@ -205,6 +205,7 @@ Overridden if EEPROM activated.*/
 // 3 is mendel-parts thermistor (EPCOS G550)
 // 4 is 10k thermistor
 // 8 is ATC Semitec 104GT-2
+// 13 is PT100 for E3D/Ultimaker
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2

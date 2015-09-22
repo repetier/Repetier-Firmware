@@ -1327,6 +1327,12 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
     {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
     {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
+#define NUMTEMPS_13 19
+const short temptable_13[NUMTEMPS_12][2] PROGMEM =
+{
+    {0,0},{908,8},{941.16,410*8},{982,08,20*8},{1015,8*30},{1048,8*40},{1080,8*50},{1113,8*60},{1146,8*70},{1178,8*80},{11211,8*90},{1276,8*110},{1318,8*120}
+    ,{1670,8*230},{2455,8*500},{3445,8*900},{3666,8*1000},{3871,8*1100},{4095,8*2000}
+};
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -1336,7 +1342,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[13] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -1357,9 +1363,10 @@ const short * const temptables[12] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_10[0][0]
         ,(short int *)&temptable_11[0][0]
         ,(short int *)&temptable_12[0][0]
+        ,(short int *)&temptable_13[0][0]
                                              };
-const uint8_t temptables_num[12] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12
+const uint8_t temptables_num[13] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13
                                            };
 
 
@@ -1390,6 +1397,7 @@ void TemperatureController::updateCurrentTemperature()
     case 99:
         currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS)); // Convert to 10 bit result
         break;
+    case 13: // PT100 E3D
     case 50: // User defined PTC table
     case 51:
     case 52:
@@ -1433,13 +1441,13 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     {
         type--;
-        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
-        uint8_t i=2;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
         short newraw,newtemp;
-        currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-currentTemperature;
+        currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - currentTemperature;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -1448,7 +1456,7 @@ void TemperatureController::updateCurrentTemperature()
             {
                 //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
                 //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
-                currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
+                currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp - oldtemp) / (newraw - oldraw));
                 return;
             }
             oldtemp = newtemp;
@@ -1458,13 +1466,17 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
     }
     break;
+    case 13:
     case 50: // User defined PTC thermistor
     case 51:
     case 52:
     {
-        type-=46;
-        uint8_t num = pgm_read_byte(&temptables_num[type])<<1;
-        uint8_t i=2;
+        if(type > 49)
+            type -= 46;
+        else
+            type--;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
@@ -1613,11 +1625,15 @@ void TemperatureController::setTargetTemperature(float target)
         targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-newraw;
         break;
     }
+    case 13: // PT100 E3D
     case 50: // user defined PTC thermistor
     case 51:
     case 52:
     {
-        type -= 46;
+        if(type > 49)
+            type -= 46;
+        else
+            type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
         uint8_t i = 2;
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
