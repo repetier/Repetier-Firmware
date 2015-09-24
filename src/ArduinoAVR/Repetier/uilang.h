@@ -88,25 +88,70 @@
 #define TEST208 "208\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337"
 #define TEST224 "224\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357"
 
+#define LANGUAGE_EN_ID 0
+#define LANGUAGE_DE_ID 1
+#define LANGUAGE_NL_ID 2
+#define LANGUAGE_PT_ID 3
+#define LANGAUGE_IT_ID 4
+#define LANGUAGE_ES_ID 5
+#define LANGUAGE_SE_ID 6
+#define LANGUAGE_FR_ID 7
+#define LANGUAGE_CZ_ID 8
+#define LANGUAGE_PL_ID 9
+
+#define NUM_LANGUAGES_KNOWN 10
+#define NUM_TRANSLATED_WORDS 14
+
+#define LANGUAGE_EN_ACTIVE 1
+#define LANGUAGE_DE_ACTIVE 1
+#define LANGUAGE_NL_ACTIVE 0
+#define LANGUAGE_PT_ACTIVE 0
+#define LANGUAGE_IT_ACTIVE 0
+#define LANGUAGE_ES_ACTIVE 0
+#define LANGUAGE_SE_ACTIVE 0
+#define LANGUAGE_FR_ACTIVE 0
+#define LANGUAGE_CZ_ACTIVE 0
+#define LANGUAGE_PL_ACTIVE 0
+
+// For selectable translations we refer to each text by a id which gets
+// defined here. The list starts at 0 and defines the position in the
+// translation index.
+
+#define UI_TEXT_ON_ID 0 //               "On"
+#define UI_TEXT_OFF_ID 1 //              "Off"
+#define UI_TEXT_NA_ID 2 //               "N/A" // Output for not available
+#define UI_TEXT_YES_ID 3 //              "Yes"
+#define UI_TEXT_NO_ID 4 //               "No"
+#define UI_TEXT_PRINT_POS_ID 5 //        "Printing..."
+#define UI_TEXT_PRINTING_ID 6 //         "Printing"
+#define UI_TEXT_IDLE_ID 7 //             "Idle"
+#define UI_TEXT_NOSDCARD_ID 8 //         "No SD Card"
+#define UI_TEXT_ERROR_ID 9 //            "**** ERROR ****"
+#define UI_TEXT_BACK_ID 10 //             "Back " cUP
+#define UI_TEXT_QUICK_SETTINGS_ID 11 //   "Quick Settings"
+
+// Universal definitions
+
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
+
 
 // At first all terms in english are defined. After that the selected language
 // can overwrite the definition. That way new strings are at least in english
 // available.
 
-#define UI_TEXT_ON               "On"
-#define UI_TEXT_OFF              "Off"
-#define UI_TEXT_NA               "N/A" // Output for not available
-#define UI_TEXT_YES              "Yes"
-#define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              cSEL
-#define UI_TEXT_NOSEL            cUNSEL
-#define UI_TEXT_PRINT_POS        "Printing..."
-#define UI_TEXT_PRINTING         "Printing"
-#define UI_TEXT_IDLE             "Idle"
-#define UI_TEXT_NOSDCARD         "No SD Card"
-#define UI_TEXT_ERROR            "**** ERROR ****"
-#define UI_TEXT_BACK             "Back " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
+#define UI_TEXT_ON_EN               "On"
+#define UI_TEXT_OFF_EN              "Off"
+#define UI_TEXT_NA_EN               "N/A" // Output for not available
+#define UI_TEXT_YES_EN              "Yes"
+#define UI_TEXT_NO_EN               "No"
+#define UI_TEXT_PRINT_POS_EN        "Printing..."
+#define UI_TEXT_PRINTING_EN         "Printing"
+#define UI_TEXT_IDLE_EN             "Idle"
+#define UI_TEXT_NOSDCARD_EN         "No SD Card"
+#define UI_TEXT_ERROR_EN            "**** ERROR ****"
+#define UI_TEXT_BACK_EN             "Back " cUP
+#define UI_TEXT_QUICK_SETTINGS_EN   "Quick Settings"
 #define UI_TEXT_CONFIGURATION    "Configuration"
 #define UI_TEXT_POSITION         "Position"
 #define UI_TEXT_EXTRUDER         "Extruder"
@@ -300,18 +345,18 @@
 
 #if UI_LANGUAGE==1
 
-#define UI_TEXT_ON               "An"
-#define UI_TEXT_OFF              "Aus"
-#define UI_TEXT_NA               "nv"
-#define UI_TEXT_YES              "Ja"
-#define UI_TEXT_NO               "Nein"
-#define UI_TEXT_PRINT_POS        "Drucke..."
-#define UI_TEXT_PRINTING         "Drucken"
-#define UI_TEXT_IDLE             "Leerlauf"
-#define UI_TEXT_NOSDCARD         "Keine SD Karte"
-#define UI_TEXT_ERROR            "**** FEHLER ****"
-#define UI_TEXT_BACK             "Zur" STR_uuml "ck " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Schnelleinst."
+#define UI_TEXT_ON_DE               "An"
+#define UI_TEXT_OFF_DE              "Aus"
+#define UI_TEXT_NA_DE               "nv"
+#define UI_TEXT_YES_DE              "Ja"
+#define UI_TEXT_NO_DE               "Nein"
+#define UI_TEXT_PRINT_POS_DE        "Drucke..."
+#define UI_TEXT_PRINTING_DE         "Drucken"
+#define UI_TEXT_IDLE_DE             "Leerlauf"
+#define UI_TEXT_NOSDCARD_DE         "Keine SD Karte"
+#define UI_TEXT_ERROR_DE            "**** FEHLER ****"
+#define UI_TEXT_BACK_DE             "Zur" STR_uuml "ck " cUP
+#define UI_TEXT_QUICK_SETTINGS_DE   "Schnelleinst."
 #define UI_TEXT_CONFIGURATION    "Konfiguration"
 #define UI_TEXT_POSITION         "Position"
 #define UI_TEXT_EXTRUDER         "Extruder"

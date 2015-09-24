@@ -590,3 +590,67 @@ void Com::printFloat(float number, uint8_t digits)
     remainder -= toPrint;
   }
 }
+
+// Translations of ui
+
+#if LANGUAGE_EN_ACTIVE
+const char* translations_en[NUM_TRANSLATED_WORDS] PROGMEM = {
+ UI_TEXT_ON_EN,
+ UI_TEXT_OFF_EN,
+ UI_TEXT_NA_EN,
+ UI_TEXT_YES_EN,
+ UI_TEXT_NO_EN,
+ UI_TEXT_PRINT_POS_EN,
+ UI_TEXT_PRINTING_EN,
+ UI_TEXT_IDLE_EN,
+ UI_TEXT_NOSDCARD_EN,
+ UI_TEXT_ERROR_EN,
+ UI_TEXT_BACK_EN,
+ UI_TEXT_QUICK_SETTINGS_EN
+};
+#define LANG_EN_TABLE translations_en
+#else
+#define LANG_EN_TABLE NULL
+#endif // LANGUAGE_EN_ACTIVE
+
+#if LANGUAGE_EN_ACTIVE
+const char* translations_de[NUM_TRANSLATED_WORDS] PROGMEM = {
+ UI_TEXT_ON_DE,
+ UI_TEXT_OFF_DE,
+ UI_TEXT_NA_DE,
+ UI_TEXT_YES_DE,
+ UI_TEXT_NO_DE,
+ UI_TEXT_PRINT_POS_DE,
+ UI_TEXT_PRINTING_DE,
+ UI_TEXT_IDLE_DE,
+ UI_TEXT_NOSDCARD_DE,
+ UI_TEXT_ERROR_DE,
+ UI_TEXT_BACK_DE,
+ UI_TEXT_QUICK_SETTINGS_DE
+};
+#define LANG_DE_TABLE translations_de
+#else
+#define LANG_DE_TABLE NULL
+#endif // LANGUAGE_EN_ACTIVE
+
+#define LANG_NL_TABLE NULL
+#define LANG_PT_TABLE NULL
+#define LANG_IT_TABLE NULL
+#define LANG_ES_TABLE NULL
+#define LANG_SE_TABLE NULL
+#define LANG_FR_TABLE NULL
+#define LANG_CZ_TABLE NULL
+#define LANG_PL_TABLE NULL
+
+const char ** const translations[NUM_LANGUAGES_KNOWN] PROGMEM = {
+    LANG_EN_TABLE,
+    LANG_DE_TABLE,
+    LANG_NL_TABLE,
+    LANG_PT_TABLE,
+    LANG_IT_TABLE,
+    LANG_ES_TABLE,
+    LANG_SE_TABLE,
+    LANG_FR_TABLE,
+    LANG_CZ_TABLE,
+    LANG_PL_TABLE
+};
