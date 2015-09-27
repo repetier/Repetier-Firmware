@@ -266,6 +266,7 @@ FSTRINGVAR(tEPR0)
 FSTRINGVAR(tEPR1)
 FSTRINGVAR(tEPR2)
 FSTRINGVAR(tEPR3)
+FSTRINGVAR(tLanguage)
 FSTRINGVAR(tEPRBaudrate)
 FSTRINGVAR(tEPRFilamentPrinted)
 FSTRINGVAR(tEPRPrinterActive)
@@ -423,6 +424,11 @@ static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
 static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+static const char* translatedF(int textId);
+static void selectLanguage(fast8_t lang);
+static uint8_t selectedLanguage;
+#endif
     protected:
     private:
 };

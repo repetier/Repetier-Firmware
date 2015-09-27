@@ -2035,6 +2035,15 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 if (cur->numDeltaSegments)
                 {
+                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
+                            && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
+                    {
+                        // execute a extra babystep
+                        //Printer::insertStepperHighDelay();
+                        //Printer::endXYZSteps();
+                        //HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY + 1);
+                        Printer::zBabystep();
+                    }
                     // Get the next delta segment
                     curd = &cur->segments[--cur->numDeltaSegments];
 
@@ -2053,49 +2062,6 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                     HAL::delayMicroseconds(DIRECTION_DELAY);
 #endif
 
-                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
-                            && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
-                    {
-                        // execute a extra babystep
-                        Printer::insertStepperHighDelay();
-                        Printer::endXYZSteps();
-                        HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY + 1);
-                        Printer::zBabystep();
-                       /* if(Printer::zBabystepsMissing > 0)
-                        {
-                            if(curd->dir & X_DIRPOS)
-                                cur->startXStep();
-                            else
-                                cur->error[X_AXIS] += curd_errupd;
-                            if(curd->dir & Y_DIRPOS)
-                                cur->startYStep();
-                            else
-                                cur->error[Y_AXIS] += curd_errupd;
-                            if(curd->dir & Z_DIRPOS)
-                                cur->startZStep();
-                            else
-                                cur->error[Z_AXIS] += curd_errupd;
-                            Printer::zBabystepsMissing--;
-                        }
-                        else
-                        {
-                            if(curd->dir & X_DIRPOS)
-                                cur->error[X_AXIS] += curd_errupd;
-                            else
-                                cur->startXStep();
-                            if(curd->dir & Y_DIRPOS)
-                                cur->error[Y_AXIS] += curd_errupd;
-                            else
-                                cur->startYStep();
-                            if(curd->dir & Z_DIRPOS)
-                                cur->error[Z_AXIS] += curd_errupd;
-                            else
-                                cur->startZStep();
-                            Printer::zBabystepsMissing++;
-                        }
-                        HAL::delayMicroseconds(1);
-                        */
-                    }
                 }
                 else
                     curd = 0;// Release the last segment
@@ -2478,7 +2444,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS(UI_TEXT_IDLE);
+        if(linesCount == 0) UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

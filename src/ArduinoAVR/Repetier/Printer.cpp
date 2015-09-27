@@ -684,6 +684,9 @@ void Printer::setup()
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
+#endif
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
 #if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
@@ -1067,6 +1070,12 @@ void Printer::setup()
   #endif
 #endif
     EVENT_INITIALIZE;
+#if EEPROM_MODE != 0 && UI_DISPLAY_TYPE != NO_DISPLAY
+    if(EEPROM::getStoredLanguage() == 254) {
+            Com::printFLN(PSTR("Needs language selection"));
+        uid.showLanguageSelectionWizard();
+    }
+#endif // EEPROM_MODE
 }
 
 void Printer::defaultLoopActions()

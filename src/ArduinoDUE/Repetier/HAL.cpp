@@ -36,6 +36,7 @@ extern long bresenham_step();
 #if ANALOG_INPUTS > 0
 int32_t osAnalogInputBuildup[ANALOG_INPUTS];
 int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
+int32_t osAnalogSamplesSum[ANALOG_INPUTS];
 static int32_t adcSamplesMin[ANALOG_INPUTS];
 static int32_t adcSamplesMax[ANALOG_INPUTS];
 static int adcCounter = 0, adcSamplePos = 0;
@@ -95,7 +96,7 @@ void HAL::setupTimer() {
   // Regular interrupts for heater control etc
   pmc_enable_periph_clk(PWM_TIMER_IRQ);
   //NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
-  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 10);
+  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 15);
 
   TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
   TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
@@ -186,6 +187,7 @@ void HAL::analogStart(void)
     adcSamplesMin[i] = 100000;
     adcSamplesMax[i] = 0;
     adcEnable |= (0x1u << osAnalogInputChannels[i]);
+    osAnalogSamplesSum[i] = 2048 * ANALOG_INPUT_MEDIAN;
     for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
       osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
   }
@@ -1122,17 +1124,15 @@ void PWM_TIMER_VECTOR ()
       osAnalogInputBuildup[i] += cur;
       adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
       adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
-      if (adcCounter >= NUM_ADC_SAMPLES)
+      if (adcCounter >= NUM_ADC_SAMPLES)     // store new conversion result
       {
         // Strip biggest and smallest value and round correctly
         osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
         adcSamplesMin[i] = 100000;
         adcSamplesMax[i] = 0;
-        osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE;
-        int sum = 0;
-        for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
-          sum += osAnalogSamples[i][j];
-        osAnalogInputValues[i] = sum / ANALOG_INPUT_MEDIAN;
+        osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
+        osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
+        osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
         osAnalogInputBuildup[i] = 0;
       } // adcCounter >= NUM_ADC_SAMPLES
     } // for i

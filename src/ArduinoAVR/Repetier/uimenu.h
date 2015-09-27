@@ -315,9 +315,147 @@ next/previous changes the value
 ok sets the value if not already done and goes back to previous menu.
 */
 
+UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK)
+#if UI_HAS_BACK_KEY==0
+#define UI_MENU_ADDCONDBACK &ui_menu_back,
+#define UI_MENU_BACKCNT 1
+#else
+#define UI_MENU_ADDCONDBACK
+#define UI_MENU_BACKCNT 0
+#endif
+
+
+// Language selection menu
+
+#if EEPROM_MODE != 0
+#define FIRSTLANG 1
+#if LANGUAGE_EN_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_en,"English",UI_ACTION_LANGUAGE_EN | UI_ACTION_TOPMENU)
+#define ADD_LANG_EN &ui_menu_setlang_en
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#endif // LANGUAGE_EN_ACTIVE
+#if LANGUAGE_DE_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de,"Deutsch",UI_ACTION_LANGUAGE_DE | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_DE &ui_menu_setlang_de
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_DE ,&ui_menu_setlang_de
+#endif
+#endif // LANGUAGE_DE_ACTIVE
+#if LANGUAGE_ES_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es,"Espanol",UI_ACTION_LANGUAGE_ES | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_ES &ui_menu_setlang_es
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_ES ,&ui_menu_setlang_es
+#endif
+#else
+#define ADD_LANG_ES
+#endif // LANGUAGE_ES_ACTIVE
+#if LANGUAGE_PT_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt,"Portugues",UI_ACTION_LANGUAGE_PT | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_PT &ui_menu_setlang_pt
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_PT ,&ui_menu_setlang_pt
+#endif
+#else
+#define ADD_LANG_PT
+#endif // LANGUAGE_PT_ACTIVE
+#if LANGUAGE_FR_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr,"Francais",UI_ACTION_LANGUAGE_FR | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_FR &ui_menu_setlang_fr
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_FR ,&ui_menu_setlang_fr
+#endif
+#else
+#define ADD_LANG_FR
+#endif // LANGUAGE_FR_ACTIVE
+#if LANGUAGE_NL_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl,"Nederlandse",UI_ACTION_LANGUAGE_NL | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_NL &ui_menu_setlang_nl
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_NL ,&ui_menu_setlang_nl
+#endif
+#else
+#define ADD_LANG_NL
+#endif // LANGUAGE_NL_ACTIVE
+#if LANGUAGE_IT_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it,"Italiano",UI_ACTION_LANGUAGE_IT | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_IT &ui_menu_setlang_it
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_IT ,&ui_menu_setlang_it
+#endif
+#else
+#define ADD_LANG_IT
+#endif // LANGUAGE_IT_ACTIVE
+#if LANGUAGE_SE_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se,"Svenska",UI_ACTION_LANGUAGE_SE | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_SE &ui_menu_setlang_se
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_SE ,&ui_menu_setlang_se
+#endif
+#else
+#define ADD_LANG_SE
+#endif // LANGUAGE_SE_ACTIVE
+#if LANGUAGE_CZ_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz,"Cestina",UI_ACTION_LANGUAGE_CZ | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_CZ &ui_menu_setlang_cz
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_CZ ,&ui_menu_setlang_cz
+#endif
+#else
+#define ADD_LANG_CZ
+#endif // LANGUAGE_CZ_ACTIVE
+#if LANGUAGE_PL_ACTIVE
+    UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl,"Polskie",UI_ACTION_LANGUAGE_PL | UI_ACTION_TOPMENU)
+#if FIRSTLANG
+#define ADD_LANG_PL &ui_menu_setlang_pl
+#undef FIRSTLANG
+#define FIRSTLANG 0
+#else
+#define ADD_LANG_PL ,&ui_menu_setlang_pl
+#endif
+#else
+#define ADD_LANG_PL
+#endif // LANGUAGE_PL_ACTIVE
+#define UI_MENU_LANGUAGES {UI_MENU_ADDCONDBACK ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL}
+#define UI_MENU_LANGUAGES_WIZ {ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL}
+UI_MENU(ui_menu_languages,UI_MENU_LANGUAGES,UI_MENU_BACKCNT + LANGUAGE_EN_ACTIVE+LANGUAGE_DE_ACTIVE+LANGUAGE_ES_ACTIVE+LANGUAGE_PT_ACTIVE+LANGUAGE_FR_ACTIVE+LANGUAGE_NL_ACTIVE+LANGUAGE_IT_ACTIVE+LANGUAGE_SE_ACTIVE+LANGUAGE_CZ_ACTIVE+LANGUAGE_PL_ACTIVE)
+UI_MENU_SUBMENU(ui_menu_conf_lang,UI_TEXT_LANGUAGE,ui_menu_languages)
+UI_STICKYMENU(ui_menu_languages_wiz,UI_MENU_LANGUAGES_WIZ,LANGUAGE_EN_ACTIVE+LANGUAGE_DE_ACTIVE+LANGUAGE_ES_ACTIVE+LANGUAGE_PT_ACTIVE+LANGUAGE_FR_ACTIVE+LANGUAGE_NL_ACTIVE+LANGUAGE_IT_ACTIVE+LANGUAGE_SE_ACTIVE+LANGUAGE_CZ_ACTIVE+LANGUAGE_PL_ACTIVE)
+#define LANGMENU_ENTRY ,&ui_menu_conf_lang
+#define LANGMENU_COUNT 1
+#else
+#define LANGMENU_ENTRY
+#define LANGMENU_COUNT 0
+#endif
+
 // Error menu
 
-UI_MENU_ACTION2(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR,"%oe")
+UI_MENU_ACTION2_T(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR_ID,UI_TEXT_ERRORMSG_ID)
 
 // Filament change wizard
 
@@ -363,14 +501,6 @@ Next step is to define submenus leading to the action.
 */
 
 // **** Positionening menu
-UI_MENU_ACTIONCOMMAND(ui_menu_back,UI_TEXT_BACK,UI_ACTION_BACK)
-#if UI_HAS_BACK_KEY==0
-#define UI_MENU_ADDCONDBACK &ui_menu_back,
-#define UI_MENU_BACKCNT 1
-#else
-#define UI_MENU_ADDCONDBACK
-#define UI_MENU_BACKCNT 0
-#endif
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_home_all,UI_TEXT_HOME_ALL,UI_ACTION_HOME_ALL,0,MENU_MODE_PRINTING)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_home_x,UI_TEXT_HOME_X,UI_ACTION_HOME_X,0,MENU_MODE_PRINTING)
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_home_y,UI_TEXT_HOME_Y,UI_ACTION_HOME_Y,0,MENU_MODE_PRINTING)
@@ -579,8 +709,8 @@ UI_MENU_SUBMENU(ui_menu_fan_sub,UI_TEXT_FANSPEED,ui_menu_fan)
 #if SDSUPPORT
 
 UI_MENU_HEADLINE(ui_menu_sd_askstop_head,UI_TEXT_STOP_PRINT)
-UI_MENU_ACTIONCOMMAND(ui_menu_sd_askstop_no,UI_TEXT_NO,UI_ACTION_BACK)
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_sd_askstop_yes,      UI_TEXT_YES,     UI_ACTION_SD_STOP | UI_ACTION_TOPMENU,     MENU_MODE_SD_PRINTING, 0)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_sd_askstop_no,UI_TEXT_NO_ID,UI_ACTION_BACK)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_askstop_yes,      UI_TEXT_YES_ID,     UI_ACTION_SD_STOP | UI_ACTION_TOPMENU,     MENU_MODE_SD_PRINTING, 0)
 #define UI_MENU_SD_ASKSTOP {&ui_menu_sd_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
 UI_MENU(ui_menu_sd_askstop,UI_MENU_SD_ASKSTOP,3)
 
@@ -747,6 +877,7 @@ UI_MENU(ui_menu_cextr,UI_MENU_CEXTR,7+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CON
 #endif
 
 // **** Configuration menu
+
 UI_MENU_SUBMENU(ui_menu_conf_general, UI_TEXT_GENERAL,      ui_menu_general)
 UI_MENU_SUBMENU(ui_menu_conf_accel,   UI_TEXT_ACCELERATION, ui_menu_accel)
 UI_MENU_SUBMENU(ui_menu_conf_feed,    UI_TEXT_FEEDRATE,     ui_menu_feedrate)
@@ -786,10 +917,10 @@ UI_MENU_SUBMENU(ui_menu_conf_delta, UI_TEXT_ZCALIB, ui_menu_delta)
 #define UI_MENU_DELTA_COND
 #define UI_MENU_DELTA_CNT 0
 #endif
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_conf_general LANGMENU_ENTRY ,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+LANGMENU_COUNT+UI_MENU_EEPROM_CNT+UI_MENU_BEDCONF_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4)
 // Main menu
-UI_MENU_SUBMENU(ui_menu_main1, UI_TEXT_QUICK_SETTINGS,ui_menu_quick)
+UI_MENU_SUBMENU_T(ui_menu_main1, UI_TEXT_QUICK_SETTINGS_ID,ui_menu_quick)
 UI_MENU_SUBMENU(ui_menu_main2, UI_TEXT_POSITION,ui_menu_positions)
 UI_MENU_SUBMENU(ui_menu_main3, UI_TEXT_EXTRUDER,ui_menu_extruder)
 UI_MENU_SUBMENU(ui_menu_main4, UI_TEXT_DEBUGGING,ui_menu_debugging)
