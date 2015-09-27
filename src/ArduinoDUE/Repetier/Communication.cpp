@@ -21,6 +21,10 @@
 
 #include "Repetier.h"
 
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+uint8_t Com::selectedLanguage;
+#endif
+
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 #else
@@ -268,6 +272,7 @@ FSTRINGVALUE(Com::tEPR1,"EPR:1 ")
 FSTRINGVALUE(Com::tEPR2,"EPR:2 ")
 FSTRINGVALUE(Com::tEPR3,"EPR:3 ")
 FSTRINGVALUE(Com::tEPRBaudrate,"Baudrate")
+FSTRINGVALUE(Com::tLanguage,"Language")
 FSTRINGVALUE(Com::tEPRFilamentPrinted,"Filament printed [m]")
 FSTRINGVALUE(Com::tEPRPrinterActive,"Printer active [s]")
 FSTRINGVALUE(Com::tEPRMaxInactiveTime,"Max. inactive time [ms,0=off]")
@@ -590,3 +595,4 @@ void Com::printFloat(float number, uint8_t digits)
     remainder -= toPrint;
   }
 }
+

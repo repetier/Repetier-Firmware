@@ -2252,6 +2252,16 @@ void Commands::processMCode(GCode *com)
         dacCommitEeprom();
 #endif
         break;
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    case 888:
+        Com::printFLN(PSTR("Selected language:"),(int)Com::selectedLanguage);
+        Com::printF(PSTR("Translation:"));
+        Com::printFLN(Com::translatedF(0));
+        break;
+    case 889:
+        uid.showLanguageSelectionWizard();
+        break;
+#endif
     default:
         if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors())
         {

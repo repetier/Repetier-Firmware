@@ -386,6 +386,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     for(uint8_t i = 0; i < 9; i++)
         HAL::eprSetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2),Printer::autolevelTransformation[i]);
 #endif
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    HAL::eprSetByte(EPR_SELECTED_LANGUAGE,Com::selectedLanguage);
+#endif
     // now the extruder
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
@@ -710,6 +713,9 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(version < 14) {
             HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
         }
+        if(version < 15) {
+            HAL::eprSetByte(EPR_SELECTED_LANGUAGE,254); // activate selector on startup
+        }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to verion 8, the cartesian max was stored in the zmax
@@ -729,6 +735,9 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    Com::selectLanguage(HAL::eprGetByte(EPR_SELECTED_LANGUAGE));
+#endif
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
 #endif
@@ -739,7 +748,7 @@ void EEPROM::initBaudrate()
     // Invariant - baudrate is intitalized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
-    if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE)
+    if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)
     {
         baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     }
@@ -811,6 +820,7 @@ With
 void EEPROM::writeSettings()
 {
 #if EEPROM_MODE != 0
+    writeByte(EPR_SELECTED_LANGUAGE,Com::tLanguage);
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
     writeFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);

@@ -24,7 +24,7 @@
 
 #include <math.h>
 
-#define REPETIER_VERSION "0.92.4"
+#define REPETIER_VERSION "0.92.5"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##

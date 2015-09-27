@@ -31,7 +31,7 @@
 #define bFOLD 6
 #define cARROW "\176"
 
-#if UI_DISPLAY_CHARSET==0 // ASCII fallback
+#if UI_DISPLAY_CHARSET == 0 // ASCII fallback
 #define CHAR_RIGHT '-'
 #define CHAR_SELECTOR '>'
 #define CHAR_SELECTED '*'
@@ -44,7 +44,7 @@
 #define STR_szlig "ss"
 #endif
 
-#if UI_DISPLAY_CHARSET==1 // HD44870 charset with knji chars
+#if UI_DISPLAY_CHARSET == 1 // HD44870 charset with knji chars
 #define CHAR_RIGHT 0x7e
 #define CHAR_SELECTOR '>'
 #define CHAR_SELECTED '*'
@@ -57,7 +57,7 @@
 #define STR_szlig "\342"
 #endif
 
-#if UI_DISPLAY_CHARSET==2 // Western charset
+#if UI_DISPLAY_CHARSET == 2 // Western charset
 #define CHAR_RIGHT 0xbc
 #define CHAR_SELECTOR 0xf6
 #define CHAR_SELECTED '*'
@@ -88,25 +88,71 @@
 #define TEST208 "208\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337"
 #define TEST224 "224\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357"
 
+#define LANGUAGE_EN_ID 0
+#define LANGUAGE_DE_ID 1
+#define LANGUAGE_NL_ID 2
+#define LANGUAGE_PT_ID 3
+#define LANGAUGE_IT_ID 4
+#define LANGUAGE_ES_ID 5
+#define LANGUAGE_SE_ID 6
+#define LANGUAGE_FR_ID 7
+#define LANGUAGE_CZ_ID 8
+#define LANGUAGE_PL_ID 9
+
+#define NUM_LANGUAGES_KNOWN 10
+#define NUM_TRANSLATED_WORDS 13
+
+#define LANGUAGE_EN_ACTIVE 1
+#define LANGUAGE_DE_ACTIVE 1
+#define LANGUAGE_NL_ACTIVE 1
+#define LANGUAGE_PT_ACTIVE 0
+#define LANGUAGE_IT_ACTIVE 0
+#define LANGUAGE_ES_ACTIVE 0
+#define LANGUAGE_SE_ACTIVE 0
+#define LANGUAGE_FR_ACTIVE 0
+#define LANGUAGE_CZ_ACTIVE 0
+#define LANGUAGE_PL_ACTIVE 0
+
+// For selectable translations we refer to each text by a id which gets
+// defined here. The list starts at 0 and defines the position in the
+// translation index.
+
+#define UI_TEXT_ON_ID 0 //               "On"
+#define UI_TEXT_OFF_ID 1 //              "Off"
+#define UI_TEXT_NA_ID 2 //               "N/A" // Output for not available
+#define UI_TEXT_YES_ID 3 //              "Yes"
+#define UI_TEXT_NO_ID 4 //               "No"
+#define UI_TEXT_PRINT_POS_ID 5 //        "Printing..."
+#define UI_TEXT_PRINTING_ID 6 //         "Printing"
+#define UI_TEXT_IDLE_ID 7 //             "Idle"
+#define UI_TEXT_NOSDCARD_ID 8 //         "No SD Card"
+#define UI_TEXT_ERROR_ID 9 //            "**** ERROR ****"
+#define UI_TEXT_BACK_ID 10 //             "Back " cUP
+#define UI_TEXT_QUICK_SETTINGS_ID 11 //   "Quick Settings"
+#define UI_TEXT_ERRORMSG_ID 12 // "%oe"
+// Universal definitions
+
+#define UI_TEXT_SEL              cSEL
+#define UI_TEXT_NOSEL            cUNSEL
+
 
 // At first all terms in english are defined. After that the selected language
 // can overwrite the definition. That way new strings are at least in english
 // available.
 
-#define UI_TEXT_ON               "On"
-#define UI_TEXT_OFF              "Off"
-#define UI_TEXT_NA               "N/A" // Output for not available
-#define UI_TEXT_YES              "Yes"
-#define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              cSEL
-#define UI_TEXT_NOSEL            cUNSEL
-#define UI_TEXT_PRINT_POS        "Printing..."
-#define UI_TEXT_PRINTING         "Printing"
-#define UI_TEXT_IDLE             "Idle"
-#define UI_TEXT_NOSDCARD         "No SD Card"
-#define UI_TEXT_ERROR            "**** ERROR ****"
-#define UI_TEXT_BACK             "Back " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
+#define UI_TEXT_ON_EN               "On"
+#define UI_TEXT_OFF_EN              "Off"
+#define UI_TEXT_NA_EN               "N/A" // Output for not available
+#define UI_TEXT_YES_EN              "Yes"
+#define UI_TEXT_NO_EN               "No"
+#define UI_TEXT_PRINT_POS_EN        "Printing..."
+#define UI_TEXT_PRINTING_EN         "Printing"
+#define UI_TEXT_IDLE_EN             "Idle"
+#define UI_TEXT_NOSDCARD_EN         "No SD Card"
+#define UI_TEXT_ERROR_EN            "**** ERROR ****"
+#define UI_TEXT_BACK_EN             "Back " cUP
+#define UI_TEXT_QUICK_SETTINGS_EN   "Quick Settings"
+#define UI_TEXT_ERRORMSG_EN "%oe"
 #define UI_TEXT_CONFIGURATION    "Configuration"
 #define UI_TEXT_POSITION         "Position"
 #define UI_TEXT_EXTRUDER         "Extruder"
@@ -295,23 +341,26 @@
 #define UI_TEXT_GLUESTICK "Glue Stick"
 #define UI_TEXT_CUSTOM "Custom"
 #define UI_TEXT_COATING_CUSTOM "Custom : %oCmm"
+#define UI_TEXT_LANGUAGE "Language"
 
 // *************** German translation ****************
 
+#define UI_TEXT_ON_DE               "An"
+#define UI_TEXT_OFF_DE              "Aus"
+#define UI_TEXT_NA_DE               "nv"
+#define UI_TEXT_YES_DE              "Ja"
+#define UI_TEXT_NO_DE               "Nein"
+#define UI_TEXT_PRINT_POS_DE        "Drucke..."
+#define UI_TEXT_PRINTING_DE         "Drucken"
+#define UI_TEXT_IDLE_DE             "Leerlauf"
+#define UI_TEXT_NOSDCARD_DE         "Keine SD Karte"
+#define UI_TEXT_ERROR_DE            "**** FEHLER ****"
+#define UI_TEXT_BACK_DE             "Zur" STR_uuml "ck " cUP
+#define UI_TEXT_QUICK_SETTINGS_DE   "Schnelleinst."
+#define UI_TEXT_ERRORMSG_DE "%oe"
+
 #if UI_LANGUAGE==1
 
-#define UI_TEXT_ON               "An"
-#define UI_TEXT_OFF              "Aus"
-#define UI_TEXT_NA               "nv"
-#define UI_TEXT_YES              "Ja"
-#define UI_TEXT_NO               "Nein"
-#define UI_TEXT_PRINT_POS        "Drucke..."
-#define UI_TEXT_PRINTING         "Drucken"
-#define UI_TEXT_IDLE             "Leerlauf"
-#define UI_TEXT_NOSDCARD         "Keine SD Karte"
-#define UI_TEXT_ERROR            "**** FEHLER ****"
-#define UI_TEXT_BACK             "Zur" STR_uuml "ck " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Schnelleinst."
 #define UI_TEXT_CONFIGURATION    "Konfiguration"
 #define UI_TEXT_POSITION         "Position"
 #define UI_TEXT_EXTRUDER         "Extruder"
@@ -487,22 +536,25 @@
 #endif
 
 // Dutch translation
+
+#define UI_TEXT_ON_NL               "Aan"
+#define UI_TEXT_OFF_NL              "Uit"
+#define UI_TEXT_NA_NL               "N/A" // Output for not available
+#define UI_TEXT_YES_NL              "Ja"
+#define UI_TEXT_NO_NL               "Nee"
+#define UI_TEXT_SEL_NL              cSEL
+#define UI_TEXT_NOSEL_NL            cUNSEL
+#define UI_TEXT_PRINT_POS_NL        "Printen..."
+#define UI_TEXT_PRINTING_NL         "Printen"
+#define UI_TEXT_IDLE_NL             "Rust"
+#define UI_TEXT_NOSDCARD_NL         "Geen SD Kaart"
+#define UI_TEXT_ERROR_NL            "**** FOUT ****"
+#define UI_TEXT_BACK_NL             "Terug " cUP
+#define UI_TEXT_QUICK_SETTINGS_NL   "Snel Instelling"
+#define UI_TEXT_ERRORMSG_NL "%oe"
+
 #if UI_LANGUAGE==2
 
-#define UI_TEXT_ON               "Aan"
-#define UI_TEXT_OFF              "Uit"
-#define UI_TEXT_NA               "N/A" // Output for not available
-#define UI_TEXT_YES              "Ja"
-#define UI_TEXT_NO               "Nee"
-#define UI_TEXT_SEL              cSEL
-#define UI_TEXT_NOSEL            cUNSEL
-#define UI_TEXT_PRINT_POS        "Printen..."
-#define UI_TEXT_PRINTING         "Printen"
-#define UI_TEXT_IDLE             "Rust"
-#define UI_TEXT_NOSDCARD         "Geen SD Kaart"
-#define UI_TEXT_ERROR            "**** FOUT ****"
-#define UI_TEXT_BACK             "Terug " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Snel Instelling"
 #define UI_TEXT_CONFIGURATION    "Configuratie"
 #define UI_TEXT_POSITION         "Positie"
 #define UI_TEXT_EXTRUDER         "Extruder"
@@ -1770,193 +1822,3 @@
 
 #endif
 
-// *************************************************************************************
-//                             User defined language
-//
-// If you need a language not mentioned above, you can translate this dummy entry.
-// If you want it added permanently to the distribution, spend it to the community under
-// GPL V3. Only new and complete translations are put into the official distribution!
-// *************************************************************************************
-
-#if UI_LANGUAGE==1000
-
-#define UI_TEXT_ON               "On"
-#define UI_TEXT_OFF              "Off"
-#define UI_TEXT_NA               "N/A" // Output for not available
-#define UI_TEXT_YES              "Yes"
-#define UI_TEXT_NO               "No"
-#define UI_TEXT_SEL              cSEL
-#define UI_TEXT_NOSEL            cUNSEL
-#define UI_TEXT_PRINT_POS        "Printing..."
-#define UI_TEXT_PRINTING         "Printing"
-#define UI_TEXT_IDLE             "Idle"
-#define UI_TEXT_NOSDCARD         "No SD Card"
-#define UI_TEXT_ERROR            "**** ERROR ****"
-#define UI_TEXT_BACK             "Back " cUP
-#define UI_TEXT_QUICK_SETTINGS   "Quick Settings"
-#define UI_TEXT_CONFIGURATION    "Configuration"
-#define UI_TEXT_POSITION         "Position"
-#define UI_TEXT_EXTRUDER         "Extruder"
-#define UI_TEXT_SD_CARD          "SD Card"
-#define UI_TEXT_DEBUGGING        "Debugging"
-#define UI_TEXT_HOME_ALL         "Home All"
-#define UI_TEXT_HOME_X           "Home X"
-#define UI_TEXT_HOME_Y           "Home Y"
-#define UI_TEXT_HOME_Z           "Home Z"
-#define UI_TEXT_PREHEAT_PLA      "Preheat PLA"
-#define UI_TEXT_PREHEAT_ABS      "Preheat ABS"
-#define UI_TEXT_COOLDOWN         "Cooldown"
-#define UI_TEXT_SET_TO_ORIGIN    "Set to Origin"
-#define UI_TEXT_DISABLE_STEPPER  "Disable stepper"
-#define UI_TEXT_X_POSITION       "X Position"
-#define UI_TEXT_X_POS_FAST       "X Pos. Fast"
-#define UI_TEXT_Y_POSITION       "Y Position"
-#define UI_TEXT_Y_POS_FAST       "Y Pos. Fast"
-#define UI_TEXT_Z_POSITION       "Z Position"
-#define UI_TEXT_Z_POS_FAST       "Z Pos. Fast"
-#define UI_TEXT_E_POSITION       "Extr. position"
-#define UI_TEXT_BED_TEMP         "Bed temp: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP       "Temp. 1 :  %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP       "Temp. 2 :  %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP       "Temp. 2 :  %E2" cDEG "C"
-#define UI_TEXT_EXTR0_OFF        "Extruder 1 Off"
-#define UI_TEXT_EXTR1_OFF        "Extruder 2 Off"
-#define UI_TEXT_EXTR2_OFF        "Extruder 3 Off"
-#define UI_TEXT_EXTR0_SELECT     "%X0 Select Extr. 1"
-#define UI_TEXT_EXTR1_SELECT     "%X1 Select Extr. 2"
-#define UI_TEXT_EXTR2_SELECT     "%X1 Select Extr. 3"
-#define UI_TEXT_EXTR_ORIGIN      "Set Origin"
-#define UI_TEXT_PRINT_X          "Print X:%ax"
-#define UI_TEXT_PRINT_Y          "Print Y:%ay"
-#define UI_TEXT_PRINT_Z          "Print Z:%az"
-#define UI_TEXT_PRINT_Z_DELTA    "Print:%az"
-#define UI_TEXT_MOVE_X           "Move X:%aX"
-#define UI_TEXT_MOVE_Y           "Move Y:%aY"
-#define UI_TEXT_MOVE_Z           "Move Z:%aZ"
-#define UI_TEXT_MOVE_Z_DELTA     "Move:%aZ"
-#define UI_TEXT_JERK             "Jerk:%aj"
-#define UI_TEXT_ZJERK            "Z-Jerk:%aJ"
-#define UI_TEXT_ACCELERATION     "Acceleration"
-#define UI_TEXT_STORE_TO_EEPROM  "Store to EEPROM"
-#define UI_TEXT_LOAD_EEPROM      "Load f. EEPROM"
-#define UI_TEXT_DBG_ECHO         "Echo   :%do"
-#define UI_TEXT_DBG_INFO         "Info   :%di"
-#define UI_TEXT_DBG_ERROR        "Errors :%de"
-#define UI_TEXT_DBG_DRYRUN       "Dry run:%dd"
-#define UI_TEXT_OPS_OFF          "%O0 OPS Off"
-#define UI_TEXT_OPS_CLASSIC      "%O1 OPS Classic"
-#define UI_TEXT_OPS_FAST         "%O2 OPS Fast"
-#define UI_TEXT_OPS_RETRACT      "Retract :%Or"
-#define UI_TEXT_OPS_BACKSLASH    "Backsl. :%Ob"
-#define UI_TEXT_OPS_MINDIST      "Min.dist:%Od"
-#define UI_TEXT_OPS_MOVE_AFTER   "Move after:%Oa"
-#define UI_TEXT_ANTI_OOZE        "Anti Ooze"
-#define UI_TEXT_PRINT_FILE       "Print file"
-#define UI_TEXT_PAUSE_PRINT      "Pause Print"
-#define UI_TEXT_CONTINUE_PRINT   "Continue Print"
-#define UI_TEXT_UNMOUNT_CARD     "Unmount Card"
-#define UI_TEXT_MOUNT_CARD       "Mount Card"
-#define UI_TEXT_DELETE_FILE      "Delete file"
-#define UI_TEXT_FEEDRATE         "Feedrate"
-#define UI_TEXT_FEED_MAX_X       "Max X:%fx"
-#define UI_TEXT_FEED_MAX_Y       "Max Y:%fy"
-#define UI_TEXT_FEED_MAX_Z       "Max Z:%fz"
-#define UI_TEXT_FEED_MAX_Z_DELTA "Max:%fz"
-#define UI_TEXT_FEED_HOME_X      "Home X:%fX"
-#define UI_TEXT_FEED_HOME_Y      "Home Y:%fY"
-#define UI_TEXT_FEED_HOME_Z      "Home Z:%fZ"
-#define UI_TEXT_FEED_HOME_Z_DELTA "Home:%fZ"
-#define UI_TEXT_ACTION_XPOSITION4 "X:%x0 mm","Min endstop:%sx","Max endstop:%sX",""
-#define UI_TEXT_ACTION_YPOSITION4 "Y:%x1 mm","Min endstop:%sy","Max endstop:%sY",""
-#define UI_TEXT_ACTION_ZPOSITION4 "Z:%x2 mm","Min endstop:%sz","Max endstop:%sZ",""
-#define UI_TEXT_ACTION_XPOSITION_FAST4 "X:%x0 mm","Min endstop:%sx","Max endstop:%sX",""
-#define UI_TEXT_ACTION_YPOSITION_FAST4 "Y:%x1 mm","Min endstop:%sy","Max endstop:%sY",""
-#define UI_TEXT_ACTION_ZPOSITION_FAST4 "Z:%x2 mm","Min endstop:%sz","Max endstop:%sZ",""
-#define UI_TEXT_ACTION_EPOSITION_FAST2 "E:%x3 mm","1 click = 1 mm"
-#define UI_TEXT_ACTION_XPOSITION2 "X:%x0 mm","Min:%sx Max:%sX"
-#define UI_TEXT_ACTION_YPOSITION2 "Y:%x1 mm","Min:%sy Max:%sY"
-#define UI_TEXT_ACTION_ZPOSITION2 "Z:%x2 mm","Min:%sz Max:%sZ"
-#define UI_TEXT_ACTION_XPOSITION_FAST2 "X:%x0 mm","Min:%sx Max:%sX"
-#define UI_TEXT_ACTION_YPOSITION_FAST2 "Y:%x1 mm","Min:%sy Max:%sY"
-#define UI_TEXT_ACTION_ZPOSITION_FAST2 "Z:%x2 mm","Min:%sz Max:%sZ"
-#define UI_TEXT_FANSPEED          "Fan speed"
-#define UI_TEXT_ACTION_FANSPEED   "Fan speed:%Fs%%%"
-#define UI_TEXT_FAN_OFF           "Turn Fan Off"
-#define UI_TEXT_FAN_25            "Set Fan 25%%%"
-#define UI_TEXT_FAN_50            "Set Fan 50%%%"
-#define UI_TEXT_FAN_75            "Set Fan 75%%%"
-#define UI_TEXT_FAN_FULL          "Set Fan Full"
-#define UI_TEXT_STEPPER_INACTIVE  "Stepper Inactive"
-#define UI_TEXT_STEPPER_INACTIVE2 "Dis. After: %is","[min] 0=Off"
-#define UI_TEXT_POWER_INACTIVE    "Max. Inactive"
-#define UI_TEXT_POWER_INACTIVE2   "Dis. After: %ip","[min] 0=Off"
-#define UI_TEXT_GENERAL           "General"
-#define UI_TEXT_BAUDRATE          "Baudrate:%oc"
-#define UI_TEXT_EXTR_STEPS        "Steps/MM:%Se"
-#define UI_TEXT_EXTR_START_FEED   "Start FR:%Xf"
-#define UI_TEXT_EXTR_MAX_FEED     "Max FR:%XF"
-#define UI_TEXT_EXTR_ACCEL        "Accel:%XA"
-#define UI_TEXT_EXTR_WATCH        "Stab.Time:%Xw"
-#define UI_TEXT_EXTR_ADVANCE_L    "Advance lin:%Xl"
-#define UI_TEXT_EXTR_ADVANCE_K    "Advance quad:%Xa"
-#define UI_TEXT_EXTR_MANAGER      "Control:%Xh"
-#define UI_TEXT_EXTR_PGAIN        "PID P:%Xp"
-#define UI_TEXT_EXTR_DEADTIME     "Deadtime:%Xp"
-#define UI_TEXT_EXTR_DMAX_DT      "Control PWM:%XM"
-#define UI_TEXT_EXTR_IGAIN        "PID I:%Xi"
-#define UI_TEXT_EXTR_DGAIN        "PID D:%Xd"
-#define UI_TEXT_EXTR_DMIN         "Drive Min:%Xm"
-#define UI_TEXT_EXTR_DMAX         "Drive Max:%XM"
-#define UI_TEXT_EXTR_PMAX         "PID Max:%XD"
-#define UI_TEXT_EXTR_XOFF         "X-Offset:%Xx"
-#define UI_TEXT_EXTR_YOFF         "Y-Offset:%Xy"
-#define UI_TEXT_STRING_HM_BANGBANG "BangBang"
-#define UI_TEXT_STRING_HM_PID     "PID"
-#define UI_TEXT_STRING_ACTION     "Action:%la"
-#define UI_TEXT_HEATING_EXTRUDER  "Heating Extruder"
-#define UI_TEXT_HEATING_BED       "Heating Bed"
-#define UI_TEXT_KILLED            "Killed"
-#define UI_TEXT_STEPPER_DISABLED  "Stepper Disabled"
-#define UI_TEXT_EEPROM_STORED     "Configuration","stored in EEPROM"
-#define UI_TEXT_EEPROM_LOADED     "Configuration","loaded f. EEPROM"
-#define UI_TEXT_UPLOADING         "Uploading..."
-#define UI_TEXT_PAGE_BUFFER       "Buffer:%oB"
-#define UI_TEXT_PAGE_EXTRUDER     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
-#define UI_TEXT_PAGE_EXTRUDER1     "E1:%e0/%E0" cDEG "C" cARROW "%o0"
-#define UI_TEXT_PAGE_EXTRUDER2     "E2:%e1/%E1" cDEG "C" cARROW "%o1"
-#define UI_TEXT_PAGE_EXTRUDER3     "E3:%e2/%E2" cDEG "C" cARROW "%o2"
-#define UI_TEXT_PAGE_BED          " B:%eb/%Eb" cDEG "C" cARROW "%ob"
-#define UI_TEXT_SPEED_MULTIPLY    "Speed Mul.:%om%%%"
-#define UI_TEXT_FLOW_MULTIPLY     "Flow Mul.:%of%%%"
-#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP  "Wait Temp.%XT" cDEG "C"
-#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS "Wait Units:%XUmm"
-#define UI_TEXT_PRINTER_READY    "Printer ready."
-// Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
-// ___88 days 12:45
-#define UI_TEXT_PRINTTIME_DAYS   " days "
-#define UI_TEXT_PRINTTIME_HOURS  ":"
-#define UI_TEXT_PRINTTIME_MINUTES ""
-#define UI_TEXT_PRINT_TIME     "Printing time"
-#define UI_TEXT_PRINT_FILAMENT "Filament printed"
-#define UI_TEXT_PRINTED           "printed"
-#define UI_TEXT_POWER            "ATX power on/off"
-#define UI_TEXT_STRING_HM_DEADTIME     "Dead Time"
-#define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
-#define UI_TEXT_STOP_PRINT "Stop Print"
-#define UI_TEXT_Z_BABYSTEPPING "Z Babystep.:%oYmm"
-#define UI_TEXT_CHANGE_FILAMENT "Change filament"
-#define UI_TEXT_WIZ_CH_FILAMENT1 "Change filament"
-#define UI_TEXT_WIZ_CH_FILAMENT2 "Rotate to move"
-#define UI_TEXT_WIZ_CH_FILAMENT3 "filament up/down"
-#define UI_TEXT_CLICK_DONE "Click when done"
-#define UI_TEXT_AUTOLEVEL_ONOFF  "Autolevel: %ll"
-#define UI_TEXT_SERVOPOS "Servo pos.: %oS"
-#define UI_TEXT_IGNORE_M106      "Ignore M106 cmd %Fi"
-#define UI_TEXT_WIZ_REHEAT1 "Click to reheat"
-#define UI_TEXT_WIZ_REHEAT2 "extruders."
-#define UI_TEXT_WIZ_WAITTEMP1 "Wait for target"
-#define UI_TEXT_WIZ_WAITTEMP2 "temperatures ..."
-#define UI_TEXT_EXTRUDER_JAM "Extruder Jam"
-#define UI_TEXT_STANDBY "Standby"
-
-#endif

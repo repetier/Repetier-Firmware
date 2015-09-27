@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 14
+#define EEPROM_PROTOCOL_VERSION 15
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -122,6 +122,7 @@ have problems with other modules using the eeprom */
 #define EPR_RETRACTION_UNDO_SPEED             1016
 #define EPR_AUTORETRACT_ENABLED               1020
 #define EPR_Z_PROBE_Z_OFFSET			      1024
+#define EPR_SELECTED_LANGUAGE                 1028
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -190,6 +191,13 @@ public:
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
+    static inline uint8_t getStoredLanguage() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_SELECTED_LANGUAGE);
+#else
+        return 0;
+#endif
+    }
     static inline float zProbeZOffset() {
 #if EEPROM_MODE != 0
 	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
