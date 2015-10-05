@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 15
+#define EEPROM_PROTOCOL_VERSION 16
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -123,6 +123,10 @@ have problems with other modules using the eeprom */
 #define EPR_AUTORETRACT_ENABLED               1020
 #define EPR_Z_PROBE_Z_OFFSET			      1024
 #define EPR_SELECTED_LANGUAGE                 1028
+#define EPR_Z_ACCELERATION_TOP                1032
+#define EPR_BENDING_CORRECTION_A              1036
+#define EPR_BENDING_CORRECTION_B              1040
+#define EPR_BENDING_CORRECTION_C              1044
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -531,5 +535,34 @@ static inline void setTowerZFloor(float newZ) {
         return 0;
 #endif
     }
+    static inline float bendingCorrectionA() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_A);
+#else
+        return BENDING_CORRECTION_A;
+#endif
+    }
+    static inline float bendingCorrectionB() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_B);
+#else
+        return BENDING_CORRECTION_B;
+#endif
+    }
+    static inline float bendingCorrectionC() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_C);
+#else
+        return BENDING_CORRECTION_C;
+#endif
+    }
+    static inline float zAccelarationTop() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_Z_ACCELERATION_TOP);
+#else
+        return Z_ACCELERATION_TOP;
+#endif
+    }
+
 };
 #endif

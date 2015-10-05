@@ -278,7 +278,7 @@ typedef struct UIMenu_struct {
   // 2 = submenu
   // 3 = modififaction menu
   // 5 = Wizard menu
-  // +128 = sticky -> no autoreturn to main menu®π after timeout
+  // +128 = sticky -> no autoreturn to main menu√º after timeout
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -453,7 +453,9 @@ extern const int8_t encoder_table[16] PROGMEM ;
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {3,action,2,name ## _entries};
 #define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0,0,0,0};
+#define UI_MENU_HEADLINE_T(name,text) UIMenuEntry name PROGMEM = {0,1,0,0,0,text};
 #define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,0,0,0};
+#define UI_MENU_CHANGEACTION_T(name,row,action) UIMenuEntry name PROGMEM = {0,4,action,0,0,row};
 #define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0,0};
 #define UI_MENU_ACTIONCOMMAND_T(name,rowId,action) UIMenuEntry name PROGMEM = {0,3,action,0,0,rowId};
 #define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0,0};
@@ -1808,6 +1810,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
 #define UI_STATUS_F(status) uid.setStatusP(status);
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
+#define UI_STATUS_UPD_F(status) {uid.setStatusP(status);uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
 #define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
@@ -1826,6 +1829,7 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_STATUS_F(status) {}
 #define UI_STATUS_RAM(status) {}
 #define UI_STATUS_UPD(status) {}
+#define UI_STATUS_UPD_F(status) {}
 #define UI_STATUS_UPD_RAM(status) {}
 #define UI_CLEAR_STATUS {}
 #define UI_ERROR(msg) {}

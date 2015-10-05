@@ -1011,6 +1011,7 @@ public:
 #if FEATURE_Z_PROBE
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
+    static float bendingCorrectionAt(float x,float y);
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe

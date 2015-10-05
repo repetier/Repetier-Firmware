@@ -1375,7 +1375,9 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
     }
     break;
-    case 134: // G134
+    case 134: // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+        break;
+    case 135: // G135
         Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
         Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
         Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
@@ -1690,7 +1692,7 @@ void Commands::processMCode(GCode *com)
     case 190: // M190 - Wait bed for heater to reach target.
 #if HAVE_HEATED_BED
         if(Printer::debugDryrun()) break;
-        UI_STATUS_UPD(UI_TEXT_HEATING_BED);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
         Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
         if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
