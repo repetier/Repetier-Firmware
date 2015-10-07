@@ -80,18 +80,21 @@ void Extruder::manageTemperatures()
         if(controller<NUM_EXTRUDER)
         {
 #if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
-            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
+            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1) {
                 if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
                         tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[0].coolerPWM = 0;
                 else
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
+	    }
             if(controller>1)
 #endif // NUM_EXTRUDER
+            {
                 if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[controller].coolerPWM = 0;
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+	    }
         }
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
@@ -149,7 +152,7 @@ void Extruder::manageTemperatures()
             {
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
-                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
+                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             pwm_pos[act->pwmIndex] = output;
         }

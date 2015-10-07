@@ -315,6 +315,7 @@ void HAL::analogStart()
     /* ADCW must be read once, otherwise the next result is wrong. */
     uint dummyADCResult;
     dummyADCResult = ADCW;
+    (void)dummyADCResult;
     // Enable interrupt driven conversion loop
     uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
@@ -747,9 +748,11 @@ ISR(PWM_TIMER_VECTOR)
     static uint8_t pwm_count = 0;
     static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
-#if EXT0_EXTRUDER_COOLER_PIN>-1 || EXT1_EXTRUDER_COOLER_PIN>-1 || EXT2_EXTRUDER_COOLER_PIN>-1 || EXT3_EXTRUDER_COOLER_PIN>-1  || EXT4_EXTRUDER_COOLER_PIN>-1 || EXT5_EXTRUDER_COOLER_PIN>-1
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
-#endif
+
+    // Prevents GCC from complaining about this variable,
+    // if it is unused.
+    (void)pwm_cooler_pos_set;
 
     PWM_OCR += 64;
     if(pwm_count_heater == 0)

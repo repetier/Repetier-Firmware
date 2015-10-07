@@ -1175,7 +1175,7 @@ void UIDisplay::parse(char *txt,bool ram)
                 printCols[col++]='%';
             break;
         case 'x':
-            if(c2>='0' && c2<='3')
+            if(c2>='0' && c2<='3') {
                 if(c2=='0')
                     fvalue = Printer::realXPosition();
                 else if(c2=='1')
@@ -1184,6 +1184,7 @@ void UIDisplay::parse(char *txt,bool ram)
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
+	    }
             addFloat(fvalue,4,2);
             break;
         case 'y':

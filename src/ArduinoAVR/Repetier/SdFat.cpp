@@ -34,7 +34,7 @@ extern int8_t RFstrnicmp(const char* s1, const char* s2, size_t n);
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-static void pstrPrint(FSTRINGPARAM(str)) {
+static inline void pstrPrint(FSTRINGPARAM(str)) {
     Com::printF(str);
 }
 //------------------------------------------------------------------------------
@@ -3461,7 +3461,7 @@ bool Sd2Card::readData(uint8_t* dst, size_t count) {
     goto fail;
   }
   // transfer data
-  if (status_ = spiRec(dst, count)) {
+  if ((status_ = spiRec(dst, count)) != 0) {
     error(SD_CARD_ERROR_SPI_DMA);
     goto fail;
   }
