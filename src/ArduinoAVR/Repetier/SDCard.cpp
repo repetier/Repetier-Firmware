@@ -169,21 +169,28 @@ void SDCard::writeCommand(GCode *code)
     uint8_t p=2;
     file.writeError = false;
     int params = 128 | (code->params & ~1);
-    *(int*)buf = params;
+
+    // Casting magic to make GCC happy
+    float *fval = (float *)(void *)&buf[p];
+    int *ival = (int *)(void *)&buf[p];
+    long int *lval = (long int *)(void *)&buf[p];
+    int *pval = (int *)(void *)&buf[0];
+
+    *pval = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
-        *(int*)&buf[p] = code->params2;
+        *ival = code->params2;
         p+=2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
-            *(int*)&buf[p] = code->M;
+            *ival = code->M;
             p+=2;
         }
         if(code->hasG())
         {
-            *(int*)&buf[p]= code->G;
+            *ival = code->G;
             p+=2;
         }
     }
@@ -200,27 +207,27 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasX())
     {
-        *(float*)&buf[p] = code->X;
+        *fval = code->X;
         p+=4;
     }
     if(code->hasY())
     {
-        *(float*)&buf[p] = code->Y;
+        *fval = code->Y;
         p+=4;
     }
     if(code->hasZ())
     {
-        *(float*)&buf[p] = code->Z;
+        *fval = code->Z;
         p+=4;
     }
     if(code->hasE())
     {
-        *(float*)&buf[p] = code->E;
+        *fval = code->E;
         p+=4;
     }
     if(code->hasF())
     {
-        *(float*)&buf[p] = code->F;
+        *fval = code->F;
         p+=4;
     }
     if(code->hasT())
@@ -229,22 +236,22 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-        *(long int*)&buf[p] = code->S;
+        *lval = code->S;
         p+=4;
     }
     if(code->hasP())
     {
-        *(long int*)&buf[p] = code->P;
+        *lval = code->P;
         p+=4;
     }
     if(code->hasI())
     {
-        *(float*)&buf[p] = code->I;
+        *fval = code->I;
         p+=4;
     }
     if(code->hasJ())
     {
-        *(float*)&buf[p] = code->J;
+        *fval = code->J;
         p+=4;
     }
     if(code->hasString())   // read 16 uint8_t into string
@@ -340,7 +347,7 @@ void SDCard::ls()
     Com::printFLN(Com::tEndFileList);
 }
 
-bool SDCard::selectFile(char *filename, bool silent)
+bool SDCard::selectFile(const char *filename, bool silent)
 {
     SdBaseFile parent;
     const char *oldP = filename;

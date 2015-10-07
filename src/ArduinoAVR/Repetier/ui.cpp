@@ -36,7 +36,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #endif
 
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-long ui_autoreturn_time=0;
+unsigned long ui_autoreturn_time=0;
 #endif
 
 
@@ -534,7 +534,7 @@ void initializeLCD()
 // ----------- end direct LCD driver
 #endif
 #if UI_DISPLAY_TYPE<4
-void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
+void UIDisplay::printRow(uint8_t r,const char *txt,const char *txt2,uint8_t changeAtCol)
 {
     changeAtCol = RMath::min(UI_COLS,changeAtCol);
     uint8_t col=0;
@@ -758,7 +758,7 @@ UIDisplay::UIDisplay()
 #if UI_ANIMATION
 void slideIn(uint8_t row,FSTRINGPARAM(text))
 {
-    char *empty="";
+    const char *empty="";
     int8_t i = 0;
     uid.col=0;
     uid.addStringP(text);
@@ -869,7 +869,7 @@ void UIDisplay::initialize()
 #endif
 }
 #if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2 || UI_DISPLAY_TYPE==3
-void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
+void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     lcdCommand(LCD_SETCGRAMADDR | (location << 3));
@@ -881,7 +881,7 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 #endif
 void  UIDisplay::waitForKey()
 {
-    int nextAction = 0;
+    int16_t nextAction = 0;
 
     lastButtonAction = 0;
     while(lastButtonAction==nextAction)
@@ -2358,7 +2358,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     case UI_ACTION_BAUDRATE:
 #if EEPROM_MODE!=0
     {
-        char p=0;
+        int p=0;
         int32_t rate;
         do
         {

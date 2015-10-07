@@ -355,10 +355,10 @@ class UIDisplay {
     int pageDelay; // Counter. If 0 page is refreshed if menuLevel is 0.
     void *errorMsg;
     uint16_t activeAction; // action for ok/next/previous
-    uint16_t lastAction;
+    int16_t  lastAction;
     millis_t lastSwitch; // Last time display switched pages
     millis_t lastRefresh;
-    uint16_t lastButtonAction;
+    int16_t  lastButtonAction;
     millis_t lastButtonStart;
     millis_t nextRepeat; // Time of next autorepeat
     millis_t lastNextPrev; // for increasing speed settings
@@ -381,7 +381,7 @@ class UIDisplay {
     void createChar(uint8_t location,const uint8_t charmap[]);
     void initialize(); // Initialize display and keys
     void waitForKey();
-    void printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol); // Print row on display
+    void printRow(uint8_t r,const char *txt,const char *txt2,uint8_t changeAtCol); // Print row on display
     void printRowP(uint8_t r,PGM_P txt);
     void parse(char *txt,bool ram); /// Parse output and write to printCols;
     void refreshPage();
