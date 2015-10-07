@@ -36,6 +36,7 @@ extern long bresenham_step();
 #if ANALOG_INPUTS > 0
 int32_t osAnalogInputBuildup[ANALOG_INPUTS];
 int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
+int32_t osAnalogSamplesSum[ANALOG_INPUTS];
 static int32_t adcSamplesMin[ANALOG_INPUTS];
 static int32_t adcSamplesMax[ANALOG_INPUTS];
 static int adcCounter = 0, adcSamplePos = 0;
@@ -95,7 +96,7 @@ void HAL::setupTimer() {
   // Regular interrupts for heater control etc
   pmc_enable_periph_clk(PWM_TIMER_IRQ);
   //NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
-  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 10);
+  NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 15);
 
   TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
   TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
@@ -186,6 +187,7 @@ void HAL::analogStart(void)
     adcSamplesMin[i] = 100000;
     adcSamplesMax[i] = 0;
     adcEnable |= (0x1u << osAnalogInputChannels[i]);
+    osAnalogSamplesSum[i] = 2048 * ANALOG_INPUT_MEDIAN;
     for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
       osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
   }
@@ -819,21 +821,6 @@ void SERVO_COMPA_VECTOR ()
 
 TcChannel *stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
 #define STEPPERTIMER_EXIT_TICKS 105 // at least 2,5us pause between stepper calls
-/** \brief Sets the timer 1 compare value to delay ticks.
-*/
-INLINE void setTimer(unsigned long delay)
-{
-  // convert old AVR timer delay value for SAM timers
-  uint32_t timer_count = (delay * TIMER1_PRESCALE);
-  if (timer_count < 210) // max. 200 khz timer frequency
-    timer_count = 210;
-  if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
-     stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
-    //stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
-  } else {
-     stepperChannel->TC_RC = timer_count;
-  }
-}
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
@@ -842,14 +829,14 @@ void TIMER1_COMPA_VECTOR ()
   // apparently have to read status register
   stepperChannel->TC_SR;
   stepperChannel->TC_RC = 1000000;
-  //InterruptProtectedBlock noInt;
+  uint32_t delay;
   if (PrintLine::hasLines())
   {
-    setTimer(PrintLine::bresenhamStep());
+    delay = PrintLine::bresenhamStep();
   }
   else if (Printer::zBabystepsMissing != 0) {
     Printer::zBabystep();
-    setTimer(Printer::interval);
+    delay = Printer::interval;
   } else
   {
     if (waitRelax == 0)
@@ -871,7 +858,18 @@ void TIMER1_COMPA_VECTOR ()
     }
     else waitRelax--;
     
-    setTimer(10000);
+    delay = 10000;
+  }
+    // convert old AVR timer delay value for SAM timers
+  uint32_t timer_count = (delay * TIMER1_PRESCALE);
+  if (timer_count < 210) // max. 200 khz timer frequency
+    timer_count = 210;
+  InterruptProtectedBlock noInt; // prevent interruption or we might get 102s delay
+  if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
+     stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
+    //stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
+  } else {
+     stepperChannel->TC_RC = timer_count;
   }
 }
 
@@ -1122,17 +1120,15 @@ void PWM_TIMER_VECTOR ()
       osAnalogInputBuildup[i] += cur;
       adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
       adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
-      if (adcCounter >= NUM_ADC_SAMPLES)
+      if (adcCounter >= NUM_ADC_SAMPLES)     // store new conversion result
       {
         // Strip biggest and smallest value and round correctly
         osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
         adcSamplesMin[i] = 100000;
         adcSamplesMax[i] = 0;
-        osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE;
-        int sum = 0;
-        for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
-          sum += osAnalogSamples[i][j];
-        osAnalogInputValues[i] = sum / ANALOG_INPUT_MEDIAN;
+        osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
+        osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
+        osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
         osAnalogInputBuildup[i] = 0;
       } // adcCounter >= NUM_ADC_SAMPLES
     } // for i

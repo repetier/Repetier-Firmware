@@ -386,6 +386,9 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     for(uint8_t i = 0; i < 9; i++)
         HAL::eprSetFloat(EPR_AUTOLEVEL_MATRIX + (((int)i) << 2),Printer::autolevelTransformation[i]);
 #endif
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    HAL::eprSetByte(EPR_SELECTED_LANGUAGE,Com::selectedLanguage);
+#endif
     // now the extruder
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
     {
@@ -497,6 +500,10 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH,RETRACTION_UNDO_EXTRA_LONG_LENGTH);
     HAL::eprSetFloat(EPR_RETRACTION_UNDO_SPEED,RETRACTION_UNDO_SPEED);
     HAL::eprSetByte(EPR_AUTORETRACT_ENABLED,AUTORETRACT_ENABLED);
+    HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
+    HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
+    HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
+    HAL::eprSetFloat(EPR_Z_ACCELERATION_TOP,Z_ACCELERATION_TOP);
 
 }
 
@@ -504,6 +511,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 {
 #if EEPROM_MODE != 0
     uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
+    //Com::printFLN(PSTR("Detected EEPROM version:"),(int)version);
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
@@ -710,6 +718,18 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(version < 14) {
             HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
         }
+        if(version < 15) {
+            HAL::eprSetByte(EPR_SELECTED_LANGUAGE, 254); // activate selector on startup
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+            Com::selectedLanguage = 254;
+#endif
+        }
+        if(version < 16) {
+            HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
+            HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
+            HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
+            HAL::eprSetFloat(EPR_Z_ACCELERATION_TOP,Z_ACCELERATION_TOP);
+        }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to verion 8, the cartesian max was stored in the zmax
@@ -729,6 +749,9 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         storeDataIntoEEPROM(false); // Store new fields for changed version
     }
     Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    Com::selectLanguage(HAL::eprGetByte(EPR_SELECTED_LANGUAGE));
+#endif
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
 #endif
@@ -739,7 +762,7 @@ void EEPROM::initBaudrate()
     // Invariant - baudrate is intitalized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
-    if(HAL::eprGetByte(EPR_MAGIC_BYTE)==EEPROM_MODE)
+    if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)
     {
         baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     }
@@ -811,6 +834,7 @@ With
 void EEPROM::writeSettings()
 {
 #if EEPROM_MODE != 0
+    writeByte(EPR_SELECTED_LANGUAGE,Com::tLanguage);
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
     writeFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted);
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);
@@ -858,6 +882,9 @@ void EEPROM::writeSettings()
 #if DRIVE_SYSTEM == DELTA
     writeFloat(EPR_Z_MAX_ACCEL, Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
+    writeFloat(EPR_Z_ACCELERATION_TOP, Com::tEPRZAccelerationAtTop);
+#endif
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH, Com::tEPRDiagonalRodLength);
     writeFloat(EPR_DELTA_HORIZONTAL_RADIUS, Com::tEPRHorizontalRadius);
     writeFloat(EPR_DELTA_MAX_RADIUS, Com::tEPRDeltaMaxRadius);
@@ -898,6 +925,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Z_PROBE_Y2, Com::tZProbeY2);
     writeFloat(EPR_Z_PROBE_X3, Com::tZProbeX3);
     writeFloat(EPR_Z_PROBE_Y3, Com::tZProbeY3);
+    writeFloat(EPR_BENDING_CORRECTION_A, Com::zZProbeBendingCorA);
+    writeFloat(EPR_BENDING_CORRECTION_B, Com::zZProbeBendingCorB);
+    writeFloat(EPR_BENDING_CORRECTION_C, Com::zZProbeBendingCorC);
 #endif
 #if FEATURE_AUTOLEVEL
     writeByte(EPR_AUTOLEVEL_ACTIVE, Com::tAutolevelActive);

@@ -435,14 +435,19 @@ void Printer::kill(uint8_t only_steppers)
 #endif // defined
     disableXStepper();
     disableYStepper();
+#if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
+#else
+    if(!only_steppers)
+        disableZStepper();
+#endif
     Extruder::disableAllExtruderMotors();
     if(!only_steppers)
     {
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
             Extruder::setTemperatureForExtruder(0, i);
         Extruder::setHeatedBedTemperature(0);
-        UI_STATUS_UPD(UI_TEXT_STANDBY);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));
 #if defined(PS_ON_PIN) && PS_ON_PIN>-1
         //pinMode(PS_ON_PIN,INPUT);
         SET_OUTPUT(PS_ON_PIN); //GND
@@ -451,7 +456,7 @@ void Printer::kill(uint8_t only_steppers)
 #endif
         Printer::setAllKilled(true);
     }
-    else UI_STATUS_UPD(UI_TEXT_STEPPER_DISABLED);
+    else UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
 #if FAN_BOARD_PIN>-1
 #if HAVE_HEATED_BED
     if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
@@ -585,6 +590,13 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
         lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
     }
 }
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
+float Printer::zAccelerationAt(float z) {
+    float zTop = EEPROM::zAccelarationTop();
+    if(zTop <= 0) return maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
+    return (maxTravelAccelerationMMPerSquareSecond[Z_AXIS] - zTop) * z / zLength;
+}
+#endif
 
 /**
   \brief Sets the destination coordinates to values stored in com.
@@ -684,6 +696,9 @@ void Printer::setup()
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
+#endif
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
 #if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
@@ -1015,11 +1030,11 @@ void Printer::setup()
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
-    UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
+    UI_INITIALIZE;
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
@@ -1067,6 +1082,12 @@ void Printer::setup()
   #endif
 #endif
     EVENT_INITIALIZE;
+#if EEPROM_MODE != 0 && UI_DISPLAY_TYPE != NO_DISPLAY
+    if(EEPROM::getStoredLanguage() == 254) {
+            Com::printFLN(PSTR("Needs language selection"));
+        uid.showLanguageSelectionWizard();
+    }
+#endif // EEPROM_MODE
 }
 
 void Printer::defaultLoopActions()
@@ -1241,7 +1262,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     // so the redundant check is only an opportunity to
     // gratuitously fail due to incorrect settings.
     // The following movements would be meaningless unless it was zeroed for example.
-    UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+    UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_DELTA_ID));
     // Homing Z axis means that you must home X and Y
     homeZAxis();
     moveToReal(0,0,Printer::zLength - zBedOffset,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
@@ -1321,7 +1342,7 @@ void Printer::homeXAxis()
 #endif
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif // NUM_EXTRUDER > 1
-        UI_STATUS_UPD(UI_TEXT_HOME_X);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_X_ID));
         steps = (Printer::xMaxSteps - Printer::xMinSteps) * X_HOME_DIR;
         currentPositionSteps[X_AXIS] = -steps;
         setHoming(true);
@@ -1360,7 +1381,7 @@ void Printer::homeYAxis()
 #endif
         // Reposition extruder that way, that all extruders can be selected at home pos.
 #endif
-        UI_STATUS_UPD(UI_TEXT_HOME_Y);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_Y_ID));
         steps = (yMaxSteps-Printer::yMinSteps) * Y_HOME_DIR;
         currentPositionSteps[Y_AXIS] = -steps;
         setHoming(true);
@@ -1390,7 +1411,7 @@ void Printer::homeZAxis() // cartesian homing
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1))
     {
-        UI_STATUS_UPD(UI_TEXT_HOME_Z);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_Z_ID));
         steps = (zMaxSteps - zMinSteps) * Z_HOME_DIR;
         currentPositionSteps[Z_AXIS] = -steps;
         setHoming(true);
@@ -1706,6 +1727,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
                                      + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS],0) * invAxisStepsPerMM[Z_AXIS];
     distance += zCorr;
 #endif
+    distance += bendingCorrectionAt(currentPosition[X_AXIS] + EEPROM::zProbeXOffset(), currentPosition[Y_AXIS] + EEPROM::zProbeYOffset());
     Com::printF(Com::tZProbe, distance);
     Com::printF(Com::tSpaceXColon, realXPosition());
 #if DISTORTION_CORRECTION
@@ -1734,6 +1756,16 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
                                                (Printer::offsetZ - oldOffZ) * Printer::axisStepsPerMM[Z_AXIS], 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);
     }
     return distance;
+}
+
+float Printer::bendingCorrectionAt(float x, float y) {
+    RVector3 p0(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
+    RVector3 p1(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
+    RVector3 p2(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
+    RVector3 a = p1-p0,b = p2 - p0;
+    RVector3 n = a.cross(b);
+    RVector3 l0(x,y,0);
+    return ((p0 - l0).scalar(n)) / n.z;
 }
 
 void Printer::waitForZProbeStart()
@@ -1867,7 +1899,7 @@ void Printer::handleInterruptEvent() {
     case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
         EVENT_JAM_DETECTED;
         Com::printFLN(PSTR("important:Extruder jam detected"));
-        UI_ERROR_P(Com::tExtruderJam);
+        UI_ERROR_P(Com::translatedF(UI_TEXT_EXTRUDER_JAM_ID));
 #if JAM_ACTION == 1 // start dialog
         Printer::setUIErrorMessage(false);
         uid.executeAction(UI_ACTION_WIZARD_JAM_EOF, true);

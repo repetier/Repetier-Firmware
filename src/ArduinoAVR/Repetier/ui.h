@@ -49,9 +49,11 @@ What display type do you use?
 // 4000-4999 : Show menu
 // 5000-5999 : Wizard pages
 // Add UI_ACTION_TOPMENU to show a menu as top menu
+// Add UI_ACTION_NO_AUTORETURN to prevent autoreturn to start display
 // ----------------------------------------------------------------------------
 
 #define UI_ACTION_TOPMENU 8192
+#define UI_ACTION_NO_AUTORETURN 16384
 
 #define UI_ACTION_NEXT 1
 #define UI_ACTION_PREVIOUS 2
@@ -193,16 +195,29 @@ What display type do you use?
 #define UI_ACTION_SERVOPOS              1203
 #define UI_ACTION_IGNORE_M106           1204
 
-#define UI_ACTION_KAPTON				1914
-#define UI_ACTION_BLUETAPE				1915
-#define UI_ACTION_NOCOATING				1916
-#define UI_ACTION_PETTAPE				1917
-#define UI_ACTION_GLUESTICK				1918
-#define UI_ACTION_RESET_MATRIX			1919
-#define UI_ACTION_CALIBRATE				1920
-#define UI_ACTION_BED_LED_CHANGE		1921
-#define UI_ACTION_COATING_CUSTOM		1922
-#define UI_ACTION_BUILDTAK				1923
+#define UI_ACTION_KAPTON				1205
+#define UI_ACTION_BLUETAPE				1206
+#define UI_ACTION_NOCOATING				1207
+#define UI_ACTION_PETTAPE				1208
+#define UI_ACTION_GLUESTICK				1209
+#define UI_ACTION_RESET_MATRIX			1210
+#define UI_ACTION_CALIBRATE				1211
+#define UI_ACTION_BED_LED_CHANGE		1212
+#define UI_ACTION_COATING_CUSTOM		1213
+#define UI_ACTION_BUILDTAK				1214
+
+// 1700-1956 language selectors
+
+#define UI_ACTION_LANGUAGE_EN           1700
+#define UI_ACTION_LANGUAGE_DE           1701
+#define UI_ACTION_LANGUAGE_NL           1702
+#define UI_ACTION_LANGUAGE_PT           1703
+#define UI_ACTION_LANGUAGE_IT           1704
+#define UI_ACTION_LANGUAGE_ES           1705
+#define UI_ACTION_LANGUAGE_SE           1706
+#define UI_ACTION_LANGUAGE_FR           1707
+#define UI_ACTION_LANGUAGE_CZ           1708
+#define UI_ACTION_LANGUAGE_PL           1709
 
 #define UI_ACTION_MENU_XPOS             4000
 #define UI_ACTION_MENU_YPOS             4001
@@ -249,10 +264,11 @@ What display type do you use?
 
 typedef struct {
   const char *text; // Menu text
-  uint8_t menuType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command,
+  uint8_t entryType; // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command, 4 = modify action command,
   unsigned int action; // must be int so it gets 32 bit on arm!
   uint8_t filter; // allows dynamic menu filtering based on Printer::menuMode bits set.
   uint8_t nofilter; // Hide if one of these bits are set
+  int translation; // Translation id
   bool showEntry() const;
 } const UIMenuEntry;
 
@@ -262,6 +278,7 @@ typedef struct UIMenu_struct {
   // 2 = submenu
   // 3 = modififaction menu
   // 5 = Wizard menu
+  // +128 = sticky -> no autoreturn to main menuü after timeout
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -342,63 +359,121 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #define UI_STRING(name,text) const char PROGMEM name[] = text
 
 #define UI_PAGE6(name,row1,row2,row3,row4,row5,row6) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);UI_STRING(name ## _5txt,row5);UI_STRING(name ## _6txt,row6);\
-   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
-   UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0};\
-   UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0};\
+   UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+   UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+   UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0,0};\
+   UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0,0};\
+   UIMenuEntry name ## _5 PROGMEM ={name ## _5txt,0,0,0,0,0};\
+   UIMenuEntry name ## _6 PROGMEM ={name ## _6txt,0,0,0,0,0};\
+   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
+   const UIMenu name PROGMEM = {0,0,6,name ## _entries};
+#define UI_PAGE6_T(name,row1,row2,row3,row4,row5,row6) \
+   UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+   UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+   UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+   UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
+   UIMenuEntry name ## _5 PROGMEM ={0,0,0,0,0,row5};\
+   UIMenuEntry name ## _6 PROGMEM ={0,0,0,0,0,row6};\
    const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4,&name ## _5,&name ## _6};\
    const UIMenu name PROGMEM = {0,0,6,name ## _entries};
 #define UI_PAGE4(name,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0,0};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {0,0,4,name ## _entries};
+#define UI_PAGE4_T(name,row1,row2,row3,row4) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+  UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+  UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {0,0,4,name ## _entries};
 #define UI_PAGE2(name,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenu name PROGMEM = {0,0,2,name ## _entries};
+#define UI_PAGE2_T(name,row1,row2) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {0,0,2,name ## _entries};
 #define UI_WIZARD4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0,0};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+#define UI_WIZARD4_T(name,action,row1,row2,row3,row4) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+  UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+  UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {5,action,4,name ## _entries};
 #define UI_WIZARD2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenu name PROGMEM = {5,action,2,name ## _entries};
+#define UI_WIZARD2_T(name,action,row1,row2) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {5,action,2,name ## _entries};
 #define UI_MENU_ACTION4C(name,action,rows) UI_MENU_ACTION4(name,action,rows)
 #define UI_MENU_ACTION2C(name,action,rows) UI_MENU_ACTION2(name,action,rows)
+#define UI_MENU_ACTION4C_T(name,action,rows) UI_MENU_ACTION4_T(name,action,rows)
+#define UI_MENU_ACTION2C_T(name,action,rows) UI_MENU_ACTION2_T(name,action,rows)
 #define UI_MENU_ACTION4(name,action,row1,row2,row3,row4) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);UI_STRING(name ## _3txt,row3);UI_STRING(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
-  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0};\
-  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
+  UIMenuEntry name ## _3 PROGMEM ={name ## _3txt,0,0,0,0,0};\
+  UIMenuEntry name ## _4 PROGMEM ={name ## _4txt,0,0,0,0,0};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {3,action,4,name ## _entries};
+#define UI_MENU_ACTION4_T(name,action,row1,row2,row3,row4) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+  UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+  UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {3,action,4,name ## _entries};
 #define UI_MENU_ACTION2(name,action,row1,row2) UI_STRING(name ## _1txt,row1);UI_STRING(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0};\
-  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _1 PROGMEM ={name ## _1txt,0,0,0,0,0};\
+  UIMenuEntry name ## _2 PROGMEM ={name ## _2txt,0,0,0,0,0};\
   const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
   const UIMenu name PROGMEM = {3,action,2,name ## _entries};
-#define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0,0,0};
-#define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,0,0};
-#define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0};
-#define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
-#define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0};
-#define UI_MENU_WIZARD(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,5,(unsigned int)&entries,0,0};
-#define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,filter,nofilter};
-#define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter};
-#define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
-#define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter};
+#define UI_MENU_ACTION2_T(name,action,row1,row2) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+  const UIMenuEntry * const name ## _entries[] PROGMEM = {&name ## _1,&name ## _2};\
+  const UIMenu name PROGMEM = {3,action,2,name ## _entries};
+#define UI_MENU_HEADLINE(name,text) UI_STRING(name ## _txt,text);UIMenuEntry name PROGMEM = {name ## _txt,1,0,0,0,0};
+#define UI_MENU_HEADLINE_T(name,text) UIMenuEntry name PROGMEM = {0,1,0,0,0,text};
+#define UI_MENU_CHANGEACTION(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,0,0,0};
+#define UI_MENU_CHANGEACTION_T(name,row,action) UIMenuEntry name PROGMEM = {0,4,action,0,0,row};
+#define UI_MENU_ACTIONCOMMAND(name,row,action) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,0,0,0};
+#define UI_MENU_ACTIONCOMMAND_T(name,rowId,action) UIMenuEntry name PROGMEM = {0,3,action,0,0,rowId};
+#define UI_MENU_ACTIONSELECTOR(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0,0};
+#define UI_MENU_ACTIONSELECTOR_T(name,row,entries) UIMenuEntry name PROGMEM = {0,2,(unsigned int)&entries,0,0,row};
+#define UI_MENU_SUBMENU(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,0,0,0};
+#define UI_MENU_SUBMENU_T(name,row,entries) UIMenuEntry name PROGMEM = {0,2,(unsigned int)&entries,0,0,row};
+#define UI_MENU_WIZARD(name,row,entries) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,5,(unsigned int)&entries,0,0,0};
+#define UI_MENU_WIZARD_T(name,row,entries) UIMenuEntry name PROGMEM = {0,5,(unsigned int)&entries,0,0,row};
+#define UI_MENU_CHANGEACTION_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,4,action,filter,nofilter,0};
+#define UI_MENU_CHANGEACTION_FILTER_T(name,row,action,filter,nofilter) UIMenuEntry name PROGMEM = {0,4,action,filter,nofilter,row};
+#define UI_MENU_ACTIONCOMMAND_FILTER(name,row,action,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,3,action,filter,nofilter,0};
+#define UI_MENU_ACTIONCOMMAND_FILTER_T(name,row,action,filter,nofilter) UIMenuEntry name PROGMEM = {0,3,action,filter,nofilter,row};
+#define UI_MENU_ACTIONSELECTOR_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter,0};
+#define UI_MENU_ACTIONSELECTOR_FILTER_T(name,row,entries,filter,nofilter) UIMenuEntry name PROGMEM = {0,2,(unsigned int)&entries,filter,nofilter,row};
+#define UI_MENU_SUBMENU_FILTER(name,row,entries,filter,nofilter) UI_STRING(name ## _txt,row);UIMenuEntry name PROGMEM = {name ## _txt,2,(unsigned int)&entries,filter,nofilter,0};
+#define UI_MENU_SUBMENU_FILTER_T(name,row,entries,filter,nofilter) UIMenuEntry name PROGMEM = {0,2,(unsigned int)&entries,filter,nofilter,row};
 #define UI_MENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2,0,itemsCnt,name ## _entries};
+#define UI_STICKYMENU(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {2+128,0,itemsCnt,name ## _entries};
 #define UI_MENU_FILESELECT(name,items,itemsCnt) const UIMenuEntry * const name ## _entries[] PROGMEM = items;const UIMenu name PROGMEM = {1,0,itemsCnt,name ## _entries};
 
 #if FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD || FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD && MOTHERBOARD != CONTROLLER_FELIX_DUE)
@@ -504,6 +579,8 @@ class UIDisplay {
     void goDir(char *name);
     bool isDirname(char *name);
     bool isWizardActive();
+    bool isSticky();
+    void showLanguageSelectionWizard();
 #if UI_BED_COATING
     void menuAdjustHeight(const UIMenu *men,float offset);
 #endif
@@ -614,6 +691,24 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_B           11
 #define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
+
+#elif MOTHERBOARD == 37 // UltiMaker 1.5.7
+#define BEEPER_PIN 18
+#define UI_DISPLAY_RS_PIN      20
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      16
+#define UI_DISPLAY_D5_PIN      21
+#define UI_DISPLAY_D6_PIN      5
+#define UI_DISPLAY_D7_PIN      6
+#define UI_ENCODER_A           42
+#define UI_ENCODER_B           40
+#define UI_ENCODER_CLICK       19
+#define UI_RESET_PIN           -1
 
 #elif MOTHERBOARD == 301 // Rambo has own pins layout
 
@@ -1731,7 +1826,9 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
+#define UI_STATUS_F(status) uid.setStatusP(status);
 #define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
+#define UI_STATUS_UPD_F(status) {uid.setStatusP(status);uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
 #define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
@@ -1747,8 +1844,10 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_MEDIUM {}
 #define UI_SLOW(allowMoves) {}
 #define UI_STATUS(status) {}
+#define UI_STATUS_F(status) {}
 #define UI_STATUS_RAM(status) {}
 #define UI_STATUS_UPD(status) {}
+#define UI_STATUS_UPD_F(status) {}
 #define UI_STATUS_UPD_RAM(status) {}
 #define UI_CLEAR_STATUS {}
 #define UI_ERROR(msg) {}

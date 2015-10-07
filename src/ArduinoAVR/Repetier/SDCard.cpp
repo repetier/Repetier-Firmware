@@ -48,14 +48,14 @@ void SDCard::automount()
             uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
             unmount();
-            UI_STATUS(UI_TEXT_SD_REMOVED);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_REMOVED_ID));
         }
     }
     else
     {
         if(!sdactive)
         {
-            UI_STATUS(UI_TEXT_SD_INSERTED);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
             Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
             initsd();
 #if UI_DISPLAY_TYPE != NO_DISPLAY
@@ -459,7 +459,7 @@ void SDCard::startWrite(char *filename)
     }
     else
     {
-        UI_STATUS(UI_TEXT_UPLOADING);
+        UI_STATUS_F(Com::translatedF(UI_TEXT_UPLOADING_ID));
         savetosd = true;
         Com::printFLN(Com::tWritingToFile,filename);
     }

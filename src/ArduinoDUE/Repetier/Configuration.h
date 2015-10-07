@@ -733,6 +733,11 @@ on this endstop.
 #define DISABLE_Y false
 #define DISABLE_Z false
 #define DISABLE_E false
+/* If you want to keep z motor running on stepper timeout, remove comments below.
+  This may be usefull if your z bed moves when motors are disabled. Will still
+  turn z off when heaters get also disabled. 
+*/
+//#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
 
 // Inverting axis direction
 #define INVERT_X_DIR false
@@ -1015,6 +1020,13 @@ for some printers causing an early stall.
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 4000
+/** If the z axis/be dmoves up/down it can shape more due to acceleration at 
+ the top of the print when the axis is lower. Therefore it can be handy to
+ interpolate the acceleration used. At bed level you then get the acceleration
+ defined above and at max z height the acceleration defined with
+ Z_ACCELERATION_TOP. To enable this feature set INTERPOLATE_Z_ACCELERATION to 1 */
+#define INTERPOLATE_Z_ACCELERATION 0
+#define Z_ACCELERATION_TOP 0
 
 /** \brief Maximum allowable jerk.
 
@@ -1277,6 +1289,14 @@ to recalibrate z.
 #define Z_PROBE_Y2 -40
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
+/* Bending correction adds a value to a measured z-probe value. This may be
+  required when the z probe needs some force to trigger and this bends the
+  bed down. Currently the correction values A/B/C correspond to z probe
+  positions 1/2/3. In later versions a bending correction algorithm might be
+  introduced to give it other meanings.*/
+#define BENDING_CORRECTION_A 0
+#define BENDING_CORRECTION_B 0
+#define BENDING_CORRECTION_C 0
 
 /* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
  * assumes that the floor is plain (i.e. glass plate)
@@ -1400,19 +1420,21 @@ The following settings override uiconfig.h!
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
+
 /**
-Select the language to use.
-0 = English
-1 = German
-2 = Dutch
-3 = Brazilian portuguese
-4 = Italian
-5 = Spanish
-6 = Swedish
-7 = French
-8 = Czech
-*/
-#define UI_LANGUAGE 1
+Select the languages to use. On first startup user can select
+the language from a menu with activated languages. In Configuration->Language
+the language can be switched any time. */
+#define LANGUAGE_EN_ACTIVE 1 // English
+#define LANGUAGE_DE_ACTIVE 1 // German
+#define LANGUAGE_NL_ACTIVE 1 // Dutch
+#define LANGUAGE_PT_ACTIVE 1 // Brazilian portuguese
+#define LANGUAGE_IT_ACTIVE 1 // Italian
+#define LANGUAGE_ES_ACTIVE 1 // Spanish
+#define LANGUAGE_SE_ACTIVE 1 // Swedish
+#define LANGUAGE_FR_ACTIVE 1 // French
+#define LANGUAGE_CZ_ACTIVE 1 // Czech
+#define LANGUAGE_PL_ACTIVE 1 // Polish
 
 /* Some displays loose their settings from time to time. Try uncommenting the 
 autorepair function if this is the case. It is not supported for all display
