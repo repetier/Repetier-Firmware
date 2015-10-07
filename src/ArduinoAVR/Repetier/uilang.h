@@ -82,6 +82,8 @@
 // can overwrite the definition. That way new strings are at least in english
 // available.
 
+#if UI_LANGUAGE==0
+
 #define UI_TEXT_ON               "On"
 #define UI_TEXT_OFF              "Off"
 #define UI_TEXT_NA               "N/A" // Output for not available
@@ -256,6 +258,7 @@
 #define UI_TEXT_STRING_HM_SLOWBANG     "SlowBang"
 #define UI_TEXT_STOP_PRINT "Stop Print"
 #define UI_TEXT_Z_BABYSTEPPING "Z Babystepping"
+#endif
 
 // *************** German translation ****************
 

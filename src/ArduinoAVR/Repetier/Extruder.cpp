@@ -80,18 +80,21 @@ void Extruder::manageTemperatures()
         if(controller<NUM_EXTRUDER)
         {
 #if NUM_EXTRUDER>=2 && EXT0_EXTRUDER_COOLER_PIN==EXT1_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN>=0
-            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1)
+            if(controller==1 && autotuneIndex!=0 && autotuneIndex!=1) {
                 if(tempController[0]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[0]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP &&
                         tempController[1]->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && tempController[1]->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[0].coolerPWM = 0;
                 else
                     extruder[0].coolerPWM = extruder[0].coolerSpeed;
+	    }
             if(controller>1)
 #endif // NUM_EXTRUDER
+            {
                 if(act->currentTemperatureC<EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC<EXTRUDER_FAN_COOL_TEMP)
                     extruder[controller].coolerPWM = 0;
                 else
                     extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
+	    }
         }
         if(!Printer::isAnyTempsensorDefect() && (act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE))   // no temp sensor or short in sensor, disable heater
         {
@@ -149,7 +152,7 @@ void Extruder::manageTemperatures()
             {
                 float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
-                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : output = act->pidDriveMax);
+                output = (act->currentTemperatureC + act->tempIState * act->pidPGain > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             pwm_pos[act->pwmIndex] = output;
         }
@@ -666,7 +669,7 @@ void TemperatureController::updateCurrentTemperature()
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp = 0;
         currentTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-currentTemperature;
         while(i<num)
         {
@@ -696,7 +699,7 @@ void TemperatureController::updateCurrentTemperature()
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp = 0;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -801,7 +804,7 @@ void TemperatureController::setTargetTemperature(float target)
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -828,7 +831,7 @@ void TemperatureController::setTargetTemperature(float target)
         const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        short newraw = 0,newtemp = 0;
         while(i<num)
         {
             newraw = pgm_read_word(&temptable[i++]);
@@ -926,13 +929,13 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
     uint32_t temp_millis = HAL::timeInMilliseconds();
     uint32_t t1=temp_millis;
     uint32_t t2=temp_millis;
-    int32_t t_high;
+    int32_t t_high = 0;
     int32_t t_low;
 
     int32_t bias=pidMax>>1;
     int32_t d = pidMax>>1;
     float Ku, Tu;
-    float Kp, Ki, Kd;
+    float Kp = 0, Ki = 0, Kd = 0;
     float maxTemp=20, minTemp=20;
 
     Com::printInfoFLN(Com::tPIDAutotuneStart);

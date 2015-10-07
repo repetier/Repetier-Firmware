@@ -97,7 +97,7 @@ void Commands::waitUntilEndOfAllMoves()
 }
 void Commands::waitUntilEndOfAllBuffers()
 {
-    GCode *code;
+    GCode *code = NULL;
 #ifdef DEBUG_PRINT
     debugWaitLoop = 9;
 #endif
@@ -674,7 +674,7 @@ void Commands::executeGCode(GCode *com)
             //bool iterate = com->hasP() && com->P>0;
             Printer::coordinateOffset[0] = Printer::coordinateOffset[1] = Printer::coordinateOffset[2] = 0;
             Printer::setAutolevelActive(false); // iterate
-            float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
+            float h1,h2,h3,oldFeedrate = Printer::feedrate;
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
             if(h1<0) break;

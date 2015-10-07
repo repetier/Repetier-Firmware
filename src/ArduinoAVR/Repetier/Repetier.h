@@ -429,7 +429,7 @@ public:
   SDCard();
   void initsd();
   void writeCommand(GCode *code);
-  bool selectFile(char *filename,bool silent=false);
+  bool selectFile(const char *filename,bool silent=false);
   void mount();
   void unmount();
   void startPrint();

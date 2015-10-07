@@ -36,7 +36,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #endif
 
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
-long ui_autoreturn_time=0;
+unsigned long ui_autoreturn_time=0;
 #endif
 
 
@@ -534,7 +534,7 @@ void initializeLCD()
 // ----------- end direct LCD driver
 #endif
 #if UI_DISPLAY_TYPE<4
-void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
+void UIDisplay::printRow(uint8_t r,const char *txt,const char *txt2,uint8_t changeAtCol)
 {
     changeAtCol = RMath::min(UI_COLS,changeAtCol);
     uint8_t col=0;
@@ -758,7 +758,7 @@ UIDisplay::UIDisplay()
 #if UI_ANIMATION
 void slideIn(uint8_t row,FSTRINGPARAM(text))
 {
-    char *empty="";
+    const char *empty="";
     int8_t i = 0;
     uid.col=0;
     uid.addStringP(text);
@@ -869,7 +869,7 @@ void UIDisplay::initialize()
 #endif
 }
 #if UI_DISPLAY_TYPE==1 || UI_DISPLAY_TYPE==2 || UI_DISPLAY_TYPE==3
-void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
+void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     lcdCommand(LCD_SETCGRAMADDR | (location << 3));
@@ -881,7 +881,7 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 #endif
 void  UIDisplay::waitForKey()
 {
-    int nextAction = 0;
+    int16_t nextAction = 0;
 
     lastButtonAction = 0;
     while(lastButtonAction==nextAction)
@@ -1175,7 +1175,7 @@ void UIDisplay::parse(char *txt,bool ram)
                 printCols[col++]='%';
             break;
         case 'x':
-            if(c2>='0' && c2<='3')
+            if(c2>='0' && c2<='3') {
                 if(c2=='0')
                     fvalue = Printer::realXPosition();
                 else if(c2=='1')
@@ -1184,6 +1184,7 @@ void UIDisplay::parse(char *txt,bool ram)
                     fvalue = Printer::realZPosition();
                 else
                     fvalue = (float)Printer::currentPositionSteps[3]*Printer::invAxisStepsPerMM[3];
+	    }
             addFloat(fvalue,4,2);
             break;
         case 'y':
@@ -1397,7 +1398,6 @@ void UIDisplay::updateSDFileCount()
 {
 #if SDSUPPORT
     dir_t* p = NULL;
-    byte offset = menuTop[menuLevel];
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -1418,8 +1418,7 @@ void UIDisplay::updateSDFileCount()
 void getSDFilenameAt(byte filePos,char *filename)
 {
 #if SDSUPPORT
-    dir_t* p;
-    byte c=0;
+    dir_t* p = NULL;
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -1521,7 +1520,7 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
 void UIDisplay::refreshPage()
 {
     uint8_t r;
-    uint8_t mtype;
+    uint8_t mtype = 0;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
@@ -2006,7 +2005,7 @@ void UIDisplay::okAction()
 #endif
 }
 
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<(typeof(a))(_min-increment*steps)) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
 
 void UIDisplay::adjustMenuPos()
 {
@@ -2084,7 +2083,6 @@ void UIDisplay::nextPreviousAction(int8_t next)
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     UIMenuEntry *testEnt;
-    uint8_t entType = HAL::readFlashByte((const prog_char*)&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
     int action = pgm_read_word(&(ent->action));
     if(mtype==2 && activeAction==0)   // browse through menu items
     {
@@ -2361,7 +2359,7 @@ void UIDisplay::nextPreviousAction(int8_t next)
     case UI_ACTION_BAUDRATE:
 #if EEPROM_MODE!=0
     {
-        char p=0;
+        int p=0;
         int32_t rate;
         do
         {
@@ -3061,7 +3059,7 @@ void UIDisplay::slowAction()
     else if(time-lastRefresh>=800)
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
+        (void)pgm_read_byte((void*)&(men->menuType));
         //if(mtype!=1)
         refresh=1;
     }
