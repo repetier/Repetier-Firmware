@@ -291,9 +291,11 @@ STEPPER_CURRENT_CONTROL
 *
 ****************************************************************************************/
 #if MOTHERBOARD == 33
+#undef MOTHERBOARD
 #define MOTHERBOARD 3
 #define RAMPS_V_1_3
 #elif MOTHERBOARD == 34
+#undef MOTHERBOARD
 #define MOTHERBOARD 3
 #define RAMPS_V_1_3
 #define AZTEEG_X3
@@ -344,6 +346,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_DIR_PIN          34
 #define ORIG_E1_ENABLE_PIN       30
 
+#define SDSUPPORT true
+#define SDCARDDETECTINVERTED     false
 #define SDPOWER            -1
 #define SDSS               53
 #define SDCARDDETECT 	    49
@@ -2020,6 +2024,7 @@ S3(ext)=9
 #define E3_DIR_PIN          38
 #define E3_ENABLE_PIN       13
 
+#define SDSUPPORT true
 #define SDPOWER            -1
 #define SDCARDDETECT 	    10
 
@@ -2196,16 +2201,20 @@ S3(ext)=9
 #define FAN_BOARD_PIN -1
 #endif
 
-#if NUM_EXTRUDER==1
+#ifndef HEATER_PINS_INVERTED
+#define HEATER_PINS_INVERTED 0
+#endif
+
+#ifndef E0_PINS
+#define E0_PINS
+#endif
+
+#ifndef E1_PINS
 #define E1_PINS
 #endif
 
-#if NUM_EXTRUDER<3
+#ifndef E2_PINS
 #define E2_PINS
-#endif
-
-#ifndef HEATER_PINS_INVERTED
-#define HEATER_PINS_INVERTED 0
 #endif
 
 // Original pin assignmats to be used in configuration tool

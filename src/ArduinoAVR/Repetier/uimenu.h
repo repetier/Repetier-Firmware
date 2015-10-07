@@ -597,9 +597,13 @@ UI_MENU_CHANGEACTION(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UNIT
 #define UI_MENU_ADV_CNT 0
 #define UI_MENU_ADVANCE
 #ifdef USE_ADVANCE
+#undef  UI_MENU_ADV_CNT
+#undef  UI_MENU_ADVANCE
 #define UI_MENU_ADV_CNT 1
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
 #ifdef ENABLE_QUADRATIC_ADVANCE
+#undef  UI_MENU_ADV_CNT
+#undef  UI_MENU_ADVANCE
 #define UI_MENU_ADV_CNT 2
 #define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
 UI_MENU_CHANGEACTION(ui_menu_cext_advancek,UI_TEXT_EXTR_ADVANCE_K,UI_ACTION_ADVANCE_K);

@@ -374,7 +374,7 @@ void PrintLine::calculateMove(float axis_diff[],uint8_t pathOptimize)
     {
         float advlin = fabs(speedE)*Extruder::current->advanceL*0.001*Printer::axisStepsPerMM[E_AXIS];
         advanceL = (uint16_t)((65536L*advlin)/vMax); //advanceLscaled = (65536*vE*k2)/vMax
-#ifdef ENABLE_QUADRATIC_ADVANCE;
+#ifdef ENABLE_QUADRATIC_ADVANCE
         advanceFull = 65536*Extruder::current->advanceK * speedE * speedE; // Steps*65536 at full speed
         long steps = (HAL::U16SquaredToU32(vMax))/(accelerationPrim<<1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
         advanceRate = advanceFull/steps;
@@ -1221,7 +1221,7 @@ uint8_t PrintLine::calculateDistance(float axisDiff[], uint8_t dir, float *dista
     }
 }
 
-#ifdef SOFTWARE_LEVELING && DRIVE_SYSTEM==3
+#if defined(SOFTWARE_LEVELING) && DRIVE_SYSTEM==3
 void PrintLine::calculatePlane(long factors[], long p1[], long p2[], long p3[])
 {
     factors[0] = p1[1] * (p2[2] - p3[2]) + p2[1] * (p3[2] - p1[2]) + p3[1] * (p1[2] - p2[2]);

@@ -747,7 +747,10 @@ ISR(PWM_TIMER_VECTOR)
     static uint8_t pwm_count = 0;
     static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER+3];
+#if EXT0_EXTRUDER_COOLER_PIN>-1 || EXT1_EXTRUDER_COOLER_PIN>-1 || EXT2_EXTRUDER_COOLER_PIN>-1 || EXT3_EXTRUDER_COOLER_PIN>-1  || EXT4_EXTRUDER_COOLER_PIN>-1 || EXT5_EXTRUDER_COOLER_PIN>-1
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
+#endif
+
     PWM_OCR += 64;
     if(pwm_count_heater == 0)
     {
