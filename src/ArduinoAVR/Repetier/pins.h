@@ -555,10 +555,11 @@ STEPPER_CURRENT_CONTROL
 #define MOSI_PIN         51
 #define SDPOWER          -1
 #define SDSS             53
+#define SDCARDETECT	 38
 
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
-#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
-#define E3_PINS E3_STEP_PIN,E3_DIR_PIN,E3_ENABLE_PIN,
+#define E2_PINS
 
 #endif
 
@@ -2194,14 +2195,6 @@ S3(ext)=9
 
 #ifndef FAN_BOARD_PIN
 #define FAN_BOARD_PIN -1
-#endif
-
-#if NUM_EXTRUDER==1
-#define E1_PINS
-#endif
-
-#if NUM_EXTRUDER<3
-#define E2_PINS
 #endif
 
 #ifndef HEATER_PINS_INVERTED
