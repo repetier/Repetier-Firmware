@@ -511,6 +511,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 {
 #if EEPROM_MODE != 0
     uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
+    //Com::printFLN(PSTR("Detected EEPROM version:"),(int)version);
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
@@ -719,6 +720,9 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         }
         if(version < 15) {
             HAL::eprSetByte(EPR_SELECTED_LANGUAGE, 254); // activate selector on startup
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+            Com::selectedLanguage = 254;
+#endif
         }
         if(version < 16) {
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);

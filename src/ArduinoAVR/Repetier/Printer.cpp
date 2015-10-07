@@ -435,7 +435,12 @@ void Printer::kill(uint8_t only_steppers)
 #endif // defined
     disableXStepper();
     disableYStepper();
+#if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
+#else
+    if(!only_steppers)
+        disableZStepper();
+#endif
     Extruder::disableAllExtruderMotors();
     if(!only_steppers)
     {
@@ -1025,11 +1030,11 @@ void Printer::setup()
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
-    UI_INITIALIZE;
     HAL::showStartReason();
     Extruder::initExtruder();
     // sets autoleveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
+    UI_INITIALIZE;
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;

@@ -637,7 +637,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
       )
     {
         Extruder *actExtruder = &extruder[extr];
-        UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
+        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_EXTRUDER_ID));
         EVENT_WAITING_HEATER(actExtruder->id);
         bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
         millis_t printedTime = HAL::timeInMilliseconds();

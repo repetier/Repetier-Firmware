@@ -195,6 +195,10 @@ public:
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
+    static inline void setVersion(uint8_t v) {
+        HAL::eprSetByte(EPR_VERSION,v);
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE,computeChecksum());
+    }
     static inline uint8_t getStoredLanguage() {
 #if EEPROM_MODE != 0
         return HAL::eprGetByte(EPR_SELECTED_LANGUAGE);

@@ -1011,6 +1011,7 @@ public:
 #if FEATURE_Z_PROBE
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
+    static float bendingCorrectionAt(float x,float y);
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
@@ -1043,6 +1044,9 @@ public:
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
+    static float zAccelerationAt(float z);
+#endif
 private:
     static void homeXAxis();
     static void homeYAxis();

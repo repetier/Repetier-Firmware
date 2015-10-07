@@ -692,6 +692,24 @@ void uiCheckSlowKeys(int &action) {}
 #define UI_ENCODER_CLICK       43
 #define UI_RESET_PIN           46
 
+#elif MOTHERBOARD == 37 // UltiMaker 1.5.7
+#define BEEPER_PIN 18
+#define UI_DISPLAY_RS_PIN      20
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      16
+#define UI_DISPLAY_D5_PIN      21
+#define UI_DISPLAY_D6_PIN      5
+#define UI_DISPLAY_D7_PIN      6
+#define UI_ENCODER_A           42
+#define UI_ENCODER_B           40
+#define UI_ENCODER_CLICK       19
+#define UI_RESET_PIN           -1
+
 #elif MOTHERBOARD == 301 // Rambo has own pins layout
 
 #define BEEPER_PIN             79

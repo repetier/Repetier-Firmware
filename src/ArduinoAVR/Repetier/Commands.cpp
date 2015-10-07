@@ -2254,7 +2254,8 @@ void Commands::processMCode(GCode *com)
         dacCommitEeprom();
 #endif
         break;
-#if UI_DISPLAY_TYPE != NO_DISPLAY
+#if 0 && UI_DISPLAY_TYPE != NO_DISPLAY
+    // some debuggingcommands normally disabled
     case 888:
         Com::printFLN(PSTR("Selected language:"),(int)Com::selectedLanguage);
         Com::printF(PSTR("Translation:"));
@@ -2272,6 +2273,10 @@ void Commands::processMCode(GCode *com)
                 Com::printFLN(PSTR(") = "),c);
             }
         }
+        break;
+    case 891:
+        if(com->hasS())
+            EEPROM::setVersion(com->S);
         break;
 #endif
     default:
