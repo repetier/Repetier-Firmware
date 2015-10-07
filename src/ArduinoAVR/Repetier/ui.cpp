@@ -1397,7 +1397,6 @@ void UIDisplay::updateSDFileCount()
 {
 #if SDSUPPORT
     dir_t* p = NULL;
-    byte offset = menuTop[menuLevel];
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -1418,8 +1417,7 @@ void UIDisplay::updateSDFileCount()
 void getSDFilenameAt(byte filePos,char *filename)
 {
 #if SDSUPPORT
-    dir_t* p;
-    byte c=0;
+    dir_t* p = NULL;
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -2084,7 +2082,6 @@ void UIDisplay::nextPreviousAction(int8_t next)
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     UIMenuEntry *testEnt;
-    uint8_t entType = HAL::readFlashByte((const prog_char*)&(ent->menuType));// 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
     int action = pgm_read_word(&(ent->action));
     if(mtype==2 && activeAction==0)   // browse through menu items
     {
@@ -3061,7 +3058,7 @@ void UIDisplay::slowAction()
     else if(time-lastRefresh>=800)
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        uint8_t mtype = pgm_read_byte((void*)&(men->menuType));
+        (void)pgm_read_byte((void*)&(men->menuType));
         //if(mtype!=1)
         refresh=1;
     }

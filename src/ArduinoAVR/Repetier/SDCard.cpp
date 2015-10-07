@@ -343,8 +343,7 @@ void SDCard::ls()
 bool SDCard::selectFile(char *filename, bool silent)
 {
     SdBaseFile parent;
-    char *oldP = filename;
-    boolean bFound;
+    const char *oldP = filename;
 
     if(!sdactive) return false;
     sdmode = false;

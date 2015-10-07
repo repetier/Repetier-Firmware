@@ -927,7 +927,6 @@ void Printer::homeZAxis() // Delta z homing
 
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
 {
-    long steps;
     setHomed(true);
     bool homeallaxis = (xaxis && yaxis && zaxis) || (!xaxis && !yaxis && !zaxis);
     if (X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1 && MAX_HARDWARE_ENDSTOP_X & MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z)
@@ -1258,13 +1257,10 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
-    int32_t updateZ = 0;
     for(uint8_t r=0; r<repeat; r++)
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
         stepsRemainingAtZHit = -1;
-        int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
-        int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
         waitForZProbeStart();
         setZProbingActive(true);
@@ -1287,7 +1283,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         if(r == 0 && first) {// Modify start z position on first probe hit to speed the ZProbe process
             int32_t newLastCorrection = currentPositionSteps[Z_AXIS] + (int32_t)((float)EEPROM::zProbeBedDistance() * axisStepsPerMM[Z_AXIS]);
             if(newLastCorrection < lastCorrection) {
-                    updateZ = lastCorrection - newLastCorrection;
                 lastCorrection = newLastCorrection;
             }
         }
