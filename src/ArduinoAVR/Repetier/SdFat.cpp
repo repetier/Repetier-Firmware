@@ -1105,7 +1105,7 @@ uint8_t SdBaseFile::lfn_checksum(const unsigned char *pFCBName)
 bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, bool bDir) {
   bool emptyFound = false;
   uint8_t index = 0;
-  dir_t tempDir, *p;
+  dir_t tempDir, *p = NULL;
   const char *tempPtr;
   char newName[SHORT_FILENAME_LENGTH+2];
   boolean bShortName = false;
@@ -3189,7 +3189,13 @@ uint8_t Sd2Card::cardCommand(uint8_t cmd, uint32_t arg) {
 
 #if USE_SD_CRC
   // form message
-  uint8_t d[6] = {cmd | 0X40, pa[3], pa[2], pa[1], pa[0]};
+  uint8_t d[6];
+
+  d[0] = cmd | 0x40;
+  d[1] = pa[3];
+  d[2] = pa[2];
+  d[3] = pa[1];
+  d[4] = pa[0];
 
   // add crc
   d[5] = CRC7(d, 5);

@@ -97,7 +97,7 @@ void Commands::waitUntilEndOfAllMoves()
 }
 void Commands::waitUntilEndOfAllBuffers()
 {
-    GCode *code;
+    GCode *code = NULL;
 #ifdef DEBUG_PRINT
     debugWaitLoop = 9;
 #endif

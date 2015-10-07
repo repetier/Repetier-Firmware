@@ -1519,7 +1519,7 @@ void sdrefresh(uint8_t &r,char cache[UI_ROWS][MAX_COLS+1])
 void UIDisplay::refreshPage()
 {
     uint8_t r;
-    uint8_t mtype;
+    uint8_t mtype = 0;
     char cache[UI_ROWS][MAX_COLS+1];
     adjustMenuPos();
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
