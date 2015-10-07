@@ -585,6 +585,13 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
         lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
     }
 }
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
+float Printer::zAccelerationAt(float z) {
+    float zTop = EEPROM::zAccelarationTop();
+    if(zTop <= 0) return maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
+    return (maxTravelAccelerationMMPerSquareSecond[Z_AXIS] - zTop) * z / zLength;
+}
+#endif
 
 /**
   \brief Sets the destination coordinates to values stored in com.
@@ -1250,7 +1257,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     // so the redundant check is only an opportunity to
     // gratuitously fail due to incorrect settings.
     // The following movements would be meaningless unless it was zeroed for example.
-    UI_STATUS_UPD(UI_TEXT_HOME_DELTA);
+    UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_DELTA_ID));
     // Homing Z axis means that you must home X and Y
     homeZAxis();
     moveToReal(0,0,Printer::zLength - zBedOffset,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
@@ -1746,9 +1753,14 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     return distance;
 }
 
-float Printer::bendingCorrectionAt(float x,float y) {
-
-
+float Printer::bendingCorrectionAt(float x, float y) {
+    RVector3 p0(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
+    RVector3 p1(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
+    RVector3 p2(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
+    RVector3 a = p1-p0,b = p2 - p0;
+    RVector3 n = a.cross(b);
+    RVector3 l0(x,y,0);
+    return ((p0 - l0).scalar(n)) / n.z;
 }
 
 void Printer::waitForZProbeStart()

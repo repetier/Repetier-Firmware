@@ -718,7 +718,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET,Z_PROBE_Z_OFFSET);
         }
         if(version < 15) {
-            HAL::eprSetByte(EPR_SELECTED_LANGUAGE,254); // activate selector on startup
+            HAL::eprSetByte(EPR_SELECTED_LANGUAGE, 254); // activate selector on startup
         }
         if(version < 16) {
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
@@ -878,7 +878,9 @@ void EEPROM::writeSettings()
 #if DRIVE_SYSTEM == DELTA
     writeFloat(EPR_Z_MAX_ACCEL, Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
     writeFloat(EPR_Z_ACCELERATION_TOP, Com::tEPRZAccelerationAtTop);
+#endif
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH, Com::tEPRDiagonalRodLength);
     writeFloat(EPR_DELTA_HORIZONTAL_RADIUS, Com::tEPRHorizontalRadius);
     writeFloat(EPR_DELTA_MAX_RADIUS, Com::tEPRDeltaMaxRadius);

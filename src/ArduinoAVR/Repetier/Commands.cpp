@@ -2263,6 +2263,16 @@ void Commands::processMCode(GCode *com)
     case 889:
         uid.showLanguageSelectionWizard();
         break;
+    case 890:
+        {
+            if(com->hasX() && com->hasY()) {
+                float c = Printer::bendingCorrectionAt(com->X,com->Y);
+                Com::printF(PSTR("Bending at ("),com->X);
+                Com::printF(PSTR(","),com->Y);
+                Com::printFLN(PSTR(") = "),c);
+            }
+        }
+        break;
 #endif
     default:
         if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors())

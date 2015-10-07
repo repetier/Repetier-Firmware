@@ -1044,6 +1044,9 @@ public:
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
+#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
+    static float zAccelerationAt(float z);
+#endif
 private:
     static void homeXAxis();
     static void homeYAxis();

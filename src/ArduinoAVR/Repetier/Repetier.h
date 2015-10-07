@@ -699,6 +699,29 @@ public:
         return t.normalize();
     }
 };
+	inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+	{
+		lhs.x += rhs.x;
+		lhs.y += rhs.y;
+		lhs.z += rhs.z;
+		return lhs;
+	}
+
+	inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+	{
+		lhs.x -= rhs.x;
+		lhs.y -= rhs.y;
+		lhs.z -= rhs.z;
+		return lhs;
+	}
+
+    inline RVector3 operator*(const RVector3 &lhs,float rhs) {
+        return lhs.scale(rhs);
+    }
+
+    inline RVector3 operator*(float lhs,const RVector3 &rhs) {
+        return rhs.scale(lhs);
+    }
 extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];

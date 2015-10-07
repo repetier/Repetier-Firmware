@@ -53,7 +53,7 @@
 #define BLUETOOTH_BAUD  115200
 #define MIXING_EXTRUDER 0
 
-#define DRIVE_SYSTEM 0
+#define DRIVE_SYSTEM 1
 #define XAXIS_STEPS_PER_MM 350.3012
 #define YAXIS_STEPS_PER_MM 350.3012
 #define ZAXIS_STEPS_PER_MM 2560
@@ -374,7 +374,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_MEMORY_POSITION 1
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 1
-#define FEATURE_CONTROLLER 2
+#define FEATURE_CONTROLLER 11
 #define UI_LANGUAGE 0
 #define UI_PRINTER_NAME "Ordbot"
 #define UI_PRINTER_COMPANY "Repetier"
@@ -413,6 +413,87 @@ Values must be in range 1..255
 #define UI_SET_MAX_EXTRUDER_TEMP   260
 #define UI_SET_EXTRUDER_FEEDRATE 2
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
+
+/** \brief Delta rod length (mm)
+*/
+#define DELTA_DIAGONAL_ROD 345 // mm
+
+
+/*  =========== Parameter essential for delta calibration ===================
+
+            C, Y-Axis
+            |                        |___| CARRIAGE_HORIZONTAL_OFFSET (recommend set it to 0)
+            |                        |   \------------------------------------------
+            |_________ X-axis        |    \                                        |
+           / \                       |     \  DELTA_DIAGONAL_ROD (length)    Each move this Rod Height
+          /   \                             \                                 is calculated
+         /     \                             \    Carriage is at printer center!   |
+         A      B                             \_____/--------------------------------
+                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET (recommend set it to 0)
+                                         |----| ROD_RADIUS (Horizontal rod pivot to pivot measure)
+                                     |-----------| PRINTER_RADIUS (recommend set it to ROD_RADIUS)
+
+    Column angles are measured from X-axis counterclockwise
+    "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
+*/
+
+/** \brief column positions - change only to correct build imperfections! */
+#define DELTA_ALPHA_A 210
+#define DELTA_ALPHA_B 330
+#define DELTA_ALPHA_C 90
+
+/** Correct radius by this value for each column. Perfect builds have 0 everywhere. */
+#define DELTA_RADIUS_CORRECTION_A 0
+#define DELTA_RADIUS_CORRECTION_B 0
+#define DELTA_RADIUS_CORRECTION_C 0
+
+/** Correction of the default diagonal size. Value gets added.*/
+#define DELTA_DIAGONAL_CORRECTION_A 0
+#define DELTA_DIAGONAL_CORRECTION_B 0
+#define DELTA_DIAGONAL_CORRECTION_C 0
+
+/** Max. radius (mm) the printer should be able to reach. */
+#define DELTA_MAX_RADIUS 200
+
+// Margin (mm) to avoid above tower minimum (xMin xMinsteps)
+// If your printer can put its carriage low enough the rod is horizontal without hitting the floor
+// set this to zero. Otherwise, measure how high the carriage is from horizontal rod
+// Also, movement speeds are 10x to 20x cartesian speeds at tower bottom.
+// You may need to leave a few mm for safety.
+// Hitting floor at high speed can damage your printer (motors, drives, etc)
+// THIS MAY NEED UPDATING IF THE HOT END HEIGHT CHANGES!
+#define DELTA_FLOOR_SAFETY_MARGIN_MM 15
+
+/** \brief Horizontal offset of the universal joints on the end effector (moving platform).
+*/
+#define END_EFFECTOR_HORIZONTAL_OFFSET 0
+
+/** \brief Horizontal offset of the universal joints on the vertical carriages.
+*/
+#define CARRIAGE_HORIZONTAL_OFFSET 0
+
+/** \brief Printer radius in mm,
+  measured from the center of the print area to the vertical smooth tower.
+  Alternatly set this to the pivot to pivot horizontal rod distance, when head is at (0,0)
+*/
+#define PRINTER_RADIUS 124
+
+/** 1 for more precise delta moves. 0 for faster computation.
+Needs a bit more computation time. */
+#define EXACT_DELTA_MOVES 1
+
+/* ========== END Delta calibation data ==============*/
+
+/** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
+If you don't do it, make sure to home first before your first move.
+*/
+#define DELTA_HOME_ON_POWER 0
+
+/** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
+you can also change the values online and autoleveling will store the results here. */
+#define DELTA_X_ENDSTOP_OFFSET_STEPS 0
+#define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
+#define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
 
 
 #define NUM_MOTOR_DRIVERS 0
