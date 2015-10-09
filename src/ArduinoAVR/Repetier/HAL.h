@@ -253,6 +253,9 @@ extern RFHardwareSerial RFSerial;
 class HAL
 {
 public:
+#if FEATURE_WATCHDOG
+    static bool wdPinged;
+#endif
     HAL();
     virtual ~HAL();
     static inline void hwSetup(void)
@@ -711,7 +714,7 @@ public:
     inline static void pingWatchdog()
     {
 #if FEATURE_WATCHDOG
-        wdt_reset();
+      wdPinged = true;
 #endif
     };
     inline static float maxExtruderTimerFrequency()

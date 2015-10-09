@@ -123,7 +123,7 @@ have problems with other modules using the eeprom */
 #define EPR_AUTORETRACT_ENABLED               1020
 #define EPR_Z_PROBE_Z_OFFSET			      1024
 #define EPR_SELECTED_LANGUAGE                 1028
-#define EPR_Z_ACCELERATION_TOP                1032
+#define EPR_ACCELERATION_FACTOR_TOP           1032
 #define EPR_BENDING_CORRECTION_A              1036
 #define EPR_BENDING_CORRECTION_B              1040
 #define EPR_BENDING_CORRECTION_C              1044
@@ -560,11 +560,11 @@ static inline void setTowerZFloor(float newZ) {
         return BENDING_CORRECTION_C;
 #endif
     }
-    static inline float zAccelarationTop() {
+    static inline float accelarationFactorTop() {
 #if EEPROM_MODE != 0
-        return HAL::eprGetFloat(EPR_Z_ACCELERATION_TOP);
+        return HAL::eprGetFloat(EPR_ACCELERATION_FACTOR_TOP);
 #else
-        return Z_ACCELERATION_TOP;
+        return ACCELERATION_FACTOR_TOP;
 #endif
     }
 

@@ -590,13 +590,6 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
         lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
     }
 }
-#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
-float Printer::zAccelerationAt(float z) {
-    float zTop = EEPROM::zAccelarationTop();
-    if(zTop <= 0) return maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
-    return (maxTravelAccelerationMMPerSquareSecond[Z_AXIS] - zTop) * z / zLength;
-}
-#endif
 
 /**
   \brief Sets the destination coordinates to values stored in com.
@@ -1427,7 +1420,10 @@ void Printer::homeZAxis() // cartesian homing
 #if Z_HOME_DIR < 0
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -Printer::zBedOffset * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
 #endif
-        currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS];
+        currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
+#if NUM_EXTRUDER > 0
+        currentPositionSteps[Z_AXIS] -= Extruder::current->zOffset;
+#endif
 #if DRIVE_SYSTEM == TUGA
         currentDeltaPositionSteps[C_TOWER] = currentPositionSteps[Z_AXIS];
 #endif

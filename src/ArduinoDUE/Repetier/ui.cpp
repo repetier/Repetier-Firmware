@@ -3013,7 +3013,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_LIGHTS_ONOFF:
             TOGGLE(CASE_LIGHTS_PIN);
             Printer::reportCaseLightStatus();
-            UI_STATUS(UI_TEXT_LIGHTS_ONOFF);
+            UI_STATUS_F(Com::translatedF(UI_TEXT_LIGHTS_ONOFF_ID));
             break;
 #endif
         case UI_ACTION_PREHEAT_PLA:

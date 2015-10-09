@@ -6,7 +6,9 @@ uint8 osAnalogInputCounter[ANALOG_INPUTS];
 uint osAnalogInputBuildup[ANALOG_INPUTS];
 uint8 osAnalogInputPos = 0; // Current sampling position
 #endif
-
+#if FEATURE_WATCHDOG
+    bool HAL::wdPinged = false;
+#endif
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL()
@@ -1002,6 +1004,12 @@ ISR(PWM_TIMER_VECTOR)
     UI_FAST; // Short timed user interface action
     pwm_count_cooler += COOLER_PWM_STEP;
     pwm_count_heater += HEATER_PWM_STEP;
+#if FEATURE_WATCHDOG
+  if(HAL::wdPinged) {
+     wdt_reset();
+     HAL::wdPinged = false;
+  }
+#endif
 }
 #if USE_ADVANCE
 

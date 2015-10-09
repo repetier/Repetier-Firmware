@@ -503,7 +503,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
-    HAL::eprSetFloat(EPR_Z_ACCELERATION_TOP,Z_ACCELERATION_TOP);
+    HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,Z_ACCELERATION_TOP);
 
 }
 
@@ -728,7 +728,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
-            HAL::eprSetFloat(EPR_Z_ACCELERATION_TOP,Z_ACCELERATION_TOP);
+            HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,ACCELERATION_FACTOR_TOP);
         }
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
@@ -882,8 +882,8 @@ void EEPROM::writeSettings()
 #if DRIVE_SYSTEM == DELTA
     writeFloat(EPR_Z_MAX_ACCEL, Com::tEPRZAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
-#if defined(INTERPOLATE_Z_ACCELERATION) && INTERPOLATE_Z_ACCELERATION != 0
-    writeFloat(EPR_Z_ACCELERATION_TOP, Com::tEPRZAccelerationAtTop);
+#if defined(INTERPOLATE_ACCELERATION_WITH_Z) && INTERPOLATE_ACCELERATION_WITH_Z != 0
+    writeFloat(EPR_ACCELERATION_FACTOR_TOP, Com::tEPRAccelerationFactorAtTop);
 #endif
     writeFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH, Com::tEPRDiagonalRodLength);
     writeFloat(EPR_DELTA_HORIZONTAL_RADIUS, Com::tEPRHorizontalRadius);
@@ -909,6 +909,9 @@ void EEPROM::writeSettings()
     writeFloat(EPR_X_MAX_TRAVEL_ACCEL, Com::tEPRXTravelAcceleration);
     writeFloat(EPR_Y_MAX_TRAVEL_ACCEL, Com::tEPRYTravelAcceleration);
     writeFloat(EPR_Z_MAX_TRAVEL_ACCEL, Com::tEPRZTravelAcceleration);
+#if defined(INTERPOLATE_ACCELERATION_WITH_Z) && INTERPOLATE_ACCELERATION_WITH_Z != 0
+    writeFloat(EPR_ACCELERATION_FACTOR_TOP, Com::tEPRAccelerationFactorAtTop);
+#endif
 #endif
 #endif
     writeFloat(EPR_Z_PROBE_Z_OFFSET, Com::tZProbeOffsetZ);

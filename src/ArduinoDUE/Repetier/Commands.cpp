@@ -1099,18 +1099,6 @@ void Commands::processGCode(GCode *com)
         Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
         h3 = Printer::runZProbe(false,true);
         if(h3 < -1) break;
-        // Zprobe with force feedback may bed bed differently for different points.
-        // these settings allow correction of the bending distance so leveling is correct afterwards.
-        // Values are normally negative with bending amount on trigger.
-#ifdef ZPROBE_1_BENDING_CORRECTION
-        h1 += ZPROBE_1_BENDING_CORRECTION;
-#endif
-#ifdef ZPROBE_2_BENDING_CORRECTION
-        h2 += ZPROBE_2_BENDING_CORRECTION;
-#endif
-#ifdef ZPROBE_3_BENDING_CORRECTION
-        h3 += ZPROBE_3_BENDING_CORRECTION;
-#endif
 #if defined(MOTORIZED_BED_LEVELING) && defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS >= 2
         // h1 is reference heights, h2 => motor 0, h3 => motor 1
         h2 -= h1;
@@ -1375,8 +1363,6 @@ void Commands::processGCode(GCode *com)
         Printer::homeAxis(true,true,true);
     }
     break;
-    case 134: // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
-        break;
     case 135: // G135
         Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
         Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
@@ -1392,6 +1378,31 @@ void Commands::processGCode(GCode *com)
         break;
 
 #endif // DRIVE_SYSTEM
+#if FEATURE_AUTOLEVEL
+    case 134: // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+        {
+            float z = com->hasZ() ? com->Z : 0;
+            int p = com->hasP() ? com->P : 0;
+            int s = com->hasS() ? com->S : -1;
+            extruder[p].zOffset = 0;
+            Extruder::selectExtruderById(p);
+            float refHeight = Printer::runZProbe(true,false,true);
+            for(int i=0;i < NUM_EXTRUDER;i++) {
+                if(i == p) continue;
+                if(s >= 0 && i != s) continue;
+                extruder[i].zOffset = 0;
+                Extruder::selectExtruderById(i);
+                float height = Printer::runZProbe(false,false);
+                extruder[i].zOffset = (height - refHeight)*Printer::axisStepsPerMM[Z_AXIS];
+            }
+            Extruder::selectExtruderById(p);
+            Printer::runZProbe(false,true);
+#if EEPROM_MODE != 0
+            EEPROM::storeDataIntoEEPROM(0);
+#endif
+        }
+        break;
+#endif
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     case 201:
         commandG201(*com);

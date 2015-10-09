@@ -1020,13 +1020,18 @@ for some printers causing an early stall.
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 4000
-/** If the z axis/be dmoves up/down it can shape more due to acceleration at 
- the top of the print when the axis is lower. Therefore it can be handy to
- interpolate the acceleration used. At bed level you then get the acceleration
- defined above and at max z height the acceleration defined with
- Z_ACCELERATION_TOP. To enable this feature set INTERPOLATE_Z_ACCELERATION to 1 */
-#define INTERPOLATE_Z_ACCELERATION 0
-#define Z_ACCELERATION_TOP 0
+/** If you print on a moving bed, it can become more shaky the higher and bigger
+ your print gets. Therfore it might be helpfull to reduce acceleration with
+ increasing print height. You can define here how acceleration should change.
+ You set ACCELERATION_FACTOR_TOP to the factor in percent for the top position
+ of your printer. Acceleration will then be modified linear over height.
+ INTERPOLATE_ACCELERATION_WITH_Z sets, which accelerations get changed:
+ 0 = do not interpolate at all
+ 1 = interpolate x and y acceleration
+ 2 = interpolate z acceleration
+ 3 = interpolate x,y and z acceleration
+  */
+
 
 /** \brief Maximum allowable jerk.
 
