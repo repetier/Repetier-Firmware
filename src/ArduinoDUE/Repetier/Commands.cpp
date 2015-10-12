@@ -1378,7 +1378,7 @@ void Commands::processGCode(GCode *com)
         break;
 
 #endif // DRIVE_SYSTEM
-#if FEATURE_AUTOLEVEL
+#if FEATURE_Z_PROBE
     case 134: // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
         {
             float z = com->hasZ() ? com->Z : 0;

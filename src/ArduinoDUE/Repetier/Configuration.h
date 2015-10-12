@@ -1020,6 +1020,7 @@ for some printers causing an early stall.
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 4000
+
 /** If you print on a moving bed, it can become more shaky the higher and bigger
  your print gets. Therfore it might be helpfull to reduce acceleration with
  increasing print height. You can define here how acceleration should change.
@@ -1031,7 +1032,8 @@ for some printers causing an early stall.
  2 = interpolate z acceleration
  3 = interpolate x,y and z acceleration
   */
-
+#define INTERPOLATE_ACCELERATION_WITH_Z 0
+#define ACCELERATION_FACTOR_TOP 100
 
 /** \brief Maximum allowable jerk.
 

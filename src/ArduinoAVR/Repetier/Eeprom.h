@@ -196,8 +196,10 @@ public:
     static void update(GCode *com);
     static void updatePrinterUsage();
     static inline void setVersion(uint8_t v) {
+#if EEPROM_MODE != 0
         HAL::eprSetByte(EPR_VERSION,v);
         HAL::eprSetByte(EPR_INTEGRITY_BYTE,computeChecksum());
+#endif
     }
     static inline uint8_t getStoredLanguage() {
 #if EEPROM_MODE != 0
