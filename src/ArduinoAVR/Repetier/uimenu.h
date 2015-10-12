@@ -321,6 +321,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back,UI_TEXT_BACK_ID,UI_ACTION_BACK)
 #define ADD_LANG_EN &ui_menu_setlang_en
 #undef FIRSTLANG
 #define FIRSTLANG 0
+#else
+#define ADD_LANG_EN
 #endif // LANGUAGE_EN_ACTIVE
 #if LANGUAGE_DE_ACTIVE
     UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de,"Deutsch",UI_ACTION_LANGUAGE_DE | UI_ACTION_TOPMENU)
