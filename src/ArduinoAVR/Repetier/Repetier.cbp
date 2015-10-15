@@ -859,6 +859,7 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="uilang.cpp" />
 		<Unit filename="uilang.h">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />

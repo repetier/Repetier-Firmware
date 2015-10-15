@@ -1387,13 +1387,13 @@ void Commands::processGCode(GCode *com)
             extruder[p].zOffset = 0;
             Extruder::selectExtruderById(p);
             float refHeight = Printer::runZProbe(true,false,true);
-            for(int i=0;i < NUM_EXTRUDER;i++) {
+            for(int i = 0;i < NUM_EXTRUDER;i++) {
                 if(i == p) continue;
                 if(s >= 0 && i != s) continue;
                 extruder[i].zOffset = 0;
                 Extruder::selectExtruderById(i);
                 float height = Printer::runZProbe(false,false);
-                extruder[i].zOffset = (height - refHeight)*Printer::axisStepsPerMM[Z_AXIS];
+                extruder[i].zOffset = (height - refHeight + z)*Printer::axisStepsPerMM[Z_AXIS];
             }
             Extruder::selectExtruderById(p);
             Printer::runZProbe(false,true);

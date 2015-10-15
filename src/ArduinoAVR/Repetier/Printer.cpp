@@ -1466,18 +1466,22 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 {
     float actTemp[NUM_EXTRUDER];
     for(int i = 0;i < NUM_EXTRUDER; i++)
-        actTemp[i] = Extruder::current->tempControl.targetTemperatureC;
+        actTemp[i] = extruder[i]->tempControl.targetTemperatureC;
     if(zaxis) {
         homeZAxis();
         Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
         Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
-        for(int i = 0; i < NUM_EXTRUDER; i++)
+        for(int i = 0; i < NUM_EXTRUDER; i++) {
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,false);
-        for(int i = 0; i < NUM_EXTRUDER; i++)
-            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,true);
+        }
+        for(int i = 0; i < NUM_EXTRUDER; i++) {
+            if(actTemp[i] < ZHOME_MIN_TEMPERATURE)
+                Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,true);
+        }
 #else
-        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZHOME_MIN_TEMPERATURE)),Extruder::current->id,false,true);
+        if(actTemp[Extruder::current->id] < ZHOME_MIN_TEMPERATURE)
+            Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZHOME_MIN_TEMPERATURE)),Extruder::current->id,false,true);
 #endif
     }
 #if ZHOME_X_POS == IGNORE_COORDINATE
