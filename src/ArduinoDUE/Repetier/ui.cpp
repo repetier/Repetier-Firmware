@@ -916,13 +916,18 @@ void UIDisplay::initialize()
     u8g_FirstPage(&u8g);
     do
     {
-        u8g_DrawBitmapP(&u8g, 128 - LOGO_WIDTH, 0, ((LOGO_WIDTH + 8) / 8), LOGO_HEIGHT, logo);
+        u8g_DrawBitmapP(&u8g, 128 - LOGO_WIDTH, 0, ((LOGO_WIDTH + 7) / 8), LOGO_HEIGHT, logo);
         for(uint8_t y = 0; y < UI_ROWS; y++) displayCache[y][0] = 0;
+#ifdef CUSTOM_LOGO
+        printRowP(4, PSTR("Repetier"));
+        printRowP(5, PSTR("Ver " REPETIER_VERSION));
+#else
         printRowP(0, PSTR("Repetier"));
         printRowP(1, PSTR("Ver " REPETIER_VERSION));
         printRowP(3, PSTR("Machine:"));
         printRowP(4, PSTR(UI_PRINTER_NAME));
         printRowP(5, PSTR(UI_PRINTER_COMPANY));
+#endif
     }
     while( u8g_NextPage(&u8g) );  //end picture loop
 #else // not DISPLAY_U8G

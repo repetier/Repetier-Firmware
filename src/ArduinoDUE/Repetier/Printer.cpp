@@ -1378,16 +1378,16 @@ void Printer::homeYAxis()
         steps = (yMaxSteps-Printer::yMinSteps) * Y_HOME_DIR;
         currentPositionSteps[Y_AXIS] = -steps;
         setHoming(true);
-        PrintLine::moveRelativeDistanceInSteps(0,2*steps,0,0,homingFeedrate[Y_AXIS],true,true);
+        PrintLine::moveRelativeDistanceInSteps(0,2 * steps,0,0,homingFeedrate[Y_AXIS],true,true);
         currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps-offY : yMaxSteps+offY;
-        PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS]*-ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
-        PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS]*2*ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
+        PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
+        PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS] * 2 * ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
         if(ENDSTOP_Y_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(0,axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
 #endif
-        currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps-offY : yMaxSteps + offY;
+        currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps - offY : yMaxSteps + offY;
 #if NUM_EXTRUDER > 1
 #if Y_HOME_DIR < 0
         PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset - offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
@@ -1411,6 +1411,9 @@ void Printer::homeZAxis() // cartesian homing
         PrintLine::moveRelativeDistanceInSteps(0,0,2 * steps,0,homingFeedrate[Z_AXIS],true,true);
         currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
+#if defined(ZHOME_WAIT_UNSWING) && ZHOME_WAIT_UNSWING > 0
+        HAL::delayMilliseconds(ZHOME_WAIT_UNSWING);
+#endif
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
@@ -1466,7 +1469,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 {
     float actTemp[NUM_EXTRUDER];
     for(int i = 0;i < NUM_EXTRUDER; i++)
-        actTemp[i] = extruder[i]->tempControl.targetTemperatureC;
+        actTemp[i] = extruder[i].tempControl.targetTemperatureC;
     if(zaxis) {
         homeZAxis();
         Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
@@ -1491,12 +1494,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif
     {
         homeXAxis();
-#if ZHOME_X_POS == IGNORE_COORDINATE
+//#if ZHOME_X_POS == IGNORE_COORDINATE
         if(X_HOME_DIR < 0) startX = Printer::xMin;
         else startX = Printer::xMin + Printer::xLength;
-#else
-        startX = ZHOME_X_POS;
-#endif
+//#else
+//        startX = ZHOME_X_POS;
+//#endif
     }
 #if ZHOME_Y_POS == IGNORE_COORDINATE
     if(yaxis)
@@ -1505,20 +1508,18 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif
     {
         homeYAxis();
-#if ZHOME_Y_POS == IGNORE_COORDINATE
+//#if ZHOME_Y_POS == IGNORE_COORDINATE
         if(Y_HOME_DIR < 0) startY = Printer::yMin;
         else startY = Printer::yMin + Printer::yLength;
-#else
-        startY = ZHOME_Y_POS;
-#endif
+//#else
+//        startY = ZHOME_Y_POS;
+//#endif
     }
+    if(zaxis) {
 #if ZHOME_X_POS != IGNORE_COORDINATE || ZHOME_Y_POS != IGNORE_COORDINATE
-    if(zaxis) { // only required for z axis
         moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[Y_AXIS]);
         Commands::waitUntilEndOfAllMoves();
-    }
 #endif
-    if(zaxis) {
         homeZAxis();
 #if ZHOME_HEAT_ALL
         for(int i = 0;i < NUM_EXTRUDER; i++)

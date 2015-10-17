@@ -611,12 +611,14 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     {
         TemperatureController *tc2 = tempController[1];
         tc2->setTargetTemperature(temperatureInCelsius);
+        tc2->updateTempControlVars();
         if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[1].coolerPWM = extruder[1].coolerSpeed;
 #if NUM_EXTRUDER > 2
         if(Extruder::dittoMode > 1 && extr == 0)
         {
             TemperatureController *tc2 = tempController[2];
             tc2->setTargetTemperature(temperatureInCelsius);
+            tc2->updateTempControlVars();
             if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[2].coolerPWM = extruder[2].coolerSpeed;
         }
 #endif
@@ -625,6 +627,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         {
             TemperatureController *tc2 = tempController[3];
             tc2->setTargetTemperature(temperatureInCelsius);
+            tc2->updateTempControlVars();
             if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[3].coolerPWM = extruder[3].coolerSpeed;
         }
 #endif
