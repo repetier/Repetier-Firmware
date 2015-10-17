@@ -805,6 +805,15 @@ void Printer::setup()
 #endif
 #endif
 
+#if FEATURE_THREE_ZSTEPPER
+    SET_OUTPUT(Z3_STEP_PIN);
+    SET_OUTPUT(Z3_DIR_PIN);
+#if Z3_ENABLE_PIN > -1
+    SET_OUTPUT(Z3_ENABLE_PIN);
+    WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
+#endif
+#endif
+
     //endstop pullups
 #if MIN_HARDWARE_ENDSTOP_X
 #if X_MIN_PIN > -1
