@@ -1213,8 +1213,8 @@ IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, a
 
 /**************** duplicate motor driver ***************
 
-If you have an unused extruder stepper free, you could use it to drive the second z motor
-instead of driving both with a single stepper. The same works for the other axis if needed.
+If you have unused extruder steppers free, you could use it to drive the second or third z motor
+instead of driving them with a single stepper. The same works for the other axis if needed.
 */
 
 #define FEATURE_TWO_XSTEPPER 0
@@ -1231,6 +1231,11 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z2_STEP_PIN   E1_STEP_PIN
 #define Z2_DIR_PIN    E1_DIR_PIN
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
+
+#define FEATURE_THREE_ZSTEPPER 0
+#define Z3_STEP_PIN   E2_STEP_PIN
+#define Z3_DIR_PIN    E2_DIR_PIN
+#define Z3_ENABLE_PIN E2_ENABLE_PIN
 
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
