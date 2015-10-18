@@ -1180,7 +1180,7 @@ void Commands::processGCode(GCode *com)
         Printer::setAutolevelActive(false); // iterate
 
         GCode::executeFString(Com::tZProbeStartScript);
-        for (int repetition = 0; repetition = MOTORIZED_LEVELING_REPETITIONS; repetition++)
+        for (int repetition = 0; repetition < MOTORIZED_LEVELING_REPETITIONS; repetition++)
         {
           Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
           float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
