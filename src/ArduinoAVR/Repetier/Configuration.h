@@ -1384,6 +1384,25 @@ Always hard to say since the other angle is 89° in this case!
 #define AXISCOMP_TANYZ 0
 #define AXISCOMP_TANXZ 0
 
+/* Experimental motorized bed leveling (G33 command) for printers with three individual motors for the z axis (print bed).
+   You do need a working Z probe (FEATURE_Z_PROBE) and three individual steppers (FEATURE_TWO_ZSTEPPER and FEATURE_THREE_ZSTEPPER)
+   for this feature to work.
+
+   This feature does NOT work and is not necessary for delta printers as there is no motorized bed.
+*/
+#define FEATURE_MOTORIZED_LEVELING 0
+#define MOTORIZED_LEVELING_REPETITIONS 5 // Repetitions of leveling for increased precision
+/* Z1 motor driver is the reference point for motorized bed leveling. Z2_DRIVER and Z3_DRIVER are the other stepper drivers.
+   The order of the steppers is important as it does have a effect on the levling precision. As the steppers are aligned as a
+   triangle you should level them in the following order:
+
+      3
+     / \
+    1---2
+    
+*/
+#define Z2_DRIVER(var) StepperDriver<Z3_STEP_PIN, Z3_DIR_PIN, Z3_ENABLE_PIN, INVERT_Z_DIR, Z_ENABLE_ON> var(ZAXIS_STEPS_PER_MM,MAX_FEEDRATE_Z/4)
+#define Z3_DRIVER(var) StepperDriver<Z2_STEP_PIN, Z2_DIR_PIN, Z2_ENABLE_PIN, INVERT_Z_DIR, Z_ENABLE_ON> var(ZAXIS_STEPS_PER_MM,MAX_FEEDRATE_Z/4)
 
 
 /** \brief Experimental calibration utility for delta printers

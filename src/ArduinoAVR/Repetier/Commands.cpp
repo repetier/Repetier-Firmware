@@ -1170,6 +1170,66 @@ void Commands::processGCode(GCode *com)
     break;
 #endif
 #endif
+
+#if FEATURE_MOTORIZED_LEVELING
+    case 33: // G33 motorized bed leveling
+    {
+#if DISTORTION_CORRECTION
+        Printer::distortion.disable(true); // if level has changed, distortion is also invalid
+#endif
+        Printer::setAutolevelActive(false); // iterate
+
+        GCode::executeFString(Com::tZProbeStartScript);
+        for (int repetition = 0; repetition = MOTORIZED_LEVELING_REPETITIONS; repetition++)
+        {
+          Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+          float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
+          Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+          h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+          if(h1 < -1) break;
+          Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+          h2 = Printer::runZProbe(false,false);
+          if(h2 < -1) break;
+          Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+          h3 = Printer::runZProbe(false,true);
+          if(h3 < -1) break;
+          // Zprobe with force feedback may bed bed differently for different points.
+          // these settings allow correction of the bending distance so leveling is correct afterwards.
+          // Values are normally negative with bending amount on trigger.
+#ifdef ZPROBE_1_BENDING_CORRECTION
+          h1 += ZPROBE_1_BENDING_CORRECTION;
+#endif
+#ifdef ZPROBE_2_BENDING_CORRECTION
+          h2 += ZPROBE_2_BENDING_CORRECTION;
+#endif
+#ifdef ZPROBE_3_BENDING_CORRECTION
+          h3 += ZPROBE_3_BENDING_CORRECTION;
+#endif
+  
+          Z2_DRIVER(z2Motor);
+          Z3_DRIVER(z3Motor);
+  
+          z2Motor.initialize();
+          z3Motor.initialize();
+  
+          // h1 is reference heights, h2 => motor 0, h3 => motor 1
+          h2 -= h1;
+          z2Motor.setCurrentAs(0);
+          z2Motor.gotoPosition(-h2);
+
+          h3 -= h1;
+          z3Motor.setCurrentAs(0);
+          z3Motor.gotoPosition(-h3);
+  
+          Printer::updateDerivedParameter();
+          Printer::updateCurrentPosition(true);
+          printCurrentPosition(PSTR("G33 "));
+          Printer::feedrate = oldFeedrate;      
+        }
+    }
+    
+#endif
+
     case 90: // G90
         Printer::relativeCoordinateMode = false;
         if(com->internalCommand)
