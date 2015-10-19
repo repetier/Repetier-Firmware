@@ -1278,10 +1278,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addStringP(Printer::relativeExtruderCoordinateMode ? Com::translatedF(UI_TEXT_YES_ID) : Com::translatedF(UI_TEXT_NO_ID));
                 break;
             }
+#if FEATURE_DITTO_PRINTING
             if(c2 == 'd') { // ditto copy mode
                 addInt(Extruder::dittoMode,1,' ');
                 break;
             }
+#endif
             uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
             if(c2 == 'c') eid = Extruder::current->id;
             else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
