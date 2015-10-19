@@ -2513,12 +2513,16 @@ S3(ext)=9
 #define FAN_BOARD_PIN -1
 #endif
 
+#ifndef E2_PINS
+#define E2_PINS
+#endif
+
 #if NUM_EXTRUDER==1
 #undef E1_PINS
 #define E1_PINS
 #endif
 
-#if NUM_EXTRUDER<3
+#if NUM_EXTRUDER < 3
 #undef E2_PINS
 #define E2_PINS
 #endif

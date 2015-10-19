@@ -69,6 +69,7 @@ debug
 
 extruder
 %ec : Current extruder temperature
+%ed : Number of copies for ditto mode
 %eIc : Current extruder temperature integer (shorter)
 %eb : Current heated bed temperature
 %e0..9 : Temp. of extruder 0..9
@@ -76,7 +77,7 @@ extruder
 %Ec : Target temperature of current extruder
 %Eb : Target temperature of heated bed
 %E0-9 : Target temperature of extruder 0..9
-
+%D0-3 : Ditto mode selected
 feed rate
 %fx : Max. feedrate x direction
 %fy : Max. feedrate y direction
@@ -164,6 +165,9 @@ delta stuff
 %yY : high (Z) tower y offset mm
 %YX : high (Z) tower x offset steps
 %YY : high (Z) tower y offset steps
+
+Z-Probing
+%zh : z-probe height
 */
 
 #if UI_DISPLAY_TYPE != NO_DISPLAY
@@ -186,6 +190,7 @@ more then one information page.
 */
 
 /* Define your pages using dynamic strings. To define a page use
+UI_PAGE6(name,row1,row2,row3,row4,row5,row6);
 UI_PAGE4(name,row1,row2,row3,row4);
 for 4 row displays and
 UI_PAGE2(name,row1,row2);
@@ -206,13 +211,35 @@ for 2 row displays. You can add additional pages or change the default pages lik
     #define UI_PRINTTIME_PAGES
     #define UI_PRINTTIME_COUNT 0
   #endif
+
+#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
+       UI_PAGE6_T(ui_page3,UI_TEXT_EXTR0_TEMP_ID,UI_TEXT_EXTR1_TEMP_ID,UI_TEXT_EXTR2_TEMP_ID,
+#if NUM_EXTRUDER > 3
+    UI_TEXT_EXTR3_TEMP_ID,
+#else
+    UI_TEXT_EMPTY_ID,
+#endif
+#if NUM_EXTRUDER > 4
+    UI_TEXT_EXTR4_TEMP_ID,
+#elif HAVE_HEATED_BED
+   UI_TEXT_BED_TEMP_ID,
+#else
+    UI_TEXT_EMPTY_ID,
+#endif
+    UI_TEXT_STATUS_ID)
+    #define UI_EXTRUDERS_PAGES ,&ui_page3
+    #define UI_EXTRUDERS_PAGES_COUNT 1
+  #else
+    #define UI_EXTRUDERS_PAGES
+    #define UI_EXTRUDERS_PAGES_COUNT 0
+  #endif
   /*
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
   */
-  #define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES}
+  #define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES UI_EXTRUDERS_PAGES}
   // How many pages do you want to have. Minimum is 1.
-  #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT
+  #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
 
 #elif UI_ROWS >= 4
  #if HAVE_HEATED_BED
@@ -288,6 +315,7 @@ Merge pages together. Use the following pattern:
 // How many pages do you want to have. Minimum is 1.
 #define UI_NUM_PAGES 3
 #endif
+
 /* ============ MENU definition ================
 
 The menu works the same as pages. In addion you need to define what the lines do
@@ -554,31 +582,92 @@ UI_MENU(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT)
 // **** Extruder menu
 
 UI_MENU_CHANGEACTION_T(ui_menu_ext_temp0,UI_TEXT_EXTR0_TEMP_ID,UI_ACTION_EXTRUDER0_TEMP)
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_ext_temp1,UI_TEXT_EXTR1_TEMP_ID,UI_ACTION_EXTRUDER1_TEMP)
-#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
+#endif
+#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_ext_temp2,UI_TEXT_EXTR2_TEMP_ID,UI_ACTION_EXTRUDER2_TEMP)
+#endif
+#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_ext_temp3,UI_TEXT_EXTR3_TEMP_ID,UI_ACTION_EXTRUDER3_TEMP)
+#endif
+#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_ext_temp4,UI_TEXT_EXTR4_TEMP_ID,UI_ACTION_EXTRUDER4_TEMP)
+#endif
+#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_ext_temp5,UI_TEXT_EXTR5_TEMP_ID,UI_ACTION_EXTRUDER5_TEMP)
 #endif
 UI_MENU_CHANGEACTION_T(ui_menu_bed_temp, UI_TEXT_BED_TEMP_ID,UI_ACTION_HEATED_BED_TEMP)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel0,UI_TEXT_EXTR0_SELECT_ID,UI_ACTION_SELECT_EXTRUDER0)
+#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel1,UI_TEXT_EXTR1_SELECT_ID,UI_ACTION_SELECT_EXTRUDER1)
-#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
+#endif
+#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel3,UI_TEXT_EXTR3_SELECT_ID,UI_ACTION_SELECT_EXTRUDER3)
+#endif
+#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel4,UI_TEXT_EXTR4_SELECT_ID,UI_ACTION_SELECT_EXTRUDER4)
+#endif
+#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel5,UI_TEXT_EXTR5_SELECT_ID,UI_ACTION_SELECT_EXTRUDER5)
+#endif
+#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel2,UI_TEXT_EXTR2_SELECT_ID,UI_ACTION_SELECT_EXTRUDER2)
 #endif
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off0,UI_TEXT_EXTR0_OFF_ID,UI_ACTION_EXTRUDER0_OFF)
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off1,UI_TEXT_EXTR1_OFF_ID,UI_ACTION_EXTRUDER1_OFF)
-#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
+#endif
+#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off2,UI_TEXT_EXTR2_OFF_ID,UI_ACTION_EXTRUDER2_OFF)
 #endif
+#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off3,UI_TEXT_EXTR3_OFF_ID,UI_ACTION_EXTRUDER3_OFF)
+#endif
+#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off4,UI_TEXT_EXTR4_OFF_ID,UI_ACTION_EXTRUDER4_OFF)
+#endif
+#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off5,UI_TEXT_EXTR5_OFF_ID,UI_ACTION_EXTRUDER5_OFF)
+#endif
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_origin,UI_TEXT_EXTR_ORIGIN_ID,UI_ACTION_RESET_EXTRUDER)
-#if NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_sel0,&ui_menu_ext_sel1,
-#define UI_MENU_EXTCNT 6
-#elif NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,
-#define UI_MENU_EXTCNT 9
+#if FEATURE_DITTO_PRINTING
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto0,UI_TEXT_DITTO_0_ID,UI_DITTO_0)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto1,UI_TEXT_DITTO_1_ID,UI_DITTO_1)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto2,UI_TEXT_DITTO_2_ID,UI_DITTO_2)
+UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto3,UI_TEXT_DITTO_3_ID,UI_DITTO_3)
+#if NUM_EXTRUDER == 3
+#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1,&ui_menu_ext_ditto2
+#define UI_DITTO_COMMANDS_COUNT 3
+#elif NUM_EXTRUDER == 4
+#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1,&ui_menu_ext_ditto2,&ui_menu_ext_ditto3
+#define UI_DITTO_COMMANDS_COUNT 4
 #else
+#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1
+#define UI_DITTO_COMMANDS_COUNT 2
+#endif
+#else
+#define UI_DITTO_COMMANDS
+#define UI_DITTO_COMMANDS_COUNT 0
+#endif
+#if MIXING_EXTRUDER || NUM_EXTRUDER == 1
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_off0,
 #define UI_MENU_EXTCNT 2
+#elif NUM_EXTRUDER == 2
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_sel0,&ui_menu_ext_sel1,
+#define UI_MENU_EXTCNT 6
+#elif NUM_EXTRUDER == 3
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,
+#define UI_MENU_EXTCNT 9
+#elif NUM_EXTRUDER == 4
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,
+#define UI_MENU_EXTCNT 12
+#elif NUM_EXTRUDER == 5
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_temp4,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_off4,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,
+#define UI_MENU_EXTCNT 15
+#elif NUM_EXTRUDER == 6
+#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_temp4,&ui_menu_ext_temp5,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_off4,&ui_menu_ext_off5,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,
+#define UI_MENU_EXTCNT 18
 #endif
 #if HAVE_HEATED_BED
 #define UI_MENU_BEDCOND &ui_menu_bed_temp,
@@ -588,8 +677,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_origin,UI_TEXT_EXTR_ORIGIN_ID,UI_ACTION_RESE
 #define UI_MENU_BEDCNT 0
 #endif
 
-#define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &ui_menu_go_epos,&ui_menu_ext_origin}
-UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU_EXTCNT+2)
+#define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &ui_menu_go_epos,&ui_menu_ext_origin UI_DITTO_COMMANDS}
+UI_MENU(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU_EXTCNT+2+UI_DITTO_COMMANDS_COUNT)
 
 // **** SD card menu
 
