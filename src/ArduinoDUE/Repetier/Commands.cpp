@@ -1174,57 +1174,85 @@ void Commands::processGCode(GCode *com)
 #if FEATURE_MOTORIZED_LEVELING
     case 33: // G33 motorized bed leveling
     {
-#if DISTORTION_CORRECTION
+        float h1,h2,h3,hDiff,oldFeedrate;
+        int retries;
+        Z2_DRIVER(z2Motor);
+        Z3_DRIVER(z3Motor);
+  
+        z2Motor.initialize();
+        z3Motor.initialize();
+
+        #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
-#endif
+        #endif
         Printer::setAutolevelActive(false); // iterate
 
         GCode::executeFString(Com::tZProbeStartScript);
+        Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+
         for (int repetition = 0; repetition < MOTORIZED_LEVELING_REPETITIONS; repetition++)
         {
-          Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
-          float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
-          Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-          h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
-          if(h1 < -1) break;
-          Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-          h2 = Printer::runZProbe(false,false);
-          if(h2 < -1) break;
-          Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
-          h3 = Printer::runZProbe(false,true);
-          if(h3 < -1) break;
-          // Zprobe with force feedback may bed bed differently for different points.
-          // these settings allow correction of the bending distance so leveling is correct afterwards.
-          // Values are normally negative with bending amount on trigger.
-#ifdef ZPROBE_1_BENDING_CORRECTION
-          h1 += ZPROBE_1_BENDING_CORRECTION;
-#endif
-#ifdef ZPROBE_2_BENDING_CORRECTION
-          h2 += ZPROBE_2_BENDING_CORRECTION;
-#endif
-#ifdef ZPROBE_3_BENDING_CORRECTION
-          h3 += ZPROBE_3_BENDING_CORRECTION;
-#endif
+          oldFeedrate = Printer::feedrate;
   
-          Z2_DRIVER(z2Motor);
-          Z3_DRIVER(z3Motor);
+          // level second bed stepper
+          retries = 0;
+          do
+          {
+            Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+            if(h1 < -1) break;    //TODO: error handling
   
-          z2Motor.initialize();
-          z3Motor.initialize();
+            Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            h2 = Printer::runZProbe(false,false);
+            if(h2 < -1) break;    //TODO: error handling
   
-          // h1 is reference heights, h2 => motor 0, h3 => motor 1
-          h2 -= h1;
-          z2Motor.setCurrentAs(0);
-          z2Motor.gotoPosition(-h2);
-
-          h3 -= h1;
-          z3Motor.setCurrentAs(0);
-          z3Motor.gotoPosition(-h3);
+            #ifdef ZPROBE_1_BENDING_CORRECTION
+            h1 += ZPROBE_1_BENDING_CORRECTION;
+            #endif
+            #ifdef ZPROBE_2_BENDING_CORRECTION
+            h2 += ZPROBE_2_BENDING_CORRECTION;
+            #endif
+  
+            hDiff = -(h2 - h1);
+            z2Motor.setCurrentAs(0);
+            z2Motor.gotoPosition(hDiff);
+          } while (retries++ < 5 && abs(hDiff) >= 0.1f);  //TODO: make configurable
+  
+          // level third bed stepper
+          retries = 0;
+          do
+          {
+            Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+            if(h1 < -1) break;    //TODO: error handling
+  
+            Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            h2 = Printer::runZProbe(false,false);
+            if(h2 < -1) break;    //TODO: error handling
+  
+            Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+            h3 = Printer::runZProbe(false,true);
+            if(h3 < -1) break;    //TODO: error handling
+  
+            #ifdef ZPROBE_1_BENDING_CORRECTION
+            h1 += ZPROBE_1_BENDING_CORRECTION;
+            #endif
+            #ifdef ZPROBE_2_BENDING_CORRECTION
+            h2 += ZPROBE_2_BENDING_CORRECTION;
+            #endif
+            #ifdef ZPROBE_3_BENDING_CORRECTION
+            h3 += ZPROBE_3_BENDING_CORRECTION;
+            #endif
+  
+            hDiff = -( h3 - ((h1+h2)/2.0f) );
+            z3Motor.setCurrentAs(0);
+            z3Motor.gotoPosition(hDiff);
+          } while (retries++ < 5 && abs(hDiff) >= 0.1f); //TODO: make configurable
   
           Printer::updateDerivedParameter();
           Printer::updateCurrentPosition(true);
           printCurrentPosition(PSTR("G33 "));
-          Printer::feedrate = oldFeedrate;      
+          Printer::feedrate = oldFeedrate;
         }
     }
     
