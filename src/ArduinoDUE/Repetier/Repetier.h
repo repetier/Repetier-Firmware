@@ -306,6 +306,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #else
 #define EXTRUDER_JAM_CONTROL 0
 #endif
+#ifndef JAM_METHOD
+#define JAM_METHOD 1
+#endif
 
 #if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE < 101
 #define EXT0_ANALOG_INPUTS 1

@@ -464,6 +464,15 @@ Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 #define FILAMENTCHANGE_SHORTRETRACT 30
 #define FILAMENTCHANGE_LONGRETRACT 30
 
+/* Define how we detect jam/out of filament
+   1 = Distance between signal changes increase
+   2 = signal gets high
+   3 = signal gets low
+   
+   2 and 3 are not jam detections, but only out of filament detection by a switch
+   that changes the signal! 
+*/
+#define JAM_METHOD 1
 // Steps normally needed for a full signal cycle.
 #define JAM_STEPS 220
 // Steps for reducing speed. Must be higher then JAM_STEPS
