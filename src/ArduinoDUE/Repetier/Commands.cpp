@@ -1178,50 +1178,79 @@ void Commands::processGCode(GCode *com)
         int retries;
         Z2_DRIVER(z2Motor);
         Z3_DRIVER(z3Motor);
-  
+
         z2Motor.initialize();
         z3Motor.initialize();
 
         #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
         #endif
-        Printer::setAutolevelActive(false); // iterate
+        bool oldAutolevel = Printer::isAutolevelActive();
+        Printer::setAutolevelActive(false);
 
         GCode::executeFString(Com::tZProbeStartScript);
         Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
 
         for (int repetition = 0; repetition < MOTORIZED_LEVELING_REPETITIONS; repetition++)
         {
+          Com::printFLN(PSTR("Info:Motorized bed leveling repetition "), repetition+1);
+          
           oldFeedrate = Printer::feedrate;
   
           // level second bed stepper
           retries = 0;
           do
           {
+            Com::printFLN(PSTR("Info:leveling z1 and z2, iteration "), retries+1);
+
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
             if(h1 < -1) break;    //TODO: error handling
+            #ifdef ZPROBE_1_BENDING_CORRECTION
+            h1 += ZPROBE_1_BENDING_CORRECTION;
+            #endif
   
             Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h2 = Printer::runZProbe(false,false);
             if(h2 < -1) break;    //TODO: error handling
-  
-            #ifdef ZPROBE_1_BENDING_CORRECTION
-            h1 += ZPROBE_1_BENDING_CORRECTION;
-            #endif
             #ifdef ZPROBE_2_BENDING_CORRECTION
             h2 += ZPROBE_2_BENDING_CORRECTION;
             #endif
+
+            // check if the bed is leveled already
+            if (repetition == 0 && retries == 0)
+            {
+              Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+              h3 = Printer::runZProbe(false,false);
+              if(h3 < -1) break;    //TODO: error handling
+              #ifdef ZPROBE_3_BENDING_CORRECTION
+              h3 += ZPROBE_3_BENDING_CORRECTION;
+              #endif
+
+              float avg = (h1+h2+h3) / 3.0f;
+              if (abs(h1-avg) <= MOTORIZED_LEVELING_MAX_ERROR && abs(h2-avg) <= MOTORIZED_LEVELING_MAX_ERROR && abs(h3-avg) <= MOTORIZED_LEVELING_MAX_ERROR)
+              {
+                // bed is flat - early out
+                Com::printInfoFLN(PSTR("leveling not necessary, bed is flat"));
+                Printer::setAutolevelActive(oldAutolevel);
+                return;
+              }
+            }
+
+            Com::printF(PSTR("Info:adjusting z2 by "), hDiff);
+            Com::printFLN(PSTR("mm"));
   
             hDiff = -(h2 - h1);
             z2Motor.setCurrentAs(0);
             z2Motor.gotoPosition(hDiff);
-          } while (retries++ < 5 && abs(hDiff) >= 0.1f);  //TODO: make configurable
+          } while (retries++ < 5 && abs(hDiff) >= MOTORIZED_LEVELING_MAX_ERROR);
   
           // level third bed stepper
           retries = 0;
           do
           {
+            Com::printFLN(PSTR("Info:leveling z3 to center of z1 and z2, iteration "), retries+1);
+
             Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
             h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
             if(h1 < -1) break;    //TODO: error handling
@@ -1243,15 +1272,20 @@ void Commands::processGCode(GCode *com)
             #ifdef ZPROBE_3_BENDING_CORRECTION
             h3 += ZPROBE_3_BENDING_CORRECTION;
             #endif
+
+            Com::printF(PSTR("Info:adjusting z3 by "), hDiff);
+            Com::printFLN(PSTR("mm"));
   
             hDiff = -( h3 - ((h1+h2)/2.0f) );
             z3Motor.setCurrentAs(0);
             z3Motor.gotoPosition(hDiff);
-          } while (retries++ < 5 && abs(hDiff) >= 0.1f); //TODO: make configurable
+          } while (retries++ < 5 && abs(hDiff) >= MOTORIZED_LEVELING_MAX_ERROR);
   
           Printer::updateDerivedParameter();
           Printer::updateCurrentPosition(true);
+          Printer::setAutolevelActive(oldAutolevel);
           printCurrentPosition(PSTR("G33 "));
+          Com::printInfoFLN(PSTR("motorized bed leveling completed succesfully"));
           Printer::feedrate = oldFeedrate;
         }
     }
