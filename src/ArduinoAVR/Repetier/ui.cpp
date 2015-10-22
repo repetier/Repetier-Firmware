@@ -1650,7 +1650,9 @@ void UIDisplay::parse(const char *txt,bool ram)
     uid.printCols[col] = 0;
 }
 void UIDisplay::showLanguageSelectionWizard() {
+#if EEPROM_MODE != 0
     pushMenu(&ui_menu_languages_wiz,true);
+#endif
 }
 void UIDisplay::setStatusP(PGM_P txt,bool error)
 {
