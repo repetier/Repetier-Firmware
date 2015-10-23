@@ -1331,9 +1331,9 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
     {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
 #define NUMTEMPS_13 19
-const short temptable_13[NUMTEMPS_12][2] PROGMEM =
+const short temptable_13[NUMTEMPS_13][2] PROGMEM =
 {
-    {0,0},{908,8},{941,410*8},{982,20*8},{1015,8*30},{1048,8*40},{1080,8*50},{1113,8*60},{1146,8*70},{1178,8*80},{11211,8*90},{1276,8*110},{1318,8*120}
+    {0,0},{908,8},{942,10*8},{982,20*8},{1015,8*30},{1048,8*40},{1080,8*50},{1113,8*60},{1146,8*70},{1178,8*80},{11211,8*90},{1276,8*110},{1318,8*120}
     ,{1670,8*230},{2455,8*500},{3445,8*900},{3666,8*1000},{3871,8*1100},{4095,8*2000}
 };
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
@@ -1643,13 +1643,13 @@ void TemperatureController::setTargetTemperature(float target)
         short oldraw = pgm_read_word(&temptable[0]);
         short oldtemp = pgm_read_word(&temptable[1]);
         short newraw = 0,newtemp;
-        while(i<num)
+        while(i < num)
         {
             newraw = pgm_read_word(&temptable[i++]);
             newtemp = pgm_read_word(&temptable[i++]);
             if (newtemp > temp)
             {
-                targetTemperature = oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
+                targetTemperature = oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp-newtemp);
                 return;
             }
             oldtemp = newtemp;

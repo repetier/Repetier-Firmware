@@ -209,6 +209,8 @@ Overridden if EEPROM activated.*/
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
+// 12 is 100k RS thermistor 198-961
+// 13 is PT100 for E3D/Ultimaker
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
