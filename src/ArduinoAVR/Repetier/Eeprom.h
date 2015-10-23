@@ -134,9 +134,9 @@ have problems with other modules using the eeprom */
 #define EEPROM_BYTE(x) HAL::eprGetByte(EPR_##x)
 #define EEPROM_SET_BYTE(x,val) HAL::eprSetByte(EPR_##x,val)
 #else
-#define EEPROM_FLOAT(x) (x)
-#define EEPROM_INT32(x) (x)
-#define EEPROM_BYTE(x) (x)
+#define EEPROM_FLOAT(x) (float)(x)
+#define EEPROM_INT32(x) (int32_t)(x)
+#define EEPROM_BYTE(x) (uint8_t)(x)
 #define EEPROM_SET_BYTE(x,val)
 #endif
 

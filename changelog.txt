@@ -15,6 +15,7 @@ Version 0.92
   Extra motor drivers.
   Event system for lights etc.
   New homing sequence with preheat for nozzle based z sensors.
+  Language selectable on runtime.
 
 Version 0.91.8
   New languages french and Czech

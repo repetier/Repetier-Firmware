@@ -1168,8 +1168,6 @@ ISR(USART_UDRE_vect)
     {
         // There is more data in the output buffer. Send the next byte
         uint8_t c = tx_buffer.buffer[tx_buffer.tail];
-        tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
-
 #if defined(UDR0)
         UDR0 = c;
 #elif defined(UDR)
@@ -1177,6 +1175,7 @@ ISR(USART_UDRE_vect)
 #else
 #error UDR not defined
 #endif
+        tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
     }
 }
 #endif
@@ -1368,7 +1367,7 @@ int RFHardwareSerial::available(void)
 }
 int RFHardwareSerial::outputUnused(void)
 {
-    return SERIAL_TX_BUFFER_SIZE-(unsigned int)((SERIAL_TX_BUFFER_SIZE + _tx_buffer->head - _tx_buffer->tail) & SERIAL_TX_BUFFER_MASK);
+    return SERIAL_TX_BUFFER_SIZE - (unsigned int)((SERIAL_TX_BUFFER_SIZE + _tx_buffer->head - _tx_buffer->tail) & SERIAL_TX_BUFFER_MASK);
 }
 
 int RFHardwareSerial::peek(void)
@@ -1411,9 +1410,9 @@ RFHardwareSerial::write(uint8_t c)
 
     // If the output buffer is full, there's nothing for it other than to
     // wait for the interrupt handler to empty it a bit
-    while (i == _tx_buffer->tail) ;
+    while (i == _tx_buffer->tail) {}
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    while (i == txx_buffer_tail) ;
+    while (i == txx_buffer_tail) {}
 #endif
     _tx_buffer->buffer[_tx_buffer->head] = c;
     _tx_buffer->head = i;

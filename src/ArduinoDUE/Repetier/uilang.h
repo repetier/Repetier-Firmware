@@ -96,7 +96,7 @@
 #define LANGUAGE_PL_ID 9
 
 #define NUM_LANGUAGES_KNOWN 10
-#define NUM_TRANSLATED_WORDS 249
+#define NUM_TRANSLATED_WORDS 262
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -353,6 +353,20 @@
 #define UI_TEXT_CURRENT_TEMP_ID 246 //cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_ID 247 //" %oCmm"
 
+#define UI_TEXT_EXTR3_TEMP_ID 248 //       "Temp. 4 : %E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_ID 249 //       "Temp. 5 : %E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_ID 250 //       "Temp. 6 : %E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_ID 251
+#define UI_TEXT_EXTR4_OFF_ID 252
+#define UI_TEXT_EXTR5_OFF_ID 253
+#define UI_TEXT_EXTR3_SELECT_ID 254
+#define UI_TEXT_EXTR4_SELECT_ID 255
+#define UI_TEXT_EXTR5_SELECT_ID 256
+#define UI_TEXT_DITTO_0_ID 257
+#define UI_TEXT_DITTO_1_ID 258
+#define UI_TEXT_DITTO_2_ID 259
+#define UI_TEXT_DITTO_3_ID 260
+#define UI_TEXT_ZPROBE_HEIGHT_ID 261
 
 // Universal definitions
 
@@ -400,10 +414,10 @@
 #define UI_TEXT_Z_POSITION_EN       "Z position"
 #define UI_TEXT_Z_POS_FAST_EN       "Z pos. fast"
 #define UI_TEXT_E_POSITION_EN       "Extr. position"
-#define UI_TEXT_BED_TEMP_EN         "Bed temp: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_EN       "Temp. 1 : %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_EN       "Temp. 2 : %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_EN       "Temp. 3 : %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_EN         "Bed temp:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_EN       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_EN       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_EN       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_EN        "Turn extr. 1 off"
 #define UI_TEXT_EXTR1_OFF_EN        "Turn extr. 2 off"
 #define UI_TEXT_EXTR2_OFF_EN        "Turn extr. 3 off"
@@ -596,18 +610,24 @@
 #define UI_TEXT_COATING_CUSTOM_EN "Custom:%oCmm"
 #define UI_TEXT_LANGUAGE_EN "Language"
 
-#define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_EN "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_EN "Buf: %oB"
@@ -625,6 +645,20 @@
 #define UI_TEXT_TEMP_SET_EN cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_EN cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_EN " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_EN "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_EN "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_EN "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_EN "Turn extr. 4 off"
+#define UI_TEXT_EXTR4_OFF_EN "Turn extr. 5 off"
+#define UI_TEXT_EXTR5_OFF_EN "Turn extr. 6 off"
+#define UI_TEXT_EXTR3_SELECT_EN "%X3 Select extr. 4"
+#define UI_TEXT_EXTR4_SELECT_EN "%X4 Select extr. 5"
+#define UI_TEXT_EXTR5_SELECT_EN "%X5 Select extr. 6"
+#define UI_TEXT_DITTO_0_EN "%D0 No copies"
+#define UI_TEXT_DITTO_1_EN "%D1 1 copy"
+#define UI_TEXT_DITTO_2_EN "%D2 2 copies"
+#define UI_TEXT_DITTO_3_EN "%D3 3 copies"
+#define UI_TEXT_ZPROBE_HEIGHT_EN "Z-probe height:%zh"
 
 // *************** German translation ****************
 
@@ -664,16 +698,16 @@
 #define UI_TEXT_Z_POSITION_DE       "Z Position"
 #define UI_TEXT_Z_POS_FAST_DE       "Z Pos. Schnell"
 #define UI_TEXT_E_POSITION_DE       "Extr. Position"
-#define UI_TEXT_BED_TEMP_DE         "Bed Temp: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_DE       "Temp. 1 : %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_DE       "Temp. 2 : %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_DE       "Temp. 3 : %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_DE         "Bed Temp:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_DE       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_DE       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_DE       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_DE        "Extruder 1 Aus"
 #define UI_TEXT_EXTR1_OFF_DE        "Extruder 2 Aus"
 #define UI_TEXT_EXTR2_OFF_DE        "Extruder 3 Aus"
-#define UI_TEXT_EXTR0_SELECT_DE     "W" STR_auml "hle Extr. 1"
-#define UI_TEXT_EXTR1_SELECT_DE     "W" STR_auml "hle Extr. 2"
-#define UI_TEXT_EXTR2_SELECT_DE     "W" STR_auml "hle Extr. 3"
+#define UI_TEXT_EXTR0_SELECT_DE     "%X0 W" STR_auml "hle Extr. 1"
+#define UI_TEXT_EXTR1_SELECT_DE     "%X1 W" STR_auml "hle Extr. 2"
+#define UI_TEXT_EXTR2_SELECT_DE     "%X2 W" STR_auml "hle Extr. 3"
 #define UI_TEXT_EXTR_ORIGIN_DE      "Setze Nullpunkt"
 #define UI_TEXT_PRINT_X_DE          "Drucken X:%ax"
 #define UI_TEXT_PRINT_Y_DE          "Drucken Y:%ay"
@@ -860,18 +894,24 @@
 #define UI_TEXT_COATING_CUSTOM_DE "Indiv.:%oCmm"
 #define UI_TEXT_LANGUAGE_DE "Sprache"
 
-#define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_DE "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_DE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_DE "Puf: %oB"
@@ -889,6 +929,20 @@
 #define UI_TEXT_TEMP_SET_DE cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_DE cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_DE " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_DE "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_DE "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_DE "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_DE "Extruder 4 Aus"
+#define UI_TEXT_EXTR4_OFF_DE "Extruder 5 Aus"
+#define UI_TEXT_EXTR5_OFF_DE "Extruder 6 Aus"
+#define UI_TEXT_EXTR3_SELECT_DE "%X3 W" STR_auml "hle Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_DE "%X4 W" STR_auml "hle Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_DE "%X5 W" STR_auml "hle Extr. 6"
+#define UI_TEXT_DITTO_0_DE "%D0 Keine Kopien"
+#define UI_TEXT_DITTO_1_DE "%D1 1 Kopie"
+#define UI_TEXT_DITTO_2_DE "%D2 2 Kopien"
+#define UI_TEXT_DITTO_3_DE "%D3 3 Kopien"
+#define UI_TEXT_ZPROBE_HEIGHT_DE "Z-Probenh" STR_ouml "he:%zh"
 
 
 // Dutch translation
@@ -929,10 +983,10 @@
 #define UI_TEXT_Z_POSITION_NL       "Z Positie"
 #define UI_TEXT_Z_POS_FAST_NL       "Z Pos. Snel"
 #define UI_TEXT_E_POSITION_NL       "Extr. positie"
-#define UI_TEXT_BED_TEMP_NL         "Bed Temp: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_NL       "Temp. 1:  %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_NL       "Temp. 2:  %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_NL       "Temp. 3:  %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_NL         "Bed Temp:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_NL       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_NL       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_NL       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_NL        "Extruder 1 Uit"
 #define UI_TEXT_EXTR1_OFF_NL        "Extruder 2 Uit"
 #define UI_TEXT_EXTR2_OFF_NL        "Extruder 3 Uit"
@@ -1125,18 +1179,24 @@
 #define UI_TEXT_COATING_CUSTOM_NL "Custom:%oCmm"
 #define UI_TEXT_LANGUAGE_NL "Taal"
 
-#define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_NL "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_NL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_NL "Buf: %oB"
@@ -1154,6 +1214,20 @@
 #define UI_TEXT_TEMP_SET_NL cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_NL cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_NL " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_NL "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_NL "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_NL "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_NL "Extruder 4 Uit"
+#define UI_TEXT_EXTR4_OFF_NL "Extruder 5 Uit"
+#define UI_TEXT_EXTR5_OFF_NL "Extruder 6 Uit"
+#define UI_TEXT_EXTR3_SELECT_NL "%X3 Select Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_NL "%X4 Select Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_NL "%X5 Select Extr. 6"
+#define UI_TEXT_DITTO_0_NL "%D0 Geen Kopieen"
+#define UI_TEXT_DITTO_1_NL "%D1 1 Kopie"
+#define UI_TEXT_DITTO_2_NL "%D2 2 Kopieen"
+#define UI_TEXT_DITTO_3_NL "%D3 3 Kopieen"
+#define UI_TEXT_ZPROBE_HEIGHT_NL "z-probe hoogte:%zh"
 
 
 // *************** Brazilian portuguese translation ****************
@@ -1196,16 +1270,16 @@
 #define UI_TEXT_Z_POSITION_PT       "Posicao Z"
 #define UI_TEXT_Z_POS_FAST_PT       "Pos. Rapida Z"
 #define UI_TEXT_E_POSITION_PT       "Posicao Extrusor"
-#define UI_TEXT_BED_TEMP_PT         "Temp. Cama: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_PT       "Temp. 1:    %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_PT       "Temp. 2:    %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_PT       "Temp. 3:    %E2" cDEG "C"
-#define UI_TEXT_EXTR0_OFF_PT        "Extrusor 1 Desligado"
-#define UI_TEXT_EXTR1_OFF_PT        "Extrusor 2 Desligado"
-#define UI_TEXT_EXTR2_OFF_PT        "Extrusor 3 Desligado"
-#define UI_TEXT_EXTR0_SELECT_PT     "%X0 Selecionar Extr. 1"
-#define UI_TEXT_EXTR1_SELECT_PT     "%X1 Selecionar Extr. 2"
-#define UI_TEXT_EXTR2_SELECT_PT     "%X2 Selecionar Extr. 3"
+#define UI_TEXT_BED_TEMP_PT         "Tem.Cama:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_PT       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_PT       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_PT       "Temp. 3 :%e2/%E2" cDEG "C"
+#define UI_TEXT_EXTR0_OFF_PT        "Extr. 1 Desligado"
+#define UI_TEXT_EXTR1_OFF_PT        "Extr. 2 Desligado"
+#define UI_TEXT_EXTR2_OFF_PT        "Extr. 3 Desligado"
+#define UI_TEXT_EXTR0_SELECT_PT     "%X0 Sel. Extr. 1"
+#define UI_TEXT_EXTR1_SELECT_PT     "%X1 Sel. Extr. 2"
+#define UI_TEXT_EXTR2_SELECT_PT     "%X2 Sel. Extr. 3"
 #define UI_TEXT_EXTR_ORIGIN_PT      "Definir Origem"
 #define UI_TEXT_PRINT_X_PT          "Imprimir X:%ax"
 #define UI_TEXT_PRINT_Y_PT          "Imprimir Y:%ay"
@@ -1392,18 +1466,24 @@
 #define UI_TEXT_COATING_CUSTOM_PT "Person.:%oCmm"
 #define UI_TEXT_LANGUAGE_PT "Idioma"
 
-#define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_PT "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_PT "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_PT "Fluxo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PT "Buf: %oB"
@@ -1421,6 +1501,20 @@
 #define UI_TEXT_TEMP_SET_PT cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_PT cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_PT " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_PT "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_PT "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_PT "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_PT "Extr. 4 Desligado"
+#define UI_TEXT_EXTR4_OFF_PT "Extr. 5 Desligado"
+#define UI_TEXT_EXTR5_OFF_PT "Extr. 6 Desligado"
+#define UI_TEXT_EXTR3_SELECT_PT "%X3 Sel. Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_PT "%X4 Sel. Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_PT "%X5 Sel. Extr. 6"
+#define UI_TEXT_DITTO_0_PT "%D0 Nenhuma Copia"
+#define UI_TEXT_DITTO_1_PT "%D1 1 Copia"
+#define UI_TEXT_DITTO_2_PT "%D2 2 Copias"
+#define UI_TEXT_DITTO_3_PT "%D3 3 Copias"
+#define UI_TEXT_ZPROBE_HEIGHT_PT "Altura Z-Probe:%zh"
 
 
 // *************** Italian translation ****************
@@ -1453,7 +1547,7 @@
 #define UI_TEXT_LIGHTS_ONOFF_IT     "Luci:%lo"
 #define UI_TEXT_COOLDOWN_IT         "Raffreddamento"
 #define UI_TEXT_SET_TO_ORIGIN_IT    "Imposta come Origine"
-#define UI_TEXT_DISABLE_STEPPER_IT  "Disabilita stepper"
+#define UI_TEXT_DISABLE_STEPPER_IT  "Disabilita Stepper"
 #define UI_TEXT_X_POSITION_IT       "Posizione X"
 #define UI_TEXT_X_POS_FAST_IT       "Pos. X Veloce"
 #define UI_TEXT_Y_POSITION_IT       "Posizione Y"
@@ -1461,10 +1555,10 @@
 #define UI_TEXT_Z_POSITION_IT       "Posizione Z"
 #define UI_TEXT_Z_POS_FAST_IT       "Pos. Z Veloce"
 #define UI_TEXT_E_POSITION_IT       "Posizione Estrusore"
-#define UI_TEXT_BED_TEMP_IT         "Temp. Piatto:%Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_IT       "Temp. 1:     %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_IT       "Temp. 2:     %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_IT       "Temp. 3:     %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_IT         "Temp.Piatto:%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_IT       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_IT       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_IT       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_IT        "Estrusore 1 Spento"
 #define UI_TEXT_EXTR1_OFF_IT        "Estrusore 2 Spento"
 #define UI_TEXT_EXTR2_OFF_IT        "Estrusore 3 Spento"
@@ -1657,18 +1751,24 @@
 #define UI_TEXT_COATING_CUSTOM_IT "Usanza:%oCmm"
 #define UI_TEXT_LANGUAGE_IT "Lingua"
 
-#define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_IT "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_IT "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_IT "Flusso:\xfd %of%%% Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_IT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_IT "Buf: %oB"
@@ -1686,6 +1786,20 @@
 #define UI_TEXT_TEMP_SET_IT cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_IT cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_IT " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_IT "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_IT "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_IT "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_IT "Estrusore 4 Spento"
+#define UI_TEXT_EXTR4_OFF_IT "Estrusore 5 Spento"
+#define UI_TEXT_EXTR5_OFF_IT "Estrusore 6 Spento"
+#define UI_TEXT_EXTR3_SELECT_IT "%X3 Seleziona Estr. 4"
+#define UI_TEXT_EXTR4_SELECT_IT "%X4 Seleziona Estr. 5"
+#define UI_TEXT_EXTR5_SELECT_IT "%X5 Seleziona Estr. 6"
+#define UI_TEXT_DITTO_0_IT "%D0 Nessuna Copia"
+#define UI_TEXT_DITTO_1_IT "%D1 1 Copia"
+#define UI_TEXT_DITTO_2_IT "%D2 2 Copie"
+#define UI_TEXT_DITTO_3_IT "%D3 3 Copie"
+#define UI_TEXT_ZPROBE_HEIGHT_IT "Altezza Z-Probe:%zh"
 
 
 // Spanish translation
@@ -1726,10 +1840,10 @@
 #define UI_TEXT_Z_POSITION_ES       "Posicion Z"
 #define UI_TEXT_Z_POS_FAST_ES       "Pos. Rapida Z"
 #define UI_TEXT_E_POSITION_ES       "Extr. Posicion"
-#define UI_TEXT_BED_TEMP_ES         "Temp. Cama: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_ES       "Temp. 1   : %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_ES       "Temp. 2   : %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_ES       "Temp. 3   : %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_ES         "Temp.Cama:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_ES       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_ES       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_ES       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_ES        "Extrusor 1 Off"
 #define UI_TEXT_EXTR1_OFF_ES        "Extrusor 2 Off"
 #define UI_TEXT_EXTR2_OFF_ES        "Extrusor 3 Off"
@@ -1867,7 +1981,7 @@
 #define UI_TEXT_PAGE_EXTRUDER3_ES     "E3:%e2/%E2" cDEG "C" cARROW "%o2"
 #define UI_TEXT_PAGE_BED_ES          " B:%eb/%Eb" cDEG "C" cARROW "%ob"
 #define UI_TEXT_SPEED_MULTIPLY_ES    "Mult. Velocidad.:%om%%%"
-#define UI_TEXT_FLOW_MULTIPLY_ES     "Mult. Flujo.:%of%%%"
+#define UI_TEXT_FLOW_MULTIPLY_ES     "Mult. Flujo:%of%%%"
 #define UI_TEXT_SHOW_MEASUREMENT_ES  "Mostrar medicion"
 #define UI_TEXT_RESET_MEASUREMENT_ES "Resetear medicion"
 #define UI_TEXT_SET_MEASURED_ORIGIN_ES "Set Z=0"
@@ -1922,18 +2036,24 @@
 #define UI_TEXT_COATING_CUSTOM_ES "Custom:%oCmm"
 #define UI_TEXT_LANGUAGE_ES "Idioma"
 
-#define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_ES "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_ES "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_ES "Flujo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_ES "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_ES "Buf: %oB"
@@ -1951,6 +2071,20 @@
 #define UI_TEXT_TEMP_SET_ES cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_ES cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_ES " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_ES "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_ES "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_ES "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_ES "Extrusor 4 Off"
+#define UI_TEXT_EXTR4_OFF_ES "Extrusor 5 Off"
+#define UI_TEXT_EXTR5_OFF_ES "Extrusor 6 Off"
+#define UI_TEXT_EXTR3_SELECT_ES "%X3 Select Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_ES "%X4 Select Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_ES "%X5 Select Extr. 6"
+#define UI_TEXT_DITTO_0_ES "%D0 No Hay Copias"
+#define UI_TEXT_DITTO_1_ES "%D1 1 Copia"
+#define UI_TEXT_DITTO_2_ES "%D2 2 Copias"
+#define UI_TEXT_DITTO_3_ES "%D3 3 Copias"
+#define UI_TEXT_ZPROBE_HEIGHT_ES "Altura Z-Probe:%zh"
 
 // *************** Swedish translation ****************
 // By Daniel Tedenljung 2013-08-21
@@ -1991,10 +2125,10 @@
 #define UI_TEXT_Z_POSITION_SE       "Z-osition"
 #define UI_TEXT_Z_POS_FAST_SE       "Z-pos. snabb"
 #define UI_TEXT_E_POSITION_SE       "Extr.-position"
-#define UI_TEXT_BED_TEMP_SE         "B" STR_auml "dd-temp: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_SE       "Temp. 1:   %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_SE       "Temp. 2:   %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_SE       "Temp. 3:   %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_SE         "B" STR_auml "dd-temp:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_SE       "Temp. 1 :%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_SE       "Temp. 2 :%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_SE       "Temp. 3 :%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_SE        "Extruder 1 av"
 #define UI_TEXT_EXTR1_OFF_SE        "Extruder 2 av"
 #define UI_TEXT_EXTR2_OFF_SE        "Extruder 3 av"
@@ -2187,18 +2321,24 @@
 #define UI_TEXT_COATING_CUSTOM_SE "Anpassad:%oCmm"
 #define UI_TEXT_LANGUAGE_SE "Sprak"
 
-#define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_SE "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_SE "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_SE "Fl" STR_ouml "de:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_SE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_SE "Buf: %oB"
@@ -2216,6 +2356,20 @@
 #define UI_TEXT_TEMP_SET_SE cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_SE cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_SE " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_SE "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_SE "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_SE "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_SE "Extruder 4 av"
+#define UI_TEXT_EXTR4_OFF_SE "Extruder 5 av"
+#define UI_TEXT_EXTR5_OFF_SE "Extruder 6 av"
+#define UI_TEXT_EXTR3_SELECT_SE "%X3 V"STR_auml"lj Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_SE "%X4 V"STR_auml"lj Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_SE "%X5 V"STR_auml"lj Extr. 6"
+#define UI_TEXT_DITTO_0_SE "%D0 Inga Kopior"
+#define UI_TEXT_DITTO_1_SE "%D1 1 Kopia"
+#define UI_TEXT_DITTO_2_SE "%D2 2 Kopior"
+#define UI_TEXT_DITTO_3_SE "%D3 3 Kopior"
+#define UI_TEXT_ZPROBE_HEIGHT_SE "Z-probh"STR_ouml"jden:%zh"
 
 
 // *************** French translation ****************
@@ -2257,16 +2411,16 @@
 #define UI_TEXT_Z_POSITION_FR       "Position Z"
 #define UI_TEXT_Z_POS_FAST_FR       "Pos. Rapide Z"
 #define UI_TEXT_E_POSITION_FR       "Position Extr."
-#define UI_TEXT_BED_TEMP_FR         "Lit Temp.: %Eb\002C"
-#define UI_TEXT_EXTR0_TEMP_FR       "Temp. 1  : %E0\002C"
-#define UI_TEXT_EXTR1_TEMP_FR       "Temp. 2  : %E1\002C"
-#define UI_TEXT_EXTR2_TEMP_FR       "Temp. 2  : %E2\002C"
+#define UI_TEXT_BED_TEMP_FR         "Lit Temp:%eb/%Eb\002C"
+#define UI_TEXT_EXTR0_TEMP_FR       "Temp. 1 :%e0/%E0\002C"
+#define UI_TEXT_EXTR1_TEMP_FR       "Temp. 2 :%e1/%E1\002C"
+#define UI_TEXT_EXTR2_TEMP_FR       "Temp. 2 :%e2/%E2\002C"
 #define UI_TEXT_EXTR0_OFF_FR        "Extrudeuse 1 Off"
 #define UI_TEXT_EXTR1_OFF_FR        "Extrudeuse 2 Off"
 #define UI_TEXT_EXTR2_OFF_FR        "Extrudeuse 3 Off"
-#define UI_TEXT_EXTR0_SELECT_FR     "%X0 Select. Extr.0"
-#define UI_TEXT_EXTR1_SELECT_FR     "%X1 Select. Extr.1"
-#define UI_TEXT_EXTR2_SELECT_FR     "%X1 Select. Extr.2"
+#define UI_TEXT_EXTR0_SELECT_FR     "%X0 Select. Extr. 1"
+#define UI_TEXT_EXTR1_SELECT_FR     "%X1 Select. Extr. 2"
+#define UI_TEXT_EXTR2_SELECT_FR     "%X1 Select. Extr. 3"
 #define UI_TEXT_EXTR_ORIGIN_FR      "Set Origin"
 #define UI_TEXT_PRINT_X_FR          "Imprim. X:%ax"
 #define UI_TEXT_PRINT_Y_FR          "Imprim. Y:%ay"
@@ -2453,18 +2607,24 @@
 #define UI_TEXT_COATING_CUSTOM_FR "Coutume:%oCmm"
 #define UI_TEXT_LANGUAGE_FR "Langue"
 
-#define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_FR "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_FR "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_FR "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_FR "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_FR "Buf: %oB"
@@ -2482,6 +2642,20 @@
 #define UI_TEXT_TEMP_SET_FR cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_FR cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_FR " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_FR "Temp. 4 :%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_FR "Temp. 5 :%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_FR "Temp. 6 :%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_FR "Extrudeuse 4 Off"
+#define UI_TEXT_EXTR4_OFF_FR "Extrudeuse 5 Off"
+#define UI_TEXT_EXTR5_OFF_FR "Extrudeuse 6 Off"
+#define UI_TEXT_EXTR3_SELECT_FR "%X3 Select. Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_FR "%X4 Select. Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_FR "%X5 Select. Extr. 6"
+#define UI_TEXT_DITTO_0_FR "%D0 Aucune Copie"
+#define UI_TEXT_DITTO_1_FR "%D1 1 Copie"
+#define UI_TEXT_DITTO_2_FR "%D2 2 Copies"
+#define UI_TEXT_DITTO_3_FR "%D3 3 Copies"
+#define UI_TEXT_ZPROBE_HEIGHT_FR "Hauteur Z-Sonde:%zh"
 
 
 // *************** Czech translation ****************
@@ -2526,9 +2700,9 @@
 #define UI_TEXT_Z_POS_FAST_CZ       "Z rychle"
 #define UI_TEXT_E_POSITION_CZ       "Pozice extruderu"
 #define UI_TEXT_BED_TEMP_CZ         "Teplota desky: %Eb\002C"
-#define UI_TEXT_EXTR0_TEMP_CZ       "Teplota 1:  %E0\002C"
-#define UI_TEXT_EXTR1_TEMP_CZ       "Teplota 2:  %E1\002C"
-#define UI_TEXT_EXTR2_TEMP_CZ       "Teplota 2:  %E2\002C"
+#define UI_TEXT_EXTR0_TEMP_CZ       "Teplota 1:%e0/%E0\002C"
+#define UI_TEXT_EXTR1_TEMP_CZ       "Teplota 2:%e1/%E1\002C"
+#define UI_TEXT_EXTR2_TEMP_CZ       "Teplota 3:%e2/%E2\002C"
 #define UI_TEXT_EXTR0_OFF_CZ        "Extruder 1 vyp."
 #define UI_TEXT_EXTR1_OFF_CZ        "Extruder 2 vyp."
 #define UI_TEXT_EXTR2_OFF_CZ        "Extruder 3 vyp."
@@ -2721,18 +2895,24 @@
 #define UI_TEXT_COATING_CUSTOM_CZ "Vlastni:%oCmm"
 #define UI_TEXT_LANGUAGE_CZ "Jazyk"
 
-#define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_CZ "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_CZ "Buf: %oB"
@@ -2750,6 +2930,20 @@
 #define UI_TEXT_TEMP_SET_CZ cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_CZ cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_CZ " %oCmm"
+#define UI_TEXT_EXTR3_TEMP_CZ "Teplota 4:%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_CZ "Teplota 5:%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_CZ "Teplota 6:%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_CZ "Extruder 4 vyp."
+#define UI_TEXT_EXTR4_OFF_CZ "Extruder 5 vyp."
+#define UI_TEXT_EXTR5_OFF_CZ "Extruder 6 vyp."
+#define UI_TEXT_EXTR3_SELECT_CZ "%X3 Zvolit Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_CZ "%X4 Zvolit Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_CZ "%X5 Zvolit Extr. 6"
+#define UI_TEXT_DITTO_0_CZ "%D0 Zadne Kopie"
+#define UI_TEXT_DITTO_1_CZ "%D1 1 Kopie"
+#define UI_TEXT_DITTO_2_CZ "%D2 2 Kopii"
+#define UI_TEXT_DITTO_3_CZ "%D3 3 Kopii"
+#define UI_TEXT_ZPROBE_HEIGHT_CZ "Vyska z-test:%zh"
 
 
 
@@ -2794,10 +2988,10 @@
 #define UI_TEXT_Z_POSITION_PL       "Pozycja Z"
 #define UI_TEXT_Z_POS_FAST_PL       "Pozycja Z Szybko"
 #define UI_TEXT_E_POSITION_PL       "Pozycja Extrudera"
-#define UI_TEXT_BED_TEMP_PL         "Temp.Stolu: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_PL       "Temp.Extr1: %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_PL       "Temp.Extr2: %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_PL       "Temp.Extr3: %E2" cDEG "C"
+#define UI_TEXT_BED_TEMP_PL         "Temp.Stolu:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_PL       "Temp.Ex1:%e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_PL       "Temp.Ex2:%e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_PL       "Temp.Ex3:%e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_PL        "Wyl. Extruder 1"
 #define UI_TEXT_EXTR1_OFF_PL        "Wyl. Extruder 2"
 #define UI_TEXT_EXTR2_OFF_PL        "Wyl. Extruder 3"
@@ -2990,18 +3184,24 @@
 #define UI_TEXT_COATING_CUSTOM_PL "Zwyczaj:%oCmm"
 #define UI_TEXT_LANGUAGE_PL "Jezyk"
 
-#define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+  #define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
+#else
+  #define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
   #define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
   #define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
   #define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
  #define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+  #define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
 #else
- #define UI_TEXT_MAINPAGE6_3_PL "Flow:\xfd %of%%%   Z:%x2"
+  #define UI_TEXT_MAINPAGE6_3_PL "Prze.:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PL "Buf: %oB"
@@ -3019,4 +3219,17 @@
 #define UI_TEXT_TEMP_SET_PL cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_PL cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_PL " %oCmm"
-
+#define UI_TEXT_EXTR3_TEMP_PL "Temp.Ex4:%e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_PL "Temp.Ex5:%e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_PL "Temp.Ex6:%e5/%E5" cDEG "C"
+#define UI_TEXT_EXTR3_OFF_PL "Wyl. Extruder 4"
+#define UI_TEXT_EXTR4_OFF_PL "Wyl. Extruder 5"
+#define UI_TEXT_EXTR5_OFF_PL "Wyl. Extruder 6"
+#define UI_TEXT_EXTR3_SELECT_PL "%X3 Wybierz Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_PL "%X4 Wybierz Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_PL "%X5 Wybierz Extr. 6"
+#define UI_TEXT_DITTO_0_PL "%D0 Nie Kopie"
+#define UI_TEXT_DITTO_1_PL "%D1 1 Kopia"
+#define UI_TEXT_DITTO_2_PL "%D2 2 Kopie"
+#define UI_TEXT_DITTO_3_PL "%D3 3 Kopie"
+#define UI_TEXT_ZPROBE_HEIGHT_PL "Wys. Z-Sonda:%zh"

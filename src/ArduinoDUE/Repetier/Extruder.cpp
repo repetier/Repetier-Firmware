@@ -1288,7 +1288,7 @@ const short temptable_4[NUMTEMPS_4][2] PROGMEM =
     {478*4, 46*8},{531*4, 41*8},{584*4, 35*8},{637*4, 30*8},{690*4, 25*8},{743*4, 20*8},{796*4, 14*8},{849*4, 7*8},{902*4, 0*8},
     {955*4, -11*8},{1008*4, -35*8}
 };
-
+// ATC 104GT
 #define NUMTEMPS_8 34
 const short temptable_8[NUMTEMPS_8][2] PROGMEM =
 {

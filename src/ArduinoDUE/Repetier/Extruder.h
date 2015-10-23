@@ -148,6 +148,7 @@ class Extruder;
 extern Extruder extruder[];
 
 #if EXTRUDER_JAM_CONTROL
+#if JAM_METHOD == 1
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal += extruder[x].jamLastDir;\
         if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
@@ -156,10 +157,21 @@ extern Extruder extruder[];
         } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
             extruder[x].tempControl.setJammed(true);\
     }
+#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
+#elif JAM_METHOD == 2
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+#elif JAM_METHOD == 3
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = !READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+#else
+#error Unknown value for JAM_METHOD
+#endif
 #define ___TEST_EXTRUDER_JAM(x,y) _TEST_EXTRUDER_JAM(x,y)
 #define __TEST_EXTRUDER_JAM(x) ___TEST_EXTRUDER_JAM(x,EXT ## x ## _JAM_PIN)
 #define TEST_EXTRUDER_JAM(x) __TEST_EXTRUDER_JAM(x)
-#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
 #else
 #define TEST_EXTRUDER_JAM(x)
 #define RESET_EXTRUDER_JAM(x,dir)

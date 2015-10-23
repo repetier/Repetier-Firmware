@@ -2059,7 +2059,7 @@ void Distortion::updateDerived()
 void Distortion::enable(bool permanent)
 {
     enabled = true;
-#if DISTORTION_PERMANENT
+#if DISTORTION_PERMANENT && EEPROM_MODE != 0
     if(permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
@@ -2069,7 +2069,7 @@ void Distortion::enable(bool permanent)
 void Distortion::disable(bool permanent)
 {
     enabled = false;
-#if DISTORTION_PERMANENT
+#if DISTORTION_PERMANENT && EEPROM_MODE != 0
     if(permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
@@ -2103,7 +2103,9 @@ int32_t Distortion::getMatrix(int index) const
 void Distortion::setMatrix(int32_t val, int index)
 {
 #if DISTORTION_PERMANENT
+#if EEPROM_MODE != 0
     EEPROM::setZCorrection(val, index);
+#endif
 #else
     matrix[index] = val;
 #endif
