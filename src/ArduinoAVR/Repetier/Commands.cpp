@@ -161,6 +161,7 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s))
 
 void Commands::printTemperatures(bool showRaw)
 {
+#if NUM_EXTRUDER > 0
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE == 0
     Com::printF(Com::tTColon,temp);
@@ -198,8 +199,15 @@ void Commands::printTemperatures(bool showRaw)
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
+#else if NUM_EXTRUDER == 1
+    if(showRaw)
+    {
+            Com::printF(Com::tSpaceRaw,(int)0);
+            Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[0].tempControl.currentTemperature);
+    }
 #endif
     Com::println();
+#endif
 }
 void Commands::changeFeedrateMultiply(int factor)
 {
@@ -1333,6 +1341,7 @@ void Commands::processGCode(GCode *com)
             EEPROM::setDeltaTowerZOffsetSteps(offz);
         }
 #endif
+        PrintLine::moveRelativeDistanceInSteps(0, 0, -5*Printer::axisStepsPerMM[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], true, true);
         Printer::homeAxis(true,true,true);
     }
     break;
@@ -1756,15 +1765,14 @@ void Commands::processMCode(GCode *com)
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
-            Extruder::setTemperatureForExtruder(0, 0);
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
             for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0, i);
 #else
             Extruder::setTemperatureForExtruder(0, 0);
 #endif
-#if HEATED_BED_TYPE!=0
-            target_bed_raw = 0;
+#if HEATED_BED_TYPE != 0
+            Extruder::setHeatedBedTemperature(0,false);
 #endif
         }
         break;

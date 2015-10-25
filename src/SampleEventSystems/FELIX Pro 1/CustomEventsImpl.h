@@ -18,3 +18,32 @@ void Felix100MS() {
     }
   }
 }
+
+bool probeValueNew = false;
+bool probeValueOld;
+char probeMessageOld[22];
+
+void Felix500MS() {
+  if(PrintLine::linesCount == 0) {
+     Endstops::update(); // need to update endstops
+     Endstops::update();
+     probeValueNew = Endstops::zProbe();
+     // check if something is changed with probe
+     if (probeValueNew != probeValueOld){
+        probeValueOld = probeValueNew;
+        // probe is triggered, take action
+        if(probeValueNew) {
+          // store old message
+          strncpy(probeMessageOld,uid.statusMsg,21);
+          // make screen update with new message
+          UI_STATUS_UPD_F(PSTR("Z sensor triggered!"));
+        } else{ 
+          //probe is not triggered;
+          // restore old message
+           UI_STATUS_RAM(probeMessageOld);
+        }
+     }
+  }
+}
+
+ 

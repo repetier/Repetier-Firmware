@@ -1147,7 +1147,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     Printer::stepsRemainingAtZHit = -1;
     setHoming(true);
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentDeltaPositionSteps);
-    PrintLine::moveRelativeDistanceInSteps(0, 0, zMaxSteps * 2.0, 0, feedrate, true, true);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, (zMaxSteps + EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[Z_AXIS]) * 1.5, 0, feedrate, true, true);
     offsetX = offsetY = offsetZ = 0;
     setHoming(false);
 }

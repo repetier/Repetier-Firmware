@@ -188,7 +188,7 @@ public:
     static INLINE void fillFromAccumulator() {
         lastState = accumulator;
 #ifdef EXTENDED_ENDSTOPS
-        lastState = accumulator2;
+        lastState2 = accumulator2;
 #endif
     }
     static INLINE bool xMin() {
