@@ -668,6 +668,9 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto3,UI_TEXT_DITTO_3_ID,UI_DITTO_3)
 #elif NUM_EXTRUDER == 6
 #define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_temp4,&ui_menu_ext_temp5,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_off4,&ui_menu_ext_off5,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,
 #define UI_MENU_EXTCNT 18
+#elif NUM_EXTRUDER == 0
+#define UI_MENU_EXTCOND
+#define UI_MENU_EXTCNT 0
 #endif
 #if HAVE_HEATED_BED
 #define UI_MENU_BEDCOND &ui_menu_bed_temp,
@@ -927,12 +930,27 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax_dt,    UI_TEXT_EXTR_DMAX_DT_ID, 
 #define UI_MENU_PIDCOND ,&ui_menu_cext_manager, &ui_menu_cext_pmax
 #define UI_MENU_PIDCNT 2
 #endif
-#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF_ID,UI_ACTION_X_OFFSET)
+UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF_ID,UI_ACTION_Y_OFFSET)
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 8
+#elif NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF_ID,UI_ACTION_X_OFFSET)
+UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF_ID,UI_ACTION_Y_OFFSET)
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 7
+#elif NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
+UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF_ID,UI_ACTION_X_OFFSET)
+UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF_ID,UI_ACTION_Y_OFFSET)
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 6
+#elif NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF_ID,UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF_ID,UI_ACTION_Y_OFFSET)
 #define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
 #define UI_MENU_CONFEXTCNT 5
-#elif NUM_EXTRUDER>1 && MIXING_EXTRUDER == 0
+#elif NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset,UI_TEXT_EXTR_XOFF_ID,UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset,UI_TEXT_EXTR_YOFF_ID,UI_ACTION_Y_OFFSET)
 #define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,

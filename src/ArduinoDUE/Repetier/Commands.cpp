@@ -260,9 +260,10 @@ void Commands::reportPrinterUsage()
     Com::printF(Com::tPrintedFilament, dist, 2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
+#if NUM_EXTRUDER > 0
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC > 15) alloff = false;
-
+#endif
     int32_t seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + HAL::eprGetInt32(EPR_PRINTING_TIME);
     int32_t tmp = seconds / 86400;
     seconds -= tmp * 86400;
@@ -1736,6 +1737,7 @@ void Commands::processMCode(GCode *com)
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
         break;
+#if NUM_TEMPERATURE_LOOPS > 0
     case 116: // Wait for temperatures to reach target temperature
         for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++)
         {
@@ -1744,7 +1746,7 @@ void Commands::processMCode(GCode *com)
             EVENT_HEATING_FINISHED(h < NUM_EXTRUDER ? h : -1);
         }
         break;
-
+#endif
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
     case 106: // M106 Fan On
         if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))

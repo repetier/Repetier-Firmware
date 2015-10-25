@@ -295,7 +295,9 @@ extern TemperatureController heatedBedController;
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
 //extern Extruder *Extruder::current;
+#if NUM_TEMPERATURE_LOOPS > 0
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
+#endif
 extern uint8_t autotuneIndex;
 
 

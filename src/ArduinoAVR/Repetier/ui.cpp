@@ -1287,6 +1287,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
             if(c2 == 'c') eid = Extruder::current->id;
             else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
+#if NUM_TEMPERATURE_LOOPS > 0
             if(Printer::isAnyTempsensorDefect())
             {
                 if(eid == 0 && ++beepdelay > 30) beepdelay = 0; // beep every 30 seconds
@@ -1310,6 +1311,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addStringP(PSTR(" jam "));
                 break;
             }
+#endif
 #endif
             if(c2 == 'c') fvalue = Extruder::current->tempControl.currentTemperatureC;
             else if(c2 >= '0' && c2 <= '9') fvalue=extruder[c2 - '0'].tempControl.currentTemperatureC;
@@ -1491,9 +1493,10 @@ void UIDisplay::parse(const char *txt,bool ram)
             {
 #if EEPROM_MODE
                 bool alloff = true;
+#if NUM_TEMPERATURE_LOOPS > 0
                 for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
                     if(tempController[i]->targetTemperatureC > 15) alloff = false;
-
+#endif
                 long seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + HAL::eprGetInt32(EPR_PRINTING_TIME);
                 long tmp = seconds / 86400;
                 seconds -= tmp * 86400;

@@ -68,6 +68,7 @@ void Extruder::manageTemperatures()
     uint8_t errorDetected = 0;
     bool hot = false;
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
+#if NUM_TEMPERATURE_LOOPS > 0
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
         TemperatureController *act = tempController[controller];
@@ -295,6 +296,8 @@ void Extruder::manageTemperatures()
 #endif
         Printer::debugLevel |= 8; // Go into dry mode
     } // any sensor defect
+    #endif
+
 }
 
 void TemperatureController::waitForTargetTemperature()
@@ -586,6 +589,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t extr, bool beep, bool wait)
 {
+#if NUM_EXTRUDER > 0
 #if MIXING_EXTRUDER
     extr = 0; // map any virtual extruder number to 0
 #endif // MIXING_EXTRUDER
@@ -701,6 +705,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         Printer::filamentPrinted = 0;  // new print, new counter
         Printer::flag2 &= ~PRINTER_FLAG2_RESET_FILAMENT_USAGE;
     }
+#endif
 }
 
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
@@ -1720,13 +1725,15 @@ void TemperatureController::setTargetTemperature(float target)
 uint8_t autotuneIndex = 255;
 void Extruder::disableAllHeater()
 {
-    for(uint8_t i=0; i<NUM_TEMPERATURE_LOOPS; i++)
+#if NUM_TEMPERATURE_LOOPS > 0
+    for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
         TemperatureController *c = tempController[i];
         c->targetTemperature = 0;
         c->targetTemperatureC = 0;
         pwm_pos[c->pwmIndex] = 0;
     }
+#endif
     autotuneIndex = 255;
 }
 
@@ -1888,6 +1895,7 @@ void writeMonitor()
 
 bool reportTempsensorError()
 {
+#if NUM_TEMPERATURE_LOOPS > 9
     if(!Printer::isAnyTempsensorDefect()) return false;
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
@@ -1901,6 +1909,9 @@ bool reportTempsensorError()
     }
     Com::printErrorFLN(Com::tDryModeUntilRestart);
     return true;
+#else
+    return false;
+#endif
 }
 
 #ifdef SUPPORT_MAX6675
@@ -2207,6 +2218,7 @@ TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE
 #define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
 #endif
 
+#if NUM_TEMPERATURE_LOOPS > 0
 TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] =
 {
 #if NUM_EXTRUDER>0
@@ -2235,4 +2247,4 @@ TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] =
 #endif
 #endif
 };
-
+#endif
