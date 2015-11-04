@@ -65,8 +65,8 @@
 
 //Inactivity shutdown variables
 millis_t previousMillisCmd = 0;
-millis_t maxInactiveTime = MAX_INACTIVE_TIME*1000L;
-millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME*1000L;
+millis_t maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
+millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
 long baudrate = BAUDRATE;         ///< Communication speed rate.
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
@@ -79,7 +79,7 @@ uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of ex
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
 PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE]; ///< Cache for print moves.
-PrintLine *PrintLine::cur = 0;               ///< Current printing line
+PrintLine *PrintLine::cur = NULL;               ///< Current printing line
 #if CPU_ARCH == ARCH_ARM
 volatile bool PrintLine::nlFlag = false;
 #endif
@@ -153,8 +153,12 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     PrintLine *p = getNextWriteLine();
 
     float axis_diff[E_AXIS_ARRAY]; // Axis movement in mm
-    if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
-    else p->flags = 0;
+    p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
+#if MIXING_EXTRUDER
+    if(Printer::isAllEMotors()) {
+        p->flags |= FLAG_ALL_E_MOTORS;
+    }
+#endif
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
@@ -163,12 +167,23 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     for(uint8_t axis = 0; axis < 4; axis++)
     {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
+        p->secondSpeed = Printer::fanSpeed;
         if(axis == E_AXIS)
         {
-            Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
-            p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
-            Printer::extrudeMultiplyError -= p->delta[E_AXIS];
-            Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
+            if(Printer::mode == PRINTER_MODE_FFF)
+            {
+                Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
+                p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
+                Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+                Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
+            }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            else if(Printer::mode == PRINTER_MODE_LASER)
+            {
+                p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
+                p->delta[E_AXIS] = 0;
+            }
+#endif
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -539,7 +554,9 @@ void PrintLine::updateTrapezoids()
         act->updateStepsParameter();
         firstLine->unblock();
         return;
-    } else {
+    }
+    else
+    {
         computeMaxJunctionSpeed(previous, act); // Set maximum junction speed if we have a real move before
     }
     // Increase speed if possible neglecting current speed
@@ -851,10 +868,13 @@ inline float PrintLine::safeSpeed()
     if(isZMove())
     {
         float mz = Printer::maxZJerk * 0.5;
-        if(isXOrYMove()) {
-           if(fabs(speedZ) > mz)
-            safe = RMath::min(safe,mz * fullSpeed / fabs(speedZ));
-        } else {
+        if(isXOrYMove())
+        {
+            if(fabs(speedZ) > mz)
+                safe = RMath::min(safe,mz * fullSpeed / fabs(speedZ));
+        }
+        else
+        {
             safe = mz;
         }
     }
@@ -1487,6 +1507,11 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff,uint8_t check_endstops,uin
     float axisDiff[5]; // Axis movement in mm
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
     else p->flags = 0;
+#if MIXING_EXTRUDER
+    if(Printer::isAllEMotors(true)) {
+        p->flags |= FLAG_ALL_E_MOTORS;
+    }
+#endif
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     //Find direction
@@ -1528,17 +1553,28 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
     //if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0; // now constrained at entry level including cylinder test
     int32_t difference[E_AXIS_ARRAY];
     float axis_diff[VIRTUAL_AXIS_ARRAY]; // Axis movement in mm. Virtual axis in 4;
+    uint8_t secondSpeed = Printer::fanSpeed;
     for(fast8_t axis = 0; axis < E_AXIS_ARRAY; axis++)
     {
         difference[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
         if(axis == E_AXIS)
         {
-            Printer::extrudeMultiplyError += (static_cast<float>(difference[E_AXIS]) * Printer::extrusionFactor);
-            difference[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
-            Printer::extrudeMultiplyError -= difference[E_AXIS];
-            axis_diff[E_AXIS] = difference[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
-            Printer::filamentPrinted += axis_diff[E_AXIS];
-            axis_diff[E_AXIS] = fabs(axis_diff[E_AXIS]);
+            if(Printer::mode == PRINTER_MODE_FFF)
+            {
+                Printer::extrudeMultiplyError += (static_cast<float>(difference[E_AXIS]) * Printer::extrusionFactor);
+                difference[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
+                Printer::extrudeMultiplyError -= difference[E_AXIS];
+                axis_diff[E_AXIS] = difference[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+                Printer::filamentPrinted += axis_diff[E_AXIS];
+                axis_diff[E_AXIS] = fabs(axis_diff[E_AXIS]);
+            }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            else if(Printer::mode == PRINTER_MODE_LASER)
+            {
+                secondSpeed = ((axis_diff[X_AXIS] != 0 || axis_diff[Y_AXIS] != 0) && (LaserDriver::laserOn || axis_diff[E_AXIS] != 0) ? LaserDriver::intensity : 0);
+                axis_diff[E_AXIS] = 0;
+            }
+#endif
         }
         else
             axis_diff[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
@@ -1650,6 +1686,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
         }
 
         p->joinFlags = 0;
+        p->secondSpeed = secondSpeed;
         p->moveID = lastMoveID;
 
         // Only set fixed on last segment
@@ -1657,6 +1694,11 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
             p->setEndSpeedFixed(true);
 
         p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
+#if MIXING_EXTRUDER
+        if(Printer::isAllEMotors(true)) {
+            p->flags |= FLAG_ALL_E_MOTORS;
+        }
+#endif
         p->numDeltaSegments = segmentsPerLine;
 
         uint16_t maxDeltaStep = p->calculateDeltaSubSegments(softEndstop);
@@ -1977,6 +2019,15 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
         cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
+        if(Printer::mode == PRINTER_MODE_FFF) {
+            Printer::setFanSpeedDirectly(cur->secondSpeed);
+        }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+        else if(Printer::mode == PRINTER_MODE_LASER)
+        {
+            LaserDriver::changeIntensity(cur->secondSpeed);
+        }
+#endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     HAL::allowInterrupts();
@@ -2181,7 +2232,18 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         //deltaSegmentCount -= cur->numDeltaSegments; // should always be zero
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+        if(linesCount == 0) {
+            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(Printer::mode == PRINTER_MODE_FFF) {
+                Printer::setFanSpeedDirectly(Printer::fanSpeed);
+            }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            else if(Printer::mode == PRINTER_MODE_LASER) // Last move disables laser for safety!
+            {
+                LaserDriver::changeIntensity(0);
+            }
+#endif
+        }
         Printer::interval >>= 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
@@ -2328,6 +2390,15 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
+        if(Printer::mode == PRINTER_MODE_FFF) {
+            Printer::setFanSpeedDirectly(cur->secondSpeed);
+        }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+        else if(Printer::mode == PRINTER_MODE_LASER)
+        {
+            LaserDriver::changeIntensity(cur->secondSpeed);
+        }
+#endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     Endstops::update();
@@ -2462,7 +2533,19 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
-        if(linesCount == 0) UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+        if(linesCount == 0)
+        {
+            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(Printer::mode == PRINTER_MODE_FFF) {
+                Printer::setFanSpeedDirectly(Printer::fanSpeed);
+            }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            else if(Printer::mode == PRINTER_MODE_LASER) // Last move disables laser for safety!
+            {
+                LaserDriver::changeIntensity(0);
+            }
+#endif
+        }
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even

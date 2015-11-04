@@ -251,6 +251,9 @@ What display type do you use?
 #define UI_ACTION_SET_P2				4014
 #define UI_ACTION_SET_P3				4015
 #define UI_ACTION_CALC_LEVEL			4016
+#define UI_ACTION_XOFF                  4020
+#define UI_ACTION_YOFF                  4021
+#define UI_ACTION_ZOFF                  4022
 
 #define UI_ACTION_SHOW_USERMENU1        4101
 #define UI_ACTION_SHOW_USERMENU2        4102

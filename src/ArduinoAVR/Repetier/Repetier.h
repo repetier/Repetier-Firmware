@@ -23,7 +23,7 @@
 #define _REPETIER_H
 
 #include <math.h>
-#define REPETIER_VERSION "0.92.5"
+#define REPETIER_VERSION "0.92.6"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -175,6 +175,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 // add pid control
 #define TEMP_PID 1
+
+#define PRINTER_MODE_FFF 0
+#define PRINTER_MODE_LASER 1
+#define PRINTER_MODE_CNC 2
 
 #include "Configuration.h"
 

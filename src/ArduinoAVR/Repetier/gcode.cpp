@@ -706,6 +706,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     char c;
     while ( (c = *(pos++)) )
     {
+        if(c == '(' || c == '%') break; // alternative comment or program block
         switch(c)
         {
         case 'N':

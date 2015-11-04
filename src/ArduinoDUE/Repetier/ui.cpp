@@ -1487,7 +1487,12 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 >= 'x' && c2 <= 'z') addFloat(Printer::axisStepsPerMM[c2 - 'x'], 3, 1);
             if(c2 == 'e') addFloat(Extruder::current->stepsPerMM, 3, 1);
             break;
-
+        case 'T': // Print offsets
+            if(c2=='2')
+                addFloat(-Printer::coordinateOffset[Z_AXIS],2,2);
+            else
+                addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
+            break;
         case 'U':
             if(c2 == 't')   // Printing time
             {
@@ -1647,6 +1652,10 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
+            if(c2=='2')
+                addFloat(-Printer::coordinateOffset[Z_AXIS],2,2);
+            else
+                addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
             break;
         }
     }
@@ -2595,7 +2604,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     switch(action)
     {
     case UI_ACTION_FANSPEED:
-        Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3,false);
+        Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3);
         break;
     case UI_ACTION_XPOSITION:
         if(!allowMoves) return false;
@@ -2817,6 +2826,23 @@ ZPOS2:
         INCREMENT_MIN_MAX(Printer::axisStepsPerMM[action - UI_ACTION_STEPS_X], 0.1, 0, 999);
         Printer::updateDerivedParameter();
         break;
+
+    case UI_ACTION_XOFF:
+    case UI_ACTION_YOFF:
+        {
+            float tmp = -Printer::coordinateOffset[action - UI_ACTION_XOFF];
+            INCREMENT_MIN_MAX(tmp, 1, -999, 999);
+            Printer::coordinateOffset[action - UI_ACTION_XOFF] = -tmp;
+        }
+        break;
+    case UI_ACTION_ZOFF:
+        {
+            float tmp = -Printer::coordinateOffset[Z_AXIS];
+            INCREMENT_MIN_MAX(tmp, 0.01, -9.99, 9.99);
+            Printer::coordinateOffset[Z_AXIS] = -tmp;
+        }
+        break;
+
     case UI_ACTION_BAUDRATE:
 #if EEPROM_MODE != 0
     {
@@ -3051,6 +3077,9 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #if CASE_LIGHTS_PIN >= 0
         case UI_ACTION_LIGHTS_ONOFF:
             TOGGLE(CASE_LIGHTS_PIN);
+#ifdef CASE_LIGHTS2_PIN
+            TOGGLE(CASE_LIGHTS2_PIN);
+#endif
             Printer::reportCaseLightStatus();
             UI_STATUS_F(Com::translatedF(UI_TEXT_LIGHTS_ONOFF_ID));
             break;
@@ -3222,20 +3251,20 @@ int UIDisplay::executeAction(int action, bool allowMoves)
         case UI_ACTION_FAN_25:
         case UI_ACTION_FAN_50:
         case UI_ACTION_FAN_75:
-            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, false);
+            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64);
             break;
         case UI_ACTION_FAN_FULL:
-            Commands::setFanSpeed(255, false);
+            Commands::setFanSpeed(255);
             break;
         case UI_ACTION_FAN_SUSPEND:
         {
             static uint8_t lastFanSpeed = 255;
             if(Printer::getFanSpeed()==0)
-                Commands::setFanSpeed(lastFanSpeed,false);
+                Commands::setFanSpeed(lastFanSpeed);
             else
             {
                 lastFanSpeed = Printer::getFanSpeed();
-                Commands::setFanSpeed(0,false);
+                Commands::setFanSpeed(0);
             }
         }
         break;
@@ -3479,10 +3508,10 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif
         break;
         case UI_ACTION_FAN_UP:
-            Commands::setFanSpeed(Printer::getFanSpeed() + 32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed() + 32);
             break;
         case UI_ACTION_FAN_DOWN:
-            Commands::setFanSpeed(Printer::getFanSpeed() - 32,false);
+            Commands::setFanSpeed(Printer::getFanSpeed() - 32);
             break;
         case UI_ACTION_KILL:
             Commands::emergencyStop();

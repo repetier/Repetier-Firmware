@@ -694,6 +694,61 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
 
+// ##########################################################################################
+// ##                             Laser configuration                                      ##
+// ##########################################################################################
+
+/*
+If the firmware is in laser mode, it can control a laser output to cut or engrave materials.
+Please use this feature only if you know about safety and required protection. Lasers are
+dangerous and can hurt or make you blind!!!
+
+The default laser driver only supports laser on and off. Here you control the eíntensity with
+your feedrate. For exchangeable diode lasers this is normally enough. If you need more control
+you can set the intensity in a range 0-255 with a custom extension to the driver. See driver.h
+and comments on how to extend the functions non invasive with our event system.
+
+If you have a laser - powder system you will like your E override. If moves contain a 
+increasing extruder position it will laser that move. With this trick you can
+use existing fdm slicers to laser the output. Laser width is extrusion width.
+
+Other tools may use M3 and M5 to enable/disable laser. Here G1/G2/G3 moves have laser enabled
+and G0 moves have it disables.
+
+In any case, laser only enables while moving. At the end of a move it gets
+automatically disabled. 
+*/
+
+#define SUPPORT_LASER 0 // set 1 to enable laser support
+#define LASER_PIN -1    // set to pin enabling laser
+#define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+
+// ##########################################################################################
+// ##                              CNC configuration                                       ##
+// ##########################################################################################
+
+/*
+If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works 
+similar to laser mode, but mill keeps enabled during G0 moves and it allows
+setting rpm (only with event extension that supports this) and milling direction.
+It also can add a delay to wait for spindle to run on full speed.
+*/
+
+#define SUPPORT_CNC 0 // Set 1 for cnc support
+#define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
+#define CNC_WAIT_ON_DISABLE 0 // delay in milliseconds after disabling spindle. May be required for direction changes.
+#define CNC_ENABLE_PIN -1 // Pin to enable mill
+#define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
+#define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
+#define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
+
+
+/* Select the default mode when the printer gets enables. Possible values are
+PRINTER_MODE_FFF 0
+PRINTER_MODE_LASER 1
+PRINTER_MODE_CNC 2
+*/
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_FDM
 
 // ##########################################################################################
 // ##                            Endstop configuration                                     ##

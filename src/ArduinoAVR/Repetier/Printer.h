@@ -94,6 +94,7 @@ union wizardVar
 #define PRINTER_FLAG2_DEBUG_JAM             16
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 #define PRINTER_FLAG2_HOMING                64
+#define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -249,6 +250,18 @@ public:
     }
 };
 
+#ifndef DEFAULT_PRINTER_MODE
+#if NUM_EXTRUDER > 0
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
+#elif defined(SUPPORT_LASER) && SUPPORT_LASER
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_LASER
+#elif defined(SUPPORT_CNC) && SUPPORT_CNC
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_CNC
+#else
+#error No supported printer mode compiled
+#endif
+#endif
+
 class Printer
 {
 public:
@@ -274,6 +287,8 @@ public:
     static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
     static uint8_t unitIsInches;
+    static uint8_t mode;
+    static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
     static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
@@ -383,7 +398,7 @@ public:
         if(highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
-
+    static void reportPrinterMode();
     static INLINE void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -441,7 +456,8 @@ public:
     {
         debugLevel &= ~flags;
     }
-
+    /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
+    static void setFanSpeedDirectly(uint8_t speed);
     /** \brief Disable stepper motor for x direction. */
     static INLINE void disableXStepper()
     {
@@ -719,6 +735,15 @@ public:
     static INLINE void setHoming(uint8_t b)
     {
         flag2 = (b ? flag2 | PRINTER_FLAG2_HOMING : flag2 & ~PRINTER_FLAG2_HOMING);
+    }
+    static INLINE uint8_t isAllEMotors()
+    {
+        return flag2 & PRINTER_FLAG2_ALL_E_MOTORS;
+    }
+
+    static INLINE void setAllEMotors(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_ALL_E_MOTORS : flag2 & ~PRINTER_FLAG2_ALL_E_MOTORS);
     }
 
     static INLINE uint8_t isDebugJam()

@@ -391,6 +391,9 @@ FSTRINGVAR(tExtrDot)
 FSTRINGVAR(tMCPEpromSettings)
 FSTRINGVAR(tMCPCurrentSettings)
 #endif
+FSTRINGVAR(tPrinterModeFFF)
+FSTRINGVAR(tPrinterModeLaser)
+FSTRINGVAR(tPrinterModeCNC)
 
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);

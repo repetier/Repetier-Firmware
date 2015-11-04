@@ -18,7 +18,8 @@ MOTOR_DRIVER_5(motorDriver5);
 MOTOR_DRIVER_6(motorDriver6);
 #endif
 
-MotorDriverInterface *motorDrivers[NUM_MOTOR_DRIVERS] = {
+MotorDriverInterface *motorDrivers[NUM_MOTOR_DRIVERS] =
+{
     &motorDriver1
 #if NUM_MOTOR_DRIVERS > 1
     , &motorDriver2
@@ -37,14 +38,16 @@ MotorDriverInterface *motorDrivers[NUM_MOTOR_DRIVERS] = {
 #endif
 };
 
-MotorDriverInterface *getMotorDriver(int idx) {
+MotorDriverInterface *getMotorDriver(int idx)
+{
     return motorDrivers[idx];
 }
 
 /**
 Run motor P until it is at position X
 */
-void commandG201(GCode &code) {
+void commandG201(GCode &code)
+{
     int id = 0;
     if(code.hasP())
         id = code.P;
@@ -55,7 +58,8 @@ void commandG201(GCode &code) {
 }
 
 //G202 P<motorId> X<setpos>  - Mark current position as X
-void commandG202(GCode &code) {
+void commandG202(GCode &code)
+{
     int id = 0;
     if(code.hasP())
         id = code.P;
@@ -65,7 +69,8 @@ void commandG202(GCode &code) {
     motorDrivers[id]->setCurrentAs(code.X);
 }
 //G203 P<motorId>            - Report current motor position
-void commandG203(GCode &code) {
+void commandG203(GCode &code)
+{
     int id = 0;
     if(code.hasP())
         id = code.P;
@@ -75,7 +80,8 @@ void commandG203(GCode &code) {
     Com::printFLN(PSTR("Pos:"),motorDrivers[id]->getPosition());
 }
 //G204 P<motorId> S<0/1>     - Enable/disable motor
-void commandG204(GCode &code) {
+void commandG204(GCode &code)
+{
     int id = 0;
     if(code.hasP())
         id = code.P;
@@ -88,13 +94,121 @@ void commandG204(GCode &code) {
         motorDrivers[id]->disable();
 }
 
-void disableAllMotorDrivers() {
+void disableAllMotorDrivers()
+{
     for(int i = 0; i < NUM_MOTOR_DRIVERS; i++)
         motorDrivers[i]->disable();
 }
-void initializeAllMotorDrivers() {
+void initializeAllMotorDrivers()
+{
     for(int i = 0; i < NUM_MOTOR_DRIVERS; i++)
         motorDrivers[i]->initialize();
 }
 
 #endif // NUM_MOTOR_DRIVERS
+
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+bool LaserDriver::laserOn = false;
+void LaserDriver::initialize()
+{
+    if(EVENT_INITALIZE_LASER)
+    {
+#if LASER_PIN > -1
+        SET_OUTPUT(LASER_PIN);
+#endif
+    }
+    changeIntensity(0);
+}
+void LaserDriver::changeIntensity(uint8_t newIntensity)
+{
+    if(EVENT_SET_LASER(newIntensity))
+    {
+        // Default implementation
+#if LASER_PIN > -1
+        WRITE(LASER_PIN,(LASER_ON_HIGH ? newIntensity > 199 : newIntensity < 200));
+#endif
+    }
+}
+#endif // SUPPORT_LASER
+
+#if defined(SUPPORT_CNC) && SUPPORT_CNC
+/**
+The CNC driver differs a bit from laser driver. Here only M3,M4,M5 have an influence on the spindle.
+The motor also keeps running for G0 moves. M3 and M4 wait for old moves to be finished and then enables
+the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reach target speed.
+*/
+
+int8_t CNCDriver::direction = 0;
+/** Initialize cnc pins. EVENT_INITALIZE_CNC should return false to prevent default initalization.*/
+void CNCDriver::initialize()
+{
+    if(EVENT_INITALIZE_CNC)
+    {
+#if CNC_ENABLE_PIN > -1
+        SET_OUTPUT(CNC_ENABLE_PIN);
+        WRITE(CNC_ENABLE_PIN,!CNC_ENABLE_WITH);
+#endif
+#if CNC_DIRECTION_PIN > -1
+        SET_OUTPUT(CNC_DIRECTION_PIN);
+#endif
+    }
+}
+/** Turns off spindle. For event override implement
+EVENT_SPINDLE_OFF
+returning false.
+*/
+void CNCDriver::spindleOff()
+{
+    if(direction == 0) return; // already off
+    if(EVENT_SPINDLE_OFF)
+    {
+#if CNC_ENABLE_PIN > -1
+        WRITE(CNC_ENABLE_PIN,!CNC_ENABLE_WITH);
+#endif
+    }
+    HAL::delayMilliseconds(CNC_WAIT_ON_DISABLE);
+}
+/** Turns spindle on. Default implementation uses a enable pin CNC_ENABLE_PIN. If
+CNC_DIRECTION_PIN is not -1 it sets direction to CNC_DIRECTION_CW. rpm is ignored.
+To override with event system, return false for the event
+EVENT_SPINDLE_CW(rpm)
+*/
+void CNCDriver::spindleOnCW(int32_t rpm)
+{
+    if(direction == 1)
+        return;
+    spindleOff();
+    direction = 1;
+    if(EVENT_SPINDLE_CW(rpm)) {
+#if CNC_DIRECTION_PIN > -1
+        WRITE(CNC_DIRECTION_PIN, CNC_DIRECTION_CW);
+#endif
+#if CNC_ENABLE_PIN > -1
+        WRITE(CNC_ENABLE_PIN, CNC_ENABLE_WITH);
+#endif
+    }
+    HAL::delayMilliseconds(CNC_WAIT_ON_ENABLE);
+}
+/** Turns spindle on. Default implementation uses a enable pin CNC_ENABLE_PIN. If
+CNC_DIRECTION_PIN is not -1 it sets direction to !CNC_DIRECTION_CW. rpm is ignored.
+To override with event system, return false for the event
+EVENT_SPINDLE_CCW(rpm)
+*/
+void CNCDriver::spindleOnCCW(int32_t rpm)
+{
+    if(direction == -1)
+        return;
+    spindleOff();
+    direction = -1;
+    if(EVENT_SPINDLE_CW(rpm)) {
+#if CNC_DIRECTION_PIN > -1
+        WRITE(CNC_DIRECTION_PIN, !CNC_DIRECTION_CW);
+#endif
+#if CNC_ENABLE_PIN > -1
+        WRITE(CNC_ENABLE_PIN, CNC_ENABLE_WITH);
+#endif
+    }
+    HAL::delayMilliseconds(CNC_WAIT_ON_ENABLE);
+}
+#endif

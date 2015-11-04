@@ -414,6 +414,9 @@ FSTRINGVALUE(Com::tExtrDot,"Extr.")
 FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
 FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
 #endif
+FSTRINGVALUE(Com::tPrinterModeFFF,"PrinterMode:FFF")
+FSTRINGVALUE(Com::tPrinterModeLaser,"PrinterMode:Laser")
+FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
