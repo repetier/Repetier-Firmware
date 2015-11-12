@@ -186,6 +186,8 @@ void GCode::checkAndPushCommand()
         {
             lastLineNumber++;
             return;
+        } else if(M == 668) {
+            lastLineNumber = 0;  // simulate a reset so lines are out of resend buffer
         }
 #endif // DEBUG_COM_ERRORS
     }
@@ -221,6 +223,10 @@ void GCode::checkAndPushCommand()
         lastLineNumber = actLineNumber;
     }
     pushCommand();
+#ifdef DEBUG_COM_ERRORS
+    if(hasM() && M == 667)
+        return; // omit ok
+#endif
 #if ACK_WITH_LINENUMBER
     Com::printFLN(Com::tOkSpace, actLineNumber);
 #else
@@ -337,6 +343,7 @@ void GCode::readFromSerial()
     {
         if((waitingForResend >= 0 || commandsReceivingWritePosition > 0) && time - timeOfLastDataPacket > 200)
         {
+            // Com::printF(PSTR("WFR:"),waitingForResend);Com::printF(PSTR(" CRWP:"),commandsReceivingWritePosition);commandReceiving[commandsReceivingWritePosition] = 0;Com::printFLN(PSTR(" GOT:"),(char*)commandReceiving);
             requestResend(); // Something is wrong, a started line was not continued in the last second
             timeOfLastDataPacket = time;
         }
@@ -392,8 +399,8 @@ void GCode::readFromSerial()
             char ch = commandReceiving[commandsReceivingWritePosition - 1];
             if(ch == 0 || ch == '\n' || ch == '\r' || (!commentDetected && ch == ':'))  // complete line read
             {
-                //Com::printF(PSTR("Parse ascii"));Com::print((char*)commandReceiving);Com::println();
                 commandReceiving[commandsReceivingWritePosition - 1] = 0;
+                //Com::printF(PSTR("Parse ascii:"));Com::print((char*)commandReceiving);Com::println();
                 commentDetected = false;
                 if(commandsReceivingWritePosition == 1)   // empty line ignore
                 {
@@ -513,7 +520,7 @@ void GCode::readFromSerial()
 bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 {
     internalCommand = !fromSerial;
-    unsigned int sum1 = 0,sum2 = 0; // for fletcher-16 checksum
+    unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
     uint8_t *p = buffer;
@@ -542,13 +549,13 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
         return false;
     }
     p = buffer;
-    params = *(unsigned int *)p;
+    params = *(uint16_t *)p;
     p += 2;
     uint8_t textlen = 16;
     if(isV2())
     {
-        params2 = *(unsigned int *)p;
-        p+=2;
+        params2 = *(uint16_t *)p;
+        p += 2;
         if(hasString())
             textlen = *p++;
     }
@@ -556,7 +563,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     if(params & 1)
     {
         actLineNumber = N = *(uint16_t *)p;
-        p+=2;
+        p += 2;
     }
     if(isV2())   // Read G,M as 16 bit value
     {
@@ -681,7 +688,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     {
         text = (char*)p;
         text[textlen] = 0; // Terminate string overwriting checksum
-        waitUntilAllCommandsAreParsed=true; // Don't destroy string until executed
+        waitUntilAllCommandsAreParsed = true; // Don't destroy string until executed
     }
     formatErrors = 0;
     return true;
@@ -699,6 +706,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     char c;
     while ( (c = *(pos++)) )
     {
+        if(c == '(' || c == '%') break; // alternative comment or program block
         switch(c)
         {
         case 'N':
@@ -721,7 +729,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'm':
         {
             M = parseLongValue(pos) & 0xffff;
-            params |=2;
+            params |= 2;
             if(M > 255) params |= 4096;
             // handle non standard text arguments that some M codes have
             if (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117)
@@ -878,7 +886,7 @@ void GCode::printCommand()
 {
     if(hasN()) {
         Com::print('N');
-        Com::print((long)N);
+        Com::print((int32_t)N);
         Com::print(' ');
     }
     if(hasM())

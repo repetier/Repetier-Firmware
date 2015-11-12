@@ -22,15 +22,23 @@
 #include "Repetier.h"
 
 FSTRINGVALUE(Com::tPrinterId, "Printer ID")
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+uint8_t Com::selectedLanguage;
+#endif
+
+#ifndef MACHINE_TYPE
 #if DRIVE_SYSTEM == DELTA
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Delta EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+#define MACHINE_TYPE "Delta"
+#elif DRIVE_SYSTEM == CARTESIAN
+#define MACHINE_TYPE "Mendel"
 #else
-#if DRIVE_SYSTEM == CARTESIAN
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
-#else
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/repetier/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Core_XY EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+#define MACHINE_TYPE "Core_XY"
 #endif
 #endif
+#ifndef FIRMWARE_URL
+#define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
+#endif // FIRMWARE_URL
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 FSTRINGVALUE(Com::tDebug,"Debug:")
 FSTRINGVALUE(Com::tOk,"ok")
 FSTRINGVALUE(Com::tNewline,"\r\n")
@@ -113,6 +121,7 @@ FSTRINGVALUE(Com::tYMinColon,"y_min:")
 FSTRINGVALUE(Com::tYMaxColon,"y_max:")
 FSTRINGVALUE(Com::tZMinColon,"z_min:")
 FSTRINGVALUE(Com::tZMaxColon,"z_max:")
+FSTRINGVALUE(Com::tZ2MinMaxColon,"z2_minmax:")
 FSTRINGVALUE(Com::tJerkColon,"Jerk:")
 FSTRINGVALUE(Com::tZJerkColon," ZJerk:")
 FSTRINGVALUE(Com::tLinearStepsColon," linear steps:")
@@ -122,8 +131,9 @@ FSTRINGVALUE(Com::tEEPROMUpdated,"EEPROM updated")
 
 FSTRINGVALUE(Com::tLinearLColon,"linear L:")
 FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
-FSTRINGVALUE(Com::tExtruderJam, UI_TEXT_EXTRUDER_JAM)
 FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
+FSTRINGVALUE(Com::tPauseCommunication,"// action:pause")
+FSTRINGVALUE(Com::tContinueCommunication,"// action:resume")
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
@@ -234,6 +244,7 @@ FSTRINGVALUE(Com::tWait,WAITING_IDENTIFIER)
 #if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport,"No EEPROM support compiled.\r\n")
 #else
+//FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight,"Z-probe height [mm]")
 FSTRINGVALUE(Com::tZProbeBedDitance,"Max. z-probe - bed dist. [mm]")
@@ -242,15 +253,18 @@ FSTRINGVALUE(Com::tZProbeOffsetY,"Z-probe offset y [mm]")
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Z-probe offset z [mm]")
 FSTRINGVALUE(Com::tZProbeSpeed,"Z-probe speed [mm/s]")
 FSTRINGVALUE(Com::tZProbeSpeedXY,"Z-probe x-y-speed [mm/s]")
-FSTRINGVALUE(Com::tZProbeX1,"Z-probe X1")
-FSTRINGVALUE(Com::tZProbeY1,"Z-probe Y1")
 FSTRINGVALUE(Com::tZProbeXY1offset,"Z-probe XY1 offset")
-FSTRINGVALUE(Com::tZProbeX2,"Z-probe X2")
-FSTRINGVALUE(Com::tZProbeY2,"Z-probe Y2")
 FSTRINGVALUE(Com::tZProbeXY2offset,"Z-probe XY2 offset")
-FSTRINGVALUE(Com::tZProbeX3,"Z-probe X3")
-FSTRINGVALUE(Com::tZProbeY3,"Z-probe Y3")
 FSTRINGVALUE(Com::tZProbeXY3offset,"Z-probe XY3 offset")
+FSTRINGVALUE(Com::tZProbeX1,"Z-probe X1 [mm]")
+FSTRINGVALUE(Com::tZProbeY1,"Z-probe Y1 [mm]")
+FSTRINGVALUE(Com::tZProbeX2,"Z-probe X2 [mm]")
+FSTRINGVALUE(Com::tZProbeY2,"Z-probe Y2 [mm]")
+FSTRINGVALUE(Com::tZProbeX3,"Z-probe X3 [mm]")
+FSTRINGVALUE(Com::tZProbeY3,"Z-probe Y3 [mm]")
+FSTRINGVALUE(Com::zZProbeBendingCorA,"Z-probe bending correction A [mm]")
+FSTRINGVALUE(Com::zZProbeBendingCorB,"Z-probe bending correction B [mm]")
+FSTRINGVALUE(Com::zZProbeBendingCorC,"Z-probe bending correction C [mm]")
 #endif
 #if FEATURE_AXISCOMP
 FSTRINGVALUE(Com::tAxisCompTanXY,"tanXY Axis Compensation")
@@ -270,13 +284,14 @@ FSTRINGVALUE(Com::tEPR1,"EPR:1 ")
 FSTRINGVALUE(Com::tEPR2,"EPR:2 ")
 FSTRINGVALUE(Com::tEPR3,"EPR:3 ")
 FSTRINGVALUE(Com::tEPRBaudrate,"Baudrate")
+FSTRINGVALUE(Com::tLanguage,"Language")
 FSTRINGVALUE(Com::tEPRFilamentPrinted,"Filament printed [m]")
 FSTRINGVALUE(Com::tEPRPrinterActive,"Printer active [s]")
 FSTRINGVALUE(Com::tEPRMaxInactiveTime,"Max. inactive time [ms,0=off]")
 FSTRINGVALUE(Com::tEPRStopAfterInactivty,"Stop stepper after inactivity [ms,0=off]")
-FSTRINGVALUE(Com::tEPRXHomePos,"X home pos [mm]")
-FSTRINGVALUE(Com::tEPRYHomePos,"Y home pos [mm]")
-FSTRINGVALUE(Com::tEPRZHomePos,"Z home pos [mm]")
+FSTRINGVALUE(Com::tEPRXHomePos,"X min pos [mm]")
+FSTRINGVALUE(Com::tEPRYHomePos,"Y min pos [mm]")
+FSTRINGVALUE(Com::tEPRZHomePos,"Z min pos [mm]")
 FSTRINGVALUE(Com::tEPRXMaxLength,"X max length [mm]")
 FSTRINGVALUE(Com::tEPRYMaxLength,"Y max length [mm]")
 FSTRINGVALUE(Com::tEPRZMaxLength,"Z max length [mm]")
@@ -284,6 +299,7 @@ FSTRINGVALUE(Com::tEPRXBacklash,"X backlash [mm]")
 FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
+FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop,"Acceleration factor at top [%,100=like bottom]")
 #if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
@@ -351,6 +367,7 @@ FSTRINGVALUE(Com::tEPRDGain,"PID D-gain")
 FSTRINGVALUE(Com::tEPRPIDMaxValue,"PID max value [0-255]")
 FSTRINGVALUE(Com::tEPRXOffset,"X-offset [steps]")
 FSTRINGVALUE(Com::tEPRYOffset,"Y-offset [steps]")
+FSTRINGVALUE(Com::tEPRZOffset,"Z-offset [steps]")
 FSTRINGVALUE(Com::tEPRStabilizeTime,"temp. stabilize time [s]")
 FSTRINGVALUE(Com::tEPRRetractionWhenHeating,"temp. for retraction when heating [C]")
 FSTRINGVALUE(Com::tEPRDistanceRetractHeating,"distance to retract when heating [mm]")
@@ -360,8 +377,8 @@ FSTRINGVALUE(Com::tEPRAdvanceL,"advance L [0=off]")
 
 #endif
 #if SDSUPPORT
-FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
-FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
+//FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
+//FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
 FSTRINGVALUE(Com::tSDInitFail,"SD init fail")
 FSTRINGVALUE(Com::tErrorWritingToFile,"error writing to file")
 FSTRINGVALUE(Com::tBeginFileList,"Begin file list")
@@ -399,6 +416,14 @@ FSTRINGVALUE(Com::tEPRRetractionUndoSpeed,"Retraction undo speed")
 #endif
 FSTRINGVALUE(Com::tConfig,"Config:")
 FSTRINGVALUE(Com::tExtrDot,"Extr.")
+
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
+FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
+#endif
+FSTRINGVALUE(Com::tPrinterModeFFF,"PrinterMode:FFF")
+FSTRINGVALUE(Com::tPrinterModeLaser,"PrinterMode:Laser")
+FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
@@ -463,7 +488,7 @@ void Com::printFLN(FSTRINGPARAM(text),const char *msg) {
 
 void Com::printF(FSTRINGPARAM(ptr)) {
   char c;
-  while ((c=HAL::readFlashByte(ptr++)) != 0)
+  while ((c = HAL::readFlashByte(ptr++)) != 0)
      HAL::serialWriteByte(c);
 }
 void Com::printF(FSTRINGPARAM(text),const char *msg) {
@@ -587,3 +612,4 @@ void Com::printFloat(float number, uint8_t digits)
     remainder -= toPrint;
   }
 }
+

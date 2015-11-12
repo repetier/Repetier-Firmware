@@ -191,6 +191,7 @@ private:
     inline float parseFloatValue(char *s)
     {
         char *endPtr;
+        while(*s == 32) s++; // skip spaces
         float f = (strtod(s, &endPtr));
         if(s == endPtr) f=0.0; // treat empty string "x " as "x0"
         return f;
@@ -198,6 +199,7 @@ private:
     inline long parseLongValue(char *s)
     {
         char *endPtr;
+        while(*s == 32) s++; // skip spaces
         long l = (strtol(s, &endPtr, 10));
         if(s == endPtr) l=0; // treat empty string argument "p " as "p0"
         return l;
