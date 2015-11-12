@@ -53,10 +53,14 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 #define MIXING_EXTRUDER 0
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
-// Arduino Due                = 401 // This is only experimental
-// Arduino Due with RADDS     = 402
-// Arduino Due with RAMPS-FD  = 403
+// Arduino Due with RADDS       = 402
+// Arduino Due with RAMPS-FD    = 403
 // Arduino Due with RAMPS-FD V2 = 404
+// Felix Printers for arm       = 405
+// DAM&DICE DUE                 = 406
+// Smart RAMPS for Due          = 408
+// Alligator Board rev1         = 500
+// Alligator Board rev2         = 501
 
 #define MOTHERBOARD 402
 
@@ -65,6 +69,19 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Override pin definions from pins.h
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
+
+
+/*
+We can connect BlueTooth to serial converter module directly to boards with a free serial port. Of course could you also
+use it to connect a second device like Raspberry PI internal connection. Just make sure only one port of the 2 supported
+gets used, or you will get probelms with checksums etc.
+- On RADDS board use the 4 extension pins new blue fuse with 1 = Serial1
+- 100 is programming port on due
+- 101 is native port on due. Us eit to support both ports at the same time!
+*/
+#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_BAUD     115200                 // communication speed
+
 
 // Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not beeing compatible!
@@ -92,7 +109,7 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 
 /** Drive settings for the Delta printers
 */
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
     // ***************************************************
     // *** These parameter are only for Delta printers ***
     // ***************************************************
@@ -179,6 +196,7 @@ Overridden if EEPROM activated.*/
 
 #define EXT0_X_OFFSET 0
 #define EXT0_Y_OFFSET 0
+#define EXT0_Z_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT0_STEPS_PER_MM 106 //425 // 825.698 //457 
 // What type of sensor is used?
@@ -187,13 +205,17 @@ Overridden if EEPROM activated.*/
 // 3 is mendel-parts thermistor (EPCOS G550)
 // 4 is 10k thermistor
 // 8 is ATC Semitec 104GT-2
+// 13 is PT100 for E3D/Ultimaker
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
+// 12 is 100k RS thermistor 198-961
+// 13 is PT100 for E3D/Ultimaker
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
 // 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1/4 the price of AD595 but only MSOT_08 package)
+// 61 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1.25 Vref offset like adafruit breakout)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -300,6 +322,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 0
 #define EXT1_Y_OFFSET 0
+#define EXT1_Z_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
 #define EXT1_STEPS_PER_MM 319.8
 // What type of sensor is used?
@@ -315,6 +338,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
 // 60 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1/4 the price of AD595 but only MSOT_08 package)
+// 61 is AD8494, AD8495, AD8496 or AD8497 (5mV/degC and 1.25 Vref offset like adafruit breakout)
 // 97 Generic thermistor table 1
 // 98 Generic thermistor table 2
 // 99 Generic thermistor table 3
@@ -442,6 +466,15 @@ Retractions speeds are taken from RETRACTION_SPEED and RETRACTION_UNDO_SPEED
 #define FILAMENTCHANGE_SHORTRETRACT 30
 #define FILAMENTCHANGE_LONGRETRACT 30
 
+/* Define how we detect jam/out of filament
+   1 = Distance between signal changes increase
+   2 = signal gets high
+   3 = signal gets low
+   
+   2 and 3 are not jam detections, but only out of filament detection by a switch
+   that changes the signal! 
+*/
+#define JAM_METHOD 1
 // Steps normally needed for a full signal cycle.
 #define JAM_STEPS 220
 // Steps for reducing speed. Must be higher then JAM_STEPS
@@ -661,6 +694,61 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
 
+// ##########################################################################################
+// ##                             Laser configuration                                      ##
+// ##########################################################################################
+
+/*
+If the firmware is in laser mode, it can control a laser output to cut or engrave materials.
+Please use this feature only if you know about safety and required protection. Lasers are
+dangerous and can hurt or make you blind!!!
+
+The default laser driver only supports laser on and off. Here you control the eíntensity with
+your feedrate. For exchangeable diode lasers this is normally enough. If you need more control
+you can set the intensity in a range 0-255 with a custom extension to the driver. See driver.h
+and comments on how to extend the functions non invasive with our event system.
+
+If you have a laser - powder system you will like your E override. If moves contain a 
+increasing extruder position it will laser that move. With this trick you can
+use existing fdm slicers to laser the output. Laser width is extrusion width.
+
+Other tools may use M3 and M5 to enable/disable laser. Here G1/G2/G3 moves have laser enabled
+and G0 moves have it disables.
+
+In any case, laser only enables while moving. At the end of a move it gets
+automatically disabled. 
+*/
+
+#define SUPPORT_LASER 0 // set 1 to enable laser support
+#define LASER_PIN -1    // set to pin enabling laser
+#define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+
+// ##########################################################################################
+// ##                              CNC configuration                                       ##
+// ##########################################################################################
+
+/*
+If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works 
+similar to laser mode, but mill keeps enabled during G0 moves and it allows
+setting rpm (only with event extension that supports this) and milling direction.
+It also can add a delay to wait for spindle to run on full speed.
+*/
+
+#define SUPPORT_CNC 0 // Set 1 for cnc support
+#define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
+#define CNC_WAIT_ON_DISABLE 0 // delay in milliseconds after disabling spindle. May be required for direction changes.
+#define CNC_ENABLE_PIN -1 // Pin to enable mill
+#define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
+#define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
+#define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
+
+
+/* Select the default mode when the printer gets enables. Possible values are
+PRINTER_MODE_FFF 0
+PRINTER_MODE_LASER 1
+PRINTER_MODE_CNC 2
+*/
+#define DEFAULT_PRINTER_MODE 0
 
 // ##########################################################################################
 // ##                            Endstop configuration                                     ##
@@ -711,6 +799,11 @@ on this endstop.
 #define DISABLE_Y false
 #define DISABLE_Z false
 #define DISABLE_E false
+/* If you want to keep z motor running on stepper timeout, remove comments below.
+  This may be usefull if your z bed moves when motors are disabled. Will still
+  turn z off when heaters get also disabled. 
+*/
+//#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
 
 // Inverting axis direction
 #define INVERT_X_DIR false
@@ -781,18 +874,23 @@ on this endstop.
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #if MOTHERBOARD==301
-#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define MOTOR_CURRENT_PERCENT {53,53,53,53,53}
 #elif MOTHERBOARD==12
-#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+//#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
+#define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
+#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
+//#define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
+#define MOTOR_CURRENT_PERCENT {51,51,51,44,44,44,44}
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move
 */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 70 // Less accurate setting for other moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 600 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 600 // Less accurate setting for other moves
 
 // Delta settings
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 /** \brief Delta rod length (mm)
 */
 #define DELTA_DIAGONAL_ROD 345 // mm
@@ -914,8 +1012,26 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 3
 
-/** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. */
+/** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. 
+ * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this
+ * case set HOME_ORDER_ZXYTZ and also define ZHOME_HEAT_HEIGHT and ZHOME_MIN_TEMPERATURE. It will do
+ * first a z home to get some reference, then raise to ZHOME_HEAT_HEIGHT do xy homing and then after
+ * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.   
+ * */
 #define HOMING_ORDER HOME_ORDER_ZXY
+// Used for homing order HOME_ORDER_ZXYTZ
+#define ZHOME_MIN_TEMPERATURE 0
+// needs to heat all extruders (1) or only current extruder (0)
+#define ZHOME_HEAT_ALL 1 
+// Z-height for heating extruder during homing
+#define ZHOME_HEAT_HEIGHT 20
+// If your bed might bend while probing, because your sensor is the extruder tip
+// you can define a predefined x,y position so beding is always the same and
+// can be compensated. Set coordinate to 999999 to ignore positions and just
+// use the position you are at.
+#define ZHOME_X_POS IGNORE_COORDINATE
+#define ZHOME_Y_POS IGNORE_COORDINATE
+
 /* If you have a backlash in both z-directions, you can use this. For most printer, the bed will be pushed down by it's
 own weight, so this is nearly never needed. */
 #define ENABLE_BACKLASH_COMPENSATION 0
@@ -946,7 +1062,7 @@ This is like reducing your 1/16th microstepping to 1/8 or 1/4. It is much cheape
 additional stepper interrupts with all it's overhead. As a result you can go as high as
 40000Hz.
 */
-#define STEP_DOUBLER_FREQUENCY 12000
+#define STEP_DOUBLER_FREQUENCY 80000
 /** If you need frequencies off more then 30000 you definitely need to enable this. If you have only 1/8 stepping
 enabling this may cause to stall your moves when 20000Hz is reached.
 */
@@ -956,12 +1072,6 @@ for some printers causing an early stall.
 
 */
 #define DOUBLE_STEP_DELAY 1 // time in microseconds
-
-/** The firmware supports trajectory smoothing. To achieve this, it divides the stepsize by 2, resulting in
-the double computation cost. For slow movements this is not an issue, but for really fast moves this is
-too much. The value specified here is the number of clock cycles between a step on the driving axis.
-If the interval at full speed is below this value, smoothing is disabled for that line.*/
-#define MAX_HALFSTEP_INTERVAL 1999
 
 //// Acceleration settings
 
@@ -976,6 +1086,20 @@ If the interval at full speed is below this value, smoothing is disabled for tha
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 4000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 4000
+
+/** If you print on a moving bed, it can become more shaky the higher and bigger
+ your print gets. Therfore it might be helpfull to reduce acceleration with
+ increasing print height. You can define here how acceleration should change.
+ You set ACCELERATION_FACTOR_TOP to the factor in percent for the top position
+ of your printer. Acceleration will then be modified linear over height.
+ INTERPOLATE_ACCELERATION_WITH_Z sets, which accelerations get changed:
+ 0 = do not interpolate at all
+ 1 = interpolate x and y acceleration
+ 2 = interpolate z acceleration
+ 3 = interpolate x,y and z acceleration
+  */
+#define INTERPOLATE_ACCELERATION_WITH_Z 0
+#define ACCELERATION_FACTOR_TOP 100
 
 /** \brief Maximum allowable jerk.
 
@@ -1144,6 +1268,11 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z2_DIR_PIN    E1_DIR_PIN
 #define Z2_ENABLE_PIN E1_ENABLE_PIN
 
+#define FEATURE_THREE_ZSTEPPER 0
+#define Z3_STEP_PIN   E2_STEP_PIN
+#define Z3_DIR_PIN    E2_DIR_PIN
+#define Z3_ENABLE_PIN E2_ENABLE_PIN
+
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */
@@ -1189,6 +1318,22 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 
 /* Z-Probing */
 
+/* After homing the z position is corrected to compensate
+for a bed coating. Since you can change coatings the value is stored in
+eeprom if enabled, so you can switch between different coatings without needing
+to recalibrate z.
+*/
+#define Z_PROBE_Z_OFFSET 0 // offset to coating form real bed level
+/* How is z min measured
+ 0 = trigger is height of real bed neglecting coating
+ 1 = trigger is current coating
+
+ For mode 1 the current coating thickness is added to measured z probe distances.
+ That way the real bed is always the reference height. For inductive sensors
+ or z min endstops the coatng has no effect on the result, so you should use mode 0.
+*/
+#define Z_PROBE_Z_OFFSET_MODE 0
+
 #define FEATURE_Z_PROBE false
 #define Z_PROBE_PIN -1  // 63
 #define Z_PROBE_PULLUP 1
@@ -1222,6 +1367,14 @@ See: AdditionalArduinoFiles: README.txt on how to install them.
 #define Z_PROBE_Y2 -40
 #define Z_PROBE_X3 0
 #define Z_PROBE_Y3 80
+/* Bending correction adds a value to a measured z-probe value. This may be
+  required when the z probe needs some force to trigger and this bends the
+  bed down. Currently the correction values A/B/C correspond to z probe
+  positions 1/2/3. In later versions a bending correction algorithm might be
+  introduced to give it other meanings.*/
+#define BENDING_CORRECTION_A 0
+#define BENDING_CORRECTION_B 0
+#define BENDING_CORRECTION_C 0
 
 /* DISTORTION_CORRECTION compensates the distortion caused by mechanical imprecisions of nonlinear (i.e. DELTA) printers
  * assumes that the floor is plain (i.e. glass plate)
@@ -1338,22 +1491,35 @@ The following settings override uiconfig.h!
 15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
+19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
+20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
+21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
+
 /**
-Select the language to use.
-0 = English
-1 = German
-2 = Dutch
-3 = Brazilian portuguese
-4 = Italian
-5 = Spanish
-6 = Swedish
-7 = French
-8 = Czech
+Select the languages to use. On first startup user can select
+the language from a menu with activated languages. In Configuration->Language
+the language can be switched any time. */
+#define LANGUAGE_EN_ACTIVE 1 // English
+#define LANGUAGE_DE_ACTIVE 1 // German
+#define LANGUAGE_NL_ACTIVE 1 // Dutch
+#define LANGUAGE_PT_ACTIVE 1 // Brazilian portuguese
+#define LANGUAGE_IT_ACTIVE 1 // Italian
+#define LANGUAGE_ES_ACTIVE 1 // Spanish
+#define LANGUAGE_SE_ACTIVE 1 // Swedish
+#define LANGUAGE_FR_ACTIVE 1 // French
+#define LANGUAGE_CZ_ACTIVE 1 // Czech
+#define LANGUAGE_PL_ACTIVE 1 // Polish
+
+/* Some displays loose their settings from time to time. Try uncommenting the 
+autorepair function if this is the case. It is not supported for all display
+types. It creates a minimal flicker from time to time and also slows down
+computations, so do not enable it if your display works stable!
 */
-#define UI_LANGUAGE 1
+//#define TRY_AUTOREPAIR_LCD_ERRORS
 
 // This is line 2 of the status display at startup. Change to your like.
 #define UI_PRINTER_NAME "Ordbot"
@@ -1361,7 +1527,7 @@ Select the language to use.
 
 
 /** Animate switches between menus etc. */
-#define UI_ANIMATION 1
+#define UI_ANIMATION 0
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1444,5 +1610,18 @@ Values must be in range 1..255
 #define USER_KEY4_PIN     -1
 #define USER_KEY4_ACTION  UI_ACTION_DUMMY
 */
+
+// ####### Advanced stuff for very special function #########
+
+#define NUM_MOTOR_DRIVERS 0
+// #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
+#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
+
+/*
+  You can expand firmware functionality with events and you own event handler.
+  Read Events.h for more informations. To activate, uncomment the following define.
+*/
+//#define CUSTOM_EVENTS
+
 #endif
 

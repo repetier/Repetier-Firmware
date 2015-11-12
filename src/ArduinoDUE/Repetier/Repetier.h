@@ -22,14 +22,16 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define REPETIER_VERSION "0.92.3"
+#include <math.h>
+#define REPETIER_VERSION "0.92.6"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
 // These are run time sqitchable debug flags
 enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x8,
-                 DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40};
+                 DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40
+                };
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
 //#define DEBUG_QUEUE_MOVE
@@ -49,7 +51,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 /** If enabled, steps to move and moved steps are compared. */
 //#define DEBUG_STEPCOUNT
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
-#define DEBUG_COM_ERRORS
+//#define DEBUG_COM_ERRORS
 /** Adds a menu point in quick settings to write debg informations to the host in case of hangs where the ui still works. */
 //#define DEBUG_PRINT
 //#define DEBUG_DELTA_OVERFLOW
@@ -73,6 +75,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ZX_GANTRY 9
 
 #define WIZARD_STACK_SIZE 8
+#define IGNORE_COORDINATE 999999
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -117,19 +120,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
 #define ANALOG_REF ANALOG_REF_AVCC
 
-// MS1 MS2 Stepper Driver Microstepping mode table
-#define MICROSTEP1 LOW,LOW
-#define MICROSTEP2 HIGH,LOW
-#define MICROSTEP4 LOW,HIGH
-#define MICROSTEP8 HIGH,HIGH
-#define MICROSTEP16 HIGH,HIGH
-
 #define HOME_ORDER_XYZ 1
 #define HOME_ORDER_XZY 2
 #define HOME_ORDER_YXZ 3
 #define HOME_ORDER_YZX 4
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
+#define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
 
 #define NO_CONTROLLER 0
 #define UICONFIG_CONTROLLER 1
@@ -150,6 +147,11 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_GAMEDUINO2 16
 #define CONTROLLER_MIREGLI 17
 #define CONTROLLER_GATE_3NOVATICA 18
+#define CONTROLLER_SPARKLCD 19
+#define CONTROLLER_BAM_DICE_DUE 20
+#define CONTROLLER_VIKI2 21
+#define CONTROLLER_LCD_MP_PHARAOH_DUE 22
+#define CONTROLLER_FELIX_DUE 405
 
 //direction flags
 #define X_DIRPOS 1
@@ -174,8 +176,43 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
+#define PRINTER_MODE_FFF 0
+#define PRINTER_MODE_LASER 1
+#define PRINTER_MODE_CNC 2
 
 #include "Configuration.h"
+
+#if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
+#error You need to define Z_PROBE_PIN to use z probe!
+#endif
+
+#if DISTORTION_CORRECTION
+#if !FEATURE_Z_PROBE
+#error Distortion correction requires the z probe feature to be enabled and configured!
+#endif
+#endif
+
+#ifndef MAX_ROOM_TEMPERATURE
+#define MAX_ROOM_TEMPERATURE 40
+#endif
+#ifndef ZHOME_X_POS
+#define ZHOME_X_POS IGNORE_COORDINATE
+#endif
+#ifndef ZHOME_Y_POS
+#define ZHOME_Y_POS IGNORE_COORDINATE
+#endif
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#if (MOTHERBOARD == 501)
+#define MICROSTEP16 LOW,LOW
+#else
+#define MICROSTEP16 HIGH,HIGH
+#endif
+#define MICROSTEP32 HIGH,HIGH
 
 #define GCODE_BUFFER_SIZE 1
 
@@ -189,8 +226,13 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define Z_PROBE_REPETITIONS 1
 #endif
 
-#define SPEED_MIN_MILLIS 300
-#define SPEED_MAX_MILLIS 50
+#ifndef MINMAX_HARDWARE_ENDSTOP_Z2
+#define MINMAX_HARDWARE_ENDSTOP_Z2 0
+#define Z2_MINMAX_PIN -1
+#endif
+
+#define SPEED_MIN_MILLIS 400
+#define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
 #define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
@@ -239,22 +281,37 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SHARED_COOLER 0
 #endif
 
+#ifndef START_STEP_WITH_HIGH
+#define START_STEP_WITH_HIGH 1
+#endif
+
+#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 101
+#define SUPPORT_MAX6675
+#endif
+
+#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 102
+#define SUPPORT_MAX31855
+#endif
+
 // Test for shared coolers between extruders and mainboard
 #if EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == FAN_BOARD_PIN
- #define SHARED_COOLER_BOARD_EXT 1
+#define SHARED_COOLER_BOARD_EXT 1
 #else
- #define SHARED_COOLER_BOARD_EXT 0
+#define SHARED_COOLER_BOARD_EXT 0
 #endif
 
 #if defined(UI_SERVO_CONTROL) && UI_SERVO_CONTROL > FEATURE_SERVO
- #undef UI_SERVO_CONTROL
- #define UI_SERVO_CONTROL FEATURE_SERVO
+#undef UI_SERVO_CONTROL
+#define UI_SERVO_CONTROL FEATURE_SERVO
 #endif
 
 #if (defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1) || (defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1) || (defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1) || (defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1) || (defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1) || (defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1)
 #define EXTRUDER_JAM_CONTROL 1
 #else
 #define EXTRUDER_JAM_CONTROL 0
+#endif
+#ifndef JAM_METHOD
+#define JAM_METHOD 1
 #endif
 
 #if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE < 101
@@ -269,7 +326,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT0_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE < 101
 #define EXT1_ANALOG_INPUTS 1
 #define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
 #define EXT1_ANALOG_CHANNEL ACCOMMA0 EXT1_TEMPSENSOR_PIN
@@ -362,6 +419,22 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define MENU_MODE_FULL_PID 32
 #define MENU_MODE_DEADTIME 64
 
+#ifndef BENDING_CORRECTION_A
+#define BENDING_CORRECTION_A 0
+#endif
+
+#ifndef BENDING_CORRECTION_B
+#define BENDING_CORRECTION_B 0
+#endif
+
+#ifndef BENDING_CORRECTION_C
+#define BENDING_CORRECTION_C 0
+#endif
+
+#ifndef Z_ACCELERATION_TOP
+#define Z_ACCELERATION_TOP 0
+#endif
+
 #include "HAL.h"
 #include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
@@ -374,9 +447,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
-  #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
-    #error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
-  #endif
+#if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
+#error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
+#endif
 #endif
 
 
@@ -390,7 +463,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM!=CARTESIAN
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -401,69 +474,268 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define uint32 uint32_t
 #define int32 int32_t
 
-#define IGNORE_COORDINATE 999999
 
 #undef min
 #undef max
 
-class RMath {
+class RMath
+{
 public:
-    static inline float min(float a,float b) {
-        if(a<b) return a;
+    static inline float min(float a,float b)
+    {
+        if(a < b) return a;
         return b;
     }
-    static inline float max(float a,float b) {
-        if(a<b) return b;
+    static inline float max(float a,float b)
+    {
+        if(a < b) return b;
         return a;
     }
-    static inline int32_t min(int32_t a,int32_t b) {
-        if(a<b) return a;
+    static inline int32_t min(int32_t a,int32_t b)
+    {
+        if(a < b) return a;
         return b;
     }
-    static inline int32_t min(int32_t a,int32_t b, int32_t c) {
-      if(a<b) return a<c ? a : c;
-      return b<c ? b : c;
+    static inline int32_t min(int32_t a,int32_t b, int32_t c)
+    {
+        if(a < b) return a < c ? a : c;
+        return b<c ? b : c;
     }
-    static inline float min(float a,float b, float c) {
-      if(a<b) return a<c ? a : c;
-      return b<c ? b : c;
+    static inline float min(float a,float b, float c)
+    {
+        if(a < b) return a < c ? a : c;
+        return b < c ? b : c;
     }
-    static inline int32_t max(int32_t a,int32_t b) {
-        if(a<b) return b;
+    static inline int32_t max(int32_t a,int32_t b)
+    {
+        if(a < b) return b;
         return a;
     }
-    static inline int min(int a,int b) {
-        if(a<b) return a;
+    static inline int min(int a,int b)
+    {
+        if(a < b) return a;
         return b;
     }
-    static inline uint16_t min(uint16_t a,uint16_t b) {
-        if(a<b) return a;
+    static inline uint16_t min(uint16_t a,uint16_t b)
+    {
+        if(a < b) return a;
         return b;
     }
-    static inline int16_t max(int16_t a,int16_t b) {
-        if(a<b) return b;
+    static inline int16_t max(int16_t a,int16_t b)
+    {
+        if(a < b) return b;
         return a;
     }
-    static inline uint16_t max(uint16_t a,uint16_t b) {
-        if(a<b) return b;
+    static inline uint16_t max(uint16_t a,uint16_t b)
+    {
+        if(a < b) return b;
         return a;
     }
-    static inline unsigned long absLong(long a)          {return a >= 0 ? a : -a;}
-    static inline int32_t sqr(int32_t a) {return a*a;}
-    static inline uint32_t sqr(uint32_t a) {return a*a;}
+    static inline unsigned long absLong(long a)
+    {
+        return a >= 0 ? a : -a;
+    }
+    static inline int32_t sqr(int32_t a)
+    {
+        return a*a;
+    }
+    static inline uint32_t sqr(uint32_t a)
+    {
+        return a*a;
+    }
 #ifdef SUPPORT_64_BIT_MATH
-    static inline int64_t sqr(int64_t a) {return a*a;}
-    static inline uint64_t sqr(uint64_t a) {return a*a;}
+    static inline int64_t sqr(int64_t a)
+    {
+        return a*a;
+    }
+    static inline uint64_t sqr(uint64_t a)
+    {
+        return a*a;
+    }
 #endif
 
-    static inline float sqr(float a) {return a*a;}
+    static inline float sqr(float a)
+    {
+        return a*a;
+    }
 };
 
+class RVector3
+{
+public:
+    float x, y, z;
+    RVector3(float _x = 0,float _y = 0,float _z = 0):x(_x),y(_y),z(_z) {};
+    RVector3(const RVector3 &a):x(a.x),y(a.y),z(a.z) {};
+
+
+/*    const float &operator[](std::size_t idx) const
+    {
+        if(idx == 0) return x;
+        if(idx == 1) return y;
+        return z;
+    };
+
+    float &operator[](std::size_t idx)
+    {
+        switch(idx) {
+        case 0: return x;
+        case 1: return y;
+        case 2: return z;
+        }
+        return 0;
+    };*/
+
+    inline bool operator==(const RVector3 &rhs)
+    {
+        return x==rhs.x && y==rhs.y && z==rhs.z;
+    }
+    inline bool operator!=(const RVector3 &rhs)
+    {
+        return !(*this==rhs);
+    }
+    inline RVector3& operator=(const RVector3 &rhs)
+    {
+        if(this!=&rhs)
+        {
+            x = rhs.x;
+            y = rhs.y;
+            z = rhs.z;
+        }
+        return *this;
+    }
+
+    inline RVector3& operator+=(const RVector3 &rhs)
+    {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+    }
+
+    inline RVector3& operator-=(const RVector3 &rhs)
+    {
+        x -= rhs.x;
+        y -= rhs.y;
+        z -= rhs.z;
+        return *this;
+    }
+    inline RVector3 operator-() const
+    {
+        return RVector3(-x,-y,-z);
+    }
+
+    inline float length() const
+    {
+        return sqrt(x * x + y * y + z * z);
+    }
+
+    inline float lengthSquared() const
+    {
+        return (x*x+y*y+z*z);
+    }
+
+    inline RVector3 cross(const RVector3 &b) const
+    {
+        return RVector3(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);
+    }
+    inline float scalar(const RVector3 &b) const
+    {
+        return (x*b.x+y*b.y+z*b.z);
+    }
+    inline RVector3 scale(float factor) const
+    {
+        return RVector3(x*factor,y*factor,z*factor);
+    }
+    inline void scaleIntern(float factor)
+    {
+        x*=factor;
+        y*=factor;
+        z*=factor;
+    }
+    inline void setMinimum(const RVector3 &b)
+    {
+        x = RMath::min(x,b.x);
+        y = RMath::min(y,b.y);
+        z = RMath::min(z,b.z);
+    }
+    inline void setMaximum(const RVector3 &b)
+    {
+        x = RMath::max(x,b.x);
+        y = RMath::max(y,b.y);
+        z = RMath::max(z,b.z);
+    }
+    inline float distance(const RVector3 &b) const
+    {
+        float dx = b.x-x,dy = b.y-y, dz = b.z-z;
+        return (sqrt(dx*dx+dy*dy+dz*dz));
+    }
+    inline float angle(RVector3 &direction)
+    {
+        return static_cast<float>(acos(scalar(direction)/(length()*direction.length())));
+    }
+
+    inline RVector3 normalize() const
+    {
+        float len = length();
+        if(len != 0) len = static_cast<float>(1.0/len);
+        return RVector3(x*len,y*len,z*len);
+    }
+
+    inline RVector3 interpolatePosition(const RVector3 &b, float pos) const
+    {
+        float pos2 = 1.0f - pos;
+        return RVector3(x * pos2 + b.x * pos, y * pos2 + b.y * pos, z * pos2 + b.z * pos);
+    }
+
+    inline RVector3 interpolateDirection(const RVector3 &b,float pos) const
+    {
+        //float pos2 = 1.0f - pos;
+
+        float dot = scalar(b);
+        if (dot > 0.9995 || dot < -0.9995)
+            return interpolatePosition(b,pos); // cases cause trouble, use linear interpolation here
+
+        float theta = acos(dot) * pos; // interpolated position
+        float st = sin(theta);
+        RVector3 t(b);
+        t -= scale(dot);
+        float lengthSq = t.lengthSquared();
+        float dl = st * ((lengthSq < 0.0001f) ? 1.0f : 1.0f / sqrt(lengthSq));
+        t.scaleIntern(dl);
+        t += scale(cos(theta));
+        return t.normalize();
+    }
+};
+	inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+	{
+		lhs.x += rhs.x;
+		lhs.y += rhs.y;
+		lhs.z += rhs.z;
+		return lhs;
+	}
+
+	inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+	{
+		lhs.x -= rhs.x;
+		lhs.y -= rhs.y;
+		lhs.z -= rhs.z;
+		return lhs;
+	}
+
+    inline RVector3 operator*(const RVector3 &lhs,float rhs) {
+        return lhs.scale(rhs);
+    }
+
+    inline RVector3 operator*(float lhs,const RVector3 &rhs) {
+        return rhs.scale(lhs);
+    }
 extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 //extern uint8 osAnalogInputPos; // Current sampling position
+#if ANALOG_INPUTS > 0
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
+#endif
 extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
@@ -528,51 +800,57 @@ extern char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPT
 #include "SdFat.h"
 
 enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
-class SDCard {
+class SDCard
+{
 public:
-  SdFat fat;
-  //Sd2Card card; // ~14 Byte
-  //SdVolume volume;
-  //SdFile root;
-  //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
-  SdFile file;
-  uint32_t filesize;
-  uint32_t sdpos;
-  //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
-  char *shortname; // Pointer to start of filename itself
-  char *pathend; // File to char where pathname in fullname ends
-  uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
-  bool sdactive;
-  //int16_t n;
-  bool savetosd;
-  SdBaseFile parentFound;
+    SdFat fat;
+    //Sd2Card card; // ~14 Byte
+    //SdVolume volume;
+    //SdFile root;
+    //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
+    SdFile file;
+    uint32_t filesize;
+    uint32_t sdpos;
+    //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+    char *shortname; // Pointer to start of filename itself
+    char *pathend; // File to char where pathname in fullname ends
+    uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
+    bool sdactive;
+    //int16_t n;
+    bool savetosd;
+    SdBaseFile parentFound;
 
-  SDCard();
-  void initsd();
-  void writeCommand(GCode *code);
-  bool selectFile(const char *filename,bool silent=false);
-  void mount();
-  void unmount();
-  void startPrint();
-  void pausePrint(bool intern = false);
-  void continuePrint(bool intern = false);
-  void stopPrint();
-  inline void setIndex(uint32_t  newpos) { if(!sdactive) return; sdpos = newpos;file.seekSet(sdpos);}
-  void printStatus();
-  void ls();
-  void startWrite(char *filename);
-  void deleteFile(char *filename);
-  void finishWrite();
-  char *createFilename(char *buffer,const dir_t &p);
-  void makeDirectory(char *filename);
-  bool showFilename(const uint8_t *name);
-  void automount();
+    SDCard();
+    void initsd();
+    void writeCommand(GCode *code);
+    bool selectFile(const char *filename,bool silent=false);
+    void mount();
+    void unmount();
+    void startPrint();
+    void pausePrint(bool intern = false);
+    void continuePrint(bool intern = false);
+    void stopPrint();
+    inline void setIndex(uint32_t  newpos)
+    {
+        if(!sdactive) return;
+        sdpos = newpos;
+        file.seekSet(sdpos);
+    }
+    void printStatus();
+    void ls();
+    void startWrite(char *filename);
+    void deleteFile(char *filename);
+    void finishWrite();
+    char *createFilename(char *buffer,const dir_t &p);
+    void makeDirectory(char *filename);
+    bool showFilename(const uint8_t *name);
+    void automount();
 #ifdef GLENN_DEBUG
-  void writeToFile();
+    void writeToFile();
 #endif
 private:
-  uint8_t lsRecursive(SdBaseFile *parent,uint8_t level,char *findFilename);
- // SdFile *getDirectory(char* name);
+    uint8_t lsRecursive(SdBaseFile *parent,uint8_t level,char *findFilename);
+// SdFile *getDirectory(char* name);
 };
 
 extern SDCard sd;
@@ -606,6 +884,13 @@ extern int debugWaitLoop;
 #define SQRT(x) ( HAL::integerSqrt(x) )
 #else
 #define SQRT(x) sqrt(x)
+#endif
+
+#include "Drivers.h"
+
+#include "Events.h"
+#if defined(CUSTOM_EVENTS)
+#include "CustomEvents.h"
 #endif
 
 #endif

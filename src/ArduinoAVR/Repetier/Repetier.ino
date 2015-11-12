@@ -53,6 +53,8 @@ Implemented Codes
 - G92 - Set current position to cordinates given
 - G131 - set extruder offset position to 0 - needed for calibration with G132
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
+- G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
+- G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
 
 RepRap M Codes
 
@@ -109,6 +111,7 @@ Custom M Codes
 - M209 S<0/1> - Enable/disable autoretraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
+- M228 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
@@ -129,6 +132,10 @@ Custom M Codes
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
+- M450 - Reports printer mode
+- M451 - Set printer mode to FFF
+- M452 - Set printer mode to laser
+- M453 - Set printer mode to CNC
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
