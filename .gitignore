@@ -7,7 +7,9 @@ Private/**
 Private/*
 
 *.hex
-src/ArduinoAVR/Repetier/bin/*
+src/ArduinoAVR/Repetier/Repetier/*
+src/ArduinoAVR/Repetier/Repetier/*
+src/ArduinoAVR/Repetier/bin/*                                
 src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf
 
 src/ArduinoAVR/Repetier/bin/Release/Repetier_mega2560_.elf.hex

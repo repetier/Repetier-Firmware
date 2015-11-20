@@ -384,7 +384,7 @@ void HAL::spiSend(byte b) {
 void HAL::spiSend(const uint8_t* buf , size_t n)
 {
   if (n == 0) return;
-  for (int i = 0; i < n - 1; i++)
+  for (size_t i = 0; i < n - 1; i++)
   {
     SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
     while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);

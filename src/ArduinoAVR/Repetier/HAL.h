@@ -611,7 +611,7 @@ public:
         SET_OUTPUT(SDSSORIG);
 #endif
         // set SS high - may be chip select for another SPI device
-#if SET_SPI_SS_HIGH
+#if defined(SET_SPI_SS_HIGH) && SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
 #endif

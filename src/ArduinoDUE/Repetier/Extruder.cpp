@@ -66,7 +66,9 @@ void Extruder::manageTemperatures()
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
     uint8_t errorDetected = 0;
+#ifdef RED_BLUE_STATUS_LEDS
     bool hot = false;
+#endif
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
 #if NUM_TEMPERATURE_LOOPS > 0
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
@@ -126,8 +128,10 @@ void Extruder::manageTemperatures()
                 EVENT_HEATER_DEFECT(controller);
             }
         }
+#ifdef RED_BLUE_STATUS_LEDS
         if(act->currentTemperatureC > 50)
             hot = true;
+#endif
         if(Printer::isAnyTempsensorDefect()) continue;
         uint8_t on = act->currentTemperatureC >= act->targetTemperatureC ? LOW : HIGH;
         // Make a sound if alarm was set on reaching target temperature
@@ -138,7 +142,7 @@ void Extruder::manageTemperatures()
         }
 
         // Run test if heater and sensor are decoupled
-        bool decoupleTestRequired = act->decoupleTestPeriod > 0 && (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
+        bool decoupleTestRequired = !errorDetected && act->decoupleTestPeriod > 0 && (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
         if(decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) // Only test when powered
         {
             if(act->isDecoupleFull()) // Phase 1: Heating fully until target range is reached
@@ -1377,7 +1381,7 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
 #define NUMTEMPS_13 19
 const short temptable_13[NUMTEMPS_13][2] PROGMEM =
 {
-    {0,0},{908,8},{942,10*8},{982,20*8},{1015,8*30},{1048,8*40},{1080,8*50},{1113,8*60},{1146,8*70},{1178,8*80},{11211,8*90},{1276,8*110},{1318,8*120}
+    {0,0},{908,8},{942,10*8},{982,20*8},{1015,8*30},{1048,8*40},{1080,8*50},{1113,8*60},{1146,8*70},{1178,8*80},{1211,8*90},{1276,8*110},{1318,8*120}
     ,{1670,8*230},{2455,8*500},{3445,8*900},{3666,8*1000},{3871,8*1100},{4095,8*2000}
 };
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
@@ -1490,12 +1494,12 @@ void TemperatureController::updateCurrentTemperature()
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
         uint8_t i = 2;
-        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
-        short oldraw = pgm_read_word(&temptable[0]);
-        short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
+        const int16_t *temptable = (const int16_t *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
+        int16_t oldraw = pgm_read_word(&temptable[0]);
+        int16_t oldtemp = pgm_read_word(&temptable[1]);
+        int16_t newraw,newtemp = 0;
         currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - currentTemperature;
-        while(i<num)
+        while(i < num)
         {
             newraw = pgm_read_word(&temptable[i++]);
             newtemp = pgm_read_word(&temptable[i++]);
@@ -1524,11 +1528,11 @@ void TemperatureController::updateCurrentTemperature()
             type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
         uint8_t i = 2;
-        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
-        short oldraw = pgm_read_word(&temptable[0]);
-        short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw,newtemp;
-        while(i<num)
+        const int16_t *temptable = (const int16_t *)pgm_read_word(&temptables[type]); //pgm_read_word_near(&temptables[type]);
+        int16_t oldraw = pgm_read_word(&temptable[0]);
+        int16_t oldtemp = pgm_read_word(&temptable[1]);
+        int16_t newraw,newtemp = 0;
+        while(i < num)
         {
             newraw = pgm_read_word(&temptable[i++]);
             newtemp = pgm_read_word(&temptable[i++]);

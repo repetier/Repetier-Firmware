@@ -16,7 +16,7 @@
 
 */
 
-#if !defined(UI_DISPLAY_CHARSET) || UI_DISPLAY_CHARSET>3
+#if !defined(UI_DISPLAY_CHARSET) || UI_DISPLAY_CHARSET > 3
 #define UI_DISPLAY_CHARSET 1
 #endif
 
@@ -610,7 +610,7 @@
 #define UI_TEXT_PETTAPE_EN "Green PET tape"
 #define UI_TEXT_GLUESTICK_EN "Glue stick"
 #define UI_TEXT_CUSTOM_EN "Custom"
-#define UI_TEXT_COATING_CUSTOM_EN "Custom:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_EN "Custom:%BCmm"
 #define UI_TEXT_LANGUAGE_EN "Language"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -647,7 +647,7 @@
 #define UI_TEXT_EMPTY_EN ""
 #define UI_TEXT_TEMP_SET_EN cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_EN cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_EN " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_EN " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_EN "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_EN "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_EN "Temp. 6 :%e5/%E5" cDEG "C"
@@ -901,7 +901,7 @@
 #define UI_TEXT_PETTAPE_DE "Gr" STR_uuml "nes PET Band"
 #define UI_TEXT_GLUESTICK_DE "Klebestift"
 #define UI_TEXT_CUSTOM_DE "Individuell"
-#define UI_TEXT_COATING_CUSTOM_DE "Indiv.:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_DE "Indiv.:%BCmm"
 #define UI_TEXT_LANGUAGE_DE "Sprache"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -938,7 +938,7 @@
 #define UI_TEXT_EMPTY_DE ""
 #define UI_TEXT_TEMP_SET_DE cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_DE cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_DE " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_DE " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_DE "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_DE "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_DE "Temp. 6 :%e5/%E5" cDEG "C"
@@ -1193,7 +1193,7 @@
 #define UI_TEXT_PETTAPE_NL "Groene PET Tape"
 #define UI_TEXT_GLUESTICK_NL "Lijmstift"
 #define UI_TEXT_CUSTOM_NL "Custom"
-#define UI_TEXT_COATING_CUSTOM_NL "Custom:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_NL "Custom:%BCmm"
 #define UI_TEXT_LANGUAGE_NL "Taal"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -1230,7 +1230,7 @@
 #define UI_TEXT_EMPTY_NL ""
 #define UI_TEXT_TEMP_SET_NL cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_NL cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_NL " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_NL " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_NL "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_NL "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_NL "Temp. 6 :%e5/%E5" cDEG "C"
@@ -1487,7 +1487,7 @@
 #define UI_TEXT_PETTAPE_PT "Fita verde PET"
 #define UI_TEXT_GLUESTICK_PT "Cola bastao"
 #define UI_TEXT_CUSTOM_PT "Personalizadas"
-#define UI_TEXT_COATING_CUSTOM_PT "Person.:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_PT "Person.:%BCmm"
 #define UI_TEXT_LANGUAGE_PT "Idioma"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -1524,7 +1524,7 @@
 #define UI_TEXT_EMPTY_PT ""
 #define UI_TEXT_TEMP_SET_PT cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_PT cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_PT " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_PT " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_PT "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_PT "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_PT "Temp. 6 :%e5/%E5" cDEG "C"
@@ -1779,7 +1779,7 @@
 #define UI_TEXT_PETTAPE_IT "Verde PET nastro"
 #define UI_TEXT_GLUESTICK_IT "Colla stick"
 #define UI_TEXT_CUSTOM_IT "Usanza"
-#define UI_TEXT_COATING_CUSTOM_IT "Usanza:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_IT "Usanza:%BCmm"
 #define UI_TEXT_LANGUAGE_IT "Lingua"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -1816,7 +1816,7 @@
 #define UI_TEXT_EMPTY_IT ""
 #define UI_TEXT_TEMP_SET_IT cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_IT cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_IT " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_IT " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_IT "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_IT "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_IT "Temp. 6 :%e5/%E5" cDEG "C"
@@ -2071,7 +2071,7 @@
 #define UI_TEXT_PETTAPE_ES "Verde PET cinta"
 #define UI_TEXT_GLUESTICK_ES "Barra de pegamento"
 #define UI_TEXT_CUSTOM_ES "Custom"
-#define UI_TEXT_COATING_CUSTOM_ES "Custom:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_ES "Custom:%BCmm"
 #define UI_TEXT_LANGUAGE_ES "Idioma"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -2108,7 +2108,7 @@
 #define UI_TEXT_EMPTY_ES ""
 #define UI_TEXT_TEMP_SET_ES cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_ES cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_ES " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_ES " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_ES "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_ES "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_ES "Temp. 6 :%e5/%E5" cDEG "C"
@@ -2177,9 +2177,9 @@
 #define UI_TEXT_EXTR0_OFF_SE        "Extruder 1 av"
 #define UI_TEXT_EXTR1_OFF_SE        "Extruder 2 av"
 #define UI_TEXT_EXTR2_OFF_SE        "Extruder 3 av"
-#define UI_TEXT_EXTR0_SELECT_SE     "%X0 V"STR_auml"lj Extr. 1"
-#define UI_TEXT_EXTR1_SELECT_SE     "%X1 V"STR_auml"lj Extr. 2"
-#define UI_TEXT_EXTR2_SELECT_SE     "%X2 V"STR_auml"lj Extr. 3"
+#define UI_TEXT_EXTR0_SELECT_SE     "%X0 V" STR_auml "lj Extr. 1"
+#define UI_TEXT_EXTR1_SELECT_SE     "%X1 V" STR_auml "lj Extr. 2"
+#define UI_TEXT_EXTR2_SELECT_SE     "%X2 V" STR_auml "lj Extr. 3"
 #define UI_TEXT_EXTR_ORIGIN_SE      "S" STR_auml "tt origo"
 #define UI_TEXT_PRINT_X_SE          "Skriv X:%ax"
 #define UI_TEXT_PRINT_Y_SE          "Skriv Y:%ay"
@@ -2363,7 +2363,7 @@
 #define UI_TEXT_PETTAPE_SE "Gr" STR_ouml "n PET band"
 #define UI_TEXT_GLUESTICK_SE "Limstift"
 #define UI_TEXT_CUSTOM_SE "Anpassad"
-#define UI_TEXT_COATING_CUSTOM_SE "Anpassad:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_SE "Anpassad:%BCmm"
 #define UI_TEXT_LANGUAGE_SE "Sprak"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -2400,21 +2400,21 @@
 #define UI_TEXT_EMPTY_SE ""
 #define UI_TEXT_TEMP_SET_SE cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_SE cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_SE " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_SE " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_SE "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_SE "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_SE "Temp. 6 :%e5/%E5" cDEG "C"
 #define UI_TEXT_EXTR3_OFF_SE "Extruder 4 av"
 #define UI_TEXT_EXTR4_OFF_SE "Extruder 5 av"
 #define UI_TEXT_EXTR5_OFF_SE "Extruder 6 av"
-#define UI_TEXT_EXTR3_SELECT_SE "%X3 V"STR_auml"lj Extr. 4"
-#define UI_TEXT_EXTR4_SELECT_SE "%X4 V"STR_auml"lj Extr. 5"
-#define UI_TEXT_EXTR5_SELECT_SE "%X5 V"STR_auml"lj Extr. 6"
+#define UI_TEXT_EXTR3_SELECT_SE "%X3 V" STR_auml "lj Extr. 4"
+#define UI_TEXT_EXTR4_SELECT_SE "%X4 V" STR_auml "lj Extr. 5"
+#define UI_TEXT_EXTR5_SELECT_SE "%X5 V" STR_auml "lj Extr. 6"
 #define UI_TEXT_DITTO_0_SE "%D0 Inga Kopior"
 #define UI_TEXT_DITTO_1_SE "%D1 1 Kopia"
 #define UI_TEXT_DITTO_2_SE "%D2 2 Kopior"
 #define UI_TEXT_DITTO_3_SE "%D3 3 Kopior"
-#define UI_TEXT_ZPROBE_HEIGHT_SE "Z-probh"STR_ouml"jden:%zh"
+#define UI_TEXT_ZPROBE_HEIGHT_SE "Z-probh" STR_ouml "jden:%zh"
 
 
 
@@ -2656,7 +2656,7 @@
 #define UI_TEXT_PETTAPE_FR "Ruban vert PET"
 #define UI_TEXT_GLUESTICK_FR "Baton de Colle"
 #define UI_TEXT_CUSTOM_FR "Coutume"
-#define UI_TEXT_COATING_CUSTOM_FR "Coutume:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_FR "Coutume:%BCmm"
 #define UI_TEXT_LANGUAGE_FR "Langue"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -2693,7 +2693,7 @@
 #define UI_TEXT_EMPTY_FR ""
 #define UI_TEXT_TEMP_SET_FR cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_FR cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_FR " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_FR " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_FR "Temp. 4 :%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_FR "Temp. 5 :%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_FR "Temp. 6 :%e5/%E5" cDEG "C"
@@ -2951,7 +2951,7 @@
 #define UI_TEXT_PETTAPE_CZ "Zelena PET paska"
 #define UI_TEXT_GLUESTICK_CZ "Lepici tycinka"
 #define UI_TEXT_CUSTOM_CZ "Vlastni"
-#define UI_TEXT_COATING_CUSTOM_CZ "Vlastni:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_CZ "Vlastni:%BCmm"
 #define UI_TEXT_LANGUAGE_CZ "Jazyk"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
@@ -2988,7 +2988,7 @@
 #define UI_TEXT_EMPTY_CZ ""
 #define UI_TEXT_TEMP_SET_CZ cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_CZ cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_CZ " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_CZ " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_CZ "Teplota 4:%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_CZ "Teplota 5:%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_CZ "Teplota 6:%e5/%E5" cDEG "C"
@@ -3243,7 +3243,7 @@
 #define UI_TEXT_PETTAPE_PL "Zielona tasma PET"
 #define UI_TEXT_GLUESTICK_PL "Klej w sztyfcie"
 #define UI_TEXT_CUSTOM_PL "Inna"
-#define UI_TEXT_COATING_CUSTOM_PL "Inna grubosc:%oCmm"
+#define UI_TEXT_COATING_CUSTOM_PL "Inna grubosc:%BCmm"
 #define UI_TEXT_LANGUAGE_PL "Jezyk"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
   #define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
@@ -3279,7 +3279,7 @@
 #define UI_TEXT_EMPTY_PL ""
 #define UI_TEXT_TEMP_SET_PL cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_PL cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_PL " %oCmm"
+#define UI_TEXT_COATING_THICKNESS_PL " %BCmm"
 #define UI_TEXT_EXTR3_TEMP_PL "Temp.Ex4:%e3/%E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_PL "Temp.Ex5:%e4/%E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_PL "Temp.Ex6:%e5/%E5" cDEG "C"

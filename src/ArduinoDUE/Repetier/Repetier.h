@@ -23,6 +23,7 @@
 #define _REPETIER_H
 
 #include <math.h>
+#include <stdint.h>
 #define REPETIER_VERSION "0.92.6"
 
 // ##########################################################################################
@@ -179,8 +180,18 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
+// we can not prevent this as some configs need a parameter and others not
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+inline void memcopy2(void *dest,void *source) {
+	*((int16_t*)dest) = *((int16_t*)source);
+}
+inline void memcopy4(void *dest,void *source) {
+	*((int32_t*)dest) = *((int32_t*)source);
+}
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
 #error You need to define Z_PROBE_PIN to use z probe!
@@ -235,7 +246,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
+#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
@@ -448,7 +459,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
 #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
-#error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
+#error You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display
 #endif
 #endif
 
@@ -778,10 +789,6 @@ extern void microstepInit();
 #include "Printer.h"
 #include "motion.h"
 extern long baudrate;
-#if OS_ANALOG_INPUTS>0
-// Get last result for pin x
-extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
-#endif
 
 #include "HAL.h"
 

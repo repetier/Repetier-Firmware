@@ -417,6 +417,9 @@ FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
 FSTRINGVALUE(Com::tPrinterModeFFF,"PrinterMode:FFF")
 FSTRINGVALUE(Com::tPrinterModeLaser,"PrinterMode:Laser")
 FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
+#ifdef STARTUP_GCODE
+FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
+#endif
 
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);

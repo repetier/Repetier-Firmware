@@ -394,6 +394,9 @@ FSTRINGVAR(tMCPCurrentSettings)
 FSTRINGVAR(tPrinterModeFFF)
 FSTRINGVAR(tPrinterModeLaser)
 FSTRINGVAR(tPrinterModeCNC)
+#ifdef STARTUP_GCODE
+FSTRINGVAR(tStartupGCode)
+#endif
 
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);

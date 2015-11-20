@@ -1078,8 +1078,8 @@ void Printer::setup()
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
     {
         currentPositionSteps[i] = 0;
-        currentPosition[i] = 0.0;
     }
+    currentPosition[X_AXIS] = currentPosition[Y_AXIS]= currentPosition[Z_AXIS] =  0.0;
 //setAutolevelActive(false); // fixme delete me
     //Commands::printCurrentPosition(PSTR("Printer::setup 0 "));
 #if DISTORTION_CORRECTION
@@ -1128,6 +1128,9 @@ void Printer::setup()
         uid.showLanguageSelectionWizard();
     }
 #endif // EEPROM_MODE
+#ifdef STARTUP_GCODE
+	GCode::executeFString(Com::tStartupGCode);
+#endif
 }
 
 void Printer::defaultLoopActions()
@@ -1724,14 +1727,14 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
 #endif
-    int32_t updateZ = 0;
+    //int32_t updateZ = 0;
     waitForZProbeStart();
     for(int8_t r = 0; r < repeat; r++)
     {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
         stepsRemainingAtZHit = -1; // Marker that we did not hit z probe
-        int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
-        int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
+        //int32_t offx = axisStepsPerMM[X_AXIS] * EEPROM::zProbeXOffset();
+        //int32_t offy = axisStepsPerMM[Y_AXIS] * EEPROM::zProbeYOffset();
         //PrintLine::moveRelativeDistanceInSteps(-offx,-offy,0,0,EEPROM::zProbeXYSpeed(),true,true);
         setZProbingActive(true);
         PrintLine::moveRelativeDistanceInSteps(0, 0, -probeDepth, 0, EEPROM::zProbeSpeed(), true, true);

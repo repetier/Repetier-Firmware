@@ -22,19 +22,19 @@
 class SDCard;
 class GCode   // 52 uint8_ts per command needed
 {
-    unsigned int params;
-    unsigned int params2;
+    uint16_t params;
+    uint16_t params2;
 public:
-    unsigned int N; // Line number
-    unsigned int M;
-    unsigned int G;
+    uint16_t N; // Line number
+    uint16_t M;
+    uint16_t G;
     float X;
     float Y;
     float Z;
     float E;
     float F;
-    long S;
-    long P;
+    int32_t S;
+    int32_t P;
     float I;
     float J;
     float R;

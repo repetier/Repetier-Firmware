@@ -129,6 +129,11 @@ If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM 0
 
+/* You can write some gcode to be executed on startup. Use this e.g. to set some 
+pins. Separate multiple gcodes with \n
+*/
+//#define STARTUP_GCODE ""
+
 // ##########################################################################################
 // ##                               Calibration                                            ##
 // ##########################################################################################

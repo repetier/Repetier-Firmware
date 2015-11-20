@@ -53,7 +53,7 @@ uint16_t servoPosition = 1500;
 static TemperatureController *currHeaterForSetup;    // pointer to extruder or heatbed temperature controller
 
 #if UI_AUTORETURN_TO_MENU_AFTER != 0
-long ui_autoreturn_time = 0;
+millis_t ui_autoreturn_time = 0;
 #endif
 #if FEATURE_BABYSTEPPING
 int zBabySteps = 0;
@@ -792,6 +792,9 @@ void initializeLCD()
 #ifdef U8GLIB_ST7565_NHD_C2832_HW_SPI
     u8g_InitHWSPI(&u8g,&u8g_dev_st7565_nhd_c12864_hw_spi,UI_DISPLAY_RS_PIN,UI_DISPLAY_D5_PIN,U8G_PIN_NONE);
 #endif
+#ifdef U8GLIB_ST7565_NHD_C2832_SW_SPI
+u8g_InitSPI(&u8g,&u8g_dev_st7565_nhd_c12864_sw_spi,UI_DISPLAY_D4_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_RS_PIN,UI_DISPLAY_D5_PIN,U8G_PIN_NONE);
+#endif
     u8g_Begin(&u8g);
 #ifdef UI_ROTATE_180
     u8g_SetRot180(&u8g);
@@ -951,7 +954,7 @@ void UIDisplay::initialize()
 #endif // gameduino2
     HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
 #endif
-#if UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
+#if defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
     // Make sure the beeper is off
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS+I2C_WRITE);
     HAL::i2cWrite(255); // Disable beeper, enable read for other pins.
@@ -959,7 +962,7 @@ void UIDisplay::initialize()
 #endif
 }
 #if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT || UI_DISPLAY_TYPE == DISPLAY_I2C
-void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
+void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
     lcdCommand(LCD_SETCGRAMADDR | (location << 3));
@@ -971,7 +974,7 @@ void UIDisplay::createChar(uint8_t location,const uint8_t PROGMEM charmap[])
 #endif
 void  UIDisplay::waitForKey()
 {
-    int nextAction = 0;
+    uint16_t nextAction = 0;
 
     lastButtonAction = 0;
     while(lastButtonAction == nextAction)
@@ -1023,7 +1026,7 @@ void UIDisplay::addInt(int value,uint8_t digits,char fillChar)
         str++;
     }
 }
-void UIDisplay::addLong(long value,char digits)
+void UIDisplay::addLong(long value,int8_t digits)
 {
     uint8_t dig = 0,neg = 0;
     byte addspaces = digits > 0;
@@ -1248,7 +1251,13 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
 #endif
             break;
-
+		case 'B':
+            if(c2 == 'C')	 //Custom coating
+            {
+	            addFloat(Printer::zBedOffset, 3, 2);
+	            break;
+            }
+			break;
         case 'd':
             if(c2 == 'o') addStringOnOff(Printer::debugEcho());
             else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
@@ -1268,8 +1277,9 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 'I')
             {
                 //give integer display
-                char c2=(ram ? *(txt++) : pgm_read_byte(txt++));
-                ivalue=0;
+                //char c2 = (ram ? *(txt++) : pgm_read_byte(txt++));
+                txt++; // just skip c sign
+                ivalue = 0;
             }
             else ivalue = UI_TEMP_PRECISION;
 
@@ -1421,11 +1431,6 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
-            if(c2 == 'C')	 //Custom coating
-            {
-                addFloat(Printer::zBedOffset, 3, 2);
-                break;
-            }
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
 #if HAVE_HEATED_BED
@@ -1697,7 +1702,6 @@ void UIDisplay::updateSDFileCount()
 {
 #if SDSUPPORT
     dir_t* p = NULL;
-    byte offset = menuTop[menuLevel];
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
@@ -1718,11 +1722,11 @@ void UIDisplay::updateSDFileCount()
 void getSDFilenameAt(uint16_t filePos,char *filename)
 {
 #if SDSUPPORT
-    dir_t* p;
+    dir_t* p = NULL;
     SdBaseFile *root = sd.fat.vwd();
 
     root->rewind();
-    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)))
+    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)) != NULL)
     {
         HAL::pingWatchdog();
         if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
@@ -1854,7 +1858,7 @@ void UIDisplay::refreshPage()
     else
     {
         UIMenu *men = (UIMenu*)menu[menuLevel];
-        uint16_t nr = pgm_read_word_near((void*)&(men->numEntries));
+        uint16_t nr = pgm_read_word_near(&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));
         uint16_t offset = menuTop[menuLevel];
         UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -1992,11 +1996,13 @@ void UIDisplay::refreshPage()
      u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
 #if SDSUPPORT
-        unsigned long sdPercent;
+        unsigned long sdPercent = 0;
 #endif
         //fan
-        int fanPercent;
+#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+        int fanPercent = 0;
         char fanString[2];
+#endif
         if(menuLevel == 0 && menuPos[0] == 0 ) // Main menu with special graphics
         {
 //ext1 and ext2 animation symbols
@@ -2084,7 +2090,7 @@ void UIDisplay::refreshPage()
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 66, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                     {
-                        printU8GRow(66,52,"SD");
+                        printU8GRow(66,52,const_cast<char *>("SD"));
                         drawHProgressBar(79,46, 46, 6, sdPercent);
                     }
 #endif
@@ -2260,13 +2266,13 @@ int UIDisplay::okAction(bool allowMoves)
         menu[1] = &ui_menu_main;
         return 0;
     }
-    UIMenu *men = (UIMenu*)menu[menuLevel];
+    const UIMenu *men = (const UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
     uint8_t mtype = pgm_read_byte(&(men->menuType));
     UIMenuEntry **entries;
     UIMenuEntry *ent;
     unsigned char entType;
-    int action;
+    unsigned int action;
 #if SDSUPPORT
     if(mtype == UI_MENU_TYPE_FILE_SELECTOR)
     {
@@ -2437,7 +2443,7 @@ void UIDisplay::adjustMenuPos()
     UIMenu *men = (UIMenu*)menu[menuLevel];
     UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
     uint8_t mtype = HAL::readFlashByte((PGM_P)&(men->menuType)) & 127;
-    int numEntries = pgm_read_word(&(men->numEntries));
+    uint16_t numEntries = pgm_read_word(&(men->numEntries));
     if(mtype != 2) return;
     UIMenuEntry *entry;
     while(menuPos[menuLevel] > 0) // Go up until we reach visible position
@@ -2546,8 +2552,8 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     UIMenuEntry *ent =(UIMenuEntry *)pgm_read_word(&(entries[menuPos[menuLevel]]));
     UIMenuEntry *testEnt;
     // 0 = Info, 1 = Headline, 2 = submenu ref, 3 = direct action command
-    uint8_t entType = HAL::readFlashByte((PGM_P)&(ent->entryType));
-    int action = pgm_read_word(&(ent->action));
+    //uint8_t entType = HAL::readFlashByte((PGM_P)&(ent->entryType));
+    unsigned int action = pgm_read_word(&(ent->action));
     if(mtype == UI_MENU_TYPE_SUBMENU && activeAction == 0)   // browse through menu items
     {
         if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
@@ -2846,11 +2852,11 @@ ZPOS2:
     case UI_ACTION_BAUDRATE:
 #if EEPROM_MODE != 0
     {
-        char p = 0;
+        int16_t p = 0;
         int32_t rate;
         do
         {
-            rate = pgm_read_dword(&(baudrates[p]));
+            rate = pgm_read_dword(&(baudrates[(uint8_t)p]));
             if(rate == baudrate) break;
             p++;
         }
@@ -2858,7 +2864,8 @@ ZPOS2:
         if(rate == 0) p -= 2;
         p += increment;
         if(p < 0) p = 0;
-        if(p > sizeof(baudrates)/4 - 2) p = sizeof(baudrates)/4 - 2;
+        if(p > static_cast<int16_t>(sizeof(baudrates)/4) - 2)
+            p = sizeof(baudrates)/4 - 2;
         baudrate = pgm_read_dword(&(baudrates[p]));
     }
 #endif
@@ -2972,7 +2979,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset)
 }
 #endif
 
-void UIDisplay::finishAction(int action)
+void UIDisplay::finishAction(unsigned int action)
 {
 #if UI_BED_COATING
     if (action == UI_ACTION_COATING_CUSTOM)
@@ -2983,7 +2990,7 @@ void UIDisplay::finishAction(int action)
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
-int UIDisplay::executeAction(int action, bool allowMoves)
+int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 {
     int ret = 0;
 #if UI_HAS_KEYS == 1
@@ -3635,9 +3642,11 @@ void UIDisplay::slowAction(bool allowMoves)
             uid.outputMask= ~led & (UI_I2C_HEATBED_LED | UI_I2C_HOTEND_LED | UI_I2C_FAN_LED);
         }
 #endif
-        int nextAction = 0;
+        uint16_t nextAction = 0;
         uiCheckSlowKeys(nextAction);
+#ifdef HAS_USER_KEYS        
         ui_check_Ukeys(nextAction);
+#endif
         if(lastButtonAction != nextAction)
         {
             lastButtonStart = time;
@@ -3774,7 +3783,7 @@ void UIDisplay::fastAction()
     if((flags & (UI_FLAG_KEY_TEST_RUNNING + UI_FLAG_SLOW_KEY_ACTION)) == 0)
     {
         flags |= UI_FLAG_KEY_TEST_RUNNING;
-        int nextAction = 0;
+        uint16_t nextAction = 0;
         uiCheckKeys(nextAction);
 //        ui_check_Ukeys(nextAction);
         if(lastButtonAction != nextAction)

@@ -79,7 +79,12 @@ void SDCard::initsd()
 #endif
     /*if(dir[0].isOpen())
         dir[0].close();*/
+#if FEATURE_CONTROLLER==CONTROLLER_VIKI2 && defined(__SAM3X8E__)
+	// Viki2 shares SPI and does not work with fast spi :-(
+    if(!fat.begin(SDSS, SPI_EIGHTH_SPEED))
+#else
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
+#endif
     {
         Com::printFLN(Com::tSDInitFail);
         return;
@@ -180,22 +185,26 @@ void SDCard::writeCommand(GCode *code)
     uint8_t buf[100];
     uint8_t p = 2;
     file.writeError = false;
-    int params = 128 | (code->params & ~1);
-    *(int*)buf = params;
+    uint16_t params = 128 | (code->params & ~1);
+	memcopy2(buf,&params);
+    //*(int*)buf = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
-        *(int*)&buf[p] = code->params2;
+		memcopy2(&buf[p],&code->params2);
+        //*(int*)&buf[p] = code->params2;
         p += 2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
-            *(int*)&buf[p] = code->M;
+			memcopy2(&buf[p],&code->M);
+            //*(int*)&buf[p] = code->M;
             p += 2;
         }
         if(code->hasG())
         {
-            *(int*)&buf[p]= code->G;
+			memcopy2(&buf[p],&code->G);
+            //*(int*)&buf[p]= code->G;
             p += 2;
         }
     }
@@ -212,27 +221,32 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasX())
     {
-        *(float*)&buf[p] = code->X;
+		memcopy4(&buf[p],&code->X);
+        //*(float*)&buf[p] = code->X;
         p += 4;
     }
     if(code->hasY())
     {
-        *(float*)&buf[p] = code->Y;
+		memcopy4(&buf[p],&code->Y);
+        //*(float*)&buf[p] = code->Y;
         p += 4;
     }
     if(code->hasZ())
     {
-        *(float*)&buf[p] = code->Z;
+		memcopy4(&buf[p],&code->Z);
+        //*(float*)&buf[p] = code->Z;
         p += 4;
     }
     if(code->hasE())
     {
-        *(float*)&buf[p] = code->E;
+		memcopy4(&buf[p],&code->E);
+        //*(float*)&buf[p] = code->E;
         p += 4;
     }
     if(code->hasF())
     {
-        *(float*)&buf[p] = code->F;
+		memcopy4(&buf[p],&code->F);
+        //*(float*)&buf[p] = code->F;
         p += 4;
     }
     if(code->hasT())
@@ -241,67 +255,80 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-        *(int32_t*)&buf[p] = code->S;
+		memcopy4(&buf[p],&code->S);
+        //*(int32_t*)&buf[p] = code->S;
         p += 4;
     }
     if(code->hasP())
     {
-        *(int32_t*)&buf[p] = code->P;
+		memcopy4(&buf[p],&code->P);
+        //*(int32_t*)&buf[p] = code->P;
         p += 4;
     }
     if(code->hasI())
     {
-        *(float*)&buf[p] = code->I;
+		memcopy4(&buf[p],&code->I);
+        //*(float*)&buf[p] = code->I;
         p += 4;
     }
     if(code->hasJ())
     {
-        *(float*)&buf[p] = code->J;
+		memcopy4(&buf[p],&code->J);
+        //*(float*)&buf[p] = code->J;
         p += 4;
     }
     if(code->hasR())
     {
-        *(float*)&buf[p] = code->R;
+		memcopy4(&buf[p],&code->R);
+        //*(float*)&buf[p] = code->R;
         p += 4;
     }
     if(code->hasD())
     {
-        *(float*)&buf[p] = code->D;
+		memcopy4(&buf[p],&code->D);
+        //*(float*)&buf[p] = code->D;
         p += 4;
     }
     if(code->hasC())
     {
-        *(float*)&buf[p] = code->C;
+		memcopy4(&buf[p],&code->C);
+        //*(float*)&buf[p] = code->C;
         p += 4;
     }
     if(code->hasH())
     {
-        *(float*)&buf[p] = code->H;
+		memcopy4(&buf[p],&code->H);
+        //*(float*)&buf[p] = code->H;
         p += 4;
     }
     if(code->hasA())
     {
-        *(float*)&buf[p] = code->A;
+		memcopy4(&buf[p],&code->A);
+        //*(float*)&buf[p] = code->A;
         p += 4;
     }
     if(code->hasB())
     {
-        *(float*)&buf[p] = code->B;
+		memcopy4(&buf[p],&code->B);
+        //*(float*)&buf[p] = code->B;
         p += 4;
     }
     if(code->hasK())
     {
-        *(float*)&buf[p] = code->K;
+		memcopy4(&buf[p],&code->K);
+        //*(float*)&buf[p] = code->K;
         p += 4;
     }
     if(code->hasL())
     {
-        *(float*)&buf[p] = code->L;
+		memcopy4(&buf[p],&code->L);
+        //*(float*)&buf[p] = code->L;
         p += 4;
     }
     if(code->hasO())
     {
-        *(float*)&buf[p] = code->O;
+		memcopy4(&buf[p],&code->O);
+        //*(float*)&buf[p] = code->O;
         p += 4;
     }
     if(code->hasString())   // read 16 uint8_t into string
@@ -334,6 +361,11 @@ void SDCard::writeCommand(GCode *code)
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
+	// Debug 
+	/*Com::printF(PSTR("Buf: "));
+	for(int i=0;i<p;i++)
+	Com::printF(PSTR(" "),(int)buf[i]);
+	Com::println();*/
     if(params == 128)
     {
         Com::printErrorFLN(Com::tAPIDFinished);
@@ -401,7 +433,6 @@ bool SDCard::selectFile(const char *filename, bool silent)
 {
     SdBaseFile parent;
     const char *oldP = filename;
-    boolean bFound;
 
     if(!sdactive) return false;
     sdmode = 0;

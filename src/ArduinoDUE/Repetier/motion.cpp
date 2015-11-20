@@ -267,13 +267,13 @@ void PrintLine::calculateMove(float axis_diff[], uint8_t pathOptimize)
     long axisInterval[E_AXIS_ARRAY];
 #endif
     float timeForMove = (float)(F_CPU)*distance / (isXOrYMove() ? RMath::max(Printer::minimumSpeed, Printer::feedrate) : Printer::feedrate); // time is in ticks
-    bool critical = Printer::isZProbingActive();
+    //bool critical = Printer::isZProbingActive();
     if(linesCount < MOVE_CACHE_LOW && timeForMove < LOW_TICKS_PER_MOVE)   // Limit speed to keep cache full.
     {
         //OUT_P_I("L:",lines_count);
         timeForMove += (3 * (LOW_TICKS_PER_MOVE - timeForMove)) / (linesCount + 1); // Increase time if queue gets empty. Add more time if queue gets smaller.
         //OUT_P_F_LN("Slow ",time_for_move);
-        critical = true;
+        //critical = true;
     }
     timeInTicks = timeForMove;
     UI_MEDIUM; // do check encoder
@@ -1763,7 +1763,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     //   plan_set_acceleration_manager_enabled(false); // disable acceleration management for the duration of the arc
     float center_axis0 = position[X_AXIS] + offset[X_AXIS];
     float center_axis1 = position[Y_AXIS] + offset[Y_AXIS];
-    float linear_travel = 0; //target[axis_linear] - position[axis_linear];
+    //float linear_travel = 0; //target[axis_linear] - position[axis_linear];
     float extruder_travel = (Printer::destinationSteps[E_AXIS] - Printer::currentPositionSteps[E_AXIS]) * Printer::invAxisStepsPerMM[E_AXIS];
     float r_axis0 = -offset[0];  // Radius vector from center to current location
     float r_axis1 = -offset[1];

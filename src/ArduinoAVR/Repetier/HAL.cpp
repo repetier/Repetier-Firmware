@@ -320,8 +320,8 @@ void HAL::analogStart()
     //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
     while (ADCSRA & _BV(ADSC) ) {} // wait for conversion
     /* ADCW must be read once, otherwise the next result is wrong. */
-    uint dummyADCResult;
-    dummyADCResult = ADCW;
+    //uint dummyADCResult;
+    //dummyADCResult = ADCW;
     // Enable interrupt driven conversion loop
     uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
@@ -785,7 +785,7 @@ ISR(PWM_TIMER_VECTOR)
     static uint8_t pwm_count_cooler = 0;
     static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_EXTRUDER + 3];
-#if NUM_EXTRUDER > 0
+#if NUM_EXTRUDER > 0 && ((defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN > -1) || (NUM_EXTRUDER > 1 && EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 2 && EXT2_EXTRUDER_COOLER_PIN > -1 && EXT2_EXTRUDER_COOLER_PIN != EXT2_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 3 && EXT3_EXTRUDER_COOLER_PIN > -1 && EXT3_EXTRUDER_COOLER_PIN != EXT3_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 4 && EXT4_EXTRUDER_COOLER_PIN > -1 && EXT4_EXTRUDER_COOLER_PIN != EXT4_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 5 && EXT5_EXTRUDER_COOLER_PIN > -1 && EXT5_EXTRUDER_COOLER_PIN != EXT5_EXTRUDER_COOLER_PIN))
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
 #endif
     PWM_OCR += 64;

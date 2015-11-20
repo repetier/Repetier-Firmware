@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-const uint8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
+const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
@@ -199,7 +199,7 @@ void Commands::printTemperatures(bool showRaw)
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
-#else if NUM_EXTRUDER == 1
+#elif NUM_EXTRUDER == 1
     if(showRaw)
     {
             Com::printF(Com::tSpaceRaw,(int)0);
@@ -1444,7 +1444,6 @@ void Commands::processGCode(GCode *com)
 */
 void Commands::processMCode(GCode *com)
 {
-    uint32_t codenum; //throw away variable
     switch( com->M )
     {
     case 3: // Spindle/laser on
@@ -1750,6 +1749,7 @@ void Commands::processMCode(GCode *com)
     previousMillisCmd = HAL::timeInMilliseconds();
     break;
     case 190: // M190 - Wait bed for heater to reach target.
+		{
 #if HAVE_HEATED_BED
         if(Printer::debugDryrun()) break;
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
@@ -1760,6 +1760,7 @@ void Commands::processMCode(GCode *com)
         if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
         EVENT_WAITING_HEATER(-1);
+	    uint32_t codenum; //throw away variable
         codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC && heatedBedController.targetTemperatureC > 25.0)
         {
@@ -1775,6 +1776,7 @@ void Commands::processMCode(GCode *com)
 #endif
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
+		}
         break;
 #if NUM_TEMPERATURE_LOOPS > 0
     case 116: // Wait for temperatures to reach target temperature
@@ -1819,7 +1821,7 @@ void Commands::processMCode(GCode *com)
 #else
             Extruder::setTemperatureForExtruder(0, 0);
 #endif
-#if HEATED_BED_TYPE != 0
+#if HAVE_HEATED_BED != 0
             Extruder::setHeatedBedTemperature(0,false);
 #endif
         }
@@ -2422,6 +2424,14 @@ void Commands::executeGCode(GCode *com)
             com->printCommand();
         }
     }
+#ifdef DEBUG_DRYRUN_ERROR
+    if(Printer::debugDryrun()) {
+        Com::printFLN("Dryrun was enabled");
+        com->printCommand();
+        Printer::debugLevel &= ~8;
+    }
+#endif
+
 }
 
 void Commands::emergencyStop()

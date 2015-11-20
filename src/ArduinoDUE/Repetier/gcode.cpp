@@ -851,7 +851,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         {
             uint8_t checksum_given = parseLongValue(pos);
             uint8_t checksum = 0;
-            while(line != (pos-1)) checksum ^= *line++;
+            while(line != (pos - 1)) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
             Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
 #endif
@@ -870,12 +870,12 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         }// end switch
     }// end while
 
-    if(hasFormatError() || (params & 518)==0)   // Must contain G, M or T command and parameter need to have variables!
+    if(hasFormatError() || (params & 518) == 0)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;
         if(Printer::debugErrors())
             Com::printErrorFLN(Com::tFormatError);
-        if(formatErrors<3) return false;
+        if(formatErrors < 3) return false;
     }
     else formatErrors = 0;
     return true;
