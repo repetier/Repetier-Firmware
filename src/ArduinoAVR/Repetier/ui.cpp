@@ -3048,7 +3048,6 @@ void UIDisplay::startAction(int action)
 }
 
 #if UI_BED_COATING
-#if !defined(UI_PRINTER_COMPANY)
 void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset)
 {
 #if EEPROM_MODE != 0
@@ -3070,9 +3069,10 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset)
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
 }
 #endif
-#endif
 void UIDisplay::finishAction(int action)
 {
+	if (action == UI_ACTION_COATING_CUSTOM)
+		menuAdjustHeight(&ui_menu_coating_custom,Printer::zBedOffset);
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
@@ -3219,7 +3219,7 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_F(UI_TEXT_PREHEATING_EN " " UI_TEXT_ABS);
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING_EN " " UI_TEXT_ABS);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif
@@ -3238,13 +3238,13 @@ int UIDisplay::executeAction(int action, bool allowMoves)
 #endif 
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_F(UI_TEXT_PREHEATING_EN " " UI_TEXT_PET);
+			UI_STATUS_UPD_RAM(UI_TEXT_PREHEATING_EN " " UI_TEXT_PET);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif			
 break;
         case UI_ACTION_COOLDOWN:
-            UI_STATUS_F(Com::translatedF(UI_TEXT_COOLDOWN_ID));
+            UI_STATUS_UPD(UI_TEXT_COOLDOWN_EN);
             for(int i = 0;i < NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0, i);
 #if HAVE_HEATED_BED
@@ -3252,7 +3252,7 @@ break;
 #endif
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_COOLDOWN_ID));
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN_EN);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif
@@ -3262,7 +3262,7 @@ break;
             Extruder::setHeatedBedTemperature(0);
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_COOLDOWN_ID));
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN_EN);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif
@@ -3272,7 +3272,7 @@ break;
             Extruder::setTemperatureForExtruder(0, 0);
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_COOLDOWN_ID));
+			UI_STATUS_UPD_RAM(UI_TEXT_COOLDOWN_EN);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif
@@ -3298,7 +3298,7 @@ break;
             Printer::kill(true);
 			menuLevel = 0;
 			activeAction = 0;
-			UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
+			UI_STATUS_UPD_RAM(UI_TEXT_STEPPER_DISABLED_EN);
 #if BED_LEDS
 			Light.ShowTemps();
 #endif
@@ -3693,16 +3693,16 @@ break;
             HAL::resetHardware();
             break;
         case UI_ACTION_PAUSE:
-  if (Printer::isPaused) {
-			    Com::print("info: resume requested\n");
+		if (Printer::isPaused) {
+			    Com::printFLN(PSTR("RequestResume:"));
 			    UI_STATUS_UPD_RAM("");
 			    Printer::resumePrinting();
-			    WRITE(HEATER_2_PIN, 1);
+			    WRITE(HEATER_3_PIN, 1);
 			    } else {
 			    Printer::isPaused = true;
-			    Com::print("info: pause requested\n");
+			    Com::printFLN(PSTR("RequestPause:"));
 			    UI_STATUS_UPD_RAM("Pause requested");
-			    WRITE(HEATER_2_PIN, 0);
+			    WRITE(HEATER_3_PIN, 0);
 		    }
 		    //just for the reference- this was used to pause RepetierHost
 		    //Com::printFLN(PSTR("RequestPause:"));            Com::printFLN(PSTR("RequestPause:"));
@@ -3764,7 +3764,7 @@ case UI_ACTION_RESET_MATRIX:
 			activeAction = 0;
 			pushMenu(&ui_menu_reset_action, false);
 			BEEP_SHORT;
-			UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
+			UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY_EN);
 			break;
 #if FEATURE_AUTOLEVEL
         case UI_ACTION_AUTOLEVEL_ONOFF:
@@ -4039,51 +4039,10 @@ void UIDisplay::menuCommand(const UIMenu *doing,const UIMenu *men,FSTRINGPARAM(c
 	activeAction = 0;
 	pushMenu(men, false);
 	BEEP_SHORT;
-	UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
+	UI_STATUS_UPD_RAM(UI_TEXT_PRINTER_READY_EN);
 	Commands::waitUntilEndOfAllMoves();
 }
-#if UI_BED_COATING
-#if defined(UI_PRINTER_COMPANY)
-void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset){
-	if (Printer::zLength < (Z_MAX_LENGTH - 200.0f) || Printer::zLength > Z_MAX_LENGTH) {
-		Com::printErrorFLN(PSTR("Corrupted Z-length!"));
-		pushMenu(&ui_menu_avoid_uninit, false);
-		return;
-	}
-	if (Printer::isPaused || Printer::isZProbingActive() || Printer::isMenuMode(MENU_MODE_SD_PRINTING) || PrintLine::hasLines())
-		pushMenu(&ui_menu_avoid, false);
-	else {
-		EEPROM::readDataFromEEPROM(false);
-		//If there is something to change
-		if (EEPROM::zProbeZOffset()!=offset) {
-			//If the offset has been previously set, reset the height
-			if (EEPROM::zProbeZOffset()!=0.0)
-				Printer::zLength += EEPROM::zProbeZOffset();
-			//Subtract the new offset (if any)
-			if (offset!=0.0)
-				Printer::zLength -= offset;
-			//Set the new offset
-			Printer::zBedOffset = offset;
-			HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, offset);
-			HAL::eprSetFloat(EPR_Z_LENGTH, Printer::zLength);
-			Com::print("\nThe new zLength: ");
-			Com::printFloat(Printer::zLength, 4);
-			EEPROM::storeDataIntoEEPROM(false);
-			Com::print(" has been stored into EEPROM.\n");
-		}
-		//Display message
-		pushMenu(men, false);
-		BEEP_SHORT;	
-		EEPROM::readDataFromEEPROM(false);
-		Printer::homeAxis(true, true, true);
-		Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
-		menuLevel = 0;
-		activeAction = 0;
-		UI_STATUS_UPD_RAM(Com::translatedF(UI_TEXT_PRINTER_READY_ID));
-	}
-}
-#endif
-#endif
+
 
 #endif
 

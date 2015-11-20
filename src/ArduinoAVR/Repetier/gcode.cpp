@@ -356,10 +356,10 @@ void GCode::readFromSerial()
 #endif
     }
 	
-	if (commandsReceivingWritePosition == 0 && Printer::isPaused) {
+	/*if (commandsReceivingWritePosition == 0 && Printer::isPaused) {
 		//printer in pause mode- do not accept any new lines
 		return;
-	}
+	}*/
 	
     while(HAL::serialByteAvailable() && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {

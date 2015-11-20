@@ -252,7 +252,7 @@ Overridden if EEPROM activated.*/
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
 // Which pin enables the heater
-#define EXT0_HEATER_PIN HEATER_3_PIN
+#define EXT0_HEATER_PIN HEATER_0_PIN
 #define EXT0_STEP_PIN E0_STEP_PIN
 #define EXT0_DIR_PIN E0_DIR_PIN
 // set to false/true for normal / inverse direction
@@ -1569,7 +1569,7 @@ computations, so do not enable it if your display works stable!
 
 
 #define DEBUGGING false
-#define BED_LEDS false
+#define BED_LEDS true
 #if BED_LEDS
 #define LED_MAX_RELATIVE_BRIGHTNESS 0.25
 #endif
