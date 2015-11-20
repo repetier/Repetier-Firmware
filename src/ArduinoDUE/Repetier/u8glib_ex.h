@@ -9778,7 +9778,7 @@ uint8_t u8g_dev_st7565_nhd_c12864_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, vo
   {
     case U8G_DEV_MSG_INIT:
 #if defined(__SAM3X8E__)	
-      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
 #else
       u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
 #endif
