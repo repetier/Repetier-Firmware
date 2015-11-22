@@ -91,6 +91,19 @@ FSTRINGVALUE(Com::tSpaceRaw," RAW")
 FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpaceSlash," /")
+#if JSON_OUTPUT
+FSTRINGVALUE(Com::tJSONDir,"{\"dir\":\"")
+FSTRINGVALUE(Com::tJSONFiles,"\",\"files\":[")
+FSTRINGVALUE(Com::tJSONArrayEnd,"]}")
+FSTRINGVALUE(Com::tJSONErrorStart,"{\"err\":\"")
+FSTRINGVALUE(Com::tJSONErrorEnd,"\"}")
+FSTRINGVALUE(Com::tJSONFileInfoStart, "{\"err\":0,\"size\":");
+FSTRINGVALUE(Com::tJSONFileInfoHeight, ",\"height\":");
+FSTRINGVALUE(Com::tJSONFileInfoLayerHeight, ",\"layerHeight\":");
+FSTRINGVALUE(Com::tJSONFileInfoFilament, ",\"filament\":[");
+FSTRINGVALUE(Com::tJSONFileInfoGeneratedBy, "],\"generatedBy\":\"");
+FSTRINGVALUE(Com::tJSONFileInfoName, ",\"fileName\":\"");
+#endif // JSON_OUTPUT
 FSTRINGVALUE(Com::tSpeedMultiply,"SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply,"FlowMultiply:")
 FSTRINGVALUE(Com::tFanspeed,"Fanspeed:")

@@ -361,7 +361,7 @@ void SDCard::writeCommand(GCode *code)
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
-	// Debug 
+	// Debug
 	/*Com::printF(PSTR("Buf: "));
 	for(int i=0;i<p;i++)
 	Com::printF(PSTR(" "),(int)buf[i]);
@@ -429,6 +429,93 @@ void SDCard::ls()
     Com::printFLN(Com::tEndFileList);
 }
 
+#if JSON_OUTPUT
+void SDCard::lsJSON(const char *filename)
+{
+    SdBaseFile dir;
+    fat.chdir();
+    if (*filename == 0) {
+        dir.openRoot(fat.vol());
+    } else {
+        if (!dir.open(fat.vwd(), filename, O_READ) || !dir.isDir()) {
+            Com::printF(Com::tJSONErrorStart);
+            Com::printF(Com::tFileOpenFailed);
+            Com::printFLN(Com::tJSONErrorEnd);
+            return;
+        }
+    }
+
+    Com::printF(Com::tJSONDir);
+    SDCard::printEscapeChars(filename);
+    Com::printF(Com::tJSONFiles);
+    dir.lsJSON();
+    Com::printFLN(Com::tJSONArrayEnd);
+}
+
+void SDCard::printEscapeChars(const char *s) {
+    for (unsigned int i = 0; i < strlen(s); ++i) {
+        switch (s[i]) {
+            case '"':
+            case '/':
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+            case '\\':
+				Com::print('\\');
+                break;
+        }
+		Com::print(s[i]);
+    }
+}
+
+void SDCard::JSONFileInfo(const char* filename) {
+    SdBaseFile targetFile;
+    GCodeFileInfo *info,tmpInfo;
+    if (strlen(filename) == 0)  {
+        targetFile = file;
+        info = &fileInfo;
+    } else {
+        if (!targetFile.open(fat.vwd(), filename, O_READ) || targetFile.isDir()) {
+            Com::printF(Com::tJSONErrorStart);
+            Com::printF(Com::tFileOpenFailed);
+            Com::printFLN(Com::tJSONErrorEnd);
+            return;
+        }
+		info = &tmpInfo;
+        info->init(targetFile);
+    }
+    if (!targetFile.isOpen()) {
+        Com::printF(Com::tJSONErrorStart);
+        Com::printF(Com::tNotSDPrinting);
+        Com::printFLN(Com::tJSONErrorEnd);
+        return;
+    }
+
+    // {"err":0,"size":457574,"height":4.00,"layerHeight":0.25,"filament":[6556.3],"generatedBy":"Slic3r 1.1.7 on 2014-11-09 at 17:11:32"}
+    Com::printF(Com::tJSONFileInfoStart);
+    Com::print(info->fileSize);
+    Com::printF(Com::tJSONFileInfoHeight);
+    Com::print(info->objectHeight);
+    Com::printF(Com::tJSONFileInfoLayerHeight);
+    Com::print(info->layerHeight);
+    Com::printF(Com::tJSONFileInfoFilament);
+    Com::print(info->filamentNeeded);
+    Com::printF(Com::tJSONFileInfoGeneratedBy);
+    Com::print(info->generatedBy);
+    Com::print('"');
+    if (strlen(filename) == 0) {
+        Com::printF(Com::tJSONFileInfoName);
+        file.printName();
+	    Com::print('"');
+    }
+	Com::print('}');
+    Com::println();
+};
+
+#endif
+
 bool SDCard::selectFile(const char *filename, bool silent)
 {
     SdBaseFile parent;
@@ -452,6 +539,9 @@ bool SDCard::selectFile(const char *filename, bool silent)
             Com::printF(Com::tFileOpened, oldP);
             Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
         }
+#if JSON_OUTPUT
+        fileInfo.init(file);
+#endif
         sdpos = 0;
         filesize = file.fileSize();
         Com::printFLN(Com::tFileSelected);

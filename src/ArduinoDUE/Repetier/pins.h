@@ -189,6 +189,8 @@ STEPPER_CURRENT_CONTROL
 #define EXTENSION_BOARD_MS3 69
 // 66 -> not connected
 // 25 -> not connected
+// To set microstepping on startup set START_GCODE to e.g.
+// "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
 #define SDSUPPORT      1
 #define SDPOWER 	   -1

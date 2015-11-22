@@ -753,7 +753,7 @@ PRINTER_MODE_FFF 0
 PRINTER_MODE_LASER 1
 PRINTER_MODE_CNC 2
 */
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_FDM
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
 
 // ##########################################################################################
 // ##                            Endstop configuration                                     ##
@@ -1470,6 +1470,12 @@ Separate commands by \n */
 the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN in 9 which
 is also used for the heater if you have 2 extruders connected. */
 #define FEATURE_FAN_CONTROL 1
+
+/** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
+ * This essentially adds command M36/M408 and extends M20.
+ * Since it requires some memory do not enable it unless you have such a display!
+ *  */
+#define FEATURE_JSON 0
 
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so

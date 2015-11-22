@@ -1937,7 +1937,7 @@ class SdBaseFile {
   uint8_t lfn_checksum(const unsigned char *pFCBName);
   bool openParentReturnFile(SdBaseFile* dirFile, const char* path, uint8_t *dname, SdBaseFile *newParent, boolean bMakeDirs);
 
-  
+
   /** \return True if this is a directory else false. */
   bool isDir() const {return type_ >= FAT_FILE_TYPE_MIN_DIR;}
   /** \return True if this is a normal file else false. */
@@ -2057,7 +2057,7 @@ class SdBaseFile {
   dir_t* readDirCacheSpecial();
   dir_t *getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATNeeded, uint32_t *pwIndexPos);
   bool findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos);
-  uint8_t lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound);
+  uint8_t lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound, bool isJson);
 
   bool setDirSize();
 //------------------------------------------------------------------------------
@@ -2208,6 +2208,9 @@ class SdBaseFile {
   static bool remove(SdBaseFile& dirFile, const char* path)  // NOLINT
     __attribute__((error("use remove(&dirFile, path)")));
 #endif  // ALLOW_DEPRECATED_FUNCTIONS
+#if JSON_OUTPUT
+	void lsJSON();
+#endif
 };
 //------------------------------------------------------------------------------
 /**

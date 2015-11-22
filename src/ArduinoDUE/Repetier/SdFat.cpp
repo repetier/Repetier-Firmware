@@ -647,11 +647,12 @@ void SdBaseFile::ls(uint8_t flags) {
   ls(flags, 0);
 }
 
-uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound)
+uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound, bool isJson)
 {
     dir_t *p = NULL;
     //uint8_t cnt=0;
     //char *oldpathend = pathend;
+    bool firstFile = true;
 
     parent->rewind();
 
@@ -660,21 +661,29 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
         HAL::pingWatchdog();
         if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
         if (strcmp(tempLongFilename, "..") == 0) continue;
-        if( DIR_IS_SUBDIR(p))
-        {
-            if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
-            if(level<SD_MAX_FOLDER_DEPTH)
-            {
-                if (findFilename == NULL)
-                  {
-                   if(level)
-                    {
-                     Com::print(fullName);
-                     Com::printF(Com::tSlash);
-                    }
-                  Com::print(tempLongFilename);
-                  Com::printFLN(Com::tSlash); //End with / to mark it as directory entry, so we can see empty directories.
+        if (tempLongFilename[0] == '.') continue; // MAC CRAP
+        if (DIR_IS_SUBDIR(p)) {
+            if (level >= SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
+            if (level < SD_MAX_FOLDER_DEPTH && findFilename == NULL) {
+                if (level && !isJson) {
+                    Com::print(fullName);
+                    Com::printF(Com::tSlash);
+                 }
+#if JSON_OUTPUT
+                if (isJson) {
+                    if (!firstFile) Com::print(',');
+				    Com::print('"');
+                    SDCard::printEscapeChars(tempLongFilename);
+				    Com::print('"');
+                    firstFile = false;
+                } else {
+                    Com::print(tempLongFilename);
+                    Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
                 }
+#else
+                Com::print(tempLongFilename);
+                Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
+#endif
             }
             SdBaseFile next;
             char *tmp;
@@ -684,11 +693,11 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
             strcat(fullName, tempLongFilename);
             uint16_t index = (parent->curPosition()-31) >> 5;
 
-            if(next.open(parent, index, O_READ))
-              {
-              if (next.lsRecursive(&next,level+1, findFilename, pParentFound))
+            if(!isJson && next.open(parent, index, O_READ))
+            {
+              if (next.lsRecursive(&next,level+1, findFilename, pParentFound,false))
                   return true;
-              }
+            }
             parent->seekSet(32 * (index + 1));
             if ((tmp = strrchr(fullName, '/'))!= NULL)
                 *tmp = 0;
@@ -716,16 +725,27 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
             }
             else
             {
-                if(level)
+                if(level && !isJson)
                 {
                     Com::print(fullName);
                     Com::printF(Com::tSlash);
                 }
-                Com::print(tempLongFilename);
-#if SD_EXTENDED_DIR
-                Com::printF(Com::tSpace,(long)p->fileSize);
+#if JSON_OUTPUT
+                if (isJson) {
+                    if (!firstFile) Com::printF(Com::tComma);
+				    Com::print('"');
+                    SDCard::printEscapeChars(tempLongFilename);
+				    Com::print('"');
+                    firstFile = false;
+                } else
 #endif
-                Com::println();
+                {
+                    Com::print(tempLongFilename);
+#if SD_EXTENDED_DIR
+                    Com::printF(Com::tSpace, (long) p->fileSize);
+#endif
+                    Com::println();
+                }
             }
         }
     }
@@ -749,14 +769,24 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
  * list to indicate subdirectory level.
  */
 void SdBaseFile::ls(uint8_t flags, uint8_t indent) {
-  SdBaseFile parent;
-
-  rewind();
+    SdBaseFile parent;
+    rewind();
     *fullName = 0;
-   pathend = fullName;
-  parent = *this;
-  lsRecursive(&parent, 0, NULL, NULL);
+    pathend = fullName;
+    parent = *this;
+    lsRecursive(&parent, 0, NULL, NULL, false);
 }
+
+#if JSON_OUTPUT
+void SdBaseFile::lsJSON() {
+    SdBaseFile parent;
+    rewind();
+    *fullName = 0;
+    parent = *this;
+    lsRecursive(&parent, 0, NULL, NULL, true);
+}
+#endif
+
 //------------------------------------------------------------------------------
 // saves 32 bytes on stack for ls recursion
 // return 0 - EOF, 1 - normal file, or 2 - directory

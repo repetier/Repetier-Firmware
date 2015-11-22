@@ -128,9 +128,9 @@ public:
     void updateDerived();
     void reportStatus();
 private:
-    INLINE int matrixIndex(fast8_t x, fast8_t y) const;
-    INLINE int32_t getMatrix(int index) const;
-    INLINE void setMatrix(int32_t val, int index);
+    int matrixIndex(fast8_t x, fast8_t y) const;
+    int32_t getMatrix(int index) const;
+    void setMatrix(int32_t val, int index);
     bool isCorner(fast8_t i, fast8_t j) const;
     INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
@@ -1093,6 +1093,9 @@ public:
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
+#if JSON_OUTPUT
+    static void showJSONStatus(int type);
+#endif
 private:
     static void homeXAxis();
     static void homeYAxis();
