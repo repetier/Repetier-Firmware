@@ -780,6 +780,9 @@ ISR(TIMER1_COMPA_vect)
 /**
 This timer is called 3906 timer per second. It is used to update pwm values for heater and some other frequent jobs.
 */
+
+uint8_t temporary_stop_isr_for_extruder = 1;
+
 ISR(PWM_TIMER_VECTOR)
 {
     static uint8_t pwm_count_cooler = 0;
@@ -854,6 +857,7 @@ ISR(PWM_TIMER_VECTOR)
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT0_HEATER_PIN, pwm_pos[0], pwm_pos_set[0], HEATER_PINS_INVERTED);
 #else
+    if(temporary_stop_isr_for_extruder)  // Sig mod
     if(pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0] != HEATER_PWM_MASK) WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if EXT0_EXTRUDER_COOLER_PIN > -1

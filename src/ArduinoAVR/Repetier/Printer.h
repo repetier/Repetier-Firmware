@@ -1102,4 +1102,6 @@ private:
     static void homeZAxis();
 };
 
+extern volatile uint8_t temp_disable_lcd_refresh;
+
 #endif // PRINTER_H_INCLUDED
