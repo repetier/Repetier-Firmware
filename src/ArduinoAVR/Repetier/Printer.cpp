@@ -1827,6 +1827,7 @@ void Printer::waitForZProbeStart()
     if(Endstops::zProbe()) return;
 #if UI_DISPLAY_TYPE != NO_DISPLAY
     uid.setStatusP(Com::tHitZProbe);
+    if(!temp_disable_lcd_refresh)
     uid.refreshPage();
 #endif
 #ifdef DEBUG_PRINT
