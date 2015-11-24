@@ -631,7 +631,7 @@ STEPPER_CURRENT_CONTROL
 #define MOSI_PIN         51
 #define SDPOWER          -1
 #define SDSS             53
-#define SDCARDETECT	    38
+#define ORIG_SDCARDDETECT	    38
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
@@ -2193,11 +2193,13 @@ S3(ext)=9
 #define TEMP_0_PIN     0
 
 #define HEATER_1_PIN   3
+// This is T2 on the board!
 #define TEMP_1_PIN     2
 
 #define HEATER_2_PIN   7
+// This is T1 on the board!
 #define TEMP_2_PIN     1
-
+// T3 on board
 #define TEMP_3_PIN     7
 
 #define ORIG_E0_STEP_PIN    34

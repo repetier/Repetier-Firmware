@@ -2551,6 +2551,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
     } // Do even
     if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing)
     {
+		HAL::forbidInterrupts();
         Printer::zBabystep();
     }
     return interval;

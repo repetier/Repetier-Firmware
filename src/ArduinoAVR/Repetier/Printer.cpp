@@ -1613,7 +1613,6 @@ void Printer::zBabystep()
     bool dir = zBabystepsMissing > 0;
     if(dir) zBabystepsMissing--;
     else zBabystepsMissing++;
-    Com::printFLN(PSTR("bsdir:"),dir);
 #if DRIVE_SYSTEM == DELTA
     Printer::enableXStepper();
     Printer::enableYStepper();

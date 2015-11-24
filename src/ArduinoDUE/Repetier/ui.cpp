@@ -2523,7 +2523,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     float f = (float)(SPEED_MIN_MILLIS - dt) / (float)(SPEED_MIN_MILLIS - SPEED_MAX_MILLIS);
     lastNextAccumul = 1.0f + (float)SPEED_MAGNIFICATION * f * f;
 #if UI_DYNAMIC_ENCODER_SPEED
-    uint16_t dynSp = lastNextAccumul / 16;
+    int16_t dynSp = lastNextAccumul / 16;
     if(dynSp < 1)  dynSp = 1;
     if(dynSp > 30) dynSp = 30;
     next *= dynSp;
@@ -2605,7 +2605,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
 #endif
     if(mtype == UI_MENU_TYPE_MODIFICATION_MENU || mtype == UI_MENU_TYPE_WIZARD) action = pgm_read_word(&(men->id));
     else action = activeAction;
-    int8_t increment = next;
+    int16_t increment = next;
     EVENT_START_NEXTPREVIOUS(action,increment);
     switch(action)
     {
@@ -2708,6 +2708,7 @@ ZPOS2:
 #endif
         if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 20000)
         {
+			InterruptProtectedBlock noint;
             Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
             zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
         }
