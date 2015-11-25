@@ -3692,17 +3692,33 @@ break;
         case UI_ACTION_RESET:
             HAL::resetHardware();
             break;
-        case UI_ACTION_PAUSE:
-		if (Printer::isPaused) {
-			    Com::printFLN(PSTR("RequestResume:"));
-			    UI_STATUS_UPD_RAM("");
-			    Printer::resumePrinting();
-			    WRITE(HEATER_3_PIN, 1);
+		case UI_ACTION_PAUSE:
+		if(!allowMoves) {
+			ret = UI_ACTION_PAUSE;
+			break;
+			}
+			if (Printer::isPaused || Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_SD_PAUSED)) {
+				if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_SD_PAUSED)) {
+					digitalWrite(HEATER_3_PIN, 1);
+					sd.continuePrint(true);
+				}
+				else {
+					Com::printFLN(PSTR("RequestResume:"));
+					UI_STATUS_UPD("");
+					Printer::resumePrinting();
+					WRITE(HEATER_3_PIN, 1);
+				}
 			    } else {
-			    Printer::isPaused = true;
-			    Com::printFLN(PSTR("RequestPause:"));
-			    UI_STATUS_UPD_RAM("Pause requested");
-			    WRITE(HEATER_3_PIN, 0);
+					if(Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+						digitalWrite(HEATER_3_PIN, 0);
+						sd.pausePrint(true);
+					}
+					else {
+						Printer::isPaused = true;
+						Com::printFLN(PSTR("RequestPause:"));
+						UI_STATUS_UPD("Pause requested");
+						WRITE(HEATER_3_PIN, 0);
+					}
 		    }
 		    //just for the reference- this was used to pause RepetierHost
 		    //Com::printFLN(PSTR("RequestPause:"));            Com::printFLN(PSTR("RequestPause:"));
