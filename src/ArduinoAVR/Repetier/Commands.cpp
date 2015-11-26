@@ -1833,11 +1833,11 @@ void Commands::processMCode(GCode *com)
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
-        if(com->hasS()) Printer::debugLevel = com->S;
+        if(com->hasS()) Printer::setDebugLevel(static_cast<uint8_t>(com->S));
         if(com->hasP())
         {
-            if (com->P > 0) Printer::debugLevel |= com->P;
-            else Printer::debugLevel &= ~(-com->P);
+            if (com->P > 0) Printer::debugSet(static_cast<uint8_t>(com->P));
+            else Printer::debugReset(static_cast<uint8_t>(-com->P));
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
@@ -2459,7 +2459,7 @@ void Commands::executeGCode(GCode *com)
     if(Printer::debugDryrun()) {
         Com::printFLN("Dryrun was enabled");
         com->printCommand();
-        Printer::debugLevel &= ~8;
+        Printer::debugReset(8);
     }
 #endif
 

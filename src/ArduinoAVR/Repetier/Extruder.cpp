@@ -105,7 +105,7 @@ void Extruder::manageTemperatures()
         if(controller == autotuneIndex) continue;
 #if MIXING_EXTRUDER
         if(controller > 0 && controller < NUM_EXTRUDER) continue; // Mixing extruder only test for ext 0
-#endif
+#endif // MIXING_EXTRUDER
 
         // Get Temperature
         act->updateCurrentTemperature();
@@ -131,7 +131,7 @@ void Extruder::manageTemperatures()
 #ifdef RED_BLUE_STATUS_LEDS
         if(act->currentTemperatureC > 50)
             hot = true;
-#endif
+#endif // RED_BLUE_STATUS_LEDS
         if(Printer::isAnyTempsensorDefect()) continue;
         uint8_t on = act->currentTemperatureC >= act->targetTemperatureC ? LOW : HIGH;
         // Make a sound if alarm was set on reaching target temperature
@@ -223,7 +223,7 @@ void Extruder::manageTemperatures()
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX == 1
                 pidTerm = (pidTerm * act->pidMax) * 0.0039215;
-#endif
+#endif // SCALE_PID_TO_MAX
                 output = constrain((int)pidTerm, 0, act->pidMax);
             }
             else if(act->heatManager == HTR_DEADTIME)     // dead-time control
@@ -234,7 +234,7 @@ void Extruder::manageTemperatures()
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             else // bang bang and slow bang bang
-#endif
+#endif // TEMP_PID
                 if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relais life
                 {
                     if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
@@ -256,12 +256,12 @@ void Extruder::manageTemperatures()
 #ifdef MAXTEMP
         if(act->currentTemperatureC > MAXTEMP) // Force heater off if MAXTEMP is exceeded
             output = 0;
-#endif
+#endif // MAXTEMP
         pwm_pos[act->pwmIndex] = output; // set pwm signal
 #if LED_PIN > -1
         if(act == &Extruder::current->tempControl)
             WRITE(LED_PIN,on);
-#endif
+#endif // LED_PIN
     } // for controller
 
 #ifdef RED_BLUE_STATUS_LEDS
@@ -282,9 +282,10 @@ void Extruder::manageTemperatures()
     if(Printer::isAnyTempsensorDefect()
 #if HAVE_HEATED_BED
             || Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5
-#endif
+#endif // HAVE_HEATED_BED
       )
     {
+		Com::printFLN(PSTR("Disabling all heaters due to detected sensor defect."));
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
         {
             pwm_pos[tempController[i]->pwmIndex] = 0;
@@ -294,13 +295,13 @@ void Extruder::manageTemperatures()
         {
 #if SDSUPPORT
             sd.stopPrint();
-#endif
+#endif // SDSUPPORT
             Printer::kill(0);
         }
-#endif
-        Printer::debugLevel |= 8; // Go into dry mode
+#endif // KILL_IF_SENSOR_DEFECT
+        Printer::debugSet(8); // Go into dry mode
     } // any sensor defect
-    #endif
+#endif // NUM_TEMPERATURE_LOOPS
 
 }
 

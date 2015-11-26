@@ -3056,16 +3056,16 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::setOrigin(0, 0, 0);
             break;
         case UI_ACTION_DEBUG_ECHO:
-            Printer::debugLevel ^= 1;
+            Printer::toggleEcho();
             break;
         case UI_ACTION_DEBUG_INFO:
-            Printer::debugLevel ^= 2;
+            Printer::toggleInfo();
             break;
         case UI_ACTION_DEBUG_ERROR:
-            Printer::debugLevel ^= 4;
+            Printer::toggleErrors();
             break;
         case UI_ACTION_DEBUG_DRYRUN:
-            Printer::debugLevel ^= 8;
+            Printer::toggleDryRun();
             if(Printer::debugDryrun())   // simulate movements without printing
             {
                 for(int i = 0;i < NUM_EXTRUDER; i++)

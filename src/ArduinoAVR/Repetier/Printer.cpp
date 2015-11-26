@@ -300,7 +300,29 @@ void Printer::constrainDestinationCoords()
 #endif
 }
 #endif
-
+void Printer::setDebugLevel(uint8_t newLevel) {
+	debugLevel = newLevel;
+	Com::printFLN(PSTR("DebugLevel:"),(int)newLevel);
+}
+void Printer::toggleEcho() {
+	setDebugLevel(debugLevel ^ 32);
+}
+void Printer::toggleInfo() {
+	setDebugLevel(debugLevel ^ 2);
+}	
+void Printer::toggleErrors() {
+	setDebugLevel(debugLevel ^ 4);
+}
+void Printer::toggleDryRun() {
+	setDebugLevel(debugLevel ^ 8);
+}
+void Printer::toggleCommunication() {
+	setDebugLevel(debugLevel ^ 16);	
+}
+void Printer::toggleNoMoves() {
+	setDebugLevel(debugLevel ^ 32);
+}
+	
 bool Printer::isPositionAllowed(float x,float y,float z)
 {
     if(isNoDestinationCheck())  return true;
