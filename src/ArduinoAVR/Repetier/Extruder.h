@@ -161,11 +161,13 @@ extern Extruder extruder[];
 #elif JAM_METHOD == 2
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = READ(pin);\
-          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
 #elif JAM_METHOD == 3
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = !READ(pin);\
-          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
 #else
 #error Unknown value for JAM_METHOD
 #endif

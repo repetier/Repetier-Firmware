@@ -1952,7 +1952,9 @@ void Printer::handleInterruptEvent() {
         UI_ERROR_P(Com::translatedF(UI_TEXT_EXTRUDER_JAM_ID));
 #if JAM_ACTION == 1 // start dialog
         Printer::setUIErrorMessage(false);
+#if UI_DISPLAY_TYPE != NO_DISPLAY
         uid.executeAction(UI_ACTION_WIZARD_JAM_EOF, true);
+#endif
 #elif JAM_ACTION == 2 // pause host/print
 #if SDSUPPORT
         if(sd.sdmode == 2) {
