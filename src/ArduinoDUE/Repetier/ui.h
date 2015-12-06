@@ -909,17 +909,27 @@ void uiCheckSlowKeys(uint16_t &action) {
 #define UI_DISPLAY_CHARSET 2
 #define UI_COLS 20
 #define UI_ROWS 4
-#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+// PINK.1, 88, D_RS
+#define UI_DISPLAY_RS_PIN		63		
 #define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+// PINK.3, 86, D_E
+#define UI_DISPLAY_ENABLE_PIN	        65		
+// PINF.5, 92, D_D4
+#define UI_DISPLAY_D0_PIN		59		
+// PINK.2, 87, D_D5
+#define UI_DISPLAY_D1_PIN		64		
+// PINL.5, 40, D_D6
+#define UI_DISPLAY_D2_PIN		44		
+// PINK.4, 85, D_D7
+#define UI_DISPLAY_D3_PIN		66		
+// PINF.5, 92, D_D4
+#define UI_DISPLAY_D4_PIN		59		
+// PINK.2, 87, D_D5
+#define UI_DISPLAY_D5_PIN		64		
+// PINL.5, 40, D_D6
+#define UI_DISPLAY_D6_PIN		44		
+// PINK.4, 85, D_D7
+#define UI_DISPLAY_D7_PIN		66		
 #define UI_DELAYPERCHAR		   50
 #define UI_INVERT_MENU_DIRECTION 0
 #ifdef UI_MAIN
@@ -947,11 +957,12 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 // You need to change these 3 button according to the positions
 // where you put them into your board!
-#define UI_ENCODER_A      7 // pins the click encoder are connected to
+#define UI_ENCODER_A      7 
 #define UI_ENCODER_B      22
-#define UI_RESET_PIN      32 // single button for reset
-#define SDCARDDETECT      49 // Set to -1 if you have not connected that pin
-#define SDSS              53 // Chip select pin
+#define UI_RESET_PIN      32 
+// Set to -1 if you have not connected that pin
+#define SDCARDDETECT      49 
+#define SDSS              53 
 
 #define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
@@ -1250,15 +1261,18 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #define UI_ENCODER_A           37
 #define UI_ENCODER_B           36
-#define UI_ENCODER_CLICK       69   ////***Vick BTN
-#define UI_RESET_PIN           -1   ////**** if you want, you can get the CNC Pin used 11
+// Vick BTN
+#define UI_ENCODER_CLICK       69   
+// if you want, you can get the CNC Pin used 11
+#define UI_RESET_PIN           -1   
 
 #define UI_DELAYPERCHAR        320
 #define UI_BUTTON_OK           47
 #define UI_BUTTON_NEXT         46
 #define UI_BUTTON_PREVIOUS     45
 #define UI_BUTTON_BACK         44
-#define UI_BUTTON_SD_PRINT     70   ////**** if you want, you can get the CNC Pin used 10
+// if you want, you can get the CNC Pin used 10
+#define UI_BUTTON_SD_PRINT     70   
 #endif
 
 #ifdef UI_MAIN
@@ -1630,23 +1644,28 @@ void uiCheckSlowKeys(uint16_t &action) {}
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
-#define UI_DISPLAY_RS_PIN		25		// PINK.1, 88, D_RS
+// PINK.1, 88, D_RS
+#define UI_DISPLAY_RS_PIN		25		
 #define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	        27		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		-1		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		-1		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		-1		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		-1		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		29		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		-1		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		-1		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		-1		// PINK.4, 85, D_D7
+// PINK.3, 86, D_E
+#define UI_DISPLAY_ENABLE_PIN	        27		
+// PINF.5, 92, D_D4
+#define UI_DISPLAY_D0_PIN		-1		
+// PINK.2, 87, D_D5
+#define UI_DISPLAY_D1_PIN		-1		
+#define UI_DISPLAY_D2_PIN		-1	
+#define UI_DISPLAY_D3_PIN		-1	
+	// PINF.5, 92, D_D4
+#define UI_DISPLAY_D4_PIN		29	
+#define UI_DISPLAY_D5_PIN		-1
+#define UI_DISPLAY_D6_PIN		-1
+#define UI_DISPLAY_D7_PIN		-1
 #define UI_DELAYPERCHAR		   50
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_ENCODER 0
-#define UI_ENCODER_SPEED 1
+#define UI_ENCODER_SPEED 2
 #define UI_ENCODER_A 35
 #define UI_ENCODER_B 33
 #define UI_ENCODER_CLICK 37
@@ -1707,8 +1726,10 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define SDCARDDETECT 49 // sd card detect as shown on drawing
 #undef BEEPER_PIN
 #define BEEPER_PIN    33
-#define UI_DISPLAY_D5_PIN 31   // Display A0
-#define UI_DISPLAY_RS_PIN 32    // Display CS
+// Display A0
+#define UI_DISPLAY_D5_PIN 31   
+// Display CS
+#define UI_DISPLAY_RS_PIN 32    
 #define UI_ENCODER_A 22
 #define UI_ENCODER_B 7
 #define UI_ENCODER_CLICK 12
@@ -1720,11 +1741,15 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #elif MOTHERBOARD == 35 // Azteeg X3 Pro
 
 #undef SDCARDDETECT
-#define SDCARDDETECT      49 // sd card detect as shown on drawing
+// sd card detect as shown on drawing
+#define SDCARDDETECT      49 
 #undef BEEPER_PIN
-#define BEEPER_PIN        47 // 33 is the on board beeper
-#define UI_DISPLAY_D5_PIN 44 // Display A0
-#define UI_DISPLAY_RS_PIN 45 // Display CS
+// 33 is the on board beeper
+#define BEEPER_PIN        47 
+// Display A0
+#define UI_DISPLAY_D5_PIN 44 
+// Display CS
+#define UI_DISPLAY_RS_PIN 45 
 #define UI_ENCODER_A      22
 #define UI_ENCODER_B       7
 #define UI_ENCODER_CLICK  39
@@ -1738,8 +1763,10 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define SDCARDDETECT 72 // sd card detect as shown on drawing
 #undef BEEPER_PIN
 #define BEEPER_PIN         33
-#define UI_DISPLAY_D5_PIN 70   // Display A0
-#define UI_DISPLAY_RS_PIN 71    // Display CS
+// Display A0
+#define UI_DISPLAY_D5_PIN 70   
+// Display CS
+#define UI_DISPLAY_RS_PIN 71    
 #define UI_ENCODER_A 85
 #define UI_ENCODER_B 84
 #define UI_ENCODER_CLICK 83
@@ -1749,13 +1776,15 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define BLUE_STATUS_LED 32
 
 #elif MOTHERBOARD == 9 || MOTHERBOARD == 92 // Printboard
-
-#define SDCARDDETECT 72 // sd card detect as shown on drawing
+// sd card detect as shown on drawing
+#define SDCARDDETECT 72 
 #define SDSS          45
 #undef BEEPER_PIN
 #define BEEPER_PIN         32
-#define UI_DISPLAY_D5_PIN 42   // Display A0
-#define UI_DISPLAY_RS_PIN 43    // Display CS
+// Display A0
+#define UI_DISPLAY_D5_PIN 42   
+// Display CS
+#define UI_DISPLAY_RS_PIN 43    
 #define UI_ENCODER_A 26
 #define UI_ENCODER_B 27
 #define UI_ENCODER_CLICK 47
@@ -1768,29 +1797,34 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #undef SDCARDDETECT
 #define SDCARDDETECT 14 // sd card detect as shown on drawing
-#undef SDSS
+//#undef SDSS
 //#define SDSS          4
 //#define SPI_PIN         87
 //#define SPI_CHAN        1
-#define SDSS            10
+/*#define SDSS            10
 #undef SPI_PIN
 #define SPI_PIN         77
 #undef SPI_CHAN
 #define SPI_CHAN        0
+
 #undef SDSUPPORT
 #define SDSUPPORT  0 // sd card does not work reliable due to spi charing
+*/
 
 #undef BEEPER_PIN
 #define BEEPER_PIN         41
 // Hardware SPI creates artifacts on display, so we use software SPI
 #undef U8GLIB_ST7565_NHD_C2832_HW_SPI
 #define U8GLIB_ST7565_NHD_C2832_SW_SPI
-#define UI_DISPLAY_ENABLE_PIN 75 // MOSI
-#define UI_DISPLAY_D4_PIN 76 // SCK pin
+// MOSI 43
+#define UI_DISPLAY_ENABLE_PIN 31
+//#define UI_DISPLAY_ENABLE_PIN 75 
+//76 // SCK pin
+#define UI_DISPLAY_D4_PIN  33 //44
 // Display A0 => LCD RS
 #define UI_DISPLAY_D5_PIN 42   
-// Display CS => CS0
-#define UI_DISPLAY_RS_PIN 4 //10    
+// Display CS => CS0 //4 //10    
+#define UI_DISPLAY_RS_PIN 35 //10
 #define UI_ENCODER_A 50
 #define UI_ENCODER_B 52
 #define UI_ENCODER_CLICK 48

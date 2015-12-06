@@ -65,7 +65,7 @@ HAL::~HAL()
 
 
 // Set up all timer interrupts
-void HAL::setupTimer() {
+void HAL::setupTimer() {  SET_OUTPUT(37);
   uint32_t     tc_count, tc_clock;
 
   pmc_set_writeprotect(false);
@@ -820,12 +820,15 @@ void SERVO_COMPA_VECTOR ()
 #endif
 
 TcChannel *stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
+#ifndef STEPPERTIMER_EXIT_TICKS
 #define STEPPERTIMER_EXIT_TICKS 105 // at least 2,5us pause between stepper calls
+#endif
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void TIMER1_COMPA_VECTOR ()
 {
+WRITE(37,1);
   // apparently have to read status register
   stepperChannel->TC_SR;
   stepperChannel->TC_RC = 1000000;
@@ -837,8 +840,7 @@ void TIMER1_COMPA_VECTOR ()
   else if (Printer::zBabystepsMissing != 0) {
     Printer::zBabystep();
     delay = Printer::interval;
-  } else
-  {
+  } else {
     if (waitRelax == 0)
     {
 #if USE_ADVANCE
@@ -862,8 +864,8 @@ void TIMER1_COMPA_VECTOR ()
   }
     // convert old AVR timer delay value for SAM timers
   uint32_t timer_count = (delay * TIMER1_PRESCALE);
-  if (timer_count < 210) // max. 200 khz timer frequency
-    timer_count = 210;
+  //if (timer_count < 210) // max. 200 khz timer frequency
+  //  timer_count = 210;
   InterruptProtectedBlock noInt; // prevent interruption or we might get 102s delay
   if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
      stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
@@ -871,6 +873,7 @@ void TIMER1_COMPA_VECTOR ()
   } else {
      stepperChannel->TC_RC = timer_count;
   }
+  WRITE(37,0);
 }
 
 #if !defined(HEATER_PWM_SPEED)

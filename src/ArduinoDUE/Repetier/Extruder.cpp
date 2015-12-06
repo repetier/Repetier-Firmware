@@ -93,14 +93,14 @@ void Extruder::manageTemperatures()
                 if(pwm_pos[NUM_EXTRUDER + 1]) enable = true;
 #endif
                 extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
-            }
+            } // controller == 0
 #else
             if(act->currentTemperatureC < EXTRUDER_FAN_COOL_TEMP && act->targetTemperatureC < EXTRUDER_FAN_COOL_TEMP)
                 extruder[controller].coolerPWM = 0;
             else
                 extruder[controller].coolerPWM = extruder[controller].coolerSpeed;
 #endif // NUM_EXTRUDER
-        }
+        } // extruder controller
         // do skip temperature control while auto tuning is in progress
         if(controller == autotuneIndex) continue;
 #if MIXING_EXTRUDER
@@ -128,6 +128,24 @@ void Extruder::manageTemperatures()
                 EVENT_HEATER_DEFECT(controller);
             }
         }
+#if HAVE_HEATED_BED
+		else if(controller == NUM_EXTRUDER && Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5) {
+            errorDetected = 1;
+            if(extruderTempErrors < 10)    // Ignore short temporary failures
+            extruderTempErrors++;
+            else
+            {
+	            act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
+				Com::printErrorFLN(PSTR("Heated bed exceeded max temperature!"));
+	            if(!Printer::isAnyTempsensorDefect())
+	            {
+		            Printer::setAnyTempsensorDefect();
+		            reportTempsensorError();
+	            }
+	            EVENT_HEATER_DEFECT(controller);
+            }			
+		}
+#endif // HAVE_HEATED_BED
 #ifdef RED_BLUE_STATUS_LEDS
         if(act->currentTemperatureC > 50)
             hot = true;
@@ -279,11 +297,7 @@ void Extruder::manageTemperatures()
 
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;
-    if(Printer::isAnyTempsensorDefect()
-#if HAVE_HEATED_BED
-            || Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5
-#endif // HAVE_HEATED_BED
-      )
+    if(Printer::isAnyTempsensorDefect())
     {
 		Com::printFLN(PSTR("Disabling all heaters due to detected sensor defect."));
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)

@@ -293,7 +293,7 @@ public:
     static float zBedOffset;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2;
-    static uint8_t stepsPerTimerCall;
+    static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;         ///< Step number in current move.

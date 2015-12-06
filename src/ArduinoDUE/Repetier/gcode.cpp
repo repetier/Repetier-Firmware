@@ -965,46 +965,47 @@ void GCode::printCommand()
 // --------------------------------------------------------------- //
 
 void GCodeFileInfo::init(SdBaseFile &file) {
-    this->fileSize = file.fileSize();
-    this->filamentNeeded = 0.0;
-    this->objectHeight = 0.0;
-    this->layerHeight = 0.0;
-    if (!file.isOpen()) return;
-    bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
-#if CPU_ARCH==ARCH_AVR
-#define GCI_BUF_SIZE 100
-#else
-#define GCI_BUF_SIZE 1024
-#endif
-    // READ 4KB FROM THE BEGINNING
-    char buf[GCI_BUF_SIZE];
-    for (int i = 0; i < 4; i++) {
-        //file.read(buf, 1024); // could skip words
-        file.fgets(buf, GCI_BUF_SIZE, NULL);
-        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
-        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
-        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
-    }
+	this->fileSize = file.fileSize();
+	this->filamentNeeded = 0.0;
+	this->objectHeight = 0.0;
+	this->layerHeight = 0.0;
+	if (!file.isOpen()) return;
+	bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
+	#if CPU_ARCH==ARCH_AVR
+	#define GCI_BUF_SIZE 120
+	#else
+	#define GCI_BUF_SIZE 1024
+	#endif
+	// READ 4KB FROM THE BEGINNING
+	char buf[GCI_BUF_SIZE];
+	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+		if(!file.seekSet(i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+	}
 
-    // READ 4KB FROM END
-    file.seekEnd(-4096);
-    for (int i = 0; i < 4; i++) {
-        //file.read(buf, 1024);
-        file.fgets(buf, GCI_BUF_SIZE, NULL);
-        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
-        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
-        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
-    }
-
-    // MOVE FROM END UP IN 1KB BLOCKS UP TO 24KB
-    for (int i = 0; i < 24; i++) {
-        file.seekEnd(-1024*i);
-        file.read(buf, 1024);
-        //file.fgets(buf, 1024, NULL);
-        if (findTotalHeight(buf, this->objectHeight)) break;
-    }
+	// READ 4KB FROM END
+	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+		if(!file.seekEnd(-4096 + i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+	}
+	
+	get_objectHeight:
+	// MOVE FROM END UP IN 1KB BLOCKS UP TO 30KB
+	for (int i = GCI_BUF_SIZE; i < 30000; i += GCI_BUF_SIZE-50) {
+		if(!file.seekEnd(-i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (findTotalHeight(buf, this->objectHeight)) break;
+	}
+	file.seekSet(0);
 }
-
 
 bool GCodeFileInfo::findGeneratedBy(char *buf, char *genBy) {
     // Slic3r & S3D

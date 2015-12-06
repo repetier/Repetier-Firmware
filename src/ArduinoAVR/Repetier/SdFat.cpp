@@ -672,7 +672,7 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
 #if JSON_OUTPUT
                 if (isJson) {
                     if (!firstFile) Com::print(',');
-				    Com::print('"');
+				    Com::print('"');Com::print('*');
                     SDCard::printEscapeChars(tempLongFilename);
 				    Com::print('"');
                     firstFile = false;

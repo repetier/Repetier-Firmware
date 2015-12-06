@@ -55,7 +55,7 @@ uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
 uint8_t Printer::flag2 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
-uint8_t Printer::stepsPerTimerCall = 1;
+fast8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
 uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 uint8_t Printer::fanSpeed = 0; // Last fan speed set with M106/M107
@@ -70,7 +70,7 @@ float Printer::zBedOffset = Z_PROBE_Z_OFFSET;
 #if FEATURE_AUTOLEVEL
 float Printer::autolevelTransformation[9]; ///< Transformation matrix
 #endif
-uint32_t Printer::interval;           ///< Last step duration in ticks.
+uint32_t Printer::interval = 30000;           ///< Last step duration in ticks.
 uint32_t Printer::timer;              ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;         ///< Step number in current move.
 #if USE_ADVANCE
@@ -171,6 +171,7 @@ flag8_t Endstops::lastState2 = 0;
 flag8_t Endstops::lastRead2 = 0;
 flag8_t Endstops::accumulator2 = 0;
 #endif
+
 void Endstops::update() {
     flag8_t newRead = 0;
 #ifdef EXTENDED_ENDSTOPS
@@ -1189,7 +1190,7 @@ void Printer::MemoryPosition()
 
 void Printer::GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed)
 {
-    if(memoryF < 0) return; // Not stored before call, so we ignor eit
+    if(memoryF < 0) return; // Not stored before call, so we ignore it
     bool all = !(x || y || z);
     moveToReal((all || x ? (lastCmdPos[X_AXIS] = memoryX) : IGNORE_COORDINATE)
                ,(all || y ?(lastCmdPos[Y_AXIS] = memoryY) : IGNORE_COORDINATE)

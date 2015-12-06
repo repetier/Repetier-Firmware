@@ -277,7 +277,7 @@ void PrintLine::calculateMove(float axis_diff[], uint8_t pathOptimize)
     }
     timeInTicks = timeForMove;
     UI_MEDIUM; // do check encoder
-    // Compute the solwest allowed interval (ticks/step), so maximum feedrate is not violated
+    // Compute the slowest allowed interval (ticks/step), so maximum feedrate is not violated
     long limitInterval = timeForMove / stepsRemaining; // until not violated by other constraints it is your target speed
     if(isXMove())
     {
@@ -1251,6 +1251,7 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
 {
     if(Printer::isZProbingActive())
     {
+		Endstops::update();
 #if FEATURE_Z_PROBE
         if(isZNegativeMove() && Endstops::zProbe())
         {
@@ -1279,6 +1280,8 @@ void DeltaSegment::checkEndstops(PrintLine *cur,bool checkall)
     }
     if(checkall)
     {
+		if(!Printer::isZProbingActive())
+			Endstops::update(); // do not test twice
         if(isXPositiveMove() && Endstops::xMax())
         {
 #if DRIVE_SYSTEM == DELTA
@@ -1508,7 +1511,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff,uint8_t check_endstops,uin
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
     else p->flags = 0;
 #if MIXING_EXTRUDER
-    if(Printer::isAllEMotors(true)) {
+    if(Printer::isAllEMotors()) {
         p->flags |= FLAG_ALL_E_MOTORS;
     }
 #endif
@@ -1695,7 +1698,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
 
         p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
 #if MIXING_EXTRUDER
-        if(Printer::isAllEMotors(true)) {
+        if(Printer::isAllEMotors()) {
             p->flags |= FLAG_ALL_E_MOTORS;
         }
 #endif
@@ -1776,7 +1779,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
     */
     // CCW angle between position and target from circle center. Only one atan2() trig computation required.
     float angular_travel = atan2(r_axis0 * rt_axis1 - r_axis1 * rt_axis0, r_axis0 * rt_axis0 + r_axis1 * rt_axis1);
-    if (angular_travel < 0)
+    if ((!isclockwise && angular_travel <= 0.00001) || (isclockwise && angular_travel < -0.000001))
     {
         angular_travel += 2.0f * M_PI;
     }
@@ -2034,7 +2037,6 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 
     if(curd != NULL)
     {
-        Endstops::update();
         curd->checkEndstops(cur,(cur->isCheckEndstops()));
     }
     int maxLoops = (Printer::stepsPerTimerCall <= cur->stepsRemaining ? Printer::stepsPerTimerCall : cur->stepsRemaining);
@@ -2401,13 +2403,14 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
-    Endstops::update();
     cur->checkEndstops();
-    fast8_t max_loops = RMath::min((int32_t)Printer::stepsPerTimerCall,cur->stepsRemaining);
+	fast8_t max_loops = Printer::stepsPerTimerCall;
+	if(cur->stepsRemaining < max_loops)
+		max_loops = cur->stepsRemaining;
     for(fast8_t loop = 0; loop < max_loops; loop++)
     {
 #if STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY > 0
-        if(loop > 0)
+        if(loop)
             HAL::delayMicroseconds(STEPPER_HIGH_DELAY + DOUBLE_STEP_DELAY);
 #endif
         if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0)
@@ -2425,19 +2428,25 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
                 Extruder::step();
             cur->error[E_AXIS] += cur_errupd;
         }
+#if CPU_ARCH == ARCH_AVR		
         if(cur->isXMove())
+#endif
             if((cur->error[X_AXIS] -= cur->delta[X_AXIS]) < 0)
             {
                 cur->startXStep();
                 cur->error[X_AXIS] += cur_errupd;
             }
+#if CPU_ARCH == ARCH_AVR
         if(cur->isYMove())
+#endif
             if((cur->error[Y_AXIS] -= cur->delta[Y_AXIS]) < 0)
             {
                 cur->startYStep();
                 cur->error[Y_AXIS] += cur_errupd;
             }
+#if CPU_ARCH == ARCH_AVR
         if(cur->isZMove())
+#endif
             if((cur->error[Z_AXIS] -= cur->delta[Z_AXIS]) < 0)
             {
                 cur->startZStep();
@@ -2457,7 +2466,8 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
-            Extruder::unstep();
+		cur->stepsRemaining--;
+        Extruder::unstep();
         Printer::endXYZSteps();
     } // for loop
     HAL::allowInterrupts(); // Allow interrupts for other types, timer1 is still disabled
@@ -2519,8 +2529,7 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #else
     Printer::stepsPerTimerCall = 1;
     Printer::interval = cur->fullInterval; // without RAMPS always use full speed
-#endif // RAMP_ACCELERATION
-    cur->stepsRemaining -= max_loops;
+#endif // RAMP_ACCELERATION    
     long interval = Printer::interval;
     if(cur->stepsRemaining <= 0 || cur->isNoMove())   // line finished
     {

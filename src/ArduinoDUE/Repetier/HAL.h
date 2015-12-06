@@ -251,7 +251,7 @@ extern int spiDueDividors[];
 
 static uint32_t    tone_pin;
 
-/** Set max. frequency to 150000Hz */
+/** Set max. frequency to 500000 Hz */
 #define LIMIT_INTERVAL (F_CPU/500000)
 
 

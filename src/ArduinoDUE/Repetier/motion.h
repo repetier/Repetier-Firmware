@@ -302,6 +302,7 @@ public:
     {
         if(isCheckEndstops())
         {
+			Endstops::update();
             if(isXNegativeMove() && Endstops::xMin())
                 setXMoveFinished();
             else if(isXPositiveMove() && Endstops::xMax())
@@ -331,10 +332,13 @@ public:
                 }
         }
 #if FEATURE_Z_PROBE
-        else if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
-        {
-            setZMoveFinished();
-            Printer::stepsRemainingAtZHit = stepsRemaining;
+        else if(Printer::isZProbingActive() && isZNegativeMove()) {
+			Endstops::update();
+			if(Endstops::zProbe())
+			{
+				setZMoveFinished();
+				Printer::stepsRemainingAtZHit = stepsRemaining;
+			}
         }
 #endif
     }
