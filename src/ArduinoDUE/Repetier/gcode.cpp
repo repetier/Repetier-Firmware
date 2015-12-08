@@ -428,7 +428,7 @@ void GCode::readFromSerial()
         }
     }
 #if SDSUPPORT
-    if(sd.sdmode == 0 || commandsReceivingWritePosition != 0)   // not reading or incoming serial command
+    if(sd.sdmode == 0 || sd.sdmode >= 100 || commandsReceivingWritePosition != 0)   // not reading or incoming serial command
         return;
     while( sd.filesize > sd.sdpos && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {

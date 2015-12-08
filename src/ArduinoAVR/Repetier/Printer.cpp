@@ -868,7 +868,7 @@ void Printer::setup()
 #endif
 #endif
 
-    //endstop pullups
+    //end stop pull ups
 #if MIN_HARDWARE_ENDSTOP_X
 #if X_MIN_PIN > -1
     SET_INPUT(X_MIN_PIN);
@@ -991,7 +991,7 @@ void Printer::setup()
     SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
     WRITE(EXT5_EXTRUDER_COOLER_PIN, LOW);
 #endif
-// Initalize jam sensors
+// Initialize jam sensors
 #if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
     SET_INPUT(EXT0_JAM_PIN);
     PULLUP(EXT0_JAM_PIN, EXT0_JAM_PULLUP);
@@ -1095,7 +1095,7 @@ void Printer::setup()
     Com::printFLN(Com::tStart);
     HAL::showStartReason();
     Extruder::initExtruder();
-    // sets autoleveling in eeprom init
+    // sets auto leveling in eeprom init
     EEPROM::init(); // Read settings from eeprom if wanted
     UI_INITIALIZE;
     for(uint8_t i = 0; i < E_AXIS_ARRAY; i++)
@@ -1128,7 +1128,7 @@ void Printer::setup()
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
 #if SDSUPPORT
-    sd.initsd();
+    sd.mount();
 #endif
 #if FEATURE_SERVO                   // set servos to neutral positions at power_up
   #if defined(SERVO0_NEUTRAL_POS) && SERVO0_NEUTRAL_POS >= 500
@@ -1145,15 +1145,15 @@ void Printer::setup()
   #endif
 #endif
     EVENT_INITIALIZE;
+#ifdef STARTUP_GCODE
+GCode::executeFString(Com::tStartupGCode);
+#endif
 #if EEPROM_MODE != 0 && UI_DISPLAY_TYPE != NO_DISPLAY
     if(EEPROM::getStoredLanguage() == 254) {
             Com::printFLN(PSTR("Needs language selection"));
         uid.showLanguageSelectionWizard();
     }
 #endif // EEPROM_MODE
-#ifdef STARTUP_GCODE
-	GCode::executeFString(Com::tStartupGCode);
-#endif
 }
 
 void Printer::defaultLoopActions()
@@ -1173,7 +1173,7 @@ void Printer::defaultLoopActions()
         if(stepperInactiveTime != 0 && curtime >  stepperInactiveTime )
             Printer::kill(true);
     }
-#if SDCARDDETECT>-1 && SDSUPPORT
+#if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();
 #endif
     DEBUG_MEMORY;

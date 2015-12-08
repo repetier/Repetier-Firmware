@@ -69,6 +69,7 @@ void Extruder::manageTemperatures()
 #ifdef RED_BLUE_STATUS_LEDS
     bool hot = false;
 #endif
+	bool newDefectFound = false;
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
 #if NUM_TEMPERATURE_LOOPS > 0
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
@@ -122,6 +123,7 @@ void Extruder::manageTemperatures()
                 act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
                 if(!Printer::isAnyTempsensorDefect())
                 {
+					newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
                 }
@@ -139,6 +141,7 @@ void Extruder::manageTemperatures()
 				Com::printErrorFLN(PSTR("Heated bed exceeded max temperature!"));
 	            if(!Printer::isAnyTempsensorDefect())
 	            {
+					newDefectFound = true;
 		            Printer::setAnyTempsensorDefect();
 		            reportTempsensorError();
 	            }
@@ -172,7 +175,12 @@ void Extruder::manageTemperatures()
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
                         act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
-                        Printer::setAnyTempsensorDefect();
+						
+						if(!Printer::isAnyTempsensorDefect())
+						{
+							Printer::setAnyTempsensorDefect();
+							newDefectFound = true;
+						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
                         Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
@@ -196,7 +204,11 @@ void Extruder::manageTemperatures()
                     if(extruderTempErrors > 10)   // Ignore short temporary failures
                     {
                         act->flags |= TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
-                        Printer::setAnyTempsensorDefect();
+						if(!Printer::isAnyTempsensorDefect())
+						{
+							Printer::setAnyTempsensorDefect();
+							newDefectFound = true;
+						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
                         Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
@@ -297,11 +309,12 @@ void Extruder::manageTemperatures()
 
     if(errorDetected == 0 && extruderTempErrors > 0)
         extruderTempErrors--;
-    if(Printer::isAnyTempsensorDefect())
+    if(newDefectFound)
     {
 		Com::printFLN(PSTR("Disabling all heaters due to detected sensor defect."));
         for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
         {
+			tempController[i]->targetTemperatureC = 0;
             pwm_pos[tempController[i]->pwmIndex] = 0;
         }
 #if defined(KILL_IF_SENSOR_DEFECT) && KILL_IF_SENSOR_DEFECT > 0
@@ -533,7 +546,7 @@ void TemperatureController::updateTempControlVars()
 
 /** \brief Select extruder ext_num.
 
-This function changes and initalizes a new extruder. This is also called, after the eeprom values are changed.
+This function changes and initializes a new extruder. This is also called, after the eeprom values are changed.
 */
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
@@ -560,7 +573,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Extruder::current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
     Extruder::current = &extruder[extruderId];
 #ifdef SEPERATE_EXTRUDER_POSITIONS
-    // Use seperate extruder positions only if beeing told. Slic3r e.g. creates a continuous extruder position increment
+    // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
 #endif
     Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
@@ -1953,7 +1966,7 @@ void writeMonitor()
 
 bool reportTempsensorError()
 {
-#if NUM_TEMPERATURE_LOOPS > 9
+#if NUM_TEMPERATURE_LOOPS > 0
     if(!Printer::isAnyTempsensorDefect()) return false;
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {

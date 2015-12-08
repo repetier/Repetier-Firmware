@@ -41,25 +41,26 @@ void SDCard::automount()
 #if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
-        if(sdactive)   // Card removed
+        if(sdactive || sdmode == 100)   // Card removed
         {
             Com::printFLN(PSTR("SD card removed"));
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
             unmount();
-            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_REMOVED_ID));
+            UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_SD_REMOVED_ID));
         }
     }
     else
     {
-        if(!sdactive)
+        if(!sdactive && sdmode != 100)
         {
-            UI_STATUS_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
-            Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
-            initsd();
+            UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
+            mount();
+			if(sdmode != 100) // send message only if we have success
+	            Com::printFLN(PSTR("SD card inserted")); // Not translatable or host will not understand signal
 #if UI_DISPLAY_TYPE != NO_DISPLAY
-            if(sdactive) {
+            if(sdactive && !uid.isWizardActive()) { // Wizards have priority
                 Printer::setAutomount(true);
                 uid.executeAction(UI_ACTION_SD_PRINT + UI_ACTION_TOPMENU, true);
             }
@@ -77,16 +78,13 @@ void SDCard::initsd()
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
+	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
     /*if(dir[0].isOpen())
         dir[0].close();*/
-#if FEATURE_CONTROLLER==CONTROLLER_VIKI2 && defined(__SAM3X8E__)
-	// Viki2 shares SPI and does not work with fast spi :-(
-    if(!fat.begin(SDSS, SPI_EIGHTH_SPEED))
-#else
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
-#endif
     {
         Com::printFLN(Com::tSDInitFail);
+		sdmode = 100; // prevent automount loop!
         return;
     }
     sdactive = true;
