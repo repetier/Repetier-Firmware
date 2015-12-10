@@ -1489,13 +1489,21 @@ void Printer::homeZAxis() // cartesian homing
 #endif
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
+		int32_t zCorrection = 0;
+#if MIN_HARDWARE_ENDSTOP_Z && FEATURE_Z_PROBE && Z_PROBE_PIN==Z_MIN_PIN
+		// Fix error from z probe testing
+		zCorrection -= axisStepsPerMM[Z_AXIS]*EEPROM::zProbeHeight();
+#endif		
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
+		// If we want to go up a bit more for some reason
         if(ENDSTOP_Z_BACK_ON_HOME > 0)
-            PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*-ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+		zCorrection -= axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR;
 #endif
 #if Z_HOME_DIR < 0
-        PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * -Printer::zBedOffset * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+		// Fix bed coating
+		zCorrection += axisStepsPerMM[Z_AXIS] * Printer::zBedOffset;
 #endif
+        PrintLine::moveRelativeDistanceInSteps(0,0,zCorrection,0,homingFeedrate[Z_AXIS],true,false);
         currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
 #if NUM_EXTRUDER > 0
         currentPositionSteps[Z_AXIS] -= Extruder::current->zOffset;
@@ -1603,7 +1611,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
 #endif
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
-        else startZ = Printer::zMin + Printer::zLength;
+        else startZ = Printer::zMin + Printer::zLength - zBedOffset;
     }
 }
 #endif
@@ -1625,7 +1633,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     }
 #endif
     updateCurrentPosition(true);
+#if defined(Z_UP_AFTER_HOME) && Z_HOME_DIR < 0
+	//PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+	startZ = Z_UP_AFTER_HOME;
+#endif
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+	updateCurrentPosition(true);
     UI_CLEAR_STATUS
     Commands::printCurrentPosition(PSTR("homeAxis "));
 }
