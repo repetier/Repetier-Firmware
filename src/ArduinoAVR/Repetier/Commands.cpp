@@ -1555,7 +1555,7 @@ void Commands::processMCode(GCode *com)
         }
         break;
 #endif
-#if JSON_OUTPUT
+#if JSON_OUTPUT && SDSUPPORT
     case 36: // M36 JSON File Info
         if (com->hasString()) {
             sd.JSONFileInfo(com->text);
