@@ -2475,7 +2475,7 @@ void Commands::emergencyStop()
     Extruder::manageTemperatures();
     for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
         pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN > -1
+#if EXT0_HEATER_PIN > -1 && NUM_EXTRUDER > 0
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
@@ -2496,10 +2496,10 @@ void Commands::emergencyStop()
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     WRITE(FAN_PIN, 0);
 #endif
-#if HEATED_BED_HEATER_PIN > -1
+#if HAVE_HEATED_BED && HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-    UI_STATUS_UPD(UI_TEXT_KILLED);
+    UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
     while(1) {}
