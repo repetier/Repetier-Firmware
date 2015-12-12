@@ -2337,90 +2337,93 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 #if JSON_OUTPUT
 void Printer::showJSONStatus(int type) {
     bool firstOccurrence;
+
+    Com::printF(PSTR("{\"status\": \""));
+    if (PrintLine::linesCount == 0) {
+        Com::print('I'); // IDLING
+#if SDSUPPORT
+    } else if (sd.sdactive) {
+        Com::print('P'); // SD PRINTING
+#endif
+    } else {
+        Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
+    }
+    Com::printF(PSTR("\",\"coords\": {"));
+    Com::printF(PSTR("\"axesHomed\":["));
+    Com::printF(isHomed() ? PSTR("1, 1, 1") : PSTR("0, 0, 0"));
+    Com::printF(PSTR("],\"extr\":["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].extrudePosition / extruder[i].stepsPerMM);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"xyz\":["));
+    Com::print(currentPosition[X_AXIS]); // X
+    Com::print(',');
+    Com::print(currentPosition[Y_AXIS]); // Y
+    Com::print(',');
+    Com::print(currentPosition[Z_AXIS]); // Z
+    Com::printF(PSTR("]},\"currentTool\":"));
+    Com::print(Extruder::current->id);
+    Com::printF(PSTR(",\"params\": {\"atxPower\":"));
+    Com::print(isPowerOn()?'1':'0');
+    Com::printF(PSTR(",\"fanPercent\":"));
+    Com::print(getFanSpeed());
+    Com::printF(PSTR(",\"speedFactor\":"));
+    Com::print(Printer::feedrateMultiply);
+    Com::printF(PSTR(",\"extrFactors\":["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print((int)Printer::extrudeMultiply); // Really *100? 100 is normal
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("]},"));
+    // SEQ??
+    Com::printF(PSTR("\"temps\": {"));
+#if HAVE_HEATED_BED
+    Com::printF(PSTR("\"bed\": {\"current\":"));
+    Com::print(heatedBedController.currentTemperatureC);
+    Com::printF(PSTR(",\"active\":"));
+    Com::print(heatedBedController.targetTemperatureC);
+    Com::printF(PSTR(",\"state\":"));
+    Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
+    Com::printF(PSTR("},"));
+#endif
+    Com::printF(PSTR("\"heads\": {\"current\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.currentTemperatureC);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"active\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.targetTemperatureC);
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("],\"state\": ["));
+    firstOccurrence = true;
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (!firstOccurrence) Com::print(',');
+        Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP?'2':'1');
+        firstOccurrence = false;
+    }
+    Com::printF(PSTR("]}},\"time\":"));
+    Com::print(HAL::timeInMilliseconds());
+
     switch (type) {
         default:
         case 0:
         case 1:
-            Com::printF(PSTR("{\"state\": \""));
-            if (PrintLine::linesCount == 0) {
-                Com::print('I'); // IDLING
-            } else if (sd.sdactive) {
-                Com::print('P'); // SD PRINTING
-            } else {
-                Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
-            }
-            Com::printF(PSTR("\",\"coords\": {"));
-            Com::printF(PSTR("\"axesHomed\":["));
-            Com::printF(isHomed() ? PSTR("1, 1, 1") : PSTR("0, 0, 0"));
-            Com::printF(PSTR("],\"extr\":["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].extrudePosition / extruder[i].stepsPerMM);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"xyz\":["));
-            Com::print(currentPosition[X_AXIS]); // X
-            Com::print(',');
-            Com::print(currentPosition[Y_AXIS]); // Y
-            Com::print(',');
-            Com::print(currentPosition[Z_AXIS]); // Z
-            Com::printF(PSTR("]},\"currentTool\":"));
-            Com::print(Extruder::current->id);
-            Com::printF(PSTR(",\"params\": {\"atxPower\":"));
-            Com::print(isPowerOn()?'1':'0');
-            Com::printF(PSTR(",\"fanPercent\":"));
-            Com::print(getFanSpeed());
-            Com::printF(PSTR(",\"speedFactor\":"));
-            Com::print(Printer::feedrateMultiply);
-            Com::printF(PSTR(",\"extrFactors\":["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print((int)Printer::extrudeMultiply); // Really *100? 100 is normal
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("]},"));
-            // SEQ??
-            Com::printF(PSTR("\"temps\": {"));
-#if HAVE_HEATED_BED
-            Com::printF(PSTR("\"bed\": {\"current\":"));
-            Com::print(heatedBedController.currentTemperatureC);
-            Com::printF(PSTR(",\"active\":"));
-            Com::print(heatedBedController.targetTemperatureC);
-            Com::printF(PSTR(",\"state\":"));
-            Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
-            Com::printF(PSTR("},"));
-#endif
-            Com::printF(PSTR("\"heads\": {\"current\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.currentTemperatureC);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"active\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.targetTemperatureC);
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("],\"state\": ["));
-            firstOccurrence = true;
-            for (int i = 0; i < NUM_EXTRUDER; i++) {
-                if (!firstOccurrence) Com::print(',');
-                Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP?'2':'1');
-                firstOccurrence = false;
-            }
-            Com::printF(PSTR("]}},\"time\":"));
-            Com::print(HAL::timeInMilliseconds());
-            Com::printFLN(PSTR("}"));
             break;
         case 2:
             // UNTIL PRINT ESTIMATE TIMES ARE IMPLEMENTED
             // NO DURATION INFO IS SUPPORTED
-            Com::printF(PSTR("{\"coldExtrudeTemp\":0,\"coldRetractTemp\":0.0,\"geometry\":\""));
+            Com::printF(PSTR(",\"coldExtrudeTemp\":0,\"coldRetractTemp\":0.0,\"geometry\":\""));
 #if (DRIVE_SYSTEM == DELTA)
             Com::printF(PSTR("delta"));
 #elif (DRIVE_SYSTEM == CARTESIAN)
@@ -2442,10 +2445,10 @@ void Printer::showJSONStatus(int type) {
                 Com::print('}');
                 firstOccurrence = false;
             }
-            Com::printFLN(PSTR("]}"));
+            Com::printFLN(PSTR("]"));
             break;
         case 3:
-            Com::printF(PSTR("{\"currentLayer\":"));
+            Com::printF(PSTR(",\"currentLayer\":"));
 #if SDSUPPORT
             if (sd.sdactive && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
                 Com::print((int) (currentPosition[Z_AXIS] / sd.fileInfo.layerHeight));
@@ -2479,11 +2482,10 @@ void Printer::showJSONStatus(int type) {
 #else
             Com::print('0');
 #endif
-            Com::printFLN(PSTR("}"));
             break;
         case 4:
         case 5:
-            Com::printF(PSTR("{\"axisMins\":["));
+            Com::printF(PSTR(",\"axisMins\":["));
             Com::print((int) X_MIN_POS);
             Com::print(',');
             Com::print((int) Y_MIN_POS);
@@ -2529,9 +2531,11 @@ void Printer::showJSONStatus(int type) {
                 Com::print(',');
                 Com::print(extruder[i].maxFeedrate);
             }
-            Com::printFLN(PSTR("]}"));
+            Com::printFLN(PSTR("]"));
             break;
     }
+
+    Com::printFLN(PSTR("}"));
 }
 
 
