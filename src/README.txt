@@ -1,1 +1,0 @@
-This branch contains the latest stable release of the RF1000 firmware.
