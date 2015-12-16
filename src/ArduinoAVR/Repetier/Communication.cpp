@@ -107,6 +107,7 @@ FSTRINGVALUE(Com::tJSONFileInfoName, ",\"fileName\":\"");
 FSTRINGVALUE(Com::tSpeedMultiply,"SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply,"FlowMultiply:")
 FSTRINGVALUE(Com::tFanspeed,"Fanspeed:")
+FSTRINGVALUE(Com::tFan2speed,"Fanspeed2:")
 FSTRINGVALUE(Com::tPrintedFilament,"Printed filament:")
 FSTRINGVALUE(Com::tPrintingTime,"Printing time:")
 FSTRINGVALUE(Com::tSpacem,"m ")

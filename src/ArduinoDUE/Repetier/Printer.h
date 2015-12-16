@@ -465,6 +465,7 @@ public:
     }
     /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
+    static void setFan2SpeedDirectly(uint8_t speed);
     /** \brief Disable stepper motor for x direction. */
     static INLINE void disableXStepper()
     {
@@ -799,8 +800,8 @@ public:
     static INLINE void unsetAllSteppersDisabled()
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
-#if FAN_BOARD_PIN>-1
-        pwm_pos[NUM_EXTRUDER + 1] = 255;
+#if FAN_BOARD_PIN > -1
+        pwm_pos[PWM_BOARD_FAN] = 255;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()
@@ -1050,7 +1051,11 @@ public:
     static bool isPositionAllowed(float x,float y,float z);
     static INLINE int getFanSpeed()
     {
-        return (int)pwm_pos[NUM_EXTRUDER + 2];
+        return (int)pwm_pos[PWM_FAN1];
+    }
+    static INLINE int getFan2Speed()
+    {
+	    return (int)pwm_pos[PWM_FAN2];
     }
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)

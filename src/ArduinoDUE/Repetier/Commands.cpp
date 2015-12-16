@@ -230,7 +230,13 @@ void Commands::changeFlowrateMultiply(int factor)
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
+#if FEATURE_FAN_CONTROL
 uint8_t fanKickstart;
+#endif
+#if FEATURE_FAN2_CONTROL
+uint8_t fan2Kickstart;
+#endif
+
 void Commands::setFanSpeed(int speed)
 {
 #if FAN_PIN >- 1 && FEATURE_FAN_CONTROL
@@ -243,6 +249,14 @@ void Commands::setFanSpeed(int speed)
         Printer::setFanSpeedDirectly(speed);
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
+}
+void Commands::setFan2Speed(int speed)
+{
+	#if FAN2_PIN >- 1 && FEATURE_FAN2_CONTROL
+	speed = constrain(speed,0,255);
+	Printer::setFan2SpeedDirectly(speed);
+	Com::printFLN(Com::tFan2speed,speed); // send only new values to break update loops!
+	#endif
 }
 
 void Commands::reportPrinterUsage()
@@ -1818,17 +1832,19 @@ void Commands::processMCode(GCode *com)
     case 106: // M106 Fan On
         if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
         {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(com->hasS() ? com->S : 255);
+            if(com->hasP() && com->P == 1)
+	            setFan2Speed(com->hasS() ? com->S : 255);
+			else
+	            setFanSpeed(com->hasS() ? com->S : 255);
         }
         break;
     case 107: // M107 Fan Off
         if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
         {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(0);
+            if(com->hasP() && com->P == 1)
+	            setFan2Speed(0);
+			else
+	            setFanSpeed(0);
         }
         break;
 #endif
@@ -1946,8 +1962,8 @@ void Commands::processMCode(GCode *com)
         TemperatureController *temp = &Extruder::current->tempControl;
         if(com->hasS())
         {
-            if(com->S<0) break;
-            if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
+            if(com->S < 0) break;
+            if(com->S < NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
 #if HAVE_HEATED_BED
             else temp = &heatedBedController;
 #else

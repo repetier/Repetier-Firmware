@@ -341,18 +341,32 @@ bool Printer::isPositionAllowed(float x,float y,float z)
 }
 
 void Printer::setFanSpeedDirectly(uint8_t speed) {
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-    if(pwm_pos[NUM_EXTRUDER + 2] == speed)
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+    if(pwm_pos[PWM_FAN1] == speed)
         return;
 #if FAN_KICKSTART_TIME
-    if(fanKickstart == 0 && speed > pwm_pos[NUM_EXTRUDER + 2] && speed < 85)
+    if(fanKickstart == 0 && speed > pwm_pos[PWM_FAN1] && speed < 85)
     {
-         if(pwm_pos[NUM_EXTRUDER + 2]) fanKickstart = FAN_KICKSTART_TIME / 100;
+         if(pwm_pos[PWM_FAN1]) fanKickstart = FAN_KICKSTART_TIME / 100;
          else                          fanKickstart = FAN_KICKSTART_TIME / 25;
     }
 #endif
-    pwm_pos[NUM_EXTRUDER + 2] = speed;
+    pwm_pos[PWM_FAN1] = speed;
 #endif
+}
+void Printer::setFan2SpeedDirectly(uint8_t speed) {
+	#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+	if(pwm_pos[PWM_FAN2] == speed)
+		return;
+	#if FAN_KICKSTART_TIME
+	if(fan2Kickstart == 0 && speed > pwm_pos[PWM_FAN2] && speed < 85)
+	{
+		if(pwm_pos[PWM_FAN2]) fan2Kickstart = FAN_KICKSTART_TIME / 100;
+		else                          fan2Kickstart = FAN_KICKSTART_TIME / 25;
+	}
+	#endif
+	pwm_pos[PWM_FAN2] = speed;
+	#endif
 }
 
 void Printer::reportPrinterMode() {
@@ -511,11 +525,11 @@ void Printer::kill(uint8_t only_steppers)
         Printer::setAllKilled(true);
     }
     else UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
-#if FAN_BOARD_PIN>-1
+#if FAN_BOARD_PIN > -1
 #if HAVE_HEATED_BED
     if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
 #endif
-       pwm_pos[NUM_EXTRUDER + 1] = 0;
+       pwm_pos[PWM_BOARD_FAN] = 0;
 #endif // FAN_BOARD_PIN
 }
 
@@ -935,9 +949,17 @@ void Printer::setup()
     PULLUP(Z_PROBE_PIN, HIGH);
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     SET_OUTPUT(FAN_PIN);
     WRITE(FAN_PIN, LOW);
+#endif
+#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+	SET_OUTPUT(FAN2_PIN);
+	WRITE(FAN2_PIN, LOW);
+#endif
+#if FAN_THERMO_PIN > -1
+	SET_OUTPUT(FAN_THERMO_PIN);
+	WRITE(FAN_THERMO_PIN, LOW);
 #endif
 #if FAN_BOARD_PIN>-1
     SET_OUTPUT(FAN_BOARD_PIN);
@@ -2368,9 +2390,14 @@ void Printer::showJSONStatus(int type) {
     Com::print(Extruder::current->id);
     Com::printF(PSTR(",\"params\": {\"atxPower\":"));
     Com::print(isPowerOn()?'1':'0');
-    Com::printF(PSTR(",\"fanPercent\":"));
-    Com::print(getFanSpeed());
-    Com::printF(PSTR(",\"speedFactor\":"));
+    Com::printF(PSTR(",\"fanPercent\":["));
+#if FEATURE_FAN_CONTROL	
+    Com::print(getFanSpeed() / 2.55f);
+#endif	
+#if FEATURE_FAN2_CONTROL
+    Com::printF(Com::tComma,getFan2Speed() / 2.55f);
+#endif
+    Com::printF(PSTR("],\"speedFactor\":"));
     Com::print(Printer::feedrateMultiply);
     Com::printF(PSTR(",\"extrFactors\":["));
     firstOccurrence = true;

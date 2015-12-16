@@ -932,7 +932,7 @@ void PWM_TIMER_VECTOR ()
 
   static uint8_t pwm_count_cooler = 0;
   static uint8_t pwm_count_heater = 0;
-  static uint8_t pwm_pos_set[NUM_EXTRUDER + 3];
+  static uint8_t pwm_pos_set[NUM_PWM];
   static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
 
   if (pwm_count_heater == 0 && !PDM_FOR_EXTRUDER)
@@ -990,10 +990,16 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
-    if ((pwm_pos_set[NUM_EXTRUDER + 1] = (pwm_pos[NUM_EXTRUDER + 1] & COOLER_PWM_MASK)) > 0) WRITE(FAN_BOARD_PIN, 1);
+        if((pwm_pos_set[PWM_BOARD_FAN] = (pwm_pos[PWM_BOARD_FAN] & COOLER_PWM_MASK)) > 0) WRITE(FAN_BOARD_PIN,1);
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    if ((pwm_pos_set[NUM_EXTRUDER + 2] = (pwm_pos[NUM_EXTRUDER + 2] & COOLER_PWM_MASK)) > 0) WRITE(FAN_PIN, 1);
+        if((pwm_pos_set[PWM_FAN1] = (pwm_pos[PWM_FAN1] & COOLER_PWM_MASK)) > 0) WRITE(FAN_PIN,1);
+#endif
+#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+		if((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0) WRITE(FAN2_PIN,1);
+#endif
+#if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
+		if((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0) WRITE(FAN_THERMO_PIN,1);
 #endif
   }
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
@@ -1080,22 +1086,39 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
+#if FAN_BOARD_PIN > -1  && SHARED_COOLER_BOARD_EXT == 0
 #if PDM_FOR_COOLER
-  pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[NUM_EXTRUDER + 1], pwm_pos_set[NUM_EXTRUDER + 1], false);
+    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[PWM_BOARD_FAN], pwm_pos_set[PWM_BOARD_FAN], false);
 #else
-  if (pwm_pos_set[NUM_EXTRUDER + 1] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 1] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN, 0);
+    if(pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 1] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN,0);
 #endif
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-  if (fanKickstart == 0)
-  {
+    if(fanKickstart == 0)
+    {
 #if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_PIN, pwm_pos[NUM_EXTRUDER + 2], pwm_pos_set[NUM_EXTRUDER + 2], false);
+        pulseDensityModulate(FAN_PIN, pwm_pos[PWM_FAN1], pwm_pos_set[PWM_FAN1], false);
 #else
-    if (pwm_pos_set[NUM_EXTRUDER + 2] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 2] != COOLER_PWM_MASK) WRITE(FAN_PIN, 0);
+        if(pwm_pos_set[PWM_FAN1] == pwm_count_cooler && pwm_pos_set[PWM_FAN1] != COOLER_PWM_MASK) WRITE(FAN_PIN,0);
 #endif
-  }
+    }
+#endif
+#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
+if(fan2Kickstart == 0)
+{
+	#if PDM_FOR_COOLER
+	pulseDensityModulate(FAN2_PIN, pwm_pos[PWM_FAN2], pwm_pos_set[PWM_FAN2], false);
+	#else
+	if(pwm_pos_set[PWM_FAN2] == pwm_count_cooler && pwm_pos_set[PWM_FAN2] != COOLER_PWM_MASK) WRITE(FAN2_PIN,0);
+	#endif
+}
+#endif
+#if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
+	#if PDM_FOR_COOLER
+	pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
+	#else
+	if(pwm_pos_set[PWM_FAN_THERMO] == pwm_count_cooler && pwm_pos_set[PWM_FAN_THERMO] != COOLER_PWM_MASK) WRITE(FAN_THERMO_PIN,0);
+	#endif
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
 #if PDM_FOR_EXTRUDER

@@ -288,11 +288,19 @@ public:
 };
 
 #if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+#define HEATED_BED_INDEX NUM_EXTRUDER
 extern TemperatureController heatedBedController;
 #else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#define HEATED_BED_INDEX NUM_EXTRUDER-1
 #endif
+#if FAN_THERMO_PIN > -1
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX+1
+extern TemperatureController thermoController;
+#else
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX
+#endif
+#define NUM_TEMPERATURE_LOOPS THERMO_CONTROLLER_INDEX+1
+
 #define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 

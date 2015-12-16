@@ -75,6 +75,26 @@ void Extruder::manageTemperatures()
     for(uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++)
     {
         TemperatureController *act = tempController[controller];
+        // Get Temperature
+        act->updateCurrentTemperature();
+#if FAN_THERMO_PIN > -1
+		// Special case thermistor controlled fan
+        if(act == &thermoController) {
+			if(act->currentTemperatureC < FAN_THERMO_MIN_TEMP)
+				pwm_pos[PWM_FAN_THERMO] = 0;
+			else if(act->currentTemperatureC > FAN_THERMO_MAX_TEMP)
+				pwm_pos[PWM_FAN_THERMO] = FAN_THERMO_MAX_PWM;
+			else {
+				// Interpolate target speed
+				float out = FAN_THERMO_MIN_PWM + (FAN_THERMO_MAX_PWM-FAN_THERMO_MIN_PWM) * (act->currentTemperatureC - FAN_THERMO_MIN_TEMP) / (FAN_THERMO_MAX_TEMP - FAN_THERMO_MIN_TEMP);
+				if(out > 255)
+					pwm_pos[PWM_FAN_THERMO] = FAN_THERMO_MAX_PWM;
+				else
+					pwm_pos[PWM_FAN_THERMO] = static_cast<uint8_t>(out);
+			}
+			continue;
+		}
+#endif
         // Handle automatic cooling of extruders
         if(controller < NUM_EXTRUDER)
         {
@@ -91,7 +111,7 @@ void Extruder::manageTemperatures()
                     }
                 }
 #if SHARED_COOLER_BOARD_EXT
-                if(pwm_pos[NUM_EXTRUDER + 1]) enable = true;
+                if(pwm_pos[PWM_BOARD_FAN]) enable = true;
 #endif
                 extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
             } // controller == 0
@@ -107,9 +127,6 @@ void Extruder::manageTemperatures()
 #if MIXING_EXTRUDER
         if(controller > 0 && controller < NUM_EXTRUDER) continue; // Mixing extruder only test for ext 0
 #endif // MIXING_EXTRUDER
-
-        // Get Temperature
-        act->updateCurrentTemperature();
 
 
         // Check for obvious sensor errors
@@ -557,10 +574,14 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     activeMixingExtruder = extruderId;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setMixingWeight(i, extruder[i].virtualWeights[extruderId]);
+	Com::printFLN(PSTR("SelectExtruder:"),static_cast<int>(extruderId));
     extruderId = 0;
 #endif
     if(extruderId >= NUM_EXTRUDER)
         extruderId = 0;
+#if !MIXING_EXTRUDER
+	Com::printFLN(PSTR("SelectExtruder:"),static_cast<int>(extruderId));
+#endif
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
     if(extruderId != Extruder::current->id)
@@ -750,9 +771,9 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
     if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
     if(temperatureInCelsius > 15)
-        pwm_pos[NUM_EXTRUDER + 1] = 255;    // turn on the mainboard cooling fan
+        pwm_pos[PWM_BOARD_FAN] = 255;    // turn on the mainboard cooling fan
     else if(Printer::areAllSteppersDisabled())
-        pwm_pos[NUM_EXTRUDER + 1] = 0;      // turn off the mainboard cooling fan only if steppers disabled
+        pwm_pos[PWM_BOARD_FAN] = 0;      // turn off the mainboard cooling fan only if steppers disabled
 #endif
 }
 
@@ -1458,7 +1479,7 @@ void TemperatureController::updateCurrentTemperature()
     case 0:
         currentTemperature = 25;
         break;
-#if ANALOG_INPUTS>0
+#if ANALOG_INPUTS > 0
     case 1:
     case 2:
     case 3:
@@ -2285,44 +2306,55 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif // NUM_EXTRUDER
 
 #if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
-TemperatureController heatedBedController = {NUM_EXTRUDER,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD
-                                            };
-#else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+        ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD};
+#endif
+
+#if FAN_THERMO_PIN > -1
+TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0,0
+	#if TEMP_PID
+	,0,255,0,10,1,1,255,0,0,0,{0,0,0,0}
+	#endif
+,0,0,0,0};
 #endif
 
 #if NUM_TEMPERATURE_LOOPS > 0
 TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] =
 {
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
     &extruder[0].tempControl
 #endif
-#if NUM_EXTRUDER>1
+#if NUM_EXTRUDER > 1
     ,&extruder[1].tempControl
 #endif
-#if NUM_EXTRUDER>2
+#if NUM_EXTRUDER > 2
     ,&extruder[2].tempControl
 #endif
-#if NUM_EXTRUDER>3
+#if NUM_EXTRUDER > 3
     ,&extruder[3].tempControl
 #endif
-#if NUM_EXTRUDER>4
+#if NUM_EXTRUDER > 4
     ,&extruder[4].tempControl
 #endif
-#if NUM_EXTRUDER>5
+#if NUM_EXTRUDER > 5
     ,&extruder[5].tempControl
 #endif
 #if HAVE_HEATED_BED
-#if NUM_EXTRUDER==0
+#if NUM_EXTRUDER == 0
     &heatedBedController
 #else
     ,&heatedBedController
 #endif
 #endif
+#if FAN_THERMO_PIN > -1
+#if NUM_EXTRUDER == 0 && !HAVE_HEATED_BED
+	&thermoController
+#else
+	,&thermoController
+#endif
+#endif // FAN_THERMO_PIN
 };
 #endif
