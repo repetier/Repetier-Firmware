@@ -80,13 +80,13 @@ void Extruder::manageTemperatures()
 #if FAN_THERMO_PIN > -1
 		// Special case thermistor controlled fan
         if(act == &thermoController) {
-			if(act->currentTemperatureC < FAN_THERMO_MIN_TEMP)
+			if(act->currentTemperatureC < Printer::thermoMinTemp)
 				pwm_pos[PWM_FAN_THERMO] = 0;
-			else if(act->currentTemperatureC > FAN_THERMO_MAX_TEMP)
+			else if(act->currentTemperatureC > Printer::thermoMaxTemp)
 				pwm_pos[PWM_FAN_THERMO] = FAN_THERMO_MAX_PWM;
 			else {
 				// Interpolate target speed
-				float out = FAN_THERMO_MIN_PWM + (FAN_THERMO_MAX_PWM-FAN_THERMO_MIN_PWM) * (act->currentTemperatureC - FAN_THERMO_MIN_TEMP) / (FAN_THERMO_MAX_TEMP - FAN_THERMO_MIN_TEMP);
+				float out = FAN_THERMO_MIN_PWM + (FAN_THERMO_MAX_PWM-FAN_THERMO_MIN_PWM) * (act->currentTemperatureC - Printer::thermoMinTemp) / (Printer::thermoMaxTemp - Printer::thermoMinTemp);
 				if(out > 255)
 					pwm_pos[PWM_FAN_THERMO] = FAN_THERMO_MAX_PWM;
 				else

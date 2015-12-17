@@ -151,6 +151,10 @@ float Printer::memoryF = -1;
 int8_t Printer::motorX;
 int8_t Printer::motorYorZ;
 #endif
+#if FAN_THERMO_PIN > -1
+float Printer::thermoMinTemp = FAN_THERMO_MIN_TEMP;
+float Printer::thermoMaxTemp = FAN_THERMO_MAX_TEMP;
+#endif
 #ifdef DEBUG_SEGMENT_LENGTH
 float Printer::maxRealSegmentLength = 0;
 #endif
@@ -2063,6 +2067,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
     Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
+    Com::config(PSTR("Fan2:"),FAN2_PIN > -1 && FEATURE_FAN2_CONTROL);
     Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
     Com::config(PSTR("XHomeDir:"),X_HOME_DIR);

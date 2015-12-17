@@ -338,6 +338,10 @@ public:
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
+#if FAN_THERMO_PIN > -1
+	static float thermoMinTemp;
+	static float thermoMaxTemp;
+#endif
     static int16_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small

@@ -136,6 +136,7 @@ Custom M Codes
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser
 - M453 - Set printer mode to CNC
+- M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!

@@ -2243,6 +2243,12 @@ void Commands::processMCode(GCode *com)
 #endif
         Printer::reportPrinterMode();
         break;
+	case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
+		if(com->hasX())
+			Printer::thermoMinTemp = com->X;
+		if(com->hasY())
+			Printer::thermoMaxTemp = com->Y;
+		break;
     case 500: // M500
     {
 #if EEPROM_MODE != 0
