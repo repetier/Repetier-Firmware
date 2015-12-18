@@ -1898,6 +1898,7 @@ void Commands::processMCode(GCode *com)
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
             Extruder::setMixingWeight(com->S, com->P);
+		Extruder::recomputeMixingExtruderSteps();
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values

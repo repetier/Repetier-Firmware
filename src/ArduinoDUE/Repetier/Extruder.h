@@ -198,6 +198,7 @@ public:
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
     static uint8_t activeMixingExtruder;
+	static void recomputeMixingExtruderSteps();
 #endif
     uint8_t id;
     int32_t xOffset;

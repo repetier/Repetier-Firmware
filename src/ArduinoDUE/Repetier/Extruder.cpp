@@ -597,9 +597,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
 #endif
-    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
-    Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
-    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
+	#if MIXING_EXTRUDER
+		recomputeMixingExtruderSteps();
+	#else
+		Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+		Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
+		Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
+	#endif
     Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
 //   max_start_speed_units_per_second[E_AXIS] = Extruder::current->maxStartFeedrate;
     Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
@@ -639,6 +643,21 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 #endif
 }
+#if MIXING_EXTRUDER
+	void Extruder::recomputeMixingExtruderSteps() {
+		int32_t sum_w = 0;
+		float sum = 0;
+		for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+			sum_w += extruder[i].mixingW;
+			sum += extruder[i].stepsPerMM * extruder[i].mixingW;
+		}
+		sum /= sum_w;
+		Printer::currentPositionSteps[E_AXIS] =  Printer::currentPositionSteps[E_AXIS] * sum / Printer::axisStepsPerMM[E_AXIS]; // reposition according resolution change
+	    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+	    Printer::axisStepsPerMM[E_AXIS] = sum;
+	    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
+	}
+#endif
 
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t extr, bool beep, bool wait)
 {

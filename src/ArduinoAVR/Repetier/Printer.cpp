@@ -352,7 +352,7 @@ void Printer::setFanSpeedDirectly(uint8_t speed) {
     if(fanKickstart == 0 && speed > pwm_pos[PWM_FAN1] && speed < 85)
     {
          if(pwm_pos[PWM_FAN1]) fanKickstart = FAN_KICKSTART_TIME / 100;
-         else                          fanKickstart = FAN_KICKSTART_TIME / 25;
+         else                  fanKickstart = FAN_KICKSTART_TIME / 25;
     }
 #endif
     pwm_pos[PWM_FAN1] = speed;
@@ -366,7 +366,7 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
 	if(fan2Kickstart == 0 && speed > pwm_pos[PWM_FAN2] && speed < 85)
 	{
 		if(pwm_pos[PWM_FAN2]) fan2Kickstart = FAN_KICKSTART_TIME / 100;
-		else                          fan2Kickstart = FAN_KICKSTART_TIME / 25;
+		else                  fan2Kickstart = FAN_KICKSTART_TIME / 25;
 	}
 	#endif
 	pwm_pos[PWM_FAN2] = speed;
@@ -2067,7 +2067,11 @@ void Printer::showConfiguration() {
     Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
     Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
-    Com::config(PSTR("Fan2:"),FAN2_PIN > -1 && FEATURE_FAN2_CONTROL);
+#if FEATURE_FAN2_CONTROL && defined(FAN2_PIN) && FAN2_PIN > -1	
+    Com::config(PSTR("Fan2:1"));
+#else
+    Com::config(PSTR("Fan2:0"));
+#endif	
     Com::config(PSTR("LCD:"),FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"),PS_ON_PIN > -1);
     Com::config(PSTR("XHomeDir:"),X_HOME_DIR);
