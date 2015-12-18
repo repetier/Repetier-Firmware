@@ -65,7 +65,7 @@ HAL::~HAL()
 
 
 // Set up all timer interrupts
-void HAL::setupTimer() {  SET_OUTPUT(37);
+void HAL::setupTimer() {
   uint32_t     tc_count, tc_clock;
 
   pmc_set_writeprotect(false);
@@ -828,7 +828,6 @@ TcChannel *stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
 */
 void TIMER1_COMPA_VECTOR ()
 {
-WRITE(37,1);
   // apparently have to read status register
   stepperChannel->TC_SR;
   stepperChannel->TC_RC = 1000000;
@@ -873,7 +872,6 @@ WRITE(37,1);
   } else {
      stepperChannel->TC_RC = timer_count;
   }
-  WRITE(37,0);
 }
 
 #if !defined(HEATER_PWM_SPEED)
