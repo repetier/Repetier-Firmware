@@ -1270,7 +1270,7 @@ void Printer::homeZAxis() // Delta z homing
 	Endstops::fillFromAccumulator();
 	if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 		// Back off for retest
-		PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+		PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS]/ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 		//Endstops::report();
 		// Check for proper release of all (XYZ) endstops
 		if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
@@ -1279,12 +1279,12 @@ void Printer::homeZAxis() // Delta z homing
 		    deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
 		    Endstops::fillFromAccumulator();
 			//Endstops::report();
-			// Check that all endstoips (XYZ) were hit again
+			// Check that all endstops (XYZ) were hit again
 			if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
 				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
-					PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, false);
+					PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, true);
 					//Endstops::report();
 					// Check for missing release of any (XYZ) endstop
 					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {

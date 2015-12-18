@@ -1655,7 +1655,7 @@ uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, u
     waitForXFreeLines(1);
 
     // Insert dummy moves if necessary
-    // Nead to leave at least one slot open for the first split move
+    // Need to leave at least one slot open for the first split move
     insertWaitMovesIfNeeded(pathOptimize, RMath::min(PRINTLINE_CACHE_SIZE - 4, numLines));
     uint32_t oldEDestination = Printer::destinationSteps[E_AXIS]; // flow and volumetric extrusion changed virtual target
     Printer::currentPositionSteps[E_AXIS] = 0;
