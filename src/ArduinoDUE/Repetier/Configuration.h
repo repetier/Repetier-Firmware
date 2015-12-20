@@ -1545,6 +1545,7 @@ the language can be switched any time. */
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 1 // Czech
 #define LANGUAGE_PL_ACTIVE 1 // Polish
+#define LANGUAGE_TR_ACTIVE 1 // Turkish
 
 /* Some displays loose their settings from time to time. Try uncommenting the 
 autorepair function if this is the case. It is not supported for all display
