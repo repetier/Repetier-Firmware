@@ -237,7 +237,7 @@ uint8_t fanKickstart;
 uint8_t fan2Kickstart;
 #endif
 
-void Commands::setFanSpeed(int speed)
+void Commands::setFanSpeed(int speed, bool immediately)
 {
 #if FAN_PIN >- 1 && FEATURE_FAN_CONTROL
     if(Printer::fanSpeed == speed)
@@ -245,8 +245,14 @@ void Commands::setFanSpeed(int speed)
     speed = constrain(speed,0,255);
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed != 0);
     Printer::fanSpeed = speed;
-    if(PrintLine::linesCount == 0)
-        Printer::setFanSpeedDirectly(speed);
+    if(PrintLine::linesCount == 0 || immediately) {
+        if(Printer::mode == PRINTER_MODE_FFF)
+        {
+	        for(fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+			    PrintLine::lines[i].secondSpeed = speed;         // fill all printline buffers with new fan speed value
+        }
+		Printer::setFanSpeedDirectly(speed);
+	}
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
 }

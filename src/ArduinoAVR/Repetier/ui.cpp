@@ -2610,7 +2610,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     switch(action)
     {
     case UI_ACTION_FANSPEED:
-        Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3);
+        Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3, true);
         break;
     case UI_ACTION_XPOSITION:
         if(!allowMoves) return false;
@@ -3259,7 +3259,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_FAN_25:
         case UI_ACTION_FAN_50:
         case UI_ACTION_FAN_75:
-            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64);
+            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, true);
             break;
         case UI_ACTION_FAN_FULL:
             Commands::setFanSpeed(255);

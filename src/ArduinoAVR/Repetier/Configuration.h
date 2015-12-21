@@ -62,6 +62,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
+// 3Drag/Velleman K8200       = 66 (experimental)
 // Open Motion Controller     = 91
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Azteeg X1                  = 65
