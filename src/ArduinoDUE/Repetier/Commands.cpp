@@ -1845,13 +1845,10 @@ void Commands::processMCode(GCode *com)
         }
         break;
     case 107: // M107 Fan Off
-        if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
-        {
-            if(com->hasP() && com->P == 1)
-	            setFan2Speed(0);
-			else
-	            setFanSpeed(0);
-        }
+        if(com->hasP() && com->P == 1)
+	        setFan2Speed(0);
+		else
+	        setFanSpeed(0);
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
