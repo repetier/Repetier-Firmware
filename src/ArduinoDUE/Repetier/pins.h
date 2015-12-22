@@ -579,7 +579,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_DIR_PIN 34
 #define ORIG_E1_ENABLE_PIN 30
  
-#define sdpower   -1
+#define SDPOWER   -1
 // 10 if using HW spi. 53 if using SW SPI
 #define SDSS 53 
 #define LED_PIN   13
