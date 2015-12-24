@@ -33,11 +33,6 @@ extern int8_t RFstrnicmp(const char* s1, const char* s2, size_t n);
 //#define GLENN_DEBUG
 
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-static void pstrPrint(FSTRINGPARAM(str)) {
-    Com::printF(str);
-}
-//------------------------------------------------------------------------------
 static void pstrPrintln(FSTRINGPARAM(str)) {
   Com::printFLN(str);
 }
@@ -652,11 +647,12 @@ void SdBaseFile::ls(uint8_t flags) {
   ls(flags, 0);
 }
 
-uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound)
+uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename, SdBaseFile *pParentFound, bool isJson)
 {
     dir_t *p = NULL;
-    uint8_t cnt=0;
-    char *oldpathend = pathend;
+    //uint8_t cnt=0;
+    //char *oldpathend = pathend;
+    bool firstFile = true;
 
     parent->rewind();
 
@@ -665,21 +661,29 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
         HAL::pingWatchdog();
         if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) continue;
         if (strcmp(tempLongFilename, "..") == 0) continue;
-        if( DIR_IS_SUBDIR(p))
-        {
-            if(level>=SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
-            if(level<SD_MAX_FOLDER_DEPTH)
-            {
-                if (findFilename == NULL)
-                  {
-                   if(level)
-                    {
-                     Com::print(fullName);
-                     Com::printF(Com::tSlash);
-                    }
-                  Com::print(tempLongFilename);
-                  Com::printFLN(Com::tSlash); //End with / to mark it as directory entry, so we can see empty directories.
+        if (tempLongFilename[0] == '.') continue; // MAC CRAP
+        if (DIR_IS_SUBDIR(p)) {
+            if (level >= SD_MAX_FOLDER_DEPTH) continue; // can't go deeper
+            if (level < SD_MAX_FOLDER_DEPTH && findFilename == NULL) {
+                if (level && !isJson) {
+                    Com::print(fullName);
+                    Com::printF(Com::tSlash);
+                 }
+#if JSON_OUTPUT
+                if (isJson) {
+                    if (!firstFile) Com::print(',');
+				    Com::print('"');Com::print('*');
+                    SDCard::printEscapeChars(tempLongFilename);
+				    Com::print('"');
+                    firstFile = false;
+                } else {
+                    Com::print(tempLongFilename);
+                    Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
                 }
+#else
+                Com::print(tempLongFilename);
+                Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
+#endif
             }
             SdBaseFile next;
             char *tmp;
@@ -689,11 +693,11 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
             strcat(fullName, tempLongFilename);
             uint16_t index = (parent->curPosition()-31) >> 5;
 
-            if(next.open(parent, index, O_READ))
-              {
-              if (next.lsRecursive(&next,level+1, findFilename, pParentFound))
+            if(!isJson && next.open(parent, index, O_READ))
+            {
+              if (next.lsRecursive(&next,level+1, findFilename, pParentFound,false))
                   return true;
-              }
+            }
             parent->seekSet(32 * (index + 1));
             if ((tmp = strrchr(fullName, '/'))!= NULL)
                 *tmp = 0;
@@ -721,16 +725,27 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
             }
             else
             {
-                if(level)
+                if(level && !isJson)
                 {
                     Com::print(fullName);
                     Com::printF(Com::tSlash);
                 }
-                Com::print(tempLongFilename);
-#if SD_EXTENDED_DIR
-                Com::printF(Com::tSpace,(long)p->fileSize);
+#if JSON_OUTPUT
+                if (isJson) {
+                    if (!firstFile) Com::printF(Com::tComma);
+				    Com::print('"');
+                    SDCard::printEscapeChars(tempLongFilename);
+				    Com::print('"');
+                    firstFile = false;
+                } else
 #endif
-                Com::println();
+                {
+                    Com::print(tempLongFilename);
+#if SD_EXTENDED_DIR
+                    Com::printF(Com::tSpace, (long) p->fileSize);
+#endif
+                    Com::println();
+                }
             }
         }
     }
@@ -754,20 +769,30 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
  * list to indicate subdirectory level.
  */
 void SdBaseFile::ls(uint8_t flags, uint8_t indent) {
-  SdBaseFile parent;
-
-  rewind();
+    SdBaseFile parent;
+    rewind();
     *fullName = 0;
-   pathend = fullName;
-  parent = *this;
-  lsRecursive(&parent, 0, NULL, NULL);
+    pathend = fullName;
+    parent = *this;
+    lsRecursive(&parent, 0, NULL, NULL, false);
 }
+
+#if JSON_OUTPUT
+void SdBaseFile::lsJSON() {
+    SdBaseFile parent;
+    rewind();
+    *fullName = 0;
+    parent = *this;
+    lsRecursive(&parent, 0, NULL, NULL, true);
+}
+#endif
+
 //------------------------------------------------------------------------------
 // saves 32 bytes on stack for ls recursion
 // return 0 - EOF, 1 - normal file, or 2 - directory
 int8_t SdBaseFile::lsPrintNext(uint8_t flags, uint8_t indent) {
   dir_t dir;
-  uint8_t w = 0;
+  //uint8_t w = 0;
   while (1) {
     if (read(&dir, sizeof(dir)) != sizeof(dir)) return 0;
     if (dir.name[0] == DIR_NAME_FREE) return 0;
@@ -876,8 +901,6 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const char* path, bool pFlag) {
     {
     return mkdir(&newParent, dname);
     }
-
- fail:
   return false;
 }
 //------------------------------------------------------------------------------
@@ -886,13 +909,13 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
 
   if (!parent->isDir()) {
     DBG_FAIL_MACRO;
-    goto fail;
+    return false;
   }
 
   // create a normal file
   if (!open(parent, dname, O_CREAT | O_EXCL | O_RDWR, true)) {
     DBG_FAIL_MACRO;
-    goto fail;
+    return false;
   }
 
   // make entry for '.'
@@ -908,7 +931,7 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
   for (uint8_t i = 1; i < 11; i++) d.name[i] = ' ';
 
   if (write(&d, sizeof(dir_t)) < 0)
-    goto fail;
+    return false;
   sync();
 
   // make entry for '..'
@@ -921,18 +944,16 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
     d.firstClusterHigh = parent->firstCluster_ >> 16;
   }
   if (write(&d, sizeof(dir_t)) < 0)
-    goto fail;
+    return false;
   sync();
   memset(&d, 0, sizeof(dir_t));
   if (write(&d, sizeof(dir_t)) < 0)
-    goto fail;
+    return false;
   sync();
 //  fileSize_ = 0;
   type_ = FAT_FILE_TYPE_SUBDIR;
   flags_ |= F_FILE_DIR_DIRTY;
   return true;
- fail:
-  return false;
 }
 //------------------------------------------------------------------------------
  /** Open a file in the current working directory.
@@ -1005,10 +1026,10 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
    SdBaseFile *newParent, boolean bMakeDirs) {
   SdBaseFile dir1, dir2;
   SdBaseFile *parent = dirFile;
-  dir_t *pEntry;
+  //dir_t *pEntry;
   SdBaseFile *sub = &dir1;
   char *p;
-  boolean bFound;
+  //boolean bFound;
 
 #ifdef GLENN_DEBUG
     Commands::checkFreeMemory();
@@ -1052,7 +1073,7 @@ bool SdBaseFile::mkdir(SdBaseFile* parent, const uint8_t *dname) {
        Commands::checkFreeMemory();
        Commands::writeLowestFreeRAM();
 #endif
-        bFound = false;
+        //bFound = false;
         if (!sub->open(parent, dname, O_READ, false))
             {
             if (!bMakeDirs)
@@ -1093,7 +1114,6 @@ bool SdBaseFile::open(SdBaseFile* dirFile, const char* path, uint8_t oflag)
     return open(&parent, dname, oflag, false);
     }
 
- fail:
   return false;
 }
 
@@ -1113,11 +1133,11 @@ uint8_t SdBaseFile::lfn_checksum(const unsigned char *pFCBName)
 bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, bool bDir) {
   bool emptyFound = false;
   uint8_t index = 0;
-  dir_t tempDir, *p;
+  dir_t tempDir, *p = NULL;
   const char *tempPtr;
   char newName[SHORT_FILENAME_LENGTH+2];
   boolean bShortName = false;
-  int8_t cVFATNeeded = -1, wIndex, cVFATFoundCur;
+  int8_t cVFATNeeded = -1, cVFATFoundCur;
   uint32_t wIndexPos = 0;
   uint8_t cbFilename;
   char *Filename = (char *)dname;
@@ -1570,6 +1590,9 @@ bool SdBaseFile::openParent(SdBaseFile* dir) {
 bool SdBaseFile::openRoot(SdVolume* vol) {
   // error if file is already open
   if (isOpen()) {
+#if defined(DEBUG_SD_ERROR)
+	Com::printErrorFLN(PSTR("Root already open"));
+#endif	  
     DBG_FAIL_MACRO;
     goto fail;
   }
@@ -1587,6 +1610,10 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
     }
   } else {
     // volume is not initialized, invalid, or FAT12 without support
+#if defined(DEBUG_SD_ERROR)
+	Com::printErrorF(PSTR("volume is not initialized, invalid, or FAT12 without support, type:"));
+	Com::print((int)vol->fatType());Com::println();
+#endif
     DBG_FAIL_MACRO;
     goto fail;
   }
@@ -1603,6 +1630,9 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
   return true;
 
  fail:
+#if defined(DEBUG_SD_ERROR)
+   Com::printErrorFLN(PSTR("SD open root dir failed"));
+#endif   
   return false;
 }
 //------------------------------------------------------------------------------
@@ -2055,7 +2085,7 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
 
 bool SdBaseFile::findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, uint32_t *pwIndexPos)
 {
-  int16_t n;
+  //int16_t n; // unused
   int8_t cVFATFound = 0;
   // if not a directory file or miss-positioned return an error
   if (!isDir()) return -1;
@@ -2081,7 +2111,7 @@ bool SdBaseFile::findSpace(dir_t *dir, int8_t cVFATNeeded, int8_t *pcVFATFound, 
            {
           if (DIR_IS_LONG_NAME(dir))
             {
-            vfat_t *VFAT = (vfat_t*)dir;
+            //vfat_t *VFAT = (vfat_t*)dir; // unused
             cVFATFound++;
             }
           else
@@ -3202,7 +3232,7 @@ uint8_t Sd2Card::cardCommand(uint8_t cmd, uint32_t arg) {
 
 #if USE_SD_CRC
   // form message
-  uint8_t d[6] = {cmd | 0X40, pa[3], pa[2], pa[1], pa[0]};
+  uint8_t d[6] = {static_cast<uint8_t>(cmd | static_cast<uint8_t>(0X40)), pa[3], pa[2], pa[1], pa[0]};
 
   // add crc
   d[5] = CRC7(d, 5);
@@ -3415,6 +3445,9 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
 
  fail:
   chipSelectHigh();
+#if defined(DEBUG_SD_ERROR)
+  Com::printErrorFLN(PSTR("SD card initalization failed"));
+#endif
   return false;
 }
 //------------------------------------------------------------------------------
@@ -3469,7 +3502,7 @@ bool Sd2Card::readData(uint8_t* dst, size_t count) {
     goto fail;
   }
   // transfer data
-  if (status_ = spiRec(dst, count)) {
+  if ((status_ = spiRec(dst, count))) {
     error(SD_CARD_ERROR_SPI_DMA);
     goto fail;
   }
@@ -4224,7 +4257,7 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   cacheStatus_ = 0;  // cacheSync() will write block if true
   cacheBlockNumber_ = 0XFFFFFFFF;
   cacheFatOffset_ = 0;
-#if USE_SERARATEFAT_CACHE
+#if defined(USE_SERARATEFAT_CACHE) && USE_SERARATEFAT_CACHE
   cacheFatStatus_ = 0;  // cacheSync() will write block if true
   cacheFatBlockNumber_ = 0XFFFFFFFF;
 #endif  // USE_SERARATEFAT_CACHE
@@ -4232,11 +4265,17 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   // if part > 0 assume mbr volume with partition table
   if (part) {
     if (part > 4) {
+#if defined(DEBUG_SD_ERROR)
+	Com::printErrorFLN(PSTR("volume init: illegal part"));
+#endif		
       DBG_FAIL_MACRO;
       goto fail;
     }
     pc = cacheFetch(volumeStartBlock, CACHE_FOR_READ);
     if (!pc) {
+#if defined(DEBUG_SD_ERROR)
+		Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
+#endif
       DBG_FAIL_MACRO;
       goto fail;
     }
@@ -4245,6 +4284,9 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
       p->totalSectors < 100 ||
       p->firstSector == 0) {
       // not a valid partition
+#if defined(DEBUG_SD_ERROR)
+		Com::printErrorFLN(PSTR("volume init: invalid partition"));
+#endif
       DBG_FAIL_MACRO;
       goto fail;
     }
@@ -4252,6 +4294,9 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   }
   pc = cacheFetch(volumeStartBlock, CACHE_FOR_READ);
   if (!pc) {
+#if defined(DEBUG_SD_ERROR)
+Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
+#endif
     DBG_FAIL_MACRO;
     goto fail;
   }
@@ -4261,6 +4306,13 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
     fbs->reservedSectorCount == 0 ||
     fbs->sectorsPerCluster == 0) {
        // not valid FAT volume
+#if defined(DEBUG_SD_ERROR)
+	Com::printErrorFLN(PSTR("volume init: not a valid FAT volume"));
+	Com::printFLN(PSTR("BytesPerSector:"),fbs->bytesPerSector);
+	Com::printFLN(PSTR("fatCount:"),fbs->fatCount);
+	Com::printFLN(PSTR("reservedSectorCount:"),fbs->reservedSectorCount);
+	Com::printFLN(PSTR("sectorsPerCluster:"),fbs->sectorsPerCluster);
+#endif
       DBG_FAIL_MACRO;
       goto fail;
   }
@@ -4303,6 +4355,9 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   if (clusterCount_ < 4085) {
     fatType_ = 12;
     if (!FAT12_SUPPORT) {
+#if defined(DEBUG_SD_ERROR)
+		Com::printErrorFLN(PSTR("volume init: No FAT 12 support"));
+#endif
       DBG_FAIL_MACRO;
       goto fail;
     }
@@ -4315,6 +4370,9 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   return true;
 
  fail:
+#if defined(DEBUG_SD_ERROR)
+   Com::printErrorFLN(PSTR("SD volume open failed"));
+#endif
   return false;
 }
 // =============== SdFile.cpp ====================

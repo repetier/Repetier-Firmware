@@ -428,7 +428,7 @@ void GCode::readFromSerial()
         }
     }
 #if SDSUPPORT
-    if(sd.sdmode == 0 || commandsReceivingWritePosition != 0)   // not reading or incoming serial command
+    if(sd.sdmode == 0 || sd.sdmode >= 100 || commandsReceivingWritePosition != 0)   // not reading or incoming serial command
         return;
     while( sd.filesize > sd.sdpos && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
@@ -706,6 +706,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     char c;
     while ( (c = *(pos++)) )
     {
+        if(c == '(' || c == '%') break; // alternative comment or program block
         switch(c)
         {
         case 'N':
@@ -731,7 +732,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
             params |= 2;
             if(M > 255) params |= 4096;
             // handle non standard text arguments that some M codes have
-            if (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117)
+            if (M == 20 || M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 36 || M == 117)
             {
                 // after M command we got a filename or text
                 char digit;
@@ -749,7 +750,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
                 text = pos;
                 while (*pos)
                 {
-                    if((M != 117 && *pos==' ') || *pos=='*') break;
+                    if((M != 117 && M != 20 && *pos==' ') || *pos=='*') break;
                     pos++; // find a space as file name end
                 }
                 *pos = 0; // truncate filename by erasing space with nul, also skips checksum
@@ -850,7 +851,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         {
             uint8_t checksum_given = parseLongValue(pos);
             uint8_t checksum = 0;
-            while(line != (pos-1)) checksum ^= *line++;
+            while(line != (pos - 1)) checksum ^= *line++;
 #if FEATURE_CHECKSUM_FORCED
             Printer::flag0 |= PRINTER_FLAG0_FORCE_CHECKSUM;
 #endif
@@ -869,12 +870,12 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         }// end switch
     }// end while
 
-    if(hasFormatError() || (params & 518)==0)   // Must contain G, M or T command and parameter need to have variables!
+    if(hasFormatError() || (params & 518) == 0)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;
         if(Printer::debugErrors())
             Com::printErrorFLN(Com::tFormatError);
-        if(formatErrors<3) return false;
+        if(formatErrors < 3) return false;
     }
     else formatErrors = 0;
     return true;
@@ -952,3 +953,193 @@ void GCode::printCommand()
     }
     Com::println();
 }
+
+#if JSON_OUTPUT
+
+// --------------------------------------------------------------- //
+// Code that gets gcode information is adapted from RepRapFirmware //
+// Originally licenced under GPL                                   //
+// Authors: reprappro, dc42, dcnewman, others                      //
+// Source: https://github.com/dcnewman/RepRapFirmware              //
+// Copy date: 15 Nov 2015                                          //
+// --------------------------------------------------------------- //
+
+void GCodeFileInfo::init(SdBaseFile &file) {
+	this->fileSize = file.fileSize();
+	this->filamentNeeded = 0.0;
+	this->objectHeight = 0.0;
+	this->layerHeight = 0.0;
+	if (!file.isOpen()) return;
+	bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
+	#if CPU_ARCH==ARCH_AVR
+	#define GCI_BUF_SIZE 120
+	#else
+	#define GCI_BUF_SIZE 1024
+	#endif
+	// READ 4KB FROM THE BEGINNING
+	char buf[GCI_BUF_SIZE];
+	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+		if(!file.seekSet(i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+	}
+
+	// READ 4KB FROM END
+	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+		if(!file.seekEnd(-4096 + i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+	}
+	
+	get_objectHeight:
+	// MOVE FROM END UP IN 1KB BLOCKS UP TO 30KB
+	for (int i = GCI_BUF_SIZE; i < 30000; i += GCI_BUF_SIZE-50) {
+		if(!file.seekEnd(-i)) break;
+		file.read(buf, GCI_BUF_SIZE);
+		if (findTotalHeight(buf, this->objectHeight)) break;
+	}
+	file.seekSet(0);
+}
+
+bool GCodeFileInfo::findGeneratedBy(char *buf, char *genBy) {
+    // Slic3r & S3D
+    const char* generatedByString = PSTR("generated by ");
+    char* pos = strstr_P(buf, generatedByString);
+    if (pos) {
+        pos += strlen_P(generatedByString);
+        size_t i = 0;
+        while (i < GENBY_SIZE - 1 && *pos >= ' ') {
+            char c = *pos++;
+            if (c == '"' || c == '\\') {
+                // Need to escape the quote-mark for JSON
+                if (i > GENBY_SIZE - 3) break;
+                genBy[i++] = '\\';
+            }
+            genBy[i++] = c;
+        }
+        genBy[i] = 0;
+        return true;
+    }
+
+    // CURA
+    const char* slicedAtString = PSTR(";Sliced at: ");
+    pos = strstr_P(buf, slicedAtString);
+    if (pos) {
+        strcpy_P(genBy, PSTR("Cura"));
+        return true;
+    }
+
+    // UNKNOWN
+    strcpy_P(genBy, PSTR("Unknown"));
+    return false;
+}
+
+bool GCodeFileInfo::findLayerHeight(char *buf, float &layerHeight) {
+    // SLIC3R
+	layerHeight = 0;
+    const char* layerHeightSlic3r = PSTR("; layer_height ");
+    char *pos = strstr_P(buf, layerHeightSlic3r);
+    if (pos) {
+        pos += strlen_P(layerHeightSlic3r);
+        while (*pos == ' ' || *pos == 't' || *pos == '=' || *pos == ':') {
+            ++pos;
+        }
+        layerHeight = strtod(pos, NULL);
+        return true;
+    }
+
+    // CURA
+    const char* layerHeightCura = PSTR("Layer height: ");
+    pos = strstr_P(buf, layerHeightCura);
+    if (pos) {
+        pos += strlen_P(layerHeightCura);
+        while (*pos == ' ' || *pos == 't' || *pos == '=' || *pos == ':') {
+            ++pos;
+        }
+        layerHeight = strtod(pos, NULL);
+        return true;
+    }
+
+    return false;
+}
+
+bool GCodeFileInfo::findFilamentNeed(char *buf, float &filament) {
+    const char* filamentUsedStr = PSTR("filament used");
+    const char* pos = strstr_P(buf, filamentUsedStr);
+	filament = 0;
+    if (pos != NULL) {
+        pos += strlen_P(filamentUsedStr);
+        while (*pos == ' ' || *pos == 't' || *pos == '=' || *pos == ':') {
+            ++pos;    // this allows for " = " from default slic3r comment and ": " from default Cura comment
+        }
+        if (isDigit(*pos)) {
+            char *q;
+            filament += strtod(pos, &q);
+            if (*q == 'm' && *(q + 1) != 'm') {
+                filament *= 1000.0;        // Cura outputs filament used in metres not mm
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool GCodeFileInfo::findTotalHeight(char *buf, float &height) {
+    int len = 1024;
+    bool inComment, inRelativeMode = false;
+    unsigned int zPos;
+    for (int i = len - 5; i > 0; i--) {
+        if (inRelativeMode) {
+            inRelativeMode = !(buf[i] == 'G' && buf[i + 1] == '9' && buf[i + 2] == '1' && buf[i + 3] <= ' ');
+        } else if (buf[i] == 'G') {
+            // Ignore G0/G1 codes if absolute mode was switched back using G90 (typical for Cura files)
+            if (buf[i + 1] == '9' && buf[i + 2] == '0' && buf[i + 3] <= ' ') {
+                inRelativeMode = true;
+            } else if ((buf[i + 1] == '0' || buf[i + 1] == '1') && buf[i + 2] == ' ') {
+                // Look for last "G0/G1 ... Z#HEIGHT#" command as generated by common slicers
+                // Looks like we found a controlled move, however it could be in a comment, especially when using slic3r 1.1.1
+                inComment = false;
+                size_t j = i;
+                while (j != 0) {
+                    --j;
+                    char c = buf[j];
+                    if (c == '\n' || c == '\r') break;
+                    if (c == ';') {
+                        // It is in a comment, so give up on this one
+                        inComment = true;
+                        break;
+                    }
+                }
+                if (inComment) continue;
+
+                // Find 'Z' position and grab that value
+                zPos = 0;
+                for (int j = i + 3; j < len - 2; j++) {
+                    char c = buf[j];
+                    if (c < ' ') {
+                        // Skip all whitespaces...
+                        while (j < len - 2 && c <= ' ') {
+                            c = buf[++j];
+                        }
+                        // ...to make sure ";End" doesn't follow G0 .. Z#HEIGHT#
+                        if (zPos != 0) {
+                            //debugPrintf("Found at offset %u text: %.100s\n", zPos, &buf[zPos + 1]);
+                            height = strtod(&buf[zPos + 1], NULL);
+                            return true;
+                        }
+                        break;
+                    } else if (c == ';') break;
+                    else if (c == 'Z') zPos = j;
+                }
+            }
+        }
+    }
+    return false;
+}
+#endif // JSON_OUTPUT

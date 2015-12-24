@@ -94,6 +94,7 @@ union wizardVar
 #define PRINTER_FLAG2_DEBUG_JAM             16
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 #define PRINTER_FLAG2_HOMING                64
+#define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -106,7 +107,7 @@ union wizardVar
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
-// Some dfines to make clearer reading, as we overload these cartesion memory locations for delta
+// Some defines to make clearer reading, as we overload these cartesian memory locations for delta
 #define towerAMaxSteps Printer::xMaxSteps
 #define towerBMaxSteps Printer::yMaxSteps
 #define towerCMaxSteps Printer::zMaxSteps
@@ -127,9 +128,9 @@ public:
     void updateDerived();
     void reportStatus();
 private:
-    INLINE int matrixIndex(fast8_t x, fast8_t y) const;
-    INLINE int32_t getMatrix(int index) const;
-    INLINE void setMatrix(int32_t val, int index);
+    int matrixIndex(fast8_t x, fast8_t y) const;
+    int32_t getMatrix(int index) const;
+    void setMatrix(int32_t val, int index);
     bool isCorner(fast8_t i, fast8_t j) const;
     INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
@@ -188,7 +189,7 @@ public:
     static INLINE void fillFromAccumulator() {
         lastState = accumulator;
 #ifdef EXTENDED_ENDSTOPS
-        lastState = accumulator2;
+        lastState2 = accumulator2;
 #endif
     }
     static INLINE bool xMin() {
@@ -249,8 +250,21 @@ public:
     }
 };
 
+#ifndef DEFAULT_PRINTER_MODE
+#if NUM_EXTRUDER > 0
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
+#elif defined(SUPPORT_LASER) && SUPPORT_LASER
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_LASER
+#elif defined(SUPPORT_CNC) && SUPPORT_CNC
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_CNC
+#else
+#error No supported printer mode compiled
+#endif
+#endif
+
 class Printer
 {
+    static uint8_t debugLevel;
 public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -274,11 +288,12 @@ public:
     static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
     static uint8_t unitIsInches;
+    static uint8_t mode;
+    static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
-    static uint8_t debugLevel;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2;
-    static uint8_t stepsPerTimerCall;
+    static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;         ///< Step number in current move.
@@ -315,13 +330,17 @@ public:
     static int32_t stepsRemainingAtXHit;
     static int32_t stepsRemainingAtYHit;
 #endif
-#if SOFTWARE_LEVELING
+#ifdef SOFTWARE_LEVELING
     static int32_t levelingP1[3];
     static int32_t levelingP2[3];
     static int32_t levelingP3[3];
 #endif
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
+#endif
+#if FAN_THERMO_PIN > -1
+	static float thermoMinTemp;
+	static float thermoMaxTemp;
 #endif
     static int16_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
@@ -383,7 +402,7 @@ public:
         if(highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
-
+    static void reportPrinterMode();
     static INLINE void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -396,7 +415,14 @@ public:
     {
         return (menuMode & mode) == mode;
     }
-
+	static void setDebugLevel(uint8_t newLevel);
+	static void toggleEcho();
+	static void toggleInfo();
+	static void toggleErrors();
+	static void toggleDryRun();
+	static void toggleCommunication();
+	static void toggleNoMoves();
+	static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
         return ((debugLevel & 1) != 0);
@@ -434,14 +460,16 @@ public:
 
     static INLINE void debugSet(uint8_t flags)
     {
-        debugLevel |= flags;
+        setDebugLevel(debugLevel | flags);
     }
 
     static INLINE void debugReset(uint8_t flags)
     {
-        debugLevel &= ~flags;
+        setDebugLevel(debugLevel & ~flags);
     }
-
+    /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
+    static void setFanSpeedDirectly(uint8_t speed);
+    static void setFan2SpeedDirectly(uint8_t speed);
     /** \brief Disable stepper motor for x direction. */
     static INLINE void disableXStepper()
     {
@@ -720,6 +748,15 @@ public:
     {
         flag2 = (b ? flag2 | PRINTER_FLAG2_HOMING : flag2 & ~PRINTER_FLAG2_HOMING);
     }
+    static INLINE uint8_t isAllEMotors()
+    {
+        return flag2 & PRINTER_FLAG2_ALL_E_MOTORS;
+    }
+
+    static INLINE void setAllEMotors(uint8_t b)
+    {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_ALL_E_MOTORS : flag2 & ~PRINTER_FLAG2_ALL_E_MOTORS);
+    }
 
     static INLINE uint8_t isDebugJam()
     {
@@ -767,8 +804,8 @@ public:
     static INLINE void unsetAllSteppersDisabled()
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
-#if FAN_BOARD_PIN>-1
-        pwm_pos[NUM_EXTRUDER + 1] = 255;
+#if FAN_BOARD_PIN > -1
+        pwm_pos[PWM_BOARD_FAN] = 255;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()
@@ -1018,7 +1055,11 @@ public:
     static bool isPositionAllowed(float x,float y,float z);
     static INLINE int getFanSpeed()
     {
-        return (int)pwm_pos[NUM_EXTRUDER + 2];
+        return (int)pwm_pos[PWM_FAN1];
+    }
+    static INLINE int getFan2Speed()
+    {
+	    return (int)pwm_pos[PWM_FAN2];
     }
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
@@ -1068,6 +1109,9 @@ public:
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
+#if JSON_OUTPUT
+    static void showJSONStatus(int type);
+#endif
 private:
     static void homeXAxis();
     static void homeYAxis();

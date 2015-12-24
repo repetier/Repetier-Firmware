@@ -791,7 +791,7 @@ void EEPROM::init()
                 if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
                     HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
             }
-            Com::printFLN(PSTR("EEprom baud rate restored from configuration."));
+            Com::printFLN(PSTR("EEPROM baud rate restored from configuration."));
             Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
         }
     }

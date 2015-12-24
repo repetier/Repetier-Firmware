@@ -50,6 +50,21 @@ Each of the following events describe the parameter and when it is called.
 // Gets called if a nextPrevius actions gets executed.
 #define EVENT_START_NEXTPREVIOUS(action,increment) {}
 
+// Called to initalize laser pins. Return false to prevent default initalization.
+#define EVENT_INITALIZE_LASER true
+// Set laser to intensity level 0 = off, 255 = full. Return false if you have overridden the setting routine.
+// with true the default solution will set it as digital value.
+#define EVENT_SET_LASER(intensity) true
+
+// Called to initalize cnc pins. Return false to prevent default initalization.
+#define EVENT_INITALIZE_CNC true
+// Turn off spindle
+#define EVENT_SPINDLE_OFF true
+// Turn spindle clockwise
+#define EVENT_SPINDLE_CW(rpm) true
+// Turn spindle counter clockwise
+#define EVENT_SPINDLE_CCW(rpm) true
+
 // Allow adding new G and M codes. To implement it create a function
 // bool eventUnhandledGCode(GCode *com)
 // that returns true if it handled the code, otherwise false.

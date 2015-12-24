@@ -23,7 +23,8 @@
 #define _REPETIER_H
 
 #include <math.h>
-#define REPETIER_VERSION "0.92.5"
+#include <stdint.h>
+#define REPETIER_VERSION "0.92.6"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -62,6 +63,8 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 //#define DEBUG_SEGMENT_LENGTH
 // Find the maximum real jerk during a print
 //#define DEBUG_REAL_JERK
+// Debug reason for not mounting a sd card
+//#define DEBUG_SD_ERROR
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 
@@ -176,7 +179,25 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
+#define PRINTER_MODE_FFF 0
+#define PRINTER_MODE_LASER 1
+#define PRINTER_MODE_CNC 2
+// we can not prevent this as some configs need a parameter and others not
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include "Configuration.h"
+
+inline void memcopy2(void *dest,void *source) {
+	*((int16_t*)dest) = *((int16_t*)source);
+}
+inline void memcopy4(void *dest,void *source) {
+	*((int32_t*)dest) = *((int32_t*)source);
+}
+
+#ifndef JSON_OUTPUT
+#define JSON_OUTPUT 0
+#endif
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
 #error You need to define Z_PROBE_PIN to use z probe!
@@ -243,10 +264,12 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (FEATURE_SOFTWARE_LEVELING && (DRIVE_SYSTEM==DELTA))
+#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
+#ifndef ROD_RADIUS
 #define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
+#endif
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
@@ -334,7 +357,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT0_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>1 && EXT1_TEMPSENSOR_TYPE < 101
+#if NUM_EXTRUDER > 1 && EXT1_TEMPSENSOR_TYPE < 101
 #define EXT1_ANALOG_INPUTS 1
 #define EXT1_SENSOR_INDEX EXT0_ANALOG_INPUTS
 #define EXT1_ANALOG_CHANNEL ACCOMMA0 EXT1_TEMPSENSOR_PIN
@@ -346,7 +369,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT1_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>2 && EXT2_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 2 && EXT2_TEMPSENSOR_TYPE<101
 #define EXT2_ANALOG_INPUTS 1
 #define EXT2_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS
 #define EXT2_ANALOG_CHANNEL ACCOMMA1 EXT2_TEMPSENSOR_PIN
@@ -382,7 +405,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define EXT4_ANALOG_CHANNEL
 #endif
 
-#if NUM_EXTRUDER>5 && EXT5_TEMPSENSOR_TYPE<101
+#if NUM_EXTRUDER > 5 && EXT5_TEMPSENSOR_TYPE<101
 #define EXT5_ANALOG_INPUTS 1
 #define EXT5_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS
 #define EXT5_ANALOG_CHANNEL ACCOMMA4 EXT5_TEMPSENSOR_PIN
@@ -398,12 +421,22 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
-#undef KOMMA
-#define KOMMA ,
+#undef BEKOMMA
+#define BED_KOMMA ,
 #else
 #define BED_ANALOG_INPUTS 0
 #define BED_SENSOR_INDEX HEATED_BED_SENSOR_PIN
 #define BED_ANALOG_CHANNEL
+#define BED_KOMMA ACCOMMA5
+#endif
+
+#if FAN_THERMO_THERMISTOR_PIN > -1 && FAN_THERMO_PIN > -1
+#define THERMO_ANALOG_INPUTS 1
+#define THERMO_ANALOG_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS
+#define THERMO_ANALOG_CHANNEL BED_KOMMA FAN_THERMO_THERMISTOR_PIN
+#else
+#define THERMO_ANALOG_INPUTS 0
+#define THERMO_ANALOG_CHANNEL
 #endif
 
 #ifndef DEBUG_FREE_MEMORY
@@ -413,10 +446,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #endif
 
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
-#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS)
-#if ANALOG_INPUTS>0
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS)
+#if ANALOG_INPUTS > 0
 /** Channels are the MUX-part of ADMUX register */
-#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL}
+#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL}
 #endif
 
 #define MENU_MODE_SD_MOUNTED 1
@@ -456,7 +489,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
 #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN==UI_DISPLAY_D5_PIN || USER_KEY1_PIN==UI_DISPLAY_D6_PIN || USER_KEY1_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN==UI_DISPLAY_D5_PIN || USER_KEY2_PIN==UI_DISPLAY_D6_PIN || USER_KEY2_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN==UI_DISPLAY_D5_PIN || USER_KEY3_PIN==UI_DISPLAY_D6_PIN || USER_KEY3_PIN==UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN==UI_DISPLAY_D5_PIN || USER_KEY4_PIN==UI_DISPLAY_D6_PIN || USER_KEY4_PIN==UI_DISPLAY_D7_PIN))
-#error "You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display"
+#error You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display
 #endif
 #endif
 
@@ -741,8 +774,16 @@ extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 //extern uint8 osAnalogInputPos; // Current sampling position
+#if ANALOG_INPUTS > 0
 extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-extern uint8_t pwm_pos[NUM_EXTRUDER+3]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
+#endif
+#define PWM_HEATED_BED NUM_EXTRUDER
+#define PWM_BOARD_FAN PWM_HEATED_BED+1
+#define PWM_FAN1 PWM_BOARD_FAN+1
+#define PWM_FAN2 PWM_FAN1+1
+#define PWM_FAN_THERMO PWM_FAN2+1
+#define NUM_PWM PWM_FAN_THERMO+1
+extern uint8_t pwm_pos[NUM_PWM]; // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
 extern int maxadv;
@@ -784,10 +825,6 @@ extern void microstepInit();
 #include "Printer.h"
 #include "motion.h"
 extern long baudrate;
-#if OS_ANALOG_INPUTS>0
-// Get last result for pin x
-extern volatile uint osAnalogInputValues[OS_ANALOG_INPUTS];
-#endif
 
 #include "HAL.h"
 
@@ -796,8 +833,12 @@ extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
 extern uint8_t counter250ms;
 extern void writeMonitor();
+#if FEATURE_FAN_CONTROL
 extern uint8_t fanKickstart;
-
+#endif
+#if FEATURE_FAN2_CONTROL
+extern uint8_t fan2Kickstart;
+#endif
 
 #if SDSUPPORT
 extern char tempLongFilename[LONG_FILENAME_LENGTH+1];
@@ -815,6 +856,9 @@ public:
     //SdFile root;
     //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
     SdFile file;
+#if JSON_OUTPUT
+    GCodeFileInfo fileInfo;
+#endif
     uint32_t filesize;
     uint32_t sdpos;
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
@@ -844,6 +888,11 @@ public:
     }
     void printStatus();
     void ls();
+#if JSON_OUTPUT
+    void lsJSON(const char *filename);
+    void JSONFileInfo(const char *filename);
+    static void printEscapeChars(const char *s);
+#endif
     void startWrite(char *filename);
     void deleteFile(char *filename);
     void finishWrite();

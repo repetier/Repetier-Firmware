@@ -28,10 +28,10 @@
 #define FLAG_WARMUP 1
 #define FLAG_NOMINAL 2
 #define FLAG_DECELERATING 4
-#define FLAG_ACCELERATION_ENABLED 8
+#define FLAG_ACCELERATION_ENABLED 8 // unused
 #define FLAG_CHECK_ENDSTOPS 16
-#define FLAG_SKIP_ACCELERATING 32
-#define FLAG_SKIP_DEACCELERATING 64
+#define FLAG_ALL_E_MOTORS 32 // For mixed extruder move all motors instead of selected motor
+#define FLAG_SKIP_DEACCELERATING 64 // unused
 #define FLAG_BLOCKED 128
 
 /** Are the step parameter computed */
@@ -174,10 +174,11 @@ public:
     static ufast8_t linesWritePos; // Position where we write the next cached line move
     ufast8_t joinFlags;
     volatile ufast8_t flags;
+    uint8_t secondSpeed; // for laser intensity or fan control
 private:
     fast8_t primaryAxis;
-    int32_t timeInTicks;
     ufast8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+    int32_t timeInTicks;
     int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
     int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
@@ -282,6 +283,9 @@ public:
     {
         return flags & FLAG_BLOCKED;
     }
+    inline bool isAllEMotors() {
+        return flags & FLAG_ALL_E_MOTORS;
+    }
     inline bool isCheckEndstops()
     {
         return flags & FLAG_CHECK_ENDSTOPS;
@@ -298,6 +302,7 @@ public:
     {
         if(isCheckEndstops())
         {
+			Endstops::update();
             if(isXNegativeMove() && Endstops::xMin())
                 setXMoveFinished();
             else if(isXPositiveMove() && Endstops::xMax())
@@ -327,10 +332,13 @@ public:
                 }
         }
 #if FEATURE_Z_PROBE
-        else if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
-        {
-            setZMoveFinished();
-            Printer::stepsRemainingAtZHit = stepsRemaining;
+        else if(Printer::isZProbingActive() && isZNegativeMove()) {
+			Endstops::update();
+			if(Endstops::zProbe())
+			{
+				setZMoveFinished();
+				Printer::stepsRemainingAtZHit = stepsRemaining;
+			}
         }
 #endif
     }
@@ -580,7 +588,7 @@ public:
         Printer::startZStep();
 #else
 #if DRIVE_SYSTEM == XZ_GANTRY
-        if(isYPositiveMove())
+        if(isZPositiveMove())
         {
             Printer::motorX++;
             Printer::motorYorZ--;
@@ -592,7 +600,7 @@ public:
         }
 #endif
 #if DRIVE_SYSTEM == ZX_GANTRY
-        if(isYPositiveMove())
+        if(isZPositiveMove())
         {
             Printer::motorX++;
             Printer::motorYorZ++;

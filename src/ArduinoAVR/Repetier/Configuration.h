@@ -48,8 +48,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 /** Number of extruders. Maximum 6 extruders. */
 #define NUM_EXTRUDER 1
 
-/** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. In that case only
-setpe per mm and heater manager settings in extruder 0 are used! */
+/** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. */
 #define MIXING_EXTRUDER 0
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
@@ -63,6 +62,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
+// 3Drag/Velleman K8200       = 66 (experimental)
 // Open Motion Controller     = 91
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Azteeg X1                  = 65
@@ -128,6 +128,11 @@ Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get resu
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM 0
+
+/* You can write some gcode to be executed on startup. Use this e.g. to set some 
+pins. Separate multiple gcodes with \n
+*/
+//#define STARTUP_GCODE ""
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -232,6 +237,7 @@ Overridden if EEPROM activated.*/
 // 3 is mendel-parts thermistor (EPCOS G550)
 // 4 is 10k thermistor
 // 8 is ATC Semitec 104GT-2
+// 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
@@ -722,6 +728,61 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
 
+// ##########################################################################################
+// ##                             Laser configuration                                      ##
+// ##########################################################################################
+
+/*
+If the firmware is in laser mode, it can control a laser output to cut or engrave materials.
+Please use this feature only if you know about safety and required protection. Lasers are
+dangerous and can hurt or make you blind!!!
+
+The default laser driver only supports laser on and off. Here you control the eíntensity with
+your feedrate. For exchangeable diode lasers this is normally enough. If you need more control
+you can set the intensity in a range 0-255 with a custom extension to the driver. See driver.h
+and comments on how to extend the functions non invasive with our event system.
+
+If you have a laser - powder system you will like your E override. If moves contain a 
+increasing extruder position it will laser that move. With this trick you can
+use existing fdm slicers to laser the output. Laser width is extrusion width.
+
+Other tools may use M3 and M5 to enable/disable laser. Here G1/G2/G3 moves have laser enabled
+and G0 moves have it disables.
+
+In any case, laser only enables while moving. At the end of a move it gets
+automatically disabled. 
+*/
+
+#define SUPPORT_LASER 0 // set 1 to enable laser support
+#define LASER_PIN -1    // set to pin enabling laser
+#define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+
+// ##########################################################################################
+// ##                              CNC configuration                                       ##
+// ##########################################################################################
+
+/*
+If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works 
+similar to laser mode, but mill keeps enabled during G0 moves and it allows
+setting rpm (only with event extension that supports this) and milling direction.
+It also can add a delay to wait for spindle to run on full speed.
+*/
+
+#define SUPPORT_CNC 0 // Set 1 for cnc support
+#define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
+#define CNC_WAIT_ON_DISABLE 0 // delay in milliseconds after disabling spindle. May be required for direction changes.
+#define CNC_ENABLE_PIN -1 // Pin to enable mill
+#define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
+#define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
+#define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
+
+
+/* Select the default mode when the printer gets enables. Possible values are
+PRINTER_MODE_FFF 0
+PRINTER_MODE_LASER 1
+PRINTER_MODE_CNC 2
+*/
+#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
 
 // ##########################################################################################
 // ##                            Endstop configuration                                     ##
@@ -1473,6 +1534,33 @@ the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN 
 is also used for the heater if you have 2 extruders connected. */
 #define FEATURE_FAN_CONTROL 1
 
+/* You can have a second fan controlled by adding P1 to M106/M107 command. */
+#define FEATURE_FAN2_CONTROL 0
+//#define FAN2_PIN ORIG_FAN2_PIN
+
+/* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan 
+goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
+//#undef FAN_BOARD_PIN
+//#define FAN_BOARD_PIN ORIG_FAN_PIN
+
+/* You can have one additional fan controlled by a temperature. You can set
+   set at which temperature it should turn on and at which it should reach max. speed.
+*/
+#define FAN_THERMO_PIN -1
+#define FAN_THERMO_MIN_PWM 128
+#define FAN_THERMO_MAX_PWM 255
+#define FAN_THERMO_MIN_TEMP 45
+#define FAN_THERMO_MAX_TEMP 60
+// Analog pin number or channel for due boards
+#define FAN_THERMO_THERMISTOR_PIN -1
+#define FAN_THERMO_THERMISTOR_TYPE 1
+
+/** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
+ * This essentially adds command M36/M408 and extends M20.
+ * Since it requires some memory do not enable it unless you have such a display!
+ *  */
+#define FEATURE_JSON 0
+
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so
 you don't need to configure uicong.h at all. Controller settings > 1 disable usage
@@ -1518,6 +1606,7 @@ the language can be switched any time. */
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 1 // Czech
 #define LANGUAGE_PL_ACTIVE 1 // Polish
+#define LANGUAGE_TR_ACTIVE 1 // Turkish
 
 /* Some displays loose their settings from time to time. Try uncommenting the
 autorepair function if this is the case. It is not supported for all display

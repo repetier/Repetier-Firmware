@@ -19,22 +19,23 @@
 #define _GCODE_H
 
 #define MAX_CMD_SIZE 96
+#define ARRAY_SIZE(_x)	(sizeof(_x)/sizeof(_x[0]))
 class SDCard;
 class GCode   // 52 uint8_ts per command needed
 {
-    unsigned int params;
-    unsigned int params2;
+    uint16_t params;
+    uint16_t params2;
 public:
-    unsigned int N; // Line number
-    unsigned int M;
-    unsigned int G;
+    uint16_t N; // Line number
+    uint16_t M;
+    uint16_t G;
     float X;
     float Y;
     float Z;
     float E;
     float F;
-    long S;
-    long P;
+    int32_t S;
+    int32_t P;
     float I;
     float J;
     float R;
@@ -191,6 +192,7 @@ private:
     inline float parseFloatValue(char *s)
     {
         char *endPtr;
+        while(*s == 32) s++; // skip spaces
         float f = (strtod(s, &endPtr));
         if(s == endPtr) f=0.0; // treat empty string "x " as "x0"
         return f;
@@ -198,6 +200,7 @@ private:
     inline long parseLongValue(char *s)
     {
         char *endPtr;
+        while(*s == 32) s++; // skip spaces
         long l = (strtol(s, &endPtr, 10));
         if(s == endPtr) l=0; // treat empty string argument "p " as "p0"
         return l;
@@ -221,6 +224,26 @@ private:
     static uint8_t formatErrors; ///< Number of sequential format errors
 };
 
+#if JSON_OUTPUT
+#include "SdFat.h"
+// Struct to hold Gcode file information 32 bytes
+#define GENBY_SIZE 16
+class GCodeFileInfo {
+public:
+    void init(SdBaseFile &file);
+
+    unsigned long fileSize;
+    float objectHeight;
+    float layerHeight;
+    float filamentNeeded;
+    char generatedBy[GENBY_SIZE];
+
+    bool findGeneratedBy(char *buf, char *genBy);
+    bool findLayerHeight(char *buf, float &layerHeight);
+    bool findFilamentNeed(char *buf, float &filament);
+    bool findTotalHeight(char *buf, float &objectHeight);
+};
+#endif
 
 #endif
 
