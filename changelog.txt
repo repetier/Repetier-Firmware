@@ -16,6 +16,7 @@ Version 0.92
   Event system for lights etc.
   New homing sequence with preheat for nozzle based z sensors.
   Language selectable on runtime.
+  Fix structure for Arduino 1.6.7
 
 Version 0.91.8
   New languages french and Czech

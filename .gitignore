@@ -27,3 +27,4 @@ Configuration_*.h
 Repetier.depend
 Repetier.layout
 activate*.bat
+src/Repetier-Atmel7/*
