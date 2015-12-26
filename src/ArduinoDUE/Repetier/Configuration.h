@@ -1426,6 +1426,40 @@ Always hard to say since the other angle is 89° in this case!
 #define AXISCOMP_TANYZ 0
 #define AXISCOMP_TANXZ 0
 
+/* Experimental motorized bed leveling (G33 command) for printers with three individual motors for the z axis (print bed).
+   You do need a working Z probe (FEATURE_Z_PROBE) and three individual steppers (FEATURE_TWO_ZSTEPPER and FEATURE_THREE_ZSTEPPER)
+   for this feature to work.
+
+   This feature does NOT work and is not necessary for delta printers as there is no motorized bed.
+*/
+#define FEATURE_MOTORIZED_LEVELING 1
+#define MOTORIZED_LEVELING_REPETITIONS 3  // Repetitions of leveling for increased precision
+#define MOTORIZED_LEVELING_ITERATIONS  5  // max. number of leveling iterations per leveling repetition
+#define MOTORIZED_LEVELING_MAX_ERROR 0.1f // max. error allowed (in millimeters) when leveling z axis
+
+/* Z1 motor driver is the reference point for motorized bed leveling. Z2_DRIVER and Z3_DRIVER are the other stepper drivers.
+   The order of the steppers is important as it does have a effect on the levling precision. As the steppers are aligned as a
+   triangle you should level them in the following order:
+
+      3
+     / \
+    1---2
+    
+*/
+#define Z2_DRIVER(var) StepperDriver<Z3_STEP_PIN, Z3_DIR_PIN, Z3_ENABLE_PIN, INVERT_Z_DIR, Z_ENABLE_ON> var(ZAXIS_STEPS_PER_MM,MAX_FEEDRATE_Z/2)
+#define Z3_DRIVER(var) StepperDriver<Z2_STEP_PIN, Z2_DIR_PIN, Z2_ENABLE_PIN, INVERT_Z_DIR, Z_ENABLE_ON> var(ZAXIS_STEPS_PER_MM,MAX_FEEDRATE_Z/2)
+
+/* Positions of the axis/spindles of z axis in cartesian coordinates. This coordinates are used to calculate the height offset for 
+   motorized bed leveling more precise. The print head does not move to this position, so it is safe to use coordinates outside
+   print area.
+*/
+#define Z1_X -60.5
+#define Z1_Y  30.0
+#define Z2_X 285.5  
+#define Z2_Y  30.0
+#define Z3_X 135.0
+#define Z3_Y 340.0
+
 /** \brief Experimental calibration utility for delta printers
  * Change 1 to 0 to disable
 */

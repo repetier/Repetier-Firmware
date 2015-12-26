@@ -928,6 +928,39 @@ void Commands::processArc(GCode *com)
 }
 #endif
 
+void doZProbe(bool probePoint1, bool probePoint2, bool probePoint3, float& h1, float& h2, float& h3)
+{
+    if (probePoint1)
+    {
+      Printer::moveTo(EEPROM::zProbeX1(),EEPROM::zProbeY1(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+      h1 = Printer::runZProbe(true,false,Z_PROBE_REPETITIONS,false);
+  //    if(h1 < -1) break;    //TODO: error handling
+      #ifdef ZPROBE_1_BENDING_CORRECTION
+      h1 += ZPROBE_1_BENDING_CORRECTION;
+      #endif
+    }
+
+    if (probePoint2)
+    {
+      Printer::moveTo(EEPROM::zProbeX2(),EEPROM::zProbeY2(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+      h2 = Printer::runZProbe(false,false);
+  //    if(h2 < -1) break;    //TODO: error handling
+      #ifdef ZPROBE_2_BENDING_CORRECTION
+      h2 += ZPROBE_2_BENDING_CORRECTION;
+      #endif  
+    }
+
+    if (probePoint3)
+    {
+      Printer::moveTo(EEPROM::zProbeX3(),EEPROM::zProbeY3(),IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeXYSpeed());
+      h3 = Printer::runZProbe(false,true);
+  //    if(h3 < -1) break;    //TODO: error handling
+      #ifdef ZPROBE_3_BENDING_CORRECTION
+      h3 += ZPROBE_3_BENDING_CORRECTION;
+      #endif  
+    }
+}
+
 /**
   \brief Execute the G command stored in com.
 */
@@ -1213,6 +1246,103 @@ void Commands::processGCode(GCode *com)
     break;
 #endif
 #endif
+
+#if FEATURE_MOTORIZED_LEVELING
+    case 33: // G33 motorized bed leveling
+    {
+        float h1,h2,h3,hDiff,oldFeedrate;
+        float zDelta1,zDelta2,zDelta3,xTemp,yTemp;                  
+        int retries;
+        Z2_DRIVER(z2Motor);
+        Z3_DRIVER(z3Motor);
+
+        z2Motor.initialize();
+        z3Motor.initialize();
+
+        #if DISTORTION_CORRECTION
+        Printer::distortion.disable(true); // if level has changed, distortion is also invalid
+        #endif
+        Printer::setAutolevelActive(false); // autolevel don't need to be reactivated after leveling, because the bed is perfectly leveled then.
+
+        GCode::executeFString(Com::tZProbeStartScript);
+        Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+
+        for (int repetition = 0; repetition < MOTORIZED_LEVELING_REPETITIONS; repetition++)
+        {
+          Com::printFLN(PSTR("Info:Motorized bed leveling repetition "), repetition+1);
+          
+          oldFeedrate = Printer::feedrate;
+  
+          // level second bed stepper
+          retries = 0;
+          do
+          {
+            Com::printFLN(PSTR("Info:leveling z1 and z2, iteration "), retries+1);
+
+            doZProbe(true, true, false, h1, h2, h3);
+
+            // check if the bed is leveled already
+            if (retries == 0)
+            {
+              doZProbe(false, false, true, h1, h2, h3);
+
+              float avg = (h1+h2+h3) / 3.0f;
+              if (abs(h1-avg) <= MOTORIZED_LEVELING_MAX_ERROR && abs(h2-avg) <= MOTORIZED_LEVELING_MAX_ERROR && abs(h3-avg) <= MOTORIZED_LEVELING_MAX_ERROR)
+              {
+                // bed is flat - early out
+                Com::printInfoFLN(PSTR("no more leveling necessary, bed is flat"));
+                Com::printInfoFLN(PSTR("motorized bed leveling completed succesfully"));
+                return;
+              }
+            }
+
+            Printer::buildTransformationMatrix(h1,h2,h3);
+
+            Printer::transformToPrinter(Z1_X,Z1_Y,0,xTemp,yTemp,zDelta1);       //Zn_X and Zn_Y describe the position of the stepper motor axis/spindle in cartesian coordinates
+            Printer::transformToPrinter(Z2_X,Z2_Y,0,xTemp,yTemp,zDelta2);
+
+            hDiff = zDelta2 - zDelta1;
+            Com::printF(PSTR("Info:adjusting z2 by "), hDiff);
+            Com::printFLN(PSTR("mm"));
+  
+            z2Motor.setCurrentAs(0);
+            z2Motor.gotoPosition(hDiff);
+          } while (retries++ < MOTORIZED_LEVELING_ITERATIONS && abs(hDiff) >= MOTORIZED_LEVELING_MAX_ERROR);
+  
+          // level third bed stepper
+          retries = 0;
+          do
+          {
+            Com::printFLN(PSTR("Info:leveling z3 to center of z1 and z2, iteration "), retries+1);
+
+            doZProbe(true, true, true, h1, h2, h3);
+
+            Printer::buildTransformationMatrix(h1,h2,h3);
+
+            Printer::transformToPrinter(Z1_X,Z1_Y,0,xTemp,yTemp,zDelta1);       //Zn_X and Zn_Y describe the position of the stepper motor axis/spindle in cartesian coordinates
+            Printer::transformToPrinter(Z2_X,Z2_Y,0,xTemp,yTemp,zDelta2);
+            Printer::transformToPrinter(Z3_X,Z3_Y,0,xTemp,yTemp,zDelta3);
+
+            hDiff = zDelta3 - ((zDelta1+zDelta2)/2.0f);
+
+            Com::printF(PSTR("Info:adjusting z3 by "), hDiff);
+            Com::printFLN(PSTR("mm"));
+  
+            z3Motor.setCurrentAs(0);
+            z3Motor.gotoPosition(hDiff);
+          } while (retries++ < MOTORIZED_LEVELING_ITERATIONS && abs(hDiff) >= MOTORIZED_LEVELING_MAX_ERROR);
+  
+          Printer::updateDerivedParameter();
+          Printer::updateCurrentPosition(true);
+          printCurrentPosition(PSTR("G33 "));
+          Printer::feedrate = oldFeedrate;
+        }
+
+        Com::printInfoFLN(PSTR("motorized bed leveling completed succesfully"));
+    }
+    break;
+#endif
+
     case 90: // G90
         Printer::relativeCoordinateMode = false;
         if(com->internalCommand)

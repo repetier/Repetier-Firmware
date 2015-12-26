@@ -209,6 +209,18 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 #endif
 
+#if FEATURE_MOTORIZED_LEVELING
+#if DRIVE_SYSTEM == DELTA
+#error FEATURE_MOTORIZED_LEVELING does NOT work for delta printers. Disable FEATURE_MOTORIZED_LEVELING in configuration.h
+#endif
+#if FEATURE_TWO_ZSTEPPER == 0 || FEATURE_THREE_ZSTEPPER == 0
+#error You have to enable and configure FEATURE_TWO_ZSTEPPER and FEATURE_THREE_ZSTEPPER for FEATURE_MOTORIZED_LEVELING to work. Enable FEATURE_TWO_ZSTEPPER and FEATURE_THREE_ZSTEPPER or disable FEATURE_MOTORIZED_LEVELING.
+#endif
+#if !FEATURE_Z_PROBE
+#error FEATURE_MOTORIZED_LEVELING requires the z probe feature to be enabled and configured!
+#endif
+#endif
+
 #ifndef MAX_ROOM_TEMPERATURE
 #define MAX_ROOM_TEMPERATURE 40
 #endif
