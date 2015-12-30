@@ -699,6 +699,20 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_RESET_PIN 66 // was 41 //AE3 was here and added this line 1/25/2014  (Note pin 41 is Y- endstop!)
 #define UI_INVERT_MENU_DIRECTION 1
 
+#elif MOTHERBOARD == 703 // Megatronics v3.0
+
+#define UI_DISPLAY_RS_PIN 32
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 31
+#define UI_DISPLAY_D4_PIN 14
+#define UI_DISPLAY_D5_PIN 30
+#define UI_DISPLAY_D6_PIN 39
+#define UI_DISPLAY_D7_PIN 15
+#define UI_ENCODER_A 45
+#define UI_ENCODER_B 44
+#define UI_ENCODER_CLICK 33
+#define UI_INVERT_MENU_DIRECTION 1
+
 #elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 
 #undef BEEPER_PIN

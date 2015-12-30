@@ -927,7 +927,7 @@ void Commands::processArc(GCode *com)
     PrintLine::arc(position, target, offset, r, isclockwise);
 }
 #endif
-
+extern void runBedLeveling(GCode *com);
 /**
   \brief Execute the G command stored in com.
 */
@@ -1117,7 +1117,10 @@ void Commands::processGCode(GCode *com)
         break;
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
+		runBedLeveling(com);
+#if 0
     {
+		
 #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
 #endif
@@ -1125,7 +1128,7 @@ void Commands::processGCode(GCode *com)
 #if DRIVE_SYSTEM == DELTA
         // It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
-        // For that reason we ensure a correct behaviour by code.
+        // For that reason we ensure a correct behavior by code.
         Printer::homeAxis(true, true, true);
         Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #endif
@@ -1210,8 +1213,16 @@ void Commands::processGCode(GCode *com)
 #endif
         Printer::feedrate = oldFeedrate;
     }
+#endif	
     break;
 #endif
+#endif
+#if DISTORTION_CORRECTION
+	case 33: {
+		float oldFeedrate = Printer::feedrate;
+		Printer::measureDistortion();
+		Printer::feedrate = oldFeedrate;
+	}
 #endif
     case 90: // G90
         Printer::relativeCoordinateMode = false;
