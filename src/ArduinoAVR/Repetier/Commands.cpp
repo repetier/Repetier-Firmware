@@ -1219,10 +1219,23 @@ void Commands::processGCode(GCode *com)
 #endif
 #if DISTORTION_CORRECTION
 	case 33: {
-		float oldFeedrate = Printer::feedrate;
-		Printer::measureDistortion();
-		Printer::feedrate = oldFeedrate;
+		if(com->hasL()) { // G33 L0 - List distortion matrix
+			Printer::distortion.showMatrix();
+		} else if(com->hasR()) { // G33 R0 - Reset distortion matrix
+			Printer::distortion.resetCorrection();
+		} else if(com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
+			if(com->hasX() && com->hasY() && com->hasZ()) {
+				Printer::distortion.set(com->X, com->Y, com->Z);
+			} else {
+				Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
+			}
+		} else { // G33
+			float oldFeedrate = Printer::feedrate;
+			Printer::measureDistortion();
+			Printer::feedrate = oldFeedrate;
+		}
 	}
+		break;
 #endif
     case 90: // G90
         Printer::relativeCoordinateMode = false;

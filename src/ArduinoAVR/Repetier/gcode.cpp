@@ -567,12 +567,12 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     }
     if(isV2())   // Read G,M as 16 bit value
     {
-        if(params & 2)
+        if(hasM())
         {
             M = *(uint16_t *)p;
             p += 2;
         }
-        if(params & 4)
+        if(hasG())
         {
             G = *(uint16_t *)p;
             p += 2;
@@ -580,51 +580,51 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
     }
     else
     {
-        if(params & 2)
+        if(hasM())
         {
             M = *p++;
         }
-        if(params & 4)
+        if(hasG())
         {
             G = *p++;
         }
     }
     //if(code->params & 8) {memcpy(&code->X,p,4);p+=4;}
-    if(params & 8)
+    if(hasX())
     {
         X = *(float *)p;
         p += 4;
     }
-    if(params & 16)
+    if(hasY())
     {
         Y = *(float *)p;
         p += 4;
     }
-    if(params & 32)
+    if(hasZ())
     {
         Z = *(float *)p;
         p += 4;
     }
-    if(params & 64)
+    if(hasE())
     {
         E = *(float *)p;
         p += 4;
     }
-    if(params & 256)
+    if(hasF())
     {
         F = *(float *)p;
         p += 4;
     }
-    if(params & 512)
+    if(hasT())
     {
         T = *p++;
     }
-    if(params & 1024)
+    if(hasS())
     {
         S = *(int32_t*)p;
         p += 4;
     }
-    if(params & 2048)
+    if(hasP())
     {
         P = *(int32_t*)p;
         p += 4;
@@ -846,6 +846,62 @@ bool GCode::parseAscii(char *line,bool fromSerial)
             params2 |= 8;
             params |= 4096; // Needs V2 for saving
             break;
+        }
+        case 'C':
+        case 'c':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 16;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'H':
+        case 'h':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 32;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'A':
+        case 'a':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 64;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'B':
+        case 'b':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 128;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'K':
+        case 'k':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 256;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'L':
+        case 'l':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 512;
+	        params |= 4096; // Needs V2 for saving
+	        break;
+        }
+        case 'O':
+        case 'o':
+        {
+	        D = parseFloatValue(pos);
+	        params2 |= 1024;
+	        params |= 4096; // Needs V2 for saving
+	        break;
         }
         case '*' : //checksum
         {

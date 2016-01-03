@@ -24,7 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.6"
+#define REPETIER_VERSION "0.92.8"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -154,6 +154,7 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_BAM_DICE_DUE 20
 #define CONTROLLER_VIKI2 21
 #define CONTROLLER_LCD_MP_PHARAOH_DUE 22
+#define CONTROLLER_SPARKLCD_ADAPTER 23
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
