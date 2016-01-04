@@ -265,7 +265,7 @@ S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 */
 void runBedLeveling(GCode *com) {
 	float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
-	int s = com->hasS() ? com->S : 0;
+	int s = com->hasS() ? com->S : -1;
 	#if DISTORTION_CORRECTION
 	bool distEnabled = Printer::distortion.isEnabled();
 	Printer::distortion.disable(false); // if level has changed, distortion is also invalid
@@ -314,8 +314,10 @@ void runBedLeveling(GCode *com) {
 		zRot = Printer::currentPosition[Z_AXIS];
 		#endif
 		// With max z endstop we adjust zlength so after next homing we have also a calibrated printer
-		Printer::zLength += currentZ - zRot;
-		Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
+		if(s != 0) {}
+		  Printer::zLength += currentZ - zRot;
+		   Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
+		}
 		#endif
 		Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
 		Printer::updateCurrentPosition(true);
