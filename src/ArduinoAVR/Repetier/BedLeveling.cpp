@@ -314,7 +314,7 @@ void runBedLeveling(GCode *com) {
 		zRot = Printer::currentPosition[Z_AXIS];
 		#endif
 		// With max z endstop we adjust zlength so after next homing we have also a calibrated printer
-		if(s != 0) {}
+		if(s != 0) {
 		  Printer::zLength += currentZ - zRot;
 		   Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
 		}
