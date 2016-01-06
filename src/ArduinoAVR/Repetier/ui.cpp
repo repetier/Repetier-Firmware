@@ -1442,11 +1442,13 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            addInt(EEPROM::PrinterId(), 5);
 	            break;
             }
+#if BED_LEDS			
 			if(c2=='L')	 //Bed LED brightness
 			{
 				addInt((int)(Light.LedBrightness*100.0), 3);
 				break;
 			}
+#endif
 			if(c2=='C')	 //Custom coating
 			{
 				addFloat(Printer::zBedOffset, 3, 2);
@@ -2837,6 +2839,7 @@ ZPOS2:
         INCREMENT_MIN_MAX(fr,1,25,500);
         Commands::changeFeedrateMultiply(fr);
     }
+#if BED_LEDS
 	//Set bed LED brightness
 	case UI_ACTION_BED_LED_CHANGE:
 	{
@@ -2845,7 +2848,7 @@ ZPOS2:
 		Commands::setBedLed(bl);
 	}
 	break;
-    
+#endif    
     case UI_ACTION_FLOWRATE_MULTIPLY:
     {
         INCREMENT_MIN_MAX(Printer::extrudeMultiply,1,25,500);

@@ -253,13 +253,13 @@ void Commands::setFanSpeed(int speed)
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
 }
-
+#if BED_LEDS
 void Commands::setBedLed(int light)
 {
 	Light.LedBrightness = (float)(light/100.0);
 	Light.ShowTemps();
 }
-
+#endif
 void Commands::reportPrinterUsage()
 {
 #if EEPROM_MODE != 0
