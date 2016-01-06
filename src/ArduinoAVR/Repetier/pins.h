@@ -2201,9 +2201,9 @@ S3(ext)=9
 */
 
 #define TEMP_0_PIN 15 // Extruder 1
-#define TEMP_2_PIN 14 // Extruder 2
-#define TEMP_3_PIN 13 // Extruder 3
-#define TEMP_1_PIN 12 // Heated bed
+#define TEMP_2_PIN 13 // Extruder 2
+#define TEMP_3_PIN 12 // Extruder 3
+#define TEMP_1_PIN 14 // Heated bed
 
 #define THERMOCOUPLE_0_PIN 11
 #define THERMOCOUPLE_1_PIN 10
