@@ -161,11 +161,13 @@ extern Extruder extruder[];
 #elif JAM_METHOD == 2
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = READ(pin);\
-          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
 #elif JAM_METHOD == 3
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = !READ(pin);\
-          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
 #else
 #error Unknown value for JAM_METHOD
 #endif
@@ -196,6 +198,7 @@ public:
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
     static uint8_t activeMixingExtruder;
+	static void recomputeMixingExtruderSteps();
 #endif
     uint8_t id;
     int32_t xOffset;
@@ -286,11 +289,19 @@ public:
 };
 
 #if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+#define HEATED_BED_INDEX NUM_EXTRUDER
 extern TemperatureController heatedBedController;
 #else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#define HEATED_BED_INDEX NUM_EXTRUDER-1
 #endif
+#if FAN_THERMO_PIN > -1
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX+1
+extern TemperatureController thermoController;
+#else
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX
+#endif
+#define NUM_TEMPERATURE_LOOPS THERMO_CONTROLLER_INDEX+1
+
 #define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 

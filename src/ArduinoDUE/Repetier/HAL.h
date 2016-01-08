@@ -40,6 +40,7 @@
 
 // Hack to make 84 MHz Due clock work without changes to pre-existing code
 // which would otherwise have problems with int overflow.
+#undef F_CPU
 #define F_CPU       21000000        // should be factor of F_CPU_TRUE
 #define F_CPU_TRUE  84000000        // actual CPU clock frequency
 #define EEPROM_BYTES 4096  // bytes of eeprom we simulate
@@ -62,13 +63,23 @@
 #define PROGMEM
 #define PGM_P const char *
 typedef char prog_char;
+#undef PSTR
 #define PSTR(s) s
+#undef pgm_read_byte_near
 #define pgm_read_byte_near(x) (*(int8_t*)x)
+#undef pgm_read_byte
 #define pgm_read_byte(x) (*(int8_t*)x)
+#undef pgm_read_float
 #define pgm_read_float(addr) (*(const float *)(addr))
-#define pgm_read_word(addr) (*(const unsigned int *)(addr))
+#undef pgm_read_word
+//#define pgm_read_word(addr) (*(const unsigned int *)(addr))
+#define pgm_read_word(addr) (*(addr))
+#undef pgm_read_word_near
 #define pgm_read_word_near(addr) pgm_read_word(addr)
-#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#undef pgm_read_dword
+#define pgm_read_dword(addr) (*(addr))
+//#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#undef pgm_read_dword_near
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
 #define _BV(x) (1 << (x))
 
@@ -160,7 +171,9 @@ typedef char prog_char;
                                       g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
+#undef LOW
 #define LOW         0
+#undef HIGH
 #define HIGH        1
 
 // Protects a variable scope for interrupts. Uses RAII to force clearance of
@@ -238,7 +251,7 @@ extern int spiDueDividors[];
 
 static uint32_t    tone_pin;
 
-/** Set max. frequency to 150000Hz */
+/** Set max. frequency to 500000 Hz */
 #define LIMIT_INTERVAL (F_CPU/500000)
 
 
@@ -301,7 +314,7 @@ extern RFDoubleSerial BTAdapter;
 #define OUT_LN //Com::println()
 
 union eeval_t {
-  uint8_t     b[];
+  uint8_t     b[4];
   float       f;
   uint32_t    i;
   uint16_t    s;
@@ -339,15 +352,15 @@ class HAL
       TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);
 #if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE
       // Copy eeprom to ram for faster access
-      int i, n = EEPROM_BYTES;
+      int i;
       for (i = 0; i < EEPROM_BYTES; i += 4) {
         eeval_t v = eprGetValue(i, 4);
-        *(int*)(&virtualEeprom[i]) = v.i;
+        memcopy4(&virtualEeprom[i],&v.i);
       }
 #else
-      int i, n = EEPROM_BYTES;
+      int i,n = 0;
       for (i = 0; i < EEPROM_BYTES; i += 4) {
-        *(int*)(&virtualEeprom[i]) = 0;
+        memcopy4(&virtualEeprom[i],&n);
       }
 #endif
     }
@@ -448,33 +461,34 @@ class HAL
       eprBurnValue(pos, 1, v);
       *(uint8_t*)&virtualEeprom[pos] = value;
     }
-    static inline void eprSetInt16(unsigned int pos, int value)
+    static inline void eprSetInt16(unsigned int pos, int16_t value)
     {
       eeval_t v;
       v.s = value;
       eprBurnValue(pos, 2, v);
-      *(uint16_t*)&virtualEeprom[pos] = value;
+      memcopy2(&virtualEeprom[pos],&value);
     }
-    static inline void eprSetInt32(unsigned int pos, int value)
+    static inline void eprSetInt32(unsigned int pos, int32_t value)
     {
       eeval_t v;
       v.i = value;
       eprBurnValue(pos, 4, v);
-      *(int*)&virtualEeprom[pos] = value;
+      memcopy4(&virtualEeprom[pos],&value);
     }
     static inline void eprSetLong(unsigned int pos, long value)
     {
       eeval_t v;
       v.l = value;
       eprBurnValue(pos, sizeof(long), v);
-      *(long*)&virtualEeprom[pos] = value;
+      memcopy4(&virtualEeprom[pos],&value);
+      //*(long*)(void*)&virtualEeprom[pos] = value;
     }
     static inline void eprSetFloat(unsigned int pos, float value)
     {
       eeval_t v;
       v.f = value;
       eprBurnValue(pos, sizeof(float), v);
-      *(float*)&virtualEeprom[pos] = value;
+      memcopy4(&virtualEeprom[pos],&value);
     }
     static inline uint8_t eprGetByte(unsigned int pos)
     {
@@ -484,26 +498,37 @@ class HAL
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
-      return *(int16_t*)&virtualEeprom[pos];
+      int16_t v;
+      memcopy2(&v,&virtualEeprom[pos]);
+      return v;
+      //return *(int16_t*)(void*)&virtualEeprom[pos];
       //eeval_t v;
       //v.i = 0;
       //v = eprGetValue(pos, 2);
       //return v.i;
     }
-    static inline int eprGetInt32(unsigned int pos)
+    static inline int32_t eprGetInt32(unsigned int pos)
     {
-      return *(int*)&virtualEeprom[pos];
+      int32_t v;
+      memcopy4(&v,&virtualEeprom[pos]);
+      return v;
       //eeval_t v = eprGetValue(pos, 4);
       //return v.i;
     }
     static inline long eprGetLong(unsigned int pos)
     {
-      return *(long*)&virtualEeprom[pos];
+      int32_t v;
+      memcopy4(&v,&virtualEeprom[pos]);
+      return v;
+      //return *(long*)(void*)&virtualEeprom[pos];
       //eeval_t v = eprGetValue(pos, sizeof(long));
       //return v.l;
     }
     static inline float eprGetFloat(unsigned int pos) {
-      return *(float*)&virtualEeprom[pos];
+      float v;
+      memcopy4(&v,&virtualEeprom[pos]);
+      return v;
+      //return *(float*)(void*)&virtualEeprom[pos];
       //eeval_t v = eprGetValue(pos, sizeof(float));
       //return v.f;
     }

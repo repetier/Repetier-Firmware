@@ -134,7 +134,7 @@ public:
 #define I2C_WRITE   0
 
 #if NONLINEAR_SYSTEM
-// Maximum speed with 100% inerrupt utilization is 27000 hz at 16MHz cpu
+// Maximum speed with 100% interrupt utilization is 27000 hz at 16MHz cpu
 // leave some margin for all the extra transformations. So we keep inside clean timings.
 #define LIMIT_INTERVAL ((F_CPU/30000)+1)
 #else
@@ -177,6 +177,8 @@ typedef uint8_t ufast8_t;
 
 #define SERIAL_BUFFER_SIZE 128
 #define SERIAL_BUFFER_MASK 127
+#undef SERIAL_TX_BUFFER_SIZE
+#undef SERIAL_TX_BUFFER_MASK
 #ifdef BIG_OUTPUT_BUFFER
 #define SERIAL_TX_BUFFER_SIZE 128
 #define SERIAL_TX_BUFFER_MASK 127
@@ -611,7 +613,7 @@ public:
         SET_OUTPUT(SDSSORIG);
 #endif
         // set SS high - may be chip select for another SPI device
-#if SET_SPI_SS_HIGH
+#if defined(SET_SPI_SS_HIGH) && SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
 #endif

@@ -48,8 +48,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 /** Number of extruders. Maximum 6 extruders. */
 #define NUM_EXTRUDER 1
 
-/** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. In that case only
-setpe per mm and heater manager settings in extruder 0 are used! */
+/** Set to 1 if all extruder motors go to 1 nozzle that mixes your colors. */
 #define MIXING_EXTRUDER 0
 
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
@@ -63,6 +62,7 @@ setpe per mm and heater manager settings in extruder 0 are used! */
 // Gen6 deluxe                = 51
 // Sanguinololu up to 1.1     = 6
 // Sanguinololu 1.2 and above = 62
+// 3Drag/Velleman K8200       = 66 (experimental)
 // Open Motion Controller     = 91
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Azteeg X1                  = 65
@@ -128,6 +128,11 @@ Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get resu
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM 3
+
+/* You can write some gcode to be executed on startup. Use this e.g. to set some 
+pins. Separate multiple gcodes with \n
+*/
+//#define STARTUP_GCODE ""
 
 // ##########################################################################################
 // ##                               Calibration                                            ##
@@ -224,7 +229,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_Y_OFFSET 0
 #define EXT0_Z_OFFSET 0
 // for skeinforge 40 and later, steps to pull the plasic 1 mm inside the extruder, not out.  Overridden if EEPROM activated.
-#define EXT0_STEPS_PER_MM 475 //520 11,2 x16  136 (7.5) 96 (10.5 x16) 192 (10.5 x32)
+#define EXT0_STEPS_PER_MM 950 //520 11,2 x16  136 (7.5) 96 (10.5 x16) 192 (10.5 x32)
 // What type of sensor is used?
 // 0 is no thermistor/temperature control
 // 1 is 100k thermistor (Epcos B57560G0107F000 - RepRap-Fab.org and many other)
@@ -259,7 +264,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_INVERSE false
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define EXT0_ENABLE_ON 0
+#define EXT0_ENABLE_ON 1
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
@@ -267,7 +272,7 @@ Overridden if EEPROM activated.*/
 #define EXT0_MAX_FEEDRATE 400
 // Feedrate from halted extruder in mm/s
 //  Overridden if EEPROM activated.
-#define EXT0_MAX_START_FEEDRATE 50
+#define EXT0_MAX_START_FEEDRATE 10
 // Acceleration in mm/s^2
 //  Overridden if EEPROM activated.
 #define EXT0_MAX_ACCELERATION 10000
@@ -821,9 +826,9 @@ on this endstop.
 //// ADVANCED SETTINGS - to tweak parameters
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
-#define X_ENABLE_ON 0
-#define Y_ENABLE_ON 0
-#define Z_ENABLE_ON 0
+#define X_ENABLE_ON 1
+#define Y_ENABLE_ON 1
+#define Z_ENABLE_ON 1
 
 // Disables axis when it's not being used.
 #define DISABLE_X false
@@ -1384,6 +1389,47 @@ to recalibrate z.
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define PROBE_ACTION_SCRIPT "G32 S2"
 
+/*
+Define how we measure the bed rotation. 
+All methods need at least 3 points to define the bed rotation correctly. The quality we get comes
+from the selection of the right points and method.
+
+BED_LEVELING_METHOD 0
+This method measures at the 3 probe points and creates a plane through these points. If you have
+a really planar bed this gives the optimum result. The 3 points must not be in one line and have
+a long distance to increase numerical stability.
+
+BED_LEVELING_METHOD 1
+This measures a grid. Probe point 1 is the origin and points 2 and 3 span a grid. We measure
+BED_LEVELING_GRID_SIZE points in each direction and compute a regression plane through all
+points. This gives a good overall plane if you have small bumps measuring inaccuracies.
+
+BED_LEVELING_METHOD 2
+Bending correcting 4 point measurement. This is for cantilevered beds that have the rotation axis
+not at the side but inside the bed. Here we can assume no bending on the axis and a symmetric
+bending to both sides of the axis. So probe points 2 and 3 build the symmetric axis and
+point 1 is mirrored to 1m across the axis. Using the symmetry we then remove the bending
+from 1 and use that as plane.
+*/
+#define BED_LEVELING_METHOD 0
+/* How to correct rotation.
+0 = software side
+1 = motorized modification of 2 from 3 fixture points.
+*/
+#define BED_CORRECTION_METHOD 0
+// Grid size for grid based plane measurement
+#define BED_LEVELING_GRID_SIZE 4
+// Repetitions for motorized bed leveling
+#define BED_LEVELING_REPETITIONS 5
+/* These are the motor positions relative to bed origin. Only needed for
+motorized bed leveling */
+#define BED_MOTOR_1_X 0
+#define BED_MOTOR_1_Y 0
+#define BED_MOTOR_2_X 200
+#define BED_MOTOR_2_Y 0
+#define BED_MOTOR_3_X 100
+#define BED_MOTOR_3_Y 200
+
 /* Autoleveling allows it to z-probe 3 points to compute the inclination and compensates the error for the print.
    This feature requires a working z-probe and you should have z-endstop at the top not at the bottom.
    The same 3 points are used for the G29 command.
@@ -1420,7 +1466,14 @@ to recalibrate z.
 
 #define DISTORTION_CORRECTION         0
 #define DISTORTION_CORRECTION_POINTS  5
+/* For delta printers you simply define the measureed radius around origin */
 #define DISTORTION_CORRECTION_R       80
+/* For all others you define the correction rectangle by setting the min/max coordinates. Make sure the the probe can reach all points! */
+#define DISTORTION_XMIN 10
+#define DISTORTION_YMIN 10
+#define DISTORTION_XMAX 190
+#define DISTORTION_YMAX 190
+
 /** Uses eeprom instead of ram. Allows bigger matrix (up to 22x22) without any ram cost.
   Especially on arm based systems with cached eeprom it is good, on AVR it has a small
   performance penalty.
@@ -1507,6 +1560,33 @@ the FAN pin is not the same as for your second extruder. RAMPS e.g. has FAN_PIN 
 is also used for the heater if you have 2 extruders connected. */
 #define FEATURE_FAN_CONTROL 1
 
+/* You can have a second fan controlled by adding P1 to M106/M107 command. */
+#define FEATURE_FAN2_CONTROL 0
+//#define FAN2_PIN ORIG_FAN2_PIN
+
+/* By setting FAN_BOARD_PIN to a pin number you get a board cooler. That fan 
+goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
+//#undef FAN_BOARD_PIN
+//#define FAN_BOARD_PIN ORIG_FAN_PIN
+
+/* You can have one additional fan controlled by a temperature. You can set
+   set at which temperature it should turn on and at which it should reach max. speed.
+*/
+#define FAN_THERMO_PIN -1
+#define FAN_THERMO_MIN_PWM 128
+#define FAN_THERMO_MAX_PWM 255
+#define FAN_THERMO_MIN_TEMP 45
+#define FAN_THERMO_MAX_TEMP 60
+// Analog pin number or channel for due boards
+#define FAN_THERMO_THERMISTOR_PIN -1
+#define FAN_THERMO_THERMISTOR_TYPE 1
+
+/** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
+ * This essentially adds command M36/M408 and extends M20.
+ * Since it requires some memory do not enable it unless you have such a display!
+ *  */
+#define FEATURE_JSON 0
+
 /** For displays and keys there are too many permutations to handle them all in once.
 For the most common available combinations you can set the controller type here, so
 you don't need to configure uicong.h at all. Controller settings > 1 disable usage
@@ -1552,6 +1632,7 @@ the language can be switched any time. */
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 1 // Czech
 #define LANGUAGE_PL_ACTIVE 1 // Polish
+#define LANGUAGE_TR_ACTIVE 1 // Turkish
 
 /* Some displays loose their settings from time to time. Try uncommenting the
 autorepair function if this is the case. It is not supported for all display
@@ -1569,7 +1650,7 @@ computations, so do not enable it if your display works stable!
 
 
 #define DEBUGGING false
-#define BED_LEDS true
+#define BED_LEDS false
 #if BED_LEDS
 #define LED_MAX_RELATIVE_BRIGHTNESS 0.25
 #endif

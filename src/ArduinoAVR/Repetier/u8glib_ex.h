@@ -116,6 +116,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+// these warnings appear and are no problem.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // ============= u8g.h ====================
 
 /*
@@ -155,6 +160,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _U8G_H
 #define _U8G_H
+
 
 /* uncomment the following line to support displays larger than 240x240 */
 //#define U8G_16BIT 1
@@ -854,6 +860,7 @@ defined(__18CXX) || defined(__PIC32MX)
 #define U8G_SPI_CLK_CYCLE_50NS 1
 #define U8G_SPI_CLK_CYCLE_300NS 2
 #define U8G_SPI_CLK_CYCLE_400NS 3
+#define U8G_SPI_CLK_CYCLE_500NS 4
 #define U8G_SPI_CLK_CYCLE_NONE 255
 
 uint8_t u8g_InitCom(u8g_t *u8g, u8g_dev_t *dev, uint8_t clk_cycle_time);
@@ -6832,8 +6839,8 @@ static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val) U8G_NOINLINE;
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 {
-  uint8_t cnt = 8;
 /*
+  uint8_t cnt = 8;
   uint8_t bitData = u8g_bitData;
   uint8_t bitNotData = u8g_bitNotData;
   uint8_t bitClock = u8g_bitClock;
@@ -6864,7 +6871,7 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
   U8G_ATOMIC_START();
   #ifdef UI_SPI_MOSI
 
-  for( cnt=0; cnt<8; cnt++ )
+  for(uint8_t cnt=0; cnt<8; cnt++ )
   {
     WRITE(UI_SPI_SCK, LOW);
     WRITE(UI_SPI_MOSI, val&0x80);
@@ -6982,8 +6989,6 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 
 static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint8_t len)
 {
-  uint8_t i;
-
   if ( rs == 0 )
   {
     /* command */
@@ -7010,8 +7015,6 @@ static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint
 
 static void u8g_com_arduino_st7920_write_byte(uint8_t rs, uint8_t val)
 {
-  uint8_t i;
-
   if ( rs == 0 )
   {
     /* command */
@@ -9774,7 +9777,11 @@ uint8_t u8g_dev_st7565_nhd_c12864_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, vo
   switch(msg)
   {
     case U8G_DEV_MSG_INIT:
+#if defined(__SAM3X8E__)	
       u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+#else
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+#endif
       u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_init_seq);
       break;
     case U8G_DEV_MSG_STOP:
@@ -10210,6 +10217,10 @@ uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void
       else if ( arg_val <= U8G_SPI_CLK_CYCLE_400NS )
       {
 	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(34) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_500NS )
+      {
+	      SPI0->SPI_CSR[0] = SPI_CSR_SCBR(42) | 1;
       }
       else
       {
@@ -10699,3 +10710,4 @@ uint8_t u8g_dev_rot270_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
 }
 
 
+#pragma GCC diagnostic push

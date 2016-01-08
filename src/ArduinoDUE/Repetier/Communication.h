@@ -67,6 +67,19 @@ FSTRINGVAR(tFreeRAM)
 FSTRINGVAR(tXColon)
 FSTRINGVAR(tSlash)
 FSTRINGVAR(tSpaceSlash)
+#if JSON_OUTPUT
+FSTRINGVAR(tJSONDir)
+FSTRINGVAR(tJSONFiles)
+FSTRINGVAR(tJSONArrayEnd)
+FSTRINGVAR(tJSONErrorStart)
+FSTRINGVAR(tJSONErrorEnd)
+FSTRINGVAR(tJSONFileInfoStart)
+FSTRINGVAR(tJSONFileInfoHeight)
+FSTRINGVAR(tJSONFileInfoLayerHeight)
+FSTRINGVAR(tJSONFileInfoFilament)
+FSTRINGVAR(tJSONFileInfoGeneratedBy)
+FSTRINGVAR(tJSONFileInfoName)
+#endif
 FSTRINGVAR(tSpaceXColon)
 FSTRINGVAR(tSpaceYColon)
 FSTRINGVAR(tSpaceZColon)
@@ -82,6 +95,7 @@ FSTRINGVAR(tColon)
 FSTRINGVAR(tSpeedMultiply)
 FSTRINGVAR(tFlowMultiply)
 FSTRINGVAR(tFanspeed)
+FSTRINGVAR(tFan2speed)
 FSTRINGVAR(tPrintedFilament)
 FSTRINGVAR(tPrintingTime)
 FSTRINGVAR(tSpacem)
@@ -394,6 +408,9 @@ FSTRINGVAR(tMCPCurrentSettings)
 FSTRINGVAR(tPrinterModeFFF)
 FSTRINGVAR(tPrinterModeLaser)
 FSTRINGVAR(tPrinterModeCNC)
+#ifdef STARTUP_GCODE
+FSTRINGVAR(tStartupGCode)
+#endif
 
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);

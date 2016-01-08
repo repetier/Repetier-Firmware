@@ -168,6 +168,7 @@ void CNCDriver::spindleOff()
 #endif
     }
     HAL::delayMilliseconds(CNC_WAIT_ON_DISABLE);
+	direction = 0;
 }
 /** Turns spindle on. Default implementation uses a enable pin CNC_ENABLE_PIN. If
 CNC_DIRECTION_PIN is not -1 it sets direction to CNC_DIRECTION_CW. rpm is ignored.

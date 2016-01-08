@@ -39,7 +39,7 @@ Implemented Codes
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
 - G4  - Dwell S<seconds> or P<milliseconds>
-- G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+- G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
 - G20 - Units for G0/G1 are inches.
 - G21 - Units for G0/G1 are mm.
@@ -47,10 +47,10 @@ Implemented Codes
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
 - G31 - Write signal of probe sensor
-- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measue and store new zLength
+- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2 Measure and store new zLength
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
-- G92 - Set current position to cordinates given
+- G92 - Set current position to coordinates given
 - G131 - set extruder offset position to 0 - needed for calibration with G132
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
@@ -60,8 +60,8 @@ RepRap M Codes
 
 - M104 - Set extruder target temp
 - M105 - Read current temp
-- M106 - Fan on
-- M107 - Fan off
+- M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
+- M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp.
 - M114 - Display current position
 
@@ -136,6 +136,7 @@ Custom M Codes
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser
 - M453 - Set printer mode to CNC
+- M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!

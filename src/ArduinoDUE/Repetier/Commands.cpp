@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-const uint8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
+const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
@@ -199,7 +199,7 @@ void Commands::printTemperatures(bool showRaw)
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
-#else if NUM_EXTRUDER == 1
+#elif NUM_EXTRUDER == 1
     if(showRaw)
     {
             Com::printF(Com::tSpaceRaw,(int)0);
@@ -230,8 +230,14 @@ void Commands::changeFlowrateMultiply(int factor)
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
+#if FEATURE_FAN_CONTROL
 uint8_t fanKickstart;
-void Commands::setFanSpeed(int speed)
+#endif
+#if FEATURE_FAN2_CONTROL
+uint8_t fan2Kickstart;
+#endif
+
+void Commands::setFanSpeed(int speed, bool immediately)
 {
 #if FAN_PIN >- 1 && FEATURE_FAN_CONTROL
     if(Printer::fanSpeed == speed)
@@ -239,10 +245,24 @@ void Commands::setFanSpeed(int speed)
     speed = constrain(speed,0,255);
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed != 0);
     Printer::fanSpeed = speed;
-    if(PrintLine::linesCount == 0)
-        Printer::setFanSpeedDirectly(speed);
+    if(PrintLine::linesCount == 0 || immediately) {
+        if(Printer::mode == PRINTER_MODE_FFF)
+        {
+	        for(fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+			    PrintLine::lines[i].secondSpeed = speed;         // fill all printline buffers with new fan speed value
+        }
+		Printer::setFanSpeedDirectly(speed);
+	}
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
+}
+void Commands::setFan2Speed(int speed)
+{
+	#if FAN2_PIN >- 1 && FEATURE_FAN2_CONTROL
+	speed = constrain(speed,0,255);
+	Printer::setFan2SpeedDirectly(speed);
+	Com::printFLN(Com::tFan2speed,speed); // send only new values to break update loops!
+	#endif
 }
 
 void Commands::reportPrinterUsage()
@@ -907,7 +927,7 @@ void Commands::processArc(GCode *com)
     PrintLine::arc(position, target, offset, r, isclockwise);
 }
 #endif
-
+extern void runBedLeveling(GCode *com);
 /**
   \brief Execute the G command stored in com.
 */
@@ -964,7 +984,18 @@ void Commands::processGCode(GCode *com)
 #if ARC_SUPPORT
     case 2: // CW Arc
     case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+		{ // disable laser for G0 moves
+		bool laserOn = LaserDriver::laserOn;
+		if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
+			LaserDriver::laserOn = false;
+		}
+#endif // defined
         processArc(com);
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+		LaserDriver::laserOn = laserOn;
+		}
+#endif // defined
         break;
 #endif
     case 4: // G4 dwell
@@ -1086,7 +1117,10 @@ void Commands::processGCode(GCode *com)
         break;
 #if FEATURE_AUTOLEVEL
     case 32: // G32 Auto-Bed leveling
+		runBedLeveling(com);
+#if 0
     {
+		
 #if DISTORTION_CORRECTION
         Printer::distortion.disable(true); // if level has changed, distortion is also invalid
 #endif
@@ -1094,7 +1128,7 @@ void Commands::processGCode(GCode *com)
 #if DRIVE_SYSTEM == DELTA
         // It is not possible to go to the edges at the top, also users try
         // it often and wonder why the coordinate system is then wrong.
-        // For that reason we ensure a correct behaviour by code.
+        // For that reason we ensure a correct behavior by code.
         Printer::homeAxis(true, true, true);
         Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #endif
@@ -1179,8 +1213,29 @@ void Commands::processGCode(GCode *com)
 #endif
         Printer::feedrate = oldFeedrate;
     }
+#endif	
     break;
 #endif
+#endif
+#if DISTORTION_CORRECTION
+	case 33: {
+		if(com->hasL()) { // G33 L0 - List distortion matrix
+			Printer::distortion.showMatrix();
+		} else if(com->hasR()) { // G33 R0 - Reset distortion matrix
+			Printer::distortion.resetCorrection();
+		} else if(com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
+			if(com->hasX() && com->hasY() && com->hasZ()) {
+				Printer::distortion.set(com->X, com->Y, com->Z);
+			} else {
+				Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
+			}
+		} else { // G33
+			float oldFeedrate = Printer::feedrate;
+			Printer::measureDistortion();
+			Printer::feedrate = oldFeedrate;
+		}
+	}
+		break;
 #endif
     case 90: // G90
         Printer::relativeCoordinateMode = false;
@@ -1444,7 +1499,6 @@ void Commands::processGCode(GCode *com)
 */
 void Commands::processMCode(GCode *com)
 {
-    uint32_t codenum; //throw away variable
     switch( com->M )
     {
     case 3: // Spindle/laser on
@@ -1486,7 +1540,15 @@ void Commands::processMCode(GCode *com)
         break;
 #if SDSUPPORT
     case 20: // M20 - list SD card
+#if JSON_OUTPUT
+       if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
+            if (com->text[3] == 'P') {
+                sd.lsJSON(com->text + 4);
+            }
+        } else sd.ls();
+#else
         sd.ls();
+#endif
         break;
     case 21: // M21 - init SD card
         sd.mount();
@@ -1534,6 +1596,13 @@ void Commands::processMCode(GCode *com)
         {
             sd.fat.chdir();
             sd.makeDirectory(com->text);
+        }
+        break;
+#endif
+#if JSON_OUTPUT && SDSUPPORT
+    case 36: // M36 JSON File Info
+        if (com->hasString()) {
+            sd.JSONFileInfo(com->text);
         }
         break;
 #endif
@@ -1750,6 +1819,7 @@ void Commands::processMCode(GCode *com)
     previousMillisCmd = HAL::timeInMilliseconds();
     break;
     case 190: // M190 - Wait bed for heater to reach target.
+		{
 #if HAVE_HEATED_BED
         if(Printer::debugDryrun()) break;
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
@@ -1760,6 +1830,7 @@ void Commands::processMCode(GCode *com)
         if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
         EVENT_WAITING_HEATER(-1);
+	    uint32_t codenum; //throw away variable
         codenum = HAL::timeInMilliseconds();
         while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC && heatedBedController.targetTemperatureC > 25.0)
         {
@@ -1775,6 +1846,7 @@ void Commands::processMCode(GCode *com)
 #endif
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
+		}
         break;
 #if NUM_TEMPERATURE_LOOPS > 0
     case 116: // Wait for temperatures to reach target temperature
@@ -1790,26 +1862,25 @@ void Commands::processMCode(GCode *com)
     case 106: // M106 Fan On
         if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
         {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(com->hasS() ? com->S : 255);
+            if(com->hasP() && com->P == 1)
+	            setFan2Speed(com->hasS() ? com->S : 255);
+			else
+	            setFanSpeed(com->hasS() ? com->S : 255);
         }
         break;
     case 107: // M107 Fan Off
-        if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND))
-        {
-            if(com->hasP())
-                Commands::waitUntilEndOfAllMoves();
-            setFanSpeed(0);
-        }
+        if(com->hasP() && com->P == 1)
+	        setFan2Speed(0);
+		else
+	        setFanSpeed(0);
         break;
 #endif
     case 111: // M111 enable/disable run time debug flags
-        if(com->hasS()) Printer::debugLevel = com->S;
+        if(com->hasS()) Printer::setDebugLevel(static_cast<uint8_t>(com->S));
         if(com->hasP())
         {
-            if (com->P > 0) Printer::debugLevel |= com->P;
-            else Printer::debugLevel &= ~(-com->P);
+            if (com->P > 0) Printer::debugSet(static_cast<uint8_t>(com->P));
+            else Printer::debugReset(static_cast<uint8_t>(-com->P));
         }
         if(Printer::debugDryrun())   // simulate movements without printing
         {
@@ -1819,7 +1890,7 @@ void Commands::processMCode(GCode *com)
 #else
             Extruder::setTemperatureForExtruder(0, 0);
 #endif
-#if HEATED_BED_TYPE != 0
+#if HAVE_HEATED_BED != 0
             Extruder::setHeatedBedTemperature(0,false);
 #endif
         }
@@ -1854,6 +1925,7 @@ void Commands::processMCode(GCode *com)
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
             Extruder::setMixingWeight(com->S, com->P);
+		Extruder::recomputeMixingExtruderSteps();
         break;
     case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
         if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
@@ -1918,8 +1990,8 @@ void Commands::processMCode(GCode *com)
         TemperatureController *temp = &Extruder::current->tempControl;
         if(com->hasS())
         {
-            if(com->S<0) break;
-            if(com->S<NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
+            if(com->S < 0) break;
+            if(com->S < NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
 #if HAVE_HEATED_BED
             else temp = &heatedBedController;
 #else
@@ -2175,6 +2247,11 @@ void Commands::processMCode(GCode *com)
     case 402: // M402 Go to stored position
         Printer::GoToMemoryPosition(com->hasX(),com->hasY(),com->hasZ(),com->hasE(),(com->hasF() ? com->F : Printer::feedrate));
         break;
+#if JSON_OUTPUT
+    case 408:
+        Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
+        break;
+#endif
     case 450:
         Printer::reportPrinterMode();
         break;
@@ -2194,6 +2271,14 @@ void Commands::processMCode(GCode *com)
 #endif
         Printer::reportPrinterMode();
         break;
+#if FAN_THERMO_PIN > -1
+	case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
+		if(com->hasX())
+			Printer::thermoMinTemp = com->X;
+		if(com->hasY())
+			Printer::thermoMaxTemp = com->Y;
+		break;
+#endif
     case 500: // M500
     {
 #if EEPROM_MODE != 0
@@ -2422,6 +2507,14 @@ void Commands::executeGCode(GCode *com)
             com->printCommand();
         }
     }
+#ifdef DEBUG_DRYRUN_ERROR
+    if(Printer::debugDryrun()) {
+        Com::printFLN("Dryrun was enabled");
+        com->printCommand();
+        Printer::debugReset(8);
+    }
+#endif
+
 }
 
 void Commands::emergencyStop()
@@ -2434,7 +2527,7 @@ void Commands::emergencyStop()
     Extruder::manageTemperatures();
     for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
         pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN > -1
+#if EXT0_HEATER_PIN > -1 && NUM_EXTRUDER > 0
     WRITE(EXT0_HEATER_PIN,HEATER_PINS_INVERTED);
 #endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
@@ -2455,10 +2548,10 @@ void Commands::emergencyStop()
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     WRITE(FAN_PIN, 0);
 #endif
-#if HEATED_BED_HEATER_PIN > -1
+#if HAVE_HEATED_BED && HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
-    UI_STATUS_UPD(UI_TEXT_KILLED);
+    UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));
     HAL::delayMilliseconds(200);
     InterruptProtectedBlock noInts;
     while(1) {}
