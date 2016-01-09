@@ -2012,11 +2012,17 @@ bool reportTempsensorError()
     {
         if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
         else Com::printF(Com::tExtruderSpace,i);
-        int temp = tempController[i]->currentTemperatureC;
+		TemperatureController *act = tempController[i];
+        int temp = act->currentTemperatureC;
         if(temp < MIN_DEFECT_TEMPERATURE || temp > MAX_DEFECT_TEMPERATURE)
-            Com::printFLN(Com::tTempSensorDefect);
+            Com::printF(Com::tTempSensorDefect);
         else
-            Com::printFLN(Com::tTempSensorWorking);
+            Com::printF(Com::tTempSensorWorking);
+		if(act->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT)
+			Com::printF(PSTR(" marked defect"));	
+		if(act->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED)
+			Com::printF(PSTR(" marked decoupled"));
+		Com::println();			
     }
     Com::printErrorFLN(Com::tDryModeUntilRestart);
     return true;
