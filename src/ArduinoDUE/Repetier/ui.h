@@ -712,6 +712,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B 44
 #define UI_ENCODER_CLICK 33
 #define UI_INVERT_MENU_DIRECTION 1
+#define UI_RESET_PIN -1
 
 #elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 
@@ -833,7 +834,9 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #if FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE
 #define UI_ENCODER_SPEED 2
 #endif
+#ifndef UI_INVERT_MENU_DIRECTION
 #define UI_INVERT_MENU_DIRECTION 0
+#endif
 
 #ifdef UI_MAIN
 void uiInitKeys() {

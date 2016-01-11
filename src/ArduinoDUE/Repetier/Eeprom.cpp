@@ -526,7 +526,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     Printer::homingFeedrate[Y_AXIS] = HAL::eprGetFloat(EPR_Y_HOMING_FEEDRATE);
     Printer::homingFeedrate[Z_AXIS] = HAL::eprGetFloat(EPR_Z_HOMING_FEEDRATE);
     Printer::maxJerk = HAL::eprGetFloat(EPR_MAX_JERK);
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM != DELTA
     Printer::maxZJerk = HAL::eprGetFloat(EPR_MAX_ZJERK);
 #endif
 #if RAMP_ACCELERATION
@@ -797,7 +797,7 @@ void EEPROM::init()
     }
     else
     {
-        HAL::eprSetByte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make datachange permanent
+        HAL::eprSetByte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make data change permanent
         initalizeUncached();
         storeDataIntoEEPROM(storedcheck != check);
     }

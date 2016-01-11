@@ -2625,8 +2625,8 @@ int32_t PrintLine::bresenhamStep() // version for cartesian printer
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) // Use interrupt for movement
 #endif
-		cur->stepsRemaining--;
         Extruder::unstep();
+		cur->stepsRemaining--;
         Printer::endXYZSteps();
     } // for loop
     HAL::allowInterrupts(); // Allow interrupts for other types, timer1 is still disabled

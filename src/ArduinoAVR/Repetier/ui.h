@@ -209,15 +209,15 @@ What display type do you use?
 #define UI_ACTION_SERVOPOS              1203
 #define UI_ACTION_IGNORE_M106           1204
 #define UI_ACTION_PREHEAT_PET           1913
-#define UI_ACTION_KAPTON				1914
-#define UI_ACTION_BLUETAPE				1915
-#define UI_ACTION_NOCOATING				1916
-#define UI_ACTION_PETTAPE				1917
-#define UI_ACTION_GLUESTICK				1918
-#define UI_ACTION_RESET_MATRIX			1919
-#define UI_ACTION_CALIBRATE				1920
-#define UI_ACTION_BED_LED_CHANGE		1921
-#define UI_ACTION_COATING_CUSTOM		1922
+#define UI_ACTION_KAPTON				1205
+#define UI_ACTION_BLUETAPE				1206
+#define UI_ACTION_NOCOATING				1207
+#define UI_ACTION_PETTAPE				1208
+#define UI_ACTION_GLUESTICK				1209
+#define UI_ACTION_RESET_MATRIX			1210
+#define UI_ACTION_CALIBRATE				1211
+#define UI_ACTION_BED_LED_CHANGE		1212
+#define UI_ACTION_COATING_CUSTOM		1213
 #define UI_ACTION_BUILDTAK				1214
 
 // 1700-1956 language selectors
@@ -711,6 +711,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B 44
 #define UI_ENCODER_CLICK 33
 #define UI_INVERT_MENU_DIRECTION 1
+#define UI_RESET_PIN -1
 
 #elif MOTHERBOARD == 80 // Rumba has different pins as RAMPS!
 #undef BEEPER_PIN
@@ -830,7 +831,10 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #if FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE
 #define UI_ENCODER_SPEED 2
 #endif
+#ifndef UI_INVERT_MENU_DIRECTION
 #define UI_INVERT_MENU_DIRECTION 0
+#endif
+
 #ifdef UI_MAIN
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A,UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
@@ -1929,23 +1933,23 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
-#if UI_ROWS==4
-#if UI_COLS==16
-#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
-#elif UI_COLS==20
-//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
-#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
-#else
-#if UI_DISPLAY_TYPE!=DISPLAY_GAMEDUINO2
-#error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
-#else
-#define UI_LINE_OFFSETS {} // dummy never used
-#endif
-#endif
-#else
-#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
-#endif
-#include "uilang.h"
+  #if UI_ROWS==4
+    #if UI_COLS==16
+      #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
+    #elif UI_COLS==20
+      //#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
+      #define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
+    #else
+      #if UI_DISPLAY_TYPE!=DISPLAY_GAMEDUINO2
+        #error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
+      #else
+        #define UI_LINE_OFFSETS {} // dummy never used
+      #endif
+    #endif
+  #else
+    #define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
+  #endif
+  #include "uilang.h"
 #endif
 
 #define UI_VERSION_STRING "Repetier " REPETIER_VERSION
