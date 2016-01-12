@@ -68,6 +68,8 @@ void Lighting::factoryTest(){
 }
 void Lighting::loop()
 {
+	if(PrintLine::hasLines())
+		return;
 	///===This part is ment to avoid pausing interrupts when it could cause problems
 	ThisStep++;
 	if (ThisStep <LED_LOOP_DEVIDER) return; //only update leds every x loops
@@ -116,6 +118,7 @@ void Lighting::loop()
 }
 void Lighting::ShowTemps()
 {
+	if(PrintLine::hasLines()) return;
 	BedCurrent			= Extruder::getHeatedBedTemperature();
 	if (BedCurrent < 35 && Extruder::getHeatedBedTargetTemperature() < 35) BedCurrent = 0;
 	ExtruderCurrent		= Extruder::current->tempControl.currentTemperatureC;

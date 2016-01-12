@@ -1650,7 +1650,7 @@ computations, so do not enable it if your display works stable!
 
 
 #define DEBUGGING false
-#define BED_LEDS false
+#define BED_LEDS true
 #if BED_LEDS
 #define LED_MAX_RELATIVE_BRIGHTNESS 0.25
 #endif
