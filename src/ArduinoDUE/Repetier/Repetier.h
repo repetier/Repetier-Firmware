@@ -183,6 +183,9 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
+
+#define ILLEGAL_Z_PROBE -888
+
 // we can not prevent this as some configs need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -198,6 +201,10 @@ inline void memcopy4(void *dest,void *source) {
 
 #ifndef JSON_OUTPUT
 #define JSON_OUTPUT 0
+#endif
+
+#if !defined(ZPROBE_MIN_TEMPERATURE) && defined(ZHOME_MIN_TEMPERATURE)
+#define ZPROBE_MIN_TEMPERATURE ZHOME_MIN_TEMPERATURE
 #endif
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN < 0

@@ -221,7 +221,14 @@ void GCode::checkAndPushCommand()
             return;
         }
         lastLineNumber = actLineNumber;
-    }
+    } else if(lastLineNumber) { // once line number always line number!
+		if(Printer::debugErrors())
+        {
+			Com::printErrorFLN(PSTR("Missing linenumber"));
+		}
+		requestResend();
+		return;
+	}
     pushCommand();
 #ifdef DEBUG_COM_ERRORS
     if(hasM() && M == 667)

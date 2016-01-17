@@ -574,13 +574,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     activeMixingExtruder = extruderId;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setMixingWeight(i, extruder[i].virtualWeights[extruderId]);
-	Com::printFLN(PSTR("SelectExtruder:"),static_cast<int>(extruderId));
+	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
     extruderId = 0;
 #endif
     if(extruderId >= NUM_EXTRUDER)
         extruderId = 0;
 #if !MIXING_EXTRUDER
-	Com::printFLN(PSTR("SelectExtruder:"),static_cast<int>(extruderId));
+	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
@@ -629,8 +629,9 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
-    if(Printer::isHomed())
+    if(Printer::isHomed()) {
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
+	}
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
 #if USE_ADVANCE
@@ -638,8 +639,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-    if(executeSelect) // Run only when changing
+    if(executeSelect) {// Run only when changing
+		Commands::waitUntilEndOfAllMoves();
         GCode::executeFString(Extruder::current->selectCommands);
+	}
 #endif
 #endif
 }

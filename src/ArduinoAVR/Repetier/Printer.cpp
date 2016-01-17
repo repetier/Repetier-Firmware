@@ -212,8 +212,13 @@ void Endstops::update() {
             newRead |= ENDSTOP_Z2_MINMAX_ID;
 #endif
 #if FEATURE_Z_PROBE
+#if Z_PROBE_PIN == Z_MIN_PIN
+	if(newRead & ENDSTOP_Z_MIN_ID) // prevent different results causing confusion
+        newRead |= ENDSTOP_Z_PROBE_ID;
+#else
     if(Z_PROBE_ON_HIGH ? READ(Z_PROBE_PIN) : !READ(Z_PROBE_PIN))
         newRead |= ENDSTOP_Z_PROBE_ID;
+#endif		
 #endif
     lastRead &= newRead;
 #ifdef EXTENDED_ENDSTOPS
@@ -1522,7 +1527,7 @@ void Printer::homeZAxis() // cartesian homing
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR,0,homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
         setHoming(false);
 		int32_t zCorrection = 0;
-#if MIN_HARDWARE_ENDSTOP_Z && FEATURE_Z_PROBE && Z_PROBE_PIN==Z_MIN_PIN
+#if MIN_HARDWARE_ENDSTOP_Z && FEATURE_Z_PROBE && Z_PROBE_PIN == Z_MIN_PIN
 		// Fix error from z probe testing
 		zCorrection -= axisStepsPerMM[Z_AXIS]*EEPROM::zProbeHeight();
 #endif		
@@ -1648,7 +1653,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         for(int i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
         for(int i = 0; i < NUM_EXTRUDER; i++)
-            Extruder::setTemperatureForExtruder(actTemp[i],i,false,true);
+			Extruder::setTemperatureForExtruder(actTemp[i],i,false, actTemp[i] > MAX_ROOM_TEMPERATURE);
 #else
         Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
 #endif
@@ -2021,6 +2026,7 @@ void Distortion::measure(void)
 #if Z_HOME_DIR < 0 && Z_PROBE_Z_OFFSET_MODE == 1
 	zCorrection += Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
 #endif
+	Printer::startProbing(true);
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
         {
@@ -2039,16 +2045,16 @@ void Distortion::measure(void)
             //Com::printF(PSTR("ix "),(int)ix);
             //Com::printFLN(PSTR("iy "),(int)iy);
             Printer::moveToReal(mtx, mty, z, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
-#if DISTORTION_EXTRAPOLATE_CORNERS && DRIVE_SYSTEM == DELTA
-            setMatrix(floor(0.5f + Printer::axisStepsPerMM[Z_AXIS] * (z -
-                        Printer::runZProbe(ix == 1 && iy == DISTORTION_CORRECTION_POINTS - 1, ix == DISTORTION_CORRECTION_POINTS - 2 && iy == 0, Z_PROBE_REPETITIONS))) + zCorrection,
-                      matrixIndex(ix,iy));
-#else
-            setMatrix(floor(0.5f + Printer::axisStepsPerMM[Z_AXIS] * (z -
-                        Printer::runZProbe(ix == 0 && iy == DISTORTION_CORRECTION_POINTS - 1, ix == DISTORTION_CORRECTION_POINTS - 1 && iy == 0, Z_PROBE_REPETITIONS))) + zCorrection,
-                      matrixIndex(ix,iy));
-#endif
+			float zp = Printer::runZProbe(false,false, Z_PROBE_REPETITIONS);
+			if(zp == ILLEGAL_Z_PROBE) {
+				Com::printErrorFLN(PSTR("Stopping distortion measurement due to errors."));
+				Printer::finishProbing();
+				return;
+			}
+            setMatrix(floor(0.5f + Printer::axisStepsPerMM[Z_AXIS] * (z -zp)) + zCorrection,
+            matrixIndex(ix,iy));
         }
+	Printer::finishProbing();
 #if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
     extrapolateCorners();
 #endif

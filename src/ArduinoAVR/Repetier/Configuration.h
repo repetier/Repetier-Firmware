@@ -1384,6 +1384,10 @@ to recalibrate z.
 /** These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
+/** Set 1 if you need a hot extruder for good probe results. Normally only required if nozzle is probe. */
+#define Z_PROBE_REQUIRES_HEATING 0
+/** Minimum extruder temperature for probing. If it is lower, it will be increased to that value. */
+#define Z_PROBE_MIN_TEMPERATURE 150
 
 /*
 Define how we measure the bed rotation. 

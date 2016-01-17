@@ -2055,8 +2055,8 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
 /**
   Moves the stepper motors one step. If the last step is reached, the next movement is started.
   The function must be called from a timer loop. It returns the time for the next call.
-  This is a modified version that implements a bresenham 'multi-step' algorithm where the dominant
-  cartesian axis steps may be less than the changing dominant delta axis.
+  This is a modified version that implements a Bresenham 'multi-step' algorithm where the dominant
+  Cartesian axis steps may be less than the changing dominant delta axis.
 */
 #if NONLINEAR_SYSTEM
 int lastblk =- 1;
@@ -2103,7 +2103,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
         if(cur->isWarmUp())
         {
-            // This is a warmup move to initalize the path planner correctly. Just waste
+            // This is a warm up move to initialize the path planner correctly. Just waste
             // a bit of time to get the planning up to date.
             if(linesCount <= cur->getWaitForXLinesFilled())
             {
@@ -2118,7 +2118,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             return(wait); // waste some time for path optimization to fill up
         } // End if WARMUP
 #if FEATURE_Z_PROBE
-        // z move may consist of mroe then 1 z line segment, so we better ignore them
+        // z move may consist of more then 1 z line segment, so we better ignore them
         // if the probe was already hit.
         if(Printer::isZProbingActive() && Printer::stepsRemainingAtZHit >= 0)
         {
@@ -2145,7 +2145,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 
             // Copy across movement into main direction flags so that endstops function correctly
             cur->dir |= curd->dir;
-            // Initialize bresenham for the first segment
+            // Initialize Bresenham for the first segment
             cur->error[X_AXIS] = cur->error[Y_AXIS] = cur->error[Z_AXIS] = cur->numPrimaryStepPerSegment >> 1;
             curd_errupd = cur->numPrimaryStepPerSegment;
             stepsPerSegRemaining = cur->numPrimaryStepPerSegment;
@@ -2427,7 +2427,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 */
 int lastblk = -1;
 int32_t cur_errupd;
-int32_t PrintLine::bresenhamStep() // version for cartesian printer
+int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 {
 #if CPU_ARCH == ARCH_ARM
     if(!PrintLine::nlFlag)
