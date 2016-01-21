@@ -186,10 +186,10 @@ private:
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s
     float speedE;                   ///< Speed in E direction at fullInterval in mm/s
     float fullSpeed;                ///< Desired speed mm/s
-    float invFullSpeed;             ///< 1.0/fullSpeed for fatser computation
-    float accelerationDistance2;             ///< Real 2.0*distanceÜacceleration mm²/s²
+    float invFullSpeed;             ///< 1.0/fullSpeed for faster computation
+    float accelerationDistance2;    ///< Real 2.0*distance*acceleration mm²/s²
     float maxJunctionSpeed;         ///< Max. junction speed between this and next segment
-    float startSpeed;               ///< Staring speed in mm/s
+    float startSpeed;               ///< Starting speed in mm/s
     float endSpeed;                 ///< Exit speed in mm/s
     float minSpeed;
     float distance;

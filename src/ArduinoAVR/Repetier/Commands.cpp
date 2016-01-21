@@ -1345,14 +1345,18 @@ void Commands::processGCode(GCode *com) {
             break;
 
 #endif // DRIVE_SYSTEM
-#if FEATURE_Z_PROBE
+#if FEATURE_Z_PROBE && NUM_EXTRUDER > 1
         case 134: 
 			{ // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
                 float z = com->hasZ() ? com->Z : 0;
                 int p = com->hasP() ? com->P : 0;
                 int s = com->hasS() ? com->S : -1;
+				int startExtruder = Extruder::current->id;
                 extruder[p].zOffset = 0;
                 float mins[NUM_EXTRUDER],maxs[NUM_EXTRUDER],avg[NUM_EXTRUDER];
+				for(int i = 0; i < NUM_EXTRUDER; i++) { // silence unnecessary compiler warning
+				      avg[i] = 0;
+				}
                 bool bigError = false;
 
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
@@ -1386,8 +1390,7 @@ void Commands::processGCode(GCode *com) {
                     Extruder::selectExtruderById(p);
                     float refHeight = Printer::runZProbe(false,false);
                     if(refHeight == ILLEGAL_Z_PROBE) {
-                        Extruder::selectExtruderById(p);
-                        Printer::finishProbing();
+						bigError = true;
                         break;
                     }
                     for(int i = 0; i < NUM_EXTRUDER && !bigError; i++) {
@@ -1397,8 +1400,6 @@ void Commands::processGCode(GCode *com) {
                         Extruder::selectExtruderById(i);
                         float height = Printer::runZProbe(false,false);
                         if(height == ILLEGAL_Z_PROBE) {
-                            Extruder::selectExtruderById(p);
-                            Printer::finishProbing();
                             bigError = true;
                             break;
                         }
@@ -1411,24 +1412,23 @@ void Commands::processGCode(GCode *com) {
                             if(off > maxs[i]) maxs[i] = off;
                             if(maxs[i] - mins[i] > G134_PRECISION) {
                                 Com::printErrorFLN(PSTR("Deviation between measurements were too big, please repeat."));
-                                Extruder::selectExtruderById(p);
-                                Printer::finishProbing();
                                 bigError = true;
                                 break;
                             }
                         }
                     }
                 }
-                if(bigError) break;
-                for(int i = 0; i < NUM_EXTRUDER; i++) {
-                    if(s >= 0 && i != s) continue;
-                    extruder[i].zOffset = avg[i] * Printer::axisStepsPerMM[Z_AXIS] / G134_REPETITIONS;
-                }
-                Extruder::selectExtruderById(p);
-                Printer::finishProbing();
+                if(!bigError) {
+		            for(int i = 0; i < NUM_EXTRUDER; i++) {
+			            if(s >= 0 && i != s) continue;
+				        extruder[i].zOffset = avg[i] * Printer::axisStepsPerMM[Z_AXIS] / G134_REPETITIONS;
+					}
 #if EEPROM_MODE != 0
-                EEPROM::storeDataIntoEEPROM(0);
+	                EEPROM::storeDataIntoEEPROM(0);
 #endif
+				}
+				Extruder::selectExtruderById(startExtruder);
+                Printer::finishProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++)

@@ -648,7 +648,7 @@ void PrintLine::updateTrapezoids()
 
     // First we find out how far back we could go with optimization.
 
-    ufast8_t maxfirst = linesPos; // first non fixed segment we might change
+    ufast8_t maxfirst = linesPos; // first non fixed segment we might change	
     if(maxfirst != linesWritePos)
         nextPlannerIndex(maxfirst); // don't touch the line printing
     // Now ignore enough segments to gain enough time for path planning
@@ -674,7 +674,7 @@ void PrintLine::updateTrapezoids()
 
     if(first == linesWritePos)   // Nothing to plan, only new element present
     {
-        act->block(); // Prevent steppe rinterrupt from using this
+        act->block(); // Prevent stepper interrupt from using this
         noInts.unprotect();
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
@@ -693,14 +693,14 @@ void PrintLine::updateTrapezoids()
     PrintLine *previous = &lines[previousIndex]; // segment before the one we are inserting
 #if DRIVE_SYSTEM != DELTA
     // filters z-move<->not z-move
-    if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
+/*    if((previous->primaryAxis == Z_AXIS && act->primaryAxis != Z_AXIS) || (previous->primaryAxis != Z_AXIS && act->primaryAxis == Z_AXIS))
     {
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
         firstLine->unblock();
         return;
-    }
+    }*/
 #endif // DRIVE_SYSTEM
 
     if(previous->isEOnlyMove() != act->isEOnlyMove())
@@ -721,10 +721,28 @@ void PrintLine::updateTrapezoids()
     // Reduce speed to reachable speeds
     forwardPlanner(first);
 
+#ifdef DEBUG_PLANNER
+	Com::printF(PSTR("Planner: "),(int)linesCount);
+	previousPlannerIndex(first);
+	Com::printF(PSTR(" F "),lines[first].startSpeed,1);
+	Com::printF(PSTR(" - "),lines[first].endSpeed,1);
+	Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
+	Com::printF(PSTR(","),(int)lines[first].joinFlags);
+	nextPlannerIndex(first);
+#endif
     // Update precomputed data
     do
     {
         lines[first].updateStepsParameter();
+#ifdef DEBUG_PLANNER
+		Com::printF(PSTR(" / "),lines[first].startSpeed,1);
+		Com::printF(PSTR(" - "),lines[first].endSpeed,1);
+		Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
+		Com::printF(PSTR(","),(int)lines[first].joinFlags);
+#ifdef DEBUG_QUEUE_MOVE
+		Com::println();
+#endif		
+#endif		
         //noInts.protect();
         lines[first].unblock();  // start with first block to release next used segment as early as possible
         nextPlannerIndex(first);
@@ -734,6 +752,12 @@ void PrintLine::updateTrapezoids()
     while(first != linesWritePos);
     act->updateStepsParameter();
     act->unblock();
+#ifdef DEBUG_PLANNER
+	Com::printF(PSTR(" / "),lines[first].startSpeed,1);
+	Com::printF(PSTR(" - "),lines[first].endSpeed,1);
+	Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
+	Com::printFLN(PSTR(","),(int)lines[first].joinFlags);
+#endif	
 }
 
 /* Computes the maximum junction speed of the newly added segment under
@@ -840,7 +864,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
 
 /** Update parameter used by updateTrapezoids
 
-Computes the acceleration/decelleration steps and advanced parameter associated.
+Computes the acceleration/deceleration steps and advanced parameter associated.
 */
 void PrintLine::updateStepsParameter()
 {
@@ -970,7 +994,7 @@ void PrintLine::forwardPlanner(ufast8_t first)
              leftSpeed = act->endSpeed;
              continue; // Nothing to do here
          }*/
-        // Avoid speed calc once crusing in split delta move
+        // Avoid speed calculate once cruising in split delta move
 #if NONLINEAR_SYSTEM
         if (act->moveID == next->moveID && act->endSpeed == act->maxJunctionSpeed)
         {
@@ -981,7 +1005,7 @@ void PrintLine::forwardPlanner(ufast8_t first)
             continue;
         }
 #endif
-        // Avoid speed calcs if we know we can accelerate within the line.
+        // Avoid speed calculates if we know we can accelerate within the line.
         vmaxRight = (act->isNominalMove() ? act->fullSpeed : sqrt(leftSpeed * leftSpeed + act->accelerationDistance2));
         if(vmaxRight > act->endSpeed)   // Could be higher next run?
         {
