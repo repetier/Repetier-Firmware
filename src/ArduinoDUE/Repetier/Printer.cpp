@@ -1914,9 +1914,9 @@ void Distortion::updateDerived()
     step = (2 * Printer::axisStepsPerMM[Z_AXIS] * DISTORTION_CORRECTION_R) / (DISTORTION_CORRECTION_POINTS - 1.0f);
     radiusCorrectionSteps = DISTORTION_CORRECTION_R * Printer::axisStepsPerMM[Z_AXIS];
 #else
-	xCorrectionSteps = (DISTORTION_XMAX - DISTORTION_XMIN) * Printer::axisStepsPerMM[X_AXIS] / DISTORTION_CORRECTION_POINTS;
+	xCorrectionSteps = (DISTORTION_XMAX - DISTORTION_XMIN) * Printer::axisStepsPerMM[X_AXIS] / (DISTORTION_CORRECTION_POINTS - 1);
 	xOffsetSteps = DISTORTION_XMIN * Printer::axisStepsPerMM[X_AXIS];
-	yCorrectionSteps = (DISTORTION_YMAX - DISTORTION_YMIN) * Printer::axisStepsPerMM[Y_AXIS] / DISTORTION_CORRECTION_POINTS;
+	yCorrectionSteps = (DISTORTION_YMAX - DISTORTION_YMIN) * Printer::axisStepsPerMM[Y_AXIS] / (DISTORTION_CORRECTION_POINTS - 1);
 	yOffsetSteps = DISTORTION_YMIN * Printer::axisStepsPerMM[Y_AXIS];
 
 #endif	
@@ -2038,7 +2038,7 @@ void Distortion::measure(void)
             float mty = Printer::invAxisStepsPerMM[Y_AXIS] * (iy * step - radiusCorrectionSteps);
 #else
 			float mtx = Printer::invAxisStepsPerMM[X_AXIS] * (ix * xCorrectionSteps + xOffsetSteps);
-			float mty = Printer::invAxisStepsPerMM[Y_AXIS] * (iy * xCorrectionSteps + yOffsetSteps);
+			float mty = Printer::invAxisStepsPerMM[Y_AXIS] * (iy * yCorrectionSteps + yOffsetSteps);
 #endif			
             //Com::printF(PSTR("mx "),mtx);
             //Com::printF(PSTR("my "),mty);
