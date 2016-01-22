@@ -118,7 +118,7 @@ Also you can control the firmware with any reprap compatible host, you will only
 the full benefits with the following products, which have special code for this
 firmware:
 
-* [Repetier-Host for Windos/Linux](http://www.repetier.com/download/)
+* [Repetier-Host for Windows/Linux](http://www.repetier.com/download/)
 * [Repetier-Host for Mac](http://www.repetier.com/download/)
 * [Repetier-Server](http://www.repetier.com/repetier-server-download/)
 

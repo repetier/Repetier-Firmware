@@ -20,7 +20,6 @@
 */
 
 #include "Repetier.h"
-#include "ui.h"
 
 #if SDSUPPORT
 
@@ -42,25 +41,26 @@ void SDCard::automount()
 #if SDCARDDETECT > -1
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
     {
-        if(sdactive)   // Card removed
+        if(sdactive || sdmode == 100)   // Card removed
         {
             Com::printFLN(PSTR("SD card removed"));
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
             unmount();
-            UI_STATUS(UI_TEXT_SD_REMOVED);
+            UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_SD_REMOVED_ID));
         }
     }
     else
     {
-        if(!sdactive)
+        if(!sdactive && sdmode != 100)
         {
-            UI_STATUS(UI_TEXT_SD_INSERTED);
-            Com::printFLN(PSTR("SD card inserted")); // Not translateable or host will not understand signal
-            initsd();
+            UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
+            mount();
+			if(sdmode != 100) // send message only if we have success
+	            Com::printFLN(PSTR("SD card inserted")); // Not translatable or host will not understand signal
 #if UI_DISPLAY_TYPE != NO_DISPLAY
-            if(sdactive) {
+            if(sdactive && !uid.isWizardActive()) { // Wizards have priority
                 Printer::setAutomount(true);
                 uid.executeAction(UI_ACTION_SD_PRINT + UI_ACTION_TOPMENU, true);
             }
@@ -78,11 +78,13 @@ void SDCard::initsd()
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
+	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
     /*if(dir[0].isOpen())
         dir[0].close();*/
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
     {
         Com::printFLN(Com::tSDInitFail);
+		sdmode = 100; // prevent automount loop!
         return;
     }
     sdactive = true;
@@ -177,27 +179,31 @@ void SDCard::stopPrint()
 
 void SDCard::writeCommand(GCode *code)
 {
-    unsigned int sum1=0,sum2=0; // for fletcher-16 checksum
+    unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     uint8_t buf[100];
-    uint8_t p=2;
+    uint8_t p = 2;
     file.writeError = false;
-    int params = 128 | (code->params & ~1);
-    *(int*)buf = params;
+    uint16_t params = 128 | (code->params & ~1);
+	memcopy2(buf,&params);
+    //*(int*)buf = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
-        *(int*)&buf[p] = code->params2;
-        p+=2;
+		memcopy2(&buf[p],&code->params2);
+        //*(int*)&buf[p] = code->params2;
+        p += 2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
-            *(int*)&buf[p] = code->M;
-            p+=2;
+			memcopy2(&buf[p],&code->M);
+            //*(int*)&buf[p] = code->M;
+            p += 2;
         }
         if(code->hasG())
         {
-            *(int*)&buf[p]= code->G;
-            p+=2;
+			memcopy2(&buf[p],&code->G);
+            //*(int*)&buf[p]= code->G;
+            p += 2;
         }
     }
     else
@@ -213,28 +219,33 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasX())
     {
-        *(float*)&buf[p] = code->X;
-        p+=4;
+		memcopy4(&buf[p],&code->X);
+        //*(float*)&buf[p] = code->X;
+        p += 4;
     }
     if(code->hasY())
     {
-        *(float*)&buf[p] = code->Y;
-        p+=4;
+		memcopy4(&buf[p],&code->Y);
+        //*(float*)&buf[p] = code->Y;
+        p += 4;
     }
     if(code->hasZ())
     {
-        *(float*)&buf[p] = code->Z;
-        p+=4;
+		memcopy4(&buf[p],&code->Z);
+        //*(float*)&buf[p] = code->Z;
+        p += 4;
     }
     if(code->hasE())
     {
-        *(float*)&buf[p] = code->E;
-        p+=4;
+		memcopy4(&buf[p],&code->E);
+        //*(float*)&buf[p] = code->E;
+        p += 4;
     }
     if(code->hasF())
     {
-        *(float*)&buf[p] = code->F;
-        p+=4;
+		memcopy4(&buf[p],&code->F);
+        //*(float*)&buf[p] = code->F;
+        p += 4;
     }
     if(code->hasT())
     {
@@ -242,23 +253,81 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-        *(long int*)&buf[p] = code->S;
-        p+=4;
+		memcopy4(&buf[p],&code->S);
+        //*(int32_t*)&buf[p] = code->S;
+        p += 4;
     }
     if(code->hasP())
     {
-        *(long int*)&buf[p] = code->P;
-        p+=4;
+		memcopy4(&buf[p],&code->P);
+        //*(int32_t*)&buf[p] = code->P;
+        p += 4;
     }
     if(code->hasI())
     {
-        *(float*)&buf[p] = code->I;
-        p+=4;
+		memcopy4(&buf[p],&code->I);
+        //*(float*)&buf[p] = code->I;
+        p += 4;
     }
     if(code->hasJ())
     {
-        *(float*)&buf[p] = code->J;
-        p+=4;
+		memcopy4(&buf[p],&code->J);
+        //*(float*)&buf[p] = code->J;
+        p += 4;
+    }
+    if(code->hasR())
+    {
+		memcopy4(&buf[p],&code->R);
+        //*(float*)&buf[p] = code->R;
+        p += 4;
+    }
+    if(code->hasD())
+    {
+		memcopy4(&buf[p],&code->D);
+        //*(float*)&buf[p] = code->D;
+        p += 4;
+    }
+    if(code->hasC())
+    {
+		memcopy4(&buf[p],&code->C);
+        //*(float*)&buf[p] = code->C;
+        p += 4;
+    }
+    if(code->hasH())
+    {
+		memcopy4(&buf[p],&code->H);
+        //*(float*)&buf[p] = code->H;
+        p += 4;
+    }
+    if(code->hasA())
+    {
+		memcopy4(&buf[p],&code->A);
+        //*(float*)&buf[p] = code->A;
+        p += 4;
+    }
+    if(code->hasB())
+    {
+		memcopy4(&buf[p],&code->B);
+        //*(float*)&buf[p] = code->B;
+        p += 4;
+    }
+    if(code->hasK())
+    {
+		memcopy4(&buf[p],&code->K);
+        //*(float*)&buf[p] = code->K;
+        p += 4;
+    }
+    if(code->hasL())
+    {
+		memcopy4(&buf[p],&code->L);
+        //*(float*)&buf[p] = code->L;
+        p += 4;
+    }
+    if(code->hasO())
+    {
+		memcopy4(&buf[p],&code->O);
+        //*(float*)&buf[p] = code->O;
+        p += 4;
     }
     if(code->hasString())   // read 16 uint8_t into string
     {
@@ -270,7 +339,7 @@ void SDCard::writeCommand(GCode *code)
         }
         else
         {
-            for(uint8_t i=0; i<16; ++i) buf[p++] = *sp++;
+            for(uint8_t i = 0; i < 16; ++i) buf[p++] = *sp++;
         }
     }
     uint8_t *ptr = buf;
@@ -282,14 +351,19 @@ void SDCard::writeCommand(GCode *code)
         do
         {
             sum1 += *ptr++;
-            if(sum1>=255) sum1-=255;
+            if(sum1 >= 255) sum1 -= 255;
             sum2 += sum1;
-            if(sum2>=255) sum2-=255;
+            if(sum2 >= 255) sum2 -= 255;
         }
         while (--tlen);
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
+	// Debug
+	/*Com::printF(PSTR("Buf: "));
+	for(int i=0;i<p;i++)
+	Com::printF(PSTR(" "),(int)buf[i]);
+	Com::println();*/
     if(params == 128)
     {
         Com::printErrorFLN(Com::tAPIDFinished);
@@ -353,11 +427,97 @@ void SDCard::ls()
     Com::printFLN(Com::tEndFileList);
 }
 
+#if JSON_OUTPUT
+void SDCard::lsJSON(const char *filename)
+{
+    SdBaseFile dir;
+    fat.chdir();
+    if (*filename == 0) {
+        dir.openRoot(fat.vol());
+    } else {
+        if (!dir.open(fat.vwd(), filename, O_READ) || !dir.isDir()) {
+            Com::printF(Com::tJSONErrorStart);
+            Com::printF(Com::tFileOpenFailed);
+            Com::printFLN(Com::tJSONErrorEnd);
+            return;
+        }
+    }
+
+    Com::printF(Com::tJSONDir);
+    SDCard::printEscapeChars(filename);
+    Com::printF(Com::tJSONFiles);
+    dir.lsJSON();
+    Com::printFLN(Com::tJSONArrayEnd);
+}
+
+void SDCard::printEscapeChars(const char *s) {
+    for (unsigned int i = 0; i < strlen(s); ++i) {
+        switch (s[i]) {
+            case '"':
+            case '/':
+            case '\b':
+            case '\f':
+            case '\n':
+            case '\r':
+            case '\t':
+            case '\\':
+				Com::print('\\');
+                break;
+        }
+		Com::print(s[i]);
+    }
+}
+
+void SDCard::JSONFileInfo(const char* filename) {
+    SdBaseFile targetFile;
+    GCodeFileInfo *info,tmpInfo;
+    if (strlen(filename) == 0)  {
+        targetFile = file;
+        info = &fileInfo;
+    } else {
+        if (!targetFile.open(fat.vwd(), filename, O_READ) || targetFile.isDir()) {
+            Com::printF(Com::tJSONErrorStart);
+            Com::printF(Com::tFileOpenFailed);
+            Com::printFLN(Com::tJSONErrorEnd);
+            return;
+        }
+		info = &tmpInfo;
+        info->init(targetFile);
+    }
+    if (!targetFile.isOpen()) {
+        Com::printF(Com::tJSONErrorStart);
+        Com::printF(Com::tNotSDPrinting);
+        Com::printFLN(Com::tJSONErrorEnd);
+        return;
+    }
+
+    // {"err":0,"size":457574,"height":4.00,"layerHeight":0.25,"filament":[6556.3],"generatedBy":"Slic3r 1.1.7 on 2014-11-09 at 17:11:32"}
+    Com::printF(Com::tJSONFileInfoStart);
+    Com::print(info->fileSize);
+    Com::printF(Com::tJSONFileInfoHeight);
+    Com::print(info->objectHeight);
+    Com::printF(Com::tJSONFileInfoLayerHeight);
+    Com::print(info->layerHeight);
+    Com::printF(Com::tJSONFileInfoFilament);
+    Com::print(info->filamentNeeded);
+    Com::printF(Com::tJSONFileInfoGeneratedBy);
+    Com::print(info->generatedBy);
+    Com::print('"');
+    if (strlen(filename) == 0) {
+        Com::printF(Com::tJSONFileInfoName);
+        file.printName();
+	    Com::print('"');
+    }
+	Com::print('}');
+    Com::println();
+};
+
+#endif
+
 bool SDCard::selectFile(const char *filename, bool silent)
 {
     SdBaseFile parent;
     const char *oldP = filename;
-    boolean bFound;
 
     if(!sdactive) return false;
     sdmode = 0;
@@ -377,6 +537,9 @@ bool SDCard::selectFile(const char *filename, bool silent)
             Com::printF(Com::tFileOpened, oldP);
             Com::printFLN(Com::tSpaceSizeColon,file.fileSize());
         }
+#if JSON_OUTPUT
+        fileInfo.init(file);
+#endif
         sdpos = 0;
         filesize = file.fileSize();
         Com::printFLN(Com::tFileSelected);
@@ -415,7 +578,7 @@ void SDCard::startWrite(char *filename)
     }
     else
     {
-        UI_STATUS(UI_TEXT_UPLOADING);
+        UI_STATUS_F(Com::translatedF(UI_TEXT_UPLOADING_ID));
         savetosd = true;
         Com::printFLN(Com::tWritingToFile,filename);
     }

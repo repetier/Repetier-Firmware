@@ -32,14 +32,18 @@
 
 #include <avr/pgmspace.h>
 #include <avr/io.h>
+
+
+#define INLINE __attribute__((always_inline))
+
 #if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
 #else
 #define PROGMEM
 #define PGM_P const char *
 #define PSTR(s) s
-#define pgm_read_byte_near(x) (*(char*)x)
-#define pgm_read_byte(x) (*(char*)x)
+#define pgm_read_byte_near(x) (*(uint8_t*)x)
+#define pgm_read_byte(x) (*(uint8_t*)x)
 #endif
 
 #define PACK
@@ -57,7 +61,7 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
 
-#if MOTHERBOARD==8 || MOTHERBOARD==88 || MOTHERBOARD==9 || CPU_ARCH!=ARCH_AVR
+#if MOTHERBOARD==8 || MOTHERBOARD==88 || MOTHERBOARD==9 || MOTHERBOARD==92 || CPU_ARCH!=ARCH_AVR
 #define EXTERNALSERIAL
 #endif
 //#define EXTERNALSERIAL  // Force using arduino serial
@@ -66,7 +70,9 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #endif
 #include <inttypes.h>
 #include "Print.h"
-
+#ifdef EXTERNALSERIAL
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -128,7 +134,7 @@ public:
 #define I2C_WRITE   0
 
 #if NONLINEAR_SYSTEM
-// Maximum speed with 100% inerrupt utilization is 27000 hz at 16MHz cpu
+// Maximum speed with 100% interrupt utilization is 27000 hz at 16MHz cpu
 // leave some margin for all the extra transformations. So we keep inside clean timings.
 #define LIMIT_INTERVAL ((F_CPU/30000)+1)
 #else
@@ -140,6 +146,7 @@ typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
 typedef uint8_t flag8_t;
 typedef int8_t fast8_t;
+typedef uint8_t ufast8_t;
 
 #define FAST_INTEGER_SQRT
 
@@ -170,18 +177,25 @@ typedef int8_t fast8_t;
 
 #define SERIAL_BUFFER_SIZE 128
 #define SERIAL_BUFFER_MASK 127
+#undef SERIAL_TX_BUFFER_SIZE
+#undef SERIAL_TX_BUFFER_MASK
+#ifdef BIG_OUTPUT_BUFFER
+#define SERIAL_TX_BUFFER_SIZE 128
+#define SERIAL_TX_BUFFER_MASK 127
+#else
 #define SERIAL_TX_BUFFER_SIZE 64
 #define SERIAL_TX_BUFFER_MASK 63
+#endif
 
 struct ring_buffer
 {
-    unsigned char buffer[SERIAL_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
 struct ring_buffer_tx
 {
-    unsigned char buffer[SERIAL_TX_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_TX_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
@@ -248,6 +262,9 @@ extern RFHardwareSerial RFSerial;
 class HAL
 {
 public:
+#if FEATURE_WATCHDOG
+    static bool wdPinged;
+#endif
     HAL();
     virtual ~HAL();
     static inline void hwSetup(void)
@@ -411,7 +428,7 @@ public:
         // unsigned int v = ((timer>>8)*cur->accel)>>10;
         return res;
 #else
-        return ((timer>>8)*accel)>>10;
+        return ((timer >> 8) * accel) >> 10;
 #endif
     }
 // Multiply two 16 bit values and return 32 bit result
@@ -468,7 +485,7 @@ public:
             :"r18","r19" );
         return res;
 #else
-        return ((int32_t)a*b)>>16;
+        return ((int32_t)a * b) >> 16;
 #endif
     }
     static inline void digitalWrite(uint8_t pin,uint8_t value)
@@ -502,36 +519,36 @@ public:
     }
     static inline void eprSetByte(unsigned int pos,uint8_t value)
     {
-        eeprom_write_byte((unsigned char *)(EEPROM_OFFSET+pos), value);
+        eeprom_write_byte((unsigned char *)(EEPROM_OFFSET + pos), value);
     }
     static inline void eprSetInt16(unsigned int pos,int16_t value)
     {
-        eeprom_write_word((unsigned int*)(EEPROM_OFFSET+pos),value);
+        eeprom_write_word((unsigned int*)(EEPROM_OFFSET + pos),value);
     }
     static inline void eprSetInt32(unsigned int pos,int32_t value)
     {
-        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET+pos),value);
+        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET + pos),value);
     }
     static inline void eprSetFloat(unsigned int pos,float value)
     {
-        eeprom_write_block(&value,(void*)(EEPROM_OFFSET+pos), 4);
+        eeprom_write_block(&value,(void*)(EEPROM_OFFSET + pos), 4);
     }
     static inline uint8_t eprGetByte(unsigned int pos)
     {
-        return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET+pos));
+        return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET + pos));
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
-        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET+pos));
+        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET + pos));
     }
     static inline int32_t eprGetInt32(unsigned int pos)
     {
-        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET+pos));
+        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET + pos));
     }
     static inline float eprGetFloat(unsigned int pos)
     {
         float v;
-        eeprom_read_block(&v,(void *)(EEPROM_OFFSET+pos),4); // newer gcc have eeprom_read_block but not arduino 22
+        eeprom_read_block(&v,(void *)(EEPROM_OFFSET + pos),4); // newer gcc have eeprom_read_block but not arduino 22
         return v;
     }
 
@@ -564,7 +581,7 @@ public:
     }
     static inline bool serialByteAvailable()
     {
-        return RFSERIAL.available()>0;
+        return RFSERIAL.available() > 0;
     }
     static inline uint8_t serialReadByte()
     {
@@ -596,7 +613,7 @@ public:
         SET_OUTPUT(SDSSORIG);
 #endif
         // set SS high - may be chip select for another SPI device
-#if SET_SPI_SS_HIGH
+#if defined(SET_SPI_SS_HIGH) && SET_SPI_SS_HIGH
         WRITE(SDSS, HIGH);
 #endif  // SET_SPI_SS_HIGH
 #endif
@@ -680,13 +697,13 @@ public:
 
     // I2C Support
 
-    static void i2cInit(unsigned long clockSpeedHz);
-    static unsigned char i2cStart(unsigned char address);
-    static void i2cStartWait(unsigned char address);
+    static void i2cInit(uint32_t clockSpeedHz);
+    static unsigned char i2cStart(uint8_t address);
+    static void i2cStartWait(uint8_t address);
     static void i2cStop(void);
-    static unsigned char i2cWrite( unsigned char data );
-    static unsigned char i2cReadAck(void);
-    static unsigned char i2cReadNak(void);
+    static uint8_t i2cWrite( uint8_t data );
+    static uint8_t i2cReadAck(void);
+    static uint8_t i2cReadNak(void);
 
     // Watchdog support
 
@@ -706,7 +723,7 @@ public:
     inline static void pingWatchdog()
     {
 #if FEATURE_WATCHDOG
-        wdt_reset();
+      wdPinged = true;
 #endif
     };
     inline static float maxExtruderTimerFrequency()

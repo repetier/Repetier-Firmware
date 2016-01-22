@@ -305,8 +305,8 @@ extern const PinDescription g_APinDescription[]=
 
   // 92 , PA5
   { PIOA, PIO_PA5,          ID_PIOA, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // 92
-  // 93 , PB12 analog
-  { PIOB, PIO_PB12X1_AD8,   ID_PIOB, PIO_OUTPUT_0,    PIO_DEFAULT, PIN_ATTR_ANALOG,                  NO_ADC, ADC8,   NOT_ON_PWM,  NOT_ON_TIMER }, // AD8 - 93
+  // 93 , PB12
+  { PIOB, PIO_PB12,         ID_PIOB, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC,   NOT_ON_PWM,  NOT_ON_TIMER }, // 93
   // 94 , PB22
   { PIOB, PIO_PB22,          ID_PIOB, PIO_OUTPUT_0, PIO_DEFAULT, PIN_ATTR_DIGITAL,                  NO_ADC, NO_ADC, NOT_ON_PWM,  NOT_ON_TIMER }, // 94
   // 95 , PB23
@@ -330,6 +330,72 @@ extern const PinDescription g_APinDescription[]=
 }
 #endif
 
+#if defined(ARDUINO) && ARDUINO >= 160
+
+/*
+ * UART objects
+ */
+RingBuffer rx_buffer1;
+RingBuffer tx_buffer1;
+
+UARTClass Serial(UART, UART_IRQn, ID_UART, &rx_buffer1, &tx_buffer1);
+void serialEvent() __attribute__((weak));
+void serialEvent() { }
+
+// IT handlers
+void UART_Handler(void)
+{
+  Serial.IrqHandler();
+}
+
+// ----------------------------------------------------------------------------
+/*
+ * USART objects
+ */
+RingBuffer rx_buffer2;
+RingBuffer rx_buffer3;
+RingBuffer rx_buffer4;
+RingBuffer tx_buffer2;
+RingBuffer tx_buffer3;
+RingBuffer tx_buffer4;
+
+USARTClass Serial1(USART0, USART0_IRQn, ID_USART0, &rx_buffer2, &tx_buffer2);
+void serialEvent1() __attribute__((weak));
+void serialEvent1() { }
+USARTClass Serial2(USART1, USART1_IRQn, ID_USART1, &rx_buffer3, &tx_buffer3);
+void serialEvent2() __attribute__((weak));
+void serialEvent2() { }
+USARTClass Serial3(USART3, USART3_IRQn, ID_USART3, &rx_buffer4, &tx_buffer4);
+void serialEvent3() __attribute__((weak));
+void serialEvent3() { }
+
+// IT handlers
+void USART0_Handler(void)
+{
+  Serial1.IrqHandler();
+}
+
+void USART1_Handler(void)
+{
+  Serial2.IrqHandler();
+}
+
+void USART3_Handler(void)
+{
+  Serial3.IrqHandler();
+}
+
+// ----------------------------------------------------------------------------
+
+void serialEventRun(void)
+{
+  if (Serial.available()) serialEvent();
+  if (Serial1.available()) serialEvent1();
+  if (Serial2.available()) serialEvent2();
+  if (Serial3.available()) serialEvent3();
+}
+
+#else
 /*
  * UART objects
  */
@@ -389,6 +455,8 @@ void serialEventRun(void)
   if (Serial3.available()) serialEvent3();
 }
 
+#endif
+
 // ----------------------------------------------------------------------------
 
 #ifdef __cplusplus
@@ -409,7 +477,7 @@ void init( void )
   }
 
   // Disable watchdog
-  WDT_Disable(WDT);
+  //WDT_Disable(WDT);
 
   // Initialize C library
   __libc_init_array();

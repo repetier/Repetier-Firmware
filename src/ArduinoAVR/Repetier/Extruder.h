@@ -148,6 +148,7 @@ class Extruder;
 extern Extruder extruder[];
 
 #if EXTRUDER_JAM_CONTROL
+#if JAM_METHOD == 1
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal += extruder[x].jamLastDir;\
         if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
@@ -156,10 +157,23 @@ extern Extruder extruder[];
         } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
             extruder[x].tempControl.setJammed(true);\
     }
+#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
+#elif JAM_METHOD == 2
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
+#elif JAM_METHOD == 3
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = !READ(pin);\
+          if(sig){extruder[x].tempControl.setJammed(true);} else if(!Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) {extruder[x].resetJamSteps();}}
+#define RESET_EXTRUDER_JAM(x,dir)
+#else
+#error Unknown value for JAM_METHOD
+#endif
 #define ___TEST_EXTRUDER_JAM(x,y) _TEST_EXTRUDER_JAM(x,y)
 #define __TEST_EXTRUDER_JAM(x) ___TEST_EXTRUDER_JAM(x,EXT ## x ## _JAM_PIN)
 #define TEST_EXTRUDER_JAM(x) __TEST_EXTRUDER_JAM(x)
-#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
 #else
 #define TEST_EXTRUDER_JAM(x)
 #define RESET_EXTRUDER_JAM(x,dir)
@@ -184,10 +198,12 @@ public:
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
     static uint8_t activeMixingExtruder;
+	static void recomputeMixingExtruderSteps();
 #endif
     uint8_t id;
     int32_t xOffset;
     int32_t yOffset;
+    int32_t zOffset;
     float stepsPerMM;        ///< Steps per mm.
     int8_t enablePin;          ///< Pin to enable extruder stepper motor.
 //  uint8_t directionPin; ///< Pin number to assign the direction.
@@ -267,22 +283,32 @@ public:
     static void initHeatedBed();
     static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
     static float getHeatedBedTemperature();
-    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false);
+    static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false,bool wait = false);
     static void pauseExtruders();
     static void unpauseExtruders();
 };
 
 #if HAVE_HEATED_BED
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER+1
+#define HEATED_BED_INDEX NUM_EXTRUDER
 extern TemperatureController heatedBedController;
 #else
-#define NUM_TEMPERATURE_LOOPS NUM_EXTRUDER
+#define HEATED_BED_INDEX NUM_EXTRUDER-1
 #endif
+#if FAN_THERMO_PIN > -1
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX+1
+extern TemperatureController thermoController;
+#else
+#define THERMO_CONTROLLER_INDEX HEATED_BED_INDEX
+#endif
+#define NUM_TEMPERATURE_LOOPS THERMO_CONTROLLER_INDEX+1
+
 #define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
 #define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
 
 //extern Extruder *Extruder::current;
+#if NUM_TEMPERATURE_LOOPS > 0
 extern TemperatureController *tempController[NUM_TEMPERATURE_LOOPS];
+#endif
 extern uint8_t autotuneIndex;
 
 

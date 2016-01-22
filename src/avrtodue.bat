@@ -13,11 +13,14 @@ copy ArduinoAVR\Repetier\Printer.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\SDCard.cpp  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\SdFat.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\ui.*  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\Drivers.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\uiconfig.h  ArduinoDue\Repetier
-copy ArduinoAVR\Repetier\uilang.h  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\uilang.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\uimenu.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\u8*.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\logo.h  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\Events.h  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\BedLeveling.*  ArduinoDue\Repetier
 
 echo Copying finished. DUE tree is now up to date.
 REM pause

@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 12
+#define EEPROM_PROTOCOL_VERSION 16
 
 /** Where to start with our datablock in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -112,15 +112,21 @@ have problems with other modules using the eeprom */
 #define EPR_AXISCOMP_TANYZ			980
 #define EPR_AXISCOMP_TANXZ			984
 
-#define EPR_DISTORTION_CORRECTION_ENABLED 988
-#define EPR_RETRACTION_LENGTH 992
-#define EPR_RETRACTION_LONG_LENGTH 996
-#define EPR_RETRACTION_SPEED 1000
-#define EPR_RETRACTION_Z_LIFT 1004
-#define EPR_RETRACTION_UNDO_EXTRA_LENGTH 1008
+#define EPR_DISTORTION_CORRECTION_ENABLED      988
+#define EPR_RETRACTION_LENGTH                  992
+#define EPR_RETRACTION_LONG_LENGTH             996
+#define EPR_RETRACTION_SPEED                  1000
+#define EPR_RETRACTION_Z_LIFT                 1004
+#define EPR_RETRACTION_UNDO_EXTRA_LENGTH      1008
 #define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
-#define EPR_RETRACTION_UNDO_SPEED 1016
-#define EPR_AUTORETRACT_ENABLED 1020
+#define EPR_RETRACTION_UNDO_SPEED             1016
+#define EPR_AUTORETRACT_ENABLED               1020
+#define EPR_Z_PROBE_Z_OFFSET			      1024
+#define EPR_SELECTED_LANGUAGE                 1028
+#define EPR_ACCELERATION_FACTOR_TOP           1032
+#define EPR_BENDING_CORRECTION_A              1036
+#define EPR_BENDING_CORRECTION_B              1040
+#define EPR_BENDING_CORRECTION_C              1044
 
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
@@ -128,9 +134,9 @@ have problems with other modules using the eeprom */
 #define EEPROM_BYTE(x) HAL::eprGetByte(EPR_##x)
 #define EEPROM_SET_BYTE(x,val) HAL::eprSetByte(EPR_##x,val)
 #else
-#define EEPROM_FLOAT(x) (x)
-#define EEPROM_INT32(x) (x)
-#define EEPROM_BYTE(x) (x)
+#define EEPROM_FLOAT(x) (float)(x)
+#define EEPROM_INT32(x) (int32_t)(x)
+#define EEPROM_BYTE(x) (uint8_t)(x)
 #define EEPROM_SET_BYTE(x,val)
 #endif
 
@@ -162,6 +168,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_COOLER_SPEED       54
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
+#define EPR_EXTRUDER_Z_OFFSET            90
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 5.0
 #endif
@@ -188,7 +195,26 @@ public:
     static void writeSettings();
     static void update(GCode *com);
     static void updatePrinterUsage();
-
+    static inline void setVersion(uint8_t v) {
+#if EEPROM_MODE != 0
+        HAL::eprSetByte(EPR_VERSION,v);
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE,computeChecksum());
+#endif
+    }
+    static inline uint8_t getStoredLanguage() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetByte(EPR_SELECTED_LANGUAGE);
+#else
+        return 0;
+#endif
+    }
+    static inline float zProbeZOffset() {
+#if EEPROM_MODE != 0
+	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+#else
+	    return Z_PROBE_Z_OFFSET;
+#endif
+    }
     static inline float zProbeSpeed() {
 #if EEPROM_MODE != 0
         return HAL::eprGetFloat(EPR_Z_PROBE_SPEED);
@@ -515,5 +541,34 @@ static inline void setTowerZFloor(float newZ) {
         return 0;
 #endif
     }
+    static inline float bendingCorrectionA() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_A);
+#else
+        return BENDING_CORRECTION_A;
+#endif
+    }
+    static inline float bendingCorrectionB() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_B);
+#else
+        return BENDING_CORRECTION_B;
+#endif
+    }
+    static inline float bendingCorrectionC() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_BENDING_CORRECTION_C);
+#else
+        return BENDING_CORRECTION_C;
+#endif
+    }
+    static inline float accelarationFactorTop() {
+#if EEPROM_MODE != 0
+        return HAL::eprGetFloat(EPR_ACCELERATION_FACTOR_TOP);
+#else
+        return ACCELERATION_FACTOR_TOP;
+#endif
+    }
+
 };
 #endif
