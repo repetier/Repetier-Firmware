@@ -2315,7 +2315,7 @@ void Printer::showJSONStatus(int type) {
                 Com::print('}');
                 firstOccurrence = false;
             }
-            Com::printFLN(PSTR("]"));
+            Com::printF(PSTR("]"));
             break;
         case 3:
             Com::printF(PSTR(",\"currentLayer\":"));
@@ -2326,7 +2326,7 @@ void Printer::showJSONStatus(int type) {
 #else
             Com::printF(PSTR("-1"));
 #endif
-            Com::printF(PSTR("\",extrRaw\":["));
+            Com::printF(PSTR(",\"extrRaw\":["));
             firstOccurrence = true;
             for (int i = 0; i < NUM_EXTRUDER; i++) {
                 if (!firstOccurrence) Com::print(',');
@@ -2401,7 +2401,7 @@ void Printer::showJSONStatus(int type) {
                 Com::print(',');
                 Com::print(extruder[i].maxFeedrate);
             }
-            Com::printFLN(PSTR("]"));
+            Com::printF(PSTR("]"));
             break;
     }
 
