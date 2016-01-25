@@ -1429,12 +1429,13 @@ void Printer::homeYAxis()
 {
     // Dummy function x and y homing must occur together
 }
-#else // cartesian printer
+#else // Cartesian printer
 void Printer::homeXAxis()
 {
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR == 1))
     {
+		coordinateOffset[X_AXIS] = 0;
         long offX = 0;
 #if NUM_EXTRUDER > 1
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
@@ -1474,6 +1475,7 @@ void Printer::homeYAxis()
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1))
     {
+		coordinateOffset[Y_AXIS] = 0;
         long offY = 0;
 #if NUM_EXTRUDER > 1
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
@@ -1514,6 +1516,7 @@ void Printer::homeZAxis() // Cartesian homing
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1))
     {
+		coordinateOffset[Z_AXIS] = 0;
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_Z_ID));
         steps = (zMaxSteps - zMinSteps) * Z_HOME_DIR;
         currentPositionSteps[Z_AXIS] = -steps;
