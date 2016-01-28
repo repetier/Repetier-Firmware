@@ -836,7 +836,7 @@ void Printer::setup()
     SET_OUTPUT(X_STEP_PIN);
     SET_OUTPUT(Y_STEP_PIN);
     SET_OUTPUT(Z_STEP_PIN);
-
+	endXYZSteps();
     //Initialize Dir Pins
 #if X_DIR_PIN > -1
     SET_OUTPUT(X_DIR_PIN);
