@@ -3587,6 +3587,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_LANGUAGE_FR:
         case UI_ACTION_LANGUAGE_CZ:
         case UI_ACTION_LANGUAGE_PL:
+        case UI_ACTION_LANGUAGE_TR:
+        case UI_ACTION_LANGUAGE_FI:
             Com::selectLanguage(action - UI_ACTION_LANGUAGE_EN);
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start

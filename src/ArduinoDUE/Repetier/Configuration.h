@@ -1592,6 +1592,7 @@ the language can be switched any time. */
 #define LANGUAGE_PT_ACTIVE 1 // Brazilian portuguese
 #define LANGUAGE_IT_ACTIVE 1 // Italian
 #define LANGUAGE_ES_ACTIVE 1 // Spanish
+#define LANGUAGE_FI_ACTIVE 1 // Finnish
 #define LANGUAGE_SE_ACTIVE 1 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
 #define LANGUAGE_CZ_ACTIVE 1 // Czech

@@ -243,7 +243,7 @@ void correctAutolevel(GCode *code,Plane &plane) {
     // h1 is reference heights, h2 => motor 0, h3 => motor 1
     h2 -= h1;
     h3 -= h1;
-#ifdef LIMIT_MOTORIZED_CORRECTION && LIMIT_MOTORIZED_CORRECTION > 0
+#if defined(LIMIT_MOTORIZED_CORRECTION)
 	if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
 	if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
 	if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
