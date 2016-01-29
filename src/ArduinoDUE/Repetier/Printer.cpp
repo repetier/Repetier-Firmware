@@ -310,6 +310,7 @@ void Printer::constrainDestinationCoords()
 #if max_software_endstop_z
     if (isAutolevelActive() == false && destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
+	EVENT_CONTRAIN_DESTINATION_COORDINATES
 }
 #endif
 void Printer::setDebugLevel(uint8_t newLevel) {

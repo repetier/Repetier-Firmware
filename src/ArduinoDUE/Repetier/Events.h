@@ -39,7 +39,7 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_KILL(only_steppers) {}
 // Gets called when a jam was detected.
 #define EVENT_JAM_DETECTED {}
-// Gets called everytime the jam detection signal switches. Steps are the extruder steps since last change.
+// Gets called every time the jam detection signal switches. Steps are the extruder steps since last change.
 #define EVENT_JAM_SIGNAL_CHANGED(extruderId,steps) {}
 // Gets called if a heater decoupling is detected.
 #define EVENT_HEATER_DECOUPLED(id) {}
@@ -49,14 +49,16 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_START_UI_ACTION(shortAction) {}
 // Gets called if a nextPrevius actions gets executed.
 #define EVENT_START_NEXTPREVIOUS(action,increment) {}
+// Gets called before a move is queued. Gives the ability to limit moves.
+#define EVENT_CONTRAIN_DESTINATION_COORDINATES
 
-// Called to initalize laser pins. Return false to prevent default initalization.
+// Called to initialize laser pins. Return false to prevent default initialization.
 #define EVENT_INITALIZE_LASER true
 // Set laser to intensity level 0 = off, 255 = full. Return false if you have overridden the setting routine.
 // with true the default solution will set it as digital value.
 #define EVENT_SET_LASER(intensity) true
 
-// Called to initalize cnc pins. Return false to prevent default initalization.
+// Called to initialize CNC pins. Return false to prevent default initialization.
 #define EVENT_INITALIZE_CNC true
 // Turn off spindle
 #define EVENT_SPINDLE_OFF true

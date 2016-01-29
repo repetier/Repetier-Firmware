@@ -165,7 +165,6 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
-    Printer::constrainDestinationCoords();
     //Find direction
     Printer::zCorrectionStepsIncluded = 0;
     for(uint8_t axis = 0; axis < 4; axis++)
@@ -271,6 +270,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 {
+    Printer::constrainDestinationCoords();
     Printer::unsetAllSteppersDisabled();
 #if DISTORTION_CORRECTION
 	if(Printer::distortion.isEnabled() && Printer::destinationSteps[Z_AXIS] < Printer::distortion.zMaxSteps() && Printer::isZProbingActive() == false && !Printer::isHoming()) {
@@ -317,7 +317,6 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
-    Printer::constrainDestinationCoords();
     //Find direction
 	Printer::zCorrectionStepsIncluded = 0;
     for(uint8_t axis = 0; axis < 4; axis++)
@@ -1737,6 +1736,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff,uint8_t check_endstops,uin
 uint8_t PrintLine::queueDeltaMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop)
 {
     //if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0; // now constrained at entry level including cylinder test
+	EVENT_CONTRAIN_DESTINATION_COORDINATES
     int32_t difference[E_AXIS_ARRAY];
     float axis_diff[VIRTUAL_AXIS_ARRAY]; // Axis movement in mm. Virtual axis in 4;
     uint8_t secondSpeed = Printer::fanSpeed;

@@ -46,4 +46,14 @@ void Felix500MS() {
   }
 }
 
+void FelixContainCoordinates() {
+  TemperatureController *bed = tempController[NUM_TEMPERATURE_LOOPS-1];
+  if((bed->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT) == TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT) {
+    Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS];
+    Printer::destinationSteps[Y_AXIS] = Printer::currentPositionSteps[Y_AXIS];
+    Printer::destinationSteps[Z_AXIS] = Printer::currentPositionSteps[Z_AXIS];
+    Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS];  // to prevent fast e move when reactivated
+    Printer::updateCurrentPosition(true);
+  }
+}
  
