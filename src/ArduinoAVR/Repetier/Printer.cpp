@@ -524,7 +524,7 @@ void Printer::kill(uint8_t only_steppers)
     Extruder::disableAllExtruderMotors();
     if(!only_steppers)
     {
-        for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(0, i);
         Extruder::setHeatedBedTemperature(0);
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));

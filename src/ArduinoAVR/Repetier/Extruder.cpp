@@ -148,7 +148,7 @@ void Extruder::manageTemperatures()
             }
         }
 #if HAVE_HEATED_BED
-		else if(controller == NUM_EXTRUDER && Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5) {
+		else if(controller == HEATED_BED_INDEX && Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5) {
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
             extruderTempErrors++;
@@ -786,8 +786,8 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 {
 #if HAVE_HEATED_BED
-    if(temperatureInCelsius>HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
-    if(temperatureInCelsius<0) temperatureInCelsius = 0;
+    if(temperatureInCelsius > HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
+    if(temperatureInCelsius < 0) temperatureInCelsius = 0;
     if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temperatureInCelsius);
     if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
@@ -802,7 +802,7 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 float Extruder::getHeatedBedTemperature()
 {
 #if HAVE_HEATED_BED
-    TemperatureController *c = tempController[NUM_TEMPERATURE_LOOPS-1];
+    TemperatureController *c = tempController[HEATED_BED_INDEX];
     return c->currentTemperatureC;
 #else
     return -1;
@@ -1848,7 +1848,7 @@ uint8_t autotuneIndex = 255;
 void Extruder::disableAllHeater()
 {
 #if NUM_TEMPERATURE_LOOPS > 0
-    for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
+    for(uint8_t i = 0; i <= HEATED_BED_INDEX; i++)
     {
         TemperatureController *c = tempController[i];
         c->targetTemperature = 0;
@@ -2022,7 +2022,10 @@ bool reportTempsensorError()
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
         if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
-        else Com::printF(Com::tExtruderSpace,i);
+#if HAVE_HEATED_BED		
+        else if(i == HEATED_BED_INDEX) Com::printF(Com::tExtruderSpace,i);
+#endif		
+		else Com::printF(PSTR("Other:"));
 		TemperatureController *act = tempController[i];
         int temp = act->currentTemperatureC;
         if(temp < MIN_DEFECT_TEMPERATURE || temp > MAX_DEFECT_TEMPERATURE)

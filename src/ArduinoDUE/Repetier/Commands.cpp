@@ -1794,7 +1794,7 @@ void Commands::processMCode(GCode *com) {
             break;
 #if NUM_TEMPERATURE_LOOPS > 0
         case 116: // Wait for temperatures to reach target temperature
-            for(fast8_t h = 0; h < NUM_TEMPERATURE_LOOPS; h++) {
+            for(fast8_t h = 0; h <= HEATED_BED_INDEX; h++) {
                 EVENT_WAITING_HEATER(h < NUM_EXTRUDER ? h : -1);
                 tempController[h]->waitForTargetTemperature();
                 EVENT_HEATING_FINISHED(h < NUM_EXTRUDER ? h : -1);
@@ -2073,14 +2073,15 @@ void Commands::processMCode(GCode *com) {
             Printer::setColdExtrusionAllowed(!com->hasS() || (com->hasS() && com->S != 0));
             break;
         case 303: { // M303
-#if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS>0
+#if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS > 0
                 int temp = 150;
                 int cont = 0;
                 int cycles = 5;
                 if(com->hasS()) temp = com->S;
                 if(com->hasP()) cont = com->P;
                 if(com->hasR()) cycles = static_cast<int>(com->R);
-                if(cont>=NUM_TEMPERATURE_LOOPS) cont = NUM_TEMPERATURE_LOOPS;
+                if(cont >= HEATED_BED_INDEX) cont = HEATED_BED_INDEX;
+				if(cont < 0) cont = 0;
                 tempController[cont]->autotunePID(temp,cont,cycles,com->hasX());
 #endif
             }

@@ -910,7 +910,6 @@ public:
         }
         if(motorYorZ <= -2)
         {
-            //ANALYZER_ON(ANALYZER_CH3); // I dont think i can use these as they are for the y - possible bug area though
             WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
             WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
@@ -922,7 +921,6 @@ public:
         }
         else if(motorYorZ >= 2)
         {
-            //ANALYZER_ON(ANALYZER_CH3); // I dont think i can use these as they are for the y - possible bug area though
             WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
             WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);

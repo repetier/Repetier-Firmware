@@ -704,7 +704,7 @@ void PrintLine::updateTrapezoids()
 
     if(previous->isEOnlyMove() != act->isEOnlyMove())
     {
-        previous->maxJunctionSpeed = previous->endSpeed;
+        previous->maxJunctionSpeed = act->startSpeed;
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();
@@ -930,7 +930,7 @@ inline void PrintLine::backwardPlanner(ufast8_t start,ufast8_t last)
         previousPlannerIndex(start);
         previous = &lines[start];
         previous->block();
-        // Avoid speed calc once crusing in split delta move
+        // Avoid speed calc once cruising in split delta move
 #if NONLINEAR_SYSTEM
         if (previous->moveID == act->moveID && lastJunctionSpeed == previous->maxJunctionSpeed)
         {
@@ -1066,6 +1066,7 @@ inline float PrintLine::safeSpeed()
         else
             safe = 0.5 * Extruder::current->maxStartFeedrate; // This is a retraction move
     }
+	// Check for minimum speeds needed for numerical robustness
     if(DRIVE_SYSTEM == DELTA || primaryAxis == X_AXIS || primaryAxis == Y_AXIS) // enforce minimum speed for numerical stability of explicit speed integration
         safe = RMath::max(Printer::minimumSpeed, safe);
     else if(primaryAxis == Z_AXIS)
@@ -2459,7 +2460,6 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
     if(cur == NULL)
 #endif
     {
-        ANALYZER_ON(ANALYZER_CH0);
         setCurrentLine();
         if(cur->isBlocked())   // This step is in computation - shouldn't happen
         {

@@ -524,7 +524,7 @@ void Printer::kill(uint8_t only_steppers)
     Extruder::disableAllExtruderMotors();
     if(!only_steppers)
     {
-        for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
+        for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(0, i);
         Extruder::setHeatedBedTemperature(0);
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));
@@ -680,7 +680,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
 
   For the computation of the destination, the following facts are considered:
   - Are units inches or mm.
-  - Reltive or absolute positioning with special case only extruder relative.
+  - Relative or absolute positioning with special case only extruder relative.
   - Offset in x and y direction for multiple extruder support.
 */
 
@@ -689,7 +689,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     register int32_t p;
     float x, y, z;
 #if FEATURE_RETRACTION
-    if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into autoretract
+    if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into auto retract
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
             Extruder::current->retract(com->E < 0,false);
         } else {
