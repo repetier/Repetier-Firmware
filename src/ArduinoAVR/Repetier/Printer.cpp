@@ -212,7 +212,7 @@ void Endstops::update() {
             newRead |= ENDSTOP_Z2_MINMAX_ID;
 #endif
 #if FEATURE_Z_PROBE
-#if Z_PROBE_PIN == Z_MIN_PIN
+#if Z_PROBE_PIN == Z_MIN_PIN && MIN_HARDWARE_ENDSTOP_Z
 	if(newRead & ENDSTOP_Z_MIN_ID) // prevent different results causing confusion
         newRead |= ENDSTOP_Z_PROBE_ID;
 #else
