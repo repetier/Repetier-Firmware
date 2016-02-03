@@ -965,11 +965,11 @@ void Commands::processGCode(GCode *com) {
             break;
 #if FEATURE_Z_PROBE
         case 29: { // G29 3 points, build average or distortion compensation
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
                 float actTemp[NUM_EXTRUDER];
                 for(int i = 0; i < NUM_EXTRUDER; i++)
                     actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-                Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                 Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1038,7 +1038,7 @@ void Commands::processGCode(GCode *com) {
                 printCurrentPosition(PSTR("G29 "));
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
                     Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
@@ -1071,11 +1071,11 @@ void Commands::processGCode(GCode *com) {
 #if FEATURE_AUTOLEVEL
         case 32: // G32 Auto-Bed leveling
 		{
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
             float actTemp[NUM_EXTRUDER];
             for(int i = 0; i < NUM_EXTRUDER; i++)
                 actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
             Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
             for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1091,7 +1091,7 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
             runBedLeveling(com);
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
             for(int i = 0; i < NUM_EXTRUDER; i++) {
                 Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
@@ -1121,11 +1121,11 @@ void Commands::processGCode(GCode *com) {
                         Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
                     }
                 } else { // G33
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
                     float actTemp[NUM_EXTRUDER];
                     for(int i = 0; i < NUM_EXTRUDER; i++)
                         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-                    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                     for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1143,7 +1143,7 @@ void Commands::processGCode(GCode *com) {
                     float oldFeedrate = Printer::feedrate;
                     Printer::measureDistortion();
                     Printer::feedrate = oldFeedrate;
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
                     for(int i = 0; i < NUM_EXTRUDER; i++)
                         Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
