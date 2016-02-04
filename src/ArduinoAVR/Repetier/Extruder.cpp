@@ -130,7 +130,7 @@ void Extruder::manageTemperatures()
 
 
         // Check for obvious sensor errors
-        if(act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE)   // no temp sensor or short in sensor, disable heater
+        if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) && act->targetTemperatureC > MIN_DEFECT_TEMPERATURE )   // no temp sensor or short in sensor, disable heater
         {
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -1449,6 +1449,15 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
     {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
     {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
+
+#define NUMTEMPS_14 27 // DYZE DESIGN 500°C Thermistor
+const short temptable_14[NUMTEMPS_14][2] PROGMEM =
+{
+    {18*4, 850*8},{18*4, 500*8},{22*4, 480*8},{27*4, 460*8},{33*4, 440*8},{41*4, 420*8},{52*4, 400*8},{68*4, 380*8},{86*4, 360*8},{112*4, 340*8},
+    {147*4, 320*8},{194*4, 300*8},{254*4, 280*8},{330*4, 260*8},{428*4, 240*8},{533*4, 220*8},{646*4, 200*8},{754*4, 180*8},{844*4, 160*8},
+    {912*4, 140*8},{959*4, 120*8},{989*4, 100*8},{1007*4, 80*8},{1016*4, 60*8},{1021*4, 30*8},{4091, 25*8},{4092, 20*8}
+};
+
 #if CPU_ARCH == ARCH_AVR
 #define NUMTEMPS_13 19
 const short temptable_13[NUMTEMPS_13][2] PROGMEM =
@@ -1472,7 +1481,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[13] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[14] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -1494,9 +1503,10 @@ const short * const temptables[13] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_11[0][0]
         ,(short int *)&temptable_12[0][0]
         ,(short int *)&temptable_13[0][0]
+        ,(short int *)&temptable_14[0][0]
                                              };
-const uint8_t temptables_num[13] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13
+const uint8_t temptables_num[14] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14
                                            };
 
 
@@ -1522,6 +1532,7 @@ void TemperatureController::updateCurrentTemperature()
     case 10:
     case 11:
     case 12:
+    case 14:
     case 97:
     case 98:
     case 99:
@@ -1569,6 +1580,7 @@ void TemperatureController::updateCurrentTemperature()
     case 10:
     case 11:
     case 12:
+    case 14:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
@@ -1731,6 +1743,7 @@ void TemperatureController::setTargetTemperature(float target)
     case 10:
     case 11:
     case 12:
+    case 14:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
