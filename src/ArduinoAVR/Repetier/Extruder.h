@@ -60,6 +60,7 @@ public:
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
+    millis_t preheatStartTime;    ///< Time (in milliseconds) when heatup was started
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
@@ -143,6 +144,18 @@ public:
 #if TEMP_PID
     void autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeResult);
 #endif
+   inline void startPreheatTime()
+   {
+       preheatStartTime = HAL::timeInMilliseconds();
+   }
+   inline void resetPreheatTime()
+   {
+       preheatStartTime = 0;
+   }
+   inline millis_t preheatTime()
+   {
+       return preheatStartTime == 0 ? 0 : HAL::timeInMilliseconds() - preheatStartTime;
+   }
 };
 class Extruder;
 extern Extruder extruder[];
