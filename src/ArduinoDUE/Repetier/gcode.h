@@ -182,7 +182,12 @@ public:
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static uint8_t computeBinarySize(char *ptr);
-
+	static void fatalError(FSTRINGPARAM(message));
+	static void reportFatalError();
+	static void resetFatalError();
+	inline static bool hasFatalError() {
+		return fatalErrorMsg != NULL;
+	}
     friend class SDCard;
     friend class UIDisplay;
 private:
@@ -206,6 +211,7 @@ private:
         return l;
     }
 
+	static FSTRINGPARAM(fatalErrorMsg);
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
     static uint8_t bufferReadIndex; ///< Read position in gcode_buffer.
     static uint8_t bufferWriteIndex; ///< Write position in gcode_buffer.

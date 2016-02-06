@@ -763,7 +763,7 @@ void PrintLine::updateTrapezoids()
 optimal conditions. There is no guarantee that the previous move will be able to reach the
 speed at all, but if it could exceed it will never exceed this theoretical limit.
 
-if you define ALTERNATIVE_JERK teh new jerk computations are used. These
+if you define ALTERNATIVE_JERK the new jerk computations are used. These
 use the cosine of the angle and the maximum speed
 Jerk = (1-cos(alpha))*min(v1,v2)
 This sets jerk to 0 on zero angle change.
@@ -776,7 +776,7 @@ This sets jerk to 0 on zero angle change.
 180°:   200               200
 
 
-von 100 auf 200
+Speed from 100 to 200
         Old               New(min)   New(max)
 0°:     100               0          0
 30°:    123,9             13.4       26.8
@@ -818,27 +818,35 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
     // move -> move (with or without extrusion)
     // First we compute the normalized jerk for speed 1
     float factor = 1.0;
+	float lengthFactor = MAX_JERK_DISTANCE;
+#ifdef REDUCE_ON_SMALL_SEGMENTS	
+	if(previous->distance < MAX_JERK_DISTANCE)
+		lengthFactor = static_cast<float>(MAX_JERK_DISTANCE) / (previous->distance * previous->distance);
+#endif		
     float maxJoinSpeed = RMath::min(current->fullSpeed,previous->fullSpeed);
 #if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
 #ifdef ALTERNATIVE_JERK
-    float jerk = maxJoinSpeed * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
+    float jerk = maxJoinSpeed * lengthFactor * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
 #else
     float dx = current->speedX - previous->speedX;
     float dy = current->speedY - previous->speedY;
     float dz = current->speedZ - previous->speedZ;
-    float jerk = sqrt(dx * dx + dy * dy + dz * dz);
+    float jerk = sqrt(dx * dx + dy * dy + dz * dz) * lengthFactor;
 #endif // ALTERNATIVE_JERK
 #else // DELTA
 #ifdef ALTERNATIVE_JERK
-    float jerk = maxJoinSpeed * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
+    float jerk = maxJoinSpeed * lengthFactor * (1.0 - (current->speedX * previous->speedX + current->speedY * previous->speedY + current->speedZ * previous->speedZ) / (current->fullSpeed * previous->fullSpeed));
 #else
     float dx = current->speedX - previous->speedX;
     float dy = current->speedY - previous->speedY;
-    float jerk = sqrt(dx * dx + dy * dy);
+    float jerk = sqrt(dx * dx + dy * dy) * lengthFactor;
 #endif // ALTERNATIVE_JERK
 #endif // DELTA
-    if(jerk > Printer::maxJerk)
+    if(jerk > Printer::maxJerk) {
         factor = Printer::maxJerk / jerk; // always < 1.0!
+		if(factor * maxJoinSpeed * 2.0 < Printer::maxJerk)
+			factor = Printer::maxJerk / (2.0 * maxJoinSpeed);
+	}
 #if DRIVE_SYSTEM != DELTA
     if((previous->dir | current->dir) & ZSTEP)
     {

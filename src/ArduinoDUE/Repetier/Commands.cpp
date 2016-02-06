@@ -851,7 +851,7 @@ void Commands::processArc(GCode *com) {
     PrintLine::arc(position, target, offset, r, isclockwise);
 }
 #endif
-extern void runBedLeveling(GCode *com);
+extern bool runBedLeveling(GCode *com);
 /**
 \brief Execute the G command stored in com.
 */
@@ -1018,8 +1018,8 @@ void Commands::processGCode(GCode *com) {
                         Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                         float zup = Printer::runZMaxProbe();
                         if(zup == ILLEGAL_Z_PROBE) {
-                            break;
-                        }
+							ok = false;
+                        } else
                         Printer::zLength = zup + sum - ENDSTOP_Z_BACK_ON_HOME;
 #endif // DELTA
                         Com::printInfoFLN(Com::tZProbeZReset);
@@ -1031,13 +1031,17 @@ void Commands::processGCode(GCode *com) {
                     }
                     Printer::feedrate = oldFeedrate;
                     Printer::setAutolevelActive(oldAutolevel);
-                    if(com->hasS() && com->S == 2)
+                    if(ok && com->hasS() && com->S == 2)
                         EEPROM::storeDataIntoEEPROM();
                 }
                 Printer::updateCurrentPosition(true);
                 printCurrentPosition(PSTR("G29 "));
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
+				if(!ok) {
+					GCode::fatalError(PSTR("G29 leveling failed!"));
+					break;
+				}
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1057,7 +1061,10 @@ void Commands::processGCode(GCode *com) {
         case 30: 
 			{ // G30 single probe set Z0
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-                Printer::runZProbe(p & 1,p & 2);
+                if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
+					GCode::fatalError(PSTR("G29 leveling failed!"));
+					break;
+				}
                 Printer::updateCurrentPosition(p & 1);
             }
             break;
@@ -1090,7 +1097,10 @@ void Commands::processGCode(GCode *com) {
                 Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
 #endif
 #endif
-            runBedLeveling(com);
+            if(!runBedLeveling(com)) {
+				GCode::fatalError(PSTR("G32 leveling failed!"));
+				break;
+			}
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
             for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1141,7 +1151,10 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
                     float oldFeedrate = Printer::feedrate;
-                    Printer::measureDistortion();
+                    if(!Printer::measureDistortion()) {
+						GCode::fatalError(PSTR("G33 failed!"));
+						break;
+					}
                     Printer::feedrate = oldFeedrate;
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
@@ -2371,6 +2384,12 @@ void Commands::processMCode(GCode *com) {
                 EEPROM::setVersion(com->S);
             break;
 #endif
+		case 999: // Stop fatal error take down
+			if(com->hasS())
+				GCode::fatalError(PSTR("Testing fatal error"));
+			else				
+				GCode::resetFatalError();
+			break;
         default:
             if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors()) {
                 Com::printF(Com::tUnknownCommand);

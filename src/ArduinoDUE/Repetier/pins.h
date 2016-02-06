@@ -161,6 +161,14 @@ STEPPER_CURRENT_CONTROL
 
 // Dua analog pin #59 = A5 -> AD 2
 #define THERMOCOUPLE_0_PIN  2   
+// There are no more analog pins freely available.
+// You can use direction and enable pin from extruder 0 socket as they are also 
+// analog pins. Then you need to move the stepper driver to a different socket.
+
+// Direction pin of extruder 0
+#define THERMOCOUPLE_1_PIN  1 
+// Step pin of extruder 1  
+#define THERMOCOUPLE_2_PIN  0   
 
 #define ORIG_E0_STEP_PIN    61
 #define ORIG_E0_DIR_PIN     60
@@ -600,6 +608,121 @@ STEPPER_CURRENT_CONTROL
 
 #endif
 
+
+// Ultratronics Board  (experimental, use with care probably even not working!)
+// http://www.reprapworld.com
+#if MOTHERBOARD == 409
+#ifndef __SAM3X8E__
+#error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
+#endif
+
+#define KNOWN_BOARD
+#define CPU_ARCH ARCH_ARM
+
+#define ORIG_X_STEP_PIN     35
+#define ORIG_X_DIR_PIN      34
+#define ORIG_X_MIN_PIN      31
+#define ORIG_X_MAX_PIN      30
+#define ORIG_X_ENABLE_PIN   37
+
+#define ORIG_Y_STEP_PIN     22 
+#define ORIG_Y_DIR_PIN      23
+#define ORIG_Y_MIN_PIN      12
+#define ORIG_Y_MAX_PIN      11
+#define ORIG_Y_ENABLE_PIN   9
+
+#define ORIG_Z_STEP_PIN     25
+#define ORIG_Z_DIR_PIN      26
+#define ORIG_Z_MIN_PIN      29
+#define ORIG_Z_MAX_PIN      28
+#define ORIG_Z_ENABLE_PIN   24
+
+// Note that on the Due pin A0 on the board is channel 2 on the ARM chip
+#define HEATER_0_PIN     3
+// Due analog pin A0 = channel 7
+#define TEMP_0_PIN       7
+
+#define HEATER_1_PIN     2 
+// Due analog pin A1 = channel 6
+#define TEMP_1_PIN       6
+// Due analog pin #58
+
+#define HEATER_2_PIN     8
+// Due analog pin A2 = channel 5
+#define TEMP_2_PIN       5
+
+#define HEATER_3_PIN     6
+// Due analog pin A3 = channel 4
+#define TEMP_3_PIN       4
+
+#define HEATER_4_PIN     9
+// Due analog pin A4 = channel 3
+#define TEMP_4_PIN       3
+
+// Dua analog pin #59 = A5 -> AD 2
+#define THERMOCOUPLE_0_PIN  65   
+#define THERMOCOUPLE_1_PIN  52   
+#define THERMOCOUPLE_2_PIN  51   
+#define THERMOCOUPLE_3_PIN  50   
+
+#define ORIG_E0_STEP_PIN    47
+#define ORIG_E0_DIR_PIN     46
+#define ORIG_E0_ENABLE_PIN  48
+
+#define ORIG_E1_STEP_PIN    44
+#define ORIG_E1_DIR_PIN     36
+#define ORIG_E1_ENABLE_PIN  45
+
+#define ORIG_E2_STEP_PIN    42
+#define ORIG_E2_DIR_PIN     41
+#define ORIG_E2_ENABLE_PIN  43
+
+#define ORIG_E3_STEP_PIN    39
+#define ORIG_E3_DIR_PIN     38
+#define ORIG_E3_ENABLE_PIN  40
+
+#define SDSUPPORT      -1 
+#define SDPOWER 	   -1
+// 4,10,52 if using HW SPI.
+#define SDSS 59
+#define MOSI_PIN        75
+#define MISO_PIN        74
+#define SCK_PIN         76
+
+#define ORIG_SDCARDDETECT  60
+#define SDCARDDETECTINVERTED 0
+#define LED_PIN 	   -1
+#define ORIG_FAN_PIN 	5 
+#define ORIG_FAN2_PIN  -1 
+#define ORIG_PS_ON_PIN -1
+#define KILL_PIN	   -1
+#define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+
+// 20 or 70
+#define SDA_PIN 				70  	
+//21 or 71
+#define SCL_PIN 				71  	
+
+// Servo pins: 5,6 und 39
+
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,TEMP_0_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,TEMP_2_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,TEMP_3_PIN,
+#define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,TEMP_4_PIN,
+
+#define TWI_CLOCK_FREQ          400000
+// see eeprom device data sheet for the following values these are for 24xx256
+#define EEPROM_SERIAL_ADDR      0x50   // 7 bit i2c address (without R/W bit)
+#define EEPROM_PAGE_SIZE        64     // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME  7      // page write time in milliseconds (docs say 5ms but that is too short)
+// specify size of eeprom address register
+// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
+#define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
+// Ultronics has no eeprom for storing changeable data
+#define EEPROM_AVAILABLE EEPROM_NONE
+#endif
+
+
 /*****************************************************************
  * Alligator Board rev2
  * http://www.3dartists.org/
@@ -993,9 +1116,17 @@ STEPPER_CURRENT_CONTROL
 //#define DUE_SOFTWARE_SPI
 #else
 #define DUE_SOFTWARE_SPI
+/* could be any pin with software */
+#ifndef MOSI_PIN
 #define MOSI_PIN		51
+#endif
+#ifndef MISO_PIN
 #define MISO_PIN		50
+#endif
+#ifndef SCK_PIN
 #define SCK_PIN 		52
+#endif
+
 #endif
 
 

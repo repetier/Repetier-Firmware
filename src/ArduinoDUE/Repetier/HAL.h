@@ -481,7 +481,6 @@ class HAL
       v.l = value;
       eprBurnValue(pos, sizeof(long), v);
       memcopy4(&virtualEeprom[pos],&value);
-      //*(long*)(void*)&virtualEeprom[pos] = value;
     }
     static inline void eprSetFloat(unsigned int pos, float value)
     {
@@ -493,44 +492,29 @@ class HAL
     static inline uint8_t eprGetByte(unsigned int pos)
     {
       return *(uint8_t*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos,1);
-      //return v.b[0];
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
       int16_t v;
       memcopy2(&v,&virtualEeprom[pos]);
       return v;
-      //return *(int16_t*)(void*)&virtualEeprom[pos];
-      //eeval_t v;
-      //v.i = 0;
-      //v = eprGetValue(pos, 2);
-      //return v.i;
     }
     static inline int32_t eprGetInt32(unsigned int pos)
     {
       int32_t v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //eeval_t v = eprGetValue(pos, 4);
-      //return v.i;
     }
     static inline long eprGetLong(unsigned int pos)
     {
       int32_t v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //return *(long*)(void*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos, sizeof(long));
-      //return v.l;
     }
     static inline float eprGetFloat(unsigned int pos) {
       float v;
       memcopy4(&v,&virtualEeprom[pos]);
       return v;
-      //return *(float*)(void*)&virtualEeprom[pos];
-      //eeval_t v = eprGetValue(pos, sizeof(float));
-      //return v.f;
     }
 
     // Write any data type to EEPROM
@@ -640,6 +624,14 @@ class HAL
       // read last byte
       v.b[i] = i2cReadNak();
       return v;
+#else
+     eeval_t v;
+     int i;
+     for (i = 0; i < size; i++) {
+        // read an incomming byte
+        v.b[i] = 0;
+     }
+     return v;       
 #endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
     }
 
@@ -771,11 +763,10 @@ class HAL
 
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
-      uint8_t response;
       if (n == 0) return;
       WRITE(SDSS, LOW);
       for (uint16_t i = 0; i < n; i++) {
-        response = spiTransfer(buf[i]);
+        spiTransfer(buf[i]);
       }
       WRITE(SDSS, HIGH);
     }
@@ -783,14 +774,12 @@ class HAL
     inline __attribute__((always_inline))
     static void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
-      uint8_t response;
-
       WRITE(SDSS, LOW);
-      response = spiTransfer(token);
+      spiTransfer(token);
 
       for (uint16_t i = 0; i < 512; i++)
       {
-        response = spiTransfer(buf[i]);
+        spiTransfer(buf[i]);
       }
       WRITE(SDSS, HIGH);
     }

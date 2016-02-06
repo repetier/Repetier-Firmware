@@ -123,7 +123,7 @@ public:
     void init();
     void enable(bool permanent = true);
     void disable(bool permanent = true);
-    void measure(void);
+    bool measure(void);
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
     void updateDerived();
     void reportStatus();
@@ -1098,7 +1098,7 @@ public:
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
 #if DISTORTION_CORRECTION
-    static void measureDistortion(void);
+    static bool measureDistortion(void);
     static Distortion distortion;
 #endif
     static void MemoryPosition();

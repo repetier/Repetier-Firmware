@@ -391,6 +391,12 @@ void Extruder::unpauseExtruders()
         extruder[i].tempControl.waitForTargetTemperature();
 }
 
+void TemperatureController::resetAllErrorStates() {
+	for(int i = 0;i < NUM_TEMPERATURE_LOOPS; i++) {
+		tempController[i]->removeErrorStates();
+	}
+}
+
 #if EXTRUDER_JAM_CONTROL
 void TemperatureController::setJammed(bool on)
 {

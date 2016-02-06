@@ -543,6 +543,7 @@ void Printer::kill(uint8_t only_steppers)
 #endif
        pwm_pos[PWM_BOARD_FAN] = 0;
 #endif // FAN_BOARD_PIN
+	Commands::printTemperatures(false);
 }
 
 void Printer::updateAdvanceFlags()
@@ -1890,9 +1891,9 @@ void Printer::showConfiguration() {
 
 Distortion Printer::distortion;
 
-void Printer::measureDistortion(void)
+bool Printer::measureDistortion(void)
 {
-    distortion.measure();
+    return distortion.measure();
 }
 
 Distortion::Distortion()
@@ -2016,7 +2017,7 @@ void Distortion::extrapolateCorners()
     extrapolateCorner(m, m,-1,-1);
 }
 
-void Distortion::measure(void)
+bool Distortion::measure(void)
 {
     fast8_t ix, iy;
     float z = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
@@ -2053,7 +2054,7 @@ void Distortion::measure(void)
 			if(zp == ILLEGAL_Z_PROBE) {
 				Com::printErrorFLN(PSTR("Stopping distortion measurement due to errors."));
 				Printer::finishProbing();
-				return;
+				return false;
 			}
             setMatrix(floor(0.5f + Printer::axisStepsPerMM[Z_AXIS] * (z -zp)) + zCorrection,
             matrixIndex(ix,iy));
@@ -2087,6 +2088,7 @@ void Distortion::measure(void)
     }
 	showMatrix();
     enable(true);
+	return true;
     //Printer::homeAxis(false, false, true);
 }
 

@@ -270,7 +270,7 @@ S = 0 : Do not update length - use this if you have not homed before or you mess
 S = 1 : Measure zLength so homing works
 S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 */
-void runBedLeveling(GCode *com) {
+bool runBedLeveling(GCode *com) {
     float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
     int s = com->hasS() ? com->S : -1;
 #if DISTORTION_CORRECTION
@@ -303,7 +303,7 @@ void runBedLeveling(GCode *com) {
 #endif
         if(!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
-            return;
+            return false;
         }
         correctAutolevel(com,plane);
 
@@ -352,6 +352,7 @@ void runBedLeveling(GCode *com) {
     Printer::homeAxis(true, true, true); // shifting z makes positioning invalid, need to recalibrate
 #endif
     Printer::feedrate = oldFeedrate;
+	return true;
 }
 
 #endif

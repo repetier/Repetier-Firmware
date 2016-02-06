@@ -29,7 +29,7 @@
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
-// These are run time sqitchable debug flags
+// These are run time switchable debug flags
 enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x8,
                  DEB_COMMUNICATION = 0x10, DEB_NOMOVES = 0x20, DEB_DEBUG = 0x40
                 };
@@ -39,14 +39,14 @@ enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x
 /** write infos about path planner changes */
 //#define DEBUG_PLANNER
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
-to test your data througput or search for communication problems. */
+to test your data throughput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION 1
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
 #define INCLUDE_DEBUG_NO_MOVE 1
 /** Writes the free RAM to output, if it is less then at the last test. Should always return
 values >500 for safety, since it doesn't catch every function call. Nice to tweak cache
-usage or for seraching for memory induced errors. Switch it off for production, it costs execution time. */
+usage or for searching for memory induced errors. Switch it off for production, it costs execution time. */
 //#define DEBUG_FREE_MEMORY
 //#define DEBUG_ADVANCE
 /** If enabled, writes the created generic table to serial port at startup. */
@@ -193,6 +193,10 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+#ifndef MAX_JERK_DISTANCE
+#define MAX_JERK_DISTANCE 0.6
+#endif
 
 inline void memcopy2(void *dest,void *source) {
 	*((int16_t*)dest) = *((int16_t*)source);
