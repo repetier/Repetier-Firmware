@@ -43,7 +43,7 @@ int8_t   GCode::waitingForResend = -1; ///< Waiting for line to be resend. -1 = 
 volatile uint8_t GCode::bufferLength = 0; ///< Number of commands stored in gcode_buffer
 millis_t GCode::timeOfLastDataPacket = 0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 uint8_t  GCode::formatErrors = 0;
-FSTRINGPARAM(GCode::fatalErrorMsg) = NULL; ///< message unset = no fatal error 
+PGM_P GCode::fatalErrorMsg = NULL; ///< message unset = no fatal error 
 
 /** \page Repetier-protocol
 
@@ -1041,7 +1041,7 @@ void GCode::reportFatalError() {
 	Com::printF(Com::tFatal);
 	Com::printF(fatalErrorMsg);
 	Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
-	UI_ERROR_UPD(fatalErrorMsg)
+	UI_ERROR_P(fatalErrorMsg)
 }
 
 void GCode::resetFatalError() {
