@@ -1041,7 +1041,7 @@ void GCode::reportFatalError() {
 	Com::printF(Com::tFatal);
 	Com::printF(fatalErrorMsg);
 	Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
-	UI_ERROR_UPD(fatalErrorMsg)
+	UI_ERROR_UPD(fatalErrorMsg);
 }
 
 void GCode::resetFatalError() {

@@ -1990,7 +1990,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
 #define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
 #define UI_ERROR_P(status) uid.setStatusP(status,true);
-#define UI_ERROR_UPD(status) {uid.setStatusP(PSTR(status),true);uid.refreshPage();}
+#define UI_ERROR_UPD(status) {uid.setStatusP(status,true);uid.refreshPage();}
 #define UI_ERROR_RAM(status) uid.setStatus(status,true);
 #define UI_ERROR_UPD_RAM(status) {uid.setStatus(status,true);uid.refreshPage();}
 //#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
