@@ -71,7 +71,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         EVENT_TIMER_500MS;
     }
     // If called from queueDelta etc. it is an error to start a new move since it
-    // would invalidate old computation resulting in unpredicted behaviour.
+    // would invalidate old computation resulting in unpredicted behavior.
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
     UI_SLOW(allowNewMoves);
@@ -1814,7 +1814,7 @@ void Commands::processMCode(GCode *com) {
             }
             break;
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case 106: // M106 Fan On
             if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
                 if(com->hasP() && com->P == 1)
@@ -1981,7 +1981,7 @@ void Commands::processMCode(GCode *com) {
         case 221: // M221 S<Extrusion flow multiplier in percent>
             changeFlowrateMultiply(com->getS(100));
             break;
-        case 228: // M228 P<pin> S<state 0/1> - Wait for pin getting state S
+        case 226: // M226 P<pin> S<state 0/1> - Wait for pin getting state S
             if(!com->hasS() || !com->hasP())
                 break;
             {

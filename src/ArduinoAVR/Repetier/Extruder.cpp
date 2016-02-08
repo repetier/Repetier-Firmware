@@ -540,10 +540,12 @@ void Extruder::initExtruder()
             SET_OUTPUT(MOSI_PIN);
             WRITE(MISO_PIN, 1);
             SET_INPUT(MISO_PIN);
-            SET_OUTPUT(SS);
-            WRITE(SS, HIGH);
-            HAL::digitalWrite(act->tempControl.sensorPin, 1);
+            //SET_OUTPUT(SS);
+            //WRITE(SS, HIGH);
+            HAL::pinMode(SS, OUTPUT);
+            HAL::digitalWrite(SS, 1);
             HAL::pinMode(act->tempControl.sensorPin, OUTPUT);
+			HAL::digitalWrite(act->tempControl.sensorPin, 1);
         }
 #endif
     }

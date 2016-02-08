@@ -1539,7 +1539,7 @@ void Printer::homeZAxis() // Cartesian homing
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 		// If we want to go up a bit more for some reason
         if(ENDSTOP_Z_BACK_ON_HOME > 0)
-			zCorrection -= axisStepsPerMM[Z_AXIS]*ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR;
+			zCorrection -= axisStepsPerMM[Z_AXIS] * ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR;
 #endif
 #if Z_HOME_DIR < 0
 		// Fix bed coating
