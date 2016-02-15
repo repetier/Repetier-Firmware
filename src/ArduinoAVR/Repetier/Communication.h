@@ -135,13 +135,16 @@ FSTRINGVAR(tEEPROMUpdated)
 FSTRINGVAR(tFilamentSlipping)
 FSTRINGVAR(tPauseCommunication)
 FSTRINGVAR(tContinueCommunication)
+#if NONLINEAR_SYSTEM
+FSTRINGVAR(tInvalidDeltaCoordinate)
+FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
+#endif
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
 FSTRINGVAR(tMeasureOriginReset)
 FSTRINGVAR(tMeasurementAbortedOrigin)
-FSTRINGVAR(tInvalidDeltaCoordinate)
 FSTRINGVAR(tLevelingCalc)
 FSTRINGVAR(tTower1)
 FSTRINGVAR(tTower2)
@@ -155,7 +158,6 @@ FSTRINGVAR(tDeltaRadiusCorrectionC)
 FSTRINGVAR(tDeltaDiagonalCorrectionA)
 FSTRINGVAR(tDeltaDiagonalCorrectionB)
 FSTRINGVAR(tDeltaDiagonalCorrectionC)
-FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDeltaMaxRadius)
 #endif // DRIVE_SYSTEM
 #if DRIVE_SYSTEM==TUGA

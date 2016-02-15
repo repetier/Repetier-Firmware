@@ -729,7 +729,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         Extruder *actExtruder = &extruder[extr];
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_EXTRUDER_ID));
         EVENT_WAITING_HEATER(actExtruder->id);
-        bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
+        bool dirRising = actExtruder->tempControl.targetTemperatureC > actExtruder->tempControl.currentTemperatureC;
         millis_t printedTime = HAL::timeInMilliseconds();
         millis_t waituntil = 0;
 #if RETRACT_DURING_HEATUP
@@ -1649,6 +1649,13 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperatureC = ((float)currentTemperature * 660.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 250.0f;
 #endif
         break;
+    case 62: // TMP36
+#if CPU_ARCH == ARCH_AVR
+    currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 50.0f;
+#else
+    currentTemperatureC = ((float)currentTemperature * 330.0f / (1024 << (2 - ANALOG_REDUCE_BITS))) - 50.0f;
+#endif
+	    break;		
     case 100: // AD595 / AD597   10mV/°C
         //return (int)((long)raw_temp * 500/(1024<<(2-ANALOG_REDUCE_BITS)));
 #if CPU_ARCH == ARCH_AVR
@@ -1720,136 +1727,6 @@ void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
     stopDecouple();
-    int temp = TEMP_FLOAT_TO_INT(target);
-    uint8_t type = sensorType;
-    switch(sensorType)
-    {
-    case 0:
-        targetTemperature = 0;
-        break;
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    {
-        type--;
-        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
-        uint8_t i = 2;
-        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
-        short oldraw = pgm_read_word(&temptable[0]);
-        short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw = 0,newtemp;
-        while(i<num)
-        {
-            newraw = pgm_read_word(&temptable[i++]);
-            newtemp = pgm_read_word(&temptable[i++]);
-            if (newtemp < temp)
-            {
-                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp - newtemp);
-                return;
-            }
-            oldtemp = newtemp;
-            oldraw = newraw;
-        }
-        // Overflow: Set to last value in the table
-        targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-newraw;
-        break;
-    }
-    case 13: // PT100 E3D
-    case 50: // user defined PTC thermistor
-    case 51:
-    case 52:
-    {
-        if(type > 49)
-            type -= 46;
-        else
-            type--;
-        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
-        uint8_t i = 2;
-        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
-        short oldraw = pgm_read_word(&temptable[0]);
-        short oldtemp = pgm_read_word(&temptable[1]);
-        short newraw = 0,newtemp;
-        while(i < num)
-        {
-            newraw = pgm_read_word(&temptable[i++]);
-            newtemp = pgm_read_word(&temptable[i++]);
-            if (newtemp > temp)
-            {
-                targetTemperature = oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp-newtemp);
-                return;
-            }
-            oldtemp = newtemp;
-            oldraw = newraw;
-        }
-        // Overflow: Set to last value in the table
-        targetTemperature = newraw;
-        break;
-    }
-    case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
-        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 1000);
-        break;
-    case 100: // HEATER_USES_AD595
-        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 500);
-        break;
-#ifdef SUPPORT_MAX6675
-    case 101:  // defined HEATER_USES_MAX6675
-        targetTemperature = temp * 4;
-        break;
-#endif
-#ifdef SUPPORT_MAX31855
-    case 102:  // defined HEATER_USES_MAX31855
-        targetTemperature = temp * 4;
-        break;
-#endif
-#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
-    case 97:
-    case 98:
-    case 99:
-    {
-        uint8_t i = 2;
-        const short *temptable;
-#ifdef USE_GENERIC_THERMISTORTABLE_1
-        if(type == 97)
-            temptable = (const short *)temptable_generic1;
-#endif
-#ifdef USE_GENERIC_THERMISTORTABLE_2
-        if(type == 98)
-            temptable = (const short *)temptable_generic2;
-#endif
-#ifdef USE_GENERIC_THERMISTORTABLE_3
-        if(type == 99)
-            temptable = (const short *)temptable_generic3;
-#endif
-        short oldraw = temptable[0];
-        short oldtemp = temptable[1];
-        short newraw,newtemp;
-        while(i<GENERIC_THERM_NUM_ENTRIES*2)
-        {
-            newraw = temptable[i++];
-            newtemp = temptable[i++];
-            if (newtemp < temp)
-            {
-                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
-                return;
-            }
-            oldtemp = newtemp;
-            oldraw = newraw;
-        }
-        // Overflow: Set to last value in the table
-        targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - newraw;
-        break;
-    }
-#endif
-    }
 }
 
 uint8_t autotuneIndex = 255;
@@ -1859,7 +1736,6 @@ void Extruder::disableAllHeater()
     for(uint8_t i = 0; i <= HEATED_BED_INDEX; i++)
     {
         TemperatureController *c = tempController[i];
-        c->targetTemperature = 0;
         c->targetTemperatureC = 0;
         pwm_pos[c->pwmIndex] = 0;
     }
@@ -2202,7 +2078,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,0,0,0,0,0,EXT0_HEAT_MANAGER
+            0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,EXT0_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2229,7 +2105,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,0,0,0,0,0,EXT1_HEAT_MANAGER
+            1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,EXT1_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2256,7 +2132,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,0,0,0,0,0,EXT2_HEAT_MANAGER
+            2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,EXT2_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2283,7 +2159,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,0,0,0,0,0,EXT3_HEAT_MANAGER
+            3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,EXT3_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2310,7 +2186,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,0,0,0,0,0,EXT4_HEAT_MANAGER
+            4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,EXT4_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2337,7 +2213,7 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,0,0,0,0,0,EXT5_HEAT_MANAGER
+            5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,EXT5_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2353,7 +2229,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif // NUM_EXTRUDER
 
 #if HAVE_HEATED_BED
-TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,0,0,0,0,0,HEATED_BED_HEAT_MANAGER
+TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,HEATED_BED_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
@@ -2361,7 +2237,7 @@ TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TY
 #endif
 
 #if FAN_THERMO_PIN > -1
-TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0,0
+TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0
 	#if TEMP_PID
 	,0,255,0,10,1,1,255,0,0,0,{0,0,0,0}
 	#endif

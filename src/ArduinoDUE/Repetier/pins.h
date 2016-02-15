@@ -167,8 +167,10 @@ STEPPER_CURRENT_CONTROL
 
 // Direction pin of extruder 0
 #define THERMOCOUPLE_1_PIN  1 
-// Step pin of extruder 1  
+// Step pin of extruder 0  
 #define THERMOCOUPLE_2_PIN  0   
+// Enable pin of extruder 0  
+#define THERMOCOUPLE_3_PIN  10   
 
 #define ORIG_E0_STEP_PIN    61
 #define ORIG_E0_DIR_PIN     60

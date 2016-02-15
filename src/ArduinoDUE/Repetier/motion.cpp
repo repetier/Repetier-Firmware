@@ -1149,6 +1149,33 @@ void PrintLine::waitForXFreeLines(uint8_t b, bool allowMoves)
     }
 }
 
+#ifdef FAST_COREXYZ
+uint8_t transformCartesianStepsToDeltaSteps(int32_t cartesianPosSteps[], int32_t corePosSteps[])
+{
+	#if DRIVE_SYSTEM == XY_GANTRY
+	//1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
+	corePosSteps[A_TOWER] = cartesianPosSteps[X_AXIS] + cartesianPosSteps[Y_AXIS];
+	corePosSteps[B_TOWER] = cartesianPosSteps[X_AXIS] - cartesianPosSteps[Y_AXIS];
+	corePosSteps[C_TOWER] = cartesianPosSteps[X_AXIS];	
+	#elif DRIVE_SYSTEM == YX_GANTRY
+	// 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
+	corePosSteps[A_TOWER] = cartesianPosSteps[X_AXIS] + cartesianPosSteps[Y_AXIS];
+	corePosSteps[B_TOWER] = cartesianPosSteps[Y_AXIS] - cartesianPosSteps[X_AXIS];
+	corePosSteps[C_TOWER] = cartesianPosSteps[X_AXIS];
+	#elif DRIVE_SYSTEM == XZ_GANTRY
+	// 8 = y axis + xz H-gantry (x_motor = x+z, z_motor = x-z)
+	corePosSteps[A_TOWER] = cartesianPosSteps[X_AXIS] + cartesianPosSteps[Z_AXIS];
+	corePosSteps[C_TOWER] = cartesianPosSteps[X_AXIS] - cartesianPosSteps[Z_AXIS];
+	corePosSteps[B_TOWER] = cartesianPosSteps[X_AXIS];
+	#elif DRIVE_SYSTEM == ZX_GANTRY
+	//9 = y axis + xz H-gantry (x_motor = x+z, z_motor = z-x)
+	corePosSteps[A_TOWER] = cartesianPosSteps[X_AXIS] + cartesianPosSteps[Z_AXIS];
+	corePosSteps[C_TOWER] = cartesianPosSteps[Z_AXIS] - cartesianPosSteps[X_AXIS];
+	corePosSteps[B_TOWER] = cartesianPosSteps[X_AXIS];
+	#endif
+	return 1;
+}
+#endif
 
 #if DRIVE_SYSTEM == DELTA
 // pick one for verbose the other silent

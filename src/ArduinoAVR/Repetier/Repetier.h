@@ -197,6 +197,22 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif
+#define XY_GANTRY 1
+#define YX_GANTRY 2
+#define DELTA 3
+#define TUGA 4
+#define BIPOD 5
+#define XZ_GANTRY 8
+#define ZX_GANTRY 9
+#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
+#undef FAST_COREXYZ
+#endif
+#ifdef FAST_COREXYZ
+#undef DELTA_SEGMENTS_PER_SECOND_PRINT
+#undef DELTA_SEGMENTS_PER_SECOND_MOVE
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 1 // core is linear, no subsegments needed
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 1
+#endif
 
 inline void memcopy2(void *dest,void *source) {
 	*((int16_t*)dest) = *((int16_t*)source);
@@ -269,7 +285,7 @@ inline void memcopy4(void *dest,void *source) {
 #define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
-#ifndef ROD_RADIUS
+#if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
 #define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
 #endif
 
@@ -277,7 +293,7 @@ inline void memcopy4(void *dest,void *source) {
 #define UI_SPEEDDEPENDENT_POSITIONING true
 #endif
 
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD
+#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
 #define NONLINEAR_SYSTEM 1
 #else
 #define NONLINEAR_SYSTEM 0
@@ -289,14 +305,14 @@ inline void memcopy4(void *dest,void *source) {
 
 #define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
 
-//Step to split a cirrcle in small Lines
+//Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
 #define MM_PER_ARC_SEGMENT 1
 #define MM_PER_ARC_SEGMENT_BIG 3
 #else
 #define MM_PER_ARC_SEGMENT_BIG MM_PER_ARC_SEGMENT
 #endif
-//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
+//After this count of steps a new SIN / COS calculation is started to correct the circle interpolation
 #define N_ARC_CORRECTION 25
 
 // Test for shared cooler

@@ -41,7 +41,8 @@ unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 #if NONLINEAR_SYSTEM
 long Printer::currentDeltaPositionSteps[E_TOWER_ARRAY];
 uint8_t lastMoveID = 0; // Last move ID
-#else
+#endif
+#if DRIVE_SYSTEM != DELTA
 int32_t Printer::zCorrectionStepsIncluded = 0;
 #endif
 int16_t Printer::zBabystepsMissing = 0;
@@ -1117,7 +1118,7 @@ void Printer::setup()
     xMin = X_MIN_POS;
     yMin = Y_MIN_POS;
     zMin = Z_MIN_POS;
-#if NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == DELTA
     radius0 = ROD_RADIUS;
 #endif
 #if ENABLE_BACKLASH_COMPENSATION

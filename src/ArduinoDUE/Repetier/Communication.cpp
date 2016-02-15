@@ -154,7 +154,6 @@ FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
 FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
 FSTRINGVALUE(Com::tMeasurementAbortedOrigin,"Origin measurement cannot be set.  Use only Z-Cartesian (straight up and down) movements and try again.")
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
 FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
 FSTRINGVALUE(Com::tTower1,"Tower 1:")
 FSTRINGVALUE(Com::tTower2,"Tower 2:")
@@ -165,11 +164,21 @@ FSTRINGVALUE(Com::tDeltaAlphaC,"Alpha C(90):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionA,"Delta Radius A(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionB,"Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC,"Delta Radius C(0):")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==TUGA
+#if NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == TUGA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
+#elif DRIVE_SYSTEM == DELTA
+FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
+FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
+#else
+FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
+FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in segment with > 1 segment. This should never happen and may cause a problem!")
+#endif
+#endif
+
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Long arm length [mm]")
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC

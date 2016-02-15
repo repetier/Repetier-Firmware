@@ -1724,56 +1724,6 @@ void Commands::processMCode(GCode *com) {
                 Extruder *actExtruder = Extruder::current;
                 if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
                 if (com->hasS()) Extruder::setTemperatureForExtruder(com->S, actExtruder->id, com->hasF() && com->F > 0, true);
-                /*        UI_STATUS_UPD(UI_TEXT_HEATING_EXTRUDER);
-                #if defined(SKIP_M109_IF_WITHIN) && SKIP_M109_IF_WITHIN > 0
-                if(abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC) < (SKIP_M109_IF_WITHIN)) break; // Already in range
-                #endif
-                EVENT_WAITING_HEATER(actExtruder->id);
-                bool dirRising = actExtruder->tempControl.targetTemperature > actExtruder->tempControl.currentTemperature;
-                millis_t printedTime = HAL::timeInMilliseconds();
-                millis_t waituntil = 0;
-                #if RETRACT_DURING_HEATUP
-                uint8_t retracted = 0;
-                #endif
-                millis_t currentTime;
-                do
-                {
-                previousMillisCmd = currentTime = HAL::timeInMilliseconds();
-                if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
-                {
-                printTemperatures();
-                printedTime = currentTime;
-                }
-                Commands::checkForPeriodicalActions(true);
-                //gcode_read_serial();
-                #if RETRACT_DURING_HEATUP
-                if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
-                {
-                PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
-                retracted = 1;
-                }
-                #endif
-                if((waituntil == 0 &&
-                (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
-                : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
-                #if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
-                || (waituntil != 0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
-                #endif
-                )
-                {
-                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
-                }
-                }
-                while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
-                #if RETRACT_DURING_HEATUP
-                if (retracted && actExtruder == Extruder::current)
-                {
-                PrintLine::moveRelativeDistanceInSteps(0, 0, 0, actExtruder->waitRetractUnits * Printer::axisStepsPerMM[E_AXIS], actExtruder->maxFeedrate / 4, false, false);
-                }
-                #endif
-                EVENT_HEATING_FINISHED(actExtruder->id);
-                }
-                UI_CLEAR_STATUS;*/
             }
 #endif
             previousMillisCmd = HAL::timeInMilliseconds();

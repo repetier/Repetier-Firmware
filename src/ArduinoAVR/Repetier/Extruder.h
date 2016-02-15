@@ -35,12 +35,12 @@ public:
     uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
     uint8_t sensorType; ///< Type of temperature sensor.
     uint8_t sensorPin; ///< Pin to read extruder temperature.
-    int16_t currentTemperature; ///< Currenttemperature value read from sensor.
-    int16_t targetTemperature; ///< Target temperature value in units of sensor.
+    int8_t heatManager; ///< How is temperature controlled. 0 = on/off, 1 = PID-Control, 3 = dead time control
+    int16_t currentTemperature; ///< Current temperature value read from sensor.
+    //int16_t targetTemperature; ///< Target temperature value in units of sensor.
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
 #if TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.

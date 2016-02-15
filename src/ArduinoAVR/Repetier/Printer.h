@@ -331,7 +331,8 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
-#else
+#endif
+#if DRIVE_SYSTEM != DELTA
 	static int32_t zCorrectionStepsIncluded; 	
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
