@@ -2197,9 +2197,9 @@ void Distortion::showMatrix() {
 #endif			
 			int32_t idx = matrixIndex(ix, iy);
 			float z = getMatrix(idx) * Printer::invAxisStepsPerMM[Z_AXIS];
-			Com::printF(PSTR("Distortion correction at px:"),x,2);
-			Com::printF(PSTR(" py:"),y,2);
-			Com::printFLN(PSTR(" zCoorection:"),z,3);
+			Com::printF(PSTR("G33 X"),x,2);
+			Com::printF(PSTR(" Y"),y,2);
+			Com::printFLN(PSTR(" Z"),z,3);
 		}
 	}
 }

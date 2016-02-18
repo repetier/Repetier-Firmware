@@ -239,6 +239,7 @@ Overridden if EEPROM activated.*/
 // 8 is ATC Semitec 104GT-2
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
+// 14 is 100K NTC 3950
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
