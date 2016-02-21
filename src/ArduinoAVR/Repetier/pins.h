@@ -1997,7 +1997,7 @@ STEPPER_CURRENT_CONTROL
  // Thermocouple 1
 #define TEMP_4_PIN         4   
 #define THERMOCOUPLE_0_PIN 8
-#define THERMOCOUPLE_0_PIN 4
+#define THERMOCOUPLE_1_PIN 4
 
 // Beeper on AUX-4
 #define BEEPER_PIN 64			
