@@ -293,23 +293,23 @@ void Printer::constrainDestinationCoords()
 {
     if(isNoDestinationCheck()) return;
 #if min_software_endstop_x
-    if (destinationSteps[X_AXIS] < xMinSteps) Printer::destinationSteps[X_AXIS] = Printer::xMinSteps;
+    if (Printer::destinationSteps[X_AXIS] < xMinSteps) Printer::destinationSteps[X_AXIS] = Printer::xMinSteps;
 #endif
 #if min_software_endstop_y
-    if (destinationSteps[Y_AXIS] < yMinSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMinSteps;
+    if (Printer::destinationSteps[Y_AXIS] < yMinSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMinSteps;
 #endif
 #if min_software_endstop_z
-    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] < zMinSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
+    if (isAutolevelActive() == false && Printer::destinationSteps[Z_AXIS] < zMinSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinSteps;
 #endif
 
 #if max_software_endstop_x
-    if (destinationSteps[X_AXIS] > Printer::xMaxSteps) Printer::destinationSteps[X_AXIS] = Printer::xMaxSteps;
+    if (Printer::destinationSteps[X_AXIS] > Printer::xMaxSteps) Printer::destinationSteps[X_AXIS] = Printer::xMaxSteps;
 #endif
 #if max_software_endstop_y
-    if (destinationSteps[Y_AXIS] > Printer::yMaxSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMaxSteps;
+    if (Printer::destinationSteps[Y_AXIS] > Printer::yMaxSteps) Printer::destinationSteps[Y_AXIS] = Printer::yMaxSteps;
 #endif
 #if max_software_endstop_z
-    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
+    if (isAutolevelActive() == false && Printer::destinationSteps[Z_AXIS] > Printer::zMaxSteps && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxSteps;
 #endif
 	EVENT_CONTRAIN_DESTINATION_COORDINATES
 }
@@ -319,7 +319,7 @@ void Printer::setDebugLevel(uint8_t newLevel) {
 	Com::printFLN(PSTR("DebugLevel:"),(int)newLevel);
 }
 void Printer::toggleEcho() {
-	setDebugLevel(debugLevel ^ 32);
+	setDebugLevel(debugLevel ^ 1);
 }
 void Printer::toggleInfo() {
 	setDebugLevel(debugLevel ^ 2);
@@ -339,7 +339,7 @@ void Printer::toggleNoMoves() {
 	
 bool Printer::isPositionAllowed(float x,float y,float z)
 {
-    if(isNoDestinationCheck())  return true;
+    if(isNoDestinationCheck()) return true;
     bool allowed = true;
 #if DRIVE_SYSTEM == DELTA
     allowed &= (z >= 0) && (z <= zLength + 0.05 + ENDSTOP_Z_BACK_ON_HOME);
