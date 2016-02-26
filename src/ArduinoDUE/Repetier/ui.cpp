@@ -1646,7 +1646,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
         case 'y':
 #if DRIVE_SYSTEM == DELTA
-            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentDeltaPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
+            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentNonlinearPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
             break;
@@ -3460,7 +3460,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
             Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);

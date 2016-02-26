@@ -187,7 +187,15 @@ public:
     static void update();
     static void report();
     static INLINE bool anyXYZMax() {
-        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
+    }
+    static INLINE bool anyXYZ() {
+#ifdef EXTENDED_ENDSTOPS
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
+		lastState2 != 0;
+#else
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
+#endif
     }
     static INLINE void resetAccumulator() {
         accumulator = 0;
@@ -315,7 +323,7 @@ public:
     static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
-    static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];
+    static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
@@ -394,7 +402,7 @@ public:
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#if GANTRY
+#if GANTRY && !defined(FAST_COREXYZ)
     static int8_t motorX;
     static int8_t motorYorZ;
 #endif
@@ -855,7 +863,7 @@ public:
     }
     static INLINE void executeXYGantrySteps()
     {
-#if (GANTRY)
+#if (GANTRY) && !defined(FAST_COREXYZ)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -892,7 +900,7 @@ public:
     }
     static INLINE void executeXZGantrySteps()
     {
-#if (GANTRY)
+#if (GANTRY) && !defined(FAST_COREXYZ)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -1074,9 +1082,9 @@ public:
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-        currentDeltaPositionSteps[A_TOWER] = xaxis;
-        currentDeltaPositionSteps[B_TOWER] = yaxis;
-        currentDeltaPositionSteps[C_TOWER] = zaxis;
+        currentNonlinearPositionSteps[A_TOWER] = xaxis;
+        currentNonlinearPositionSteps[B_TOWER] = yaxis;
+        currentNonlinearPositionSteps[C_TOWER] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif

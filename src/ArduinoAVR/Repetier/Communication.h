@@ -161,8 +161,6 @@ FSTRINGVAR(tDeltaDiagonalCorrectionC)
 FSTRINGVAR(tEPRDeltaMaxRadius)
 #endif // DRIVE_SYSTEM
 #if DRIVE_SYSTEM==TUGA
-FSTRINGVAR(tInvalidDeltaCoordinate)
-FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
 FSTRINGVAR(tEPRDiagonalRodLength)
 #endif
 #ifdef DEBUG_GENERIC
@@ -322,8 +320,6 @@ FSTRINGVAR(tEPRYTravelAcceleration)
 #else
 FSTRINGVAR(tEPRDiagonalRodLength)
 FSTRINGVAR(tEPRHorizontalRadius)
-FSTRINGVAR(tEPRSegmentsPerSecondPrint)
-FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 FSTRINGVAR(tEPRTowerXOffset)
 FSTRINGVAR(tEPRTowerYOffset)
 FSTRINGVAR(tEPRTowerZOffset)
@@ -413,6 +409,10 @@ FSTRINGVAR(tPrinterModeLaser)
 FSTRINGVAR(tPrinterModeCNC)
 #ifdef STARTUP_GCODE
 FSTRINGVAR(tStartupGCode)
+#endif
+#if NONLINEAR_SYSTEM
+FSTRINGVAR(tEPRSegmentsPerSecondPrint)
+FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 #endif
 
 static void config(FSTRINGPARAM(text));

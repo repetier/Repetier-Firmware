@@ -1933,6 +1933,80 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 #endif // CONTROLLER_LCD_MP_PHARAOH_DUE
 
+#if FEATURE_CONTROLLER == CONTROLLER_ZONESTAR
+
+// Keypad
+#if !defined(ADC_KEYPAD_PIN) || (ADC_KEYPAD_PIN < 0)
+#error CONTROLLER_ZONESTAR requres ADC_KEYPAD_PIN = 1 defined in Configuration.h
+#endif
+
+// This must be defined in the Configuration.h since used in ADC tables
+//#define ADC_KEYPAD_PIN         1    // A1 (D30, analog numbering)
+
+// Display
+#define UI_DISPLAY_TYPE          DISPLAY_4BIT
+#define UI_DISPLAY_CHARSET       1
+#define UI_COLS                  20
+#define UI_ROWS                  4
+
+#define UI_DISPLAY_ENABLE_PIN    29    // A2
+#define UI_DISPLAY_RS_PIN        28    // A3
+#define UI_DISPLAY_RW_PIN        -1
+#define UI_DISPLAY_D4_PIN        10
+#define UI_DISPLAY_D5_PIN        11
+#define UI_DISPLAY_D6_PIN        16
+#define UI_DISPLAY_D7_PIN        17
+
+// UI
+#define UI_HAS_KEYS              1
+#define UI_HAS_BACK_KEY          1
+#define UI_DELAYPERCHAR          50
+#define UI_INVERT_MENU_DIRECTION 1
+
+// Opportunity to override the Enter key via Configuration.h
+// By default it duplicates the Right key, but could be set to
+// anything else, e.g. UI_ACTION_TOP_MENU.
+#ifndef ADC_KEYPAD_CENTER_ACTION
+#define ADC_KEYPAD_CENTER_ACTION UI_ACTION_OK
+#endif
+
+#ifdef UI_MAIN
+// Nothing to init since ADC is read in a loop if ADC_KEYPAD_PIN > -1
+inline void uiInitKeys() {}
+
+// Read and decode ADC keypad (fast reads)
+void uiCheckKeys(uint16_t &action) {
+	struct {
+		uint16_t min;
+		uint16_t max;
+		uint16_t action;
+		} keys[] = {
+		{   300,   500, UI_ACTION_BACK           },    // Left
+		{   570,   870, UI_ACTION_PREVIOUS       },    // Up
+		{  1150,  1450, ADC_KEYPAD_CENTER_ACTION },    // Center
+		{  1900,  2200, UI_ACTION_OK             },    // Right
+		{  2670,  2870, UI_ACTION_NEXT           }     // Down
+	};
+	const uint8_t numOfKeys = sizeof(keys) / sizeof(keys[0]);
+
+	extern volatile uint16_t osAnalogInputValues[ANALOG_INPUTS];
+	uint16_t adc = osAnalogInputValues[KEYPAD_ANALOG_INDEX] >> (ANALOG_REDUCE_BITS);
+	if (adc < 4000) {
+		for (int8_t i = 0; i < numOfKeys; ++i) {
+			if ((adc > keys[i].min) && (adc < keys[i].max)) {
+				action = keys[i].action;
+				return;
+			}
+		}
+	}
+}
+
+// Read and decode ADC keypad (slow reads)
+inline void uiCheckSlowKeys(uint16_t &action) {}
+#endif // UI_MAIN
+
+#endif // CONTROLLER_ZONESTAR
+
 #ifndef UI_HAS_I2C_ENCODER
 #define UI_HAS_I2C_ENCODER 0
 #endif

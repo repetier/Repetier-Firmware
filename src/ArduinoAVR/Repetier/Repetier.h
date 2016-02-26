@@ -55,7 +55,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 //#define DEBUG_STEPCOUNT
 /** This enables code to make M666 drop an ok, so you get problems with communication. It is to test host robustness. */
 //#define DEBUG_COM_ERRORS
-/** Adds a menu point in quick settings to write debg informations to the host in case of hangs where the ui still works. */
+/** Adds a menu point in quick settings to write debug informations to the host in case of hangs where the ui still works. */
 //#define DEBUG_PRINT
 //#define DEBUG_DELTA_OVERFLOW
 //#define DEBUG_DELTA_REALPOS
@@ -78,6 +78,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
+#define GANTRY_FAKE 10
 
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
@@ -132,6 +133,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXY 5
 #define HOME_ORDER_ZYX 6
 #define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
+#define HOME_ORDER_XYTZ 8 // Needs hot hotend for correct homing
 
 #define NO_CONTROLLER 0
 #define UICONFIG_CONTROLLER 1
@@ -157,6 +159,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_VIKI2 21
 #define CONTROLLER_LCD_MP_PHARAOH_DUE 22
 #define CONTROLLER_SPARKLCD_ADAPTER 23
+#define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_FELIX_DUE 405
 
 //direction flags
@@ -188,7 +191,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #define ILLEGAL_Z_PROBE -888
 
-// we can not prevent this as some configs need a parameter and others not
+// we can not prevent this as some configurations need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
@@ -204,14 +207,18 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
-#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
+#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
 #undef FAST_COREXYZ
 #endif
 #ifdef FAST_COREXYZ
+#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
 #undef DELTA_SEGMENTS_PER_SECOND_PRINT
+#define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
+#endif
+#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
 #undef DELTA_SEGMENTS_PER_SECOND_MOVE
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 1 // core is linear, no subsegments needed
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 1
+#define DELTA_SEGMENTS_PER_SECOND_MOVE 30
+#endif
 #endif
 
 inline void memcopy2(void *dest,void *source) {
@@ -249,7 +256,7 @@ inline void memcopy4(void *dest,void *source) {
 #define ZHOME_Y_POS IGNORE_COORDINATE
 #endif
 
-// MS1 MS2 Stepper Driver Microstepping mode table
+// MS1 MS2 Stepper Driver Micro stepping mode table
 #define MICROSTEP1 LOW,LOW
 #define MICROSTEP2 HIGH,LOW
 #define MICROSTEP4 LOW,HIGH
@@ -303,7 +310,7 @@ inline void memcopy4(void *dest,void *source) {
 #define MANUAL_CONTROL 1
 #endif
 
-#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY)
+#define GANTRY ( DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
 
 //Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
@@ -451,9 +458,20 @@ inline void memcopy4(void *dest,void *source) {
 #define THERMO_ANALOG_INPUTS 1
 #define THERMO_ANALOG_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS
 #define THERMO_ANALOG_CHANNEL BED_KOMMA FAN_THERMO_THERMISTOR_PIN
+#define THERMO_COMMA ,
 #else
 #define THERMO_ANALOG_INPUTS 0
 #define THERMO_ANALOG_CHANNEL
+#define THERMO_COMMA BED_KOMMA
+#endif
+
+#if defined(ADC_KEYPAD_PIN) && (ADC_KEYPAD_PIN > -1)
+#define KEYPAD_ANALOG_INPUTS 1
+#define KEYPAD_ANALOG_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS
+#define KEYPAD_ANALOG_CHANNEL THERMO_COMMA ADC_KEYPAD_PIN
+#else
+#define KEYPAD_ANALOG_INPUTS 0
+#define KEYPAD_ANALOG_CHANNEL
 #endif
 
 #ifndef DEBUG_FREE_MEMORY
@@ -463,10 +481,10 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
-#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS)
+#define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS+KEYPAD_ANALOG_INPUTS)
 #if ANALOG_INPUTS > 0
 /** Channels are the MUX-part of ADMUX register */
-#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL}
+#define  ANALOG_INPUT_CHANNELS {EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL KEYPAD_ANALOG_CHANNEL}
 #endif
 
 #define MENU_MODE_SD_MOUNTED 1
