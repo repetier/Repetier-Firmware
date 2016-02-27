@@ -318,6 +318,10 @@ FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop,"Acceleration factor at top [%,100=like bottom]")
+#if NONLINEAR_SYSTEM
+FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
+FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
+#endif
 #if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
@@ -327,8 +331,6 @@ FSTRINGVALUE(Com::tEPRZHomingFeedrate,"Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Diagonal rod length [mm]")
 FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal rod radius at 0,0 [mm]")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 
 FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")

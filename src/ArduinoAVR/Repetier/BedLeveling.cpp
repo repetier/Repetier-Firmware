@@ -371,7 +371,7 @@ void Printer::setAutolevelActive(bool on) {
 #if MAX_HARDWARE_ENDSTOP_Z
 float Printer::runZMaxProbe() {
 #if NONLINEAR_SYSTEM
-    long startZ = realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
+    long startZ = realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
 #endif
     Commands::waitUntilEndOfAllMoves();
     long probeDepth = 2*(Printer::zMaxSteps-Printer::zMinSteps);
@@ -459,7 +459,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
     int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
 #if NONLINEAR_SYSTEM
-    realDeltaPositionSteps[Z_AXIS] = currentDeltaPositionSteps[Z_AXIS]; // update real
+    realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
 #endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
@@ -483,12 +483,12 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         }
         setZProbingActive(false);
 #if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentDeltaPositionSteps[C_TOWER]; // nonlinear moves may split z so stepsRemainingAtZHit is only what is left from last segment not total move. This corrects the problem.
+        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentNonlinearPositionSteps[C_TOWER]; // nonlinear moves may split z so stepsRemainingAtZHit is only what is left from last segment not total move. This corrects the problem.
 #endif
 #if DRIVE_SYSTEM == DELTA
-        currentDeltaPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
-        currentDeltaPositionSteps[B_TOWER] += stepsRemainingAtZHit;
-        currentDeltaPositionSteps[C_TOWER] += stepsRemainingAtZHit;
+        currentNonlinearPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
+        currentNonlinearPositionSteps[B_TOWER] += stepsRemainingAtZHit;
+        currentNonlinearPositionSteps[C_TOWER] += stepsRemainingAtZHit;
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         sum += lastCorrection - currentPositionSteps[Z_AXIS];

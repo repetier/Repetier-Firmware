@@ -79,6 +79,8 @@ void SDCard::initsd()
         return;
 #endif
 	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
+    fat.begin(SDSS, SPI_FULL_SPEED);  // dummy init of SD_CARD
+    HAL::delayMilliseconds(50);       // wait for init end
     /*if(dir[0].isOpen())
         dir[0].close();*/
     if(!fat.begin(SDSS, SPI_FULL_SPEED))

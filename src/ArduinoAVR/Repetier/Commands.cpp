@@ -871,7 +871,7 @@ void Commands::processGCode(GCode *com) {
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
 #if NONLINEAR_SYSTEM
-                    if (!PrintLine::queueDeltaMove(ALWAYS_CHECK_ENDSTOPS, true, true)) {
+                    if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, true, true)) {
                         Com::printWarningFLN(PSTR("executeGCode / queueDeltaMove returns error"));
                     }
 #else
@@ -1225,7 +1225,7 @@ void Commands::processGCode(GCode *com) {
                                 // Use either A or B tower as they acnhor x cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 float h = Printer::deltaDiagonalStepsSquaredB.f;
-                                unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
+                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
                                 // The correct Rod Radius would put us here at z==0 and B height is
                                 // square root (rod length squared minus rod radius squared)
                                 // Reverse that to get calculated Rod Radius given B height
@@ -1238,7 +1238,7 @@ void Commands::processGCode(GCode *com) {
                                 // Use either A or B tower as they acnhor x cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 unsigned long h = Printer::deltaDiagonalStepsSquaredB.l;
-                                unsigned long bSteps = Printer::currentDeltaPositionSteps[B_TOWER];
+                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
                                 // The correct Rod Radius would put us here at z==0 and B height is
                                 // square root (rod length squared minus rod radius squared)
                                 // Reverse that to get calculated Rod Radius given B height
@@ -1326,9 +1326,9 @@ void Commands::processGCode(GCode *com) {
                 Printer::coordinateOffset[X_AXIS] = 0;
                 Printer::coordinateOffset[Y_AXIS] = 0;
                 Printer::coordinateOffset[Z_AXIS] = 0;
-                Printer::currentDeltaPositionSteps[A_TOWER] = 0;
-                Printer::currentDeltaPositionSteps[B_TOWER] = 0;
-                Printer::currentDeltaPositionSteps[C_TOWER] = 0;
+                Printer::currentNonlinearPositionSteps[A_TOWER] = 0;
+                Printer::currentNonlinearPositionSteps[B_TOWER] = 0;
+                Printer::currentNonlinearPositionSteps[C_TOWER] = 0;
                 // similar to comment above, this will get a different answer from any different starting point
                 // so it is unclear how this is helpful. It must start at a well defined point.
                 Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
@@ -1344,9 +1344,9 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 135: // G135
-            Com::printF(PSTR("CompDelta:"),Printer::currentDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
+            Com::printF(PSTR("CompDelta:"),Printer::currentNonlinearPositionSteps[A_TOWER]);
+            Com::printF(Com::tComma,Printer::currentNonlinearPositionSteps[B_TOWER]);
+            Com::printFLN(Com::tComma,Printer::currentNonlinearPositionSteps[C_TOWER]);
 #ifdef DEBUG_REAL_POSITION
             Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
             Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
@@ -1987,7 +1987,7 @@ void Commands::processMCode(GCode *com) {
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
             Printer::updateCurrentPosition();
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
