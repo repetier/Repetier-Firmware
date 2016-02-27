@@ -211,16 +211,16 @@
 #define UI_ACTION_SERVOPOS              1203
 #define UI_ACTION_IGNORE_M106           1204
 
-#define UI_ACTION_KAPTON				        1205
-#define UI_ACTION_BLUETAPE				      1206
-#define UI_ACTION_NOCOATING				      1207
-#define UI_ACTION_PETTAPE				        1208
-#define UI_ACTION_GLUESTICK				      1209
-#define UI_ACTION_RESET_MATRIX			    1210
-#define UI_ACTION_CALIBRATE				      1211
-#define UI_ACTION_BED_LED_CHANGE		    1212
-#define UI_ACTION_COATING_CUSTOM		    1213
-#define UI_ACTION_BUILDTAK				      1214
+#define UI_ACTION_KAPTON                1205
+#define UI_ACTION_BLUETAPE              1206
+#define UI_ACTION_NOCOATING             1207
+#define UI_ACTION_PETTAPE               1208
+#define UI_ACTION_GLUESTICK             1209
+#define UI_ACTION_RESET_MATRIX          1210
+#define UI_ACTION_CALIBRATE             1211
+#define UI_ACTION_BED_LED_CHANGE        1212
+#define UI_ACTION_COATING_CUSTOM        1213
+#define UI_ACTION_BUILDTAK              1214
 
 // 1700-1956 language selectors
 
