@@ -54,8 +54,8 @@
 #define FAN_THERMO_THERMISTOR_TYPE 1
 
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
-// Uncomment the following line if you are using arduino compatible firmware made for Arduino version earlier then 1.0
-// If it is incompatible you will get compiler errors about write functions not beeing compatible!
+// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
+// If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 #define BLUETOOTH_SERIAL  -1
 #define BLUETOOTH_BAUD  115200
@@ -106,7 +106,7 @@
 #define EXT0_DESELECT_COMMANDS ""
 #define EXT0_EXTRUDER_COOLER_PIN -1
 #define EXT0_EXTRUDER_COOLER_SPEED 255
-#define EXT0_DECOUPLE_TEST_PERIOD 12000
+#define EXT0_DECOUPLE_TEST_PERIOD 20000
 #define EXT0_JAM_PIN -1
 #define EXT0_JAM_PULLUP 0
 
@@ -135,7 +135,7 @@
 #define RETRACT_DURING_HEATUP true
 #define PID_CONTROL_RANGE 20
 #define SKIP_M109_IF_WITHIN 2
-#define SCALE_PID_TO_MAX 0
+#define SCALE_PID_TO_MAX 1
 #define TEMP_HYSTERESIS 0
 #define EXTRUDE_MAXLENGTH 160
 #define NUM_TEMPS_USERTHERMISTOR0 0
@@ -273,11 +273,11 @@ It also can add a delay to wait for spindle to run on full speed.
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
-#define X_MAX_LENGTH 200
-#define Y_MAX_LENGTH 200
-#define Z_MAX_LENGTH 120
-#define X_MIN_POS 0
-#define Y_MIN_POS 0
+#define X_MAX_LENGTH 245
+#define Y_MAX_LENGTH 210
+#define Z_MAX_LENGTH 230
+#define X_MIN_POS -38
+#define Y_MIN_POS -7
 #define Z_MIN_POS 0
 #define DISTORTION_CORRECTION 0
 #define DISTORTION_CORRECTION_POINTS 5
@@ -309,12 +309,12 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 0L
-#define MAX_FEEDRATE_X 200
-#define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 2
-#define HOMING_FEEDRATE_X 40
-#define HOMING_FEEDRATE_Y 40
-#define HOMING_FEEDRATE_Z 2
+#define MAX_FEEDRATE_X 400
+#define MAX_FEEDRATE_Y 400
+#define MAX_FEEDRATE_Z 5
+#define HOMING_FEEDRATE_X 100
+#define HOMING_FEEDRATE_Y 100
+#define HOMING_FEEDRATE_Z 4
 #define HOMING_ORDER HOME_ORDER_XYZ
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 1
@@ -334,11 +334,11 @@ It also can add a delay to wait for spindle to run on full speed.
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 2000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 2000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
-#define INTERPOLATE_ACCELERATION_WITH_Z 0
-#define ACCELERATION_FACTOR_TOP 100
+#define INTERPOLATE_ACCELERATION_WITH_Z 1
+#define ACCELERATION_FACTOR_TOP 50
 #define MAX_JERK 20
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 16
@@ -397,7 +397,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define UI_SERVO_CONTROL 0
 #define FAN_KICKSTART_TIME  200
 
-        #define FEATURE_WATCHDOG 0
+        #define FEATURE_WATCHDOG 1
 
 // #################### Z-Probing #####################
 
@@ -460,7 +460,8 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 1
 #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_CONTROLLER 7
+#define FEATURE_CONTROLLER 23
+#define ADC_KEYPAD_PIN 1
 #define LANGUAGE_EN_ACTIVE 1
 #define LANGUAGE_DE_ACTIVE 0
 #define LANGUAGE_NL_ACTIVE 0
@@ -483,14 +484,14 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_UI_KEYS 0
 #define UI_ENCODER_SPEED 1
 #define UI_REVERSE_ENCODER 0
-#define UI_KEY_BOUNCETIME 10
-#define UI_KEY_FIRST_REPEAT 500
+#define UI_KEY_BOUNCETIME 15
+#define UI_KEY_FIRST_REPEAT 250
 #define UI_KEY_REDUCE_REPEAT 50
-#define UI_KEY_MIN_REPEAT 50
+#define UI_KEY_MIN_REPEAT 25
 #define FEATURE_BEEPER 0
 #define CASE_LIGHTS_PIN -1
 #define CASE_LIGHT_DEFAULT_ON 1
-#define UI_START_SCREEN_DELAY 1000
+#define UI_START_SCREEN_DELAY 3000
 #define UI_DYNAMIC_ENCODER_SPEED 1
         /**
 Beeper sound definitions for short beeps during key actions
@@ -515,20 +516,26 @@ Values must be in range 1..255
 #define NUM_MOTOR_DRIVERS 0
 
 //----------------------------------------------------------------------------------
-// These are mostly default settings for Zonestar 3D printer with Melzi board.
-// Most notable changes are steps/mm, Z direction inversion, homing order,
-// digital pin 12 for bed heater (instead of default 10 set in Melzi configuration).
-// Also should be set X/Y/Z min positions and working lengths.
-// The rest kept with defaults (not means optimal), including SD card settings
-// for the board config (which overrides given here option).
-// User config below provides support for the Zonestar ADC keypad controller.
-// No watchdog activated.
+// Sample configuration for Zonestar P802M 3D printer and similar models.
+// http://forum.repetier.com/discussion/1105/melzi-v2-0-with-lcd2004-and-5-keys
 //----------------------------------------------------------------------------------
-
-#define ADC_KEYPAD_PIN 1
-
-#undef FEATURE_CONTROLLER
-#define FEATURE_CONTROLLER CONTROLLER_ZONESTAR
+// A bit optimized settings for Zonestar 3D printer with Melzi board. Most important
+// settings are steps/mm, Z direction inversion, homing order, digital pin 12 for
+// bed heater (instead of default 10 set in Melzi configuration), Zonestar display
+// controller with analog pin 1 for keypad. This firmware is a bit faster than
+// Repetier firmware defaults.
+//
+// Do not forget to update X/Y/Z min positions for your printer (it homes with
+// negative values for X/Y) and then set X/Y/Z max travel so the printer does not
+// kick max ends (all set from General tab of web configurator or later via EEPROM
+// editor).
+//
+// Make sure you use this firmware settings and not previously stored ones. M502
+// (restore firmware defaults) and M500 (save to EEPROM) commands may help.
+//
+// By default the Enter/OK (center) key is mapped to the same action
+// as the Right one (ACTION_OK). It can be redefined here if desired:
+//#define ADC_KEYPAD_CENTER_ACTION UI_ACTION_TOP_MENU
 //----------------------------------------------------------------------------------
 
 #endif
@@ -594,7 +601,7 @@ Values must be in range 1..255
                 "enable": "ORIG_E0_ENABLE_PIN"
             },
             "advanceBacklashSteps": 0,
-            "decoupleTestPeriod": 12,
+            "decoupleTestPeriod": 20,
             "jamPin": -1,
             "jamPullup": "0"
         }
@@ -609,16 +616,16 @@ Values must be in range 1..255
     "zMaxEndstop": 0,
     "motherboard": 63,
     "driveSystem": 0,
-    "xMaxSpeed": 200,
-    "xHomingSpeed": 40,
-    "xTravelAcceleration": 1000,
+    "xMaxSpeed": 400,
+    "xHomingSpeed": 100,
+    "xTravelAcceleration": 2000,
     "xPrintAcceleration": 1000,
-    "yMaxSpeed": 200,
-    "yHomingSpeed": 40,
-    "yTravelAcceleration": 1000,
+    "yMaxSpeed": 400,
+    "yHomingSpeed": 100,
+    "yTravelAcceleration": 2000,
     "yPrintAcceleration": 1000,
-    "zMaxSpeed": 2,
-    "zHomingSpeed": 2,
+    "zMaxSpeed": 5,
+    "zHomingSpeed": 4,
     "zTravelAcceleration": 100,
     "zPrintAcceleration": 100,
     "xMotor": {
@@ -645,12 +652,12 @@ Values must be in range 1..255
     "backlashZ": 0,
     "stepperInactiveTime": 360,
     "maxInactiveTime": 0,
-    "xMinPos": 0,
-    "yMinPos": 0,
+    "xMinPos": -38,
+    "yMinPos": -7,
     "zMinPos": 0,
-    "xLength": 200,
-    "yLength": 200,
-    "zLength": 120,
+    "xLength": 245,
+    "yLength": 210,
+    "zLength": 230,
     "alwaysCheckEndstops": "1",
     "disableX": "0",
     "disableY": "0",
@@ -733,12 +740,12 @@ Values must be in range 1..255
     "servo1Pin": -1,
     "servo2Pin": -1,
     "servo3Pin": -1,
-    "featureWatchdog": "0",
+    "featureWatchdog": "1",
     "hasHeatedBed": "1",
     "enableZProbing": "0",
     "extrudeMaxLength": 160,
     "homeOrder": "HOME_ORDER_XYZ",
-    "featureController": 7,
+    "featureController": 23,
     "uiPrinterName": "P802_8_V1.5",
     "uiPrinterCompany": "Zonestar 3D printer",
     "uiPagesDuration": 4000,
@@ -748,10 +755,10 @@ Values must be in range 1..255
     "featureKeys": "0",
     "uiEncoderSpeed": 1,
     "uiReverseEncoder": "0",
-    "uiKeyBouncetime": 10,
-    "uiKeyFirstRepeat": 500,
+    "uiKeyBouncetime": 15,
+    "uiKeyFirstRepeat": 250,
     "uiKeyReduceRepeat": 50,
-    "uiKeyMinRepeat": 50,
+    "uiKeyMinRepeat": 25,
     "featureBeeper": "0",
     "uiPresetBedTempPLA": 60,
     "uiPresetBedABS": 110,
@@ -842,7 +849,7 @@ Values must be in range 1..255
     "fanThermoMaxTemp": 60,
     "fanThermoThermistorPin": -1,
     "fanThermoThermistorType": 1,
-    "scalePidToMax": "0",
+    "scalePidToMax": "1",
     "zProbePin": -1,
     "zProbeBedDistance": 10,
     "zProbePullup": "0",
@@ -867,7 +874,7 @@ Values must be in range 1..255
     "sdSupport": "0",
     "sdCardDetectPin": -1,
     "sdCardDetectInverted": "0",
-    "uiStartScreenDelay": 1000,
+    "uiStartScreenDelay": 3000,
     "xEndstopBackMove": 5,
     "yEndstopBackMove": 5,
     "zEndstopBackMove": 2,
@@ -1011,7 +1018,7 @@ Values must be in range 1..255
             "enablePin": -1
         }
     ],
-    "manualConfig": "\/\/----------------------------------------------------------------------------------\n\/\/ These are mostly default settings for Zonestar 3D printer with Melzi board.\n\/\/ Most notable changes are steps\/mm, Z direction inversion, homing order,\n\/\/ digital pin 12 for bed heater (instead of default 10 set in Melzi configuration).\n\/\/ Also should be set X\/Y\/Z min positions and working lengths.\n\/\/ The rest kept with defaults (not means optimal), including SD card settings\n\/\/ for the board config (which overrides given here option).\n\/\/ User config below provides support for the Zonestar ADC keypad controller.\n\/\/ No watchdog activated.\n\/\/----------------------------------------------------------------------------------\n\n#define ADC_KEYPAD_PIN 1\n\n#undef FEATURE_CONTROLLER\n#define FEATURE_CONTROLLER CONTROLLER_ZONESTAR\n\/\/----------------------------------------------------------------------------------",
+    "manualConfig": "\/\/----------------------------------------------------------------------------------\n\/\/ Sample configuration for Zonestar P802M 3D printer and similar models.\n\/\/ http:\/\/forum.repetier.com\/discussion\/1105\/melzi-v2-0-with-lcd2004-and-5-keys\n\/\/----------------------------------------------------------------------------------\n\/\/ A bit optimized settings for Zonestar 3D printer with Melzi board. Most important\n\/\/ settings are steps\/mm, Z direction inversion, homing order, digital pin 12 for\n\/\/ bed heater (instead of default 10 set in Melzi configuration), Zonestar display\n\/\/ controller with analog pin 1 for keypad. This firmware is a bit faster than\n\/\/ Repetier firmware defaults.\n\/\/\n\/\/ Do not forget to update X\/Y\/Z min positions for your printer (it homes with\n\/\/ negative values for X\/Y) and then set X\/Y\/Z max travel so the printer does not\n\/\/ kick max ends (all set from General tab of web configurator or later via EEPROM\n\/\/ editor).\n\/\/\n\/\/ Make sure you use this firmware settings and not previously stored ones. M502\n\/\/ (restore firmware defaults) and M500 (save to EEPROM) commands may help.\n\/\/\n\/\/ By default the Enter\/OK (center) key is mapped to the same action\n\/\/ as the Right one (ACTION_OK). It can be redefined here if desired:\n\/\/#define ADC_KEYPAD_CENTER_ACTION UI_ACTION_TOP_MENU\n\/\/----------------------------------------------------------------------------------",
     "zHomeMinTemperature": 0,
     "zHomeXPos": 999999,
     "zHomeYPos": 999999,
@@ -1032,8 +1039,8 @@ Values must be in range 1..255
     "langCZ": "0",
     "langPL": "0",
     "langTR": "0",
-    "interpolateAccelerationWithZ": 0,
-    "accelerationFactorTop": 100,
+    "interpolateAccelerationWithZ": 1,
+    "accelerationFactorTop": 50,
     "bendingCorrectionA": 0,
     "bendingCorrectionB": 0,
     "bendingCorrectionC": 0,
@@ -1063,6 +1070,7 @@ Values must be in range 1..255
     "bedMotor3Y": 200,
     "zProbeRequiresHeating": "0",
     "zProbeMinTemperature": 150,
+    "adcKeypadPin": "1",
     "hasMAX6675": false,
     "hasMAX31855": false,
     "hasGeneric1": false,
