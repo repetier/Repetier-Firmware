@@ -23,7 +23,7 @@ TO BUILD THE FIRMWARE:
 - Optionally flash new bootloader via ISP programmer (using Arduino IDE options).
   Originally supplied bootloader uses 57600 baud rate instead of 115200 and has
   some issues. This update is optional.
-- Upload sample Configuration.h to the web configurator and make any cnahges
+- Upload sample Configuration.h to the web configurator and make any changes
   if desired. Download new Configuration.h if changed, or firmware zip bundle.
 - Build and flash the firmware.
 
