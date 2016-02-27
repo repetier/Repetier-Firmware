@@ -1839,7 +1839,8 @@ void UIDisplay::refreshPage()
         ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
-
+    Endstops::update();
+    Endstops::update();
     // Copy result into cache
     if(menuLevel == 0) // Top level menu
     {
