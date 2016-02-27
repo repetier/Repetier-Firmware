@@ -460,7 +460,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 1
 #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_CONTROLLER 23
+#define FEATURE_CONTROLLER 24
 #define ADC_KEYPAD_PIN 1
 #define LANGUAGE_EN_ACTIVE 1
 #define LANGUAGE_DE_ACTIVE 0
@@ -745,7 +745,7 @@ Values must be in range 1..255
     "enableZProbing": "0",
     "extrudeMaxLength": 160,
     "homeOrder": "HOME_ORDER_XYZ",
-    "featureController": 23,
+    "featureController": 24,
     "uiPrinterName": "P802_8_V1.5",
     "uiPrinterCompany": "Zonestar 3D printer",
     "uiPagesDuration": 4000,
