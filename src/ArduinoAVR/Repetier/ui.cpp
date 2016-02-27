@@ -1263,7 +1263,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if (c2 == 'i') addStringOnOff(Printer::debugInfo());
             else if (c2 == 'e') addStringOnOff(Printer::debugErrors());
             else if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
-//          else if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
+            else if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
             break;
  
         case 'D':
