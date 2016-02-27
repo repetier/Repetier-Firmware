@@ -2207,6 +2207,7 @@
 #define UI_TEXT_DBG_INFO_SE         "Info:   %di"
 #define UI_TEXT_DBG_ERROR_SE        "Errors: %de"
 #define UI_TEXT_DBG_DRYRUN_SE       "Torrk" STR_ouml "r:%dd"
+#define UI_TEXT_DBG_ENDSTOP_SE      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_SE          "%O1 OPS av"
 #define UI_TEXT_OPS_CLASSIC_SE      "%O2 OPS klassisk"
 #define UI_TEXT_OPS_FAST_SE         "%O3 OPS snabb"
