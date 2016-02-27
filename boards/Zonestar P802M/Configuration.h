@@ -484,10 +484,10 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_UI_KEYS 0
 #define UI_ENCODER_SPEED 1
 #define UI_REVERSE_ENCODER 0
-#define UI_KEY_BOUNCETIME 15
-#define UI_KEY_FIRST_REPEAT 250
+#define UI_KEY_BOUNCETIME 20
+#define UI_KEY_FIRST_REPEAT 500
 #define UI_KEY_REDUCE_REPEAT 50
-#define UI_KEY_MIN_REPEAT 25
+#define UI_KEY_MIN_REPEAT 50
 #define FEATURE_BEEPER 0
 #define CASE_LIGHTS_PIN -1
 #define CASE_LIGHT_DEFAULT_ON 1
@@ -755,10 +755,10 @@ Values must be in range 1..255
     "featureKeys": "0",
     "uiEncoderSpeed": 1,
     "uiReverseEncoder": "0",
-    "uiKeyBouncetime": 15,
-    "uiKeyFirstRepeat": 250,
+    "uiKeyBouncetime": 20,
+    "uiKeyFirstRepeat": 500,
     "uiKeyReduceRepeat": 50,
-    "uiKeyMinRepeat": 25,
+    "uiKeyMinRepeat": 50,
     "featureBeeper": "0",
     "uiPresetBedTempPLA": 60,
     "uiPresetBedABS": 110,
