@@ -1258,7 +1258,7 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            break;
             }
 			break;
-        case 'd':
+        case 'd':           // debug boolean
             if (c2 == 'o') addStringOnOff(Printer::debugEcho());
             else if (c2 == 'i') addStringOnOff(Printer::debugInfo());
             else if (c2 == 'e') addStringOnOff(Printer::debugErrors());
@@ -3066,6 +3066,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_DEBUG_ERROR:
             Printer::toggleErrors();
+            break;
+        case UI_ACTION_DEBUG_ENDSTOP:
+            Printer::toggleEndStop();
             break;
         case UI_ACTION_DEBUG_DRYRUN:
             Printer::toggleDryRun();

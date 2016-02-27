@@ -125,6 +125,7 @@
 #define UI_ACTION_FAN_FULL              1054
 #define UI_ACTION_FEEDRATE_MULTIPLY     1055
 #define UI_ACTION_STEPPER_INACTIVE      1056
+
 #define UI_ACTION_PID_PGAIN             1058
 #define UI_ACTION_PID_IGAIN             1059
 #define UI_ACTION_PID_DGAIN             1060
@@ -141,6 +142,7 @@
 #define UI_ACTION_PID_MAX               1071
 #define UI_ACTION_ADVANCE_K             1072
 #define UI_ACTION_SET_ORIGIN            1073
+
 #define UI_ACTION_POWER                 1078
 #define UI_ACTION_PREHEAT_PLA           1079
 #define UI_ACTION_COOLDOWN              1080
@@ -199,11 +201,11 @@
 #define UI_DITTO_2                      1136
 #define UI_DITTO_3                      1137
 
-#define UI_ACTION_DEBUG_ECHO            1190
-#define UI_ACTION_DEBUG_INFO            1191
-#define UI_ACTION_DEBUG_ERROR           1192
-#define UI_ACTION_DEBUG_DRYRUN          1193
-#define UI_ACTION_DEBUG_ENDSTOP         1194
+#define UI_ACTION_DEBUG_ECHO            1150
+#define UI_ACTION_DEBUG_INFO            1151
+#define UI_ACTION_DEBUG_ERROR           1152
+#define UI_ACTION_DEBUG_DRYRUN          1153
+#define UI_ACTION_DEBUG_ENDSTOP         1154
 
 #define UI_ACTION_SD_PRI_PAU_CONT       1200
 #define UI_ACTION_FAN_SUSPEND           1201
