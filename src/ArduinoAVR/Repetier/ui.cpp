@@ -1259,11 +1259,13 @@ void UIDisplay::parse(const char *txt,bool ram)
             }
 			break;
         case 'd':
-            if(c2 == 'o') addStringOnOff(Printer::debugEcho());
-            else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
-            else if(c2 == 'e') addStringOnOff(Printer::debugErrors());
-            else if(c2 == 'd') addStringOnOff(Printer::debugDryrun());
+            if (c2 == 'o') addStringOnOff(Printer::debugEcho());
+            else if (c2 == 'i') addStringOnOff(Printer::debugInfo());
+            else if (c2 == 'e') addStringOnOff(Printer::debugErrors());
+            else if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
+//          else if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
             break;
+ 
         case 'D':
 #if FEATURE_DITTO_PRINTING
             if(c2>='0' && c2<='9')

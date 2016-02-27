@@ -236,9 +236,7 @@ void Endstops::update() {
         lastState2 = lastRead2;
         accumulator2 |= lastState2;
 #endif
-#ifdef DEBUG_ENDSTOPS
-        report();
-#endif
+    if (Printer::debugEndStop())  Endstops::report();
     } else {
         lastState = lastRead;
 #ifdef EXTENDED_ENDSTOPS
@@ -335,6 +333,9 @@ void Printer::toggleCommunication() {
 }
 void Printer::toggleNoMoves() {
 	setDebugLevel(debugLevel ^ 32);
+}
+void Printer::toggleEndStop() {
+  setDebugLevel(debugLevel ^ 64);
 }
 	
 bool Printer::isPositionAllowed(float x,float y,float z)
