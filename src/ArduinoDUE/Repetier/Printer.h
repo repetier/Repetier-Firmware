@@ -442,6 +442,7 @@ public:
 	static void toggleDryRun();
 	static void toggleCommunication();
 	static void toggleNoMoves();
+    static void toggleEndStop();
 	static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
@@ -473,6 +474,11 @@ public:
         return ((debugLevel & 32) != 0);
     }
 
+    static INLINE bool debugEndStop()
+    {
+        return ((debugLevel & 64) != 0);
+    }
+    
     static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);

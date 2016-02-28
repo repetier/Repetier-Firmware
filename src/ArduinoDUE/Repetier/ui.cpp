@@ -1258,12 +1258,14 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            break;
             }
 			break;
-        case 'd':
-            if(c2 == 'o') addStringOnOff(Printer::debugEcho());
-            else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
-            else if(c2 == 'e') addStringOnOff(Printer::debugErrors());
-            else if(c2 == 'd') addStringOnOff(Printer::debugDryrun());
+        case 'd':           // debug boolean
+            if (c2 == 'o') addStringOnOff(Printer::debugEcho());
+            else if (c2 == 'i') addStringOnOff(Printer::debugInfo());
+            else if (c2 == 'e') addStringOnOff(Printer::debugErrors());
+            else if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
+            else if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
             break;
+ 
         case 'D':
 #if FEATURE_DITTO_PRINTING
             if(c2>='0' && c2<='9')
@@ -1837,7 +1839,6 @@ void UIDisplay::refreshPage()
         ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
-
     // Copy result into cache
     if(menuLevel == 0) // Top level menu
     {
@@ -1857,6 +1858,8 @@ void UIDisplay::refreshPage()
     }
     else
     {
+	    Endstops::update();
+		Endstops::update();
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint16_t nr = pgm_read_word_near(&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));
@@ -3063,6 +3066,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_DEBUG_ERROR:
             Printer::toggleErrors();
+            break;
+        case UI_ACTION_DEBUG_ENDSTOP:
+            Printer::toggleEndStop();
             break;
         case UI_ACTION_DEBUG_DRYRUN:
             Printer::toggleDryRun();

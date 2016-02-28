@@ -1839,8 +1839,6 @@ void UIDisplay::refreshPage()
         ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
-    Endstops::update();
-    Endstops::update();
     // Copy result into cache
     if(menuLevel == 0) // Top level menu
     {
@@ -1860,6 +1858,8 @@ void UIDisplay::refreshPage()
     }
     else
     {
+	    Endstops::update();
+		Endstops::update();
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint16_t nr = pgm_read_word_near(&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));

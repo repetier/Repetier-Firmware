@@ -1543,6 +1543,12 @@ bool NonlinearSegment::checkEndstops(PrintLine *cur, bool checkall)
 	        cur->setZMoveFinished();
 	        r = 1;
         }
+	    if(cur->isZNegativeMove() && Endstops::zMin())
+		{
+			setZMoveFinished();
+			cur->setZMoveFinished();
+			r = 1;
+		}
 #else		
 		// endstops are per motor and do not depend on global axis movement
         if(isXPositiveMove() && Endstops::xMax())
@@ -1592,12 +1598,12 @@ bool NonlinearSegment::checkEndstops(PrintLine *cur, bool checkall)
 		if(Printer::isHoming())
 			return r == 3;			
 #endif		
-    }
-    if(isZNegativeMove() && Endstops::zMin())
-    {
-        setZMoveFinished();
-        cur->setZMoveFinished();
-		r++;
+		if(isZNegativeMove() && Endstops::zMin())
+		{
+			setZMoveFinished();
+			cur->setZMoveFinished();
+		    r++;
+	    }
     }
 	return r != 0;
 }
