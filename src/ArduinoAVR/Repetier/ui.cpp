@@ -1831,6 +1831,7 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
+   Endstops::update();
 #if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::refresh();
 #else
@@ -1845,6 +1846,7 @@ void UIDisplay::refreshPage()
 #endif
     encoderStartScreen = uid.encoderLast;
     // Copy result into cache
+    Endstops::update();
     if(menuLevel == 0) // Top level menu
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
@@ -1863,8 +1865,6 @@ void UIDisplay::refreshPage()
     }
     else
     {
-	    Endstops::update();
-		Endstops::update();
         UIMenu *men = (UIMenu*)menu[menuLevel];
         uint16_t nr = pgm_read_word_near(&(men->numEntries));
         mtype = pgm_read_byte((void*)&(men->menuType));

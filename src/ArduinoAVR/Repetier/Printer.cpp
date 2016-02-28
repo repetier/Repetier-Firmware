@@ -2126,7 +2126,7 @@ bool Distortion::measure(void)
 
 int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 {
-    if (!enabled || z > zEnd || Printer::isZProbingActive()) return 0.0f;
+    if (!enabled || z > zEnd || Printer::isZProbingActive()) return 0;
     if(false && z == 0) {
   Com::printF(PSTR("correcting ("), x); Com::printF(PSTR(","), y);
     }
@@ -2181,7 +2181,7 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
       Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), fy);
     }
     if (z > zStart && z > 0)
-        correction_z *= (zEnd - z) / (zEnd - zStart);
+        correction_z = (correction_z * (zEnd - z)) / (zEnd - zStart);
    /* if(correction_z > 20 || correction_z < -20) {
             Com::printFLN(PSTR("Corr. error too big:"),correction_z);
         Com::printF(PSTR("fxf"),(int)fxFloor);
