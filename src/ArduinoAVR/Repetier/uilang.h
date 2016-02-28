@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 266
+#define NUM_TRANSLATED_WORDS 267
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -372,6 +372,7 @@
 #define UI_TEXT_X_OFFSET_ID 263
 #define UI_TEXT_Y_OFFSET_ID 264
 #define UI_TEXT_Z_OFFSET_ID 265
+#define UI_TEXT_DBG_ENDSTOP_ID 266 //     "EndStop:%dp"
 
 // Universal definitions
 
@@ -447,6 +448,7 @@
 #define UI_TEXT_DBG_INFO_EN         "Info   :%di"
 #define UI_TEXT_DBG_ERROR_EN        "Errors :%de"
 #define UI_TEXT_DBG_DRYRUN_EN       "Dry run:%dd"
+#define UI_TEXT_DBG_ENDSTOP_EN      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_EN          "%O0 OPS off"
 #define UI_TEXT_OPS_CLASSIC_EN      "%O1 OPS classic"
 #define UI_TEXT_OPS_FAST_EN         "%O2 OPS fast"
@@ -616,23 +618,23 @@
 #define UI_TEXT_LANGUAGE_EN "Language"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_EN "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_EN "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_EN "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_EN "Buf: %oB"
@@ -738,6 +740,7 @@
 #define UI_TEXT_DBG_INFO_DE         "Info       :%di"
 #define UI_TEXT_DBG_ERROR_DE        "Fehler     :%de"
 #define UI_TEXT_DBG_DRYRUN_DE       "Trockenlauf:%dd"
+#define UI_TEXT_DBG_ENDSTOP_DE      "EndStop    :%dp"
 #define UI_TEXT_OPS_OFF_DE          "%O0 OPS Aus"
 #define UI_TEXT_OPS_CLASSIC_DE      "%O1 OPS Klassisch"
 #define UI_TEXT_OPS_FAST_DE         "%O2 OPS Schnell"
@@ -907,23 +910,23 @@
 #define UI_TEXT_LANGUAGE_DE "Sprache"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_DE "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_DE "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_DE "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_DE "Fluss:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_DE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_DE "Puf: %oB"
@@ -1030,6 +1033,7 @@
 #define UI_TEXT_DBG_INFO_NL         "Info     :%di"
 #define UI_TEXT_DBG_ERROR_NL        "Fouten   :%de"
 #define UI_TEXT_DBG_DRYRUN_NL       "Droogloop:%dd"
+#define UI_TEXT_DBG_ENDSTOP_NL      "EndStop  :%dp"
 #define UI_TEXT_OPS_OFF_NL          "%O0 OPS Uit"
 #define UI_TEXT_OPS_CLASSIC_NL      "%O1 OPS Klassiek"
 #define UI_TEXT_OPS_FAST_NL         "%O2 OPS Snel"
@@ -1199,23 +1203,23 @@
 #define UI_TEXT_LANGUAGE_NL "Taal"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_NL "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_NL "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_NL "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_NL "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_NL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_NL "Buf: %oB"
@@ -1322,8 +1326,9 @@
 #define UI_TEXT_LOAD_EEPROM_PT      "Carregar da EEPROM"
 #define UI_TEXT_DBG_ECHO_PT         "Echo   :%do"
 #define UI_TEXT_DBG_INFO_PT         "Info   :%di"
-#define UI_TEXT_DBG_ERROR_PT        "Erros :%de"
+#define UI_TEXT_DBG_ERROR_PT        "Erros  :%de"
 #define UI_TEXT_DBG_DRYRUN_PT       "Dry run:%dd"
+#define UI_TEXT_DBG_ENDSTOP_PT      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_PT          "%O0 OPS Off"
 #define UI_TEXT_OPS_CLASSIC_PT      "%O1 OPS Classic"
 #define UI_TEXT_OPS_FAST_PT         "%O2 OPS Fast"
@@ -1493,23 +1498,23 @@
 #define UI_TEXT_LANGUAGE_PT "Idioma"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_PT "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PT "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PT "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_PT "Fluxo:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PT "Fluxo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PT "Buf: %oB"
@@ -1612,10 +1617,11 @@
 #define UI_TEXT_ACCELERATION_IT     "Accelerazione"
 #define UI_TEXT_STORE_TO_EEPROM_IT  "Salva in EEPROM"
 #define UI_TEXT_LOAD_EEPROM_IT      "Carica da EEPROM"
-#define UI_TEXT_DBG_ECHO_IT         "Eco   :%do"
+#define UI_TEXT_DBG_ECHO_IT         "Eco    :%do"
 #define UI_TEXT_DBG_INFO_IT         "Info   :%di"
 #define UI_TEXT_DBG_ERROR_IT        "Errori :%de"
 #define UI_TEXT_DBG_DRYRUN_IT       "Simulazione:%dd"
+#define UI_TEXT_DBG_ENDSTOP_IT      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_IT          "%O0 OPS Spento"
 #define UI_TEXT_OPS_CLASSIC_IT      "%O1 OPS Classico"
 #define UI_TEXT_OPS_FAST_IT         "%O2 OPS Veloce"
@@ -1785,23 +1791,23 @@
 #define UI_TEXT_LANGUAGE_IT "Lingua"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_IT "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_IT "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_IT "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_IT "Flusso:\xfd %of%%% Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_IT "Flusso:\xfd %of%%% Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_IT "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_IT "Buf: %oB"
@@ -1908,6 +1914,7 @@
 #define UI_TEXT_DBG_INFO_ES         "Info   :%di"
 #define UI_TEXT_DBG_ERROR_ES        "Errors :%de"
 #define UI_TEXT_DBG_DRYRUN_ES       "Ejecucion vacio:%dd"
+#define UI_TEXT_DBG_ENDSTOP_ES      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_ES          "%O0 OPS Off"
 #define UI_TEXT_OPS_CLASSIC_ES      "%O1 OPS Classica"
 #define UI_TEXT_OPS_FAST_ES         "%O2 OPS Rapida"
@@ -2077,23 +2084,23 @@
 #define UI_TEXT_LANGUAGE_ES "Idioma"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_ES "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_ES "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_ES "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_ES "Flujo:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_ES "Flujo:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_ES "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_ES "Buf: %oB"
@@ -2200,6 +2207,7 @@
 #define UI_TEXT_DBG_INFO_SE         "Info:   %di"
 #define UI_TEXT_DBG_ERROR_SE        "Errors: %de"
 #define UI_TEXT_DBG_DRYRUN_SE       "Torrk" STR_ouml "r:%dd"
+#define UI_TEXT_DBG_ENDSTOP_SE      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_SE          "%O1 OPS av"
 #define UI_TEXT_OPS_CLASSIC_SE      "%O2 OPS klassisk"
 #define UI_TEXT_OPS_FAST_SE         "%O3 OPS snabb"
@@ -2369,23 +2377,23 @@
 #define UI_TEXT_LANGUAGE_SE "Sprak"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_SE "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_SE "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_SE "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_SE "Fl" STR_ouml "de:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_SE "Fl" STR_ouml "de:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_SE "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_SE "Buf: %oB"
@@ -2448,7 +2456,7 @@
 #define UI_TEXT_SD_CARD_FR          "Carte SD"
 #define UI_TEXT_DEBUGGING_FR        "Deboguer"
 #define UI_TEXT_HOME_DELTA_FR       "Accueil Delta"
-#define UI_TEXT_HOME_ALL_FR         "Accueil Tout"
+#define UI_TEXT_HOME_ALL_FR         "Accueil XYZ"
 #define UI_TEXT_HOME_X_FR           "Accueil X"
 #define UI_TEXT_HOME_Y_FR           "Accueil Y"
 #define UI_TEXT_HOME_Z_FR           "Accueil Z"
@@ -2489,10 +2497,11 @@
 #define UI_TEXT_ACCELERATION_FR     "Acceleration"
 #define UI_TEXT_STORE_TO_EEPROM_FR  "Stock. Dans EEPROM"
 #define UI_TEXT_LOAD_EEPROM_FR      "Charg. f. EEPROM"
-#define UI_TEXT_DBG_ECHO_FR         "Echo   :%do"
-#define UI_TEXT_DBG_INFO_FR         "Info   :%di"
-#define UI_TEXT_DBG_ERROR_FR        "Erreurs :%de"
+#define UI_TEXT_DBG_ECHO_FR         "Echo         :%do"
+#define UI_TEXT_DBG_INFO_FR         "Info         :%di"
+#define UI_TEXT_DBG_ERROR_FR        "Erreurs      :%de"
 #define UI_TEXT_DBG_DRYRUN_FR       "Fonct. a Vide:%dd"
+#define UI_TEXT_DBG_ENDSTOP_FR      "Fin de course:%dp"
 #define UI_TEXT_OPS_OFF_FR          "%O0 OPS Off"
 #define UI_TEXT_OPS_CLASSIC_FR      "%O1 OPS Classiq."
 #define UI_TEXT_OPS_FAST_FR         "%O2 OPS Rapide"
@@ -2662,23 +2671,23 @@
 #define UI_TEXT_LANGUAGE_FR "Langue"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_FR "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_FR "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_FR "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_FR "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_FR "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_FR "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_FR "Buf: %oB"
@@ -2786,8 +2795,9 @@
 #define UI_TEXT_LOAD_EEPROM_CZ      "Nahrat z EEPROM"
 #define UI_TEXT_DBG_ECHO_CZ         "Echo   :%do"
 #define UI_TEXT_DBG_INFO_CZ         "Info   :%di"
-#define UI_TEXT_DBG_ERROR_CZ        "Chyby :%de"
+#define UI_TEXT_DBG_ERROR_CZ        "Chyby  :%de"
 #define UI_TEXT_DBG_DRYRUN_CZ       "Beh nanecisto:%dd"
+#define UI_TEXT_DBG_ENDSTOP_CZ      "EndStop:%dp"
 #define UI_TEXT_OPS_OFF_CZ          "%O0 OPS Vypnuto"
 #define UI_TEXT_OPS_CLASSIC_CZ      "%O1 OPS Klasicke"
 #define UI_TEXT_OPS_FAST_CZ         "%O2 OPS Rychle"
@@ -2957,23 +2967,23 @@
 #define UI_TEXT_LANGUAGE_CZ "Jazyk"
 
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_CZ "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_CZ "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_CZ "Flow:\xfd %of%%%   Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_CZ "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_CZ "Buf: %oB"
@@ -3080,6 +3090,7 @@
 #define UI_TEXT_DBG_INFO_PL         "Informacje  : %di"
 #define UI_TEXT_DBG_ERROR_PL        "Bledy       : %de"
 #define UI_TEXT_DBG_DRYRUN_PL       "Bez wydruku : %dd"
+#define UI_TEXT_DBG_ENDSTOP_PL      "EndStop     : %dp"
 #define UI_TEXT_OPS_OFF_PL          "%O0 OPS Off"
 #define UI_TEXT_OPS_CLASSIC_PL      "%O1 OPS Classic"
 #define UI_TEXT_OPS_FAST_PL         "%O2 OPS Fast"
@@ -3248,23 +3259,23 @@
 #define UI_TEXT_COATING_CUSTOM_PL "Inna grubosc:%BCmm"
 #define UI_TEXT_LANGUAGE_PL "Jezyk"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
-  #define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PL "\xa %ec/%Ec\xb0 X:%x0"
 #else
-  #define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_1_PL "\xa %e0/%E0\xb0 X:%x0"
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
-  #define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
 #elif HAVE_HEATED_BED
-  #define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-  #define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
 #endif
 #if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
- #define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
-  #define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
 #else
-  #define UI_TEXT_MAINPAGE6_3_PL "Przep:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_PL "Przep:\xfd %of%%%  Z:%x2"
 #endif
 #define UI_TEXT_MAINPAGE6_4_PL "Mul: %om%%% \xfd   E: %x4m"
 #define UI_TEXT_MAINPAGE6_5_PL "Buf: %oB"
@@ -3364,10 +3375,11 @@
 #define UI_TEXT_ACCELERATION_TR     "Ivme"
 #define UI_TEXT_STORE_TO_EEPROM_TR  "EEPROM'a kaydet"
 #define UI_TEXT_LOAD_EEPROM_TR      "EEPROM'dan cagir"
-#define UI_TEXT_DBG_ECHO_TR         "Echo   :%do"
+#define UI_TEXT_DBG_ECHO_TR         "Echo    :%do"
 #define UI_TEXT_DBG_INFO_TR         "Bilgi   :%di"
 #define UI_TEXT_DBG_ERROR_TR        "Hatalar :%de"
 #define UI_TEXT_DBG_DRYRUN_TR       "Bosta Calis:%dd"
+#define UI_TEXT_DBG_ENDSTOP_TR      "EndStop :%dp"
 #define UI_TEXT_OPS_OFF_TR          "%O0 OPS Kapali"
 #define UI_TEXT_OPS_CLASSIC_TR      "%O1 OPS Klasik"
 #define UI_TEXT_OPS_FAST_TR         "%O2 OPS Hizli"
@@ -3654,8 +3666,9 @@
 #define UI_TEXT_LOAD_EEPROM_FI      "Lataa    EEPROM"
 #define UI_TEXT_DBG_ECHO_FI         "Toista   :%do"
 #define UI_TEXT_DBG_INFO_FI         "Tiedot   :%di"
-#define UI_TEXT_DBG_ERROR_FI        "Virheet :%de"
+#define UI_TEXT_DBG_ERROR_FI        "Virheet  :%de"
 #define UI_TEXT_DBG_DRYRUN_FI       "Kuiva-ajo:%dd"
+#define UI_TEXT_DBG_ENDSTOP_FI      "EndStop  :%dp"
 #define UI_TEXT_OPS_OFF_FI          "%O0 OPS ei"
 #define UI_TEXT_OPS_CLASSIC_FI      "%O1 OPS normaali"
 #define UI_TEXT_OPS_FAST_FI         "%O2 OPS nopea"
