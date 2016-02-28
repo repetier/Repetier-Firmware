@@ -67,7 +67,14 @@
   %de : Debug error state.
   %dd : Debug dry run state.
   %dp : Debug end stop state.
-
+  endstop stats with only one char
+  %dx : Debug min x endstop
+  %dX : Debug max x endstop
+  %dy : Debug min y endstop
+  %dY : Debug max y endstop
+  %dz : Debug min z endstop
+  %dZ : Debug max z endstop
+  
   extruder
   %ec : Current extruder temperature
   %ed : Number of copies for ditto mode
