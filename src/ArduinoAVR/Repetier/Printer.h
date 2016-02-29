@@ -125,7 +125,8 @@ public:
     void disable(bool permanent = true);
     bool measure(void);
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
-    void updateDerived();
+    int32_t correctExtrusion(int32_t x, int32_t y, int32_t z, int32_t e) const;
+	void updateDerived();
     void reportStatus();
 	bool isEnabled() {return enabled;}
 	int32_t zMaxSteps() {return zEnd;}	

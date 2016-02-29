@@ -143,6 +143,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 	/* Special version which adds distortion correction to z. Gets called from queueCartesianMove if needed. */
 	void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize) {
 	
+	int32_t z_old = Printer::destinationSteps[Z_AXIS];
 	// Correct the bumps	
 	Printer::zCorrectionStepsIncluded = Printer::distortion.correct(Printer::destinationSteps[X_AXIS],Printer::destinationSteps[Y_AXIS],Printer::destinationSteps[Z_AXIS]);	
 	Printer::destinationSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
@@ -175,6 +176,10 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 	    {
 		    if(Printer::mode == PRINTER_MODE_FFF)
 		    {
+#if DISTORTION_CORRECTION
+				p->delta[axis] = Printer::distortion.correctExtrusion(Printer::destinationSteps[X_AXIS],Printer::destinationSteps[Y_AXIS],z_old ,p->delta[axis]);
+#endif
+				
 			    Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
 			    p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
 			    Printer::extrudeMultiplyError -= p->delta[E_AXIS];
@@ -278,8 +283,16 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 		// including a z correction
 		int32_t deltas[E_AXIS_ARRAY],start[E_AXIS_ARRAY];
 		for(fast8_t i = 0;i < E_AXIS_ARRAY;i++) {
-			deltas[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
-			start[i] = Printer::currentPositionSteps[i];
+			if(i==Z_AXIS){
+			  //TODO Printer::destinationSteps is not perfect here. It should be the current Z-position without distortion correction (That's not currentPosition)
+			  //when z in GCode is constant over one layer, it is no problem.
+				int32_t  zCor = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS],Printer::currentPositionSteps[Y_AXIS],Printer::destinationSteps[Z_AXIS]); 
+				start[i] = Printer::currentPositionSteps[i] - zCor;
+			}
+			else{
+				start[i] = Printer::currentPositionSteps[i];
+			}
+			deltas[i] = Printer::destinationSteps[i] - start[i];
 		}
 		float dx = Printer::invAxisStepsPerMM[X_AXIS] * deltas[X_AXIS];
 		float dy = Printer::invAxisStepsPerMM[Y_AXIS] * deltas[Y_AXIS];

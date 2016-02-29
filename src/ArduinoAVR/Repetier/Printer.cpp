@@ -2181,7 +2181,8 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
       Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), fy);
     }
     if (z > zStart && z > 0)
-        correction_z = (correction_z * (zEnd - z)) / (zEnd - zStart);
+        //All variables are type int. For calculation we need float values
+        correction_z = (correction_z * static_cast<float>(zEnd - z) / (zEnd - zStart));
    /* if(correction_z > 20 || correction_z < -20) {
             Com::printFLN(PSTR("Corr. error too big:"),correction_z);
         Com::printF(PSTR("fxf"),(int)fxFloor);
@@ -2198,6 +2199,19 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
         correction_z = 0;
     }*/
     return correction_z;
+}
+
+int32_t Distortion::correctExtrusion(int32_t x, int32_t y, int32_t z, int32_t e) const
+{
+    //TODO Retracts are multiblied at the moment. This causes strings in layers. (zStart < layers < zEnd)
+    if (!enabled || z > zEnd || z < zStart || Printer::isZProbingActive()){
+      return e;
+    }
+    //calculate Extrusionmultiplier for zStart < z < zEnd
+    int32_t zCor = correct(x, y, 0); 
+    //float correction_e = static_cast<float>((zEnd - zStart) - zCor) / (zEnd - zStart);
+    float correction_e = static_cast<float>((zEnd - zStart) - zCor) / (zEnd - zStart);
+    return round(correction_e * e);
 }
 
 void Distortion::set(float x,float y,float z) {
