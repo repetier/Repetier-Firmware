@@ -401,6 +401,8 @@ void Printer::updateDerivedParameter()
 #if NONLINEAR_SYSTEM
     travelMovesPerSecond = EEPROM::deltaSegmentsPerSecondMove();
     printMovesPerSecond = EEPROM::deltaSegmentsPerSecondPrint();
+	if(travelMovesPerSecond < 15) travelMovesPerSecond = 15; // lower values make no sense and can cause serious problems
+	if(printMovesPerSecond < 15) printMovesPerSecond = 15;
 #endif
 #if DRIVE_SYSTEM == DELTA
     axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
@@ -2181,7 +2183,8 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
       Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), fy);
     }
     if (z > zStart && z > 0)
-        correction_z = (correction_z * (zEnd - z)) / (zEnd - zStart);
+        //All variables are type int. For calculation we need float values
+        correction_z = (correction_z * static_cast<float>(zEnd - z) / (zEnd - zStart));
    /* if(correction_z > 20 || correction_z < -20) {
             Com::printFLN(PSTR("Corr. error too big:"),correction_z);
         Com::printF(PSTR("fxf"),(int)fxFloor);
