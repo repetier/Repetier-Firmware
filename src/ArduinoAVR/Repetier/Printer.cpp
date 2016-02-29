@@ -2203,7 +2203,7 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 
 int32_t Distortion::correctExtrusion(int32_t x, int32_t y, int32_t z, int32_t e) const
 {
-    //TODO Retracts are multiblied at the moment. This causes strings in layers. (zStart < layers < zEnd)
+    //TODO Retracts are multiplied at the moment. This causes strings in layers. (zStart < layers < zEnd)
     if (!enabled || z > zEnd || z < zStart || Printer::isZProbingActive()){
       return e;
     }
