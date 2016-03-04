@@ -313,7 +313,13 @@ void Printer::constrainDestinationCoords()
 }
 #endif
 void Printer::setDebugLevel(uint8_t newLevel) {
-	debugLevel = newLevel;
+	if(newLevel != debugLevel) {
+		debugLevel = newLevel;
+		if(debugDryrun()) {
+			// Disable all heaters in case they were on
+			Extruder::disableAllHeater();
+		}
+	}
 	Com::printFLN(PSTR("DebugLevel:"),(int)newLevel);
 }
 void Printer::toggleEcho() {

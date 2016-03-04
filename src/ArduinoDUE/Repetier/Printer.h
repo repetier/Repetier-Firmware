@@ -841,6 +841,7 @@ public:
     static INLINE void setAnyTempsensorDefect()
     {
         flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+		debugSet(8);
     }
     static INLINE void unsetAnyTempsensorDefect()
     {
