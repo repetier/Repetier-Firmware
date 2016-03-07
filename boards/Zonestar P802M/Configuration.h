@@ -551,7 +551,7 @@ Values must be in range 1..255
     "bluetoothBaudrate": 115200,
     "xStepsPerMM": 100,
     "yStepsPerMM": 100,
-    "zStepsPerMM": 400,
+    "zStepsPerMM": 1600,
     "xInvert": 0,
     "xInvertEnable": 0,
     "eepromMode": 1,
