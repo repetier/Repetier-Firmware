@@ -64,11 +64,11 @@ void EEPROM::update(GCode *com)
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
 	// can only be done right if we also update permanent values not cached!
+#if EEPROM_MODE != 0
 	EEPROM::initalizeUncached();
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
 		HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);	
-#if EEPROM_MODE != 0
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
     stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
