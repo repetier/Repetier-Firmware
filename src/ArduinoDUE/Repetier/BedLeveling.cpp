@@ -123,6 +123,9 @@ class Plane {
 class PlaneBuilder {
         float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
     public:
+		PlaneBuilder() {
+			reset();
+		}
         void reset() {
             sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
         }
@@ -137,14 +140,16 @@ class PlaneBuilder {
             sum_yz += y * z;
             sum_z += z;
         }
-        void createPlane(Plane &plane) {
+        void createPlane(Plane &plane,bool silent=false) {
             float det = (sum_x*(sum_xy*sum_y-sum_x*sum_yy)+sum_xx*(n*sum_yy-sum_y*sum_y)+sum_xy*(sum_x*sum_y-n*sum_xy));
             plane.a = ((sum_xy*sum_y-sum_x*sum_yy)*sum_z+(sum_x*sum_y-n*sum_xy)*sum_yz+sum_xz*(n*sum_yy-sum_y*sum_y))   /det;
             plane.b = ((sum_x*sum_xy-sum_xx*sum_y)*sum_z+(n*sum_xx-sum_x*sum_x)*sum_yz+sum_xz*(sum_x*sum_y-n*sum_xy))   /det;
             plane.c = ((sum_xx*sum_yy-sum_xy*sum_xy)*sum_z+(sum_x*sum_xy-sum_xx*sum_y)*sum_yz+sum_xz*(sum_xy*sum_y-sum_x*sum_yy))/det;
-            Com::printF(PSTR("plane: a = "),plane.a,4);
-            Com::printF(PSTR(" b = "),plane.b,4);
-            Com::printFLN(PSTR(" c = "),plane.c,4);
+			if(!silent) {
+				Com::printF(PSTR("plane: a = "),plane.a,4);
+				Com::printF(PSTR(" b = "),plane.b,4);
+				Com::printFLN(PSTR(" c = "),plane.c,4);
+			}
         }
 };
 
@@ -539,13 +544,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 }
 
 float Printer::bendingCorrectionAt(float x, float y) {
-    RVector3 p0(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
-    RVector3 p1(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
-    RVector3 p2(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
-    RVector3 a = p1-p0,b = p2 - p0;
-    RVector3 n = a.cross(b);
-    RVector3 l0(x,y,0);
-    return ((p0 - l0).scalar(n)) / n.z;
+	PlaneBuilder builder;
+    builder.addPoint(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
+    builder.addPoint(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
+    builder.addPoint(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
+	Plane plane;
+	builder.createPlane(plane);
+	return plane.z(x,y);
 }
 
 void Printer::waitForZProbeStart() {

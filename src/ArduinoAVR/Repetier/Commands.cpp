@@ -2311,7 +2311,7 @@ void Commands::processMCode(GCode *com) {
 #endif
             break;
 #if 0 && UI_DISPLAY_TYPE != NO_DISPLAY
-        // some debuggingcommands normally disabled
+        // some debugging commands normally disabled
         case 888:
             Com::printFLN(PSTR("Selected language:"),(int)Com::selectedLanguage);
             Com::printF(PSTR("Translation:"));
@@ -2320,19 +2320,21 @@ void Commands::processMCode(GCode *com) {
         case 889:
             uid.showLanguageSelectionWizard();
             break;
-        case 890: {
-                if(com->hasX() && com->hasY()) {
-                    float c = Printer::bendingCorrectionAt(com->X,com->Y);
-                    Com::printF(PSTR("Bending at ("),com->X);
-                    Com::printF(PSTR(","),com->Y);
-                    Com::printFLN(PSTR(") = "),c);
-                }
-            }
-            break;
         case 891:
             if(com->hasS())
                 EEPROM::setVersion(com->S);
             break;
+#endif
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+		case 890: {
+			if(com->hasX() && com->hasY()) {
+				float c = Printer::bendingCorrectionAt(com->X,com->Y);
+				Com::printF(PSTR("Bending at ("),com->X);
+				Com::printF(PSTR(","),com->Y);
+				Com::printFLN(PSTR(") = "),c);
+			}
+		}
+break;
 #endif
 		case 999: // Stop fatal error take down
 			if(com->hasS())
