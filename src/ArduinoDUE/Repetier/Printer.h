@@ -115,6 +115,14 @@ union wizardVar
 #define towerBMinSteps Printer::yMinSteps
 #define towerCMinSteps Printer::zMinSteps
 
+class Plane {
+	public:
+	// f(x, y) = ax + by + c
+	float a,b,c;
+	float z(float x,float y) {
+		return a * x + y * b + c;
+	}
+};
 #if DISTORTION_CORRECTION
 class Distortion
 {
@@ -1111,7 +1119,8 @@ public:
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void resetTransformationMatrix(bool silent);
-    static void buildTransformationMatrix(float h1,float h2,float h3);
+    //static void buildTransformationMatrix(float h1,float h2,float h3);
+    static void buildTransformationMatrix(Plane &plane);
 #endif
 #if DISTORTION_CORRECTION
     static bool measureDistortion(void);

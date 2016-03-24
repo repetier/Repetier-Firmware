@@ -713,7 +713,7 @@ public:
         WDTCSR = (1<<WDCE) | (1<<WDE);								// wdt FIX for arduino mega boards
         WDTCSR = (1<<WDIE) | (1<<WDP3);
 #else
-        wdt_enable(WDTO_1S);
+        wdt_enable(WDTO_4S);
 #endif
     };
     inline static void stopWatchdog()

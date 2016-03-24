@@ -673,7 +673,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t extr, bool beep, bool wait)
 {
 #if NUM_EXTRUDER > 0
-#if MIXING_EXTRUDER
+#if MIXING_EXTRUDER || SHARED_EXTRUDER_HEATER
     extr = 0; // map any virtual extruder number to 0
 #endif // MIXING_EXTRUDER
     bool alloffs = true;

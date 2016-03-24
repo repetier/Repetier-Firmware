@@ -197,6 +197,22 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#ifndef SHARED_EXTRUDER_HEATER
+#define SHARED_EXTRUDER_HEATER 0
+#endif
+#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
+#undef EXT1_HEATER_PIN
+#undef EXT2_HEATER_PIN
+#undef EXT3_HEATER_PIN
+#undef EXT4_HEATER_PIN
+#undef EXT5_HEATER_PIN
+#define EXT1_HEATER_PIN -1
+#define EXT2_HEATER_PIN -1
+#define EXT3_HEATER_PIN -1
+#define EXT4_HEATER_PIN -1
+#define EXT5_HEATER_PIN -1
+#endif
+
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif

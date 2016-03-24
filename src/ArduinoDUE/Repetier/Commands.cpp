@@ -2008,6 +2008,11 @@ void Commands::processMCode(GCode *com) {
         case 281: // Trigger watchdog
 #if FEATURE_WATCHDOG
             {
+				if(com->hasX()) {
+					HAL::stopWatchdog();
+					Com::printFLN(PSTR("Watchdog disabled"));
+					break;
+				}
                 Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
                 Printer::kill(false);
                 HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety

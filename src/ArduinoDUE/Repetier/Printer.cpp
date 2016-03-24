@@ -145,10 +145,10 @@ float Printer::backlashY;
 float Printer::backlashZ;
 uint8_t Printer::backlashDir;
 #endif
-float Printer::memoryX;
-float Printer::memoryY;
-float Printer::memoryZ;
-float Printer::memoryE;
+float Printer::memoryX = IGNORE_COORDINATE;
+float Printer::memoryY = IGNORE_COORDINATE;
+float Printer::memoryZ = IGNORE_COORDINATE;
+float Printer::memoryE = IGNORE_COORDINATE;
 float Printer::memoryF = -1;
 #if GANTRY && !defined(FAST_COREXYZ)
 int8_t Printer::motorX;

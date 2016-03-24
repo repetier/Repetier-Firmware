@@ -2359,7 +2359,6 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
     if(curd != NULL)
     {
         if(curd->checkEndstops(cur,(cur->isCheckEndstops()))) { // should stop move
-			Com::printFLN(PSTR("STop move endstop"));
 			cur->stepsRemaining = 0;
 			curd = NULL;
 			// eat up all following segments with moveID
