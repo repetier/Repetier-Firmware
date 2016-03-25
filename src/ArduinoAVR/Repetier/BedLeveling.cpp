@@ -90,6 +90,18 @@ from 1 and use that as plane.
 By now the leveling process is finished. All errors that remain are measuring errors and bumps on
 the bed it self. For deltas you can enable distortion correction to follow the bumps.
 
+There are 2 ways to consider a changing bed coating, which are defined by Z_PROBE_Z_OFFSET_MODE.
+Z_PROBE_Z_OFFSET_MODE = 0 means we measure the surface of the bed below any coating. This is e.g. 
+the case with inductive sensors where we put BuildTak on top. In that case we can set Z_PROBE_Z_OFFSET
+to the thickness of BuildTak to compensate. If we later change the coating, we only change Z_PROBE_Z_OFFSET
+to new coating thickness.
+
+Z_PROBE_Z_OFFSET_MODE = 1 means we measure the surface of the coating, e.g. because we have a mechanical switch.
+In that case we add Z_PROBE_Z_OFFSET for the measured height to compensate for correct distance to bed surface.
+
+In homing to max we reduce z length by Z_PROBE_Z_OFFSET to get a correct height.
+In homing to z min we assume z endstop is bed level so we move up Z_PROBE_Z_OFFSET after endstop is hit. This 
+requires the extruder to bend the coating thickness without harm!
 */
 
 #include "Repetier.h"
@@ -110,8 +122,6 @@ the bed it self. For deltas you can enable distortion correction to follow the b
 #define BED_LEVELING_REPETITIONS 1
 #endif
 
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
-
 
 class PlaneBuilder {
         float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
@@ -127,17 +137,17 @@ class PlaneBuilder {
             sum_xx += x * x;
             sum_xy += x * y;
             sum_yy += y * y;
-            sum_x += x;
-            sum_y += y;
+            sum_x  += x;
+            sum_y  += y;
             sum_xz += x * z;
             sum_yz += y * z;
-            sum_z += z;
+            sum_z  += z;
         }
         void createPlane(Plane &plane,bool silent=false) {
-            float det = (sum_x*(sum_xy*sum_y-sum_x*sum_yy)+sum_xx*(n*sum_yy-sum_y*sum_y)+sum_xy*(sum_x*sum_y-n*sum_xy));
-            plane.a = ((sum_xy*sum_y-sum_x*sum_yy)*sum_z+(sum_x*sum_y-n*sum_xy)*sum_yz+sum_xz*(n*sum_yy-sum_y*sum_y))   /det;
-            plane.b = ((sum_x*sum_xy-sum_xx*sum_y)*sum_z+(n*sum_xx-sum_x*sum_x)*sum_yz+sum_xz*(sum_x*sum_y-n*sum_xy))   /det;
-            plane.c = ((sum_xx*sum_yy-sum_xy*sum_xy)*sum_z+(sum_x*sum_xy-sum_xx*sum_y)*sum_yz+sum_xz*(sum_xy*sum_y-sum_x*sum_yy))/det;
+            float det = (sum_x * (sum_xy * sum_y - sum_x * sum_yy) + sum_xx * (n * sum_yy - sum_y * sum_y) + sum_xy * (sum_x * sum_y - n * sum_xy));
+            plane.a = ((sum_xy * sum_y  - sum_x * sum_yy)  * sum_z + (sum_x * sum_y  - n      * sum_xy) * sum_yz + sum_xz * (n      * sum_yy - sum_y * sum_y))  / det;
+            plane.b = ((sum_x  * sum_xy - sum_xx * sum_y)  * sum_z + (n     * sum_xx - sum_x  * sum_x)  * sum_yz + sum_xz * (sum_x  * sum_y  - n     * sum_xy)) / det;
+            plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y)  * sum_yz + sum_xz * (sum_xy * sum_y  - sum_x * sum_yy)) / det;
 			if(!silent) {
 				Com::printF(PSTR("plane: a = "),plane.a,4);
 				Com::printF(PSTR(" b = "),plane.b,4);
@@ -145,6 +155,8 @@ class PlaneBuilder {
 			}
         }
 };
+
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 
 bool measureAutolevelPlane(Plane &plane) {
     PlaneBuilder builder;

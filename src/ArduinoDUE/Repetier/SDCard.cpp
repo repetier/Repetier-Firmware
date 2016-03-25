@@ -178,7 +178,7 @@ void SDCard::stopPrint()
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();
-        Printer::kill(true);
+        Printer::kill(false);
     }
 }
 

@@ -1582,6 +1582,8 @@ void Printer::homeZAxis() // Cartesian homing
 #if Z_HOME_DIR < 0
 		// Fix bed coating
 		zCorrection += axisStepsPerMM[Z_AXIS] * Printer::zBedOffset;
+#else
+		currentPositionSteps[Z_AXIS] -= zBedOffset * axisStepsPerMM[Z_AXIS]; // Correct bed coating	
 #endif
         PrintLine::moveRelativeDistanceInSteps(0,0,zCorrection,0,homingFeedrate[Z_AXIS],true,false);
         currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
