@@ -223,6 +223,9 @@ Overridden if EEPROM activated.*/
 #define PAUSE_START_COMMANDS ""
 // These commands get executed before we go to stored position.
 #define PAUSE_END_COMMANDS ""
+/* Set to 1 if all extruders use the same heater block. Temp. control is then always
+controlled by settings in extruder 0 definition. */
+#define SHARED_EXTRUDER_HEATER 0
 
 // Extruder offsets in steps not mm!
 #define EXT0_X_OFFSET 0
@@ -266,6 +269,12 @@ Overridden if EEPROM activated.*/
 #define EXT0_ENABLE_PIN E0_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT0_ENABLE_ON 0
+/* Set to 1 to mirror motor. Pins for mirrored motor are below */
+#define EXT0_MIRROR_STEPPER 0
+#define EXT0_STEP2_PIN E0_STEP_PIN
+#define EXT0_DIR2_PIN E0_DIR_PIN
+#define EXT0_INVERSE2 false
+#define EXT0_ENABLE2_PIN E0_ENABLE_PIN
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use higher values.
@@ -389,6 +398,12 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT1_ENABLE_PIN E1_ENABLE_PIN
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 #define EXT1_ENABLE_ON false
+/* Set to 1 to mirror motor. Pins for mirrored motor are below */
+#define EXT1_MIRROR_STEPPER 0
+#define EXT1_STEP2_PIN E0_STEP_PIN
+#define EXT1_DIR2_PIN E0_DIR_PIN
+#define EXT1_INVERSE2 false
+#define EXT1_ENABLE2_PIN E0_ENABLE_PIN
 // The following speed settings are for skeinforge 40+ where e is the
 // length of filament pulled inside the heater. For repsnap or older
 // skeinforge use heigher values.
