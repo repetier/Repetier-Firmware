@@ -201,7 +201,7 @@ Overridden if EEPROM activated.*/
 #define PDM_FOR_COOLER 1
 
 // The firmware checks if the heater and sensor got decoupled, which is dangerous. Since it will never reach target
-// temperature, the heater will stay on for every which can burn your printe ror house.
+// temperature, the heater will stay on for every which can burn your printer or house.
 // As an additional barrier to your smoke detectors (I hope you have one above your printer) we now
 // do some more checks to detect if something got wrong.
 
