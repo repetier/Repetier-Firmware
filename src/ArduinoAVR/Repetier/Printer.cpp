@@ -1352,7 +1352,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
     if (!(X_MAX_PIN > -1 && Y_MAX_PIN > -1 && Z_MAX_PIN > -1
             && MAX_HARDWARE_ENDSTOP_X && MAX_HARDWARE_ENDSTOP_Y && MAX_HARDWARE_ENDSTOP_Z))
     {
-        Com::printErrorFLN(PSTR("Hardware setup inconsistent. Delta cannot home wihtout max endstops."));
+        Com::printErrorFLN(PSTR("Hardware setup inconsistent. Delta cannot home without max endstops."));
     }
     // The delta has to have home capability to zero and set position,
     // so the redundant check is only an opportunity to
