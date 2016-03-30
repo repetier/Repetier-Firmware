@@ -112,7 +112,11 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::yMin = Y_MIN_POS;
     Printer::zMin = Z_MIN_POS;
 #if NONLINEAR_SYSTEM
+#ifdef ROD_RADIUS
 	Printer::radius0 = ROD_RADIUS;
+#else
+	Printer::radius0 = 0;
+#endif	
 #endif
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = X_BACKLASH;

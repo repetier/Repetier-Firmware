@@ -626,6 +626,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if !MIXING_EXTRUDER
 	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
+    if(Printer::isHomed() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed
+		Printer::offsetZ = -extruder[extruderId].zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
+	    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+	    Commands::waitUntilEndOfAllMoves();
+		Printer::updateCurrentPosition(true);
+    }
+
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     bool executeSelect = false;
     if(extruderId != Extruder::current->id)
@@ -635,7 +642,16 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     }
     Commands::waitUntilEndOfAllMoves();
 #endif
+    float cx, cy, cz;
+    Printer::realPosition(cx, cy, cz);
+    float oldfeedrate = Printer::feedrate;
     Extruder::current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
+#if DUAL_X_AXIS
+	// Park current extruder
+	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps;
+	if(Printer::isHomed())
+		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+#endif	
     Extruder::current = &extruder[extruderId];
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
@@ -666,15 +682,28 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     if(fmax < Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif
     Extruder::current->tempControl.updateTempControlVars();
-    float cx, cy, cz;
-    Printer::realPosition(cx, cy, cz);
-    float oldfeedrate = Printer::feedrate;
+#if DUAL_X_AXIS
+	// Unpark new current extruder
+	if(executeSelect) {// Run only when changing
+		Commands::waitUntilEndOfAllMoves();
+		Printer::updateCurrentPosition(true);
+		GCode::executeFString(Extruder::current->selectCommands);
+		executeSelect = false;
+	}
+	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPos;
+	if(Printer::isHomed())
+		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+	Printer::currentPositionSteps[X_AXIS] = dualXPos + Printer::xMinSteps;
+    Printer::offsetX = 0;
+	Printer::updateCurrentPosition(true);
+#else	
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
+#endif
     Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
     if(Printer::isHomed()) {
-        Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
+        Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
 	}
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();

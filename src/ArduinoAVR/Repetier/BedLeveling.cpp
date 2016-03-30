@@ -326,12 +326,8 @@ bool runBedLeveling(GCode *com) {
         Printer::zMin = 0;
 #if MAX_HARDWARE_ENDSTOP_Z
         float xRot,yRot,zRot;
-#if BED_CORRECTION_METHOD != 1
         Printer::transformFromPrinter(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS],xRot,yRot,zRot);
         Com::printFLN(PSTR("Z after rotation:"),zRot);
-#else
-        zRot = Printer::currentPosition[Z_AXIS];
-#endif
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
         if(s != 0) {
             Printer::zLength += currentZ - zRot;
@@ -591,29 +587,52 @@ void Printer::waitForZProbeStart() {
 }
 #endif
 
-#if FEATURE_AUTOLEVEL
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if FEATURE_AXISCOMP
     // Axis compensation:
     x = x + y * EEPROM::axisCompTanXY() + z * EEPROM::axisCompTanXZ();
     y = y + z * EEPROM::axisCompTanYZ();
 #endif
-    transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
-    transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
-    transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
+	if(isAutolevelActive()) {
+		transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
+		transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
+		transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+	} else {
+		transX = x;
+		transY = y;
+		transZ = z;		
+	}
+#else
+	transX = x;
+	transY = y;
+	transZ = z;
+#endif	
 }
 
 void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
-    transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
-    transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
-    transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
+	if(isAutolevelActive()) {
+		transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
+		transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
+		transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+	} else {
+		transX = x;
+		transY = y;
+		transZ = z;		
+	}
+#else
+	transX = x;
+	transY = y;
+	transZ = z;
+#endif
 #if FEATURE_AXISCOMP
     // Axis compensation:
     transY = transY - transZ * EEPROM::axisCompTanYZ();
     transX = transX - transY * EEPROM::axisCompTanXY() - transZ * EEPROM::axisCompTanXZ();
 #endif
 }
-
+#if FEATURE_AUTOLEVEL
 void Printer::resetTransformationMatrix(bool silent) {
     autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
     autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] =

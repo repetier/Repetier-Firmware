@@ -510,7 +510,7 @@ public:
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
-#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+#if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
         WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
@@ -545,7 +545,7 @@ public:
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
-#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+#if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
         WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
@@ -579,14 +579,14 @@ public:
         if(positive)
         {
             WRITE(X_DIR_PIN,!INVERT_X_DIR);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
             WRITE(X2_DIR_PIN,!INVERT_X_DIR);
 #endif
         }
         else
         {
             WRITE(X_DIR_PIN,INVERT_X_DIR);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
             WRITE(X2_DIR_PIN,INVERT_X_DIR);
 #endif
         }
@@ -958,9 +958,17 @@ public:
     }
     static INLINE void startXStep()
     {
+#if DUAL_X_AXIS
+		if(Extruder::current->id) {
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
+		} else {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
+		}
+#else		
         WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
 #endif
     }
     static INLINE void startYStep()
@@ -983,7 +991,7 @@ public:
     static INLINE void endXYZSteps()
     {
         WRITE(X_STEP_PIN,!START_STEP_WITH_HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
         WRITE(X2_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
         WRITE(Y_STEP_PIN,!START_STEP_WITH_HIGH);
@@ -1115,9 +1123,9 @@ public:
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
-#if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
+#if FEATURE_AUTOLEVEL
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane &plane);

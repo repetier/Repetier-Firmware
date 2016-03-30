@@ -121,8 +121,8 @@ Custom M Codes
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-- M320 - Activate autolevel
-- M321 - Deactivate autolevel
+- M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
+- M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
 - M322 - Reset autolevel matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.

@@ -1,3 +1,9 @@
+Version 92.9
+  Extrduer motor mirroring.
+  Fixes in autoleveling.
+  Dual x axis support.
+  Axis compensation now always on.
+  
 Version 0.92
   Cleaner code base.
   Pulse dense modulation for heater and fans.

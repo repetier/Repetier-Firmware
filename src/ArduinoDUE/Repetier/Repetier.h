@@ -24,7 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.8"
+#define REPETIER_VERSION "0.92.9"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -200,6 +200,11 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0
 #endif
+
+#ifndef DUAL_X_AXIS
+#define DUAL_X_AXIS 0
+#endif
+
 #if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN
