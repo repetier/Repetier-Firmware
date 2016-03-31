@@ -226,6 +226,8 @@ Overridden if EEPROM activated.*/
 /* Set to 1 if all extruders use the same heater block. Temp. control is then always
 controlled by settings in extruder 0 definition. */
 #define SHARED_EXTRUDER_HEATER 0
+/* Speed in mm/s for extruder moves fom internal commands, e.g. switching extruder. */
+#define EXTRUDER_SWITCH_XY_SPEED 100
 
 // Extruder offsets in steps not mm!
 #define EXT0_X_OFFSET 0

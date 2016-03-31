@@ -959,6 +959,13 @@ public:
     static INLINE void startXStep()
     {
 #if DUAL_X_AXIS
+#if FEATURE_DITTO_PRINTING
+		if(Extruder::dittoMode) {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+			return;
+		}
+#endif
 		if(Extruder::current->id) {
 			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
 		} else {
@@ -1156,7 +1163,6 @@ public:
 #if JSON_OUTPUT
     static void showJSONStatus(int type);
 #endif
-private:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();

@@ -2000,9 +2000,22 @@ void Commands::processMCode(GCode *com) {
 #endif
 #if FEATURE_DITTO_PRINTING
         case 280: // M280
+#if DUAL_X_AXIS
+			Extruder::dittoMode = 0;
+			Extruder::selectExtruderById(0);
+			Printer::homeXAxis();
+			if(com->hasS() && com->S > 0) {
+				Extruder::current = &extruder[1];
+				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
+				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
+				Extruder::current = &extruder[0];
+				Extruder::dittoMode = 1;
+			}
+#else		
             if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
                 Extruder::dittoMode = com->S;
             }
+#endif			
             break;
 #endif
         case 281: // Trigger watchdog
