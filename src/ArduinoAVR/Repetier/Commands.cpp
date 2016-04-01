@@ -969,7 +969,7 @@ void Commands::processGCode(GCode *com) {
                 float actTemp[NUM_EXTRUDER];
                 for(int i = 0; i < NUM_EXTRUDER; i++)
                     actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+	            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                 Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                 for(int i = 0; i < NUM_EXTRUDER; i++) {
@@ -1135,7 +1135,7 @@ void Commands::processGCode(GCode *com) {
                     float actTemp[NUM_EXTRUDER];
                     for(int i = 0; i < NUM_EXTRUDER; i++)
                         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),ZHOME_HEAT_HEIGHT),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
                     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
                     for(int i = 0; i < NUM_EXTRUDER; i++) {
