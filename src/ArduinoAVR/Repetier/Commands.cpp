@@ -262,7 +262,7 @@ void Commands::reportPrinterUsage() {
 // Digipot methods for controling current and microstepping
 
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
-int digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotControl example
+void digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotControl example
     if(value > 255)
         value = 255;
     WRITE(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
