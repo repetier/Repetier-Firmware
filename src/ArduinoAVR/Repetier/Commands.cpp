@@ -269,7 +269,6 @@ void digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotCo
     HAL::spiSend(address); //  send in the address and value via SPI:
     HAL::spiSend(value);
     WRITE(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
-    //delay(10);
 }
 
 void setMotorCurrent(uint8_t driver, uint16_t current) {
