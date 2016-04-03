@@ -1301,10 +1301,10 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
+#if NUM_TEMPERATURE_LOOPS > 0
             uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
             if(c2 == 'c') eid = Extruder::current->id;
             else if(c2 >= '0' && c2 <= '9') eid = c2 - '0';
-#if NUM_TEMPERATURE_LOOPS > 0
             if(Printer::isAnyTempsensorDefect())
             {
                 if(eid == 0 && ++beepdelay > 30) beepdelay = 0; // beep every 30 seconds

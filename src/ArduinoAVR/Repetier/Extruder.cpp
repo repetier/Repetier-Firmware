@@ -392,9 +392,11 @@ void Extruder::unpauseExtruders()
 }
 
 void TemperatureController::resetAllErrorStates() {
+#if NUM_TEMPERATURE_LOOPS > 0
 	for(int i = 0;i < NUM_TEMPERATURE_LOOPS; i++) {
 		tempController[i]->removeErrorStates();
 	}
+#endif	
 }
 
 #if EXTRUDER_JAM_CONTROL
