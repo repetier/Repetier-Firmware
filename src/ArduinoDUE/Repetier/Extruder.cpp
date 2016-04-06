@@ -872,6 +872,7 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
     else if(Printer::areAllSteppersDisabled())
         pwm_pos[PWM_BOARD_FAN] = 0;      // turn off the mainboard cooling fan only if steppers disabled
 #endif
+	EVENT_SET_BED_TEMP(temperatureInCelsius,beep);
 }
 
 float Extruder::getHeatedBedTemperature()
