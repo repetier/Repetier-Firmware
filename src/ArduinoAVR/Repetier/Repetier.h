@@ -218,6 +218,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define EXT5_HEATER_PIN -1
 #endif
 
+#ifndef BOARD_FAN_SPEED
+#define BOARD_FAN_SPEED
+#endif
+
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif

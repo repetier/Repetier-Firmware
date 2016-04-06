@@ -868,7 +868,7 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
     if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
     if(temperatureInCelsius > 15)
-        pwm_pos[PWM_BOARD_FAN] = 255;    // turn on the mainboard cooling fan
+        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;    // turn on the mainboard cooling fan
     else if(Printer::areAllSteppersDisabled())
         pwm_pos[PWM_BOARD_FAN] = 0;      // turn off the mainboard cooling fan only if steppers disabled
 #endif
