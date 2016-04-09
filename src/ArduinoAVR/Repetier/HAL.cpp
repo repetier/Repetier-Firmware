@@ -349,9 +349,24 @@ void HAL::analogStart()
 
 #include <avr/io.h>
 
+/****************************************************************************************
+ Setting for I2C Clock speed. needed to change  clock speed for different peripherals
+ here is just the same as i2cInit  , added to be compatible to DUE Version
+****************************************************************************************/
+
+void HAL::Seti2cClockspeed(unsigned long clockSpeedHz)
+
+{
+    /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
+    TWSR = 0;                         /* no prescaler */
+    TWBR = ((F_CPU/clockSpeedHz)-16)/2;  /* must be > 10 for stable operation */
+}
+
+
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
+
 void HAL::i2cInit(unsigned long clockSpeedHz)
 {
     /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
