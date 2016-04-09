@@ -67,6 +67,9 @@ RepRap M Codes
 
 Custom M Codes
 
+- M3 - Spindle on, Clockwise or Laser on during G1 moves.
+- M4 - Spindle on, Counterclockwise.
+- M5 - Spindle off, Laser off.
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card

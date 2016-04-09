@@ -1126,6 +1126,11 @@ for some printers causing an early stall.
 */
 #define DOUBLE_STEP_DELAY 0 // time in microseconds
 
+/** If the firmware is busy, it will send a busy signal to host signaling that
+ everything is fine and it only takes a bit longer to finish. That way the 
+ host can keep timeout short so in case of communication errors the resulting
+ blobs are much smaller. Set to 0 to disable it. */
+#define KEEP_ALIVE_INTERVAL 2000
 //// Acceleration settings
 
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high!

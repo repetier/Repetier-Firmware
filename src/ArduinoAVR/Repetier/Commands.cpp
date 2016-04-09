@@ -51,6 +51,7 @@ void Commands::commandLoop() {
                 code->popCurrentCommand();
             }
         } else {
+			GCode::keepAlive(Paused);
             UI_MEDIUM;
         }
         Printer::defaultLoopActions();
@@ -60,14 +61,14 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
-    if(!executePeriodical) return;
+    if(!executePeriodical) return; // gets true every 100ms
     executePeriodical = 0;
     EVENT_TIMER_100MS;
     Extruder::manageTemperatures();
-    if(--counter250ms == 0) {
+    if(--counter500ms == 0) {
         if(manageMonitor)
             writeMonitor();
-        counter250ms = 5;
+        counter500ms = 5;
         EVENT_TIMER_500MS;
     }
     // If called from queueDelta etc. it is an error to start a new move since it
@@ -933,7 +934,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoriding to stored setting
 #if NUM_EXTRUDER > 1
             Extruder::current->retract(true, com->hasS() && com->S > 0);
 #else
