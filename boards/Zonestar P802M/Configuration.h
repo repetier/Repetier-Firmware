@@ -397,7 +397,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define UI_SERVO_CONTROL 0
 #define FAN_KICKSTART_TIME  200
 
-        #define FEATURE_WATCHDOG 1
+        #define FEATURE_WATCHDOG 0
 
 // #################### Z-Probing #####################
 
@@ -551,7 +551,7 @@ Values must be in range 1..255
     "bluetoothBaudrate": 115200,
     "xStepsPerMM": 100,
     "yStepsPerMM": 100,
-    "zStepsPerMM": 400,
+    "zStepsPerMM": 1600,
     "xInvert": 0,
     "xInvertEnable": 0,
     "eepromMode": 1,
@@ -740,7 +740,7 @@ Values must be in range 1..255
     "servo1Pin": -1,
     "servo2Pin": -1,
     "servo3Pin": -1,
-    "featureWatchdog": "1",
+    "featureWatchdog": "0",
     "hasHeatedBed": "1",
     "enableZProbing": "0",
     "extrudeMaxLength": 160,

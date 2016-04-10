@@ -90,6 +90,18 @@ from 1 and use that as plane.
 By now the leveling process is finished. All errors that remain are measuring errors and bumps on
 the bed it self. For deltas you can enable distortion correction to follow the bumps.
 
+There are 2 ways to consider a changing bed coating, which are defined by Z_PROBE_Z_OFFSET_MODE.
+Z_PROBE_Z_OFFSET_MODE = 0 means we measure the surface of the bed below any coating. This is e.g. 
+the case with inductive sensors where we put BuildTak on top. In that case we can set Z_PROBE_Z_OFFSET
+to the thickness of BuildTak to compensate. If we later change the coating, we only change Z_PROBE_Z_OFFSET
+to new coating thickness.
+
+Z_PROBE_Z_OFFSET_MODE = 1 means we measure the surface of the coating, e.g. because we have a mechanical switch.
+In that case we add Z_PROBE_Z_OFFSET for the measured height to compensate for correct distance to bed surface.
+
+In homing to max we reduce z length by Z_PROBE_Z_OFFSET to get a correct height.
+In homing to z min we assume z endstop is bed level so we move up Z_PROBE_Z_OFFSET after endstop is hit. This 
+requires the extruder to bend the coating thickness without harm!
 */
 
 #include "Repetier.h"
@@ -110,19 +122,13 @@ the bed it self. For deltas you can enable distortion correction to follow the b
 #define BED_LEVELING_REPETITIONS 1
 #endif
 
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 
-class Plane {
-    public:
-        // f(x, y) = ax + by + c
-        float a,b,c;
-        float z(float x,float y) {
-            return a * x + y * b + c;
-        }
-};
 class PlaneBuilder {
         float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
     public:
+		PlaneBuilder() {
+			reset();
+		}
         void reset() {
             sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
         }
@@ -131,22 +137,26 @@ class PlaneBuilder {
             sum_xx += x * x;
             sum_xy += x * y;
             sum_yy += y * y;
-            sum_x += x;
-            sum_y += y;
+            sum_x  += x;
+            sum_y  += y;
             sum_xz += x * z;
             sum_yz += y * z;
-            sum_z += z;
+            sum_z  += z;
         }
-        void createPlane(Plane &plane) {
-            float det = (sum_x*(sum_xy*sum_y-sum_x*sum_yy)+sum_xx*(n*sum_yy-sum_y*sum_y)+sum_xy*(sum_x*sum_y-n*sum_xy));
-            plane.a = ((sum_xy*sum_y-sum_x*sum_yy)*sum_z+(sum_x*sum_y-n*sum_xy)*sum_yz+sum_xz*(n*sum_yy-sum_y*sum_y))   /det;
-            plane.b = ((sum_x*sum_xy-sum_xx*sum_y)*sum_z+(n*sum_xx-sum_x*sum_x)*sum_yz+sum_xz*(sum_x*sum_y-n*sum_xy))   /det;
-            plane.c = ((sum_xx*sum_yy-sum_xy*sum_xy)*sum_z+(sum_x*sum_xy-sum_xx*sum_y)*sum_yz+sum_xz*(sum_xy*sum_y-sum_x*sum_yy))/det;
-            Com::printF(PSTR("plane: a = "),plane.a,4);
-            Com::printF(PSTR(" b = "),plane.b,4);
-            Com::printFLN(PSTR(" c = "),plane.c,4);
+        void createPlane(Plane &plane,bool silent=false) {
+            float det = (sum_x * (sum_xy * sum_y - sum_x * sum_yy) + sum_xx * (n * sum_yy - sum_y * sum_y) + sum_xy * (sum_x * sum_y - n * sum_xy));
+            plane.a = ((sum_xy * sum_y  - sum_x * sum_yy)  * sum_z + (sum_x * sum_y  - n      * sum_xy) * sum_yz + sum_xz * (n      * sum_yy - sum_y * sum_y))  / det;
+            plane.b = ((sum_x  * sum_xy - sum_xx * sum_y)  * sum_z + (n     * sum_xx - sum_x  * sum_x)  * sum_yz + sum_xz * (sum_x  * sum_y  - n     * sum_xy)) / det;
+            plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y)  * sum_yz + sum_xz * (sum_xy * sum_y  - sum_x * sum_yy)) / det;
+			if(!silent) {
+				Com::printF(PSTR("plane: a = "),plane.a,4);
+				Com::printF(PSTR(" b = "),plane.b,4);
+				Com::printFLN(PSTR(" c = "),plane.c,4);
+			}
         }
 };
+
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 
 bool measureAutolevelPlane(Plane &plane) {
     PlaneBuilder builder;
@@ -225,13 +235,14 @@ bool measureAutolevelPlane(Plane &plane) {
 #else
 #error Unknown bed leveling method
 #endif
-    builder.createPlane(plane);
+    builder.createPlane(plane,false);
     return true;
 }
 
 void correctAutolevel(GCode *code,Plane &plane) {
 #if BED_CORRECTION_METHOD == 0 // rotation matrix
-    Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
+    //Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
+	Printer::buildTransformationMatrix(plane);
 #elif BED_CORRECTION_METHOD == 1 // motorized correction
 #if !defined(NUM_MOTOR_DRIVERS) || NUM_MOTOR_DRIVERS < 2
 #error You need to define 2 motors for motorized bed correction
@@ -315,12 +326,8 @@ bool runBedLeveling(GCode *com) {
         Printer::zMin = 0;
 #if MAX_HARDWARE_ENDSTOP_Z
         float xRot,yRot,zRot;
-#if BED_CORRECTION_METHOD != 1
         Printer::transformFromPrinter(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS],xRot,yRot,zRot);
         Com::printFLN(PSTR("Z after rotation:"),zRot);
-#else
-        zRot = Printer::currentPosition[Z_AXIS];
-#endif
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
         if(s != 0) {
             Printer::zLength += currentZ - zRot;
@@ -539,13 +546,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 }
 
 float Printer::bendingCorrectionAt(float x, float y) {
-    RVector3 p0(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
-    RVector3 p1(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
-    RVector3 p2(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
-    RVector3 a = p1-p0,b = p2 - p0;
-    RVector3 n = a.cross(b);
-    RVector3 l0(x,y,0);
-    return ((p0 - l0).scalar(n)) / n.z;
+	PlaneBuilder builder;
+    builder.addPoint(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
+    builder.addPoint(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
+    builder.addPoint(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
+	Plane plane;
+	builder.createPlane(plane,true);
+	return plane.z(x,y);
 }
 
 void Printer::waitForZProbeStart() {
@@ -580,29 +587,52 @@ void Printer::waitForZProbeStart() {
 }
 #endif
 
-#if FEATURE_AUTOLEVEL
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if FEATURE_AXISCOMP
     // Axis compensation:
     x = x + y * EEPROM::axisCompTanXY() + z * EEPROM::axisCompTanXZ();
     y = y + z * EEPROM::axisCompTanYZ();
 #endif
-    transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
-    transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
-    transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
+	if(isAutolevelActive()) {
+		transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
+		transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
+		transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+	} else {
+		transX = x;
+		transY = y;
+		transZ = z;		
+	}
+#else
+	transX = x;
+	transY = y;
+	transZ = z;
+#endif	
 }
 
 void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
-    transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
-    transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
-    transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
+	if(isAutolevelActive()) {
+		transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
+		transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
+		transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+	} else {
+		transX = x;
+		transY = y;
+		transZ = z;		
+	}
+#else
+	transX = x;
+	transY = y;
+	transZ = z;
+#endif
 #if FEATURE_AXISCOMP
     // Axis compensation:
     transY = transY - transZ * EEPROM::axisCompTanYZ();
     transX = transX - transY * EEPROM::axisCompTanXY() - transZ * EEPROM::axisCompTanXZ();
 #endif
 }
-
+#if FEATURE_AUTOLEVEL
 void Printer::resetTransformationMatrix(bool silent) {
     autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
     autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] =
@@ -611,13 +641,44 @@ void Printer::resetTransformationMatrix(bool silent) {
         Com::printInfoFLN(Com::tAutolevelReset);
 }
 
+void Printer::buildTransformationMatrix(Plane &plane) {
+	float z0 = plane.z(0,0);
+	float az = z0-plane.z(1,0); // ax = 1, ay = 0
+	float bz = z0-plane.z(0,1); // bx = 0, by = 1
+    // First z direction
+    autolevelTransformation[6] = -az;
+    autolevelTransformation[7] = -bz;
+    autolevelTransformation[8] = 1;
+    float len = sqrt(az * az + bz * bz + 1);
+    autolevelTransformation[6] /= len;
+    autolevelTransformation[7] /= len;
+    autolevelTransformation[8] /= len;
+    autolevelTransformation[0] = 1;
+    autolevelTransformation[1] = 0;
+    autolevelTransformation[2] = -autolevelTransformation[6]/autolevelTransformation[8];
+    len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[1] * autolevelTransformation[1] + autolevelTransformation[2] * autolevelTransformation[2]);
+    autolevelTransformation[0] /= len;
+    autolevelTransformation[1] /= len;
+    autolevelTransformation[2] /= len;
+    // cross(z,x) y,z)
+    autolevelTransformation[3] = autolevelTransformation[7] * autolevelTransformation[2] - autolevelTransformation[8] * autolevelTransformation[1];
+    autolevelTransformation[4] = autolevelTransformation[8] * autolevelTransformation[0] - autolevelTransformation[6] * autolevelTransformation[2];
+    autolevelTransformation[5] = autolevelTransformation[6] * autolevelTransformation[1] - autolevelTransformation[7] * autolevelTransformation[0];
+    len = sqrt(autolevelTransformation[3] * autolevelTransformation[3] + autolevelTransformation[4] * autolevelTransformation[4] + autolevelTransformation[5] * autolevelTransformation[5]);
+    autolevelTransformation[3] /= len;
+    autolevelTransformation[4] /= len;
+    autolevelTransformation[5] /= len;
+	
+    Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
+}
+/* 
 void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
-    float ax = EEPROM::zProbeX2()-EEPROM::zProbeX1();
-    float ay = EEPROM::zProbeY2()-EEPROM::zProbeY1();
-    float az = h1-h2;
-    float bx = EEPROM::zProbeX3()-EEPROM::zProbeX1();
-    float by = EEPROM::zProbeY3()-EEPROM::zProbeY1();
-    float bz = h1-h3;
+    float ax = EEPROM::zProbeX2() - EEPROM::zProbeX1();
+    float ay = EEPROM::zProbeY2() - EEPROM::zProbeY1();
+    float az = h1 - h2;
+    float bx = EEPROM::zProbeX3() - EEPROM::zProbeX1();
+    float by = EEPROM::zProbeY3() - EEPROM::zProbeY1();
+    float bz = h1 - h3;
     // First z direction
     autolevelTransformation[6] = ay * bz - az * by;
     autolevelTransformation[7] = az * bx - ax * bz;
@@ -633,7 +694,7 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
     // cross(y,z)
     autolevelTransformation[0] = autolevelTransformation[4] * autolevelTransformation[8] - autolevelTransformation[5] * autolevelTransformation[7];
     autolevelTransformation[1] = autolevelTransformation[5] * autolevelTransformation[6];// - autolevelTransformation[3] * autolevelTransformation[8];
-    autolevelTransformation[2] = /*autolevelTransformation[3] * autolevelTransformation[7]*/ - autolevelTransformation[4] * autolevelTransformation[6];
+    autolevelTransformation[2] = autolevelTransformation[3] * autolevelTransformation[7] - autolevelTransformation[4] * autolevelTransformation[6];
     len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[1] * autolevelTransformation[1] + autolevelTransformation[2] * autolevelTransformation[2]);
     autolevelTransformation[0] /= len;
     autolevelTransformation[1] /= len;
@@ -643,4 +704,5 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
     autolevelTransformation[5] /= len;
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
+*/
 #endif

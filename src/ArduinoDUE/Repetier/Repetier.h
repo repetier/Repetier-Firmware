@@ -24,7 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.8"
+#define REPETIER_VERSION "0.92.9"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -196,6 +196,31 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+#ifndef SHARED_EXTRUDER_HEATER
+#define SHARED_EXTRUDER_HEATER 0
+#endif
+
+#ifndef DUAL_X_AXIS
+#define DUAL_X_AXIS 0
+#endif
+
+#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
+#undef EXT1_HEATER_PIN
+#undef EXT2_HEATER_PIN
+#undef EXT3_HEATER_PIN
+#undef EXT4_HEATER_PIN
+#undef EXT5_HEATER_PIN
+#define EXT1_HEATER_PIN -1
+#define EXT2_HEATER_PIN -1
+#define EXT3_HEATER_PIN -1
+#define EXT4_HEATER_PIN -1
+#define EXT5_HEATER_PIN -1
+#endif
+
+#ifndef BOARD_FAN_SPEED
+#define BOARD_FAN_SPEED
+#endif
 
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
@@ -509,6 +534,10 @@ inline void memcopy4(void *dest,void *source) {
 
 #ifndef Z_ACCELERATION_TOP
 #define Z_ACCELERATION_TOP 0
+#endif
+
+#ifndef KEEP_ALIVE_INTERVAL
+#define KEEP_ALIVE_INTERVAL 2000
 #endif
 
 #include "HAL.h"
@@ -866,7 +895,7 @@ extern long baudrate;
 
 extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
-extern uint8_t counter250ms;
+extern uint8_t counter500ms;
 extern void writeMonitor();
 #if FEATURE_FAN_CONTROL
 extern uint8_t fanKickstart;

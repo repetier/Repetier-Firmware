@@ -78,9 +78,11 @@ void SDCard::initsd()
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
+	HAL::pingWatchdog();
 	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
     fat.begin(SDSS, SPI_FULL_SPEED);  // dummy init of SD_CARD
     HAL::delayMilliseconds(50);       // wait for init end
+	HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
@@ -91,6 +93,7 @@ void SDCard::initsd()
     }
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
+	HAL::pingWatchdog();
 
     fat.chdir();
     if(selectFile("init.g", true))
@@ -175,7 +178,7 @@ void SDCard::stopPrint()
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();
-        Printer::kill(true);
+        Printer::kill(false);
     }
 }
 

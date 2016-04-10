@@ -821,7 +821,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
 	float lengthFactor = 1.0;
 #ifdef REDUCE_ON_SMALL_SEGMENTS	
 	if(previous->distance < MAX_JERK_DISTANCE)
-		lengthFactor = static_cast<float>(MAX_JERK_DISTANCE*MAX_JERK_DISTANCE) / (previous->distance * previous->distance);
+		lengthFactor = static_cast<float>(MAX_JERK_DISTANCE * MAX_JERK_DISTANCE) / (previous->distance * previous->distance);
 #endif		
     float maxJoinSpeed = RMath::min(current->fullSpeed,previous->fullSpeed);
 #if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
@@ -2359,7 +2359,6 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
     if(curd != NULL)
     {
         if(curd->checkEndstops(cur,(cur->isCheckEndstops()))) { // should stop move
-			Com::printFLN(PSTR("STop move endstop"));
 			cur->stepsRemaining = 0;
 			curd = NULL;
 			// eat up all following segments with moveID

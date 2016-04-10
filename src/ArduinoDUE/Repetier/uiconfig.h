@@ -113,6 +113,8 @@ What display type do you use?
 #define U8GLIB_ST7920
 // SSD1306 with software SPI
 //#define U8GLIB_SSD1306_SW_SPI
+// SH1106 with software SPI
+// U8GLIB_SH1106_SW_SPI
 // SSD1306 over I2C using hardware I2C pins
 //#define U8GLIB_SSD1306_I2C
 // For the 8 bit ks0108 display you need to set these pins

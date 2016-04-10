@@ -76,8 +76,10 @@ public:
             HAL::delayMicroseconds(delayUS);
             target--;
             HAL::pingWatchdog();
-            if((target & 127) == 0)
+            if((target & 127) == 0) {
                 Commands::checkForPeriodicalActions(false);
+				GCode::keepAlive(Processing);
+			}
         }
     }
     void enable()
