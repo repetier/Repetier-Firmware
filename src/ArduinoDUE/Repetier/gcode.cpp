@@ -159,9 +159,11 @@ void GCode::keepAlive(enum FirmwareState state) {
 		if(now - lastBusySignal < keepAliveInterval)
 			return;
 		if(state == Paused) {
-			Com::printFLN(PSTR("busy: paused for user interaction"));			
-		} else { // processing and uncatched cases
-			Com::printFLN(PSTR("busy: processing"));
+			Com::printFLN(PSTR("busy:paused for user interaction"));	
+		} else if(state == WaitHeater) {
+			Com::printFLN(PSTR("busy:heating"));	
+		} else { // processing and uncaught cases
+			Com::printFLN(PSTR("busy:processing"));
 		}
 	}
 	lastBusySignal = now;

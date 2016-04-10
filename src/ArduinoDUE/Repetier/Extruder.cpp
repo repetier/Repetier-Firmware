@@ -362,6 +362,7 @@ void TemperatureController::waitForTargetTemperature()
             time = HAL::timeInMilliseconds();
         }
         Commands::checkForPeriodicalActions(true);
+		GCode::keepAlive(WaitHeater);
         if(fabs(targetTemperatureC - currentTemperatureC) <= 1)
             return;
     }
@@ -812,6 +813,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
                 printedTime = currentTime;
             }
             Commands::checkForPeriodicalActions(true);
+			GCode::keepAlive(WaitHeater);
             //gcode_read_serial();
 #if RETRACT_DURING_HEATUP
             if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
@@ -828,7 +830,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
 #endif
               )
             {
-                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabalize
+                waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabilize
             }
         }
         while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
@@ -2236,7 +2238,7 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxC
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
-
+		GCode::keepAlive(WaitHeater);
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
         unsigned long time = HAL::timeInMilliseconds();

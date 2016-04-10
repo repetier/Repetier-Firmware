@@ -21,7 +21,7 @@
 #define MAX_CMD_SIZE 96
 #define ARRAY_SIZE(_x)	(sizeof(_x)/sizeof(_x[0]))
 
-enum FirmwareState {NotBusy=0,Processing,Paused};
+enum FirmwareState {NotBusy=0,Processing,Paused,WaitHeater};
 
 class SDCard;
 class GCode   // 52 uint8_ts per command needed

@@ -91,6 +91,7 @@ void Commands::waitUntilEndOfAllMoves() {
     while(PrintLine::hasLines()) {
         GCode::readFromSerial();
         checkForPeriodicalActions(false);
+		GCode::keepAlive(Processing);
         UI_MEDIUM;
     }
 }
@@ -1755,6 +1756,7 @@ void Commands::processMCode(GCode *com) {
                         codenum = previousMillisCmd = HAL::timeInMilliseconds();
                     }
                     Commands::checkForPeriodicalActions(true);
+					GCode::keepAlive(Processing);
                 }
 #endif
                 EVENT_HEATING_FINISHED(-1);
@@ -1952,6 +1954,7 @@ void Commands::processMCode(GCode *com) {
                 }
                 do {
                     Commands::checkForPeriodicalActions(true);
+					GCode::keepAlive(WaitHeater);
                 } while(HAL::digitalRead(com->P) != comp);
             }
             break;
