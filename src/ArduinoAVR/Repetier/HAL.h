@@ -697,11 +697,12 @@ public:
 
     // I2C Support
 
+	static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);
     static unsigned char i2cStart(uint8_t address);
     static void i2cStartWait(uint8_t address);
     static void i2cStop(void);
-    static uint8_t i2cWrite( uint8_t data );
+    static void i2cWrite( uint8_t data );
     static uint8_t i2cReadAck(void);
     static uint8_t i2cReadNak(void);
 

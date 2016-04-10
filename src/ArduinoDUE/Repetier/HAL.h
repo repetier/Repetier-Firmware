@@ -340,7 +340,9 @@ class HAL
         WDT_Disable(WDT);
       #endif
   
-      HAL::i2cInit(TWI_CLOCK_FREQ);
+      #if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEprom installed or using i2c display
+      HAL::i2cInit(TWI_CLOCK_FREQ); 
+      #endif
       // make debugging startup easier
       //Serial.begin(115200);
       TimeTick_Configure(F_CPU_TRUE);
@@ -564,7 +566,7 @@ class HAL
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
 #elif EEPROM_AVAILABLE == EEPROM_I2C
       i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);
-      i2cWriting(newvalue.b[0]);        // write first byte
+      i2cWrite(newvalue.b[0]);        // write first byte
       for (int i = 1; i < size; i++) {
         pos++;
         // writes cannot cross page boundary
@@ -574,9 +576,9 @@ class HAL
           delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
           i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
         } else {
-          i2cTxFinished();      // wait for transmission register to empty
+         while ( (TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY);// wait for transmission register to empty
         }
-        i2cWriting(newvalue.b[i]);
+        i2cWrite(newvalue.b[i]);
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
@@ -615,8 +617,6 @@ class HAL
       size--;
       // set read location
       i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_READ, pos);
-      // begin transmission from device
-      i2cStartBit();
       for (i = 0; i < size; i++) {
         // read an incomming byte
         v.b[i] = i2cReadAck();
@@ -810,18 +810,18 @@ class HAL
 #endif  /*DUE_SOFTWARE_SPI*/
 
     // I2C Support
+    static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(unsigned long clockSpeedHz);
     static void i2cStartWait(unsigned char address);
-    static unsigned char i2cStart(unsigned char address);
+    static uint8_t i2cStart(unsigned char address);
     static void i2cStartAddr(unsigned char address, unsigned int pos);
     static void i2cStop(void);
     static void i2cStartBit(void);
     static void i2cCompleted (void);
     static void i2cTxFinished(void);
-    static void i2cWriting( uint8_t data );
-    static unsigned char i2cWrite( unsigned char data );
-    static unsigned char i2cReadAck(void);
-    static unsigned char i2cReadNak(void);
+    static void i2cWrite( uint8_t data );
+    static uint8_t i2cReadAck(void);
+    static uint8_t i2cReadNak(void);
 
 
     // Watchdog support

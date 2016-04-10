@@ -1756,7 +1756,7 @@ void Commands::processMCode(GCode *com) {
                         codenum = previousMillisCmd = HAL::timeInMilliseconds();
                     }
                     Commands::checkForPeriodicalActions(true);
-					GCode::keepAlive(Processing);
+					GCode::keepAlive(WaitHeater);
                 }
 #endif
                 EVENT_HEATING_FINISHED(-1);
