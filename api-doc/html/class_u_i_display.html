@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -111,17 +111,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a221f7c8208292a0fa2f46e3bdb3af94c">addInt</a> (int value, byte digits)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a510fc792157b075bfa8a1266c964b939">setOutputMaskBits</a> (unsigned int bits)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#acbd5931c8af70912d2336b87fd57dbdc">unsetOutputMaskBits</a> (unsigned int bits)</td></tr>
+<tr><td colspan="2"><div class="groupHeader">DISPLAY_CONFIGURATION</div></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a7795f0351f3a70fd77f3c8a7b11d75f5">addInt</a> (int value, uint8_t digits, char fillChar=' ')</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a28880d7d66ab7900830b3d881e51da64">addLong</a> (long value, char digits)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#aebf38b46ea70652375ee5c6d54f86bc3">addFloat</a> (float number, char fixdigits, byte digits)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a5824b30b71fc8adf40325189651b57c3">addFloat</a> (float number, char fixdigits, uint8_t digits)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ac533fa9aaf97e5a717add5fd6f691d24">addStringP</a> (PGM_P text)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ada53b10fb4b9956f61d223ba30ddc717">okAction</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a0b636118b460a143ed5501b220570d93">nextPreviousAction</a> (char next)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a7c6ec2c0fb44017d2d44d1bbde236431">nextPreviousAction</a> (int8_t next)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a76426ad0cb68eef672b0be41ebe4abe2">UIDisplay</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ad1b9f0e850aa68bc321c36e9480c6d9e">createChar</a> (byte location, const byte charmap[])</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a091ac8dc5b30673b640ade1ea1c7c9e6">createChar</a> (uint8_t location, const uint8_t charmap[])</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a25a40b6614565f755233080a384c35f1">initialize</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a0cc68f9e0c92be1e7cc8b240d8fb2ef7">printRow</a> (byte r, char *txt)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a1666999f8dc2397a0afc2bbeb31d4cb6">printRowP</a> (byte r, PGM_P txt)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a6ee47e3046e6ea151b5547169c378623">waitForKey</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a6944c685479eaf13475622c7a0236681">printRow</a> (uint8_t r, char *txt, char *txt2, uint8_t changeAtCol)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a23f55f4eec0f91ca82145c896d648241">printRowP</a> (uint8_t r, PGM_P txt)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#abc31ae48522e42e9c30b369badeb39c7">parse</a> (char *txt, bool ram)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a6894bddf27143554707b3845a4824ad3">refreshPage</a> ()</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse output and write to printCols;.  <a href="#a6894bddf27143554707b3845a4824ad3"></a><br/></td></tr>
@@ -133,29 +137,32 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ae960fb6cadf828e999c114bc2e193e61">pushMenu</a> (void *men, bool refresh)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#af2bb765cf7b52562028433f403e9c344">setStatusP</a> (PGM_P txt)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a65b38229c5c0582511825cb811525f76">setStatus</a> (char *txt)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a510fc792157b075bfa8a1266c964b939">setOutputMaskBits</a> (unsigned int bits)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#acbd5931c8af70912d2336b87fd57dbdc">unsetOutputMaskBits</a> (unsigned int bits)</td></tr>
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a620e4fe55e686a6266ce09062479c010">flags</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a64f8690207fa8a85fc6ceb47afebf27c">col</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a48df98f3ba3a12f21a568b89e2300ff9">menuLevel</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a19186ec0639b6be861d3d68dbe21a3ac">menuPos</a> [5]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a27ac1730f3c9b0d5935ac0c406f7b9f3">flags</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ae739ef8fb1ba860a6b2c9e312cc65e86">col</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ab1839d1076b09f4dfc68eb40c7e44037">menuLevel</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ad7bd93b13934b2f3bab02d28b6db53c4">menuPos</a> [5]</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a27dbbb06869a30432e1ba9555e26de47">menu</a> [5]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#abe37edce81af1b1aa9e6d0698c44bcdd">menuTop</a> [5]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a679991a4cf3b0b6634d341eb7e5ee3d7">menuTop</a> [5]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#aae0b870465c7dc8d516f8cba4d21bdfc">shift</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a80c18d08a3f26b4f28183116268c46db">pageDelay</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ac827ba8261f8eb941c3f02e2268c10be">errorMsg</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a4ed41b80c19c971afff21b9ec182a2aa">activeAction</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#abb61caa3591dfe5b3179536ccac566b3">lastAction</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#aa9a0e03b5a74135798304b4fa8c7b3a3">lastSwitch</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a7caca90a06d25109066e42f080b51d5b">lastRefresh</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a84b6ee549baf7355d1bcd22271dc14f8">lastButtonAction</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a3f2e334013c8ebddc5eb5ad5de32656d">lastButtonStart</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#abff45e541c16c8670ec88ab14419357e">nextRepeat</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a02c10b3541ff33ab341ec6e3adfebc36">activeAction</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a760bf7ba79f4678859e81e9f788ea75f">lastAction</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a18955e7248c31c89a28f9e23a90c85ce">lastSwitch</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a311236841a49965f505015f9dac3c46c">lastRefresh</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ae094ff63871418ffcd6da11715959d6e">lastButtonAction</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ae37a6e2548b7e1bad7321b35f83df2c5">lastButtonStart</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a964065521f51402999edbeda265b1397">nextRepeat</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#aeef8d3dff5202af0df545ea4f591b07a">lastNextPrev</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a4ec8bf0adcc27e584909aa9fe432a4d3">lastNextAccumul</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a7eafcff02948b689ebbeb50fbc62c11e">outputMask</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#ade69a49c05fa157ffb6bd558c22d5904">repeatDuration</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a3654964d0ad725a8d9e6161f61f2cfbc">oldMenuLevel</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a6f309ecd3a7c8e89d9cd7fb9a3d1fd0e">encoderStartScreen</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a46c029dc90d5c015e3ed4d3c3ba8b555">statusMsg</a> [17]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a8fb5ff6848e598afb7d362afe1641f61">encoderPos</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a6a6606d6b6f3b8edf8a6d8a839470c95">encoderPos</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#acc81538f4365875045d85692b1b19617">encoderLast</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">PGM_P&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html#a9fcdded83c4b6845b764a500ac2edb12">statusText</a></td></tr>
 </table>
@@ -177,12 +184,12 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="aebf38b46ea70652375ee5c6d54f86bc3"></a><!-- doxytag: member="UIDisplay::addFloat" ref="aebf38b46ea70652375ee5c6d54f86bc3" args="(float number, char fixdigits, byte digits)" -->
+<a class="anchor" id="a5824b30b71fc8adf40325189651b57c3"></a><!-- doxytag: member="UIDisplay::addFloat" ref="a5824b30b71fc8adf40325189651b57c3" args="(float number, char fixdigits, uint8_t digits)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#aebf38b46ea70652375ee5c6d54f86bc3">addFloat</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a5824b30b71fc8adf40325189651b57c3">addFloat</a> </td>
           <td>(</td>
           <td class="paramtype">float&#160;</td>
           <td class="paramname"><em>number</em>, </td>
@@ -196,7 +203,7 @@ Data Fields</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>digits</em>&#160;</td>
         </tr>
         <tr>
@@ -210,12 +217,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a221f7c8208292a0fa2f46e3bdb3af94c"></a><!-- doxytag: member="UIDisplay::addInt" ref="a221f7c8208292a0fa2f46e3bdb3af94c" args="(int value, byte digits)" -->
+<a class="anchor" id="a7795f0351f3a70fd77f3c8a7b11d75f5"></a><!-- doxytag: member="UIDisplay::addInt" ref="a7795f0351f3a70fd77f3c8a7b11d75f5" args="(int value, uint8_t digits, char fillChar=' ')" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#a221f7c8208292a0fa2f46e3bdb3af94c">addInt</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a7795f0351f3a70fd77f3c8a7b11d75f5">addInt</a> </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>value</em>, </td>
@@ -223,8 +230,14 @@ Data Fields</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>digits</em>&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>digits</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>fillChar</em> = <code>'&#160;'</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -281,20 +294,20 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad1b9f0e850aa68bc321c36e9480c6d9e"></a><!-- doxytag: member="UIDisplay::createChar" ref="ad1b9f0e850aa68bc321c36e9480c6d9e" args="(byte location, const byte charmap[])" -->
+<a class="anchor" id="a091ac8dc5b30673b640ade1ea1c7c9e6"></a><!-- doxytag: member="UIDisplay::createChar" ref="a091ac8dc5b30673b640ade1ea1c7c9e6" args="(uint8_t location, const uint8_t charmap[])" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#ad1b9f0e850aa68bc321c36e9480c6d9e">createChar</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a091ac8dc5b30673b640ade1ea1c7c9e6">createChar</a> </td>
           <td>(</td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>location</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const byte&#160;</td>
+          <td class="paramtype">const uint8_t&#160;</td>
           <td class="paramname"><em>charmap</em>[]&#160;</td>
         </tr>
         <tr>
@@ -390,14 +403,14 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0b636118b460a143ed5501b220570d93"></a><!-- doxytag: member="UIDisplay::nextPreviousAction" ref="a0b636118b460a143ed5501b220570d93" args="(char next)" -->
+<a class="anchor" id="a7c6ec2c0fb44017d2d44d1bbde236431"></a><!-- doxytag: member="UIDisplay::nextPreviousAction" ref="a7c6ec2c0fb44017d2d44d1bbde236431" args="(int8_t next)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#a0b636118b460a143ed5501b220570d93">nextPreviousAction</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a7c6ec2c0fb44017d2d44d1bbde236431">nextPreviousAction</a> </td>
           <td>(</td>
-          <td class="paramtype">char&#160;</td>
+          <td class="paramtype">int8_t&#160;</td>
           <td class="paramname"><em>next</em></td><td>)</td>
           <td></td>
         </tr>
@@ -450,21 +463,33 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0cc68f9e0c92be1e7cc8b240d8fb2ef7"></a><!-- doxytag: member="UIDisplay::printRow" ref="a0cc68f9e0c92be1e7cc8b240d8fb2ef7" args="(byte r, char *txt)" -->
+<a class="anchor" id="a6944c685479eaf13475622c7a0236681"></a><!-- doxytag: member="UIDisplay::printRow" ref="a6944c685479eaf13475622c7a0236681" args="(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#a0cc68f9e0c92be1e7cc8b240d8fb2ef7">printRow</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a6944c685479eaf13475622c7a0236681">printRow</a> </td>
           <td>(</td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>r</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>txt</em>&#160;</td>
+          <td class="paramname"><em>txt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>txt2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>changeAtCol</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -477,14 +502,14 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1666999f8dc2397a0afc2bbeb31d4cb6"></a><!-- doxytag: member="UIDisplay::printRowP" ref="a1666999f8dc2397a0afc2bbeb31d4cb6" args="(byte r, PGM_P txt)" -->
+<a class="anchor" id="a23f55f4eec0f91ca82145c896d648241"></a><!-- doxytag: member="UIDisplay::printRowP" ref="a23f55f4eec0f91ca82145c896d648241" args="(uint8_t r, PGM_P txt)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_u_i_display.html#a1666999f8dc2397a0afc2bbeb31d4cb6">printRowP</a> </td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a23f55f4eec0f91ca82145c896d648241">printRowP</a> </td>
           <td>(</td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>r</em>, </td>
         </tr>
         <tr>
@@ -633,13 +658,15 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<hr/><h2>Field Documentation</h2>
-<a class="anchor" id="a4ed41b80c19c971afff21b9ec182a2aa"></a><!-- doxytag: member="UIDisplay::activeAction" ref="a4ed41b80c19c971afff21b9ec182a2aa" args="" -->
+<a class="anchor" id="a6ee47e3046e6ea151b5547169c378623"></a><!-- doxytag: member="UIDisplay::waitForKey" ref="a6ee47e3046e6ea151b5547169c378623" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="class_u_i_display.html#a4ed41b80c19c971afff21b9ec182a2aa">activeAction</a></td>
+          <td class="memname">void <a class="el" href="class_u_i_display.html#a6ee47e3046e6ea151b5547169c378623">waitForKey</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div>
@@ -647,12 +674,26 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a64f8690207fa8a85fc6ceb47afebf27c"></a><!-- doxytag: member="UIDisplay::col" ref="a64f8690207fa8a85fc6ceb47afebf27c" args="" -->
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a02c10b3541ff33ab341ec6e3adfebc36"></a><!-- doxytag: member="UIDisplay::activeAction" ref="a02c10b3541ff33ab341ec6e3adfebc36" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="class_u_i_display.html#a64f8690207fa8a85fc6ceb47afebf27c">col</a></td>
+          <td class="memname">uint16_t <a class="el" href="class_u_i_display.html#a02c10b3541ff33ab341ec6e3adfebc36">activeAction</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae739ef8fb1ba860a6b2c9e312cc65e86"></a><!-- doxytag: member="UIDisplay::col" ref="ae739ef8fb1ba860a6b2c9e312cc65e86" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="class_u_i_display.html#ae739ef8fb1ba860a6b2c9e312cc65e86">col</a></td>
         </tr>
       </table>
 </div>
@@ -673,12 +714,25 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8fb5ff6848e598afb7d362afe1641f61"></a><!-- doxytag: member="UIDisplay::encoderPos" ref="a8fb5ff6848e598afb7d362afe1641f61" args="" -->
+<a class="anchor" id="a6a6606d6b6f3b8edf8a6d8a839470c95"></a><!-- doxytag: member="UIDisplay::encoderPos" ref="a6a6606d6b6f3b8edf8a6d8a839470c95" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char <a class="el" href="class_u_i_display.html#a8fb5ff6848e598afb7d362afe1641f61">encoderPos</a></td>
+          <td class="memname">int8_t <a class="el" href="class_u_i_display.html#a6a6606d6b6f3b8edf8a6d8a839470c95">encoderPos</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6f309ecd3a7c8e89d9cd7fb9a3d1fd0e"></a><!-- doxytag: member="UIDisplay::encoderStartScreen" ref="a6f309ecd3a7c8e89d9cd7fb9a3d1fd0e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="class_u_i_display.html#a6f309ecd3a7c8e89d9cd7fb9a3d1fd0e">encoderStartScreen</a></td>
         </tr>
       </table>
 </div>
@@ -699,12 +753,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a620e4fe55e686a6266ce09062479c010"></a><!-- doxytag: member="UIDisplay::flags" ref="a620e4fe55e686a6266ce09062479c010" args="" -->
+<a class="anchor" id="a27ac1730f3c9b0d5935ac0c406f7b9f3"></a><!-- doxytag: member="UIDisplay::flags" ref="a27ac1730f3c9b0d5935ac0c406f7b9f3" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">volatile byte <a class="el" href="class_u_i_display.html#a620e4fe55e686a6266ce09062479c010">flags</a></td>
+          <td class="memname">volatile uint8_t <a class="el" href="class_u_i_display.html#a27ac1730f3c9b0d5935ac0c406f7b9f3">flags</a></td>
         </tr>
       </table>
 </div>
@@ -712,12 +766,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abb61caa3591dfe5b3179536ccac566b3"></a><!-- doxytag: member="UIDisplay::lastAction" ref="abb61caa3591dfe5b3179536ccac566b3" args="" -->
+<a class="anchor" id="a760bf7ba79f4678859e81e9f788ea75f"></a><!-- doxytag: member="UIDisplay::lastAction" ref="a760bf7ba79f4678859e81e9f788ea75f" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="class_u_i_display.html#abb61caa3591dfe5b3179536ccac566b3">lastAction</a></td>
+          <td class="memname">uint16_t <a class="el" href="class_u_i_display.html#a760bf7ba79f4678859e81e9f788ea75f">lastAction</a></td>
         </tr>
       </table>
 </div>
@@ -725,12 +779,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a84b6ee549baf7355d1bcd22271dc14f8"></a><!-- doxytag: member="UIDisplay::lastButtonAction" ref="a84b6ee549baf7355d1bcd22271dc14f8" args="" -->
+<a class="anchor" id="ae094ff63871418ffcd6da11715959d6e"></a><!-- doxytag: member="UIDisplay::lastButtonAction" ref="ae094ff63871418ffcd6da11715959d6e" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="class_u_i_display.html#a84b6ee549baf7355d1bcd22271dc14f8">lastButtonAction</a></td>
+          <td class="memname">uint16_t <a class="el" href="class_u_i_display.html#ae094ff63871418ffcd6da11715959d6e">lastButtonAction</a></td>
         </tr>
       </table>
 </div>
@@ -738,12 +792,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3f2e334013c8ebddc5eb5ad5de32656d"></a><!-- doxytag: member="UIDisplay::lastButtonStart" ref="a3f2e334013c8ebddc5eb5ad5de32656d" args="" -->
+<a class="anchor" id="ae37a6e2548b7e1bad7321b35f83df2c5"></a><!-- doxytag: member="UIDisplay::lastButtonStart" ref="ae37a6e2548b7e1bad7321b35f83df2c5" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long <a class="el" href="class_u_i_display.html#a3f2e334013c8ebddc5eb5ad5de32656d">lastButtonStart</a></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="class_u_i_display.html#ae37a6e2548b7e1bad7321b35f83df2c5">lastButtonStart</a></td>
         </tr>
       </table>
 </div>
@@ -751,12 +805,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7caca90a06d25109066e42f080b51d5b"></a><!-- doxytag: member="UIDisplay::lastRefresh" ref="a7caca90a06d25109066e42f080b51d5b" args="" -->
+<a class="anchor" id="a4ec8bf0adcc27e584909aa9fe432a4d3"></a><!-- doxytag: member="UIDisplay::lastNextAccumul" ref="a4ec8bf0adcc27e584909aa9fe432a4d3" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long <a class="el" href="class_u_i_display.html#a7caca90a06d25109066e42f080b51d5b">lastRefresh</a></td>
+          <td class="memname">float <a class="el" href="class_u_i_display.html#a4ec8bf0adcc27e584909aa9fe432a4d3">lastNextAccumul</a></td>
         </tr>
       </table>
 </div>
@@ -764,12 +818,38 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa9a0e03b5a74135798304b4fa8c7b3a3"></a><!-- doxytag: member="UIDisplay::lastSwitch" ref="aa9a0e03b5a74135798304b4fa8c7b3a3" args="" -->
+<a class="anchor" id="aeef8d3dff5202af0df545ea4f591b07a"></a><!-- doxytag: member="UIDisplay::lastNextPrev" ref="aeef8d3dff5202af0df545ea4f591b07a" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long <a class="el" href="class_u_i_display.html#aa9a0e03b5a74135798304b4fa8c7b3a3">lastSwitch</a></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="class_u_i_display.html#aeef8d3dff5202af0df545ea4f591b07a">lastNextPrev</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a311236841a49965f505015f9dac3c46c"></a><!-- doxytag: member="UIDisplay::lastRefresh" ref="a311236841a49965f505015f9dac3c46c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="class_u_i_display.html#a311236841a49965f505015f9dac3c46c">lastRefresh</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a18955e7248c31c89a28f9e23a90c85ce"></a><!-- doxytag: member="UIDisplay::lastSwitch" ref="a18955e7248c31c89a28f9e23a90c85ce" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="class_u_i_display.html#a18955e7248c31c89a28f9e23a90c85ce">lastSwitch</a></td>
         </tr>
       </table>
 </div>
@@ -790,12 +870,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a48df98f3ba3a12f21a568b89e2300ff9"></a><!-- doxytag: member="UIDisplay::menuLevel" ref="a48df98f3ba3a12f21a568b89e2300ff9" args="" -->
+<a class="anchor" id="ab1839d1076b09f4dfc68eb40c7e44037"></a><!-- doxytag: member="UIDisplay::menuLevel" ref="ab1839d1076b09f4dfc68eb40c7e44037" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="class_u_i_display.html#a48df98f3ba3a12f21a568b89e2300ff9">menuLevel</a></td>
+          <td class="memname">uint8_t <a class="el" href="class_u_i_display.html#ab1839d1076b09f4dfc68eb40c7e44037">menuLevel</a></td>
         </tr>
       </table>
 </div>
@@ -803,12 +883,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a19186ec0639b6be861d3d68dbe21a3ac"></a><!-- doxytag: member="UIDisplay::menuPos" ref="a19186ec0639b6be861d3d68dbe21a3ac" args="[5]" -->
+<a class="anchor" id="ad7bd93b13934b2f3bab02d28b6db53c4"></a><!-- doxytag: member="UIDisplay::menuPos" ref="ad7bd93b13934b2f3bab02d28b6db53c4" args="[5]" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="class_u_i_display.html#a19186ec0639b6be861d3d68dbe21a3ac">menuPos</a>[5]</td>
+          <td class="memname">uint8_t <a class="el" href="class_u_i_display.html#ad7bd93b13934b2f3bab02d28b6db53c4">menuPos</a>[5]</td>
         </tr>
       </table>
 </div>
@@ -816,12 +896,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abe37edce81af1b1aa9e6d0698c44bcdd"></a><!-- doxytag: member="UIDisplay::menuTop" ref="abe37edce81af1b1aa9e6d0698c44bcdd" args="[5]" -->
+<a class="anchor" id="a679991a4cf3b0b6634d341eb7e5ee3d7"></a><!-- doxytag: member="UIDisplay::menuTop" ref="a679991a4cf3b0b6634d341eb7e5ee3d7" args="[5]" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="class_u_i_display.html#abe37edce81af1b1aa9e6d0698c44bcdd">menuTop</a>[5]</td>
+          <td class="memname">uint8_t <a class="el" href="class_u_i_display.html#a679991a4cf3b0b6634d341eb7e5ee3d7">menuTop</a>[5]</td>
         </tr>
       </table>
 </div>
@@ -829,12 +909,25 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abff45e541c16c8670ec88ab14419357e"></a><!-- doxytag: member="UIDisplay::nextRepeat" ref="abff45e541c16c8670ec88ab14419357e" args="" -->
+<a class="anchor" id="a964065521f51402999edbeda265b1397"></a><!-- doxytag: member="UIDisplay::nextRepeat" ref="a964065521f51402999edbeda265b1397" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long <a class="el" href="class_u_i_display.html#abff45e541c16c8670ec88ab14419357e">nextRepeat</a></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="class_u_i_display.html#a964065521f51402999edbeda265b1397">nextRepeat</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3654964d0ad725a8d9e6161f61f2cfbc"></a><!-- doxytag: member="UIDisplay::oldMenuLevel" ref="a3654964d0ad725a8d9e6161f61f2cfbc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t <a class="el" href="class_u_i_display.html#a3654964d0ad725a8d9e6161f61f2cfbc">oldMenuLevel</a></td>
         </tr>
       </table>
 </div>
@@ -881,6 +974,19 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aae0b870465c7dc8d516f8cba4d21bdfc"></a><!-- doxytag: member="UIDisplay::shift" ref="aae0b870465c7dc8d516f8cba4d21bdfc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t <a class="el" href="class_u_i_display.html#aae0b870465c7dc8d516f8cba4d21bdfc">shift</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a46c029dc90d5c015e3ed4d3c3ba8b555"></a><!-- doxytag: member="UIDisplay::statusMsg" ref="a46c029dc90d5c015e3ed4d3c3ba8b555" args="[17]" -->
 <div class="memitem">
 <div class="memproto">
@@ -907,8 +1013,9 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="ui_8h_source.html">ui.h</a></li>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="ui_8h_source.html">ui.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="ui_8cpp.html">ui.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -930,7 +1037,7 @@ Data Fields</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_u_i_display.html">UIDisplay</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

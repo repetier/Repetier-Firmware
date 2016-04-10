@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/gcode.h Source File</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/gcode.h Source File</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Repetier/gcode.h</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/gcode.h</div>  </div>
 </div><!--header-->
 <div class="contents">
 <a href="gcode_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -121,185 +121,163 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00018"></a>00018 <span class="preprocessor">#ifndef _GCODE_H</span>
 <a name="l00019"></a>00019 <span class="preprocessor"></span><span class="preprocessor">#define _GCODE_H</span>
 <a name="l00020"></a>00020 <span class="preprocessor"></span>
-<a name="l00021"></a>00021 <span class="preprocessor">#include &lt;avr/pgmspace.h&gt;</span>
-<a name="l00022"></a>00022 <span class="comment">// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734 </span>
-<a name="l00023"></a>00023 <span class="comment">//#ifdef PROGMEM </span>
-<a name="l00024"></a>00024 <span class="comment">//#undef PROGMEM </span>
-<a name="l00025"></a>00025 <span class="comment">//#define PROGMEM __attribute__((section(&quot;.progmem.data&quot;))) </span>
-<a name="l00026"></a>00026 <span class="comment">//#endif</span>
-<a name="l00027"></a>00027 
-<a name="l00028"></a><a class="code" href="struct_g_code.html">00028</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>{ <span class="comment">// 52 bytes per command needed</span>
-<a name="l00029"></a><a class="code" href="struct_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">00029</a>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a>;
-<a name="l00030"></a><a class="code" href="struct_g_code.html#acfbeb6013604a585552007021f3236ba">00030</a>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a>;
-<a name="l00031"></a><a class="code" href="struct_g_code.html#ae8b170dcb376fe60270f4675f84e4477">00031</a>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_g_code.html#ae8b170dcb376fe60270f4675f84e4477">N</a>; <span class="comment">// Line number</span>
-<a name="l00032"></a><a class="code" href="struct_g_code.html#a68dc0bf731afd0463b8e8cc4ed81c0f8">00032</a>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_g_code.html#a68dc0bf731afd0463b8e8cc4ed81c0f8">M</a>;
-<a name="l00033"></a><a class="code" href="struct_g_code.html#a8f7aab5ea8436167078632d62232a98a">00033</a>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="struct_g_code.html#a8f7aab5ea8436167078632d62232a98a">G</a>;
-<a name="l00034"></a><a class="code" href="struct_g_code.html#ab3c4b737dfc5c78a6aba50dda616f7c3">00034</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#ab3c4b737dfc5c78a6aba50dda616f7c3">X</a>;
-<a name="l00035"></a><a class="code" href="struct_g_code.html#ac915220fb659eb2c5958a1ccd81b80d4">00035</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#ac915220fb659eb2c5958a1ccd81b80d4">Y</a>;
-<a name="l00036"></a><a class="code" href="struct_g_code.html#aa65967cca170d24dcd0d555df0d5ee4f">00036</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#aa65967cca170d24dcd0d555df0d5ee4f">Z</a>;
-<a name="l00037"></a><a class="code" href="struct_g_code.html#a5b514bbfa4713e7bcf9c6a367cb6ebfe">00037</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#a5b514bbfa4713e7bcf9c6a367cb6ebfe">E</a>;
-<a name="l00038"></a><a class="code" href="struct_g_code.html#a9ab4bd02302051f763e80ede43fcac71">00038</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#a9ab4bd02302051f763e80ede43fcac71">F</a>;
-<a name="l00039"></a><a class="code" href="struct_g_code.html#a56d2adf7837705583cba96a42b0b6b60">00039</a>    byte <a class="code" href="struct_g_code.html#a56d2adf7837705583cba96a42b0b6b60">T</a>;
-<a name="l00040"></a><a class="code" href="struct_g_code.html#a531ffbc18075585b12607aff08fec9b0">00040</a>    <span class="keywordtype">long</span> <a class="code" href="struct_g_code.html#a531ffbc18075585b12607aff08fec9b0">S</a>;
-<a name="l00041"></a><a class="code" href="struct_g_code.html#ad510039b7e7f97aaedeeda277b423624">00041</a>    <span class="keywordtype">long</span> <a class="code" href="struct_g_code.html#ad510039b7e7f97aaedeeda277b423624">P</a>;
-<a name="l00042"></a><a class="code" href="struct_g_code.html#a145f61de888f096c52a2945234a407b0">00042</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#a145f61de888f096c52a2945234a407b0">I</a>;
-<a name="l00043"></a><a class="code" href="struct_g_code.html#a7c20f6b5c2b8c830d450944735b761b3">00043</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#a7c20f6b5c2b8c830d450944735b761b3">J</a>;
-<a name="l00044"></a><a class="code" href="struct_g_code.html#a4c4b08e61e92b3da1ed512f4e006f34a">00044</a>    <span class="keywordtype">float</span> <a class="code" href="struct_g_code.html#a4c4b08e61e92b3da1ed512f4e006f34a">R</a>;   
-<a name="l00045"></a><a class="code" href="struct_g_code.html#a5633b1433389cec21ade3811bbe9ca5b">00045</a>    <span class="keywordtype">char</span> *<a class="code" href="struct_g_code.html#a5633b1433389cec21ade3811bbe9ca5b">text</a>; <span class="comment">//text[17];</span>
-<a name="l00046"></a>00046 } <a class="code" href="struct_g_code.html">GCode</a>;
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 <span class="preprocessor">#ifndef EXTERNALSERIAL</span>
-<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="comment">// Implement serial communication for one stream only!</span>
-<a name="l00050"></a>00050 <span class="comment">/*</span>
-<a name="l00051"></a>00051 <span class="comment">  HardwareSerial.h - Hardware serial library for Wiring</span>
-<a name="l00052"></a>00052 <span class="comment">  Copyright (c) 2006 Nicholas Zambetti.  All right reserved.</span>
-<a name="l00053"></a>00053 <span class="comment"></span>
-<a name="l00054"></a>00054 <span class="comment">  This library is free software; you can redistribute it and/or</span>
-<a name="l00055"></a>00055 <span class="comment">  modify it under the terms of the GNU Lesser General Public</span>
-<a name="l00056"></a>00056 <span class="comment">  License as published by the Free Software Foundation; either</span>
-<a name="l00057"></a>00057 <span class="comment">  version 2.1 of the License, or (at your option) any later version.</span>
-<a name="l00058"></a>00058 <span class="comment"></span>
-<a name="l00059"></a>00059 <span class="comment">  This library is distributed in the hope that it will be useful,</span>
-<a name="l00060"></a>00060 <span class="comment">  but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<a name="l00061"></a>00061 <span class="comment">  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
-<a name="l00062"></a>00062 <span class="comment">  Lesser General Public License for more details.</span>
-<a name="l00063"></a>00063 <span class="comment"></span>
-<a name="l00064"></a>00064 <span class="comment">  You should have received a copy of the GNU Lesser General Public</span>
-<a name="l00065"></a>00065 <span class="comment">  License along with this library; if not, write to the Free Software</span>
-<a name="l00066"></a>00066 <span class="comment">  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA</span>
-<a name="l00067"></a>00067 <span class="comment"></span>
-<a name="l00068"></a>00068 <span class="comment">  Modified 28 September 2010 by Mark Sproul</span>
-<a name="l00069"></a>00069 <span class="comment">  </span>
-<a name="l00070"></a>00070 <span class="comment">  Modified to use only 1 queue with fixed length by Repetier</span>
-<a name="l00071"></a>00071 <span class="comment">*/</span>
-<a name="l00072"></a>00072 
-<a name="l00073"></a><a class="code" href="gcode_8h.html#aaa07390e6158db5d82d40510d2ae02d5">00073</a> <span class="preprocessor">#define SERIAL_BUFFER_SIZE 128</span>
-<a name="l00074"></a><a class="code" href="gcode_8h.html#a802cf662365d7027fced85e4bfb8b968">00074</a> <span class="preprocessor"></span><span class="preprocessor">#define SERIAL_BUFFER_MASK 127</span>
-<a name="l00075"></a>00075 <span class="preprocessor"></span>
-<a name="l00076"></a><a class="code" href="structring__buffer.html">00076</a> <span class="keyword">struct </span><a class="code" href="structring__buffer.html">ring_buffer</a>
-<a name="l00077"></a>00077 {
-<a name="l00078"></a><a class="code" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">00078</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">buffer</a>[<a class="code" href="gcode_8h.html#aaa07390e6158db5d82d40510d2ae02d5">SERIAL_BUFFER_SIZE</a>];
-<a name="l00079"></a><a class="code" href="structring__buffer.html#aecf8bcfb19c55c90d1a1a80d52b8e133">00079</a>   <span class="keyword">volatile</span> <span class="keywordtype">int</span> <a class="code" href="structring__buffer.html#aecf8bcfb19c55c90d1a1a80d52b8e133">head</a>;
-<a name="l00080"></a><a class="code" href="structring__buffer.html#a1366e1fcd97ae453d54d510f8451c8a4">00080</a>   <span class="keyword">volatile</span> <span class="keywordtype">int</span> <a class="code" href="structring__buffer.html#a1366e1fcd97ae453d54d510f8451c8a4">tail</a>;
-<a name="l00081"></a>00081 };
-<a name="l00082"></a><a class="code" href="class_r_f_hardware_serial.html">00082</a> <span class="keyword">class </span><a class="code" href="class_r_f_hardware_serial.html">RFHardwareSerial</a> : <span class="keyword">public</span> Print
-<a name="l00083"></a>00083 {
-<a name="l00084"></a>00084   <span class="keyword">public</span>:
-<a name="l00085"></a><a class="code" href="class_r_f_hardware_serial.html#a3ceb97590500d70e4f593a3a3505a06e">00085</a>     <a class="code" href="structring__buffer.html">ring_buffer</a> *<a class="code" href="class_r_f_hardware_serial.html#a3ceb97590500d70e4f593a3a3505a06e">_rx_buffer</a>;
-<a name="l00086"></a><a class="code" href="class_r_f_hardware_serial.html#a054597195edb6fb50e316efa3ad3fbd2">00086</a>     <a class="code" href="structring__buffer.html">ring_buffer</a> *<a class="code" href="class_r_f_hardware_serial.html#a054597195edb6fb50e316efa3ad3fbd2">_tx_buffer</a>;
-<a name="l00087"></a><a class="code" href="class_r_f_hardware_serial.html#a153b1679eb26fd221c6eab0b85ea6604">00087</a>     <span class="keyword">volatile</span> uint8_t *<a class="code" href="class_r_f_hardware_serial.html#a153b1679eb26fd221c6eab0b85ea6604">_ubrrh</a>;
-<a name="l00088"></a><a class="code" href="class_r_f_hardware_serial.html#a7fc0285f716afc115aebd1751184eecf">00088</a>     <span class="keyword">volatile</span> uint8_t *<a class="code" href="class_r_f_hardware_serial.html#a7fc0285f716afc115aebd1751184eecf">_ubrrl</a>;
-<a name="l00089"></a><a class="code" href="class_r_f_hardware_serial.html#a15e4698ed69c55c428ab0c201a2b4c0a">00089</a>     <span class="keyword">volatile</span> uint8_t *<a class="code" href="class_r_f_hardware_serial.html#a15e4698ed69c55c428ab0c201a2b4c0a">_ucsra</a>;
-<a name="l00090"></a><a class="code" href="class_r_f_hardware_serial.html#ae954be19035e8fb2a80e58908aa5ef4b">00090</a>     <span class="keyword">volatile</span> uint8_t *<a class="code" href="class_r_f_hardware_serial.html#ae954be19035e8fb2a80e58908aa5ef4b">_ucsrb</a>;
-<a name="l00091"></a><a class="code" href="class_r_f_hardware_serial.html#abddf2d2d6b5a05b004f42de06519577b">00091</a>     <span class="keyword">volatile</span> uint8_t *<a class="code" href="class_r_f_hardware_serial.html#abddf2d2d6b5a05b004f42de06519577b">_udr</a>;
-<a name="l00092"></a><a class="code" href="class_r_f_hardware_serial.html#acbd333cef3f8ec3a8e2dca77b02b3511">00092</a>     uint8_t <a class="code" href="class_r_f_hardware_serial.html#acbd333cef3f8ec3a8e2dca77b02b3511">_rxen</a>;
-<a name="l00093"></a><a class="code" href="class_r_f_hardware_serial.html#ad951d0a88a63fe2971d2cef44a407419">00093</a>     uint8_t <a class="code" href="class_r_f_hardware_serial.html#ad951d0a88a63fe2971d2cef44a407419">_txen</a>;
-<a name="l00094"></a><a class="code" href="class_r_f_hardware_serial.html#a4eed30c69d0ce191c9fdc4828e07c7a1">00094</a>     uint8_t <a class="code" href="class_r_f_hardware_serial.html#a4eed30c69d0ce191c9fdc4828e07c7a1">_rxcie</a>;
-<a name="l00095"></a><a class="code" href="class_r_f_hardware_serial.html#a07b4b2f8df43eb85fb4c132ff7ccfb46">00095</a>     uint8_t <a class="code" href="class_r_f_hardware_serial.html#a07b4b2f8df43eb85fb4c132ff7ccfb46">_udrie</a>;
-<a name="l00096"></a><a class="code" href="class_r_f_hardware_serial.html#aaa016ee9deb727df7e20eecea191e3af">00096</a>     uint8_t <a class="code" href="class_r_f_hardware_serial.html#aaa016ee9deb727df7e20eecea191e3af">_u2x</a>;
-<a name="l00097"></a>00097   <span class="keyword">public</span>:
-<a name="l00098"></a>00098     <a class="code" href="class_r_f_hardware_serial.html#a6892e2ea65a83e8235f1282509973ae7">RFHardwareSerial</a>(<a class="code" href="structring__buffer.html">ring_buffer</a> *<a class="code" href="gcode_8cpp.html#ace077a9982cfc6e7cffcc11101b0df4c">rx_buffer</a>, <a class="code" href="structring__buffer.html">ring_buffer</a> *<a class="code" href="gcode_8cpp.html#a104962a4f6ac1d11c06d6bcf93ca12e4">tx_buffer</a>,
-<a name="l00099"></a>00099       <span class="keyword">volatile</span> uint8_t *ubrrh, <span class="keyword">volatile</span> uint8_t *ubrrl,
-<a name="l00100"></a>00100       <span class="keyword">volatile</span> uint8_t *ucsra, <span class="keyword">volatile</span> uint8_t *ucsrb,
-<a name="l00101"></a>00101       <span class="keyword">volatile</span> uint8_t *udr,
-<a name="l00102"></a>00102       uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
-<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="class_r_f_hardware_serial.html#ad3fcb1f90c11e7939fcf5079e2d29b89">begin</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>);
-<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="class_r_f_hardware_serial.html#aaf81d3fdaf258088d7692fa70cece087">end</a>();
-<a name="l00105"></a>00105     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="class_r_f_hardware_serial.html#a2ec870a76d736051cfa7db65173332e4">available</a>(<span class="keywordtype">void</span>);
-<a name="l00106"></a>00106     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="class_r_f_hardware_serial.html#a4d46097cf44ef5e943170bf7cbee3625">peek</a>(<span class="keywordtype">void</span>);
-<a name="l00107"></a>00107     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="class_r_f_hardware_serial.html#af3aac984a5eb2c21d26b5a4e35693194">read</a>(<span class="keywordtype">void</span>);
-<a name="l00108"></a>00108     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_r_f_hardware_serial.html#a0a9e9396972b76c5947592479860020d">flush</a>(<span class="keywordtype">void</span>);
-<a name="l00109"></a>00109 <span class="preprocessor">#ifdef COMPAT_PRE1</span>
-<a name="l00110"></a>00110 <span class="preprocessor"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="class_r_f_hardware_serial.html#a5762c6450a362153180092b960a57da2">write</a>(uint8_t);
-<a name="l00111"></a>00111 <span class="preprocessor">#else</span>
-<a name="l00112"></a>00112 <span class="preprocessor"></span>    <span class="keyword">virtual</span> <span class="keywordtype">size_t</span> <a class="code" href="class_r_f_hardware_serial.html#a5762c6450a362153180092b960a57da2">write</a>(uint8_t);
-<a name="l00113"></a>00113 <span class="preprocessor">#endif</span>
-<a name="l00114"></a>00114 <span class="preprocessor"></span>    <span class="keyword">using</span> <a class="code" href="class_r_f_hardware_serial.html#a5762c6450a362153180092b960a57da2">Print::write</a>; <span class="comment">// pull in write(str) and write(buf, size) from Print</span>
-<a name="l00115"></a>00115     <a class="code" href="class_r_f_hardware_serial.html#a9b3baad8c612d81b96e46f84d7e97580">operator bool</a>();
-<a name="l00116"></a>00116 };
-<a name="l00117"></a>00117 <span class="keyword">extern</span> <a class="code" href="class_r_f_hardware_serial.html">RFHardwareSerial</a> <a class="code" href="gcode_8h.html#afbb1290b3ca9b145cd2f83d39cccf570">RFSerial</a>; 
-<a name="l00118"></a><a class="code" href="gcode_8h.html#a17da3e86d60c2b299dd9e523bf746699">00118</a> <span class="preprocessor">#define RFSERIAL RFSerial</span>
-<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="keyword">extern</span> <a class="code" href="structring__buffer.html">ring_buffer</a> <a class="code" href="gcode_8cpp.html#a104962a4f6ac1d11c06d6bcf93ca12e4">tx_buffer</a>;
-<a name="l00120"></a><a class="code" href="gcode_8h.html#a2460646a2c88b65c0f8d1b9ba7c8d0f5">00120</a> <span class="preprocessor">#define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}</span>
-<a name="l00121"></a>00121 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00122"></a>00122 <span class="preprocessor"></span><span class="preprocessor">#define RFSERIAL Serial</span>
-<a name="l00123"></a>00123 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00124"></a>00124 <span class="preprocessor"></span>
-<a name="l00125"></a><a class="code" href="class_serial_output.html">00125</a> <span class="keyword">class </span><a class="code" href="class_serial_output.html">SerialOutput</a> : <span class="keyword">public</span> Print {
-<a name="l00126"></a>00126 <span class="keyword">public</span>:
-<a name="l00127"></a>00127   <a class="code" href="class_serial_output.html#ab8b90f364edebdacac713d3fa76d7e48">SerialOutput</a>();
-<a name="l00128"></a>00128 <span class="preprocessor">#ifdef COMPAT_PRE1</span>
-<a name="l00129"></a>00129 <span class="preprocessor"></span>  <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a5762c6450a362153180092b960a57da2">write</a>(uint8_t);
-<a name="l00130"></a>00130 <span class="preprocessor">#else</span>
-<a name="l00131"></a>00131 <span class="preprocessor"></span>  <span class="keywordtype">size_t</span> <a class="code" href="class_serial_output.html#a5762c6450a362153180092b960a57da2">write</a>(uint8_t);
-<a name="l00132"></a>00132 <span class="preprocessor">#endif</span>
-<a name="l00133"></a>00133 <span class="preprocessor"></span>  <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a05da0b417b0b441edd32df89b7ca568e">print_P</a>(PGM_P ptr);
-<a name="l00134"></a>00134   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a5ac652bc3699e2ad3373403101b3a42d">println_P</a>(PGM_P ptr);
-<a name="l00135"></a>00135   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a66634e140d1163449d94054199a6f2fe">print_long_P</a>(PGM_P ptr,<span class="keywordtype">long</span> value);
-<a name="l00136"></a>00136   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a7715cd08fd3b9abc2eeed9526bc52303">print_int_P</a>(PGM_P ptr,<span class="keywordtype">int</span> value);
-<a name="l00137"></a>00137   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#ad8b6061ce6a03224a04577a317eaaafc">print_float_P</a>(PGM_P ptr,<span class="keywordtype">float</span> value,uint8_t digits = 2);
-<a name="l00138"></a>00138   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#ae53b9d6a1292979888eb3eefe06c092f">println_long_P</a>(PGM_P ptr,<span class="keywordtype">long</span> value);
-<a name="l00139"></a>00139   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a9a0062a2cc7e750b395334c4778c63b2">println_int_P</a>(PGM_P ptr,<span class="keywordtype">int</span> value);
-<a name="l00140"></a>00140   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#af12cbebadb4f88f32f273fd1a7dee724">println_float_P</a>(PGM_P ptr,<span class="keywordtype">float</span> value,uint8_t digits = 2);
-<a name="l00141"></a>00141   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a655749e5d9f529fa389da9066dc61894">print_error_P</a>(PGM_P ptr,<span class="keywordtype">bool</span> newline);
-<a name="l00142"></a>00142   <span class="keywordtype">void</span> <a class="code" href="class_serial_output.html#a9069fbc52a5b3042869673ad5f42af1e">printFloat</a>(<span class="keywordtype">double</span> number, uint8_t digits=2); 
-<a name="l00143"></a>00143 
-<a name="l00144"></a>00144 };
-<a name="l00145"></a><a class="code" href="gcode_8h.html#a4e146bcc38d06e2a9aa55ccbf21b600a">00145</a> <span class="preprocessor">#define OUT_P_I(p,i) out.print_int_P(PSTR(p),(int)(i))</span>
-<a name="l00146"></a><a class="code" href="gcode_8h.html#a626b60bc02c5e4a9aa90d7851ec4d4c7">00146</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_I_LN(p,i) out.println_int_P(PSTR(p),(int)(i))</span>
-<a name="l00147"></a><a class="code" href="gcode_8h.html#ae9a1d8c5c5118dcf862af2dc40a8b23a">00147</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_L(p,i) out.print_long_P(PSTR(p),(long)(i))</span>
-<a name="l00148"></a><a class="code" href="gcode_8h.html#aa78c8b9cd9c351fdaad74486b21c3af0">00148</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_L_LN(p,i) out.println_long_P(PSTR(p),(long)(i))</span>
-<a name="l00149"></a><a class="code" href="gcode_8h.html#a16983fb51961d90a6b6c4f24b1041885">00149</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_F(p,i) out.print_float_P(PSTR(p),(float)(i))</span>
-<a name="l00150"></a><a class="code" href="gcode_8h.html#ab8f60a8ebbabb650f7eee866e88e8ef7">00150</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_F_LN(p,i) out.println_float_P(PSTR(p),(float)(i))</span>
-<a name="l00151"></a><a class="code" href="gcode_8h.html#a6ca8478da16088491c73594090191c40">00151</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_FX(p,i,x) out.print_float_P(PSTR(p),(float)(i),x)</span>
-<a name="l00152"></a><a class="code" href="gcode_8h.html#ab0a7b7474ee8525af4aa296f98945268">00152</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_FX_LN(p,i,x) out.println_float_P(PSTR(p),(float)(i),x)</span>
-<a name="l00153"></a><a class="code" href="gcode_8h.html#a6174c84155b88c81a35cdb184214d042">00153</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P(p) out.print_P(PSTR(p))</span>
-<a name="l00154"></a><a class="code" href="gcode_8h.html#a026f71fdb25c58319213d95ec3d32e51">00154</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_P_LN(p) out.println_P(PSTR(p))</span>
-<a name="l00155"></a><a class="code" href="gcode_8h.html#ab3bec22e4d3c7c543f791e2c61923b33">00155</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_ERROR_P(p) out.print_error_P(PSTR(p),false)</span>
-<a name="l00156"></a><a class="code" href="gcode_8h.html#a086a3926126156cd7f53aa5d05942cc3">00156</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_ERROR_P_LN(p) out.print_error_P(PSTR(p),true)</span>
-<a name="l00157"></a><a class="code" href="gcode_8h.html#a97e418f3a4ce0f3d316d54638eb39c61">00157</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT(v) out.print(v)</span>
-<a name="l00158"></a><a class="code" href="gcode_8h.html#ad921e3744830690bcc58bbc30c842cc9">00158</a> <span class="preprocessor"></span><span class="preprocessor">#define OUT_LN out.println()</span>
-<a name="l00159"></a>00159 <span class="preprocessor"></span><span class="keyword">extern</span> <a class="code" href="class_serial_output.html">SerialOutput</a> <a class="code" href="gcode_8cpp.html#a6914ad77902bf7fd9037a61cbbe26f98" title="Instance used for serail write operations.">out</a>;
-<a name="l00161"></a>00161 <span class="keyword">extern</span> <a class="code" href="struct_g_code.html">GCode</a> *<a class="code" href="gcode_8cpp.html#ad8bb7900a4140a778ff16af5bc835c71">gcode_next_command</a>();
-<a name="l00163"></a>00163 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="gcode_8cpp.html#af143927dd635024a7a516d07762ccaeb" title="Removes the last returned command from cache.">gcode_command_finished</a>(<a class="code" href="struct_g_code.html">GCode</a> *code);
-<a name="l00164"></a>00164 <span class="comment">// check for new commands</span>
-<a name="l00165"></a>00165 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="gcode_8cpp.html#a9ee13c23015f7541b51320ae353c2268" title="Read from serial console or sdcard.">gcode_read_serial</a>();
-<a name="l00166"></a>00166 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="gcode_8cpp.html#a32e2d75c0e5f162b77af20e1f23b2ad1" title="Execute commands in progmem stored string. Multiple commands are seperated by  .">gcode_execute_PString</a>(PGM_P cmd);
-<a name="l00167"></a>00167 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="gcode_8cpp.html#a0023ecabe77de653c0474a38c9dbb5bf" title="Print command on serial console.">gcode_print_command</a>(<a class="code" href="struct_g_code.html">GCode</a> *code);
-<a name="l00168"></a>00168 <span class="keyword">extern</span> byte <a class="code" href="gcode_8cpp.html#a32452c07ccbcdd86f07411662e208a59" title="Computes size of binary data from bitfield.">gcode_comp_binary_size</a>(<span class="keywordtype">char</span> *ptr);
-<a name="l00169"></a>00169 <span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code" href="gcode_8cpp.html#ab4f9b912b5eaed405890b401d269dfdb">gcode_parse_binary</a>(<a class="code" href="struct_g_code.html">GCode</a> *code,byte *buffer);
-<a name="l00170"></a>00170 <span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code" href="gcode_8cpp.html#aa165b67defaaa76208ebd5961b00d3b9">gcode_parse_ascii</a>(<a class="code" href="struct_g_code.html">GCode</a> *code,<span class="keywordtype">char</span> *line);
-<a name="l00171"></a>00171 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="gcode_8cpp.html#aef68e49eb90ce86fe498ffc757de5141">emergencyStop</a>();
-<a name="l00172"></a>00172 
-<a name="l00173"></a>00173 <span class="comment">// Helper macros to detect, if parameter is stored in GCode struct</span>
-<a name="l00174"></a><a class="code" href="gcode_8h.html#a953f991b29df3201dbb4c514bc09d619">00174</a> <span class="preprocessor">#define GCODE_HAS_N(a) ((a-&gt;params &amp; 1)!=0)</span>
-<a name="l00175"></a><a class="code" href="gcode_8h.html#a2ebe5575d7ec76ef27a3011ff7fd7ca5">00175</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_M(a) ((a-&gt;params &amp; 2)!=0)</span>
-<a name="l00176"></a><a class="code" href="gcode_8h.html#a463d0fb9b1200fee691f2a665fcacbc1">00176</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_G(a) ((a-&gt;params &amp; 4)!=0)</span>
-<a name="l00177"></a><a class="code" href="gcode_8h.html#afa0ab303c7b93d7c298e85b740ceba87">00177</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_X(a) ((a-&gt;params &amp; 8)!=0)</span>
-<a name="l00178"></a><a class="code" href="gcode_8h.html#ac09519d33d429108c4349c5d250293a2">00178</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_Y(a) ((a-&gt;params &amp; 16)!=0)</span>
-<a name="l00179"></a><a class="code" href="gcode_8h.html#a8e3dd4fb5663f216a3f0779a0b4efc69">00179</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_Z(a) ((a-&gt;params &amp; 32)!=0)</span>
-<a name="l00180"></a><a class="code" href="gcode_8h.html#a3b0d9665b4dea7d462467bdc64fecfa1">00180</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_NO_XYZ(a) ((a-&gt;params &amp; 56)==0)</span>
-<a name="l00181"></a><a class="code" href="gcode_8h.html#ac320ba8b9ecc29f0affcf459f62d1d43">00181</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_E(a) ((a-&gt;params &amp; 64)!=0)</span>
-<a name="l00182"></a><a class="code" href="gcode_8h.html#a734fcfb305c2872b9703726e2ad82120">00182</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_F(a) ((a-&gt;params &amp; 256)!=0)</span>
-<a name="l00183"></a><a class="code" href="gcode_8h.html#ae43f39e497cf3fdb8c99abc0640290ea">00183</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_T(a) ((a-&gt;params &amp; 512)!=0)</span>
-<a name="l00184"></a><a class="code" href="gcode_8h.html#a09d47da2e751b4590dff61c05a78a1f4">00184</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_S(a) ((a-&gt;params &amp; 1024)!=0)</span>
-<a name="l00185"></a><a class="code" href="gcode_8h.html#ae002b89e8d50352d9137a84e4fc4de3d">00185</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_P(a) ((a-&gt;params &amp; 2048)!=0)</span>
-<a name="l00186"></a><a class="code" href="gcode_8h.html#a5da7aca35e69cfdb5cb29d9bcf1b6498">00186</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_IS_V2(a) ((a-&gt;params &amp; 4096)!=0)</span>
-<a name="l00187"></a><a class="code" href="gcode_8h.html#ade28d2989aa607805a90c094da82cf64">00187</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_STRING(a) ((a-&gt;params &amp; 32768)!=0)</span>
-<a name="l00188"></a><a class="code" href="gcode_8h.html#ac9bb5ad3697be75d5ec6714be28e9693">00188</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_I(a) ((a-&gt;params2 &amp; 1)!=0)</span>
-<a name="l00189"></a><a class="code" href="gcode_8h.html#afb420fc1ece680bf3bf51c570deb59f0">00189</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_J(a) ((a-&gt;params2 &amp; 2)!=0)</span>
-<a name="l00190"></a><a class="code" href="gcode_8h.html#a18ad383d2e9028322d20e38dcc6b4b14">00190</a> <span class="preprocessor"></span><span class="preprocessor">#define GCODE_HAS_R(a) ((a-&gt;params2 &amp; 4)!=0)</span>
-<a name="l00191"></a>00191 <span class="preprocessor"></span>
-<a name="l00192"></a>00192 <span class="keyword">extern</span> byte <a class="code" href="gcode_8h.html#aaae6b1486f88cf77818c945257d86047" title="Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication...">debug_level</a>;
-<a name="l00193"></a><a class="code" href="gcode_8h.html#a476aeb194e6da91c9b1d0ba91cabb5dd">00193</a> <span class="preprocessor">#define DEBUG_ECHO ((debug_level &amp; 1)!=0)</span>
-<a name="l00194"></a><a class="code" href="gcode_8h.html#a4407b4d6eae3ba7fe9538b1242a7e165">00194</a> <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_INFO ((debug_level &amp; 2)!=0)</span>
-<a name="l00195"></a><a class="code" href="gcode_8h.html#afac447366f2d03139d1a9beba4f7f7a1">00195</a> <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_ERRORS ((debug_level &amp; 4)!=0)</span>
-<a name="l00196"></a><a class="code" href="gcode_8h.html#aaa7753e39e51556f1c1b83eeb0fa11df">00196</a> <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_DRYRUN ((debug_level &amp; 8)!=0)</span>
-<a name="l00197"></a><a class="code" href="gcode_8h.html#afc1a00539f0843b63f85f44586a04b6d">00197</a> <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_COMMUNICATION ((debug_level &amp; 16)!=0)</span>
-<a name="l00198"></a><a class="code" href="gcode_8h.html#a01a8c03c7f8f04720e1181e49ed4c5a2">00198</a> <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_NO_MOVES ((debug_level &amp; 32)!=0)</span>
-<a name="l00199"></a>00199 <span class="preprocessor"></span>
-<a name="l00200"></a>00200 <span class="preprocessor">#endif</span>
-<a name="l00201"></a>00201 <span class="preprocessor"></span>
+<a name="l00021"></a><a class="code" href="gcode_8h.html#a11b2387a44dc0cf3642ddcbe0581276b">00021</a> <span class="preprocessor">#define MAX_CMD_SIZE 96</span>
+<a name="l00022"></a>00022 <span class="preprocessor"></span><span class="keyword">class </span>SDCard;
+<a name="l00023"></a><a class="code" href="class_g_code.html">00023</a> <span class="keyword">class </span><a class="code" href="class_g_code.html">GCode</a>   <span class="comment">// 52 uint8_ts per command needed</span>
+<a name="l00024"></a>00024 {
+<a name="l00025"></a><a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">00025</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a>;
+<a name="l00026"></a><a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">00026</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a>;
+<a name="l00027"></a>00027 <span class="keyword">public</span>:
+<a name="l00028"></a><a class="code" href="class_g_code.html#ae8b170dcb376fe60270f4675f84e4477">00028</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="class_g_code.html#ae8b170dcb376fe60270f4675f84e4477">N</a>; <span class="comment">// Line number</span>
+<a name="l00029"></a><a class="code" href="class_g_code.html#a68dc0bf731afd0463b8e8cc4ed81c0f8">00029</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="class_g_code.html#a68dc0bf731afd0463b8e8cc4ed81c0f8">M</a>;
+<a name="l00030"></a><a class="code" href="class_g_code.html#a8f7aab5ea8436167078632d62232a98a">00030</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="class_g_code.html#a8f7aab5ea8436167078632d62232a98a">G</a>;
+<a name="l00031"></a><a class="code" href="class_g_code.html#ab3c4b737dfc5c78a6aba50dda616f7c3">00031</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#ab3c4b737dfc5c78a6aba50dda616f7c3">X</a>;
+<a name="l00032"></a><a class="code" href="class_g_code.html#ac915220fb659eb2c5958a1ccd81b80d4">00032</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#ac915220fb659eb2c5958a1ccd81b80d4">Y</a>;
+<a name="l00033"></a><a class="code" href="class_g_code.html#aa65967cca170d24dcd0d555df0d5ee4f">00033</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#aa65967cca170d24dcd0d555df0d5ee4f">Z</a>;
+<a name="l00034"></a><a class="code" href="class_g_code.html#a5b514bbfa4713e7bcf9c6a367cb6ebfe">00034</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a5b514bbfa4713e7bcf9c6a367cb6ebfe">E</a>;
+<a name="l00035"></a><a class="code" href="class_g_code.html#a9ab4bd02302051f763e80ede43fcac71">00035</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a9ab4bd02302051f763e80ede43fcac71">F</a>;
+<a name="l00036"></a><a class="code" href="class_g_code.html#a15d9493667828f95bcd674193a8ed3bb">00036</a>     uint8_t <a class="code" href="class_g_code.html#a15d9493667828f95bcd674193a8ed3bb">T</a>;
+<a name="l00037"></a><a class="code" href="class_g_code.html#a531ffbc18075585b12607aff08fec9b0">00037</a>     <span class="keywordtype">long</span> <a class="code" href="class_g_code.html#a531ffbc18075585b12607aff08fec9b0">S</a>;
+<a name="l00038"></a><a class="code" href="class_g_code.html#ad510039b7e7f97aaedeeda277b423624">00038</a>     <span class="keywordtype">long</span> <a class="code" href="class_g_code.html#ad510039b7e7f97aaedeeda277b423624">P</a>;
+<a name="l00039"></a><a class="code" href="class_g_code.html#a145f61de888f096c52a2945234a407b0">00039</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a145f61de888f096c52a2945234a407b0">I</a>;
+<a name="l00040"></a><a class="code" href="class_g_code.html#a7c20f6b5c2b8c830d450944735b761b3">00040</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a7c20f6b5c2b8c830d450944735b761b3">J</a>;
+<a name="l00041"></a><a class="code" href="class_g_code.html#a4c4b08e61e92b3da1ed512f4e006f34a">00041</a>     <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a4c4b08e61e92b3da1ed512f4e006f34a">R</a>;
+<a name="l00042"></a><a class="code" href="class_g_code.html#a5633b1433389cec21ade3811bbe9ca5b">00042</a>     <span class="keywordtype">char</span> *<a class="code" href="class_g_code.html#a5633b1433389cec21ade3811bbe9ca5b">text</a>; <span class="comment">//text[17];</span>
+<a name="l00043"></a><a class="code" href="class_g_code.html#ad627b9fcc8742c59b50cc2ff75986fdf">00043</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#ad627b9fcc8742c59b50cc2ff75986fdf">hasM</a>()
+<a name="l00044"></a>00044     {
+<a name="l00045"></a>00045         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 2)!=0);
+<a name="l00046"></a>00046     }
+<a name="l00047"></a><a class="code" href="class_g_code.html#a354c07e91d9f07e5dca7e702c424a2be">00047</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a354c07e91d9f07e5dca7e702c424a2be">hasN</a>()
+<a name="l00048"></a>00048     {
+<a name="l00049"></a>00049         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 1)!=0);
+<a name="l00050"></a>00050     }
+<a name="l00051"></a><a class="code" href="class_g_code.html#a0fee0af21babbf94aaea313b312b67b2">00051</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a0fee0af21babbf94aaea313b312b67b2">hasG</a>()
+<a name="l00052"></a>00052     {
+<a name="l00053"></a>00053         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 4)!=0);
+<a name="l00054"></a>00054     }
+<a name="l00055"></a><a class="code" href="class_g_code.html#a59610b3c566738910cef263d6e314d2c">00055</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a59610b3c566738910cef263d6e314d2c">hasX</a>()
+<a name="l00056"></a>00056     {
+<a name="l00057"></a>00057         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 8)!=0);
+<a name="l00058"></a>00058     }
+<a name="l00059"></a><a class="code" href="class_g_code.html#aa9c73c80f058ed5aff18418857b9fc8c">00059</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#aa9c73c80f058ed5aff18418857b9fc8c">hasY</a>()
+<a name="l00060"></a>00060     {
+<a name="l00061"></a>00061         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 16)!=0);
+<a name="l00062"></a>00062     }
+<a name="l00063"></a><a class="code" href="class_g_code.html#a5ce957691cde1a890ea983593834c86a">00063</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a5ce957691cde1a890ea983593834c86a">hasZ</a>()
+<a name="l00064"></a>00064     {
+<a name="l00065"></a>00065         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 32)!=0);
+<a name="l00066"></a>00066     }
+<a name="l00067"></a><a class="code" href="class_g_code.html#aa6448ba2fc12604bd9981ae39273550b">00067</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#aa6448ba2fc12604bd9981ae39273550b">hasNoXYZ</a>()
+<a name="l00068"></a>00068     {
+<a name="l00069"></a>00069         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 56)==0);
+<a name="l00070"></a>00070     }
+<a name="l00071"></a><a class="code" href="class_g_code.html#a7db24ad7e9be70fcf07c0f8ed09f63d4">00071</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a7db24ad7e9be70fcf07c0f8ed09f63d4">hasE</a>()
+<a name="l00072"></a>00072     {
+<a name="l00073"></a>00073         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 64)!=0);
+<a name="l00074"></a>00074     }
+<a name="l00075"></a><a class="code" href="class_g_code.html#a92de511ac42283493d3cf4845f7825b0">00075</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a92de511ac42283493d3cf4845f7825b0">hasF</a>()
+<a name="l00076"></a>00076     {
+<a name="l00077"></a>00077         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 256)!=0);
+<a name="l00078"></a>00078     }
+<a name="l00079"></a><a class="code" href="class_g_code.html#a0bc3484c6cd5c74e6f4d3b5842c6451a">00079</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a0bc3484c6cd5c74e6f4d3b5842c6451a">hasT</a>()
+<a name="l00080"></a>00080     {
+<a name="l00081"></a>00081         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 512)!=0);
+<a name="l00082"></a>00082     }
+<a name="l00083"></a><a class="code" href="class_g_code.html#a7cba976d76f48125857f8265579d63b8">00083</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a7cba976d76f48125857f8265579d63b8">hasS</a>()
+<a name="l00084"></a>00084     {
+<a name="l00085"></a>00085         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 1024)!=0);
+<a name="l00086"></a>00086     }
+<a name="l00087"></a><a class="code" href="class_g_code.html#a72b307016fc4535d3cfb5ab45685b889">00087</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a72b307016fc4535d3cfb5ab45685b889">hasP</a>()
+<a name="l00088"></a>00088     {
+<a name="l00089"></a>00089         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 2048)!=0);
+<a name="l00090"></a>00090     }
+<a name="l00091"></a><a class="code" href="class_g_code.html#a1da244d7365de529cc6b0d25004fde0e">00091</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a1da244d7365de529cc6b0d25004fde0e">isV2</a>()
+<a name="l00092"></a>00092     {
+<a name="l00093"></a>00093         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 4096)!=0);
+<a name="l00094"></a>00094     }
+<a name="l00095"></a><a class="code" href="class_g_code.html#afd8cb53cedf0a0bb6e421e5dba2b063b">00095</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#afd8cb53cedf0a0bb6e421e5dba2b063b">hasString</a>()
+<a name="l00096"></a>00096     {
+<a name="l00097"></a>00097         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#a9575eb2cccc85ee4d0800ceca524e220">params</a> &amp; 32768)!=0);
+<a name="l00098"></a>00098     }
+<a name="l00099"></a><a class="code" href="class_g_code.html#ae14c39e21746b24bead2b12f84580957">00099</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#ae14c39e21746b24bead2b12f84580957">hasI</a>()
+<a name="l00100"></a>00100     {
+<a name="l00101"></a>00101         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a> &amp; 1)!=0);
+<a name="l00102"></a>00102     }
+<a name="l00103"></a><a class="code" href="class_g_code.html#aefa13cb17bef643abd208b729c8d2846">00103</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#aefa13cb17bef643abd208b729c8d2846">hasJ</a>()
+<a name="l00104"></a>00104     {
+<a name="l00105"></a>00105         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a> &amp; 2)!=0);
+<a name="l00106"></a>00106     }
+<a name="l00107"></a><a class="code" href="class_g_code.html#a08ac8451ce63fab8971d58eb9ace5f78">00107</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a08ac8451ce63fab8971d58eb9ace5f78">hasR</a>()
+<a name="l00108"></a>00108     {
+<a name="l00109"></a>00109         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a> &amp; 4)!=0);
+<a name="l00110"></a>00110     }
+<a name="l00111"></a><a class="code" href="class_g_code.html#a8e6c5c0ccbc59fc5d684c4cb0583ae7e">00111</a>     <span class="keyword">inline</span> <span class="keywordtype">long</span> <a class="code" href="class_g_code.html#a8e6c5c0ccbc59fc5d684c4cb0583ae7e">getS</a>(<span class="keywordtype">long</span> def)
+<a name="l00112"></a>00112     {
+<a name="l00113"></a>00113         <span class="keywordflow">return</span> (<a class="code" href="class_g_code.html#a7cba976d76f48125857f8265579d63b8">hasS</a>() ? <a class="code" href="class_g_code.html#a531ffbc18075585b12607aff08fec9b0">S</a> : def);
+<a name="l00114"></a>00114     }
+<a name="l00115"></a><a class="code" href="class_g_code.html#a456e07f5d7f05f2b881221b84bd4d3e1">00115</a>     <span class="keyword">inline</span> <span class="keywordtype">long</span> <a class="code" href="class_g_code.html#a456e07f5d7f05f2b881221b84bd4d3e1">getP</a>(<span class="keywordtype">long</span> def)
+<a name="l00116"></a>00116     {
+<a name="l00117"></a>00117         <span class="keywordflow">return</span> (<a class="code" href="class_g_code.html#a72b307016fc4535d3cfb5ab45685b889">hasP</a>() ? <a class="code" href="class_g_code.html#ad510039b7e7f97aaedeeda277b423624">P</a> : def);
+<a name="l00118"></a>00118     }
+<a name="l00119"></a><a class="code" href="class_g_code.html#a308eedbe63c4ddf89087fcd169788bd7">00119</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#a308eedbe63c4ddf89087fcd169788bd7">setFormatError</a>() {
+<a name="l00120"></a>00120         <a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a> |= 32768;
+<a name="l00121"></a>00121     }
+<a name="l00122"></a><a class="code" href="class_g_code.html#a6a7825dd8d9d215960db16ef1718ad55">00122</a>     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a6a7825dd8d9d215960db16ef1718ad55">hasFormatError</a>() {
+<a name="l00123"></a>00123         <span class="keywordflow">return</span> ((<a class="code" href="class_g_code.html#acfbeb6013604a585552007021f3236ba">params2</a> &amp; 32768)!=0);
+<a name="l00124"></a>00124     }
+<a name="l00125"></a>00125     <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#afc4ad19d7a76a9a51093686c3885e3f6" title="Print command on serial console.">printCommand</a>();
+<a name="l00126"></a>00126     <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a5f5eab7f0c0bdd111bd7e9d4861d2db5">parseBinary</a>(uint8_t *buffer,<span class="keywordtype">bool</span> fromSerial);
+<a name="l00127"></a>00127     <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#a6dbf91c2f4a8af6b5a9b71999aee74b2">parseAscii</a>(<span class="keywordtype">char</span> *line,<span class="keywordtype">bool</span> fromSerial);
+<a name="l00128"></a>00128     <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#adace9de265fd44792952c40b1f450eb8" title="Removes the last returned command from cache.">popCurrentCommand</a>();
+<a name="l00129"></a>00129     <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#a407282f1098168f0cd39ac76e71f9017">echoCommand</a>();
+<a name="l00131"></a>00131     <span class="keyword">static</span> <a class="code" href="class_g_code.html">GCode</a> *<a class="code" href="class_g_code.html#af9d3b5b05e1283ab71cc535cf665afde">peekCurrentCommand</a>();
+<a name="l00133"></a>00133     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#a87ea6987f10bd02eed4df0f5325addbc" title="Read from serial console or sdcard.">readFromSerial</a>();
+<a name="l00134"></a>00134     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#ae32a41a97c43d9dcbf3adeb4c2166fcd">pushCommand</a>();
+<a name="l00135"></a>00135     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#a91c98381184c2887d0d9fec16db0f073" title="Execute commands in progmem stored string. Multiple commands are seperated by  .">executeFString</a>(<a class="code" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(cmd));
+<a name="l00136"></a>00136     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a08303c4786704f45a8f45077195a7cd1" title="Computes size of binary data from bitfield.">computeBinarySize</a>(<span class="keywordtype">char</span> *ptr);
+<a name="l00137"></a>00137 
+<a name="l00138"></a><a class="code" href="class_g_code.html#a0d5f139d8b7a8991eefe478b40b1c60e">00138</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="class_g_code.html#a0d5f139d8b7a8991eefe478b40b1c60e">SDCard</a>;
+<a name="l00139"></a><a class="code" href="class_g_code.html#a9100ab40407fd382a882168b2001f3a3">00139</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="class_u_i_display.html">UIDisplay</a>;
+<a name="l00140"></a>00140 <span class="keyword">private</span>:
+<a name="l00141"></a>00141     <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#aed1ee228d8ce301755b4be98266674f2">debugCommandBuffer</a>();
+<a name="l00142"></a>00142     <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#a3854665196b54a5c671986a0a4c86d0a">checkAndPushCommand</a>();
+<a name="l00143"></a>00143     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_g_code.html#aa839f66e08d9ef994b8ac4e3bcd80b7a">requestResend</a>();
+<a name="l00144"></a><a class="code" href="class_g_code.html#a0bfee121128af24724c5cd4590b5975e">00144</a>     <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_g_code.html#a0bfee121128af24724c5cd4590b5975e">parseFloatValue</a>(<span class="keywordtype">char</span> *s)
+<a name="l00145"></a>00145     {
+<a name="l00146"></a>00146         <span class="keywordtype">char</span> *endPtr;
+<a name="l00147"></a>00147         <span class="keywordtype">float</span> f = (strtod(s, &amp;endPtr));
+<a name="l00148"></a>00148         <span class="keywordflow">if</span>(s == endPtr) <a class="code" href="class_g_code.html#a308eedbe63c4ddf89087fcd169788bd7">setFormatError</a>();
+<a name="l00149"></a>00149         <span class="keywordflow">return</span> f;
+<a name="l00150"></a>00150     }
+<a name="l00151"></a><a class="code" href="class_g_code.html#a917cf7c98ac341743ea4d2e3ca750b71">00151</a>     <span class="keyword">inline</span> <span class="keywordtype">long</span> <a class="code" href="class_g_code.html#a917cf7c98ac341743ea4d2e3ca750b71">parseLongValue</a>(<span class="keywordtype">char</span> *s)
+<a name="l00152"></a>00152     {
+<a name="l00153"></a>00153         <span class="keywordtype">char</span> *endPtr;
+<a name="l00154"></a>00154         <span class="keywordtype">long</span> l = (strtol(s, &amp;endPtr, 10));
+<a name="l00155"></a>00155         <span class="keywordflow">if</span>(s == endPtr) <a class="code" href="class_g_code.html#a308eedbe63c4ddf89087fcd169788bd7">setFormatError</a>();
+<a name="l00156"></a>00156         <span class="keywordflow">return</span> l;
+<a name="l00157"></a>00157     }
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="class_g_code.html#a4a5a5d3e1e9bb4c0aff0d3d46bfb702d">00159</a>     <span class="keyword">static</span> <a class="code" href="class_g_code.html">GCode</a> <a class="code" href="class_g_code.html#a4a5a5d3e1e9bb4c0aff0d3d46bfb702d" title="Buffer for received commands.">commandsBuffered</a>[<a class="code" href="_configuration_8h.html#af6168edd26520974b8660182d040051a" title="Cache size for incoming commands.">GCODE_BUFFER_SIZE</a>]; 
+<a name="l00160"></a><a class="code" href="class_g_code.html#abd13795558ced02f98624f5f4145e8a1">00160</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#abd13795558ced02f98624f5f4145e8a1" title="Read position in gcode_buffer.">bufferReadIndex</a>; 
+<a name="l00161"></a><a class="code" href="class_g_code.html#aa6d981ef713911418ac058dd7b540b88">00161</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#aa6d981ef713911418ac058dd7b540b88" title="Write position in gcode_buffer.">bufferWriteIndex</a>; 
+<a name="l00162"></a><a class="code" href="class_g_code.html#aeb7bfeac07657aa04dbd1972987ef566">00162</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#aeb7bfeac07657aa04dbd1972987ef566" title="Current received command.">commandReceiving</a>[<a class="code" href="gcode_8h.html#a11b2387a44dc0cf3642ddcbe0581276b">MAX_CMD_SIZE</a>]; 
+<a name="l00163"></a><a class="code" href="class_g_code.html#a7ae416230b7eaad8baf7876f704c8ed3">00163</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a7ae416230b7eaad8baf7876f704c8ed3" title="Writing position in gcode_transbuffer.">commandsReceivingWritePosition</a>; 
+<a name="l00164"></a><a class="code" href="class_g_code.html#a1da565449e87769fab2ad8ed464f7fb4">00164</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a1da565449e87769fab2ad8ed464f7fb4" title="Flags the command as binary input.">sendAsBinary</a>; 
+<a name="l00165"></a><a class="code" href="class_g_code.html#a46c7e4d550a684389e4a2679285c9426">00165</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a46c7e4d550a684389e4a2679285c9426" title="Was the last successful command in binary mode?">wasLastCommandReceivedAsBinary</a>; 
+<a name="l00166"></a><a class="code" href="class_g_code.html#a2cf13f01620e29dce6e5d5beae802a6a">00166</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a2cf13f01620e29dce6e5d5beae802a6a" title="Flags true if we are reading the comment part of a command.">commentDetected</a>; 
+<a name="l00167"></a><a class="code" href="class_g_code.html#a6857647781cb268444d0db1e4f740895">00167</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#a6857647781cb268444d0db1e4f740895" title="Expected size of the incoming binary command.">binaryCommandSize</a>; 
+<a name="l00168"></a><a class="code" href="class_g_code.html#afb85e3546bdc44fa2de39178024313e6">00168</a>     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_code.html#afb85e3546bdc44fa2de39178024313e6" title="Don&#39;t read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings...">waitUntilAllCommandsAreParsed</a>; 
+<a name="l00169"></a><a class="code" href="class_g_code.html#a1e2b8fd7b74923d5095f172fa664c1dc">00169</a>     <span class="keyword">static</span> uint32_t <a class="code" href="class_g_code.html#a1e2b8fd7b74923d5095f172fa664c1dc" title="Last line number received.">lastLineNumber</a>; 
+<a name="l00170"></a><a class="code" href="class_g_code.html#ad5ce1c5e04a84d9eabc4eee25eaf7044">00170</a>     <span class="keyword">static</span> uint32_t <a class="code" href="class_g_code.html#ad5ce1c5e04a84d9eabc4eee25eaf7044" title="Line number of current command.">actLineNumber</a>; 
+<a name="l00171"></a><a class="code" href="class_g_code.html#ad3540c61877acc4ccbc151e51c8f4571">00171</a>     <span class="keyword">static</span> int8_t <a class="code" href="class_g_code.html#ad3540c61877acc4ccbc151e51c8f4571" title="Waiting for line to be resend. -1 = no wait.">waitingForResend</a>; 
+<a name="l00172"></a><a class="code" href="class_g_code.html#af50d7a77c05ce98bdf4ac183d3083345">00172</a>     <span class="keyword">static</span> <span class="keyword">volatile</span> uint8_t <a class="code" href="class_g_code.html#af50d7a77c05ce98bdf4ac183d3083345" title="Number of commands stored in gcode_buffer.">bufferLength</a>; 
+<a name="l00173"></a><a class="code" href="class_g_code.html#a83e62d4a64a948fdfb38781ece3c907a">00173</a>     <span class="keyword">static</span> <a class="code" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="code" href="class_g_code.html#a83e62d4a64a948fdfb38781ece3c907a" title="Time, when we got the last data packet. Used to detect missing uint8_ts.">timeOfLastDataPacket</a>; 
+<a name="l00174"></a><a class="code" href="class_g_code.html#aeabd970d3e418187a82adf4fbb0894c0">00174</a>     <span class="keyword">static</span> uint8_t <a class="code" href="class_g_code.html#aeabd970d3e418187a82adf4fbb0894c0" title="Number of sequential format errors.">formatErrors</a>; 
+<a name="l00175"></a>00175 };
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177 
+<a name="l00178"></a>00178 <span class="preprocessor">#endif</span>
+<a name="l00179"></a>00179 <span class="preprocessor"></span>
 </pre></div></div><!-- contents -->
 </div>
 <!-- window showing the filter options -->
@@ -320,7 +298,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul>
       <li class="navelem"><a class="el" href="gcode_8h.html">gcode.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

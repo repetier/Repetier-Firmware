@@ -16,7 +16,7 @@ var class_sd2_card =
     [ "readCID", "class_sd2_card.html#ac2a262a5e6c508ec5d5b312f01b54e67", null ],
     [ "readCSD", "class_sd2_card.html#a4a73b4acf0416c0edd9ced858ad37656", null ],
     [ "readData", "class_sd2_card.html#ace9c999f7d24d3382bb6a32ac1f271d1", null ],
-    [ "readData", "class_sd2_card.html#a6803e1f55274c23799ff1e2a2b755e66", null ],
+    [ "readData", "class_sd2_card.html#a33b3b771603b9e91c791cd7a39be5fbd", null ],
     [ "readRegister", "class_sd2_card.html#af7820e455ba72ac41b8749ecce475523", null ],
     [ "readStart", "class_sd2_card.html#a2d7e430e3cb4a8509b356b94481ea3bd", null ],
     [ "readStop", "class_sd2_card.html#a0d8e8db6267dc686d0de12986f432684", null ],

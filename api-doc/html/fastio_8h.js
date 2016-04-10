@@ -9,6 +9,7 @@ var fastio_8h =
     [ "_WRITE", "fastio_8h.html#acb82a1ce7f87b692abfb5e41d6810f2b", null ],
     [ "GET_INPUT", "fastio_8h.html#a8239afa0238afc5ccad6202f14dde224", null ],
     [ "GET_OUTPUT", "fastio_8h.html#af2d22ed088f7f41f71de346dbeae57fc", null ],
+    [ "PULLUP", "fastio_8h.html#a608adcba13929aae3476f1de99498566", null ],
     [ "READ", "fastio_8h.html#a9716cca366b99de7c0d101eeab24c967", null ],
     [ "SET_INPUT", "fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc", null ],
     [ "SET_OUTPUT", "fastio_8h.html#a4bdb8759f0e85e88956ac23262e0916b", null ],

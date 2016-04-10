@@ -428,7 +428,10 @@
 				<Option type="1" />
 				<Option compiler="avrgcc" />
 				<Compiler>
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-Os" />
+					<Add option="-O3" />
+					<Add option="-pedantic" />
 					<Add option="-W" />
 					<Add option="-Wall" />
 					<Add option="-mmcu=$(MCU)" />
@@ -442,6 +445,7 @@
 				<Linker>
 					<Add option="-mmcu=$(MCU)" />
 					<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+					<Add option="-mrelax" />
 				</Linker>
 				<ExtraCommands>
 					<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
@@ -552,7 +556,9 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-pedantic" />
 			<Add option="-w" />
+			<Add option="-Wall" />
 			<Add directory="." />
 		</Compiler>
 		<Unit filename="Commands.cpp">
@@ -576,6 +582,8 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="Drivers.cpp" />
+		<Unit filename="Drivers.h" />
 		<Unit filename="Eeprom.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />
@@ -594,6 +602,7 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="Events.h" />
 		<Unit filename="Extruder.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />
@@ -800,6 +809,7 @@
 			<Option compile="0" />
 			<Option link="0" />
 		</Unit>
+		<Unit filename="logo.h" />
 		<Unit filename="motion.cpp">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />
@@ -849,6 +859,7 @@
 			<Option target="Arduino Mega 1280" />
 			<Option target="Arduino Mega 8" />
 		</Unit>
+		<Unit filename="uilang.cpp" />
 		<Unit filename="uilang.h">
 			<Option target="Simulator - Debug" />
 			<Option target="Simulator - Release" />

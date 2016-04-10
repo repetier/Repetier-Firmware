@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -123,14 +123,14 @@ Inheritance diagram for SdFile:</div>
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#ad1f46fedf64b4195535e53cb31cc6974">SdFile</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a2b40ebbf89221903430dba02f50cbd9b">SdFile</a> (const char *name, uint8_t oflag)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a2b40ebbf89221903430dba02f50cbd9b">SdFile</a> (const char *name, uint8_t <a class="el" href="class_sd_base_file.html#a2319f1b18c7dcb22957b3f75f6436299">oflag</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a9b199fded04cffe6a609465dce43fdcc">getWriteError</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#af50f0c1e1c726ef3dee08a84456090b9">clearWriteError</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write</a> (uint8_t b)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a13a01b8a75f64e33fbea47e95186cdf1">write</a> (const char *str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">write</a> (const void *buf, uint16_t nbyte)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#af4dace00a7941e0936830200cb3fc9f9">write_P</a> (PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a01a8e28448c6120f8de1db3f44c15da9">writeln_P</a> (PGM_P str)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#abc47d1855b6d1ac124b27c3bea6ad9ef">write</a> (const char *str)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">write</a> (const void *buf, size_t nbyte)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a125d7f01d9c471f0f45266bc5f1fdef8">write_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html#a355726bfcd0db6fe83cb4516f6c4f124">writeln_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="class_sd_base_file.html" title="Base class for SdFile with Print and C++ streams.">SdBaseFile</a> with Print. </p>
@@ -234,12 +234,12 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a13a01b8a75f64e33fbea47e95186cdf1"></a><!-- doxytag: member="SdFile::write" ref="a13a01b8a75f64e33fbea47e95186cdf1" args="(const char *str)" -->
+<a class="anchor" id="abc47d1855b6d1ac124b27c3bea6ad9ef"></a><!-- doxytag: member="SdFile::write" ref="abc47d1855b6d1ac124b27c3bea6ad9ef" args="(const char *str)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int16_t <a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write</a> </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>str</em></td><td>)</td>
@@ -251,12 +251,12 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac2cd3987fc778298bd4c23a4d53fbfd7"></a><!-- doxytag: member="SdFile::write" ref="ac2cd3987fc778298bd4c23a4d53fbfd7" args="(const void *buf, uint16_t nbyte)" -->
+<a class="anchor" id="aaf4f4cafe922e54d7b10c1b18bf60d07"></a><!-- doxytag: member="SdFile::write" ref="aaf4f4cafe922e54d7b10c1b18bf60d07" args="(const void *buf, size_t nbyte)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int16_t <a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write</a> </td>
+          <td class="memname">int <a class="el" href="class_sd_file.html#ac82b138293686567ab5dfbe3ba1fa1ee">write</a> </td>
           <td>(</td>
           <td class="paramtype">const void *&#160;</td>
           <td class="paramname"><em>buf</em>, </td>
@@ -264,7 +264,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>nbyte</em>&#160;</td>
         </tr>
         <tr>
@@ -276,19 +276,19 @@ Public Member Functions</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Reimplemented from <a class="el" href="class_sd_base_file.html#ac2cd3987fc778298bd4c23a4d53fbfd7">SdBaseFile</a>.</p>
+<p>Reimplemented from <a class="el" href="class_sd_base_file.html#aaf4f4cafe922e54d7b10c1b18bf60d07">SdBaseFile</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="af4dace00a7941e0936830200cb3fc9f9"></a><!-- doxytag: member="SdFile::write_P" ref="af4dace00a7941e0936830200cb3fc9f9" args="(PGM_P str)" -->
+<a class="anchor" id="a125d7f01d9c471f0f45266bc5f1fdef8"></a><!-- doxytag: member="SdFile::write_P" ref="a125d7f01d9c471f0f45266bc5f1fdef8" args="(FSTRINGPARAM(str))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_file.html#af4dace00a7941e0936830200cb3fc9f9">write_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_file.html#a125d7f01d9c471f0f45266bc5f1fdef8">write_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -297,15 +297,15 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a01a8e28448c6120f8de1db3f44c15da9"></a><!-- doxytag: member="SdFile::writeln_P" ref="a01a8e28448c6120f8de1db3f44c15da9" args="(PGM_P str)" -->
+<a class="anchor" id="a355726bfcd0db6fe83cb4516f6c4f124"></a><!-- doxytag: member="SdFile::writeln_P" ref="a355726bfcd0db6fe83cb4516f6c4f124" args="(FSTRINGPARAM(str))" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_sd_file.html#a01a8e28448c6120f8de1db3f44c15da9">writeln_P</a> </td>
+          <td class="memname">void <a class="el" href="class_sd_file.html#a355726bfcd0db6fe83cb4516f6c4f124">writeln_P</a> </td>
           <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>str</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str)&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -315,7 +315,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -337,7 +337,7 @@ Public Member Functions</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_sd_file.html">SdFile</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -107,23 +107,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <!-- doxytag: class="RFHardwareSerial" -->
-<p><code>#include &lt;<a class="el" href="gcode_8h_source.html">gcode.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="_h_a_l_8h_source.html">HAL.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a6892e2ea65a83e8235f1282509973ae7">RFHardwareSerial</a> (<a class="el" href="structring__buffer.html">ring_buffer</a> *<a class="el" href="gcode_8cpp.html#ace077a9982cfc6e7cffcc11101b0df4c">rx_buffer</a>, <a class="el" href="structring__buffer.html">ring_buffer</a> *<a class="el" href="gcode_8h.html#a104962a4f6ac1d11c06d6bcf93ca12e4">tx_buffer</a>, volatile uint8_t *ubrrh, volatile uint8_t *ubrrl, volatile uint8_t *ucsra, volatile uint8_t *ucsrb, volatile uint8_t *udr, uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a60645c2c2014ca35e565e147f4b7eb3a">RFHardwareSerial</a> (<a class="el" href="structring__buffer.html">ring_buffer</a> *<a class="el" href="_h_a_l_8cpp.html#ace077a9982cfc6e7cffcc11101b0df4c">rx_buffer</a>, <a class="el" href="structring__buffer__tx.html">ring_buffer_tx</a> *<a class="el" href="_h_a_l_8cpp.html#a913c237b12b90ca109743c3ac15725d2">tx_buffer</a>, volatile uint8_t *ubrrh, volatile uint8_t *ubrrl, volatile uint8_t *ucsra, volatile uint8_t *ucsrb, volatile uint8_t *udr, uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#ad3fcb1f90c11e7939fcf5079e2d29b89">begin</a> (unsigned long)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#aaf81d3fdaf258088d7692fa70cece087">end</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a2ec870a76d736051cfa7db65173332e4">available</a> (void)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a4d46097cf44ef5e943170bf7cbee3625">peek</a> (void)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#af3aac984a5eb2c21d26b5a4e35693194">read</a> (void)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a0a9e9396972b76c5947592479860020d">flush</a> (void)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a5762c6450a362153180092b960a57da2">write</a> (uint8_t)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#aeec8f4dbef97221a6041d6cdc6e9b716">available</a> (void)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a65e3a688fcd31f2f486d3af02c400d8f">peek</a> (void)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#aead319e2866cf90d56c10f2ed39a4396">read</a> (void)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a0a4efd3d0f68d057f23eb5dfcd16c17c">flush</a> (void)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a729ed73e880aa6992f5c38ca84aa99b1">write</a> (uint8_t)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a9b3baad8c612d81b96e46f84d7e97580">operator bool</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a0eb9f6296a682a7601fd607325ad38b6">outputUnused</a> (void)</td></tr>
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structring__buffer.html">ring_buffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a3ceb97590500d70e4f593a3a3505a06e">_rx_buffer</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structring__buffer.html">ring_buffer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a054597195edb6fb50e316efa3ad3fbd2">_tx_buffer</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structring__buffer__tx.html">ring_buffer_tx</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a255f8188fbd3b483165fb352dc647e81">_tx_buffer</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a153b1679eb26fd221c6eab0b85ea6604">_ubrrh</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a7fc0285f716afc115aebd1751184eecf">_ubrrl</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#a15e4698ed69c55c428ab0c201a2b4c0a">_ucsra</a></td></tr>
@@ -136,7 +137,7 @@ Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_f_hardware_serial.html#aaa016ee9deb727df7e20eecea191e3af">_u2x</a></td></tr>
 </table>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a6892e2ea65a83e8235f1282509973ae7"></a><!-- doxytag: member="RFHardwareSerial::RFHardwareSerial" ref="a6892e2ea65a83e8235f1282509973ae7" args="(ring_buffer *rx_buffer, ring_buffer *tx_buffer, volatile uint8_t *ubrrh, volatile uint8_t *ubrrl, volatile uint8_t *ucsra, volatile uint8_t *ucsrb, volatile uint8_t *udr, uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)" -->
+<a class="anchor" id="a60645c2c2014ca35e565e147f4b7eb3a"></a><!-- doxytag: member="RFHardwareSerial::RFHardwareSerial" ref="a60645c2c2014ca35e565e147f4b7eb3a" args="(ring_buffer *rx_buffer, ring_buffer_tx *tx_buffer, volatile uint8_t *ubrrh, volatile uint8_t *ubrrl, volatile uint8_t *ucsra, volatile uint8_t *ucsrb, volatile uint8_t *udr, uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -149,7 +150,7 @@ Data Fields</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structring__buffer.html">ring_buffer</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="structring__buffer__tx.html">ring_buffer_tx</a> *&#160;</td>
           <td class="paramname"><em>tx_buffer</em>, </td>
         </tr>
         <tr>
@@ -224,12 +225,12 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a2ec870a76d736051cfa7db65173332e4"></a><!-- doxytag: member="RFHardwareSerial::available" ref="a2ec870a76d736051cfa7db65173332e4" args="(void)" -->
+<a class="anchor" id="aeec8f4dbef97221a6041d6cdc6e9b716"></a><!-- doxytag: member="RFHardwareSerial::available" ref="aeec8f4dbef97221a6041d6cdc6e9b716" args="(void)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="class_r_f_hardware_serial.html#a2ec870a76d736051cfa7db65173332e4">available</a> </td>
+          <td class="memname">virtual int <a class="el" href="class_r_f_hardware_serial.html#aeec8f4dbef97221a6041d6cdc6e9b716">available</a> </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -248,8 +249,8 @@ Data Fields</h2></td></tr>
         <tr>
           <td class="memname">void <a class="el" href="class_r_f_hardware_serial.html#ad3fcb1f90c11e7939fcf5079e2d29b89">begin</a> </td>
           <td>(</td>
-          <td class="paramtype">unsigned long&#160;</td>
-          <td class="paramname"><em>baud</em></td><td>)</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>long</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -274,12 +275,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0a9e9396972b76c5947592479860020d"></a><!-- doxytag: member="RFHardwareSerial::flush" ref="a0a9e9396972b76c5947592479860020d" args="(void)" -->
+<a class="anchor" id="a0a4efd3d0f68d057f23eb5dfcd16c17c"></a><!-- doxytag: member="RFHardwareSerial::flush" ref="a0a4efd3d0f68d057f23eb5dfcd16c17c" args="(void)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_r_f_hardware_serial.html#a0a9e9396972b76c5947592479860020d">flush</a> </td>
+          <td class="memname">virtual void <a class="el" href="class_r_f_hardware_serial.html#a0a4efd3d0f68d057f23eb5dfcd16c17c">flush</a> </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -307,12 +308,29 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4d46097cf44ef5e943170bf7cbee3625"></a><!-- doxytag: member="RFHardwareSerial::peek" ref="a4d46097cf44ef5e943170bf7cbee3625" args="(void)" -->
+<a class="anchor" id="a0eb9f6296a682a7601fd607325ad38b6"></a><!-- doxytag: member="RFHardwareSerial::outputUnused" ref="a0eb9f6296a682a7601fd607325ad38b6" args="(void)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="class_r_f_hardware_serial.html#a4d46097cf44ef5e943170bf7cbee3625">peek</a> </td>
+          <td class="memname">int <a class="el" href="class_r_f_hardware_serial.html#a0eb9f6296a682a7601fd607325ad38b6">outputUnused</a> </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a65e3a688fcd31f2f486d3af02c400d8f"></a><!-- doxytag: member="RFHardwareSerial::peek" ref="a65e3a688fcd31f2f486d3af02c400d8f" args="(void)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int <a class="el" href="class_r_f_hardware_serial.html#a65e3a688fcd31f2f486d3af02c400d8f">peek</a> </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -324,12 +342,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="af3aac984a5eb2c21d26b5a4e35693194"></a><!-- doxytag: member="RFHardwareSerial::read" ref="af3aac984a5eb2c21d26b5a4e35693194" args="(void)" -->
+<a class="anchor" id="aead319e2866cf90d56c10f2ed39a4396"></a><!-- doxytag: member="RFHardwareSerial::read" ref="aead319e2866cf90d56c10f2ed39a4396" args="(void)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="class_r_f_hardware_serial.html#af3aac984a5eb2c21d26b5a4e35693194">read</a> </td>
+          <td class="memname">virtual int <a class="el" href="class_r_f_hardware_serial.html#aead319e2866cf90d56c10f2ed39a4396">read</a> </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -341,15 +359,15 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5762c6450a362153180092b960a57da2"></a><!-- doxytag: member="RFHardwareSerial::write" ref="a5762c6450a362153180092b960a57da2" args="(uint8_t)" -->
+<a class="anchor" id="a729ed73e880aa6992f5c38ca84aa99b1"></a><!-- doxytag: member="RFHardwareSerial::write" ref="a729ed73e880aa6992f5c38ca84aa99b1" args="(uint8_t)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="class_r_f_hardware_serial.html#a5762c6450a362153180092b960a57da2">write</a> </td>
+          <td class="memname">virtual void <a class="el" href="class_r_f_hardware_serial.html#a729ed73e880aa6992f5c38ca84aa99b1">write</a> </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>c</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td><code> [virtual]</code></td>
         </tr>
       </table>
@@ -398,12 +416,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a054597195edb6fb50e316efa3ad3fbd2"></a><!-- doxytag: member="RFHardwareSerial::_tx_buffer" ref="a054597195edb6fb50e316efa3ad3fbd2" args="" -->
+<a class="anchor" id="a255f8188fbd3b483165fb352dc647e81"></a><!-- doxytag: member="RFHardwareSerial::_tx_buffer" ref="a255f8188fbd3b483165fb352dc647e81" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structring__buffer.html">ring_buffer</a>* <a class="el" href="class_r_f_hardware_serial.html#a054597195edb6fb50e316efa3ad3fbd2">_tx_buffer</a></td>
+          <td class="memname"><a class="el" href="structring__buffer__tx.html">ring_buffer_tx</a>* <a class="el" href="class_r_f_hardware_serial.html#a255f8188fbd3b483165fb352dc647e81">_tx_buffer</a></td>
         </tr>
       </table>
 </div>
@@ -515,9 +533,8 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
-<li>Repetier/<a class="el" href="gcode_8h_source.html">gcode.h</a></li>
-<li>Repetier/<a class="el" href="gcode_8cpp.html">gcode.cpp</a></li>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_h_a_l_8h_source.html">HAL.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -539,7 +556,7 @@ Data Fields</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_r_f_hardware_serial.html">RFHardwareSerial</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

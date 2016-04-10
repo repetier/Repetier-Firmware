@@ -28,14 +28,19 @@ class Commands
 {
 public:
     static void commandLoop();
-    static void checkForPeriodicalActions();
+    static void checkForPeriodicalActions(bool allowNewMoves);
+    static void processArc(GCode *com);
+    static void processGCode(GCode *com);
+    static void processMCode(GCode *com);
     static void executeGCode(GCode *com);
     static void waitUntilEndOfAllMoves();
-    static void printCurrentPosition();
+    static void waitUntilEndOfAllBuffers();
+    static void printCurrentPosition(FSTRINGPARAM(s));
     static void printTemperatures(bool showRaw = false);
-    static void setFanSpeed(int speed,bool wait); /// Set fan speed 0..255
+    static void setFanSpeed(int speed, bool immediately = false); /// Set fan speed 0..255
+    static void setFan2Speed(int speed); /// Set fan speed 0..255
     static void changeFeedrateMultiply(int factorInPercent);
-    static void changeFlowateMultiply(int factorInPercent);
+    static void changeFlowrateMultiply(int factorInPercent);
     static void reportPrinterUsage();
     static void emergencyStop();
     static void checkFreeMemory();

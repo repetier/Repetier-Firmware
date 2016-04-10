@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/SdFat.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/SdFat.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -105,7 +105,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/SdFat.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/SdFat.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -135,12 +135,13 @@ Data Structures</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">FSINFO sector for a FAT32 volume.  <a href="structfat32__fsinfo.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdirectory_entry.html">directoryEntry</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">FAT short directory entry.  <a href="structdirectory_entry.html#details">More...</a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdirectory_v_f_a_t_entry.html">directoryVFATEntry</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unioncache__t.html">cache_t</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache for an SD data block.  <a href="unioncache__t.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_volume.html">SdVolume</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Access FAT16 and FAT32 volumes on SD and SDHC cards.  <a href="class_sd_volume.html#details">More...</a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfpos__t.html">fpos_t</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">internal type for istream do not use in user apps  <a href="structfpos__t.html#details">More...</a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_fat_pos__t.html">FatPos_t</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">internal type for istream do not use in user apps  <a href="struct_fat_pos__t.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_base_file.html">SdBaseFile</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for <a class="el" href="class_sd_file.html" title="SdBaseFile with Print.">SdFile</a> with Print and C++ streams.  <a href="class_sd_base_file.html#details">More...</a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd_file.html">SdFile</a></td></tr>
@@ -152,33 +153,39 @@ Namespaces</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html">SdFatUtil</a></td></tr>
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aca25ecce379f446043bdee2c55304210">SD_FAT_VERSION</a>&#160;&#160;&#160;20120719</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af2e76ffb2fdb830175abf513dd640fdd">USE_SD_CRC</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aca25ecce379f446043bdee2c55304210">SD_FAT_VERSION</a>&#160;&#160;&#160;20130629</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af2e76ffb2fdb830175abf513dd640fdd">USE_SD_CRC</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac6b66d035a552c981ab0db9006bdfb7b">USE_MULTIPLE_CARDS</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a9a2b1ca4d91cff876f48deeaacbc33da">DESTRUCTOR_CLOSES_FILE</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a23f662882413dcb017ebd8107473b8c3">USE_SEPARATE_FAT_CACHE</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac551245b3e5d757ea6d3f4867b939f5b">USE_MULTI_BLOCK_SD_IO</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a8dfff1c0ff6919b9eeaa17120834c23d">USE_ARDUINO_SPI_LIBRARY</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0e67a549e139c3e792261fa36e0a69e6">USE_NATIVE_MK20DX128_SPI</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a87c59beeb1465d2d3b5faf008031a037">USE_NATIVE_SAM3X_SPI</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab4b647a03aa38c5fcc2d6f8301410fce">USE_SERIAL_FOR_STD_OUT</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a270eefdaec4778f2a491658f34f61b17">ENDL_CALLS_FLUSH</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af8ef36dfd023f41169baa17d05f55c56">ALLOW_DEPRECATED_FUNCTIONS</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af8ef36dfd023f41169baa17d05f55c56">ALLOW_DEPRECATED_FUNCTIONS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a28998c5daf4bd038f4f93172698320b1">FAT12_SUPPORT</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa94c2fdbafa7278baa2afa1c97dc6546">SPI_SD_INIT_RATE</a>&#160;&#160;&#160;5</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa94c2fdbafa7278baa2afa1c97dc6546">SPI_SD_INIT_RATE</a>&#160;&#160;&#160;11</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab780c3f0584e602320e2f746f73e0d5d">SET_SPI_SS_HIGH</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad3a00a466d2b81cff13c5447a09d704b">MEGA_SOFT_SPI</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a60a162fdb06d182b5cefc271d67ea765">LEONARDO_SOFT_SPI</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#adc58bc95f1a1e044149d907287cb79a1">USE_SOFTWARE_SPI</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a91d7d33ce23ec0b34dcc1f2f638887f3">SD_CARD_REUSE_FAT_ENTRIES</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6d413885c384693a5c98de870c752ac5">PgmPrint</a>(x)&#160;&#160;&#160;SerialPrint_P(PSTR(x))</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a3b0de03c1185b3235b3c1e8a80ef281f">PgmPrintln</a>(x)&#160;&#160;&#160;SerialPrintln_P(PSTR(x))</td></tr>
 <tr><td colspan="2"><h2><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_c_i_d.html">CID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a7f1c4653597f0e5276671139a3592dcd">cid_t</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_c_s_d_v1.html">CSDV1</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a4dc5a2aea3d7715c82094bce06e1b3a7">csd1_t</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct_c_s_d_v2.html">CSDV2</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a3e07997926302b26d47ffb0535da9d01">csd2_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structpartition_table.html">partitionTable</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a37251e7d5c69a159be727a3fc8c9d0e6">part_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structmaster_boot_record.html">masterBootRecord</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a7c429e5097f101c8c97663d6c4155bd9">mbr_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structfat__boot.html">fat_boot</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aedac4595ee08198da26c14b9891a07d5">fat_boot_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structfat32__boot.html">fat32_boot</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a38fa081d004647a828095d31b07ec491">fat32_boot_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structfat32__fsinfo.html">fat32_fsinfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6030ed0fce3a819326a2548407fc8556">fat32_fsinfo_t</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structdirectory_v_f_a_t_entry.html">directoryVFATEntry</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac6971dadcb93615aead14e8614a704ba">vfat_t</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structdirectory_entry.html">directoryEntry</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a></td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_c_i_d.html">CID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a> ((packed)) cid_t</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a504c3d996b412f386becc27a8c49cd2c">DIR_IS_LONG_NAME</a> (const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5ce8bde4d6ff3950df951e84c7bb8d58">DIR_IS_FILE</a> (const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ace8ed88fcb41afc4d2fe0eabf96e71c6">DIR_IS_SUBDIR</a> (const <a class="el" href="_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3">dir_t</a> *dir)</td></tr>
@@ -192,10 +199,8 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a1b09676a41ae6c9e19664bdcd5b1d34e">FAT_MINUTE</a> (uint16_t fatTime)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a4d553e2088d42e01d6c08ee84e611b00">FAT_SECOND</a> (uint16_t fatTime)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a9103b9a4934cfc4d5dea9e7fec7353d1">FreeRam</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#ad286914ceca90b6952327d90237d3e56">print_P</a> (Print *pr, PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a59f16a2fc62ff5c3af0ec2f10edaf6a1">println_P</a> (Print *pr, PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a97af8c0fb43dece0f32e5cbd36dfd34c">SerialPrint_P</a> (PGM_P str)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a9b4dae4ef11bfdf2458295c5b7ac9102">SerialPrintln_P</a> (PGM_P str)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#a53501f750724a30711199f13157368b0">SerialPrint_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_sd_fat_util.html#ac5a07ab8c6efe1f2e2a635cfb395a8c3">SerialPrintln_P</a> (<a class="el" href="_h_a_l_8h.html#a6c7567c1812b6b6ca9067377476ddc4e">FSTRINGPARAM</a>(str))</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a1ec3c92c9dd38b0efa9126be38850d29">CMD0</a> = 0X00</td></tr>
@@ -224,15 +229,72 @@ Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a55a97e38f040eaef5ea72c04ed0b8ca3">WRITE_MULTIPLE_TOKEN</a> = 0XFC</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ae8f749cad9dfa06c4a44435bac117183">DATA_RES_MASK</a> = 0X1F</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0fbc8534d6683fea65b463f439df1c3d">DATA_RES_ACCEPTED</a> = 0X05</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ae7e18f9a317db7063e35ef5a5d4bd5f7">mid</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0e7c3c74464b5888d6e4dde057c4d2c9">oid</a> [2]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a44c58f891140614a2a6a1ad573ca0bf3">pnm</a> [5]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a4db87c2ec4c352612dcf8cedf9986d8e">prv_m</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a1cb6a1abc2649d20b1f2e57dd1763997">prv_n</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab39d64e654c57f0bc30ce636e071713a">psn</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5e4772a445bb5e242f62d89ed9fa01bb">mdt_year_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad828f5fe7507f2e5a9df0da7a74b59e8">reserved</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6f31f0414d7c277a8f3ac4a8e7a83101">mdt_month</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aaf6f6e0f7e73844d7d2a59b3e7f3b6de">mdt_year_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af3bbe76c61e108c500f5a861dff1e6c2">always1</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa7963a1d695d609cf3609747cf19fd71">crc</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#affe215a7220b2d52fb9dacf3b35e56dc">reserved1</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a468f68d66a14a0e3d70ae9dce7c7b084">csd_ver</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#add15a5302761bd6e2ee294c0c38e9f8a">taac</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a877524d1f9ede3c07079957826d08a1e">nsac</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af83be4d825b2e325d094297e81693443">tran_speed</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a76b00b1b0657aefa115a98f122aca8c5">ccc_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af43ab7cd256a4134cd3b78bdecb9d7c5">read_bl_len</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad38ba451d9647c41a9b60a2f7a61e9d4">ccc_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a8ca62fc4ed0f6598005209d3c34f9c44">c_size_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#add22350e7fe29ca6649dd6564e8425ea">reserved2</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#adca766448ce5830490363d3fbb02ab4b">dsr_imp</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a31c0f3174289d3fb8abade294770fc33">read_blk_misalign</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5fd0cab21c874fd49fc4ea5d537be201">write_blk_misalign</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a7387a4ab3ec1161c246ed02941e1325e">read_bl_partial</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a8cd3e8cdbf34be110b1d87b0c5f7b1d8">c_size_mid</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a68aafd29ea70955c274ebeb0364b4033">vdd_r_curr_max</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0e5dbcfa1434c0d43a5f71067b54377a">vdd_r_curr_min</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a2af914ea8fe2b045432553e2d7c75bb7">c_size_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a7428d75741e0eb9add87c4a2f672581e">c_size_mult_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa018db4afbad1a906ffc7c2f16e949b6">vdd_w_cur_max</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a17680224cd64eb6021437f4955b6392b">vdd_w_curr_min</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a2580a4c6ddd99928402db34c2f650033">sector_size_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa0ada858f4a1455c6cb4e9b7523d8fd1">erase_blk_en</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6ac71fb99912431be5df16b72a8f75e4">c_size_mult_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a3574bbe4ccfc7f26daa84efd98a9ff4c">wp_grp_size</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#afcbc43e43942a772e79ef2aa55e37650">sector_size_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af31036ae33a6db8cf3db322fef249b48">write_bl_len_high</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#acbc1184d8705d3631d9492f927ccb8e8">r2w_factor</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6525406821be82277577a768a2d4e904">reserved3</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab4247b023129bd89e0cebe8508b35f0a">wp_grp_enable</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a1dcde2e7c54e279f4d7aac27d130cc17">reserved4</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a062890f25943538976760e7db822a635">write_partial</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad61c0325b9602bdb15cf59b69fc4a67f">write_bl_len_low</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6dd54d3f51fc8f0916d8882851d26d91">reserved5</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa1a7dd102774cf915cbe66010250253d">file_format</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0d4a26aaf05de47ca630a0976e897f90">tmp_write_protect</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a674d846d31b5a170bf7b2a27d8c8856a">perm_write_protect</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a0ff3051eb9cb79426196331363674fa7">copy</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa44f7b6ef5fd710a716fa9ef045c68f0">file_format_grp</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa8656feb1159d94a13733e19da33d258">reserved6</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a88028b6a6993ea4c35717196f8e16a9e">reserved7</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">union <a class="el" href="unioncsd__t.html">csd_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a011d27aa1579ba8c8866dbfc61d0f47b">__attribute__</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5e0307dbc42b2444deedd558bcdd8933">SOFT_SPI_CS_PIN</a> = 10</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac2f492b4970ffbbea92d5d3e3f8aa2f0">SOFT_SPI_MOSI_PIN</a> = 11</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af12e3a0d80cb8c7c9e3841887c508f3f">SOFT_SPI_MISO_PIN</a> = 12</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#add7db7df22669e60cddd5698113d6327">SOFT_SPI_SCK_PIN</a> = 13</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a> = 0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#abf126d9da3318e2709bbc3f2ab3cb3d1">SPI_HALF_SPEED</a> = 1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad6a75e4ff6409fe1305ec6915787458e">SPI_QUARTER_SPEED</a> = 2</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#acf9e8ae5785dfdaa0fa59042e528ea6c">SPI_EIGHTH_SPEED</a> = 3</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a792e282c1b86c65d14e3d6e6612ad2d0">SPI_SIXTEENTH_SPEED</a> = 4</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5a1200ff5e0c910fdea6eca447d10a19">SPI_DIV3_SPEED</a> = 1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#abf126d9da3318e2709bbc3f2ab3cb3d1">SPI_HALF_SPEED</a> = 2</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a491576f0359638403febf9289f7e4fbd">SPI_DIV6_SPEED</a> = 3</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ad6a75e4ff6409fe1305ec6915787458e">SPI_QUARTER_SPEED</a> = 4</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#acf9e8ae5785dfdaa0fa59042e528ea6c">SPI_EIGHTH_SPEED</a> = 6</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a792e282c1b86c65d14e3d6e6612ad2d0">SPI_SIXTEENTH_SPEED</a> = 8</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a2d32bcdd4baf13c77aecf1f60d3018a1">MAX_SCK_RATE_ID</a> = 14</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint16_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab7b9920a819e60f97f988ee13b3ddc40">SD_INIT_TIMEOUT</a> = 2000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint16_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#afb7454898d781c58caa00f82f0f14f63">SD_ERASE_TIMEOUT</a> = 10000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint16_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a02f6ddc876ebab300586940bd111eccd">SD_READ_TIMEOUT</a> = 300</td></tr>
@@ -264,6 +326,7 @@ Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab2b7080183030b2cce47b7469e0dde7d">SD_CARD_ERROR_INIT_NOT_CALLED</a> = 0X19</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a974f951f7de236ad1bf498344c573b26">SD_CARD_ERROR_CMD59</a> = 0X1A</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#afb7f0b9a1a4ea92107204508c893cc81">SD_CARD_ERROR_READ_CRC</a> = 0X1B</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ae10703397b36b451e590946497a58867">SD_CARD_ERROR_SPI_DMA</a> = 0X1C</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#af55081a60d333ab063a5da5dd2c3633b">SD_CARD_TYPE_SD1</a> = 1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a225807c91fc41717b4230d3b7e99c9f7">SD_CARD_TYPE_SD2</a> = 2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a39b05691c3bcfffddd5d590589980f44">SD_CARD_TYPE_SDHC</a> = 3</td></tr>
@@ -271,6 +334,7 @@ Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#aa1aeb3a5e2838c5c7270fa17bcc31e8e">BOOTSIG0</a> = 0X55</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a1b5a143c48d93d6f4e3fc1f5f3ac1dc3">BOOTSIG1</a> = 0XAA</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac856ff0a92288eb124e1688581628cd0">EXTENDED_BOOT_SIG</a> = 0X29</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structpartition_table.html">partitionTable</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a6f596e0861a880c81c6b7006065d9eab">PACK</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ac569b1b465f941aaa41a17d270e278df">FSINFO_LEAD_SIG</a> = 0x41615252</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint32_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#ab777b40d12137b9ed073b3bb578703d0">FSINFO_STRUCT_SIG</a> = 0x61417272</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint16_t const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_sd_fat_8h.html#a5beb263a9cb768739f5ddb476ede6690">FAT12EOC</a> = 0XFFF</td></tr>
@@ -329,12 +393,27 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#af8ef36dfd023f41169baa17d05f55c56">ALLOW_DEPRECATED_FUNCTIONS</a>&#160;&#160;&#160;1</td>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#af8ef36dfd023f41169baa17d05f55c56">ALLOW_DEPRECATED_FUNCTIONS</a>&#160;&#160;&#160;0</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 <p>Allow use of deprecated functions if ALLOW_DEPRECATED_FUNCTIONS is nonzero </p>
+
+</div>
+</div>
+<a class="anchor" id="a9a2b1ca4d91cff876f48deeaacbc33da"></a><!-- doxytag: member="SdFat.h::DESTRUCTOR_CLOSES_FILE" ref="a9a2b1ca4d91cff876f48deeaacbc33da" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a9a2b1ca4d91cff876f48deeaacbc33da">DESTRUCTOR_CLOSES_FILE</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set DESTRUCTOR_CLOSES_FILE nonzero to close a file in its destructor.</p>
+<p>Causes use of lots of heap in ARM. </p>
 
 </div>
 </div>
@@ -436,12 +515,25 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a91d7d33ce23ec0b34dcc1f2f638887f3"></a><!-- doxytag: member="SdFat.h::SD_CARD_REUSE_FAT_ENTRIES" ref="a91d7d33ce23ec0b34dcc1f2f638887f3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a91d7d33ce23ec0b34dcc1f2f638887f3">SD_CARD_REUSE_FAT_ENTRIES</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="aca25ecce379f446043bdee2c55304210"></a><!-- doxytag: member="SdFat.h::SD_FAT_VERSION" ref="aca25ecce379f446043bdee2c55304210" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#aca25ecce379f446043bdee2c55304210">SD_FAT_VERSION</a>&#160;&#160;&#160;20120719</td>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#aca25ecce379f446043bdee2c55304210">SD_FAT_VERSION</a>&#160;&#160;&#160;20130629</td>
         </tr>
       </table>
 </div>
@@ -469,12 +561,40 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#aa94c2fdbafa7278baa2afa1c97dc6546">SPI_SD_INIT_RATE</a>&#160;&#160;&#160;5</td>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#aa94c2fdbafa7278baa2afa1c97dc6546">SPI_SD_INIT_RATE</a>&#160;&#160;&#160;11</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>SPI init rate for SD initialization commands. Must be 5 (F_CPU/64) or 6 (F_CPU/128). </p>
+<p>SPI init rate for SD initialization commands. Must be 10 (F_CPU/64) or greater </p>
+
+</div>
+</div>
+<a class="anchor" id="a8dfff1c0ff6919b9eeaa17120834c23d"></a><!-- doxytag: member="SdFat.h::USE_ARDUINO_SPI_LIBRARY" ref="a8dfff1c0ff6919b9eeaa17120834c23d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a8dfff1c0ff6919b9eeaa17120834c23d">USE_ARDUINO_SPI_LIBRARY</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Force use of Arduino Standard SPI library if USE_ARDUINO_SPI_LIBRARY is nonzero. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac551245b3e5d757ea6d3f4867b939f5b"></a><!-- doxytag: member="SdFat.h::USE_MULTI_BLOCK_SD_IO" ref="ac551245b3e5d757ea6d3f4867b939f5b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#ac551245b3e5d757ea6d3f4867b939f5b">USE_MULTI_BLOCK_SD_IO</a>&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Don't use mult-block read/write on small AVR boards </p>
 
 </div>
 </div>
@@ -494,12 +614,40 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0e67a549e139c3e792261fa36e0a69e6"></a><!-- doxytag: member="SdFat.h::USE_NATIVE_MK20DX128_SPI" ref="a0e67a549e139c3e792261fa36e0a69e6" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a0e67a549e139c3e792261fa36e0a69e6">USE_NATIVE_MK20DX128_SPI</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Use native SPI on Teensy 3.0 if USE_NATIVE_MK20DX128-SPI is nonzero. </p>
+
+</div>
+</div>
+<a class="anchor" id="a87c59beeb1465d2d3b5faf008031a037"></a><!-- doxytag: member="SdFat.h::USE_NATIVE_SAM3X_SPI" ref="a87c59beeb1465d2d3b5faf008031a037" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a87c59beeb1465d2d3b5faf008031a037">USE_NATIVE_SAM3X_SPI</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Use fast SAM3X SPI library if USE_NATIVE_SAM3X_SPI is nonzero. </p>
+
+</div>
+</div>
 <a class="anchor" id="af2e76ffb2fdb830175abf513dd640fdd"></a><!-- doxytag: member="SdFat.h::USE_SD_CRC" ref="af2e76ffb2fdb830175abf513dd640fdd" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#af2e76ffb2fdb830175abf513dd640fdd">USE_SD_CRC</a>&#160;&#160;&#160;0</td>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#af2e76ffb2fdb830175abf513dd640fdd">USE_SD_CRC</a>&#160;&#160;&#160;2</td>
         </tr>
       </table>
 </div>
@@ -507,6 +655,20 @@ Variables</h2></td></tr>
 <p>To enable SD card CRC checking set USE_SD_CRC nonzero.</p>
 <p>Set USE_SD_CRC to 1 to use a smaller slower CRC-CCITT function.</p>
 <p>Set USE_SD_CRC to 2 to used a larger faster table driven CRC-CCITT function. </p>
+
+</div>
+</div>
+<a class="anchor" id="a23f662882413dcb017ebd8107473b8c3"></a><!-- doxytag: member="SdFat.h::USE_SEPARATE_FAT_CACHE" ref="a23f662882413dcb017ebd8107473b8c3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_sd_fat_8h.html#a23f662882413dcb017ebd8107473b8c3">USE_SEPARATE_FAT_CACHE</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set USE_SEPARATE_FAT_CACHE nonzero to use a second 512 byte cache for FAT table entries. Improves performance for large writes that are not a multiple of 512 bytes. </p>
 
 </div>
 </div>
@@ -522,7 +684,7 @@ Variables</h2></td></tr>
 <div class="memdoc">
 <p>Set nonzero to use Serial (the HardwareSerial class) for error messages and output from print functions like ls().</p>
 <p>If USE_SERIAL_FOR_STD_OUT is zero, a small non-interrupt driven class is used to output messages to serial port zero. This allows an alternate Serial library like SerialPort to be used with <a class="el" href="class_sd_fat.html" title="Integration class for the SdFat library.">SdFat</a>.</p>
-<p>You can redirect stdOut with <a class="el" href="class_sd_fat.html#a625a8635c2db7a668fc93f82766688f9">SdFat::setStdOut(Print* stream)</a> and get the current stream with <a class="el" href="class_sd_fat.html#a957df3529dafdd6ed3e17b23b4efbf27">SdFat::stdOut()</a>. </p>
+<p>You can redirect stdOut with SdFat::setStdOut(Print* stream) and get the current stream with SdFat::stdOut(). </p>
 
 </div>
 </div>
@@ -541,48 +703,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Typedef Documentation</h2>
-<a class="anchor" id="a7f1c4653597f0e5276671139a3592dcd"></a><!-- doxytag: member="SdFat.h::cid_t" ref="a7f1c4653597f0e5276671139a3592dcd" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="struct_c_i_d.html">CID</a> <a class="el" href="_sd_fat_8h.html#a7f1c4653597f0e5276671139a3592dcd">cid_t</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Card IDentification (<a class="el" href="struct_c_i_d.html">CID</a>) register </p>
-
-</div>
-</div>
-<a class="anchor" id="a4dc5a2aea3d7715c82094bce06e1b3a7"></a><!-- doxytag: member="SdFat.h::csd1_t" ref="a4dc5a2aea3d7715c82094bce06e1b3a7" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="struct_c_s_d_v1.html">CSDV1</a> <a class="el" href="_sd_fat_8h.html#a4dc5a2aea3d7715c82094bce06e1b3a7">csd1_t</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>CSD for version 1.00 cards </p>
-
-</div>
-</div>
-<a class="anchor" id="a3e07997926302b26d47ffb0535da9d01"></a><!-- doxytag: member="SdFat.h::csd2_t" ref="a3e07997926302b26d47ffb0535da9d01" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef struct <a class="el" href="struct_c_s_d_v2.html">CSDV2</a> <a class="el" href="_sd_fat_8h.html#a3e07997926302b26d47ffb0535da9d01">csd2_t</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>CSD for version 2.00 cards </p>
-
-</div>
-</div>
 <a class="anchor" id="a803db59d4e16a0c54a647afc6a7954e3"></a><!-- doxytag: member="SdFat.h::dir_t" ref="a803db59d4e16a0c54a647afc6a7954e3" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -667,7 +787,40 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ac6971dadcb93615aead14e8614a704ba"></a><!-- doxytag: member="SdFat.h::vfat_t" ref="ac6971dadcb93615aead14e8614a704ba" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structdirectory_v_f_a_t_entry.html">directoryVFATEntry</a> <a class="el" href="_sd_fat_8h.html#ac6971dadcb93615aead14e8614a704ba">vfat_t</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <hr/><h2>Function Documentation</h2>
+<a class="anchor" id="a30166ffbe6c407702ab1da3ac6f80227"></a><!-- doxytag: member="SdFat.h::__attribute__" ref="a30166ffbe6c407702ab1da3ac6f80227" args="((packed)) cid_t" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="struct_c_i_d.html">CID</a> <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a> </td>
+          <td>(</td>
+          <td class="paramtype">(packed)&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Card IDentification (<a class="el" href="struct_c_i_d.html">CID</a>) register</p>
+<p>CSD for version 1.00 cards</p>
+<p>CSD for version 2.00 cards </p>
+
+</div>
+</div>
 <a class="anchor" id="a5ce8bde4d6ff3950df951e84c7bb8d58"></a><!-- doxytag: member="SdFat.h::DIR_IS_FILE" ref="a5ce8bde4d6ff3950df951e84c7bb8d58" args="(const dir_t *dir)" -->
 <div class="memitem">
 <div class="memproto">
@@ -1005,6 +1158,21 @@ Variables</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Variable Documentation</h2>
+<a class="anchor" id="a011d27aa1579ba8c8866dbfc61d0f47b"></a><!-- doxytag: member="SdFat.h::__attribute__" ref="a011d27aa1579ba8c8866dbfc61d0f47b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="struct_c_s_d_v2.html">CSDV2</a> <a class="el" href="_sd_fat_8h.html#a30166ffbe6c407702ab1da3ac6f80227">__attribute__</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>CSD for version 1.00 cards</p>
+<p>CSD for version 2.00 cards </p>
+
+</div>
+</div>
 <a class="anchor" id="a4427a8b94a0a6092255388a8666c42eb"></a><!-- doxytag: member="SdFat.h::ACMD23" ref="a4427a8b94a0a6092255388a8666c42eb" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1033,6 +1201,20 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af3bbe76c61e108c500f5a861dff1e6c2"></a><!-- doxytag: member="SdFat.h::always1" ref="af3bbe76c61e108c500f5a861dff1e6c2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#af3bbe76c61e108c500f5a861dff1e6c2">always1</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used always 1 </p>
+
+</div>
+</div>
 <a class="anchor" id="aa1aeb3a5e2838c5c7270fa17bcc31e8e"></a><!-- doxytag: member="SdFat.h::BOOTSIG0" ref="aa1aeb3a5e2838c5c7270fa17bcc31e8e" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1058,6 +1240,100 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>Value for byte 511 of boot block or MBR </p>
+
+</div>
+</div>
+<a class="anchor" id="a8ca62fc4ed0f6598005209d3c34f9c44"></a><!-- doxytag: member="SdFat.h::c_size_high" ref="a8ca62fc4ed0f6598005209d3c34f9c44" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a8ca62fc4ed0f6598005209d3c34f9c44">c_size_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>high part of card size </p>
+
+</div>
+</div>
+<a class="anchor" id="a2af914ea8fe2b045432553e2d7c75bb7"></a><!-- doxytag: member="SdFat.h::c_size_low" ref="a2af914ea8fe2b045432553e2d7c75bb7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a2af914ea8fe2b045432553e2d7c75bb7">c_size_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>low part of card size </p>
+
+</div>
+</div>
+<a class="anchor" id="a8cd3e8cdbf34be110b1d87b0c5f7b1d8"></a><!-- doxytag: member="SdFat.h::c_size_mid" ref="a8cd3e8cdbf34be110b1d87b0c5f7b1d8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a8cd3e8cdbf34be110b1d87b0c5f7b1d8">c_size_mid</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>middle part of card size </p>
+
+</div>
+</div>
+<a class="anchor" id="a7428d75741e0eb9add87c4a2f672581e"></a><!-- doxytag: member="SdFat.h::c_size_mult_high" ref="a7428d75741e0eb9add87c4a2f672581e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a7428d75741e0eb9add87c4a2f672581e">c_size_mult_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6ac71fb99912431be5df16b72a8f75e4"></a><!-- doxytag: member="SdFat.h::c_size_mult_low" ref="a6ac71fb99912431be5df16b72a8f75e4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a6ac71fb99912431be5df16b72a8f75e4">c_size_mult_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a76b00b1b0657aefa115a98f122aca8c5"></a><!-- doxytag: member="SdFat.h::ccc_high" ref="a76b00b1b0657aefa115a98f122aca8c5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a76b00b1b0657aefa115a98f122aca8c5">ccc_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad38ba451d9647c41a9b60a2f7a61e9d4"></a><!-- doxytag: member="SdFat.h::ccc_low" ref="ad38ba451d9647c41a9b60a2f7a61e9d4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#ad38ba451d9647c41a9b60a2f7a61e9d4">ccc_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -1285,6 +1561,47 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0ff3051eb9cb79426196331363674fa7"></a><!-- doxytag: member="SdFat.h::copy" ref="a0ff3051eb9cb79426196331363674fa7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a0ff3051eb9cb79426196331363674fa7">copy</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa7963a1d695d609cf3609747cf19fd71"></a><!-- doxytag: member="SdFat.h::crc" ref="aa7963a1d695d609cf3609747cf19fd71" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa7963a1d695d609cf3609747cf19fd71">crc</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>CRC7 checksum</p>
+<p>checksum </p>
+
+</div>
+</div>
+<a class="anchor" id="a468f68d66a14a0e3d70ae9dce7c7b084"></a><!-- doxytag: member="SdFat.h::csd_ver" ref="a468f68d66a14a0e3d70ae9dce7c7b084" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a468f68d66a14a0e3d70ae9dce7c7b084">csd_ver</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a0fbc8534d6683fea65b463f439df1c3d"></a><!-- doxytag: member="SdFat.h::DATA_RES_ACCEPTED" ref="a0fbc8534d6683fea65b463f439df1c3d" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1506,6 +1823,33 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>name[0] value for entry that is free and no allocated entries follow </p>
+
+</div>
+</div>
+<a class="anchor" id="adca766448ce5830490363d3fbb02ab4b"></a><!-- doxytag: member="SdFat.h::dsr_imp" ref="adca766448ce5830490363d3fbb02ab4b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#adca766448ce5830490363d3fbb02ab4b">dsr_imp</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa0ada858f4a1455c6cb4e9b7523d8fd1"></a><!-- doxytag: member="SdFat.h::erase_blk_en" ref="aa0ada858f4a1455c6cb4e9b7523d8fd1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa0ada858f4a1455c6cb4e9b7523d8fd1">erase_blk_en</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 1 - erase single is supported </p>
 
 </div>
 </div>
@@ -1733,6 +2077,35 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa1a7dd102774cf915cbe66010250253d"></a><!-- doxytag: member="SdFat.h::file_format" ref="aa1a7dd102774cf915cbe66010250253d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa1a7dd102774cf915cbe66010250253d">file_format</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Do not use always 0 </p>
+
+</div>
+</div>
+<a class="anchor" id="aa44f7b6ef5fd710a716fa9ef045c68f0"></a><!-- doxytag: member="SdFat.h::file_format_grp" ref="aa44f7b6ef5fd710a716fa9ef045c68f0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa44f7b6ef5fd710a716fa9ef045c68f0">file_format_grp</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Indicates the file format on the card</p>
+<p>Do not use always 0 </p>
+
+</div>
+</div>
 <a class="anchor" id="ac569b1b465f941aaa41a17d270e278df"></a><!-- doxytag: member="SdFat.h::FSINFO_LEAD_SIG" ref="ac569b1b465f941aaa41a17d270e278df" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1800,6 +2173,90 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>ls() flag to print file size </p>
+
+</div>
+</div>
+<a class="anchor" id="a2d32bcdd4baf13c77aecf1f60d3018a1"></a><!-- doxytag: member="SdFat.h::MAX_SCK_RATE_ID" ref="a2d32bcdd4baf13c77aecf1f60d3018a1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t <a class="el" href="_sd_fat_8h.html#a2d32bcdd4baf13c77aecf1f60d3018a1">MAX_SCK_RATE_ID</a> = 14</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>MAX rate test - see spiInit for a given chip for details </p>
+
+</div>
+</div>
+<a class="anchor" id="a6f31f0414d7c277a8f3ac4a8e7a83101"></a><!-- doxytag: member="SdFat.h::mdt_month" ref="a6f31f0414d7c277a8f3ac4a8e7a83101" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a6f31f0414d7c277a8f3ac4a8e7a83101">mdt_month</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Manufacturing date month </p>
+
+</div>
+</div>
+<a class="anchor" id="a5e4772a445bb5e242f62d89ed9fa01bb"></a><!-- doxytag: member="SdFat.h::mdt_year_high" ref="a5e4772a445bb5e242f62d89ed9fa01bb" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a5e4772a445bb5e242f62d89ed9fa01bb">mdt_year_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Manufacturing date year low digit </p>
+
+</div>
+</div>
+<a class="anchor" id="aaf6f6e0f7e73844d7d2a59b3e7f3b6de"></a><!-- doxytag: member="SdFat.h::mdt_year_low" ref="aaf6f6e0f7e73844d7d2a59b3e7f3b6de" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aaf6f6e0f7e73844d7d2a59b3e7f3b6de">mdt_year_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Manufacturing date year low digit </p>
+
+</div>
+</div>
+<a class="anchor" id="ae7e18f9a317db7063e35ef5a5d4bd5f7"></a><!-- doxytag: member="SdFat.h::mid" ref="ae7e18f9a317db7063e35ef5a5d4bd5f7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#ae7e18f9a317db7063e35ef5a5d4bd5f7">mid</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Manufacturer ID </p>
+
+</div>
+</div>
+<a class="anchor" id="a877524d1f9ede3c07079957826d08a1e"></a><!-- doxytag: member="SdFat.h::nsac" ref="a877524d1f9ede3c07079957826d08a1e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a877524d1f9ede3c07079957826d08a1e">nsac</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 0 </p>
 
 </div>
 </div>
@@ -1971,6 +2428,102 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0e7c3c74464b5888d6e4dde057c4d2c9"></a><!-- doxytag: member="SdFat.h::oid" ref="a0e7c3c74464b5888d6e4dde057c4d2c9" args="[2]" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char <a class="el" href="_sd_fat_8h.html#a0e7c3c74464b5888d6e4dde057c4d2c9">oid</a>[2]</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>OEM/Application ID </p>
+
+</div>
+</div>
+<a class="anchor" id="a6f596e0861a880c81c6b7006065d9eab"></a><!-- doxytag: member="SdFat.h::PACK" ref="a6f596e0861a880c81c6b7006065d9eab" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">union <a class="el" href="unioncache__t.html">cache_t</a>  <a class="el" href="_sd_fat_8h.html#a6f596e0861a880c81c6b7006065d9eab">PACK</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a674d846d31b5a170bf7b2a27d8c8856a"></a><!-- doxytag: member="SdFat.h::perm_write_protect" ref="a674d846d31b5a170bf7b2a27d8c8856a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a674d846d31b5a170bf7b2a27d8c8856a">perm_write_protect</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a44c58f891140614a2a6a1ad573ca0bf3"></a><!-- doxytag: member="SdFat.h::pnm" ref="a44c58f891140614a2a6a1ad573ca0bf3" args="[5]" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char <a class="el" href="_sd_fat_8h.html#a44c58f891140614a2a6a1ad573ca0bf3">pnm</a>[5]</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Product name </p>
+
+</div>
+</div>
+<a class="anchor" id="a4db87c2ec4c352612dcf8cedf9986d8e"></a><!-- doxytag: member="SdFat.h::prv_m" ref="a4db87c2ec4c352612dcf8cedf9986d8e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a4db87c2ec4c352612dcf8cedf9986d8e">prv_m</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Product revision least significant digit </p>
+
+</div>
+</div>
+<a class="anchor" id="a1cb6a1abc2649d20b1f2e57dd1763997"></a><!-- doxytag: member="SdFat.h::prv_n" ref="a1cb6a1abc2649d20b1f2e57dd1763997" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a1cb6a1abc2649d20b1f2e57dd1763997">prv_n</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Product revision most significant digit </p>
+
+</div>
+</div>
+<a class="anchor" id="ab39d64e654c57f0bc30ce636e071713a"></a><!-- doxytag: member="SdFat.h::psn" ref="ab39d64e654c57f0bc30ce636e071713a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t <a class="el" href="_sd_fat_8h.html#ab39d64e654c57f0bc30ce636e071713a">psn</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Product serial number </p>
+
+</div>
+</div>
 <a class="anchor" id="a180d34bf6496bc49f34e750d3878c528"></a><!-- doxytag: member="SdFat.h::R1_IDLE_STATE" ref="a180d34bf6496bc49f34e750d3878c528" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2010,6 +2563,171 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>status for card in the ready state </p>
+
+</div>
+</div>
+<a class="anchor" id="acbc1184d8705d3631d9492f927ccb8e8"></a><!-- doxytag: member="SdFat.h::r2w_factor" ref="acbc1184d8705d3631d9492f927ccb8e8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#acbc1184d8705d3631d9492f927ccb8e8">r2w_factor</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed value of 2 </p>
+
+</div>
+</div>
+<a class="anchor" id="af43ab7cd256a4134cd3b78bdecb9d7c5"></a><!-- doxytag: member="SdFat.h::read_bl_len" ref="af43ab7cd256a4134cd3b78bdecb9d7c5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#af43ab7cd256a4134cd3b78bdecb9d7c5">read_bl_len</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>This field is fixed to 9h, which indicates READ_BL_LEN=512 Byte </p>
+
+</div>
+</div>
+<a class="anchor" id="a7387a4ab3ec1161c246ed02941e1325e"></a><!-- doxytag: member="SdFat.h::read_bl_partial" ref="a7387a4ab3ec1161c246ed02941e1325e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a7387a4ab3ec1161c246ed02941e1325e">read_bl_partial</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 0 - no partial read </p>
+
+</div>
+</div>
+<a class="anchor" id="a31c0f3174289d3fb8abade294770fc33"></a><!-- doxytag: member="SdFat.h::read_blk_misalign" ref="a31c0f3174289d3fb8abade294770fc33" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a31c0f3174289d3fb8abade294770fc33">read_blk_misalign</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 0 </p>
+
+</div>
+</div>
+<a class="anchor" id="ad828f5fe7507f2e5a9df0da7a74b59e8"></a><!-- doxytag: member="SdFat.h::reserved" ref="ad828f5fe7507f2e5a9df0da7a74b59e8" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#ad828f5fe7507f2e5a9df0da7a74b59e8">reserved</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used </p>
+
+</div>
+</div>
+<a class="anchor" id="affe215a7220b2d52fb9dacf3b35e56dc"></a><!-- doxytag: member="SdFat.h::reserved1" ref="affe215a7220b2d52fb9dacf3b35e56dc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#affe215a7220b2d52fb9dacf3b35e56dc">reserved1</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="add22350e7fe29ca6649dd6564e8425ea"></a><!-- doxytag: member="SdFat.h::reserved2" ref="add22350e7fe29ca6649dd6564e8425ea" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#add22350e7fe29ca6649dd6564e8425ea">reserved2</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used </p>
+
+</div>
+</div>
+<a class="anchor" id="a6525406821be82277577a768a2d4e904"></a><!-- doxytag: member="SdFat.h::reserved3" ref="a6525406821be82277577a768a2d4e904" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a6525406821be82277577a768a2d4e904">reserved3</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used </p>
+
+</div>
+</div>
+<a class="anchor" id="a1dcde2e7c54e279f4d7aac27d130cc17"></a><!-- doxytag: member="SdFat.h::reserved4" ref="a1dcde2e7c54e279f4d7aac27d130cc17" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a1dcde2e7c54e279f4d7aac27d130cc17">reserved4</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used </p>
+
+</div>
+</div>
+<a class="anchor" id="a6dd54d3f51fc8f0916d8882851d26d91"></a><!-- doxytag: member="SdFat.h::reserved5" ref="a6dd54d3f51fc8f0916d8882851d26d91" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a6dd54d3f51fc8f0916d8882851d26d91">reserved5</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>not used </p>
+
+</div>
+</div>
+<a class="anchor" id="aa8656feb1159d94a13733e19da33d258"></a><!-- doxytag: member="SdFat.h::reserved6" ref="aa8656feb1159d94a13733e19da33d258" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa8656feb1159d94a13733e19da33d258">reserved6</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a88028b6a6993ea4c35717196f8e16a9e"></a><!-- doxytag: member="SdFat.h::reserved7" ref="a88028b6a6993ea4c35717196f8e16a9e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a88028b6a6993ea4c35717196f8e16a9e">reserved7</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -2307,6 +3025,20 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae10703397b36b451e590946497a58867"></a><!-- doxytag: member="SdFat.h::SD_CARD_ERROR_SPI_DMA" ref="ae10703397b36b451e590946497a58867" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#ae10703397b36b451e590946497a58867">SD_CARD_ERROR_SPI_DMA</a> = 0X1C</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>SPI DMA error </p>
+
+</div>
+</div>
 <a class="anchor" id="a87264e66265e36be6b1428ebacf2e4ed"></a><!-- doxytag: member="SdFat.h::SD_CARD_ERROR_STOP_TRAN" ref="a87264e66265e36be6b1428ebacf2e4ed" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2503,6 +3235,34 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a2580a4c6ddd99928402db34c2f650033"></a><!-- doxytag: member="SdFat.h::sector_size_high" ref="a2580a4c6ddd99928402db34c2f650033" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a2580a4c6ddd99928402db34c2f650033">sector_size_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>sector size is fixed at 64 KB </p>
+
+</div>
+</div>
+<a class="anchor" id="afcbc43e43942a772e79ef2aa55e37650"></a><!-- doxytag: member="SdFat.h::sector_size_low" ref="afcbc43e43942a772e79ef2aa55e37650" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#afcbc43e43942a772e79ef2aa55e37650">sector_size_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>sector size is fixed at 64 KB </p>
+
+</div>
+</div>
 <a class="anchor" id="a5e0307dbc42b2444deedd558bcdd8933"></a><!-- doxytag: member="SdFat.h::SOFT_SPI_CS_PIN" ref="a5e0307dbc42b2444deedd558bcdd8933" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2559,12 +3319,40 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a5a1200ff5e0c910fdea6eca447d10a19"></a><!-- doxytag: member="SdFat.h::SPI_DIV3_SPEED" ref="a5a1200ff5e0c910fdea6eca447d10a19" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#a5a1200ff5e0c910fdea6eca447d10a19">SPI_DIV3_SPEED</a> = 1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set SCK rate to F_CPU/3 for Due </p>
+
+</div>
+</div>
+<a class="anchor" id="a491576f0359638403febf9289f7e4fbd"></a><!-- doxytag: member="SdFat.h::SPI_DIV6_SPEED" ref="a491576f0359638403febf9289f7e4fbd" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#a491576f0359638403febf9289f7e4fbd">SPI_DIV6_SPEED</a> = 3</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set SCK rate to F_CPU/6 for Due </p>
+
+</div>
+</div>
 <a class="anchor" id="acf9e8ae5785dfdaa0fa59042e528ea6c"></a><!-- doxytag: member="SdFat.h::SPI_EIGHTH_SPEED" ref="acf9e8ae5785dfdaa0fa59042e528ea6c" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#acf9e8ae5785dfdaa0fa59042e528ea6c">SPI_EIGHTH_SPEED</a> = 3</td>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#acf9e8ae5785dfdaa0fa59042e528ea6c">SPI_EIGHTH_SPEED</a> = 6</td>
         </tr>
       </table>
 </div>
@@ -2592,7 +3380,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#abf126d9da3318e2709bbc3f2ab3cb3d1">SPI_HALF_SPEED</a> = 1</td>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#abf126d9da3318e2709bbc3f2ab3cb3d1">SPI_HALF_SPEED</a> = 2</td>
         </tr>
       </table>
 </div>
@@ -2606,7 +3394,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#ad6a75e4ff6409fe1305ec6915787458e">SPI_QUARTER_SPEED</a> = 2</td>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#ad6a75e4ff6409fe1305ec6915787458e">SPI_QUARTER_SPEED</a> = 4</td>
         </tr>
       </table>
 </div>
@@ -2620,7 +3408,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#a792e282c1b86c65d14e3d6e6612ad2d0">SPI_SIXTEENTH_SPEED</a> = 4</td>
+          <td class="memname">uint8_t const <a class="el" href="_sd_fat_8h.html#a792e282c1b86c65d14e3d6e6612ad2d0">SPI_SIXTEENTH_SPEED</a> = 8</td>
         </tr>
       </table>
 </div>
@@ -2685,6 +3473,167 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="add15a5302761bd6e2ee294c0c38e9f8a"></a><!-- doxytag: member="SdFat.h::taac" ref="add15a5302761bd6e2ee294c0c38e9f8a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#add15a5302761bd6e2ee294c0c38e9f8a">taac</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 0X0E </p>
+
+</div>
+</div>
+<a class="anchor" id="a0d4a26aaf05de47ca630a0976e897f90"></a><!-- doxytag: member="SdFat.h::tmp_write_protect" ref="a0d4a26aaf05de47ca630a0976e897f90" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a0d4a26aaf05de47ca630a0976e897f90">tmp_write_protect</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af83be4d825b2e325d094297e81693443"></a><!-- doxytag: member="SdFat.h::tran_speed" ref="af83be4d825b2e325d094297e81693443" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#af83be4d825b2e325d094297e81693443">tran_speed</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a68aafd29ea70955c274ebeb0364b4033"></a><!-- doxytag: member="SdFat.h::vdd_r_curr_max" ref="a68aafd29ea70955c274ebeb0364b4033" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a68aafd29ea70955c274ebeb0364b4033">vdd_r_curr_max</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0e5dbcfa1434c0d43a5f71067b54377a"></a><!-- doxytag: member="SdFat.h::vdd_r_curr_min" ref="a0e5dbcfa1434c0d43a5f71067b54377a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a0e5dbcfa1434c0d43a5f71067b54377a">vdd_r_curr_min</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa018db4afbad1a906ffc7c2f16e949b6"></a><!-- doxytag: member="SdFat.h::vdd_w_cur_max" ref="aa018db4afbad1a906ffc7c2f16e949b6" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#aa018db4afbad1a906ffc7c2f16e949b6">vdd_w_cur_max</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a17680224cd64eb6021437f4955b6392b"></a><!-- doxytag: member="SdFat.h::vdd_w_curr_min" ref="a17680224cd64eb6021437f4955b6392b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a17680224cd64eb6021437f4955b6392b">vdd_w_curr_min</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab4247b023129bd89e0cebe8508b35f0a"></a><!-- doxytag: member="SdFat.h::wp_grp_enable" ref="ab4247b023129bd89e0cebe8508b35f0a" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#ab4247b023129bd89e0cebe8508b35f0a">wp_grp_enable</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed value of 0 - no write protect groups </p>
+
+</div>
+</div>
+<a class="anchor" id="a3574bbe4ccfc7f26daa84efd98a9ff4c"></a><!-- doxytag: member="SdFat.h::wp_grp_size" ref="a3574bbe4ccfc7f26daa84efd98a9ff4c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a3574bbe4ccfc7f26daa84efd98a9ff4c">wp_grp_size</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af31036ae33a6db8cf3db322fef249b48"></a><!-- doxytag: member="SdFat.h::write_bl_len_high" ref="af31036ae33a6db8cf3db322fef249b48" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#af31036ae33a6db8cf3db322fef249b48">write_bl_len_high</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>write_bl_len fixed for 512 byte blocks </p>
+
+</div>
+</div>
+<a class="anchor" id="ad61c0325b9602bdb15cf59b69fc4a67f"></a><!-- doxytag: member="SdFat.h::write_bl_len_low" ref="ad61c0325b9602bdb15cf59b69fc4a67f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#ad61c0325b9602bdb15cf59b69fc4a67f">write_bl_len_low</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>write_bl_len fixed for 512 byte blocks </p>
+
+</div>
+</div>
+<a class="anchor" id="a5fd0cab21c874fd49fc4ea5d537be201"></a><!-- doxytag: member="SdFat.h::write_blk_misalign" ref="a5fd0cab21c874fd49fc4ea5d537be201" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a5fd0cab21c874fd49fc4ea5d537be201">write_blk_misalign</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>fixed to 0 </p>
+
+</div>
+</div>
 <a class="anchor" id="a55a97e38f040eaef5ea72c04ed0b8ca3"></a><!-- doxytag: member="SdFat.h::WRITE_MULTIPLE_TOKEN" ref="a55a97e38f040eaef5ea72c04ed0b8ca3" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2696,6 +3645,20 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>start data token for write multiple blocks </p>
+
+</div>
+</div>
+<a class="anchor" id="a062890f25943538976760e7db822a635"></a><!-- doxytag: member="SdFat.h::write_partial" ref="a062890f25943538976760e7db822a635" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char <a class="el" href="_sd_fat_8h.html#a062890f25943538976760e7db822a635">write_partial</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>always zero - no partial block read </p>
 
 </div>
 </div>
@@ -2719,7 +3682,7 @@ Variables</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="_sd_fat_8h.html">SdFat.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

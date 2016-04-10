@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/Configuration.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/Configuration.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -100,7 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#define-members">Defines</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/Configuration.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/Configuration.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="pins_8h_source.html">pins.h</a>&quot;</code><br/>
@@ -109,24 +109,25 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a90a6f18a03e3c38a95a38089380c086a">MOTHERBOARD</a>&#160;&#160;&#160;5</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a07c83ca8d93f264a9b477cd94c678fe7">DRIVE_SYSTEM</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a72532fd06152bb6611ef6d35d05e1d41">XAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;80</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in x direction. For xy gantry use 2*belt moved! Overridden if EEPROM activated.  <a href="#a72532fd06152bb6611ef6d35d05e1d41"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8781262a1849bb33736fd374ba37d34a">YAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;80</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in y direction. For xy gantry use 2*belt moved! Overridden if EEPROM activated.  <a href="#a8781262a1849bb33736fd374ba37d34a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8410fd94dd62e48904dd82b300496130">ZAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;3360</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in z direction Overridden if EEPROM activated.  <a href="#a8410fd94dd62e48904dd82b300496130"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a90a6f18a03e3c38a95a38089380c086a">MOTHERBOARD</a>&#160;&#160;&#160;33</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a07c83ca8d93f264a9b477cd94c678fe7">DRIVE_SYSTEM</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a72532fd06152bb6611ef6d35d05e1d41">XAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;98.425196</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in x direction. For xy gantry use 2*belt moved! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#a72532fd06152bb6611ef6d35d05e1d41"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8781262a1849bb33736fd374ba37d34a">YAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;98.425196</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in y direction. For xy gantry use 2*belt moved! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#a8781262a1849bb33736fd374ba37d34a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8410fd94dd62e48904dd82b300496130">ZAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;2560</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of steps for a 1mm move in z direction Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#a8410fd94dd62e48904dd82b300496130"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aea4522d18c3cb7707c97180bf00e38a9">EXTRUDER_FAN_COOL_TEMP</a>&#160;&#160;&#160;50</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a602f54bd2c928cac4fad9ddd37d6a896">EXT0_X_OFFSET</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a00cab1e160327abca37fcee438e5a816">EXT0_Y_OFFSET</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afd02318a39ecb907684ab453d56fbf99">EXT0_STEPS_PER_MM</a>&#160;&#160;&#160;385</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afd02318a39ecb907684ab453d56fbf99">EXT0_STEPS_PER_MM</a>&#160;&#160;&#160;413</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa36796338507f6dddbf7d4964c6f740d">EXT0_TEMPSENSOR_TYPE</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad34404c86e225ce594c317b84556541e">EXT0_TEMPSENSOR_PIN</a>&#160;&#160;&#160;<a class="el" href="pins_8h.html#afb306d1b4bdaee7b0df79066bc177101">TEMP_0_PIN</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeefa06ad16c004185a5dbcf6f4f8642f">EXT0_HEATER_PIN</a>&#160;&#160;&#160;<a class="el" href="pins_8h.html#a1187644466b5dd2376ad6b4e99c0878b">HEATER_0_PIN</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a500527759a4c15569c4a69efe2811dc1">EXT0_STEP_PIN</a>&#160;&#160;&#160;<a class="el" href="pins_8h.html#a7c52d592c2ea7d9ffe5b3d5f829f3eab">E0_STEP_PIN</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa05066c7d6379276615dcab8f5e5eb1f">EXT0_DIR_PIN</a>&#160;&#160;&#160;<a class="el" href="pins_8h.html#ae214f9713b83e06996df6ad209b00b06">E0_DIR_PIN</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1d2b536d0751a942656d556613481b95">EXT0_ENABLE_PIN</a>&#160;&#160;&#160;<a class="el" href="pins_8h.html#aba18d60a1007d0e24018e050c4a0d88d">E0_ENABLE_PIN</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a30f9bdf00c36767d4c9329f636de4e82">EXT0_ENABLE_ON</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac436a35cc3678431777106325f0db62a">EXT0_MAX_FEEDRATE</a>&#160;&#160;&#160;30</td></tr>
@@ -143,20 +144,23 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6cefe567e56369dedd3efbb04eb30737">EXT0_PID_D</a>&#160;&#160;&#160;80</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adfb2192d3c11c6eb519b2a67e7957a4f">EXT0_PID_MAX</a>&#160;&#160;&#160;255</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adba446ad427bf3bf4f1aa23d0dadfb0a">EXT0_ADVANCE_K</a>&#160;&#160;&#160;0.0f</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Faktor for the advance algorithm. 0 disables the algorithm. Overridden if EEPROM activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency.  <a href="#adba446ad427bf3bf4f1aa23d0dadfb0a"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Faktor for the advance algorithm. 0 disables the algorithm. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency.  <a href="#adba446ad427bf3bf4f1aa23d0dadfb0a"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1e090e7843885bcfb96398f986488cbc">EXT0_ADVANCE_L</a>&#160;&#160;&#160;0.0f</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2d7b013803a8a356ce900b96168bdf48">EXT0_ADVANCE_BACKLASH_STEPS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5ea67cbc7ad8483969be5599dddaf89d">EXT0_WAIT_RETRACT_TEMP</a>&#160;&#160;&#160;150</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated.  <a href="#a5ea67cbc7ad8483969be5599dddaf89d"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperature to retract filament when extruder is heating up. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#a5ea67cbc7ad8483969be5599dddaf89d"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa7a64c6c073793d2ba0b822221d85e2f">EXT0_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set to 0 to disable.  <a href="#aa7a64c6c073793d2ba0b822221d85e2f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M120 S5 P5\nM117 <a class="el" href="struct_extruder.html">Extruder</a> 1&quot;</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Units (mm/inches) to retract filament when extruder is heating up. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. Set to 0 to disable.  <a href="#aa7a64c6c073793d2ba0b822221d85e2f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M117 <a class="el" href="class_extruder.html">Extruder</a> 1&quot;</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a322745adad097f15f7d6428968f11884">EXT0_DESELECT_COMMANDS</a>&#160;&#160;&#160;&quot;&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a60a8379b48860a892629008c5dfa5a77">EXT0_EXTRUDER_COOLER_PIN</a>&#160;&#160;&#160;-1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a324981d80431aca554dbc7070f3b40ae">EXT0_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;255</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9370d4e224c3a105b2d20a0855aa0870">EXT1_X_OFFSET</a>&#160;&#160;&#160;10</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a39a4554891e9bdfcb08fd0d6c74ed4c3">EXT1_Y_OFFSET</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a43478caab7ff2ef321b69386a5462670">EXT1_STEPS_PER_MM</a>&#160;&#160;&#160;373</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aab34954744968cb9caa878b9209aba1a">EXT1_TEMPSENSOR_TYPE</a>&#160;&#160;&#160;3</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aff9bf6b6094565a0d865f5c50d5a977b">EXT1_TEMPSENSOR_PIN</a>&#160;&#160;&#160;TEMP_1_PIN</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af3bf0232b3b4c84f347466cc28939c6b">EXT1_HEATER_PIN</a>&#160;&#160;&#160;HEATER_1_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aff9bf6b6094565a0d865f5c50d5a977b">EXT1_TEMPSENSOR_PIN</a>&#160;&#160;&#160;TEMP_2_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af3bf0232b3b4c84f347466cc28939c6b">EXT1_HEATER_PIN</a>&#160;&#160;&#160;HEATER_2_PIN</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a44f7f33acf4ae9e2d2d6873adba91b67">EXT1_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aac15c2cf2fef99337a69696c1407049a">EXT1_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aaf701c8f32898b0ae48c54cf2ff40718">EXT1_INVERSE</a>&#160;&#160;&#160;false</td></tr>
@@ -176,14 +180,18 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a34b2134028121deaf28c5500f390b466">EXT1_PID_D</a>&#160;&#160;&#160;200</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a04a7280d4a7136f9222a8a46abb34de1">EXT1_PID_MAX</a>&#160;&#160;&#160;255</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a20d37bb739aa0a0b0438e718d5046995">EXT1_ADVANCE_K</a>&#160;&#160;&#160;0.0f</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Faktor for the advance algorithm. 0 disables the algorithm. Overridden if EEPROM activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency.  <a href="#a20d37bb739aa0a0b0438e718d5046995"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Faktor for the advance algorithm. 0 disables the algorithm. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency.  <a href="#a20d37bb739aa0a0b0438e718d5046995"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8636e8ae656bdde3994db653f6c39fca">EXT1_ADVANCE_L</a>&#160;&#160;&#160;0.0f</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa5ea7e9c2b1d0472b65a8c335ab9bae1">EXT1_ADVANCE_BACKLASH_STEPS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa32a4200673f161a548645244758575a">EXT1_WAIT_RETRACT_TEMP</a>&#160;&#160;&#160;150</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3108e27d5bd74a0f86a7790d1c783da4">EXT1_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;40</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#acfb1b649118012323d66651a03fb5d38">EXT1_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M120 S5 P15\nM117 <a class="el" href="struct_extruder.html">Extruder</a> 2&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3108e27d5bd74a0f86a7790d1c783da4">EXT1_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#acfb1b649118012323d66651a03fb5d38">EXT1_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M117 <a class="el" href="class_extruder.html">Extruder</a> 2&quot;</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2a7c114962299fb818aad0ccb969c7bc">EXT1_DESELECT_COMMANDS</a>&#160;&#160;&#160;&quot;&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adacf9e2f5707d98189c35d27e13fd03c">EXT1_EXTRUDER_COOLER_PIN</a>&#160;&#160;&#160;-1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ace5ba84495fa172f7f6cb163e24c929e">EXT1_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;255</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#abc7bd548aa3d883f6bf227c8b934e8dd">RETRACT_DURING_HEATUP</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad558811085bc740e2f321421e6aef424">PID_CONTROL_RANGE</a>&#160;&#160;&#160;15</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad558811085bc740e2f321421e6aef424">PID_CONTROL_RANGE</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5d1b46d81791ea320c65266441cf9a13">EXTRUDE_MAXLENGTH</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a77af8750d303d708512c1e64a4c1b416">SKIP_M109_IF_WITHIN</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeba3c210690a31bfb8fabc07afce1f6b">SCALE_PID_TO_MAX</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Set PID scaling.  <a href="#aeba3c210690a31bfb8fabc07afce1f6b"></a><br/></td></tr>
@@ -193,22 +201,22 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a661012a52420483eda439846f00fabd2">USER_THERMISTORTABLE1</a>&#160;&#160;&#160;{}</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a82c8102a4461b6d9dfc74074f89ac5c5">NUM_TEMPS_USERTHERMISTOR2</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4c15037cdc427465c0a591093ad7f00a">USER_THERMISTORTABLE2</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5ca6efa89931bc58dd1a3330cc2ca2ab">GENERIC_THERM1_R0</a>&#160;&#160;&#160;100000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a477d5ab3153a97973b5a2a8f4d7f0f1d">GENERIC_THERM1_T0</a>&#160;&#160;&#160;25</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5ca6efa89931bc58dd1a3330cc2ca2ab">GENERIC_THERM1_R0</a>&#160;&#160;&#160;100000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac6ab266194902e244ffb38a2b0d656ff">GENERIC_THERM1_BETA</a>&#160;&#160;&#160;4036</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad05f4af83a13d1f6f5576d3898f0ad0e">GENERIC_THERM1_MIN_TEMP</a>&#160;&#160;&#160;-20</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac2ef3266e4fdb8a1bb31777c5f3ebccc">GENERIC_THERM1_MAX_TEMP</a>&#160;&#160;&#160;300</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a49090bf756ad1045c6cfc9cce75128a8">GENERIC_THERM1_R1</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3655538b5b4be5c0b033a7912978a383">GENERIC_THERM1_R2</a>&#160;&#160;&#160;4700</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad0a47f2c06b7d0cc03c3fd8521321acd">GENERIC_THERM2_R0</a>&#160;&#160;&#160;1042.7</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9b4fc95c0ba90c99a3cd3ac82347f639">GENERIC_THERM2_T0</a>&#160;&#160;&#160;170</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad0a47f2c06b7d0cc03c3fd8521321acd">GENERIC_THERM2_R0</a>&#160;&#160;&#160;1042.7</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a56ee793696b482845f27a339da5d4d40">GENERIC_THERM2_BETA</a>&#160;&#160;&#160;4036</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aacd341f31f3a19e26e3e74841d20b9d9">GENERIC_THERM2_MIN_TEMP</a>&#160;&#160;&#160;-20</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2b7ec0ea07a785bf825c915068f9e8a8">GENERIC_THERM2_MAX_TEMP</a>&#160;&#160;&#160;300</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#abb84fa9d4e74efca5212515416b32182">GENERIC_THERM2_R1</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a584ada6ac40433d3a9df4b06023cf05e">GENERIC_THERM2_R2</a>&#160;&#160;&#160;4700</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aea437e5dca4dcb222cac9a815541198d">GENERIC_THERM3_R0</a>&#160;&#160;&#160;1042.7</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3791a81833ce78fb1bbaef6778f165a6">GENERIC_THERM3_T0</a>&#160;&#160;&#160;170</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aea437e5dca4dcb222cac9a815541198d">GENERIC_THERM3_R0</a>&#160;&#160;&#160;1042.7</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeb9e1dc322ccce4f93feabfa1a2ebf5c">GENERIC_THERM3_BETA</a>&#160;&#160;&#160;4036</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9231f5f56beb0c47a61efef4c37973c3">GENERIC_THERM3_MIN_TEMP</a>&#160;&#160;&#160;-20</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1424b76833c6143666ca6b71aa1a0ec8">GENERIC_THERM3_MAX_TEMP</a>&#160;&#160;&#160;300</td></tr>
@@ -216,9 +224,9 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae8ee9766538219c8f1c84088c6aa61ce">GENERIC_THERM3_R2</a>&#160;&#160;&#160;4700</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a45fa6366f5bfe2d85b6e5218a9ed39cd">GENERIC_THERM_VREF</a>&#160;&#160;&#160;5</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a050ae208528dd0f3604240bf56e7abbc">GENERIC_THERM_NUM_ENTRIES</a>&#160;&#160;&#160;33</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54">HAVE_HEATED_BED</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54">HAVE_HEATED_BED</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Set true if you have a heated bed conected to your board, false if not.  <a href="#af497238d15c9887103688ca9a2831e54"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a87286c0ff48fb57d50277e2d2a67d961">HEATED_BED_MAX_TEMP</a>&#160;&#160;&#160;90</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a87286c0ff48fb57d50277e2d2a67d961">HEATED_BED_MAX_TEMP</a>&#160;&#160;&#160;115</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2070df069021bc6c7e4c240f8cf47318">SKIP_M190_IF_WITHIN</a>&#160;&#160;&#160;3</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5df62475b1594399911a233e82fdd66c">HEATED_BED_SENSOR_TYPE</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad800cbe7e9d08c57fc0055cc875559b9">HEATED_BED_SENSOR_PIN</a>&#160;&#160;&#160;TEMP_1_PIN</td></tr>
@@ -227,56 +235,54 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad832ef07ba7bac7af033df64b73ff67b">HEATED_BED_SET_INTERVAL</a>&#160;&#160;&#160;5000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad1929cde6fe0b05d274e19faebb1e194">HEATED_BED_HEAT_MANAGER</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa03ef2bf14a818ef8e9d5ddde39f4282">HEATED_BED_PID_INTEGRAL_DRIVE_MAX</a>&#160;&#160;&#160;255</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum value, I-gain can contribute to the output.  <a href="#aa03ef2bf14a818ef8e9d5ddde39f4282"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum value, I-gain can contribute to the output. The precise values may differ for different nozzle/resistor combination. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#aa03ef2bf14a818ef8e9d5ddde39f4282"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6fe7675a3991230372f55ff6810ac145">HEATED_BED_PID_INTEGRAL_DRIVE_MIN</a>&#160;&#160;&#160;80</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">lower value for integral part  <a href="#a6fe7675a3991230372f55ff6810ac145"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0b017f2440d1afb15e277c58f69f794c">HEATED_BED_PID_PGAIN</a>&#160;&#160;&#160;15</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1c3700c0340fbe283e131ac1c684cea5">HEATED_BED_PID_IGAIN</a>&#160;&#160;&#160;0.9</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8a273bedf59a150b30df2b683617d6bc">HEATED_BED_PID_DGAIN</a>&#160;&#160;&#160;40</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0b017f2440d1afb15e277c58f69f794c">HEATED_BED_PID_PGAIN</a>&#160;&#160;&#160;196</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1c3700c0340fbe283e131ac1c684cea5">HEATED_BED_PID_IGAIN</a>&#160;&#160;&#160;33.02</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8a273bedf59a150b30df2b683617d6bc">HEATED_BED_PID_DGAIN</a>&#160;&#160;&#160;290</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac11ebc6b9995267a1cc65aa15438900b">HEATED_BED_PID_MAX</a>&#160;&#160;&#160;255</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af348f6d0d21ffcb39ae86cb2e2188999">TEMP_PID</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae8103ab99028a60b42da51ee9b20da06">MINTEMP</a>&#160;&#160;&#160;5</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1b93da4072588f486fb962e7aa094d73">MAXTEMP</a>&#160;&#160;&#160;260</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af5eb7e3dc57a2c282b06f32e51970839">ANALOG_REF</a>&#160;&#160;&#160;<a class="el" href="_reptier_8h.html#ac4969cdff62b814d6be75510e4fd1f46">ANALOG_REF_AVCC</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V inernaly generated.  <a href="#af5eb7e3dc57a2c282b06f32e51970839"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeb6d9a7a15162b1184c6753118d7fcc9">ENDSTOP_PULLUP_X_MIN</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a21203f0d65bfa571d3fe4e531d91c7b7">ENDSTOP_PULLUP_Y_MIN</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0a04ee9c34ed6011b8aa1e1552613bb6">ENDSTOP_PULLUP_Z_MIN</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a95d699ac75bcea47d055774068e6a8ce">MIN_DEFECT_TEMPERATURE</a>&#160;&#160;&#160;-10</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afcf5d7d5403d22027359ae7db7c1ea92">MAX_DEFECT_TEMPERATURE</a>&#160;&#160;&#160;300</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aeb6d9a7a15162b1184c6753118d7fcc9">ENDSTOP_PULLUP_X_MIN</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a21203f0d65bfa571d3fe4e531d91c7b7">ENDSTOP_PULLUP_Y_MIN</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0a04ee9c34ed6011b8aa1e1552613bb6">ENDSTOP_PULLUP_Z_MIN</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adb46d9921ce79f6e9863d11364e70b43">ENDSTOP_PULLUP_X_MAX</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8cd5150d5d1d949420417632fa02d209">ENDSTOP_PULLUP_Y_MAX</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afda109e0fadad8a3ca613ece0d91cbe3">ENDSTOP_PULLUP_Z_MAX</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a36361f907337c0106876c3b3d0c0a775">ENDSTOP_X_MIN_INVERTING</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae8a42c460d07a2ebfc7d468f8da71087">ENDSTOP_Y_MIN_INVERTING</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a802ae8540a5ae109a395643485566211">ENDSTOP_Z_MIN_INVERTING</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afda109e0fadad8a3ca613ece0d91cbe3">ENDSTOP_PULLUP_Z_MAX</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a36361f907337c0106876c3b3d0c0a775">ENDSTOP_X_MIN_INVERTING</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae8a42c460d07a2ebfc7d468f8da71087">ENDSTOP_Y_MIN_INVERTING</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a802ae8540a5ae109a395643485566211">ENDSTOP_Z_MIN_INVERTING</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a69329bd7889e14a8ee122db11a065c7f">ENDSTOP_X_MAX_INVERTING</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3773b0e5b679517c578a5b2ef5268fb9">ENDSTOP_Y_MAX_INVERTING</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa142f86dfc0d1342ecdbe410c0d18d8c">ENDSTOP_Z_MAX_INVERTING</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa142f86dfc0d1342ecdbe410c0d18d8c">ENDSTOP_Z_MAX_INVERTING</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a507ad30ef3567957aa1cd24b528fb0cb">MIN_HARDWARE_ENDSTOP_X</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0a2bd598fb1cb4a0952c3a5a020d598d">MIN_HARDWARE_ENDSTOP_Y</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7b618ecda4db4b5cd7b186258aeba986">MIN_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7b618ecda4db4b5cd7b186258aeba986">MIN_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa36e4ac255e81a1401601820c39cbc76">MAX_HARDWARE_ENDSTOP_X</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a77127905ccaad40f6e384cbba7f64313">MAX_HARDWARE_ENDSTOP_Y</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad523815e06fa281c39458539c82ff3c5">MAX_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad523815e06fa281c39458539c82ff3c5">MAX_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7afdf61cfd5a42d565ac71759dc05974">X_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#acc0bb5bd702433e1d38a31f6584ed821">Y_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6ed17da670ae70c7666be298862e3c27">Z_ENABLE_ON</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9f7183dc5b8aa69d693ee84b906f2641">DISABLE_X</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a80a96c3a651dda99af25b7dc3f2d2f17">DISABLE_Y</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">DISABLE_Z</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">DISABLE_Z</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3ea6d4ec2118ee62a5171b02a295018a">DISABLE_E</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">INVERT_X_DIR</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">INVERT_X_DIR</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1b0a90f40d48a2f35f6265ba5ab7399c">INVERT_Y_DIR</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">INVERT_Z_DIR</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">INVERT_Z_DIR</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2944654fc8082ed77783a57c21a634bc">X_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9fea75ea9dba3ccfd3e37bb262efdb4c">Y_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">Z_HOME_DIR</a>&#160;&#160;&#160;-1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">Z_HOME_DIR</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#abc2dab53e2e920c1c8f95ac3095a107e">max_software_endstop_r</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2fed5dda29e02984a779bf339da29474">min_software_endstop_x</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afe518625c397b009050ac6938b370318">min_software_endstop_y</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a4d02d6b42d1ee5cff91bb46cfc2b6594">min_software_endstop_z</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac6e6af9d5bd4feaa00f7b18fc5140d53">max_software_endstop_x</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a523a930efc25e0e19b8d47fca14f61f5">max_software_endstop_y</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a35873e42a82dcc5fa4b381407eeeb2e1">max_software_endstop_z</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a35873e42a82dcc5fa4b381407eeeb2e1">max_software_endstop_z</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ab4f088a347798148173e552d44a54f25">ENDSTOP_X_BACK_MOVE</a>&#160;&#160;&#160;5</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5417e23cdc3cc75223208668670c69e9">ENDSTOP_Y_BACK_MOVE</a>&#160;&#160;&#160;5</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a10bf1e4237660ef20f2671784c9718df">ENDSTOP_Z_BACK_MOVE</a>&#160;&#160;&#160;2</td></tr>
@@ -285,25 +291,30 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5e76728af384dd3ee5a7e3aeb37a5b05">ENDSTOP_Z_RETEST_REDUCTION_FACTOR</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7871963ee425f04109d56eed47ff493f">ENDSTOP_X_BACK_ON_HOME</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3a4de9c8a0a48a77c937e717622c5d06">ENDSTOP_Y_BACK_ON_HOME</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adb026d4e2e3a99db5ba92ced0de22e51">ENDSTOP_Z_BACK_ON_HOME</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a17ce3bb9d0988ef866a24fa47d2edfcf">ALWAYS_CHECK_ENDSTOPS</a>&#160;&#160;&#160;false</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">X_MAX_LENGTH</a>&#160;&#160;&#160;195</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">Y_MAX_LENGTH</a>&#160;&#160;&#160;195</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">Z_MAX_LENGTH</a>&#160;&#160;&#160;80</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adb026d4e2e3a99db5ba92ced0de22e51">ENDSTOP_Z_BACK_ON_HOME</a>&#160;&#160;&#160;5</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a17ce3bb9d0988ef866a24fa47d2edfcf">ALWAYS_CHECK_ENDSTOPS</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">X_MAX_LENGTH</a>&#160;&#160;&#160;165</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">Y_MAX_LENGTH</a>&#160;&#160;&#160;175</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">Z_MAX_LENGTH</a>&#160;&#160;&#160;116.820</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a113b0d62a745e9907333f0e688d21fa4">X_MIN_POS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af5ff596cc0d5f7b93e8f4c458372a9b0">Y_MIN_POS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1f6b01a417191454d51f68f04e243abe">Z_MIN_POS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a11d69c4ef754c199cfce71eb79760cc3">MICROSTEP_MODES</a>&#160;&#160;&#160;{8,8,8,8,8}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a8f52dfdadbdf274fc019d8921ded0328">MOTOR_CURRENT</a>&#160;&#160;&#160;{48713,48713,42713,48713,42713}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;120L</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae439537f4f2cda93e2692fd863d6b31d">DELTA_SEGMENTS_PER_SECOND_PRINT</a>&#160;&#160;&#160;180</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of segments to generate for delta conversions per second of move.  <a href="#ae439537f4f2cda93e2692fd863d6b31d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aad0deb0ebe3f073faca903657018830b">DELTA_SEGMENTS_PER_SECOND_MOVE</a>&#160;&#160;&#160;70</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a147f62b0bcb70fda0ace1984698b6176">MAX_DELTA_SEGMENTS_PER_LINE</a>&#160;&#160;&#160;22</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines. Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino Mega. Used only for nonlinear systems like delta or tuga.  <a href="#a147f62b0bcb70fda0ace1984698b6176"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;360</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">MAX_INACTIVE_TIME</a>&#160;&#160;&#160;0L</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aee3020ebe35be1c65e0746d4415d3b4d">MAX_FEEDRATE_X</a>&#160;&#160;&#160;200</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af2a48135c571a906b7dd95b9abc596d8">MAX_FEEDRATE_Y</a>&#160;&#160;&#160;200</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a144a0c5e25b1f7ba0d0470ee206e83b7">MAX_FEEDRATE_Z</a>&#160;&#160;&#160;40</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a144a0c5e25b1f7ba0d0470ee206e83b7">MAX_FEEDRATE_Z</a>&#160;&#160;&#160;5</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ab424984839ed2d92d6198ffa13b4bae0">HOMING_FEEDRATE_X</a>&#160;&#160;&#160;80</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa98185c6185491e3a569ea20b477ee05">HOMING_FEEDRATE_Y</a>&#160;&#160;&#160;80</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa55a91a026d53ee6f8ff737e4a5ded3f">HOMING_FEEDRATE_Z</a>&#160;&#160;&#160;30</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a394b1f7b405c2f11fd85ef4d61f63ea4">ENABLE_BACKLASH_COMPENSATION</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa55a91a026d53ee6f8ff737e4a5ded3f">HOMING_FEEDRATE_Z</a>&#160;&#160;&#160;3</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa485fd6b42c23f8e7ebd58052064bcef">HOMING_ORDER</a>&#160;&#160;&#160;<a class="el" href="_repetier_8h.html#a7a9e1a33c1089feef3d2a46f8dea8758">HOME_ORDER_ZXY</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a394b1f7b405c2f11fd85ef4d61f63ea4">ENABLE_BACKLASH_COMPENSATION</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af4cc97e37ea3fdff7716c8fc7d5cde52">Z_BACKLASH</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac9f9a075d786ff200686b488d90f65dc">X_BACKLASH</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af4042864409df7c10e344b2173405ca0">Y_BACKLASH</a>&#160;&#160;&#160;0</td></tr>
@@ -314,11 +325,11 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9090680575209de08aedc561e2674a49">DOUBLE_STEP_DELAY</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa7b579fe75903d3cbbe6b266221e053f">MAX_HALFSTEP_INTERVAL</a>&#160;&#160;&#160;1999</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a127ae1803649ab6dbbb91ba0e7eba7d6">MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X</a>&#160;&#160;&#160;1500</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! Overridden if EEPROM activated.  <a href="#a127ae1803649ab6dbbb91ba0e7eba7d6"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#a127ae1803649ab6dbbb91ba0e7eba7d6"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7f28f8bb53e694fd4a7db80844d81f33">MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y</a>&#160;&#160;&#160;1500</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a5e728f0a23023215ba47b49aae3a7218">MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa78c11eeb7c076f0e7dac287184a741d">MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X</a>&#160;&#160;&#160;3000</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z max acceleration in mm/s^2 for travel moves. Overridden if EEPROM activated.  <a href="#aa78c11eeb7c076f0e7dac287184a741d"></a><br/></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">X, Y, Z max acceleration in mm/s^2 for travel moves. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated.  <a href="#aa78c11eeb7c076f0e7dac287184a741d"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a47ddae0f8fbdc2d2250556eef0333742">MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y</a>&#160;&#160;&#160;3000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0416305f981031fbc78ae9596851cc13">MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z</a>&#160;&#160;&#160;100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aef98e140e44898a5ff54c4055621fb43">MAX_JERK</a>&#160;&#160;&#160;20.0</td></tr>
@@ -330,26 +341,15 @@ Defines</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Low filled cache size.  <a href="#a82e4ee9e8ab6ba09ccb95dc8a96559df"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac8f65c88887ef2ebeb66cf93822a469c">LOW_TICKS_PER_MOVE</a>&#160;&#160;&#160;250000</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Cycles per move, if move cache is low.  <a href="#ac8f65c88887ef2ebeb66cf93822a469c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a806ea970ccbc3c57a4d4ad45dbbb4725">TIMER0_PRESCALE</a>&#160;&#160;&#160;64</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Prescale factor, timer0 runs at.  <a href="#a806ea970ccbc3c57a4d4ad45dbbb4725"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2b508e94835493e76669002cf2a3c41d">MIN_EXTRUDER_TEMP</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac2f980048fb598f74113af5217ef511a">USE_OPS</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Activate ooze prevention system.  <a href="#ac2f980048fb598f74113af5217ef511a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a636fd50521ed2a0d5b77febec6ad876c">OPS_MODE</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the ops operation mode.  <a href="#a636fd50521ed2a0d5b77febec6ad876c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a23b51a8037d37fd722e042c50385a295">OPS_MIN_DISTANCE</a>&#160;&#160;&#160;0.8</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum distance for retraction.  <a href="#a23b51a8037d37fd722e042c50385a295"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad8a5aabc56cff256d29ef74831d8ebe0">OPS_MOVE_AFTER</a>&#160;&#160;&#160;50.0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Move printhead only after x% of retract distance have been retracted.  <a href="#ad8a5aabc56cff256d29ef74831d8ebe0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6731ff93d77288441b9114aecf0de95f">OPS_RETRACT_DISTANCE</a>&#160;&#160;&#160;1.5</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Retraction distance in mm. If you want to enable OPS only sometimes, compile with OPS support and set retraction distance to 0. If you set it to e.g. 3 in your eeprom settings it is enabled. Overridden if EEPROM activated.  <a href="#a6731ff93d77288441b9114aecf0de95f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2acaaa7a1827124753d915d4247814f8">OPS_RETRACT_BACKLASH</a>&#160;&#160;&#160;0.0</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Backslash produced by extruder reversal.  <a href="#a2acaaa7a1827124753d915d4247814f8"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2b508e94835493e76669002cf2a3c41d">MIN_EXTRUDER_TEMP</a>&#160;&#160;&#160;160</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3e38843cf1b7d9902feaf622292096c0">USE_ADVANCE</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable advance algorithm.  <a href="#a3e38843cf1b7d9902feaf622292096c0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a>&#160;&#160;&#160;250000</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">enables quadratic component.  <a href="#a734bbab06e1a9fd2e5522db0221ff6e3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1c9f7a0d3a9728b9c51d4d5f6658776d">ENABLE_QUADRATIC_ADVANCE</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">enables quadratic component.  <a href="#a1c9f7a0d3a9728b9c51d4d5f6658776d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a>&#160;&#160;&#160;115200</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Communication speed.  <a href="#a734bbab06e1a9fd2e5522db0221ff6e3"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af07421374338f565a90366aa8d32fbfc">ENABLE_POWER_ON_STARTUP</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3ae7b30e813f71eb4588c68765e4fc22">POWER_INVERTING</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a59e9281d5075865df9950ef4bbc3e8b2">KILL_METHOD</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af6168edd26520974b8660182d040051a">GCODE_BUFFER_SIZE</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache size for incoming commands.  <a href="#af6168edd26520974b8660182d040051a"></a><br/></td></tr>
@@ -358,19 +358,63 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac367c9a6d11165da67e68db5ef270307">ECHO_ON_EXECUTE</a></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets time for echo debug.  <a href="#ac367c9a6d11165da67e68db5ef270307"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a39741ee55d77198f9c1f4e47f0a5d478">EEPROM_MODE</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">EEPROM storage mode.  <a href="#a39741ee55d77198f9c1f4e47f0a5d478"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad9d358ddc3c8d8d17e31007e50814660">SD_EXTENDED_DIR</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> storage mode.  <a href="#a39741ee55d77198f9c1f4e47f0a5d478"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad1d58b33b7dc60e375025a977da07b8f">FEATURE_TWO_XSTEPPER</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3c065952d4985697e1b1095e8236a0b9">X2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a9aaa449ed510720ddbcdccbe76651226">X2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad293afc97a434a46e73cdffde9085c69">X2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa6597496797acec9d9cddd4d2031b42c">FEATURE_TWO_YSTEPPER</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa0057d47f91277e928db606389336d78">Y2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a966bcbb595b01ea1f47b44ee54561f17">Y2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a24a774ef39e666b4cfc4e2507876adde">Y2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3d0f91410a9fbb97c585d757ed6f07fa">FEATURE_TWO_ZSTEPPER</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a74542a04437600f9bf1ac6f3dd5e8c0d">Z2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a178ffc50f37d780f6c7e2f41065259b3">Z2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa307cf262f6a195b77107a7ba0a47eb3">Z2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a11f4f87ec2e4f99e782450147447c30e">FEATURE_DITTO_PRINTING</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3841264ce2c14e4f014973a8f74bc787">FEATURE_SERVO</a>&#160;&#160;&#160;false</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1fdd264637580640d89fbffa822a45ae">SERVO0_PIN</a>&#160;&#160;&#160;11</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#acc407398818b8e8fe8a1e314f762db21">SERVO1_PIN</a>&#160;&#160;&#160;6</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0e45aba502d52eac8d6261055e5ecb74">SERVO2_PIN</a>&#160;&#160;&#160;5</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ae10111ce2dd1b9a78f3eaeeda632d4e0">SERVO3_PIN</a>&#160;&#160;&#160;4</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0cee34610df91d33da8529bb4d4cc0e4">FEATURE_WATCHDOG</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2e6c84d7684b29d0c5a29e48378c2ea3">FEATURE_Z_PROBE</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0c7b058babb5f320295349b4b009a8ea">Z_PROBE_PIN</a>&#160;&#160;&#160;63</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3a54079a45359832d7f3fd96c8219e5d">Z_PROBE_PULLUP</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a56930ee08e30adf2b4366812bd1334ae">Z_PROBE_ON_HIGH</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a03e229c3ee72dc7f7ce49577cf97d086">Z_PROBE_X_OFFSET</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aab5d69ddf958e1bb838fd16f8686fb2f">Z_PROBE_Y_OFFSET</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6f7822296d50c200957b8a74f6699738">Z_PROBE_WAIT_BEFORE_TEST</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a707d7dccb6663f9ee7756482ef446203">Z_PROBE_SPEED</a>&#160;&#160;&#160;2</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad438255c65db5e54c90e89780d9e6196">Z_PROBE_XY_SPEED</a>&#160;&#160;&#160;150</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a43d204b928407664cb5512a722424db7">Z_PROBE_HEIGHT</a>&#160;&#160;&#160;39.91</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a180407f97284ec0bb4befbcbd523b3f9">Z_PROBE_START_SCRIPT</a>&#160;&#160;&#160;&quot;&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a39be7d391509b0162ec8e5f402cb6587">Z_PROBE_FINISHED_SCRIPT</a>&#160;&#160;&#160;&quot;&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa35e4f087e44e8572e3401e2c69491ff">FEATURE_AUTOLEVEL</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a234370629ef9bbd300f8c4b696d51067">Z_PROBE_X1</a>&#160;&#160;&#160;100</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a281c2c72b1ec819b64e5e13b82657d1d">Z_PROBE_Y1</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1e46da249ea8408c8c17235803d7159f">Z_PROBE_X2</a>&#160;&#160;&#160;160</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a2729cc174476584409552a1feaf61e31">Z_PROBE_Y2</a>&#160;&#160;&#160;170</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afd4deed5ad688aa5cb407423d3871d4d">Z_PROBE_X3</a>&#160;&#160;&#160;20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa63f6e9f9d1f981e72a5a73515f5185e">Z_PROBE_Y3</a>&#160;&#160;&#160;170</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a420259c9d480b04b5c81eb5318539729">CASE_LIGHTS_PIN</a>&#160;&#160;&#160;-1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad9d358ddc3c8d8d17e31007e50814660">SD_EXTENDED_DIR</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a04c3e4e97298e790df11d5fa207e8cc8">ARC_SUPPORT</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7a6e8b66901ec17312c4712cad1db50f">FEATURE_MEMORY_POSITION</a>&#160;&#160;&#160;true</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3cf5cd86c6aa268a525f6ff8e3cbe055">FEATURE_CHECKSUM_FORCED</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad9432f5b6e67eb031fdbf57b6cf82ceb">FEATURE_FAN_CONTROL</a>&#160;&#160;&#160;true</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a682e53a9f87d58fffe94ab430daefeb6">FEATURE_CONTROLLER</a>&#160;&#160;&#160;0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a682e53a9f87d58fffe94ab430daefeb6">FEATURE_CONTROLLER</a>&#160;&#160;&#160;2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a235295c716cfc8d5d260d9e9679e9292">UI_LANGUAGE</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a7afcec92e58e39dcd34317c357b423ef">UI_VERSION_STRING2</a>&#160;&#160;&#160;&quot;Mendel&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3d54fd865db9e4902b871b2e71b6c15c">UI_PRINTER_NAME</a>&#160;&#160;&#160;&quot;Ordbot&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aea0a00e1a55484219639cb68ab5f5e3f">UI_PRINTER_COMPANY</a>&#160;&#160;&#160;&quot;RepRapDiscount&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afd6ac7487ac40dde209dc9015944f0ce">UI_ANIMATION</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a3a7ac572f59523065f8cc7f46b4d6979">UI_PAGES_DURATION</a>&#160;&#160;&#160;4000</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a03f98986f96e1012025984a43a31f03b">UI_START_SCREEN_DELAY</a>&#160;&#160;&#160;1000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ad54b6782a841ebc25f37a751ef222fc8">UI_DISABLE_AUTO_PAGESWITCH</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aa06eb30bc10293da1641d37b8d20c6d9">UI_AUTORETURN_TO_MENU_AFTER</a>&#160;&#160;&#160;30000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a177ce40fea67d3478cba80c669cd0d81">FEATURE_UI_KEYS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac80947b6ab1c0c03fa4ec2b8c6bbc0a3">UI_ENCODER_SPEED</a>&#160;&#160;&#160;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#adff3e56ae54dcab96d975f15efbb88c5">UI_SPEEDDEPENDENT_POSITIONING</a>&#160;&#160;&#160;true</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#afce9d3cf25e6caa3bd0920d22880fe15">UI_KEY_BOUNCETIME</a>&#160;&#160;&#160;10</td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">bounce time of keys in milliseconds  <a href="#afce9d3cf25e6caa3bd0920d22880fe15"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#aed0faceac5c328e5e32f6794a6489e22">UI_KEY_FIRST_REPEAT</a>&#160;&#160;&#160;500</td></tr>
@@ -383,7 +427,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a0d19ce62862c0dcb7c2279a834564fdb">BEEPER_SHORT_SEQUENCE</a>&#160;&#160;&#160;2,2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a1c2445db031d3097d68348156dee1657">BEEPER_LONG_SEQUENCE</a>&#160;&#160;&#160;8,8</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a6ce408a273a47e36d05ad391251b9af6">UI_SET_PRESET_HEATED_BED_TEMP_PLA</a>&#160;&#160;&#160;60</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af34de32b962bbea62608aca4b56efee3">UI_SET_PRESET_EXTRUDER_TEMP_PLA</a>&#160;&#160;&#160;170</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#af34de32b962bbea62608aca4b56efee3">UI_SET_PRESET_EXTRUDER_TEMP_PLA</a>&#160;&#160;&#160;180</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#ac24bd3209748e044b2838fe96c20904f">UI_SET_PRESET_HEATED_BED_TEMP_ABS</a>&#160;&#160;&#160;110</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a67c80658bf8ecb46d37b05dd724c95f3">UI_SET_PRESET_EXTRUDER_TEMP_ABS</a>&#160;&#160;&#160;240</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_configuration_8h.html#a79cd0373f27a638ae3286b9c556bb0a5">UI_SET_MIN_HEATED_BED_TEMP</a>&#160;&#160;&#160;55</td></tr>
@@ -404,7 +448,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Appends the linenumber after ever ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this </p>
+<p>Appends the linenumber after every ok send, to acknowledge the received command. Uncomment for plain ok ACK if your host has problems with this </p>
 
 </div>
 </div>
@@ -427,26 +471,11 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a17ce3bb9d0988ef866a24fa47d2edfcf">ALWAYS_CHECK_ENDSTOPS</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a17ce3bb9d0988ef866a24fa47d2edfcf">ALWAYS_CHECK_ENDSTOPS</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="af5eb7e3dc57a2c282b06f32e51970839"></a><!-- doxytag: member="Configuration.h::ANALOG_REF" ref="af5eb7e3dc57a2c282b06f32e51970839" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#af5eb7e3dc57a2c282b06f32e51970839">ANALOG_REF</a>&#160;&#160;&#160;<a class="el" href="_reptier_8h.html#ac4969cdff62b814d6be75510e4fd1f46">ANALOG_REF_AVCC</a></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Used reference, normally ANALOG_REF_AVCC or ANALOG_REF_AREF for experts ANALOG_REF_INT_2_56 = 2.56V and ANALOG_REF_INT_1_1=1.1V inernaly generated. </p>
 
 </div>
 </div>
@@ -468,14 +497,13 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a>&#160;&#160;&#160;250000</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a>&#160;&#160;&#160;115200</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>enables quadratic component. </p>
-<p>Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need to activate the quadratic term. Only adds lots of computations and storage usage. Communication speed.</p>
+<p>Communication speed. </p>
 <ul>
 <li>250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt</li>
 <li>115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%</li>
@@ -483,7 +511,7 @@ Defines</h2></td></tr>
 <li>57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection</li>
 <li>38600</li>
 </ul>
-<p>Overridden if EEPROM activated. </p>
+<p>Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -510,7 +538,48 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Beeper sound definitions for short beeps during key actions and longer beeps for important actions. Parameter is is delay in microseconds and the secons is the number of repetitions. Values must be in range 1..255 </p>
+<p>Beeper sound definitions for short beeps during key actions and longer beeps for important actions. Parameter is delay in microseconds and the secons is the number of repetitions. Values must be in range 1..255 </p>
+
+</div>
+</div>
+<a class="anchor" id="a420259c9d480b04b5c81eb5318539729"></a><!-- doxytag: member="Configuration.h::CASE_LIGHTS_PIN" ref="a420259c9d480b04b5c81eb5318539729" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a420259c9d480b04b5c81eb5318539729">CASE_LIGHTS_PIN</a>&#160;&#160;&#160;-1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aad0deb0ebe3f073faca903657018830b"></a><!-- doxytag: member="Configuration.h::DELTA_SEGMENTS_PER_SECOND_MOVE" ref="aad0deb0ebe3f073faca903657018830b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aad0deb0ebe3f073faca903657018830b">DELTA_SEGMENTS_PER_SECOND_MOVE</a>&#160;&#160;&#160;70</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae439537f4f2cda93e2692fd863d6b31d"></a><!-- doxytag: member="Configuration.h::DELTA_SEGMENTS_PER_SECOND_PRINT" ref="ae439537f4f2cda93e2692fd863d6b31d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae439537f4f2cda93e2692fd863d6b31d">DELTA_SEGMENTS_PER_SECOND_PRINT</a>&#160;&#160;&#160;180</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Number of segments to generate for delta conversions per second of move. </p>
 
 </div>
 </div>
@@ -558,7 +627,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">DISABLE_Z</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a9d01b4ec87ea3a211d83ab75d6b4ec9e">DISABLE_Z</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -605,7 +674,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>Sets time for echo debug. </p>
-<p>You can set M111 1 which enables ECHO of commands send. This define specifies the position, when it will be executed. In the original FiveD software, echo is done after receiving the command. With checksum you know, how it looks from the sending string. With this define uncommented, you will see the last command executed. To be more specific: It is written after execution. This helps tracking errors, because there may be 8 or more commands in the queue and it is elsewise difficult to know, what your reprap is currently doing. </p>
+<p>You can set M111 1 which enables ECHO of commands sent. This define specifies the position, when it will be executed. In the original FiveD software, echo is done after receiving the command. With checksum you know, how it looks from the sending string. With this define uncommented, you will see the last command executed. To be more specific: It is written after execution. This helps tracking errors, because there may be 8 or more commands in the queue and it is elsewise difficult to know, what your reprap is currently doing. </p>
 
 </div>
 </div>
@@ -620,9 +689,9 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>EEPROM storage mode. </p>
-<p>Set the EEPROM_MODE to 0 if you always wan't to use the settings in this configuration file. If not, set it to a value not stored in the first EEPROM-byte used. If you later want to overwrite your current eeprom settings with configuration defaults, just select an other value. On the first call to <a class="el" href="_eeprom_8cpp.html#a739c1d676ce722809e48629d65217b08">epr_init()</a> it will detect a mismatch of the first byte and copys default values into EEPROM. If the first byte matches, the stored values are used to overwrite the settings.</p>
-<p>IMPORTANT: With mode &lt;&gt;0 some changes in <a class="el" href="_configuration_8h.html">configuration.h</a> are not set any more, as they are taken from the EEPROM. </p>
+<p><a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> storage mode. </p>
+<p>Set the EEPROM_MODE to 0 if you always want to use the settings in this configuration file. If not, set it to a value not stored in the first EEPROM-byte used. If you later want to overwrite your current <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> settings with configuration defaults, just select an other value. On the first call to epr_init() it will detect a mismatch of the first byte and copy default values into <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a>. If the first byte matches, the stored values are used to overwrite the settings.</p>
+<p>IMPORTANT: With mode &lt;&gt;0 some changes in <a class="el" href="_configuration_8h.html">Configuration.h</a> are not set any more, as they are taken from the <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a>. </p>
 
 </div>
 </div>
@@ -631,7 +700,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a394b1f7b405c2f11fd85ef4d61f63ea4">ENABLE_BACKLASH_COMPENSATION</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a394b1f7b405c2f11fd85ef4d61f63ea4">ENABLE_BACKLASH_COMPENSATION</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -653,6 +722,22 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1c9f7a0d3a9728b9c51d4d5f6658776d"></a><!-- doxytag: member="Configuration.h::ENABLE_QUADRATIC_ADVANCE" ref="a1c9f7a0d3a9728b9c51d4d5f6658776d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1c9f7a0d3a9728b9c51d4d5f6658776d">ENABLE_QUADRATIC_ADVANCE</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>enables quadratic component. </p>
+<p>Uncomment to allow a quadratic advance dependency. Linear is the dominant value, so no real need to activate the quadratic term. Only adds lots of computations and storage usage. </p>
+
+</div>
+</div>
 <a class="anchor" id="adb46d9921ce79f6e9863d11364e70b43"></a><!-- doxytag: member="Configuration.h::ENDSTOP_PULLUP_X_MAX" ref="adb46d9921ce79f6e9863d11364e70b43" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -671,7 +756,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#aeb6d9a7a15162b1184c6753118d7fcc9">ENDSTOP_PULLUP_X_MIN</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aeb6d9a7a15162b1184c6753118d7fcc9">ENDSTOP_PULLUP_X_MIN</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -697,7 +782,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a21203f0d65bfa571d3fe4e531d91c7b7">ENDSTOP_PULLUP_Y_MIN</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a21203f0d65bfa571d3fe4e531d91c7b7">ENDSTOP_PULLUP_Y_MIN</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -710,7 +795,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#afda109e0fadad8a3ca613ece0d91cbe3">ENDSTOP_PULLUP_Z_MAX</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#afda109e0fadad8a3ca613ece0d91cbe3">ENDSTOP_PULLUP_Z_MAX</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -723,7 +808,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0a04ee9c34ed6011b8aa1e1552613bb6">ENDSTOP_PULLUP_Z_MIN</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0a04ee9c34ed6011b8aa1e1552613bb6">ENDSTOP_PULLUP_Z_MIN</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -775,7 +860,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a36361f907337c0106876c3b3d0c0a775">ENDSTOP_X_MIN_INVERTING</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a36361f907337c0106876c3b3d0c0a775">ENDSTOP_X_MIN_INVERTING</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -840,7 +925,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae8a42c460d07a2ebfc7d468f8da71087">ENDSTOP_Y_MIN_INVERTING</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae8a42c460d07a2ebfc7d468f8da71087">ENDSTOP_Y_MIN_INVERTING</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -879,7 +964,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#adb026d4e2e3a99db5ba92ced0de22e51">ENDSTOP_Z_BACK_ON_HOME</a>&#160;&#160;&#160;0</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#adb026d4e2e3a99db5ba92ced0de22e51">ENDSTOP_Z_BACK_ON_HOME</a>&#160;&#160;&#160;5</td>
         </tr>
       </table>
 </div>
@@ -892,7 +977,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa142f86dfc0d1342ecdbe410c0d18d8c">ENDSTOP_Z_MAX_INVERTING</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa142f86dfc0d1342ecdbe410c0d18d8c">ENDSTOP_Z_MAX_INVERTING</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -905,7 +990,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a802ae8540a5ae109a395643485566211">ENDSTOP_Z_MIN_INVERTING</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a802ae8540a5ae109a395643485566211">ENDSTOP_Z_MIN_INVERTING</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -926,6 +1011,19 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a2d7b013803a8a356ce900b96168bdf48"></a><!-- doxytag: member="Configuration.h::EXT0_ADVANCE_BACKLASH_STEPS" ref="a2d7b013803a8a356ce900b96168bdf48" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2d7b013803a8a356ce900b96168bdf48">EXT0_ADVANCE_BACKLASH_STEPS</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="adba446ad427bf3bf4f1aa23d0dadfb0a"></a><!-- doxytag: member="Configuration.h::EXT0_ADVANCE_K" ref="adba446ad427bf3bf4f1aa23d0dadfb0a" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -937,7 +1035,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Faktor for the advance algorithm. 0 disables the algorithm. Overridden if EEPROM activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency. </p>
+<p>Faktor for the advance algorithm. 0 disables the algorithm. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency. </p>
 
 </div>
 </div>
@@ -1006,6 +1104,34 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a60a8379b48860a892629008c5dfa5a77"></a><!-- doxytag: member="Configuration.h::EXT0_EXTRUDER_COOLER_PIN" ref="a60a8379b48860a892629008c5dfa5a77" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a60a8379b48860a892629008c5dfa5a77">EXT0_EXTRUDER_COOLER_PIN</a>&#160;&#160;&#160;-1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. </p>
+
+</div>
+</div>
+<a class="anchor" id="a324981d80431aca554dbc7070f3b40ae"></a><!-- doxytag: member="Configuration.h::EXT0_EXTRUDER_COOLER_SPEED" ref="a324981d80431aca554dbc7070f3b40ae" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a324981d80431aca554dbc7070f3b40ae">EXT0_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;255</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>PWM speed for the cooler fan. 0=off 255=full speed </p>
+
+</div>
+</div>
 <a class="anchor" id="a4f7bb4c4c6b5ace3ef06f93a95bc1320"></a><!-- doxytag: member="Configuration.h::EXT0_HEAT_MANAGER" ref="a4f7bb4c4c6b5ace3ef06f93a95bc1320" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1019,7 +1145,8 @@ Defines</h2></td></tr>
 <p>Type of heat manager for this extruder.</p>
 <ul>
 <li>0 = Simply switch on/off if temperature is reached. Works always.</li>
-<li>1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder. Overridden if EEPROM activated. </li>
+<li>1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder.</li>
+<li>3 = Dead-time control. PID_P becomes dead-time in seconds. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </li>
 </ul>
 
 </div>
@@ -1042,7 +1169,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a4d7548e7d077d740e66361405f821e36">EXT0_INVERSE</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -1099,7 +1226,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Dgain. Overridden if EEPROM activated. </p>
+<p>Dgain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1113,7 +1240,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>I-gain. Overridden if EEPROM activated. </p>
+<p>I-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1129,8 +1256,8 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>The maximum value, I-gain can contribute to the output. </p>
-<p>A good value is slightly higher then the output needed for your temperature. Values for starts: 130 =&gt; PLA for temperatures from 170-180°C 180 =&gt; ABS for temperatures around 240°C</p>
-<p>The precise values may differ for different nozzle/resistor combination. Overridden if EEPROM activated. </p>
+<p>A good value is slightly higher then the output needed for your temperature. Values for starts: 130 =&gt; PLA for temperatures from 170-180 deg C 180 =&gt; ABS for temperatures around 240 deg C</p>
+<p>The precise values may differ for different nozzle/resistor combination. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1146,7 +1273,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>lower value for integral part </p>
-<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if EEPROM activated. </p>
+<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1173,7 +1300,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>P-gain. Overridden if EEPROM activated. </p>
+<p>P-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1182,12 +1309,12 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M120 S5 P5\nM117 <a class="el" href="struct_extruder.html">Extruder</a> 1&quot;</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a7fe6c9161180687dc08de8baf0f5d997">EXT0_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M117 <a class="el" href="class_extruder.html">Extruder</a> 1&quot;</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>You can run any gcode command son extruder deselect/select. Seperate multiple commands with a new line <br/>
+<p>You can run any gcode command on extruder deselect/select. Seperate multiple commands with a new line <br/>
 . That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need. The codes are only executed for multiple extruder when changing the extruder. </p>
 
 </div>
@@ -1210,7 +1337,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#afd02318a39ecb907684ab453d56fbf99">EXT0_STEPS_PER_MM</a>&#160;&#160;&#160;385</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#afd02318a39ecb907684ab453d56fbf99">EXT0_STEPS_PER_MM</a>&#160;&#160;&#160;413</td>
         </tr>
       </table>
 </div>
@@ -1255,7 +1382,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated. </p>
+<p>Temperature to retract filament when extruder is heating up. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1270,7 +1397,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set to 0 to disable. </p>
+<p>Units (mm/inches) to retract filament when extruder is heating up. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. Set to 0 to disable. </p>
 
 </div>
 </div>
@@ -1284,7 +1411,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Wait x seconds, after reaching target temperature. Only used for M109. Overridden if EEPROM activated. </p>
+<p>Wait x seconds, after reaching target temperature. Only used for M109. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1314,6 +1441,19 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa5ea7e9c2b1d0472b65a8c335ab9bae1"></a><!-- doxytag: member="Configuration.h::EXT1_ADVANCE_BACKLASH_STEPS" ref="aa5ea7e9c2b1d0472b65a8c335ab9bae1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa5ea7e9c2b1d0472b65a8c335ab9bae1">EXT1_ADVANCE_BACKLASH_STEPS</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a20d37bb739aa0a0b0438e718d5046995"></a><!-- doxytag: member="Configuration.h::EXT1_ADVANCE_K" ref="a20d37bb739aa0a0b0438e718d5046995" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1325,7 +1465,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Faktor for the advance algorithm. 0 disables the algorithm. Overridden if EEPROM activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency. </p>
+<p>Faktor for the advance algorithm. 0 disables the algorithm. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. K is the factor for the quadratic term, which is normally disabled in newer versions. If you want to use the quadratic factor make sure ENABLE_QUADRATIC_ADVANCE is defined. L is the linear factor and seems to be working better then the quadratic dependency. </p>
 
 </div>
 </div>
@@ -1394,6 +1534,34 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="adacf9e2f5707d98189c35d27e13fd03c"></a><!-- doxytag: member="Configuration.h::EXT1_EXTRUDER_COOLER_PIN" ref="adacf9e2f5707d98189c35d27e13fd03c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#adacf9e2f5707d98189c35d27e13fd03c">EXT1_EXTRUDER_COOLER_PIN</a>&#160;&#160;&#160;-1</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>The extruder cooler is a fan to cool the extruder when it is heating. If you turn the etxruder on, the fan goes on. </p>
+
+</div>
+</div>
+<a class="anchor" id="ace5ba84495fa172f7f6cb163e24c929e"></a><!-- doxytag: member="Configuration.h::EXT1_EXTRUDER_COOLER_SPEED" ref="ace5ba84495fa172f7f6cb163e24c929e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ace5ba84495fa172f7f6cb163e24c929e">EXT1_EXTRUDER_COOLER_SPEED</a>&#160;&#160;&#160;255</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>PWM speed for the cooler fan. 0=off 255=full speed </p>
+
+</div>
+</div>
 <a class="anchor" id="a97870aca6c1d518a58b413f47d6ffb55"></a><!-- doxytag: member="Configuration.h::EXT1_HEAT_MANAGER" ref="a97870aca6c1d518a58b413f47d6ffb55" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1407,7 +1575,7 @@ Defines</h2></td></tr>
 <p>Type of heat manager for this extruder.</p>
 <ul>
 <li>0 = Simply switch on/off if temperature is reached. Works always.</li>
-<li>1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder. Overridden if EEPROM activated. </li>
+<li>1 = PID Temperature control. Is better but needs good PID values. Defaults are a good start for most extruder. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </li>
 </ul>
 
 </div>
@@ -1417,7 +1585,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#af3bf0232b3b4c84f347466cc28939c6b">EXT1_HEATER_PIN</a>&#160;&#160;&#160;HEATER_1_PIN</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#af3bf0232b3b4c84f347466cc28939c6b">EXT1_HEATER_PIN</a>&#160;&#160;&#160;HEATER_2_PIN</td>
         </tr>
       </table>
 </div>
@@ -1487,7 +1655,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Dgain. Overridden if EEPROM activated. </p>
+<p>D-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1501,7 +1669,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>I-gain. Overridden if EEPROM activated. </p>
+<p>I-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1517,8 +1685,8 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>The maximum value, I-gain can contribute to the output. </p>
-<p>A good value is slightly higher then the output needed for your temperature. Values for starts: 130 =&gt; PLA for temperatures from 170-180°C 180 =&gt; ABS for temperatures around 240°C</p>
-<p>The precise values may differ for different nozzle/resistor combination. Overridden if EEPROM activated. </p>
+<p>A good value is slightly higher then the output needed for your temperature. Values for starts: 130 =&gt; PLA for temperatures from 170-180 deg C 180 =&gt; ABS for temperatures around 240 deg C</p>
+<p>The precise values may differ for different nozzle/resistor combination. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1534,7 +1702,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>lower value for integral part </p>
-<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if EEPROM activated. </p>
+<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1561,7 +1729,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>P-gain. Overridden if EEPROM activated. </p>
+<p>P-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1570,7 +1738,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#acfb1b649118012323d66651a03fb5d38">EXT1_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M120 S5 P15\nM117 <a class="el" href="struct_extruder.html">Extruder</a> 2&quot;</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#acfb1b649118012323d66651a03fb5d38">EXT1_SELECT_COMMANDS</a>&#160;&#160;&#160;&quot;M117 <a class="el" href="class_extruder.html">Extruder</a> 2&quot;</td>
         </tr>
       </table>
 </div>
@@ -1609,7 +1777,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#aff9bf6b6094565a0d865f5c50d5a977b">EXT1_TEMPSENSOR_PIN</a>&#160;&#160;&#160;TEMP_1_PIN</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aff9bf6b6094565a0d865f5c50d5a977b">EXT1_TEMPSENSOR_PIN</a>&#160;&#160;&#160;TEMP_2_PIN</td>
         </tr>
       </table>
 </div>
@@ -1648,7 +1816,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3108e27d5bd74a0f86a7790d1c783da4">EXT1_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;40</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3108e27d5bd74a0f86a7790d1c783da4">EXT1_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;0</td>
         </tr>
       </table>
 </div>
@@ -1666,7 +1834,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Wait x seconds, after reaching target temperature. Only used for M109. Overridden if EEPROM activated. </p>
+<p>Wait x seconds, after reaching target temperature. Only used for M109. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -1696,6 +1864,46 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a5d1b46d81791ea320c65266441cf9a13"></a><!-- doxytag: member="Configuration.h::EXTRUDE_MAXLENGTH" ref="a5d1b46d81791ea320c65266441cf9a13" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a5d1b46d81791ea320c65266441cf9a13">EXTRUDE_MAXLENGTH</a>&#160;&#160;&#160;100</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Prevent extrusions longer then x mm for one command. This is especially important if you abort a print. Then the extrusion poistion might be at any value like 23344. If you then have an G1 E-2 it will roll back 23 meter! </p>
+
+</div>
+</div>
+<a class="anchor" id="aea4522d18c3cb7707c97180bf00e38a9"></a><!-- doxytag: member="Configuration.h::EXTRUDER_FAN_COOL_TEMP" ref="aea4522d18c3cb7707c97180bf00e38a9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aea4522d18c3cb7707c97180bf00e38a9">EXTRUDER_FAN_COOL_TEMP</a>&#160;&#160;&#160;50</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa35e4f087e44e8572e3401e2c69491ff"></a><!-- doxytag: member="Configuration.h::FEATURE_AUTOLEVEL" ref="aa35e4f087e44e8572e3401e2c69491ff" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa35e4f087e44e8572e3401e2c69491ff">FEATURE_AUTOLEVEL</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="abf0e7ad54a0fd071912cb512876c2ee6"></a><!-- doxytag: member="Configuration.h::FEATURE_BEEPER" ref="abf0e7ad54a0fd071912cb512876c2ee6" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1709,19 +1917,46 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a3cf5cd86c6aa268a525f6ff8e3cbe055"></a><!-- doxytag: member="Configuration.h::FEATURE_CHECKSUM_FORCED" ref="a3cf5cd86c6aa268a525f6ff8e3cbe055" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3cf5cd86c6aa268a525f6ff8e3cbe055">FEATURE_CHECKSUM_FORCED</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>If a checksum is sent, all future comamnds must also contain a checksum. Increases reliability especially for binary protocol. </p>
+
+</div>
+</div>
 <a class="anchor" id="a682e53a9f87d58fffe94ab430daefeb6"></a><!-- doxytag: member="Configuration.h::FEATURE_CONTROLLER" ref="a682e53a9f87d58fffe94ab430daefeb6" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a682e53a9f87d58fffe94ab430daefeb6">FEATURE_CONTROLLER</a>&#160;&#160;&#160;0</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a682e53a9f87d58fffe94ab430daefeb6">FEATURE_CONTROLLER</a>&#160;&#160;&#160;2</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 <p>For displays and keys there are too many permutations to handle them all in once. For the most common available combinations you can set the controller type here, so you don't need to configure uicong.h at all. Controller settings &gt; 1 disable usage of <a class="el" href="uiconfig_8h.html">uiconfig.h</a></p>
 <p>0 = no display 1 = Manual definition of display and keys parameter in <a class="el" href="uiconfig_8h.html">uiconfig.h</a></p>
-<p>The following settings override <a class="el" href="uiconfig_8h.html">uiconfig.h</a>! 2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board 3 = Adafruit RGB controller 4 = Foltyn 3DMaster with display attached </p>
+<p>The following settings override <a class="el" href="uiconfig_8h.html">uiconfig.h</a>! 2 = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board 3 = Adafruit RGB controller 4 = Foltyn 3DMaster with display attached 5 = ViKi LCD - Check pin configuration in <a class="el" href="ui_8h.html">ui.h</a> for feature controller 5!!! sd card disabled by default! 6 = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in <a class="el" href="ui_8h.html">ui.h</a>. 7 = RADDS Extension Port 8 = PiBot Display/Controller extension with 20x4 character display 9 = PiBot Display/Controller extension with 16x2 character display 10 = Gadgets3D shield on RAMPS 1.4, see <a href="http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel">http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel</a> 11 = RepRapDiscount Full Graphic Smart Controller </p>
+
+</div>
+</div>
+<a class="anchor" id="a11f4f87ec2e4f99e782450147447c30e"></a><!-- doxytag: member="Configuration.h::FEATURE_DITTO_PRINTING" ref="a11f4f87ec2e4f99e782450147447c30e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a11f4f87ec2e4f99e782450147447c30e">FEATURE_DITTO_PRINTING</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -1753,12 +1988,90 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a3841264ce2c14e4f014973a8f74bc787"></a><!-- doxytag: member="Configuration.h::FEATURE_SERVO" ref="a3841264ce2c14e4f014973a8f74bc787" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3841264ce2c14e4f014973a8f74bc787">FEATURE_SERVO</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad1d58b33b7dc60e375025a977da07b8f"></a><!-- doxytag: member="Configuration.h::FEATURE_TWO_XSTEPPER" ref="ad1d58b33b7dc60e375025a977da07b8f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad1d58b33b7dc60e375025a977da07b8f">FEATURE_TWO_XSTEPPER</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa6597496797acec9d9cddd4d2031b42c"></a><!-- doxytag: member="Configuration.h::FEATURE_TWO_YSTEPPER" ref="aa6597496797acec9d9cddd4d2031b42c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa6597496797acec9d9cddd4d2031b42c">FEATURE_TWO_YSTEPPER</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3d0f91410a9fbb97c585d757ed6f07fa"></a><!-- doxytag: member="Configuration.h::FEATURE_TWO_ZSTEPPER" ref="a3d0f91410a9fbb97c585d757ed6f07fa" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3d0f91410a9fbb97c585d757ed6f07fa">FEATURE_TWO_ZSTEPPER</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a177ce40fea67d3478cba80c669cd0d81"></a><!-- doxytag: member="Configuration.h::FEATURE_UI_KEYS" ref="a177ce40fea67d3478cba80c669cd0d81" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="_configuration_8h.html#a177ce40fea67d3478cba80c669cd0d81">FEATURE_UI_KEYS</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0cee34610df91d33da8529bb4d4cc0e4"></a><!-- doxytag: member="Configuration.h::FEATURE_WATCHDOG" ref="a0cee34610df91d33da8529bb4d4cc0e4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0cee34610df91d33da8529bb4d4cc0e4">FEATURE_WATCHDOG</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2e6c84d7684b29d0c5a29e48378c2ea3"></a><!-- doxytag: member="Configuration.h::FEATURE_Z_PROBE" ref="a2e6c84d7684b29d0c5a29e48378c2ea3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2e6c84d7684b29d0c5a29e48378c2ea3">FEATURE_Z_PROBE</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -1778,7 +2091,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>Cache size for incoming commands. </p>
-<p>There should be no reason to increase this cache. Commands are nearly immediately send to execution. </p>
+<p>There should be no reason to increase this cache. <a class="el" href="class_commands.html">Commands</a> are nearly immediately sent to execution. </p>
 
 </div>
 </div>
@@ -1835,17 +2148,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>If defined, creates a thermistortable at startup.</p>
-<p>If you dont feel like computing the table on your own, you can use this generic method. It is a simple approximation which may be not as accurate as a good table computed from the reference values in the datasheet. You can increase precision if you use a temperature/resistance for R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures, which are not realy important. The resistors must fit the following schematic: </p>
-<div class="fragment"><pre class="fragment">VREF ---- R2 ---+--- Termistor ---+-- GND
-                |                 |
-                +------ R1 -------+
-                |                 |
-                +---- Capacitor --+
-                |
-                V measured
-</pre></div><p>If you don't have R1, set it to 0. The capacitor is for reducing noise from long thermistor cable. If you don't have have one, it's OK.</p>
-<p>If you don't need the generic table, uncomment the following define. Reference resistance </p>
+<p>Resistance at reference temperature </p>
 
 </div>
 </div>
@@ -1885,7 +2188,17 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Temperature at reference resistance </p>
+<p>If defined, creates a thermistor table at startup.</p>
+<p>If you don't feel like computing the table on your own, you can use this generic method. It is a simple approximation which may be not as accurate as a good table computed from the reference values in the datasheet. You can increase precision if you use a temperature/resistance for R0/T0, which is near your operating temperature. This will reduce precision for lower temperatures, which are not realy important. The resistors must fit the following schematic: </p>
+<div class="fragment"><pre class="fragment">VREF ---- R2 ---+--- Termistor ---+-- GND
+                |                 |
+                +------ R1 -------+
+                |                 |
+                +---- Capacitor --+
+                |
+                V measured
+</pre></div><p>If you don't have R1, set it to 0. The capacitor is for reducing noise from long thermistor cable. If you don't have one, it's OK.</p>
+<p>If you need the generic table, uncomment the following define. Reference Temperature </p>
 
 </div>
 </div>
@@ -2095,7 +2408,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Supply voltage to ADC, can be changed be setting ANALOG_REF below to different value. </p>
+<p>Supply voltage to ADC, can be changed by setting ANALOG_REF below to different value. </p>
 
 </div>
 </div>
@@ -2104,7 +2417,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54">HAVE_HEATED_BED</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54">HAVE_HEATED_BED</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -2124,7 +2437,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Heat manager for heated bed: 0 = Bang Bang, fast update 1 = PID controlled 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relais driven beds to save life </p>
+<p>Heat manager for heated bed: 0 = Bang Bang, fast update 1 = PID controlled 2 = Bang Bang, limited check every HEATED_BED_SET_INTERVAL. Use this with relay-driven beds to save life time 3 = dead time control </p>
 
 </div>
 </div>
@@ -2148,7 +2461,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a87286c0ff48fb57d50277e2d2a67d961">HEATED_BED_MAX_TEMP</a>&#160;&#160;&#160;90</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a87286c0ff48fb57d50277e2d2a67d961">HEATED_BED_MAX_TEMP</a>&#160;&#160;&#160;115</td>
         </tr>
       </table>
 </div>
@@ -2161,12 +2474,12 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8a273bedf59a150b30df2b683617d6bc">HEATED_BED_PID_DGAIN</a>&#160;&#160;&#160;40</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8a273bedf59a150b30df2b683617d6bc">HEATED_BED_PID_DGAIN</a>&#160;&#160;&#160;290</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Dgain. Overridden if EEPROM activated. </p>
+<p>Dgain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2175,12 +2488,12 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1c3700c0340fbe283e131ac1c684cea5">HEATED_BED_PID_IGAIN</a>&#160;&#160;&#160;0.9</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1c3700c0340fbe283e131ac1c684cea5">HEATED_BED_PID_IGAIN</a>&#160;&#160;&#160;33.02</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>I-gain Overridden if EEPROM activated. </p>
+<p>I-gain Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2195,9 +2508,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>The maximum value, I-gain can contribute to the output. </p>
-<p>A good value is slightly higher then the output needed for your temperature. Values for starts: 130 =&gt; PLA for temperatures from 170-180°C 180 =&gt; ABS for temperatures around 240°C</p>
-<p>The precise values may differ for different nozzle/resistor combination. Overridden if EEPROM activated. </p>
+<p>The maximum value, I-gain can contribute to the output. The precise values may differ for different nozzle/resistor combination. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2213,7 +2524,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 
 <p>lower value for integral part </p>
-<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if EEPROM activated. </p>
+<p>The I state should converge to the exact heater output needed for the target temperature. To prevent a long deviation from the target zone, this value limits the lower value. A good start is 30 lower then the optimal value. You need to leave room for cooling. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2235,12 +2546,12 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0b017f2440d1afb15e277c58f69f794c">HEATED_BED_PID_PGAIN</a>&#160;&#160;&#160;15</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0b017f2440d1afb15e277c58f69f794c">HEATED_BED_PID_PGAIN</a>&#160;&#160;&#160;196</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>P-gain. Overridden if EEPROM activated. </p>
+<p>P-gain. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2294,7 +2605,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Speed in mm/min for finding the home position. Overridden if EEPROM activated. </p>
+<p>Home position speed in mm/s. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2316,11 +2627,25 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa55a91a026d53ee6f8ff737e4a5ded3f">HOMING_FEEDRATE_Z</a>&#160;&#160;&#160;30</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa55a91a026d53ee6f8ff737e4a5ded3f">HOMING_FEEDRATE_Z</a>&#160;&#160;&#160;3</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa485fd6b42c23f8e7ebd58052064bcef"></a><!-- doxytag: member="Configuration.h::HOMING_ORDER" ref="aa485fd6b42c23f8e7ebd58052064bcef" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa485fd6b42c23f8e7ebd58052064bcef">HOMING_ORDER</a>&#160;&#160;&#160;<a class="el" href="_repetier_8h.html#a7a9e1a33c1089feef3d2a46f8dea8758">HOME_ORDER_ZXY</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order. </p>
 
 </div>
 </div>
@@ -2329,7 +2654,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">INVERT_X_DIR</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a178df9ff3acad1d612a5d194ccc148c1">INVERT_X_DIR</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -2355,7 +2680,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">INVERT_Z_DIR</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ace7e04e0e8a6994bcfb576d34ba54a8f">INVERT_Z_DIR</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -2373,7 +2698,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>What shall the printer do, when it receives an M112 emergency stop signal? 0 = Disable heaters/motors, wait for ever until someone presses reset. 1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip! </p>
+<p>What shall the printer do, when it receives an M112 emergency stop signal? 0 = Disable heaters/motors, wait forever until someone presses reset. 1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip! </p>
 
 </div>
 </div>
@@ -2404,7 +2729,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! Overridden if EEPROM activated. </p>
+<p>X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2434,6 +2759,34 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="afcf5d7d5403d22027359ae7db7c1ea92"></a><!-- doxytag: member="Configuration.h::MAX_DEFECT_TEMPERATURE" ref="afcf5d7d5403d22027359ae7db7c1ea92" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#afcf5d7d5403d22027359ae7db7c1ea92">MAX_DEFECT_TEMPERATURE</a>&#160;&#160;&#160;300</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a147f62b0bcb70fda0ace1984698b6176"></a><!-- doxytag: member="Configuration.h::MAX_DELTA_SEGMENTS_PER_LINE" ref="a147f62b0bcb70fda0ace1984698b6176" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a147f62b0bcb70fda0ace1984698b6176">MAX_DELTA_SEGMENTS_PER_LINE</a>&#160;&#160;&#160;22</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines. Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE will be allocated for the delta buffer. With defaults 7 * 16 * 22 = 2464 bytes. This leaves ~1K free RAM on an Arduino Mega. Used only for nonlinear systems like delta or tuga. </p>
+
+</div>
+</div>
 <a class="anchor" id="aee3020ebe35be1c65e0746d4415d3b4d"></a><!-- doxytag: member="Configuration.h::MAX_FEEDRATE_X" ref="aee3020ebe35be1c65e0746d4415d3b4d" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2444,7 +2797,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Maximum feedrate, the system allows. Higher feedrates are reduced to these values. The axis order in all axis related arrays is X, Y, Z Overridden if EEPROM activated. </p>
+<p>Maximum feedrate, the system allows. Higher feedrates are reduced to these values. The axis order in all axis related arrays is X, Y, Z Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2466,7 +2819,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a144a0c5e25b1f7ba0d0470ee206e83b7">MAX_FEEDRATE_Z</a>&#160;&#160;&#160;40</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a144a0c5e25b1f7ba0d0470ee206e83b7">MAX_FEEDRATE_Z</a>&#160;&#160;&#160;5</td>
         </tr>
       </table>
 </div>
@@ -2484,7 +2837,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>The firmware supports trajectory smoothing. To acieve this, it divides the stepsize by 2, resulting in the double computation cost. For slow movements this is not an issue, but for really fast moves this is too much. The value specified here is the number of clock cycles between a step on the driving axis. If the interval at full speed is below this value, smoothing is disabled for that line. </p>
+<p>The firmware supports trajectory smoothing. To achieve this, it divides the stepsize by 2, resulting in the double computation cost. For slow movements this is not an issue, but for really fast moves this is too much. The value specified here is the number of clock cycles between a step on the driving axis. If the interval at full speed is below this value, smoothing is disabled for that line. </p>
 
 </div>
 </div>
@@ -2519,7 +2872,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad523815e06fa281c39458539c82ff3c5">MAX_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;false</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad523815e06fa281c39458539c82ff3c5">MAX_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
@@ -2537,7 +2890,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>After x seconds of inactivity, the system will go down as far it can. It will at least disable all stepper motors and heaters. If the board has a power pin, it will be disabled, too. Set value to 0 for disabled. Overridden if EEPROM activated. </p>
+<p>After x seconds of inactivity, the system will go down as far it can. It will at least disable all stepper motors and heaters. If the board has a power pin, it will be disabled, too. Set value to 0 for disabled. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2554,11 +2907,11 @@ Defines</h2></td></tr>
 
 <p>Maximum allowable jerk. </p>
 <p>Caution: This is no real jerk in a physical meaning.</p>
-<p>The jerk determines your start speed and the maximum speed at the join of two segments. It's unit is mm/s. If the printer is standing still, the start speed is jerk/2. At the join of two segments, the speed difference is limited to the jerk value.</p>
+<p>The jerk determines your start speed and the maximum speed at the join of two segments. Its unit is mm/s. If the printer is standing still, the start speed is jerk/2. At the join of two segments, the speed difference is limited to the jerk value.</p>
 <p>Examples: For all examples jerk is assumed as 40.</p>
 <p>Segment 1: vx = 50, vy = 0 Segment 2: vx = 0, vy = 50 v_diff = sqrt((50-0)^2+(0-50)^2) = 70.71 v_diff &gt; jerk =&gt; vx_1 = vy_2 = jerk/v_diff*vx_1 = 40/70.71*50 = 28.3 mm/s at the join</p>
 <p>Segment 1: vx = 50, vy = 0 Segment 2: vx = 35.36, vy = 35.36 v_diff = sqrt((50-35.36)^2+(0-35.36)^2) = 38.27 &lt; jerk Corner can be printed with full speed of 50 mm/s</p>
-<p>Overridden if EEPROM activated. </p>
+<p>Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2606,7 +2959,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a35873e42a82dcc5fa4b381407eeeb2e1">max_software_endstop_z</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a35873e42a82dcc5fa4b381407eeeb2e1">max_software_endstop_z</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -2625,7 +2978,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>X, Y, Z max acceleration in mm/s^2 for travel moves. Overridden if EEPROM activated. </p>
+<p>X, Y, Z max acceleration in mm/s^2 for travel moves. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -2694,12 +3047,26 @@ Defines</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a95d699ac75bcea47d055774068e6a8ce"></a><!-- doxytag: member="Configuration.h::MIN_DEFECT_TEMPERATURE" ref="a95d699ac75bcea47d055774068e6a8ce" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a95d699ac75bcea47d055774068e6a8ce">MIN_DEFECT_TEMPERATURE</a>&#160;&#160;&#160;-10</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Extreme values to detect defect thermistors. </p>
+
+</div>
+</div>
 <a class="anchor" id="a2b508e94835493e76669002cf2a3c41d"></a><!-- doxytag: member="Configuration.h::MIN_EXTRUDER_TEMP" ref="a2b508e94835493e76669002cf2a3c41d" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2b508e94835493e76669002cf2a3c41d">MIN_EXTRUDER_TEMP</a>&#160;&#160;&#160;0</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2b508e94835493e76669002cf2a3c41d">MIN_EXTRUDER_TEMP</a>&#160;&#160;&#160;160</td>
         </tr>
       </table>
 </div>
@@ -2738,7 +3105,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a7b618ecda4db4b5cd7b186258aeba986">MIN_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a7b618ecda4db4b5cd7b186258aeba986">MIN_HARDWARE_ENDSTOP_Z</a>&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div>
@@ -2785,38 +3152,12 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae8103ab99028a60b42da51ee9b20da06"></a><!-- doxytag: member="Configuration.h::MINTEMP" ref="ae8103ab99028a60b42da51ee9b20da06" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae8103ab99028a60b42da51ee9b20da06">MINTEMP</a>&#160;&#160;&#160;5</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a90a6f18a03e3c38a95a38089380c086a"></a><!-- doxytag: member="Configuration.h::MOTHERBOARD" ref="a90a6f18a03e3c38a95a38089380c086a" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a90a6f18a03e3c38a95a38089380c086a">MOTHERBOARD</a>&#160;&#160;&#160;5</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a8f52dfdadbdf274fc019d8921ded0328"></a><!-- doxytag: member="Configuration.h::MOTOR_CURRENT" ref="a8f52dfdadbdf274fc019d8921ded0328" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8f52dfdadbdf274fc019d8921ded0328">MOTOR_CURRENT</a>&#160;&#160;&#160;{48713,48713,42713,48713,42713}</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a90a6f18a03e3c38a95a38089380c086a">MOTHERBOARD</a>&#160;&#160;&#160;33</td>
         </tr>
       </table>
 </div>
@@ -2866,7 +3207,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Number of extruders. Maximum 2 extruder. </p>
+<p>Number of extruders. Maximum 6 extruders. </p>
 
 </div>
 </div>
@@ -2880,11 +3221,11 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Temperature range for target temperature to hold in M109 command. 5 means +/-5°C</p>
-<p>Uncomment define to use force the temperature into the range for given watchperiod. Userdefined thermistor table</p>
+<p>Temperature range for target temperature to hold in M109 command. 5 means +/-5 degC</p>
+<p>Uncomment define to force the temperature into the range for given watchperiod. Userdefined thermistor table</p>
 <p>There are many different thermistors, which can be combined with different resistors. This result in unpredictable number of tables. As a resolution, the user can define one table here, that can be used as type 5 for thermister type in extruder/heated bed definition. Make sure, the number of entries matches the value in NUM_TEMPS_USERTHERMISTOR0. If you span definition over multiple lines, make sure to end each line, except the last, with a backslash. The table format is {{adc1,temp1},{adc2,temp2}...} with increasing adc values. For more informations, read <a href="http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html">http://hydraraptor.blogspot.com/2007/10/measuring-temperature-easy-way.html</a></p>
 <p>If you have a sprinter temperature table, you have to multiply the first value with 4 and the second with 8. This firmware works with increased precision, so the value reads go from 0 to 4095 and the temperature is temperature*8.</p>
-<p>If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7! Number of entries in the user thermistortable 0. Set to 0 to disable it. </p>
+<p>If you have a PTC thermistor instead of a NTC thermistor, keep the adc values increasing and use themistor types 50-52 instead of 5-7! Number of entries in the user thermistor table 0. Set to 0 to disable it. </p>
 
 </div>
 </div>
@@ -2898,7 +3239,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Number of entries in the user thermistortable 1. Set to 0 to disable it. </p>
+<p>Number of entries in the user thermistor table 1. Set to 0 to disable it. </p>
 
 </div>
 </div>
@@ -2912,87 +3253,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Number of entries in the user thermistortable 2. Set to 0 to disable it. </p>
-
-</div>
-</div>
-<a class="anchor" id="a23b51a8037d37fd722e042c50385a295"></a><!-- doxytag: member="Configuration.h::OPS_MIN_DISTANCE" ref="a23b51a8037d37fd722e042c50385a295" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a23b51a8037d37fd722e042c50385a295">OPS_MIN_DISTANCE</a>&#160;&#160;&#160;0.8</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Minimum distance for retraction. </p>
-<p>If a travel move is shorter than this distance, no retraction will occur. This is to prevent retraction with infill, where the angle to the perimeter needs a short stop. Unit is mm. Overridden if EEPROM activated. </p>
-
-</div>
-</div>
-<a class="anchor" id="a636fd50521ed2a0d5b77febec6ad876c"></a><!-- doxytag: member="Configuration.h::OPS_MODE" ref="a636fd50521ed2a0d5b77febec6ad876c" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a636fd50521ed2a0d5b77febec6ad876c">OPS_MODE</a>&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Sets the ops operation mode. </p>
-<p>0: Off 1: Classic mode. Stop head, retract move to target, push filament back. 2: Fast mode. Retract during move, start pushing back the filament during move. For safty, we start at with a low speed and wait for the push back, before the pintmove starts. Normally there is some time needed to wait for the filament.</p>
-<p>Overridden if EEPROM activated. </p>
-
-</div>
-</div>
-<a class="anchor" id="ad8a5aabc56cff256d29ef74831d8ebe0"></a><!-- doxytag: member="Configuration.h::OPS_MOVE_AFTER" ref="ad8a5aabc56cff256d29ef74831d8ebe0" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad8a5aabc56cff256d29ef74831d8ebe0">OPS_MOVE_AFTER</a>&#160;&#160;&#160;50.0</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Move printhead only after x% of retract distance have been retracted. </p>
-<p>Overridden if EEPROM activated. </p>
-
-</div>
-</div>
-<a class="anchor" id="a2acaaa7a1827124753d915d4247814f8"></a><!-- doxytag: member="Configuration.h::OPS_RETRACT_BACKLASH" ref="a2acaaa7a1827124753d915d4247814f8" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2acaaa7a1827124753d915d4247814f8">OPS_RETRACT_BACKLASH</a>&#160;&#160;&#160;0.0</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Backslash produced by extruder reversal. </p>
-<p>If you are using a bowden extruder, you may need some extra distance to push the filament back into the original place. This is the value you enter here. Unit is mm. Overridden if EEPROM activated. </p>
-
-</div>
-</div>
-<a class="anchor" id="a6731ff93d77288441b9114aecf0de95f"></a><!-- doxytag: member="Configuration.h::OPS_RETRACT_DISTANCE" ref="a6731ff93d77288441b9114aecf0de95f" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a6731ff93d77288441b9114aecf0de95f">OPS_RETRACT_DISTANCE</a>&#160;&#160;&#160;1.5</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Retraction distance in mm. If you want to enable OPS only sometimes, compile with OPS support and set retraction distance to 0. If you set it to e.g. 3 in your eeprom settings it is enabled. Overridden if EEPROM activated. </p>
+<p>Number of entries in the user thermistor table 2. Set to 0 to disable it. </p>
 
 </div>
 </div>
@@ -3001,12 +3262,26 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad558811085bc740e2f321421e6aef424">PID_CONTROL_RANGE</a>&#160;&#160;&#160;15</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad558811085bc740e2f321421e6aef424">PID_CONTROL_RANGE</a>&#160;&#160;&#160;20</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>PID control only works target temperature +/- PID_CONTROL_RANGE. If you get much overshoot at the first temperature set, because the heater is going full power to long, you need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15. </p>
+<p>PID control only works target temperature +/- PID_CONTROL_RANGE. If you get much overshoot at the first temperature set, because the heater is going full power too long, you need to increase this value. For one 6.8 Ohm heater 10 is ok. With two 6.8 Ohm heater use 15. </p>
+
+</div>
+</div>
+<a class="anchor" id="a3ae7b30e813f71eb4588c68765e4fc22"></a><!-- doxytag: member="Configuration.h::POWER_INVERTING" ref="a3ae7b30e813f71eb4588c68765e4fc22" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3ae7b30e813f71eb4588c68765e4fc22">POWER_INVERTING</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>If you use an ATX power supply you need the power pin to work non inverting. For some special boards you might need to make it inverting. </p>
 
 </div>
 </div>
@@ -3059,12 +3334,64 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad9d358ddc3c8d8d17e31007e50814660">SD_EXTENDED_DIR</a></td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad9d358ddc3c8d8d17e31007e50814660">SD_EXTENDED_DIR</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Set to false to disable SD support: Show extended directory including file length. Don't use this with pronterface! </p>
+<p>Set to false to disable SD support: Show extended directory including file length. Don't use this with Pronterface! </p>
+
+</div>
+</div>
+<a class="anchor" id="a1fdd264637580640d89fbffa822a45ae"></a><!-- doxytag: member="Configuration.h::SERVO0_PIN" ref="a1fdd264637580640d89fbffa822a45ae" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1fdd264637580640d89fbffa822a45ae">SERVO0_PIN</a>&#160;&#160;&#160;11</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="acc407398818b8e8fe8a1e314f762db21"></a><!-- doxytag: member="Configuration.h::SERVO1_PIN" ref="acc407398818b8e8fe8a1e314f762db21" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#acc407398818b8e8fe8a1e314f762db21">SERVO1_PIN</a>&#160;&#160;&#160;6</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0e45aba502d52eac8d6261055e5ecb74"></a><!-- doxytag: member="Configuration.h::SERVO2_PIN" ref="a0e45aba502d52eac8d6261055e5ecb74" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0e45aba502d52eac8d6261055e5ecb74">SERVO2_PIN</a>&#160;&#160;&#160;5</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ae10111ce2dd1b9a78f3eaeeda632d4e0"></a><!-- doxytag: member="Configuration.h::SERVO3_PIN" ref="ae10111ce2dd1b9a78f3eaeeda632d4e0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae10111ce2dd1b9a78f3eaeeda632d4e0">SERVO3_PIN</a>&#160;&#160;&#160;4</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -3129,42 +3456,26 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;120L</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>&#160;&#160;&#160;360</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>After x seconds of inactivity, the stepper motors are disabled. Set to 0 to leave them enabled. This helps cooling the Stepper motors between two print jobs. Overridden if EEPROM activated. </p>
+<p>After x seconds of inactivity, the stepper motors are disabled. Set to 0 to leave them enabled. This helps cooling the Stepper motors between two print jobs. Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
-<a class="anchor" id="af348f6d0d21ffcb39ae86cb2e2188999"></a><!-- doxytag: member="Configuration.h::TEMP_PID" ref="af348f6d0d21ffcb39ae86cb2e2188999" args="" -->
+<a class="anchor" id="afd6ac7487ac40dde209dc9015944f0ce"></a><!-- doxytag: member="Configuration.h::UI_ANIMATION" ref="afd6ac7487ac40dde209dc9015944f0ce" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#af348f6d0d21ffcb39ae86cb2e2188999">TEMP_PID</a>&#160;&#160;&#160;true</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#afd6ac7487ac40dde209dc9015944f0ce">UI_ANIMATION</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Include PID control for all heaters. </p>
-
-</div>
-</div>
-<a class="anchor" id="a806ea970ccbc3c57a4d4ad45dbbb4725"></a><!-- doxytag: member="Configuration.h::TIMER0_PRESCALE" ref="a806ea970ccbc3c57a4d4ad45dbbb4725" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a806ea970ccbc3c57a4d4ad45dbbb4725">TIMER0_PRESCALE</a>&#160;&#160;&#160;64</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Prescale factor, timer0 runs at. </p>
-<p>All known arduino boards use 64. This value is needed for the extruder timing. </p>
+<p>Animate switches between menus etc. </p>
 
 </div>
 </div>
@@ -3279,7 +3590,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Select the language to use. 0 = english 1 = german 2 = dutch </p>
+<p>Select the language to use. 0 = English 1 = German 2 = Dutch 3 = Brazilian portuguese 4 = Italian 5 = Spanish 6 = Swedish </p>
 
 </div>
 </div>
@@ -3294,6 +3605,32 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 <p>How many ms should a single page be shown, until it is switched to the next one. </p>
+
+</div>
+</div>
+<a class="anchor" id="aea0a00e1a55484219639cb68ab5f5e3f"></a><!-- doxytag: member="Configuration.h::UI_PRINTER_COMPANY" ref="aea0a00e1a55484219639cb68ab5f5e3f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aea0a00e1a55484219639cb68ab5f5e3f">UI_PRINTER_COMPANY</a>&#160;&#160;&#160;&quot;RepRapDiscount&quot;</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3d54fd865db9e4902b871b2e71b6c15c"></a><!-- doxytag: member="Configuration.h::UI_PRINTER_NAME" ref="a3d54fd865db9e4902b871b2e71b6c15c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3d54fd865db9e4902b871b2e71b6c15c">UI_PRINTER_NAME</a>&#160;&#160;&#160;&quot;Ordbot&quot;</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -3393,7 +3730,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#af34de32b962bbea62608aca4b56efee3">UI_SET_PRESET_EXTRUDER_TEMP_PLA</a>&#160;&#160;&#160;170</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#af34de32b962bbea62608aca4b56efee3">UI_SET_PRESET_EXTRUDER_TEMP_PLA</a>&#160;&#160;&#160;180</td>
         </tr>
       </table>
 </div>
@@ -3427,16 +3764,30 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7afcec92e58e39dcd34317c357b423ef"></a><!-- doxytag: member="Configuration.h::UI_VERSION_STRING2" ref="a7afcec92e58e39dcd34317c357b423ef" args="" -->
+<a class="anchor" id="adff3e56ae54dcab96d975f15efbb88c5"></a><!-- doxytag: member="Configuration.h::UI_SPEEDDEPENDENT_POSITIONING" ref="adff3e56ae54dcab96d975f15efbb88c5" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a7afcec92e58e39dcd34317c357b423ef">UI_VERSION_STRING2</a>&#160;&#160;&#160;&quot;Mendel&quot;</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#adff3e56ae54dcab96d975f15efbb88c5">UI_SPEEDDEPENDENT_POSITIONING</a>&#160;&#160;&#160;true</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a03f98986f96e1012025984a43a31f03b"></a><!-- doxytag: member="Configuration.h::UI_START_SCREEN_DELAY" ref="a03f98986f96e1012025984a43a31f03b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a03f98986f96e1012025984a43a31f03b">UI_START_SCREEN_DELAY</a>&#160;&#160;&#160;1000</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Delay of start screen in milliseconds </p>
 
 </div>
 </div>
@@ -3453,24 +3804,6 @@ Defines</h2></td></tr>
 
 <p>Enable advance algorithm. </p>
 <p>Without a correct adjusted advance algorithm, you get blobs at points, where acceleration changes. The effect increases with speed and acceleration difference. Using the advance method decreases this effect. For more informations, read the wiki. </p>
-
-</div>
-</div>
-<a class="anchor" id="ac2f980048fb598f74113af5217ef511a"></a><!-- doxytag: member="Configuration.h::USE_OPS" ref="ac2f980048fb598f74113af5217ef511a" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ac2f980048fb598f74113af5217ef511a">USE_OPS</a>&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Activate ooze prevention system. </p>
-<p>The ooze prevention system tries to prevent ooze, by a fast retract of the filament every time printing stops. Most slicing software have already an option to do this. Using OPS_MODE=1 will in fact mimic this. This works good, but can increase printing time. To reduce the additional waiting time, the OPS has a fast mode, which performs the retraction during the travelling move. The only reason, your slicer doesn't do it, is because it can't tell. There is simple no G-Code command telling the firmware to do that.</p>
-<p>You can always compile including OPS. Then you can disable/enable it anytime you want. To disable it set USE_OPS 0</p>
-<p>Caution: Don't enable anti-ooze in your slicer if you are using this. </p>
 
 </div>
 </div>
@@ -3527,7 +3860,46 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Communication errors can swollow part of the ok, which tells the host software to send the next command. Not receiving it will cause your printer to stop. Sending this string every second, if our queue is empty should prevent this. Uncomment if you don't wan't this feature. </p>
+<p>Communication errors can swollow part of the ok, which tells the host software to send the next command. Not receiving it will cause your printer to stop. Sending this string every second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. </p>
+
+</div>
+</div>
+<a class="anchor" id="a9aaa449ed510720ddbcdccbe76651226"></a><!-- doxytag: member="Configuration.h::X2_DIR_PIN" ref="a9aaa449ed510720ddbcdccbe76651226" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a9aaa449ed510720ddbcdccbe76651226">X2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad293afc97a434a46e73cdffde9085c69"></a><!-- doxytag: member="Configuration.h::X2_ENABLE_PIN" ref="ad293afc97a434a46e73cdffde9085c69" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad293afc97a434a46e73cdffde9085c69">X2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3c065952d4985697e1b1095e8236a0b9"></a><!-- doxytag: member="Configuration.h::X2_STEP_PIN" ref="a3c065952d4985697e1b1095e8236a0b9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3c065952d4985697e1b1095e8236a0b9">X2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -3575,7 +3947,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">X_MAX_LENGTH</a>&#160;&#160;&#160;195</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3d38dfe2e06bb0eba6cec5ac159fe370">X_MAX_LENGTH</a>&#160;&#160;&#160;165</td>
         </tr>
       </table>
 </div>
@@ -3601,14 +3973,53 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a72532fd06152bb6611ef6d35d05e1d41">XAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;80</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a72532fd06152bb6611ef6d35d05e1d41">XAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;98.425196</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Number of steps for a 1mm move in x direction. For xy gantry use 2*belt moved! Overridden if EEPROM activated. </p>
+<p>Number of steps for a 1mm move in x direction. For xy gantry use 2*belt moved! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 <p>Drive settings for the Delta printers Drive settings for printers with cartesian drive systems </p>
+
+</div>
+</div>
+<a class="anchor" id="a966bcbb595b01ea1f47b44ee54561f17"></a><!-- doxytag: member="Configuration.h::Y2_DIR_PIN" ref="a966bcbb595b01ea1f47b44ee54561f17" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a966bcbb595b01ea1f47b44ee54561f17">Y2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a24a774ef39e666b4cfc4e2507876adde"></a><!-- doxytag: member="Configuration.h::Y2_ENABLE_PIN" ref="a24a774ef39e666b4cfc4e2507876adde" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a24a774ef39e666b4cfc4e2507876adde">Y2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa0057d47f91277e928db606389336d78"></a><!-- doxytag: member="Configuration.h::Y2_STEP_PIN" ref="aa0057d47f91277e928db606389336d78" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa0057d47f91277e928db606389336d78">Y2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -3656,7 +4067,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">Y_MAX_LENGTH</a>&#160;&#160;&#160;195</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#adfbd7c1fdaa51033a32bc81cf22da42d">Y_MAX_LENGTH</a>&#160;&#160;&#160;175</td>
         </tr>
       </table>
 </div>
@@ -3682,13 +4093,52 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8781262a1849bb33736fd374ba37d34a">YAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;80</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8781262a1849bb33736fd374ba37d34a">YAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;98.425196</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Number of steps for a 1mm move in y direction. For xy gantry use 2*belt moved! Overridden if EEPROM activated. </p>
+<p>Number of steps for a 1mm move in y direction. For xy gantry use 2*belt moved! Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
+
+</div>
+</div>
+<a class="anchor" id="a178ffc50f37d780f6c7e2f41065259b3"></a><!-- doxytag: member="Configuration.h::Z2_DIR_PIN" ref="a178ffc50f37d780f6c7e2f41065259b3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a178ffc50f37d780f6c7e2f41065259b3">Z2_DIR_PIN</a>&#160;&#160;&#160;E1_DIR_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa307cf262f6a195b77107a7ba0a47eb3"></a><!-- doxytag: member="Configuration.h::Z2_ENABLE_PIN" ref="aa307cf262f6a195b77107a7ba0a47eb3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa307cf262f6a195b77107a7ba0a47eb3">Z2_ENABLE_PIN</a>&#160;&#160;&#160;E1_ENABLE_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a74542a04437600f9bf1ac6f3dd5e8c0d"></a><!-- doxytag: member="Configuration.h::Z2_STEP_PIN" ref="a74542a04437600f9bf1ac6f3dd5e8c0d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a74542a04437600f9bf1ac6f3dd5e8c0d">Z2_STEP_PIN</a>&#160;&#160;&#160;E1_STEP_PIN</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
 
 </div>
 </div>
@@ -3723,7 +4173,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">Z_HOME_DIR</a>&#160;&#160;&#160;-1</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a23221a87aec075edb27eb06d530fdf09">Z_HOME_DIR</a>&#160;&#160;&#160;1</td>
         </tr>
       </table>
 </div>
@@ -3736,7 +4186,7 @@ Defines</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">Z_MAX_LENGTH</a>&#160;&#160;&#160;80</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ae3581b4dea69d291b0aa6dba1097d57d">Z_MAX_LENGTH</a>&#160;&#160;&#160;116.820</td>
         </tr>
       </table>
 </div>
@@ -3757,18 +4207,242 @@ Defines</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8410fd94dd62e48904dd82b300496130"></a><!-- doxytag: member="Configuration.h::ZAXIS_STEPS_PER_MM" ref="a8410fd94dd62e48904dd82b300496130" args="" -->
+<a class="anchor" id="a39be7d391509b0162ec8e5f402cb6587"></a><!-- doxytag: member="Configuration.h::Z_PROBE_FINISHED_SCRIPT" ref="a39be7d391509b0162ec8e5f402cb6587" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8410fd94dd62e48904dd82b300496130">ZAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;3360</td>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a39be7d391509b0162ec8e5f402cb6587">Z_PROBE_FINISHED_SCRIPT</a>&#160;&#160;&#160;&quot;&quot;</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Number of steps for a 1mm move in z direction Overridden if EEPROM activated. </p>
+</div>
+</div>
+<a class="anchor" id="a43d204b928407664cb5512a722424db7"></a><!-- doxytag: member="Configuration.h::Z_PROBE_HEIGHT" ref="a43d204b928407664cb5512a722424db7" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a43d204b928407664cb5512a722424db7">Z_PROBE_HEIGHT</a>&#160;&#160;&#160;39.91</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>The height is the difference between activated probe position and nozzle height. </p>
+
+</div>
+</div>
+<a class="anchor" id="a56930ee08e30adf2b4366812bd1334ae"></a><!-- doxytag: member="Configuration.h::Z_PROBE_ON_HIGH" ref="a56930ee08e30adf2b4366812bd1334ae" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a56930ee08e30adf2b4366812bd1334ae">Z_PROBE_ON_HIGH</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0c7b058babb5f320295349b4b009a8ea"></a><!-- doxytag: member="Configuration.h::Z_PROBE_PIN" ref="a0c7b058babb5f320295349b4b009a8ea" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a0c7b058babb5f320295349b4b009a8ea">Z_PROBE_PIN</a>&#160;&#160;&#160;63</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a3a54079a45359832d7f3fd96c8219e5d"></a><!-- doxytag: member="Configuration.h::Z_PROBE_PULLUP" ref="a3a54079a45359832d7f3fd96c8219e5d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a3a54079a45359832d7f3fd96c8219e5d">Z_PROBE_PULLUP</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a707d7dccb6663f9ee7756482ef446203"></a><!-- doxytag: member="Configuration.h::Z_PROBE_SPEED" ref="a707d7dccb6663f9ee7756482ef446203" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a707d7dccb6663f9ee7756482ef446203">Z_PROBE_SPEED</a>&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Speed of z-axis in mm/s when probing </p>
+
+</div>
+</div>
+<a class="anchor" id="a180407f97284ec0bb4befbcbd523b3f9"></a><!-- doxytag: member="Configuration.h::Z_PROBE_START_SCRIPT" ref="a180407f97284ec0bb4befbcbd523b3f9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a180407f97284ec0bb4befbcbd523b3f9">Z_PROBE_START_SCRIPT</a>&#160;&#160;&#160;&quot;&quot;</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>These scripts are run before resp. after the z-probe is done. Add here code to activate/deactivate probe if needed. </p>
+
+</div>
+</div>
+<a class="anchor" id="a6f7822296d50c200957b8a74f6699738"></a><!-- doxytag: member="Configuration.h::Z_PROBE_WAIT_BEFORE_TEST" ref="a6f7822296d50c200957b8a74f6699738" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a6f7822296d50c200957b8a74f6699738">Z_PROBE_WAIT_BEFORE_TEST</a>&#160;&#160;&#160;true</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a234370629ef9bbd300f8c4b696d51067"></a><!-- doxytag: member="Configuration.h::Z_PROBE_X1" ref="a234370629ef9bbd300f8c4b696d51067" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a234370629ef9bbd300f8c4b696d51067">Z_PROBE_X1</a>&#160;&#160;&#160;100</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a1e46da249ea8408c8c17235803d7159f"></a><!-- doxytag: member="Configuration.h::Z_PROBE_X2" ref="a1e46da249ea8408c8c17235803d7159f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a1e46da249ea8408c8c17235803d7159f">Z_PROBE_X2</a>&#160;&#160;&#160;160</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afd4deed5ad688aa5cb407423d3871d4d"></a><!-- doxytag: member="Configuration.h::Z_PROBE_X3" ref="afd4deed5ad688aa5cb407423d3871d4d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#afd4deed5ad688aa5cb407423d3871d4d">Z_PROBE_X3</a>&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a03e229c3ee72dc7f7ce49577cf97d086"></a><!-- doxytag: member="Configuration.h::Z_PROBE_X_OFFSET" ref="a03e229c3ee72dc7f7ce49577cf97d086" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a03e229c3ee72dc7f7ce49577cf97d086">Z_PROBE_X_OFFSET</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ad438255c65db5e54c90e89780d9e6196"></a><!-- doxytag: member="Configuration.h::Z_PROBE_XY_SPEED" ref="ad438255c65db5e54c90e89780d9e6196" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#ad438255c65db5e54c90e89780d9e6196">Z_PROBE_XY_SPEED</a>&#160;&#160;&#160;150</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a281c2c72b1ec819b64e5e13b82657d1d"></a><!-- doxytag: member="Configuration.h::Z_PROBE_Y1" ref="a281c2c72b1ec819b64e5e13b82657d1d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a281c2c72b1ec819b64e5e13b82657d1d">Z_PROBE_Y1</a>&#160;&#160;&#160;20</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a2729cc174476584409552a1feaf61e31"></a><!-- doxytag: member="Configuration.h::Z_PROBE_Y2" ref="a2729cc174476584409552a1feaf61e31" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a2729cc174476584409552a1feaf61e31">Z_PROBE_Y2</a>&#160;&#160;&#160;170</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aa63f6e9f9d1f981e72a5a73515f5185e"></a><!-- doxytag: member="Configuration.h::Z_PROBE_Y3" ref="aa63f6e9f9d1f981e72a5a73515f5185e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aa63f6e9f9d1f981e72a5a73515f5185e">Z_PROBE_Y3</a>&#160;&#160;&#160;170</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aab5d69ddf958e1bb838fd16f8686fb2f"></a><!-- doxytag: member="Configuration.h::Z_PROBE_Y_OFFSET" ref="aab5d69ddf958e1bb838fd16f8686fb2f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#aab5d69ddf958e1bb838fd16f8686fb2f">Z_PROBE_Y_OFFSET</a>&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8410fd94dd62e48904dd82b300496130"></a><!-- doxytag: member="Configuration.h::ZAXIS_STEPS_PER_MM" ref="a8410fd94dd62e48904dd82b300496130" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="_configuration_8h.html#a8410fd94dd62e48904dd82b300496130">ZAXIS_STEPS_PER_MM</a>&#160;&#160;&#160;2560</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Number of steps for a 1mm move in z direction Overridden if <a class="el" href="class_e_e_p_r_o_m.html">EEPROM</a> activated. </p>
 
 </div>
 </div>
@@ -3792,7 +4466,7 @@ Defines</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="_configuration_8h.html">Configuration.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

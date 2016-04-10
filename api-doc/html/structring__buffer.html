@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -106,13 +106,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <!-- doxytag: class="ring_buffer" -->
-<p><code>#include &lt;<a class="el" href="gcode_8h_source.html">gcode.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="_h_a_l_8h_source.html">HAL.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">buffer</a> [<a class="el" href="gcode_8h.html#aaa07390e6158db5d82d40510d2ae02d5">SERIAL_BUFFER_SIZE</a>]</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#aecf8bcfb19c55c90d1a1a80d52b8e133">head</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">volatile int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#a1366e1fcd97ae453d54d510f8451c8a4">tail</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">buffer</a> [<a class="el" href="_h_a_l_8h.html#aaa07390e6158db5d82d40510d2ae02d5">SERIAL_BUFFER_SIZE</a>]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#aae22e2b3b3f930af186a18d70c863648">head</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structring__buffer.html#a7d299975a87db769b08769ea6b6561eb">tail</a></td></tr>
 </table>
 <hr/><h2>Field Documentation</h2>
 <a class="anchor" id="a2d9546fdd214976a34a12baa9c758ada"></a><!-- doxytag: member="ring_buffer::buffer" ref="a2d9546fdd214976a34a12baa9c758ada" args="[SERIAL_BUFFER_SIZE]" -->
@@ -120,7 +120,7 @@ Data Fields</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned char <a class="el" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">buffer</a>[<a class="el" href="gcode_8h.html#aaa07390e6158db5d82d40510d2ae02d5">SERIAL_BUFFER_SIZE</a>]</td>
+          <td class="memname">unsigned char <a class="el" href="structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada">buffer</a>[<a class="el" href="_h_a_l_8h.html#aaa07390e6158db5d82d40510d2ae02d5">SERIAL_BUFFER_SIZE</a>]</td>
         </tr>
       </table>
 </div>
@@ -128,12 +128,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aecf8bcfb19c55c90d1a1a80d52b8e133"></a><!-- doxytag: member="ring_buffer::head" ref="aecf8bcfb19c55c90d1a1a80d52b8e133" args="" -->
+<a class="anchor" id="aae22e2b3b3f930af186a18d70c863648"></a><!-- doxytag: member="ring_buffer::head" ref="aae22e2b3b3f930af186a18d70c863648" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">volatile int <a class="el" href="structring__buffer.html#aecf8bcfb19c55c90d1a1a80d52b8e133">head</a></td>
+          <td class="memname">volatile uint8_t <a class="el" href="structring__buffer.html#aae22e2b3b3f930af186a18d70c863648">head</a></td>
         </tr>
       </table>
 </div>
@@ -141,12 +141,12 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1366e1fcd97ae453d54d510f8451c8a4"></a><!-- doxytag: member="ring_buffer::tail" ref="a1366e1fcd97ae453d54d510f8451c8a4" args="" -->
+<a class="anchor" id="a7d299975a87db769b08769ea6b6561eb"></a><!-- doxytag: member="ring_buffer::tail" ref="a7d299975a87db769b08769ea6b6561eb" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">volatile int <a class="el" href="structring__buffer.html#a1366e1fcd97ae453d54d510f8451c8a4">tail</a></td>
+          <td class="memname">volatile uint8_t <a class="el" href="structring__buffer.html#a7d299975a87db769b08769ea6b6561eb">tail</a></td>
         </tr>
       </table>
 </div>
@@ -155,7 +155,7 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="gcode_8h_source.html">gcode.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_h_a_l_8h_source.html">HAL.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -177,7 +177,7 @@ Data Fields</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="structring__buffer.html">ring_buffer</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

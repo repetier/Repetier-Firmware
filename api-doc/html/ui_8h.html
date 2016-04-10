@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/ui.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/ui.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -103,16 +103,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/ui.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/ui.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;WProgram.h&quot;</code><br/>
-<code>#include &lt;avr/pgmspace.h&gt;</code><br/>
-<code>#include &quot;<a class="el" href="gcode_8h_source.html">gcode.h</a>&quot;</code><br/>
+<div class="textblock"><code>#include &quot;<a class="el" href="gcode_8h_source.html">gcode.h</a>&quot;</code><br/>
 <code>#include &quot;<a class="el" href="uilang_8h_source.html">uilang.h</a>&quot;</code><br/>
-<code>#include &quot;<a class="el" href="_configuration_8h_source.html">Configuration.h</a>&quot;</code><br/>
-<code>#include &quot;<a class="el" href="fastio_8h_source.html">fastio.h</a>&quot;</code><br/>
-<code>#include &lt;avr/io.h&gt;</code><br/>
+<code>#include &quot;<a class="el" href="uimenu_8h_source.html">uimenu.h</a>&quot;</code><br/>
 </div>
 <p><a href="ui_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -123,7 +119,6 @@ Data Structures</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_i_display.html">UIDisplay</a></td></tr>
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a8632c40d5411175b1dd8044667d2e265">COMPAT_PRE1</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0376e7bd1683fa45972d1d56adba98a9">UI_ACTION_TOPMENU</a>&#160;&#160;&#160;8192</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aaa4a7b89072ed573078be6dc3655e6b3">UI_ACTION_NEXT</a>&#160;&#160;&#160;1</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a7d761251c7c0b55f7f7edb2a621f6d12">UI_ACTION_PREVIOUS</a>&#160;&#160;&#160;2</td></tr>
@@ -167,10 +162,6 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a29aab9c5095b45910ee54264425bd7cd">UI_ACTION_HOME_Y</a>&#160;&#160;&#160;1023</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a7149d15e66318376c0513a497b6eff8a">UI_ACTION_HOME_Z</a>&#160;&#160;&#160;1024</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#adfce8a1d85293c67745cb022cce5c7ba">UI_ACTION_SELECT_EXTRUDER1</a>&#160;&#160;&#160;1025</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ab930afac453b699b53e6d337dfc18398">UI_ACTION_OPS_RETRACTDISTANCE</a>&#160;&#160;&#160;1026</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a746da779de8a64804b0a525f906e5227">UI_ACTION_OPS_BACKLASH</a>&#160;&#160;&#160;1027</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad4418320f15eb1f057a2adac84f67bc2">UI_ACTION_OPS_MOVE_AFTER</a>&#160;&#160;&#160;1028</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a381c97c1ab91291a59418608657450d1">UI_ACTION_OPS_MINDISTANCE</a>&#160;&#160;&#160;1029</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae092c04f456da231d3376b8f51365e95">UI_ACTION_STORE_EEPROM</a>&#160;&#160;&#160;1030</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a1e5b1992f0345cb6fd8a952f8a0e2d2c">UI_ACTION_LOAD_EEPROM</a>&#160;&#160;&#160;1031</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a4bf37c2a6e926488e87668781b2b709d">UI_ACTION_PRINT_ACCEL_X</a>&#160;&#160;&#160;1032</td></tr>
@@ -243,6 +234,13 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aba3c0090e02cb672991fa458bb1070b5">UI_ACTION_PAUSE</a>&#160;&#160;&#160;1099</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad363f46bc602ff96a3b0b11d3da8d295">UI_ACTION_EXTR_WAIT_RETRACT_TEMP</a>&#160;&#160;&#160;1100</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a1a52c11084dabbb7b766d5b93a5dfefe">UI_ACTION_EXTR_WAIT_RETRACT_UNITS</a>&#160;&#160;&#160;1101</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0b123286e1bfa931c11f454b78b2006d">UI_ACTION_EXTRUDER2_OFF</a>&#160;&#160;&#160;1102</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0ba8664ff1888002e1a7ebed8d05b07e">UI_ACTION_EXTRUDER2_TEMP</a>&#160;&#160;&#160;1103</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aba6a0aa3f9e51a27f4779cf5af5b39ec">UI_ACTION_SELECT_EXTRUDER2</a>&#160;&#160;&#160;1104</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad36dad0ea973bc92d734aab982080cfc">UI_ACTION_WRITE_DEBUG</a>&#160;&#160;&#160;1105</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a66a327b69609069e29617759ce3e6143">UI_ACTION_FANSPEED</a>&#160;&#160;&#160;1106</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aaa1ed14b72f52c8217062a8a3a9173f9">UI_ACTION_LIGHTS_ONOFF</a>&#160;&#160;&#160;1107</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#af3945b1a8d4d677d546f97db3b2abc60">UI_ACTION_SD_STOP</a>&#160;&#160;&#160;1108</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a79b955c3b7c81ec1ca901dcd8e4ad767">UI_ACTION_MENU_XPOS</a>&#160;&#160;&#160;4000</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#abe61f21ad6c2ea328ea829e247fc867e">UI_ACTION_MENU_YPOS</a>&#160;&#160;&#160;4001</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a5c4651aaf24619b1356c28b280cb6615">UI_ACTION_MENU_ZPOS</a>&#160;&#160;&#160;4002</td></tr>
@@ -253,8 +251,6 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ab3d8752161348913470ede0ca42249f4">UI_ACTION_MENU_QUICKSETTINGS</a>&#160;&#160;&#160;4007</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#af5f27972b91aec3c713a79624f8c43a9">UI_ACTION_MENU_EXTRUDER</a>&#160;&#160;&#160;4008</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a8b7577d468ba88db2cdaf41e1a85436c">UI_ACTION_MENU_POSITIONS</a>&#160;&#160;&#160;4009</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ac125f1237bc346a89a2aac70a93bb641">UI_ACTION_SHOW_MEASUREMENT</a>&#160;&#160;&#160;4010</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a06f8fcca2a1cc77d091c7e9890cf5751">UI_ACTION_RESET_MEASUREMENT</a>&#160;&#160;&#160;4011</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad7fab7c382026749ac75a0492d84aaf4">UI_ACTION_SET_MEASURED_ORIGIN</a>&#160;&#160;&#160;4012</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a693488555117210dfb92b5107b69e903">UI_ACTION_SET_P1</a>&#160;&#160;&#160;4013</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a5fb0bc18cb386a948340bef1f1f987c7">UI_ACTION_SET_P2</a>&#160;&#160;&#160;4014</td></tr>
@@ -270,13 +266,10 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aba269f677175e0d4e1d568d4f75215d6">UI_ACTION_SHOW_USERMENU8</a>&#160;&#160;&#160;4108</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a542accef6bd82a54a9284acf8d3188ff">UI_ACTION_SHOW_USERMENU9</a>&#160;&#160;&#160;4109</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a17a6026f66f4bb34ce95aca43bbfc6ee">UI_ACTION_SHOW_USERMENU10</a>&#160;&#160;&#160;4110</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>&#160;&#160;&#160;1</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad33503cf741851d1bca1d274e9001796">i2c_read</a>(ack)&#160;&#160;&#160;(ack) ? <a class="el" href="ui_8h.html#a32ac22052d55f93375b024192217db21">i2c_readAck</a>() : <a class="el" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e">i2c_readNak</a>();</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a4b401e8097f3cf841db33914755bad3a">UI_KEYS_INIT_CLICKENCODER_LOW</a>(pinA, pinB)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinA,HIGH);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinB,HIGH);</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(pin)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pin,HIGH);</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aa6127966504963e917f79dcc3295e2cc">UI_KEYS_INIT_CLICKENCODER_HIGH</a>(pinA, pinB)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinA,LOW);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinB,LOW);</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a2cad5ab6586817b20fb57e492a43240d">UI_KEYS_INIT_BUTTON_HIGH</a>(pin)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pin,LOW);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a4b401e8097f3cf841db33914755bad3a">UI_KEYS_INIT_CLICKENCODER_LOW</a>(pinA, pinB)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinA,HIGH);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinB,HIGH);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a60cfc4ad20b7a6814ff8ab3c11faef8f">UI_KEYS_INIT_BUTTON_LOW</a>(pin)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pin,HIGH);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aa6127966504963e917f79dcc3295e2cc">UI_KEYS_INIT_CLICKENCODER_HIGH</a>(pinA, pinB)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinA,LOW);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinB,LOW);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a2cad5ab6586817b20fb57e492a43240d">UI_KEYS_INIT_BUTTON_HIGH</a>(pin)&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pin,LOW);</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aedc513dd0e6a836b54ea50616aa25e65">UI_KEYS_CLICKENCODER_LOW</a>(pinA, pinB)&#160;&#160;&#160;uid.encoderLast = (uid.encoderLast &lt;&lt; 2) &amp; 0x0F;if (!READ(pinA)) uid.encoderLast |=2;if (!READ(pinB)) uid.encoderLast |=1; uid.encoderPos += pgm_read_byte(&amp;encoder_table[uid.encoderLast]);</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a57f3db99b2afc7b9d7227972813038a7">UI_KEYS_CLICKENCODER_LOW_REV</a>(pinA, pinB)&#160;&#160;&#160;uid.encoderLast = (uid.encoderLast &lt;&lt; 2) &amp; 0x0F;if (!READ(pinA)) uid.encoderLast |=2;if (!READ(pinB)) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&amp;encoder_table[uid.encoderLast]);</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a83566d1fbae4377cb445da2415c046ad">UI_KEYS_BUTTON_LOW</a>(pin, action_)&#160;&#160;&#160;if(<a class="el" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967">READ</a>(pin)==0) action=action_;</td></tr>
@@ -292,50 +285,43 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae3c0daaa271a44c71b8814daeff269dc">UI_KEYS_I2C_CLICKENCODER_HIGH_REV</a>(pinA, pinB)&#160;&#160;&#160;uid.encoderLast = (uid.encoderLast &lt;&lt; 2) &amp; 0x0F;if (keymask &amp; pinA) uid.encoderLast |=2;if (keymask &amp; pinB) uid.encoderLast |=1; uid.encoderPos -= pgm_read_byte(&amp;encoder_table[uid.encoderLast]);</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a486ffeb5fcf2838026865c45e96c1cf1">UI_KEYS_I2C_BUTTON_HIGH</a>(pin, action_)&#160;&#160;&#160;if((pin &amp; keymask)!=0) action=action_;</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name, text)&#160;&#160;&#160;const char <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> name[] = text;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a8d2e26b179b21e0e747cca5a967edf28">UI_PAGE6</a>(name, row1, row2, row3, row4, row5, row6)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(name, row1, row2, row3, row4)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(name, row1, row2)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(name, action, rows)&#160;&#160;&#160;<a class="el" href="ui_8h.html#aec127ba9cc1c38346dc5d9059948108c">UI_MENU_ACTION4</a>(name,action,rows)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(name, action, rows)&#160;&#160;&#160;<a class="el" href="ui_8h.html#ac8bfa72ab35ed4b111100107c520a794">UI_MENU_ACTION2</a>(name,action,rows)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aec127ba9cc1c38346dc5d9059948108c">UI_MENU_ACTION4</a>(name, action, row1, row2, row3, row4)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ac8bfa72ab35ed4b111100107c520a794">UI_MENU_ACTION2</a>(name, action, row1, row2)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#af171b18200b67ab1d528143c4a19710f">UI_MENU_HEADLINE</a>(name, text)&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,text);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,1,0};</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(name, row, action)&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action};</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(name, row, action)&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action};</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(name, row, entries)&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries};</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(name, row, entries)&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#af171b18200b67ab1d528143c4a19710f">UI_MENU_HEADLINE</a>(name, text)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,text);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,1,0,0,0};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(name, row, action)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action,0,0};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(name, row, action)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action,0,0};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(name, row, entries)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,0,0};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(name, row, entries)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,0,0};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a76e4d96a50e7dc744bba3c7ba96cf8ce">UI_MENU_CHANGEACTION_FILTER</a>(name, row, action, filter, nofilter)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action,filter,nofilter};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(name, row, action, filter, nofilter)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action,filter,nofilter};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#afe2ae4505aa5574c02a640f5f42ca3de">UI_MENU_ACTIONSELECTOR_FILTER</a>(name, row, entries, filter, nofilter)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,filter,nofilter};</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#acbbb6df751d2280a708782446cf9f814">UI_MENU_SUBMENU_FILTER</a>(name, row, entries, filter, nofilter)&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,filter,nofilter};</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(name, items, itemsCnt)&#160;&#160;&#160;const <a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * const name ## _entries[] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = items;const <a class="el" href="struct_u_i_menu.html">UIMenu</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {2,0,itemsCnt,name ## _entries}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#adff5eb981bb16aee813dad51aad971a5">UI_MENU_FILESELECT</a>(name, items, itemsCnt)&#160;&#160;&#160;const <a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> *name ## _entries[] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = items;const <a class="el" href="struct_u_i_menu.html">UIMenu</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {1,0,itemsCnt,name ## _entries}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#adff5eb981bb16aee813dad51aad971a5">UI_MENU_FILESELECT</a>(name, items, itemsCnt)&#160;&#160;&#160;const <a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * const name ## _entries[] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = items;const <a class="el" href="struct_u_i_menu.html">UIMenu</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {1,0,itemsCnt,name ## _entries}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a551f71f92f90f76151a3cfc9679271a0">MAX_COLS</a>&#160;&#160;&#160;28</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a267f14484086fc10fbc14aecf9bf26a9">UI_HAS_KEYS</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a1f1cfb8da393500709a423b74c8c60c9">UI_DISPLAY_TYPE</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aa1527d572e383125c201901703e396ff">UI_VERSION_STRING</a>&#160;&#160;&#160;&quot;Repetier &quot; REPETIER_VERSION</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a38d368d3390d4992058f71ab15b7ceee">UI_INITIALIZE</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a8951268e57885ef77b2c132da53fe2bc">UI_FAST</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a08a44b00edfbc35a010da97d9f978cd7">UI_MEDIUM</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a59f640c60ccd7221539b30f987cb081d">UI_SLOW</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae9f33e20619525a88c3032ee2394d35a">UI_STATUS</a>(status)&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a28bcf9fad0a3a05e1aacaab582489ea4">UI_STATUS_UPD</a>(status)&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a185334cb390d65f26afe58826ef22b79">UI_CLEAR_STATUS</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a7341ad7ec5de617b6790928cf6259d2d">UI_ERROR</a>(msg)&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae27886dddb15e503bba28d7eab5f8a17">UI_STATUS_UPD_RAM</a>(status)&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad21d5350c9813a1caabc8c3ee557ef31">BEEP_SHORT</a>&#160;&#160;&#160;{}</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a3073cfbf85171e628e3919243047aecc">BEEP_LONG</a>&#160;&#160;&#160;{}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a38d368d3390d4992058f71ab15b7ceee">UI_INITIALIZE</a>&#160;&#160;&#160;uid.initialize();</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a8951268e57885ef77b2c132da53fe2bc">UI_FAST</a>&#160;&#160;&#160;if(pwm_count &amp; 4) {uid.fastAction();}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a08a44b00edfbc35a010da97d9f978cd7">UI_MEDIUM</a>&#160;&#160;&#160;uid.mediumAction();</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a59f640c60ccd7221539b30f987cb081d">UI_SLOW</a>&#160;&#160;&#160;uid.slowAction();</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae9f33e20619525a88c3032ee2394d35a">UI_STATUS</a>(status)&#160;&#160;&#160;uid.setStatusP(PSTR(status));</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a28bcf9fad0a3a05e1aacaab582489ea4">UI_STATUS_UPD</a>(status)&#160;&#160;&#160;{uid.setStatusP(PSTR(status));uid.refreshPage();}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a5a654e06f266992544b49f11f69278f3">UI_STATUS_RAM</a>(status)&#160;&#160;&#160;uid.setStatus(status);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ae27886dddb15e503bba28d7eab5f8a17">UI_STATUS_UPD_RAM</a>(status)&#160;&#160;&#160;{uid.setStatus(status);uid.refreshPage();}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a7341ad7ec5de617b6790928cf6259d2d">UI_ERROR</a>(msg)&#160;&#160;&#160;{uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&amp;ui_menu_error,true);}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a185334cb390d65f26afe58826ef22b79">UI_CLEAR_STATUS</a>&#160;&#160;&#160;{uid.statusMsg[0]=0;}</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad21d5350c9813a1caabc8c3ee557ef31">BEEP_SHORT</a>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a>(<a class="el" href="_configuration_8h.html#a0d19ce62862c0dcb7c2279a834564fdb">BEEPER_SHORT_SEQUENCE</a>);</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a3073cfbf85171e628e3919243047aecc">BEEP_LONG</a>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a>(<a class="el" href="_configuration_8h.html#a1c2445db031d3097d68348156dee1657">BEEPER_LONG_SEQUENCE</a>);</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3">i2c_stop</a> (void)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Terminates the data transfer and releases the I2C bus.  <a href="#ad35d4e4f52ca74b503d5e5e1e0a3f5f3"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a58dfadce0c2fee4bfac01df6cd2b4477">i2c_start</a> (unsigned char addr)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Issues a start condition and sends address and transfer direction.  <a href="#a58dfadce0c2fee4bfac01df6cd2b4477"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#aee3747a01738315cd5580588994b6c28">i2c_start_wait</a> (unsigned char addr)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Issues a start condition and sends address and transfer direction.  <a href="#aee3747a01738315cd5580588994b6c28"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#add947aade44ed6b7f92265f9dec4a711">i2c_write</a> (unsigned char data)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Send one byte to I2C device.  <a href="#add947aade44ed6b7f92265f9dec4a711"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a32ac22052d55f93375b024192217db21">i2c_readAck</a> (void)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">read one byte from the I2C device, request more data from device  <a href="#a32ac22052d55f93375b024192217db21"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e">i2c_readNak</a> (void)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">read one byte from the I2C device, read is followed by a stop condition  <a href="#ad89e839fc17b05fbb5dd79897c55234e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a669c0357614a79b3b35ae815f6f50e82">i2c_read</a> (unsigned char ack)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">read one byte from the I2C device  <a href="#a669c0357614a79b3b35ae815f6f50e82"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0ee488dbf276ee9f31b7bae8c902ad27">beep</a> (byte duration, byte count)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a> (uint8_t duration, uint8_t count)</td></tr>
 <tr><td colspan="2"><h2><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const int8_t encoder_table[16]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a></td></tr>
@@ -347,7 +333,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a3073cfbf85171e628e3919243047aecc">BEEP_LONG</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a3073cfbf85171e628e3919243047aecc">BEEP_LONG</a>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a>(<a class="el" href="_configuration_8h.html#a1c2445db031d3097d68348156dee1657">BEEPER_LONG_SEQUENCE</a>);</td>
         </tr>
       </table>
 </div>
@@ -360,7 +346,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#ad21d5350c9813a1caabc8c3ee557ef31">BEEP_SHORT</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#ad21d5350c9813a1caabc8c3ee557ef31">BEEP_SHORT</a>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a>(<a class="el" href="_configuration_8h.html#a0d19ce62862c0dcb7c2279a834564fdb">BEEPER_SHORT_SEQUENCE</a>);</td>
         </tr>
       </table>
 </div>
@@ -368,61 +354,16 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8632c40d5411175b1dd8044667d2e265"></a><!-- doxytag: member="ui.h::COMPAT_PRE1" ref="a8632c40d5411175b1dd8044667d2e265" args="" -->
+<a class="anchor" id="a551f71f92f90f76151a3cfc9679271a0"></a><!-- doxytag: member="ui.h::MAX_COLS" ref="a551f71f92f90f76151a3cfc9679271a0" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a8632c40d5411175b1dd8044667d2e265">COMPAT_PRE1</a></td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a551f71f92f90f76151a3cfc9679271a0">MAX_COLS</a>&#160;&#160;&#160;28</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ab5c0fbe837494c5f9130a5914854250d"></a><!-- doxytag: member="ui.h::I2C_READ" ref="ab5c0fbe837494c5f9130a5914854250d" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#ab5c0fbe837494c5f9130a5914854250d">I2C_READ</a>&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>defines the data direction (reading from I2C device) in <a class="el" href="ui_8h.html#a58dfadce0c2fee4bfac01df6cd2b4477" title="Issues a start condition and sends address and transfer direction.">i2c_start()</a>,i2c_rep_start() </p>
-
-</div>
-</div>
-<a class="anchor" id="ad33503cf741851d1bca1d274e9001796"></a><!-- doxytag: member="ui.h::i2c_read" ref="ad33503cf741851d1bca1d274e9001796" args="(ack)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a669c0357614a79b3b35ae815f6f50e82">i2c_read</a></td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname">ack</td><td>)</td>
-          <td>&#160;&#160;&#160;(ack) ? <a class="el" href="ui_8h.html#a32ac22052d55f93375b024192217db21">i2c_readAck</a>() : <a class="el" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e">i2c_readNak</a>();</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a9536bf85bced4f4e549a82fb18eb6140"></a><!-- doxytag: member="ui.h::I2C_WRITE" ref="a9536bf85bced4f4e549a82fb18eb6140" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a9536bf85bced4f4e549a82fb18eb6140">I2C_WRITE</a>&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>defines the data direction (writing to I2C device) in <a class="el" href="ui_8h.html#a58dfadce0c2fee4bfac01df6cd2b4477" title="Issues a start condition and sends address and transfer direction.">i2c_start()</a>,i2c_rep_start() </p>
 
 </div>
 </div>
@@ -803,6 +744,32 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0b123286e1bfa931c11f454b78b2006d"></a><!-- doxytag: member="ui.h::UI_ACTION_EXTRUDER2_OFF" ref="a0b123286e1bfa931c11f454b78b2006d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a0b123286e1bfa931c11f454b78b2006d">UI_ACTION_EXTRUDER2_OFF</a>&#160;&#160;&#160;1102</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a0ba8664ff1888002e1a7ebed8d05b07e"></a><!-- doxytag: member="ui.h::UI_ACTION_EXTRUDER2_TEMP" ref="a0ba8664ff1888002e1a7ebed8d05b07e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a0ba8664ff1888002e1a7ebed8d05b07e">UI_ACTION_EXTRUDER2_TEMP</a>&#160;&#160;&#160;1103</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a50b34120e709f3c8fe35705d15317998"></a><!-- doxytag: member="ui.h::UI_ACTION_EXTRUDER_DOWN" ref="a50b34120e709f3c8fe35705d15317998" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -965,6 +932,19 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="ui_8h.html#abab4782fbe563a3fc9937e2114b64903">UI_ACTION_FAN_UP</a>&#160;&#160;&#160;112</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a66a327b69609069e29617759ce3e6143"></a><!-- doxytag: member="ui.h::UI_ACTION_FANSPEED" ref="a66a327b69609069e29617759ce3e6143" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a66a327b69609069e29617759ce3e6143">UI_ACTION_FANSPEED</a>&#160;&#160;&#160;1106</td>
         </tr>
       </table>
 </div>
@@ -1147,6 +1127,19 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="ui_8h.html#a922589c78b8824436596bfc757092e75">UI_ACTION_KILL</a>&#160;&#160;&#160;1097</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aaa1ed14b72f52c8217062a8a3a9173f9"></a><!-- doxytag: member="ui.h::UI_ACTION_LIGHTS_ONOFF" ref="aaa1ed14b72f52c8217062a8a3a9173f9" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#aaa1ed14b72f52c8217062a8a3a9173f9">UI_ACTION_LIGHTS_ONOFF</a>&#160;&#160;&#160;1107</td>
         </tr>
       </table>
 </div>
@@ -1453,19 +1446,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a746da779de8a64804b0a525f906e5227"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_BACKLASH" ref="a746da779de8a64804b0a525f906e5227" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a746da779de8a64804b0a525f906e5227">UI_ACTION_OPS_BACKLASH</a>&#160;&#160;&#160;1027</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ae2ee5826ab9108fa9e289e451ce89956"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_CLASSIC" ref="ae2ee5826ab9108fa9e289e451ce89956" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1492,51 +1472,12 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a381c97c1ab91291a59418608657450d1"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_MINDISTANCE" ref="a381c97c1ab91291a59418608657450d1" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a381c97c1ab91291a59418608657450d1">UI_ACTION_OPS_MINDISTANCE</a>&#160;&#160;&#160;1029</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ad4418320f15eb1f057a2adac84f67bc2"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_MOVE_AFTER" ref="ad4418320f15eb1f057a2adac84f67bc2" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#ad4418320f15eb1f057a2adac84f67bc2">UI_ACTION_OPS_MOVE_AFTER</a>&#160;&#160;&#160;1028</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a88fd5ff92f8c9415719a4b6cf7c6fbc9"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_OFF" ref="a88fd5ff92f8c9415719a4b6cf7c6fbc9" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="ui_8h.html#a88fd5ff92f8c9415719a4b6cf7c6fbc9">UI_ACTION_OPS_OFF</a>&#160;&#160;&#160;1087</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ab930afac453b699b53e6d337dfc18398"></a><!-- doxytag: member="ui.h::UI_ACTION_OPS_RETRACTDISTANCE" ref="ab930afac453b699b53e6d337dfc18398" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#ab930afac453b699b53e6d337dfc18398">UI_ACTION_OPS_RETRACTDISTANCE</a>&#160;&#160;&#160;1026</td>
         </tr>
       </table>
 </div>
@@ -1726,19 +1667,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a06f8fcca2a1cc77d091c7e9890cf5751"></a><!-- doxytag: member="ui.h::UI_ACTION_RESET_MEASUREMENT" ref="a06f8fcca2a1cc77d091c7e9890cf5751" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a06f8fcca2a1cc77d091c7e9890cf5751">UI_ACTION_RESET_MEASUREMENT</a>&#160;&#160;&#160;4011</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a97582b2bc3ba9ddb5d11d6ee38354b08"></a><!-- doxytag: member="ui.h::UI_ACTION_SD_CONTINUE" ref="a97582b2bc3ba9ddb5d11d6ee38354b08" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1804,6 +1732,19 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af3945b1a8d4d677d546f97db3b2abc60"></a><!-- doxytag: member="ui.h::UI_ACTION_SD_STOP" ref="af3945b1a8d4d677d546f97db3b2abc60" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#af3945b1a8d4d677d546f97db3b2abc60">UI_ACTION_SD_STOP</a>&#160;&#160;&#160;1108</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a333a4ca9b7d54a3550b9adff25b0993f"></a><!-- doxytag: member="ui.h::UI_ACTION_SD_UNMOUNT" ref="a333a4ca9b7d54a3550b9adff25b0993f" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -1836,6 +1777,19 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="ui_8h.html#adfce8a1d85293c67745cb022cce5c7ba">UI_ACTION_SELECT_EXTRUDER1</a>&#160;&#160;&#160;1025</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="aba6a0aa3f9e51a27f4779cf5af5b39ec"></a><!-- doxytag: member="ui.h::UI_ACTION_SELECT_EXTRUDER2" ref="aba6a0aa3f9e51a27f4779cf5af5b39ec" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#aba6a0aa3f9e51a27f4779cf5af5b39ec">UI_ACTION_SELECT_EXTRUDER2</a>&#160;&#160;&#160;1104</td>
         </tr>
       </table>
 </div>
@@ -1901,19 +1855,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define <a class="el" href="ui_8h.html#a622537bbec4e41d52d948ee6f06b150b">UI_ACTION_SET_P3</a>&#160;&#160;&#160;4015</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ac125f1237bc346a89a2aac70a93bb641"></a><!-- doxytag: member="ui.h::UI_ACTION_SHOW_MEASUREMENT" ref="ac125f1237bc346a89a2aac70a93bb641" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#ac125f1237bc346a89a2aac70a93bb641">UI_ACTION_SHOW_MEASUREMENT</a>&#160;&#160;&#160;4010</td>
         </tr>
       </table>
 </div>
@@ -2142,6 +2083,19 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ad36dad0ea973bc92d734aab982080cfc"></a><!-- doxytag: member="ui.h::UI_ACTION_WRITE_DEBUG" ref="ad36dad0ea973bc92d734aab982080cfc" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#ad36dad0ea973bc92d734aab982080cfc">UI_ACTION_WRITE_DEBUG</a>&#160;&#160;&#160;1105</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a8690b243ec5d0dde903923e524e6ee68"></a><!-- doxytag: member="ui.h::UI_ACTION_X_DOWN" ref="a8690b243ec5d0dde903923e524e6ee68" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -2329,7 +2283,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a185334cb390d65f26afe58826ef22b79">UI_CLEAR_STATUS</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a185334cb390d65f26afe58826ef22b79">UI_CLEAR_STATUS</a>&#160;&#160;&#160;{uid.statusMsg[0]=0;}</td>
         </tr>
       </table>
 </div>
@@ -2359,7 +2313,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">msg</td><td>)</td>
-          <td>&#160;&#160;&#160;{}</td>
+          <td>&#160;&#160;&#160;{uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&amp;ui_menu_error,true);}</td>
         </tr>
       </table>
 </div>
@@ -2372,7 +2326,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a8951268e57885ef77b2c132da53fe2bc">UI_FAST</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a8951268e57885ef77b2c132da53fe2bc">UI_FAST</a>&#160;&#160;&#160;if(pwm_count &amp; 4) {uid.fastAction();}</td>
         </tr>
       </table>
 </div>
@@ -2398,7 +2352,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a38d368d3390d4992058f71ab15b7ceee">UI_INITIALIZE</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a38d368d3390d4992058f71ab15b7ceee">UI_INITIALIZE</a>&#160;&#160;&#160;uid.initialize();</td>
         </tr>
       </table>
 </div>
@@ -2739,7 +2693,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">pin</td><td>)</td>
-          <td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pin,LOW);</td>
+          <td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pin,LOW);</td>
         </tr>
       </table>
 </div>
@@ -2756,7 +2710,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">pin</td><td>)</td>
-          <td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pin,HIGH);</td>
+          <td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pin);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pin,HIGH);</td>
         </tr>
       </table>
 </div>
@@ -2783,7 +2737,7 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinA,LOW);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinB,LOW);</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinA,LOW);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinB,LOW);</td>
         </tr>
       </table>
 </div>
@@ -2810,7 +2764,7 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinA,HIGH);<a class="el" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591">WRITE</a>(pinB,HIGH);</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinA);<a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">SET_INPUT</a>(pinB); <a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinA,HIGH);<a class="el" href="fastio_8h.html#a608adcba13929aae3476f1de99498566">PULLUP</a>(pinB,HIGH);</td>
         </tr>
       </table>
 </div>
@@ -2944,7 +2898,7 @@ Variables</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment">{byte r = (c1&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c1):0) &amp;&amp; (c2&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c2):0) &amp;&amp; (c3&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c3):0) &amp;&amp; (c4&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c4):0);\
+<b>Value:</b><div class="fragment"><pre class="fragment">{uint8_t r = (c1&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c1):0) &amp;&amp; (c2&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c2):0) &amp;&amp; (c3&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c3):0) &amp;&amp; (c4&gt;=0?<a class="code" href="fastio_8h.html#a9716cca366b99de7c0d101eeab24c967" title="Read a pin wrapper.">READ</a>(c4):0);\
     if(!r) {\
       r = 255;\
       if(r2&gt;=0)<a class="code" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591" title="Write to a pin wrapper.">WRITE</a>(r2,HIGH);if(r3&gt;=0)<a class="code" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591" title="Write to a pin wrapper.">WRITE</a>(r3,HIGH);if(r4&gt;=0)<a class="code" href="fastio_8h.html#a3d38c0667426652d3fa2eb62f23e1591" title="Write to a pin wrapper.">WRITE</a>(r4,HIGH);\
@@ -2981,7 +2935,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a08a44b00edfbc35a010da97d9f978cd7">UI_MEDIUM</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a08a44b00edfbc35a010da97d9f978cd7">UI_MEDIUM</a>&#160;&#160;&#160;uid.mediumAction();</td>
         </tr>
       </table>
 </div>
@@ -3059,10 +3013,10 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _1txt,row1);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _1txt,0,0};\
-  UIMenuEntry name ## _2 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _2txt,0,0};\
-  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2};\
-  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {3,action,2,name ## _entries};
+  UIMenuEntry name ## _1 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _2txt,0,0,0,0};\
+  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2};\
+  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {3,action,2,name ## _entries};
 </pre></div>
 </div>
 </div>
@@ -3148,12 +3102,12 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _1txt,row1);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _2txt,row2);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _3txt,row3);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _1txt,0,0};\
-  UIMenuEntry name ## _2 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _2txt,0,0};\
-  UIMenuEntry name ## _3 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _3txt,0,0};\
-  UIMenuEntry name ## _4 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _4txt,0,0};\
-  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2,&amp;name ## _3,&amp;name ## _4};\
-  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {3,action,4,name ## _entries};
+  UIMenuEntry name ## _1 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _3 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _3txt,0,0,0,0};\
+  UIMenuEntry name ## _4 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _4txt,0,0,0,0};\
+  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2,&amp;name ## _3,&amp;name ## _4};\
+  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {3,action,4,name ## _entries};
 </pre></div>
 </div>
 </div>
@@ -3215,7 +3169,52 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action};</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action,0,0};</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af6e4109b52de956d560c505157594baf"></a><!-- doxytag: member="ui.h::UI_MENU_ACTIONCOMMAND_FILTER" ref="af6e4109b52de956d560c505157594baf" args="(name, row, action, filter, nofilter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">action, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">filter, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">nofilter&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,3,action,filter,nofilter};</td>
         </tr>
       </table>
 </div>
@@ -3248,7 +3247,52 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries};</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,0,0};</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afe2ae4505aa5574c02a640f5f42ca3de"></a><!-- doxytag: member="ui.h::UI_MENU_ACTIONSELECTOR_FILTER" ref="afe2ae4505aa5574c02a640f5f42ca3de" args="(name, row, entries, filter, nofilter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#afe2ae4505aa5574c02a640f5f42ca3de">UI_MENU_ACTIONSELECTOR_FILTER</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">entries, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">filter, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">nofilter&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,filter,nofilter};</td>
         </tr>
       </table>
 </div>
@@ -3281,7 +3325,52 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action};</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action,0,0};</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a76e4d96a50e7dc744bba3c7ba96cf8ce"></a><!-- doxytag: member="ui.h::UI_MENU_CHANGEACTION_FILTER" ref="a76e4d96a50e7dc744bba3c7ba96cf8ce" args="(name, row, action, filter, nofilter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a76e4d96a50e7dc744bba3c7ba96cf8ce">UI_MENU_CHANGEACTION_FILTER</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">action, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">filter, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">nofilter&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,4,action,filter,nofilter};</td>
         </tr>
       </table>
 </div>
@@ -3314,7 +3403,7 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;const <a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> *name ## _entries[] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = items;const <a class="el" href="struct_u_i_menu.html">UIMenu</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {1,0,itemsCnt,name ## _entries}</td>
+          <td></td><td>&#160;&#160;&#160;const <a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * const name ## _entries[] <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = items;const <a class="el" href="struct_u_i_menu.html">UIMenu</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {1,0,itemsCnt,name ## _entries}</td>
         </tr>
       </table>
 </div>
@@ -3341,7 +3430,7 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,text);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,1,0};</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,text);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,1,0,0,0};</td>
         </tr>
       </table>
 </div>
@@ -3374,7 +3463,52 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries};</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,0,0};</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="acbbb6df751d2280a708782446cf9f814"></a><!-- doxytag: member="ui.h::UI_MENU_SUBMENU_FILTER" ref="acbbb6df751d2280a708782446cf9f814" args="(name, row, entries, filter, nofilter)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#acbbb6df751d2280a708782446cf9f814">UI_MENU_SUBMENU_FILTER</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">entries, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">filter, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">nofilter&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a>(name ## _txt,row);<a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a> name <a class="el" href="ui_8h.html#a0ecb7d204e04196a839885837c052002">PROGMEM</a> = {name ## _txt,2,(unsigned int)&amp;entries,filter,nofilter};</td>
         </tr>
       </table>
 </div>
@@ -3413,10 +3547,10 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _1txt,row1);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _2txt,row2);\
-  UIMenuEntry name ## _1 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _1txt,0,0};\
-  UIMenuEntry name ## _2 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _2txt,0,0};\
-  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2};\
-  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {0,0,2,name ## _entries};
+  UIMenuEntry name ## _1 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _2txt,0,0,0,0};\
+  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries[] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2};\
+  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {0,0,2,name ## _entries};
 </pre></div>
 </div>
 </div>
@@ -3463,12 +3597,78 @@ Variables</h2></td></tr>
 </div>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _1txt,row1);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _2txt,row2);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _3txt,row3);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _4txt,row4);\
-  UIMenuEntry name ## _1 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _1txt,0,0};\
-  UIMenuEntry name ## _2 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _2txt,0,0};\
-  UIMenuEntry name ## _3 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _3txt,0,0};\
-  UIMenuEntry name ## _4 <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> ={name ## _4txt,0,0};\
-  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries [] <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2,&amp;name ## _3,&amp;name ## _4};\
-  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="_commands_8cpp.html#a4b2ed7b5ba34b563eecfb81fe2a36781">PROGMEM</a> = {0,0,4,name ## _entries};
+  UIMenuEntry name ## _1 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _1txt,0,0,0,0};\
+  UIMenuEntry name ## _2 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _2txt,0,0,0,0};\
+  UIMenuEntry name ## _3 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _3txt,0,0,0,0};\
+  UIMenuEntry name ## _4 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _4txt,0,0,0,0};\
+  const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries [] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2,&amp;name ## _3,&amp;name ## _4};\
+  const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {0,0,4,name ## _entries};
+</pre></div>
+</div>
+</div>
+<a class="anchor" id="a8d2e26b179b21e0e747cca5a967edf28"></a><!-- doxytag: member="ui.h::UI_PAGE6" ref="a8d2e26b179b21e0e747cca5a967edf28" args="(name, row1, row2, row3, row4, row5, row6)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a8d2e26b179b21e0e747cca5a967edf28">UI_PAGE6</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">name, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row1, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row2, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row3, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row4, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row5, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">row6&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<b>Value:</b><div class="fragment"><pre class="fragment"><a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _1txt,row1);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _2txt,row2);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _3txt,row3);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _4txt,row4);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _5txt,row5);<a class="code" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a>(name ## _6txt,row6);\
+   UIMenuEntry name ## _1 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _1txt,0,0,0,0};\
+   UIMenuEntry name ## _2 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _2txt,0,0,0,0};\
+   UIMenuEntry name ## _3 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _3txt,0,0,0,0};\
+   UIMenuEntry name ## _4 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _4txt,0,0,0,0};\
+   UIMenuEntry name ## _5 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _5txt,0,0,0,0};\
+   UIMenuEntry name ## _6 <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> ={name ## _6txt,0,0,0,0};\
+   const <a class="code" href="struct_u_i_menu_entry.html">UIMenuEntry</a> * <span class="keyword">const</span> name ## _entries [] <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {&amp;name ## _1,&amp;name ## _2,&amp;name ## _3,&amp;name ## _4,&amp;name ## _5,&amp;name ## _6};\
+   const <a class="code" href="struct_u_i_menu.html">UIMenu</a> name <a class="code" href="u8glib__ex_8h.html#a75acaba9e781937468d0911423bc0c35">PROGMEM</a> = {0,0,6,name ## _entries};
 </pre></div>
 </div>
 </div>
@@ -3477,7 +3677,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a59f640c60ccd7221539b30f987cb081d">UI_SLOW</a>&#160;&#160;&#160;{}</td>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a59f640c60ccd7221539b30f987cb081d">UI_SLOW</a>&#160;&#160;&#160;uid.slowAction();</td>
         </tr>
       </table>
 </div>
@@ -3494,7 +3694,24 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">status</td><td>)</td>
-          <td>&#160;&#160;&#160;{}</td>
+          <td>&#160;&#160;&#160;uid.setStatusP(PSTR(status));</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a5a654e06f266992544b49f11f69278f3"></a><!-- doxytag: member="ui.h::UI_STATUS_RAM" ref="a5a654e06f266992544b49f11f69278f3" args="(status)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="ui_8h.html#a5a654e06f266992544b49f11f69278f3">UI_STATUS_RAM</a></td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">status</td><td>)</td>
+          <td>&#160;&#160;&#160;uid.setStatus(status);</td>
         </tr>
       </table>
 </div>
@@ -3511,7 +3728,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">status</td><td>)</td>
-          <td>&#160;&#160;&#160;{}</td>
+          <td>&#160;&#160;&#160;{uid.setStatusP(PSTR(status));uid.refreshPage();}</td>
         </tr>
       </table>
 </div>
@@ -3528,7 +3745,7 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">status</td><td>)</td>
-          <td>&#160;&#160;&#160;{}</td>
+          <td>&#160;&#160;&#160;{uid.setStatus(status);uid.refreshPage();}</td>
         </tr>
       </table>
 </div>
@@ -3541,7 +3758,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define <a class="el" href="ui_8h.html#a0a2ccd60d544596e4de1f7f3ef6323e1">UI_STRING</a></td>
+          <td class="memname">#define <a class="el" href="ui_8cpp.html#a06d95f9c35dbf3afa1e651d343702d95">UI_STRING</a></td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname">name, </td>
@@ -3577,20 +3794,20 @@ Variables</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a0ee488dbf276ee9f31b7bae8c902ad27"></a><!-- doxytag: member="ui.h::beep" ref="a0ee488dbf276ee9f31b7bae8c902ad27" args="(byte duration, byte count)" -->
+<a class="anchor" id="a4cdb62ccad20bd76e7ff3da83985b54d"></a><!-- doxytag: member="ui.h::beep" ref="a4cdb62ccad20bd76e7ff3da83985b54d" args="(uint8_t duration, uint8_t count)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="ui_8h.html#a0ee488dbf276ee9f31b7bae8c902ad27">beep</a> </td>
+          <td class="memname">void <a class="el" href="ui_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d">beep</a> </td>
           <td>(</td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>duration</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">byte&#160;</td>
+          <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>count</em>&#160;</td>
         </tr>
         <tr>
@@ -3601,191 +3818,6 @@ Variables</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a669c0357614a79b3b35ae815f6f50e82"></a><!-- doxytag: member="ui.h::i2c_read" ref="a669c0357614a79b3b35ae815f6f50e82" args="(unsigned char ack)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char <a class="el" href="ui_8h.html#a669c0357614a79b3b35ae815f6f50e82">i2c_read</a> </td>
-          <td>(</td>
-          <td class="paramtype">unsigned char&#160;</td>
-          <td class="paramname"><em>ack</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>read one byte from the I2C device </p>
-<p>Implemented as a macro, which calls either i2c_readAck or i2c_readNak</p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ack</td><td>1 send ack, request more data from device<br/>
- 0 send nak, read is followed by a stop condition </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>byte read from I2C device </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a32ac22052d55f93375b024192217db21"></a><!-- doxytag: member="ui.h::i2c_readAck" ref="a32ac22052d55f93375b024192217db21" args="(void)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char <a class="el" href="ui_8h.html#a32ac22052d55f93375b024192217db21">i2c_readAck</a> </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>read one byte from the I2C device, request more data from device </p>
-<dl class="return"><dt><b>Returns:</b></dt><dd>byte read from I2C device </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ad89e839fc17b05fbb5dd79897c55234e"></a><!-- doxytag: member="ui.h::i2c_readNak" ref="ad89e839fc17b05fbb5dd79897c55234e" args="(void)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char <a class="el" href="ui_8h.html#ad89e839fc17b05fbb5dd79897c55234e">i2c_readNak</a> </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>read one byte from the I2C device, read is followed by a stop condition </p>
-<dl class="return"><dt><b>Returns:</b></dt><dd>byte read from I2C device </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a58dfadce0c2fee4bfac01df6cd2b4477"></a><!-- doxytag: member="ui.h::i2c_start" ref="a58dfadce0c2fee4bfac01df6cd2b4477" args="(unsigned char addr)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char <a class="el" href="ui_8h.html#a58dfadce0c2fee4bfac01df6cd2b4477">i2c_start</a> </td>
-          <td>(</td>
-          <td class="paramtype">unsigned char&#160;</td>
-          <td class="paramname"><em>addr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Issues a start condition and sends address and transfer direction. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">addr</td><td>address and transfer direction of I2C device </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="retval"><dt><b>Return values:</b></dt><dd>
-  <table class="retval">
-    <tr><td class="paramname">0</td><td>device accessible </td></tr>
-    <tr><td class="paramname">1</td><td>failed to access device </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="aee3747a01738315cd5580588994b6c28"></a><!-- doxytag: member="ui.h::i2c_start_wait" ref="aee3747a01738315cd5580588994b6c28" args="(unsigned char addr)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="ui_8h.html#aee3747a01738315cd5580588994b6c28">i2c_start_wait</a> </td>
-          <td>(</td>
-          <td class="paramtype">unsigned char&#160;</td>
-          <td class="paramname"><em>addr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Issues a start condition and sends address and transfer direction. </p>
-<p>If device is busy, use ack polling to wait until device ready </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">addr</td><td>address and transfer direction of I2C device </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>none </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ad35d4e4f52ca74b503d5e5e1e0a3f5f3"></a><!-- doxytag: member="ui.h::i2c_stop" ref="ad35d4e4f52ca74b503d5e5e1e0a3f5f3" args="(void)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="ui_8h.html#ad35d4e4f52ca74b503d5e5e1e0a3f5f3">i2c_stop</a> </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Terminates the data transfer and releases the I2C bus. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">void</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="return"><dt><b>Returns:</b></dt><dd>none </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="add947aade44ed6b7f92265f9dec4a711"></a><!-- doxytag: member="ui.h::i2c_write" ref="add947aade44ed6b7f92265f9dec4a711" args="(unsigned char data)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned char <a class="el" href="ui_8h.html#add947aade44ed6b7f92265f9dec4a711">i2c_write</a> </td>
-          <td>(</td>
-          <td class="paramtype">unsigned char&#160;</td>
-          <td class="paramname"><em>data</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Send one byte to I2C device. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">data</td><td>byte to be transfered </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="retval"><dt><b>Return values:</b></dt><dd>
-  <table class="retval">
-    <tr><td class="paramname">0</td><td>write successful </td></tr>
-    <tr><td class="paramname">1</td><td>write failed </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -3836,7 +3868,7 @@ Variables</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="ui_8h.html">ui.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

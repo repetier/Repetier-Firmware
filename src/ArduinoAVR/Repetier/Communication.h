@@ -66,6 +66,21 @@ FSTRINGVAR(tUnknownCommand)
 FSTRINGVAR(tFreeRAM)
 FSTRINGVAR(tXColon)
 FSTRINGVAR(tSlash)
+FSTRINGVAR(tSpaceSlash)
+FSTRINGVAR(tFatal)
+#if JSON_OUTPUT
+FSTRINGVAR(tJSONDir)
+FSTRINGVAR(tJSONFiles)
+FSTRINGVAR(tJSONArrayEnd)
+FSTRINGVAR(tJSONErrorStart)
+FSTRINGVAR(tJSONErrorEnd)
+FSTRINGVAR(tJSONFileInfoStart)
+FSTRINGVAR(tJSONFileInfoHeight)
+FSTRINGVAR(tJSONFileInfoLayerHeight)
+FSTRINGVAR(tJSONFileInfoFilament)
+FSTRINGVAR(tJSONFileInfoGeneratedBy)
+FSTRINGVAR(tJSONFileInfoName)
+#endif
 FSTRINGVAR(tSpaceXColon)
 FSTRINGVAR(tSpaceYColon)
 FSTRINGVAR(tSpaceZColon)
@@ -78,9 +93,10 @@ FSTRINGVAR(tSpaceRaw)
 FSTRINGVAR(tSpaceAt)
 FSTRINGVAR(tSpaceBAtColon)
 FSTRINGVAR(tColon)
-FSTRINGVAR(tSpeedMultiply);
-FSTRINGVAR(tFlowMultiply);
-FSTRINGVAR(tFanspeed);
+FSTRINGVAR(tSpeedMultiply)
+FSTRINGVAR(tFlowMultiply)
+FSTRINGVAR(tFanspeed)
+FSTRINGVAR(tFan2speed)
 FSTRINGVAR(tPrintedFilament)
 FSTRINGVAR(tPrintingTime)
 FSTRINGVAR(tSpacem)
@@ -96,7 +112,9 @@ FSTRINGVAR(tE0Colon)
 FSTRINGVAR(tE1Colon)
 FSTRINGVAR(tMS1MS2Pins)
 FSTRINGVAR(tSetOutputSpace)
+FSTRINGVAR(tGetInputSpace)
 FSTRINGVAR(tSpaceToSpace)
+FSTRINGVAR(tSpaceIsSpace)
 FSTRINGVAR(tHSpace)
 FSTRINGVAR(tLSpace)
 FSTRINGVAR(tXMinColon)
@@ -104,6 +122,7 @@ FSTRINGVAR(tXMaxColon)
 FSTRINGVAR(tYMinColon)
 FSTRINGVAR(tYMaxColon)
 FSTRINGVAR(tZMinColon)
+FSTRINGVAR(tZ2MinMaxColon)
 FSTRINGVAR(tZMaxColon)
 FSTRINGVAR(tJerkColon)
 FSTRINGVAR(tZJerkColon)
@@ -113,14 +132,19 @@ FSTRINGVAR(tCommaSpeedEqual)
 FSTRINGVAR(tLinearLColon)
 FSTRINGVAR(tQuadraticKColon)
 FSTRINGVAR(tEEPROMUpdated)
-
-#if DRIVE_SYSTEM==3
+FSTRINGVAR(tFilamentSlipping)
+FSTRINGVAR(tPauseCommunication)
+FSTRINGVAR(tContinueCommunication)
+#if NONLINEAR_SYSTEM
+FSTRINGVAR(tInvalidDeltaCoordinate)
+FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
+#endif
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVAR(tMeasurementReset)
 FSTRINGVAR(tMeasureDeltaSteps)
 FSTRINGVAR(tMeasureDelta)
 FSTRINGVAR(tMeasureOriginReset)
 FSTRINGVAR(tMeasurementAbortedOrigin)
-FSTRINGVAR(tInvalidDeltaCoordinate)
 FSTRINGVAR(tLevelingCalc)
 FSTRINGVAR(tTower1)
 FSTRINGVAR(tTower2)
@@ -131,11 +155,12 @@ FSTRINGVAR(tDeltaAlphaC)
 FSTRINGVAR(tDeltaRadiusCorrectionA)
 FSTRINGVAR(tDeltaRadiusCorrectionB)
 FSTRINGVAR(tDeltaRadiusCorrectionC)
-FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
+FSTRINGVAR(tDeltaDiagonalCorrectionA)
+FSTRINGVAR(tDeltaDiagonalCorrectionB)
+FSTRINGVAR(tDeltaDiagonalCorrectionC)
+FSTRINGVAR(tEPRDeltaMaxRadius)
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==4
-FSTRINGVAR(tInvalidDeltaCoordinate)
-FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVAR(tEPRDiagonalRodLength)
 #endif
 #ifdef DEBUG_GENERIC
@@ -208,10 +233,12 @@ FSTRINGVAR(tZProbeEndScript)
 FSTRINGVAR(tHitZProbe)
 FSTRINGVAR(tZProbeAverage)
 FSTRINGVAR(tZProbeZReset)
-FSTRINGVAR(tAutolevelReset)
+FSTRINGVAR(tZProbeBedDitance)
 #endif
+FSTRINGVAR(tAutolevelReset)
 FSTRINGVAR(tAutolevelEnabled)
 FSTRINGVAR(tAutolevelDisabled)
+FSTRINGVAR(tTransformationMatrix)
 FSTRINGVAR(tZProbeFailed)
 FSTRINGVAR(tZProbeMax)
 FSTRINGVAR(tZProbePrinterHeight)
@@ -223,6 +250,7 @@ FSTRINGVAR(tWait)
 #if EEPROM_MODE==0
 FSTRINGVAR(tNoEEPROMSupport)
 #else
+FSTRINGVAR(tZProbeOffsetZ)
 #if FEATURE_Z_PROBE
 FSTRINGVAR(tZProbeHeight)
 FSTRINGVAR(tZProbeOffsetX)
@@ -235,19 +263,27 @@ FSTRINGVAR(tZProbeX2)
 FSTRINGVAR(tZProbeY2)
 FSTRINGVAR(tZProbeX3)
 FSTRINGVAR(tZProbeY3)
+FSTRINGVAR(zZProbeBendingCorA)
+FSTRINGVAR(zZProbeBendingCorB)
+FSTRINGVAR(zZProbeBendingCorC)
 #endif
 #if FEATURE_AUTOLEVEL
 FSTRINGVAR(tAutolevelActive)
+#endif
+#if FEATURE_AXISCOMP
+FSTRINGVAR(tAxisCompTanXY)
+FSTRINGVAR(tAxisCompTanYZ)
+FSTRINGVAR(tAxisCompTanXZ)
 #endif
 FSTRINGVAR(tConfigStoredEEPROM)
 FSTRINGVAR(tConfigLoadedEEPROM)
 FSTRINGVAR(tEPRConfigResetDefaults)
 FSTRINGVAR(tEPRProtocolChanged)
-FSTRINGVAR(tExtrDot)
 FSTRINGVAR(tEPR0)
 FSTRINGVAR(tEPR1)
 FSTRINGVAR(tEPR2)
 FSTRINGVAR(tEPR3)
+FSTRINGVAR(tLanguage)
 FSTRINGVAR(tEPRBaudrate)
 FSTRINGVAR(tEPRFilamentPrinted)
 FSTRINGVAR(tEPRPrinterActive)
@@ -265,10 +301,11 @@ FSTRINGVAR(tEPRYBacklash)
 FSTRINGVAR(tEPRZBacklash)
 FSTRINGVAR(tEPRZAcceleration)
 FSTRINGVAR(tEPRZTravelAcceleration)
+FSTRINGVAR(tEPRAccelerationFactorAtTop)
 FSTRINGVAR(tEPRZStepsPerMM)
 FSTRINGVAR(tEPRZMaxFeedrate)
 FSTRINGVAR(tEPRZHomingFeedrate)
-#if DRIVE_SYSTEM!=3
+#if DRIVE_SYSTEM != DELTA
 FSTRINGVAR(tEPRMaxZJerk)
 FSTRINGVAR(tEPRXStepsPerMM)
 FSTRINGVAR(tEPRYStepsPerMM)
@@ -283,8 +320,6 @@ FSTRINGVAR(tEPRYTravelAcceleration)
 #else
 FSTRINGVAR(tEPRDiagonalRodLength)
 FSTRINGVAR(tEPRHorizontalRadius)
-FSTRINGVAR(tEPRSegmentsPerSecondPrint)
-FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 FSTRINGVAR(tEPRTowerXOffset)
 FSTRINGVAR(tEPRTowerYOffset)
 FSTRINGVAR(tEPRTowerZOffset)
@@ -309,11 +344,14 @@ FSTRINGVAR(tEPRHeatManager)
 FSTRINGVAR(tEPRDriveMax)
 FSTRINGVAR(tEPRDriveMin)
 FSTRINGVAR(tEPRPGain)
+FSTRINGVAR(tEPRDead)
+FSTRINGVAR(tEPRUnused)
 FSTRINGVAR(tEPRIGain)
 FSTRINGVAR(tEPRDGain)
 FSTRINGVAR(tEPRPIDMaxValue)
 FSTRINGVAR(tEPRXOffset)
 FSTRINGVAR(tEPRYOffset)
+FSTRINGVAR(tEPRZOffset)
 FSTRINGVAR(tEPRStabilizeTime)
 FSTRINGVAR(tEPRRetractionWhenHeating)
 FSTRINGVAR(tEPRDistanceRetractHeating)
@@ -322,8 +360,8 @@ FSTRINGVAR(tEPRAdvanceK)
 FSTRINGVAR(tEPRAdvanceL)
 #endif
 #if SDSUPPORT
-FSTRINGVAR(tSDRemoved)
-FSTRINGVAR(tSDInserted)
+//FSTRINGVAR(tSDRemoved)
+//FSTRINGVAR(tSDInserted)
 FSTRINGVAR(tSDInitFail)
 FSTRINGVAR(tErrorWritingToFile)
 FSTRINGVAR(tBeginFileList)
@@ -343,10 +381,47 @@ FSTRINGVAR(tDirectoryCreated)
 FSTRINGVAR(tCreationFailed)
 FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
+FSTRINGVAR(tHeaterDecoupled)
+FSTRINGVAR(tHeaterDecoupledWarning)
+#if DISTORTION_CORRECTION
+FSTRINGVAR(tZCorrectionEnabled)
+FSTRINGVAR(tZCorrectionDisabled)
+#endif
+#if FEATURE_RETRACTION
+FSTRINGVAR(tEPRAutoretractEnabled)
+FSTRINGVAR(tEPRRetractionLength)
+FSTRINGVAR(tEPRRetractionLongLength)
+FSTRINGVAR(tEPRRetractionSpeed)
+FSTRINGVAR(tEPRRetractionZLift)
+FSTRINGVAR(tEPRRetractionUndoExtraLength)
+FSTRINGVAR(tEPRRetractionUndoExtraLongLength)
+FSTRINGVAR(tEPRRetractionUndoSpeed)
+#endif
+FSTRINGVAR(tConfig)
+FSTRINGVAR(tExtrDot)
 
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
+FSTRINGVAR(tMCPEpromSettings)
+FSTRINGVAR(tMCPCurrentSettings)
+#endif
+FSTRINGVAR(tPrinterModeFFF)
+FSTRINGVAR(tPrinterModeLaser)
+FSTRINGVAR(tPrinterModeCNC)
+#ifdef STARTUP_GCODE
+FSTRINGVAR(tStartupGCode)
+#endif
+#if NONLINEAR_SYSTEM
+FSTRINGVAR(tEPRSegmentsPerSecondPrint)
+FSTRINGVAR(tEPRSegmentsPerSecondTravel)
+#endif
 
-
-static void printNumber(unsigned long n);
+static void config(FSTRINGPARAM(text));
+static void config(FSTRINGPARAM(text),int value);
+static void config(FSTRINGPARAM(text),const char *msg);
+static void config(FSTRINGPARAM(text),int32_t value);
+static void config(FSTRINGPARAM(text),uint32_t value);
+static void config(FSTRINGPARAM(text),float value,uint8_t digits=2);
+static void printNumber(uint32_t n);
 static void printWarningF(FSTRINGPARAM(text));
 static void printInfoF(FSTRINGPARAM(text));
 static void printErrorF(FSTRINGPARAM(text));
@@ -357,25 +432,48 @@ static void printFLN(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text));
 static void printF(FSTRINGPARAM(text),int value);
 static void printF(FSTRINGPARAM(text),const char *msg);
-static void printF(FSTRINGPARAM(text),long value);
-static void printF(FSTRINGPARAM(text),unsigned long value);
+static void printF(FSTRINGPARAM(text),int32_t value);
+static void printF(FSTRINGPARAM(text),uint32_t value);
 static void printF(FSTRINGPARAM(text),float value,uint8_t digits=2);
 static void printFLN(FSTRINGPARAM(text),int value);
-static void printFLN(FSTRINGPARAM(text),long value);
-static void printFLN(FSTRINGPARAM(text),unsigned long value);
+static void printFLN(FSTRINGPARAM(text),int32_t value);
+static void printFLN(FSTRINGPARAM(text),uint32_t value);
 static void printFLN(FSTRINGPARAM(text),const char *msg);
 static void printFLN(FSTRINGPARAM(text),float value,uint8_t digits=2);
 static void printArrayFLN(FSTRINGPARAM(text),float *arr,uint8_t n=4,uint8_t digits=2);
 static void printArrayFLN(FSTRINGPARAM(text),long *arr,uint8_t n=4);
 static void print(long value);
-static inline void print(unsigned long value) {printNumber(value);}
-static inline void print(int value) {print((long)value);}
+static inline void print(uint32_t value) {printNumber(value);}
+static inline void print(int value) {print((int32_t)value);}
 static void print(const char *text);
 static inline void print(char c) {HAL::serialWriteByte(c);}
 static void printFloat(float number, uint8_t digits);
+static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {HAL::serialWriteByte('\r');HAL::serialWriteByte('\n');}
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+static const char* translatedF(int textId);
+static void selectLanguage(fast8_t lang);
+static uint8_t selectedLanguage;
+#endif
     protected:
     private:
 };
+
+#ifdef DEBUG
+#define SHOW(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::println();}
+#define SHOWS(x) {Com::printF(PSTR(" " #x "=")); Com::print(x); Com::print(" steps  "); Com::print(x/80); Com::printFLN(PSTR(" mm"));}
+#define SHOWM(x) {Com::printF(PSTR(" " #x "=")); Com::print((long)x*80); Com::print(" steps  "); Com::print(x); Com::printFLN(PSTR(" mm"));}
+#define SHOT(x) Com::printF(PSTR(x " "))
+#define SHOWA(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWS(a[i]);}
+#define SHOWAM(t,a,n) {SHOT(t); for (int i=0;i<n;i++) SHOWM(a[i]);}
+
+#else
+#define SHOW(x)
+#define SHOT(x)
+#define SHOWS(x)
+#define SHOWM(x)
+#define SHOWA(t,a,n)
+#define SHOWAM(t,a,n)
+#endif
 
 #endif // COMMUNICATION_H

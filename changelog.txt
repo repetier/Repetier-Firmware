@@ -1,3 +1,52 @@
+Version 92.9
+  Extruder motor mirroring.
+  Fixes in autoleveling.
+  Dual x axis support.
+  Axis compensation now always on.
+  Watchdog handling improved.
+  
+Version 0.92
+  Cleaner code base.
+  Pulse dense modulation for heater and fans.
+  Bed bump correction for delta printer.
+  Correction of parallelogram distortions.
+  Decoupling test for heater and sensor for more safety.
+  Mixing extruder support.
+  Test for watchdog.
+  Allow cold extrusion.
+  Fixed pause sd print issues.
+  Commands on sd stop.
+  Disable heaters/extruders on sd stop.
+  Safety question for sd stop.
+  Many minor corrections and improvements.
+  Extra motor drivers.
+  Event system for lights etc.
+  New homing sequence with preheat for nozzle based z sensors.
+  Language selectable on runtime.
+  Fix structure for Arduino 1.6.7
+  New bed leveling.
+  Fatal error handling added.
+
+Version 0.91.8
+  New languages french and Czech
+  Ditto printing with up to 4 extruder.
+  
+Version 0.91.7 15-03-2014
+  Babystepping.
+  Z-Calib allows Z < 0.
+  Improved delta moves.
+  Retest sd read on error preventing abort on error.
+  Fixed around a Arduino upload error bug when > 123.6kb  
+
+Version 0.91.5 21-02-2014
+  Delta version on due working.
+  More delta corrections.
+  Limit z probing retest height.
+  Fixed z-probing bug for large deltas (rounding errors).
+  Limit print area for deltas to a cylinder.
+  More boards like RAMPS-FD.
+  Some bug fixes.
+  
 Version 0.91
   Online configuration tool: http://www.repetier.com/firmware/v091
   Support for Arduino Due - thank to John Silvia for this port!

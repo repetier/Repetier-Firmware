@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -100,6 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
 <div class="title">UIMenuEntry Struct Reference</div>  </div>
@@ -108,12 +109,34 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="UIMenuEntry" -->
 <p><code>#include &lt;<a class="el" href="ui_8h_source.html">ui.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr><td colspan="2"><h2><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#a5949e16f6f156c1081afd2a1cba45b7b">showEntry</a> () const </td></tr>
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#a16343090e80c4472521560f30113d96c">text</a></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#abe780536c31ff5db0168630df52b840a">menuType</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#af1bbc286a4bf3ca2406481cd4253312b">menuType</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#aa2af53713137e5f082918dd4c1023bf5">action</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#aa69d890d38e8a1abafc8697d1760bb04">filter</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_u_i_menu_entry.html#a628840ea375f7362131e6919ab4cbc5e">nofilter</a></td></tr>
 </table>
+<hr/><h2>Member Function Documentation</h2>
+<a class="anchor" id="a5949e16f6f156c1081afd2a1cba45b7b"></a><!-- doxytag: member="UIMenuEntry::showEntry" ref="a5949e16f6f156c1081afd2a1cba45b7b" args="() const " -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="struct_u_i_menu_entry.html#a5949e16f6f156c1081afd2a1cba45b7b">showEntry</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <hr/><h2>Field Documentation</h2>
 <a class="anchor" id="aa2af53713137e5f082918dd4c1023bf5"></a><!-- doxytag: member="UIMenuEntry::action" ref="aa2af53713137e5f082918dd4c1023bf5" args="" -->
 <div class="memitem">
@@ -128,12 +151,38 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abe780536c31ff5db0168630df52b840a"></a><!-- doxytag: member="UIMenuEntry::menuType" ref="abe780536c31ff5db0168630df52b840a" args="" -->
+<a class="anchor" id="aa69d890d38e8a1abafc8697d1760bb04"></a><!-- doxytag: member="UIMenuEntry::filter" ref="aa69d890d38e8a1abafc8697d1760bb04" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned char <a class="el" href="struct_u_i_menu_entry.html#abe780536c31ff5db0168630df52b840a">menuType</a></td>
+          <td class="memname">uint8_t <a class="el" href="struct_u_i_menu_entry.html#aa69d890d38e8a1abafc8697d1760bb04">filter</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af1bbc286a4bf3ca2406481cd4253312b"></a><!-- doxytag: member="UIMenuEntry::menuType" ref="af1bbc286a4bf3ca2406481cd4253312b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="struct_u_i_menu_entry.html#af1bbc286a4bf3ca2406481cd4253312b">menuType</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a628840ea375f7362131e6919ab4cbc5e"></a><!-- doxytag: member="UIMenuEntry::nofilter" ref="a628840ea375f7362131e6919ab4cbc5e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="struct_u_i_menu_entry.html#a628840ea375f7362131e6919ab4cbc5e">nofilter</a></td>
         </tr>
       </table>
 </div>
@@ -154,8 +203,9 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="ui_8h_source.html">ui.h</a></li>
+<hr/>The documentation for this struct was generated from the following files:<ul>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="ui_8h_source.html">ui.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="ui_8cpp.html">ui.cpp</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -177,7 +227,7 @@ Data Fields</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="struct_u_i_menu_entry.html">UIMenuEntry</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

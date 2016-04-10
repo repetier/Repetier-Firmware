@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -124,7 +124,7 @@ Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a6f85fee8f55dfe119a47647cd4dfbcb9">errorData</a> () const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a008934b78ad099ce978883287b320b47">init</a> (uint8_t sckRateID=<a class="el" href="_sd_fat_8h.html#a6c091c07d1eb82a94b1c5738f720264b">SPI_FULL_SPEED</a>, uint8_t chipSelectPin=<a class="el" href="_sd_fat_8h.html#ae6b17538c14ba6c91ccb513db2c4c29c">SD_CHIP_SELECT_PIN</a>)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a2d3c126910c2c0c9d6ac468a459eec39">readBlock</a> (uint32_t block, uint8_t *dst)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#ac2a262a5e6c508ec5d5b312f01b54e67">readCID</a> (<a class="el" href="_sd_fat_8h.html#a7f1c4653597f0e5276671139a3592dcd">cid_t</a> *cid)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#ac2a262a5e6c508ec5d5b312f01b54e67">readCID</a> (cid_t *cid)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a4a73b4acf0416c0edd9ced858ad37656">readCSD</a> (<a class="el" href="unioncsd__t.html">csd_t</a> *csd)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#ace9c999f7d24d3382bb6a32ac1f271d1">readData</a> (uint8_t *dst)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a2d7e430e3cb4a8509b356b94481ea3bd">readStart</a> (uint32_t blockNumber)</td></tr>
@@ -139,7 +139,7 @@ Public Member Functions</h2></td></tr>
 Private Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a4517419ec4bf821be8e34bb1562a906e">cardAcmd</a> (uint8_t cmd, uint32_t arg)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a4144ac40b43534083c41a7faf3383415">cardCommand</a> (uint8_t cmd, uint32_t arg)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a6803e1f55274c23799ff1e2a2b755e66">readData</a> (uint8_t *dst, uint16_t count)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a33b3b771603b9e91c791cd7a39be5fbd">readData</a> (uint8_t *dst, size_t count)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#af7820e455ba72ac41b8749ecce475523">readRegister</a> (uint8_t cmd, void *buf)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#a4d554e76d6f91a5a0722fca298ee0242">chipSelectHigh</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sd2_card.html#aad1f1ef78c225d04b1fffdc4cdd9f360">chipSelectLow</a> ()</td></tr>
@@ -441,7 +441,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname">bool <a class="el" href="class_sd2_card.html#ac2a262a5e6c508ec5d5b312f01b54e67">readCID</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="_sd_fat_8h.html#a7f1c4653597f0e5276671139a3592dcd">cid_t</a> *&#160;</td>
+          <td class="paramtype">cid_t *&#160;</td>
           <td class="paramname"><em>cid</em></td><td>)</td>
           <td><code> [inline]</code></td>
         </tr>
@@ -501,7 +501,7 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6803e1f55274c23799ff1e2a2b755e66"></a><!-- doxytag: member="Sd2Card::readData" ref="a6803e1f55274c23799ff1e2a2b755e66" args="(uint8_t *dst, uint16_t count)" -->
+<a class="anchor" id="a33b3b771603b9e91c791cd7a39be5fbd"></a><!-- doxytag: member="Sd2Card::readData" ref="a33b3b771603b9e91c791cd7a39be5fbd" args="(uint8_t *dst, size_t count)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -514,7 +514,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>count</em>&#160;</td>
         </tr>
         <tr>
@@ -838,7 +838,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
+<li>src/ArduinoAVR/Repetier/<a class="el" href="_sd_fat_8h_source.html">SdFat.h</a></li>
 </ul>
 </div><!-- contents -->
 </div>
@@ -860,7 +860,7 @@ Private Attributes</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="class_sd2_card.html">Sd2Card</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/uimenu.h Source File</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/uimenu.h Source File</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Repetier/uimenu.h</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/uimenu.h</div>  </div>
 </div><!--header-->
 <div class="contents">
 <a href="uimenu_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -184,428 +184,529 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00081"></a>00081 <span class="comment">%fX : Homing feedrate x direction</span>
 <a name="l00082"></a>00082 <span class="comment">%fY : Homing feedrate y direction</span>
 <a name="l00083"></a>00083 <span class="comment">%fZ : Homing feedrate z direction</span>
-<a name="l00084"></a>00084 <span class="comment">%Sx : Steps per mm x direction</span>
-<a name="l00085"></a>00085 <span class="comment">%Sy : Steps per mm y direction</span>
-<a name="l00086"></a>00086 <span class="comment">%Sz : Steps per mm z direction</span>
-<a name="l00087"></a>00087 <span class="comment">%Se : Steps per mm current extruder</span>
-<a name="l00088"></a>00088 <span class="comment">%is : Stepper inactive time in seconds</span>
-<a name="l00089"></a>00089 <span class="comment">%ip : Max. inactive time in seconds</span>
-<a name="l00090"></a>00090 <span class="comment">%X0..9 : Extruder selected marker</span>
-<a name="l00091"></a>00091 <span class="comment">%Xi : PID I gain</span>
-<a name="l00092"></a>00092 <span class="comment">%Xp : PID P gain</span>
-<a name="l00093"></a>00093 <span class="comment">%Xd : PID D gain</span>
-<a name="l00094"></a>00094 <span class="comment">%Xm : PID drive min</span>
-<a name="l00095"></a>00095 <span class="comment">%XM : PID drive max</span>
-<a name="l00096"></a>00096 <span class="comment">%XD : PID max</span>
-<a name="l00097"></a>00097 <span class="comment">%Xw : Extruder watch period in seconds</span>
-<a name="l00098"></a>00098 <span class="comment">%Xh : Extruder heat manager (BangBang/PID)</span>
-<a name="l00099"></a>00099 <span class="comment">%Xa : Advance K value</span>
-<a name="l00100"></a>00100 <span class="comment">%Xx : x offset in steps</span>
-<a name="l00101"></a>00101 <span class="comment">%Xy : y offset in steps</span>
-<a name="l00102"></a>00102 <span class="comment">%Xf : Extruder max. start feedrate</span>
-<a name="l00103"></a>00103 <span class="comment">%XF : Extruder max. feedrate</span>
-<a name="l00104"></a>00104 <span class="comment">%XA : Extruder max. acceleration</span>
-<a name="l00105"></a>00105 <span class="comment">*/</span>
-<a name="l00106"></a>00106 
-<a name="l00107"></a>00107 
-<a name="l00108"></a>00108 <span class="comment">// Define precision for temperatures. With small displays only integer values fit.</span>
-<a name="l00109"></a>00109 <span class="preprocessor">#ifndef UI_TEMP_PRECISION</span>
-<a name="l00110"></a>00110 <span class="preprocessor"></span><span class="preprocessor">#if UI_COLS&gt;16</span>
-<a name="l00111"></a>00111 <span class="preprocessor"></span><span class="preprocessor">#define UI_TEMP_PRECISION 1</span>
-<a name="l00112"></a>00112 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00113"></a>00113 <span class="preprocessor"></span><span class="preprocessor">#define UI_TEMP_PRECISION 0</span>
-<a name="l00114"></a>00114 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00115"></a>00115 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00116"></a>00116 <span class="preprocessor"></span>
-<a name="l00117"></a>00117 <span class="comment">/* ============= PAGES DEFINITION =============</span>
-<a name="l00118"></a>00118 <span class="comment"></span>
-<a name="l00119"></a>00119 <span class="comment">If you are not iside a menu, the firmware displays pages with information.</span>
-<a name="l00120"></a>00120 <span class="comment">Especially if you have only a small display it is convenient to have</span>
-<a name="l00121"></a>00121 <span class="comment">more then one information page.</span>
-<a name="l00122"></a>00122 <span class="comment">*/</span>
-<a name="l00123"></a>00123 
-<a name="l00124"></a>00124 <span class="comment">/* Define your pages using dynamic strings. To define a page use</span>
-<a name="l00125"></a>00125 <span class="comment">UI_PAGE4(name,row1,row2,row3,row4);</span>
-<a name="l00126"></a>00126 <span class="comment">for 4 row displays and</span>
-<a name="l00127"></a>00127 <span class="comment">UI_PAGE2(name,row1,row2);</span>
-<a name="l00128"></a>00128 <span class="comment">for 2 row displays. You can add additional pages or change the default pages like you want.</span>
-<a name="l00129"></a>00129 <span class="comment">*/</span>
-<a name="l00130"></a>00130 <span class="preprocessor">#if UI_ROWS&gt;=4</span>
-<a name="l00131"></a>00131 <span class="preprocessor"></span><span class="preprocessor"> #if HAVE_HEATED_BED==true</span>
-<a name="l00132"></a>00132 <span class="preprocessor"></span>   <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page1,<span class="stringliteral">&quot;\005%ec/%Ec\002B%eB/%Eb\002&quot;</span>,<span class="stringliteral">&quot;Z:%x2&quot;</span>,<span class="stringliteral">&quot;Mul:%om Buf:%oB&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00133"></a>00133    <span class="comment">//UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,&quot;%os&quot;);</span>
-<a name="l00134"></a>00134 <span class="preprocessor"> #else</span>
-<a name="l00135"></a>00135 <span class="preprocessor"></span>   <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<a class="code" href="uilang_8h.html#a745e6008703b549cd5031a97277c1aa5">UI_TEXT_PAGE_BUFFER</a>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00136"></a>00136 <span class="preprocessor"> #endif</span>
-<a name="l00137"></a>00137 <span class="preprocessor"></span>  <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page2,<span class="stringliteral">&quot;X:%x0 mm&quot;</span>,<span class="stringliteral">&quot;Y:%x1 mm&quot;</span>,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00138"></a>00138 <span class="comment">//UI_PAGE4(ui_page2,&quot;dX:%y0 mm %sX&quot;,&quot;dY:%y1 mm %sY&quot;,&quot;dZ:%y2 mm %sZ&quot;,&quot;%os&quot;);</span>
-<a name="l00139"></a>00139  <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page3,<a class="code" href="uilang_8h.html#a3aba7e56a936ea5790f7c7d9a29dd6be">UI_TEXT_PAGE_EXTRUDER1</a>,
-<a name="l00140"></a>00140 #<span class="keywordflow">if</span> <a class="code" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>&gt;1
-<a name="l00141"></a>00141 <a class="code" href="uilang_8h.html#a6134559b42591917bbfd8ce68fa77545">UI_TEXT_PAGE_EXTRUDER2</a>
-<a name="l00142"></a>00142 #<span class="keywordflow">else</span>
-<a name="l00143"></a>00143  <span class="stringliteral">&quot;&quot;</span>
-<a name="l00144"></a>00144 #endif
-<a name="l00145"></a>00145  ,<a class="code" href="uilang_8h.html#ae5938cca1672e1d2ff07cd33109ba0dc">UI_TEXT_PAGE_BED</a>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00146"></a>00146 
-<a name="l00147"></a>00147 <span class="comment">/*</span>
-<a name="l00148"></a>00148 <span class="comment">Merge pages together. Use the following pattern:</span>
-<a name="l00149"></a>00149 <span class="comment">#define UI_PAGES {&amp;name1,&amp;name2,&amp;name3}</span>
-<a name="l00150"></a>00150 <span class="comment">*/</span>
-<a name="l00151"></a>00151 <span class="preprocessor">#define UI_PAGES {&amp;ui_page1,&amp;ui_page2,&amp;ui_page3}</span>
-<a name="l00152"></a>00152 <span class="preprocessor"></span><span class="comment">// How many pages do you want to have. Minimum is 1.</span>
-<a name="l00153"></a>00153 <span class="preprocessor">#define UI_NUM_PAGES 3</span>
-<a name="l00154"></a>00154 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00155"></a>00155 <span class="preprocessor"></span><span class="preprocessor">#if HAVE_HEATED_BED==true</span>
-<a name="l00156"></a>00156 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<a class="code" href="uilang_8h.html#ae5938cca1672e1d2ff07cd33109ba0dc">UI_TEXT_PAGE_BED</a>);
-<a name="l00157"></a>00157 <span class="preprocessor">#else</span>
-<a name="l00158"></a>00158 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00159"></a>00159 <span class="preprocessor">#endif</span>
-<a name="l00160"></a>00160 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page2,<span class="stringliteral">&quot;X:%x0 Y:%x1&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00161"></a>00161 <a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page3,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
-<a name="l00162"></a>00162 <span class="comment">/*</span>
-<a name="l00163"></a>00163 <span class="comment">Merge pages together. Use the following pattern:</span>
-<a name="l00164"></a>00164 <span class="comment">#define UI_PAGES {&amp;name1,&amp;name2,&amp;name3}</span>
-<a name="l00165"></a>00165 <span class="comment">*/</span>
-<a name="l00166"></a>00166 <span class="preprocessor">#define UI_PAGES {&amp;ui_page1,&amp;ui_page2,&amp;ui_page3}</span>
-<a name="l00167"></a>00167 <span class="preprocessor"></span><span class="comment">// How many pages do you want to have. Minimum is 1.</span>
-<a name="l00168"></a>00168 <span class="preprocessor">#define UI_NUM_PAGES 3</span>
-<a name="l00169"></a>00169 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00170"></a>00170 <span class="preprocessor"></span><span class="comment">/* ============ MENU definition ================</span>
-<a name="l00171"></a>00171 <span class="comment"></span>
-<a name="l00172"></a>00172 <span class="comment">The menu works the same as pages. In addion you need to define what the lines do</span>
-<a name="l00173"></a>00173 <span class="comment">or where to jump to. For that reason, the menu structure needs to be entered in</span>
-<a name="l00174"></a>00174 <span class="comment">reverse order. Starting from the leaves, the menu structure is defined.</span>
-<a name="l00175"></a>00175 <span class="comment">*/</span>
-<a name="l00176"></a>00176 
-<a name="l00177"></a>00177 <span class="comment">/*</span>
-<a name="l00178"></a>00178 <span class="comment">At first define all actions available in the menu. The actions define, what the</span>
-<a name="l00179"></a>00179 <span class="comment">next/previous button will do. All menu actions work the same:</span>
-<a name="l00180"></a>00180 <span class="comment">next/previous changes the value</span>
-<a name="l00181"></a>00181 <span class="comment">ok sets the value if not already done and goes back to previous menu.</span>
-<a name="l00182"></a>00182 <span class="comment">*/</span>
-<a name="l00183"></a>00183 
-<a name="l00184"></a>00184 <span class="comment">// Error menu</span>
-<a name="l00185"></a>00185 
-<a name="l00186"></a>00186 <a class="code" href="ui_8h.html#ac8bfa72ab35ed4b111100107c520a794">UI_MENU_ACTION2</a>(ui_menu_error,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#aa64c9f8717d54892e9554ad7e95eea73">UI_TEXT_ERROR</a>,<span class="stringliteral">&quot;%oe&quot;</span>);
-<a name="l00187"></a>00187 
-<a name="l00188"></a>00188 <span class="comment">// **** Positions submenus</span>
-<a name="l00189"></a>00189 
-<a name="l00190"></a>00190 <span class="preprocessor">#if UI_ROWS&gt;=4</span>
-<a name="l00191"></a>00191 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_xpos,<a class="code" href="ui_8h.html#a1ef3f459468b52a38fe4fffc66354f74">UI_ACTION_XPOSITION</a>,<a class="code" href="uilang_8h.html#a9b518e9d71554aa8f1c12eab0e8ac3a6">UI_TEXT_ACTION_XPOSITION4</a>);
-<a name="l00192"></a>00192 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_ypos,<a class="code" href="ui_8h.html#a04370ec777e6807e7065de53c629e793">UI_ACTION_YPOSITION</a>,<a class="code" href="uilang_8h.html#a77e93955bf38eb94653109856532b3f4">UI_TEXT_ACTION_YPOSITION4</a>);
-<a name="l00193"></a>00193 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_zpos,<a class="code" href="ui_8h.html#acf0eba931a353fa69913627edef83604">UI_ACTION_ZPOSITION</a>,<a class="code" href="uilang_8h.html#ae181f0cad78d4a4cc01d7c80ec950298">UI_TEXT_ACTION_ZPOSITION4</a>);
-<a name="l00194"></a>00194 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_xpos_fast,<a class="code" href="ui_8h.html#a72a86a29358c20f85a4d8be9f31ceafa">UI_ACTION_XPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a64e2b1d91205ea1d163eabd2bd28a965">UI_TEXT_ACTION_XPOSITION_FAST4</a>);
-<a name="l00195"></a>00195 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_ypos_fast,<a class="code" href="ui_8h.html#a3cf59357e508ee576f3739b7ae06d906">UI_ACTION_YPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#acf9e9ae7de892bcef10811d1078f4ae0">UI_TEXT_ACTION_YPOSITION_FAST4</a>);
-<a name="l00196"></a>00196 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_zpos_fast,<a class="code" href="ui_8h.html#a3717fb4a2b9df95fd1af1c875689e7fb">UI_ACTION_ZPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a3b1a137474275ac3ee7770324c8fd645">UI_TEXT_ACTION_ZPOSITION_FAST4</a>);
-<a name="l00197"></a>00197 <span class="preprocessor">#else</span>
-<a name="l00198"></a>00198 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_xpos,<a class="code" href="ui_8h.html#a1ef3f459468b52a38fe4fffc66354f74">UI_ACTION_XPOSITION</a>,<a class="code" href="uilang_8h.html#ad5f47b7d05e85f1a93047064fdb81ee5">UI_TEXT_ACTION_XPOSITION2</a>);
-<a name="l00199"></a>00199 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_ypos,<a class="code" href="ui_8h.html#a04370ec777e6807e7065de53c629e793">UI_ACTION_YPOSITION</a>,<a class="code" href="uilang_8h.html#a55b840b39dac781ce0e1bc33b5985e47">UI_TEXT_ACTION_YPOSITION2</a>);
-<a name="l00200"></a>00200 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_zpos,<a class="code" href="ui_8h.html#acf0eba931a353fa69913627edef83604">UI_ACTION_ZPOSITION</a>,<a class="code" href="uilang_8h.html#a156e137750dc9d244316f7f31e62a596">UI_TEXT_ACTION_ZPOSITION2</a>);
-<a name="l00201"></a>00201 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_xpos_fast,<a class="code" href="ui_8h.html#a72a86a29358c20f85a4d8be9f31ceafa">UI_ACTION_XPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a3bf951d0b17a7786ca494cb7bd3f5321">UI_TEXT_ACTION_XPOSITION_FAST2</a>);
-<a name="l00202"></a>00202 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_ypos_fast,<a class="code" href="ui_8h.html#a3cf59357e508ee576f3739b7ae06d906">UI_ACTION_YPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#ad95f9cd56234fb6a4fd99dfa8c680ab6">UI_TEXT_ACTION_YPOSITION_FAST2</a>);
-<a name="l00203"></a>00203 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_zpos_fast,<a class="code" href="ui_8h.html#a3717fb4a2b9df95fd1af1c875689e7fb">UI_ACTION_ZPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#acca19314d62e3fe54528dbc875811335">UI_TEXT_ACTION_ZPOSITION_FAST2</a>);
-<a name="l00204"></a>00204 <span class="preprocessor">#endif</span>
-<a name="l00205"></a>00205 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_epos,<a class="code" href="ui_8h.html#a2325a5f4d041db35d411006a860a3883">UI_ACTION_EPOSITION</a>,<a class="code" href="uilang_8h.html#a0ede80b16d8c9788d4863ba0b542a939">UI_TEXT_ACTION_EPOSITION_FAST2</a>);
-<a name="l00206"></a>00206 
-<a name="l00207"></a>00207 <span class="comment">/*</span>
-<a name="l00208"></a>00208 <span class="comment">Next step is to define submenus leading to the action.</span>
-<a name="l00209"></a>00209 <span class="comment">*/</span>
-<a name="l00210"></a>00210 
-<a name="l00211"></a>00211 <span class="comment">// **** Positionening menu</span>
-<a name="l00212"></a>00212 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_back,<a class="code" href="uilang_8h.html#a6ef2de587b60d8dabe53924e8aa38e91">UI_TEXT_BACK</a>,<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>);
-<a name="l00213"></a>00213 <span class="preprocessor">#if UI_HAS_BACK_KEY==0</span>
-<a name="l00214"></a>00214 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADDCONDBACK &amp;ui_menu_back,</span>
-<a name="l00215"></a>00215 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BACKCNT 1</span>
-<a name="l00216"></a>00216 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00217"></a>00217 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADDCONDBACK</span>
-<a name="l00218"></a>00218 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BACKCNT 0</span>
-<a name="l00219"></a>00219 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00220"></a>00220 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_all,<a class="code" href="uilang_8h.html#a5ef31305c5118d56ab946c82f84a3e3d">UI_TEXT_HOME_ALL</a>,<a class="code" href="ui_8h.html#a5fd2d531eccf1d966c177a8e2e137ab7">UI_ACTION_HOME_ALL</a>);
-<a name="l00221"></a>00221 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_x,<a class="code" href="uilang_8h.html#a7e4ad85c23619462c2b8ff3f1218669b">UI_TEXT_HOME_X</a>,<a class="code" href="ui_8h.html#a2433e70d06baefbf8cfd7c8f99c8e007">UI_ACTION_HOME_X</a>);
-<a name="l00222"></a>00222 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_y,<a class="code" href="uilang_8h.html#a375e8a5040a083b5fe45d19959666f91">UI_TEXT_HOME_Y</a>,<a class="code" href="ui_8h.html#a29aab9c5095b45910ee54264425bd7cd">UI_ACTION_HOME_Y</a>);
-<a name="l00223"></a>00223 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_z,<a class="code" href="uilang_8h.html#a38645e46f381311429a8851ea4f7a808">UI_TEXT_HOME_Z</a>,<a class="code" href="ui_8h.html#a7149d15e66318376c0513a497b6eff8a">UI_ACTION_HOME_Z</a>);
-<a name="l00224"></a>00224 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_xpos,<a class="code" href="uilang_8h.html#a32b841e91e2d7a21213fc11b1767dfce">UI_TEXT_X_POSITION</a>,ui_menu_xpos);
-<a name="l00225"></a>00225 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_ypos,<a class="code" href="uilang_8h.html#a039828302e8fc9aa4f77c5112c66286e">UI_TEXT_Y_POSITION</a>,ui_menu_ypos);
-<a name="l00226"></a>00226 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_zpos,<a class="code" href="uilang_8h.html#a76643ed28840cb35793a3d944cf1b03e">UI_TEXT_Z_POSITION</a>,ui_menu_zpos);
-<a name="l00227"></a>00227 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_epos,<a class="code" href="uilang_8h.html#a56d225100758d303b60cf14f4cdeabdc">UI_TEXT_E_POSITION</a>,ui_menu_epos);
-<a name="l00228"></a>00228 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_xfast,<a class="code" href="uilang_8h.html#a93a1164b4d0a08f8b0a6c842bafeeb84">UI_TEXT_X_POS_FAST</a>,ui_menu_xpos_fast);
-<a name="l00229"></a>00229 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_yfast,<a class="code" href="uilang_8h.html#a1cb9cb92fb226d49e96678c5556554f4">UI_TEXT_Y_POS_FAST</a>,ui_menu_ypos_fast);
-<a name="l00230"></a>00230 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_zfast,<a class="code" href="uilang_8h.html#ae9c62462e82927c520c0bc91e5a42a2b">UI_TEXT_Z_POS_FAST</a>,ui_menu_zpos_fast);
-<a name="l00231"></a>00231 
-<a name="l00232"></a>00232 <span class="preprocessor">#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all,&amp;ui_menu_home_x,&amp;ui_menu_home_y,&amp;ui_menu_home_z,&amp;ui_menu_go_xfast,&amp;ui_menu_go_xpos,&amp;ui_menu_go_yfast,&amp;ui_menu_go_ypos,&amp;ui_menu_go_zfast,&amp;ui_menu_go_zpos,&amp;ui_menu_go_epos}</span>
-<a name="l00233"></a>00233 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_positions,UI_MENU_POSITIONS,11+UI_MENU_BACKCNT);
+<a name="l00084"></a>00084 <span class="comment">%Fs : Fan speed</span>
+<a name="l00085"></a>00085 <span class="comment">%PN : Printer name</span>
+<a name="l00086"></a>00086 <span class="comment">%Sx : Steps per mm x direction</span>
+<a name="l00087"></a>00087 <span class="comment">%Sy : Steps per mm y direction</span>
+<a name="l00088"></a>00088 <span class="comment">%Sz : Steps per mm z direction</span>
+<a name="l00089"></a>00089 <span class="comment">%Se : Steps per mm current extruder</span>
+<a name="l00090"></a>00090 <span class="comment">%Ut : Shows printing time</span>
+<a name="l00091"></a>00091 <span class="comment">%Uf : Shows total filament usage</span>
+<a name="l00092"></a>00092 <span class="comment">%is : Stepper inactive time in seconds</span>
+<a name="l00093"></a>00093 <span class="comment">%ip : Max. inactive time in seconds</span>
+<a name="l00094"></a>00094 <span class="comment">%X0..9 : Extruder selected marker</span>
+<a name="l00095"></a>00095 <span class="comment">%Xi : PID I gain</span>
+<a name="l00096"></a>00096 <span class="comment">%Xp : PID P gain</span>
+<a name="l00097"></a>00097 <span class="comment">%Xd : PID D gain</span>
+<a name="l00098"></a>00098 <span class="comment">%Xm : PID drive min</span>
+<a name="l00099"></a>00099 <span class="comment">%XM : PID drive max</span>
+<a name="l00100"></a>00100 <span class="comment">%XD : PID max</span>
+<a name="l00101"></a>00101 <span class="comment">%Xw : Extruder watch period in seconds</span>
+<a name="l00102"></a>00102 <span class="comment">%Xh : Extruder heat manager (BangBang/PID)</span>
+<a name="l00103"></a>00103 <span class="comment">%Xa : Advance K value</span>
+<a name="l00104"></a>00104 <span class="comment">%Xl : Advance L value</span>
+<a name="l00105"></a>00105 <span class="comment">%Xx : x offset in steps</span>
+<a name="l00106"></a>00106 <span class="comment">%Xy : y offset in steps</span>
+<a name="l00107"></a>00107 <span class="comment">%Xf : Extruder max. start feedrate</span>
+<a name="l00108"></a>00108 <span class="comment">%XF : Extruder max. feedrate</span>
+<a name="l00109"></a>00109 <span class="comment">%XA : Extruder max. acceleration</span>
+<a name="l00110"></a>00110 <span class="comment">*/</span>
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113 <span class="comment">// Define precision for temperatures. With small displays only integer values fit.</span>
+<a name="l00114"></a>00114 <span class="preprocessor">#ifndef UI_TEMP_PRECISION</span>
+<a name="l00115"></a>00115 <span class="preprocessor"></span><span class="preprocessor">#if UI_COLS&gt;16</span>
+<a name="l00116"></a>00116 <span class="preprocessor"></span><span class="preprocessor">#define UI_TEMP_PRECISION 1</span>
+<a name="l00117"></a>00117 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00118"></a>00118 <span class="preprocessor"></span><span class="preprocessor">#define UI_TEMP_PRECISION 0</span>
+<a name="l00119"></a>00119 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00120"></a>00120 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00121"></a>00121 <span class="preprocessor"></span>
+<a name="l00122"></a>00122 <span class="comment">/* ============= PAGES DEFINITION =============</span>
+<a name="l00123"></a>00123 <span class="comment"></span>
+<a name="l00124"></a>00124 <span class="comment">If you are not iside a menu, the firmware displays pages with information.</span>
+<a name="l00125"></a>00125 <span class="comment">Especially if you have only a small display it is convenient to have</span>
+<a name="l00126"></a>00126 <span class="comment">more then one information page.</span>
+<a name="l00127"></a>00127 <span class="comment">*/</span>
+<a name="l00128"></a>00128 
+<a name="l00129"></a>00129 <span class="comment">/* Define your pages using dynamic strings. To define a page use</span>
+<a name="l00130"></a>00130 <span class="comment">UI_PAGE4(name,row1,row2,row3,row4);</span>
+<a name="l00131"></a>00131 <span class="comment">for 4 row displays and</span>
+<a name="l00132"></a>00132 <span class="comment">UI_PAGE2(name,row1,row2);</span>
+<a name="l00133"></a>00133 <span class="comment">for 2 row displays. You can add additional pages or change the default pages like you want.</span>
+<a name="l00134"></a>00134 <span class="comment">*/</span>
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136 <span class="preprocessor">#if UI_ROWS&gt;=6 &amp;&amp; UI_DISPLAY_TYPE==5</span>
+<a name="l00137"></a>00137 <span class="preprocessor"></span>
+<a name="l00138"></a>00138  <span class="comment">//graphic main status</span>
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140    <a class="code" href="ui_8h.html#a8d2e26b179b21e0e747cca5a967edf28">UI_PAGE6</a>(ui_page1,<span class="stringliteral">&quot;\xa %e0/%E0\xb0 X:%x0&quot;</span>,
+<a name="l00141"></a>00141    #<span class="keywordflow">if</span> <a class="code" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>&gt;1
+<a name="l00142"></a>00142      <span class="stringliteral">&quot;\xa %e1/%E1\xb0 Y:%x1&quot;</span>,
+<a name="l00143"></a>00143   #<span class="keywordflow">else</span>
+<a name="l00144"></a>00144      <span class="stringliteral">&quot;\xa -----/---\xb0 Y:%x1&quot;</span>,
+<a name="l00145"></a>00145    #endif
+<a name="l00146"></a>00146    #<span class="keywordflow">if</span> <a class="code" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54" title="Set true if you have a heated bed conected to your board, false if not.">HAVE_HEATED_BED</a>==<span class="keyword">true</span>
+<a name="l00147"></a>00147      <span class="stringliteral">&quot;\xe %eb/%Eb\xb0 Z:%x2&quot;</span>,
+<a name="l00148"></a>00148    #<span class="keywordflow">else</span>
+<a name="l00149"></a>00149      <span class="stringliteral">&quot;\xb -----/---\xb0 Z:%x2&quot;</span>,
+<a name="l00150"></a>00150    #endif
+<a name="l00151"></a>00151    <span class="stringliteral">&quot;Mul:%om&quot;</span>, <span class="stringliteral">&quot;Buf:%oB&quot;</span>, <span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153 <span class="preprocessor">  #if EEPROM_MODE!=0</span>
+<a name="l00154"></a>00154 <span class="preprocessor"></span>    <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page2,<a class="code" href="uilang_8h.html#aba231dc57a25bd6e93220afeb2fced6d">UI_TEXT_PRINT_TIME</a>,<span class="stringliteral">&quot;%Ut&quot;</span>,<a class="code" href="uilang_8h.html#ab932af36675b51be24a9b2408d1a9ae0">UI_TEXT_PRINT_FILAMENT</a>,<span class="stringliteral">&quot;%Uf m&quot;</span>);
+<a name="l00155"></a>00155 <span class="preprocessor">    #define UI_PRINTTIME_PAGES ,&amp;ui_page2</span>
+<a name="l00156"></a>00156 <span class="preprocessor"></span><span class="preprocessor">    #define UI_PRINTTIME_COUNT 1</span>
+<a name="l00157"></a>00157 <span class="preprocessor"></span><span class="preprocessor">  #else</span>
+<a name="l00158"></a>00158 <span class="preprocessor"></span><span class="preprocessor">    #define UI_PRINTTIME_PAGES</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span><span class="preprocessor">    #define UI_PRINTTIME_COUNT 0</span>
+<a name="l00160"></a>00160 <span class="preprocessor"></span><span class="preprocessor">  #endif</span>
+<a name="l00161"></a>00161 <span class="preprocessor"></span>  <span class="comment">/*</span>
+<a name="l00162"></a>00162 <span class="comment">  Merge pages together. Use the following pattern:</span>
+<a name="l00163"></a>00163 <span class="comment">  #define UI_PAGES {&amp;name1,&amp;name2,&amp;name3}</span>
+<a name="l00164"></a>00164 <span class="comment">  */</span>
+<a name="l00165"></a>00165 <span class="preprocessor">  #define UI_PAGES {&amp;ui_page1 UI_PRINTTIME_PAGES}</span>
+<a name="l00166"></a>00166 <span class="preprocessor"></span>  <span class="comment">// How many pages do you want to have. Minimum is 1.</span>
+<a name="l00167"></a>00167 <span class="preprocessor">  #define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT</span>
+<a name="l00168"></a>00168 <span class="preprocessor"></span>
+<a name="l00169"></a>00169 <span class="preprocessor">#elif UI_ROWS&gt;=4</span>
+<a name="l00170"></a>00170 <span class="preprocessor"></span><span class="preprocessor"> #if HAVE_HEATED_BED==true</span>
+<a name="l00171"></a>00171 <span class="preprocessor"></span>   <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page1,<span class="stringliteral">&quot;\005%ec/%Ec\002B%eB/%Eb\002&quot;</span>,<span class="stringliteral">&quot;Z:%x2&quot;</span>,<span class="stringliteral">&quot;Mul:%om Buf:%oB&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00172"></a>00172    <span class="comment">//UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,&quot;%os&quot;);</span>
+<a name="l00173"></a>00173 <span class="preprocessor"> #else</span>
+<a name="l00174"></a>00174 <span class="preprocessor"></span>   <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<a class="code" href="uilang_8h.html#a745e6008703b549cd5031a97277c1aa5">UI_TEXT_PAGE_BUFFER</a>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00175"></a>00175 <span class="preprocessor"> #endif</span>
+<a name="l00176"></a>00176 <span class="preprocessor"></span>  <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page2,<span class="stringliteral">&quot;X:%x0 mm&quot;</span>,<span class="stringliteral">&quot;Y:%x1 mm&quot;</span>,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00177"></a>00177 <span class="comment">//UI_PAGE4(ui_page2,&quot;dX:%y0 mm %sX&quot;,&quot;dY:%y1 mm %sY&quot;,&quot;dZ:%y2 mm %sZ&quot;,&quot;%os&quot;);</span>
+<a name="l00178"></a>00178    <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page3,<a class="code" href="uilang_8h.html#a3aba7e56a936ea5790f7c7d9a29dd6be">UI_TEXT_PAGE_EXTRUDER1</a>,
+<a name="l00179"></a>00179  #<span class="keywordflow">if</span> <a class="code" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>&gt;1
+<a name="l00180"></a>00180    <a class="code" href="uilang_8h.html#a6134559b42591917bbfd8ce68fa77545">UI_TEXT_PAGE_EXTRUDER2</a>
+<a name="l00181"></a>00181  #<span class="keywordflow">else</span>
+<a name="l00182"></a>00182    <span class="stringliteral">&quot;&quot;</span>
+<a name="l00183"></a>00183  #endif
+<a name="l00184"></a>00184  #<span class="keywordflow">if</span> <a class="code" href="_configuration_8h.html#af497238d15c9887103688ca9a2831e54" title="Set true if you have a heated bed conected to your board, false if not.">HAVE_HEATED_BED</a>==<span class="keyword">true</span>
+<a name="l00185"></a>00185   ,<a class="code" href="uilang_8h.html#ae5938cca1672e1d2ff07cd33109ba0dc">UI_TEXT_PAGE_BED</a>
+<a name="l00186"></a>00186  #<span class="keywordflow">else</span>
+<a name="l00187"></a>00187   ,<span class="stringliteral">&quot;&quot;</span>
+<a name="l00188"></a>00188  #endif
+<a name="l00189"></a>00189  ,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00190"></a>00190 <span class="preprocessor"> #if EEPROM_MODE!=0</span>
+<a name="l00191"></a>00191 <span class="preprocessor"></span>  <a class="code" href="ui_8h.html#aa25ae57174e654c5c056f98f16ceda8b">UI_PAGE4</a>(ui_page4,<a class="code" href="uilang_8h.html#aba231dc57a25bd6e93220afeb2fced6d">UI_TEXT_PRINT_TIME</a>,<span class="stringliteral">&quot;%Ut&quot;</span>,<a class="code" href="uilang_8h.html#ab932af36675b51be24a9b2408d1a9ae0">UI_TEXT_PRINT_FILAMENT</a>,<span class="stringliteral">&quot;%Uf m&quot;</span>);
+<a name="l00192"></a>00192 <span class="preprocessor">  #define UI_PRINTTIME_PAGES ,&amp;ui_page4</span>
+<a name="l00193"></a>00193 <span class="preprocessor"></span><span class="preprocessor">  #define UI_PRINTTIME_COUNT 1</span>
+<a name="l00194"></a>00194 <span class="preprocessor"></span><span class="preprocessor"> #else</span>
+<a name="l00195"></a>00195 <span class="preprocessor"></span><span class="preprocessor">  #define UI_PRINTTIME_PAGES</span>
+<a name="l00196"></a>00196 <span class="preprocessor"></span><span class="preprocessor">  #define UI_PRINTTIME_COUNT 0</span>
+<a name="l00197"></a>00197 <span class="preprocessor"></span><span class="preprocessor"> #endif</span>
+<a name="l00198"></a>00198 <span class="preprocessor"></span><span class="comment">/*</span>
+<a name="l00199"></a>00199 <span class="comment">Merge pages together. Use the following pattern:</span>
+<a name="l00200"></a>00200 <span class="comment">#define UI_PAGES {&amp;name1,&amp;name2,&amp;name3}</span>
+<a name="l00201"></a>00201 <span class="comment">*/</span>
+<a name="l00202"></a>00202 <span class="preprocessor"> #define UI_PAGES {&amp;ui_page1,&amp;ui_page2,&amp;ui_page3 UI_PRINTTIME_PAGES}</span>
+<a name="l00203"></a>00203 <span class="preprocessor"></span><span class="comment">// How many pages do you want to have. Minimum is 1.</span>
+<a name="l00204"></a>00204 <span class="preprocessor"> #define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT</span>
+<a name="l00205"></a>00205 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00206"></a>00206 <span class="preprocessor"></span><span class="preprocessor">#if HAVE_HEATED_BED==true</span>
+<a name="l00207"></a>00207 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<a class="code" href="uilang_8h.html#ae5938cca1672e1d2ff07cd33109ba0dc">UI_TEXT_PAGE_BED</a>);
+<a name="l00208"></a>00208 <span class="preprocessor">#else</span>
+<a name="l00209"></a>00209 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page1,<a class="code" href="uilang_8h.html#af461e1e695fa5cf85fa33e9ba6ea44b7">UI_TEXT_PAGE_EXTRUDER</a>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00210"></a>00210 <span class="preprocessor">#endif</span>
+<a name="l00211"></a>00211 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page2,<span class="stringliteral">&quot;X:%x0 Y:%x1&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00212"></a>00212 <a class="code" href="ui_8h.html#a5ed7410ee8d5eeab0f2a51dde4a223f4">UI_PAGE2</a>(ui_page3,<span class="stringliteral">&quot;Z:%x2 mm&quot;</span>,<span class="stringliteral">&quot;%os&quot;</span>);
+<a name="l00213"></a>00213 <span class="comment">/*</span>
+<a name="l00214"></a>00214 <span class="comment">Merge pages together. Use the following pattern:</span>
+<a name="l00215"></a>00215 <span class="comment">#define UI_PAGES {&amp;name1,&amp;name2,&amp;name3}</span>
+<a name="l00216"></a>00216 <span class="comment">*/</span>
+<a name="l00217"></a>00217 <span class="preprocessor">#define UI_PAGES {&amp;ui_page1,&amp;ui_page2,&amp;ui_page3}</span>
+<a name="l00218"></a>00218 <span class="preprocessor"></span><span class="comment">// How many pages do you want to have. Minimum is 1.</span>
+<a name="l00219"></a>00219 <span class="preprocessor">#define UI_NUM_PAGES 3</span>
+<a name="l00220"></a>00220 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00221"></a>00221 <span class="preprocessor"></span><span class="comment">/* ============ MENU definition ================</span>
+<a name="l00222"></a>00222 <span class="comment"></span>
+<a name="l00223"></a>00223 <span class="comment">The menu works the same as pages. In addion you need to define what the lines do</span>
+<a name="l00224"></a>00224 <span class="comment">or where to jump to. For that reason, the menu structure needs to be entered in</span>
+<a name="l00225"></a>00225 <span class="comment">reverse order. Starting from the leaves, the menu structure is defined.</span>
+<a name="l00226"></a>00226 <span class="comment">*/</span>
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228 <span class="comment">/*</span>
+<a name="l00229"></a>00229 <span class="comment">At first define all actions available in the menu. The actions define, what the</span>
+<a name="l00230"></a>00230 <span class="comment">next/previous button will do. All menu actions work the same:</span>
+<a name="l00231"></a>00231 <span class="comment">next/previous changes the value</span>
+<a name="l00232"></a>00232 <span class="comment">ok sets the value if not already done and goes back to previous menu.</span>
+<a name="l00233"></a>00233 <span class="comment">*/</span>
 <a name="l00234"></a>00234 
-<a name="l00235"></a>00235 <span class="comment">// **** Delta calibration menu</span>
-<a name="l00236"></a>00236 <span class="preprocessor">#ifdef STEP_COUNTER</span>
-<a name="l00237"></a>00237 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_show_measurement,<a class="code" href="uilang_8h.html#aec12c12a64453080f31c41d611dc6935">UI_TEXT_SHOW_MEASUREMENT</a>,<a class="code" href="ui_8h.html#ac125f1237bc346a89a2aac70a93bb641">UI_ACTION_SHOW_MEASUREMENT</a>);
-<a name="l00238"></a>00238 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_reset_measurement,<a class="code" href="uilang_8h.html#a6d20ec3b58c02af77d7d63510ad4f214">UI_TEXT_RESET_MEASUREMENT</a>,<a class="code" href="ui_8h.html#a06f8fcca2a1cc77d091c7e9890cf5751">UI_ACTION_RESET_MEASUREMENT</a>);
-<a name="l00239"></a>00239 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_measured_origin,<a class="code" href="uilang_8h.html#a0c639c6c2c858c408d49f4dda4fc1897">UI_TEXT_SET_MEASURED_ORIGIN</a>,<a class="code" href="ui_8h.html#ad7fab7c382026749ac75a0492d84aaf4">UI_ACTION_SET_MEASURED_ORIGIN</a>);
-<a name="l00240"></a>00240 <span class="preprocessor">#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &amp;ui_menu_show_measurement,&amp;ui_menu_reset_measurement,&amp;ui_menu_set_measured_origin,&amp;ui_menu_home_all,&amp;ui_menu_go_zpos,&amp;ui_menu_go_zfast}</span>
-<a name="l00241"></a>00241 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_delta,UI_MENU_DELTA,6+UI_MENU_BACKCNT);
-<a name="l00242"></a>00242 <span class="preprocessor">#endif</span>
-<a name="l00243"></a>00243 <span class="preprocessor"></span>
-<a name="l00244"></a>00244 <span class="comment">// **** Bed leveling menu</span>
-<a name="l00245"></a>00245 <span class="preprocessor">#ifdef SOFTWARE_LEVELING</span>
-<a name="l00246"></a>00246 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p1,<a class="code" href="uilang_8h.html#afb94deceefbbb108a747cda47049e259">UI_TEXT_SET_P1</a>,<a class="code" href="ui_8h.html#a693488555117210dfb92b5107b69e903">UI_ACTION_SET_P1</a>);
-<a name="l00247"></a>00247 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p2,<a class="code" href="uilang_8h.html#a3691e6c9b63480aa4b4b3dd27122cf86">UI_TEXT_SET_P2</a>,<a class="code" href="ui_8h.html#a5fb0bc18cb386a948340bef1f1f987c7">UI_ACTION_SET_P2</a>);
-<a name="l00248"></a>00248 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p3,<a class="code" href="uilang_8h.html#a0fe32752788f2451cf16a337de69111a">UI_TEXT_SET_P3</a>,<a class="code" href="ui_8h.html#a622537bbec4e41d52d948ee6f06b150b">UI_ACTION_SET_P3</a>);
-<a name="l00249"></a>00249 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_calculate_leveling,<a class="code" href="uilang_8h.html#a137d34b268e299768372d61a190b47d9">UI_TEXT_CALCULATE_LEVELING</a>,<a class="code" href="ui_8h.html#ac5613e988339f0454e89acf600509d9b">UI_ACTION_CALC_LEVEL</a>);
-<a name="l00250"></a>00250 <span class="preprocessor">#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &amp;ui_menu_set_p1,&amp;ui_menu_set_p2,&amp;ui_menu_set_p3,&amp;ui_menu_calculate_leveling,&amp;ui_menu_go_xpos,&amp;ui_menu_go_xfast,&amp;ui_menu_go_ypos,&amp;ui_menu_go_yfast,&amp;ui_menu_go_zpos,&amp;ui_menu_go_zfast}</span>
-<a name="l00251"></a>00251 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_level,UI_MENU_LEVEL,10+UI_MENU_BACKCNT);
-<a name="l00252"></a>00252 <span class="preprocessor">#endif</span>
-<a name="l00253"></a>00253 <span class="preprocessor"></span>
-<a name="l00254"></a>00254 <span class="comment">// **** Extruder menu</span>
-<a name="l00255"></a>00255 
-<a name="l00256"></a>00256 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_temp0,<a class="code" href="uilang_8h.html#a7588e3246eda586d7c37d32a460411b4">UI_TEXT_EXTR0_TEMP</a>,<a class="code" href="ui_8h.html#a1867e8876ed9092d044533472a152eb7">UI_ACTION_EXTRUDER0_TEMP</a>);
-<a name="l00257"></a>00257 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_temp1,<a class="code" href="uilang_8h.html#a41637a12f31e6f1234284c6390b563f5">UI_TEXT_EXTR1_TEMP</a>,<a class="code" href="ui_8h.html#ac57ab27009b68077ed5f07995578ab46">UI_ACTION_EXTRUDER1_TEMP</a>);
-<a name="l00258"></a>00258 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_bed_temp, <a class="code" href="uilang_8h.html#a7a34700060e3fb30fd8360f4aa0ff00a">UI_TEXT_BED_TEMP</a>,<a class="code" href="ui_8h.html#a5f408c78afe0f29a9a7284c6a6faa92d">UI_ACTION_HEATED_BED_TEMP</a>);
-<a name="l00259"></a>00259 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_sel0,<a class="code" href="uilang_8h.html#a1e4ba596771cd3af2abf489946e3ffa5">UI_TEXT_EXTR0_SELECT</a>,<a class="code" href="ui_8h.html#ae4cb2baa1d3d0733a339a5c2e547d60b">UI_ACTION_SELECT_EXTRUDER0</a>);
-<a name="l00260"></a>00260 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_sel1,<a class="code" href="uilang_8h.html#a54e7d78313918184f9a33f931e13d511">UI_TEXT_EXTR1_SELECT</a>,<a class="code" href="ui_8h.html#adfce8a1d85293c67745cb022cce5c7ba">UI_ACTION_SELECT_EXTRUDER1</a>);
-<a name="l00261"></a>00261 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_off0,<a class="code" href="uilang_8h.html#ad854b567a41d3e0d7bc450d5f1a5799f">UI_TEXT_EXTR0_OFF</a>,<a class="code" href="ui_8h.html#a1551ca89187d0ce81da1b2939cdc0121">UI_ACTION_EXTRUDER0_OFF</a>);
-<a name="l00262"></a>00262 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_off1,<a class="code" href="uilang_8h.html#a7705e082665538569e4a533b972ad456">UI_TEXT_EXTR1_OFF</a>,<a class="code" href="ui_8h.html#a4764410b45bb2d4c6ee3dc7dd26d3322">UI_ACTION_EXTRUDER1_OFF</a>);
-<a name="l00263"></a>00263 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_origin,<a class="code" href="uilang_8h.html#a0eaed82dcf96976f0dc47bf36594a4a1">UI_TEXT_EXTR_ORIGIN</a>,<a class="code" href="ui_8h.html#a1d79de1e2dd1e694c575477e1fb173a0">UI_ACTION_RESET_EXTRUDER</a>);
-<a name="l00264"></a>00264 
-<a name="l00265"></a>00265 <span class="preprocessor">#if NUM_EXTRUDER&gt;1</span>
-<a name="l00266"></a>00266 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCOND &amp;ui_menu_ext_temp0,&amp;ui_menu_ext_temp1,&amp;ui_menu_ext_off0,&amp;ui_menu_ext_off1,&amp;ui_menu_ext_sel0,&amp;ui_menu_ext_sel1,</span>
-<a name="l00267"></a>00267 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCNT 6</span>
-<a name="l00268"></a>00268 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00269"></a>00269 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCOND &amp;ui_menu_ext_temp0,&amp;ui_menu_ext_off0,</span>
-<a name="l00270"></a>00270 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCNT 2</span>
-<a name="l00271"></a>00271 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00272"></a>00272 <span class="preprocessor"></span><span class="preprocessor">#if HAVE_HEATED_BED==true</span>
-<a name="l00273"></a>00273 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCOND &amp;ui_menu_bed_temp,</span>
-<a name="l00274"></a>00274 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCNT 1</span>
-<a name="l00275"></a>00275 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00276"></a>00276 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCOND</span>
-<a name="l00277"></a>00277 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCNT 0</span>
-<a name="l00278"></a>00278 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00279"></a>00279 <span class="preprocessor"></span>
-<a name="l00280"></a>00280 <span class="preprocessor">#define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &amp;ui_menu_go_epos,&amp;ui_menu_ext_origin}</span>
-<a name="l00281"></a>00281 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU_EXTCNT+2);
-<a name="l00282"></a>00282 
-<a name="l00283"></a>00283 <span class="comment">// **** SD card menu</span>
-<a name="l00284"></a>00284 
-<a name="l00285"></a>00285 <span class="comment">// **** Quick menu</span>
-<a name="l00286"></a>00286 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_preheat_pla,<a class="code" href="uilang_8h.html#ae0afc90d368128d0660cf14030cf60d4">UI_TEXT_PREHEAT_PLA</a>,<a class="code" href="ui_8h.html#a80d482a904b1a1cb6b23d70d8bf9a571">UI_ACTION_PREHEAT_PLA</a>);
-<a name="l00287"></a>00287 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_preheat_abs,<a class="code" href="uilang_8h.html#abeff3e38c1b1a1a8acedaf917b603fef">UI_TEXT_PREHEAT_ABS</a>,<a class="code" href="ui_8h.html#aa51b104e335f8782f4270949baa71622">UI_ACTION_PREHEAT_ABS</a>);
-<a name="l00288"></a>00288 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_cooldown,<a class="code" href="uilang_8h.html#a051b6e51987596853d40813890ce9d3d">UI_TEXT_COOLDOWN</a>,<a class="code" href="ui_8h.html#af7a46234f09be3ed3e66dd3b753a8831">UI_ACTION_COOLDOWN</a>);
-<a name="l00289"></a>00289 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_origin,<a class="code" href="uilang_8h.html#a1acce1c0a9cb99bc0e23036e8d865b0f">UI_TEXT_SET_TO_ORIGIN</a>,<a class="code" href="ui_8h.html#a1e389bcd2e902c281f9d97bf8d4655f8">UI_ACTION_SET_ORIGIN</a>);
-<a name="l00290"></a>00290 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_stopstepper,<a class="code" href="uilang_8h.html#a2c39407390f6a019eec59d4c08990283">UI_TEXT_DISABLE_STEPPER</a>,<a class="code" href="ui_8h.html#a8cb23d8ee81fe6d14b21f738b889beb4">UI_ACTION_DISABLE_STEPPER</a>);
-<a name="l00291"></a>00291 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_quick_speedmultiply,<a class="code" href="uilang_8h.html#a20ef77f9b8ce7b332a20698b3fe2d08e">UI_TEXT_SPEED_MULTIPLY</a>,<a class="code" href="ui_8h.html#a310358365ffe41b670cca7d3f98e733d">UI_ACTION_FEEDRATE_MULTIPLY</a>);
-<a name="l00292"></a>00292 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_quick_flowmultiply,<a class="code" href="uilang_8h.html#a3cc94159e1d317fab7cb662a47be9607">UI_TEXT_FLOW_MULTIPLY</a>,<a class="code" href="ui_8h.html#a938843b54d34aceb2edc0002d94428bf">UI_ACTION_FLOWRATE_MULTIPLY</a>);
-<a name="l00293"></a>00293 <span class="preprocessor">#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all,&amp;ui_menu_quick_preheat_pla,&amp;ui_menu_quick_preheat_abs,&amp;ui_menu_quick_speedmultiply,&amp;ui_menu_quick_flowmultiply,&amp;ui_menu_quick_cooldown,&amp;ui_menu_quick_origin,&amp;ui_menu_quick_stopstepper}</span>
-<a name="l00294"></a>00294 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT);
-<a name="l00295"></a>00295 
-<a name="l00296"></a>00296 <span class="comment">// **** Fan menu</span>
-<a name="l00297"></a>00297 
-<a name="l00298"></a>00298 <span class="preprocessor">#if FAN_PIN&gt;-1</span>
-<a name="l00299"></a>00299 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_off,<a class="code" href="uilang_8h.html#a8f91756a1024ef409cdb5c080adcfb74">UI_TEXT_FAN_OFF</a>,<a class="code" href="ui_8h.html#a4789b7f832af1ac035c84a3fd6ef4f5f">UI_ACTION_FAN_OFF</a>);
-<a name="l00300"></a>00300 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_25,<a class="code" href="uilang_8h.html#a519111ac8ab0ff1a84c2a6e6a1ced9b2">UI_TEXT_FAN_25</a>,<a class="code" href="ui_8h.html#a36d49825cec962f3e93159dbb490f2a0">UI_ACTION_FAN_25</a>);
-<a name="l00301"></a>00301 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_50,<a class="code" href="uilang_8h.html#a71919761e6fc24db8ae8ac4629c3e011">UI_TEXT_FAN_50</a>,<a class="code" href="ui_8h.html#a4b227957c35769c77549a5f02c6dfdfc">UI_ACTION_FAN_50</a>);
-<a name="l00302"></a>00302 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_75,<a class="code" href="uilang_8h.html#ac9f65da273da4c9eb67432f84fa3d1ec">UI_TEXT_FAN_75</a>,<a class="code" href="ui_8h.html#a475cc074f97602819de4fc2efb80c885">UI_ACTION_FAN_75</a>);
-<a name="l00303"></a>00303 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_full,<a class="code" href="uilang_8h.html#ac128598063bd83967b17cdb9031ad807">UI_TEXT_FAN_FULL</a>,<a class="code" href="ui_8h.html#a4509616ec3148f1271cacb1477aa0549">UI_ACTION_FAN_FULL</a>);
-<a name="l00304"></a>00304 <span class="preprocessor">#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &amp;ui_menu_fan_off,&amp;ui_menu_fan_25,&amp;ui_menu_fan_50,&amp;ui_menu_fan_75,&amp;ui_menu_fan_full}</span>
-<a name="l00305"></a>00305 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_fan,UI_MENU_FAN,5+UI_MENU_BACKCNT);
-<a name="l00306"></a>00306 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_fan_sub,<a class="code" href="uilang_8h.html#add27718784f46355137b63afac5ece64">UI_TEXT_FANSPEED</a>,ui_menu_fan);
-<a name="l00307"></a>00307 <span class="preprocessor">#define UI_MENU_FAN_COND &amp;ui_menu_fan_sub,</span>
-<a name="l00308"></a>00308 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_CNT 1</span>
-<a name="l00309"></a>00309 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00310"></a>00310 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_COND </span>
-<a name="l00311"></a>00311 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_CNT 0</span>
-<a name="l00312"></a>00312 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00313"></a>00313 <span class="preprocessor"></span>
-<a name="l00314"></a>00314 <span class="comment">// **** SD card menu</span>
-<a name="l00315"></a>00315 
-<a name="l00316"></a>00316 <span class="preprocessor">#ifdef SDSUPPORT</span>
-<a name="l00317"></a>00317 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_FILESELECTOR {&amp;ui_menu_back}</span>
-<a name="l00318"></a>00318 <span class="preprocessor"></span><a class="code" href="ui_8h.html#adff5eb981bb16aee813dad51aad971a5">UI_MENU_FILESELECT</a>(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
-<a name="l00319"></a>00319 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_printfile,<a class="code" href="uilang_8h.html#a0068c0efa6f400d812da68f7446b2cbc">UI_TEXT_PRINT_FILE</a>,<a class="code" href="ui_8h.html#ae915626599ace17139e49669b86acb10">UI_ACTION_SD_PRINT</a>);
-<a name="l00320"></a>00320 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_pause,<a class="code" href="uilang_8h.html#ad0bffb5493ff9bdf3c09d12172b7d350">UI_TEXT_PAUSE_PRINT</a>,<a class="code" href="ui_8h.html#a1c0b54a2f68567d607a6bc4dd5fce5b0">UI_ACTION_SD_PAUSE</a>);
-<a name="l00321"></a>00321 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_continue,<a class="code" href="uilang_8h.html#a950c3db066d01e5e3c484728406be7a3">UI_TEXT_CONTINUE_PRINT</a>,<a class="code" href="ui_8h.html#a97582b2bc3ba9ddb5d11d6ee38354b08">UI_ACTION_SD_CONTINUE</a>);
-<a name="l00322"></a>00322 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_unmount,<a class="code" href="uilang_8h.html#adf4914624832e01dc5371ddae29c850a">UI_TEXT_UNMOUNT_CARD</a>,<a class="code" href="ui_8h.html#a333a4ca9b7d54a3550b9adff25b0993f">UI_ACTION_SD_UNMOUNT</a>);
-<a name="l00323"></a>00323 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_mount,<a class="code" href="uilang_8h.html#ad541e94d3cd6b7236a0f11fe98bca38c">UI_TEXT_MOUNT_CARD</a>,<a class="code" href="ui_8h.html#a166e19b9386c5b355af7031c1b734952">UI_ACTION_SD_MOUNT</a>);
-<a name="l00324"></a>00324 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_sd_delete,<a class="code" href="uilang_8h.html#a9e2ed0a95d3742943a43da1742f7084f">UI_TEXT_DELETE_FILE</a>,<a class="code" href="ui_8h.html#a2a15bc99a6efdb771264b83d7c883af2">UI_ACTION_SD_DELETE</a>);
-<a name="l00325"></a>00325 <span class="preprocessor">#define UI_MENU_SD {UI_MENU_ADDCONDBACK &amp;ui_menu_sd_printfile,&amp;ui_menu_sd_pause,&amp;ui_menu_sd_continue,&amp;ui_menu_sd_unmount,&amp;ui_menu_sd_mount,&amp;ui_menu_sd_delete}</span>
-<a name="l00326"></a>00326 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+6);
-<a name="l00327"></a>00327 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_sd_sub,<a class="code" href="uilang_8h.html#afd9b609b5db888cd0988052ba8f0a801">UI_TEXT_SD_CARD</a>,ui_menu_sd);
-<a name="l00328"></a>00328 
-<a name="l00329"></a>00329 <span class="preprocessor">#define UI_MENU_SD_COND &amp;ui_menu_sd_sub,</span>
-<a name="l00330"></a>00330 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_CNT 1</span>
-<a name="l00331"></a>00331 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00332"></a>00332 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_COND</span>
-<a name="l00333"></a>00333 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_CNT 0</span>
-<a name="l00334"></a>00334 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00335"></a>00335 <span class="preprocessor"></span>
-<a name="l00336"></a>00336 
-<a name="l00337"></a>00337 <span class="comment">// **** Debugging menu</span>
-<a name="l00338"></a>00338 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_echo,<a class="code" href="uilang_8h.html#a95cd6d98538958580d4263f30c90d20b">UI_TEXT_DBG_ECHO</a>,<a class="code" href="ui_8h.html#ac57879041f8a45a08f703a7db618105f">UI_ACTION_DEBUG_ECHO</a>);
-<a name="l00339"></a>00339 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_info,<a class="code" href="uilang_8h.html#a1640a0f98dfefd1445d9f323117d27c1">UI_TEXT_DBG_INFO</a>,<a class="code" href="ui_8h.html#a8ea6a765cc13d2caac819fd3e18d0fbf">UI_ACTION_DEBUG_INFO</a>);
-<a name="l00340"></a>00340 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_error,<a class="code" href="uilang_8h.html#a996e7cc895238c864450af7097d8ad3d">UI_TEXT_DBG_ERROR</a>,<a class="code" href="ui_8h.html#a2b24f10710a837997eb162f6587a58ea">UI_ACTION_DEBUG_ERROR</a>);
-<a name="l00341"></a>00341 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_dryrun,<a class="code" href="uilang_8h.html#aa92b47d5200c41cedd412bfadd919089">UI_TEXT_DBG_DRYRUN</a>,<a class="code" href="ui_8h.html#a023c69616d5a2403cbe94995466a1b01">UI_ACTION_DEBUG_DRYRUN</a>);
-<a name="l00342"></a>00342 
-<a name="l00343"></a>00343 <span class="preprocessor">#define UI_MENU_DEBUGGING {UI_MENU_ADDCONDBACK &amp;ui_menu_debug_echo,&amp;ui_menu_debug_info,&amp;ui_menu_debug_error,&amp;ui_menu_debug_dryrun}</span>
-<a name="l00344"></a>00344 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_debugging,UI_MENU_DEBUGGING,4+UI_MENU_BACKCNT);
-<a name="l00345"></a>00345 
-<a name="l00346"></a>00346 <span class="comment">// **** OPS configuration</span>
-<a name="l00347"></a>00347 <span class="preprocessor">#if USE_OPS==1</span>
-<a name="l00348"></a>00348 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ops_off,<a class="code" href="uilang_8h.html#a69a290636afade09cb3ae020775f002d">UI_TEXT_OPS_OFF</a>,<a class="code" href="ui_8h.html#a88fd5ff92f8c9415719a4b6cf7c6fbc9">UI_ACTION_OPS_OFF</a>);
-<a name="l00349"></a>00349 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ops_classic,<a class="code" href="uilang_8h.html#af46ffdeb2a83f36872b0ed8d3c18b1ac">UI_TEXT_OPS_CLASSIC</a>,<a class="code" href="ui_8h.html#ae2ee5826ab9108fa9e289e451ce89956">UI_ACTION_OPS_CLASSIC</a>);
-<a name="l00350"></a>00350 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ops_fast,<a class="code" href="uilang_8h.html#a42dedeedebbaaa4ed89ebb8b4bbbbbe0">UI_TEXT_OPS_FAST</a>,<a class="code" href="ui_8h.html#a60fc69c73ea3102791dd5c255f9e7ce0">UI_ACTION_OPS_FAST</a>);
-<a name="l00351"></a>00351 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ops_retract,<a class="code" href="uilang_8h.html#abc95e3e22805a4d0bd8cb6c4b948fd40">UI_TEXT_OPS_RETRACT</a>,<a class="code" href="ui_8h.html#ab930afac453b699b53e6d337dfc18398">UI_ACTION_OPS_RETRACTDISTANCE</a>);
-<a name="l00352"></a>00352 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ops_backslash,<a class="code" href="uilang_8h.html#adf27789d38c450b3c775285a6d3c1998">UI_TEXT_OPS_BACKSLASH</a>,<a class="code" href="ui_8h.html#a746da779de8a64804b0a525f906e5227">UI_ACTION_OPS_BACKLASH</a>);
-<a name="l00353"></a>00353 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ops_mindist,<a class="code" href="uilang_8h.html#a7e79758c96ef9209fefcaf22641f490f">UI_TEXT_OPS_MINDIST</a>,<a class="code" href="ui_8h.html#a381c97c1ab91291a59418608657450d1">UI_ACTION_OPS_MINDISTANCE</a>);
-<a name="l00354"></a>00354 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ops_moveafter,<a class="code" href="uilang_8h.html#af5b3a84e27a827215c5419710dd68aff">UI_TEXT_OPS_MOVE_AFTER</a>,<a class="code" href="ui_8h.html#ad4418320f15eb1f057a2adac84f67bc2">UI_ACTION_OPS_MOVE_AFTER</a>);
-<a name="l00355"></a>00355 <span class="preprocessor">#define UI_MENU_OPS {UI_MENU_ADDCONDBACK &amp;ui_menu_ops_off,&amp;ui_menu_ops_classic,&amp;ui_menu_ops_fast,&amp;ui_menu_ops_retract,&amp;ui_menu_ops_backslash,&amp;ui_menu_ops_mindist,&amp;ui_menu_ops_moveafter}</span>
-<a name="l00356"></a>00356 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_ops,UI_MENU_OPS,7+UI_MENU_BACKCNT);
-<a name="l00357"></a>00357 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_ops_sub,<a class="code" href="uilang_8h.html#a9f05703deaf098b6e92c06cad42c27a4">UI_TEXT_ANTI_OOZE</a>,ui_menu_ops);
-<a name="l00358"></a>00358 <span class="preprocessor">#define UI_MENU_ADDCONDOPS &amp;ui_menu_ops_sub,</span>
-<a name="l00359"></a>00359 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00360"></a>00360 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADDCONDOPS</span>
-<a name="l00361"></a>00361 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00362"></a>00362 <span class="preprocessor"></span>
-<a name="l00363"></a>00363 <span class="comment">// **** Acceleration settings</span>
-<a name="l00364"></a>00364 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printx,<a class="code" href="uilang_8h.html#a1157adcc0183f9c935431808f637d1e5">UI_TEXT_PRINT_X</a>,<a class="code" href="ui_8h.html#a4bf37c2a6e926488e87668781b2b709d">UI_ACTION_PRINT_ACCEL_X</a>);
-<a name="l00365"></a>00365 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printy,<a class="code" href="uilang_8h.html#a6b3c0502e03bc7ed85dbf0a94e15a5b0">UI_TEXT_PRINT_Y</a>,<a class="code" href="ui_8h.html#abd68f52a37ea81a391a45ca520a91c45">UI_ACTION_PRINT_ACCEL_Y</a>);
-<a name="l00366"></a>00366 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printz,<a class="code" href="uilang_8h.html#a8d0d671fd80bbce996050905be33c286">UI_TEXT_PRINT_Z</a>,<a class="code" href="ui_8h.html#a36f37dcd57ae22c697a50a436af59aa0">UI_ACTION_PRINT_ACCEL_Z</a>);
-<a name="l00367"></a>00367 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travelx,<a class="code" href="uilang_8h.html#a8d5781c45946f2764e649ef1a650297b">UI_TEXT_MOVE_X</a>,<a class="code" href="ui_8h.html#a65bdb14d38489b883905c96aef935ee5">UI_ACTION_MOVE_ACCEL_X</a>);
-<a name="l00368"></a>00368 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travely,<a class="code" href="uilang_8h.html#a6b74b2b6cffd4e5e88c2cd0a11acf1af">UI_TEXT_MOVE_Y</a>,<a class="code" href="ui_8h.html#a9c05362222b75dcd04be56542f331642">UI_ACTION_MOVE_ACCEL_Y</a>);
-<a name="l00369"></a>00369 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travelz,<a class="code" href="uilang_8h.html#a62d9009f997ae2b63d7b1c82c7a62367">UI_TEXT_MOVE_Z</a>,<a class="code" href="ui_8h.html#a9b8724284841e555231e6886a6c62b8f">UI_ACTION_MOVE_ACCEL_Z</a>);
-<a name="l00370"></a>00370 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_jerk,<a class="code" href="uilang_8h.html#a9d01be21a78594cffc1b07abe562c498">UI_TEXT_JERK</a>,<a class="code" href="ui_8h.html#a7b3050f0a1471a73651a7863ea1e4ea9">UI_ACTION_MAX_JERK</a>);
-<a name="l00371"></a>00371 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_zjerk,<a class="code" href="uilang_8h.html#a60a7853ec6804b74b9b1a293351c504d">UI_TEXT_ZJERK</a>,<a class="code" href="ui_8h.html#a9d6b89f35369c1b4fdb84708905437bb">UI_ACTION_MAX_ZJERK</a>);
-<a name="l00372"></a>00372 <span class="preprocessor">#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &amp;ui_menu_accel_printx,&amp;ui_menu_accel_printy,&amp;ui_menu_accel_printz,&amp;ui_menu_accel_travelx,&amp;ui_menu_accel_travely,&amp;ui_menu_accel_travelz,&amp;ui_menu_accel_jerk,&amp;ui_menu_accel_zjerk}</span>
-<a name="l00373"></a>00373 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_accel,UI_MENU_ACCEL,8+UI_MENU_BACKCNT);
-<a name="l00374"></a>00374 
-<a name="l00375"></a>00375 <span class="comment">// **** Feedrates</span>
-<a name="l00376"></a>00376 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxx,<a class="code" href="uilang_8h.html#a921acebafd6cb2cbb6e3c929a3445b4b">UI_TEXT_FEED_MAX_X</a>,<a class="code" href="ui_8h.html#a6a96117be59b0c25718c9e6a89b9943c">UI_ACTION_MAX_FEEDRATE_X</a>);
-<a name="l00377"></a>00377 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxy,<a class="code" href="uilang_8h.html#a123ea770cd1b8e6c41c9940c93c10c85">UI_TEXT_FEED_MAX_Y</a>,<a class="code" href="ui_8h.html#afe1892becafdf2145d5cba300e27242d">UI_ACTION_MAX_FEEDRATE_Y</a>);
-<a name="l00378"></a>00378 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxz,<a class="code" href="uilang_8h.html#a37f15f5bba1267d6ccd7b307f9538a0f">UI_TEXT_FEED_MAX_Z</a>,<a class="code" href="ui_8h.html#a5ed739b9200e6c6cc23ac3a85b5786be">UI_ACTION_MAX_FEEDRATE_Z</a>);
-<a name="l00379"></a>00379 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homex,<a class="code" href="uilang_8h.html#a439de5cbdb17a5e7a9e00928a5d9b879">UI_TEXT_FEED_HOME_X</a>,<a class="code" href="ui_8h.html#a547091dc11d9bf4547f19b22e6d362b0">UI_ACTION_HOMING_FEEDRATE_X</a>);
-<a name="l00380"></a>00380 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homey,<a class="code" href="uilang_8h.html#a2057575353acde3dd6bcb262f7982f34">UI_TEXT_FEED_HOME_Y</a>,<a class="code" href="ui_8h.html#ab0ac9acb97f66442428592d8a3b5d0f3">UI_ACTION_HOMING_FEEDRATE_Y</a>);
-<a name="l00381"></a>00381 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homez,<a class="code" href="uilang_8h.html#af598eb0f16a35b6eca082dee082546b7">UI_TEXT_FEED_HOME_Z</a>,<a class="code" href="ui_8h.html#a39531276f38d45095c5306dac4bc64dd">UI_ACTION_HOMING_FEEDRATE_Z</a>);
-<a name="l00382"></a>00382 <span class="preprocessor">#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &amp;ui_menu_feedrate_maxx,&amp;ui_menu_feedrate_maxy,&amp;ui_menu_feedrate_maxz,&amp;ui_menu_feedrate_homex,&amp;ui_menu_feedrate_homey,&amp;ui_menu_feedrate_homez}</span>
-<a name="l00383"></a>00383 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_feedrate,UI_MENU_ACCEL,6+UI_MENU_BACKCNT);
-<a name="l00384"></a>00384 
-<a name="l00385"></a>00385 <span class="comment">// **** General configuration settings</span>
-<a name="l00386"></a>00386 
-<a name="l00387"></a>00387 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_stepper2,<a class="code" href="ui_8h.html#aa05409470afc017aef46b37f32e92167">UI_ACTION_STEPPER_INACTIVE</a>,<a class="code" href="uilang_8h.html#ac56fc06685cef1d7f9a6567c41adac0e">UI_TEXT_STEPPER_INACTIVE2</a>);
-<a name="l00388"></a>00388 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_maxinactive2,<a class="code" href="ui_8h.html#a1011076579d4f8d1b4be612d40c866b5">UI_ACTION_MAX_INACTIVE</a>,<a class="code" href="uilang_8h.html#a18c223aa1e38a67fe78d69ded77ceeb2">UI_TEXT_POWER_INACTIVE2</a>);
-<a name="l00389"></a>00389 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_general_baud,<a class="code" href="uilang_8h.html#a1b5553bbbd802905577b411637ab0599">UI_TEXT_BAUDRATE</a>,<a class="code" href="ui_8h.html#a4ddc30066bc238f59422feaf451849b0">UI_ACTION_BAUDRATE</a>);
-<a name="l00390"></a>00390 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_general_stepper_inactive,<a class="code" href="uilang_8h.html#a597976169e6edddd11359085246788b9">UI_TEXT_STEPPER_INACTIVE</a>,ui_menu_stepper2);
-<a name="l00391"></a>00391 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_general_max_inactive,<a class="code" href="uilang_8h.html#aa91c2c61c57ec161385f21e8cf6a0b5a">UI_TEXT_POWER_INACTIVE</a>,ui_menu_maxinactive2);
-<a name="l00392"></a>00392 <span class="preprocessor">#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &amp;ui_menu_general_baud,&amp;ui_menu_general_stepper_inactive,&amp;ui_menu_general_max_inactive}</span>
-<a name="l00393"></a>00393 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_general,UI_MENU_GENERAL,3+UI_MENU_BACKCNT);
-<a name="l00394"></a>00394 
-<a name="l00395"></a>00395 <span class="comment">// **** Extruder configuration</span>
-<a name="l00396"></a>00396 
-<a name="l00397"></a>00397 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_steps,<a class="code" href="uilang_8h.html#a5ed64f59dc91a4ac51e8c5b5759a90a7">UI_TEXT_EXTR_STEPS</a>,<a class="code" href="ui_8h.html#a740c709475aa0bf2e55e5177bc77f197">UI_ACTION_EXTR_STEPS</a>);
-<a name="l00398"></a>00398 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_start_feedrate,<a class="code" href="uilang_8h.html#ae5d02a18fe57b57da86ef0790fcef423">UI_TEXT_EXTR_START_FEED</a>,<a class="code" href="ui_8h.html#a4df68b19805b67688f32fee4e777288b">UI_ACTION_EXTR_START_FEEDRATE</a>);
-<a name="l00399"></a>00399 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_max_feedrate,<a class="code" href="uilang_8h.html#af8a8f76b4ba66f76eb9041f84b5dbbe1">UI_TEXT_EXTR_MAX_FEED</a>,<a class="code" href="ui_8h.html#aa2f7b85b27c04289b9a7f64844990d6d">UI_ACTION_EXTR_MAX_FEEDRATE</a>);
-<a name="l00400"></a>00400 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_acceleration,<a class="code" href="uilang_8h.html#a7eb91d66a5a6b57ed3eb538c47c54e9a">UI_TEXT_EXTR_ACCEL</a>,<a class="code" href="ui_8h.html#a0a4400d560b9f9a5e9d109e6b9e216be">UI_ACTION_EXTR_ACCELERATION</a>);
-<a name="l00401"></a>00401 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_watch_period,<a class="code" href="uilang_8h.html#a3ab3ad4951274c0e9ed5057761659616">UI_TEXT_EXTR_WATCH</a>,<a class="code" href="ui_8h.html#a39607560ff6738d4f1985140ba05fd4f">UI_ACTION_EXTR_WATCH_PERIOD</a>);
-<a name="l00402"></a>00402 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_wait_temp,<a class="code" href="uilang_8h.html#ad58d429c6029f5c747621e4fda25695c">UI_TEXT_EXTR_WAIT_RETRACT_TEMP</a>,<a class="code" href="ui_8h.html#ad363f46bc602ff96a3b0b11d3da8d295">UI_ACTION_EXTR_WAIT_RETRACT_TEMP</a>);
-<a name="l00403"></a>00403 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_wait_units,<a class="code" href="uilang_8h.html#a5a4e443edce895d7a054cfc53996c8f4">UI_TEXT_EXTR_WAIT_RETRACT_UNITS</a>,<a class="code" href="ui_8h.html#a1a52c11084dabbb7b766d5b93a5dfefe">UI_ACTION_EXTR_WAIT_RETRACT_UNITS</a>);
-<a name="l00404"></a>00404 <span class="preprocessor">#define UI_MENU_ADV_CNT 0</span>
-<a name="l00405"></a>00405 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE</span>
-<a name="l00406"></a>00406 <span class="preprocessor"></span><span class="preprocessor">#ifdef USE_ADVANCE</span>
-<a name="l00407"></a>00407 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADV_CNT 1</span>
-<a name="l00408"></a>00408 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE ,&amp;ui_menu_cext_advancel</span>
-<a name="l00409"></a>00409 <span class="preprocessor"></span><span class="preprocessor">#ifdef ENABLE_QUADRATIC_ADVANCE</span>
-<a name="l00410"></a>00410 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADV_CNT 2</span>
-<a name="l00411"></a>00411 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE ,&amp;ui_menu_cext_advancel,&amp;ui_menu_cext_advancek</span>
-<a name="l00412"></a>00412 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_advancek,<a class="code" href="uilang_8h.html#a62143049db99610867e131e5b135b836">UI_TEXT_EXTR_ADVANCE_K</a>,<a class="code" href="ui_8h.html#a571c1f102544b6a3052138868de57fd0">UI_ACTION_ADVANCE_K</a>);
-<a name="l00413"></a>00413 <span class="preprocessor">#endif</span>
-<a name="l00414"></a>00414 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_advancel,<a class="code" href="uilang_8h.html#a6862d9d5595c5b8f442f8e7cadd19341">UI_TEXT_EXTR_ADVANCE_L</a>,<a class="code" href="ui_8h.html#ae86c06c1e30dd2fc413ed84d87f90ede">UI_ACTION_ADVANCE_L</a>);
-<a name="l00415"></a>00415 <span class="preprocessor">#endif</span>
-<a name="l00416"></a>00416 <span class="preprocessor"></span><span class="preprocessor">#ifdef TEMP_PID</span>
-<a name="l00417"></a>00417 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_manager,<a class="code" href="uilang_8h.html#a192952ad09a153c094ce5156abcdb1bb">UI_TEXT_EXTR_MANAGER</a>,<a class="code" href="ui_8h.html#a38eba0e0278e07eaf4e3f05eccddc913">UI_ACTION_EXTR_HEATMANAGER</a>);
-<a name="l00418"></a>00418 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_pgain,<a class="code" href="uilang_8h.html#a73dc1641242ccb3b0db77f96dde9b93a">UI_TEXT_EXTR_PGAIN</a>,<a class="code" href="ui_8h.html#a033fb5ac159235091f7ff230169ca33d">UI_ACTION_PID_PGAIN</a>);
-<a name="l00419"></a>00419 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_igain,<a class="code" href="uilang_8h.html#abfc5dc85b8dcdb5a49d91cdb22721715">UI_TEXT_EXTR_IGAIN</a>,<a class="code" href="ui_8h.html#a3f2109847802269fa14fbef4567a8ce4">UI_ACTION_PID_IGAIN</a>);
-<a name="l00420"></a>00420 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dgain,<a class="code" href="uilang_8h.html#a87da38c95c6f70d02f7534b83552823c">UI_TEXT_EXTR_DGAIN</a>,<a class="code" href="ui_8h.html#a47afa2d7891048b835711e6e414b0863">UI_ACTION_PID_DGAIN</a>);
-<a name="l00421"></a>00421 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dmin,<a class="code" href="uilang_8h.html#ae2c2d5b5dde3aace54089d68d2e8552a">UI_TEXT_EXTR_DMIN</a>,<a class="code" href="ui_8h.html#a97ef7b0f0bc0920cf888c483ece5f271">UI_ACTION_DRIVE_MIN</a>);
-<a name="l00422"></a>00422 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dmax,<a class="code" href="uilang_8h.html#aca44bc11e8082ed273f9f5dfcb1ebae0">UI_TEXT_EXTR_DMAX</a>,<a class="code" href="ui_8h.html#ad806dde8d455640c91749402918871cf">UI_ACTION_DRIVE_MAX</a>);
-<a name="l00423"></a>00423 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_pmax,<a class="code" href="uilang_8h.html#aefe5bc3f7fdd54a294380f2a41ae8aae">UI_TEXT_EXTR_PMAX</a>,<a class="code" href="ui_8h.html#a76ad73dc9254fa21155b6fee5807ef2c">UI_ACTION_PID_MAX</a>);
-<a name="l00424"></a>00424 <span class="preprocessor">#define UI_MENU_PIDCOND ,&amp;ui_menu_cext_manager,&amp;ui_menu_cext_pgain,&amp;ui_menu_cext_igain,&amp;ui_menu_cext_dgain,&amp;ui_menu_cext_dmin,&amp;ui_menu_cext_dmax,&amp;ui_menu_cext_pmax</span>
-<a name="l00425"></a>00425 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCNT 7</span>
-<a name="l00426"></a>00426 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00427"></a>00427 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCOND</span>
-<a name="l00428"></a>00428 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCNT 0</span>
-<a name="l00429"></a>00429 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00430"></a>00430 <span class="preprocessor"></span><span class="preprocessor">#if NUM_EXTRUDER&gt;1</span>
-<a name="l00431"></a>00431 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_xoffset,<a class="code" href="uilang_8h.html#a7653bc2c75b3eadc430f7612269ab522">UI_TEXT_EXTR_XOFF</a>,<a class="code" href="ui_8h.html#a9d9beaa3b44a5ab41831426eb4238c9d">UI_ACTION_X_OFFSET</a>);
-<a name="l00432"></a>00432 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_yoffset,<a class="code" href="uilang_8h.html#a5067bb31c30e49049af3a91719df3e58">UI_TEXT_EXTR_YOFF</a>,<a class="code" href="ui_8h.html#af9f4cf208904a281d9fe4016145ea1fa">UI_ACTION_Y_OFFSET</a>);
-<a name="l00433"></a>00433 <span class="preprocessor">#define UI_MENU_CONFEXTCOND &amp;ui_menu_ext_sel0,&amp;ui_menu_ext_sel1,&amp;ui_menu_cext_xoffset,&amp;ui_menu_cext_yoffset,</span>
-<a name="l00434"></a>00434 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCNT 4</span>
+<a name="l00235"></a>00235 <span class="comment">// Error menu</span>
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237 <a class="code" href="ui_8h.html#ac8bfa72ab35ed4b111100107c520a794">UI_MENU_ACTION2</a>(ui_menu_error,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#aa64c9f8717d54892e9554ad7e95eea73">UI_TEXT_ERROR</a>,<span class="stringliteral">&quot;%oe&quot;</span>);
+<a name="l00238"></a>00238 
+<a name="l00239"></a>00239 <span class="comment">// **** Positions submenus</span>
+<a name="l00240"></a>00240 
+<a name="l00241"></a>00241 <span class="preprocessor">#if UI_ROWS&gt;=4</span>
+<a name="l00242"></a>00242 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_xpos,<a class="code" href="ui_8h.html#a1ef3f459468b52a38fe4fffc66354f74">UI_ACTION_XPOSITION</a>,<a class="code" href="uilang_8h.html#a9b518e9d71554aa8f1c12eab0e8ac3a6">UI_TEXT_ACTION_XPOSITION4</a>);
+<a name="l00243"></a>00243 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_ypos,<a class="code" href="ui_8h.html#a04370ec777e6807e7065de53c629e793">UI_ACTION_YPOSITION</a>,<a class="code" href="uilang_8h.html#a77e93955bf38eb94653109856532b3f4">UI_TEXT_ACTION_YPOSITION4</a>);
+<a name="l00244"></a>00244 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_zpos,<a class="code" href="ui_8h.html#acf0eba931a353fa69913627edef83604">UI_ACTION_ZPOSITION</a>,<a class="code" href="uilang_8h.html#ae181f0cad78d4a4cc01d7c80ec950298">UI_TEXT_ACTION_ZPOSITION4</a>);
+<a name="l00245"></a>00245 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_xpos_fast,<a class="code" href="ui_8h.html#a72a86a29358c20f85a4d8be9f31ceafa">UI_ACTION_XPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a64e2b1d91205ea1d163eabd2bd28a965">UI_TEXT_ACTION_XPOSITION_FAST4</a>);
+<a name="l00246"></a>00246 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_ypos_fast,<a class="code" href="ui_8h.html#a3cf59357e508ee576f3739b7ae06d906">UI_ACTION_YPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#acf9e9ae7de892bcef10811d1078f4ae0">UI_TEXT_ACTION_YPOSITION_FAST4</a>);
+<a name="l00247"></a>00247 <a class="code" href="ui_8h.html#a39920f8080f4df1704bdf3775b999b02">UI_MENU_ACTION4C</a>(ui_menu_zpos_fast,<a class="code" href="ui_8h.html#a3717fb4a2b9df95fd1af1c875689e7fb">UI_ACTION_ZPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a3b1a137474275ac3ee7770324c8fd645">UI_TEXT_ACTION_ZPOSITION_FAST4</a>);
+<a name="l00248"></a>00248 <span class="preprocessor">#else</span>
+<a name="l00249"></a>00249 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_xpos,<a class="code" href="ui_8h.html#a1ef3f459468b52a38fe4fffc66354f74">UI_ACTION_XPOSITION</a>,<a class="code" href="uilang_8h.html#ad5f47b7d05e85f1a93047064fdb81ee5">UI_TEXT_ACTION_XPOSITION2</a>);
+<a name="l00250"></a>00250 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_ypos,<a class="code" href="ui_8h.html#a04370ec777e6807e7065de53c629e793">UI_ACTION_YPOSITION</a>,<a class="code" href="uilang_8h.html#a55b840b39dac781ce0e1bc33b5985e47">UI_TEXT_ACTION_YPOSITION2</a>);
+<a name="l00251"></a>00251 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_zpos,<a class="code" href="ui_8h.html#acf0eba931a353fa69913627edef83604">UI_ACTION_ZPOSITION</a>,<a class="code" href="uilang_8h.html#a156e137750dc9d244316f7f31e62a596">UI_TEXT_ACTION_ZPOSITION2</a>);
+<a name="l00252"></a>00252 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_xpos_fast,<a class="code" href="ui_8h.html#a72a86a29358c20f85a4d8be9f31ceafa">UI_ACTION_XPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#a3bf951d0b17a7786ca494cb7bd3f5321">UI_TEXT_ACTION_XPOSITION_FAST2</a>);
+<a name="l00253"></a>00253 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_ypos_fast,<a class="code" href="ui_8h.html#a3cf59357e508ee576f3739b7ae06d906">UI_ACTION_YPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#ad95f9cd56234fb6a4fd99dfa8c680ab6">UI_TEXT_ACTION_YPOSITION_FAST2</a>);
+<a name="l00254"></a>00254 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_zpos_fast,<a class="code" href="ui_8h.html#a3717fb4a2b9df95fd1af1c875689e7fb">UI_ACTION_ZPOSITION_FAST</a>,<a class="code" href="uilang_8h.html#acca19314d62e3fe54528dbc875811335">UI_TEXT_ACTION_ZPOSITION_FAST2</a>);
+<a name="l00255"></a>00255 <span class="preprocessor">#endif</span>
+<a name="l00256"></a>00256 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_epos,<a class="code" href="ui_8h.html#a2325a5f4d041db35d411006a860a3883">UI_ACTION_EPOSITION</a>,<a class="code" href="uilang_8h.html#a0ede80b16d8c9788d4863ba0b542a939">UI_TEXT_ACTION_EPOSITION_FAST2</a>);
+<a name="l00257"></a>00257 
+<a name="l00258"></a>00258 <span class="comment">/*</span>
+<a name="l00259"></a>00259 <span class="comment">Next step is to define submenus leading to the action.</span>
+<a name="l00260"></a>00260 <span class="comment">*/</span>
+<a name="l00261"></a>00261 
+<a name="l00262"></a>00262 <span class="comment">// **** Positionening menu</span>
+<a name="l00263"></a>00263 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_back,<a class="code" href="uilang_8h.html#a6ef2de587b60d8dabe53924e8aa38e91">UI_TEXT_BACK</a>,<a class="code" href="ui_8h.html#afaa185811886214a66718bbe7bf90da6">UI_ACTION_BACK</a>);
+<a name="l00264"></a>00264 <span class="preprocessor">#if UI_HAS_BACK_KEY==0</span>
+<a name="l00265"></a>00265 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADDCONDBACK &amp;ui_menu_back,</span>
+<a name="l00266"></a>00266 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BACKCNT 1</span>
+<a name="l00267"></a>00267 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00268"></a>00268 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADDCONDBACK</span>
+<a name="l00269"></a>00269 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BACKCNT 0</span>
+<a name="l00270"></a>00270 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00271"></a>00271 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_all,<a class="code" href="uilang_8h.html#a5ef31305c5118d56ab946c82f84a3e3d">UI_TEXT_HOME_ALL</a>,<a class="code" href="ui_8h.html#a5fd2d531eccf1d966c177a8e2e137ab7">UI_ACTION_HOME_ALL</a>);
+<a name="l00272"></a>00272 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_x,<a class="code" href="uilang_8h.html#a7e4ad85c23619462c2b8ff3f1218669b">UI_TEXT_HOME_X</a>,<a class="code" href="ui_8h.html#a2433e70d06baefbf8cfd7c8f99c8e007">UI_ACTION_HOME_X</a>);
+<a name="l00273"></a>00273 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_y,<a class="code" href="uilang_8h.html#a375e8a5040a083b5fe45d19959666f91">UI_TEXT_HOME_Y</a>,<a class="code" href="ui_8h.html#a29aab9c5095b45910ee54264425bd7cd">UI_ACTION_HOME_Y</a>);
+<a name="l00274"></a>00274 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_home_z,<a class="code" href="uilang_8h.html#a38645e46f381311429a8851ea4f7a808">UI_TEXT_HOME_Z</a>,<a class="code" href="ui_8h.html#a7149d15e66318376c0513a497b6eff8a">UI_ACTION_HOME_Z</a>);
+<a name="l00275"></a>00275 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_xpos,<a class="code" href="uilang_8h.html#a32b841e91e2d7a21213fc11b1767dfce">UI_TEXT_X_POSITION</a>,ui_menu_xpos);
+<a name="l00276"></a>00276 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_ypos,<a class="code" href="uilang_8h.html#a039828302e8fc9aa4f77c5112c66286e">UI_TEXT_Y_POSITION</a>,ui_menu_ypos);
+<a name="l00277"></a>00277 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_zpos,<a class="code" href="uilang_8h.html#a76643ed28840cb35793a3d944cf1b03e">UI_TEXT_Z_POSITION</a>,ui_menu_zpos);
+<a name="l00278"></a>00278 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_epos,<a class="code" href="uilang_8h.html#a56d225100758d303b60cf14f4cdeabdc">UI_TEXT_E_POSITION</a>,ui_menu_epos);
+<a name="l00279"></a>00279 <span class="preprocessor">#if !UI_SPEEDDEPENDENT_POSITIONING</span>
+<a name="l00280"></a>00280 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_xfast,<a class="code" href="uilang_8h.html#a93a1164b4d0a08f8b0a6c842bafeeb84">UI_TEXT_X_POS_FAST</a>,ui_menu_xpos_fast);
+<a name="l00281"></a>00281 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_yfast,<a class="code" href="uilang_8h.html#a1cb9cb92fb226d49e96678c5556554f4">UI_TEXT_Y_POS_FAST</a>,ui_menu_ypos_fast);
+<a name="l00282"></a>00282 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_go_zfast,<a class="code" href="uilang_8h.html#ae9c62462e82927c520c0bc91e5a42a2b">UI_TEXT_Z_POS_FAST</a>,ui_menu_zpos_fast);
+<a name="l00283"></a>00283 <span class="preprocessor">#define UI_SPEED 2</span>
+<a name="l00284"></a>00284 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_X ,&amp;ui_menu_go_xfast,&amp;ui_menu_go_xpos</span>
+<a name="l00285"></a>00285 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_Y ,&amp;ui_menu_go_yfast,&amp;ui_menu_go_ypos</span>
+<a name="l00286"></a>00286 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_Z ,&amp;ui_menu_go_zfast,&amp;ui_menu_go_zpos</span>
+<a name="l00287"></a>00287 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00288"></a>00288 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED 1</span>
+<a name="l00289"></a>00289 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_X ,&amp;ui_menu_go_xpos</span>
+<a name="l00290"></a>00290 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_Y ,&amp;ui_menu_go_ypos</span>
+<a name="l00291"></a>00291 <span class="preprocessor"></span><span class="preprocessor">#define UI_SPEED_Z ,&amp;ui_menu_go_zpos</span>
+<a name="l00292"></a>00292 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00293"></a>00293 <span class="preprocessor"></span>
+<a name="l00294"></a>00294 <span class="preprocessor">#if DRIVE_SYSTEM!=3     //Positioning menu for non-delta</span>
+<a name="l00295"></a>00295 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all,&amp;ui_menu_home_x,&amp;ui_menu_home_y,&amp;ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&amp;ui_menu_go_epos}</span>
+<a name="l00296"></a>00296 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_positions,UI_MENU_POSITIONS,5+3*UI_SPEED+UI_MENU_BACKCNT);
+<a name="l00297"></a>00297 <span class="preprocessor">#else                   //Positioning menu for delta (removes individual x,y,z homing)</span>
+<a name="l00298"></a>00298 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all  UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&amp;ui_menu_go_epos}</span>
+<a name="l00299"></a>00299 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_positions,UI_MENU_POSITIONS,2+3*UI_SPEED+UI_MENU_BACKCNT);
+<a name="l00300"></a>00300 <span class="preprocessor">#endif</span>
+<a name="l00301"></a>00301 <span class="preprocessor"></span>
+<a name="l00302"></a>00302 <span class="comment">// **** Delta calibration menu</span>
+<a name="l00303"></a>00303 <span class="preprocessor">#ifdef Z_HOME_DIR &lt; 0</span>
+<a name="l00304"></a>00304 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_measured_origin,<a class="code" href="uilang_8h.html#a0c639c6c2c858c408d49f4dda4fc1897">UI_TEXT_SET_MEASURED_ORIGIN</a>,<a class="code" href="ui_8h.html#ad7fab7c382026749ac75a0492d84aaf4">UI_ACTION_SET_MEASURED_ORIGIN</a>);
+<a name="l00305"></a>00305 <span class="preprocessor">#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all UI_SPEED_Z,&amp;ui_menu_set_measured_origin}</span>
+<a name="l00306"></a>00306 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_delta,UI_MENU_DELTA,2+UI_SPEED+UI_MENU_BACKCNT);
+<a name="l00307"></a>00307 <span class="preprocessor">#endif</span>
+<a name="l00308"></a>00308 <span class="preprocessor"></span>
+<a name="l00309"></a>00309 <span class="comment">// **** Bed leveling menu</span>
+<a name="l00310"></a>00310 <span class="preprocessor">#ifdef SOFTWARE_LEVELING</span>
+<a name="l00311"></a>00311 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p1,<a class="code" href="uilang_8h.html#afb94deceefbbb108a747cda47049e259">UI_TEXT_SET_P1</a>,<a class="code" href="ui_8h.html#a693488555117210dfb92b5107b69e903">UI_ACTION_SET_P1</a>);
+<a name="l00312"></a>00312 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p2,<a class="code" href="uilang_8h.html#a3691e6c9b63480aa4b4b3dd27122cf86">UI_TEXT_SET_P2</a>,<a class="code" href="ui_8h.html#a5fb0bc18cb386a948340bef1f1f987c7">UI_ACTION_SET_P2</a>);
+<a name="l00313"></a>00313 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_set_p3,<a class="code" href="uilang_8h.html#a0fe32752788f2451cf16a337de69111a">UI_TEXT_SET_P3</a>,<a class="code" href="ui_8h.html#a622537bbec4e41d52d948ee6f06b150b">UI_ACTION_SET_P3</a>);
+<a name="l00314"></a>00314 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_calculate_leveling,<a class="code" href="uilang_8h.html#a137d34b268e299768372d61a190b47d9">UI_TEXT_CALCULATE_LEVELING</a>,<a class="code" href="ui_8h.html#ac5613e988339f0454e89acf600509d9b">UI_ACTION_CALC_LEVEL</a>);
+<a name="l00315"></a>00315 <span class="preprocessor">#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &amp;ui_menu_set_p1,&amp;ui_menu_set_p2,&amp;ui_menu_set_p3,&amp;ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_Z}</span>
+<a name="l00316"></a>00316 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_level,UI_MENU_LEVEL,4+3*UI_SPEED+UI_MENU_BACKCNT);
+<a name="l00317"></a>00317 <span class="preprocessor">#endif</span>
+<a name="l00318"></a>00318 <span class="preprocessor"></span>
+<a name="l00319"></a>00319 <span class="comment">// **** Extruder menu</span>
+<a name="l00320"></a>00320 
+<a name="l00321"></a>00321 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_temp0,<a class="code" href="uilang_8h.html#a7588e3246eda586d7c37d32a460411b4">UI_TEXT_EXTR0_TEMP</a>,<a class="code" href="ui_8h.html#a1867e8876ed9092d044533472a152eb7">UI_ACTION_EXTRUDER0_TEMP</a>);
+<a name="l00322"></a>00322 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_temp1,<a class="code" href="uilang_8h.html#a41637a12f31e6f1234284c6390b563f5">UI_TEXT_EXTR1_TEMP</a>,<a class="code" href="ui_8h.html#ac57ab27009b68077ed5f07995578ab46">UI_ACTION_EXTRUDER1_TEMP</a>);
+<a name="l00323"></a>00323 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_bed_temp, <a class="code" href="uilang_8h.html#a7a34700060e3fb30fd8360f4aa0ff00a">UI_TEXT_BED_TEMP</a>,<a class="code" href="ui_8h.html#a5f408c78afe0f29a9a7284c6a6faa92d">UI_ACTION_HEATED_BED_TEMP</a>);
+<a name="l00324"></a>00324 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_sel0,<a class="code" href="uilang_8h.html#a1e4ba596771cd3af2abf489946e3ffa5">UI_TEXT_EXTR0_SELECT</a>,<a class="code" href="ui_8h.html#ae4cb2baa1d3d0733a339a5c2e547d60b">UI_ACTION_SELECT_EXTRUDER0</a>);
+<a name="l00325"></a>00325 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_sel1,<a class="code" href="uilang_8h.html#a54e7d78313918184f9a33f931e13d511">UI_TEXT_EXTR1_SELECT</a>,<a class="code" href="ui_8h.html#adfce8a1d85293c67745cb022cce5c7ba">UI_ACTION_SELECT_EXTRUDER1</a>);
+<a name="l00326"></a>00326 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_off0,<a class="code" href="uilang_8h.html#ad854b567a41d3e0d7bc450d5f1a5799f">UI_TEXT_EXTR0_OFF</a>,<a class="code" href="ui_8h.html#a1551ca89187d0ce81da1b2939cdc0121">UI_ACTION_EXTRUDER0_OFF</a>);
+<a name="l00327"></a>00327 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_off1,<a class="code" href="uilang_8h.html#a7705e082665538569e4a533b972ad456">UI_TEXT_EXTR1_OFF</a>,<a class="code" href="ui_8h.html#a4764410b45bb2d4c6ee3dc7dd26d3322">UI_ACTION_EXTRUDER1_OFF</a>);
+<a name="l00328"></a>00328 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_origin,<a class="code" href="uilang_8h.html#a0eaed82dcf96976f0dc47bf36594a4a1">UI_TEXT_EXTR_ORIGIN</a>,<a class="code" href="ui_8h.html#a1d79de1e2dd1e694c575477e1fb173a0">UI_ACTION_RESET_EXTRUDER</a>);
+<a name="l00329"></a>00329 
+<a name="l00330"></a>00330 <span class="preprocessor">#if NUM_EXTRUDER==2</span>
+<a name="l00331"></a>00331 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCOND &amp;ui_menu_ext_temp0,&amp;ui_menu_ext_temp1,&amp;ui_menu_ext_off0,&amp;ui_menu_ext_off1,&amp;ui_menu_ext_sel0,&amp;ui_menu_ext_sel1,</span>
+<a name="l00332"></a>00332 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCNT 6</span>
+<a name="l00333"></a>00333 <span class="preprocessor"></span><span class="preprocessor">#elif NUM_EXTRUDER&gt;2</span>
+<a name="l00334"></a>00334 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_temp2,<a class="code" href="uilang_8h.html#aef08c1c7b6c52af55f767d21242cf0ac">UI_TEXT_EXTR2_TEMP</a>,<a class="code" href="ui_8h.html#a0ba8664ff1888002e1a7ebed8d05b07e">UI_ACTION_EXTRUDER2_TEMP</a>);
+<a name="l00335"></a>00335 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_sel2,<a class="code" href="uilang_8h.html#a6b3299e904436bb50c02f1a60a9beb09">UI_TEXT_EXTR2_SELECT</a>,<a class="code" href="ui_8h.html#aba6a0aa3f9e51a27f4779cf5af5b39ec">UI_ACTION_SELECT_EXTRUDER2</a>);
+<a name="l00336"></a>00336 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_ext_off2,<a class="code" href="uilang_8h.html#a4efe270d9a7157375b7ede3c2f0664d0">UI_TEXT_EXTR2_OFF</a>,<a class="code" href="ui_8h.html#a0b123286e1bfa931c11f454b78b2006d">UI_ACTION_EXTRUDER2_OFF</a>);
+<a name="l00337"></a>00337 <span class="preprocessor">#define UI_MENU_EXTCOND &amp;ui_menu_ext_temp0,&amp;ui_menu_ext_temp1,&amp;ui_menu_ext_temp2,&amp;ui_menu_ext_off0,&amp;ui_menu_ext_off1,&amp;ui_menu_ext_off2,&amp;ui_menu_ext_sel0,&amp;ui_menu_ext_sel1,&amp;ui_menu_ext_sel1,</span>
+<a name="l00338"></a>00338 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCNT 9</span>
+<a name="l00339"></a>00339 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00340"></a>00340 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCOND &amp;ui_menu_ext_temp0,&amp;ui_menu_ext_off0,</span>
+<a name="l00341"></a>00341 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EXTCNT 2</span>
+<a name="l00342"></a>00342 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00343"></a>00343 <span class="preprocessor"></span><span class="preprocessor">#if HAVE_HEATED_BED==true</span>
+<a name="l00344"></a>00344 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCOND &amp;ui_menu_bed_temp,</span>
+<a name="l00345"></a>00345 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCNT 1</span>
+<a name="l00346"></a>00346 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00347"></a>00347 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCOND</span>
+<a name="l00348"></a>00348 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_BEDCNT 0</span>
+<a name="l00349"></a>00349 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00350"></a>00350 <span class="preprocessor"></span>
+<a name="l00351"></a>00351 <span class="preprocessor">#define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &amp;ui_menu_go_epos,&amp;ui_menu_ext_origin}</span>
+<a name="l00352"></a>00352 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_extruder,UI_MENU_EXTRUDER,UI_MENU_BACKCNT+UI_MENU_BEDCNT+UI_MENU_EXTCNT+2);
+<a name="l00353"></a>00353 
+<a name="l00354"></a>00354 <span class="comment">// **** SD card menu</span>
+<a name="l00355"></a>00355 
+<a name="l00356"></a>00356 <span class="comment">// **** Quick menu</span>
+<a name="l00357"></a>00357 <span class="preprocessor">#if PS_ON_PIN&gt;=0</span>
+<a name="l00358"></a>00358 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_power,<a class="code" href="uilang_8h.html#aef17a93d6ba58ee8c2d8432808ad18d0">UI_TEXT_POWER</a>,<a class="code" href="ui_8h.html#ac0d8ad4a8cdde1ceb5ca4725020acb4a">UI_ACTION_POWER</a>);
+<a name="l00359"></a>00359 <span class="preprocessor">#define MENU_PSON_COUNT 1</span>
+<a name="l00360"></a>00360 <span class="preprocessor"></span><span class="preprocessor">#define MENU_PSON_ENTRY ,&amp;ui_menu_quick_power</span>
+<a name="l00361"></a>00361 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00362"></a>00362 <span class="preprocessor"></span><span class="preprocessor">#define MENU_PSON_COUNT 0</span>
+<a name="l00363"></a>00363 <span class="preprocessor"></span><span class="preprocessor">#define MENU_PSON_ENTRY</span>
+<a name="l00364"></a>00364 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00365"></a>00365 <span class="preprocessor"></span><span class="preprocessor">#if CASE_LIGHTS_PIN &gt; 0</span>
+<a name="l00366"></a>00366 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_toggle_light,<a class="code" href="uilang_8h.html#a569b8453a6551857ab0699960f199403">UI_TEXT_LIGHTS_ONOFF</a>,<a class="code" href="ui_8h.html#aaa1ed14b72f52c8217062a8a3a9173f9">UI_ACTION_LIGHTS_ONOFF</a>);
+<a name="l00367"></a>00367 <span class="preprocessor">#define UI_TOOGLE_LIGHT_ENTRY ,&amp;ui_menu_toggle_light</span>
+<a name="l00368"></a>00368 <span class="preprocessor"></span><span class="preprocessor">#define UI_TOGGLE_LIGHT_COUNT 1</span>
+<a name="l00369"></a>00369 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00370"></a>00370 <span class="preprocessor"></span><span class="preprocessor">#define UI_TOOGLE_LIGHT_ENTRY</span>
+<a name="l00371"></a>00371 <span class="preprocessor"></span><span class="preprocessor">#define UI_TOGGLE_LIGHT_COUNT 0</span>
+<a name="l00372"></a>00372 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00373"></a>00373 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_preheat_pla,<a class="code" href="uilang_8h.html#ae0afc90d368128d0660cf14030cf60d4">UI_TEXT_PREHEAT_PLA</a>,<a class="code" href="ui_8h.html#a80d482a904b1a1cb6b23d70d8bf9a571">UI_ACTION_PREHEAT_PLA</a>);
+<a name="l00374"></a>00374 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_preheat_abs,<a class="code" href="uilang_8h.html#abeff3e38c1b1a1a8acedaf917b603fef">UI_TEXT_PREHEAT_ABS</a>,<a class="code" href="ui_8h.html#aa51b104e335f8782f4270949baa71622">UI_ACTION_PREHEAT_ABS</a>);
+<a name="l00375"></a>00375 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_cooldown,<a class="code" href="uilang_8h.html#a051b6e51987596853d40813890ce9d3d">UI_TEXT_COOLDOWN</a>,<a class="code" href="ui_8h.html#af7a46234f09be3ed3e66dd3b753a8831">UI_ACTION_COOLDOWN</a>);
+<a name="l00376"></a>00376 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_origin,<a class="code" href="uilang_8h.html#a1acce1c0a9cb99bc0e23036e8d865b0f">UI_TEXT_SET_TO_ORIGIN</a>,<a class="code" href="ui_8h.html#a1e389bcd2e902c281f9d97bf8d4655f8">UI_ACTION_SET_ORIGIN</a>);
+<a name="l00377"></a>00377 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_stopstepper,<a class="code" href="uilang_8h.html#a2c39407390f6a019eec59d4c08990283">UI_TEXT_DISABLE_STEPPER</a>,<a class="code" href="ui_8h.html#a8cb23d8ee81fe6d14b21f738b889beb4">UI_ACTION_DISABLE_STEPPER</a>);
+<a name="l00378"></a>00378 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_quick_speedmultiply,<a class="code" href="uilang_8h.html#a20ef77f9b8ce7b332a20698b3fe2d08e">UI_TEXT_SPEED_MULTIPLY</a>,<a class="code" href="ui_8h.html#a310358365ffe41b670cca7d3f98e733d">UI_ACTION_FEEDRATE_MULTIPLY</a>);
+<a name="l00379"></a>00379 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_quick_flowmultiply,<a class="code" href="uilang_8h.html#a3cc94159e1d317fab7cb662a47be9607">UI_TEXT_FLOW_MULTIPLY</a>,<a class="code" href="ui_8h.html#a938843b54d34aceb2edc0002d94428bf">UI_ACTION_FLOWRATE_MULTIPLY</a>);
+<a name="l00380"></a>00380 <span class="preprocessor">#ifdef DEBUG_PRINT</span>
+<a name="l00381"></a>00381 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_quick_debug,<span class="stringliteral">&quot;Write Debug&quot;</span>,<a class="code" href="ui_8h.html#ad36dad0ea973bc92d734aab982080cfc">UI_ACTION_WRITE_DEBUG</a>);
+<a name="l00382"></a>00382 <span class="preprocessor">#define DEBUG_PRINT_COUNT 1</span>
+<a name="l00383"></a>00383 <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_PRINT_EXTRA ,&amp;ui_menu_quick_debug</span>
+<a name="l00384"></a>00384 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00385"></a>00385 <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_PRINT_COUNT 0</span>
+<a name="l00386"></a>00386 <span class="preprocessor"></span><span class="preprocessor">#define DEBUG_PRINT_EXTRA</span>
+<a name="l00387"></a>00387 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00388"></a>00388 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &amp;ui_menu_home_all,&amp;ui_menu_quick_speedmultiply,&amp;ui_menu_quick_flowmultiply UI_TOOGLE_LIGHT_ENTRY ,&amp;ui_menu_quick_preheat_pla,&amp;ui_menu_quick_preheat_abs,&amp;ui_menu_quick_cooldown,&amp;ui_menu_quick_origin,&amp;ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}</span>
+<a name="l00389"></a>00389 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_quick,UI_MENU_QUICK,8+UI_MENU_BACKCNT+MENU_PSON_COUNT+DEBUG_PRINT_COUNT+UI_TOGGLE_LIGHT_COUNT);
+<a name="l00390"></a>00390 
+<a name="l00391"></a>00391 <span class="comment">// **** Fan menu</span>
+<a name="l00392"></a>00392 
+<a name="l00393"></a>00393 <span class="preprocessor">#if FAN_PIN&gt;-1</span>
+<a name="l00394"></a>00394 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_fan_fanspeed, <a class="code" href="uilang_8h.html#a05c90c94651251ca8acb5c4a76db2f87">UI_TEXT_ACTION_FANSPEED</a>,<a class="code" href="ui_8h.html#a66a327b69609069e29617759ce3e6143">UI_ACTION_FANSPEED</a>);
+<a name="l00395"></a>00395 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_fan_off,<a class="code" href="uilang_8h.html#a8f91756a1024ef409cdb5c080adcfb74">UI_TEXT_FAN_OFF</a>,<a class="code" href="ui_8h.html#a4789b7f832af1ac035c84a3fd6ef4f5f">UI_ACTION_FAN_OFF</a>,<a class="code" href="_repetier_8h.html#a2cd09db1b62b1d5eac5233fe177032f1">MENU_MODE_FAN_RUNNING</a>,0);
+<a name="l00396"></a>00396 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_25,<a class="code" href="uilang_8h.html#a519111ac8ab0ff1a84c2a6e6a1ced9b2">UI_TEXT_FAN_25</a>,<a class="code" href="ui_8h.html#a36d49825cec962f3e93159dbb490f2a0">UI_ACTION_FAN_25</a>);
+<a name="l00397"></a>00397 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_50,<a class="code" href="uilang_8h.html#a71919761e6fc24db8ae8ac4629c3e011">UI_TEXT_FAN_50</a>,<a class="code" href="ui_8h.html#a4b227957c35769c77549a5f02c6dfdfc">UI_ACTION_FAN_50</a>);
+<a name="l00398"></a>00398 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_75,<a class="code" href="uilang_8h.html#ac9f65da273da4c9eb67432f84fa3d1ec">UI_TEXT_FAN_75</a>,<a class="code" href="ui_8h.html#a475cc074f97602819de4fc2efb80c885">UI_ACTION_FAN_75</a>);
+<a name="l00399"></a>00399 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_fan_full,<a class="code" href="uilang_8h.html#ac128598063bd83967b17cdb9031ad807">UI_TEXT_FAN_FULL</a>,<a class="code" href="ui_8h.html#a4509616ec3148f1271cacb1477aa0549">UI_ACTION_FAN_FULL</a>);
+<a name="l00400"></a>00400 <span class="preprocessor">#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &amp;ui_menu_fan_fanspeed,&amp;ui_menu_fan_off,&amp;ui_menu_fan_25,&amp;ui_menu_fan_50,&amp;ui_menu_fan_75,&amp;ui_menu_fan_full}</span>
+<a name="l00401"></a>00401 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_fan,UI_MENU_FAN,6+UI_MENU_BACKCNT);
+<a name="l00402"></a>00402 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_fan_sub,<a class="code" href="uilang_8h.html#add27718784f46355137b63afac5ece64">UI_TEXT_FANSPEED</a>,ui_menu_fan);
+<a name="l00403"></a>00403 <span class="preprocessor">#define UI_MENU_FAN_COND &amp;ui_menu_fan_sub,</span>
+<a name="l00404"></a>00404 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_CNT 1</span>
+<a name="l00405"></a>00405 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00406"></a>00406 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_COND</span>
+<a name="l00407"></a>00407 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_FAN_CNT 0</span>
+<a name="l00408"></a>00408 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00409"></a>00409 <span class="preprocessor"></span>
+<a name="l00410"></a>00410 <span class="comment">// **** SD card menu</span>
+<a name="l00411"></a>00411 
+<a name="l00412"></a>00412 <span class="preprocessor">#ifdef SDSUPPORT</span>
+<a name="l00413"></a>00413 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_FILESELECTOR {&amp;ui_menu_back}</span>
+<a name="l00414"></a>00414 <span class="preprocessor"></span><a class="code" href="ui_8h.html#adff5eb981bb16aee813dad51aad971a5">UI_MENU_FILESELECT</a>(ui_menu_sd_fileselector,UI_MENU_SD_FILESELECTOR,1);
+<a name="l00415"></a>00415 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_printfile,<a class="code" href="uilang_8h.html#a0068c0efa6f400d812da68f7446b2cbc">UI_TEXT_PRINT_FILE</a>,<a class="code" href="ui_8h.html#ae915626599ace17139e49669b86acb10">UI_ACTION_SD_PRINT</a>,<a class="code" href="_repetier_8h.html#a965a628ac06f6815452f8f5719cd86fb">MENU_MODE_SD_MOUNTED</a>,<a class="code" href="_repetier_8h.html#ace5a0ed57fad83447abfa7e55c6e518e">MENU_MODE_SD_PRINTING</a>);
+<a name="l00416"></a>00416 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_pause,<a class="code" href="uilang_8h.html#ad0bffb5493ff9bdf3c09d12172b7d350">UI_TEXT_PAUSE_PRINT</a>,<a class="code" href="ui_8h.html#a1c0b54a2f68567d607a6bc4dd5fce5b0">UI_ACTION_SD_PAUSE</a>,<a class="code" href="_repetier_8h.html#ace5a0ed57fad83447abfa7e55c6e518e">MENU_MODE_SD_PRINTING</a>,<a class="code" href="_repetier_8h.html#a7a146367cc179b4a4b0678bcc4eb405d">MENU_MODE_SD_PAUSED</a>);
+<a name="l00417"></a>00417 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_continue,<a class="code" href="uilang_8h.html#a950c3db066d01e5e3c484728406be7a3">UI_TEXT_CONTINUE_PRINT</a>,<a class="code" href="ui_8h.html#a97582b2bc3ba9ddb5d11d6ee38354b08">UI_ACTION_SD_CONTINUE</a>,<a class="code" href="_repetier_8h.html#a7a146367cc179b4a4b0678bcc4eb405d">MENU_MODE_SD_PAUSED</a>,0);
+<a name="l00418"></a>00418 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_stop,<a class="code" href="uilang_8h.html#afe5e334aeddcb10415e86c2037a1067e">UI_TEXT_STOP_PRINT</a>,<a class="code" href="ui_8h.html#af3945b1a8d4d677d546f97db3b2abc60">UI_ACTION_SD_STOP</a>,<a class="code" href="_repetier_8h.html#ace5a0ed57fad83447abfa7e55c6e518e">MENU_MODE_SD_PRINTING</a>,0);
+<a name="l00419"></a>00419 <span class="preprocessor">#if defined(SDCARDDETECT) &amp;&amp; SDCARDDETECT&gt;-1</span>
+<a name="l00420"></a>00420 <span class="preprocessor"></span><span class="preprocessor">#define UI_MOUNT_CNT 0</span>
+<a name="l00421"></a>00421 <span class="preprocessor"></span><span class="preprocessor">#define UI_MOUNT_CMD</span>
+<a name="l00422"></a>00422 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00423"></a>00423 <span class="preprocessor"></span><a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_unmount,<a class="code" href="uilang_8h.html#adf4914624832e01dc5371ddae29c850a">UI_TEXT_UNMOUNT_CARD</a>,<a class="code" href="ui_8h.html#a333a4ca9b7d54a3550b9adff25b0993f">UI_ACTION_SD_UNMOUNT</a>,<a class="code" href="_repetier_8h.html#a965a628ac06f6815452f8f5719cd86fb">MENU_MODE_SD_MOUNTED</a>,0);
+<a name="l00424"></a>00424 <a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_mount,<a class="code" href="uilang_8h.html#ad541e94d3cd6b7236a0f11fe98bca38c">UI_TEXT_MOUNT_CARD</a>,<a class="code" href="ui_8h.html#a166e19b9386c5b355af7031c1b734952">UI_ACTION_SD_MOUNT</a>,0,<a class="code" href="_repetier_8h.html#a965a628ac06f6815452f8f5719cd86fb">MENU_MODE_SD_MOUNTED</a>);
+<a name="l00425"></a>00425 <span class="preprocessor">#define UI_MOUNT_CNT 2</span>
+<a name="l00426"></a>00426 <span class="preprocessor"></span><span class="preprocessor">#define UI_MOUNT_CMD ,&amp;ui_menu_sd_unmount,&amp;ui_menu_sd_mount</span>
+<a name="l00427"></a>00427 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00428"></a>00428 <span class="preprocessor"></span><a class="code" href="ui_8h.html#af6e4109b52de956d560c505157594baf">UI_MENU_ACTIONCOMMAND_FILTER</a>(ui_menu_sd_delete,<a class="code" href="uilang_8h.html#a9e2ed0a95d3742943a43da1742f7084f">UI_TEXT_DELETE_FILE</a>,<a class="code" href="ui_8h.html#a2a15bc99a6efdb771264b83d7c883af2">UI_ACTION_SD_DELETE</a>,<a class="code" href="_repetier_8h.html#a965a628ac06f6815452f8f5719cd86fb">MENU_MODE_SD_MOUNTED</a>,<a class="code" href="_repetier_8h.html#ace5a0ed57fad83447abfa7e55c6e518e">MENU_MODE_SD_PRINTING</a>);
+<a name="l00429"></a>00429 <span class="preprocessor">#define UI_MENU_SD {UI_MENU_ADDCONDBACK &amp;ui_menu_sd_printfile,&amp;ui_menu_sd_pause,&amp;ui_menu_sd_stop,&amp;ui_menu_sd_continue UI_MOUNT_CMD ,&amp;ui_menu_sd_delete}</span>
+<a name="l00430"></a>00430 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_sd,UI_MENU_SD,UI_MENU_BACKCNT+5+UI_MOUNT_CNT);
+<a name="l00431"></a>00431 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_sd_sub,<a class="code" href="uilang_8h.html#afd9b609b5db888cd0988052ba8f0a801">UI_TEXT_SD_CARD</a>,ui_menu_sd);
+<a name="l00432"></a>00432 
+<a name="l00433"></a>00433 <span class="preprocessor">#define UI_MENU_SD_COND &amp;ui_menu_sd_sub,</span>
+<a name="l00434"></a>00434 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_CNT 1</span>
 <a name="l00435"></a>00435 <span class="preprocessor"></span><span class="preprocessor">#else</span>
-<a name="l00436"></a>00436 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCOND </span>
-<a name="l00437"></a>00437 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCNT 0</span>
+<a name="l00436"></a>00436 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_COND</span>
+<a name="l00437"></a>00437 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SD_CNT 0</span>
 <a name="l00438"></a>00438 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00439"></a>00439 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &amp;ui_menu_cext_steps,&amp;ui_menu_cext_start_feedrate,&amp;ui_menu_cext_max_feedrate,&amp;ui_menu_cext_acceleration,&amp;ui_menu_cext_watch_period,&amp;ui_menu_ext_wait_units,&amp;ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}</span>
-<a name="l00440"></a>00440 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_cextr,UI_MENU_CEXTR,7+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
-<a name="l00441"></a>00441 
-<a name="l00442"></a>00442 <span class="comment">// **** Configuration menu</span>
-<a name="l00443"></a>00443 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_general,<a class="code" href="uilang_8h.html#ae395a3c1f3faedd128a40c166f3efb54">UI_TEXT_GENERAL</a>,ui_menu_general);
-<a name="l00444"></a>00444 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_accel,<a class="code" href="uilang_8h.html#a785fd66567009607be7489930e9768ec">UI_TEXT_ACCELERATION</a>,ui_menu_accel);
-<a name="l00445"></a>00445 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_feed,<a class="code" href="uilang_8h.html#a3e999445b5774d014033fe96ef65b284">UI_TEXT_FEEDRATE</a>,ui_menu_feedrate);
-<a name="l00446"></a>00446 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_extr,<a class="code" href="uilang_8h.html#af3e61cf5ecaf1373fe49896606030b8b">UI_TEXT_EXTRUDER</a>,ui_menu_cextr);
-<a name="l00447"></a>00447 <span class="preprocessor">#if EEPROM_MODE!=0</span>
-<a name="l00448"></a>00448 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_conf_to_eeprom,<a class="code" href="uilang_8h.html#a39d5a5d7e47c1b9f3596c82bc7d6f367">UI_TEXT_STORE_TO_EEPROM</a>,<a class="code" href="ui_8h.html#ae092c04f456da231d3376b8f51365e95">UI_ACTION_STORE_EEPROM</a>);
-<a name="l00449"></a>00449 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_conf_from_eeprom,<a class="code" href="uilang_8h.html#abbf76e9debfdf97b6792e0447a1e7d12">UI_TEXT_LOAD_EEPROM</a>,<a class="code" href="ui_8h.html#a1e5b1992f0345cb6fd8a952f8a0e2d2c">UI_ACTION_LOAD_EEPROM</a>);
-<a name="l00450"></a>00450 <span class="preprocessor">#define UI_MENU_EEPROM_COND ,&amp;ui_menu_conf_to_eeprom,&amp;ui_menu_conf_from_eeprom</span>
-<a name="l00451"></a>00451 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_CNT 2</span>
-<a name="l00452"></a>00452 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_eeprom_saved,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#accbd9259b5e6fb6ff7ce42d69193dcc6">UI_TEXT_EEPROM_STORED</a>);
-<a name="l00453"></a>00453 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_eeprom_loaded,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#a997b2aac3b27c684658e5c08ee8d7f58">UI_TEXT_EEPROM_LOADED</a>);
-<a name="l00454"></a>00454 <span class="preprocessor">#else</span>
-<a name="l00455"></a>00455 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_COND</span>
-<a name="l00456"></a>00456 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_CNT 0</span>
-<a name="l00457"></a>00457 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00458"></a>00458 <span class="preprocessor"></span><span class="preprocessor">#ifdef SOFTWARE_LEVELING</span>
-<a name="l00459"></a>00459 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_COND ,&amp;ui_menu_conf_level</span>
-<a name="l00460"></a>00460 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_CNT 1</span>
-<a name="l00461"></a>00461 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_level, <a class="code" href="uilang_8h.html#ade5595332b740d9cf82b027d8b4b3ee3">UI_TEXT_LEVEL</a>, ui_menu_level);
-<a name="l00462"></a>00462 <span class="preprocessor">#else</span>
-<a name="l00463"></a>00463 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_COND</span>
-<a name="l00464"></a>00464 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_CNT 0</span>
-<a name="l00465"></a>00465 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-<a name="l00466"></a>00466 <span class="preprocessor"></span><span class="preprocessor">#ifdef STEP_COUNTER</span>
-<a name="l00467"></a>00467 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_COND ,&amp;ui_menu_conf_delta</span>
-<a name="l00468"></a>00468 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_CNT 1</span>
-<a name="l00469"></a>00469 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_delta, <a class="code" href="uilang_8h.html#aaa5628c1f64d110e32948a647b963db8">UI_TEXT_DELTA</a>, ui_menu_delta);
-<a name="l00470"></a>00470 <span class="preprocessor">#else</span>
-<a name="l00471"></a>00471 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_COND</span>
-<a name="l00472"></a>00472 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_CNT 0</span>
-<a name="l00473"></a>00473 <span class="preprocessor"></span><span class="preprocessor">#endif </span>
-<a name="l00474"></a>00474 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &amp;ui_menu_conf_general,UI_MENU_ADDCONDOPS &amp;ui_menu_conf_accel,&amp;ui_menu_conf_feed,&amp;ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}</span>
-<a name="l00475"></a>00475 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+<a class="code" href="_configuration_8h.html#ac2f980048fb598f74113af5217ef511a" title="Activate ooze prevention system.">USE_OPS</a>+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
-<a name="l00476"></a>00476 <span class="comment">// Main menu</span>
-<a name="l00477"></a>00477 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main1,<a class="code" href="uilang_8h.html#a6007e948c3395fb89c0680bcdedd5b14">UI_TEXT_QUICK_SETTINGS</a>,ui_menu_quick);
-<a name="l00478"></a>00478 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main2, <a class="code" href="uilang_8h.html#a2f6a28a692cc72e70e472370c0d6f533">UI_TEXT_POSITION</a>,ui_menu_positions);
-<a name="l00479"></a>00479 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main3,<a class="code" href="uilang_8h.html#af3e61cf5ecaf1373fe49896606030b8b">UI_TEXT_EXTRUDER</a>,ui_menu_extruder);
-<a name="l00480"></a>00480 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main4,<a class="code" href="uilang_8h.html#aeb1c3a4646e56c8f806b2dd32f07dd59">UI_TEXT_DEBUGGING</a>,ui_menu_debugging);
-<a name="l00481"></a>00481 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main5,<a class="code" href="uilang_8h.html#ae24f427ed131e848d2fe732e010b244a">UI_TEXT_CONFIGURATION</a>,ui_menu_configuration);
-<a name="l00482"></a>00482 <span class="preprocessor">#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &amp;ui_menu_main1,&amp;ui_menu_main2,&amp;ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &amp;ui_menu_main4,&amp;ui_menu_main5}</span>
-<a name="l00483"></a>00483 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_main,UI_MENU_MAIN,5+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
-<a name="l00484"></a>00484 
-<a name="l00485"></a>00485 <span class="comment">/* Define menus accessible by action commands</span>
-<a name="l00486"></a>00486 <span class="comment"></span>
-<a name="l00487"></a>00487 <span class="comment">You can create up to 10 user menus which are accessible by the action commands UI_ACTION_SHOW_USERMENU1 until UI_ACTION_SHOW_USERMENU10</span>
-<a name="l00488"></a>00488 <span class="comment">You this the same way as with the menus above or you use one of the above menus. Then add a define like</span>
-<a name="l00489"></a>00489 <span class="comment"></span>
-<a name="l00490"></a>00490 <span class="comment">#define UI_USERMENU1 ui_menu_conf_feed</span>
-<a name="l00491"></a>00491 <span class="comment"></span>
-<a name="l00492"></a>00492 <span class="comment">which assigns the menu stored in ui_menu_conf_feed to the action UI_ACTION_SHOW_USERMENU1. Make sure only to change the numbers and not the name of the define.</span>
-<a name="l00493"></a>00493 <span class="comment"></span>
-<a name="l00494"></a>00494 <span class="comment">When do you need this? You might want a fast button to change the temperature. In the default menu you have no menu</span>
-<a name="l00495"></a>00495 <span class="comment">to change the temperature and view it the same time. So you need to make an action menu for this like:</span>
-<a name="l00496"></a>00496 <span class="comment">UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,&quot;Temp. 0  :%E0\002C&quot;,&quot;&quot;,&quot;&quot;,&quot;&quot;);</span>
-<a name="l00497"></a>00497 <span class="comment">Then you assign this menu to a usermenu:</span>
-<a name="l00498"></a>00498 <span class="comment">#define UI_USERMENU2 ui_menu_extrtemp</span>
-<a name="l00499"></a>00499 <span class="comment"></span>
-<a name="l00500"></a>00500 <span class="comment">Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a key and that will now show the temperture screen and allows</span>
-<a name="l00501"></a>00501 <span class="comment">the change of temperature with the next/previous buttons.</span>
-<a name="l00502"></a>00502 <span class="comment"></span>
-<a name="l00503"></a>00503 <span class="comment">*/</span>
-<a name="l00504"></a>00504 
-<a name="l00505"></a>00505 <span class="preprocessor">#endif // __UI_MENU_H</span>
+<a name="l00439"></a>00439 <span class="preprocessor"></span>
+<a name="l00440"></a>00440 
+<a name="l00441"></a>00441 <span class="comment">// **** Debugging menu</span>
+<a name="l00442"></a>00442 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_echo,<a class="code" href="uilang_8h.html#a95cd6d98538958580d4263f30c90d20b">UI_TEXT_DBG_ECHO</a>,<a class="code" href="ui_8h.html#ac57879041f8a45a08f703a7db618105f">UI_ACTION_DEBUG_ECHO</a>);
+<a name="l00443"></a>00443 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_info,<a class="code" href="uilang_8h.html#a1640a0f98dfefd1445d9f323117d27c1">UI_TEXT_DBG_INFO</a>,<a class="code" href="ui_8h.html#a8ea6a765cc13d2caac819fd3e18d0fbf">UI_ACTION_DEBUG_INFO</a>);
+<a name="l00444"></a>00444 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_error,<a class="code" href="uilang_8h.html#a996e7cc895238c864450af7097d8ad3d">UI_TEXT_DBG_ERROR</a>,<a class="code" href="ui_8h.html#a2b24f10710a837997eb162f6587a58ea">UI_ACTION_DEBUG_ERROR</a>);
+<a name="l00445"></a>00445 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_debug_dryrun,<a class="code" href="uilang_8h.html#aa92b47d5200c41cedd412bfadd919089">UI_TEXT_DBG_DRYRUN</a>,<a class="code" href="ui_8h.html#a023c69616d5a2403cbe94995466a1b01">UI_ACTION_DEBUG_DRYRUN</a>);
+<a name="l00446"></a>00446 
+<a name="l00447"></a>00447 <span class="preprocessor">#define UI_MENU_DEBUGGING {UI_MENU_ADDCONDBACK &amp;ui_menu_debug_echo,&amp;ui_menu_debug_info,&amp;ui_menu_debug_error,&amp;ui_menu_debug_dryrun}</span>
+<a name="l00448"></a>00448 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_debugging,UI_MENU_DEBUGGING,4+UI_MENU_BACKCNT);
+<a name="l00449"></a>00449 
+<a name="l00450"></a>00450 <span class="comment">// **** Acceleration settings</span>
+<a name="l00451"></a>00451 <span class="preprocessor">#if DRIVE_SYSTEM!=3</span>
+<a name="l00452"></a>00452 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printx,<a class="code" href="uilang_8h.html#a1157adcc0183f9c935431808f637d1e5">UI_TEXT_PRINT_X</a>,<a class="code" href="ui_8h.html#a4bf37c2a6e926488e87668781b2b709d">UI_ACTION_PRINT_ACCEL_X</a>);
+<a name="l00453"></a>00453 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printy,<a class="code" href="uilang_8h.html#a6b3c0502e03bc7ed85dbf0a94e15a5b0">UI_TEXT_PRINT_Y</a>,<a class="code" href="ui_8h.html#abd68f52a37ea81a391a45ca520a91c45">UI_ACTION_PRINT_ACCEL_Y</a>);
+<a name="l00454"></a>00454 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printz,<a class="code" href="uilang_8h.html#a8d0d671fd80bbce996050905be33c286">UI_TEXT_PRINT_Z</a>,<a class="code" href="ui_8h.html#a36f37dcd57ae22c697a50a436af59aa0">UI_ACTION_PRINT_ACCEL_Z</a>);
+<a name="l00455"></a>00455 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travelx,<a class="code" href="uilang_8h.html#a8d5781c45946f2764e649ef1a650297b">UI_TEXT_MOVE_X</a>,<a class="code" href="ui_8h.html#a65bdb14d38489b883905c96aef935ee5">UI_ACTION_MOVE_ACCEL_X</a>);
+<a name="l00456"></a>00456 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travely,<a class="code" href="uilang_8h.html#a6b74b2b6cffd4e5e88c2cd0a11acf1af">UI_TEXT_MOVE_Y</a>,<a class="code" href="ui_8h.html#a9c05362222b75dcd04be56542f331642">UI_ACTION_MOVE_ACCEL_Y</a>);
+<a name="l00457"></a>00457 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travelz,<a class="code" href="uilang_8h.html#a62d9009f997ae2b63d7b1c82c7a62367">UI_TEXT_MOVE_Z</a>,<a class="code" href="ui_8h.html#a9b8724284841e555231e6886a6c62b8f">UI_ACTION_MOVE_ACCEL_Z</a>);
+<a name="l00458"></a>00458 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_jerk,<a class="code" href="uilang_8h.html#a9d01be21a78594cffc1b07abe562c498">UI_TEXT_JERK</a>,<a class="code" href="ui_8h.html#a7b3050f0a1471a73651a7863ea1e4ea9">UI_ACTION_MAX_JERK</a>);
+<a name="l00459"></a>00459 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_zjerk,<a class="code" href="uilang_8h.html#a60a7853ec6804b74b9b1a293351c504d">UI_TEXT_ZJERK</a>,<a class="code" href="ui_8h.html#a9d6b89f35369c1b4fdb84708905437bb">UI_ACTION_MAX_ZJERK</a>);
+<a name="l00460"></a>00460 <span class="preprocessor">#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &amp;ui_menu_accel_printx,&amp;ui_menu_accel_printy,&amp;ui_menu_accel_printz,&amp;ui_menu_accel_travelx,&amp;ui_menu_accel_travely,&amp;ui_menu_accel_travelz,&amp;ui_menu_accel_jerk,&amp;ui_menu_accel_zjerk}</span>
+<a name="l00461"></a>00461 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_accel,UI_MENU_ACCEL,8+UI_MENU_BACKCNT);
+<a name="l00462"></a>00462 
+<a name="l00463"></a>00463 <span class="comment">// **** Feedrates</span>
+<a name="l00464"></a>00464 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxx,<a class="code" href="uilang_8h.html#a921acebafd6cb2cbb6e3c929a3445b4b">UI_TEXT_FEED_MAX_X</a>,<a class="code" href="ui_8h.html#a6a96117be59b0c25718c9e6a89b9943c">UI_ACTION_MAX_FEEDRATE_X</a>);
+<a name="l00465"></a>00465 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxy,<a class="code" href="uilang_8h.html#a123ea770cd1b8e6c41c9940c93c10c85">UI_TEXT_FEED_MAX_Y</a>,<a class="code" href="ui_8h.html#afe1892becafdf2145d5cba300e27242d">UI_ACTION_MAX_FEEDRATE_Y</a>);
+<a name="l00466"></a>00466 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxz,<a class="code" href="uilang_8h.html#a37f15f5bba1267d6ccd7b307f9538a0f">UI_TEXT_FEED_MAX_Z</a>,<a class="code" href="ui_8h.html#a5ed739b9200e6c6cc23ac3a85b5786be">UI_ACTION_MAX_FEEDRATE_Z</a>);
+<a name="l00467"></a>00467 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homex,<a class="code" href="uilang_8h.html#a439de5cbdb17a5e7a9e00928a5d9b879">UI_TEXT_FEED_HOME_X</a>,<a class="code" href="ui_8h.html#a547091dc11d9bf4547f19b22e6d362b0">UI_ACTION_HOMING_FEEDRATE_X</a>);
+<a name="l00468"></a>00468 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homey,<a class="code" href="uilang_8h.html#a2057575353acde3dd6bcb262f7982f34">UI_TEXT_FEED_HOME_Y</a>,<a class="code" href="ui_8h.html#ab0ac9acb97f66442428592d8a3b5d0f3">UI_ACTION_HOMING_FEEDRATE_Y</a>);
+<a name="l00469"></a>00469 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homez,<a class="code" href="uilang_8h.html#af598eb0f16a35b6eca082dee082546b7">UI_TEXT_FEED_HOME_Z</a>,<a class="code" href="ui_8h.html#a39531276f38d45095c5306dac4bc64dd">UI_ACTION_HOMING_FEEDRATE_Z</a>);
+<a name="l00470"></a>00470 <span class="preprocessor">#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &amp;ui_menu_feedrate_maxx,&amp;ui_menu_feedrate_maxy,&amp;ui_menu_feedrate_maxz,&amp;ui_menu_feedrate_homex,&amp;ui_menu_feedrate_homey,&amp;ui_menu_feedrate_homez}</span>
+<a name="l00471"></a>00471 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_feedrate,UI_MENU_FEEDRATE,6+UI_MENU_BACKCNT);
+<a name="l00472"></a>00472 <span class="preprocessor">#else</span>
+<a name="l00473"></a>00473 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_printz,<a class="code" href="uilang_8h.html#ae4ce7195a7f9cfae5fac471baaf52700">UI_TEXT_PRINT_Z_DELTA</a>,<a class="code" href="ui_8h.html#a36f37dcd57ae22c697a50a436af59aa0">UI_ACTION_PRINT_ACCEL_Z</a>);
+<a name="l00474"></a>00474 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_travelz,<a class="code" href="uilang_8h.html#a9512c9fb2dd6b7a6e9aea79ad4c713cc">UI_TEXT_MOVE_Z_DELTA</a>,<a class="code" href="ui_8h.html#a9b8724284841e555231e6886a6c62b8f">UI_ACTION_MOVE_ACCEL_Z</a>);
+<a name="l00475"></a>00475 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_accel_jerk,<a class="code" href="uilang_8h.html#a9d01be21a78594cffc1b07abe562c498">UI_TEXT_JERK</a>,<a class="code" href="ui_8h.html#a7b3050f0a1471a73651a7863ea1e4ea9">UI_ACTION_MAX_JERK</a>);
+<a name="l00476"></a>00476 <span class="preprocessor">#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &amp;ui_menu_accel_printz,&amp;ui_menu_accel_travelz,&amp;ui_menu_accel_jerk}</span>
+<a name="l00477"></a>00477 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_accel,UI_MENU_ACCEL,3+UI_MENU_BACKCNT);
+<a name="l00478"></a>00478 
+<a name="l00479"></a>00479 <span class="comment">// **** Feedrates</span>
+<a name="l00480"></a>00480 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_maxz,<a class="code" href="uilang_8h.html#ac84a24445e88667440b2dba365c8a0d5">UI_TEXT_FEED_MAX_Z_DELTA</a>,<a class="code" href="ui_8h.html#a5ed739b9200e6c6cc23ac3a85b5786be">UI_ACTION_MAX_FEEDRATE_Z</a>);
+<a name="l00481"></a>00481 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_feedrate_homez,<a class="code" href="uilang_8h.html#a6afbadca3ccd5f5b00faeab807188c90">UI_TEXT_FEED_HOME_Z_DELTA</a>,<a class="code" href="ui_8h.html#a39531276f38d45095c5306dac4bc64dd">UI_ACTION_HOMING_FEEDRATE_Z</a>);
+<a name="l00482"></a>00482 <span class="preprocessor">#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &amp;ui_menu_feedrate_maxz,&amp;ui_menu_feedrate_homez}</span>
+<a name="l00483"></a>00483 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_feedrate,UI_MENU_FEEDRATE,2+UI_MENU_BACKCNT);
+<a name="l00484"></a>00484 <span class="preprocessor">#endif</span>
+<a name="l00485"></a>00485 <span class="preprocessor"></span>
+<a name="l00486"></a>00486 <span class="comment">// **** General configuration settings</span>
+<a name="l00487"></a>00487 
+<a name="l00488"></a>00488 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_stepper2,<a class="code" href="ui_8h.html#aa05409470afc017aef46b37f32e92167">UI_ACTION_STEPPER_INACTIVE</a>,<a class="code" href="uilang_8h.html#ac56fc06685cef1d7f9a6567c41adac0e">UI_TEXT_STEPPER_INACTIVE2</a>);
+<a name="l00489"></a>00489 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_maxinactive2,<a class="code" href="ui_8h.html#a1011076579d4f8d1b4be612d40c866b5">UI_ACTION_MAX_INACTIVE</a>,<a class="code" href="uilang_8h.html#a18c223aa1e38a67fe78d69ded77ceeb2">UI_TEXT_POWER_INACTIVE2</a>);
+<a name="l00490"></a>00490 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_general_baud,<a class="code" href="uilang_8h.html#a1b5553bbbd802905577b411637ab0599">UI_TEXT_BAUDRATE</a>,<a class="code" href="ui_8h.html#a4ddc30066bc238f59422feaf451849b0">UI_ACTION_BAUDRATE</a>);
+<a name="l00491"></a>00491 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_general_stepper_inactive,<a class="code" href="uilang_8h.html#a597976169e6edddd11359085246788b9">UI_TEXT_STEPPER_INACTIVE</a>,ui_menu_stepper2);
+<a name="l00492"></a>00492 <a class="code" href="ui_8h.html#ade18a00948d3e403812e437e996dae15">UI_MENU_ACTIONSELECTOR</a>(ui_menu_general_max_inactive,<a class="code" href="uilang_8h.html#aa91c2c61c57ec161385f21e8cf6a0b5a">UI_TEXT_POWER_INACTIVE</a>,ui_menu_maxinactive2);
+<a name="l00493"></a>00493 <span class="preprocessor">#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &amp;ui_menu_general_baud,&amp;ui_menu_general_stepper_inactive,&amp;ui_menu_general_max_inactive}</span>
+<a name="l00494"></a>00494 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_general,UI_MENU_GENERAL,3+UI_MENU_BACKCNT);
+<a name="l00495"></a>00495 
+<a name="l00496"></a>00496 <span class="comment">// **** Extruder configuration</span>
+<a name="l00497"></a>00497 
+<a name="l00498"></a>00498 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_steps,<a class="code" href="uilang_8h.html#a5ed64f59dc91a4ac51e8c5b5759a90a7">UI_TEXT_EXTR_STEPS</a>,<a class="code" href="ui_8h.html#a740c709475aa0bf2e55e5177bc77f197">UI_ACTION_EXTR_STEPS</a>);
+<a name="l00499"></a>00499 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_start_feedrate,<a class="code" href="uilang_8h.html#ae5d02a18fe57b57da86ef0790fcef423">UI_TEXT_EXTR_START_FEED</a>,<a class="code" href="ui_8h.html#a4df68b19805b67688f32fee4e777288b">UI_ACTION_EXTR_START_FEEDRATE</a>);
+<a name="l00500"></a>00500 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_max_feedrate,<a class="code" href="uilang_8h.html#af8a8f76b4ba66f76eb9041f84b5dbbe1">UI_TEXT_EXTR_MAX_FEED</a>,<a class="code" href="ui_8h.html#aa2f7b85b27c04289b9a7f64844990d6d">UI_ACTION_EXTR_MAX_FEEDRATE</a>);
+<a name="l00501"></a>00501 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_acceleration,<a class="code" href="uilang_8h.html#a7eb91d66a5a6b57ed3eb538c47c54e9a">UI_TEXT_EXTR_ACCEL</a>,<a class="code" href="ui_8h.html#a0a4400d560b9f9a5e9d109e6b9e216be">UI_ACTION_EXTR_ACCELERATION</a>);
+<a name="l00502"></a>00502 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_watch_period,<a class="code" href="uilang_8h.html#a3ab3ad4951274c0e9ed5057761659616">UI_TEXT_EXTR_WATCH</a>,<a class="code" href="ui_8h.html#a39607560ff6738d4f1985140ba05fd4f">UI_ACTION_EXTR_WATCH_PERIOD</a>);
+<a name="l00503"></a>00503 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_wait_temp,<a class="code" href="uilang_8h.html#ad58d429c6029f5c747621e4fda25695c">UI_TEXT_EXTR_WAIT_RETRACT_TEMP</a>,<a class="code" href="ui_8h.html#ad363f46bc602ff96a3b0b11d3da8d295">UI_ACTION_EXTR_WAIT_RETRACT_TEMP</a>);
+<a name="l00504"></a>00504 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_ext_wait_units,<a class="code" href="uilang_8h.html#a5a4e443edce895d7a054cfc53996c8f4">UI_TEXT_EXTR_WAIT_RETRACT_UNITS</a>,<a class="code" href="ui_8h.html#a1a52c11084dabbb7b766d5b93a5dfefe">UI_ACTION_EXTR_WAIT_RETRACT_UNITS</a>);
+<a name="l00505"></a>00505 <span class="preprocessor">#define UI_MENU_ADV_CNT 0</span>
+<a name="l00506"></a>00506 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE</span>
+<a name="l00507"></a>00507 <span class="preprocessor"></span><span class="preprocessor">#ifdef USE_ADVANCE</span>
+<a name="l00508"></a>00508 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADV_CNT 1</span>
+<a name="l00509"></a>00509 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE ,&amp;ui_menu_cext_advancel</span>
+<a name="l00510"></a>00510 <span class="preprocessor"></span><span class="preprocessor">#ifdef ENABLE_QUADRATIC_ADVANCE</span>
+<a name="l00511"></a>00511 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADV_CNT 2</span>
+<a name="l00512"></a>00512 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_ADVANCE ,&amp;ui_menu_cext_advancel,&amp;ui_menu_cext_advancek</span>
+<a name="l00513"></a>00513 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_advancek,<a class="code" href="uilang_8h.html#a62143049db99610867e131e5b135b836">UI_TEXT_EXTR_ADVANCE_K</a>,<a class="code" href="ui_8h.html#a571c1f102544b6a3052138868de57fd0">UI_ACTION_ADVANCE_K</a>);
+<a name="l00514"></a>00514 <span class="preprocessor">#endif</span>
+<a name="l00515"></a>00515 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_advancel,<a class="code" href="uilang_8h.html#a6862d9d5595c5b8f442f8e7cadd19341">UI_TEXT_EXTR_ADVANCE_L</a>,<a class="code" href="ui_8h.html#ae86c06c1e30dd2fc413ed84d87f90ede">UI_ACTION_ADVANCE_L</a>);
+<a name="l00516"></a>00516 <span class="preprocessor">#endif</span>
+<a name="l00517"></a>00517 <span class="preprocessor"></span><span class="preprocessor">#ifdef TEMP_PID</span>
+<a name="l00518"></a>00518 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_manager,<a class="code" href="uilang_8h.html#a192952ad09a153c094ce5156abcdb1bb">UI_TEXT_EXTR_MANAGER</a>,<a class="code" href="ui_8h.html#a38eba0e0278e07eaf4e3f05eccddc913">UI_ACTION_EXTR_HEATMANAGER</a>);
+<a name="l00519"></a>00519 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_pgain,<a class="code" href="uilang_8h.html#a73dc1641242ccb3b0db77f96dde9b93a">UI_TEXT_EXTR_PGAIN</a>,<a class="code" href="ui_8h.html#a033fb5ac159235091f7ff230169ca33d">UI_ACTION_PID_PGAIN</a>);
+<a name="l00520"></a>00520 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_igain,<a class="code" href="uilang_8h.html#abfc5dc85b8dcdb5a49d91cdb22721715">UI_TEXT_EXTR_IGAIN</a>,<a class="code" href="ui_8h.html#a3f2109847802269fa14fbef4567a8ce4">UI_ACTION_PID_IGAIN</a>);
+<a name="l00521"></a>00521 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dgain,<a class="code" href="uilang_8h.html#a87da38c95c6f70d02f7534b83552823c">UI_TEXT_EXTR_DGAIN</a>,<a class="code" href="ui_8h.html#a47afa2d7891048b835711e6e414b0863">UI_ACTION_PID_DGAIN</a>);
+<a name="l00522"></a>00522 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dmin,<a class="code" href="uilang_8h.html#ae2c2d5b5dde3aace54089d68d2e8552a">UI_TEXT_EXTR_DMIN</a>,<a class="code" href="ui_8h.html#a97ef7b0f0bc0920cf888c483ece5f271">UI_ACTION_DRIVE_MIN</a>);
+<a name="l00523"></a>00523 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_dmax,<a class="code" href="uilang_8h.html#aca44bc11e8082ed273f9f5dfcb1ebae0">UI_TEXT_EXTR_DMAX</a>,<a class="code" href="ui_8h.html#ad806dde8d455640c91749402918871cf">UI_ACTION_DRIVE_MAX</a>);
+<a name="l00524"></a>00524 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_pmax,<a class="code" href="uilang_8h.html#aefe5bc3f7fdd54a294380f2a41ae8aae">UI_TEXT_EXTR_PMAX</a>,<a class="code" href="ui_8h.html#a76ad73dc9254fa21155b6fee5807ef2c">UI_ACTION_PID_MAX</a>);
+<a name="l00525"></a>00525 <span class="preprocessor">#define UI_MENU_PIDCOND ,&amp;ui_menu_cext_manager,&amp;ui_menu_cext_pgain,&amp;ui_menu_cext_igain,&amp;ui_menu_cext_dgain,&amp;ui_menu_cext_dmin,&amp;ui_menu_cext_dmax,&amp;ui_menu_cext_pmax</span>
+<a name="l00526"></a>00526 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCNT 7</span>
+<a name="l00527"></a>00527 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00528"></a>00528 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCOND</span>
+<a name="l00529"></a>00529 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_PIDCNT 0</span>
+<a name="l00530"></a>00530 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00531"></a>00531 <span class="preprocessor"></span><span class="preprocessor">#if NUM_EXTRUDER&gt;1</span>
+<a name="l00532"></a>00532 <span class="preprocessor"></span><a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_xoffset,<a class="code" href="uilang_8h.html#a7653bc2c75b3eadc430f7612269ab522">UI_TEXT_EXTR_XOFF</a>,<a class="code" href="ui_8h.html#a9d9beaa3b44a5ab41831426eb4238c9d">UI_ACTION_X_OFFSET</a>);
+<a name="l00533"></a>00533 <a class="code" href="ui_8h.html#ad5dc725d925d79ce24c578360b5be912">UI_MENU_CHANGEACTION</a>(ui_menu_cext_yoffset,<a class="code" href="uilang_8h.html#a5067bb31c30e49049af3a91719df3e58">UI_TEXT_EXTR_YOFF</a>,<a class="code" href="ui_8h.html#af9f4cf208904a281d9fe4016145ea1fa">UI_ACTION_Y_OFFSET</a>);
+<a name="l00534"></a>00534 <span class="preprocessor">#define UI_MENU_CONFEXTCOND &amp;ui_menu_ext_sel0,&amp;ui_menu_ext_sel1,&amp;ui_menu_cext_xoffset,&amp;ui_menu_cext_yoffset,</span>
+<a name="l00535"></a>00535 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCNT 4</span>
+<a name="l00536"></a>00536 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00537"></a>00537 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCOND</span>
+<a name="l00538"></a>00538 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFEXTCNT 0</span>
+<a name="l00539"></a>00539 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00540"></a>00540 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &amp;ui_menu_cext_steps,&amp;ui_menu_cext_start_feedrate,&amp;ui_menu_cext_max_feedrate,&amp;ui_menu_cext_acceleration,&amp;ui_menu_cext_watch_period,&amp;ui_menu_ext_wait_units,&amp;ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}</span>
+<a name="l00541"></a>00541 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_cextr,UI_MENU_CEXTR,7+UI_MENU_BACKCNT+UI_MENU_PIDCNT+UI_MENU_CONFEXTCNT+UI_MENU_ADV_CNT);
+<a name="l00542"></a>00542 
+<a name="l00543"></a>00543 <span class="comment">// **** Configuration menu</span>
+<a name="l00544"></a>00544 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_general,<a class="code" href="uilang_8h.html#ae395a3c1f3faedd128a40c166f3efb54">UI_TEXT_GENERAL</a>,ui_menu_general);
+<a name="l00545"></a>00545 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_accel,<a class="code" href="uilang_8h.html#a785fd66567009607be7489930e9768ec">UI_TEXT_ACCELERATION</a>,ui_menu_accel);
+<a name="l00546"></a>00546 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_feed,<a class="code" href="uilang_8h.html#a3e999445b5774d014033fe96ef65b284">UI_TEXT_FEEDRATE</a>,ui_menu_feedrate);
+<a name="l00547"></a>00547 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_extr,<a class="code" href="uilang_8h.html#af3e61cf5ecaf1373fe49896606030b8b">UI_TEXT_EXTRUDER</a>,ui_menu_cextr);
+<a name="l00548"></a>00548 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00549"></a>00549 <span class="preprocessor"></span><a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_conf_to_eeprom,<a class="code" href="uilang_8h.html#a39d5a5d7e47c1b9f3596c82bc7d6f367">UI_TEXT_STORE_TO_EEPROM</a>,<a class="code" href="ui_8h.html#ae092c04f456da231d3376b8f51365e95">UI_ACTION_STORE_EEPROM</a>);
+<a name="l00550"></a>00550 <a class="code" href="ui_8h.html#abfa9c15593e23b92dfa7cd274c4e9349">UI_MENU_ACTIONCOMMAND</a>(ui_menu_conf_from_eeprom,<a class="code" href="uilang_8h.html#abbf76e9debfdf97b6792e0447a1e7d12">UI_TEXT_LOAD_EEPROM</a>,<a class="code" href="ui_8h.html#a1e5b1992f0345cb6fd8a952f8a0e2d2c">UI_ACTION_LOAD_EEPROM</a>);
+<a name="l00551"></a>00551 <span class="preprocessor">#define UI_MENU_EEPROM_COND ,&amp;ui_menu_conf_to_eeprom,&amp;ui_menu_conf_from_eeprom</span>
+<a name="l00552"></a>00552 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_CNT 2</span>
+<a name="l00553"></a>00553 <span class="preprocessor"></span><a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_eeprom_saved,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#accbd9259b5e6fb6ff7ce42d69193dcc6">UI_TEXT_EEPROM_STORED</a>);
+<a name="l00554"></a>00554 <a class="code" href="ui_8h.html#aaa804117ecf24350f5b67ba03e4563cc">UI_MENU_ACTION2C</a>(ui_menu_eeprom_loaded,<a class="code" href="ui_8h.html#a805b79beca32e71119c52596f35bb1cb">UI_ACTION_DUMMY</a>,<a class="code" href="uilang_8h.html#a997b2aac3b27c684658e5c08ee8d7f58">UI_TEXT_EEPROM_LOADED</a>);
+<a name="l00555"></a>00555 <span class="preprocessor">#else</span>
+<a name="l00556"></a>00556 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_COND</span>
+<a name="l00557"></a>00557 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_EEPROM_CNT 0</span>
+<a name="l00558"></a>00558 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00559"></a>00559 <span class="preprocessor"></span><span class="preprocessor">#ifdef SOFTWARE_LEVELING</span>
+<a name="l00560"></a>00560 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_COND ,&amp;ui_menu_conf_level</span>
+<a name="l00561"></a>00561 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_CNT 1</span>
+<a name="l00562"></a>00562 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_level, <a class="code" href="uilang_8h.html#ade5595332b740d9cf82b027d8b4b3ee3">UI_TEXT_LEVEL</a>, ui_menu_level);
+<a name="l00563"></a>00563 <span class="preprocessor">#else</span>
+<a name="l00564"></a>00564 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_COND</span>
+<a name="l00565"></a>00565 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_SL_CNT 0</span>
+<a name="l00566"></a>00566 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00567"></a>00567 <span class="preprocessor"></span><span class="preprocessor">#ifdef Z_HOME_DIR&lt;0</span>
+<a name="l00568"></a>00568 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_COND ,&amp;ui_menu_conf_delta</span>
+<a name="l00569"></a>00569 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_CNT 1</span>
+<a name="l00570"></a>00570 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_conf_delta, <a class="code" href="uilang_8h.html#a0b5dfa03276a9decae7e1d4e7524618f">UI_TEXT_ZCALIB</a>, ui_menu_delta);
+<a name="l00571"></a>00571 <span class="preprocessor">#else</span>
+<a name="l00572"></a>00572 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_COND</span>
+<a name="l00573"></a>00573 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_DELTA_CNT 0</span>
+<a name="l00574"></a>00574 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00575"></a>00575 <span class="preprocessor"></span><span class="preprocessor">#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &amp;ui_menu_conf_general,&amp;ui_menu_conf_accel,&amp;ui_menu_conf_feed,&amp;ui_menu_conf_extr UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}</span>
+<a name="l00576"></a>00576 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_configuration,UI_MENU_CONFIGURATION,UI_MENU_BACKCNT+UI_MENU_EEPROM_CNT+UI_MENU_DELTA_CNT+UI_MENU_SL_CNT+4);
+<a name="l00577"></a>00577 <span class="comment">// Main menu</span>
+<a name="l00578"></a>00578 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main1,<a class="code" href="uilang_8h.html#a6007e948c3395fb89c0680bcdedd5b14">UI_TEXT_QUICK_SETTINGS</a>,ui_menu_quick);
+<a name="l00579"></a>00579 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main2, <a class="code" href="uilang_8h.html#a2f6a28a692cc72e70e472370c0d6f533">UI_TEXT_POSITION</a>,ui_menu_positions);
+<a name="l00580"></a>00580 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main3,<a class="code" href="uilang_8h.html#af3e61cf5ecaf1373fe49896606030b8b">UI_TEXT_EXTRUDER</a>,ui_menu_extruder);
+<a name="l00581"></a>00581 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main4,<a class="code" href="uilang_8h.html#aeb1c3a4646e56c8f806b2dd32f07dd59">UI_TEXT_DEBUGGING</a>,ui_menu_debugging);
+<a name="l00582"></a>00582 <a class="code" href="ui_8h.html#a31790e5ac14ae52c67b58c96f4fcf807">UI_MENU_SUBMENU</a>(ui_menu_main5,<a class="code" href="uilang_8h.html#ae24f427ed131e848d2fe732e010b244a">UI_TEXT_CONFIGURATION</a>,ui_menu_configuration);
+<a name="l00583"></a>00583 <span class="preprocessor">#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK  &amp;ui_menu_main1,&amp;ui_menu_sd_printfile,&amp;ui_menu_main2,&amp;ui_menu_main3,UI_MENU_FAN_COND UI_MENU_SD_COND &amp;ui_menu_main4,&amp;ui_menu_main5}</span>
+<a name="l00584"></a>00584 <span class="preprocessor"></span><a class="code" href="ui_8h.html#a6c387ba3eae79ffc62c97651dde10db5">UI_MENU</a>(ui_menu_main,UI_MENU_MAIN,6+UI_MENU_BACKCNT+UI_MENU_SD_CNT+UI_MENU_FAN_CNT);
+<a name="l00585"></a>00585 
+<a name="l00586"></a>00586 <span class="comment">/* Define menus accessible by action commands</span>
+<a name="l00587"></a>00587 <span class="comment"></span>
+<a name="l00588"></a>00588 <span class="comment">You can create up to 10 user menus which are accessible by the action commands UI_ACTION_SHOW_USERMENU1 until UI_ACTION_SHOW_USERMENU10</span>
+<a name="l00589"></a>00589 <span class="comment">You this the same way as with the menus above or you use one of the above menus. Then add a define like</span>
+<a name="l00590"></a>00590 <span class="comment"></span>
+<a name="l00591"></a>00591 <span class="comment">#define UI_USERMENU1 ui_menu_conf_feed</span>
+<a name="l00592"></a>00592 <span class="comment"></span>
+<a name="l00593"></a>00593 <span class="comment">which assigns the menu stored in ui_menu_conf_feed to the action UI_ACTION_SHOW_USERMENU1. Make sure only to change the numbers and not the name of the define.</span>
+<a name="l00594"></a>00594 <span class="comment"></span>
+<a name="l00595"></a>00595 <span class="comment">When do you need this? You might want a fast button to change the temperature. In the default menu you have no menu</span>
+<a name="l00596"></a>00596 <span class="comment">to change the temperature and view it the same time. So you need to make an action menu for this like:</span>
+<a name="l00597"></a>00597 <span class="comment">UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,&quot;Temp. 0  :%E0\002C&quot;,&quot;&quot;,&quot;&quot;,&quot;&quot;);</span>
+<a name="l00598"></a>00598 <span class="comment">Then you assign this menu to a usermenu:</span>
+<a name="l00599"></a>00599 <span class="comment">#define UI_USERMENU2 ui_menu_extrtemp</span>
+<a name="l00600"></a>00600 <span class="comment"></span>
+<a name="l00601"></a>00601 <span class="comment">Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a key and that will now show the temperture screen and allows</span>
+<a name="l00602"></a>00602 <span class="comment">the change of temperature with the next/previous buttons.</span>
+<a name="l00603"></a>00603 <span class="comment"></span>
+<a name="l00604"></a>00604 <span class="comment">*/</span>
+<a name="l00605"></a>00605 
+<a name="l00606"></a>00606 <span class="preprocessor">#endif // __UI_MENU_H</span>
 </pre></div></div><!-- contents -->
 </div>
 <!-- window showing the filter options -->
@@ -626,7 +727,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul>
       <li class="navelem"><a class="el" href="uimenu_8h.html">uimenu.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

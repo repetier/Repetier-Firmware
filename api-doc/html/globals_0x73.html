@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -114,6 +114,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li class="current"><a href="globals_0x73.html#index_s"><span>s</span></a></li>
       <li><a href="globals_0x74.html#index_t"><span>t</span></a></li>
       <li><a href="globals_0x75.html#index_u"><span>u</span></a></li>
+      <li><a href="globals_0x76.html#index_v"><span>v</span></a></li>
       <li><a href="globals_0x77.html#index_w"><span>w</span></a></li>
       <li><a href="globals_0x78.html#index_x"><span>x</span></a></li>
       <li><a href="globals_0x79.html#index_y"><span>y</span></a></li>
@@ -138,9 +139,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="textblock">Here is a list of all functions, variables, defines, enums, and typedefs with links to the files they belong to:</div>
 
 <h3><a class="anchor" id="index_s"></a>- s -</h3><ul>
-<li>safeSpeed()
-: <a class="el" href="motion_8cpp.html#ade2454036639a692fd63a9cdffe9f6c4">motion.cpp</a>
-</li>
 <li>SCALE_PID_TO_MAX
 : <a class="el" href="_configuration_8h.html#aeba3c210690a31bfb8fabc07afce1f6b">Configuration.h</a>
 </li>
@@ -207,6 +205,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>SD_CARD_ERROR_SCK_RATE
 : <a class="el" href="_sd_fat_8h.html#aa4036973d09278197c2949181094e8e2">SdFat.h</a>
 </li>
+<li>SD_CARD_ERROR_SPI_DMA
+: <a class="el" href="_sd_fat_8h.html#ae10703397b36b451e590946497a58867">SdFat.h</a>
+</li>
 <li>SD_CARD_ERROR_STOP_TRAN
 : <a class="el" href="_sd_fat_8h.html#a87264e66265e36be6b1428ebacf2e4ed">SdFat.h</a>
 </li>
@@ -224,6 +225,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>SD_CARD_ERROR_WRITE_TIMEOUT
 : <a class="el" href="_sd_fat_8h.html#ae6574296ec37c52209c5f2c5664dccdb">SdFat.h</a>
+</li>
+<li>SD_CARD_REUSE_FAT_ENTRIES
+: <a class="el" href="_sd_fat_8h.html#a91d7d33ce23ec0b34dcc1f2f638887f3">SdFat.h</a>
 </li>
 <li>SD_CARD_TYPE_SD1
 : <a class="el" href="_sd_fat_8h.html#af55081a60d333ab063a5da5dd2c3633b">SdFat.h</a>
@@ -249,6 +253,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>SD_INIT_TIMEOUT
 : <a class="el" href="_sd_fat_8h.html#ab7b9920a819e60f97f988ee13b3ddc40">SdFat.h</a>
 </li>
+<li>SD_MAX_FOLDER_DEPTH
+: <a class="el" href="_repetier_8h.html#a4f72bc2f610f4156f446d7cc00fab46c">Repetier.h</a>
+</li>
 <li>SD_READ_TIMEOUT
 : <a class="el" href="_sd_fat_8h.html#a02f6ddc876ebab300586940bd111eccd">SdFat.h</a>
 </li>
@@ -262,20 +269,43 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="pins_8h.html#ace91a4e928d61240785c9438be8651d0">pins.h</a>
 </li>
 <li>SECONDS_TO_TICKS
-: <a class="el" href="_reptier_8h.html#a6252b6137f2c7128b048b21f86157df7">Reptier.h</a>
+: <a class="el" href="_h_a_l_8h.html#a6252b6137f2c7128b048b21f86157df7">HAL.h</a>
+</li>
+<li>sector_size_high
+: <a class="el" href="_sd_fat_8h.html#a2580a4c6ddd99928402db34c2f650033">SdFat.h</a>
+</li>
+<li>sector_size_low
+: <a class="el" href="_sd_fat_8h.html#afcbc43e43942a772e79ef2aa55e37650">SdFat.h</a>
 </li>
 <li>SENSITIVE_PINS
 : <a class="el" href="pins_8h.html#a7554de9fe38c3746f23fc77dfaecf2ff">pins.h</a>
 </li>
 <li>SERIAL_BUFFER_MASK
-: <a class="el" href="gcode_8h.html#a802cf662365d7027fced85e4bfb8b968">gcode.h</a>
+: <a class="el" href="_h_a_l_8h.html#a802cf662365d7027fced85e4bfb8b968">HAL.h</a>
 </li>
 <li>SERIAL_BUFFER_SIZE
-: <a class="el" href="gcode_8h.html#aaa07390e6158db5d82d40510d2ae02d5">gcode.h</a>
+: <a class="el" href="_h_a_l_8h.html#aaa07390e6158db5d82d40510d2ae02d5">HAL.h</a>
 </li>
-<li>set_fan_speed()
-: <a class="el" href="_reptier_8h.html#a9b1e6267b8d2922a6cd0e71d1966f43c">Reptier.h</a>
-, <a class="el" href="_commands_8cpp.html#a9b1e6267b8d2922a6cd0e71d1966f43c">Commands.cpp</a>
+<li>SERIAL_TX_BUFFER_MASK
+: <a class="el" href="_h_a_l_8h.html#aa9e24a9121e507c4f7a0ed7a06c77763">HAL.h</a>
+</li>
+<li>SERIAL_TX_BUFFER_SIZE
+: <a class="el" href="_h_a_l_8h.html#af0d9a9a9aac810bf58f698086f76e516">HAL.h</a>
+</li>
+<li>serialEvent_implemented
+: <a class="el" href="_h_a_l_8cpp.html#ad85813cb15982722984f0f0db49088f8">HAL.cpp</a>
+</li>
+<li>SERVO0_PIN
+: <a class="el" href="_configuration_8h.html#a1fdd264637580640d89fbffa822a45ae">Configuration.h</a>
+</li>
+<li>SERVO1_PIN
+: <a class="el" href="_configuration_8h.html#acc407398818b8e8fe8a1e314f762db21">Configuration.h</a>
+</li>
+<li>SERVO2_PIN
+: <a class="el" href="_configuration_8h.html#a0e45aba502d52eac8d6261055e5ecb74">Configuration.h</a>
+</li>
+<li>SERVO3_PIN
+: <a class="el" href="_configuration_8h.html#ae10111ce2dd1b9a78f3eaeeda632d4e0">Configuration.h</a>
 </li>
 <li>SET_INPUT
 : <a class="el" href="fastio_8h.html#afa76df25ccdb2d113a057c8c305399cc">fastio.h</a>
@@ -287,13 +317,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 : <a class="el" href="_sd_fat_8h.html#ab780c3f0584e602320e2f746f73e0d5d">SdFat.h</a>
 </li>
 <li>setTimer()
-: <a class="el" href="_repetier_8pde.html#a179289a2897d5034b844a3c4de1abc32">Repetier.pde</a>
-</li>
-<li>setup()
-: <a class="el" href="_repetier_8pde.html#a4fc01d736fe50cf5b977f755b675f11d">Repetier.pde</a>
+: <a class="el" href="_h_a_l_8cpp.html#a179289a2897d5034b844a3c4de1abc32">HAL.cpp</a>
 </li>
 <li>setupTimerInterrupt()
-: <a class="el" href="_reptier_8h.html#a0764a6316281ac76f1e8fa8a07b0332e">Reptier.h</a>
+: <a class="el" href="_repetier_8h.html#a0764a6316281ac76f1e8fa8a07b0332e">Repetier.h</a>
 </li>
 <li>SKIP_M109_IF_WITHIN
 : <a class="el" href="_configuration_8h.html#a77af8750d303d708512c1e64a4c1b416">Configuration.h</a>
@@ -313,6 +340,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>SOFT_SPI_SCK_PIN
 : <a class="el" href="_sd_fat_8h.html#add7db7df22669e60cddd5698113d6327">SdFat.h</a>
 </li>
+<li>SPEED_MAGNIFICATION
+: <a class="el" href="_repetier_8h.html#af6775b549e42844b7fa0dae6a6b26dbc">Repetier.h</a>
+</li>
+<li>SPEED_MAX_MILLIS
+: <a class="el" href="_repetier_8h.html#ac71536ab59d4ae217590e9e2bb70ef06">Repetier.h</a>
+</li>
+<li>SPEED_MIN_MILLIS
+: <a class="el" href="_repetier_8h.html#a73708ff09bb1146a609cf387ec0abb40">Repetier.h</a>
+</li>
+<li>speed_t
+: <a class="el" href="_h_a_l_8h.html#a14a0666abcf3bb67c7ff400b4a450467">HAL.h</a>
+</li>
+<li>SPI_DIV3_SPEED
+: <a class="el" href="_sd_fat_8h.html#a5a1200ff5e0c910fdea6eca447d10a19">SdFat.h</a>
+</li>
+<li>SPI_DIV6_SPEED
+: <a class="el" href="_sd_fat_8h.html#a491576f0359638403febf9289f7e4fbd">SdFat.h</a>
+</li>
 <li>SPI_EIGHTH_SPEED
 : <a class="el" href="_sd_fat_8h.html#acf9e8ae5785dfdaa0fa59042e528ea6c">SdFat.h</a>
 </li>
@@ -331,32 +376,33 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>SPI_SIXTEENTH_SPEED
 : <a class="el" href="_sd_fat_8h.html#a792e282c1b86c65d14e3d6e6612ad2d0">SdFat.h</a>
 </li>
+<li>st_Draw()
+: <a class="el" href="u8glib__ex_8h.html#a6b98d77e399c0e6b8d5a5d0bce1cd9ca">u8glib_ex.h</a>
+</li>
+<li>st_Step()
+: <a class="el" href="u8glib__ex_8h.html#ab0f086c0c9acf408fda8c7b77ef0dae7">u8glib_ex.h</a>
+</li>
 <li>STEP_DOUBLER_FREQUENCY
 : <a class="el" href="_configuration_8h.html#a0571dfea8f7cc9fe22a0a2f21aee53bf">Configuration.h</a>
-</li>
-<li>STEP_PIN
-: <a class="el" href="_repetier_8pde.html#a7a4a4c3f0320af0a5302a8e9c293d69b">Repetier.pde</a>
 </li>
 <li>STEPPER_HIGH_DELAY
 : <a class="el" href="_configuration_8h.html#aaa88e47f41a7a1924d9c0fc0aeff0a49">Configuration.h</a>
 </li>
-<li>stepper_inactive_time
-: <a class="el" href="_repetier_8pde.html#a42b85fa8f5f131ba70a2d02d14e7e507">Repetier.pde</a>
-</li>
 <li>STEPPER_INACTIVE_TIME
 : <a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">Configuration.h</a>
 </li>
-<li>stepper_inactive_time
-: <a class="el" href="_reptier_8h.html#a42b85fa8f5f131ba70a2d02d14e7e507">Reptier.h</a>
+<li>stepperInactiveTime
+: <a class="el" href="_repetier_8h.html#acfda5eefcb4f9723567641d4167a9582">Repetier.h</a>
+, <a class="el" href="motion_8cpp.html#acfda5eefcb4f9723567641d4167a9582">motion.cpp</a>
 </li>
 <li>stepperWait
-: <a class="el" href="_repetier_8pde.html#adf5afbea13ec61dc94d6b0ebf6b1eb48">Repetier.pde</a>
+: <a class="el" href="_h_a_l_8cpp.html#adf5afbea13ec61dc94d6b0ebf6b1eb48">HAL.cpp</a>
 </li>
 <li>STOP_TRAN_TOKEN
 : <a class="el" href="_sd_fat_8h.html#a22cd4350449d8c6e4ed71ddaa86d4482">SdFat.h</a>
 </li>
 <li>STR
-: <a class="el" href="_reptier_8h.html#a6388870e639eee9c0a69446876f1f8cc">Reptier.h</a>
+: <a class="el" href="_repetier_8h.html#a6388870e639eee9c0a69446876f1f8cc">Repetier.h</a>
 </li>
 <li>STR_auml
 : <a class="el" href="uilang_8h.html#aee1d7a9ce367fdf2cf42dd2ba1a3ca9f">uilang.h</a>
@@ -364,11 +410,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>STR_Auml
 : <a class="el" href="uilang_8h.html#a54ff7393b953b5b69d27cee735188902">uilang.h</a>
 </li>
-<li>STR_ouml
-: <a class="el" href="uilang_8h.html#a06ee06142dcd517378ccb7a092052913">uilang.h</a>
-</li>
 <li>STR_Ouml
 : <a class="el" href="uilang_8h.html#a74657287675a44eef92155586284b523">uilang.h</a>
+</li>
+<li>STR_ouml
+: <a class="el" href="uilang_8h.html#a06ee06142dcd517378ccb7a092052913">uilang.h</a>
 </li>
 <li>STR_szlig
 : <a class="el" href="uilang_8h.html#a1dcfd38eea727be0f8ee2231ed25a7a8">uilang.h</a>
@@ -399,7 +445,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="nav-path" class="navpath">
     <ul>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

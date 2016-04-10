@@ -4,6 +4,5 @@ var searchData=
   ['sdbasefile',['SdBaseFile',['../class_sd_base_file.html',1,'']]],
   ['sdfat',['SdFat',['../class_sd_fat.html',1,'']]],
   ['sdfile',['SdFile',['../class_sd_file.html',1,'']]],
-  ['sdvolume',['SdVolume',['../class_sd_volume.html',1,'']]],
-  ['serialoutput',['SerialOutput',['../class_serial_output.html',1,'']]]
+  ['sdvolume',['SdVolume',['../class_sd_volume.html',1,'']]]
 ];

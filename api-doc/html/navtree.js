@@ -1,7 +1,7 @@
 var NAVTREE =
 [
   [ "Repetier-Firmware", "index.html", [
-    [ "Repetier-Firmware for Arduino based RepRaps", "index.html", null ],
+    [ "Arduino SdFat Library", "index.html", null ],
     [ "Related Pages", "pages.html", "pages" ],
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.html", "namespaces" ],
@@ -25,7 +25,7 @@ var NAVTREE =
       [ "File List", "files.html", "files" ],
       [ "Globals", "globals.html", [
         [ "All", "globals.html", "globals_dup" ],
-        [ "Functions", "globals_func.html", null ],
+        [ "Functions", "globals_func.html", "globals_func" ],
         [ "Variables", "globals_vars.html", "globals_vars" ],
         [ "Typedefs", "globals_type.html", null ],
         [ "Defines", "globals_defs.html", "globals_defs" ]

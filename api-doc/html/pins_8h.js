@@ -11,7 +11,6 @@ var pins_8h =
     [ "E2_PINS", "pins_8h.html#aab8228755a4a1d84da4c45fcbec727e3", null ],
     [ "FAN_PIN", "pins_8h.html#a2659364744f6d57a126d7199e3e11343", null ],
     [ "HEATER_0_PIN", "pins_8h.html#a1187644466b5dd2376ad6b4e99c0878b", null ],
-    [ "KILL_PIN", "pins_8h.html#aff1372f6d6eba317ecc336b8e4822963", null ],
     [ "KNOWN_BOARD", "pins_8h.html#a2bb94c28142cbf583e425d3fa42a5550", null ],
     [ "LED_PIN", "pins_8h.html#ab4553be4db9860d940f81d7447173b2f", null ],
     [ "PS_ON_PIN", "pins_8h.html#adfa9645ffbea2e304b2fb7059862e787", null ],

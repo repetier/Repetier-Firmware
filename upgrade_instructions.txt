@@ -1,6 +1,19 @@
 If you are upgrading from an earlier version, make sure you followed the upgrade
 instructions for that version.
 
+Upgrade to 0.91
+
+Starting with 0.91 we offer an online configuration tool. You find it here:
+
+http://www.repetier.com/firmware/v091/
+
+Once you have created a configuration with that tool, you can upload these
+configurations to the latest version and it will add all missing options and
+highlight them for inspections. Unfortuanetly this relies on a special comment
+conteining configuration data, so uploading existing Configuration.h files
+will not work.
+
+
 Upgrade to 0.80
 
 The EEPROM storage uses now a checksum to help switching from other firmwares. This

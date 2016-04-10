@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/Eeprom.h Source File</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/Eeprom.h Source File</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,7 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Repetier/Eeprom.h</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/Eeprom.h</div>  </div>
 </div><!--header-->
 <div class="contents">
 <a href="_eeprom_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -122,118 +122,331 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00019"></a>00019 <span class="preprocessor">#ifndef _EEPROM_H</span>
 <a name="l00020"></a>00020 <span class="preprocessor"></span><span class="preprocessor">#define _EEPROM_H</span>
 <a name="l00021"></a>00021 <span class="preprocessor"></span>
-<a name="l00022"></a>00022 <span class="preprocessor">#include &lt;avr/eeprom.h&gt;</span>
-<a name="l00023"></a>00023 
-<a name="l00024"></a>00024 <span class="comment">// Id to distinguish version changes </span>
-<a name="l00025"></a><a class="code" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">00025</a> <span class="preprocessor">#define EEPROM_PROTOCOL_VERSION 1</span>
-<a name="l00026"></a>00026 <span class="preprocessor"></span>
-<a name="l00030"></a><a class="code" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">00030</a> <span class="preprocessor">#define EEPROM_OFFSET               0</span>
-<a name="l00031"></a><a class="code" href="_eeprom_8h.html#ade30e27b166cc7fa8c6c61cd8a01d1d1">00031</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAGIC_BYTE              0</span>
-<a name="l00032"></a><a class="code" href="_eeprom_8h.html#ac50a4c7f2bc4d7e2c876a28f631561d7">00032</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_ACCELERATION_TYPE       1</span>
-<a name="l00033"></a><a class="code" href="_eeprom_8h.html#a8922fb8a0e782dcf6a51fb5a38d1d8b8">00033</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_XAXIS_STEPS_PER_MM      3</span>
-<a name="l00034"></a><a class="code" href="_eeprom_8h.html#a6d63760d73b626620c609bc43d20f18e">00034</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_YAXIS_STEPS_PER_MM      7</span>
-<a name="l00035"></a><a class="code" href="_eeprom_8h.html#a726a50b6b49d55ad4c1be62bd8962d79">00035</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_ZAXIS_STEPS_PER_MM     11</span>
-<a name="l00036"></a><a class="code" href="_eeprom_8h.html#a174c827554a74b3d36ce6330d76051a9">00036</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_FEEDRATE         15</span>
-<a name="l00037"></a><a class="code" href="_eeprom_8h.html#a2b662cf101fe608885ecb1de260f4c2e">00037</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_FEEDRATE         19</span>
-<a name="l00038"></a><a class="code" href="_eeprom_8h.html#a957fdf7fe063b0925355084264cb3a3b">00038</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_FEEDRATE         23</span>
-<a name="l00039"></a><a class="code" href="_eeprom_8h.html#ade4042dbe39efc939de8a75e0102ee4b">00039</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_HOMING_FEEDRATE      27</span>
-<a name="l00040"></a><a class="code" href="_eeprom_8h.html#a848be186f70158156487357cea8a076f">00040</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_HOMING_FEEDRATE      31</span>
-<a name="l00041"></a><a class="code" href="_eeprom_8h.html#a2bbc6d31ec012b522b7b8700852fb236">00041</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_HOMING_FEEDRATE      35</span>
-<a name="l00042"></a><a class="code" href="_eeprom_8h.html#aa90bbc0fc3c7b8e8e0a1bca0c99a5a44">00042</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAX_JERK               39</span>
-<a name="l00043"></a><a class="code" href="_eeprom_8h.html#aaac0aa2508218f3241396b2f71b74acf">00043</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_OPS_MIN_DISTANCE       43</span>
-<a name="l00044"></a><a class="code" href="_eeprom_8h.html#affc38f44bedceafaa70242ece11a43b6">00044</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAX_ZJERK              47</span>
-<a name="l00045"></a><a class="code" href="_eeprom_8h.html#ac5c699b9db85fa31d55057190d426f8a">00045</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_ACCEL            51</span>
-<a name="l00046"></a><a class="code" href="_eeprom_8h.html#ac92348123f02b917797b1f1aeabae211">00046</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_ACCEL            55</span>
-<a name="l00047"></a><a class="code" href="_eeprom_8h.html#a5348a179e18b172568cde394861318a8">00047</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_ACCEL            59</span>
-<a name="l00048"></a><a class="code" href="_eeprom_8h.html#a30d1011b1e11d6c4f5927df02a3194ec">00048</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_TRAVEL_ACCEL     63</span>
-<a name="l00049"></a><a class="code" href="_eeprom_8h.html#a74134773b5ecd9fe785c7124c03923a1">00049</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_TRAVEL_ACCEL     67</span>
-<a name="l00050"></a><a class="code" href="_eeprom_8h.html#ae9bb5eec63a8826ccac85b3245a4ec3b">00050</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_TRAVEL_ACCEL     71</span>
-<a name="l00051"></a><a class="code" href="_eeprom_8h.html#a67738eb9838d52221677f73de020f87c">00051</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BAUDRATE               75</span>
-<a name="l00052"></a><a class="code" href="_eeprom_8h.html#a5eebdcc1d55d8635fb4296f9dc371f33">00052</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAX_INACTIVE_TIME      79</span>
-<a name="l00053"></a><a class="code" href="_eeprom_8h.html#a3e3982e8d6fbf37b06de3253722170bc">00053</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_STEPPER_INACTIVE_TIME  83</span>
-<a name="l00054"></a><a class="code" href="_eeprom_8h.html#a4b48a037ac143186e460bec3c5c3ec4a">00054</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_OPS_RETRACT_DISTANCE   87</span>
-<a name="l00055"></a><a class="code" href="_eeprom_8h.html#aa688939bd8b7f1f7e640f40d4b4beb97">00055</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_OPS_RETRACT_BACKLASH   91</span>
-<a name="l00056"></a><a class="code" href="_eeprom_8h.html#a16ea8a2464dbc67f58429c7e1699b916">00056</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_SPEED         95</span>
-<a name="l00057"></a><a class="code" href="_eeprom_8h.html#a4b3e9d284d63fdddc2707765e01aca81">00057</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_OPS_MOVE_AFTER         99</span>
-<a name="l00058"></a><a class="code" href="_eeprom_8h.html#a6812ff9c2354db4eddeda8afa24e6727">00058</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_OPS_MODE              103</span>
-<a name="l00059"></a><a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">00059</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_INTEGRITY_BYTE        104   // Here the xored sum over eeprom is stored</span>
-<a name="l00060"></a><a class="code" href="_eeprom_8h.html#a09417ae921b9d1693e57c854ea7b54d3">00060</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_VERSION               105   // Version id for updates in EEPROM storage</span>
-<a name="l00061"></a><a class="code" href="_eeprom_8h.html#a431c0d7daae00f28b101769db333f669">00061</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_HEAT_MANAGER      106</span>
-<a name="l00062"></a><a class="code" href="_eeprom_8h.html#a31694e12f9a9e110c27686512218e796">00062</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_DRIVE_MAX         107</span>
-<a name="l00063"></a><a class="code" href="_eeprom_8h.html#a8b2ef6824d9af29e85a3fbb9f6a36069">00063</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_PGAIN         108</span>
-<a name="l00064"></a><a class="code" href="_eeprom_8h.html#a3a80c6ed2a0af7709dfa213efb036afe">00064</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_IGAIN         112</span>
-<a name="l00065"></a><a class="code" href="_eeprom_8h.html#a03c7fdbbe8d3232a5d9933e94f3378ac">00065</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_DGAIN         116</span>
-<a name="l00066"></a><a class="code" href="_eeprom_8h.html#a4e1f001be8f24a0367517871c8dbcd9d">00066</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_MAX           120</span>
-<a name="l00067"></a><a class="code" href="_eeprom_8h.html#a29eb8c2e447e884aaed85324619330cd">00067</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_DRIVE_MIN         124</span>
-<a name="l00068"></a><a class="code" href="_eeprom_8h.html#aaa272eb58e900d5a14455aa37911e2f9">00068</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_PRINTING_TIME         125  // Time in seconds printing</span>
-<a name="l00069"></a><a class="code" href="_eeprom_8h.html#a496378b775749413300f48c80ff16b57">00069</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_PRINTING_DISTANCE     129  // Filament length printed</span>
-<a name="l00070"></a><a class="code" href="_eeprom_8h.html#a551556875e62375776216298efb193e3">00070</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_HOME_OFFSET         133</span>
-<a name="l00071"></a><a class="code" href="_eeprom_8h.html#a5db8240da54aaf1667544c2ef84866a6">00071</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_HOME_OFFSET         137</span>
-<a name="l00072"></a><a class="code" href="_eeprom_8h.html#aba3e24d6f36e5802c9d3362ca9a7d861">00072</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_HOME_OFFSET         141</span>
-<a name="l00073"></a><a class="code" href="_eeprom_8h.html#a1e53e4104888c8e50378ef1e05f05a7b">00073</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_LENGTH              145</span>
-<a name="l00074"></a><a class="code" href="_eeprom_8h.html#a343380631e998e4b24ed168a0e098717">00074</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_LENGTH              149</span>
-<a name="l00075"></a><a class="code" href="_eeprom_8h.html#a8484255136826adeeeaa3192756a4a10">00075</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_LENGTH              153</span>
-<a name="l00076"></a><a class="code" href="_eeprom_8h.html#a188992c8f5056c25aa32663180e8671e">00076</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_X            157</span>
-<a name="l00077"></a><a class="code" href="_eeprom_8h.html#a076338d01a1438efa02108c08ef293ed">00077</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_Y            161</span>
-<a name="l00078"></a><a class="code" href="_eeprom_8h.html#a8f78c6be0c233d4e3c5597b0fee2a086">00078</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_Z            165</span>
-<a name="l00079"></a>00079 <span class="preprocessor"></span>
-<a name="l00080"></a><a class="code" href="_eeprom_8h.html#a2e4d24d1f849863e301efa608a0e741b">00080</a> <span class="preprocessor">#define EEPROM_EXTRUDER_OFFSET 200</span>
-<a name="l00081"></a>00081 <span class="preprocessor"></span><span class="comment">// bytes per extruder needed, leave some space for future development</span>
-<a name="l00082"></a><a class="code" href="_eeprom_8h.html#a2b0a7c91c014b194d4f3b523d9d3dc80">00082</a> <span class="preprocessor">#define EEPROM_EXTRUDER_LENGTH 100</span>
-<a name="l00083"></a>00083 <span class="preprocessor"></span><span class="comment">// Extruder positions relative to extruder start</span>
-<a name="l00084"></a><a class="code" href="_eeprom_8h.html#ae486cf564337eb8348f02693a7a1db15">00084</a> <span class="preprocessor">#define EPR_EXTRUDER_STEPS_PER_MM        0</span>
-<a name="l00085"></a><a class="code" href="_eeprom_8h.html#ac96661c2acfe3597671945966ad622db">00085</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_MAX_FEEDRATE        4</span>
-<a name="l00086"></a>00086 <span class="preprocessor"></span><span class="comment">// Feedrate from halted extruder in mm/s</span>
-<a name="l00087"></a><a class="code" href="_eeprom_8h.html#ae30ea99b46404cce130ff5519bbb351c">00087</a> <span class="preprocessor">#define EPR_EXTRUDER_MAX_START_FEEDRATE  8</span>
-<a name="l00088"></a>00088 <span class="preprocessor"></span><span class="comment">// Acceleration in mm/s^2</span>
-<a name="l00089"></a><a class="code" href="_eeprom_8h.html#af2ebb9833f1ed1240d4a3634f5c2cc91">00089</a> <span class="preprocessor">#define EPR_EXTRUDER_MAX_ACCELERATION   12</span>
-<a name="l00090"></a><a class="code" href="_eeprom_8h.html#abf561de365a604c9b9eef07f09c2dcf4">00090</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_HEAT_MANAGER       16</span>
-<a name="l00091"></a><a class="code" href="_eeprom_8h.html#a5c8ec34eb3c5b63d198339d2d5a03e1f">00091</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_DRIVE_MAX          17</span>
-<a name="l00092"></a><a class="code" href="_eeprom_8h.html#a26adedf47a4999f5d95bf90702cf4279">00092</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_PGAIN          18</span>
-<a name="l00093"></a><a class="code" href="_eeprom_8h.html#a0b170db839b555e267069325a808f46b">00093</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_IGAIN          22</span>
-<a name="l00094"></a><a class="code" href="_eeprom_8h.html#a8263733e569d30827eacdb9ceb03f50f">00094</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_DGAIN          26</span>
-<a name="l00095"></a><a class="code" href="_eeprom_8h.html#a0af76b5a2434d9254be68b34fbbdb8f8">00095</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_MAX            30</span>
-<a name="l00096"></a><a class="code" href="_eeprom_8h.html#aaa75ec8857ee428f5d27ab0af6ef8e57">00096</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_X_OFFSET           31</span>
-<a name="l00097"></a><a class="code" href="_eeprom_8h.html#a6b8073d98b5971c76db78f4618c95165">00097</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_Y_OFFSET           35</span>
-<a name="l00098"></a><a class="code" href="_eeprom_8h.html#ac50372ef9cb0166493cdee63d63e5ee6">00098</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WATCH_PERIOD       39</span>
-<a name="l00099"></a><a class="code" href="_eeprom_8h.html#aa80919dea6acb89e650815fa56958297">00099</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_ADVANCE_K          41</span>
-<a name="l00100"></a><a class="code" href="_eeprom_8h.html#aa77e27a5f910034883f4902902959cde">00100</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_DRIVE_MIN          45</span>
-<a name="l00101"></a><a class="code" href="_eeprom_8h.html#a51d7d0452567f9a4a7e988fe92555ca0">00101</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_ADVANCE_L          46</span>
-<a name="l00102"></a><a class="code" href="_eeprom_8h.html#aecc4cd24a102279140365a1e214a8966">00102</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50</span>
-<a name="l00103"></a><a class="code" href="_eeprom_8h.html#a53dad7df44314718656b7a57ffad4378">00103</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52</span>
-<a name="l00104"></a>00104 <span class="preprocessor"></span><span class="preprocessor">#if EEPROM_MODE!=0</span>
-<a name="l00105"></a>00105 <span class="preprocessor"></span>
-<a name="l00106"></a>00106 <span class="keyword">extern</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a37525a59556115a45af474c3a79bf5bd">epr_set_byte</a>(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,byte value);
-<a name="l00107"></a>00107 <span class="keyword">extern</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a1a0ed1952af58945d4971ded155921f1">epr_set_int</a>(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,<span class="keywordtype">int</span> value);
-<a name="l00108"></a>00108 <span class="keyword">extern</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a64e8e946b90f0df1c9e0022b839fb050">epr_set_long</a>(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,<span class="keywordtype">long</span> value);
-<a name="l00109"></a>00109 <span class="keyword">extern</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a9e5086186dad9611d47d31436314f23d">epr_set_float</a>(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,<span class="keywordtype">float</span> value);
-<a name="l00110"></a>00110 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#ac41226e40edfb9ee79cd6b73e0d748bd" title="Moves current settings to EEPROM.">epr_data_to_eeprom</a>(byte corrupted);
-<a name="l00111"></a>00111 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#ac0fe50ff98d900c49f50e850acc70bb5" title="Copy data from EEPROM to variables.">epr_eeprom_to_data</a>();
-<a name="l00112"></a>00112 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#abe42c4e72eed3db08c014487c1b90a4c" title="Copy data from EEPROM to variables.">epr_eeprom_reset</a>();
-<a name="l00113"></a>00113 
-<a name="l00114"></a>00114 <span class="keyword">inline</span> byte epr_get_byte(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos) {
-<a name="l00115"></a>00115    <span class="keywordflow">return</span> eeprom_read_byte ((<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *)(<a class="code" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>+pos));
-<a name="l00116"></a>00116 }
-<a name="l00117"></a>00117 <span class="keyword">inline</span> <span class="keywordtype">int</span> epr_get_int(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos) {
-<a name="l00118"></a>00118   <span class="keywordflow">return</span> eeprom_read_word((<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *)(<a class="code" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>+pos));
-<a name="l00119"></a>00119 }
-<a name="l00120"></a>00120 <span class="keyword">inline</span> <span class="keywordtype">long</span> epr_get_long(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos) {
-<a name="l00121"></a>00121   <span class="keywordflow">return</span> eeprom_read_dword((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>*)(<a class="code" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>+pos));
-<a name="l00122"></a>00122 }
-<a name="l00123"></a>00123 <span class="keyword">inline</span> <span class="keywordtype">float</span> epr_get_float(<a class="code" href="_reptier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos) {
-<a name="l00124"></a>00124   <span class="keywordtype">float</span> v;
-<a name="l00125"></a>00125   eeprom_read_block(&amp;v,(<span class="keywordtype">void</span> *)(<a class="code" href="_eeprom_8h.html#afe7387252655a7ee07b26cb83c5ed0be">EEPROM_OFFSET</a>+pos),4); <span class="comment">// newer gcc have eeprom_read_block but not arduino 22</span>
-<a name="l00126"></a>00126   <span class="keywordflow">return</span> v;
-<a name="l00127"></a>00127 }
-<a name="l00128"></a>00128 <span class="preprocessor">#endif</span>
-<a name="l00129"></a>00129 <span class="preprocessor"></span>
-<a name="l00130"></a>00130 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a56159747b47dd1eda34659f51287c89d" title="Writes all eeprom settings to serial console.">epr_output_settings</a>();
-<a name="l00131"></a>00131 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a1688d15668bdcefb7c078e75161f5242">epr_update</a>(<a class="code" href="struct_g_code.html">GCode</a> *com);
-<a name="l00132"></a>00132 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a739c1d676ce722809e48629d65217b08">epr_init</a>();
-<a name="l00133"></a>00133 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#ae8e836ee3254ec9a160e904dcb631bde">epr_init_baudrate</a>();
-<a name="l00134"></a>00134 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="_eeprom_8cpp.html#a526c528a70afb99c2d9bf8083d502f9f">epr_update_usage</a>();
-<a name="l00135"></a>00135 <span class="preprocessor">#endif</span>
-<a name="l00136"></a>00136 <span class="preprocessor"></span>
+<a name="l00022"></a>00022 <span class="comment">// Id to distinguish version changes</span>
+<a name="l00023"></a><a class="code" href="_eeprom_8h.html#a0837cb4b56bf81f801e83758a6191e44">00023</a> <span class="preprocessor">#define EEPROM_PROTOCOL_VERSION 6</span>
+<a name="l00024"></a>00024 <span class="preprocessor"></span>
+<a name="l00029"></a><a class="code" href="_eeprom_8h.html#ade30e27b166cc7fa8c6c61cd8a01d1d1">00029</a> <span class="preprocessor">#define EPR_MAGIC_BYTE              0</span>
+<a name="l00030"></a><a class="code" href="_eeprom_8h.html#ac50a4c7f2bc4d7e2c876a28f631561d7">00030</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_ACCELERATION_TYPE       1</span>
+<a name="l00031"></a><a class="code" href="_eeprom_8h.html#a8922fb8a0e782dcf6a51fb5a38d1d8b8">00031</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_XAXIS_STEPS_PER_MM      3</span>
+<a name="l00032"></a><a class="code" href="_eeprom_8h.html#a6d63760d73b626620c609bc43d20f18e">00032</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_YAXIS_STEPS_PER_MM      7</span>
+<a name="l00033"></a><a class="code" href="_eeprom_8h.html#a726a50b6b49d55ad4c1be62bd8962d79">00033</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_ZAXIS_STEPS_PER_MM     11</span>
+<a name="l00034"></a><a class="code" href="_eeprom_8h.html#a174c827554a74b3d36ce6330d76051a9">00034</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_FEEDRATE         15</span>
+<a name="l00035"></a><a class="code" href="_eeprom_8h.html#a2b662cf101fe608885ecb1de260f4c2e">00035</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_FEEDRATE         19</span>
+<a name="l00036"></a><a class="code" href="_eeprom_8h.html#a957fdf7fe063b0925355084264cb3a3b">00036</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_FEEDRATE         23</span>
+<a name="l00037"></a><a class="code" href="_eeprom_8h.html#ade4042dbe39efc939de8a75e0102ee4b">00037</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_HOMING_FEEDRATE      27</span>
+<a name="l00038"></a><a class="code" href="_eeprom_8h.html#a848be186f70158156487357cea8a076f">00038</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_HOMING_FEEDRATE      31</span>
+<a name="l00039"></a><a class="code" href="_eeprom_8h.html#a2bbc6d31ec012b522b7b8700852fb236">00039</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_HOMING_FEEDRATE      35</span>
+<a name="l00040"></a><a class="code" href="_eeprom_8h.html#aa90bbc0fc3c7b8e8e0a1bca0c99a5a44">00040</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAX_JERK               39</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="comment">//#define EPR_OPS_MIN_DISTANCE       43</span>
+<a name="l00042"></a><a class="code" href="_eeprom_8h.html#affc38f44bedceafaa70242ece11a43b6">00042</a> <span class="preprocessor">#define EPR_MAX_ZJERK              47</span>
+<a name="l00043"></a><a class="code" href="_eeprom_8h.html#ac5c699b9db85fa31d55057190d426f8a">00043</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_ACCEL            51</span>
+<a name="l00044"></a><a class="code" href="_eeprom_8h.html#ac92348123f02b917797b1f1aeabae211">00044</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_ACCEL            55</span>
+<a name="l00045"></a><a class="code" href="_eeprom_8h.html#a5348a179e18b172568cde394861318a8">00045</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_ACCEL            59</span>
+<a name="l00046"></a><a class="code" href="_eeprom_8h.html#a30d1011b1e11d6c4f5927df02a3194ec">00046</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_MAX_TRAVEL_ACCEL     63</span>
+<a name="l00047"></a><a class="code" href="_eeprom_8h.html#a74134773b5ecd9fe785c7124c03923a1">00047</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_MAX_TRAVEL_ACCEL     67</span>
+<a name="l00048"></a><a class="code" href="_eeprom_8h.html#ae9bb5eec63a8826ccac85b3245a4ec3b">00048</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_MAX_TRAVEL_ACCEL     71</span>
+<a name="l00049"></a><a class="code" href="_eeprom_8h.html#a67738eb9838d52221677f73de020f87c">00049</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BAUDRATE               75</span>
+<a name="l00050"></a><a class="code" href="_eeprom_8h.html#a5eebdcc1d55d8635fb4296f9dc371f33">00050</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_MAX_INACTIVE_TIME      79</span>
+<a name="l00051"></a><a class="code" href="_eeprom_8h.html#a3e3982e8d6fbf37b06de3253722170bc">00051</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_STEPPER_INACTIVE_TIME  83</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="comment">//#define EPR_OPS_RETRACT_DISTANCE   87</span>
+<a name="l00053"></a>00053 <span class="comment">//#define EPR_OPS_RETRACT_BACKLASH   91</span>
+<a name="l00054"></a><a class="code" href="_eeprom_8h.html#a16ea8a2464dbc67f58429c7e1699b916">00054</a> <span class="preprocessor">#define EPR_EXTRUDER_SPEED         95</span>
+<a name="l00055"></a>00055 <span class="preprocessor"></span><span class="comment">//#define EPR_OPS_MOVE_AFTER         99</span>
+<a name="l00056"></a>00056 <span class="comment">//#define EPR_OPS_MODE              103</span>
+<a name="l00057"></a><a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">00057</a> <span class="preprocessor">#define EPR_INTEGRITY_BYTE        104   // Here the xored sum over eeprom is stored</span>
+<a name="l00058"></a><a class="code" href="_eeprom_8h.html#a09417ae921b9d1693e57c854ea7b54d3">00058</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_VERSION               105   // Version id for updates in EEPROM storage</span>
+<a name="l00059"></a><a class="code" href="_eeprom_8h.html#a431c0d7daae00f28b101769db333f669">00059</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_HEAT_MANAGER      106</span>
+<a name="l00060"></a><a class="code" href="_eeprom_8h.html#a31694e12f9a9e110c27686512218e796">00060</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_DRIVE_MAX         107</span>
+<a name="l00061"></a><a class="code" href="_eeprom_8h.html#a8b2ef6824d9af29e85a3fbb9f6a36069">00061</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_PGAIN         108</span>
+<a name="l00062"></a><a class="code" href="_eeprom_8h.html#a3a80c6ed2a0af7709dfa213efb036afe">00062</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_IGAIN         112</span>
+<a name="l00063"></a><a class="code" href="_eeprom_8h.html#a03c7fdbbe8d3232a5d9933e94f3378ac">00063</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_DGAIN         116</span>
+<a name="l00064"></a><a class="code" href="_eeprom_8h.html#a4e1f001be8f24a0367517871c8dbcd9d">00064</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_PID_MAX           120</span>
+<a name="l00065"></a><a class="code" href="_eeprom_8h.html#a29eb8c2e447e884aaed85324619330cd">00065</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BED_DRIVE_MIN         124</span>
+<a name="l00066"></a><a class="code" href="_eeprom_8h.html#aaa272eb58e900d5a14455aa37911e2f9">00066</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_PRINTING_TIME         125  // Time in seconds printing</span>
+<a name="l00067"></a><a class="code" href="_eeprom_8h.html#a496378b775749413300f48c80ff16b57">00067</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_PRINTING_DISTANCE     129  // Filament length printed</span>
+<a name="l00068"></a><a class="code" href="_eeprom_8h.html#a551556875e62375776216298efb193e3">00068</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_HOME_OFFSET         133</span>
+<a name="l00069"></a><a class="code" href="_eeprom_8h.html#a5db8240da54aaf1667544c2ef84866a6">00069</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_HOME_OFFSET         137</span>
+<a name="l00070"></a><a class="code" href="_eeprom_8h.html#aba3e24d6f36e5802c9d3362ca9a7d861">00070</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_HOME_OFFSET         141</span>
+<a name="l00071"></a><a class="code" href="_eeprom_8h.html#a1e53e4104888c8e50378ef1e05f05a7b">00071</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_X_LENGTH              145</span>
+<a name="l00072"></a><a class="code" href="_eeprom_8h.html#a343380631e998e4b24ed168a0e098717">00072</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Y_LENGTH              149</span>
+<a name="l00073"></a><a class="code" href="_eeprom_8h.html#a8484255136826adeeeaa3192756a4a10">00073</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_LENGTH              153</span>
+<a name="l00074"></a><a class="code" href="_eeprom_8h.html#a188992c8f5056c25aa32663180e8671e">00074</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_X            157</span>
+<a name="l00075"></a><a class="code" href="_eeprom_8h.html#a076338d01a1438efa02108c08ef293ed">00075</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_Y            161</span>
+<a name="l00076"></a><a class="code" href="_eeprom_8h.html#a8f78c6be0c233d4e3c5597b0fee2a086">00076</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_BACKLASH_Z            165</span>
+<a name="l00077"></a>00077 <span class="preprocessor"></span>
+<a name="l00078"></a><a class="code" href="_eeprom_8h.html#a80bf0281ddde2a2512279cf3cf139d92">00078</a> <span class="preprocessor">#define EPR_Z_PROBE_X_OFFSET      800</span>
+<a name="l00079"></a><a class="code" href="_eeprom_8h.html#ab76f89f7895e1e390989ccb2dfb4cb2c">00079</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_Y_OFFSET      804</span>
+<a name="l00080"></a><a class="code" href="_eeprom_8h.html#abe14026280395e813c2effc984921232">00080</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_HEIGHT        808</span>
+<a name="l00081"></a><a class="code" href="_eeprom_8h.html#a9e1312cdcc6454cec7e06af42b0787f0">00081</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_SPEED         812</span>
+<a name="l00082"></a><a class="code" href="_eeprom_8h.html#a02bfd8e5a195b643ef3b9a6da1025f71">00082</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_X1            816</span>
+<a name="l00083"></a><a class="code" href="_eeprom_8h.html#a5ad63d9efd3f3aefeb0c38ccf06db6e0">00083</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_Y1            820</span>
+<a name="l00084"></a><a class="code" href="_eeprom_8h.html#a6ef40dcd1941cb3ac787a9002801d772">00084</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_X2            824</span>
+<a name="l00085"></a><a class="code" href="_eeprom_8h.html#ac950c84f046fe3b56fce66da782941e7">00085</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_Y2            828</span>
+<a name="l00086"></a><a class="code" href="_eeprom_8h.html#afe125983166607f24dfbea05b191d7c1">00086</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_X3            832</span>
+<a name="l00087"></a><a class="code" href="_eeprom_8h.html#a96c5f28e68b5cf457332a04c9072f0eb">00087</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_Y3            836</span>
+<a name="l00088"></a><a class="code" href="_eeprom_8h.html#a7227b7e0564473a670020a925d3b0bb7">00088</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_Z_PROBE_XY_SPEED      840</span>
+<a name="l00089"></a><a class="code" href="_eeprom_8h.html#a390e8839cfa29a1cf8fbbb1830721f2c">00089</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_AUTOLEVEL_MATRIX      844</span>
+<a name="l00090"></a><a class="code" href="_eeprom_8h.html#a5b6df4b1de7c02625e66331bb2807ec2">00090</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_AUTOLEVEL_ACTIVE      880</span>
+<a name="l00091"></a><a class="code" href="_eeprom_8h.html#a77172c00c31a25cfc4f831d2c1da7ae9">00091</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_DIAGONAL_ROD_LENGTH 881</span>
+<a name="l00092"></a><a class="code" href="_eeprom_8h.html#a9b46383b2fddb7b9e3efec6b837af3e4">00092</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_HORIZONTAL_RADIUS 885</span>
+<a name="l00093"></a><a class="code" href="_eeprom_8h.html#a8f51a6c7f48f48ed60691740f20c55f3">00093</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_SEGMENTS_PER_SECOND_PRINT 889</span>
+<a name="l00094"></a><a class="code" href="_eeprom_8h.html#a99a88872e4a0dad430f6f28ecaaf10ff">00094</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_SEGMENTS_PER_SECOND_MOVE 891</span>
+<a name="l00095"></a><a class="code" href="_eeprom_8h.html#a18a0d04c5e1eb9a63d2f4685536a82bc">00095</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_TOWERX_OFFSET_STEPS 893</span>
+<a name="l00096"></a><a class="code" href="_eeprom_8h.html#a97deb23c43de0cc6efed4f83df07e340">00096</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_TOWERY_OFFSET_STEPS 895</span>
+<a name="l00097"></a><a class="code" href="_eeprom_8h.html#a7a1dfd32287137b04916e331ca790d98">00097</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_TOWERZ_OFFSET_STEPS 897</span>
+<a name="l00098"></a><a class="code" href="_eeprom_8h.html#af6d064eb27cc2ce9439b52908cbe1bb8">00098</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_ALPHA_A         901</span>
+<a name="l00099"></a><a class="code" href="_eeprom_8h.html#a44a50634fcfa27eb9d2138225fd9dd2a">00099</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_ALPHA_B         905</span>
+<a name="l00100"></a><a class="code" href="_eeprom_8h.html#ab81ab54bcbf30669695c121e90b0cc58">00100</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_ALPHA_C         909</span>
+<a name="l00101"></a><a class="code" href="_eeprom_8h.html#ac3a50022366946a5e86bc423f8146c62">00101</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_RADIUS_CORR_A   913</span>
+<a name="l00102"></a><a class="code" href="_eeprom_8h.html#a0c735c861397a15d530a8378de008c75">00102</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_RADIUS_CORR_B   917</span>
+<a name="l00103"></a><a class="code" href="_eeprom_8h.html#ae708532fc7ea889dfea6495c7bef7602">00103</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_DELTA_RADIUS_CORR_C   921</span>
+<a name="l00104"></a>00104 <span class="preprocessor"></span>
+<a name="l00105"></a><a class="code" href="_eeprom_8h.html#a2e4d24d1f849863e301efa608a0e741b">00105</a> <span class="preprocessor">#define EEPROM_EXTRUDER_OFFSET 200</span>
+<a name="l00106"></a>00106 <span class="preprocessor"></span><span class="comment">// bytes per extruder needed, leave some space for future development</span>
+<a name="l00107"></a><a class="code" href="_eeprom_8h.html#a2b0a7c91c014b194d4f3b523d9d3dc80">00107</a> <span class="preprocessor">#define EEPROM_EXTRUDER_LENGTH 100</span>
+<a name="l00108"></a>00108 <span class="preprocessor"></span><span class="comment">// Extruder positions relative to extruder start</span>
+<a name="l00109"></a><a class="code" href="_eeprom_8h.html#ae486cf564337eb8348f02693a7a1db15">00109</a> <span class="preprocessor">#define EPR_EXTRUDER_STEPS_PER_MM        0</span>
+<a name="l00110"></a><a class="code" href="_eeprom_8h.html#ac96661c2acfe3597671945966ad622db">00110</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_MAX_FEEDRATE        4</span>
+<a name="l00111"></a>00111 <span class="preprocessor"></span><span class="comment">// Feedrate from halted extruder in mm/s</span>
+<a name="l00112"></a><a class="code" href="_eeprom_8h.html#ae30ea99b46404cce130ff5519bbb351c">00112</a> <span class="preprocessor">#define EPR_EXTRUDER_MAX_START_FEEDRATE  8</span>
+<a name="l00113"></a>00113 <span class="preprocessor"></span><span class="comment">// Acceleration in mm/s^2</span>
+<a name="l00114"></a><a class="code" href="_eeprom_8h.html#af2ebb9833f1ed1240d4a3634f5c2cc91">00114</a> <span class="preprocessor">#define EPR_EXTRUDER_MAX_ACCELERATION   12</span>
+<a name="l00115"></a><a class="code" href="_eeprom_8h.html#abf561de365a604c9b9eef07f09c2dcf4">00115</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_HEAT_MANAGER       16</span>
+<a name="l00116"></a><a class="code" href="_eeprom_8h.html#a5c8ec34eb3c5b63d198339d2d5a03e1f">00116</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_DRIVE_MAX          17</span>
+<a name="l00117"></a><a class="code" href="_eeprom_8h.html#a26adedf47a4999f5d95bf90702cf4279">00117</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_PGAIN          18</span>
+<a name="l00118"></a><a class="code" href="_eeprom_8h.html#a0b170db839b555e267069325a808f46b">00118</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_IGAIN          22</span>
+<a name="l00119"></a><a class="code" href="_eeprom_8h.html#a8263733e569d30827eacdb9ceb03f50f">00119</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_DGAIN          26</span>
+<a name="l00120"></a><a class="code" href="_eeprom_8h.html#a0af76b5a2434d9254be68b34fbbdb8f8">00120</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_PID_MAX            30</span>
+<a name="l00121"></a><a class="code" href="_eeprom_8h.html#aaa75ec8857ee428f5d27ab0af6ef8e57">00121</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_X_OFFSET           31</span>
+<a name="l00122"></a><a class="code" href="_eeprom_8h.html#a6b8073d98b5971c76db78f4618c95165">00122</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_Y_OFFSET           35</span>
+<a name="l00123"></a><a class="code" href="_eeprom_8h.html#ac50372ef9cb0166493cdee63d63e5ee6">00123</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WATCH_PERIOD       39</span>
+<a name="l00124"></a><a class="code" href="_eeprom_8h.html#aa80919dea6acb89e650815fa56958297">00124</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_ADVANCE_K          41</span>
+<a name="l00125"></a><a class="code" href="_eeprom_8h.html#aa77e27a5f910034883f4902902959cde">00125</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_DRIVE_MIN          45</span>
+<a name="l00126"></a><a class="code" href="_eeprom_8h.html#a51d7d0452567f9a4a7e988fe92555ca0">00126</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_ADVANCE_L          46</span>
+<a name="l00127"></a><a class="code" href="_eeprom_8h.html#aecc4cd24a102279140365a1e214a8966">00127</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50</span>
+<a name="l00128"></a><a class="code" href="_eeprom_8h.html#a53dad7df44314718656b7a57ffad4378">00128</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52</span>
+<a name="l00129"></a><a class="code" href="_eeprom_8h.html#a19535993cc5ff2983c818949a9c80c3f">00129</a> <span class="preprocessor"></span><span class="preprocessor">#define EPR_EXTRUDER_COOLER_SPEED       54</span>
+<a name="l00130"></a>00130 <span class="preprocessor"></span>
+<a name="l00131"></a><a class="code" href="class_e_e_p_r_o_m.html">00131</a> <span class="keyword">class </span><a class="code" href="class_e_e_p_r_o_m.html">EEPROM</a>
+<a name="l00132"></a>00132 {
+<a name="l00133"></a>00133 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00134"></a>00134 <span class="preprocessor"></span>    <span class="keyword">static</span> uint8_t computeChecksum();
+<a name="l00135"></a>00135     <span class="keyword">static</span> <span class="keywordtype">void</span> writeExtruderPrefix(<a class="code" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos);
+<a name="l00136"></a>00136     <span class="keyword">static</span> <span class="keywordtype">void</span> writeFloat(<a class="code" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,PGM_P text,uint8_t digits=3);
+<a name="l00137"></a>00137     <span class="keyword">static</span> <span class="keywordtype">void</span> writeLong(<a class="code" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,PGM_P text);
+<a name="l00138"></a>00138     <span class="keyword">static</span> <span class="keywordtype">void</span> writeInt(<a class="code" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,PGM_P text);
+<a name="l00139"></a>00139     <span class="keyword">static</span> <span class="keywordtype">void</span> writeByte(<a class="code" href="_repetier_8h.html#ad46b2ebcd4c426b06cda147ddc1001e7">uint</a> pos,PGM_P text);
+<a name="l00140"></a>00140 <span class="preprocessor">#endif</span>
+<a name="l00141"></a>00141 <span class="preprocessor"></span><span class="keyword">public</span>:
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00144"></a>00144     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#ac3dcb3f97658f30649fc7f32982e7dab">initBaudrate</a>();
+<a name="l00145"></a>00145     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#a7b0356b25677f331602fb60ecc8b2bbe">storeDataIntoEEPROM</a>(uint8_t corrupted=0);
+<a name="l00146"></a>00146     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#ab20d24f351eb214732e348ed9aac8684">readDataFromEEPROM</a>();
+<a name="l00147"></a>00147     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#a468f01a9e50fb65672b72f0061002ea0">restoreEEPROMSettingsFromConfiguration</a>();
+<a name="l00148"></a>00148     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#a82ee1fab763ad7e0f0898aff8a7f0735" title="Writes all eeprom settings to serial console.">writeSettings</a>();
+<a name="l00149"></a>00149     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#abe4a83c60db16f5f2cee36821106dbb0">update</a>(<a class="code" href="class_g_code.html">GCode</a> *com);
+<a name="l00150"></a>00150     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#a58b41d6ffe53da5c3b10ae68fa6a7c72">updatePrinterUsage</a>();
+<a name="l00151"></a>00151 
+<a name="l00152"></a><a class="code" href="class_e_e_p_r_o_m.html#a478b6044af6c6fe4a9957b46739f5bf9">00152</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a478b6044af6c6fe4a9957b46739f5bf9">zProbeSpeed</a>() {
+<a name="l00153"></a>00153 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00154"></a>00154 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a9e1312cdcc6454cec7e06af42b0787f0">EPR_Z_PROBE_SPEED</a>);
+<a name="l00155"></a>00155 <span class="preprocessor">#else</span>
+<a name="l00156"></a>00156 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a707d7dccb6663f9ee7756482ef446203">Z_PROBE_SPEED</a>;
+<a name="l00157"></a>00157 <span class="preprocessor">#endif</span>
+<a name="l00158"></a>00158 <span class="preprocessor"></span>    }
+<a name="l00159"></a><a class="code" href="class_e_e_p_r_o_m.html#a6f96802256adb345abc27c73380bd257">00159</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a6f96802256adb345abc27c73380bd257">zProbeXYSpeed</a>() {
+<a name="l00160"></a>00160 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00161"></a>00161 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a7227b7e0564473a670020a925d3b0bb7">EPR_Z_PROBE_XY_SPEED</a>);
+<a name="l00162"></a>00162 <span class="preprocessor">#else</span>
+<a name="l00163"></a>00163 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#ad438255c65db5e54c90e89780d9e6196">Z_PROBE_XY_SPEED</a>;
+<a name="l00164"></a>00164 <span class="preprocessor">#endif</span>
+<a name="l00165"></a>00165 <span class="preprocessor"></span>    }
+<a name="l00166"></a><a class="code" href="class_e_e_p_r_o_m.html#a2779cf386fd3e03d99d4609e4dd5d13b">00166</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a2779cf386fd3e03d99d4609e4dd5d13b">zProbeXOffset</a>() {
+<a name="l00167"></a>00167 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00168"></a>00168 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a80bf0281ddde2a2512279cf3cf139d92">EPR_Z_PROBE_X_OFFSET</a>);
+<a name="l00169"></a>00169 <span class="preprocessor">#else</span>
+<a name="l00170"></a>00170 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a03e229c3ee72dc7f7ce49577cf97d086">Z_PROBE_X_OFFSET</a>;
+<a name="l00171"></a>00171 <span class="preprocessor">#endif</span>
+<a name="l00172"></a>00172 <span class="preprocessor"></span>    }
+<a name="l00173"></a><a class="code" href="class_e_e_p_r_o_m.html#a643b8e82cf4510671c7f737a511c26bc">00173</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a643b8e82cf4510671c7f737a511c26bc">zProbeYOffset</a>() {
+<a name="l00174"></a>00174 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00175"></a>00175 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#ab76f89f7895e1e390989ccb2dfb4cb2c">EPR_Z_PROBE_Y_OFFSET</a>);
+<a name="l00176"></a>00176 <span class="preprocessor">#else</span>
+<a name="l00177"></a>00177 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#aab5d69ddf958e1bb838fd16f8686fb2f">Z_PROBE_Y_OFFSET</a>;
+<a name="l00178"></a>00178 <span class="preprocessor">#endif</span>
+<a name="l00179"></a>00179 <span class="preprocessor"></span>    }
+<a name="l00180"></a><a class="code" href="class_e_e_p_r_o_m.html#a0c17d6f0cd9833b076c2c788c176f4bb">00180</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a0c17d6f0cd9833b076c2c788c176f4bb">zProbeHeight</a>() {
+<a name="l00181"></a>00181 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00182"></a>00182 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#abe14026280395e813c2effc984921232">EPR_Z_PROBE_HEIGHT</a>);
+<a name="l00183"></a>00183 <span class="preprocessor">#else</span>
+<a name="l00184"></a>00184 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a43d204b928407664cb5512a722424db7">Z_PROBE_HEIGHT</a>;
+<a name="l00185"></a>00185 <span class="preprocessor">#endif</span>
+<a name="l00186"></a>00186 <span class="preprocessor"></span>    }
+<a name="l00187"></a><a class="code" href="class_e_e_p_r_o_m.html#a7d0f5f7c67f560528d8c7377370ef204">00187</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a7d0f5f7c67f560528d8c7377370ef204">zProbeX1</a>() {
+<a name="l00188"></a>00188 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00189"></a>00189 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a02bfd8e5a195b643ef3b9a6da1025f71">EPR_Z_PROBE_X1</a>);
+<a name="l00190"></a>00190 <span class="preprocessor">#else</span>
+<a name="l00191"></a>00191 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a234370629ef9bbd300f8c4b696d51067">Z_PROBE_X1</a>;
+<a name="l00192"></a>00192 <span class="preprocessor">#endif</span>
+<a name="l00193"></a>00193 <span class="preprocessor"></span>    }
+<a name="l00194"></a><a class="code" href="class_e_e_p_r_o_m.html#a0b1e0f0668554b2e28f79c064208690c">00194</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a0b1e0f0668554b2e28f79c064208690c">zProbeY1</a>() {
+<a name="l00195"></a>00195 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00196"></a>00196 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a5ad63d9efd3f3aefeb0c38ccf06db6e0">EPR_Z_PROBE_Y1</a>);
+<a name="l00197"></a>00197 <span class="preprocessor">#else</span>
+<a name="l00198"></a>00198 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a281c2c72b1ec819b64e5e13b82657d1d">Z_PROBE_Y1</a>;
+<a name="l00199"></a>00199 <span class="preprocessor">#endif</span>
+<a name="l00200"></a>00200 <span class="preprocessor"></span>    }
+<a name="l00201"></a><a class="code" href="class_e_e_p_r_o_m.html#aec4fad08c8e191c0a0d2eab61500d5bc">00201</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#aec4fad08c8e191c0a0d2eab61500d5bc">zProbeX2</a>() {
+<a name="l00202"></a>00202 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00203"></a>00203 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a6ef40dcd1941cb3ac787a9002801d772">EPR_Z_PROBE_X2</a>);
+<a name="l00204"></a>00204 <span class="preprocessor">#else</span>
+<a name="l00205"></a>00205 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a1e46da249ea8408c8c17235803d7159f">Z_PROBE_X2</a>;
+<a name="l00206"></a>00206 <span class="preprocessor">#endif</span>
+<a name="l00207"></a>00207 <span class="preprocessor"></span>    }
+<a name="l00208"></a><a class="code" href="class_e_e_p_r_o_m.html#aed01ca31962750c88a37c04561fde81f">00208</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#aed01ca31962750c88a37c04561fde81f">zProbeY2</a>() {
+<a name="l00209"></a>00209 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00210"></a>00210 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#ac950c84f046fe3b56fce66da782941e7">EPR_Z_PROBE_Y2</a>);
+<a name="l00211"></a>00211 <span class="preprocessor">#else</span>
+<a name="l00212"></a>00212 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#a2729cc174476584409552a1feaf61e31">Z_PROBE_Y2</a>;
+<a name="l00213"></a>00213 <span class="preprocessor">#endif</span>
+<a name="l00214"></a>00214 <span class="preprocessor"></span>    }
+<a name="l00215"></a><a class="code" href="class_e_e_p_r_o_m.html#ae041385b633a07b0266c515268e6f0b7">00215</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#ae041385b633a07b0266c515268e6f0b7">zProbeX3</a>() {
+<a name="l00216"></a>00216 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00217"></a>00217 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#afe125983166607f24dfbea05b191d7c1">EPR_Z_PROBE_X3</a>);
+<a name="l00218"></a>00218 <span class="preprocessor">#else</span>
+<a name="l00219"></a>00219 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#afd4deed5ad688aa5cb407423d3871d4d">Z_PROBE_X3</a>;
+<a name="l00220"></a>00220 <span class="preprocessor">#endif</span>
+<a name="l00221"></a>00221 <span class="preprocessor"></span>    }
+<a name="l00222"></a><a class="code" href="class_e_e_p_r_o_m.html#a37f0672906e12b5e569dfcb8bca01d6f">00222</a>     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> <a class="code" href="class_e_e_p_r_o_m.html#a37f0672906e12b5e569dfcb8bca01d6f">zProbeY3</a>() {
+<a name="l00223"></a>00223 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00224"></a>00224 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a96c5f28e68b5cf457332a04c9072f0eb">EPR_Z_PROBE_Y3</a>);
+<a name="l00225"></a>00225 <span class="preprocessor">#else</span>
+<a name="l00226"></a>00226 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#aa63f6e9f9d1f981e72a5a73515f5185e">Z_PROBE_Y3</a>;
+<a name="l00227"></a>00227 <span class="preprocessor">#endif</span>
+<a name="l00228"></a>00228 <span class="preprocessor"></span>    }
+<a name="l00229"></a>00229 <span class="preprocessor">#if NONLINEAR_SYSTEM</span>
+<a name="l00230"></a>00230 <span class="preprocessor"></span>    <span class="keyword">static</span> <span class="keyword">inline</span> int16_t deltaSegmentsPerSecondMove() {
+<a name="l00231"></a>00231 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00232"></a>00232 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#ab06e7809bbb8ba7845390d77646ce3c2">HAL::eprGetInt16</a>(<a class="code" href="_eeprom_8h.html#a99a88872e4a0dad430f6f28ecaaf10ff">EPR_DELTA_SEGMENTS_PER_SECOND_MOVE</a>);
+<a name="l00233"></a>00233 <span class="preprocessor">#else</span>
+<a name="l00234"></a>00234 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#aad0deb0ebe3f073faca903657018830b">DELTA_SEGMENTS_PER_SECOND_MOVE</a>;
+<a name="l00235"></a>00235 <span class="preprocessor">#endif</span>
+<a name="l00236"></a>00236 <span class="preprocessor"></span>    }
+<a name="l00237"></a>00237     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaDiagonalRodLength() {
+<a name="l00238"></a>00238 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00239"></a>00239 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a77172c00c31a25cfc4f831d2c1da7ae9">EPR_DELTA_DIAGONAL_ROD_LENGTH</a>);
+<a name="l00240"></a>00240 <span class="preprocessor">#else</span>
+<a name="l00241"></a>00241 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_DIAGONAL_ROD;
+<a name="l00242"></a>00242 <span class="preprocessor">#endif</span>
+<a name="l00243"></a>00243 <span class="preprocessor"></span>    }
+<a name="l00244"></a>00244     <span class="keyword">static</span> <span class="keyword">inline</span> int16_t deltaSegmentsPerSecondPrint() {
+<a name="l00245"></a>00245 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00246"></a>00246 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#ab06e7809bbb8ba7845390d77646ce3c2">HAL::eprGetInt16</a>(<a class="code" href="_eeprom_8h.html#a8f51a6c7f48f48ed60691740f20c55f3">EPR_DELTA_SEGMENTS_PER_SECOND_PRINT</a>);
+<a name="l00247"></a>00247 <span class="preprocessor">#else</span>
+<a name="l00248"></a>00248 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="_configuration_8h.html#ae439537f4f2cda93e2692fd863d6b31d" title="Number of segments to generate for delta conversions per second of move.">DELTA_SEGMENTS_PER_SECOND_PRINT</a>;
+<a name="l00249"></a>00249 <span class="preprocessor">#endif</span>
+<a name="l00250"></a>00250 <span class="preprocessor"></span>    }
+<a name="l00251"></a>00251 <span class="preprocessor">#endif</span>
+<a name="l00252"></a>00252 <span class="preprocessor"></span><span class="preprocessor">#if DRIVE_SYSTEM==3</span>
+<a name="l00253"></a>00253 <span class="preprocessor"></span>    <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaHorizontalRadius() {
+<a name="l00254"></a>00254 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00255"></a>00255 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a9b46383b2fddb7b9e3efec6b837af3e4">EPR_DELTA_HORIZONTAL_RADIUS</a>);
+<a name="l00256"></a>00256 <span class="preprocessor">#else</span>
+<a name="l00257"></a>00257 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_RADIUS;
+<a name="l00258"></a>00258 <span class="preprocessor">#endif</span>
+<a name="l00259"></a>00259 <span class="preprocessor"></span>    }
+<a name="l00260"></a>00260     <span class="keyword">static</span> <span class="keyword">inline</span> int16_t deltaTowerXOffsetSteps() {
+<a name="l00261"></a>00261 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00262"></a>00262 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#ab06e7809bbb8ba7845390d77646ce3c2">HAL::eprGetInt16</a>(<a class="code" href="_eeprom_8h.html#a18a0d04c5e1eb9a63d2f4685536a82bc">EPR_DELTA_TOWERX_OFFSET_STEPS</a>);
+<a name="l00263"></a>00263 <span class="preprocessor">#else</span>
+<a name="l00264"></a>00264 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_X_ENDSTOP_OFFSET_STEPS;
+<a name="l00265"></a>00265 <span class="preprocessor">#endif</span>
+<a name="l00266"></a>00266 <span class="preprocessor"></span>    }
+<a name="l00267"></a>00267     <span class="keyword">static</span> <span class="keyword">inline</span> int16_t deltaTowerYOffsetSteps() {
+<a name="l00268"></a>00268 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00269"></a>00269 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#ab06e7809bbb8ba7845390d77646ce3c2">HAL::eprGetInt16</a>(<a class="code" href="_eeprom_8h.html#a97deb23c43de0cc6efed4f83df07e340">EPR_DELTA_TOWERY_OFFSET_STEPS</a>);
+<a name="l00270"></a>00270 <span class="preprocessor">#else</span>
+<a name="l00271"></a>00271 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_Y_ENDSTOP_OFFSET_STEPS;
+<a name="l00272"></a>00272 <span class="preprocessor">#endif</span>
+<a name="l00273"></a>00273 <span class="preprocessor"></span>    }
+<a name="l00274"></a>00274     <span class="keyword">static</span> <span class="keyword">inline</span> int16_t deltaTowerZOffsetSteps() {
+<a name="l00275"></a>00275 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00276"></a>00276 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#ab06e7809bbb8ba7845390d77646ce3c2">HAL::eprGetInt16</a>(<a class="code" href="_eeprom_8h.html#a7a1dfd32287137b04916e331ca790d98">EPR_DELTA_TOWERZ_OFFSET_STEPS</a>);
+<a name="l00277"></a>00277 <span class="preprocessor">#else</span>
+<a name="l00278"></a>00278 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_Z_ENDSTOP_OFFSET_STEPS;
+<a name="l00279"></a>00279 <span class="preprocessor">#endif</span>
+<a name="l00280"></a>00280 <span class="preprocessor"></span>    }
+<a name="l00281"></a>00281     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> setDeltaTowerXOffsetSteps(int16_t steps) {
+<a name="l00282"></a>00282 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00283"></a>00283 <span class="preprocessor"></span>        <a class="code" href="class_h_a_l.html#a5972e15871bb7d4ea4636d6c167759b2">HAL::eprSetInt16</a>(<a class="code" href="_eeprom_8h.html#a18a0d04c5e1eb9a63d2f4685536a82bc">EPR_DELTA_TOWERX_OFFSET_STEPS</a>,steps);
+<a name="l00284"></a>00284         uint8_t newcheck = computeChecksum();
+<a name="l00285"></a>00285         <span class="keywordflow">if</span>(newcheck!=<a class="code" href="class_h_a_l.html#abf59c48dfd636724c15100ef1866899d">HAL::eprGetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>))
+<a name="l00286"></a>00286             <a class="code" href="class_h_a_l.html#a8f4e462098ac1eef804e8e45addff4e6">HAL::eprSetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>,newcheck);
+<a name="l00287"></a>00287 <span class="preprocessor">#endif</span>
+<a name="l00288"></a>00288 <span class="preprocessor"></span>    }
+<a name="l00289"></a>00289     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> setDeltaTowerYOffsetSteps(int16_t steps) {
+<a name="l00290"></a>00290 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00291"></a>00291 <span class="preprocessor"></span>        <a class="code" href="class_h_a_l.html#a5972e15871bb7d4ea4636d6c167759b2">HAL::eprSetInt16</a>(<a class="code" href="_eeprom_8h.html#a97deb23c43de0cc6efed4f83df07e340">EPR_DELTA_TOWERY_OFFSET_STEPS</a>,steps);
+<a name="l00292"></a>00292         uint8_t newcheck = computeChecksum();
+<a name="l00293"></a>00293         <span class="keywordflow">if</span>(newcheck!=<a class="code" href="class_h_a_l.html#abf59c48dfd636724c15100ef1866899d">HAL::eprGetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>))
+<a name="l00294"></a>00294             <a class="code" href="class_h_a_l.html#a8f4e462098ac1eef804e8e45addff4e6">HAL::eprSetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>,newcheck);
+<a name="l00295"></a>00295 <span class="preprocessor">#endif</span>
+<a name="l00296"></a>00296 <span class="preprocessor"></span>    }
+<a name="l00297"></a>00297     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> setDeltaTowerZOffsetSteps(int16_t steps) {
+<a name="l00298"></a>00298 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00299"></a>00299 <span class="preprocessor"></span>        <a class="code" href="class_h_a_l.html#a5972e15871bb7d4ea4636d6c167759b2">HAL::eprSetInt16</a>(<a class="code" href="_eeprom_8h.html#a7a1dfd32287137b04916e331ca790d98">EPR_DELTA_TOWERZ_OFFSET_STEPS</a>,steps);
+<a name="l00300"></a>00300         uint8_t newcheck = computeChecksum();
+<a name="l00301"></a>00301         <span class="keywordflow">if</span>(newcheck!=<a class="code" href="class_h_a_l.html#abf59c48dfd636724c15100ef1866899d">HAL::eprGetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>))
+<a name="l00302"></a>00302             <a class="code" href="class_h_a_l.html#a8f4e462098ac1eef804e8e45addff4e6">HAL::eprSetByte</a>(<a class="code" href="_eeprom_8h.html#a524b96d44f0297e79b493a29f421c7ab">EPR_INTEGRITY_BYTE</a>,newcheck);
+<a name="l00303"></a>00303 <span class="preprocessor">#endif</span>
+<a name="l00304"></a>00304 <span class="preprocessor"></span>    }
+<a name="l00305"></a>00305     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaAlphaA() {
+<a name="l00306"></a>00306 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00307"></a>00307 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#af6d064eb27cc2ce9439b52908cbe1bb8">EPR_DELTA_ALPHA_A</a>);
+<a name="l00308"></a>00308 <span class="preprocessor">#else</span>
+<a name="l00309"></a>00309 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_ALPHA_A;
+<a name="l00310"></a>00310 <span class="preprocessor">#endif</span>
+<a name="l00311"></a>00311 <span class="preprocessor"></span>    }
+<a name="l00312"></a>00312     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaAlphaB() {
+<a name="l00313"></a>00313 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00314"></a>00314 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a44a50634fcfa27eb9d2138225fd9dd2a">EPR_DELTA_ALPHA_B</a>);
+<a name="l00315"></a>00315 <span class="preprocessor">#else</span>
+<a name="l00316"></a>00316 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_ALPHA_B;
+<a name="l00317"></a>00317 <span class="preprocessor">#endif</span>
+<a name="l00318"></a>00318 <span class="preprocessor"></span>    }
+<a name="l00319"></a>00319     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaAlphaC() {
+<a name="l00320"></a>00320 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00321"></a>00321 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#ab81ab54bcbf30669695c121e90b0cc58">EPR_DELTA_ALPHA_C</a>);
+<a name="l00322"></a>00322 <span class="preprocessor">#else</span>
+<a name="l00323"></a>00323 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_ALPHA_C;
+<a name="l00324"></a>00324 <span class="preprocessor">#endif</span>
+<a name="l00325"></a>00325 <span class="preprocessor"></span>    }
+<a name="l00326"></a>00326     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaRadiusCorrectionA() {
+<a name="l00327"></a>00327 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00328"></a>00328 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#ac3a50022366946a5e86bc423f8146c62">EPR_DELTA_RADIUS_CORR_A</a>);
+<a name="l00329"></a>00329 <span class="preprocessor">#else</span>
+<a name="l00330"></a>00330 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_RADIUS_CORRECTION_A;
+<a name="l00331"></a>00331 <span class="preprocessor">#endif</span>
+<a name="l00332"></a>00332 <span class="preprocessor"></span>    }
+<a name="l00333"></a>00333     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaRadiusCorrectionB() {
+<a name="l00334"></a>00334 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00335"></a>00335 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#a0c735c861397a15d530a8378de008c75">EPR_DELTA_RADIUS_CORR_B</a>);
+<a name="l00336"></a>00336 <span class="preprocessor">#else</span>
+<a name="l00337"></a>00337 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_RADIUS_CORRECTION_B;
+<a name="l00338"></a>00338 <span class="preprocessor">#endif</span>
+<a name="l00339"></a>00339 <span class="preprocessor"></span>    }
+<a name="l00340"></a>00340     <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">float</span> deltaRadiusCorrectionC() {
+<a name="l00341"></a>00341 <span class="preprocessor">#if EEPROM_MODE!=0</span>
+<a name="l00342"></a>00342 <span class="preprocessor"></span>        <span class="keywordflow">return</span> <a class="code" href="class_h_a_l.html#a9d4b0a749807ef9f8f9816f3e60c4d94">HAL::eprGetFloat</a>(<a class="code" href="_eeprom_8h.html#ae708532fc7ea889dfea6495c7bef7602">EPR_DELTA_RADIUS_CORR_C</a>);
+<a name="l00343"></a>00343 <span class="preprocessor">#else</span>
+<a name="l00344"></a>00344 <span class="preprocessor"></span>        <span class="keywordflow">return</span> DELTA_RADIUS_CORRECTION_C;
+<a name="l00345"></a>00345 <span class="preprocessor">#endif</span>
+<a name="l00346"></a>00346 <span class="preprocessor"></span>    }
+<a name="l00347"></a>00347 <span class="preprocessor">#endif</span>
+<a name="l00348"></a>00348 <span class="preprocessor"></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_e_e_p_r_o_m.html#af87060c7e2fc74ba77c23826dd2c9432">initalizeUncached</a>();
+<a name="l00349"></a>00349 };
+<a name="l00350"></a>00350 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 </div>
 <!-- window showing the filter options -->
@@ -254,7 +467,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul>
       <li class="navelem"><a class="el" href="_eeprom_8h.html">Eeprom.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/uiconfig.h File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/uiconfig.h File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -100,7 +100,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#define-members">Defines</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/uiconfig.h File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/uiconfig.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -109,6 +109,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#a01568045a16bd4c43a379d8d9130076c">UI_DISPLAY_CHARSET</a>&#160;&#160;&#160;2</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#acc832c7c2fc6bfc96baf17ded9ffe94c">BEEPER_TYPE_INVERTING</a>&#160;&#160;&#160;false</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#a1f1cfb8da393500709a423b74c8c60c9">UI_DISPLAY_TYPE</a>&#160;&#160;&#160;0</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#a358d532c9bed430d93e65ddabc9ef375">UI_COLS</a>&#160;&#160;&#160;20</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#abc388782791eea22ff9ca1b2a97c1cd7">UI_ROWS</a>&#160;&#160;&#160;4</td></tr>
@@ -139,6 +140,20 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="uiconfig_8h.html#a8c375dae61ff82c1dc5ce6ff86068041">UI_I2C_KEY_ADDRESS</a>&#160;&#160;&#160;0x40</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
+<a class="anchor" id="acc832c7c2fc6bfc96baf17ded9ffe94c"></a><!-- doxytag: member="uiconfig.h::BEEPER_TYPE_INVERTING" ref="acc832c7c2fc6bfc96baf17ded9ffe94c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define <a class="el" href="uiconfig_8h.html#acc832c7c2fc6bfc96baf17ded9ffe94c">BEEPER_TYPE_INVERTING</a>&#160;&#160;&#160;false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Select type of beeper 0 = none 1 = Piezo connected to pin 2 = Piezo connected to a pin over I2C </p>
+
+</div>
+</div>
 <a class="anchor" id="a358d532c9bed430d93e65ddabc9ef375"></a><!-- doxytag: member="uiconfig.h::UI_COLS" ref="a358d532c9bed430d93e65ddabc9ef375" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -401,7 +416,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Select type of beeper 0 = none 1 = Piezo connected to pin 2 = Piezo connected to a pin over I2C What display type do you use? 0 = No display 1 = LCD Display with 4 bit data bus 2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1) 3 = LCD Display with I2C connection, 4 bit mode 4 = Use the slower LiquiedCrystal library bundled with arduino. IMPORTANT: You need to uncomment the LiquidCrystal include in <a class="el" href="_repetier_8pde.html">Repetier.pde</a> for it to work. If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012) </p>
+<p>What display type do you use? 0 = No display 1 = LCD Display with 4 bit data bus 2 = LCD Display with 8 bit data bus (currently not implemented, fallback to 1) 3 = LCD Display with I2C connection, 4 bit mode 4 = Use the slower LiquiedCrystal library bundled with arduino. IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work. If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012) 5 = U8G supported display </p>
 
 </div>
 </div>
@@ -524,7 +539,7 @@ Defines</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="uiconfig_8h.html">uiconfig.h</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:03 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

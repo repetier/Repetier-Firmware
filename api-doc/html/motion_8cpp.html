@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>Repetier-Firmware: Repetier/motion.cpp File Reference</title>
+<title>Repetier-Firmware: src/ArduinoAVR/Repetier/motion.cpp File Reference</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -35,7 +35,7 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Repetier-Firmware
-   &#160;<span id="projectnumber">0.80</span>
+   &#160;<span id="projectnumber">0.91</span>
    </div>
    
   </td>
@@ -98,94 +98,50 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div id="doc-content">
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
-<div class="title">Repetier/motion.cpp File Reference</div>  </div>
+<div class="title">src/ArduinoAVR/Repetier/motion.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_reptier_8h_source.html">Reptier.h</a>&quot;</code><br/>
-<code>#include &quot;<a class="el" href="ui_8h_source.html">ui.h</a>&quot;</code><br/>
+<div class="textblock"><code>#include &quot;<a class="el" href="_repetier_8h_source.html">Repetier.h</a>&quot;</code><br/>
 </div><table class="memberdecls">
-<tr><td colspan="2"><h2><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a42e7fa1e5464d85be6036d7989aa36e6">U16SquaredToU32</a> (unsigned int val)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a2068ab2eeb1958d3baaa48f6b3e49279">computeMaxJunctionSpeed</a> (<a class="el" href="struct_print_line.html">PrintLine</a> *p1, <a class="el" href="struct_print_line.html">PrintLine</a> *p2)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#adf6a7cb291c016fdbefd2e795f610ae0">updateStepsParameter</a> (<a class="el" href="struct_print_line.html">PrintLine</a> *p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a84460b541bce50d1df5020c386507899">testnum</a> (float x, char c)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a8b195a6b2ca2d37261b869cbd45a6997">backwardPlanner</a> (byte p, byte last)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a2b4fee83334c920bb2ceb234336bd8fa">forwardPlanner</a> (byte p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a4edeadbc946c68b6e89af7fcac7bab3b">updateTrapezoids</a> (byte p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#ade2454036639a692fd63a9cdffe9f6c4">safeSpeed</a> (<a class="el" href="struct_print_line.html">PrintLine</a> *p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a4cd9fbb08dc435925db16932af1cb6f3">move_steps</a> (long x, long y, long z, long e, float feedrate, bool waitEnd, bool check_endstop)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a09262c69cca862b10d4b4a3cb36fae8d">check_new_move</a> (byte pathOptimize, byte waitExtraLines)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a894fed44d5b55de578a69f8a3636d549">log_long_array</a> (PGM_P ptr, long *arr)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#abe4824e0c9e73d6b27aca1f6d7a90405">log_float_array</a> (PGM_P ptr, float *arr)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a84855e7a4c95efd4be35e57b768e24ba">log_printLine</a> (<a class="el" href="struct_print_line.html">PrintLine</a> *p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a20ce21964641a1ca00756ef832206d0d">calculate_move</a> (<a class="el" href="struct_print_line.html">PrintLine</a> *p, float axis_diff[], byte check_endstops, byte pathOptimize)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#ad4aa9634974ee66e47d58a1fd3a1027c">queue_move</a> (byte check_endstops, byte pathOptimize)</td></tr>
+<tr><td colspan="2"><h2><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#adc903858a94689ba9ae8882a135b3f3b">previousMillisCmd</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#ab70f53b8c69009326cad4be6edd3a1f0">maxInactiveTime</a> = <a class="el" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">MAX_INACTIVE_TIME</a>*1000L</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#acfda5eefcb4f9723567641d4167a9582">stepperInactiveTime</a> = <a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>*1000L</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a758f659f15b3784c13d14aee2e89e6a2">baudrate</a> = <a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Communication speed rate.  <a href="#a758f659f15b3784c13d14aee2e89e6a2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#ac13098470e707fa98e8274e2fe1532e5">maxadv</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#af30ccb099aa74e5ab14e18d157294f1a">maxadv2</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#addae499e542db954fc7b0514113128ff">maxadvspeed</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a446bd741ad7766bcb66b61d127448157">pwm_pos</a> [<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>+3]</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">volatile int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#aa9d0e229ec10a7a98c224f60d88fe410">waitRelax</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#ab3da02840fd9fa28a75a7c2bfa234d72">lastblk</a> = -1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="motion_8cpp.html#a2bafb93c60fc16e128dbc1f9ad3d7afa">cur_errupd</a></td></tr>
 </table>
-<hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a8b195a6b2ca2d37261b869cbd45a6997"></a><!-- doxytag: member="motion.cpp::backwardPlanner" ref="a8b195a6b2ca2d37261b869cbd45a6997" args="(byte p, byte last)" -->
+<hr/><h2>Variable Documentation</h2>
+<a class="anchor" id="a758f659f15b3784c13d14aee2e89e6a2"></a><!-- doxytag: member="motion.cpp::baudrate" ref="a758f659f15b3784c13d14aee2e89e6a2" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a8b195a6b2ca2d37261b869cbd45a6997">backwardPlanner</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>last</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [inline]</code></td>
+          <td class="memname">long <a class="el" href="_repetier_8h.html#a758f659f15b3784c13d14aee2e89e6a2">baudrate</a> = <a class="el" href="_configuration_8h.html#a734bbab06e1a9fd2e5522db0221ff6e3">BAUDRATE</a></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Compute the maximum speed from the last entered move. The backwards planner traverses the moves from last to first looking at deceleration. The RHS of the accelerate/decelerate ramp.</p>
-<p>p = last line inserted last = last element until we check </p>
+
+<p>Communication speed rate. </p>
 
 </div>
 </div>
-<a class="anchor" id="a20ce21964641a1ca00756ef832206d0d"></a><!-- doxytag: member="motion.cpp::calculate_move" ref="a20ce21964641a1ca00756ef832206d0d" args="(PrintLine *p, float axis_diff[], byte check_endstops, byte pathOptimize)" -->
+<a class="anchor" id="a2bafb93c60fc16e128dbc1f9ad3d7afa"></a><!-- doxytag: member="motion.cpp::cur_errupd" ref="a2bafb93c60fc16e128dbc1f9ad3d7afa" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a20ce21964641a1ca00756ef832206d0d">calculate_move</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>axis_diff</em>[], </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>check_endstops</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>pathOptimize</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">long <a class="el" href="motion_8cpp.html#a2bafb93c60fc16e128dbc1f9ad3d7afa">cur_errupd</a></td>
         </tr>
       </table>
 </div>
@@ -193,73 +149,27 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a09262c69cca862b10d4b4a3cb36fae8d"></a><!-- doxytag: member="motion.cpp::check_new_move" ref="a09262c69cca862b10d4b4a3cb36fae8d" args="(byte pathOptimize, byte waitExtraLines)" -->
+<a class="anchor" id="ab3da02840fd9fa28a75a7c2bfa234d72"></a><!-- doxytag: member="motion.cpp::lastblk" ref="ab3da02840fd9fa28a75a7c2bfa234d72" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">byte <a class="el" href="motion_8cpp.html#a09262c69cca862b10d4b4a3cb36fae8d">check_new_move</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>pathOptimize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>waitExtraLines</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">int <a class="el" href="motion_8cpp.html#ab3da02840fd9fa28a75a7c2bfa234d72">lastblk</a> = -1</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Check if move is new. If it is insert some dummy moves to allow the path optimizer to work since it does not act on the first two moves in the queue. The stepper timer will spot these moves and leave some time for processing. </p>
+<p>Moves the stepper motors one step. If the last step is reached, the next movement is started. The function must be called from a timer loop. It returns the time for the next call. This is a modified version that implements a bresenham 'multi-step' algorithm where the dominant cartesian axis steps may be less than the changing dominant delta axis. Moves the stepper motors one step. If the last step is reached, the next movement is started. The function must be called from a timer loop. It returns the time for the next call.</p>
+<p>Normal non delta algorithm </p>
 
 </div>
 </div>
-<a class="anchor" id="a2068ab2eeb1958d3baaa48f6b3e49279"></a><!-- doxytag: member="motion.cpp::computeMaxJunctionSpeed" ref="a2068ab2eeb1958d3baaa48f6b3e49279" args="(PrintLine *p1, PrintLine *p2)" -->
+<a class="anchor" id="ac13098470e707fa98e8274e2fe1532e5"></a><!-- doxytag: member="motion.cpp::maxadv" ref="ac13098470e707fa98e8274e2fe1532e5" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a2068ab2eeb1958d3baaa48f6b3e49279">computeMaxJunctionSpeed</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p2</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td><code> [inline]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Computes the maximum junction speed</p>
-<p>p1 = previous segment p2 = new segment </p>
-
-</div>
-</div>
-<a class="anchor" id="a2b4fee83334c920bb2ceb234336bd8fa"></a><!-- doxytag: member="motion.cpp::forwardPlanner" ref="a2b4fee83334c920bb2ceb234336bd8fa" args="(byte p)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a2b4fee83334c920bb2ceb234336bd8fa">forwardPlanner</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td><code> [inline]</code></td>
+          <td class="memname">int <a class="el" href="_repetier_8h.html#ac13098470e707fa98e8274e2fe1532e5">maxadv</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -267,26 +177,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abe4824e0c9e73d6b27aca1f6d7a90405"></a><!-- doxytag: member="motion.cpp::log_float_array" ref="abe4824e0c9e73d6b27aca1f6d7a90405" args="(PGM_P ptr, float *arr)" -->
+<a class="anchor" id="af30ccb099aa74e5ab14e18d157294f1a"></a><!-- doxytag: member="motion.cpp::maxadv2" ref="af30ccb099aa74e5ab14e18d157294f1a" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#abe4824e0c9e73d6b27aca1f6d7a90405">log_float_array</a> </td>
-          <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>ptr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>arr</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">int <a class="el" href="_repetier_8h.html#af30ccb099aa74e5ab14e18d157294f1a">maxadv2</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -294,26 +190,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a894fed44d5b55de578a69f8a3636d549"></a><!-- doxytag: member="motion.cpp::log_long_array" ref="a894fed44d5b55de578a69f8a3636d549" args="(PGM_P ptr, long *arr)" -->
+<a class="anchor" id="addae499e542db954fc7b0514113128ff"></a><!-- doxytag: member="motion.cpp::maxadvspeed" ref="addae499e542db954fc7b0514113128ff" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a894fed44d5b55de578a69f8a3636d549">log_long_array</a> </td>
-          <td>(</td>
-          <td class="paramtype">PGM_P&#160;</td>
-          <td class="paramname"><em>ptr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long *&#160;</td>
-          <td class="paramname"><em>arr</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">float <a class="el" href="_repetier_8h.html#addae499e542db954fc7b0514113128ff">maxadvspeed</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -321,16 +203,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a84855e7a4c95efd4be35e57b768e24ba"></a><!-- doxytag: member="motion.cpp::log_printLine" ref="a84855e7a4c95efd4be35e57b768e24ba" args="(PrintLine *p)" -->
+<a class="anchor" id="ab70f53b8c69009326cad4be6edd3a1f0"></a><!-- doxytag: member="motion.cpp::maxInactiveTime" ref="ab70f53b8c69009326cad4be6edd3a1f0" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a84855e7a4c95efd4be35e57b768e24ba">log_printLine</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="_repetier_8h.html#ab70f53b8c69009326cad4be6edd3a1f0">maxInactiveTime</a> = <a class="el" href="_configuration_8h.html#a93a47e8d3e037750926e3fbef221b909">MAX_INACTIVE_TIME</a>*1000L</td>
         </tr>
       </table>
 </div>
@@ -338,108 +216,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4cd9fbb08dc435925db16932af1cb6f3"></a><!-- doxytag: member="motion.cpp::move_steps" ref="a4cd9fbb08dc435925db16932af1cb6f3" args="(long x, long y, long z, long e, float feedrate, bool waitEnd, bool check_endstop)" -->
+<a class="anchor" id="adc903858a94689ba9ae8882a135b3f3b"></a><!-- doxytag: member="motion.cpp::previousMillisCmd" ref="adc903858a94689ba9ae8882a135b3f3b" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#a4cd9fbb08dc435925db16932af1cb6f3">move_steps</a> </td>
-          <td>(</td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>e</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>feedrate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>waitEnd</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>check_endstop</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Move printer the given number of steps. Puts the move into the queue. Used by e.g. homing commands. </p>
-
-</div>
-</div>
-<a class="anchor" id="ad4aa9634974ee66e47d58a1fd3a1027c"></a><!-- doxytag: member="motion.cpp::queue_move" ref="ad4aa9634974ee66e47d58a1fd3a1027c" args="(byte check_endstops, byte pathOptimize)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#ad4aa9634974ee66e47d58a1fd3a1027c">queue_move</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>check_endstops</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>pathOptimize</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Put a move to the current destination coordinates into the movement cache. If the cache is full, the method will wait, until a place gets free. During wait communication and temperature control is enabled. </p>
-<dl class="params"><dt><b>Parameters:</b></dt><dd>
-  <table class="params">
-    <tr><td class="paramname">check_endstops</td><td>Read endstop during move. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="ade2454036639a692fd63a9cdffe9f6c4"></a><!-- doxytag: member="motion.cpp::safeSpeed" ref="ade2454036639a692fd63a9cdffe9f6c4" args="(PrintLine *p)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float <a class="el" href="motion_8cpp.html#ade2454036639a692fd63a9cdffe9f6c4">safeSpeed</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td><code> [inline]</code></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="_repetier_8h.html#adc903858a94689ba9ae8882a135b3f3b">previousMillisCmd</a> = 0</td>
         </tr>
       </table>
 </div>
@@ -447,26 +229,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a84460b541bce50d1df5020c386507899"></a><!-- doxytag: member="motion.cpp::testnum" ref="a84460b541bce50d1df5020c386507899" args="(float x, char c)" -->
+<a class="anchor" id="a446bd741ad7766bcb66b61d127448157"></a><!-- doxytag: member="motion.cpp::pwm_pos" ref="a446bd741ad7766bcb66b61d127448157" args="[NUM_EXTRUDER+3]" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a84460b541bce50d1df5020c386507899">testnum</a> </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">uint8_t <a class="el" href="_repetier_8h.html#a446bd741ad7766bcb66b61d127448157">pwm_pos</a>[<a class="el" href="_configuration_8h.html#a8cb1f491dd9270f6668ba7a5b0454799">NUM_EXTRUDER</a>+3]</td>
         </tr>
       </table>
 </div>
@@ -474,16 +242,12 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a42e7fa1e5464d85be6036d7989aa36e6"></a><!-- doxytag: member="motion.cpp::U16SquaredToU32" ref="a42e7fa1e5464d85be6036d7989aa36e6" args="(unsigned int val)" -->
+<a class="anchor" id="acfda5eefcb4f9723567641d4167a9582"></a><!-- doxytag: member="motion.cpp::stepperInactiveTime" ref="acfda5eefcb4f9723567641d4167a9582" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long <a class="el" href="motion_8cpp.html#a42e7fa1e5464d85be6036d7989aa36e6">U16SquaredToU32</a> </td>
-          <td>(</td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>val</em></td><td>)</td>
-          <td><code> [inline]</code></td>
+          <td class="memname"><a class="el" href="_h_a_l_8h.html#ab14fc3b0e7b9535ec25836108ce96a45">millis_t</a> <a class="el" href="_repetier_8h.html#acfda5eefcb4f9723567641d4167a9582">stepperInactiveTime</a> = <a class="el" href="_configuration_8h.html#a1ce1327259c993fa88540e00c8dd09b5">STEPPER_INACTIVE_TIME</a>*1000L</td>
         </tr>
       </table>
 </div>
@@ -491,42 +255,16 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="adf6a7cb291c016fdbefd2e795f610ae0"></a><!-- doxytag: member="motion.cpp::updateStepsParameter" ref="adf6a7cb291c016fdbefd2e795f610ae0" args="(PrintLine *p)" -->
+<a class="anchor" id="aa9d0e229ec10a7a98c224f60d88fe410"></a><!-- doxytag: member="motion.cpp::waitRelax" ref="aa9d0e229ec10a7a98c224f60d88fe410" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="_reptier_8h.html#adf6a7cb291c016fdbefd2e795f610ae0">updateStepsParameter</a> </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_print_line.html">PrintLine</a> *&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td></td>
+          <td class="memname">volatile int <a class="el" href="_repetier_8h.html#aa9d0e229ec10a7a98c224f60d88fe410">waitRelax</a> = 0</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
-<p>Update parameter used by updateTrapezoids</p>
-<p>Computes the acceleration/decelleration steps and advanced parameter associated. </p>
-
-</div>
-</div>
-<a class="anchor" id="a4edeadbc946c68b6e89af7fcac7bab3b"></a><!-- doxytag: member="motion.cpp::updateTrapezoids" ref="a4edeadbc946c68b6e89af7fcac7bab3b" args="(byte p)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="motion_8cpp.html#a4edeadbc946c68b6e89af7fcac7bab3b">updateTrapezoids</a> </td>
-          <td>(</td>
-          <td class="paramtype">byte&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>This is the path planner.</p>
-<p>It goes from the last entry and tries to increase the end speed of previous moves in a fashion that the maximum jerk is never exceeded. If a segment with reached maximum speed is met, the planner stops. Everything left from this is already optimal from previous updates. The first 2 entries in the queue are not checked. The first is the one that is already in print and the following will likely become active.</p>
-<p>The method is called before lines_count is increased! </p>
 
 </div>
 </div>
@@ -550,7 +288,7 @@ Functions</h2></td></tr>
     <ul>
       <li class="navelem"><a class="el" href="motion_8cpp.html">motion.cpp</a>      </li>
 
-    <li class="footer">Generated on Fri Jan 11 2013 18:39:23 for Repetier-Firmware by
+    <li class="footer">Generated on Mon Dec 30 2013 18:53:02 for Repetier-Firmware by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.6.1 </li>
    </ul>

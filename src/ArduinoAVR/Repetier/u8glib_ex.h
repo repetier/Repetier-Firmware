@@ -116,6 +116,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+// these warnings appear and are no problem.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // ============= u8g.h ====================
 
 /*
@@ -155,6 +160,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _U8G_H
 #define _U8G_H
+
 
 /* uncomment the following line to support displays larger than 240x240 */
 //#define U8G_16BIT 1
@@ -854,6 +860,7 @@ defined(__18CXX) || defined(__PIC32MX)
 #define U8G_SPI_CLK_CYCLE_50NS 1
 #define U8G_SPI_CLK_CYCLE_300NS 2
 #define U8G_SPI_CLK_CYCLE_400NS 3
+#define U8G_SPI_CLK_CYCLE_500NS 4
 #define U8G_SPI_CLK_CYCLE_NONE 255
 
 uint8_t u8g_InitCom(u8g_t *u8g, u8g_dev_t *dev, uint8_t clk_cycle_time);
@@ -1389,6 +1396,12 @@ void st_Step(uint8_t player_pos, uint8_t is_auto_fire, uint8_t is_fire);
 
 /* options for u8g_i2c_init() */
 #define U8G_I2C_OPT_NONE 0
+#define U8G_I2C_OPT_NO_ACK 2
+#define U8G_I2C_OPT_DEV_0 0
+#define U8G_I2C_OPT_DEV_1 4
+#define U8G_I2C_OPT_FAST 16
+
+/* u8g_com_i2c.c */
 
 /* retrun values from u8g_twi_get_error() */
 #define U8G_I2C_ERR_NONE 0x00
@@ -2601,6 +2614,418 @@ u8g_dev_t u8g_dev_st7920_128x64_4x_sw_spi = { u8g_dev_st7920_128x64_4x_fn, &u8g_
 u8g_dev_t u8g_dev_st7920_128x64_4x_hw_spi = { u8g_dev_st7920_128x64_4x_fn, &u8g_dev_st7920_128x64_4x_pb, U8G_COM_ST7920_HW_SPI };
 u8g_dev_t u8g_dev_st7920_128x64_4x_8bit = { u8g_dev_st7920_128x64_4x_fn, &u8g_dev_st7920_128x64_4x_pb, U8G_COM_FAST_PARALLEL };
 u8g_dev_t u8g_dev_st7920_128x64_4x_custom = { u8g_dev_st7920_128x64_4x_fn, &u8g_dev_st7920_128x64_4x_pb, u8g_com_arduino_st7920_custom_fn };
+
+// ================ u8g_dev_ssd1306_128x64.c ==========
+
+/*
+
+  u8g_dev_ssd1306_128x64.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+#define WIDTH 128
+#define HEIGHT 64
+#define PAGE_HEIGHT 8
+
+/* init sequence adafruit 128x64 OLED (NOT TESTED) */
+static const uint8_t u8g_dev_ssd1306_128x64_adafruit1_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x0ae,				/* display off, sleep mode */
+  0x0d5, 0x080,		/* clock divide ratio (0x00=1) and oscillator frequency (0x8) */
+  0x0a8, 0x03f,		/* */
+
+  0x0d3, 0x000,		/*  */
+
+  0x040,				/* start line */
+
+  0x08d, 0x010,		/* [1] charge pump setting (p62): 0x014 enable, 0x010 disable */
+
+  0x020, 0x000,		/* */
+  0x0a1,				/* segment remap a0/a1*/
+  0x0c8,				/* c0: scan dir normal, c8: reverse */
+  0x0da, 0x012,		/* com pin HW config, sequential com pin config (bit 4), disable left/right remap (bit 5) */
+  0x081, 0x09f,		/* [1] set contrast control */
+  0x0d9, 0x022,		/* [1] pre-charge period 0x022/f1*/
+  0x0db, 0x040,		/* vcomh deselect level */
+
+  0x02e,				/* 2012-05-27: Deactivate scroll */
+  0x0a4,				/* output ram to display */
+  0x0a6,				/* none inverted normal display mode */
+  0x0af,				/* display on */
+
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+/* init sequence adafruit 128x64 OLED (NOT TESTED) */
+static const uint8_t u8g_dev_ssd1306_128x64_adafruit2_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x0ae,				/* display off, sleep mode */
+  0x0d5, 0x080,		/* clock divide ratio (0x00=1) and oscillator frequency (0x8) */
+  0x0a8, 0x03f,		/* */
+
+  0x0d3, 0x000,		/*  */
+
+  0x040,				/* start line */
+
+  0x08d, 0x014,		/* [2] charge pump setting (p62): 0x014 enable, 0x010 disable */
+
+  0x020, 0x000,		/* */
+  0x0a1,				/* segment remap a0/a1*/
+  0x0c8,				/* c0: scan dir normal, c8: reverse */
+  0x0da, 0x012,		/* com pin HW config, sequential com pin config (bit 4), disable left/right remap (bit 5) */
+  0x081, 0x0cf,		/* [2] set contrast control */
+  0x0d9, 0x0f1,		/* [2] pre-charge period 0x022/f1*/
+  0x0db, 0x040,		/* vcomh deselect level */
+
+  0x02e,				/* 2012-05-27: Deactivate scroll */
+  0x0a4,				/* output ram to display */
+  0x0a6,				/* none inverted normal display mode */
+  0x0af,				/* display on */
+
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+/* init sequence adafruit 128x64 OLED (NOT TESTED), like adafruit3, but with page addressing mode */
+static const uint8_t u8g_dev_ssd1306_128x64_adafruit3_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x0ae,				/* display off, sleep mode */
+  0x0d5, 0x080,		/* clock divide ratio (0x00=1) and oscillator frequency (0x8) */
+  0x0a8, 0x03f,		/* */
+
+  0x0d3, 0x000,		/*  */
+
+  0x040,				/* start line */
+
+  0x08d, 0x014,		/* [2] charge pump setting (p62): 0x014 enable, 0x010 disable */
+
+  0x020, 0x002,		/* 2012-05-27: page addressing mode */
+  0x0a1,				/* segment remap a0/a1*/
+  0x0c8,				/* c0: scan dir normal, c8: reverse */
+  0x0da, 0x012,		/* com pin HW config, sequential com pin config (bit 4), disable left/right remap (bit 5) */
+  0x081, 0x0cf,		/* [2] set contrast control */
+  0x0d9, 0x0f1,		/* [2] pre-charge period 0x022/f1*/
+  0x0db, 0x040,		/* vcomh deselect level */
+
+  0x02e,				/* 2012-05-27: Deactivate scroll */
+  0x0a4,				/* output ram to display */
+  0x0a6,				/* none inverted normal display mode */
+  0x0af,				/* display on */
+
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+/* init sequence Univision datasheet (NOT TESTED) */
+static const uint8_t u8g_dev_ssd1306_128x64_univision_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x0ae,				/* display off, sleep mode */
+  0x0d5, 0x080,		/* clock divide ratio (0x00=1) and oscillator frequency (0x8) */
+  0x0a8, 0x03f,		/* multiplex ratio */
+  0x0d3, 0x000,		/* display offset */
+  0x040,				/* start line */
+  0x08d, 0x010,		/* charge pump setting (p62): 0x014 enable, 0x010 disable */
+  0x0a1,				/* segment remap a0/a1*/
+  0x0c8,				/* c0: scan dir normal, c8: reverse */
+  0x0da, 0x012,		/* com pin HW config, sequential com pin config (bit 4), disable left/right remap (bit 5) */
+  0x081, 0x09f,		/* set contrast control */
+  0x0d9, 0x022,		/* pre-charge period */
+  0x0db, 0x040,		/* vcomh deselect level */
+  0x022, 0x000,		/* page addressing mode WRONG: 3 byte cmd! */
+  0x0a4,				/* output ram to display */
+  0x0a6,				/* none inverted normal display mode */
+  0x0af,				/* display on */
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+/* select one init sequence here */
+//#define u8g_dev_ssd1306_128x64_init_seq u8g_dev_ssd1306_128x64_univision_init_seq
+//#define u8g_dev_ssd1306_128x64_init_seq u8g_dev_ssd1306_128x64_adafruit1_init_seq
+// 26. Apr 2014: in this thead: http://forum.arduino.cc/index.php?topic=234930.msg1696754;topicseen#msg1696754
+// it is mentiond, that adafruit2_init_seq works better --> this will be used by the ssd1306_adafruit device
+//#define u8g_dev_ssd1306_128x64_init_seq u8g_dev_ssd1306_128x64_adafruit2_init_seq
+
+#define u8g_dev_ssd1306_128x64_init_seq u8g_dev_ssd1306_128x64_adafruit3_init_seq
+
+
+static const uint8_t u8g_dev_ssd1306_128x64_data_start[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x010,		/* set upper 4 bit of the col adr to 0 */
+  0x000,		/* set lower 4 bit of the col adr to 0  */
+  U8G_ESC_END                /* end of sequence */
+};
+
+/* the sh1106 is compatible to the ssd1306, but is 132x64. display seems to be centered */
+static const uint8_t u8g_dev_sh1106_128x64_data_start[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x010,		/* set upper 4 bit of the col adr to 0 */
+  0x002,		/* set lower 4 bit of the col adr to 2 (centered display with sh1106)  */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_ssd13xx_sleep_on[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0ae,		/* display off */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_ssd13xx_sleep_off[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0af,		/* display on */
+  U8G_ESC_DLY(50),       /* delay 50 ms */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+uint8_t u8g_dev_ssd1306_128x64_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_adafruit2_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | pb->p.page); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        if ( u8g_pb_WriteBuffer(pb, u8g, dev) == 0 )
+          return 0;
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+uint8_t u8g_dev_ssd1306_adafruit_128x64_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | pb->p.page); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        if ( u8g_pb_WriteBuffer(pb, u8g, dev) == 0 )
+          return 0;
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+uint8_t u8g_dev_sh1106_128x64_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_sh1106_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | pb->p.page); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        if ( u8g_pb_WriteBuffer(pb, u8g, dev) == 0 )
+          return 0;
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+
+uint8_t u8g_dev_ssd1306_128x64_2x_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (pb->p.page*2)); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (pb->p.page*2+1)); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)(pb->buf)+pb->width);
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb16v1_base_fn(u8g, dev, msg, arg);
+}
+
+uint8_t u8g_dev_sh1106_128x64_2x_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_300NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_sh1106_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (pb->p.page*2)); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_sh1106_128x64_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (pb->p.page*2+1)); /* select current page (SSD1306) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)(pb->buf)+pb->width);
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd13xx_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb16v1_base_fn(u8g, dev, msg, arg);
+}
+
+
+
+
+U8G_PB_DEV(u8g_dev_ssd1306_128x64_sw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_128x64_fn, U8G_COM_SW_SPI);
+U8G_PB_DEV(u8g_dev_ssd1306_128x64_hw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_128x64_fn, U8G_COM_HW_SPI);
+U8G_PB_DEV(u8g_dev_ssd1306_128x64_i2c, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_128x64_fn, U8G_COM_SSD_I2C);
+
+U8G_PB_DEV(u8g_dev_ssd1306_adafruit_128x64_sw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_adafruit_128x64_fn, U8G_COM_SW_SPI);
+U8G_PB_DEV(u8g_dev_ssd1306_adafruit_128x64_hw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_adafruit_128x64_fn, U8G_COM_HW_SPI);
+U8G_PB_DEV(u8g_dev_ssd1306_adafruit_128x64_i2c, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ssd1306_adafruit_128x64_fn, U8G_COM_SSD_I2C);
+
+
+uint8_t u8g_dev_ssd1306_128x64_2x_buf[WIDTH*2] U8G_NOCOMMON ;
+u8g_pb_t u8g_dev_ssd1306_128x64_2x_pb = { {16, HEIGHT, 0, 0, 0},  WIDTH, u8g_dev_ssd1306_128x64_2x_buf};
+u8g_dev_t u8g_dev_ssd1306_128x64_2x_sw_spi = { u8g_dev_ssd1306_128x64_2x_fn, &u8g_dev_ssd1306_128x64_2x_pb, U8G_COM_SW_SPI };
+u8g_dev_t u8g_dev_ssd1306_128x64_2x_hw_spi = { u8g_dev_ssd1306_128x64_2x_fn, &u8g_dev_ssd1306_128x64_2x_pb, U8G_COM_HW_SPI };
+u8g_dev_t u8g_dev_ssd1306_128x64_2x_i2c = { u8g_dev_ssd1306_128x64_2x_fn, &u8g_dev_ssd1306_128x64_2x_pb, U8G_COM_SSD_I2C };
+
+
+U8G_PB_DEV(u8g_dev_sh1106_128x64_sw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_sh1106_128x64_fn, U8G_COM_SW_SPI);
+U8G_PB_DEV(u8g_dev_sh1106_128x64_hw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_sh1106_128x64_fn, U8G_COM_HW_SPI);
+U8G_PB_DEV(u8g_dev_sh1106_128x64_i2c, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_sh1106_128x64_fn, U8G_COM_SSD_I2C);
+
+uint8_t u8g_dev_sh1106_128x64_2x_buf[WIDTH*2] U8G_NOCOMMON ;
+u8g_pb_t u8g_dev_sh1106_128x64_2x_pb = { {16, HEIGHT, 0, 0, 0},  WIDTH, u8g_dev_sh1106_128x64_2x_buf};
+u8g_dev_t u8g_dev_sh1106_128x64_2x_sw_spi = { u8g_dev_sh1106_128x64_2x_fn, &u8g_dev_sh1106_128x64_2x_pb, U8G_COM_SW_SPI };
+u8g_dev_t u8g_dev_sh1106_128x64_2x_hw_spi = { u8g_dev_sh1106_128x64_2x_fn, &u8g_dev_sh1106_128x64_2x_pb, U8G_COM_HW_SPI };
+u8g_dev_t u8g_dev_sh1106_128x64_2x_i2c = { u8g_dev_sh1106_128x64_2x_fn, &u8g_dev_sh1106_128x64_2x_pb, U8G_COM_SSD_I2C };
 
 
 // ================ u8g_font.c ===================
@@ -6382,16 +6807,6 @@ uint8_t u8g_dev_pb8h1_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg
 
 #if defined(ARDUINO)
 
-#if ARDUINO < 100
-#include <WProgram.h>
-#include "wiring_private.h"
-#include "pins_arduino.h"
-
-#else
-#include <Arduino.h>
-#include "wiring_private.h"
-#endif
-
 #if defined(__AVR__)
 
 uint8_t u8g_bitData, u8g_bitNotData;
@@ -6401,6 +6816,13 @@ volatile uint8_t *u8g_outClock;
 
 static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
 {
+#ifdef UI_SPI_MOSI
+  SET_OUTPUT(UI_SPI_MOSI);
+  SET_OUTPUT(UI_SPI_SCK);
+  WRITE(UI_SPI_MOSI, LOW);
+  WRITE(UI_SPI_SCK,  HIGH);
+#endif
+/*
   u8g_outData = portOutputRegister(digitalPinToPort(dataPin));
   u8g_outClock = portOutputRegister(digitalPinToPort(clockPin));
   u8g_bitData = digitalPinToBitMask(dataPin);
@@ -6411,11 +6833,13 @@ static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
 
   u8g_bitNotData = u8g_bitData;
   u8g_bitNotData ^= 0x0ff;
+*/
 }
 
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val) U8G_NOINLINE;
 static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 {
+/*
   uint8_t cnt = 8;
   uint8_t bitData = u8g_bitData;
   uint8_t bitNotData = u8g_bitNotData;
@@ -6434,14 +6858,6 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
       *outData = bitData;
     else
       *outData = bitNotData;
-
-    /*
-    *outClock |= bitClock;
-    val <<= 1;
-    cnt--;
-    *outClock &= bitNotClock;
-    */
-
     val <<= 1;
     *outClock &= bitNotClock;
     cnt--;
@@ -6450,6 +6866,31 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
     *outClock |= bitClock;
     //u8g_MicroDelay();
   } while( cnt != 0 );
+
+*/
+  U8G_ATOMIC_START();
+  #ifdef UI_SPI_MOSI
+
+  for(uint8_t cnt=0; cnt<8; cnt++ )
+  {
+    WRITE(UI_SPI_SCK, LOW);
+    WRITE(UI_SPI_MOSI, val&0x80);
+    val<<=1;
+    asm volatile("nop\n\t"
+"nop\n\t"
+"nop\n\t"
+"nop\n\t"
+::);
+    //u8g_MicroDelay();
+    WRITE(UI_SPI_SCK, HIGH);
+asm volatile("nop\n\t"
+"nop\n\t"
+"nop\n\t"
+"nop\n\t"
+::);
+    //u8g_MicroDelay();
+  }
+  #endif
   U8G_ATOMIC_END();
 }
 
@@ -6526,7 +6967,7 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 	digitalWrite(u8g_data_pin, LOW);
 #endif
     val <<= 1;
-    //u8g_MicroDelay();
+    u8g_MicroDelay();
 #ifdef UI_SPI_SCK
     WRITE(UI_SPI_SCK,LOW);
 #else
@@ -6548,8 +6989,6 @@ static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
 
 static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint8_t len)
 {
-  uint8_t i;
-
   if ( rs == 0 )
   {
     /* command */
@@ -6567,17 +7006,15 @@ static void u8g_com_arduino_st7920_write_byte_seq(uint8_t rs, uint8_t *ptr, uint
     u8g_com_arduino_do_shift_out_msb_first(*ptr << 4);
     ptr++;
     len--;
-    u8g_10MicroDelay();
+//    u8g_10MicroDelay();
   }
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 }
 
 static void u8g_com_arduino_st7920_write_byte(uint8_t rs, uint8_t val)
 {
-  uint8_t i;
-
   if ( rs == 0 )
   {
     /* command */
@@ -6592,7 +7029,7 @@ static void u8g_com_arduino_st7920_write_byte(uint8_t rs, uint8_t val)
   u8g_com_arduino_do_shift_out_msb_first(val & 0x0f0);
   u8g_com_arduino_do_shift_out_msb_first(val << 4);
 
-  for( i = 0; i < 4; i++ )
+//  for( i = 0; i < 4; i++ )
     u8g_10MicroDelay();
 
 }
@@ -6603,6 +7040,7 @@ uint8_t u8g_com_arduino_st7920_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, 
   switch(msg)
   {
     case U8G_COM_MSG_INIT:
+      u8g->pin_list[U8G_PI_CS2]=U8G_PIN_NONE;
       u8g_com_arduino_assign_pin_output_high(u8g);
 #ifdef UI_SPI_CS
       WRITE(UI_SPI_CS,LOW);
@@ -7178,3 +7616,3098 @@ void u8g_DrawRBox(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, u8g_uint_t w, u8g_uint
     //u8g_draw_vline(u8g, x+w, yu, hh);
   }
 }
+
+// ============ u8g_com_arduino_ssd_i2c.c =================
+
+/*
+
+  u8g_com_arduino_ssd_i2c.c
+
+  com interface for arduino (AND atmega) and the SSDxxxx chip (SOLOMON) variant
+  I2C protocol
+
+  ToDo: Rename this to u8g_com_avr_ssd_i2c.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2012, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  Special pin usage:
+    U8G_PI_I2C_OPTION	additional options
+    U8G_PI_A0_STATE	used to store the last value of the command/data register selection
+    U8G_PI_SET_A0		1: Signal request to update I2C device with new A0_STATE, 0: Do nothing, A0_STATE matches I2C device
+    U8G_PI_SCL		clock line (NOT USED)
+    U8G_PI_SDA		data line (NOT USED)
+
+    U8G_PI_RESET		reset line (currently disabled, see below)
+
+  Protocol:
+    SLA, Cmd/Data Selection, Arguments
+    The command/data register is selected by a special instruction byte, which is sent after SLA
+
+    The continue bit is always 0 so that a (re)start is equired for the change from cmd to/data mode
+*/
+
+
+#if defined(U8G_WITH_PINLIST)
+
+
+#define I2C_SLA         (0x3c*2)
+//#define I2C_CMD_MODE  0x080
+#define I2C_CMD_MODE    0x000
+#define I2C_DATA_MODE   0x040
+
+uint8_t u8g_com_arduino_ssd_start_sequence(u8g_t *u8g)
+{
+  /* are we requested to set the a0 state? */
+  if ( u8g->pin_list[U8G_PI_SET_A0] == 0 )
+    return 1;
+
+  /* setup bus, might be a repeated start */
+  if ( u8g_i2c_start(I2C_SLA) == 0 )
+    return 0;
+  if ( u8g->pin_list[U8G_PI_A0_STATE] == 0 )
+  {
+    if ( u8g_i2c_send_byte(I2C_CMD_MODE) == 0 )
+      return 0;
+  }
+  else
+  {
+    if ( u8g_i2c_send_byte(I2C_DATA_MODE) == 0 )
+      return 0;
+  }
+
+  u8g->pin_list[U8G_PI_SET_A0] = 0;
+  return 1;
+}
+
+uint8_t u8g_com_arduino_ssd_i2c_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      //u8g_com_arduino_digital_write(u8g, U8G_PI_SCL, HIGH);
+      //u8g_com_arduino_digital_write(u8g, U8G_PI_SDA, HIGH);
+      //u8g->pin_list[U8G_PI_A0_STATE] = 0;       /* inital RS state: unknown mode */
+
+      u8g_i2c_init(u8g->pin_list[U8G_PI_I2C_OPTION]);
+
+      break;
+
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_RESET:
+      /* Currently disabled, but it could be enable. Previous restrictions have been removed */
+      /* u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val); */
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      u8g->pin_list[U8G_PI_A0_STATE] = 0;
+      u8g->pin_list[U8G_PI_SET_A0] = 1;		/* force a0 to set again, also forces start condition */
+      if ( arg_val == 0 )
+      {
+        /* disable chip, send stop condition */
+	u8g_i2c_stop();
+     }
+      else
+      {
+        /* enable, do nothing: any byte writing will trigger the i2c start */
+      }
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      //u8g->pin_list[U8G_PI_SET_A0] = 1;
+      if ( u8g_com_arduino_ssd_start_sequence(u8g) == 0 )
+	return u8g_i2c_stop(), 0;
+      if ( u8g_i2c_send_byte(arg_val) == 0 )
+	return u8g_i2c_stop(), 0;
+      // u8g_i2c_stop();
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      //u8g->pin_list[U8G_PI_SET_A0] = 1;
+      if ( u8g_com_arduino_ssd_start_sequence(u8g) == 0 )
+	return u8g_i2c_stop(), 0;
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+	  if ( u8g_i2c_send_byte(*ptr++) == 0 )
+	    return u8g_i2c_stop(), 0;
+          arg_val--;
+        }
+      }
+      // u8g_i2c_stop();
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      //u8g->pin_list[U8G_PI_SET_A0] = 1;
+      if ( u8g_com_arduino_ssd_start_sequence(u8g) == 0 )
+	return u8g_i2c_stop(), 0;
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+	  if ( u8g_i2c_send_byte(u8g_pgm_read(ptr)) == 0 )
+	    return 0;
+          ptr++;
+          arg_val--;
+        }
+      }
+      // u8g_i2c_stop();
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g->pin_list[U8G_PI_A0_STATE] = arg_val;
+      u8g->pin_list[U8G_PI_SET_A0] = 1;		/* force a0 to set again */
+
+#ifdef OLD_CODE
+      if ( i2c_state != 0 )
+      {
+	u8g_i2c_stop();
+	i2c_state = 0;
+      }
+
+      if ( u8g_com_arduino_ssd_start_sequence(arg_val) == 0 )
+	return 0;
+
+      /* setup bus, might be a repeated start */
+      /*
+      if ( u8g_i2c_start(I2C_SLA) == 0 )
+	return 0;
+      if ( arg_val == 0 )
+      {
+	i2c_state = 1;
+
+	if ( u8g_i2c_send_byte(I2C_CMD_MODE) == 0 )
+	  return 0;
+      }
+      else
+      {
+	i2c_state = 2;
+	if ( u8g_i2c_send_byte(I2C_DATA_MODE) == 0 )
+	  return 0;
+      }
+      */
+#endif
+      break;
+  }
+  return 1;
+}
+
+#else  /* defined(U8G_WITH_PINLIST) */
+
+uint8_t u8g_com_arduino_ssd_i2c_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* defined(U8G_WITH_PINLIST) */
+
+// ============  u8g_com_i2c.c ===============
+
+/*
+
+  u8g_com_i2c.c
+
+  generic i2c interface
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+
+//#define U8G_I2C_WITH_NO_ACK
+
+static uint8_t u8g_i2c_err_code;
+static uint8_t u8g_i2c_opt;		/* U8G_I2C_OPT_NO_ACK, SAM: U8G_I2C_OPT_DEV_1 */
+/*
+  position values
+    1: start condition
+    2: sla transfer
+*/
+static uint8_t u8g_i2c_err_pos;
+
+
+void u8g_i2c_clear_error(void)
+{
+  u8g_i2c_err_code = U8G_I2C_ERR_NONE;
+  u8g_i2c_err_pos = 0;
+}
+
+uint8_t  u8g_i2c_get_error(void)
+{
+  return u8g_i2c_err_code;
+}
+
+uint8_t u8g_i2c_get_err_pos(void)
+{
+  return u8g_i2c_err_pos;
+}
+
+static void u8g_i2c_set_error(uint8_t code, uint8_t pos)
+{
+  if ( u8g_i2c_err_code > 0 )
+    return;
+  u8g_i2c_err_code |= code;
+  u8g_i2c_err_pos = pos;
+}
+
+
+
+#if defined(__AVR__)
+#define U8G_ATMEGA_HW_TWI
+
+/* remove the definition for attiny */
+#if __AVR_ARCH__ == 2
+#undef U8G_ATMEGA_HW_TWI
+#endif
+#if __AVR_ARCH__ == 25
+#undef U8G_ATMEGA_HW_TWI
+#endif
+#endif
+
+#if defined(U8G_ATMEGA_HW_TWI)
+
+#include <avr/io.h>
+#include <util/twi.h>
+
+
+
+void u8g_i2c_init(uint8_t options)
+{
+  /*
+  TWBR: bit rate register
+  TWSR: status register (contains preselector bits)
+
+  prescalar
+    0		1
+    1		4
+    2		16
+    3		64
+
+  f = F_CPU/(16+2*TWBR*prescalar)
+
+  F_CPU = 16MHz
+    TWBR = 152;
+    TWSR = 0;
+	--> 50KHz
+
+    TWBR = 72;
+    TWSR = 0;
+	--> 100KHz
+
+    TWBR = 12;
+    TWSR = 0;
+	--> 400KHz
+
+    F_CPU/(2*100000)-8  --> calculate TWBR value for 100KHz
+*/
+  u8g_i2c_opt = options;
+  TWSR = 0;
+  if ( options & U8G_I2C_OPT_FAST )
+  {
+    TWBR = F_CPU/(2*400000)-8;
+  }
+  else
+  {
+    TWBR = F_CPU/(2*100000)-8;
+  }
+  u8g_i2c_clear_error();
+}
+
+uint8_t u8g_i2c_wait(uint8_t mask, uint8_t pos)
+{
+  volatile uint16_t cnt = 2000;	/* timout value should be > 280 for 50KHz Bus and 16 Mhz CPU, however the start condition might need longer */
+  while( !(TWCR & mask) )
+  {
+      if ( cnt == 0 )
+      {
+	if ( u8g_i2c_opt & U8G_I2C_OPT_NO_ACK )
+	{
+	  return 1;	/* all ok */
+	}
+	else
+	{
+	  u8g_i2c_set_error(U8G_I2C_ERR_TIMEOUT, pos);
+	  return 0; /* error */
+	}
+      }
+      cnt--;
+    }
+  return 1;	/* all ok */
+}
+
+/* sla includes all 8 bits (with r/w bit), assums master transmit */
+uint8_t u8g_i2c_start(uint8_t sla)
+{
+  register uint8_t status;
+
+  /* send start */
+  TWCR = _BV(TWINT) |  _BV(TWSTA)  |  _BV(TWEN);
+
+  /* wait */
+  if ( u8g_i2c_wait(_BV(TWINT), 1) == 0 )
+    return 0;
+
+  status = TW_STATUS;
+
+  /* check status after start */
+  if ( status != TW_START && status != TW_REP_START )
+  {
+    u8g_i2c_set_error(U8G_I2C_ERR_BUS, 1);
+    return 0;
+  }
+
+  /* set slave address */
+  TWDR = sla;
+
+  /* enable sla transfer */
+  TWCR = _BV(TWINT)  |  _BV(TWEN);
+
+  /* wait */
+  if ( u8g_i2c_wait(_BV(TWINT), 2) == 0 )
+    return 0;
+
+  if ( u8g_i2c_opt & U8G_I2C_OPT_NO_ACK )
+  {
+    /* do not check for ACK */
+  }
+  else
+  {
+    status = TW_STATUS;
+    /* check status after sla */
+    if ( status != TW_MT_SLA_ACK )
+    {
+      u8g_i2c_set_error(U8G_I2C_ERR_BUS, 2);
+      return 0;
+    }
+  }
+
+   return 1;
+}
+
+uint8_t u8g_i2c_send_byte(uint8_t data)
+{
+  register uint8_t status;
+  TWDR = data;
+  TWCR = _BV(TWINT)  |  _BV(TWEN);
+  if ( u8g_i2c_wait(_BV(TWINT), 3) == 0 )
+    return 0;
+
+  if ( u8g_i2c_opt & U8G_I2C_OPT_NO_ACK )
+  {
+    /* do not check for ACK */
+  }
+  else
+  {
+    status = TW_STATUS;
+    if ( status != TW_MT_DATA_ACK )
+    {
+      u8g_i2c_set_error(U8G_I2C_ERR_BUS, 3);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+void u8g_i2c_stop(void)
+{
+  /* write stop */
+  TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWSTO);
+
+  /* no error is checked for the stop condition */
+  u8g_i2c_wait(_BV(TWSTO), 4);
+
+}
+
+/*
+void twi_send(uint8_t adr, uint8_t data1, uint8_t data2)
+{
+  u8g_i2c_start(adr<<1);
+  u8g_i2c_send_byte(data1);
+  u8g_i2c_send_byte(data2);
+  u8g_i2c_stop();
+}
+*/
+
+#elif defined(ARDUINO) && defined(__SAM3X8E__)
+/* Arduino Due */
+#include "Arduino.h"
+#include "sam.h"
+
+/*
+
+Controller
+
+TWI0 TWCK0 PA18 A			DUE PCB: SCL1
+TWI0 TWD0 PA17 A			DUE PCB: SDA1
+TWI1 TWCK1 PB13 A			DUE PCB: SCL 21
+TWI1 TWD1 PB12 A			DUE PCB: SDA 20
+
+Arduino definitions
+
+#define PIN_WIRE_SDA         (20u)
+#define PIN_WIRE_SCL         (21u)
+#define WIRE_INTERFACE       TWI1
+#define WIRE_INTERFACE_ID    ID_TWI1
+#define WIRE_ISR_HANDLER     TWI1_Handler
+
+#define PIN_WIRE1_SDA        (70u)
+#define PIN_WIRE1_SCL        (71u)
+#define WIRE1_INTERFACE      TWI0
+#define WIRE1_INTERFACE_ID   ID_TWI0
+#define WIRE1_ISR_HANDLER    TWI0_Handler
+
+
+*/
+
+static void i2c_400KHz_delay(void)
+{
+  /* should be at least 4 */
+  /* should be 5 for 100KHz transfer speed */
+
+
+  /*
+    Arduino Due
+    0x NOP: 470KHz
+    4x NOP: 450KHz
+    8x NOP: 430KHz
+    16x NOP: 400KHz
+  */
+
+  __NOP();
+  __NOP();
+  __NOP();
+  __NOP();
+
+  __NOP();
+  __NOP();
+  __NOP();
+  __NOP();
+
+  __NOP();
+  __NOP();
+  __NOP();
+  __NOP();
+
+  __NOP();
+  __NOP();
+  __NOP();
+  __NOP();
+}
+
+static void i2c_100KHz_delay(void)
+{
+  /*
+    1x u8g_MicroDelay()	ca. 130KHz
+    2x u8g_MicroDelay()	ca. 80KHz
+  */
+  u8g_MicroDelay();
+  u8g_MicroDelay();
+}
+
+
+uint32_t i2c_started = 0;
+uint32_t i2c_scl_pin = 0;
+uint32_t i2c_sda_pin = 0;
+void (*i2c_delay)(void) = i2c_100KHz_delay;
+
+const PinDescription *i2c_scl_pin_desc;
+const PinDescription *i2c_sda_pin_desc;
+
+
+/* maybe this can be optimized */
+static void i2c_init(void)
+{
+  i2c_sda_pin_desc = &(g_APinDescription[i2c_sda_pin]);
+  i2c_scl_pin_desc = &(g_APinDescription[i2c_scl_pin]);
+  pinMode(i2c_sda_pin, OUTPUT);
+  digitalWrite(i2c_sda_pin, HIGH);
+  pinMode(i2c_scl_pin, OUTPUT);
+  digitalWrite(i2c_scl_pin, HIGH);
+  PIO_Configure( i2c_sda_pin_desc->pPort, PIO_OUTPUT_0, i2c_sda_pin_desc->ulPin, PIO_OPENDRAIN );
+  PIO_Configure( i2c_scl_pin_desc->pPort, PIO_OUTPUT_0, i2c_scl_pin_desc->ulPin, PIO_OPENDRAIN );
+  PIO_Clear( i2c_sda_pin_desc->pPort, i2c_sda_pin_desc->ulPin) ;
+  PIO_Clear( i2c_scl_pin_desc->pPort, i2c_scl_pin_desc->ulPin) ;
+  PIO_Configure( i2c_sda_pin_desc->pPort, PIO_INPUT, i2c_sda_pin_desc->ulPin, PIO_DEFAULT ) ;
+  PIO_Configure( i2c_scl_pin_desc->pPort, PIO_INPUT, i2c_scl_pin_desc->ulPin, PIO_DEFAULT ) ;
+  i2c_delay();
+}
+
+/* actually, the scl line is not observed, so this procedure does not return a value */
+static void i2c_read_scl_and_delay(void)
+{
+  uint32_t dwMask = i2c_scl_pin_desc->ulPin;
+  //PIO_Configure( i2c_scl_pin_desc->pPort, PIO_INPUT, i2c_scl_pin_desc->ulPin, PIO_DEFAULT ) ;
+  //PIO_SetInput( i2c_scl_pin_desc->pPort, i2c_scl_pin_desc->ulPin, PIO_DEFAULT ) ;
+
+  /* set as input */
+  i2c_scl_pin_desc->pPort->PIO_ODR = dwMask ;
+  i2c_scl_pin_desc->pPort->PIO_PER = dwMask ;
+
+  i2c_delay();
+}
+
+static void i2c_clear_scl(void)
+{
+  uint32_t dwMask = i2c_scl_pin_desc->ulPin;
+
+  /* set open collector and drive low */
+  //PIO_Configure( i2c_scl_pin_desc->pPort, PIO_OUTPUT_0, i2c_scl_pin_desc->ulPin, PIO_OPENDRAIN );
+  //PIO_SetOutput( i2c_scl_pin_desc->pPort, i2c_scl_pin_desc->ulPin, 0, 1, 0);
+
+  /* open drain, zero default output */
+  i2c_scl_pin_desc->pPort->PIO_MDER = dwMask;
+  i2c_scl_pin_desc->pPort->PIO_CODR = dwMask;
+  i2c_scl_pin_desc->pPort->PIO_OER = dwMask;
+  i2c_scl_pin_desc->pPort->PIO_PER = dwMask;
+
+  //PIO_Clear( i2c_scl_pin_desc->pPort, i2c_scl_pin_desc->ulPin) ;
+}
+
+static uint8_t i2c_read_sda(void)
+{
+  uint32_t dwMask = i2c_sda_pin_desc->ulPin;
+  //PIO_Configure( i2c_sda_pin_desc->pPort, PIO_INPUT, i2c_sda_pin_desc->ulPin, PIO_DEFAULT ) ;
+  //PIO_SetInput( i2c_sda_pin_desc->pPort, i2c_sda_pin_desc->ulPin, PIO_DEFAULT ) ;
+
+  /* set as input */
+  i2c_sda_pin_desc->pPort->PIO_ODR = dwMask ;
+  i2c_sda_pin_desc->pPort->PIO_PER = dwMask ;
+
+
+  return 1;
+}
+
+static void i2c_clear_sda(void)
+{
+  uint32_t dwMask = i2c_sda_pin_desc->ulPin;
+
+  /* set open collector and drive low */
+  //PIO_Configure( i2c_sda_pin_desc->pPort, PIO_OUTPUT_0, i2c_sda_pin_desc->ulPin, PIO_OPENDRAIN );
+  //PIO_SetOutput( i2c_sda_pin_desc->pPort, i2c_sda_pin_desc->ulPin, 0, 1, 0);
+
+  /* open drain, zero default output */
+  i2c_sda_pin_desc->pPort->PIO_MDER = dwMask ;
+  i2c_sda_pin_desc->pPort->PIO_CODR = dwMask ;
+  i2c_sda_pin_desc->pPort->PIO_OER = dwMask ;
+  i2c_sda_pin_desc->pPort->PIO_PER = dwMask ;
+
+  //PIO_Clear( i2c_sda_pin_desc->pPort, i2c_sda_pin_desc->ulPin) ;
+}
+
+static void i2c_start(void)
+{
+  if ( i2c_started != 0 )
+  {
+    /* if already started: do restart */
+    i2c_read_sda();     /* SDA = 1 */
+    i2c_delay();
+    i2c_read_scl_and_delay();
+  }
+  i2c_read_sda();
+  /*
+  if (i2c_read_sda() == 0)
+  {
+    // do something because arbitration is lost
+  }
+  */
+  /* send the start condition, both lines go from 1 to 0 */
+  i2c_clear_sda();
+  i2c_delay();
+  i2c_clear_scl();
+  i2c_started = 1;
+}
+
+
+static void i2c_stop(void)
+{
+  /* set SDA to 0 */
+  i2c_clear_sda();
+  i2c_delay();
+
+  /* now release all lines */
+  i2c_read_scl_and_delay();
+
+  /* set SDA to 1 */
+  i2c_read_sda();
+  i2c_delay();
+  i2c_started = 0;
+}
+
+static void i2c_write_bit(uint8_t val)
+{
+  if (val)
+    i2c_read_sda();
+  else
+    i2c_clear_sda();
+
+  i2c_delay();
+  i2c_read_scl_and_delay();
+  i2c_clear_scl();
+}
+
+static uint8_t i2c_read_bit(void)
+{
+  uint8_t val;
+  /* do not drive SDA */
+  i2c_read_sda();
+  i2c_delay();
+  i2c_read_scl_and_delay();
+  val = i2c_read_sda();
+  i2c_delay();
+  i2c_clear_scl();
+  return val;
+}
+
+static uint8_t i2c_write_byte(uint8_t b)
+{
+  i2c_write_bit(b & 128);
+  i2c_write_bit(b & 64);
+  i2c_write_bit(b & 32);
+  i2c_write_bit(b & 16);
+  i2c_write_bit(b & 8);
+  i2c_write_bit(b & 4);
+  i2c_write_bit(b & 2);
+  i2c_write_bit(b & 1);
+
+  /* read ack from client */
+  /* 0: ack was given by client */
+  /* 1: nothing happend during ack cycle */
+  return i2c_read_bit();
+}
+
+
+
+void u8g_i2c_init(uint8_t options)
+{
+  u8g_i2c_opt = options;
+  u8g_i2c_clear_error();
+
+  if ( u8g_i2c_opt & U8G_I2C_OPT_FAST )
+  {
+    i2c_delay = i2c_400KHz_delay;
+  }
+  else
+  {
+    i2c_delay = i2c_100KHz_delay;
+  }
+
+
+  if ( u8g_i2c_opt & U8G_I2C_OPT_DEV_1 )
+  {
+    i2c_scl_pin = PIN_WIRE1_SCL;
+    i2c_sda_pin = PIN_WIRE1_SDA;
+
+    //REG_PIOA_PDR = PIO_PB12A_TWD1 | PIO_PB13A_TWCK1;
+  }
+  else
+  {
+
+    i2c_scl_pin = PIN_WIRE_SCL;
+    i2c_sda_pin = PIN_WIRE_SDA;
+
+    //REG_PIOA_PDR = PIO_PA17A_TWD0 | PIO_PA18A_TWCK0;
+  }
+
+  i2c_init();
+
+}
+
+/* sla includes also the r/w bit */
+uint8_t u8g_i2c_start(uint8_t sla)
+{
+  i2c_start();
+  i2c_write_byte(sla);
+  return 1;
+}
+
+uint8_t u8g_i2c_send_byte(uint8_t data)
+{
+  return i2c_write_byte(data);
+}
+
+void u8g_i2c_stop(void)
+{
+  i2c_stop();
+}
+
+
+#elif defined(U8G_RASPBERRY_PI)
+
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
+#define I2C_SLA         0x3c
+
+static int fd=-1;
+static uint8_t i2cMode = 0;
+
+void u8g_i2c_init(uint8_t options) {
+   u8g_i2c_clear_error();
+   u8g_i2c_opt = options;
+
+   if (wiringPiSetup() == -1) {
+      printf("wiringPi-Error\n");
+      exit(1);
+   }
+
+   fd = wiringPiI2CSetup(I2C_SLA);
+   if (fd < 0) {
+      printf ("Unable to open I2C device 0: %s\n", strerror (errno)) ;
+      exit (1) ;
+   }
+   //u8g_SetPIOutput(u8g, U8G_PI_RESET);
+   //u8g_SetPIOutput(u8g, U8G_PI_A0);
+}
+uint8_t u8g_i2c_start(uint8_t sla) {
+   u8g_i2c_send_mode(0);
+
+   return 1;
+}
+
+void u8g_i2c_stop(void) {
+}
+
+uint8_t u8g_i2c_send_mode(uint8_t mode) {
+   i2cMode = mode;
+}
+
+uint8_t u8g_i2c_send_byte(uint8_t data) {
+   wiringPiI2CWriteReg8(fd, i2cMode, data);
+
+   return 1;
+}
+
+uint8_t u8g_i2c_wait(uint8_t mask, uint8_t pos)
+{
+  return 1;
+}
+
+#else
+
+/* empty interface */
+
+void u8g_i2c_init(uint8_t options)
+{
+  u8g_i2c_clear_error();
+}
+
+uint8_t u8g_i2c_wait(uint8_t mask, uint8_t pos)
+{
+  return 1;
+}
+
+uint8_t u8g_i2c_start(uint8_t sla)
+{
+  return 1;
+}
+uint8_t u8g_i2c_send_byte(uint8_t data)
+{
+  return 1;
+}
+
+void u8g_i2c_stop(void)
+{
+}
+
+
+#endif
+// ==============   u8g_pb8v1.c ===============
+
+/*
+
+  u8g_pb8v1.c
+
+  8bit height monochrom (1 bit) page buffer
+  byte has vertical orientation
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+void u8g_pb8v1_Init(u8g_pb_t *b, void *buf, u8g_uint_t width) U8G_NOINLINE;
+void u8g_pb8v1_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index) U8G_NOINLINE;
+void u8g_pb8v1_SetPixel(u8g_pb_t *b, const u8g_dev_arg_pixel_t * const arg_pixel) U8G_NOINLINE ;
+void u8g_pb8v1_Set8PixelStd(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel) U8G_NOINLINE;
+
+/* Obsolete, usually set by the init of the structure */
+void u8g_pb8v1_Init(u8g_pb_t *b, void *buf, u8g_uint_t width)
+{
+  b->buf = buf;
+  b->width = width;
+  u8g_pb_Clear(b);
+}
+
+void u8g_pb8v1_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index)
+{
+  register uint8_t mask;
+  uint8_t *ptr = (uint8_t*)b->buf;
+
+  y -= b->p.page_y0;
+  mask = 1;
+  y &= 0x07;
+  mask <<= y;
+  ptr += x;
+  if ( color_index )
+  {
+    *ptr |= mask;
+  }
+  else
+  {
+    mask ^=0xff;
+    *ptr &= mask;
+  }
+}
+
+
+void u8g_pb8v1_SetPixel(u8g_pb_t *b, const u8g_dev_arg_pixel_t * const arg_pixel)
+{
+  if ( arg_pixel->y < b->p.page_y0 )
+    return;
+  if ( arg_pixel->y > b->p.page_y1 )
+    return;
+  if ( arg_pixel->x >= b->width )
+    return;
+  u8g_pb8v1_set_pixel(b, arg_pixel->x, arg_pixel->y, arg_pixel->color);
+}
+
+void u8g_pb8v1_Set8PixelStd(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel)
+{
+  register uint8_t pixel = arg_pixel->pixel;
+  do
+  {
+    if ( pixel & 128 )
+    {
+      u8g_pb8v1_SetPixel(b, arg_pixel);
+    }
+    switch( arg_pixel->dir )
+    {
+      case 0: arg_pixel->x++; break;
+      case 1: arg_pixel->y++; break;
+      case 2: arg_pixel->x--; break;
+      case 3: arg_pixel->y--; break;
+    }
+    pixel <<= 1;
+  } while( pixel != 0  );
+}
+
+
+void u8g_pb8v1_Set8PixelOpt2(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel)
+{
+  register uint8_t pixel = arg_pixel->pixel;
+  u8g_uint_t dx = 0;
+  u8g_uint_t dy = 0;
+
+  switch( arg_pixel->dir )
+  {
+    case 0: dx++; break;
+    case 1: dy++; break;
+    case 2: dx--; break;
+    case 3: dy--; break;
+  }
+
+  do
+  {
+    if ( pixel & 128 )
+      u8g_pb8v1_SetPixel(b, arg_pixel);
+    arg_pixel->x += dx;
+    arg_pixel->y += dy;
+    pixel <<= 1;
+  } while( pixel != 0  );
+
+}
+
+uint8_t u8g_dev_pb8v1_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    case U8G_DEV_MSG_SET_8PIXEL:
+      if ( u8g_pb_Is8PixelVisible(pb, (u8g_dev_arg_pixel_t *)arg) )
+        u8g_pb8v1_Set8PixelOpt2(pb, (u8g_dev_arg_pixel_t *)arg);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+        u8g_pb8v1_SetPixel(pb, (u8g_dev_arg_pixel_t *)arg);
+      break;
+    case U8G_DEV_MSG_INIT:
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_FIRST:
+      u8g_pb_Clear(pb);
+      u8g_page_First(&(pb->p));
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      if ( u8g_page_Next(&(pb->p)) == 0 )
+        return 0;
+      u8g_pb_Clear(pb);
+      break;
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      return u8g_pb_IsIntersection(pb, (u8g_dev_arg_bbx_t *)arg);
+#endif
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      u8g_pb_GetPageBox(pb, (u8g_box_t *)arg);
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = pb->width;
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = pb->p.total_height;
+      break;
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+      break;
+    case U8G_DEV_MSG_SET_XY_CB:
+      break;
+    case U8G_DEV_MSG_GET_MODE:
+      return U8G_MODE_BW;
+  }
+  return 1;
+}
+
+
+// ============== u8g_pb16v1.c ================
+
+/*
+
+  u8g_pb16v1.c
+
+  16bit height monochrom (1 bit) page buffer
+  byte has vertical orientation
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+#include <string.h>
+
+void u8g_pb16v1_Init(u8g_pb_t *b, void *buf, u8g_uint_t width) U8G_NOINLINE;
+void u8g_pb16v1_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index) U8G_NOINLINE;
+void u8g_pb16v1_SetPixel(u8g_pb_t *b, const u8g_dev_arg_pixel_t * const arg_pixel) U8G_NOINLINE ;
+void u8g_pb16v1_Set8PixelStd(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel) U8G_NOINLINE;
+
+
+void u8g_pb16v1_Clear(u8g_pb_t *b)
+{
+  uint8_t *ptr = (uint8_t *)b->buf;
+  uint8_t *end_ptr = ptr;
+  end_ptr += b->width*2;
+  do
+  {
+    *ptr++ = 0;
+  } while( ptr != end_ptr );
+}
+
+/* Obsolete, usually set by the init of the structure */
+void u8g_pb16v1_Init(u8g_pb_t *b, void *buf, u8g_uint_t width)
+{
+  b->buf = buf;
+  b->width = width;
+  u8g_pb16v1_Clear(b);
+}
+
+void u8g_pb16v1_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index)
+{
+  register uint8_t mask;
+  uint8_t *ptr = (uint8_t*)b->buf;
+
+  y -= b->p.page_y0;
+  if ( y >= 8 )
+  {
+    ptr += b->width;
+    y &= 0x07;
+  }
+  mask = 1;
+  mask <<= y;
+  ptr += x;
+  if ( color_index )
+  {
+    *ptr |= mask;
+  }
+  else
+  {
+    mask ^=0xff;
+    *ptr &= mask;
+  }
+}
+
+
+void u8g_pb16v1_SetPixel(u8g_pb_t *b, const u8g_dev_arg_pixel_t * const arg_pixel)
+{
+  if ( arg_pixel->y < b->p.page_y0 )
+    return;
+  if ( arg_pixel->y > b->p.page_y1 )
+    return;
+  if ( arg_pixel->x >= b->width )
+    return;
+  u8g_pb16v1_set_pixel(b, arg_pixel->x, arg_pixel->y, arg_pixel->color);
+}
+
+void u8g_pb16v1_Set8PixelStd(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel)
+{
+  register uint8_t pixel = arg_pixel->pixel;
+  do
+  {
+    if ( pixel & 128 )
+    {
+      u8g_pb16v1_SetPixel(b, arg_pixel);
+    }
+    switch( arg_pixel->dir )
+    {
+      case 0: arg_pixel->x++; break;
+      case 1: arg_pixel->y++; break;
+      case 2: arg_pixel->x--; break;
+      case 3: arg_pixel->y--; break;
+    }
+    pixel <<= 1;
+  } while( pixel != 0  );
+}
+
+
+void u8g_pb16v1_Set8PixelOpt2(u8g_pb_t *b, u8g_dev_arg_pixel_t *arg_pixel)
+{
+  register uint8_t pixel = arg_pixel->pixel;
+  u8g_uint_t dx = 0;
+  u8g_uint_t dy = 0;
+
+  switch( arg_pixel->dir )
+  {
+    case 0: dx++; break;
+    case 1: dy++; break;
+    case 2: dx--; break;
+    case 3: dy--; break;
+  }
+
+  do
+  {
+    if ( pixel & 128 )
+      u8g_pb16v1_SetPixel(b, arg_pixel);
+    arg_pixel->x += dx;
+    arg_pixel->y += dy;
+    pixel <<= 1;
+  } while( pixel != 0  );
+
+}
+
+uint8_t u8g_dev_pb16v1_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    case U8G_DEV_MSG_SET_8PIXEL:
+      if ( u8g_pb_Is8PixelVisible(pb, (u8g_dev_arg_pixel_t *)arg) )
+        u8g_pb16v1_Set8PixelOpt2(pb, (u8g_dev_arg_pixel_t *)arg);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+        u8g_pb16v1_SetPixel(pb, (u8g_dev_arg_pixel_t *)arg);
+      break;
+    case U8G_DEV_MSG_INIT:
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_FIRST:
+      u8g_pb16v1_Clear(pb);
+      u8g_page_First(&(pb->p));
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      if ( u8g_page_Next(&(pb->p)) == 0 )
+        return 0;
+      u8g_pb16v1_Clear(pb);
+      break;
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      return u8g_pb_IsIntersection(pb, (u8g_dev_arg_bbx_t *)arg);
+#endif
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      u8g_pb_GetPageBox(pb, (u8g_box_t *)arg);
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = pb->width;
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = pb->p.total_height;
+      break;
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+      break;
+    case U8G_DEV_MSG_SET_XY_CB:
+      break;
+    case U8G_DEV_MSG_GET_MODE:
+      return U8G_MODE_BW;
+  }
+  return 1;
+}
+
+// ========== u8g_arduino_sw_spi.c ================
+
+/*
+
+  u8g_arduino_sw_spi.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  Update for ATOMIC operation done (01 Jun 2013)
+    U8G_ATOMIC_OR(ptr, val)
+    U8G_ATOMIC_AND(ptr, val)
+    U8G_ATOMIC_START();
+    U8G_ATOMIC_END();
+
+
+*/
+
+#if defined(ARDUINO)
+
+/*=========================================================*/
+/* Arduino, AVR */
+
+#if defined(__AVR__)
+
+//uint8_t u8g_bitData, u8g_bitNotData;
+//uint8_t u8g_bitClock, u8g_bitNotClock;
+//volatile uint8_t *u8g_outData;
+//volatile uint8_t *u8g_outClock;
+
+/*static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
+{
+  u8g_outData = portOutputRegister(digitalPinToPort(dataPin));
+  u8g_outClock = portOutputRegister(digitalPinToPort(clockPin));
+  u8g_bitData = digitalPinToBitMask(dataPin);
+  u8g_bitClock = digitalPinToBitMask(clockPin);
+
+  u8g_bitNotClock = u8g_bitClock;
+  u8g_bitNotClock ^= 0x0ff;
+
+  u8g_bitNotData = u8g_bitData;
+  u8g_bitNotData ^= 0x0ff;
+}
+
+static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val) U8G_NOINLINE;
+static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
+{
+  uint8_t cnt = 8;
+  uint8_t bitData = u8g_bitData;
+  uint8_t bitNotData = u8g_bitNotData;
+  uint8_t bitClock = u8g_bitClock;
+  uint8_t bitNotClock = u8g_bitNotClock;
+  volatile uint8_t *outData = u8g_outData;
+  volatile uint8_t *outClock = u8g_outClock;
+  U8G_ATOMIC_START();
+  do
+  {
+    if ( val & 128 )
+      *outData |= bitData;
+    else
+      *outData &= bitNotData;
+
+    *outClock |= bitClock;
+    val <<= 1;
+    cnt--;
+    *outClock &= bitNotClock;
+  } while( cnt != 0 );
+  U8G_ATOMIC_END();
+}*/
+
+/*=========================================================*/
+/* Arduino, Chipkit */
+#elif defined(__18CXX) || defined(__PIC32MX)
+
+uint16_t dog_bitData, dog_bitNotData;
+uint16_t dog_bitClock, dog_bitNotClock;
+volatile uint32_t *dog_outData;
+volatile uint32_t *dog_outClock;
+volatile uint32_t dog_pic32_spi_tmp;
+
+static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
+{
+  dog_outData = portOutputRegister(digitalPinToPort(dataPin));
+  dog_outClock = portOutputRegister(digitalPinToPort(clockPin));
+  dog_bitData = digitalPinToBitMask(dataPin);
+  dog_bitClock = digitalPinToBitMask(clockPin);
+
+  dog_bitNotClock = dog_bitClock;
+  dog_bitNotClock ^= 0x0ffff;
+
+  dog_bitNotData = dog_bitData;
+  dog_bitNotData ^= 0x0ffff;
+}
+
+static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
+{
+  uint8_t cnt = 8;
+  U8G_ATOMIC_START();
+  do
+  {
+    if ( val & 128 )
+	*dog_outData |= dog_bitData;
+    else
+	*dog_outData &= dog_bitNotData;
+    val <<= 1;
+    /*
+	There must be some delay here. However
+	fetching the adress dog_outClock is enough delay, so
+	do not place dog_outClock in a local variable. This will
+	break the procedure
+    */
+    *dog_outClock |= dog_bitClock;
+    cnt--;
+    *dog_outClock &= dog_bitNotClock;
+    /*
+	little additional delay after clk pulse, done by 3x32bit reads
+	from I/O. Optimized for PIC32 with 80 MHz.
+    */
+    dog_pic32_spi_tmp = *dog_outClock;
+    dog_pic32_spi_tmp = *dog_outClock;
+    dog_pic32_spi_tmp = *dog_outClock;
+  } while( cnt != 0 );
+  U8G_ATOMIC_END();
+}
+
+/*=========================================================*/
+/* Arduino Due */
+#elif defined(__SAM3X8E__)
+
+/* Due */
+
+void u8g_digital_write_sam_high(uint8_t pin)
+{
+    PIO_Set( g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin) ;
+}
+
+void u8g_digital_write_sam_low(uint8_t pin)
+{
+    PIO_Clear( g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin) ;
+}
+
+static uint8_t u8g_sam_data_pin;
+static uint8_t u8g_sam_clock_pin;
+
+/*static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
+{
+  u8g_sam_data_pin = dataPin;
+  u8g_sam_clock_pin = clockPin;
+}
+
+static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
+{
+  uint8_t i = 8;
+  do
+  {
+    if ( val & 128 )
+      u8g_digital_write_sam_high(u8g_sam_data_pin);
+    else
+      u8g_digital_write_sam_low(u8g_sam_data_pin);
+    val <<= 1;
+    //u8g_MicroDelay();
+    u8g_digital_write_sam_high(u8g_sam_clock_pin);
+    u8g_MicroDelay();
+    u8g_digital_write_sam_low(u8g_sam_clock_pin);
+    u8g_MicroDelay();
+    i--;
+  } while( i != 0 );
+}
+*/
+
+#else
+/* empty interface */
+
+static void u8g_com_arduino_init_shift_out(uint8_t dataPin, uint8_t clockPin)
+{
+}
+
+static void u8g_com_arduino_do_shift_out_msb_first(uint8_t val)
+{
+}
+
+#endif
+
+
+uint8_t u8g_com_arduino_sw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+      u8g_com_arduino_digital_write(u8g, U8G_PI_MOSI, LOW);
+      u8g_com_arduino_init_shift_out(u8g->pin_list[U8G_PI_MOSI], u8g->pin_list[U8G_PI_SCK]);
+      break;
+
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, LOW);
+	/* issue 227 */
+	u8g_com_arduino_init_shift_out(u8g->pin_list[U8G_PI_MOSI], u8g->pin_list[U8G_PI_SCK]);
+      }
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_com_arduino_do_shift_out_msb_first( arg_val );
+      //u8g_arduino_sw_spi_shift_out(u8g->pin_list[U8G_PI_MOSI], u8g->pin_list[U8G_PI_SCK], arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_do_shift_out_msb_first(*ptr++);
+          // u8g_arduino_sw_spi_shift_out(u8g->pin_list[U8G_PI_MOSI], u8g->pin_list[U8G_PI_SCK], *ptr++);
+          arg_val--;
+        }
+      }
+      break;
+
+      case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_do_shift_out_msb_first( u8g_pgm_read(ptr) );
+          //u8g_arduino_sw_spi_shift_out(u8g->pin_list[U8G_PI_MOSI], u8g->pin_list[U8G_PI_SCK], u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_A0, arg_val);
+      break;
+  }
+  return 1;
+}
+
+#else /* ARDUINO */
+
+uint8_t u8g_com_arduino_sw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* ARDUINO */
+
+// ================ u8g_dev_ks0108_128x64.c ===================
+
+/*
+
+  u8g_dev_ks0108_128x64.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+  ADDRESS = 0   (Command Mode)
+    0x03f       Display On
+    0x0c0       Start Display at line 0
+    0x040 | y   write to y address (y:0..63)
+    0x0b8 | x   write to page [0..7]
+
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+*/
+
+#define WIDTH 128
+#define HEIGHT 64
+#define PAGE_HEIGHT 8
+
+static const uint8_t u8g_dev_ks0108_128x64_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip 1 */
+  0x03f,		                /* display on */
+  0x0c0,		                /* start at line 0 */
+  U8G_ESC_DLY(20),         /* delay 20 ms */
+  U8G_ESC_CS(2),             /* enable chip 2 */
+  0x03f,		                /* display on */
+  0x0c0,		                /* start at line 0 */
+  U8G_ESC_DLY(20),         /* delay 20 ms */
+  U8G_ESC_CS(0),             /* disable all chips */
+  U8G_ESC_END                /* end of sequence */
+};
+
+
+uint8_t u8g_dev_ks0108_128x64_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_NONE);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_ks0108_128x64_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_SetAddress(u8g, dev, 0);           /* command mode */
+        u8g_SetChipSelect(u8g, dev, 2);
+        u8g_WriteByte(u8g, dev, 0x0b8 | pb->p.page); /* select current page (KS0108b) */
+        u8g_WriteByte(u8g, dev, 0x040 );		/* set address 0 */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        u8g_WriteSequence(u8g, dev, 64, (uint8_t*)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_SetAddress(u8g, dev, 0);           /* command mode */
+        u8g_SetChipSelect(u8g, dev, 1);
+        u8g_WriteByte(u8g, dev, 0x0b8 | pb->p.page); /* select current page (KS0108b) */
+        u8g_WriteByte(u8g, dev, 0x040 );		/* set address 0 */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        u8g_WriteSequence(u8g, dev, 64, 64+(uint8_t *)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+      }
+      break;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+U8G_PB_DEV(u8g_dev_ks0108_128x64, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ks0108_128x64_fn, U8G_COM_PARALLEL);
+U8G_PB_DEV(u8g_dev_ks0108_128x64_fast, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_ks0108_128x64_fn, U8G_COM_FAST_PARALLEL);
+
+// ================= 8g_com_arduino_parallel.c ==================
+
+/*
+
+  u8g_com_arduino_parallel.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+  PIN_D0 8
+  PIN_D1 9
+  PIN_D2 10
+  PIN_D3 11
+  PIN_D4 4
+  PIN_D5 5
+  PIN_D6 6
+  PIN_D7 7
+
+  PIN_CS1 14
+  PIN_CS2 15
+  PIN_RW 16
+  PIN_DI 17
+  PIN_EN 18
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+*/
+
+#if  defined(ARDUINO)
+
+
+void u8g_com_arduino_parallel_write(u8g_t *u8g, uint8_t val)
+{
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D0, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D1, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D2, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D3, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D4, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D5, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D6, val&1);
+  val >>= 1;
+  u8g_com_arduino_digital_write(u8g, U8G_PI_D7, val&1);
+
+  /* EN cycle time must be 1 micro second, digitalWrite is slow enough to do this */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, HIGH);
+  u8g_MicroDelay(); /* delay by 1000ns, reference: ST7920: 140ns, SBN1661: 100ns */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, LOW);
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+}
+
+
+uint8_t u8g_com_arduino_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      /* setup the RW pin as output and force it to low */
+      if ( u8g->pin_list[U8G_PI_RW] != U8G_PIN_NONE )
+      {
+        pinMode(u8g->pin_list[U8G_PI_RW], OUTPUT);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RW, LOW);
+      }
+      /* set all pins (except RW pin) */
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      break;
+    case U8G_COM_MSG_STOP:
+      break;
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 1 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 2 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      break;
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_com_arduino_parallel_write(u8g, arg_val);
+      break;
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_parallel_write(u8g, *ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_parallel_write(u8g, u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_DI, arg_val);
+      break;
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+  }
+  return 1;
+}
+
+#else
+
+
+uint8_t u8g_com_arduino_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* ARDUINO */
+
+
+// =============== u8g_arduino_fast_parallel.c ================
+/*
+
+  u8g_arduino_fast_parallel.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  PIN_D0 8
+  PIN_D1 9
+  PIN_D2 10
+  PIN_D3 11
+  PIN_D4 4
+  PIN_D5 5
+  PIN_D6 6
+  PIN_D7 7
+
+  PIN_CS1 14
+  PIN_CS2 15
+  PIN_RW 16
+  PIN_DI 17
+  PIN_EN 18
+
+  u8g_Init8Bit(u8g, dev, d0, d1, d2, d3, d4, d5, d6, d7, en, cs1, cs2, di, rw, reset)
+  u8g_Init8Bit(u8g, dev,  8,    9, 10, 11,   4,   5,   6,   7, 18, 14, 15, 17, 16, U8G_PIN_NONE)
+
+  Update for ATOMIC operation done (01 Jun 2013)
+    U8G_ATOMIC_OR(ptr, val)
+    U8G_ATOMIC_AND(ptr, val)
+    U8G_ATOMIC_START();
+    U8G_ATOMIC_END();
+
+*/
+
+#if  defined(ARDUINO)
+
+#define PIN_D0 UI_DISPLAY_D0_PIN
+#define PIN_D1 UI_DISPLAY_D1_PIN
+#define PIN_D2 UI_DISPLAY_D2_PIN
+#define PIN_D3 UI_DISPLAY_D3_PIN
+#define PIN_D4 UI_DISPLAY_D4_PIN
+#define PIN_D5 UI_DISPLAY_D5_PIN
+#define PIN_D6 UI_DISPLAY_D6_PIN
+#define PIN_D7 UI_DISPLAY_D7_PIN
+
+#define PIN_CS1 UI_DISPLAY_CS1
+#define PIN_CS2 UI_DISPLAY_CS2
+#define PIN_RW UI_DISPLAY_RW_PIN
+#define PIN_DI UI_DISPLAY_DI
+#define PIN_EN UI_DISPLAY_ENABLE_PIN
+
+//#define PIN_RESET
+
+
+#if defined(__PIC32MX)
+/* CHIPKIT PIC32 */
+static volatile uint32_t *u8g_data_port[8];
+static uint32_t u8g_data_mask[8];
+#else
+static volatile uint8_t *u8g_data_port[8];
+static uint8_t u8g_data_mask[8];
+#endif
+
+
+
+static void u8g_com_arduino_fast_parallel_init(u8g_t *u8g)
+{
+  u8g_data_port[0] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D0]));// added conversion for due to compile
+  u8g_data_mask[0] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D0]);
+  u8g_data_port[1] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D1]));// added conversion for due to compile
+  u8g_data_mask[1] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D1]);
+  u8g_data_port[2] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D2]));// added conversion for due to compile
+  u8g_data_mask[2] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D2]);
+  u8g_data_port[3] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D3]));// added conversion for due to compile
+  u8g_data_mask[3] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D3]);
+
+  u8g_data_port[4] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D4])); // added conversion for due to compile
+  u8g_data_mask[4] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D4]);
+  u8g_data_port[5] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D5]));// added conversion for due to compile
+  u8g_data_mask[5] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D5]);
+  u8g_data_port[6] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D6]));// added conversion for due to compile
+  u8g_data_mask[6] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D6]);
+  u8g_data_port[7] =  (volatile uint8_t*)portOutputRegister(digitalPinToPort(u8g->pin_list[U8G_PI_D7]));// added conversion for due to compile
+  u8g_data_mask[7] =  digitalPinToBitMask(u8g->pin_list[U8G_PI_D7]);
+}
+
+/* atomic protection must be done by calling function */
+static void u8g_com_arduino_fast_write_data_pin(uint8_t pin, uint8_t val)
+{
+  if ( val != 0 )
+    *u8g_data_port[pin] |= u8g_data_mask[pin];
+  else
+    *u8g_data_port[pin] &= ~u8g_data_mask[pin];
+}
+
+
+void u8g_com_arduino_fast_parallel_write(u8g_t *u8g, uint8_t val)
+{
+  U8G_ATOMIC_START();
+  u8g_com_arduino_fast_write_data_pin( 0, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 1, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 2, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 3, val&1 );
+  val >>= 1;
+
+  u8g_com_arduino_fast_write_data_pin( 4, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 5, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 6, val&1 );
+  val >>= 1;
+  u8g_com_arduino_fast_write_data_pin( 7, val&1 );
+  val >>= 1;
+  U8G_ATOMIC_END();
+
+  /* EN cycle time must be 1 micro second */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, HIGH);
+  u8g_MicroDelay(); /* delay by 1000ns, reference: ST7920: 140ns, SBN1661: 100ns */
+  u8g_com_arduino_digital_write(u8g, U8G_PI_EN, LOW);
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+  u8g_10MicroDelay(); /* ST7920 commands: 72us */
+}
+
+
+uint8_t u8g_com_arduino_fast_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_fast_parallel_init(u8g);
+      /* setup the RW pin as output and force it to low */
+      if ( u8g->pin_list[U8G_PI_RW] != U8G_PIN_NONE )
+      {
+        pinMode(u8g->pin_list[U8G_PI_RW], OUTPUT);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RW, LOW);
+      }
+      /* set all pins (except RW pin) */
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      break;
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 1 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, HIGH);
+      }
+      else if ( arg_val == 2 )
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, HIGH);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS1, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS2, LOW);
+      }
+      break;
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_com_arduino_fast_parallel_write(u8g, arg_val);
+      break;
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_fast_parallel_write(u8g, *ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_com_arduino_fast_parallel_write(u8g, u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_DI, arg_val);
+      break;
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+  }
+  return 1;
+}
+
+#else
+
+
+uint8_t u8g_com_arduino_fast_parallel_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+
+#endif /* ARDUINO */
+
+
+/*
+
+  u8g_dev_st7565_nhd_c12864.c
+
+  Support for the NHD-C12864A1Z-FSB-FBW (Newhaven Display)
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2012, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+#define WIDTH 128
+#define HEIGHT 64
+#define PAGE_HEIGHT 8
+
+const uint8_t u8g_dev_st7565_nhd_c12864_init_seq[] PROGMEM = {
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_RST(10),           /* do reset low pulse with (10*16)+2 milliseconds */
+  U8G_ESC_CS(1),             /* enable chip */
+
+  0x040,		                /* set display start line */
+  0x0a1,		                /* ADC set to reverse */
+  0x0c0,		                /* common output mode: set scan direction normal operation */
+  0x0a6,                           /* display normal, bit val 0: LCD pixel off. */
+  0x0a2,		                /* LCD bias 1/9 */
+  0x02f,		                /* all power  control circuits on */
+  0x0f8,		                /* set booster ratio to */
+  0x000,		                /* 4x */
+  0x027,		                /* set V0 voltage resistor ratio to large */
+  0x081,		                /* set contrast */
+  0x008,		                /* contrast: 0x008 is a good value for NHD C12864, Nov 2012: User reports that 0x1a is much better */
+  0x0ac,		                /* indicator */
+  0x000,		                /* disable */
+  0x0af,		                /* display on */
+
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  0x0a5,		                /* display all points, ST7565 */
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  U8G_ESC_DLY(100),       /* delay 100 ms */
+  0x0a4,		                /* normal display */
+  U8G_ESC_CS(0),             /* disable chip */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_nhd_c12864_data_start[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x010,		/* set upper 4 bit of the col adr to 0 */
+  0x004,		/* set lower 4 bit of the col adr to 4 (NHD C12864) */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_c12864_sleep_on[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0ac,		/* static indicator off */
+  0x000,		                /* indicator register set (not sure if this is required) */
+  0x0ae,		/* display off */
+  0x0a5,		/* all points on */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+static const uint8_t u8g_dev_st7565_c12864_sleep_off[] PROGMEM = {
+  U8G_ESC_ADR(0),           /* instruction mode */
+  U8G_ESC_CS(1),             /* enable chip */
+  0x0a4,		/* all points off */
+  0x0af,		/* display on */
+  U8G_ESC_DLY(50),       /* delay 50 ms */
+  U8G_ESC_CS(0),             /* disable chip, bugfix 12 nov 2014 */
+  U8G_ESC_END                /* end of sequence */
+};
+
+uint8_t u8g_dev_st7565_nhd_c12864_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+#if defined(__SAM3X8E__)	
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+#else
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+#endif
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | pb->p.page); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+        if ( u8g_pb_WriteBuffer(pb, u8g, dev) == 0 )
+          return 0;
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_CONTRAST:
+      u8g_SetChipSelect(u8g, dev, 1);
+      u8g_SetAddress(u8g, dev, 0);          /* instruction mode */
+      u8g_WriteByte(u8g, dev, 0x081);
+      u8g_WriteByte(u8g, dev, (*(uint8_t *)arg) >> 2);
+      u8g_SetChipSelect(u8g, dev, 0);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb8v1_base_fn(u8g, dev, msg, arg);
+}
+
+uint8_t u8g_dev_st7565_nhd_c12864_2x_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  switch(msg)
+  {
+    case U8G_DEV_MSG_INIT:
+      u8g_InitCom(u8g, dev, U8G_SPI_CLK_CYCLE_400NS);
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_init_seq);
+      break;
+    case U8G_DEV_MSG_STOP:
+      break;
+    case U8G_DEV_MSG_PAGE_NEXT:
+      {
+        u8g_pb_t *pb = (u8g_pb_t *)(dev->dev_mem);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (2*pb->p.page)); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t*)pb->buf);
+        u8g_SetChipSelect(u8g, dev, 0);
+
+        u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_nhd_c12864_data_start);
+        u8g_WriteByte(u8g, dev, 0x0b0 | (2*pb->p.page+1)); /* select current page (ST7565R) */
+        u8g_SetAddress(u8g, dev, 1);           /* data mode */
+	u8g_WriteSequence(u8g, dev, pb->width, (uint8_t *)(pb->buf)+pb->width);
+        u8g_SetChipSelect(u8g, dev, 0);
+      }
+      break;
+    case U8G_DEV_MSG_CONTRAST:
+      u8g_SetChipSelect(u8g, dev, 1);
+      u8g_SetAddress(u8g, dev, 0);          /* instruction mode */
+      u8g_WriteByte(u8g, dev, 0x081);
+      u8g_WriteByte(u8g, dev, (*(uint8_t *)arg) >> 2);
+      u8g_SetChipSelect(u8g, dev, 0);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_ON:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_on);
+      return 1;
+    case U8G_DEV_MSG_SLEEP_OFF:
+      u8g_WriteEscSeqP(u8g, dev, u8g_dev_st7565_c12864_sleep_off);
+      return 1;
+  }
+  return u8g_dev_pb16v1_base_fn(u8g, dev, msg, arg);
+}
+
+U8G_PB_DEV(u8g_dev_st7565_nhd_c12864_sw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_st7565_nhd_c12864_fn, U8G_COM_SW_SPI);
+U8G_PB_DEV(u8g_dev_st7565_nhd_c12864_hw_spi, WIDTH, HEIGHT, PAGE_HEIGHT, u8g_dev_st7565_nhd_c12864_fn, U8G_COM_HW_SPI);
+
+
+uint8_t u8g_dev_st7565_nhd_c12864_2x_buf[WIDTH*2] U8G_NOCOMMON ;
+u8g_pb_t u8g_dev_st7565_nhd_c12864_2x_pb = { {16, HEIGHT, 0, 0, 0},  WIDTH, u8g_dev_st7565_nhd_c12864_2x_buf};
+u8g_dev_t u8g_dev_st7565_nhd_c12864_2x_sw_spi = { u8g_dev_st7565_nhd_c12864_2x_fn, &u8g_dev_st7565_nhd_c12864_2x_pb, U8G_COM_SW_SPI };
+u8g_dev_t u8g_dev_st7565_nhd_c12864_2x_hw_spi = { u8g_dev_st7565_nhd_c12864_2x_fn, &u8g_dev_st7565_nhd_c12864_2x_pb, U8G_COM_HW_SPI };
+
+/*
+
+  u8g_com_arduino_hw_spi.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  SPI Clock Cycle Type
+
+  SSD1351	  50ns		20 MHz
+  SSD1322	300ns		  3.3 MHz
+  SSD1327	300ns
+  SSD1306	300ns
+  ST7565		400ns 		  2.5 MHz
+  ST7920		400ns
+
+  Arduino DUE
+
+  PA25	MISO
+  PA26	MOSI	75
+  PA27	SCLK	76
+
+
+typedef struct {
+  WoReg SPI_CR;        (Spi Offset: 0x00) Control Register
+  RwReg SPI_MR;        (Spi Offset: 0x04) Mode Register
+  RoReg SPI_RDR;       (Spi Offset: 0x08) Receive Data Register
+  WoReg SPI_TDR;       (Spi Offset: 0x0C) Transmit Data Register
+  RoReg SPI_SR;        (Spi Offset: 0x10) Status Register
+  WoReg SPI_IER;       (Spi Offset: 0x14) Interrupt Enable Register
+  WoReg SPI_IDR;       (Spi Offset: 0x18) Interrupt Disable Register
+  RoReg SPI_IMR;       (Spi Offset: 0x1C) Interrupt Mask Register
+  RoReg Reserved1[4];
+  RwReg SPI_CSR[4];    (Spi Offset: 0x30) Chip Select Register
+  RoReg Reserved2[41];
+  RwReg SPI_WPMR;      (Spi Offset: 0xE4) Write Protection Control Register
+  RoReg SPI_WPSR;      (Spi Offset: 0xE8) Write Protection Status Register
+} Spi;
+
+  Power Management Controller (PMC)
+  arduino-1.5.2/hardware/arduino/sam/system/CMSIS/Device/ATMEL/sam3xa/include/instance/instance_pmc.h
+    - enable PIO
+
+      REG_PMC_PCER0 = 1UL << ID_PIOA
+    - enable SPI
+      REG_PMC_PCER0 = 1UL << ID_SPI0
+
+
+    - enable PIOA and SPI0
+      REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+
+  Parallel Input/Output Controller (PIO)
+  arduino-1.5.2/hardware/arduino/sam/system/CMSIS/Device/ATMEL/sam3xa/include/instance/instance_pioa.h
+    - enable special function of the pin: disable PIO on A26 and A27:
+	REG_PIOA_PDR = 0x0c000000
+	PIOA->PIO_PDR = 0x0c000000
+
+  SPI
+    SPI0->SPI_CR = SPI_CR_SPIDIS
+    SPI0->SPI_CR = SPI_CR_SWRST ;
+    SPI0->SPI_CR = SPI_CR_SWRST ;
+    SPI0->SPI_CR = SPI_CR_SPIEN
+
+    Bit 0: Master Mode = 1 (active)
+    Bit 1: Peripheral Select = 0 (fixed)
+    Bit 2: Chip Select Decode Mode = 1 (4 to 16)
+    Bit 4: Mode Fault Detection = 1 (disabled)
+    Bit 5: Wait Data Read = 0 (disabled)
+    Bit 7: Loop Back Mode = 0 (disabled)
+    Bit 16-19: Peripheral Chip Select = 0 (chip select 0)
+    SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS
+
+    Bit 0: Clock Polarity = 0
+    Bit 1: Clock Phase = 0
+    Bit 4-7: Bits = 0 (8 Bit)
+    Bit 8-15: SCBR = 1
+    SPI0->SPI_CSR[0] = SPI_CSR_SCBR(x)	Serial Baud Rate
+	SCBR / 84000000 > 50 / 1000000000
+	SCBR / 84 > 5 / 100
+	SCBR  > 50 *84 / 1000 --> SCBR=5
+	SCBR  > 300*84 / 1000 --> SCBR=26
+	SCBR  > 400*84 / 1000 --> SCBR=34
+
+  Arduino Due test code:
+    REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+    REG_PIOA_PDR = 0x0c000000;
+    SPI0->SPI_CR = SPI_CR_SPIDIS;
+    SPI0->SPI_CR = SPI_CR_SWRST;
+    SPI0->SPI_CR = SPI_CR_SWRST;
+    SPI0->SPI_CR = SPI_CR_SPIEN;
+    SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS;
+    SPI0->SPI_CSR[0] = SPI_CSR_SCBR(30);
+
+    for(;;)
+    {
+      while( (SPI0->SPI_SR & SPI_SR_TDRE) == 0 )
+	;
+      SPI0->SPI_TDR = 0x050;
+    }
+
+*/
+
+#if defined(ARDUINO)
+
+#if defined(__AVR__)
+#define U8G_ARDUINO_ATMEGA_HW_SPI
+/* remove the definition for attiny */
+#if __AVR_ARCH__ == 2
+#undef U8G_ARDUINO_ATMEGA_HW_SPI
+#endif
+#if __AVR_ARCH__ == 25
+#undef U8G_ARDUINO_ATMEGA_HW_SPI
+#endif
+#endif
+
+#if defined(U8G_ARDUINO_ATMEGA_HW_SPI)
+
+//#include <avr/interrupt.h>
+//#include <avr/io.h>
+
+#if ARDUINO < 100
+
+/* fixed pins */
+#if defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__) // Sanguino.cc board
+#define PIN_SCK         7
+#define PIN_MISO        6
+#define PIN_MOSI        5
+#define PIN_CS          4
+#else                                   // Arduino Board
+#define PIN_SCK 13
+#define PIN_MISO  12
+#define PIN_MOSI 11
+#define PIN_CS 10
+#endif // (__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
+
+#else
+
+/* use Arduino pin definitions */
+#define PIN_SCK SCK
+#define PIN_MISO  MISO_PIN
+#define PIN_MOSI MOSI_PIN
+#define PIN_CS SS
+
+#endif
+
+
+
+//static uint8_t u8g_spi_out(uint8_t data) U8G_NOINLINE;
+static uint8_t u8g_spi_out(uint8_t data)
+{
+  /* unsigned char x = 100; */
+  /* send data */
+  SPDR = data;
+  /* wait for transmission */
+  while (!(SPSR & (1<<SPIF)))
+    ;
+  /* clear the SPIF flag by reading SPDR */
+  return  SPDR;
+}
+
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      pinMode(PIN_SCK, OUTPUT);
+      digitalWrite(PIN_SCK, LOW);
+      pinMode(PIN_MOSI, OUTPUT);
+      digitalWrite(PIN_MOSI, LOW);
+      /* pinMode(PIN_MISO, INPUT); */
+
+      pinMode(PIN_CS, OUTPUT);			/* system chip select for the atmega board */
+      digitalWrite(PIN_CS, HIGH);
+
+
+
+      /*
+        SPR1 SPR0
+            0	0		fclk/4
+            0	1		fclk/16
+            1	0		fclk/64
+            1	1		fclk/128
+      */
+      SPCR = 0;
+      SPCR =  (1<<SPE) | (1<<MSTR)|(0<<SPR1)|(0<<SPR0)|(0<<CPOL)|(0<<CPHA);
+#ifdef U8G_HW_SPI_2X
+      SPSR = (1 << SPI2X);  /* double speed, issue 89 */
+#else
+      if ( arg_val  <= U8G_SPI_CLK_CYCLE_50NS )
+      {
+	SPSR = (1 << SPI2X);  /* double speed, issue 89 */
+      }
+#endif
+
+
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_A0, arg_val);
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+      }
+      else
+      {
+        /* enable */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, LOW);
+      }
+      break;
+
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_spi_out(arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(*ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+  }
+  return 1;
+}
+
+/* #elif defined(__18CXX) || defined(__PIC32MX) */
+
+#elif defined(__SAM3X8E__)		// Arduino Due, maybe we should better check for __SAM3X8E__
+
+/* use Arduino pin definitions */
+#define PIN_SCK SCK
+#define PIN_MISO  MISO
+#define PIN_MOSI MOSI
+#define PIN_CS SS
+
+
+static uint8_t u8g_spi_out(uint8_t data)
+{
+  /* wait until tx register is empty */
+  while( (SPI0->SPI_SR & SPI_SR_TDRE) == 0 )
+    ;
+  /* send data */
+  SPI0->SPI_TDR = (uint32_t)data;
+  return  data;
+}
+
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8G_COM_MSG_STOP:
+      break;
+
+    case U8G_COM_MSG_INIT:
+      u8g_com_arduino_assign_pin_output_high(u8g);
+      u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+
+      /* Arduino Due specific code */
+
+      /* enable PIOA and SPI0 */
+      REG_PMC_PCER0 = (1UL << ID_PIOA) | (1UL << ID_SPI0);
+
+      /* disable PIO on A26 and A27 */
+      REG_PIOA_PDR = 0x0c000000;
+
+      /* reset SPI0 (from sam lib) */
+      SPI0->SPI_CR = SPI_CR_SPIDIS;
+      SPI0->SPI_CR = SPI_CR_SWRST;
+      SPI0->SPI_CR = SPI_CR_SWRST;
+      SPI0->SPI_CR = SPI_CR_SPIEN;
+      u8g_MicroDelay();
+
+      /* master mode, no fault detection, chip select 0 */
+      SPI0->SPI_MR = SPI_MR_MSTR | SPI_MR_PCSDEC | SPI_MR_MODFDIS;
+
+      /* Polarity, Phase, 8 Bit data transfer, baud rate */
+      /* x * 1000 / 84 --> clock cycle in ns
+        5 * 1000 / 84 = 58 ns
+	SCBR  > 50 *84 / 1000 --> SCBR=5
+	SCBR  > 300*84 / 1000 --> SCBR=26
+	SCBR  > 400*84 / 1000 --> SCBR=34
+      */
+
+      if ( arg_val <= U8G_SPI_CLK_CYCLE_50NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(5) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_300NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(26) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_400NS )
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(34) | 1;
+      }
+      else if ( arg_val <= U8G_SPI_CLK_CYCLE_500NS )
+      {
+	      SPI0->SPI_CSR[0] = SPI_CSR_SCBR(42) | 1;
+      }
+      else
+      {
+	SPI0->SPI_CSR[0] = SPI_CSR_SCBR(84) | 1;
+      }
+
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_ADDRESS:                     /* define cmd (arg_val = 0) or data mode (arg_val = 1) */
+      u8g_com_arduino_digital_write(u8g, U8G_PI_A0, arg_val);
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_CHIP_SELECT:
+      if ( arg_val == 0 )
+      {
+        /* disable */
+	u8g_MicroDelay();		/* this delay is required to avoid that the display is switched off too early --> DOGS102 with DUE */
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, HIGH);
+	u8g_MicroDelay();
+      }
+      else
+      {
+        /* enable */
+        //u8g_com_arduino_digital_write(u8g, U8G_PI_SCK, LOW);
+        u8g_com_arduino_digital_write(u8g, U8G_PI_CS, LOW);
+	u8g_MicroDelay();
+      }
+      break;
+
+    case U8G_COM_MSG_RESET:
+      if ( u8g->pin_list[U8G_PI_RESET] != U8G_PIN_NONE )
+        u8g_com_arduino_digital_write(u8g, U8G_PI_RESET, arg_val);
+      break;
+
+    case U8G_COM_MSG_WRITE_BYTE:
+      u8g_spi_out(arg_val);
+      u8g_MicroDelay();
+      break;
+
+    case U8G_COM_MSG_WRITE_SEQ:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(*ptr++);
+          arg_val--;
+        }
+      }
+      break;
+    case U8G_COM_MSG_WRITE_SEQ_P:
+      {
+        register uint8_t *ptr = (uint8_t*)arg_ptr;
+        while( arg_val > 0 )
+        {
+          u8g_spi_out(u8g_pgm_read(ptr));
+          ptr++;
+          arg_val--;
+        }
+      }
+      break;
+  }
+  return 1;
+}
+
+
+
+#else /* U8G_ARDUINO_ATMEGA_HW_SPI */
+
+#endif /* U8G_ARDUINO_ATMEGA_HW_SPI */
+
+#else /* ARDUINO */
+
+uint8_t u8g_com_arduino_hw_spi_fn(u8g_t *u8g, uint8_t msg, uint8_t arg_val, void *arg_ptr)
+{
+  return 1;
+}
+
+#endif /* ARDUINO */
+
+/*
+
+  u8g_rot.c
+
+  Universal 8bit Graphics Library
+
+  Copyright (c) 2011, olikraus@gmail.com
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this list
+    of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice, this
+    list of conditions and the following disclaimer in the documentation and/or other
+    materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+*/
+
+uint8_t u8g_dev_rot90_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+uint8_t u8g_dev_rot180_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+uint8_t u8g_dev_rot270_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
+
+uint8_t u8g_dev_rot_dummy_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  return 0;
+}
+
+u8g_dev_t u8g_dev_rot = { u8g_dev_rot_dummy_fn, NULL, NULL };
+
+
+void u8g_UndoRotation(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+    return;
+  u8g->dev = (u8g_dev_t*)u8g_dev_rot.dev_mem;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot90(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot90_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot180(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot180_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+void u8g_SetRot270(u8g_t *u8g)
+{
+  if ( u8g->dev != &u8g_dev_rot )
+  {
+    u8g_dev_rot.dev_mem = u8g->dev;
+    u8g->dev = &u8g_dev_rot;
+  }
+  u8g_dev_rot.dev_fn = u8g_dev_rot270_fn;
+  u8g_UpdateDimension(u8g);
+}
+
+uint8_t u8g_dev_rot90_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y, tmp;
+
+        /* transform the reference point */
+        y = bbx->x;
+        x = u8g->height;
+        /* x = u8g_GetWidthLL(u8g, rotation_chain); */
+        x -= bbx->y;
+        x--;
+
+        /* adjust point to be the uppler left corner again */
+        x -= bbx->h;
+        x++;
+
+        /* swap box dimensions */
+        tmp = bbx->w;
+        bbx->w = bbx->h;
+        bbx->h = tmp;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+	//new_box.x0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	//new_box.x1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+
+	new_box.x0 = ((u8g_box_t *)arg)->y0;
+	new_box.x1 = ((u8g_box_t *)arg)->y1;
+	new_box.y0 = ((u8g_box_t *)arg)->x0;
+	new_box.y1 = ((u8g_box_t *)arg)->x1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+        y = ((u8g_dev_arg_pixel_t *)arg)->x;
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+	//uint16_t x,y;
+        y = ((u8g_dev_arg_pixel_t *)arg)->x;
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=1;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+uint8_t u8g_dev_rot180_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y;
+
+        /* transform the reference point */
+        //y = u8g_GetHeightLL(u8g, rotation_chain);
+        y = u8g->height;
+        y -= bbx->y;
+        y--;
+
+        //x = u8g_GetWidthLL(u8g, rotation_chain);
+        x = u8g->width;
+        x -= bbx->x;
+        x--;
+
+        /* adjust point to be the uppler left corner again */
+        y -= bbx->h;
+        y++;
+
+        x -= bbx->w;
+        x++;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+
+	new_box.x0 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x1 - 1;
+	new_box.x1 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x0 - 1;
+	new_box.y0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	new_box.y1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        y--;
+
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        x--;
+
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        y--;
+
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        x--;
+
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=2;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+uint8_t u8g_dev_rot270_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
+{
+  u8g_dev_t *rotation_chain = (u8g_dev_t *)(dev->dev_mem);
+  switch(msg)
+  {
+    default:
+    /*
+    case U8G_DEV_MSG_INIT:
+    case U8G_DEV_MSG_STOP:
+    case U8G_DEV_MSG_PAGE_FIRST:
+    case U8G_DEV_MSG_PAGE_NEXT:
+    case U8G_DEV_MSG_SET_COLOR_ENTRY:
+    case U8G_DEV_MSG_SET_XY_CB:
+    */
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#ifdef U8G_DEV_MSG_IS_BBX_INTERSECTION
+    case U8G_DEV_MSG_IS_BBX_INTERSECTION:
+      {
+        u8g_dev_arg_bbx_t *bbx = (u8g_dev_arg_bbx_t *)arg;
+        u8g_uint_t x, y, tmp;
+
+        /* transform the reference point */
+        x = bbx->y;
+
+        y = u8g->width;
+        /* y = u8g_GetHeightLL(u8g, rotation_chain); */
+        y -= bbx->x;
+        y--;
+
+        /* adjust point to be the uppler left corner again */
+        y -= bbx->w;
+        y++;
+
+        /* swap box dimensions */
+        tmp = bbx->w;
+        bbx->w = bbx->h;
+        bbx->h = tmp;
+
+        /* store x,y */
+        bbx->x = x;
+        bbx->y = y;
+      }
+      return u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+#endif /* U8G_DEV_MSG_IS_BBX_INTERSECTION */
+    case U8G_DEV_MSG_GET_PAGE_BOX:
+      /* get page size from next device in the chain */
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      //printf("pre x: %3d..%3d y: %3d..%3d   ", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      {
+	u8g_box_t new_box;
+
+	new_box.x0 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y1 - 1;
+	new_box.x1 = u8g_GetHeightLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->y0 - 1;
+	new_box.y0 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x1 - 1;
+	new_box.y1 = u8g_GetWidthLL(u8g,rotation_chain) - ((u8g_box_t *)arg)->x0 - 1;
+	*((u8g_box_t *)arg) = new_box;
+	//printf("post x: %3d..%3d y: %3d..%3d\n", ((u8g_box_t *)arg)->x0, ((u8g_box_t *)arg)->x1, ((u8g_box_t *)arg)->y0, ((u8g_box_t *)arg)->y1);
+      }
+      break;
+    case U8G_DEV_MSG_GET_WIDTH:
+      *((u8g_uint_t *)arg) = u8g_GetHeightLL(u8g,rotation_chain);
+      break;
+    case U8G_DEV_MSG_GET_HEIGHT:
+      *((u8g_uint_t *)arg) = u8g_GetWidthLL(u8g, rotation_chain);
+      break;
+    case U8G_DEV_MSG_SET_PIXEL:
+    case U8G_DEV_MSG_SET_TPIXEL:
+      {
+        u8g_uint_t x, y;
+        x = ((u8g_dev_arg_pixel_t *)arg)->y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        y--;
+
+        /*
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        */
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+    case U8G_DEV_MSG_SET_8PIXEL:
+    case U8G_DEV_MSG_SET_4TPIXEL:
+      {
+        u8g_uint_t x, y;
+        x = ((u8g_dev_arg_pixel_t *)arg)->y;
+
+        y = u8g_GetHeightLL(u8g, rotation_chain);
+        y -= ((u8g_dev_arg_pixel_t *)arg)->x;
+        y--;
+
+        /*
+        x = u8g_GetWidthLL(u8g, rotation_chain);
+        x -= ((u8g_dev_arg_pixel_t *)arg)->y;
+        x--;
+        */
+        ((u8g_dev_arg_pixel_t *)arg)->x = x;
+        ((u8g_dev_arg_pixel_t *)arg)->y = y;
+        ((u8g_dev_arg_pixel_t *)arg)->dir+=3;
+        ((u8g_dev_arg_pixel_t *)arg)->dir &= 3;
+      }
+      u8g_call_dev_fn(u8g, rotation_chain, msg, arg);
+      break;
+  }
+  return 1;
+}
+
+
+#pragma GCC diagnostic push
