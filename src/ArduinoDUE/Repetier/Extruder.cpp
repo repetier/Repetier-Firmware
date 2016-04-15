@@ -652,7 +652,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if DUAL_X_AXIS
 	// Park current extruder
 	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps;
-	if(Printer::isHomed())
+	if(Printer::isHomed() && executeSelect)
 		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
 #endif	
     Extruder::current = &extruder[extruderId];
@@ -691,14 +691,14 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		Commands::waitUntilEndOfAllMoves();
 		Printer::updateCurrentPosition(true);
 		GCode::executeFString(Extruder::current->selectCommands);
-		executeSelect = false;
 	}
 	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPos;
-	if(Printer::isHomed())
+	if(Printer::isHomed() && executeSelect)
 		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
 	Printer::currentPositionSteps[X_AXIS] = dualXPos + Printer::xMinSteps;
     Printer::offsetX = 0;
 	Printer::updateCurrentPosition(true);
+	executeSelect = false;
 #else	
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
 #endif

@@ -883,7 +883,7 @@ void Commands::processGCode(GCode *com) {
                 // ui can only execute motion commands if we are not waiting inside a move for an
                 // old move to finish. For normal response times, we always leave one free after
                 // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
-                // gets filled while waiting, the lost is neglectible.
+                // gets filled while waiting, the lost is neglectable.
                 PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
 #ifdef DEBUG_QUEUE_MOVE

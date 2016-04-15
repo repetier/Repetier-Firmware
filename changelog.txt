@@ -1,3 +1,7 @@
+Version 1.0.0
+  Keep alive/busy signal for host timeout improvement.
+  Fixed I2C handling for due.
+  
 Version 92.9
   Extruder motor mirroring.
   Fixes in autoleveling.
