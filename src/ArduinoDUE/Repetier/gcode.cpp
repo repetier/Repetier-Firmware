@@ -963,7 +963,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
             break;
         }// end switch
     }// end while
-	if(wasLastCommandReceivedAsBinary && !hasChecksum) {
+	if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial) {
 		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
 		return false;
 	}

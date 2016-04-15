@@ -474,14 +474,14 @@ void HAL::i2cStop(void)
 *************************************************************************/
 void HAL::i2cWrite( unsigned char data )
 {
-    uint8_t   twst;
+    //uint8_t   twst;
     // send data to the previously addressed device
     TWDR = data;
     TWCR = (1<<TWINT) | (1<<TWEN);
     // wait until transmission completed
     while(!(TWCR & (1<<TWINT)));
     // check value of TWI Status Register. Mask prescaler bits
-    twst = TW_STATUS & 0xF8;
+    //twst = TW_STATUS & 0xF8;
     //if( twst != TW_MT_DATA_ACK) return 1;
     //return 0;
 }
