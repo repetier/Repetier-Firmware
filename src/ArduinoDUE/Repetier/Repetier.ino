@@ -134,7 +134,7 @@ Custom M Codes
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
-- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
+- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
 - M450 - Reports printer mode
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser
@@ -147,6 +147,8 @@ Custom M Codes
 - M600 Change filament
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
+- M603 - Simulate a jam
+- M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */

@@ -158,7 +158,7 @@ extern Extruder extruder[];
         if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
           if(sig) {extruder[x].resetJamSteps();} \
           extruder[x].jamLastSignal = sig;extruder[x].jamLastChangeAt = extruder[x].jamStepsSinceLastSignal;\
-        } else if(abs(extruder[x].jamStepsSinceLastSignal) > JAM_ERROR_STEPS && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > extruder[x].jamErrorSteps && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
             extruder[x].tempControl.setJammed(true);\
     }
 #define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
@@ -246,6 +246,9 @@ public:
     int8_t jamLastDir;
     int16_t jamStepsOnSignal;
     int16_t jamLastChangeAt;
+	int16_t jamSlowdownSteps;
+	int16_t jamErrorSteps;
+	uint8_t jamSlowdownTo;
 #endif
 
     // Methods here

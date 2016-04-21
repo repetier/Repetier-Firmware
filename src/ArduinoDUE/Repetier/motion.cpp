@@ -1863,7 +1863,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff,uint8_t check_endstops,uin
   Split a line up into a series of lines with at most DELTASEGMENTS_PER_PRINTLINE delta segments.
   @param check_endstops Check endstops during the move.
   @param pathOptimize Run the path optimizer.
-  @param delta_step_rate delta step rate in segments per second for the move.
+  @param softEndstop check if we go out of bounds.
 */
 uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop)
 {

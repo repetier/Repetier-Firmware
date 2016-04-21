@@ -2296,6 +2296,7 @@ void Commands::processMCode(GCode *com) {
             else
                 Extruder::unpauseExtruders();
             break;
+#if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
         case 602:
             Commands::waitUntilEndOfAllMoves();
             if(com->hasS()) Printer::setDebugJam(com->S > 0);
@@ -2304,6 +2305,22 @@ void Commands::processMCode(GCode *com) {
         case 603:
             Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
             break;
+		case 604:
+			{
+				uint8_t extId = Extruder::current->id;
+				if(com->hasT()) extId = com->T;
+				if(extId >= NUM_EXTRUDER)
+					break;
+				Extruder &ext = extruder[extId];
+				if(com->hasX())
+					ext.jamSlowdownSteps = static_cast<int16_t>(com->X);
+				if(com->hasY())
+					ext.jamErrorSteps = static_cast<int16_t>(com->Y);
+				if(com->hasZ())
+					ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
+			}
+			break;
+#endif			
         case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
                 // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.

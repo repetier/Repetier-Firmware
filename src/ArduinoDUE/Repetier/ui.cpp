@@ -2083,7 +2083,7 @@ void UIDisplay::refreshPage()
                     uint8_t py = 8;
                     for(uint8_t r = 0; r < 3; r++)
                     {
-                        if(u8g_IsBBXIntersection(&u8g, 0, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        if(u8g_IsBBXIntersection(&u8g, 0, py - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                             printU8GRow(0, py, cache[r]);
                         py += 10;
                     }

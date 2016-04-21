@@ -1288,7 +1288,7 @@ void Printer::homeZAxis() // Delta z homing
 				homingSuccess = true; // Assume success in case there is no back move
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
 				if(ENDSTOP_Z_BACK_ON_HOME > 0) {
-					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS], true, true);
+					PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_ON_HOME,0,homingFeedrate[Z_AXIS], true, true);
 					//Endstops::report();
 					// Check for missing release of any (XYZ) endstop
 					if (Endstops::xMax() || Endstops::yMax() || Endstops::zMax()) {
@@ -1845,11 +1845,12 @@ void Printer::handleInterruptEvent() {
         {
             if(isJamcontrolDisabled()) break;
             fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
+			Extruder &ext = extruder[extruderIndex];
             int16_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
             EVENT_JAM_SIGNAL_CHANGED(extruderIndex,steps);
-            if(steps > JAM_SLOWDOWN_STEPS && !extruder[extruderIndex].tempControl.isSlowedDown()) {
+            if(steps > ext.jamSlowdownSteps && !ext.tempControl.isSlowedDown()) {
                 extruder[extruderIndex].tempControl.setSlowedDown(true);
-                Commands::changeFeedrateMultiply(JAM_SLOWDOWN_TO);
+                Commands::changeFeedrateMultiply(ext.jamSlowdownTo);
                 UI_ERROR_P(Com::tFilamentSlipping);
             }
             if(isDebugJam()) {
