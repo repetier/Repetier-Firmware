@@ -2013,7 +2013,8 @@ void Commands::processMCode(GCode *com) {
         case 280: // M280
 #if DUAL_X_AXIS
 			Extruder::dittoMode = 0;
-			Extruder::selectExtruderById(0);
+			if(Extruder::current->id != 0)
+				Extruder::selectExtruderById(0);
 			Printer::homeXAxis();
 			if(com->hasS() && com->S > 0) {
 				Extruder::current = &extruder[1];
@@ -2022,6 +2023,7 @@ void Commands::processMCode(GCode *com) {
 				Extruder::current = &extruder[0];
 				Extruder::dittoMode = 1;
 			}
+			Printer::updateCurrentPosition(true);
 #else		
             if(com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
                 Extruder::dittoMode = com->S;

@@ -107,7 +107,7 @@ union wizardVar
 // define an integer number of steps more than large enough to get to endstop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
-// Some defines to make clearer reading, as we overload these cartesian memory locations for delta
+// Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
 #define towerAMaxSteps Printer::xMaxSteps
 #define towerBMaxSteps Printer::yMaxSteps
 #define towerCMaxSteps Printer::zMaxSteps

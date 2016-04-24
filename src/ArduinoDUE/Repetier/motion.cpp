@@ -235,7 +235,6 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 	    p->distance = sqrt(xydist2 + back_diff[Z_AXIS] * back_diff[Z_AXIS]);
 	    else
 	    p->distance = sqrt(xydist2);
-	    // 56 seems to be xstep|ystep|e_posdir which just seems odd
 	    Printer::backlashDir = (Printer::backlashDir & 56) | (p2->dir & XYZ_DIRPOS);
 	    p->calculateMove(back_diff,pathOptimize,p->primaryAxis);
 	    p = p2; // use saved instance for the real move

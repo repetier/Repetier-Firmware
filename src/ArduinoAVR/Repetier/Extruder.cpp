@@ -614,6 +614,10 @@ This function changes and initializes a new extruder. This is also called, after
 */
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
+#if DUAL_X_AXIS && FEATURE_DITTO_PRINTING
+	if(dittoMode != 0) // In ditto mode only extruder 0 is usable and gets set by selecting ditto mode
+		return;
+#endif
 #if NUM_EXTRUDER > 0
 #if MIXING_EXTRUDER
     if(extruderId >= VIRTUAL_EXTRUDER)
