@@ -185,6 +185,19 @@ usage or for searching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
+#define PRINTER_MODE_FFF 0
+#define PRINTER_MODE_LASER 1
+#define PRINTER_MODE_CNC 2
+
+#define ILLEGAL_Z_PROBE -888
+
+// we can not prevent this as some configurations need a parameter and others not
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+#include "Configuration.h"
+
+
 // HAL Tool PWM
 #define FEATURE_TOOL_PWM 0
 #ifndef TOOL_PWM_HZ
@@ -200,10 +213,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define LASER_TYPE_PWM 2
 
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
-#if ((LASER_TYPE == LASER_TYPE_PWM) && (LASER_PIN > -1))
-#if defined(FEATURE_SERVO) && FEATURE_SERVO
-#error Servos and Laser PWM not possible on the same time
+#ifndef LASER_TYPE
+#define LASER_TYPE LASER_TYPE_ONOFF
 #endif
+#if ((LASER_TYPE == LASER_TYPE_PWM) && (LASER_PIN > -1))
 // enable TOOL PWM
 #undef FEATURE_TOOL_PWM
 #define FEATURE_TOOL_PWM 1
@@ -211,18 +224,18 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #endif
 
 
+#if defined(SUPPORT_CNC) && SUPPORT_CNC
+#if defined(CNC_PWM_PIN) && (CNC_PWM_PIN > -1)
+// enable TOOL PWM
+#undef FEATURE_TOOL_PWM
+#define FEATURE_TOOL_PWM 1
+#endif
+#endif
 
-#define PRINTER_MODE_FFF 0
-#define PRINTER_MODE_LASER 1
-#define PRINTER_MODE_CNC 2
+#if (defined(FEATURE_SERVO) && FEATURE_SERVO) && (defined(FEATURE_TOOL_PWM) && FEATURE_TOOL_PWM)
+#error Servos and Tool PWM not possible on the same time
+#endif
 
-#define ILLEGAL_Z_PROBE -888
-
-// we can not prevent this as some configurations need a parameter and others not
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
-#include "Configuration.h"
 
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0

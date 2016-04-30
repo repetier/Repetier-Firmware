@@ -157,6 +157,10 @@ void CNCDriver::initialize()
 #if CNC_DIRECTION_PIN > -1
         SET_OUTPUT(CNC_DIRECTION_PIN);
 #endif
+#if CNC_PWM_PIN > -1
+        SET_OUTPUT(CNC_PWM_PIN);
+        WRITE(CNC_PWM_PIN, CNC_PWM_INV);
+#endif
     }
 }
 /** Turns off spindle. For event override implement
@@ -168,6 +172,9 @@ void CNCDriver::spindleOff()
     if(direction == 0) return; // already off
     if(EVENT_SPINDLE_OFF)
     {
+#if CNC_PWM_PIN > -1
+        HAL::setPWM(0, CNC_PWM_PIN, CNC_PWM_INV);
+#endif
 #if CNC_ENABLE_PIN > -1
         WRITE(CNC_ENABLE_PIN,!CNC_ENABLE_WITH);
 #endif
@@ -187,6 +194,16 @@ void CNCDriver::spindleOnCW(int32_t rpm)
     spindleOff();
     direction = 1;
     if(EVENT_SPINDLE_CW(rpm)) {
+#if CNC_PWM_PIN > -1
+#if defined(CNC_MAX_RPM)
+        if(rpm > CNC_MAX_RPM) {
+            rpm = CNC_MAX_RPM;
+        }
+        HAL::setPWM((uint8_t)(rpm/(CNC_MAX_RPM/TOOL_PWM_STEPS)), CNC_PWM_PIN, CNC_PWM_INV);
+#else
+        HAL::setPWM(rpm, CNC_PWM_PIN, CNC_PWM_INV);
+#endif
+#endif
 #if CNC_DIRECTION_PIN > -1
         WRITE(CNC_DIRECTION_PIN, CNC_DIRECTION_CW);
 #endif
@@ -208,6 +225,16 @@ void CNCDriver::spindleOnCCW(int32_t rpm)
     spindleOff();
     direction = -1;
     if(EVENT_SPINDLE_CW(rpm)) {
+#if CNC_PWM_PIN > -1
+#if defined(CNC_MAX_RPM)
+        if(rpm > CNC_MAX_RPM) {
+            rpm = CNC_MAX_RPM;
+        }
+        HAL::setPWM((uint8_t)(rpm/(CNC_MAX_RPM/TOOL_PWM_STEPS)), CNC_PWM_PIN, CNC_PWM_INV);
+#else
+        HAL::setPWM(rpm, CNC_PWM_PIN, CNC_PWM_INV);
+#endif
+#endif
 #if CNC_DIRECTION_PIN > -1
         WRITE(CNC_DIRECTION_PIN, !CNC_DIRECTION_CW);
 #endif

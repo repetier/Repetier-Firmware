@@ -9,6 +9,11 @@ uint8 osAnalogInputPos = 0; // Current sampling position
 #if FEATURE_WATCHDOG
     bool HAL::wdPinged = false;
 #endif
+
+#if (FEATURE_TOOL_PWM)
+t_tool_pwm_cfg HAL::tool_cfg;
+#endif
+
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL()
@@ -260,6 +265,9 @@ void HAL::setupTimer()
     TIMSK3 = _BV(OCIE3A); // enable the output compare interrupt
 #endif
     tool_cfg.pin = -1;
+    tool_cfg.inv = false;
+    tool_cfg.pwm = 0;
+    tool_cfg.state = 0;
 #endif
 
 #if FEATURE_SERVO
@@ -541,7 +549,7 @@ void HAL::setPWM(uint8_t val, int8_t pin, bool inv) {
         TIMSK3 = 0; // disable the output compare interrupt
 #endif
         //disable old PWM
-        WRITE(tool_cfg.pin, tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
     }
 
 
@@ -558,21 +566,21 @@ void HAL::setPWM(uint8_t val, int8_t pin, bool inv) {
     }
 
     if(val == 0) {
-        WRITE(tool_cfg.pin, tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
 #if defined(__AVR_ATmega128__)
         ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
 #else
         TIMSK3 = 0; // disable the output compare interrupt
 #endif
     } else if(val == TOOL_PWM_STEPS) {
-        WRITE(tool_cfg.pin, !tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
 #if defined(__AVR_ATmega128__)
         ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
 #else
         TIMSK3 = 0; // disable the output compare interrupt
 #endif
     } else {
-        WRITE(tool_cfg.pin, !tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
         tool_cfg.state = true;
         OCR3A = (TOOL_STEP * val);
 #if defined(__AVR_ATmega128__)
@@ -585,8 +593,8 @@ void HAL::setPWM(uint8_t val, int8_t pin, bool inv) {
     }
 }
 
-SIGNAL (TIMER3_COMPA_vect) {
-    TCNT3 = 0;
+
+void HAL::timer3_irq() {
     if(tool_cfg.pin <= -1) {
 #if defined(__AVR_ATmega128__)
         ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
@@ -595,22 +603,27 @@ SIGNAL (TIMER3_COMPA_vect) {
 #endif
     }
     if(tool_cfg.pwm <= 0) {
-        WRITE(tool_cfg.pin, tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
         OCR3A = TOOL_PERIOD;
     } else if(tool_cfg.pwm >= TOOL_PWM_STEPS) {
-        WRITE(tool_cfg.pin, !tool_cfg.inv);
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
         OCR3A = TOOL_PERIOD;
     } else {
         if(tool_cfg.state == false) {
-            WRITE(tool_cfg.pin, !tool_cfg.inv);
+            digitalWrite(tool_cfg.pin, !tool_cfg.inv);
             tool_cfg.state = true;
             OCR3A = (TOOL_STEP * tool_cfg.pwm);
         } else {
-            WRITE(tool_cfg.pin, tool_cfg.inv);
+            digitalWrite(tool_cfg.pin, tool_cfg.inv);
             tool_cfg.state = false;
             OCR3A = (TOOL_STEP * (TOOL_PWM_STEPS - tool_cfg.pwm));
         }
     }
+}
+
+SIGNAL (TIMER3_COMPA_vect) {
+    TCNT3 = 0;
+    HAL::timer3_irq();
 }
 #endif
 
