@@ -185,6 +185,33 @@ usage or for searching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
+// HAL Tool PWM
+#define FEATURE_TOOL_PWM 0
+#ifndef TOOL_PWM_HZ
+#define TOOL_PWM_HZ 100
+#endif
+#ifndef TOOL_PWM_STEPS
+#define TOOL_PWM_STEPS 255
+#endif
+
+// Laser Type
+#define LASER_TYPE_OFF 0
+#define LASER_TYPE_ONOFF 1
+#define LASER_TYPE_PWM 2
+
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+#if ((LASER_TYPE == LASER_TYPE_PWM) && (LASER_PIN > -1))
+#if defined(FEATURE_SERVO) && FEATURE_SERVO
+#error Servos and Laser PWM not possible on the same time
+#endif
+// enable TOOL PWM
+#undef FEATURE_TOOL_PWM
+#define FEATURE_TOOL_PWM 1
+#endif
+#endif
+
+
+
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2

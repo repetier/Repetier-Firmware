@@ -706,6 +706,20 @@ public:
     static uint8_t i2cReadAck(void);
     static uint8_t i2cReadNak(void);
 
+
+    // Software PWM
+#if (FEATURE_TOOL_PWM)
+    typedef struct {
+            int8_t pin;
+            uint8_t pwm;
+            bool state;
+            bool inv;
+    } t_tool_pwm_cfg;
+
+    static t_tool_pwm_cfg tool_cfg;
+    static void setPWM(uint8_t val, int8_t pin, bool inv);
+#endif
+
     // Watchdog support
 
     inline static void startWatchdog()

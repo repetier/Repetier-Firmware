@@ -769,11 +769,19 @@ and G0 moves have it disables.
 
 In any case, laser only enables while moving. At the end of a move it gets
 automatically disabled. 
+
+Laser Types
+LASER_ON_OFF only enable an disable the Laser
+LASER_PWM use a PWM to control the output power (M3 Sxxx 0-255)
+Note: PWM can not be used with Servos
 */
 
-#define SUPPORT_LASER 0 // set 1 to enable laser support
+#define SUPPORT_LASER 1 // set 1 to enable laser support
+//#define LASER_TYPE LASER_TYPE_PWM
+#define LASER_TYPE LASER_ON_OFF
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##

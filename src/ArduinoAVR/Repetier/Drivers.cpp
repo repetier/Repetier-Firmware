@@ -116,6 +116,7 @@ void LaserDriver::initialize()
     {
 #if LASER_PIN > -1
         SET_OUTPUT(LASER_PIN);
+        WRITE(LASER_PIN, !LASER_ON_HIGH); // be sure laser is off!
 #endif
     }
     changeIntensity(0);
@@ -126,7 +127,11 @@ void LaserDriver::changeIntensity(uint8_t newIntensity)
     {
         // Default implementation
 #if LASER_PIN > -1
+#if (LASER_TYPE == LASER_ON_OFF)
         WRITE(LASER_PIN,(LASER_ON_HIGH ? newIntensity > 199 : newIntensity < 200));
+#elif (LASER_TYPE == LASER_PWM)
+        HAL::setPWM(LASER_PIN, newIntensity, !LASER_ON_HIGH);
+#endif
 #endif
     }
 }
