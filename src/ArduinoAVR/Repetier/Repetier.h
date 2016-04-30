@@ -197,6 +197,46 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+
+// HAL Tool PWM
+#define FEATURE_TOOL_PWM 0
+#ifndef TOOL_PWM_HZ
+#define TOOL_PWM_HZ 100
+#endif
+#ifndef TOOL_PWM_STEPS
+#define TOOL_PWM_STEPS 255
+#endif
+
+// Laser Type
+#define LASER_TYPE_OFF 0
+#define LASER_TYPE_ONOFF 1
+#define LASER_TYPE_PWM 2
+
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+#ifndef LASER_TYPE
+#define LASER_TYPE LASER_TYPE_ONOFF
+#endif
+#if ((LASER_TYPE == LASER_TYPE_PWM) && (LASER_PIN > -1))
+// enable TOOL PWM
+#undef FEATURE_TOOL_PWM
+#define FEATURE_TOOL_PWM 1
+#endif
+#endif
+
+
+#if defined(SUPPORT_CNC) && SUPPORT_CNC
+#if defined(CNC_PWM_PIN) && (CNC_PWM_PIN > -1)
+// enable TOOL PWM
+#undef FEATURE_TOOL_PWM
+#define FEATURE_TOOL_PWM 1
+#endif
+#endif
+
+#if (defined(FEATURE_SERVO) && FEATURE_SERVO) && (defined(FEATURE_TOOL_PWM) && FEATURE_TOOL_PWM)
+#error Servos and Tool PWM not possible on the same time
+#endif
+
+
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0
 #endif

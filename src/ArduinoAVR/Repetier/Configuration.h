@@ -769,11 +769,19 @@ and G0 moves have it disables.
 
 In any case, laser only enables while moving. At the end of a move it gets
 automatically disabled. 
+
+Laser Types
+LASER_ON_OFF only enable an disable the Laser
+LASER_PWM use a PWM to control the output power (M3 Sxxx 0-255)
+Note: PWM can not be used with Servos
 */
 
 #define SUPPORT_LASER 0 // set 1 to enable laser support
+//#define LASER_TYPE LASER_TYPE_PWM
+#define LASER_TYPE LASER_TYPE_ONOFF
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##
@@ -793,7 +801,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
 #define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
-
+#define CNC_PWM_PIN -1  // PWM pin for controlling Speed (RPM)
+#define CNC_PWM_INV 0 //Invert the PWM
+#define CNC_MAX_RPM 12000 // MAX RPM of the Tool
 
 /* Select the default mode when the printer gets enables. Possible values are
 PRINTER_MODE_FFF 0

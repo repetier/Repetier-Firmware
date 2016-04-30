@@ -9,6 +9,11 @@ uint8 osAnalogInputPos = 0; // Current sampling position
 #if FEATURE_WATCHDOG
     bool HAL::wdPinged = false;
 #endif
+
+#if (FEATURE_TOOL_PWM)
+t_tool_pwm_cfg HAL::tool_cfg;
+#endif
+
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL()
@@ -246,6 +251,25 @@ void HAL::setupTimer()
     TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
     OCR1A=65500; //start off with a slow frequency.
     TIMSK1 |= (1<<OCIE1A); // Enable interrupt
+
+
+#if (FEATURE_TOOL_PWM)
+    TCCR3A = 0;             // normal counting mode
+    TCCR3B = _BV(CS31);     // set prescaler of 8
+    TCNT3 = 0;              // clear the timer count
+#if defined(__AVR_ATmega128__)
+    TIFR |= _BV(OCF3A);     // clear any pending interrupts;
+    ETIMSK |= _BV(OCIE3A);// enable the output compare interrupt
+#else
+    TIFR3 = _BV(OCF3A);     // clear any pending interrupts;
+    TIMSK3 = _BV(OCIE3A); // enable the output compare interrupt
+#endif
+    tool_cfg.pin = -1;
+    tool_cfg.inv = false;
+    tool_cfg.pwm = 0;
+    tool_cfg.state = 0;
+#endif
+
 #if FEATURE_SERVO
 #if SERVO0_PIN>-1
     SET_OUTPUT(SERVO0_PIN);
@@ -509,6 +533,100 @@ unsigned char HAL::i2cReadNak(void)
     while(!(TWCR & (1<<TWINT)));
     return TWDR;
 }
+
+
+#if (FEATURE_TOOL_PWM)
+
+#define TOOL_PERIOD ((F_CPU/8)/TOOL_PWM_HZ)
+#define TOOL_STEP (TOOL_PERIOD/TOOL_PWM_STEPS)
+
+void HAL::setPWM(uint8_t val, int8_t pin, bool inv) {
+
+    if(tool_cfg.pin > -1) {
+#if defined(__AVR_ATmega128__)
+        ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
+#else
+        TIMSK3 = 0; // disable the output compare interrupt
+#endif
+        //disable old PWM
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
+    }
+
+
+    if(val > TOOL_PWM_STEPS) {
+        val = TOOL_PWM_STEPS;
+    }
+
+    tool_cfg.pwm = val;
+    tool_cfg.pin = pin;
+    tool_cfg.inv = inv;
+
+    if(tool_cfg.pin > -1) {
+        return;
+    }
+
+    if(val == 0) {
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
+#if defined(__AVR_ATmega128__)
+        ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
+#else
+        TIMSK3 = 0; // disable the output compare interrupt
+#endif
+    } else if(val == TOOL_PWM_STEPS) {
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
+#if defined(__AVR_ATmega128__)
+        ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
+#else
+        TIMSK3 = 0; // disable the output compare interrupt
+#endif
+    } else {
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
+        tool_cfg.state = true;
+        OCR3A = (TOOL_STEP * val);
+#if defined(__AVR_ATmega128__)
+        TIFR |= _BV(OCF3A);     // clear any pending interrupts;
+        ETIMSK |= _BV(OCIE3A);// enable the output compare interrupt
+#else
+        TIFR3 = _BV(OCF3A);     // clear any pending interrupts;
+        TIMSK3 = _BV(OCIE3A); // enable the output compare interrupt
+#endif
+    }
+}
+
+
+void HAL::timer3_irq() {
+    if(tool_cfg.pin <= -1) {
+#if defined(__AVR_ATmega128__)
+        ETIMSK &= ~_BV(OCIE3A);  // disable the output compare interrupt
+#else
+        TIMSK3 = 0; // disable the output compare interrupt
+#endif
+    }
+    if(tool_cfg.pwm <= 0) {
+        digitalWrite(tool_cfg.pin, tool_cfg.inv);
+        OCR3A = TOOL_PERIOD;
+    } else if(tool_cfg.pwm >= TOOL_PWM_STEPS) {
+        digitalWrite(tool_cfg.pin, !tool_cfg.inv);
+        OCR3A = TOOL_PERIOD;
+    } else {
+        if(tool_cfg.state == false) {
+            digitalWrite(tool_cfg.pin, !tool_cfg.inv);
+            tool_cfg.state = true;
+            OCR3A = (TOOL_STEP * tool_cfg.pwm);
+        } else {
+            digitalWrite(tool_cfg.pin, tool_cfg.inv);
+            tool_cfg.state = false;
+            OCR3A = (TOOL_STEP * (TOOL_PWM_STEPS - tool_cfg.pwm));
+        }
+    }
+}
+
+SIGNAL (TIMER3_COMPA_vect) {
+    TCNT3 = 0;
+    HAL::timer3_irq();
+}
+#endif
+
 
 #if FEATURE_SERVO
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) ||defined(__AVR_ATmega1281__)||defined(__AVR_ATmega2561__)

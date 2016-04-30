@@ -187,6 +187,15 @@ typedef uint8_t ufast8_t;
 #define SERIAL_TX_BUFFER_MASK 63
 #endif
 
+#if (FEATURE_TOOL_PWM)
+    typedef struct {
+        int8_t pin;
+        uint8_t pwm;
+        bool state;
+        bool inv;
+    } t_tool_pwm_cfg;
+#endif
+
 struct ring_buffer
 {
     uint8_t buffer[SERIAL_BUFFER_SIZE];
@@ -705,6 +714,14 @@ public:
     static void i2cWrite( uint8_t data );
     static uint8_t i2cReadAck(void);
     static uint8_t i2cReadNak(void);
+
+
+    // Software PWM
+#if (FEATURE_TOOL_PWM)
+    static t_tool_pwm_cfg tool_cfg;
+    static void setPWM(uint8_t val, int8_t pin, bool inv);
+    static void timer3_irq(void);
+#endif
 
     // Watchdog support
 
