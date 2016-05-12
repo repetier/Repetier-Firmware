@@ -1143,6 +1143,10 @@ private:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
+#if (FEATURE_AUTOLEVEL || DISTORTION_CORRECTION)
+    static bool SafeZ4Homing();
+    static int UnsafeZ4Homing(bool safedZ4Home, bool zaxis);
+#endif //FEATURE_AUTOLEVEL || DISTORTION_CORRECTION
 };
 
 #endif // PRINTER_H_INCLUDED
