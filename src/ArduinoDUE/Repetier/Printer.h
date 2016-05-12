@@ -388,7 +388,7 @@ public:
     static float zMin;
     static float feedrate;                   ///< Last requested feedrate.
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
-    static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
+    static unsigned int extrudeMultiply;     ///< Flow multiplier in percent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
     static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
 #if DRIVE_SYSTEM!=DELTA
@@ -397,9 +397,9 @@ public:
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
     static float offsetZ;                     ///< Y-offset for different extruder positions.
-    static speed_t vMaxReached;         ///< Maximumu reached speed
-    static uint32_t msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
-    static float filamentPrinted;            ///< mm of filament printed since counting started
+    static speed_t vMaxReached;               ///< Maximum reached speed
+    static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
+    static float filamentPrinted;             ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION
     static float backlashX;
     static float backlashY;

@@ -2392,6 +2392,9 @@ int UIDisplay::okAction(bool allowMoves)
             Printer::homeAxis(true, true, false);
 #endif
 #endif
+			Printer::coordinateOffset[Z_AXIS] = Printer::popWizardVar().f;
+			Printer::coordinateOffset[Y_AXIS] = Printer::popWizardVar().f;
+			Printer::coordinateOffset[X_AXIS] = Printer::popWizardVar().f;
             Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
             Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
             Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
@@ -3397,6 +3400,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&ui_wiz_filamentchange, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
@@ -3416,6 +3422,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&ui_wiz_jamreheat, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
