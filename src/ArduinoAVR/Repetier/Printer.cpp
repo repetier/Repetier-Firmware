@@ -37,6 +37,7 @@ float Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS_ARRAY] = {MAX_TRAVE
 unsigned long Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 /** Acceleration in steps/s^2 in movement mode.*/
 unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
+uint32_t Printer::maxInterval;
 #endif
 #if NONLINEAR_SYSTEM
 long Printer::currentNonlinearPositionSteps[E_TOWER_ARRAY];
@@ -112,8 +113,8 @@ int32_t Printer::levelingP1[3];
 int32_t Printer::levelingP2[3];
 int32_t Printer::levelingP3[3];
 #endif
-float Printer::minimumSpeed;               ///< lowest allowed speed to keep integration error small
-float Printer::minimumZSpeed;
+//float Printer::minimumSpeed;               ///< lowest allowed speed to keep integration error small
+//float Printer::minimumZSpeed;
 int32_t Printer::xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
 int32_t Printer::yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
 int32_t Printer::zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -504,9 +505,24 @@ void Printer::updateDerivedParameter()
 #endif
     }
     float accel = RMath::max(maxAccelerationMMPerSquareSecond[X_AXIS], maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
-    minimumSpeed = accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS]*accel));
+    float minimumSpeed = accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS]*accel));
+	if(maxJerk < 2 * minimumSpeed) {// Enforce minimum start speed if target is faster and jerk too low
+		maxJerk = 2 * minimumSpeed;
+		Com::printFLN(PSTR("XY jerk was too low, setting to "),maxJerk);
+	}
     accel = RMath::max(maxAccelerationMMPerSquareSecond[Z_AXIS], maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
-    minimumZSpeed = accel * sqrt(2.0f / (axisStepsPerMM[Z_AXIS] * accel));
+    float minimumZSpeed = 0.5 * accel * sqrt(2.0f / (axisStepsPerMM[Z_AXIS] * accel));
+	if(maxZJerk < 2 * minimumZSpeed) {
+		maxZJerk = 2 * minimumZSpeed;
+		Com::printFLN(PSTR("Z jerk was too low, setting to "),maxZJerk);
+	}
+	maxInterval = F_CPU/(minimumSpeed*axisStepsPerMM[X_AXIS]);
+	uint32_t tmp = F_CPU/(minimumSpeed*axisStepsPerMM[Y_AXIS]);
+	if(tmp < maxInterval)
+		maxInterval = tmp;
+	tmp = F_CPU/(minimumZSpeed*axisStepsPerMM[Z_AXIS]);
+	if(tmp < maxInterval)
+		maxInterval = tmp;
 	//Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
 	//Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
 #if DISTORTION_CORRECTION
@@ -744,7 +760,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         }
     }
     else Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
-    if(com->hasF())
+    if(com->hasF() && com->F > 0.1)
     {
         if(unitIsInches)
             feedrate = com->F * 0.0042333f * (float)feedrateMultiply;  // Factor is 25.5/60/100

@@ -111,7 +111,7 @@ void HAL::setupTimer() {
   // Timer for stepper motor control
   pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
   //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,1); // highest priority - no surprises here wanted
+  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,2); // highest priority - no surprises here wanted
 
   TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
                TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);

@@ -30,6 +30,11 @@
   all hardware related code should be packed into the hal files.
 */
 
+// You can set different sizes if you want, but with binary mode it does not get faster
+#ifndef SERIAL_RX_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
+
 #ifndef HAL_H
 #define HAL_H
 
@@ -655,8 +660,10 @@ class HAL
     {
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
+      BTAdapter.setInterruptPriority(1);
 #else
       RFSERIAL.begin(baud);
+      RFSERIAL.setInterruptPriority(1);
 #endif
     }
     static inline bool serialByteAvailable()

@@ -954,9 +954,9 @@ void EEPROM::writeSettings()
 #endif
 
 #if FEATURE_AXISCOMP
-    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY);
-    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ);
-    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ);
+    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY,6);
+    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ,6);
+    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ,6);
 #endif
 
 

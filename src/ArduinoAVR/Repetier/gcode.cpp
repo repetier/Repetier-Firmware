@@ -430,13 +430,15 @@ void GCode::readFromSerial()
                 return;
             }
         }
-        else     // Ascii command
+        else     // ASCII command
         {
             char ch = commandReceiving[commandsReceivingWritePosition - 1];
-            if(ch == 0 || ch == '\n' || ch == '\r' || (!commentDetected && ch == ':'))  // complete line read
+            if(ch == 0 || ch == '\n' || ch == '\r' /*|| (!commentDetected && ch == ':')*/)  // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition - 1] = 0;
-                //Com::printF(PSTR("Parse ascii:"));Com::print((char*)commandReceiving);Com::println();
+#ifdef DEBUG_ECHO_ASCII				
+                Com::printF(PSTR("Got:"));Com::print((char*)commandReceiving);Com::println();
+#endif				
                 commentDetected = false;
                 if(commandsReceivingWritePosition == 1)   // empty line ignore
                 {

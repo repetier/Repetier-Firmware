@@ -305,6 +305,7 @@ public:
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
+	static uint32_t maxInterval; // slowest allowed interval
     static float maxAccelerationMMPerSquareSecond[];
     static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
@@ -371,8 +372,8 @@ public:
 	static float thermoMaxTemp;
 #endif
     static int16_t zBabystepsMissing;
-    static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
-    static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
+    //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
+    //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static int32_t yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static int32_t zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
