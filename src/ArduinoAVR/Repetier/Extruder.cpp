@@ -1548,6 +1548,7 @@ void TemperatureController::updateCurrentTemperature()
     case 11:
     case 12:
 	case 14:
+	case 15:
     case 97:
     case 98:
     case 99:
@@ -1596,6 +1597,7 @@ void TemperatureController::updateCurrentTemperature()
     case 11:
     case 12:
 	case 14:
+	case 15:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
