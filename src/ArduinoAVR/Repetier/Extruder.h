@@ -218,12 +218,12 @@ public:
     float maxAcceleration;  ///< Maximum acceleration in mm/s^2.
     float maxStartFeedrate; ///< Maximum start feedrate in mm/s.
     int32_t extrudePosition;   ///< Current extruder position in steps.
-    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabalize temperature
-    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heatup
-    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heatup
+    int16_t watchPeriod;        ///< Time in seconds, a M109 command will wait to stabilize temperature
+    int16_t waitRetractTemperature; ///< Temperature to retract the filament when waiting for heat up
+    int16_t waitRetractUnits;   ///< Units to retract the filament when waiting for heat up
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
-    float advanceK;         ///< Koefficient for advance algorithm. 0 = off
+    float advanceK;         ///< Coefficient for advance algorithm. 0 = off
 #endif
     float advanceL;
     int16_t advanceBacklash;

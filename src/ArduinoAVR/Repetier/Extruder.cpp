@@ -34,7 +34,7 @@ uint8_t Extruder::mixingDir = 10;
 uint8_t Extruder::activeMixingExtruder = 0;
 #endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
-extern int16_t read_max6675(uint8_t ss_pin);
+extern int16_t read_max6675(uint8_t ss_pin,fast8_t idx);
 #endif
 #ifdef SUPPORT_MAX31855
 extern int16_t read_max31855(uint8_t ss_pin);
@@ -2008,7 +2008,7 @@ void TemperatureController::updateCurrentTemperature()
 #endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperature = read_max6675(sensorPin);
+        currentTemperature = read_max6675(sensorPin,pwmIndex);
         break;
 #endif
 #ifdef SUPPORT_MAX31855
@@ -2393,22 +2393,28 @@ bool reportTempsensorError()
 
 #ifdef SUPPORT_MAX6675
 
-int16_t read_max6675(uint8_t ss_pin)
+int16_t read_max6675(uint8_t ss_pin,fast8_t idx)
 {
-    static millis_t last_max6675_read = 0;
-    static int16_t max6675_temp = 0;
-    if (HAL::timeInMilliseconds() - last_max6675_read > 230)
+	static bool firstRun = true;
+    static millis_t last_max6675_read[NUM_PWM];
+    static int16_t max6675_temp[NUM_PWM];	
+	if(firstRun) {
+		for(fast8_t i=0;i<NUM_PWM;i++) {
+			last_max6675_read[i] = 0;			
+		}
+	}
+    if (HAL::timeInMilliseconds() - last_max6675_read[idx] > 230)
     {
         HAL::spiInit(2);
         HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
         HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
-        max6675_temp = HAL::spiReceive(0);
-        max6675_temp <<= 8;
-        max6675_temp |= HAL::spiReceive(0);
+        max6675_temp[idx] = HAL::spiReceive(0);
+        max6675_temp[idx] <<= 8;
+        max6675_temp[idx] |= HAL::spiReceive(0);
         HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
-        last_max6675_read = HAL::timeInMilliseconds();
+        last_max6675_read[idx] = HAL::timeInMilliseconds();
     }
-    return max6675_temp & 4 ? 2000 : max6675_temp >> 3; // thermocouple open?
+    return max6675_temp[idx] & 4 ? 2000 : max6675_temp[idx] >> 3; // thermocouple open?
 }
 #endif
 #ifdef SUPPORT_MAX31855
