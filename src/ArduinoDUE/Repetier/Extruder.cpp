@@ -2402,6 +2402,7 @@ int16_t read_max6675(uint8_t ss_pin,fast8_t idx)
 		for(fast8_t i=0;i<NUM_PWM;i++) {
 			last_max6675_read[i] = 0;			
 		}
+		firstRun = false;
 	}
     if (HAL::timeInMilliseconds() - last_max6675_read[idx] > 230)
     {
