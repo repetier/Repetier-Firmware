@@ -310,7 +310,7 @@ bool runBedLeveling(GCode *com) {
             Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
             Printer::startProbing(true);
         }
-#endif
+#endif // DELTA
 #endif
         if(!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
@@ -613,6 +613,10 @@ void Printer::waitForZProbeStart() {
 }
 #endif
 
+/*
+ Transforms theoretical correct coordinates to corrected coordinates resulting from bed rotation
+ and shear transformations.
+*/
 void Printer::transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if FEATURE_AXISCOMP
     // Axis compensation:

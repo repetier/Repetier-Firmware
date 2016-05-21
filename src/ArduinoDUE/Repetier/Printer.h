@@ -79,7 +79,7 @@ union wizardVar
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
 #define PRINTER_FLAG0_ZPROBEING             64
 #define PRINTER_FLAG0_LARGE_MACHINE         128
-#define PRINTER_FLAG1_HOMED                 1
+#define PRINTER_FLAG1_HOMED_ALL             1
 #define PRINTER_FLAG1_AUTOMOUNT             2
 #define PRINTER_FLAG1_ANIMATION             4
 #define PRINTER_FLAG1_ALLKILLED             8
@@ -95,6 +95,9 @@ union wizardVar
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 #define PRINTER_FLAG2_HOMING                64
 #define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
+#define PRINTER_FLAG3_X_HOMED               1
+#define PRINTER_FLAG3_Y_HOMED               2
+#define PRINTER_FLAG3_Z_HOMED               3
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -318,7 +321,7 @@ public:
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
-    static uint8_t flag2;
+    static uint8_t flag2,flag3;
     static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -669,14 +672,45 @@ public:
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
 
-    static INLINE uint8_t isHomed()
+    static INLINE uint8_t isHomedAll()
     {
-        return flag1 & PRINTER_FLAG1_HOMED;
+        return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
-    static INLINE void setHomed(uint8_t b)
+    static INLINE void updateHomedAll()
     {
-        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
+		bool b = isXHomed() && isYHomed() && isZHomed();
+        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED_ALL : flag1 & ~PRINTER_FLAG1_HOMED_ALL);
+    }
+
+    static INLINE uint8_t isXHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_X_HOMED;
+    }
+
+    static INLINE void setXHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
+    }
+
+    static INLINE uint8_t isYHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_Y_HOMED;
+    }
+
+    static INLINE void setYHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
+    }
+
+    static INLINE uint8_t isZHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_Z_HOMED;
+    }
+
+    static INLINE void setZHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
     }
 
     static INLINE uint8_t isAllKilled()
@@ -1164,6 +1198,7 @@ public:
 #if JSON_OUTPUT
     static void showJSONStatus(int type);
 #endif
+private:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();

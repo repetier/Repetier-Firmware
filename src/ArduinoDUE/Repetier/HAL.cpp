@@ -1240,6 +1240,7 @@ void RFDoubleSerial::begin(unsigned long baud) {
   RFSERIAL.begin(baud);
   BT_SERIAL.begin(BLUETOOTH_BAUD);
 }
+
 void RFDoubleSerial::end() {
   RFSERIAL.end();
   BT_SERIAL.end();

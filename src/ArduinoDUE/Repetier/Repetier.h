@@ -24,6 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
+//#define REPETIER_VERSION "0.92.10"
 #define REPETIER_VERSION "1.0.0dev"
 
 // ##########################################################################################
@@ -205,6 +206,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #ifndef DUAL_X_AXIS
 #define DUAL_X_AXIS 0
+#endif
+
+#ifndef LAZY_DUAL_X_AXIS
+#define LAZY_DUAL_X_AXIS 0
 #endif
 
 #if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER

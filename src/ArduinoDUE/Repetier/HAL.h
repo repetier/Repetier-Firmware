@@ -658,12 +658,11 @@ class HAL
     }
     static inline void serialSetBaudrate(long baud)
     {
+      Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
-      BTAdapter.setInterruptPriority(1);
 #else
       RFSERIAL.begin(baud);
-      RFSERIAL.setInterruptPriority(1);
 #endif
     }
     static inline bool serialByteAvailable()

@@ -345,8 +345,10 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
             buf[buflen++] = c;
         }
         while(buflen < 79);
-        if(buflen == 0)   // empty line ignore
+        if(buflen == 0) {  // empty line ignore
+			if(!c) return; // Special case \n0
             continue;
+		}
         buf[buflen] = 0;
         // Send command into command buffer
         if(code.parseAscii((char *)buf,false) && (code.params & 518))   // Success
@@ -733,7 +735,7 @@ bool GCode::parseBinary(uint8_t *buffer,bool fromSerial)
 }
 
 /**
-  Converts a ascii GCode line into a GCode structure.
+  Converts a ASCII GCode line into a GCode structure.
 */
 bool GCode::parseAscii(char *line,bool fromSerial)
 {
@@ -969,7 +971,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
 		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
 		return false;
 	}
-    if(hasFormatError() || (params & 518) == 0)   // Must contain G, M or T command and parameter need to have variables!
+    if(hasFormatError() /*|| (params & 518) == 0*/)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;
         if(Printer::debugErrors())
@@ -1064,8 +1066,8 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
 		PrintLine::moveRelativeDistanceInStepsReal(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],true,true);
 	EVENT_FATAL_ERROR_OCCURED		
 	Commands::waitUntilEndOfAllMoves();
-	Printer::kill(true);		
 	reportFatalError();
+	Printer::kill(false);
 }
 
 void GCode::reportFatalError() {

@@ -195,6 +195,7 @@ public:
 	static uint32_t keepAliveInterval;
     friend class SDCard;
     friend class UIDisplay;
+	static FSTRINGPARAM(fatalErrorMsg);
 private:
     void debugCommandBuffer();
     void checkAndPushCommand();
@@ -216,7 +217,6 @@ private:
         return l;
     }
 
-	static FSTRINGPARAM(fatalErrorMsg);
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
     static uint8_t bufferReadIndex; ///< Read position in gcode_buffer.
     static uint8_t bufferWriteIndex; ///< Write position in gcode_buffer.
