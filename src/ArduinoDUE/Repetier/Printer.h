@@ -1198,7 +1198,6 @@ public:
 #if JSON_OUTPUT
     static void showJSONStatus(int type);
 #endif
-private:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
