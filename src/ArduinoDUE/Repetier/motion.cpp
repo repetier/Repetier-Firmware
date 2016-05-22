@@ -2755,6 +2755,9 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
 #endif
+#if MULTI_ZENDSTOP_HOMING
+		Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
+#endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     cur->checkEndstops();

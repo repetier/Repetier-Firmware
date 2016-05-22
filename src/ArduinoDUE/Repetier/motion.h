@@ -317,17 +317,44 @@ public:
             }
             else
 #endif
-                if(isZNegativeMove() && Endstops::zMin())
-                {
-                    setZMoveFinished();
-                }
-                else if(isZPositiveMove() && Endstops::zMax())
-                {
-#if MAX_HARDWARE_ENDSTOP_Z
-                    Printer::stepsRemainingAtZHit = stepsRemaining;
+#if MULTI_ZENDSTOP_HOMING
+           if(isZNegativeMove())
+           {
+				if(Endstops::zMin())
+					Printer::multiZHomeFlags &= ~1;
+				if(Endstops::z2MinMax())
+				   Printer::multiZHomeFlags &= ~2;
+				if(Printer::multiZHomeFlags == 0)
+					setZMoveFinished();
+           }
+           else if(isZPositiveMove())
+           {
+				if(Endstops::zMin())
+					Printer::multiZHomeFlags &= ~1;
+				if(Endstops::z2MinMax())
+					Printer::multiZHomeFlags &= ~2;
+				if(Printer::multiZHomeFlags == 0) {
+	           #if MAX_HARDWARE_ENDSTOP_Z
+					Printer::stepsRemainingAtZHit = stepsRemaining;
+	           #endif
+					setZMoveFinished();
+				}
+           }
+#else
+           if(isZNegativeMove() && Endstops::zMin())
+           {
+	           setZMoveFinished();
+           }
+           else if(isZPositiveMove() && Endstops::zMax())
+           {
+	           #if MAX_HARDWARE_ENDSTOP_Z
+	           Printer::stepsRemainingAtZHit = stepsRemaining;
+	           #endif
+	           setZMoveFinished();
+           }
 #endif
-                    setZMoveFinished();
-                }
+
+     
         }
 #if FEATURE_Z_PROBE
         else if(Printer::isZProbingActive() && isZNegativeMove()) {

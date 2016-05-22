@@ -484,7 +484,7 @@ void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,
 }
 #endif
 
-/** \brief Initalizes all extruder.
+/** \brief Initializes all extruder.
 
 Updates the pin configuration needed for the extruder and activates extruder 0.
 Starts a interrupt based analog input reader, which is used by simple thermistors
@@ -596,8 +596,9 @@ void Extruder::initExtruder()
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
     Extruder::initHeatedBed();
 #endif
+#if ANALOG_INPUTS > 0
     HAL::analogStart();
-
+#endif
 }
 
 void TemperatureController::updateTempControlVars()

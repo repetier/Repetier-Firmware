@@ -166,6 +166,9 @@ float Printer::maxRealSegmentLength = 0;
 #ifdef DEBUG_REAL_JERK
 float Printer::maxRealJerk = 0;
 #endif
+#if MULTI_ZENDSTOP_HOMING
+fast8_t Printer::multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
+#endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif
@@ -280,7 +283,7 @@ void Endstops::report() {
         Com::printF(zMax() ? Com::tHSpace : Com::tLSpace);
 #endif
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
-        Com::printF(Com::tZMinMaxColon);
+        Com::printF(PSTR("z2_minmax:"));
         Com::printF(z2MinMax() ? Com::tHSpace : Com::tLSpace);
 #endif
 #if FEATURE_Z_PROBE
@@ -953,6 +956,16 @@ void Printer::setup()
 #endif
 #else
 #error You have defined hardware z min endstop without pin assignment. Set pin number for Z_MIN_PIN
+#endif
+#endif
+#if MINMAX_HARDWARE_ENDSTOP_Z2
+#if Z2_MINMAX_PIN > -1
+SET_INPUT(Z2_MINMAX_PIN);
+#if ENDSTOP_PULLUP_Z2_MINMAX
+PULLUP(Z2_MINMAX_PIN, HIGH);
+#endif
+#else
+#error You have defined hardware z2 minmax endstop without pin assignment. Set pin number for Z2_MINMAX_PIN
 #endif
 #endif
 #if MAX_HARDWARE_ENDSTOP_X

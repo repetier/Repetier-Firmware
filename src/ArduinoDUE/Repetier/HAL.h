@@ -850,9 +850,7 @@ class HAL
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
-#if ANALOG_INPUTS > 0
     static void analogStart(void);
-#endif
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif

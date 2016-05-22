@@ -317,6 +317,13 @@ inline void memcopy4(void *dest,void *source) {
 #define Z2_MINMAX_PIN -1
 #endif
 
+#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1 
+#define MULTI_ZENDSTOP_HOMING 1
+#define MULTI_ZENDSTOP_ALL 3
+#else
+#define MULTI_ZENDSTOP_HOMING 0
+#endif
+
 #define SPEED_MIN_MILLIS 400
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f

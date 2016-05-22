@@ -174,6 +174,7 @@ private:
 #define ENDSTOP_Z_MIN_ID 16
 #define ENDSTOP_Z_MAX_ID 32
 #define ENDSTOP_Z2_MIN_ID 64
+#define ENDSTOP_Z2_MINMAX_ID 64
 #define ENDSTOP_Z_PROBE_ID 128
 
 // These endstops are only used with EXTENDED_ENDSTOPS
@@ -264,7 +265,7 @@ public:
     }
     static INLINE bool z2MinMax() {
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
-        return (lastState & ENDSTOP_Z2_MINMAX_ID) != 0;
+        return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
 #else
         return false;
 #endif
@@ -408,6 +409,9 @@ public:
     static float backlashY;
     static float backlashZ;
     static uint8_t backlashDir;
+#endif
+#if MULTI_ZENDSTOP_HOMING
+	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
     static float memoryX;
     static float memoryY;
@@ -1022,12 +1026,28 @@ public:
     }
     static INLINE void startZStep()
     {
+#if MULTI_ZENDSTOP_HOMING
+	if(Printer::multiZHomeFlags & 1) {
+        WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#if FEATURE_TWO_ZSTEPPER
+	if(Printer::multiZHomeFlags & 2) {
+        WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
+#if FEATURE_THREE_ZSTEPPER
+	if(Printer::multiZHomeFlags & 4) {
+        WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
+#else		
         WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
 #endif
     }
     static INLINE void endXYZSteps()
