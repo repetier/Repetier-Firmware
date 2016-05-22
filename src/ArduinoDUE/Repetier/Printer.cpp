@@ -1509,7 +1509,7 @@ void Printer::homeXAxis()
     #endif
 	Extruder::current = curExtruder;
 #if LAZY_DUAL_X_AXIS 
-	currentPositionSteps[X_AXIS] = -Extruder::current->xOffset;
+	currentPositionSteps[X_AXIS] = xMinSteps + Extruder::current->xOffset;
 #else	
 	// Now position current extrude on x = 0
 	PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
