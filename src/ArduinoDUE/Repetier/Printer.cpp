@@ -1528,6 +1528,7 @@ void Printer::homeXAxis()
 	PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
 	currentPositionSteps[X_AXIS] = xMinSteps;
 #endif	
+	updateCurrentPosition(false);
 	offsetX = 0;
 	setXHomed(true);
 #else	// DUAL_AXIS
@@ -1819,8 +1820,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if HOMING_ORDER != HOME_ORDER_ZXYTZ
     if(xaxis)
     {
+#if DUAL_X_AXIS
+		startX = currentPosition[X_AXIS];
+#else		
         if(X_HOME_DIR < 0) startX = Printer::xMin;
         else startX = Printer::xMin + Printer::xLength;
+#endif		
     }
     if(yaxis)
     {
