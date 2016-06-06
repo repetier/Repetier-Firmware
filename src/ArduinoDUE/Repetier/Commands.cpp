@@ -1063,7 +1063,7 @@ void Commands::processGCode(GCode *com) {
 			{ // G30 single probe set Z0
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G29 leveling failed!"));
+					GCode::fatalError(PSTR("G30 probing failed!"));
 					break;
 				}
                 Printer::updateCurrentPosition(p & 1);

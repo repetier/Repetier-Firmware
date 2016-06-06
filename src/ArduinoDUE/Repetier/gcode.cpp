@@ -1063,7 +1063,7 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
 	}
 #endif	
 	if(Printer::currentPosition[Z_AXIS] < Printer::zMin + Printer::zLength - 15)
-		PrintLine::moveRelativeDistanceInStepsReal(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],true,true);
+		PrintLine::moveRelativeDistanceInSteps(0, 0, 10 * Printer::axisStepsPerMM[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], true, true);
 	EVENT_FATAL_ERROR_OCCURED		
 	Commands::waitUntilEndOfAllMoves();
 	reportFatalError();

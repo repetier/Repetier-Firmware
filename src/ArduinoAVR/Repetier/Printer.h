@@ -97,7 +97,7 @@ union wizardVar
 #define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
 #define PRINTER_FLAG3_X_HOMED               1
 #define PRINTER_FLAG3_Y_HOMED               2
-#define PRINTER_FLAG3_Z_HOMED               3
+#define PRINTER_FLAG3_Z_HOMED               4
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
