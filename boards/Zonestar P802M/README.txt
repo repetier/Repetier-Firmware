@@ -1,5 +1,5 @@
 There are some printers sold under different names like 'Zonestar P802M',
-'Prusa i3 P802M DIY kit', etc, which have LCD 20x4 with 5 keys controller
+'Prusa i3 P802M DIY kit', 'Anet A8-B', etc, which have LCD 20x4 with 5 keys controller
 connected to Melzi V2.0 board via 10 wires cable. Keys are connected to a
 single analog input using resistive divider.
 
