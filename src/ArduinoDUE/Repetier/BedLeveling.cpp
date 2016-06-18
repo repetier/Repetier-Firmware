@@ -535,6 +535,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         }
     }
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
+	//Com::printFLN(PSTR("OrigDistance:"),distance);
 #if Z_PROBE_Z_OFFSET_MODE == 1
     distance += EEPROM::zProbeZOffset(); // We measured including coating, so we need to add coating thickness!
 #endif

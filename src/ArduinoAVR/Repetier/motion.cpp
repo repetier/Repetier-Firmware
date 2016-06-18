@@ -2658,7 +2658,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         ANALYZER_OFF(ANALYZER_CH0);
         if(cur->isWarmUp())
         {
-            // This is a warmup move to initalize the path planner correctly. Just waste
+            // This is a warm up move to initialize the path planner correctly. Just waste
             // a bit of time to get the planning up to date.
             if(linesCount<=cur->getWaitForXLinesFilled())
             {

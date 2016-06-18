@@ -230,6 +230,7 @@ public:
 #endif // USE_ADVANCE
 #if MIXING_EXTRUDER > 0
     int mixingW;   ///< Weight for this extruder when mixing steps
+	int mixingWB;  ///< Weight after balancing extruder steps per mm
     int mixingE;   ///< Cumulated error for this step.
     int virtualWeights[VIRTUAL_EXTRUDER]; // Virtual extruder weights
 #endif // MIXING_EXTRUDER > 0

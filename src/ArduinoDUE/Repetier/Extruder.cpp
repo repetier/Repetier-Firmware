@@ -911,10 +911,15 @@ void Extruder::setMixingWeight(uint8_t extr,int weight)
     uint8_t i;
     mixingS = 0;
     extruder[extr].mixingW = weight;
+	float sum = 0;
+	for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+	    sum += extruder[i].stepsPerMM * extruder[i].mixingW;                   // steps of virtual axis with original weights
+	}
     for(i=0; i<NUM_EXTRUDER; i++)
     {
-        extruder[i].mixingE = extruder[i].mixingW;
-        mixingS += extruder[i].mixingW;
+		extruder[i].mixingWB = static_cast<int>(10000.0*extruder[i].stepsPerMM*extruder[i].mixingW / sum);
+        extruder[i].mixingE = extruder[i].mixingWB;
+        mixingS += extruder[i].mixingWB;
     }
 }
 void Extruder::step()
@@ -980,32 +985,32 @@ void Extruder::step()
     int bestError;
     if(mixingDir)
     {
-        bestError = -10000;
+        bestError = -20000;
         for(i = 0; i < NUM_EXTRUDER; i++)
         {
-            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingWB == 0) continue;
             if(extruder[i].mixingE > bestError)
             {
                 bestError = extruder[i].mixingE;
                 best = i;
             }
-            extruder[i].mixingE += extruder[i].mixingW;
+            extruder[i].mixingE += extruder[i].mixingWB;
         }
         if(best == 255) return; // no extruder has weight!
         extruder[best].mixingE -= mixingS;
     }
     else
     {
-        bestError = 10000;
+        bestError = 20000;
         for(i = 0; i < NUM_EXTRUDER; i++)
         {
-            if(extruder[i].mixingW == 0) continue;
+            if(extruder[i].mixingWB == 0) continue;
             if(extruder[i].mixingE < bestError)
             {
                 bestError = extruder[i].mixingE;
                 best = i;
             }
-            extruder[i].mixingE -= extruder[i].mixingW;
+            extruder[i].mixingE -= extruder[i].mixingWB;
         }
         if(best == 255) return; // no extruder has weight!
         extruder[best].mixingE += mixingS;

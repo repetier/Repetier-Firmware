@@ -1713,8 +1713,8 @@ void uiCheckSlowKeys(uint16_t &action) {}
 // PINK.3, 86, D_E
 #define UI_DISPLAY_ENABLE_PIN	       45
 #define UI_DISPLAY_D4_PIN		46
-#define UI_ENCODER_A 52
-#define UI_ENCODER_B 50
+#define UI_ENCODER_A 50
+#define UI_ENCODER_B 52
 #define UI_ENCODER_CLICK 48
 #endif
 
