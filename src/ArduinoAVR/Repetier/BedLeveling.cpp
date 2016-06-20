@@ -320,7 +320,7 @@ bool runBedLeveling(GCode *com) {
 
         // Leveling is finished now update own position and store leveling data if needed.
         // Zero point here because rotation matrix rotates through zero point, not through current position point. 
-		float currentZ = plane.z((float)0,(float)0);
+        float currentZ = plane.z((float)0,(float)0);
         Com::printF(PSTR("CurrentZ:"),currentZ);
         Com::printFLN(PSTR(" atZ:"),Printer::currentPosition[Z_AXIS]);
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
