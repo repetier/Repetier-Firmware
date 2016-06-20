@@ -331,7 +331,7 @@ bool runBedLeveling(GCode *com) {
         Com::printFLN(PSTR("Z after rotation:"),zRot);
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
         if(s != 0) {
-            Printer::zLength += currentZ - zRot;
+            Printer::zLength += plane.z((float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS]) - zRot;
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
         }
 #endif
