@@ -371,6 +371,26 @@ void TemperatureController::waitForTargetTemperature()
     }
 }
 
+fast8_t TemperatureController::errorState() {
+	if(isSensorDefect())
+		return 1;
+	if(isSensorDecoupled())
+		return 2;
+#if EXTRUDER_JAM_CONTROL
+	if(isFilamentChange())
+		return 6;
+#if JAM_METHOD == 1
+	if(isJammed())
+		return 5; // jammed or out of filament
+	if(isSlowedDown())
+		return 3; // slipping				
+#else // only a simple switch to pause on end of filament
+	if(isJammed())
+		return 6; // out of filament	
+#endif
+#endif
+	return 0;
+}
 /* For pausing we negate target temperature, so negative value means paused extruder.
 Since temp. is negative no heating will occur. */
 void Extruder::pauseExtruders()
@@ -433,7 +453,11 @@ void Extruder::resetJamSteps()
 {
     jamStepsOnSignal = jamStepsSinceLastSignal;
     jamStepsSinceLastSignal = 0;
-    Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 + id, false);
+	if(tempControl.isFilamentChange()) {
+		tempControl.setFilamentChange(false);
+	} else {
+		Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 + id, false);
+	}
 }
 #endif
 

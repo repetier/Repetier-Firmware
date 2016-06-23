@@ -311,7 +311,7 @@ bool runBedLeveling(GCode *com) {
             Printer::startProbing(true);
         }
 #endif // DELTA
-#endif
+#endif // BED_CORRECTION_METHOD == 1
         if(!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
             return false;
@@ -319,28 +319,31 @@ bool runBedLeveling(GCode *com) {
         correctAutolevel(com,plane);
 
         // Leveling is finished now update own positions and store leveling data if needed
-        float currentZ = plane.z((float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS]);
+        //float currentZ = plane.z((float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS]);
+		float currentZ = plane.z(0.0,0.0); // we rotated around this point, so that is now z height
         Com::printF(PSTR("CurrentZ:"),currentZ);
         Com::printFLN(PSTR(" atZ:"),Printer::currentPosition[Z_AXIS]);
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
         Printer::zMin = 0;
 #if MAX_HARDWARE_ENDSTOP_Z
-        float xRot,yRot,zRot;
-        Printer::transformFromPrinter(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS],xRot,yRot,zRot);
-        Com::printFLN(PSTR("Z after rotation:"),zRot);
+        //float xRot,yRot,zRot;
+        //Printer::transformFromPrinter(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS],xRot,yRot,zRot);
+        //Com::printFLN(PSTR("Z after rotation:"),zRot);
         // With max z endstop we adjust zlength so after next homing we have also a calibrated printer
         if(s != 0) {
-            Printer::zLength += currentZ - zRot;
+			// at origin rotations have no influence so use values there to update
+			Printer::zLength += currentZ - Printer::currentPosition[Z_AXIS];
+            //Printer::zLength += /*currentZ*/ plane.z((float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS]) - zRot;
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
         }
 #endif
         Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
-        Printer::updateCurrentPosition(true);
+        Printer::updateCurrentPosition(true); // set position based on steps position
 #if BED_CORRECTION_METHOD == 1
         if(fabs(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025 )
             break;  // we reached achievable precision so we can stop
     }
-#endif
+#endif // BED_CORRECTION_METHOD == 1
     Printer::updateDerivedParameter();
     Printer::finishProbing();
 #if BED_CORRECTION_METHOD != 1
@@ -641,6 +644,7 @@ void Printer::transformToPrinter(float x,float y,float z,float &transX,float &tr
 #endif	
 }
 
+/* Transform back to real printer coordinates. */
 void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
 	if(isAutolevelActive()) {

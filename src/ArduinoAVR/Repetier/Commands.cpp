@@ -143,6 +143,7 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
 }
 
 void Commands::printTemperatures(bool showRaw) {
+	int error;
 #if NUM_EXTRUDER > 0
     float temp = Extruder::current->tempControl.currentTemperatureC;
 #if HEATED_BED_SENSOR_TYPE == 0
@@ -154,6 +155,9 @@ void Commands::printTemperatures(bool showRaw) {
 #if HAVE_HEATED_BED
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
     Com::printF(Com::tSpaceSlash,heatedBedController.targetTemperatureC,0);
+	if((error = heatedBedController.errorState()) > 0) {
+		Com::printF(PSTR(" DB:"),error);
+	}
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)NUM_EXTRUDER);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - heatedBedController.currentTemperature);
@@ -173,12 +177,19 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
 #endif
+		if((error = extruder[i].tempControl.errorState()) > 0) {
+			Com::printF(PSTR(" D"),(int)i);
+			Com::printF(Com::tColon,error);
+		}
         if(showRaw) {
             Com::printF(Com::tSpaceRaw,(int)i);
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
 #elif NUM_EXTRUDER == 1
+	if((error = extruder[0].tempControl.errorState()) > 0) {
+		Com::printF(PSTR(" D0:"),error);
+	}
     if(showRaw) {
         Com::printF(Com::tSpaceRaw,(int)0);
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[0].tempControl.currentTemperature);
