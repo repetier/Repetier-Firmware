@@ -349,10 +349,22 @@ void HAL::analogStart()
 
 #include <avr/io.h>
 
+/****************************************************************************************
+ Setting for I2C Clock speed. needed to change  clock speed for different peripherals
+ here is just the same as i2cInit  , added to be compatible to DUE Version
+****************************************************************************************/
+
+void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
+{
+    /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
+    TWSR = 0;                         /* no prescaler */
+    TWBR = ((F_CPU/clockSpeedHz)-16)/2;  /* must be > 10 for stable operation */
+}
+
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
-void HAL::i2cInit(unsigned long clockSpeedHz)
+void HAL::i2cInit(uint32_t clockSpeedHz)
 {
     /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
     TWSR = 0;                         /* no prescaler */
@@ -364,7 +376,7 @@ void HAL::i2cInit(unsigned long clockSpeedHz)
   Issues a start condition and sends address and transfer direction.
   return 0 = device accessible, 1= failed to access device
 *************************************************************************/
-unsigned char HAL::i2cStart(unsigned char address)
+unsigned char HAL::i2cStart(uint8_t address)
 {
     uint8_t   twst;
 
@@ -460,18 +472,18 @@ void HAL::i2cStop(void)
   Return:   0 write successful
             1 write failed
 *************************************************************************/
-unsigned char HAL::i2cWrite( unsigned char data )
+void HAL::i2cWrite( unsigned char data )
 {
-    uint8_t   twst;
+    //uint8_t   twst;
     // send data to the previously addressed device
     TWDR = data;
     TWCR = (1<<TWINT) | (1<<TWEN);
     // wait until transmission completed
     while(!(TWCR & (1<<TWINT)));
     // check value of TWI Status Register. Mask prescaler bits
-    twst = TW_STATUS & 0xF8;
-    if( twst != TW_MT_DATA_ACK) return 1;
-    return 0;
+    //twst = TW_STATUS & 0xF8;
+    //if( twst != TW_MT_DATA_ACK) return 1;
+    //return 0;
 }
 
 
@@ -794,19 +806,19 @@ ISR(PWM_TIMER_VECTOR)
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
         if((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK)) > 0) WRITE(EXT0_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
         if((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK)) > 0) WRITE(EXT1_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
         if((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK)) > 0) WRITE(EXT2_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
         if((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK)) > 0) WRITE(EXT3_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
         if((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK)) > 0) WRITE(EXT4_HEATER_PIN,!HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
         if((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0) WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
@@ -870,7 +882,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], pwm_pos_set[1], HEATER_PINS_INVERTED);
 #else
@@ -884,7 +896,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], pwm_pos_set[2], HEATER_PINS_INVERTED);
 #else
@@ -898,7 +910,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER > 3
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN>-1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], pwm_pos_set[3], HEATER_PINS_INVERTED);
 #else
@@ -912,7 +924,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], pwm_pos_set[4], HEATER_PINS_INVERTED);
 #else
@@ -926,7 +938,7 @@ ISR(PWM_TIMER_VECTOR)
 #endif
 #endif
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER > 5
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN>-1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], pwm_pos_set[5], HEATER_PINS_INVERTED);
 #else

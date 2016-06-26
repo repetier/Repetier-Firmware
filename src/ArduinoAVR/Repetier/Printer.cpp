@@ -1893,6 +1893,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("EEPROM:"),EEPROM_MODE != 0);
     Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
     Com::config(PSTR("JerkXY:"),maxJerk);
+    Com::config(PSTR("KeepAliveInterval:"), KEEP_ALIVE_INTERVAL);
 #if DRIVE_SYSTEM != DELTA
     Com::config(PSTR("JerkZ:"),maxZJerk);
 #endif

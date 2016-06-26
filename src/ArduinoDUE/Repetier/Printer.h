@@ -839,7 +839,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN > -1
-        pwm_pos[PWM_BOARD_FAN] = 255;
+        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()

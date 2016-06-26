@@ -1,8 +1,9 @@
 Version 92.9
-  Extrduer motor mirroring.
+  Extruder motor mirroring.
   Fixes in autoleveling.
   Dual x axis support.
   Axis compensation now always on.
+  Watchdog handling improved.
   
 Version 0.92
   Cleaner code base.

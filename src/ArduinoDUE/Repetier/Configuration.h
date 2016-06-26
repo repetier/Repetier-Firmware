@@ -1096,6 +1096,12 @@ for some printers causing an early stall.
 */
 #define DOUBLE_STEP_DELAY 1 // time in microseconds
 
+/** If the firmware is busy, it will send a busy signal to host signaling that
+ everything is fine and it only takes a bit longer to finish. That way the 
+ host can keep timeout short so in case of communication errors the resulting
+ blobs are much smaller. Set to 0 to disable it. */
+#define KEEP_ALIVE_INTERVAL 2000
+
 //// Acceleration settings
 
 /** \brief X, Y, Z max acceleration in mm/s^2 for printing moves or retracts. Make sure your printer can go that high!
@@ -1548,6 +1554,8 @@ is also used for the heater if you have 2 extruders connected. */
 goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers. */
 //#undef FAN_BOARD_PIN
 //#define FAN_BOARD_PIN ORIG_FAN_PIN
+/** Speed of board fan when on. 0 = off, 255 = max */
+#define BOARD_FAN_SPEED 255
 
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.

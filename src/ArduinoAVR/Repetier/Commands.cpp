@@ -51,6 +51,7 @@ void Commands::commandLoop() {
                 code->popCurrentCommand();
             }
         } else {
+			GCode::keepAlive(Paused);
             UI_MEDIUM;
         }
         Printer::defaultLoopActions();
@@ -60,14 +61,14 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
-    if(!executePeriodical) return;
+    if(!executePeriodical) return; // gets true every 100ms
     executePeriodical = 0;
     EVENT_TIMER_100MS;
     Extruder::manageTemperatures();
-    if(--counter250ms == 0) {
+    if(--counter500ms == 0) {
         if(manageMonitor)
             writeMonitor();
-        counter250ms = 5;
+        counter500ms = 5;
         EVENT_TIMER_500MS;
     }
     // If called from queueDelta etc. it is an error to start a new move since it
@@ -90,6 +91,7 @@ void Commands::waitUntilEndOfAllMoves() {
     while(PrintLine::hasLines()) {
         GCode::readFromSerial();
         checkForPeriodicalActions(false);
+		GCode::keepAlive(Processing);
         UI_MEDIUM;
     }
 }
@@ -933,7 +935,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoridng to stored setting
+        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoriding to stored setting
 #if NUM_EXTRUDER > 1
             Extruder::current->retract(true, com->hasS() && com->S > 0);
 #else
@@ -955,11 +957,18 @@ void Commands::processGCode(GCode *com) {
             Printer::unitIsInches = 0;
             break;
         case 28: { //G28 Home all Axis one at a time
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+				bool oldLaser = LaserDriver::laserOn;
+			    LaserDriver::laserOn = false;
+#endif				
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
                     Printer::currentPositionSteps[E_AXIS] = 0;
                 if(homeAllAxis || !com->hasNoXYZ())
                     Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+			    LaserDriver::laserOn = oldLaser;
+#endif
                 Printer::updateCurrentPosition();
             }
             break;
@@ -1747,6 +1756,7 @@ void Commands::processMCode(GCode *com) {
                         codenum = previousMillisCmd = HAL::timeInMilliseconds();
                     }
                     Commands::checkForPeriodicalActions(true);
+					GCode::keepAlive(WaitHeater);
                 }
 #endif
                 EVENT_HEATING_FINISHED(-1);
@@ -1944,6 +1954,7 @@ void Commands::processMCode(GCode *com) {
                 }
                 do {
                     Commands::checkForPeriodicalActions(true);
+					GCode::keepAlive(WaitHeater);
                 } while(HAL::digitalRead(com->P) != comp);
             }
             break;

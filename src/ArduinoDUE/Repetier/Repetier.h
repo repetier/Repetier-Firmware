@@ -218,6 +218,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define EXT5_HEATER_PIN -1
 #endif
 
+#ifndef BOARD_FAN_SPEED
+#define BOARD_FAN_SPEED
+#endif
+
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif
@@ -530,6 +534,10 @@ inline void memcopy4(void *dest,void *source) {
 
 #ifndef Z_ACCELERATION_TOP
 #define Z_ACCELERATION_TOP 0
+#endif
+
+#ifndef KEEP_ALIVE_INTERVAL
+#define KEEP_ALIVE_INTERVAL 2000
 #endif
 
 #include "HAL.h"
@@ -887,7 +895,7 @@ extern long baudrate;
 
 extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
-extern uint8_t counter250ms;
+extern uint8_t counter500ms;
 extern void writeMonitor();
 #if FEATURE_FAN_CONTROL
 extern uint8_t fanKickstart;
