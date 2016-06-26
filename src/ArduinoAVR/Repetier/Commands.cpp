@@ -908,19 +908,7 @@ void Commands::processGCode(GCode *com) {
 #if ARC_SUPPORT
         case 2: // CW Arc
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            {
-                // disable laser for G0 moves
-                bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
-#endif // defined
-                processArc(com);
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                LaserDriver::laserOn = laserOn;
-            }
-#endif // defined
+            processArc(com);
             break;
 #endif
         case 4: // G4 dwell
