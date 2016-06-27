@@ -923,9 +923,9 @@ void Commands::processGCode(GCode *com) {
             {
                 // disable laser for G0 moves
                 bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
+                /*if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
                     LaserDriver::laserOn = false;
-                }
+                }*/
 #endif // defined
                 processArc(com);
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
