@@ -568,7 +568,164 @@ void initializeLCD()
 }
 // ----------- end direct LCD driver
 #endif
-#if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB
+
+#if UI_DISPLAY_TYPE == DISPLAY_SR
+// Native LCD driver for displays connected using shift register (2-wire or 3-wire)
+//
+// Options:
+//   #define UI_DISPLAY_TYPE        DISPLAY_SR
+//   #define UI_DISPLAY_DATA_PIN    29
+//   #define UI_DISPLAY_CLOCK_PIN   28
+//   #define UI_DISPLAY_ENABLE_PIN  -1 // or undefined for 2-wire, pin number for 3-wire
+//
+// Non-latching shift register (e.g. 74LS164) outputs:
+//   - Q0 - unused
+//   - Q1 - unused
+//   - Q2 - LCD RS
+//   - Q3 - LCD D4
+//   - Q4 - LCD D5
+//   - Q5 - LCD D6
+//   - Q6 - LCD D7
+//   - Q7 - LCD ENABLE (via AND gate for 2-wire version, unused for 3-wire)
+//
+// More info about this:
+//    https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
+// More schematics including latching (74HC595) and non-latching (74LS164) shift registers:
+//    https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/schematics
+
+// Shift a bit into shift register
+static void lcdShiftBit(uint8_t bit)
+{
+    WRITE(UI_DISPLAY_DATA_PIN, bit);
+    WRITE(UI_DISPLAY_CLOCK_PIN, 1);
+    HAL::delayMicroseconds(2);
+    WRITE(UI_DISPLAY_CLOCK_PIN, 0);
+    HAL::delayMicroseconds(2);
+}
+
+// Write a nibble into LCD via SR
+void lcdWriteNibble(uint8_t value, uint8_t rs = 0)
+{
+#if !(defined(UI_DISPLAY_ENABLE_PIN) && (UI_DISPLAY_ENABLE_PIN > -1))
+    // Clear shift register by shifting zero bits (for 2-wire only)
+    for (uint8_t i = 0; i < 8; ++i)
+        lcdShiftBit(0);
+#endif
+
+    // Shift ENABLE bit to AND gate (for 2-wire version). It will be
+    // set to high for LCD when both Q7 and DATA/EN output are high.
+    lcdShiftBit(1);          // Q7: AND gate
+
+    // Shift 4 data bits from value
+    lcdShiftBit(value & 8);  // Q6: LCD D7
+    lcdShiftBit(value & 4);  // Q5: LCD D6
+    lcdShiftBit(value & 2);  // Q4: LCD D5
+    lcdShiftBit(value & 1);  // Q3: LCD D4
+
+    // Shift RS bit
+    lcdShiftBit(rs);         // Q2: LCD RS
+
+    // Shift 2 unused bits (last must be 0 for 2-wire version)
+    lcdShiftBit(0);          // Q1
+    lcdShiftBit(0);          // Q0, shifts 1 to Q7 that allows EN output
+
+    // Strobe ENABLE bit to write data into the LCD using AND gate
+    // for 2-wire version or dedicated pin for 3-wire
+#if defined(UI_DISPLAY_ENABLE_PIN) && (UI_DISPLAY_ENABLE_PIN > -1)
+    WRITE(UI_DISPLAY_ENABLE_PIN, 1);
+#else
+    WRITE(UI_DISPLAY_DATA_PIN, 1);
+#endif
+    HAL::delayMicroseconds(2);
+#if defined(UI_DISPLAY_ENABLE_PIN) && (UI_DISPLAY_ENABLE_PIN > -1)
+    WRITE(UI_DISPLAY_ENABLE_PIN, 0);
+#else
+    WRITE(UI_DISPLAY_DATA_PIN, 0);
+#endif
+    HAL::delayMicroseconds(UI_DELAYPERCHAR);
+}
+
+// Write a byte into LCD via SR
+void lcdWriteByte(uint8_t c, uint8_t rs)
+{
+    lcdWriteNibble(c >> 4, rs);
+    lcdWriteNibble(c, rs);
+}
+
+// Initialize LCD via SR
+void initializeLCD(bool refresh = false)
+{
+    if (!refresh) {
+        // Init LCD pins
+        SET_OUTPUT(UI_DISPLAY_DATA_PIN);
+        SET_OUTPUT(UI_DISPLAY_CLOCK_PIN);
+        WRITE(UI_DISPLAY_DATA_PIN, 0);
+        WRITE(UI_DISPLAY_CLOCK_PIN, 0);
+#if defined(UI_DISPLAY_ENABLE_PIN) && (UI_DISPLAY_ENABLE_PIN > -1)
+        SET_OUTPUT(UI_DISPLAY_ENABLE_PIN);
+        WRITE(UI_DISPLAY_ENABLE_PIN, 0);
+#endif
+
+        // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
+        // according to datasheet, we need at least 40ms after power rises above 2.7V
+        // before sending commands. Arduino can turn on way before 4.5V.
+        // is this delay long enough for all cases??
+        HAL::delayMilliseconds(235);
+    }
+
+    // Put the LCD into 4 bit mode
+    // this is according to the hitachi HD44780 datasheet
+    // figure 24, pg 46
+
+    // We start in 8 bit mode, try to set 4 bit mode
+    // at this point we are in 8 bit mode but of course in this
+    // interface 4 pins are dangling unconnected and the values
+    // on them don't matter for these instructions.
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5000); // I have one LCD for which 4500 here was not long enough.
+    // Second try
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(5000);
+    // Third go!
+    lcdWriteNibble(0x03);
+    HAL::delayMicroseconds(160);
+    // Finally, set to 4-bit interface
+    lcdWriteNibble(0x02);
+    HAL::delayMicroseconds(160);
+
+    // finally, set # lines, font size, etc.
+    lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
+    if (!refresh) {
+        lcdCommand(LCD_CLEAR);
+        HAL::delayMilliseconds(3); // clear is slow operation
+    }
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);
+    uid.createChar(1, character_back);
+    uid.createChar(2, character_degree);
+    uid.createChar(3, character_selected);
+    uid.createChar(4, character_unselected);
+    uid.createChar(5, character_temperature);
+    uid.createChar(6, character_folder);
+    uid.createChar(7, character_ready);
+
+    uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
+}
+
+#ifdef TRY_AUTOREPAIR_LCD_ERRORS
+#define HAS_AUTOREPAIR
+// Fast repair function for displays loosing their settings.
+// Do not call this if your display has no problems.
+void repairLCD()
+{
+    // Almost the same as for init except GPIO init and LCD clear
+    initializeLCD(true);
+}
+#endif
+
+#endif // UI_DISPLAY_TYPE == DISPLAY_SR
+
+#if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB || UI_DISPLAY_TYPE == DISPLAY_SR
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
     changeAtCol = RMath::min(UI_COLS, changeAtCol);
@@ -964,7 +1121,7 @@ void UIDisplay::initialize()
     HAL::i2cStop();
 #endif
 }
-#if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT || UI_DISPLAY_TYPE == DISPLAY_I2C
+#if UI_DISPLAY_TYPE == DISPLAY_4BIT || UI_DISPLAY_TYPE == DISPLAY_8BIT || UI_DISPLAY_TYPE == DISPLAY_I2C || UI_DISPLAY_TYPE == DISPLAY_SR
 void UIDisplay::createChar(uint8_t location,const uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
