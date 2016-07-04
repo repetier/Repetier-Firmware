@@ -934,7 +934,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament accoriding to stored setting
+        case 10: // G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 #if NUM_EXTRUDER > 1
             Extruder::current->retract(true, com->hasS() && com->S > 0);
 #else
@@ -1806,6 +1806,11 @@ void Commands::processMCode(GCode *com) {
             break;
         case 114: // M114
             printCurrentPosition(PSTR("M114 "));
+			if(com->hasS() && com->S) {
+				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
+				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
+				Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
+			}
             break;
         case 117: // M117 message to lcd
             if(com->hasString()) {

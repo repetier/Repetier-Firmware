@@ -846,6 +846,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         uint8_t retracted = 0;
 #endif
         millis_t currentTime;
+		millis_t maxWaitUntil = 0;
         do
         {
             previousMillisCmd = currentTime = HAL::timeInMilliseconds();
@@ -864,16 +865,23 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
                 retracted = 1;
             }
 #endif
+			if(maxWaitUntil == 0) {
+				if(dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 5 : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 5) {
+					maxWaitUntil = currentTime + 120000L;
+				}
+			} else if((millis_t)(maxWaitUntil - currentTime) < 2000000000UL) {
+				break;
+			}
             if((waituntil == 0 &&
                     (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1
                      : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
-#if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS>=1
+#if defined(TEMP_HYSTERESIS) && TEMP_HYSTERESIS >= 1
                     || (waituntil != 0 && (abs(actExtruder->tempControl.currentTemperatureC - actExtruder->tempControl.targetTemperatureC)) > TEMP_HYSTERESIS)
 #endif
               )
             {
                 waituntil = currentTime + 1000UL*(millis_t)actExtruder->watchPeriod; // now wait for temp. to stabilize
-            }
+            }			
         }
         while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
 #if RETRACT_DURING_HEATUP

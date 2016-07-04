@@ -63,7 +63,7 @@ RepRap M Codes
 - M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp.
-- M114 - Display current position
+- M114 S1 - Display current position, S1 = also write position in steps
 
 Custom M Codes
 

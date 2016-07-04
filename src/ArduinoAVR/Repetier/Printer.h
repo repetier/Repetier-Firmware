@@ -352,6 +352,9 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
+#else
+	static int32_t xMinStepsAdj,yMinStepsAdj,zMinStepsAdj;	// adjusted to cover extruder/probe offsets
+	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
 #endif
 #if DRIVE_SYSTEM != DELTA
 	static int32_t zCorrectionStepsIncluded; 	

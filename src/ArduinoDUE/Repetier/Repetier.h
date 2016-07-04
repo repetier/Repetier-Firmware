@@ -212,6 +212,16 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define LAZY_DUAL_X_AXIS 0
 #endif
 
+#ifndef MOVE_X_WHEN_HOMED
+#define MOVE_X_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Y_WHEN_HOMED
+#define MOVE_Y_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Z_WHEN_HOMED
+#define MOVE_Z_WHEN_HOMED 0
+#endif
+
 #if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN

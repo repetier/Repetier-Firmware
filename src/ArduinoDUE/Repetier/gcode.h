@@ -75,14 +75,23 @@ public:
     {
         return ((params & 8)!=0);
     }
+	inline void unsetX() {
+		params &= ~8;
+	}
     inline bool hasY()
     {
         return ((params & 16)!=0);
     }
+	inline void unsetY() {
+		params &= ~16;
+	}
     inline bool hasZ()
     {
         return ((params & 32)!=0);
     }
+	inline void unsetZ() {
+		params &= ~32;
+	}
     inline bool hasNoXYZ()
     {
         return ((params & 56)==0);
