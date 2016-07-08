@@ -822,6 +822,28 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_VOLTAGE_LEVEL 1 // Set 1=5 o 0=3.3 V
 #endif
 
+#elif ((MOTHERBOARD == 410) || (MOTHERBOARD == 411))	// DUE3DOM / DUE3DOM MINI has own pins layout
+
+#undef BEEPER_PIN
+#define BEEPER_PIN             41
+#define UI_DISPLAY_RS_PIN      42
+#define UI_DISPLAY_ENABLE_PIN  43
+#define UI_DISPLAY_D4_PIN      44
+#define UI_DISPLAY_D5_PIN      45
+#define UI_DISPLAY_D6_PIN      46
+#define UI_DISPLAY_D7_PIN      47
+#define UI_ENCODER_A           52
+#define UI_ENCODER_B           50
+#define UI_ENCODER_CLICK       48
+#define UI_RESET_PIN           -1
+#undef SDCARDDETECT
+#define SDCARDDETECT           14
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED   0
+#ifndef UI_VOLTAGE_LEVEL
+#define UI_VOLTAGE_LEVEL 1 // Set 1=5 o 0=3.3 V
+#endif
+
 #elif MOTHERBOARD == CONTROLLER_FELIX_DUE
 
 #undef BEEPER_PIN

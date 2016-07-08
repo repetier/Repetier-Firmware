@@ -278,13 +278,13 @@ void Extruder::manageTemperatures()
             else if(act->heatManager == HTR_DEADTIME)     // dead-time control
             {
                 act->startHoldDecouple(time);
-                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciproke of time interval (300 ms)
+                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciprocal of time interval (300 ms)
                 act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
                 output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
             }
             else // bang bang and slow bang bang
 #endif // TEMP_PID
-                if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relais life
+                if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relays life
                 {
                     if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
                     {
@@ -421,6 +421,7 @@ void TemperatureController::resetAllErrorStates() {
 		tempController[i]->removeErrorStates();
 	}
 #endif	
+	Printer::unsetAnyTempsensorDefect();
 }
 
 #if EXTRUDER_JAM_CONTROL
@@ -2422,10 +2423,11 @@ bool reportTempsensorError()
     if(!Printer::isAnyTempsensorDefect()) return false;
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
-        if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
-#if HAVE_HEATED_BED		
-        else if(i == HEATED_BED_INDEX) Com::printF(Com::tExtruderSpace,i);
-#endif		
+#if HAVE_HEATED_BED
+        if(i == HEATED_BED_INDEX) Com::printF(Com::tHeatedBed);
+        else 
+#endif
+		if(i < NUM_EXTRUDER) Com::printF(Com::tExtruderSpace,i);
 		else Com::printF(PSTR("Other:"));
 		TemperatureController *act = tempController[i];
         int temp = act->currentTemperatureC;

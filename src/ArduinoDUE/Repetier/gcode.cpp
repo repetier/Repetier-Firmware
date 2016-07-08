@@ -1079,6 +1079,7 @@ void GCode::reportFatalError() {
 
 void GCode::resetFatalError() {
 	TemperatureController::resetAllErrorStates();
+	Printer::debugReset(8); // disable dry run
 	fatalErrorMsg = NULL;
 	UI_ERROR("");
 	EVENT_CONTINUE_FROM_FATAL_ERROR
