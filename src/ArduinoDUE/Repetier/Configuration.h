@@ -59,8 +59,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // DAM&DICE DUE                 = 406
 // Smart RAMPS for Due          = 408
 // Ultratronics Board           = 409
-// DUE2DOM                      = 410
-// DUE2DOM MINI                 = 411
+// DUE3DOM                      = 410
+// DUE3DOM MINI                 = 411
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 #define MOTHERBOARD 402
