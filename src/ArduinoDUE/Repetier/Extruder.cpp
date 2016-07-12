@@ -662,7 +662,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if !MIXING_EXTRUDER
 	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
-    if(Printer::isHomedAll() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed
+    if(Printer::isHomedAll() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed - move bed down a bit
 		Printer::offsetZ = -extruder[extruderId].zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
 	    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 	    Commands::waitUntilEndOfAllMoves();

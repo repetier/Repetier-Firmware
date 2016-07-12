@@ -1190,7 +1190,7 @@ void Commands::processGCode(GCode *com) {
                 if(com->hasZ()) zOff = Printer::convertToMM(com->Z) - Printer::currentPosition[Z_AXIS];
                 Printer::setOrigin(xOff, yOff, zOff);
                 if(com->hasE()) {
-                    Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
+                    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
                 }
             }
             break;
