@@ -556,8 +556,8 @@ inline void memcopy4(void *dest,void *source) {
 #define BENDING_CORRECTION_C 0
 #endif
 
-#ifndef Z_ACCELERATION_TOP
-#define Z_ACCELERATION_TOP 0
+#ifndef ACCELERATION_FACTOR_TOP
+#define ACCELERATION_FACTOR_TOP 100
 #endif
 
 #ifndef KEEP_ALIVE_INTERVAL
