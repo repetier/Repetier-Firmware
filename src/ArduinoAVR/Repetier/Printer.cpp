@@ -2018,7 +2018,7 @@ void Printer::handleInterruptEvent() {
             if(isJamcontrolDisabled()) break;
             fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
 			Extruder &ext = extruder[extruderIndex];
-            int16_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
+            int32_t steps = abs(extruder[extruderIndex].jamStepsOnSignal);
             EVENT_JAM_SIGNAL_CHANGED(extruderIndex,steps);
             if(steps > ext.jamSlowdownSteps && !ext.tempControl.isSlowedDown()) {
                 extruder[extruderIndex].tempControl.setSlowedDown(true);
