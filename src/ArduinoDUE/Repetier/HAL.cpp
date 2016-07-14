@@ -44,7 +44,7 @@ static int adcCounter = 0, adcSamplePos = 0;
 
 static   uint32_t  adcEnable = 0;
 
-char HAL::virtualEeprom[EEPROM_BYTES];
+char HAL::virtualEeprom[EEPROM_BYTES] = {0,0,0,0,0,0,0};
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
@@ -268,7 +268,7 @@ void HAL::importEEPROM() {
 		} else {
       Com::printFLN("EEPROM read from sd card.");
     }
-    Printer::updateDerivedParameter();
+    EEPROM::restoreEEPROMSettingsFromConfiguration();
 }
 
 #endif
