@@ -1246,22 +1246,23 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
 
-#if NONLINEAR_SYSTEM
-    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
-
-#if DELTA_HOME_ON_POWER
-    homeAxis(true,true,true);
-#endif
-    setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
-    Commands::printCurrentPosition(PSTR("Printer::setup "));
-#endif // DRIVE_SYSTEM
-    Extruder::selectExtruderById(0);
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif // FEATURE_WATCHDOG
 #if SDSUPPORT
     sd.mount();
 #endif
+#if NONLINEAR_SYSTEM
+	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+
+#if DELTA_HOME_ON_POWER
+	homeAxis(true,true,true);
+#endif
+	setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
+	Commands::printCurrentPosition(PSTR("Printer::setup "));
+#endif // DRIVE_SYSTEM
+	Extruder::selectExtruderById(0);
+
 #if FEATURE_SERVO                   // set servos to neutral positions at power_up
   #if defined(SERVO0_NEUTRAL_POS) && SERVO0_NEUTRAL_POS >= 500
     HAL::servoMicroseconds(0,SERVO0_NEUTRAL_POS, 1000);
