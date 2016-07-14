@@ -33,6 +33,7 @@ STEPPER_CURRENT_CONTROL
 #define EEPROM_NONE 0
 #define EEPROM_I2C  1
 #define EEPROM_SPI_ALLIGATOR 2
+#define EEPROM_SDCARD 3
 
 #if MOTHERBOARD == 401
 #ifndef __SAM3X8E__
@@ -723,7 +724,10 @@ STEPPER_CURRENT_CONTROL
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
 // Ultronics has no eeprom for storing changeable data
-#define EEPROM_AVAILABLE EEPROM_NONE
+// as a solution you can use sd card. But this requires always
+// the same sd card when powering up the printer
+//#define EEPROM_AVAILABLE EEPROM_NONE
+#define EEPROM_AVAILABLE EEPROM_SDCARD
 #endif
 
 

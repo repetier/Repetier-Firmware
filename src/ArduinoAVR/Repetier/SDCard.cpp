@@ -96,6 +96,10 @@ void SDCard::initsd()
 	HAL::pingWatchdog();
 
     fat.chdir();
+	
+#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+	HAL::importEEPROM();
+#endif	
     if(selectFile("init.g", true))
     {
         startPrint();

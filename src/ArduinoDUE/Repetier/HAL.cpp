@@ -221,6 +221,58 @@ void HAL::analogStart(void)
 
 #endif
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+
+#if !SDSUPPORT
+#error EEPROM using sd card requires SDCARSUPPORT
+#endif
+
+millis_t eprSyncTime = 0; // in sync
+SdFile eepromFile;
+void HAL::syncEEPROM() { // store to disk if changed
+  millis_t time = millis();
+
+  if (eprSyncTime && (time - eprSyncTime > 15000)) // Buffer writes only every 15 seconds to pool writes
+  {
+    eprSyncTime = 0;
+    bool failed = false;
+    if (!sd.sdactive) // not mounted
+	  {
+		  if (eepromFile.isOpen())
+			  eepromFile.close();
+        Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");
+        Com::println();
+		  return;
+	  }
+
+	  if (!eepromFile.seekSet(0))
+		  failed = true;
+
+	  if(!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+      failed = true; 
+    
+    if(failed) {
+        Com::printErrorF("Could not write eeprom to sd card");
+        Com::println();
+    }
+  }
+}
+
+void HAL::importEEPROM() {
+    if (eepromFile.isOpen())
+			eepromFile.close();
+		if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) ||
+			eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
+		{
+			Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
+		} else {
+      Com::printFLN("EEPROM read from sd card.");
+    }
+    Printer::updateDerivedParameter();
+}
+
+#endif
+
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
   int mcu = (RSTC->RSTC_SR & RSTC_SR_RSTTYP_Msk) >> RSTC_SR_RSTTYP_Pos;

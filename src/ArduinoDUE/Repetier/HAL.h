@@ -326,6 +326,10 @@ union eeval_t {
   long        l;
 } PACK;
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+extern millis_t eprSyncTime;
+#endif
+
 class HAL
 {
   public:
@@ -461,6 +465,11 @@ class HAL
       WRITE_VAR(pin, LOW);
     }
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+    static void syncEEPROM(); // store to disk if changed
+    static void importEEPROM();
+#endif
+
     static inline void eprSetByte(unsigned int pos, uint8_t value)
     {
       eeval_t v;
@@ -587,7 +596,9 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD
+      eprSyncTime = HAL::timeInMilliseconds() | 1UL; 
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue

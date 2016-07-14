@@ -775,7 +775,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 
 void EEPROM::initBaudrate()
 {
-    // Invariant - baudrate is intitalized with or without eeprom!
+    // Invariant - baudrate is initialized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)
