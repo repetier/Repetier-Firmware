@@ -301,23 +301,23 @@ void Printer::constrainDestinationCoords()
 {
     if(isNoDestinationCheck() || isHoming()) return;
 #if min_software_endstop_x
-    if (Printer::destinationSteps[X_AXIS] < xMinStepsAdj) Printer::destinationSteps[X_AXIS] = Printer::xMinStepsAdj;
+    if (destinationSteps[X_AXIS] < xMinStepsAdj) destinationSteps[X_AXIS] = xMinStepsAdj;
 #endif
 #if min_software_endstop_y
-    if (Printer::destinationSteps[Y_AXIS] < yMinStepsAdj) Printer::destinationSteps[Y_AXIS] = Printer::yMinStepsAdj;
+    if (destinationSteps[Y_AXIS] < yMinStepsAdj) destinationSteps[Y_AXIS] = yMinStepsAdj;
 #endif
 #if min_software_endstop_z
-    if (isAutolevelActive() == false && Printer::destinationSteps[Z_AXIS] < zMinStepsAdj && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMinStepsAdj;
+    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] < zMinStepsAdj && !isZProbingActive()) destinationSteps[Z_AXIS] = zMinStepsAdj;
 #endif
 
 #if max_software_endstop_x
-    if (Printer::destinationSteps[X_AXIS] > Printer::xMaxStepsAdj) Printer::destinationSteps[X_AXIS] = Printer::xMaxStepsAdj;
+    if (destinationSteps[X_AXIS] > xMaxStepsAdj) destinationSteps[X_AXIS] = xMaxStepsAdj;
 #endif
 #if max_software_endstop_y
-    if (Printer::destinationSteps[Y_AXIS] > Printer::yMaxStepsAdj) Printer::destinationSteps[Y_AXIS] = Printer::yMaxStepsAdj;
+    if (destinationSteps[Y_AXIS] > yMaxStepsAdj) destinationSteps[Y_AXIS] = yMaxStepsAdj;
 #endif
 #if max_software_endstop_z
-    if (isAutolevelActive() == false && Printer::destinationSteps[Z_AXIS] > Printer::zMaxStepsAdj && !isZProbingActive()) Printer::destinationSteps[Z_AXIS] = Printer::zMaxStepsAdj;
+    if (isAutolevelActive() == false && destinationSteps[Z_AXIS] > zMaxStepsAdj && !isZProbingActive()) destinationSteps[Z_AXIS] = zMaxStepsAdj;
 #endif
 	EVENT_CONTRAIN_DESTINATION_COORDINATES
 }
@@ -526,18 +526,18 @@ void Printer::updateDerivedParameter()
     zMinStepsAdj = zMinSteps = static_cast<int32_t>(axisStepsPerMM[Z_AXIS] * zMin);
 	for(fast8_t i = 0; i < NUM_EXTRUDER;i++) {
 		Extruder &e = extruder[i];
-		xMaxStepsAdj = RMath::max(xMaxStepsAdj,xMaxSteps + e.xOffset);
-		xMinStepsAdj = RMath::max(xMinStepsAdj,xMinSteps + e.xOffset);
-		yMaxStepsAdj = RMath::max(yMaxStepsAdj,yMaxSteps + e.yOffset);
-		yMinStepsAdj = RMath::max(yMinStepsAdj,yMinSteps + e.yOffset);
-		zMaxStepsAdj = RMath::max(zMaxStepsAdj,zMaxSteps + e.zOffset);
-		zMinStepsAdj = RMath::max(zMinStepsAdj,zMinSteps + e.zOffset);
+		xMaxStepsAdj = RMath::max(xMaxStepsAdj,xMaxSteps - e.xOffset);
+		xMinStepsAdj = RMath::min(xMinStepsAdj,xMinSteps - e.xOffset);
+		yMaxStepsAdj = RMath::max(yMaxStepsAdj,yMaxSteps - e.yOffset);
+		yMinStepsAdj = RMath::min(yMinStepsAdj,yMinSteps - e.yOffset);
+		zMaxStepsAdj = RMath::max(zMaxStepsAdj,zMaxSteps - e.zOffset);
+		zMinStepsAdj = RMath::min(zMinStepsAdj,zMinSteps - e.zOffset);
 	}
 #if FEATURE_Z_PROBE
-		xMaxStepsAdj = RMath::max(xMaxStepsAdj,xMaxSteps + static_cast<int32_t>(EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]));
-		xMinStepsAdj = RMath::max(xMinStepsAdj,xMinSteps + static_cast<int32_t>(EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]));
-		yMaxStepsAdj = RMath::max(yMaxStepsAdj,yMaxSteps + static_cast<int32_t>(EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]));
-		yMinStepsAdj = RMath::max(yMinStepsAdj,yMinSteps + static_cast<int32_t>(EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]));
+		xMaxStepsAdj = RMath::max(xMaxStepsAdj,xMaxSteps - static_cast<int32_t>(EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]));
+		xMinStepsAdj = RMath::min(xMinStepsAdj,xMinSteps - static_cast<int32_t>(EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]));
+		yMaxStepsAdj = RMath::max(yMaxStepsAdj,yMaxSteps - static_cast<int32_t>(EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]));
+		yMinStepsAdj = RMath::min(yMinStepsAdj,yMinSteps - static_cast<int32_t>(EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]));
 #endif	
     // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
