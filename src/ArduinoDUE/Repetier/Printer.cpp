@@ -373,12 +373,12 @@ bool Printer::isPositionAllowed(float x,float y,float z)
 	}
 #else	// DRIVE_SYSTEM
 	if(!isHoming()) {
-		allowed = allowed && x >= xMin;
-		allowed = allowed && x <= xMin + xLength;
-		allowed = allowed && y >= yMin;
-		allowed = allowed && y <= yMin + yLength;
-		allowed = allowed && z >= zMin;
-		allowed = allowed && z <= zMin + zLength + ENDSTOP_Z_BACK_ON_HOME;	
+		allowed = allowed && x >= xMin - 0.01;
+		allowed = allowed && x <= xMin + xLength + 0.01;
+		allowed = allowed && y >= yMin - 0.01;
+		allowed = allowed && y <= yMin + yLength + 0.01;
+		allowed = allowed && z >= zMin - 0.01;
+		allowed = allowed && z <= zMin + zLength + ENDSTOP_Z_BACK_ON_HOME + 0.01;	
 	}
 #endif 
 #if DUAL_X_AXIS
@@ -393,7 +393,6 @@ bool Printer::isPositionAllowed(float x,float y,float z)
 #endif
     if(!allowed)
     {
-	Com::printFLN(PSTR("x3"));
         Printer::updateCurrentPosition(true);
         Commands::printCurrentPosition(PSTR("isPositionAllowed "));
     }

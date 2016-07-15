@@ -55,6 +55,10 @@ Implemented Codes
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
 - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+- G201 P<motorId> X<pos>     - Go to position X with motor X
+- G202 P<motorId> X<setpos>  - Mark current position as X
+- G203 P<motorId>            - Report current motor position
+- G204 P<motorId> S<0/1>     - Enable/disable motor
 
 RepRap M Codes
 
