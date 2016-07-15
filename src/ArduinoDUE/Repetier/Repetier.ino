@@ -67,6 +67,9 @@ RepRap M Codes
 
 Custom M Codes
 
+- M3 - Spindle on, Clockwise or Laser on during G1 moves.
+- M4 - Spindle on, Counterclockwise.
+- M5 - Spindle off, Laser off.
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card
@@ -117,12 +120,12 @@ Custom M Codes
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
 - M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
-- M281 Test if watchdog is running and working.
+- M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-- M320 - Activate autolevel
-- M321 - Deactivate autolevel
+- M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
+- M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
 - M322 - Reset autolevel matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.

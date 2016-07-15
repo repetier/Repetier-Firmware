@@ -43,14 +43,14 @@
 #error The PID system has changed. Please use the new float number options!
 #endif
 // ####################################################################################
-// #          No configuration below this line - just some errorchecking              #
+// #          No configuration below this line - just some error checking             #
 // ####################################################################################
 #ifdef SUPPORT_MAX6675
 #if !defined SCK_PIN || !defined MOSI_PIN || !defined MISO_PIN
 #error For MAX6675 support, you need to define SCK_PIN, MISO_PIN and MOSI_PIN in pins.h
 #endif
 #endif
-#if X_STEP_PIN<0 || Y_STEP_PIN<0 || Z_STEP_PIN<0
+#if X_STEP_PIN < 0 || Y_STEP_PIN < 0 || Z_STEP_PIN < 0
 #error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN
 #endif
 #if EXT0_STEP_PIN < 0 && NUM_EXTRUDER > 0
@@ -821,7 +821,7 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
 	float lengthFactor = 1.0;
 #ifdef REDUCE_ON_SMALL_SEGMENTS	
 	if(previous->distance < MAX_JERK_DISTANCE)
-		lengthFactor = static_cast<float>(MAX_JERK_DISTANCE*MAX_JERK_DISTANCE) / (previous->distance * previous->distance);
+		lengthFactor = static_cast<float>(MAX_JERK_DISTANCE * MAX_JERK_DISTANCE) / (previous->distance * previous->distance);
 #endif		
     float maxJoinSpeed = RMath::min(current->fullSpeed,previous->fullSpeed);
 #if (DRIVE_SYSTEM == DELTA) // No point computing Z Jerk separately for delta moves
@@ -2290,7 +2290,9 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         }
 #endif
 
-        if(cur->isEMove()) Extruder::enable();
+        if(cur->isEMove()) {
+			Extruder::enable();
+		}
         cur->fixStartAndEndSpeed();
         // Set up delta segments
         if (cur->numNonlinearSegments)
@@ -2449,6 +2451,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 }
             stepsPerSegRemaining--;
+		}
 #if CPU_ARCH != ARCH_AVR
 			if(loop < maxLoops - 1)
 			{
@@ -2464,7 +2467,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
             if (!stepsPerSegRemaining) // start new nonlinear segment
             {
-                if (cur->numNonlinearSegments)
+                if (cur->numNonlinearSegments && curd != NULL)
                 {
                     if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
                             && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
@@ -2497,7 +2500,6 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
                 else
                     curd = 0;// Release the last segment
                 //deltaSegmentCount--;
-            }
         }
     } // for loop
 

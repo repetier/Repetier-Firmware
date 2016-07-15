@@ -1856,7 +1856,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
   #define SPI_CHAN        0
 
   #undef SDSUPPORT
-  #define SDSUPPORT  0 // sd card does not work reliable due to spi charing
+  #define SDSUPPORT  0 // sd card does not work reliable due to spi sharing
 */
 
 #undef BEEPER_PIN
@@ -1882,7 +1882,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define RED_STATUS_LED 6
 // PWM1 Pin
 #define BLUE_STATUS_LED 5
-
 
 #else
 #error No predefined Viki 2 mapping for your board available

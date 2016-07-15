@@ -44,6 +44,8 @@ volatile uint8_t GCode::bufferLength = 0; ///< Number of commands stored in gcod
 millis_t GCode::timeOfLastDataPacket = 0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 uint8_t  GCode::formatErrors = 0;
 PGM_P GCode::fatalErrorMsg = NULL; ///< message unset = no fatal error 
+millis_t GCode::lastBusySignal = 0; ///< When was the last busy signal
+uint32_t GCode::keepAliveInterval = KEEP_ALIVE_INTERVAL;
 
 /** \page Repetier-protocol
 
@@ -150,6 +152,23 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
     return s;
 }
 
+void GCode::keepAlive(enum FirmwareState state) {
+	millis_t now = HAL::timeInMilliseconds();
+	
+	if(state != NotBusy && keepAliveInterval != 0) {
+		if(now - lastBusySignal < keepAliveInterval)
+			return;
+		if(state == Paused) {
+			Com::printFLN(PSTR("busy:paused for user interaction"));	
+		} else if(state == WaitHeater) {
+			Com::printFLN(PSTR("busy:heating"));	
+		} else { // processing and uncaught cases
+			Com::printFLN(PSTR("busy:processing"));
+		}
+	}
+	lastBusySignal = now;
+}
+
 void GCode::requestResend()
 {
     HAL::serialFlush();
@@ -222,14 +241,16 @@ void GCode::checkAndPushCommand()
             return;
         }
         lastLineNumber = actLineNumber;
-    } else if(lastLineNumber) { // once line number always line number!
+    } /*
+	This test is not compatible with all hosts. Replaced by forbidding backward switch of protocols.
+	else if(lastLineNumber && !(hasM() && M == 117)) { // once line number always line number!
 		if(Printer::debugErrors())
         {
 			Com::printErrorFLN(PSTR("Missing linenumber"));
 		}
 		requestResend();
 		return;
-	}
+	}*/
 	if(GCode::hasFatalError() && !(hasM() && M==999)) {
 		GCode::reportFatalError();
 	} else {
@@ -245,6 +266,7 @@ void GCode::checkAndPushCommand()
     Com::printFLN(Com::tOk);
 #endif
     wasLastCommandReceivedAsBinary = sendAsBinary;
+	keepAlive(NotBusy);
     waitingForResend = -1; // everything is ok.
 }
 
@@ -347,8 +369,10 @@ It must be called frequently to empty the incoming buffer.
 */
 void GCode::readFromSerial()
 {
-    if(bufferLength >= GCODE_BUFFER_SIZE) return; // all buffers full
-    if(waitUntilAllCommandsAreParsed && bufferLength) return;
+    if(bufferLength >= GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength)) {
+		keepAlive(Processing);
+		return; // all buffers full
+	}
     waitUntilAllCommandsAreParsed = false;
     millis_t time = HAL::timeInMilliseconds();
     if(!HAL::serialByteAvailable())
@@ -715,6 +739,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     params = 0;
     params2 = 0;
     internalCommand = !fromSerial;
+	bool hasChecksum = false;
     char c;
     while ( (c = *(pos++)) )
     {
@@ -931,13 +956,17 @@ bool GCode::parseAscii(char *line,bool fromSerial)
                 }
                 return false; // mismatch
             }
+			hasChecksum = true;
             break;
         }
         default:
             break;
         }// end switch
     }// end while
-
+	if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial) {
+		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
+		return false;
+	}
     if(hasFormatError() || (params & 518) == 0)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;

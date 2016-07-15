@@ -1,5 +1,5 @@
 There are some printers sold under different names like 'Zonestar P802M',
-'Prusa i3 P802M DIY kit', etc, which have LCD 20x4 with 5 keys controller
+'Prusa i3 P802M DIY kit', 'Anet A8-B', etc, which have LCD 20x4 with 5 keys controller
 connected to Melzi V2.0 board via 10 wires cable. Keys are connected to a
 single analog input using resistive divider.
 
@@ -26,6 +26,16 @@ TO BUILD THE FIRMWARE:
 - Upload sample Configuration.h to the web configurator and make any changes
   if desired. Download new Configuration.h if changed, or firmware zip bundle.
 - Build and flash the firmware.
+
+IMPORTANT NOTES:
+- It seems that some Zonestar printers have different steppers and/or
+  Z mechanics. Some of them require 400 Z-steps/mm, some 1600. The latter
+  value is used by default, but if you have issues with Z-steps - change
+  them to 400.
+- At least some Zonestar printers have issues with Watchdog enabled.
+  Particularly, if no SD card inserted, such printers with watchdog enabled
+  cannot boot and constantly restart. So by default the watchdog option is
+  now disabled. Enable it if desired.
 
 Do not forget about EEPROM modes, so you use this firmware settings and not
 previously stored. M502 (restore firmware defaults), M500 (save to EEPROM)

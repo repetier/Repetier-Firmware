@@ -115,6 +115,14 @@ union wizardVar
 #define towerBMinSteps Printer::yMinSteps
 #define towerCMinSteps Printer::zMinSteps
 
+class Plane {
+	public:
+	// f(x, y) = ax + by + c
+	float a,b,c;
+	float z(float x,float y) {
+		return a * x + y * b + c;
+	}
+};
 #if DISTORTION_CORRECTION
 class Distortion
 {
@@ -502,7 +510,7 @@ public:
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
-#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+#if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
         WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
@@ -537,7 +545,7 @@ public:
 #if (X_ENABLE_PIN > -1)
         WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
-#if FEATURE_TWO_XSTEPPER && (X2_ENABLE_PIN > -1)
+#if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
         WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
@@ -571,14 +579,14 @@ public:
         if(positive)
         {
             WRITE(X_DIR_PIN,!INVERT_X_DIR);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
             WRITE(X2_DIR_PIN,!INVERT_X_DIR);
 #endif
         }
         else
         {
             WRITE(X_DIR_PIN,INVERT_X_DIR);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
             WRITE(X2_DIR_PIN,INVERT_X_DIR);
 #endif
         }
@@ -831,7 +839,7 @@ public:
     {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN > -1
-        pwm_pos[PWM_BOARD_FAN] = 255;
+        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()
@@ -841,6 +849,7 @@ public:
     static INLINE void setAnyTempsensorDefect()
     {
         flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+		debugSet(8);
     }
     static INLINE void unsetAnyTempsensorDefect()
     {
@@ -949,9 +958,24 @@ public:
     }
     static INLINE void startXStep()
     {
+#if DUAL_X_AXIS
+#if FEATURE_DITTO_PRINTING
+		if(Extruder::dittoMode) {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+			return;
+		}
+#endif
+		if(Extruder::current->id) {
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
+		} else {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
+		}
+#else		
         WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
 #endif
     }
     static INLINE void startYStep()
@@ -974,7 +998,7 @@ public:
     static INLINE void endXYZSteps()
     {
         WRITE(X_STEP_PIN,!START_STEP_WITH_HIGH);
-#if FEATURE_TWO_XSTEPPER
+#if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
         WRITE(X2_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
         WRITE(Y_STEP_PIN,!START_STEP_WITH_HIGH);
@@ -1106,11 +1130,12 @@ public:
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
-#if FEATURE_AUTOLEVEL
     static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
     static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
+#if FEATURE_AUTOLEVEL
     static void resetTransformationMatrix(bool silent);
-    static void buildTransformationMatrix(float h1,float h2,float h3);
+    //static void buildTransformationMatrix(float h1,float h2,float h3);
+    static void buildTransformationMatrix(Plane &plane);
 #endif
 #if DISTORTION_CORRECTION
     static bool measureDistortion(void);
@@ -1138,7 +1163,6 @@ public:
 #if JSON_OUTPUT
     static void showJSONStatus(int type);
 #endif
-private:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();

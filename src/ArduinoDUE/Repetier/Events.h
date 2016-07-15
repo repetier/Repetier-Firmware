@@ -79,6 +79,9 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UNHANDLED_G_CODE(c) false
 #define EVENT_UNHANDLED_M_CODE(c) false
 
+// Called when bed temperature is set
+#define EVENT_SET_BED_TEMP(temp,boop)
+
 // This gets called every time the user has saved a value to eeprom
 // or any other reason why dependent values may need recomputation.
 #define EVENT_UPDATE_DERIVED {}
