@@ -130,8 +130,10 @@ void Extruder::manageTemperatures()
 
 
         // Check for obvious sensor errors
-        if(act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE)   // no temp sensor or short in sensor, disable heater
-        {
+        if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) &&
+            act->targetTemperatureC > MIN_DEFECT_TEMPERATURE /*is heating*/ &&
+            act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/)   // no temp sensor or short in sensor, disable heater
+        { 
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
                 extruderTempErrors++;
@@ -754,6 +756,11 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     TemperatureController *tc = tempController[extr];
     if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
+    if (temperatureInCelsius == 0)
+        tc->resetPreheatTime();
+    else if (tc->targetTemperatureC == 0)
+        tc->startPreheatTime();
+
     tc->setTargetTemperature(temperatureInCelsius);
     tc->updateTempControlVars();
     if(beep && temperatureInCelsius > MAX_ROOM_TEMPERATURE)
@@ -1903,6 +1910,15 @@ const short temptable_12[NUMTEMPS_12][2] PROGMEM =
     {351*4, 140*8},{386*4, 134*8},{421*4, 128*8},{456*4, 122*8},{491*4, 117*8},{526*4, 112*8},{561*4, 107*8},{596*4, 102*8},{631*4, 97*8},{666*4, 91*8},
     {701*4, 86*8},{736*4, 81*8},{771*4, 76*8},{806*4, 70*8},{841*4, 63*8},{876*4, 56*8},{911*4, 48*8},{946*4, 38*8},{981*4, 23*8},{1005*4, 5*8},{1016*4, 0*8}
 };
+
+#define NUMTEMPS_14 27 // DYZE DESIGN 500°C Thermistor
+const short temptable_14[NUMTEMPS_14][2] PROGMEM =
+{
+    {18*4, 850*8},{18*4, 500*8},{22*4, 480*8},{27*4, 460*8},{33*4, 440*8},{41*4, 420*8},{52*4, 400*8},{68*4, 380*8},{86*4, 360*8},{112*4, 340*8},
+    {147*4, 320*8},{194*4, 300*8},{254*4, 280*8},{330*4, 260*8},{428*4, 240*8},{533*4, 220*8},{646*4, 200*8},{754*4, 180*8},{844*4, 160*8},
+    {912*4, 140*8},{959*4, 120*8},{989*4, 100*8},{1007*4, 80*8},{1016*4, 60*8},{1021*4, 30*8},{4091, 25*8},{4092, 20*8}
+};
+
 #if CPU_ARCH == ARCH_AVR
 #define NUMTEMPS_13 19
 const short temptable_13[NUMTEMPS_13][2] PROGMEM =
@@ -1986,7 +2002,7 @@ void TemperatureController::updateCurrentTemperature()
     case 10:
     case 11:
     case 12:
-	case 14:
+    case 14:
     case 97:
     case 98:
     case 99:
@@ -2034,7 +2050,7 @@ void TemperatureController::updateCurrentTemperature()
     case 10:
     case 11:
     case 12:
-	case 14:
+    case 14:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
@@ -2185,6 +2201,137 @@ void TemperatureController::setTargetTemperature(float target)
 {
     targetTemperatureC = target;
     stopDecouple();
+    int temp = TEMP_FLOAT_TO_INT(target);
+    uint8_t type = sensorType;
+    switch(sensorType)
+    {
+    case 0:
+        targetTemperature = 0;
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 14:
+    {
+        type--;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
+        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
+        short oldraw = pgm_read_word(&temptable[0]);
+        short oldtemp = pgm_read_word(&temptable[1]);
+        short newraw = 0,newtemp;
+        while(i<num)
+        {
+            newraw = pgm_read_word(&temptable[i++]);
+            newtemp = pgm_read_word(&temptable[i++]);
+            if (newtemp < temp)
+            {
+                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS))- oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp - newtemp);
+                return;
+            }
+            oldtemp = newtemp;
+            oldraw = newraw;
+        }
+        // Overflow: Set to last value in the table
+        targetTemperature = (1023<<(2-ANALOG_REDUCE_BITS))-newraw;
+        break;
+    }
+    case 13: // PT100 E3D
+    case 50: // user defined PTC thermistor
+    case 51:
+    case 52:
+    {
+        if(type > 49)
+            type -= 46;
+        else
+            type--;
+        uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
+        uint8_t i = 2;
+        const short *temptable = (const short *)pgm_read_word(&temptables[type]); //pgm_read_word(&temptables[type]);
+        short oldraw = pgm_read_word(&temptable[0]);
+        short oldtemp = pgm_read_word(&temptable[1]);
+        short newraw = 0,newtemp;
+        while(i < num)
+        {
+            newraw = pgm_read_word(&temptable[i++]);
+            newtemp = pgm_read_word(&temptable[i++]);
+            if (newtemp > temp)
+            {
+                targetTemperature = oldraw + (int32_t)(oldtemp - temp) * (int32_t)(oldraw - newraw) / (oldtemp-newtemp);
+                return;
+            }
+            oldtemp = newtemp;
+            oldraw = newraw;
+        }
+        // Overflow: Set to last value in the table
+        targetTemperature = newraw;
+        break;
+    }
+    case 60: // HEATER_USES_AD8495 (Delivers 5mV/degC)
+        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 1000);
+        break;
+    case 100: // HEATER_USES_AD595
+        targetTemperature = (int)((int32_t)temp * (1024 << (2 - ANALOG_REDUCE_BITS))/ 500);
+        break;
+#ifdef SUPPORT_MAX6675
+    case 101:  // defined HEATER_USES_MAX6675
+        targetTemperature = temp * 4;
+        break;
+#endif
+#ifdef SUPPORT_MAX31855
+    case 102:  // defined HEATER_USES_MAX31855
+        targetTemperature = temp * 4;
+        break;
+#endif
+#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
+    case 97:
+    case 98:
+    case 99:
+    {
+        uint8_t i = 2;
+        const short *temptable;
+#ifdef USE_GENERIC_THERMISTORTABLE_1
+        if(type == 97)
+            temptable = (const short *)temptable_generic1;
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_2
+        if(type == 98)
+            temptable = (const short *)temptable_generic2;
+#endif
+#ifdef USE_GENERIC_THERMISTORTABLE_3
+        if(type == 99)
+            temptable = (const short *)temptable_generic3;
+#endif
+        short oldraw = temptable[0];
+        short oldtemp = temptable[1];
+        short newraw,newtemp;
+        while(i<GENERIC_THERM_NUM_ENTRIES*2)
+        {
+            newraw = temptable[i++];
+            newtemp = temptable[i++];
+            if (newtemp < temp)
+            {
+                targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - oldraw + (int32_t)(oldtemp-temp) * (int32_t)(oldraw-newraw) / (oldtemp-newtemp);
+                return;
+            }
+            oldtemp = newtemp;
+            oldraw = newraw;
+        }
+        // Overflow: Set to last value in the table
+        targetTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - newraw;
+        break;
+    }
+#endif
+    }
 }
 
 uint8_t autotuneIndex = 255;

@@ -28,6 +28,7 @@
 #define DISPLAY_ARDUINO_LIB  4
 #define DISPLAY_U8G  5
 #define DISPLAY_GAMEDUINO2 6
+#define DISPLAY_SR 7
 
 /**
   What display type do you use?
@@ -39,6 +40,8 @@
     IMPORTANT: You need to uncomment the LiquidCrystal include in Repetier.pde for it to work.
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
   5 = U8G supported display
+  6 = Gameduino2 display
+  7 = LCD Display via shift register (2 or 3 wire connection: DATA/EN, CLOCK, ENABLE/-1)
 */
 
 // ----------------------------------------------------------------------------
@@ -1962,10 +1965,15 @@ void uiCheckSlowKeys(uint16_t &action) {}
 //#define ADC_KEYPAD_PIN         1    // A1 (D30, analog numbering)
 
 // Display
+// Define UI_DISPLAY_TYPE = DISPLAY_SR with pins to override default settings
+// that work for original Zonestar hardware.
+// For instance:
+//   #define UI_DISPLAY_TYPE        DISPLAY_SR
+//   #define UI_DISPLAY_DATA_PIN    29
+//   #define UI_DISPLAY_CLOCK_PIN   28
+//   #define UI_DISPLAY_ENABLE_PIN  -1 // for 2-wire or pin number for 3-wire
+#ifndef UI_DISPLAY_TYPE
 #define UI_DISPLAY_TYPE          DISPLAY_4BIT
-#define UI_DISPLAY_CHARSET       1
-#define UI_COLS                  20
-#define UI_ROWS                  4
 
 #define UI_DISPLAY_ENABLE_PIN    29    // A2
 #define UI_DISPLAY_RS_PIN        28    // A3
@@ -1974,6 +1982,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_DISPLAY_D5_PIN        11
 #define UI_DISPLAY_D6_PIN        16
 #define UI_DISPLAY_D7_PIN        17
+#endif
+
+#define UI_DISPLAY_CHARSET       1
+#define UI_COLS                  20
+#define UI_ROWS                  4
 
 // UI
 #define UI_HAS_KEYS              1
