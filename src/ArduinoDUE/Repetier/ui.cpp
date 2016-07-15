@@ -568,7 +568,6 @@ void initializeLCD()
 }
 // ----------- end direct LCD driver
 #endif
-
 #if UI_DISPLAY_TYPE < DISPLAY_ARDUINO_LIB
 void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 {
