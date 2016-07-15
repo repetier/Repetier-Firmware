@@ -900,6 +900,7 @@ void Printer::setup()
 #else
 #if PS_ON_PIN > -1
     SET_OUTPUT(PS_ON_PIN); //GND
+	WRITE(PS_ON_PIN,(POWER_INVERTING ? LOW : HIGH));
     Printer::setPowerOn(false);
 #else
     Printer::setPowerOn(true);
