@@ -91,6 +91,7 @@ FSTRINGVALUE(Com::tSpaceRaw," RAW")
 FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpaceSlash," /")
+FSTRINGVALUE(Com::tFatal,"fatal:")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir,"{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles,"\",\"files\":[")
@@ -153,7 +154,6 @@ FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
 FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
 FSTRINGVALUE(Com::tMeasurementAbortedOrigin,"Origin measurement cannot be set.  Use only Z-Cartesian (straight up and down) movements and try again.")
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
 FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
 FSTRINGVALUE(Com::tTower1,"Tower 1:")
 FSTRINGVALUE(Com::tTower2,"Tower 2:")
@@ -164,11 +164,21 @@ FSTRINGVALUE(Com::tDeltaAlphaC,"Alpha C(90):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionA,"Delta Radius A(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionB,"Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC,"Delta Radius C(0):")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
 #endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==TUGA
+#if NONLINEAR_SYSTEM
+#if DRIVE_SYSTEM == TUGA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
+#elif DRIVE_SYSTEM == DELTA
+FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
+FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
+#else
+FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
+FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in segment with > 1 segment. This should never happen and may cause a problem!")
+#endif
+#endif
+
+#if DRIVE_SYSTEM==TUGA
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Long arm length [mm]")
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
@@ -187,7 +197,7 @@ FSTRINGVALUE(Com::tAPIDClassic," Classic PID")
 FSTRINGVALUE(Com::tAPIDKp," Kp: ")
 FSTRINGVALUE(Com::tAPIDKi," Ki: ")
 FSTRINGVALUE(Com::tAPIDKd," Kd: ")
-FSTRINGVALUE(Com::tAPIDFailedHigh,"PID Autotune failed! Temperature to high")
+FSTRINGVALUE(Com::tAPIDFailedHigh,"PID Autotune failed! Temperature too high")
 FSTRINGVALUE(Com::tAPIDFailedTimeout,"PID Autotune failed! timeout")
 FSTRINGVALUE(Com::tAPIDFinished,"PID Autotune finished ! Place the Kp, Ki and Kd constants in the Configuration.h or EEPROM")
 FSTRINGVALUE(Com::tMTEMPColon,"MTEMP:")
@@ -308,6 +318,10 @@ FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop,"Acceleration factor at top [%,100=like bottom]")
+#if NONLINEAR_SYSTEM
+FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
+FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
+#endif
 #if DRIVE_SYSTEM==DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
@@ -317,8 +331,6 @@ FSTRINGVALUE(Com::tEPRZHomingFeedrate,"Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Diagonal rod length [mm]")
 FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal rod radius at 0,0 [mm]")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
 
 FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
 FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")

@@ -144,11 +144,11 @@ char displayCache[UI_ROWS][MAX_COLS+1];
 // .***. 14
 // *.*.* 21
 // ..*.. 4
+// ..*.. 4
+// ..*.. 4
 // ***.. 28
 // ..... 0
-// ..... 0
-// ..... 0
-const uint8_t character_back[8] PROGMEM = {4,14,21,4,28,0,0,0};
+const uint8_t character_back[8] PROGMEM = {4, 14, 21, 4, 4, 4, 28, 0};
 // Degrees sign - code 2
 // ..*.. 4
 // .*.*. 10
@@ -1258,17 +1258,24 @@ void UIDisplay::parse(const char *txt,bool ram)
 	            break;
             }
 			break;
-        case 'd':
-            if(c2 == 'o') addStringOnOff(Printer::debugEcho());
-            else if(c2 == 'i') addStringOnOff(Printer::debugInfo());
-            else if(c2 == 'e') addStringOnOff(Printer::debugErrors());
-            else if(c2 == 'd') addStringOnOff(Printer::debugDryrun());
-            break;
+        case 'd':  // debug boolean
+            if (c2 == 'o') addStringOnOff(Printer::debugEcho());
+            if (c2 == 'i') addStringOnOff(Printer::debugInfo());
+            if (c2 == 'e') addStringOnOff(Printer::debugErrors());
+            if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
+            if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
+            if (c2 == 'x') addStringP(Endstops::xMin() ? ui_selected : ui_unselected);
+            if (c2 == 'X') addStringP(Endstops::xMax() ? ui_selected : ui_unselected);
+            if (c2 == 'y') addStringP(Endstops::yMin() ? ui_selected : ui_unselected);
+            if (c2 == 'Y') addStringP(Endstops::yMax() ? ui_selected : ui_unselected);
+            if (c2 == 'z') addStringP(Endstops::zMin() ? ui_selected : ui_unselected);
+            if (c2 == 'Z') addStringP(Endstops::zMax() ? ui_selected : ui_unselected);
+        break;
         case 'D':
 #if FEATURE_DITTO_PRINTING
             if(c2>='0' && c2<='9')
             {
-                addStringP(Extruder::dittoMode==c2-'0'?ui_selected:ui_unselected);
+                addStringP(Extruder::dittoMode==c2-'0' ? ui_selected : ui_unselected);
             }
 #endif
             break;
@@ -1646,7 +1653,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
         case 'y':
 #if DRIVE_SYSTEM == DELTA
-            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentDeltaPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
+            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentNonlinearPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
             addFloat(fvalue,3,2);
 #endif
             break;
@@ -1824,6 +1831,7 @@ void sdrefresh(uint16_t &r,char cache[UI_ROWS][MAX_COLS+1])
 // Refresh current menu page
 void UIDisplay::refreshPage()
 {
+   Endstops::update();
 #if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::refresh();
 #else
@@ -1831,14 +1839,14 @@ void UIDisplay::refreshPage()
     uint8_t mtype = UI_MENU_TYPE_INFO;
     char cache[UI_ROWS][MAX_COLS + 1];
     adjustMenuPos();
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
+#if UI_AUTORETURN_TO_MENU_AFTER != 0
     // Reset timeout on menu back when user active on menu
     if (uid.encoderLast != encoderStartScreen)
         ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
     encoderStartScreen = uid.encoderLast;
-
     // Copy result into cache
+    Endstops::update();
     if(menuLevel == 0) // Top level menu
     {
         UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
@@ -2021,18 +2029,18 @@ void UIDisplay::refreshPage()
                 cache[1][0] = '\x0a'; //off
 #endif
 #if HAVE_HEATED_BED
-            //heatbed animated icons
+            //heated bed animated icons
             uint8_t lin = 2 - ((NUM_EXTRUDER != 2) ? 1 : 0);
             if(heatedBedController.targetTemperatureC > 30)
                 cache[lin][0] = Printer::isAnimation() ? '\x0c' : '\x0d';
             else
                 cache[lin][0] = '\x0b';
 #endif
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
             //fan
             fanPercent = Printer::getFanSpeed() * 100 / 255;
             fanString[1] = 0;
-            if(fanPercent > 0)  //fan running anmation
+            if(fanPercent > 0)  //fan running animation
             {
                 fanString[0] = Printer::isAnimation() ? '\x0e' : '\x0f';
             }
@@ -2081,11 +2089,11 @@ void UIDisplay::refreshPage()
                     if(u8g_IsBBXIntersection(&u8g, 0, 30 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                         printU8GRow(117,30,fanString);
                     drawVProgressBar(116, 0, 9, 20, fanPercent);
-                    if(u8g_IsBBXIntersection(&u8g, 0, 42 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-                        printU8GRow(0,42,cache[3]); //mul + extruded
-                    if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-                        printU8GRow(0,52,cache[4]); //buf
 #endif
+                    if(u8g_IsBBXIntersection(&u8g, 0, 42 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+					   printU8GRow(0,42,cache[3]); //multiplier + extruded
+                    if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+						printU8GRow(0,52,cache[4]); //buffer usage
 #if SDSUPPORT
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 66, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -3064,6 +3072,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_DEBUG_ERROR:
             Printer::toggleErrors();
             break;
+        case UI_ACTION_DEBUG_ENDSTOP:
+            Printer::toggleEndStop();
+            break;
         case UI_ACTION_DEBUG_DRYRUN:
             Printer::toggleDryRun();
             if(Printer::debugDryrun())   // simulate movements without printing
@@ -3460,7 +3471,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
 #if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentDeltaPositionSteps);
+            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
             Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);

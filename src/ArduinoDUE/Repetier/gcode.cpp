@@ -43,6 +43,7 @@ int8_t   GCode::waitingForResend = -1; ///< Waiting for line to be resend. -1 = 
 volatile uint8_t GCode::bufferLength = 0; ///< Number of commands stored in gcode_buffer
 millis_t GCode::timeOfLastDataPacket = 0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 uint8_t  GCode::formatErrors = 0;
+PGM_P GCode::fatalErrorMsg = NULL; ///< message unset = no fatal error 
 
 /** \page Repetier-protocol
 
@@ -229,7 +230,11 @@ void GCode::checkAndPushCommand()
 		requestResend();
 		return;
 	}
-    pushCommand();
+	if(GCode::hasFatalError() && !(hasM() && M==999)) {
+		GCode::reportFatalError();
+	} else {
+		pushCommand();
+	}
 #ifdef DEBUG_COM_ERRORS
     if(hasM() && M == 667)
         return; // omit ok
@@ -424,7 +429,7 @@ void GCode::readFromSerial()
             }
             else
             {
-                if(ch == ';') commentDetected = true; // ignore new data until lineend
+                if(ch == ';') commentDetected = true; // ignore new data until line end
                 if(commentDetected) commandsReceivingWritePosition--;
             }
         }
@@ -507,7 +512,7 @@ void GCode::readFromSerial()
             }
             else
             {
-                if(ch == ';') commentDetected = true; // ignore new data until lineend
+                if(ch == ';') commentDetected = true; // ignore new data until line end
                 if(commentDetected) commandsReceivingWritePosition--;
             }
         }
@@ -1017,11 +1022,41 @@ void GCode::printCommand()
     Com::println();
 }
 
+void GCode::fatalError(FSTRINGPARAM(message)) {
+	fatalErrorMsg = message;
+#if SDSUPPORT
+	if(sd.sdmode != 0)	{ // stop sd print to prevent damage
+		sd.stopPrint();
+	}
+#endif	
+	if(Printer::currentPosition[Z_AXIS] < Printer::zMin + Printer::zLength - 15)
+		PrintLine::moveRelativeDistanceInStepsReal(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],true,true);
+	EVENT_FATAL_ERROR_OCCURED		
+	Commands::waitUntilEndOfAllMoves();
+	Printer::kill(true);		
+	reportFatalError();
+}
+
+void GCode::reportFatalError() {
+	Com::printF(Com::tFatal);
+	Com::printF(fatalErrorMsg);
+	Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
+	UI_ERROR_P(fatalErrorMsg)
+}
+
+void GCode::resetFatalError() {
+	TemperatureController::resetAllErrorStates();
+	fatalErrorMsg = NULL;
+	UI_ERROR("");
+	EVENT_CONTINUE_FROM_FATAL_ERROR
+	Com::printFLN(PSTR("info:Continue from fatal state"));
+}
+
 #if JSON_OUTPUT
 
 // --------------------------------------------------------------- //
 // Code that gets gcode information is adapted from RepRapFirmware //
-// Originally licenced under GPL                                   //
+// Originally licensed under GPL                                   //
 // Authors: reprappro, dc42, dcnewman, others                      //
 // Source: https://github.com/dcnewman/RepRapFirmware              //
 // Copy date: 15 Nov 2015                                          //

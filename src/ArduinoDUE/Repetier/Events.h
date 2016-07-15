@@ -51,6 +51,10 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_START_NEXTPREVIOUS(action,increment) {}
 // Gets called before a move is queued. Gives the ability to limit moves.
 #define EVENT_CONTRAIN_DESTINATION_COORDINATES
+// Gets called when a fatal error occurs and all actions should be stopped
+#define EVENT_FATAL_ERROR_OCCURED
+// Gets called after a M999 to continue from fatal errors
+#define EVENT_CONTINUE_FROM_FATAL_ERROR
 
 // Called to initialize laser pins. Return false to prevent default initialization.
 #define EVENT_INITALIZE_LASER true

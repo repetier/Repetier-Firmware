@@ -239,6 +239,7 @@ Overridden if EEPROM activated.*/
 // 8 is ATC Semitec 104GT-2
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
+// 14 is 100K NTC 3950
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
@@ -1615,9 +1616,15 @@ The following settings override uiconfig.h!
 17 or CONTROLLER_MIREGLI 17
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 21 or CONTROLLER_VIKI2 Panucatt VIKI2 graphic lcd
+24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 */
 
 #define FEATURE_CONTROLLER NO_CONTROLLER
+
+/* You can have one keypad connected via single analog pin as seen on
+ some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be
+ the analog pin number! */
+#define ADC_KEYPAD_PIN -1
 
 /**
 Select the languages to use. On first startup user can select

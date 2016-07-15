@@ -2,22 +2,38 @@
 
 ## Installation
 
-Please use your new at [http://www.repetier.com/firmware/v092](http://www.repetier.com/firmware/v092)
-for easy and fast configuration. You get the complete sources you need to compile from
-the online configurator.
-This system also allows it to upload configurations created with this tool and modify
-the configuration.
+Please use your configuration tool at 
+[http://www.repetier.com/firmware/v092](http://www.repetier.com/firmware/v092)
+for easy and fast configuration. You get the complete sources you need to compile from the online configurator.
+This system also allows it to upload configurations created with this tool and modify the configuration. This is handy for updates as you get all newly introduced parameter just by uploading the old version and downloading the
+latest version. New parameter are initalized with default values.
 
-<div style="background:orange;padding:10px;">
-0.92 is the current development version, so expect greater changes in time without
-version number changes.</div>
-
-## Version 0.92
-  Cleaner code base.
-  Optional pulse dense modulation for heater and fans.
-  Decoupling test for heater and sensor for more safety.
+## Version 0.92.8 
+* Cleaner code base.
+* Pulse dense modulation for heater and fans.
+* Bed bump correction for delta printer.
+* Correction of parallelogram distortions.
+* Decoupling test for heater and sensor for more safety.
+* Mixing extruder support.
+* Test for watchdog.
+* Allow cold extrusion.
+* Fixed pause sd print issues.
+* Commands on sd stop.
+* Disable heaters/extruders on sd stop.
+* Safety question for sd stop.
+* Many minor corrections and improvements.
+* Extra motor drivers.
+* Event system for lights etc.
+* New homing sequence with preheat for nozzle based z sensors.
+* Language selectable on runtime.
+* Fix structure for Arduino 1.6.7
+* New bed leveling.
+* Fatal error handling added.
 
 ## Version 0.91 released 2013-12-30
+
+WARNING: This version only compiles with older Arduino IDE 1.0.x, for
+compilation with newest version use 0.92
 
 Improvements over old code:
 * Works with CodeBlocks for Arduino http://www.arduinodev.com/codeblocks/#download
@@ -62,43 +78,25 @@ This firmware is a nearly complete rewrite of the sprinter firmware by kliment
 which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 Some ideas were also taken from Teacup, Grbl and Marlin.
 
-Supported boards:
-
-The following boards are supported by setting the proper motherboard type.Other boards
-require a matching pin definition.
-
-* MEGA/RAMPS up to 1.2       = 3
-* RAMPS 1.3/RAMPS 1.4        = 33
-* Azteeg X3                  = 34
-* Gen6                       = 5 
-* Gen6 deluxe                = 51
-* Sanguinololu up to 1.1     = 6
-* Sanguinololu 1.2 and above = 62
-* Melzi board                = 63
-* Gen7 1.1 till 1.3.x        = 7
-* Gen7 1.4.1 and later       = 71
-* Teensylu (at90usb)         = 8 // requires Teensyduino
-* Printrboard (at90usb)      = 9 // requires Teensyduino
-* Foltyn 3D Master           = 12
-* MegaTronics                = 70
-* Megatronics 2.0            = 701
-* RUMBA                      = 80  // Get it from reprapdiscount
-* Rambo                      = 301
-
 ## Features
 
+- Supports cartesian, delta and core xy/yz printers.
 - RAMP acceleration support.
 - Path planning for higher print speeds.
 - Trajectory smoothing for smoother lines.
-- Ooze prevention system for faster anti ooze then slicer can do,
 - Nozzle pressure control for improved print quality with RAMPS.
-- Fast - 40000 Hz and more stepper frequency is possible with a 16 MHz AVR. 
+- Fast - 40000 Hz and more stepper frequency is possible with a 16 MHz AVR.
+- Support for Arduino Due based boards allowing much faster speeds. 
 - Multiple extruder supported (max. 6 extruder).
 - Standard ASCII and improved binary (Repetier protocol) communication.
 - Autodetect the command protocol, so it will work with any host software.
-- Continuous monitoring of one temperature.
 - Important parameters are stored in EEPROM and can easily be modified without
   recompilation of the firmware.
+- Automatic bed leveling.
+- Mixed extruder.
+- Detection of heater/thermistor decoupling.
+- 2 fans plus thermistor controlled fan.
+- Multi-Language support, switchable at runtime.
 - Stepper control is handled in an interrupt routine, leaving time for
   filling caches for next move.
 - PID control for extruder/heated bed temperature.
@@ -108,7 +106,6 @@ require a matching pin definition.
 - Supports SD-cards.
 - mm and inches can be used for G0/G1
 - Arc support
-- Works with Skeinforge 41, all unknown commands are ignored.
 - Dry run : Execute yout GCode without using the extruder. This way you can
   test for non-extruder related failures without actually printing.
 

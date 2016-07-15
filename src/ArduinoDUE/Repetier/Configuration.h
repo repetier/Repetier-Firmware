@@ -215,6 +215,7 @@ Overridden if EEPROM activated.*/
 // 7 is userdefined thermistor table 2
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
+// 14 is 100K NTC 3950
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
@@ -1577,10 +1578,15 @@ The following settings override uiconfig.h!
 19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
 21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
+/* You can have one keypad connected via single analog pin as seen on
+ some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be
+ the analog pin number! */
+#define ADC_KEYPAD_PIN -1
 
 /**
 Select the languages to use. On first startup user can select

@@ -365,11 +365,8 @@ STEPPER_CURRENT_CONTROL
 #if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35
 #define KNOWN_BOARD 1
 
-//////////////////FIX THIS//////////////
-#ifndef __AVR_ATmega1280__
-#ifndef __AVR_ATmega2560__
+#if !(defined (__AVR_ATmega1280__ ) || defined (__AVR_ATmega2560__ ))
 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
-#endif
 #endif
 
 // uncomment one of the following lines for RAMPS v1.3 or v1.0, comment both for v1.2 or 1.1
@@ -2000,7 +1997,7 @@ STEPPER_CURRENT_CONTROL
  // Thermocouple 1
 #define TEMP_4_PIN         4   
 #define THERMOCOUPLE_0_PIN 8
-#define THERMOCOUPLE_0_PIN 4
+#define THERMOCOUPLE_1_PIN 4
 
 // Beeper on AUX-4
 #define BEEPER_PIN 64			

@@ -9,7 +9,7 @@
 //#endif
 
 // Updates the temperature of all extruders and heated bed if it's time.
-// Toggels the heater power if necessary.
+// Toggles the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
 extern uint8_t manageMonitor;
 #define HTR_OFF 0
@@ -25,7 +25,7 @@ extern uint8_t manageMonitor;
 #define TEMPERATURE_CONTROLLER_FLAG_JAM           32 //< Indicates a jammed filament
 #define TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN      64 //< Indicates a slowed down extruder
 
-/** TemperatureController manages one heater-temperature sensore loop. You can have up to
+/** TemperatureController manages one heater-temperature sensor loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
 
 */
@@ -35,12 +35,12 @@ public:
     uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
     uint8_t sensorType; ///< Type of temperature sensor.
     uint8_t sensorPin; ///< Pin to read extruder temperature.
-    int16_t currentTemperature; ///< Currenttemperature value read from sensor.
-    int16_t targetTemperature; ///< Target temperature value in units of sensor.
+    int8_t heatManager; ///< How is temperature controlled. 0 = on/off, 1 = PID-Control, 3 = dead time control
+    int16_t currentTemperature; ///< Current temperature value read from sensor.
+    //int16_t targetTemperature; ///< Target temperature value in units of sensor.
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-    int8_t heatManager; ///< How is temperature controled. 0 = on/off, 1 = PID-Control, 3 = deat time control
 #if TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
@@ -78,6 +78,9 @@ public:
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
     }
+	inline void removeErrorStates() {
+        flags &= ~(TEMPERATURE_CONTROLLER_FLAG_ALARM | TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT | TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED);
+	}
     inline bool isDecoupleFullOrHold()
     {
         return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
@@ -123,6 +126,7 @@ public:
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
     }
+	static void resetAllErrorStates();
 #if EXTRUDER_JAM_CONTROL
     inline bool isJammed()
     {

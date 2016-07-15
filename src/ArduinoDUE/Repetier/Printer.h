@@ -123,7 +123,7 @@ public:
     void init();
     void enable(bool permanent = true);
     void disable(bool permanent = true);
-    void measure(void);
+    bool measure(void);
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
     void updateDerived();
     void reportStatus();
@@ -187,7 +187,15 @@ public:
     static void update();
     static void report();
     static INLINE bool anyXYZMax() {
-        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
+    }
+    static INLINE bool anyXYZ() {
+#ifdef EXTENDED_ENDSTOPS
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
+		lastState2 != 0;
+#else
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
+#endif
     }
     static INLINE void resetAccumulator() {
         accumulator = 0;
@@ -315,7 +323,7 @@ public:
     static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
     static int32_t maxDeltaPositionSteps;
-    static int32_t currentDeltaPositionSteps[E_TOWER_ARRAY];
+    static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
     static floatLong deltaDiagonalStepsSquaredA;
     static floatLong deltaDiagonalStepsSquaredB;
     static floatLong deltaDiagonalStepsSquaredC;
@@ -331,7 +339,8 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
-#else
+#endif
+#if DRIVE_SYSTEM != DELTA
 	static int32_t zCorrectionStepsIncluded; 	
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
@@ -393,7 +402,7 @@ public:
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#if GANTRY
+#if GANTRY && !defined(FAST_COREXYZ)
     static int8_t motorX;
     static int8_t motorYorZ;
 #endif
@@ -433,6 +442,7 @@ public:
 	static void toggleDryRun();
 	static void toggleCommunication();
 	static void toggleNoMoves();
+    static void toggleEndStop();
 	static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
@@ -464,6 +474,11 @@ public:
         return ((debugLevel & 32) != 0);
     }
 
+    static INLINE bool debugEndStop()
+    {
+        return ((debugLevel & 64) != 0);
+    }
+    
     static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);
@@ -854,7 +869,7 @@ public:
     }
     static INLINE void executeXYGantrySteps()
     {
-#if (GANTRY)
+#if (GANTRY) && !defined(FAST_COREXYZ)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -891,7 +906,7 @@ public:
     }
     static INLINE void executeXZGantrySteps()
     {
-#if (GANTRY)
+#if (GANTRY) && !defined(FAST_COREXYZ)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -1073,9 +1088,9 @@ public:
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-        currentDeltaPositionSteps[A_TOWER] = xaxis;
-        currentDeltaPositionSteps[B_TOWER] = yaxis;
-        currentDeltaPositionSteps[C_TOWER] = zaxis;
+        currentNonlinearPositionSteps[A_TOWER] = xaxis;
+        currentNonlinearPositionSteps[B_TOWER] = yaxis;
+        currentNonlinearPositionSteps[C_TOWER] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif
@@ -1098,7 +1113,7 @@ public:
     static void buildTransformationMatrix(float h1,float h2,float h3);
 #endif
 #if DISTORTION_CORRECTION
-    static void measureDistortion(void);
+    static bool measureDistortion(void);
     static Distortion distortion;
 #endif
     static void MemoryPosition();
