@@ -1381,7 +1381,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 's')
             {
 #if SDSUPPORT
-                if(sd.sdactive && sd.sdmode)
+                if(sd.sdactive && sd.sdmode && !statusMsg[0])
                 {
                     addStringP(Com::translatedF(UI_TEXT_PRINT_POS_ID));
                     float percent;
