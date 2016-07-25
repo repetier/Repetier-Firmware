@@ -133,6 +133,7 @@ void SDCard::startPrint()
     sdmode = 1;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED, false);
+	UI_STATUS_F(PSTR(""));
 }
 void SDCard::pausePrint(bool intern)
 {
