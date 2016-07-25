@@ -2536,12 +2536,20 @@ void Extruder::retract(bool isRetract,bool isLong)
     int32_t zlift = static_cast<int32_t>(zLiftF * Printer::axisStepsPerMM[Z_AXIS]);
     if(isRetract && !isRetracted())
     {
+#ifdef EARLY_ZLIFT
+        if(zlift > 0) {
+	        PrintLine::moveRelativeDistanceInStepsReal(0,0,zlift,0,Printer::maxFeedrate[Z_AXIS], false);
+	        Printer::coordinateOffset[Z_AXIS] -= zLiftF;
+        }
+#endif
         retractDistance(distance);
         setRetracted(true);
+#ifndef EARLY_ZLIFT
         if(zlift > 0) {
             PrintLine::moveRelativeDistanceInStepsReal(0,0,zlift,0,Printer::maxFeedrate[Z_AXIS], false);
             Printer::coordinateOffset[Z_AXIS] -= zLiftF;
         }
+#endif
     }
     else if(!isRetract && isRetracted())
     {
