@@ -110,7 +110,7 @@ Custom M Codes
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-- M203 - Set temperture monitor to Sx
+- M203 - Set temperature monitor to Sx
 - M204 - Set PID parameter X => Kp Y => Ki Z => Kd S<extruder> Default is current extruder. NUM_EXTRUDER=Heated bed
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
