@@ -517,7 +517,7 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
-    HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,Z_ACCELERATION_TOP);
+    HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,ACCELERATION_FACTOR_TOP);
 
 }
 
@@ -775,7 +775,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 
 void EEPROM::initBaudrate()
 {
-    // Invariant - baudrate is intitalized with or without eeprom!
+    // Invariant - baudrate is initialized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)
@@ -954,9 +954,9 @@ void EEPROM::writeSettings()
 #endif
 
 #if FEATURE_AXISCOMP
-    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY);
-    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ);
-    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ);
+    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY,6);
+    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ,6);
+    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ,6);
 #endif
 
 

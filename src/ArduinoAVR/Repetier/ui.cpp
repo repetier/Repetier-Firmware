@@ -1538,7 +1538,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 's')
             {
 #if SDSUPPORT
-                if(sd.sdactive && sd.sdmode)
+                if(sd.sdactive && sd.sdmode && !statusMsg[0])
                 {
                     addStringP(Com::translatedF(UI_TEXT_PRINT_POS_ID));
                     float percent;
@@ -2240,7 +2240,7 @@ void UIDisplay::refreshPage()
                     uint8_t py = 8;
                     for(uint8_t r = 0; r < 3; r++)
                     {
-                        if(u8g_IsBBXIntersection(&u8g, 0, py-UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
+                        if(u8g_IsBBXIntersection(&u8g, 0, py - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                             printU8GRow(0, py, cache[r]);
                         py += 10;
                     }
@@ -2549,6 +2549,9 @@ int UIDisplay::okAction(bool allowMoves)
             Printer::homeAxis(true, true, false);
 #endif
 #endif
+			Printer::coordinateOffset[Z_AXIS] = Printer::popWizardVar().f;
+			Printer::coordinateOffset[Y_AXIS] = Printer::popWizardVar().f;
+			Printer::coordinateOffset[X_AXIS] = Printer::popWizardVar().f;
             Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
             Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
             Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
@@ -3356,6 +3359,21 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_DITTO_1:
         case UI_DITTO_2:
         case UI_DITTO_3:
+#if DUAL_X_AXIS
+			Extruder::dittoMode = 0;
+			Extruder::selectExtruderById(0);
+			Printer::homeXAxis();
+			if( action - UI_DITTO_0 > 0) {
+				Extruder::current = &extruder[1];
+				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
+				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
+				Extruder::current = &extruder[0];
+				Extruder::dittoMode =  1;
+			}
+#else
+			Extruder::dittoMode =  action - UI_DITTO_0;
+#endif
+		
             Extruder::dittoMode = action - UI_DITTO_0;
             break;
 #endif
@@ -3539,6 +3557,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&ui_wiz_filamentchange, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
@@ -3558,6 +3579,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&ui_wiz_jamreheat, true);
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
+			Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
@@ -3734,8 +3758,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Com::printF(PSTR(" Buf. Len:"),(int)GCode::bufferLength);
             Com::printF(PSTR(" Wait resend:"),(int)GCode::waitingForResend);
             Com::printFLN(PSTR(" Recv. Write Pos:"),(int)GCode::commandsReceivingWritePosition);
-            Com::printF(PSTR("Min. XY Speed:"),Printer::minimumSpeed);
-            Com::printF(PSTR(" Min. Z Speed:"),Printer::minimumZSpeed);
+            //Com::printF(PSTR("Min. XY Speed:"),Printer::minimumSpeed);
+            //Com::printF(PSTR(" Min. Z Speed:"),Printer::minimumZSpeed);
             Com::printF(PSTR(" Buffer:"),PrintLine::linesCount);
             Com::printF(PSTR(" Lines pos:"),(int)PrintLine::linesPos);
             Com::printFLN(PSTR(" Write Pos:"),(int)PrintLine::linesWritePos);

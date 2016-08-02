@@ -30,6 +30,11 @@
   all hardware related code should be packed into the hal files.
 */
 
+// You can set different sizes if you want, but with binary mode it does not get faster
+#ifndef SERIAL_RX_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
+
 #ifndef HAL_H
 #define HAL_H
 
@@ -321,6 +326,10 @@ union eeval_t {
   long        l;
 } PACK;
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+extern millis_t eprSyncTime;
+#endif
+
 class HAL
 {
   public:
@@ -456,6 +465,11 @@ class HAL
       WRITE_VAR(pin, LOW);
     }
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+    static void syncEEPROM(); // store to disk if changed
+    static void importEEPROM();
+#endif
+
     static inline void eprSetByte(unsigned int pos, uint8_t value)
     {
       eeval_t v;
@@ -582,7 +596,9 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD
+      eprSyncTime = HAL::timeInMilliseconds() | 1UL; 
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -653,6 +669,7 @@ class HAL
     }
     static inline void serialSetBaudrate(long baud)
     {
+      Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
 #else
@@ -844,9 +861,7 @@ class HAL
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
-#if ANALOG_INPUTS > 0
     static void analogStart(void);
-#endif
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif

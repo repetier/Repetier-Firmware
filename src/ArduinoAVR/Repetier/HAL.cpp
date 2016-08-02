@@ -519,8 +519,8 @@ unsigned int servoAutoOff[4] = {0,0,0,0};
 static uint8_t servoIndex = 0;
 void HAL::servoMicroseconds(uint8_t servo,int ms, uint16_t autoOff)
 {
-    if(ms<500) ms = 0;
-    if(ms>2500) ms = 2500;
+    if(ms < 500) ms = 0;
+    if(ms > 2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU/1000000)*(long)ms)>>3);
     servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0;
 }
@@ -532,7 +532,7 @@ SIGNAL (TIMER3_COMPA_vect)
         TCNT3 = 0;
         if(HAL::servoTimings[0])
         {
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
             WRITE(SERVO0_PIN,HIGH);
 #endif
             OCR3A = HAL::servoTimings[0];
@@ -540,7 +540,7 @@ SIGNAL (TIMER3_COMPA_vect)
         else OCR3A = SERVO2500US;
         break;
     case 1:
-#if SERVO0_PIN>-1
+#if SERVO0_PIN > -1
         WRITE(SERVO0_PIN,LOW);
 #endif
         OCR3A = SERVO5000US;
@@ -549,7 +549,7 @@ SIGNAL (TIMER3_COMPA_vect)
         TCNT3 = 0;
         if(HAL::servoTimings[1])
         {
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
             WRITE(SERVO1_PIN,HIGH);
 #endif
             OCR3A = HAL::servoTimings[1];
@@ -557,7 +557,7 @@ SIGNAL (TIMER3_COMPA_vect)
         else OCR3A = SERVO2500US;
         break;
     case 3:
-#if SERVO1_PIN>-1
+#if SERVO1_PIN > -1
         WRITE(SERVO1_PIN,LOW);
 #endif
         OCR3A = SERVO5000US;
@@ -566,7 +566,7 @@ SIGNAL (TIMER3_COMPA_vect)
         TCNT3 = 0;
         if(HAL::servoTimings[2])
         {
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
             WRITE(SERVO2_PIN,HIGH);
 #endif
             OCR3A = HAL::servoTimings[2];
@@ -574,7 +574,7 @@ SIGNAL (TIMER3_COMPA_vect)
         else OCR3A = SERVO2500US;
         break;
     case 5:
-#if SERVO2_PIN>-1
+#if SERVO2_PIN > -1
         WRITE(SERVO2_PIN,LOW);
 #endif
         OCR3A = SERVO5000US;
@@ -583,7 +583,7 @@ SIGNAL (TIMER3_COMPA_vect)
         TCNT3 = 0;
         if(HAL::servoTimings[3])
         {
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
             WRITE(SERVO3_PIN,HIGH);
 #endif
             OCR3A = HAL::servoTimings[3];
@@ -591,7 +591,7 @@ SIGNAL (TIMER3_COMPA_vect)
         else OCR3A = SERVO2500US;
         break;
     case 7:
-#if SERVO3_PIN>-1
+#if SERVO3_PIN > -1
         WRITE(SERVO3_PIN,LOW);
 #endif
         OCR3A = SERVO5000US;
@@ -607,7 +607,7 @@ SIGNAL (TIMER3_COMPA_vect)
         }
     }
     servoIndex++;
-    if(servoIndex>7)
+    if(servoIndex > 7)
         servoIndex = 0;
 }
 #else

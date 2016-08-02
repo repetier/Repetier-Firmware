@@ -55,6 +55,10 @@ Implemented Codes
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
 - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+- G201 P<motorId> X<pos>     - Go to position X with motor X
+- G202 P<motorId> X<setpos>  - Mark current position as X
+- G203 P<motorId>            - Report current motor position
+- G204 P<motorId> S<0/1>     - Enable/disable motor
 
 RepRap M Codes
 
@@ -63,7 +67,7 @@ RepRap M Codes
 - M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
 - M109 - Wait for extruder current temp to reach target temp.
-- M114 - Display current position
+- M114 S1 - Display current position, S1 = also write position in steps
 
 Custom M Codes
 
@@ -134,7 +138,7 @@ Custom M Codes
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
-- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
+- M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
 - M450 - Reports printer mode
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser
@@ -147,6 +151,8 @@ Custom M Codes
 - M600 Change filament
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
+- M603 - Simulate a jam
+- M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */

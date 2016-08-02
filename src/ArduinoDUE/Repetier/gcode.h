@@ -75,14 +75,23 @@ public:
     {
         return ((params & 8)!=0);
     }
+	inline void unsetX() {
+		params &= ~8;
+	}
     inline bool hasY()
     {
         return ((params & 16)!=0);
     }
+	inline void unsetY() {
+		params &= ~16;
+	}
     inline bool hasZ()
     {
         return ((params & 32)!=0);
     }
+	inline void unsetZ() {
+		params &= ~32;
+	}
     inline bool hasNoXYZ()
     {
         return ((params & 56)==0);
@@ -195,6 +204,7 @@ public:
 	static uint32_t keepAliveInterval;
     friend class SDCard;
     friend class UIDisplay;
+	static FSTRINGPARAM(fatalErrorMsg);
 private:
     void debugCommandBuffer();
     void checkAndPushCommand();
@@ -216,7 +226,6 @@ private:
         return l;
     }
 
-	static FSTRINGPARAM(fatalErrorMsg);
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
     static uint8_t bufferReadIndex; ///< Read position in gcode_buffer.
     static uint8_t bufferWriteIndex; ///< Write position in gcode_buffer.

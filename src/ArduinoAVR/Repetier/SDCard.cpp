@@ -96,6 +96,10 @@ void SDCard::initsd()
 	HAL::pingWatchdog();
 
     fat.chdir();
+	
+#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+	HAL::importEEPROM();
+#endif	
     if(selectFile("init.g", true))
     {
         startPrint();
@@ -129,6 +133,7 @@ void SDCard::startPrint()
     sdmode = 1;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED, false);
+	UI_STATUS_F(PSTR(""));
 }
 void SDCard::pausePrint(bool intern)
 {

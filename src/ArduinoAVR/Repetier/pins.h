@@ -483,6 +483,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
 #define ORIG_SDCARDDETECT 49
+#undef ORIG_FAN_PIN
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
 #define LIGHT_PIN         6

@@ -44,7 +44,7 @@ static int adcCounter = 0, adcSamplePos = 0;
 
 static   uint32_t  adcEnable = 0;
 
-char HAL::virtualEeprom[EEPROM_BYTES];
+char HAL::virtualEeprom[EEPROM_BYTES] = {0,0,0,0,0,0,0};
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
@@ -111,7 +111,7 @@ void HAL::setupTimer() {
   // Timer for stepper motor control
   pmc_enable_periph_clk(TIMER1_TIMER_IRQ );
   //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,1); // highest priority - no surprises here wanted
+  NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ,2); // highest priority - no surprises here wanted
 
   TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC |
                TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
@@ -217,6 +217,58 @@ void HAL::analogStart(void)
 
   // start first conversion
   ADC->ADC_CR = ADC_CR_START;
+}
+
+#endif
+
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+
+#if !SDSUPPORT
+#error EEPROM using sd card requires SDCARSUPPORT
+#endif
+
+millis_t eprSyncTime = 0; // in sync
+SdFile eepromFile;
+void HAL::syncEEPROM() { // store to disk if changed
+  millis_t time = millis();
+
+  if (eprSyncTime && (time - eprSyncTime > 15000)) // Buffer writes only every 15 seconds to pool writes
+  {
+    eprSyncTime = 0;
+    bool failed = false;
+    if (!sd.sdactive) // not mounted
+	  {
+		  if (eepromFile.isOpen())
+			  eepromFile.close();
+        Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");
+        Com::println();
+		  return;
+	  }
+
+	  if (!eepromFile.seekSet(0))
+		  failed = true;
+
+	  if(!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+      failed = true; 
+    
+    if(failed) {
+        Com::printErrorF("Could not write eeprom to sd card");
+        Com::println();
+    }
+  }
+}
+
+void HAL::importEEPROM() {
+    if (eepromFile.isOpen())
+			eepromFile.close();
+		if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) ||
+			eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
+		{
+			Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
+		} else {
+      Com::printFLN("EEPROM read from sd card.");
+    }
+    EEPROM::readDataFromEEPROM();
 }
 
 #endif
@@ -1240,6 +1292,7 @@ void RFDoubleSerial::begin(unsigned long baud) {
   RFSERIAL.begin(baud);
   BT_SERIAL.begin(BLUETOOTH_BAUD);
 }
+
 void RFDoubleSerial::end() {
   RFSERIAL.end();
   BT_SERIAL.end();

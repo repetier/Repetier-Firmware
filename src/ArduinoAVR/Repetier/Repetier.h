@@ -24,7 +24,8 @@
 
 #include <math.h>
 #include <stdint.h>
-#define REPETIER_VERSION "0.92.9"
+//#define REPETIER_VERSION "0.92.10"
+#define REPETIER_VERSION "1.0.0dev"
 
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
@@ -41,6 +42,8 @@ enum debugFlags {DEB_ECHO = 0x1, DEB_INFO = 0x2, DEB_ERROR = 0x4,DEB_DRYRUN = 0x
 /** Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data throughput or search for communication problems. */
 #define INCLUDE_DEBUG_COMMUNICATION 1
+// Echo all ascii commands after receiving
+//#define DEBUG_ECHO_ASCII
 /** Allows M111 so set bit 6 (32) which disables moves, at the first tried step. In combination
 with a dry run, you can test the speed of path computations, which are still performed. */
 #define INCLUDE_DEBUG_NO_MOVE 1
@@ -205,6 +208,20 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define DUAL_X_AXIS 0
 #endif
 
+#ifndef LAZY_DUAL_X_AXIS
+#define LAZY_DUAL_X_AXIS 0
+#endif
+
+#ifndef MOVE_X_WHEN_HOMED
+#define MOVE_X_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Y_WHEN_HOMED
+#define MOVE_Y_WHEN_HOMED 0
+#endif
+#ifndef MOVE_Z_WHEN_HOMED
+#define MOVE_Z_WHEN_HOMED 0
+#endif
+
 #if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN
@@ -308,6 +325,13 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef MINMAX_HARDWARE_ENDSTOP_Z2
 #define MINMAX_HARDWARE_ENDSTOP_Z2 0
 #define Z2_MINMAX_PIN -1
+#endif
+
+#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1 
+#define MULTI_ZENDSTOP_HOMING 1
+#define MULTI_ZENDSTOP_ALL 3
+#else
+#define MULTI_ZENDSTOP_HOMING 0
 #endif
 
 #define SPEED_MIN_MILLIS 400
@@ -532,8 +556,8 @@ inline void memcopy4(void *dest,void *source) {
 #define BENDING_CORRECTION_C 0
 #endif
 
-#ifndef Z_ACCELERATION_TOP
-#define Z_ACCELERATION_TOP 0
+#ifndef ACCELERATION_FACTOR_TOP
+#define ACCELERATION_FACTOR_TOP 100
 #endif
 
 #ifndef KEEP_ALIVE_INTERVAL
