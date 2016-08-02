@@ -1725,7 +1725,7 @@ void Printer::homeZAxis() // Cartesian homing
 		// Fix error from z probe testing
 		zCorrection -= axisStepsPerMM[Z_AXIS]*EEPROM::zProbeHeight();
 		// Correct from bed rotation
-		updateCurrentPosition(true);
+		//updateCurrentPosition(true);
 		//float xt,yt,zt;
 		//transformToPrinter(currentPosition[X_AXIS],currentPosition[Y_AXIS],0,xt,yt,zt);
 		//zCorrection -= zt;
@@ -1741,7 +1741,7 @@ void Printer::homeZAxis() // Cartesian homing
 #else
 		currentPositionSteps[Z_AXIS] -= zBedOffset * axisStepsPerMM[Z_AXIS]; // Correct bed coating	
 #endif
-		//Com::printFLN(PSTR("Z-Correction-Steps:"),zCorrection);
+		//Com::printFLN(PSTR("Z-Correction-Steps:"),zCorrection); // TEST
         PrintLine::moveRelativeDistanceInSteps(0,0,zCorrection,0,homingFeedrate[Z_AXIS],true,false);
         currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
 #if NUM_EXTRUDER > 0
@@ -1754,6 +1754,13 @@ void Printer::homeZAxis() // Cartesian homing
 			currentPositionSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
 		}
 #endif
+		updateCurrentPosition(true); 
+#if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+		// If we have software leveling enabled and are not at 0,0 z position is not zero, but we measured 
+		// for z = 0, so we need to correct for rotation.
+		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * currentPosition[Z_AXIS];
+		currentPosition[Z_AXIS] = 0;
+#endif		
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif

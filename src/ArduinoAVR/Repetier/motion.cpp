@@ -933,11 +933,11 @@ void PrintLine::updateStepsParameter()
     advanceEnd   = (float)advanceFull * endFactor   * endFactor;
 #endif
 #endif
-    if(accelSteps + decelSteps >= stepsRemaining)   // can't reach limit speed
+    if(static_cast<int32_t>(accelSteps + decelSteps) >= stepsRemaining)   // can't reach limit speed
     {
-        uint16_t red = (accelSteps + decelSteps + 2 - stepsRemaining) >> 1;
-        accelSteps = accelSteps - RMath::min(accelSteps, red);
-        decelSteps = decelSteps - RMath::min(decelSteps, red);
+        uint32_t red = (accelSteps + decelSteps - stepsRemaining) >> 1;
+        accelSteps = accelSteps - RMath::min(static_cast<int32_t>(accelSteps), static_cast<int32_t>(red));
+        decelSteps = decelSteps - RMath::min(static_cast<int32_t>(decelSteps), static_cast<int32_t>(red));
     }
     setParameterUpToDate();
 #ifdef DEBUG_QUEUE_MOVE

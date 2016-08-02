@@ -198,8 +198,8 @@ private:
     NonlinearSegment segments[DELTASEGMENTS_PER_PRINTLINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
-    uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
-    uint16_t decelSteps;        ///< How much steps does it take, to reach the end speed.
+    uint32_t accelSteps;        ///< How much steps does it take, to reach the plateau.
+    uint32_t decelSteps;        ///< How much steps does it take, to reach the end speed.
     uint32_t accelerationPrim; ///< Acceleration along primary axis
     uint32_t fAcceleration;    ///< accelerationPrim*262144/F_CPU
     speed_t vMax;              ///< Maximum reached speed in steps/s.
@@ -529,7 +529,7 @@ public:
     }
     INLINE bool moveDecelerating()
     {
-        if(stepsRemaining <= decelSteps)
+        if(stepsRemaining <= static_cast<int32_t>(decelSteps))
         {
             if (!(flags & FLAG_DECELERATING))
             {
