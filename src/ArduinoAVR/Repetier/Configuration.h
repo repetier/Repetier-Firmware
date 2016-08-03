@@ -245,6 +245,7 @@ controlled by settings in extruder 0 definition. */
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
+// 15 DYZE DESIGN 500°C Thermistor
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
