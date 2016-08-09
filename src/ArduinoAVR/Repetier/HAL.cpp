@@ -739,7 +739,7 @@ ISR(TIMER1_COMPA_vect)
 #endif
         }
         else waitRelax--;
-        stepperWait = 0; // Importent becaus of optimization in asm at begin
+        stepperWait = 0; // Important because of optimization in asm at begin
         OCR1A = 65500; // Wait for next move
     }
     DEBUG_MEMORY;

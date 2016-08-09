@@ -700,7 +700,7 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f,bool pat
     destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
     if(e != IGNORE_COORDINATE && !Printer::debugDryrun()
 #if MIN_EXTRUDER_TEMP > 30
-            && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed())
+            && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
 #endif
       )
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
@@ -818,7 +818,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         {
             if(
 #if MIN_EXTRUDER_TEMP > 20
-                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
+                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
 #endif
                 fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
                 p = 0;
@@ -828,7 +828,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         {
             if(
 #if MIN_EXTRUDER_TEMP > 20
-                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP  && !Printer::isColdExtrusionAllowed()) ||
+                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP  && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
 #endif
                 fabs(p - currentPositionSteps[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
                 currentPositionSteps[E_AXIS] = p;
@@ -1737,12 +1737,12 @@ void Printer::homeZAxis() // Cartesian homing
 #endif
 #if Z_HOME_DIR < 0
 		// Fix bed coating
-		zCorrection += axisStepsPerMM[Z_AXIS] * Printer::zBedOffset;
+		zCorrection += axisStepsPerMM[Z_AXIS] * zBedOffset;
 #else
 		currentPositionSteps[Z_AXIS] -= zBedOffset * axisStepsPerMM[Z_AXIS]; // Correct bed coating	
 #endif
 		//Com::printFLN(PSTR("Z-Correction-Steps:"),zCorrection); // TEST
-        PrintLine::moveRelativeDistanceInSteps(0,0,zCorrection,0,homingFeedrate[Z_AXIS],true,false);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, zCorrection, 0, homingFeedrate[Z_AXIS], true, false);
         currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
 #if NUM_EXTRUDER > 0
         currentPositionSteps[Z_AXIS] -= Extruder::current->zOffset;
@@ -1750,12 +1750,12 @@ void Printer::homeZAxis() // Cartesian homing
 #if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
 // Special case where z probe is z min endstop and distortion correction is enabled
 		if(Printer::distortion.isEnabled()) {
-			Printer::zCorrectionStepsIncluded = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS],currentPositionSteps[Y_AXIS],currentPositionSteps[Z_AXIS]);
+			Printer::zCorrectionStepsIncluded = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], currentPositionSteps[Y_AXIS], currentPositionSteps[Z_AXIS]);
 			currentPositionSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
 		}
 #endif
 		updateCurrentPosition(true); 
-#if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
 		// If we have software leveling enabled and are not at 0,0 z position is not zero, but we measured 
 		// for z = 0, so we need to correct for rotation.
 		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * currentPosition[Z_AXIS];
