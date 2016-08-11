@@ -352,7 +352,8 @@ public:
     static int16_t travelMovesPerSecond;
     static int16_t printMovesPerSecond;
     static float radius0;
-#else
+#endif
+#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
 	static int32_t xMinStepsAdj,yMinStepsAdj,zMinStepsAdj;	// adjusted to cover extruder/probe offsets
 	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
 #endif

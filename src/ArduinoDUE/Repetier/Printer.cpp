@@ -101,7 +101,8 @@ int32_t Printer::deltaCPosYSteps;
 int32_t Printer::realDeltaPositionSteps[TOWER_ARRAY];
 int16_t Printer::travelMovesPerSecond;
 int16_t Printer::printMovesPerSecond;
-#else
+#endif
+#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
 int32_t Printer::xMinStepsAdj,Printer::yMinStepsAdj,Printer::zMinStepsAdj;	// adjusted to cover extruder/probe offsets
 int32_t Printer::xMaxStepsAdj,Printer::yMaxStepsAdj,Printer::zMaxStepsAdj;
 #endif
