@@ -81,6 +81,7 @@
   %eIc : Current extruder temperature integer (shorter)
   %eb : Current heated bed temperature
   %e0..9 : Temp. of extruder 0..9
+  %et : Thermo controlled fan temperature
   %er : Extruder relative mode
   %Ec : Target temperature of current extruder
   %Eb : Target temperature of heated bed

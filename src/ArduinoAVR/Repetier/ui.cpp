@@ -1498,6 +1498,12 @@ void UIDisplay::parse(const char *txt,bool ram)
                 ivalue = 0;
                 fvalue = Extruder::getHeatedBedTemperature();
             }
+#if FAN_THERMO_PIN > -1
+			else if(c2 == 't') {
+				fvalue = thermoController.currentTemperatureC;
+				ivalue = 0;
+			}
+#endif
             addFloat(fvalue, 3, ivalue);
             break;
         }
