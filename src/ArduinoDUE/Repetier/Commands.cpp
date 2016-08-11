@@ -1292,10 +1292,10 @@ void Commands::processGCode(GCode *com) {
                 Printer::coordinateOffset[X_AXIS] = 0;
                 Printer::coordinateOffset[Y_AXIS] = 0;
                 Printer::coordinateOffset[Z_AXIS] = 0;
-                // I think this is coded incorrectly, as it depends on the biginning position of the
+                // I think this is coded incorrectly, as it depends on the start position of the
                 // of the hot end, and so should first move to x,y,z= 0,0,0, but as that may not
                 // be possible if the printer is not in the homes/zeroed state, the printer
-                // cannot safely move to 0 z coordinate without crashong into the print surface.
+                // cannot safely move to 0 z coordinate without crashing into the print surface.
                 // so other than commenting, I'm not meddling.
                 // but you will always get different counts from different positions.
                 Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);

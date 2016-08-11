@@ -134,7 +134,7 @@ void Extruder::manageTemperatures()
         // Check for obvious sensor errors
         if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) &&
             act->targetTemperatureC > MIN_DEFECT_TEMPERATURE /*is heating*/ &&
-            act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/)   // no temp sensor or short in sensor, disable heater
+            (act->preheatTime() == 0 || act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/))   // no temp sensor or short in sensor, disable heater
         { 
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -799,7 +799,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     TemperatureController *tc = tempController[extr];
     if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
-    if (temperatureInCelsius == 0)
+    if (temperatureInCelsius < MAX_ROOM_TEMPERATURE)
         tc->resetPreheatTime();
     else if (tc->targetTemperatureC == 0)
         tc->startPreheatTime();
