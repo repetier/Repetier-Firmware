@@ -2792,7 +2792,7 @@ TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_T
 	#if TEMP_PID
 	,0,255,0,10,1,1,255,0,0,0,{0,0,0,0}
 	#endif
-,0,0,0,0};
+,0,0,0,0,0};
 #endif
 
 #if NUM_TEMPERATURE_LOOPS > 0

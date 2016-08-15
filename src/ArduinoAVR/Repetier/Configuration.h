@@ -1395,6 +1395,8 @@ to recalibrate z.
 #define Z_PROBE_Z_OFFSET_MODE 0
 
 #define FEATURE_Z_PROBE 1
+// Especially if you have more then 1 extruder acting as z probe this is important!
+#define EXTRUDER_IS_Z_PROBE 0
 #define Z_PROBE_PIN 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 1

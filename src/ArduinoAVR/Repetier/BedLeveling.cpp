@@ -420,9 +420,10 @@ void Printer::startProbing(bool runScript) {
         moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
     }
 	// Fix position to be inside print area when probe is enabled
+	float xExtra = 0,yExtra = 0;
+#if EXTRUDER_IS_Z_PROBE == 0	
 	float ZPOffsetX = EEPROM::zProbeXOffset();
 	float ZPOffsetY = EEPROM::zProbeYOffset();
-	float xExtra = 0,yExtra = 0;
 	if(ZPOffsetX > 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX < Printer::xMin)
 		xExtra = Printer::xMin + ZPOffsetX - Printer::currentPosition[X_AXIS];
 	if(ZPOffsetY > 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY < Printer::yMin)
@@ -431,10 +432,11 @@ void Printer::startProbing(bool runScript) {
 		xExtra = Printer::xMin + Printer::xLength + ZPOffsetX - Printer::currentPosition[X_AXIS];
 	if(ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)
 		yExtra = Printer::yMin + Printer::yLength + ZPOffsetY - Printer::currentPosition[Y_AXIS];
-	// Update position
+	// Update position	
     Printer::offsetX = -ZPOffsetX;
     Printer::offsetY = -ZPOffsetY;
-    Printer::offsetZ = 0; // we correct this with probe height
+#endif	
+    //Printer::offsetZ = 0; // we correct this with probe height
     PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX + xExtra) * Printer::axisStepsPerMM[X_AXIS],
                                            (Printer::offsetY - oldOffY + yExtra) * Printer::axisStepsPerMM[Y_AXIS],
                                            0, 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);
@@ -452,6 +454,7 @@ void Printer::finishProbing() {
         Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
         Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     }
+#if EXTRUDER_IS_Z_PROBE == 0
 	float ZPOffsetX = oldOffX - Printer::offsetX;
 	float ZPOffsetY = oldOffY - Printer::offsetY;
 	if(ZPOffsetX > 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX < Printer::xMin)
@@ -462,6 +465,10 @@ void Printer::finishProbing() {
 		xExtra = Printer::xMin + Printer::xLength + ZPOffsetX - Printer::currentPosition[X_AXIS];
 	if(ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)
 		yExtra = Printer::yMin + Printer::yLength + ZPOffsetY - Printer::currentPosition[Y_AXIS];
+#else
+	float ZPOffsetX = 0;
+	float ZPOffsetY = 0;
+#endif		
     PrintLine::moveRelativeDistanceInSteps((xExtra - ZPOffsetX) * Printer::axisStepsPerMM[X_AXIS],
                                            (yExtra - ZPOffsetY) * Printer::axisStepsPerMM[Y_AXIS],
                                            (Printer::offsetZ - oldOffZ) * Printer::axisStepsPerMM[Z_AXIS], 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);

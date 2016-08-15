@@ -615,6 +615,8 @@ SIGNAL (TIMER3_COMPA_vect)
 #endif
 #endif
 
+long __attribute__((used)) stepperWait = 0;
+
 // ================== Interrupt handling ======================
 
 /** \brief Sets the timer 1 compare value to delay ticks.
@@ -656,6 +658,7 @@ inline void setTimer(uint32_t delay)
         "sts	%[ocr]+1, %D[delay] \n\t"
         "sts	%[ocr], r1 \n\t"
         "end%=: \n\t"
+        //:[delay]"=&d"(delay),[stepperWait]"=&d"(stepperWait) // Output
         :[delay]"=&d"(delay) // Output
         :"0"(delay),[ocr]"i" (_SFR_MEM_ADDR(OCR1A)),[time]"i"(_SFR_MEM_ADDR(TCNT1)) // Input
         :"r18" // Clobber
@@ -675,7 +678,6 @@ inline void setTimer(uint32_t delay)
 }
 
 volatile uint8_t insideTimer1 = 0;
-long __attribute__((used)) stepperWait = 0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
@@ -706,6 +708,7 @@ ISR(TIMER1_COMPA_vect)
         "end1%=: ldi %[ex],1 \n\t"
         "end%=: \n\t"
         :[ex]"=&d"(doExit):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
+//        :[ex]"=&d"(doExit),[stepperWait]"=&d"(stepperWait):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
     if(doExit) return;
     insideTimer1 = 1;
     OCR1A = 61000;

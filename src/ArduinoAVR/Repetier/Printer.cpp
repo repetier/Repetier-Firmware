@@ -1588,10 +1588,11 @@ void Printer::homeXAxis()
 	// Now position current extrude on x = 0
 	PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
 	currentPositionSteps[X_AXIS] = xMinSteps;
-#endif	
+#endif	// LAZY_DUAL_X_AXIS
 	updateCurrentPosition(false);
 	offsetX = 0;
 	setXHomed(true);
+
 #else	// DUAL_AXIS
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR == 1))
     {
@@ -1744,9 +1745,12 @@ void Printer::homeZAxis() // Cartesian homing
 #endif
 		//Com::printFLN(PSTR("Z-Correction-Steps:"),zCorrection); // TEST
         PrintLine::moveRelativeDistanceInSteps(0, 0, zCorrection, 0, homingFeedrate[Z_AXIS], true, false);
-        currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - Printer::zBedOffset * axisStepsPerMM[Z_AXIS]);
+        currentPositionSteps[Z_AXIS] = ((Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps - zBedOffset * axisStepsPerMM[Z_AXIS]);
 #if NUM_EXTRUDER > 0
+#if (EXTRUDER_IS_Z_PROBE == 0 || Z_HOME_DIR > 0)
         currentPositionSteps[Z_AXIS] -= Extruder::current->zOffset;
+#endif		
+		//Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
 #endif
 #if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
 // Special case where z probe is z min endstop and distortion correction is enabled
@@ -1757,10 +1761,17 @@ void Printer::homeZAxis() // Cartesian homing
 #endif
 		updateCurrentPosition(true); 
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+		//Com::printF(PSTR("uc pz:"),currentPosition[Z_AXIS]);Com::printFLN(PSTR(" sz:"),currentPositionSteps[Z_AXIS]);
 		// If we have software leveling enabled and are not at 0,0 z position is not zero, but we measured 
 		// for z = 0, so we need to correct for rotation.
+#if 0 && EXTRUDER_IS_Z_PROBE
+		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * (currentPosition[Z_AXIS] - offsetZ);
+		currentPosition[Z_AXIS] = offsetZ;
+#else		
 		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * currentPosition[Z_AXIS];
 		currentPosition[Z_AXIS] = 0;
+#endif		
+		//Com::printF(PSTR("uc2 pz:"),currentPosition[Z_AXIS]);Com::printFLN(PSTR(" sz:"),currentPositionSteps[Z_AXIS]);
 #endif		
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
@@ -1878,7 +1889,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         homeZAxis(); // real z distance at that point to zero
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
         else startZ = Printer::zMin + Printer::zLength - zBedOffset;
-		moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[X_AXIS]); // correct rotation!
+		moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
 #if ZHOME_HEAT_ALL
         for(int i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
@@ -1928,7 +1939,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 	LaserDriver::laserOn = oldLaser;
 #endif
-setNoDestinationCheck(nocheck);
+    setNoDestinationCheck(nocheck);
 	Printer::updateCurrentPosition();
 }
 #endif  // Not delta printer

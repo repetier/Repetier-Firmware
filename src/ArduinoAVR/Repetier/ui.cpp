@@ -1713,6 +1713,17 @@ void UIDisplay::parse(const char *txt,bool ram)
                     addFloat(Printer::filamentPrinted * 0.001,3,2);
                     break;
                 }
+				if(c2>='0' && c2<='2') {
+					if(Printer::isHoming()) {
+						addStringP(PSTR(" Homing"));
+						break;
+					} else {
+						if(Printer::isAnimation() && ((c2=='0' && !Printer::isXHomed()) || (c2=='1' && !Printer::isYHomed()) || (c2=='2' && !Printer::isZHomed()))) {
+							addStringP(PSTR("   ?.??"));
+							break;
+						}	
+					}					
+				}
                 if(c2=='0')
                     fvalue = Printer::realXPosition();
                 else if(c2=='1')
@@ -2150,7 +2161,7 @@ void UIDisplay::refreshPage()
         }
 #endif
     }
-    for(uint8_t l = 0; l<loops; l++)
+    for(uint8_t l = 0; l < loops; l++)
     {
         if(uid.encoderLast != encoderStartScreen)
         {
@@ -2361,7 +2372,6 @@ void UIDisplay::refreshPage()
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
         }
         while( u8g_NextPage(&u8g) );  //end picture loop
-        Printer::toggleAnimation();
 #endif
     } // for l
 #if UI_ANIMATION
@@ -2372,6 +2382,7 @@ void UIDisplay::refreshPage()
     oldMenuLevel = menuLevel;
 #endif
 #endif
+    Printer::toggleAnimation();
 }
 
 void UIDisplay::pushMenu(const UIMenu *men, bool refresh)
