@@ -675,7 +675,7 @@ inline void setTimer(uint32_t delay)
 }
 
 volatile uint8_t insideTimer1 = 0;
-long stepperWait = 0;
+__attribute__((used)) long stepperWait = 0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 ISR(TIMER1_COMPA_vect)
@@ -1479,4 +1479,3 @@ RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UC
 #endif
 
 #endif
-
