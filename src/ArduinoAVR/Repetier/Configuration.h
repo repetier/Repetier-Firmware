@@ -1597,6 +1597,9 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 //#define FAN_BOARD_PIN ORIG_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 255
+/* Speed when no cooling is required. Normally 0 but if you need slightly cooling
+it can be set here */
+#define BOARD_FAN_MIN_SPEED 0
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.
 */

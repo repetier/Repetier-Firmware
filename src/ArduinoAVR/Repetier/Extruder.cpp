@@ -111,7 +111,7 @@ void Extruder::manageTemperatures()
                     }
                 }
 #if SHARED_COOLER_BOARD_EXT
-                if(pwm_pos[PWM_BOARD_FAN]) enable = true;
+                if(pwm_pos[PWM_BOARD_FAN] == BOARD_FAN_SPEED) enable = true;
 #endif
                 extruder[0].coolerPWM = (enable ? extruder[0].coolerSpeed : 0);
             } // controller == 0
@@ -930,7 +930,7 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
     if(temperatureInCelsius > 15)
         pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;    // turn on the mainboard cooling fan
     else if(Printer::areAllSteppersDisabled())
-        pwm_pos[PWM_BOARD_FAN] = 0;      // turn off the mainboard cooling fan only if steppers disabled
+        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;      // turn off the mainboard cooling fan only if steppers disabled
 #endif
 	EVENT_SET_BED_TEMP(temperatureInCelsius,beep);
 }

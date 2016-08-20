@@ -629,7 +629,7 @@ void Printer::kill(uint8_t only_steppers)
 #if HAVE_HEATED_BED
     if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
 #endif
-       pwm_pos[PWM_BOARD_FAN] = 0;
+       pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;
 #endif // FAN_BOARD_PIN
 	Commands::printTemperatures(false);
 }
