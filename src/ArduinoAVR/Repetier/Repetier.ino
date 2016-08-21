@@ -139,6 +139,7 @@ Custom M Codes
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
+- M408 S<0-5> - Return status as json string (requires matching feature) for PanelDue
 - M450 - Reports printer mode
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser

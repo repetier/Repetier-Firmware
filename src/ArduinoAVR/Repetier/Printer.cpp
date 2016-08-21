@@ -2471,9 +2471,115 @@ void Printer::showJSONStatus(int type) {
     } else {
         Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
     }
-    Com::printF(PSTR("\",\"coords\": {"));
+	
+	//	"heaters": [27.5, 30.3, 30.6],
+	Com::printF(PSTR("\",\"heaters\":["));
+#if HAVE_HEATED_BED
+	Com::print(heatedBedController.currentTemperatureC);
+#else
+	Com::print((int)0);
+#endif	
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+	    Com::print(',');
+	    Com::print(extruder[i].tempControl.currentTemperatureC);
+    }
+	//	"active": [65.0, 195.0, 0.0],
+	Com::printF(PSTR("],\"active\":["));
+#if HAVE_HEATED_BED
+	Com::print(heatedBedController.targetTemperatureC);
+#else
+	Com::print((int)0);
+#endif
+for (int i = 0; i < NUM_EXTRUDER; i++) {
+	Com::print(',');
+	Com::print(extruder[i].tempControl.targetTemperatureC);
+}
+	//	"standby": [-273.1, 0.0, 150.0],
+	Com::printF(PSTR("],\"standby\":["));
+	#if HAVE_HEATED_BED
+	Com::print(heatedBedController.targetTemperatureC);
+	#else
+	Com::print((int)0);
+	#endif
+	for (int i = 0; i < NUM_EXTRUDER; i++) {
+		Com::print(',');
+		Com::print(extruder[i].tempControl.targetTemperatureC);
+	}
+	//	"hstat": [0, 0, 0],
+	//  hstat is 0 for heater off, 1 for standby, 2 for active and 3 for fault. We have just added 4 for "being auto-tuned'
+	Com::printF(PSTR("],\"hstat\":["));
+	#if HAVE_HEATED_BED
+	if(heatedBedController.isSensorDefect() || heatedBedController.isSensorDecoupled())
+		Com::print((int)3);
+	else
+		Com::print((int)(heatedBedController.targetTemperatureC < 30 ? 0 : 2));
+	Com::print(heatedBedController.targetTemperatureC);
+	#else
+	Com::print((int)0);
+	#endif
+	for (int i = 0; i < NUM_EXTRUDER; i++) {
+		Com::print(',');
+		if(extruder[i].tempControl.isSensorDefect() || extruder[i].tempControl.isSensorDecoupled())
+			Com::print((int)3);
+		else
+			Com::print((int)(extruder[i].tempControl.targetTemperatureC < 30 ? 0 : 2));
+	}	
+	//	"pos": [1.00, 205.00, 6.48],
+    Com::printF(PSTR("],\"pos\":["));
+    Com::print(currentPosition[X_AXIS]); // X
+    Com::print(',');
+    Com::print(currentPosition[Y_AXIS]); // Y
+    Com::print(',');
+    Com::print(currentPosition[Z_AXIS]); // Z
+	//	"extr": [0.0, 0.0],
+    Com::printF(PSTR("],\"extr\":["));
+	//	"sfactor": 100.00,
+	Com::printF(PSTR("],\"sfactor\":"),Printer::feedrateMultiply);
+	//	"efactor": [100.00, 100.00],
+	Com::printF(PSTR(",\"efactor\":["));
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+	    if (i) Com::print(',');
+	    Com::print((int)Printer::extrudeMultiply); 
+    }	
+	//	"tool": 0,
+	Com::printF(PSTR("],\"tool\":"),Extruder::current->id);
+		//"probe": "4",
+    Com::printF(PSTR(",\"probe\":"));
+    if(Endstops::zProbe())
+		Com::print((int)0);
+	else
+		Com::print((int)1000);			
+	//	"fanPercent": [0.00, 100.00],
+    Com::printF(PSTR(",\"fanPercent\":["));
+    #if FEATURE_FAN_CONTROL
+    Com::print(getFanSpeed() / 2.55f);
+    #endif
+    #if FEATURE_FAN2_CONTROL
+    Com::printF(Com::tComma,getFan2Speed() / 2.55f);
+    #endif
+    Com::printF(PSTR("]"));
+	//	"fanRPM": 0,
+	//	"homed": [1, 1, 1],
+    Com::printF(PSTR(",\"homed\":["));
+    Com::print((int)isXHomed());
+    Com::print(',');Com::print(isYHomed());
+    Com::print(',');Com::print(isZHomed());
+	Com::printF(PSTR("]"));
+    if(type == 1) {		
+		//	"geometry": "cartesian",
+#if DRIVE_SYSTEM == DELTA
+		Com::printF(PSTR(",\"geometry\":\"Delta\""));
+#else
+		Com::printF(PSTR(",\"geometry\":\"Cartesian\""));
+#endif	
+		//	"myName": "Ormerod"
+		Com::printF(PSTR(",\"myName\":\"" UI_PRINTER_NAME "\""));
+    }
+    Com::printF(PSTR(",\"coords\": {"));
     Com::printF(PSTR("\"axesHomed\":["));
-    Com::printF(isHomedAll() ? PSTR("1, 1, 1") : PSTR("0, 0, 0"));
+	Com::print((int)isXHomed());
+	Com::print(',');Com::print(isYHomed());
+	Com::print(',');Com::print(isZHomed());
     Com::printF(PSTR("],\"extr\":["));
     firstOccurrence = true;
     for (int i = 0; i < NUM_EXTRUDER; i++) {
