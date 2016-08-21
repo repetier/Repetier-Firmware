@@ -1815,6 +1815,10 @@ void Commands::processMCode(GCode *com) {
         case 117: // M117 message to lcd
             if(com->hasString()) {
                 UI_STATUS_UPD_RAM(com->text);
+#if JSON_OUTPUT && defined(WRITE_MESSAGES_To_JSON)
+				Com::printF(PSTR("{\"message\":\""),com->text);
+				Com::printFLN(PSTR("\"}"));
+#endif				
             }
             break;
         case 119: // M119
