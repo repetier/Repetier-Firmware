@@ -397,7 +397,7 @@
 #define UI_TEXT_BACK_EN             "Back " cUP
 #define UI_TEXT_QUICK_SETTINGS_EN   "Quick settings"
 #define UI_TEXT_ERRORMSG_EN         "%oe"
-#define UI_TEXT_CONFIGURATION_EN    "Configuration"
+#define UI_TEXT_CONFIGURATION_EN    "Settings"
 #define UI_TEXT_POSITION_EN         "Position"
 #define UI_TEXT_EXTRUDER_EN         "Extruder"
 #define UI_TEXT_SD_CARD_EN          "SD card"
@@ -689,7 +689,7 @@
 #define UI_TEXT_BACK_DE             "Zur" STR_uuml "ck " cUP
 #define UI_TEXT_QUICK_SETTINGS_DE   "Schnelleinst."
 #define UI_TEXT_ERRORMSG_DE         "%oe"
-#define UI_TEXT_CONFIGURATION_DE    "Konfiguration"
+#define UI_TEXT_CONFIGURATION_DE    "Einstellungen"
 #define UI_TEXT_POSITION_DE         "Position"
 #define UI_TEXT_EXTRUDER_DE         "Extruder"
 #define UI_TEXT_SD_CARD_DE          "SD Karte"

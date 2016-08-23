@@ -85,6 +85,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // PiBot Controller V2.0      = 316
 // Sanguish Beta              = 501
 // Unique One rev. A          = 88
+// SAV MK1                    = 89
 // User layout defined in userpins.h = 999
 
 #define MOTHERBOARD 33

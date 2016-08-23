@@ -2756,6 +2756,65 @@ S3(ext)=9
 #define E1_PINS
 #endif
 
+/****************************************************************************************
+ * SAV MK1 (ATMEGA90USB)
+ * Requires the Teensyduino software!
+ * See how to install software etc. here: http://reprap.org/wiki/SAV_MKI#Setting-up_the_environment
+ ****************************************************************************************/
+ #if MOTHERBOARD == 89
+ #define KNOWN_BOARD 1
+ 
+ #define ORIG_X_STEP_PIN         28
+ #define ORIG_X_DIR_PIN          29
+ #define ORIG_X_ENABLE_PIN       19
+ #define ORIG_X_MIN_PIN          25
+ #define ORIG_X_MAX_PIN          -1
+ 
+ #define ORIG_Y_STEP_PIN         30
+ #define ORIG_Y_DIR_PIN          31
+ #define ORIG_Y_ENABLE_PIN       18
+ #define ORIG_Y_MIN_PIN          26
+ #define ORIG_Y_MAX_PIN          -1
+ 
+ #define ORIG_Z_STEP_PIN         32
+ #define ORIG_Z_DIR_PIN          33
+ #define ORIG_Z_ENABLE_PIN       17
+ #define ORIG_Z_MIN_PIN          -1
+ #define ORIG_Z_MAX_PIN          27
+ 
+ #define ORIG_E0_STEP_PIN         34
+ #define ORIG_E0_DIR_PIN          35
+ #define ORIG_E0_ENABLE_PIN       13
+ 
+ // Extruder - ANALOG PIN NUMBER!
+ #define TEMP_0_PIN          7
+ // Bed - ANALOG PIN NUMBER!
+ #define TEMP_1_PIN          6
+ // Extruder
+ #define HEATER_0_PIN       15
+ // bed
+ #define HEATER_1_PIN       14
+ #define HEATER_2_PIN   -1
+ #define TEMP_2_PIN     -1
+ 
+ #define SDPOWER            -1
+ #define SDSS                20
+ #define LED_PIN            -1
+ // Fan
+ #define ORIG_FAN_PIN            16
+ #define ORIG_PS_ON_PIN          -1
+ 
+ #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+ #define E1_PINS
+ 
+ #if !SDSUPPORT
+ // these pins are defined in the SD library if building with SD support
+ #define SCK_PIN          21
+ #define MISO_PIN         23
+ #define MOSI_PIN         22
+ #endif
+ 
+ #endif
 
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
