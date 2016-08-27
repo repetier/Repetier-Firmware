@@ -855,6 +855,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 void Printer::setup()
 {
     HAL::stopWatchdog();
+    for(uint8_t i = 0; i < NUM_PWM; i++) pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
@@ -1196,7 +1197,6 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
 #endif
     advanceStepsSet = 0;
 #endif
-    for(uint8_t i = 0; i < NUM_EXTRUDER + 3; i++) pwm_pos[i] = 0;
     maxJerk = MAX_JERK;
 #if DRIVE_SYSTEM != DELTA
     maxZJerk = MAX_ZJERK;
