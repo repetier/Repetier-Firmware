@@ -1720,6 +1720,19 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_DISPLAY_D7_PIN		-1
 
 #if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
+#if MOTHERBOARD == 412 // STACKER 3d Superboard
+// PINK.1, 88, D_RS
+#define UI_DISPLAY_RS_PIN		29
+#define UI_DISPLAY_RW_PIN		-1
+// PINK.3, 86, D_E
+#define UI_DISPLAY_ENABLE_PIN	25
+// PINF.5, 92, D_D4
+// PINF.5, 92, D_D4
+#define UI_DISPLAY_D4_PIN		27
+#define UI_ENCODER_A 35
+#define UI_ENCODER_B 33
+#define UI_ENCODER_CLICK 37
+#else
 // PINK.1, 88, D_RS
 #define UI_DISPLAY_RS_PIN		25
 #define UI_DISPLAY_RW_PIN		-1
@@ -1731,6 +1744,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_A 35
 #define UI_ENCODER_B 33
 #define UI_ENCODER_CLICK 37
+#endif
 #else
 // PINK.1, 88, D_RS
 #define UI_DISPLAY_RS_PIN		44

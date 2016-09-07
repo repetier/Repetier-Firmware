@@ -61,6 +61,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Ultratronics Board           = 409
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
+// STACKER 3D Superboard        = 412
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 #define MOTHERBOARD 402
