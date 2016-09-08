@@ -175,3 +175,27 @@ alligator_r2.build.variant=alligator_r2
 alligator_r2.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
 alligator_r2.build.vid=0x2341
 alligator_r2.build.pid=0x003e
+
+stacker_3d_superboard_dbg.name=STACKER 3d Superboard (Programming Port)
+stacker_3d_superboard_dbg.vid.0=0x2341
+stacker_3d_superboard_dbg.pid.0=0x003d
+stacker_3d_superboard_dbg.vid.1=0x2A03
+stacker_3d_superboard_dbg.pid.1=0x003d
+stacker_3d_superboard_dbg.upload.tool=bossac
+stacker_3d_superboard_dbg.upload.protocol=sam-ba
+stacker_3d_superboard_dbg.upload.maximum_size=524288
+stacker_3d_superboard_dbg.upload.use_1200bps_touch=true
+stacker_3d_superboard_dbg.upload.wait_for_upload_port=false
+stacker_3d_superboard_dbg.upload.native_usb=false
+stacker_3d_superboard_dbg.build.mcu=cortex-m3
+stacker_3d_superboard_dbg.build.f_cpu=84000000L
+stacker_3d_superboard_dbg.build.usb_product="Arduino Due"
+stacker_3d_superboard_dbg.build.board=SAM_DUE
+stacker_3d_superboard_dbg.build.core=arduino
+stacker_3d_superboard_dbg.build.extra_flags=-D__SAM3X8E__ -mthumb {build.usb_flags}
+stacker_3d_superboard_dbg.build.ldscript=linker_scripts/gcc/flash.ld
+stacker_3d_superboard_dbg.build.variant=arduino_due_x
+stacker_3d_superboard_dbg.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
+stacker_3d_superboard_dbg.build.vid=0x2341
+stacker_3d_superboard_dbg.build.pid=0x003e
+

@@ -976,7 +976,6 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_Z_ENABLE_PIN   15
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
-#define HEATER_0_PIN     13
 /*
 Input Pins Channel Number
 AD0 CH0
@@ -996,70 +995,71 @@ AD13 CH13
 AD14 CH14
 AD15 CH15
 */
+#define HEATER_0_PIN     7
 #define TEMP_0_PIN       7 
-#define HEATER_1_PIN     7 
+// These pins are for bed !
+#define HEATER_1_PIN     98 
 #define TEMP_1_PIN       3 
-#define HEATER_2_PIN     12
+#define HEATER_2_PIN     8
 #define TEMP_2_PIN       6 
-#define HEATER_3_PIN     11
+#define HEATER_3_PIN     9
 #define TEMP_3_PIN       5 
-#define TEMP_4_PIN       4 
+// D7
+#define HEATER_4_PIN     11
+#define TEMP_4_PIN       4
+// D8 
+#define HEATER_5_PIN     12
+#define HEATER_6_PIN     13
+#define HEATER_7_PIN     100
+#define HEATER_8_PIN     72
 
 #define THERMOCOUPLE_0_PIN  10   
 #define THERMOCOUPLE_1_PIN  11 
 #define THERMOCOUPLE_2_PIN  12   
 #define THERMOCOUPLE_3_PIN  13   
 #define THERMOCOUPLE_4_PIN  14   
+#define THERMOCOUPLE_5_PIN  0   
+#define THERMOCOUPLE_6_PIN  1   
+#define THERMOCOUPLE_7_PIN  2   
 
-#define ORIG_E0_STEP_PIN    61
-#define ORIG_E0_DIR_PIN     60
-#define ORIG_E0_ENABLE_PIN  62
+#define ORIG_E0_STEP_PIN    105
+#define ORIG_E0_DIR_PIN     106
+#define ORIG_E0_ENABLE_PIN  107
 
-#define ORIG_E1_STEP_PIN    64
-#define ORIG_E1_DIR_PIN     63
-#define ORIG_E1_ENABLE_PIN  65
+#define ORIG_E1_STEP_PIN    102
+#define ORIG_E1_DIR_PIN     101
+#define ORIG_E1_ENABLE_PIN  103
 
 #define ORIG_E2_STEP_PIN    51
 #define ORIG_E2_DIR_PIN     53
 #define ORIG_E2_ENABLE_PIN  49
 
-// Extra driver on extension board
-// Might require pin 66 high for some drivers!
-#define ORIG_E3_STEP_PIN    35
-#define ORIG_E3_DIR_PIN     33
-#define ORIG_E3_ENABLE_PIN  37
+#define ORIG_E3_STEP_PIN    41
+#define ORIG_E3_DIR_PIN     99
+#define ORIG_E3_ENABLE_PIN  40
 
-// Extra driver on extension port
-// Might require pin 25 high for some drivers!
-#define ORIG_E4_STEP_PIN    29
-#define ORIG_E4_DIR_PIN     27
+#define ORIG_E4_STEP_PIN    5
+#define ORIG_E4_DIR_PIN     4
 #define ORIG_E4_ENABLE_PIN  31
-
-#define EXTENSION_BOARD_MS1 67
-#define EXTENSION_BOARD_MS2 68
-#define EXTENSION_BOARD_MS3 69
-// 66 -> not connected
-// 25 -> not connected
-// To set microstepping on startup set START_GCODE to e.g.
-// "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
 #define SDSUPPORT      1
 #define SDPOWER 	   -1
 // 4,10,52 if using HW SPI.
-#define SDSS		    4
+#define SDSS		    77
 #define ORIG_SDCARDDETECT       14
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	   9 
-#define ORIG_FAN2_PIN           8 
-#define ORIG_PS_ON_PIN          40
+#define ORIG_FAN_PIN 	   97 
+// Same as heater 8, alias
+#define ORIG_FAN2_PIN           72 
+#define ORIG_PS_ON_PIN          -1
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
-#define SDA_PIN 				20  	
+#define SDA_PIN 				70  	
 // 21 or 71
-#define SCL_PIN 				21  	
+#define SCL_PIN 				71  	
 
 // Servo pins: 5,6 und 39
 

@@ -891,7 +891,7 @@ STEPPER_CURRENT_CONTROL
 
 #else
 
-#define HEATER_1_PIN       14  // (bed)
+#define HEATER_1_PIN       14
 #define ORIG_X_ENABLE_PIN       -1
 #define ORIG_Y_ENABLE_PIN       -1
 #define ORIG_Z_ENABLE_PIN       -1
