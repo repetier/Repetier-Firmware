@@ -984,7 +984,12 @@ void Printer::setup()
     WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #endif
-
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+	SET_INPUT(DOOR_PIN);
+#if defined(DOOR_PULLUP) && DOOR_PULLUP
+	PULLUP(DOOR_PIN,HIGH);
+#endif	
+#endif
     //end stop pull ups
 #if MIN_HARDWARE_ENDSTOP_X
 #if X_MIN_PIN > -1

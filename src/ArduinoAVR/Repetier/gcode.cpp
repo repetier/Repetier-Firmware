@@ -162,6 +162,8 @@ void GCode::keepAlive(enum FirmwareState state) {
 			Com::printFLN(PSTR("busy:paused for user interaction"));	
 		} else if(state == WaitHeater) {
 			Com::printFLN(PSTR("busy:heating"));	
+		} else if(state == DoorOpen) {
+			Com::printFLN(PSTR("busy:door open"));
 		} else { // processing and uncaught cases
 			Com::printFLN(PSTR("busy:processing"));
 		}
@@ -371,6 +373,12 @@ It must be called frequently to empty the incoming buffer.
 */
 void GCode::readFromSerial()
 {
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+	if(READ(DOOR_PIN) != DOOR_INVERTING) {
+		keepAlive(DoorOpen);
+		return; // do nothing while door is open
+	}
+#endif	
     if(bufferLength >= GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength)) {
 		keepAlive(Processing);
 		return; // all buffers full

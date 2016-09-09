@@ -1682,7 +1682,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif // CONTROLLER_GATE_3NOVATICA
 
 #if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD || FEATURE_CONTROLLER == CONTROLLER_SPARKLCD_ADAPTER
-#if MOTHERBOARD != 402
+#if MOTHERBOARD != 402 && MOTHERBOARD != 412
 #error This config only works with RADDS motherboard!
 #endif
 #define UI_DISPLAY_CHARSET 3

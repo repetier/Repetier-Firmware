@@ -1585,6 +1585,15 @@ it can be set here */
 #define FAN_THERMO_THERMISTOR_PIN -1
 #define FAN_THERMO_THERMISTOR_TYPE 1
 
+/** The door pin is to detect a door opening. This will prevent new command
+ from serial or sd card getting executed. It will not stop immediately. Instead
+ it lets the move buffer run empty so closing the door allows continuing the print.
+ The exact behavior might change in the future.
+  */
+ 
+#define DOOR_PIN -1
+#define DOOR_PULLUP 1
+#define DOOR_INVERTING 1
 
 /** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
  * This essentially adds command M36/M408 and extends M20.
