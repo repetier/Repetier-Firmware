@@ -688,8 +688,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	float lastX = Printer::lastCmdPos[X_AXIS];
 	// Park current extruder
 	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps;
-	if(Printer::isXHomed() && executeSelect)
+	if(Printer::isXHomed() && executeSelect) {
+		bool oldDestCheck = Printer::isNoDestinationCheck();
+		Printer::setNoDestinationCheck(true);
 		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+		Printer::setNoDestinationCheck(oldDestCheck);
+	}
 #endif	
     Extruder::current = &extruder[extruderId];
 #ifdef SEPERATE_EXTRUDER_POSITIONS
@@ -1995,7 +1999,62 @@ const short temptable_15[NUMTEMPS_15][2] PROGMEM =
    { 147 * 4, 320 * 8 },{ 194 * 4, 300 * 8 },{ 254 * 4, 280 * 8 },{ 330 * 4, 260 * 8 },{ 428 * 4, 240 * 8 },{ 533 * 4, 220 * 8 },{ 646 * 4, 200 * 8 },{ 754 * 4, 180 * 8 },{ 844 * 4, 160 * 8 },
    { 912 * 4, 140 * 8 },{ 959 * 4, 120 * 8 },{ 989 * 4, 100 * 8 },{ 1007 * 4, 80 * 8 },{ 1016 * 4, 60 * 8 },{ 1021 * 4, 30 * 8 },{ 4091, 25 * 8 },{ 4092, 20 * 8 }
 };
-	
+// Contributed by Brandon Coates - May 2015
+// B3 Innovations Pico 500c Thermistor
+// B150/250 = 5300 K +/- 3%
+// R 250 = 2.705k Ohms +/- 2.5%
+#define NUMTEMPS_16 49
+const short temptable_16[NUMTEMPS_16][2] PROGMEM = {
+	{  37 ,  510*8 },
+	{  44 ,  500*8 },
+	{  51 ,  490*8 },
+	{  58 ,  480*8 },
+	{  67 ,  470*8 },
+	{  77 ,  460*8 },
+	{  88 ,  450*8 },
+	{  99 ,  440*8 },
+	{  112 ,  430*8 },
+	{  126 ,  420*8 },
+	{  144 ,  410*8 },
+	{  163 ,  400*8 },
+	{  185 ,  390*8 },
+	{  210 ,  380*8 },
+	{  240 ,  370*8 },
+	{  273 ,  360*8 },
+	{  311 ,  350*8 },
+	{  355 ,  340*8 },
+	{  408 ,  330*8 },
+	{  470 ,  320*8 },
+	{  542 ,  310*8 },
+	{  623 ,  300*8 },
+	{  720 ,  290*8 },
+	{  832 ,  280*8 },
+	{  961 ,  270*8 },
+	{  1108 ,  260*8 },
+	{  1276 ,  250*8 },
+	{  1463 ,  240*8 },
+	{  1676 ,  230*8 },
+	{  1896 ,  220*8 },
+	{  2133 ,  210*8 },
+	{  2382 ,  200*8 },
+	{  2635 ,  190*8 },
+	{  2866 ,  180*8 },
+	{  3092 ,  170*8 },
+	{  3288 ,  160*8 },
+	{  3468 ,  150*8 },
+	{  3608 ,  140*8 },
+	{  3727 ,  130*8 },
+	{  3824 ,  120*8 },
+	{  3898 ,  110*8 },
+	{  3955 ,  100*8 },
+	{  4029 ,  80*8 },
+	{  4060 ,  65*8 },
+	{  4073 ,  55*8 },
+	{  4082 ,  45*8 },
+	{  4088 ,  35*8 },
+	{  4092 ,  25*8 },
+	{  4095 ,   0*8 },
+};	
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -2005,7 +2064,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[15] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[16] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -2029,9 +2088,10 @@ const short * const temptables[15] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_13[0][0]
         ,(short int *)&temptable_14[0][0]
         ,(short int *)&temptable_15[0][0]
+        ,(short int *)&temptable_16[0][0]
                                              };
-const uint8_t temptables_num[15] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14,NUMTEMPS_15
+const uint8_t temptables_num[16] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14,NUMTEMPS_15,NUMTEMPS_16
                                            };
 
 
@@ -2059,6 +2119,7 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     case 14:
     case 15:
+	case 16:
     case 97:
     case 98:
     case 99:
@@ -2108,6 +2169,7 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     case 14:
     case 15:
+	case 16:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;

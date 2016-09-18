@@ -225,6 +225,7 @@ controlled by settings in extruder 0 definition. */
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
 // 15 DYZE DESIGN 500°C Thermistor
+// 16 is B3 innovations 500°C sensor
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors

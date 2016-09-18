@@ -1051,7 +1051,7 @@ void UIDisplay::initialize()
 #if defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1
     UI_KEYS_INIT_BUTTON_LOW(USER_KEY4_PIN);
 #endif
-#if UI_DISPLAY_TYPE == DISPLAY_I2C
+#if UI_DISPLAY_TYPE == DISPLAY_I2C && defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE==1
     // I don't know why but after power up the lcd does not come up
     // but if I reinitialize i2c and the lcd again here it works.
     HAL::delayMilliseconds(10);
