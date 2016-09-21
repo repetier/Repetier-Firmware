@@ -193,7 +193,7 @@ extern Extruder extruder[];
 #define _TEST_EXTRUDER_JAM(x,pin) {\
         uint8_t sig = READ(pin);\
 		  if(sig != extruder[x].jamLastSignal) {\
-			  extruder[x].jamLastSignal ) sig;\
+			  extruder[x].jamLastSignal = sig;\
 			  if(sig)\
 				{extruder[x].tempControl.setFilamentChange(true);extruder[x].tempControl.setJammed(true);} \
 			  else if(!Printer::isDebugJamOrDisabled() && extruder[x].tempControl.isJammed()) \
@@ -204,7 +204,7 @@ extern Extruder extruder[];
 #define _TEST_EXTRUDER_JAM(x,pin) {\
 	uint8_t sig = !READ(pin);\
 	if(sig != extruder[x].jamLastSignal) {\
-		extruder[x].jamLastSignal ) sig;\
+		extruder[x].jamLastSignal = sig;\
 		if(sig)\
 		{extruder[x].tempControl.setFilamentChange(true);extruder[x].tempControl.setJammed(true);} \
 		else if(!Printer::isDebugJamOrDisabled() && extruder[x].tempControl.isJammed()) \
