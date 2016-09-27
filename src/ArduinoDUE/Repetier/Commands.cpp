@@ -186,7 +186,7 @@ void Commands::printTemperatures(bool showRaw) {
             Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[i].tempControl.currentTemperature);
         }
     }
-#elif NUM_EXTRUDER == 1
+#elif NUM_EXTRUDER == 1 || MIXING_EXTRUDER
 	if((error = extruder[0].tempControl.errorState()) > 0) {
 		Com::printF(PSTR(" D0:"),error);
 	}

@@ -1157,6 +1157,25 @@ PULLUP(Z2_MINMAX_PIN, HIGH);
     SET_INPUT(EXT5_JAM_PIN);
     PULLUP(EXT5_JAM_PIN, EXT5_JAM_PULLUP);
 #endif // defined
+HAL::delayMilliseconds(1);
+#if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
+extruder[0].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
+#if defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
+extruder[1].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
+#if defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
+extruder[2].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
+#if defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
+extruder[3].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
+#if defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
+extruder[4].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
+#if defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
+extruder[5].jamLastSignal = READ(EXT0_JAM_PIN);
+#endif // defined
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
     WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
