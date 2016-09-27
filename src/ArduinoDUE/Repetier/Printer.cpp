@@ -1162,19 +1162,19 @@ HAL::delayMilliseconds(1);
 extruder[0].jamLastSignal = READ(EXT0_JAM_PIN);
 #endif // defined
 #if defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-extruder[1].jamLastSignal = READ(EXT0_JAM_PIN);
+extruder[1].jamLastSignal = READ(EXT1_JAM_PIN);
 #endif // defined
 #if defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-extruder[2].jamLastSignal = READ(EXT0_JAM_PIN);
+extruder[2].jamLastSignal = READ(EXT2_JAM_PIN);
 #endif // defined
 #if defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-extruder[3].jamLastSignal = READ(EXT0_JAM_PIN);
+extruder[3].jamLastSignal = READ(EXT3_JAM_PIN);
 #endif // defined
 #if defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-extruder[4].jamLastSignal = READ(EXT0_JAM_PIN);
+extruder[4].jamLastSignal = READ(EXT4_JAM_PIN);
 #endif // defined
 #if defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-extruder[5].jamLastSignal = READ(EXT0_JAM_PIN);
+extruder[5].jamLastSignal = READ(EXT5_JAM_PIN);
 #endif // defined
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
