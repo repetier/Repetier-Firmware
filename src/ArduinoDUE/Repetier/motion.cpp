@@ -757,19 +757,22 @@ void PrintLine::updateTrapezoids()
     forwardPlanner(first);
 
 #ifdef DEBUG_PLANNER
+	if(Printer::debugEcho()) {
 	Com::printF(PSTR("Planner: "),(int)linesCount);
-	previousPlannerIndex(first);
-	Com::printF(PSTR(" F "),lines[first].startSpeed,1);
-	Com::printF(PSTR(" - "),lines[first].endSpeed,1);
-	Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
-	Com::printF(PSTR(","),(int)lines[first].joinFlags);
-	nextPlannerIndex(first);
+		previousPlannerIndex(first);
+		Com::printF(PSTR(" F "),lines[first].startSpeed,1);
+		Com::printF(PSTR(" - "),lines[first].endSpeed,1);
+		Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
+		Com::printF(PSTR(","),(int)lines[first].joinFlags);
+		nextPlannerIndex(first);
+	}
 #endif
     // Update precomputed data
     do
     {
         lines[first].updateStepsParameter();
 #ifdef DEBUG_PLANNER
+	if(Printer::debugEcho()) {
 		Com::printF(PSTR(" / "),lines[first].startSpeed,1);
 		Com::printF(PSTR(" - "),lines[first].endSpeed,1);
 		Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
@@ -777,6 +780,7 @@ void PrintLine::updateTrapezoids()
 #ifdef DEBUG_QUEUE_MOVE
 		Com::println();
 #endif		
+	}
 #endif		
         //noInts.protect();
         lines[first].unblock();  // start with first block to release next used segment as early as possible
@@ -788,10 +792,12 @@ void PrintLine::updateTrapezoids()
     act->updateStepsParameter();
     act->unblock();
 #ifdef DEBUG_PLANNER
-	Com::printF(PSTR(" / "),lines[first].startSpeed,1);
-	Com::printF(PSTR(" - "),lines[first].endSpeed,1);
-	Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
-	Com::printFLN(PSTR(","),(int)lines[first].joinFlags);
+	if(Printer::debugEcho()) {
+		Com::printF(PSTR(" / "),lines[first].startSpeed,1);
+		Com::printF(PSTR(" - "),lines[first].endSpeed,1);
+		Com::printF(PSTR("("),lines[first].maxJunctionSpeed,1);
+		Com::printFLN(PSTR(","),(int)lines[first].joinFlags);
+	}
 #endif	
 }
 
@@ -1344,7 +1350,7 @@ uint8_t transformCartesianStepsToDeltaSteps(int32_t cartesianPosSteps[], int32_t
     }
     else
     {
-        // As we are right on the edge of many printers arm lengths, this is rewrittent to use unsigned long
+        // As we are right on the edge of many printers arm lengths, this is rewritten to use unsigned long
         // This allows 52% longer arms to be used without performance penalty
         // the code is a bit longer, because we cannot use negative to test for invalid conditions
         // Also, previous code did not check for overflow of squared result

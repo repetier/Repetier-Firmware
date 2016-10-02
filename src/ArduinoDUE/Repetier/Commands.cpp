@@ -2170,17 +2170,20 @@ void Commands::processMCode(GCode *com) {
             Printer::reportPrinterMode();
             break;
         case 451:
+			waitUntilEndOfAllMoves();
             Printer::mode = PRINTER_MODE_FFF;
             Printer::reportPrinterMode();
             break;
         case 452:
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
+			waitUntilEndOfAllMoves();
             Printer::mode = PRINTER_MODE_LASER;
 #endif
             Printer::reportPrinterMode();
             break;
         case 453:
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
+			waitUntilEndOfAllMoves();
             Printer::mode = PRINTER_MODE_CNC;
 #endif
             Printer::reportPrinterMode();
