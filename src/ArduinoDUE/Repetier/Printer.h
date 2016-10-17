@@ -549,6 +549,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
+#endif
     }
 
     /** \brief Enable stepper motor for x direction. */
@@ -583,6 +586,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, Z_ENABLE_ON);
+#endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
@@ -632,6 +638,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
+#endif
         }
         else
         {
@@ -641,6 +650,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
@@ -984,6 +996,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
             motorYorZ += 2;
         }
         else if(motorYorZ >= 2)
@@ -994,6 +1009,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
             motorYorZ -= 2;
         }
@@ -1044,6 +1062,11 @@ public:
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 	}
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+	if(Printer::multiZHomeFlags & 8) {
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
 #else		
         WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
@@ -1051,6 +1074,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #endif
     }
@@ -1070,6 +1096,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,!START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
     }
     static INLINE speed_t updateStepsPerTimerCall(speed_t vbase)

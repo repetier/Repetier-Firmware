@@ -1314,6 +1314,11 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z3_DIR_PIN    E2_DIR_PIN
 #define Z3_ENABLE_PIN E2_ENABLE_PIN
 
+#define FEATURE_FOUR_ZSTEPPER 0
+#define Z4_STEP_PIN   E2_STEP_PIN
+#define Z4_DIR_PIN    E2_DIR_PIN
+#define Z4_ENABLE_PIN E2_ENABLE_PIN
+
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
 */

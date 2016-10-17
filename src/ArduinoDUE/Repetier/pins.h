@@ -81,7 +81,8 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_E1_STEP_PIN    36
 #define ORIG_E1_DIR_PIN     34
-#define ORIG_E1_ENABLE_PIN  40
+// was 40 but seemed to be wrong!
+#define ORIG_E1_ENABLE_PIN  30
 
 #define SDPOWER 	   -1
 // 10 if using HW SPI. 53 if using SW SPI
