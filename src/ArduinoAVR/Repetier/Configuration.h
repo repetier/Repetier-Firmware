@@ -87,6 +87,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguish Beta              = 501
 // Unique One rev. A          = 88
 // SAV MK1                    = 89
+// MJRice Pica Rev B          = 183
+// MJRice Pica Rev C          = 184
 // User layout defined in userpins.h = 999
 
 #define MOTHERBOARD 33

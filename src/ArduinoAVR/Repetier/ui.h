@@ -856,6 +856,27 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
 
+#elif ( MOTHERBOARD == 183 ) || ( MOTHERBOARD == 184 ) // MJRice Pica
+
+#undef BEEPER_PIN
+#define BEEPER_PIN 19
+#define UI_DISPLAY_RS_PIN 33
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 30
+#define UI_DISPLAY_D0_PIN -1
+#define UI_DISPLAY_D1_PIN -1
+#define UI_DISPLAY_D2_PIN -1
+#define UI_DISPLAY_D3_PIN -1
+#define UI_DISPLAY_D4_PIN 35
+#define UI_DISPLAY_D5_PIN 32
+#define UI_DISPLAY_D6_PIN 37
+#define UI_DISPLAY_D7_PIN 36
+#define UI_ENCODER_A 47
+#define UI_ENCODER_B 48
+#define UI_ENCODER_CLICK 31
+#define UI_RESET_PIN -1
+#define SDCARDDETECT 49
+
 #else  // RAMPS
 #undef BEEPER_PIN
 #define BEEPER_PIN             37
