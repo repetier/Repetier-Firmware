@@ -593,6 +593,31 @@ void initializeLCD()
 // More schematics including latching (74HC595) and non-latching (74LS164) shift registers:
 //    https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/schematics
 
+#ifdef UI_DISPLAY_MTGHTY1
+void lcdShiftByte(uint8_t value) {
+
+    for (int8_t i = 7; i >= 0; i--) {
+        WRITE(UI_DISPLAY_CLOCK_PIN, 0);
+        HAL::delayMicroseconds(1);
+        WRITE(UI_DISPLAY_DATA_PIN, (value >> i) & 0x01);
+        HAL::delayMicroseconds(1);
+        WRITE(UI_DISPLAY_CLOCK_PIN, 1);
+    }
+    // toggle sr strobe
+    WRITE(UI_DISPLAY_ENABLE_PIN, 1);
+    HAL::delayMicroseconds(1);
+    WRITE(UI_DISPLAY_ENABLE_PIN, 0);
+    WRITE(UI_DISPLAY_CLOCK_PIN, 0);
+}
+
+void lcdWriteNibble(uint8_t value, uint8_t rs = 0) {
+    uint8_t v = (value<<4) | (rs ? 0b0010 : 0);
+    // toggle enable
+    lcdShiftByte(v | 0b00001000);
+    lcdShiftByte(v & 0b11110111);
+}
+#else
+
 // Shift a bit into shift register
 static void lcdShiftBit(uint8_t bit)
 {
@@ -644,6 +669,7 @@ void lcdWriteNibble(uint8_t value, uint8_t rs = 0)
 #endif
     HAL::delayMicroseconds(UI_DELAYPERCHAR);
 }
+#endif
 
 // Write a byte into LCD via SR
 void lcdWriteByte(uint8_t c, uint8_t rs)

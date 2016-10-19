@@ -2095,6 +2095,41 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 
 #endif // CONTROLLER_ZONESTAR
 
+#if FEATURE_CONTROLLER == CONTROLLER_MIGHTY1
+
+#define UI_DISPLAY_TYPE DISPLAY_SR
+#define UI_COLS 20
+#define UI_ROWS 4
+#define BEEPER_TYPE     1
+#define UI_HAS_KEYS     1
+#define UI_HAS_BACK_KEY 1
+#define UI_INVERT_MENU_DIRECTION 1
+
+#ifdef UI_MAIN
+void uiInitKeys() {
+#if UI_HAS_KEYS!=0
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_LEFT); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_DOWN);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_UP);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_RIGHT);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_CENTER);
+#endif
+}
+void uiCheckKeys(uint16_t &action) {
+#if UI_HAS_KEYS!=0
+
+     UI_KEYS_BUTTON_LOW(INTERFACE_CENTER,UI_ACTION_OK); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_DOWN,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_UP,UI_ACTION_NEXT); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_LEFT,UI_ACTION_BACK); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_RIGHT,UI_ACTION_SD_PRINT); // push button, connects gnd to pin
+#endif
+}
+inline void uiCheckSlowKeys(uint16_t &action) {}
+#endif // UI_MAIN
+#endif // CONTROLLER_MIGHTY1
+
+
 #ifndef UI_HAS_I2C_ENCODER
 #define UI_HAS_I2C_ENCODER 0
 #endif

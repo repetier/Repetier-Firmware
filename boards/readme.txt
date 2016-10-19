@@ -38,6 +38,10 @@ gen7 1.0+ version:
 Make sure to copy the Arduino.h which is needed to compile on Arduino 1.0.
 Replace the original boards.txt with the boards.txt so uploading files works.
 
+Mighty1 version
+------------------
+arduino tools must be 1.6.12 or greater. See boards manager.
+
 ============================
 
 The versions are the Arduino IDE versions not the board versions!

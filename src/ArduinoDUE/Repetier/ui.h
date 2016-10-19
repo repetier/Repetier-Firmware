@@ -856,6 +856,27 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
 
+#elif ( MOTHERBOARD == 183 ) || ( MOTHERBOARD == 184 ) // MJRice Pica
+
+#undef BEEPER_PIN
+#define BEEPER_PIN 19
+#define UI_DISPLAY_RS_PIN 33
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 30
+#define UI_DISPLAY_D0_PIN -1
+#define UI_DISPLAY_D1_PIN -1
+#define UI_DISPLAY_D2_PIN -1
+#define UI_DISPLAY_D3_PIN -1
+#define UI_DISPLAY_D4_PIN 35
+#define UI_DISPLAY_D5_PIN 32
+#define UI_DISPLAY_D6_PIN 37
+#define UI_DISPLAY_D7_PIN 36
+#define UI_ENCODER_A 47
+#define UI_ENCODER_B 48
+#define UI_ENCODER_CLICK 31
+#define UI_RESET_PIN -1
+#define SDCARDDETECT 49
+
 #else  // RAMPS
 #undef BEEPER_PIN
 #define BEEPER_PIN             37
@@ -2073,6 +2094,41 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #endif // UI_MAIN
 
 #endif // CONTROLLER_ZONESTAR
+
+#if FEATURE_CONTROLLER == CONTROLLER_MIGHTY1
+
+#define UI_DISPLAY_TYPE DISPLAY_SR
+#define UI_COLS 20
+#define UI_ROWS 4
+#define BEEPER_TYPE     1
+#define UI_HAS_KEYS     1
+#define UI_HAS_BACK_KEY 1
+#define UI_INVERT_MENU_DIRECTION 1
+
+#ifdef UI_MAIN
+void uiInitKeys() {
+#if UI_HAS_KEYS!=0
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_LEFT); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_DOWN);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_UP);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_RIGHT);
+  UI_KEYS_INIT_BUTTON_LOW(INTERFACE_CENTER);
+#endif
+}
+void uiCheckKeys(uint16_t &action) {
+#if UI_HAS_KEYS!=0
+
+     UI_KEYS_BUTTON_LOW(INTERFACE_CENTER,UI_ACTION_OK); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_DOWN,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_UP,UI_ACTION_NEXT); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_LEFT,UI_ACTION_BACK); // push button, connects gnd to pin
+     UI_KEYS_BUTTON_LOW(INTERFACE_RIGHT,UI_ACTION_SD_PRINT); // push button, connects gnd to pin
+#endif
+}
+inline void uiCheckSlowKeys(uint16_t &action) {}
+#endif // UI_MAIN
+#endif // CONTROLLER_MIGHTY1
+
 
 #ifndef UI_HAS_I2C_ENCODER
 #define UI_HAS_I2C_ENCODER 0

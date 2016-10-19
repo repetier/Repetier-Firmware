@@ -918,6 +918,12 @@ void Printer::setup()
     SET_INPUT(SDCARDDETECT);
     PULLUP(SDCARDDETECT, HIGH);
 #endif
+#if defined(SDWRITEPROTECTDETECT) && SDWRITEPROTECTDETECT > -1
+    // currently unused but make sure that it is an input
+    SET_INPUT(SDWRITEPROTECTDETECT);
+    PULLUP(SDWRITEPROTECTDETECT, HIGH);
+#endif
+
 #endif
 
     //Initialize Step Pins

@@ -1,0 +1,8 @@
+/core/
+/libraries/
+/Release/
+/.ino.cpp
+/.cproject
+/.project
+/.settings/
+/.pydevproject

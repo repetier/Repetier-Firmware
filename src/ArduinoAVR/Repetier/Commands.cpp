@@ -595,6 +595,31 @@ void motorCurrentControlInit() { //Initialize MCP4728 Motor Current
 }
 #endif
 
+#if STEPPER_CURRENT_CONTROL==CURRENT_CONTROL_MIGHTY1
+	SoftPotManager<MIGHTY1_CURRENT_CONTROL_PINS> softI2cMIGHTY1;
+
+	void setMotorCurrent(uint8_t channel, uint16_t level) {
+		uint8_t raw_level = ( level > MIGHTY1_VOUT_MAX ? MIGHTY1_VOUT_MAX:level );
+		softI2cMIGHTY1.writeByte(channel, 0b01011110, raw_level);
+	}
+	// for testing
+	uint8_t getMotorCurrent(uint8_t channel) {
+		return softI2cMIGHTY1.readByte(channel,0b01011110);
+	}
+	void setMotorCurrentPercent(uint8_t channel,float level) {
+		uint8_t raw_level = ( level * MIGHTY1_VOUT_MAX / 100 );
+		setMotorCurrent(channel, raw_level);
+	}
+	void motorCurrentControlInit() {
+		static const uint8_t defaultValues[] PROGMEM = MIGHTY1_CURRENT_DEFAULTS;
+		softI2cMIGHTY1.init();
+		for(uint8_t i = 0; i < sizeof(defaultValues); i++) {
+			setMotorCurrent(i,pgm_read_byte(defaultValues+i));
+		}
+	}
+
+#endif
+
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2) {
     if(ms1 > -1) switch(driver) {
@@ -1596,17 +1621,17 @@ void Commands::processMCode(GCode *com) {
                 if (pin_number > -1) {
                     if(com->hasS()) {
                         if(com->S >= 0 && com->S <= 255) {
-                            pinMode(pin_number, OUTPUT);
-                            digitalWrite(pin_number, com->S);
+                        	HAL::pinMode(pin_number, OUTPUT);
+                            HAL::digitalWrite(pin_number, com->S);
                             analogWrite(pin_number, com->S);
                             Com::printF(Com::tSetOutputSpace, pin_number);
                             Com::printFLN(Com::tSpaceToSpace,(int)com->S);
                         } else
                             Com::printErrorFLN(PSTR("Illegal S value for M42"));
                     } else {
-                        pinMode(pin_number, INPUT_PULLUP);
+                        HAL::pinMode(pin_number, INPUT_PULLUP);
                         Com::printF(Com::tSpaceToSpace, pin_number);
-                        Com::printFLN(Com::tSpaceIsSpace, digitalRead(pin_number));
+                        Com::printFLN(Com::tSpaceIsSpace, HAL::digitalRead(pin_number));
                     }
                 } else {
                     Com::printErrorFLN(PSTR("Pin can not be set by M42, is in sensitive pins! "));

@@ -35,6 +35,9 @@ uint8_t Extruder::activeMixingExtruder = 0;
 #endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
 extern int16_t read_max6675(uint8_t ss_pin,fast8_t idx);
+#ifdef THERMO_SCK
+static SoftSPI<THERMO_SCK,THERMO_MISO> thermoSoftSPI;
+#endif
 #endif
 #ifdef SUPPORT_MAX31855
 extern int16_t read_max31855(uint8_t ss_pin);
@@ -603,6 +606,7 @@ void Extruder::initExtruder()
 #if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
         if(act->tempControl.sensorType == 101 || act->tempControl.sensorType == 102)
         {
+#ifndef THERMO_SCK
             WRITE(SCK_PIN, 0);
             SET_OUTPUT(SCK_PIN);
             WRITE(MOSI_PIN, 1);
@@ -613,6 +617,7 @@ void Extruder::initExtruder()
             //WRITE(SS, HIGH);
             HAL::pinMode(SS, OUTPUT);
             HAL::digitalWrite(SS, 1);
+#endif
             HAL::pinMode(act->tempControl.sensorPin, OUTPUT);
 			HAL::digitalWrite(act->tempControl.sensorPin, 1);
         }
@@ -2055,6 +2060,36 @@ const short temptable_16[NUMTEMPS_16][2] PROGMEM = {
 	{  4092 ,  25*8 },
 	{  4095 ,   0*8 },
 };	
+
+// createTemperatureLookup.py --r0=50000 --t0=25 --r1=0 --r2=4700 --beta=4050 --max-adc=1023
+#define NUMTEMPS_17 25
+const short temptable_17[NUMTEMPS_17][2] PROGMEM = {
+   {4*1, 8*671},
+   {4*43, 8*227},
+   {4*85, 8*186},
+   {4*127, 8*164},
+   {4*169, 8*148},
+   {4*211, 8*137},
+   {4*253, 8*127},
+   {4*295, 8*119},
+   {4*337, 8*112},
+   {4*379, 8*105},
+   {4*421, 8*99},
+   {4*463, 8*94},
+   {4*505, 8*88},
+   {4*547, 8*83},
+   {4*589, 8*78},
+   {4*631, 8*73},
+   {4*673, 8*68},
+   {4*715, 8*62},
+   {4*757, 8*57},
+   {4*799, 8*51},
+   {4*841, 8*44},
+   {4*883, 8*37},
+   {4*925, 8*27},
+   {4*967, 8*15},
+   {4*1009, 8*-10}
+};
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
 #endif
@@ -2064,7 +2099,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[16] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[17] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -2089,9 +2124,10 @@ const short * const temptables[16] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_14[0][0]
         ,(short int *)&temptable_15[0][0]
         ,(short int *)&temptable_16[0][0]
+        ,(short int *)&temptable_17[0][0]
                                              };
-const uint8_t temptables_num[16] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14,NUMTEMPS_15,NUMTEMPS_16
+const uint8_t temptables_num[17] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14,NUMTEMPS_15,NUMTEMPS_16,NUMTEMPS_17
                                            };
 
 
@@ -2119,7 +2155,8 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     case 14:
     case 15:
-	case 16:
+    case 16:
+    case 17:
     case 97:
     case 98:
     case 99:
@@ -2169,7 +2206,8 @@ void TemperatureController::updateCurrentTemperature()
     case 12:
     case 14:
     case 15:
-	case 16:
+    case 16:
+    case 17:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
@@ -2542,12 +2580,21 @@ int16_t read_max6675(uint8_t ss_pin,fast8_t idx)
 	}
     if (HAL::timeInMilliseconds() - last_max6675_read[idx] > 230)
     {
+#ifdef THERMO_SCK
+        HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
+        HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
+
+        max6675_temp[idx] = thermoSoftSPI.receive();
+        max6675_temp[idx] <<= 8;
+        max6675_temp[idx] |= thermoSoftSPI.receive();
+#else
         HAL::spiInit(2);
         HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX6675
         HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
         max6675_temp[idx] = HAL::spiReceive(0);
         max6675_temp[idx] <<= 8;
         max6675_temp[idx] |= HAL::spiReceive(0);
+#endif
         HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX6675
         last_max6675_read[idx] = HAL::timeInMilliseconds();
     }
@@ -2559,6 +2606,16 @@ int16_t read_max31855(uint8_t ss_pin)
 {
     uint32_t data = 0;
     int16_t temperature;
+#ifdef THERMO_SCK
+    HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX31855
+    HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
+
+    for (unsigned short byte = 0; byte < 4; byte++)
+    {
+        data <<= 8;
+        data |= thermoSoftSPI.receive();
+    }
+#else
     HAL::spiInit(2);
     HAL::digitalWrite(ss_pin, 0);  // enable TT_MAX31855
     HAL::delayMicroseconds(1);    // ensure 100ns delay - a bit extra is fine
@@ -2568,7 +2625,7 @@ int16_t read_max31855(uint8_t ss_pin)
         data <<= 8;
         data |= HAL::spiReceive();
     }
-
+#endif
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX31855
 
     //Process temp
