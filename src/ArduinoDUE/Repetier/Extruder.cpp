@@ -352,24 +352,37 @@ void Extruder::manageTemperatures()
     } // any sensor defect
 #endif // NUM_TEMPERATURE_LOOPS
 
+    // Report temperatures every second, so we do not need to send M105
+    if(Printer::isAutoreportTemp()) {
+        millis_t now = HAL::timeInMilliseconds();
+        if(now-Printer::lastTempReport > 1000) {
+            Printer::lastTempReport = now;
+            Commands::printTemperatures();
+        }
+        
+    }
 }
 
 void TemperatureController::waitForTargetTemperature()
 {
     if(targetTemperatureC < 30) return;
     if(Printer::debugDryrun()) return;
-    millis_t time = HAL::timeInMilliseconds();
+    bool oldReport = Printer::isAutoreportTemp();
+    Printer::setAutoreportTemp(true);
+    //millis_t time = HAL::timeInMilliseconds();
     while(true)
     {
-        if( (HAL::timeInMilliseconds() - time) > 1000 )   //Print Temp Reading every 1 second while heating up.
+        /*if( (HAL::timeInMilliseconds() - time) > 1000 )   //Print Temp Reading every 1 second while heating up.
         {
             Commands::printTemperatures();
             time = HAL::timeInMilliseconds();
-        }
+        }*/
         Commands::checkForPeriodicalActions(true);
 		GCode::keepAlive(WaitHeater);
-        if(fabs(targetTemperatureC - currentTemperatureC) <= 1)
+        if(fabs(targetTemperatureC - currentTemperatureC) <= 1) {
+            Printer::setAutoreportTemp(oldReport);
             return;
+        }
     }
 }
 
@@ -469,6 +482,22 @@ void Extruder::initHeatedBed()
 #if HAVE_HEATED_BED
 #if TEMP_PID
     heatedBedController.updateTempControlVars();
+#endif
+
+#if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
+if(heatedBedController.sensorType == 101 || heatedBedController.sensorType == 102)
+{
+	WRITE(SCK_PIN, 0);
+	SET_OUTPUT(SCK_PIN);
+	WRITE(MOSI_PIN, 1);
+	SET_OUTPUT(MOSI_PIN);
+	WRITE(MISO_PIN, 1);
+	SET_INPUT(MISO_PIN);
+	HAL::pinMode(SS, OUTPUT);
+	HAL::digitalWrite(SS, 1);
+	HAL::pinMode(heatedBedController.sensorPin, OUTPUT);
+	HAL::digitalWrite(heatedBedController.sensorPin, 1);
+}
 #endif
 #endif
 }
@@ -852,21 +881,23 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_EXTRUDER_ID));
         EVENT_WAITING_HEATER(actExtruder->id);
         bool dirRising = actExtruder->tempControl.targetTemperatureC > actExtruder->tempControl.currentTemperatureC;
-        millis_t printedTime = HAL::timeInMilliseconds();
+        //millis_t printedTime = HAL::timeInMilliseconds();
         millis_t waituntil = 0;
 #if RETRACT_DURING_HEATUP
         uint8_t retracted = 0;
 #endif
         millis_t currentTime;
 		millis_t maxWaitUntil = 0;
+        bool oldAutoreport = Printer::isAutoreportTemp();
+        Printer::setAutoreportTemp(true);
         do
         {
             previousMillisCmd = currentTime = HAL::timeInMilliseconds();
-            if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
+            /*if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
             {
                 Commands::printTemperatures();
                 printedTime = currentTime;
-            }
+            }*/
             Commands::checkForPeriodicalActions(true);
 			GCode::keepAlive(WaitHeater);
             //gcode_read_serial();
@@ -896,6 +927,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
             }			
         }
         while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
+        Printer::setAutoreportTemp(oldAutoreport);
 #if RETRACT_DURING_HEATUP
         if (retracted && actExtruder == Extruder::current)
         {

@@ -1707,8 +1707,9 @@ computations, so do not enable it if your display works stable!
 #define UI_PRINTER_COMPANY "Self Made"
 
 
-/** Animate switches between menus etc. */
-#define UI_ANIMATION 0
+/** For graphic displays you can have a fixed top line. It can also contain
+ * dynamic modifiers. Do not define it if you want full 6 rows of data */
+//#define UI_HEAD "E1:%e0/%E0 E2:%e1/%E1 B:%eb/%Eb"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1786,6 +1787,7 @@ If you have leveling with bed coating or fixed z min you can use this menu to ad
 #define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
+
 
 /*
 #define USER_KEY1_PIN     UI_DISPLAY_D5_PIN      // D5 to display (not used for graphics controller), change to other pin if you use character LCD !

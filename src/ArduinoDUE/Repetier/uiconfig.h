@@ -139,7 +139,6 @@ What display type do you use?
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#define UI_ANIMATION false  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font

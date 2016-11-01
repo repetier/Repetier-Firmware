@@ -1235,7 +1235,7 @@ void Commands::processGCode(GCode *com) {
                             } else {
                                 // calculate radius assuming we are at surface
                                 // If Z is greater than 0 it will get calculated out for correct radius
-                                // Use either A or B tower as they acnhor x cartesian axis and always have
+                                // Use either A or B tower as they anchor x Cartesian axis and always have
                                 // Radius distance to center in simplest set up.
                                 unsigned long h = Printer::deltaDiagonalStepsSquaredB.l;
                                 unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
@@ -1739,22 +1739,17 @@ void Commands::processMCode(GCode *com) {
                 if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
                 EVENT_WAITING_HEATER(-1);
-                uint32_t codenum; //throw away variable
-                codenum = HAL::timeInMilliseconds();
-                while(heatedBedController.currentTemperatureC + 0.5 < heatedBedController.targetTemperatureC && heatedBedController.targetTemperatureC > 25.0) {
-                    if( (HAL::timeInMilliseconds() - codenum) > 1000 ) { //Print Temp Reading every 1 second while heating up.
-                        printTemperatures();
-                        codenum = previousMillisCmd = HAL::timeInMilliseconds();
-                    }
-                    Commands::checkForPeriodicalActions(true);
-					GCode::keepAlive(WaitHeater);
-                }
+                tempController[HEATED_BED_INDEX]->waitForTargetTemperature();
 #endif
                 EVENT_HEATING_FINISHED(-1);
 #endif
                 UI_CLEAR_STATUS;
                 previousMillisCmd = HAL::timeInMilliseconds();
             }
+            break;
+        case 155: // M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second.
+            Printer::setAutoreportTemp((com->hasS() && com->S != 0) || !com->hasS() );
+            Printer::lastTempReport = HAL::timeInMilliseconds();
             break;
 #if NUM_TEMPERATURE_LOOPS > 0
         case 116: // Wait for temperatures to reach target temperature
@@ -1803,6 +1798,37 @@ void Commands::processMCode(GCode *com) {
             break;
         case 115: // M115
             Com::printFLN(Com::tFirmware);
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+            Com::cap(PSTR("PROGRESS:1"));
+#else
+            Com::cap(PSTR("PROGRESS:0"));
+#endif
+            Com::cap(PSTR("AUTOREPORT_TEMP:1"));
+#if EEPROM_MODE != 0
+            Com::cap(PSTR("EEPROM:0"));
+#else
+            Com::cap(PSTR("EEPROM:1"));
+#endif
+#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+            Com::cap(PSTR("AUTOLEVEL:1"));
+#else
+            Com::cap(PSTR("AUTOLEVEL:0"));
+#endif
+#if FEATURE_Z_PROBE
+            Com::cap(PSTR("Z_PROBE:1"));
+#else
+            Com::cap(PSTR("Z_PROBE:0"));
+#endif
+#if PS_ON_PIN>-1
+            Com::cap(PSTR("SOFTWARE_POWER:1"));
+#else
+            Com::cap(PSTR("SOFTWARE_POWER:0"));
+#endif
+#if CASE_LIGHTS_PIN > -1
+            Com::cap(PSTR("TOGGLE_LIGHTS:1"));
+#else
+            Com::cap(PSTR("TOGGLE_LIGHTS:0"));
+#endif
             reportPrinterUsage();
             Printer::reportPrinterMode();
             break;
@@ -2098,7 +2124,7 @@ void Commands::processMCode(GCode *com) {
                 EEPROM::storeDataIntoEEPROM();
             }
             break;
-        case 322: // M322 Reset autoeveling matrix
+        case 322: // M322 Reset auto leveling matrix
             Printer::resetTransformationMatrix(false);
             if(com->hasS() && com->S) {
                 EEPROM::storeDataIntoEEPROM();
@@ -2228,6 +2254,31 @@ void Commands::processMCode(GCode *com) {
             Extruder::markAllUnjammed();
             break;
 #endif // EXTRUDER_JAM_CONTROL
+//- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
+        case 530:
+            if(com->hasL())
+                Printer::maxLayer = static_cast<int>(com->L);
+            if(com->hasS())
+                Printer::setPrinting(static_cast<uint8_t>(com->S));
+            else
+                Printer::setPrinting(0);
+            break;
+//- M531 filename - Define filename being printed
+        case 531:
+            strncpy(Printer::printName,com->text,20);
+            Printer::printName[20] = 0;
+            break;
+//- M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
+        case 532:
+            if(com->hasX())
+                Printer::progress = com->X;
+                if(Printer::progress > 100.0)
+                    Printer::progress = 100.0;
+                else if(Printer::progress < 0)
+                    Printer::progress = 0;
+            if(com->hasL())
+                Printer::currentLayer = static_cast<int>(com->L);
+            break;
 #ifdef DEBUG_QUEUE_MOVE
         case 533: { // M533 Write move data
                 InterruptProtectedBlock noInts;

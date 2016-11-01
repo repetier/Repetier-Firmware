@@ -118,6 +118,12 @@
   %oY : babysteps counter
   %BC : Bed coating thickness
 
+  Print status related
+  %Pn : filename being printed
+  %Pl : current layer
+  %PL : num layer
+  %pp : Progress in percent, one digit 
+
   stops
   %sx : State of x min endstop.
   %sX : State of x max endstop.
@@ -196,9 +202,17 @@
 #endif
 #endif
 
+#if HAVE_HEATED_BED // make sure it is only 0 or 1 to be used in menu math
+#undef HAVE_HEATED_BED
+#define HAVE_HEATED_BED 1
+#else
+#undef HAVE_HEATED_BED
+#define HAVE_HEATED_BED 0
+#endif
+
 /* ============= PAGES DEFINITION =============
 
-  If you are not iside a menu, the firmware displays pages with information.
+  If you are not inside a menu, the firmware displays pages with information.
   Especially if you have only a small display it is convenient to have
   more then one information page.
 */
@@ -211,14 +225,14 @@
   for 2 row displays. You can add additional pages or change the default pages like you want.
 */
 
-#if UI_ROWS>=6 && UI_DISPLAY_TYPE == DISPLAY_U8G
+#if UI_ROWS>=5 && UI_DISPLAY_TYPE == DISPLAY_U8G
 
 //graphic main status
 
 UI_PAGE6_T(ui_page1, UI_TEXT_MAINPAGE6_1_ID, UI_TEXT_MAINPAGE6_2_ID, UI_TEXT_MAINPAGE6_3_ID, UI_TEXT_MAINPAGE6_4_ID, UI_TEXT_MAINPAGE6_5_ID, UI_TEXT_MAINPAGE6_6_ID)
 
 #if EEPROM_MODE != 0
-UI_PAGE4_T(ui_page2, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT_PRINT_FILAMENT_ID, UI_TEXT_PRINT_FILAMENT_VALUE_ID)
+UI_PAGE6_T(ui_page2, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT_PRINT_FILAMENT_ID, UI_TEXT_PRINT_FILAMENT_VALUE_ID,UI_TEXT_EMPTY_ID,UI_TEXT_STATUS_ID)
 #define UI_PRINTTIME_PAGES ,&ui_page2
 #define UI_PRINTTIME_COUNT 1
 #else
@@ -226,34 +240,47 @@ UI_PAGE4_T(ui_page2, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT
 #define UI_PRINTTIME_COUNT 0
 #endif
 
-#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-UI_PAGE6_T(ui_page3, UI_TEXT_EXTR0_TEMP_ID, UI_TEXT_EXTR1_TEMP_ID, UI_TEXT_EXTR2_TEMP_ID,
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+UI_PAGE6_T(ui_page3, UI_TEXT_EXTR0_TEMP_ID, UI_TEXT_EXTR1_TEMP_ID, 
+#if NUM_EXTRUDER > 2
+  UI_TEXT_EXTR2_TEMP_ID,
+#endif
 #if NUM_EXTRUDER > 3
            UI_TEXT_EXTR3_TEMP_ID,
-#else
-           UI_TEXT_EMPTY_ID,
 #endif
 #if NUM_EXTRUDER > 4
            UI_TEXT_EXTR4_TEMP_ID,
-#elif HAVE_HEATED_BED
+#endif
+#if HAVE_HEATED_BED && NUM_EXTRUDER < 5
            UI_TEXT_BED_TEMP_ID,
-#else
+#endif
+#if NUM_EXTRUDER + HAVE_HEATED_BED < 5
+            UI_TEXT_FLOW_MULTIPLY_ID,
+#endif
+#if NUM_EXTRUDER + HAVE_HEATED_BED < 3
            UI_TEXT_EMPTY_ID,
 #endif
-           UI_TEXT_STATUS_ID)
+#if NUM_EXTRUDER + HAVE_HEATED_BED < 4
+            UI_TEXT_EMPTY_ID,
+#endif
+           UI_TEXT_STATUS_ID
+)
 #define UI_EXTRUDERS_PAGES ,&ui_page3
 #define UI_EXTRUDERS_PAGES_COUNT 1
 #else
 #define UI_EXTRUDERS_PAGES
 #define UI_EXTRUDERS_PAGES_COUNT 0
 #endif
+
+UI_PAGE6_T(ui_page4, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4A_ID, UI_TEXT_ACTION_ZPOSITION4A_ID,UI_TEXT_PAGE_BUFFER_ID,UI_TEXT_SPEED_MULTIPLY_ID, UI_TEXT_STATUS_ID)
+
 /*
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES UI_EXTRUDERS_PAGES}
+#define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES ,&ui_page4 UI_EXTRUDERS_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 1+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
+#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
 
 #elif UI_ROWS >= 4
 #if HAVE_HEATED_BED

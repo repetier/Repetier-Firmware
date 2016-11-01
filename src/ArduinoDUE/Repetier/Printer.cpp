@@ -67,6 +67,12 @@ uint8_t Printer::fanSpeed = 0; // Last fan speed set with M106/M107
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
 uint8_t Printer::interruptEvent = 0;
+int Printer::currentLayer = 0;
+int Printer::maxLayer = -1; // -1 = unknown
+char Printer::printName[21]=""; // max. 20 chars + 0
+float Printer::progress = 0;
+millis_t Printer::lastTempReport = 0;
+
 #if EEPROM_MODE != 0
 float Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
 #else
@@ -2117,6 +2123,15 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XHomeDir:"),X_HOME_DIR);
     Com::config(PSTR("YHomeDir:"),Y_HOME_DIR);
     Com::config(PSTR("ZHomeDir:"),Z_HOME_DIR);
+#if DRIVE_SYSTEM == DELTA
+    Com::config(PSTR("XHomePos:"),0,2);
+    Com::config(PSTR("YHomePos:"),0,2);
+    Com::config(PSTR("ZHomePos:"),zMin + zLength,3);
+#else
+    Com::config(PSTR("XHomePos:"),xMin + (X_HOME_DIR > 0 ? xLength : 0),2);
+    Com::config(PSTR("YHomePos:"),yMin + (Y_HOME_DIR > 0 ? yLength : 0),2);
+    Com::config(PSTR("ZHomePos:"),zMin + (Z_HOME_DIR > 0 ? zLength : 0),3);
+#endif
     Com::config(PSTR("SupportG10G11:"),FEATURE_RETRACTION);
     Com::config(PSTR("SupportLocalFilamentchange:"),FEATURE_RETRACTION);
     Com::config(PSTR("CaseLights:"),CASE_LIGHTS_PIN > -1);

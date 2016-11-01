@@ -36,6 +36,7 @@ FSTRINGVAR(tInfo)
 FSTRINGVAR(tWarning)
 FSTRINGVAR(tResend)
 FSTRINGVAR(tEcho)
+FSTRINGVAR(tCap)
 FSTRINGVAR(tOkSpace)
 FSTRINGVAR(tWrongChecksum)
 FSTRINGVAR(tMissingChecksum)
@@ -415,6 +416,7 @@ FSTRINGVAR(tEPRSegmentsPerSecondPrint)
 FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 #endif
 
+static void cap(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text),int value);
 static void config(FSTRINGPARAM(text),const char *msg);

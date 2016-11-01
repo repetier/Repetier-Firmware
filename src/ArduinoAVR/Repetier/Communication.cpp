@@ -37,6 +37,7 @@ uint8_t Com::selectedLanguage;
 #ifndef FIRMWARE_URL
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
+
 FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
 FSTRINGVALUE(Com::tDebug,"Debug:")
 FSTRINGVALUE(Com::tOk,"ok")
@@ -48,6 +49,7 @@ FSTRINGVALUE(Com::tInfo,"Info:")
 FSTRINGVALUE(Com::tWarning,"Warning:")
 FSTRINGVALUE(Com::tResend,"Resend:")
 FSTRINGVALUE(Com::tEcho,"Echo:")
+FSTRINGVALUE(Com::tCap,"Cap:")
 FSTRINGVALUE(Com::tOkSpace,"ok ")
 FSTRINGVALUE(Com::tWrongChecksum,"Wrong checksum")
 FSTRINGVALUE(Com::tMissingChecksum,"Missing checksum")
@@ -447,6 +449,10 @@ FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
 #endif
 
+void Com::cap(FSTRINGPARAM(text)) {
+    printF(tCap);
+    printFLN(text);
+}
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
     printFLN(text);

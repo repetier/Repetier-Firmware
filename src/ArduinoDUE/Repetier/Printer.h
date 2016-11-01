@@ -98,6 +98,8 @@ union wizardVar
 #define PRINTER_FLAG3_X_HOMED               1
 #define PRINTER_FLAG3_Y_HOMED               2
 #define PRINTER_FLAG3_Z_HOMED               4
+#define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
+#define PRINTER_FLAG3_AUTOREPORT_TEMP       16
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -332,6 +334,7 @@ public:
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
+    static millis_t lastTempReport;
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
@@ -432,6 +435,11 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
+    // Print status related
+    static int currentLayer;
+    static int maxLayer; // -1 = unknown
+    static char printName[21]; // max. 20 chars + 0
+    static float progress;
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
@@ -732,6 +740,15 @@ public:
     {
 	    flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
     }
+    static INLINE uint8_t isAutoreportTemp()
+    {
+        return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
+    }
+
+    static INLINE void setAutoreportTemp(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
+    }
 
     static INLINE uint8_t isAllKilled()
     {
@@ -828,6 +845,18 @@ public:
         flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         Com::printFLN(PSTR("Autoretract:"),b);
     }
+
+    static INLINE uint8_t isPrinting()
+    {
+        return flag3 & PRINTER_FLAG3_PRINTING;
+    }
+
+    static INLINE void setPrinting(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
+        Printer::setMenuMode(MENU_MODE_PRINTING, b);
+    }
+
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;

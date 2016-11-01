@@ -133,8 +133,12 @@ void SDCard::startPrint()
     sdmode = 1;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED, false);
+    Printer::setPrinting(true);
+    Printer::maxLayer = 0;
+    Printer::currentLayer = 0;
 	UI_STATUS_F(PSTR(""));
 }
+
 void SDCard::pausePrint(bool intern)
 {
     if(!sd.sdactive) return;
@@ -180,6 +184,7 @@ void SDCard::stopPrint()
     sdmode = 0;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING,false);
     Printer::setMenuMode(MENU_MODE_SD_PAUSED,false);
+    Printer::setPrinting(0);
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();
@@ -533,7 +538,9 @@ bool SDCard::selectFile(const char *filename, bool silent)
     sdmode = 0;
 
     file.close();
-
+    // Filename for progress view
+    strncpy(Printer::printName,filename,20);
+    Printer::printName[20] = 0;
     parent = *fat.vwd();
     if (file.open(&parent, filename, O_READ))
       {

@@ -584,6 +584,7 @@ class UIDisplay {
       addFloat(number, -9, 2);
     };
     void addStringP(PGM_P text);
+    void addString(char* text);
     void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
@@ -662,8 +663,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
@@ -855,6 +854,27 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B           50
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
+
+#elif ( MOTHERBOARD == 183 ) || ( MOTHERBOARD == 184 ) // MJRice Pica
+
+#undef BEEPER_PIN
+#define BEEPER_PIN 19
+#define UI_DISPLAY_RS_PIN 33
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 30
+#define UI_DISPLAY_D0_PIN -1
+#define UI_DISPLAY_D1_PIN -1
+#define UI_DISPLAY_D2_PIN -1
+#define UI_DISPLAY_D3_PIN -1
+#define UI_DISPLAY_D4_PIN 35
+#define UI_DISPLAY_D5_PIN 32
+#define UI_DISPLAY_D6_PIN 37
+#define UI_DISPLAY_D7_PIN 36
+#define UI_ENCODER_A 47
+#define UI_ENCODER_B 48
+#define UI_ENCODER_CLICK 31
+#define UI_RESET_PIN -1
+#define SDCARDDETECT 49
 
 #else  // RAMPS
 #undef BEEPER_PIN
@@ -1612,8 +1632,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #endif
 
 #ifdef UI_MAIN
@@ -1699,8 +1717,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #define UI_DELAYPERCHAR		  50
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
@@ -1788,8 +1804,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)

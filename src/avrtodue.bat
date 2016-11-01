@@ -23,4 +23,4 @@ copy ArduinoAVR\Repetier\Events.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\BedLeveling.*  ArduinoDue\Repetier
 
 echo Copying finished. DUE tree is now up to date.
-pause
+REM pause

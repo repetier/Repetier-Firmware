@@ -1673,9 +1673,9 @@ computations, so do not enable it if your display works stable!
 #define UI_PRINTER_NAME "Ordbot"
 #define UI_PRINTER_COMPANY "RepRapDiscount"
 
-
-/** Animate switches between menus etc. */
-#define UI_ANIMATION 0
+/** For graphic displays you can have a fixed top line. It can also contain
+ * dynamic modifiers. Do not define it if you want full 6 rows of data */
+//#define UI_HEAD "E1:%e0/%E0 E2:%e1/%E1 B:%eb/%Eb"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000

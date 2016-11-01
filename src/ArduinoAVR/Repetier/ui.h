@@ -584,6 +584,7 @@ class UIDisplay {
       addFloat(number, -9, 2);
     };
     void addStringP(PGM_P text);
+    void addString(char* text);
     void addStringOnOff(uint8_t);
     void addChar(const char c);
     void addGCode(GCode *code);
@@ -662,8 +663,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
@@ -1633,8 +1632,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #endif
 
 #ifdef UI_MAIN
@@ -1720,8 +1717,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 #define UI_DELAYPERCHAR		  50
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
@@ -1809,8 +1804,6 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#undef UI_ANIMATION
-#define UI_ANIMATION 0  // Animations are too slow
 
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)

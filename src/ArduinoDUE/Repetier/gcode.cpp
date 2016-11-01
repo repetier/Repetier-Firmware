@@ -781,7 +781,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
             params |= 2;
             if(M > 255) params |= 4096;
             // handle non standard text arguments that some M codes have
-            if (M == 20 || M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 36 || M == 117)
+            if (M == 20 || M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 36 || M == 117 || M == 531)
             {
                 // after M command we got a filename or text
                 char digit;
@@ -799,7 +799,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
                 text = pos;
                 while (*pos)
                 {
-                    if((M != 117 && M != 20 && *pos==' ') || *pos=='*') break;
+                    if((M != 117 && M != 20 && M != 531 && *pos==' ') || *pos=='*') break;
                     pos++; // find a space as file name end
                 }
                 *pos = 0; // truncate filename by erasing space with null, also skips checksum
