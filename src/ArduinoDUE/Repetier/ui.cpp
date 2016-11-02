@@ -2363,7 +2363,7 @@ void UIDisplay::refreshPage()
                         printRow(y, &cache[y][off[y]], NULL, UI_COLS);
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
                     }
-                }
+                
 #endif
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
         }

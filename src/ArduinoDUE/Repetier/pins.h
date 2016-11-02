@@ -687,6 +687,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E3_DIR_PIN     38
 #define ORIG_E3_ENABLE_PIN  40
 
+#define UI_DISPLAY_RS_PIN 62
+
 #define SDSUPPORT      -1 
 #define SDPOWER 	   -1
 // 4,10,52 if using HW SPI.
@@ -697,12 +699,15 @@ STEPPER_CURRENT_CONTROL
 
 #define ORIG_SDCARDDETECT  60
 #define SDCARDDETECTINVERTED 0
-#define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	5 
-#define ORIG_FAN2_PIN  -1 
+#define LED_PIN 	   13
+#define ORIG_FAN_PIN 	6
+#define ORIG_FAN2_PIN 5
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+#define ENC424_SS             61 
+
+
 
 // 20 or 70
 #define SDA_PIN 				70  	
