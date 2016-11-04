@@ -858,8 +858,15 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     return !com->hasNoXYZ() || (com->hasE() && destinationSteps[E_AXIS] != currentPositionSteps[E_AXIS]); // ignore unproductive moves
 }
 
+
+
 void Printer::setup()
 {
+  
+  #if defined(MB_SETUP)
+    MB_SETUP;
+  #endif
+  
     HAL::stopWatchdog();
     for(uint8_t i = 0; i < NUM_PWM; i++) pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
