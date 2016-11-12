@@ -22,7 +22,7 @@
 // Id to distinguish version changes
 #define EEPROM_PROTOCOL_VERSION 16
 
-/** Where to start with our datablock in memory. Can be moved if you
+/** Where to start with our data block in memory. Can be moved if you
 have problems with other modules using the eeprom */
 
 #define EPR_MAGIC_BYTE              0

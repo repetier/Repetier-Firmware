@@ -603,7 +603,6 @@ void Printer::kill(uint8_t only_steppers)
     EVENT_KILL(only_steppers);
     if(areAllSteppersDisabled() && only_steppers) return;
     if(Printer::isAllKilled()) return;
-    setAllSteppersDiabled();
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     disableAllMotorDrivers();
 #endif // defined
@@ -611,6 +610,7 @@ void Printer::kill(uint8_t only_steppers)
     disableYStepper();
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
+    setAllSteppersDiabled();
 #else
     if(!only_steppers)
         disableZStepper();
@@ -1950,7 +1950,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #else		
         if(X_HOME_DIR < 0) startX = Printer::xMin;
         else startX = Printer::xMin + Printer::xLength;
-#endif		
+#endif	// else DUAL_X_AXIS	
     }
     if(yaxis)
     {
@@ -1962,7 +1962,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
         else startZ = Printer::zMin + Printer::zLength - Printer::zBedOffset;
     }
-#endif
+#endif // HOMING_ORDER != HOME_ORDER_ZXYTZ
     updateCurrentPosition(true);
 #if defined(Z_UP_AFTER_HOME) && Z_HOME_DIR < 0
 	//PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);

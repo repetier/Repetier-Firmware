@@ -8,7 +8,7 @@ For some special printers you need to control extra motors. Possible reasons are
 - Leveling
 
 Repetier-Firmware supports up to 4 extra motors that can be controlled by
-G201 P<motorId> X<pos>     - Go to position X with motor X
+G201 P<motorId> X<pos>     - Go to position X with motor motorId
 G202 P<motorId> X<setpos>  - Mark current position as X
 G203 P<motorId>            - Report current motor position
 G204 P<motorId> S<0/1>     - Enable/disable motor

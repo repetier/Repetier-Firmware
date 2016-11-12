@@ -329,7 +329,7 @@ public:
            }
            else if(isZPositiveMove())
            {
-				if(Endstops::zMin())
+				if(Endstops::zMax())
 					Printer::multiZHomeFlags &= ~1;
 				if(Endstops::z2MinMax())
 					Printer::multiZHomeFlags &= ~2;
