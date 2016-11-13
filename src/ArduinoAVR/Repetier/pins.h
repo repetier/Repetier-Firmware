@@ -483,7 +483,6 @@ STEPPER_CURRENT_CONTROL
 #define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
 #define ORIG_SDCARDDETECT 49
-#undef ORIG_FAN_PIN
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
 #define LIGHT_PIN         6
@@ -891,7 +890,7 @@ STEPPER_CURRENT_CONTROL
 
 #else
 
-#define HEATER_1_PIN       14
+#define HEATER_1_PIN       14  // (bed)
 #define ORIG_X_ENABLE_PIN       -1
 #define ORIG_Y_ENABLE_PIN       -1
 #define ORIG_Z_ENABLE_PIN       -1
@@ -2815,6 +2814,95 @@ S3(ext)=9
  #endif
  
  #endif
+/****************************************************************************************
+* Mighty ... rev. E pin assignment
+*
+****************************************************************************************/
+#if MOTHERBOARD == 90
+#define CURRENT_CONTROL_MIGHTY1    6
+#define STEPPER_CURRENT_CONTROL   CURRENT_CONTROL_MIGHTY1
+#define MIGHTY1_VOUT_MAX    118
+#define MIGHTY1_CURRENT_DEFAULTS {118,118,40,118,118}
+
+#define UI_DISPLAY_ENABLE_PIN  33
+#define UI_DISPLAY_DATA_PIN    34
+#define UI_DISPLAY_CLOCK_PIN   35
+#define UI_DISPLAY_MTGHTY1
+
+#define POTS_SCL        76
+#define X_POT_PIN       57
+#define Y_POT_PIN       61
+#define Z_POT_PIN       65
+#define E0_POT_PIN      27
+#define E1_POT_PIN      77
+
+#define MIGHTY1_CURRENT_CONTROL_PINS DioPin<POTS_SCL> \
+    ,DioPin<X_POT_PIN>,DioPin<Y_POT_PIN>,DioPin<Z_POT_PIN> \
+    ,DioPin<E0_POT_PIN>,DioPin<E1_POT_PIN>
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+
+#define ORIG_X_STEP_PIN         55
+#define ORIG_X_DIR_PIN          54
+#define ORIG_X_ENABLE_PIN       56
+#define ORIG_X_MIN_PIN          49
+#define ORIG_X_MAX_PIN          48
+
+#define ORIG_Y_STEP_PIN         59
+#define ORIG_Y_DIR_PIN          58
+#define ORIG_Y_ENABLE_PIN       60
+#define ORIG_Y_MIN_PIN          47
+#define ORIG_Y_MAX_PIN          46
+
+#define ORIG_Z_STEP_PIN         63
+#define ORIG_Z_DIR_PIN          62
+#define ORIG_Z_ENABLE_PIN       64
+#define ORIG_Z_MIN_PIN          43
+#define ORIG_Z_MAX_PIN          42
+
+#define ORIG_E0_STEP_PIN        25
+#define ORIG_E0_DIR_PIN         24
+#define ORIG_E0_ENABLE_PIN      26
+#define ORIG_E0_FAN_PIN         7
+#define HEATER_0_PIN            6
+#define TEMP_0_PIN              5
+
+#define ORIG_E1_STEP_PIN        29
+#define ORIG_E1_DIR_PIN         28
+#define ORIG_E1_ENABLE_PIN      39
+#define ORIG_E1_FAN_PIN         12
+#define HEATER_1_PIN            11
+#define TEMP_1_PIN              2
+
+#define SDCARDDETECTINVERTED    0
+#define SDPOWER                 -1
+#define SDSS                    53
+#define ORIG_SDCARDDETECT       9
+#define SDWRITEPROTECTDETECT    8
+
+#define LED_PIN             31
+#define ORIG_FAN_PIN        44
+#define ORIG_PS_ON_PIN      -1
+
+#define HEATER_2_PIN        45
+
+#define THERMO_SCK          78
+#define THERMO_MISO         3
+
+#define TEMP_2_PIN         15 // ADC channel, not pin!
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+
+#define BEEPER_PIN          4
+
+#define INTERFACE_LEFT      72
+#define INTERFACE_DOWN      73
+#define INTERFACE_UP        75
+#define INTERFACE_RIGHT     14
+#define INTERFACE_CENTER    15
+#endif
 
 /****************************************************************************************
 * MJRice Pica Rev B * 
@@ -3002,7 +3090,7 @@ S3(ext)=9
 #define HEATER_PINS_INVERTED 0
 #endif
 
-// Original pin assignmats to be used in configuration tool
+// Original pin assignments to be used in configuration tool
 #define X_STEP_PIN ORIG_X_STEP_PIN
 #define X_DIR_PIN ORIG_X_DIR_PIN
 #define X_ENABLE_PIN ORIG_X_ENABLE_PIN
@@ -3056,6 +3144,9 @@ S3(ext)=9
 #define ORIG_SDCARDDETECT -1
 #endif
 #define SDCARDDETECT ORIG_SDCARDDETECT
+#ifndef ORIG_SDWRITEPROTECTED
+#define ORIG_SDWRITEPROTECTED -1
+#endif
 
 #define SENSITIVE_PINS {0, 1, ORIG_X_STEP_PIN, ORIG_X_DIR_PIN, ORIG_X_ENABLE_PIN, ORIG_X_MIN_PIN, ORIG_X_MAX_PIN, \
         ORIG_Y_STEP_PIN, ORIG_Y_DIR_PIN, ORIG_Y_ENABLE_PIN, ORIG_Y_MIN_PIN, ORIG_Y_MAX_PIN, ORIG_Z_STEP_PIN,\

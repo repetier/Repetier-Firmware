@@ -87,6 +87,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Sanguish Beta              = 501
 // Unique One rev. A          = 88
 // SAV MK1                    = 89
+// Mighty ... 1 rev. E        = 90
 // MJRice Pica Rev B          = 183
 // MJRice Pica Rev C          = 184
 // User layout defined in userpins.h = 999
@@ -251,6 +252,7 @@ controlled by settings in extruder 0 definition. */
 // 14 is 100K NTC 3950
 // 15 DYZE DESIGN 500°C Thermistor
 // 16 is B3 innovations 500°C sensor
+// 17 is generic 50k NTC (FF creator,CTC dual?)
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
@@ -1666,6 +1668,7 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 21 or CONTROLLER_VIKI2 Panucatt VIKI2 graphic lcd
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
+25 or CONTROLLER_MIGHTY1 = Mighty1 controller
 */
 
 #define FEATURE_CONTROLLER NO_CONTROLLER

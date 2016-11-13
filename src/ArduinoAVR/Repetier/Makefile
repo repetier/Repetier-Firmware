@@ -129,7 +129,7 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
-all: applet_files build sizeafter
+all: build sizeafter
 
 build: elf hex lss
 

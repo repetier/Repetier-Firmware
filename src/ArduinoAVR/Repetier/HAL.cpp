@@ -1482,4 +1482,3 @@ RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UC
 #endif
 
 #endif
-
