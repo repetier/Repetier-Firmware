@@ -1414,6 +1414,7 @@ void Printer::homeZAxis() // Delta z homing
 {
 	bool homingSuccess = false;
 	Endstops::resetAccumulator();
+	Endstops::fillFromAccumulator();
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
 	// New safe homing routine by Kyrre Aalerud
 	// This method will safeguard against sticky endstops such as may be gotten cheaply from china.
