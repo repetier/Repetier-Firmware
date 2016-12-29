@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 270
+#define NUM_TRANSLATED_WORDS 288
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -376,14 +376,34 @@
 #define UI_TEXT_LAYER_ID 267
 #define UI_TEXT_PROGRESS_ID 268
 #define UI_TEXT_PRINTNAME_ID 269
+
+#define UI_TEXT_SETUP_ID 270 //"Setup"
+#define UI_TEXT_MEASURE_DISTORTION_ID 271 // "Measure distortion"
+#define UI_TEXT_DISTORTION_CORR_ID 272 // "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_ID 273 //   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_ID 274 // "Cancel"
+#define UI_TEXT_PLEASE_WAIT_ID 275 // "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_ID 276 // "Make sure the heated"
+#define UI_TEXT_CLEARBED2_ID 277 // "bed is clear of any"
+#define UI_TEXT_CLEARBED3_ID 278 // "obstructions"
+#define UI_TEXT_NOTIFICATION_ID 279 // "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_ID 280 // "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_ID 281 // "Heater decoupled"
+#define UI_TEXT_SLIPPING_ID 282 // "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_ID 283 // "Leveling error"
+#define UI_TEXT_OK_ID 284 // "Ok"
+#define UI_TEXT_CALIBRATING_ID 285 // "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_ID 286 // "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_ID 287 // "Autolevel bed"
+
 // Universal definitions
 
 #define UI_TEXT_SEL              cSEL
 #define UI_TEXT_NOSEL            cUNSEL
 
 
-// At first all terms in english are defined. After that the selected language
-// can overwrite the definition. That way new strings are at least in english
+// At first all terms in English are defined. After that the selected language
+// can overwrite the definition. That way new strings are at least in English
 // available.
 
 #define UI_TEXT_ON_EN               "On"
@@ -397,10 +417,10 @@
 #define UI_TEXT_NOSDCARD_EN         "No SD card"
 #define UI_TEXT_ERROR_EN            "**** ERROR ****"
 #define UI_TEXT_BACK_EN             "Back " cUP
-#define UI_TEXT_QUICK_SETTINGS_EN   "Quick settings"
+#define UI_TEXT_QUICK_SETTINGS_EN   "Control"
 #define UI_TEXT_ERRORMSG_EN         "%oe"
 #define UI_TEXT_CONFIGURATION_EN    "Settings"
-#define UI_TEXT_POSITION_EN         "Position"
+#define UI_TEXT_POSITION_EN         "Move"
 #define UI_TEXT_EXTRUDER_EN         "Extruder"
 #define UI_TEXT_SD_CARD_EN          "SD card"
 #define UI_TEXT_DEBUGGING_EN        "Debugging"
@@ -415,13 +435,13 @@
 #define UI_TEXT_COOLDOWN_EN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN_EN    "Set to origin"
 #define UI_TEXT_DISABLE_STEPPER_EN  "Disable stepper"
-#define UI_TEXT_X_POSITION_EN       "X position"
-#define UI_TEXT_X_POS_FAST_EN       "X pos. fast"
-#define UI_TEXT_Y_POSITION_EN       "Y position"
-#define UI_TEXT_Y_POS_FAST_EN       "Y pos. fast"
-#define UI_TEXT_Z_POSITION_EN       "Z position"
-#define UI_TEXT_Z_POS_FAST_EN       "Z pos. fast"
-#define UI_TEXT_E_POSITION_EN       "Extr. position"
+#define UI_TEXT_X_POSITION_EN       "Move X"
+#define UI_TEXT_X_POS_FAST_EN       "Move X fast"
+#define UI_TEXT_Y_POSITION_EN       "Move Y"
+#define UI_TEXT_Y_POS_FAST_EN       "Move Y fast"
+#define UI_TEXT_Z_POSITION_EN       "Move Z"
+#define UI_TEXT_Z_POS_FAST_EN       "Move Z fast"
+#define UI_TEXT_E_POSITION_EN       "Move Extruder"
 #define UI_TEXT_BED_TEMP_EN         "Bed temp:%eb/%Eb" cDEG "C"
 #define UI_TEXT_EXTR0_TEMP_EN       "Temp. 1 :%e0/%E0" cDEG "C"
 #define UI_TEXT_EXTR1_TEMP_EN       "Temp. 2 :%e1/%E1" cDEG "C"
@@ -677,7 +697,24 @@
 #define UI_TEXT_PROGRESS_EN "%Pp%%%"
 #define UI_TEXT_PRINTNAME_EN "%Pn"
 
-
+#define UI_TEXT_SETUP_EN "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_EN "Measure distortion"
+#define UI_TEXT_DISTORTION_CORR_EN "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_EN   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_EN "Cancel"
+#define UI_TEXT_PLEASE_WAIT_EN "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_EN "Make sure the heated"
+#define UI_TEXT_CLEARBED2_EN "bed is clear of any"
+#define UI_TEXT_CLEARBED3_EN "obstructions"
+#define UI_TEXT_NOTIFICATION_EN "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_EN "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_EN "Heater decoupled"
+#define UI_TEXT_SLIPPING_EN "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_EN "Leveling error"
+#define UI_TEXT_OK_EN "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_EN "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_EN "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_EN "Autolevel bed"
 
 // *************** German translation ****************
 
@@ -692,7 +729,7 @@
 #define UI_TEXT_NOSDCARD_DE         "Keine SD Karte"
 #define UI_TEXT_ERROR_DE            "**** FEHLER ****"
 #define UI_TEXT_BACK_DE             "Zur" STR_uuml "ck " cUP
-#define UI_TEXT_QUICK_SETTINGS_DE   "Schnelleinst."
+#define UI_TEXT_QUICK_SETTINGS_DE   "Kontrolle"
 #define UI_TEXT_ERRORMSG_DE         "%oe"
 #define UI_TEXT_CONFIGURATION_DE    "Einstellungen"
 #define UI_TEXT_POSITION_DE         "Position"
@@ -732,10 +769,10 @@
 #define UI_TEXT_PRINT_Y_DE          "Drucken Y:%ay"
 #define UI_TEXT_PRINT_Z_DE          "Drucken Z:%az"
 #define UI_TEXT_PRINT_Z_DELTA_DE    "Drucken:%az"
-#define UI_TEXT_MOVE_X_DE           "Bewegen X:%aX"
-#define UI_TEXT_MOVE_Y_DE           "Bewegen Y:%aY"
-#define UI_TEXT_MOVE_Z_DE           "Bewegen Z:%aZ"
-#define UI_TEXT_MOVE_Z_DELTA_DE     "Bewegen:%aZ"
+#define UI_TEXT_MOVE_X_DE           "Bewege X:%aX"
+#define UI_TEXT_MOVE_Y_DE           "Bewege Y:%aY"
+#define UI_TEXT_MOVE_Z_DE           "Bewege Z:%aZ"
+#define UI_TEXT_MOVE_Z_DELTA_DE     "Bewege:%aZ"
 #define UI_TEXT_JERK_DE             "Ruck     :%aj"
 #define UI_TEXT_ZJERK_DE            "Z-Ruck   :%aJ"
 #define UI_TEXT_ACCELERATION_DE     "Beschleunigung"
@@ -974,6 +1011,24 @@
 #define UI_TEXT_PROGRESS_DE "%Pp%%%"
 #define UI_TEXT_PRINTNAME_DE "%Pn"
 
+#define UI_TEXT_SETUP_DE "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_DE "Messe Z-Verzerrung"
+#define UI_TEXT_DISTORTION_CORR_DE "Z-Korrektur:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_DE   "L" STR_uuml "fter 2:%FS%%%"
+#define UI_TEXT_CANCEL_DE "Abbruch"
+#define UI_TEXT_PLEASE_WAIT_DE "*** Bitte warten ***"
+#define UI_TEXT_CLEARBED1_DE "Stellen Sie sicher,"
+#define UI_TEXT_CLEARBED2_DE "dass keine Objekte"
+#define UI_TEXT_CLEARBED3_DE "auf dem Bett sind."
+#define UI_TEXT_NOTIFICATION_DE "Mitteilung:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_DE "Temp.-Sensor defekt"
+#define UI_TEXT_HEATER_DECOUPLED_DE "Heizelem. entkoppelt"
+#define UI_TEXT_SLIPPING_DE "Filament rutscht"
+#define UI_TEXT_LEVELING_ERROR_DE "Leveling Fehler"
+#define UI_TEXT_OK_DE "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_DE "Kalibriere Bed"
+#define UI_TEXT_CALIBRATION_ERROR_DE "Kalibrierungsfehler"
+#define UI_TEXT_AUTOLEVEL_BED_DE "Autolevel Bett"
 
 // Dutch translation
 
@@ -988,7 +1043,7 @@
 #define UI_TEXT_NOSDCARD_NL         "Geen SD Kaart"
 #define UI_TEXT_ERROR_NL            "**** FOUT ****"
 #define UI_TEXT_BACK_NL             "Terug " cUP
-#define UI_TEXT_QUICK_SETTINGS_NL   "Snel Instelling"
+#define UI_TEXT_QUICK_SETTINGS_NL   "Control"
 #define UI_TEXT_ERRORMSG_NL         "%oe"
 #define UI_TEXT_CONFIGURATION_NL    "Configuratie"
 #define UI_TEXT_POSITION_NL         "Positie"
@@ -1260,8 +1315,6 @@
 #define UI_TEXT_DITTO_3_NL "%D3 3 Kopieen"
 #define UI_TEXT_ZPROBE_HEIGHT_NL "z-probe hoogte:%zh"
 
-
-
 #define UI_TEXT_OFFSETS_NL "Set print offsets"
 #define UI_TEXT_X_OFFSET_NL "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_NL "Set Y offset:%T1mm"
@@ -1269,6 +1322,25 @@
 #define UI_TEXT_LAYER_NL "Laag %Pl/%PL"
 #define UI_TEXT_PROGRESS_NL "%Pp%%%"
 #define UI_TEXT_PRINTNAME_NL "%Pn"
+
+#define UI_TEXT_SETUP_NL "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_NL "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_NL "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_NL   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_NL "Cancel"
+#define UI_TEXT_PLEASE_WAIT_NL "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_NL "Make sure the heated"
+#define UI_TEXT_CLEARBED2_NL "bed is clear of any"
+#define UI_TEXT_CLEARBED3_NL "obstructions"
+#define UI_TEXT_NOTIFICATION_NL "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_NL "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_NL "Heater decoupled"
+#define UI_TEXT_SLIPPING_NL "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_NL "Leveling error"
+#define UI_TEXT_OK_NL "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_NL "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_NL "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_NL "Autolevel bed"
 
 
 // *************** Brazilian portuguese translation ****************
@@ -1286,7 +1358,7 @@
 #define UI_TEXT_NOSDCARD_PT         "Nenhum cartao SD"
 #define UI_TEXT_ERROR_PT            "**** ERRO ****"
 #define UI_TEXT_BACK_PT             "Voltar " cUP
-#define UI_TEXT_QUICK_SETTINGS_PT   "Configuracoes Rapidas"
+#define UI_TEXT_QUICK_SETTINGS_PT   "Control" //"Configuracoes Rapidas"
 #define UI_TEXT_ERRORMSG_PT         "%oe"
 #define UI_TEXT_CONFIGURATION_PT    "Configuracao"
 #define UI_TEXT_POSITION_PT         "Posicao"
@@ -1558,8 +1630,6 @@
 #define UI_TEXT_DITTO_3_PT "%D3 3 Copias"
 #define UI_TEXT_ZPROBE_HEIGHT_PT "Altura Z-Probe:%zh"
 
-
-
 #define UI_TEXT_OFFSETS_PT "Set print offsets"
 #define UI_TEXT_X_OFFSET_PT "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_PT "Set Y offset:%T1mm"
@@ -1567,6 +1637,25 @@
 #define UI_TEXT_LAYER_PT "Camada %Pl/%PL"
 #define UI_TEXT_PROGRESS_PT "%Pp%%%"
 #define UI_TEXT_PRINTNAME_PT "%Pn"
+
+#define UI_TEXT_SETUP_PT "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_PT "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_PT "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_PT   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_PT "Cancel"
+#define UI_TEXT_PLEASE_WAIT_PT "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_PT "Make sure the heated"
+#define UI_TEXT_CLEARBED2_PT "bed is clear of any"
+#define UI_TEXT_CLEARBED3_PT "obstructions"
+#define UI_TEXT_NOTIFICATION_PT "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_PT "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_PT "Heater decoupled"
+#define UI_TEXT_SLIPPING_PT "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_PT "Leveling error"
+#define UI_TEXT_OK_PT "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_PT "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_PT "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_PT "Autolevel bed"
 
 
 // *************** Italian translation ****************
@@ -1582,7 +1671,7 @@
 #define UI_TEXT_NOSDCARD_IT         "No Scheda SD"
 #define UI_TEXT_ERROR_IT            "**** ERRORE ****"
 #define UI_TEXT_BACK_IT             "Indietro " cUP
-#define UI_TEXT_QUICK_SETTINGS_IT   "Impostazioni veloci"
+#define UI_TEXT_QUICK_SETTINGS_IT   "Control" //"Impostazioni veloci"
 #define UI_TEXT_ERRORMSG_IT         "%oe"
 #define UI_TEXT_CONFIGURATION_IT    "Configurazione"
 #define UI_TEXT_POSITION_IT         "Posizione"
@@ -1854,8 +1943,6 @@
 #define UI_TEXT_DITTO_3_IT "%D3 3 Copie"
 #define UI_TEXT_ZPROBE_HEIGHT_IT "Altezza Z-Probe:%zh"
 
-
-
 #define UI_TEXT_OFFSETS_IT "Set print offsets"
 #define UI_TEXT_X_OFFSET_IT "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_IT "Set Y offset:%T1mm"
@@ -1864,6 +1951,24 @@
 #define UI_TEXT_PROGRESS_IT "%Pp%%%"
 #define UI_TEXT_PRINTNAME_IT "%Pn"
 
+#define UI_TEXT_SETUP_IT "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_IT "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_IT "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_IT   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_IT "Cancel"
+#define UI_TEXT_PLEASE_WAIT_IT "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_IT "Make sure the heated"
+#define UI_TEXT_CLEARBED2_IT "bed is clear of any"
+#define UI_TEXT_CLEARBED3_IT "obstructions"
+#define UI_TEXT_NOTIFICATION_IT "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_IT "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_IT "Heater decoupled"
+#define UI_TEXT_SLIPPING_IT "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_IT "Leveling error"
+#define UI_TEXT_OK_IT "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_IT "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_IT "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_IT "Autolevel bed"
 
 // Spanish translation
 
@@ -1878,7 +1983,7 @@
 #define UI_TEXT_NOSDCARD_ES         "Sin tarjeta SD"
 #define UI_TEXT_ERROR_ES            "**** ERROR ****"
 #define UI_TEXT_BACK_ES             "Atras " cUP
-#define UI_TEXT_QUICK_SETTINGS_ES   "Configuracion Rapida"
+#define UI_TEXT_QUICK_SETTINGS_ES   "Control" //"Configuracion Rapida"
 #define UI_TEXT_ERRORMSG_ES         "%oe"
 #define UI_TEXT_CONFIGURATION_ES    "Configuracion"
 #define UI_TEXT_POSITION_ES         "Posicion"
@@ -2150,7 +2255,6 @@
 #define UI_TEXT_DITTO_3_ES "%D3 3 Copias"
 #define UI_TEXT_ZPROBE_HEIGHT_ES "Altura Z-Probe:%zh"
 
-
 #define UI_TEXT_OFFSETS_ES "Set print offsets"
 #define UI_TEXT_X_OFFSET_ES "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_ES "Set Y offset:%T1mm"
@@ -2158,6 +2262,25 @@
 #define UI_TEXT_LAYER_ES "Capa %Pl/%PL"
 #define UI_TEXT_PROGRESS_ES "%Pp%%%"
 #define UI_TEXT_PRINTNAME_ES "%Pn"
+
+#define UI_TEXT_SETUP_ES "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_ES "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_ES "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_ES   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_ES "Cancel"
+#define UI_TEXT_PLEASE_WAIT_ES "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_ES "Make sure the heated"
+#define UI_TEXT_CLEARBED2_ES "bed is clear of any"
+#define UI_TEXT_CLEARBED3_ES "obstructions"
+#define UI_TEXT_NOTIFICATION_ES "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_ES "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_ES "Heater decoupled"
+#define UI_TEXT_SLIPPING_ES "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_ES "Leveling error"
+#define UI_TEXT_OK_ES "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_ES "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_ES "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_ES "Autolevel bed"
 
 
 // *************** Swedish translation ****************
@@ -2174,7 +2297,7 @@
 #define UI_TEXT_NOSDCARD_SE         "Inget SD-kort"
 #define UI_TEXT_ERROR_SE            "**** FEL ****"
 #define UI_TEXT_BACK_SE             "Tillbaka " cUP
-#define UI_TEXT_QUICK_SETTINGS_SE   "Inst" STR_auml "llnigar"
+#define UI_TEXT_QUICK_SETTINGS_SE   "Control" //"Inst" STR_auml "llnigar"
 #define UI_TEXT_ERRORMSG_SE         "%oe"
 #define UI_TEXT_CONFIGURATION_SE    "Konfiguration"
 #define UI_TEXT_POSITION_SE         "Position"
@@ -2456,6 +2579,25 @@
 #define UI_TEXT_PROGRESS_SE "%Pp%%%"
 #define UI_TEXT_PRINTNAME_SE "%Pn"
 
+#define UI_TEXT_SETUP_SE "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_SE "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_SE "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_SE   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_SE "Cancel"
+#define UI_TEXT_PLEASE_WAIT_SE "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_SE "Make sure the heated"
+#define UI_TEXT_CLEARBED2_SE "bed is clear of any"
+#define UI_TEXT_CLEARBED3_SE "obstructions"
+#define UI_TEXT_NOTIFICATION_SE "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_SE "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_SE "Heater decoupled"
+#define UI_TEXT_SLIPPING_SE "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_SE "Leveling error"
+#define UI_TEXT_OK_SE "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_SE "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_SE "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_SE "Autolevel bed"
+
 
 // *************** French translation ****************
 // ***************      By Doudou     ****************
@@ -2471,7 +2613,7 @@
 #define UI_TEXT_NOSDCARD_FR         "Pas de Carte SD"
 #define UI_TEXT_ERROR_FR            "**** ERREUR ****"
 #define UI_TEXT_BACK_FR             "Retour \001"
-#define UI_TEXT_QUICK_SETTINGS_FR   "Reglages Rapides"
+#define UI_TEXT_QUICK_SETTINGS_FR   "Control" //"Reglages Rapides"
 #define UI_TEXT_ERRORMSG_FR         "%oe"
 #define UI_TEXT_CONFIGURATION_FR    "Configuration"
 #define UI_TEXT_POSITION_FR         "Position"
@@ -2743,8 +2885,6 @@
 #define UI_TEXT_DITTO_3_FR "%D3 3 Copies"
 #define UI_TEXT_ZPROBE_HEIGHT_FR "Hauteur Z-Sonde:%zh"
 
-
-
 #define UI_TEXT_OFFSETS_FR "Set print offsets"
 #define UI_TEXT_X_OFFSET_FR "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_FR "Set Y offset:%T1mm"
@@ -2752,6 +2892,25 @@
 #define UI_TEXT_LAYER_FR "Couche %Pl/%PL"
 #define UI_TEXT_PROGRESS_FR "%Pp%%%"
 #define UI_TEXT_PRINTNAME_FR "%Pn"
+
+#define UI_TEXT_SETUP_FR "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_FR "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_FR "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_FR   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_FR "Cancel"
+#define UI_TEXT_PLEASE_WAIT_FR "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_FR "Make sure the heated"
+#define UI_TEXT_CLEARBED2_FR "bed is clear of any"
+#define UI_TEXT_CLEARBED3_FR "obstructions"
+#define UI_TEXT_NOTIFICATION_FR "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_FR "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_FR "Heater decoupled"
+#define UI_TEXT_SLIPPING_FR "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_FR "Leveling error"
+#define UI_TEXT_OK_FR "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_FR "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_FR "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_FR "Autolevel bed"
 
 
 // *************** Czech translation ****************
@@ -2770,7 +2929,7 @@
 #define UI_TEXT_NOSDCARD_CZ         "Neni SD karta"
 #define UI_TEXT_ERROR_CZ            "**** CHYBA ****"
 #define UI_TEXT_BACK_CZ             "Zpet \001"
-#define UI_TEXT_QUICK_SETTINGS_CZ   "Zakladni nastaveni"
+#define UI_TEXT_QUICK_SETTINGS_CZ   "Control" //"Zakladni nastaveni"
 #define UI_TEXT_ERRORMSG_CZ         "%oe"
 #define UI_TEXT_CONFIGURATION_CZ    "Nastaveni"
 #define UI_TEXT_POSITION_CZ         "Pozice"
@@ -3050,6 +3209,25 @@
 #define UI_TEXT_PROGRESS_CZ "%Pp%%%"
 #define UI_TEXT_PRINTNAME_CZ "%Pn"
 
+#define UI_TEXT_SETUP_CZ "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_CZ "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_CZ "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_CZ   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_CZ "Cancel"
+#define UI_TEXT_PLEASE_WAIT_CZ "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_CZ "Make sure the heated"
+#define UI_TEXT_CLEARBED2_CZ "bed is clear of any"
+#define UI_TEXT_CLEARBED3_CZ "obstructions"
+#define UI_TEXT_NOTIFICATION_CZ "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_CZ "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_CZ "Heater decoupled"
+#define UI_TEXT_SLIPPING_CZ "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_CZ "Leveling error"
+#define UI_TEXT_OK_CZ "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_CZ "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_CZ "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_CZ "Autolevel bed"
+
 
 // *************** Polish translation ****************
 // ***************       By MIS       ****************
@@ -3066,7 +3244,7 @@
 #define UI_TEXT_NOSDCARD_PL         "Brak karty SD"
 #define UI_TEXT_ERROR_PL            "**** BLAD ****"
 #define UI_TEXT_BACK_PL             "Powrot " cUP
-#define UI_TEXT_QUICK_SETTINGS_PL   "Szybkie ustawienia"
+#define UI_TEXT_QUICK_SETTINGS_PL   "Control" //"Szybkie ustawienia"
 #define UI_TEXT_ERRORMSG_PL         "%oe"
 #define UI_TEXT_CONFIGURATION_PL    "Konfiguracja"
 #define UI_TEXT_POSITION_PL         "Pozycja"
@@ -3345,6 +3523,25 @@
 #define UI_TEXT_PROGRESS_PL "%Pp%%%"
 #define UI_TEXT_PRINTNAME_PL "%Pn"
 
+#define UI_TEXT_SETUP_PL "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_PL "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_PL "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_PL   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_PL "Cancel"
+#define UI_TEXT_PLEASE_WAIT_PL "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_PL "Make sure the heated"
+#define UI_TEXT_CLEARBED2_PL "bed is clear of any"
+#define UI_TEXT_CLEARBED3_PL "obstructions"
+#define UI_TEXT_NOTIFICATION_PL "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_PL "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_PL "Heater decoupled"
+#define UI_TEXT_SLIPPING_PL "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_PL "Leveling error"
+#define UI_TEXT_OK_PL "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_PL "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_PL "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_PL "Autolevel bed"
+
 // Türk
 
 #define UI_TEXT_ON_TR               "Acik"
@@ -3358,7 +3555,7 @@
 #define UI_TEXT_NOSDCARD_TR         "SD Kart Yok"
 #define UI_TEXT_ERROR_TR            "**** HATA ****"
 #define UI_TEXT_BACK_TR             "Geri " cUP
-#define UI_TEXT_QUICK_SETTINGS_TR   "Hizli Ayar"
+#define UI_TEXT_QUICK_SETTINGS_TR   "Control" //"Hizli Ayar"
 #define UI_TEXT_ERRORMSG_TR         "%oe"
 #define UI_TEXT_CONFIGURATION_TR    "Yapilandirma"
 #define UI_TEXT_POSITION_TR         "Konum-Hareket"
@@ -3636,6 +3833,25 @@
 #define UI_TEXT_PROGRESS_TR "%Pp%%%"
 #define UI_TEXT_PRINTNAME_TR "%Pn"
 
+#define UI_TEXT_SETUP_TR "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_TR "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_TR "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_TR   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_TR "Cancel"
+#define UI_TEXT_PLEASE_WAIT_TR "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_TR "Make sure the heated"
+#define UI_TEXT_CLEARBED2_TR "bed is clear of any"
+#define UI_TEXT_CLEARBED3_TR "obstructions"
+#define UI_TEXT_NOTIFICATION_TR "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_TR "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_TR "Heater decoupled"
+#define UI_TEXT_SLIPPING_TR "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_TR "Leveling error"
+#define UI_TEXT_OK_TR "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_TR "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_TR "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_TR "Autolevel bed"
+
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
 
@@ -3650,7 +3866,7 @@
 #define UI_TEXT_NOSDCARD_FI         "Ei SD korttia"
 #define UI_TEXT_ERROR_FI            "**** VIRHE ****"
 #define UI_TEXT_BACK_FI             "Takaisin" cUP
-#define UI_TEXT_QUICK_SETTINGS_FI   "Pika-asetukset"
+#define UI_TEXT_QUICK_SETTINGS_FI   "Control" //"Pika-asetukset"
 #define UI_TEXT_ERRORMSG_FI         "%oe"
 #define UI_TEXT_CONFIGURATION_FI    "Kokoonpano"
 #define UI_TEXT_POSITION_FI         "Paikka"
@@ -3929,3 +4145,42 @@
 #define UI_TEXT_LAYER_FI "Kerros %Pl/%PL"
 #define UI_TEXT_PROGRESS_FI "%Pp%%%"
 #define UI_TEXT_PRINTNAME_FI "%Pn"
+
+#define UI_TEXT_SETUP_FI "Setup"
+#define UI_TEXT_MEASURE_DISTORTION_FI "Measure z-distortion"
+#define UI_TEXT_DISTORTION_CORR_FI "Distortion corr.:%De"
+#define UI_TEXT_ACTION_FAN2SPEED_FI   "Fan 2 speed:%FS%%%"
+#define UI_TEXT_CANCEL_FI "Cancel"
+#define UI_TEXT_PLEASE_WAIT_FI "*** Please wait ***"
+#define UI_TEXT_CLEARBED1_FI "Make sure the heated"
+#define UI_TEXT_CLEARBED2_FI "bed is clear of any"
+#define UI_TEXT_CLEARBED3_FI "obstructions"
+#define UI_TEXT_NOTIFICATION_FI "Notification:"
+#define UI_TEXT_TEMPSENSOR_DEFECT_FI "Temp. sensor defect"
+#define UI_TEXT_HEATER_DECOUPLED_FI "Heater decoupled"
+#define UI_TEXT_SLIPPING_FI "Filament slipping"
+#define UI_TEXT_LEVELING_ERROR_FI "Leveling error"
+#define UI_TEXT_OK_FI "    >>> Ok <<<"
+#define UI_TEXT_CALIBRATING_FI "Calibrating bed"
+#define UI_TEXT_CALIBRATION_ERROR_FI "Calibration Error"
+#define UI_TEXT_AUTOLEVEL_BED_FI "Autolevel bed"
+
+
+#define TRANS(x) UI_STRING(F ## x,x)
+#ifdef CUSTOM_TRANSLATIONS
+#include "CustomTranslations.h"
+#else
+#define NUM_EXTRA_TRANSLATIONS 0
+#define CUSTOM_TRANS_EN
+#define CUSTOM_TRANS_DE
+#define CUSTOM_TRANS_NL
+#define CUSTOM_TRANS_ES
+#define CUSTOM_TRANS_PT
+#define CUSTOM_TRANS_FR
+#define CUSTOM_TRANS_IT
+#define CUSTOM_TRANS_SE
+#define CUSTOM_TRANS_CZ
+#define CUSTOM_TRANS_PL
+#define CUSTOM_TRANS_TR
+#define CUSTOM_TRANS_FI
+#endif

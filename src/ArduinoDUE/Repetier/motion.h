@@ -318,6 +318,8 @@ public:
             else
 #endif
 #if MULTI_ZENDSTOP_HOMING
+           {
+               if(Printer::isHoming()) {
            if(isZNegativeMove())
            {
 				if(Endstops::zMin())
@@ -340,6 +342,20 @@ public:
 					setZMoveFinished();
 				}
            }
+               } else {
+           if(isZNegativeMove() && Endstops::zMin())
+           {
+               setZMoveFinished();
+           }
+           else if(isZPositiveMove() && Endstops::zMax())
+           {
+               #if MAX_HARDWARE_ENDSTOP_Z
+               Printer::stepsRemainingAtZHit = stepsRemaining;
+               #endif
+               setZMoveFinished();
+           }                   
+               }                          
+}           
 #else
            if(isZNegativeMove() && Endstops::zMin())
            {

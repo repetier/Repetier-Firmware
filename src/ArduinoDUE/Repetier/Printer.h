@@ -100,6 +100,7 @@ union wizardVar
 #define PRINTER_FLAG3_Z_HOMED               4
 #define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
 #define PRINTER_FLAG3_AUTOREPORT_TEMP       16
+#define PRINTER_FLAG3_SUPPORTS_STARTSTOP    32
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -109,7 +110,7 @@ union wizardVar
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3 5
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
-// define an integer number of steps more than large enough to get to endstop from anywhere
+// define an integer number of steps more than large enough to get to end stop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
 // Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
@@ -293,6 +294,8 @@ public:
 #endif
 #endif
 
+extern bool runBedLeveling(int save); // save = S parameter in gcode
+
 class Printer
 {
     static uint8_t debugLevel;
@@ -382,7 +385,13 @@ public:
 	static float thermoMinTemp;
 	static float thermoMaxTemp;
 #endif
+#if LAZY_DUAL_X_AXIS
+    static bool sledParked;
+#endif
+#if FEATURE_BABYSTEPPING
     static int16_t zBabystepsMissing;
+    static int16_t zBabysteps;
+#endif    
     //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -857,6 +866,16 @@ public:
         Printer::setMenuMode(MENU_MODE_PRINTING, b);
     }
 
+    static INLINE uint8_t isStartStopSupported()
+    {
+        return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;
+    }
+
+    static INLINE void setSupportStartStop(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
+    }
+
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;
@@ -1255,7 +1274,7 @@ public:
     static void buildTransformationMatrix(Plane &plane);
 #endif
 #if DISTORTION_CORRECTION
-    static bool measureDistortion(void);
+    static void measureDistortion(void);
     static Distortion distortion;
 #endif
     static void MemoryPosition();
@@ -1283,6 +1302,9 @@ public:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
+    static void pausePrint();
+    static void continuePrint();
+    static void stopPrint();
 };
 
 #endif // PRINTER_H_INCLUDED

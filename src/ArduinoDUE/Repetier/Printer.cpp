@@ -46,7 +46,10 @@ uint8_t lastMoveID = 0; // Last move ID
 #if DRIVE_SYSTEM != DELTA
 int32_t Printer::zCorrectionStepsIncluded = 0;
 #endif
+#if FEATURE_BABYSTEPPING
 int16_t Printer::zBabystepsMissing = 0;
+int16_t Printer::zBabysteps = 0;
+#endif
 uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
@@ -181,6 +184,9 @@ fast8_t Printer::multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
+#endif
+#if LAZY_DUAL_X_AXIS
+bool Printer::sledParked = false;
 #endif
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
@@ -816,6 +822,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 		destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
 		destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
 		destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
+#if LAZY_DUAL_X_AXIS
+        sledParked = false;
+#endif        
 	}
     if(com->hasE() && !Printer::debugDryrun())
     {
@@ -1336,7 +1345,7 @@ void Printer::defaultLoopActions()
     Commands::checkForPeriodicalActions(true);  //check heater every n milliseconds
     UI_MEDIUM; // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
-    if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PAUSED))
+    if(PrintLine::hasLines() || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
         previousMillisCmd = curtime;
     else
     {
@@ -1454,17 +1463,17 @@ void Printer::homeZAxis() // Delta z homing
 		setYHomed(false);
 		setZHomed(false);
 		updateHomedAll(); // Clear the homed flag
-		Com::printFLN(PSTR("RequestPause:Homing failed!"));
+		GCodeSource::printAllFLN(PSTR("RequestPause:Homing failed!"));
 	} else {
 		setXHomed(true);
 		setYHomed(true);
 		setZHomed(true);
 		updateHomedAll(); // Set the homed flag
 	}
-    // Correct different endstop heights
+    // Correct different end stop heights
     // These can be adjusted by two methods. You can use offsets stored by determining the center
     // or you can use the xyzMinSteps from G100 calibration. Both have the same effect but only one
-    // should be measuredas both have the same effect.
+    // should be measured as both have the same effect.
     long dx = -xMinSteps - EEPROM::deltaTowerXOffsetSteps();
     long dy = -yMinSteps - EEPROM::deltaTowerYOffsetSteps();
     long dz = -zMinSteps - EEPROM::deltaTowerZOffsetSteps();
@@ -1499,6 +1508,9 @@ void Printer::homeZAxis() // Delta z homing
         maxDeltaPositionSteps += axisStepsPerMM[Z_AXIS] * ENDSTOP_Z_BACK_ON_HOME;
 #endif
     Extruder::selectExtruderById(Extruder::current->id);
+    #if FEATURE_BABYSTEPPING
+    Printer::zBabysteps = 0;
+    #endif
 }
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // Delta homing code
@@ -1625,6 +1637,7 @@ void Printer::homeXAxis()
 	Extruder::current = curExtruder;
 #if LAZY_DUAL_X_AXIS 
 	currentPositionSteps[X_AXIS] = xMinSteps + Extruder::current->xOffset;
+    sledParked = true;
 #else	
 	// Now position current extrude on x = 0
 	PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
@@ -1780,7 +1793,9 @@ void Printer::homeZAxis() // Cartesian homing
 #endif
 #if Z_HOME_DIR < 0
 		// Fix bed coating
+#if Z_PROBE_Z_OFFSET_MODE == 0  // Only if measure through coating e.g. inductive
 		zCorrection += axisStepsPerMM[Z_AXIS] * zBedOffset;
+#endif        
 #else
 		currentPositionSteps[Z_AXIS] -= zBedOffset * axisStepsPerMM[Z_AXIS]; // Correct bed coating	
 #endif
@@ -1818,6 +1833,9 @@ void Printer::homeZAxis() // Cartesian homing
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
 		setZHomed(true);
+        #if FEATURE_BABYSTEPPING
+        Printer::zBabysteps = 0;
+        #endif
     }
 }
 
@@ -1987,6 +2005,7 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 
 void Printer::zBabystep()
 {
+#if FEATURE_BABYSTEPPING    
     bool dir = zBabystepsMissing > 0;
     if(dir) zBabystepsMissing--;
     else zBabystepsMissing++;
@@ -2028,6 +2047,7 @@ void Printer::zBabystep()
     HAL::delayMicroseconds(DIRECTION_DELAY);
 #endif
     //HAL::delayMicroseconds(STEPPER_HIGH_DELAY + 1);
+#endif    
 }
 
 void Printer::setCaseLight(bool on) {
@@ -2070,7 +2090,7 @@ void Printer::handleInterruptEvent() {
             break;
         }
 #endif // SDSUPPORT
-        Com::printFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+        GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
 #endif // JAM_ACTION
         break;
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0:
@@ -2088,7 +2108,8 @@ void Printer::handleInterruptEvent() {
             if(steps > ext.jamSlowdownSteps && !ext.tempControl.isSlowedDown()) {
                 extruder[extruderIndex].tempControl.setSlowedDown(true);
                 Commands::changeFeedrateMultiply(ext.jamSlowdownTo);
-                UI_ERROR_P(Com::tFilamentSlipping);
+                //UI_ERROR_P(Com::tFilamentSlipping);
+                UI_MESSAGE(4);
             }
             if(isDebugJam()) {
                 Com::printF(PSTR("Jam signal steps:"),steps);
@@ -2192,9 +2213,43 @@ void Printer::showConfiguration() {
 
 Distortion Printer::distortion;
 
-bool Printer::measureDistortion(void)
+void Printer::measureDistortion(void)
 {
-    return distortion.measure();
+    #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
+    float actTemp[NUM_EXTRUDER];
+    for(int i = 0; i < NUM_EXTRUDER; i++)
+    actTemp[i] = extruder[i].tempControl.targetTemperatureC;
+    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+    Commands::waitUntilEndOfAllMoves();
+    #if ZHOME_HEAT_ALL
+    for(int i = 0; i < NUM_EXTRUDER; i++) {
+        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
+    }
+    for(int i = 0; i < NUM_EXTRUDER; i++) {
+        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,true);
+    }
+    #else
+    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
+    #endif
+    #endif
+    float oldFeedrate = Printer::feedrate;
+    if(!distortion.measure()) {
+        GCode::fatalError(PSTR("G33 failed!"));
+        return;
+    }
+    Printer::feedrate = oldFeedrate;
+    #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
+    #if ZHOME_HEAT_ALL
+    for(int i = 0; i < NUM_EXTRUDER; i++)
+    Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
+    for(int i = 0; i < NUM_EXTRUDER; i++)
+    Extruder::setTemperatureForExtruder(actTemp[i],i,false, actTemp[i] > MAX_ROOM_TEMPERATURE);
+    #else
+    Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
+    #endif
+    #endif
 }
 
 Distortion::Distortion()
@@ -2321,17 +2376,17 @@ void Distortion::extrapolateCorners()
 bool Distortion::measure(void)
 {
     fast8_t ix, iy;
-    float z = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
+    
     disable(false);
+    float z = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
+	Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeHeight(),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
     //Com::printFLN(PSTR("radiusCorr:"), radiusCorrectionSteps);
     //Com::printFLN(PSTR("steps:"), step);
 	int32_t zCorrection = 0;
-#if Z_HOME_DIR < 0
-	zCorrection += Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
-#endif		
-#if Z_HOME_DIR < 0 && Z_PROBE_Z_OFFSET_MODE == 1
-	zCorrection += Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
+#if Z_PROBE_Z_OFFSET_MODE == 1
+	zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
 #endif
+
 	Printer::startProbing(true);
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
@@ -2624,6 +2679,7 @@ for (int i = 0; i < NUM_EXTRUDER; i++) {
 #endif	
 		//	"myName": "Ormerod"
 		Com::printF(PSTR(",\"myName\":\"" UI_PRINTER_NAME "\""));
+		Com::printF(PSTR(",\"firmwareName\":\"Repetier\""));
     }
     Com::printF(PSTR(",\"coords\": {"));
     Com::printF(PSTR("\"axesHomed\":["));
@@ -2825,7 +2881,39 @@ for (int i = 0; i < NUM_EXTRUDER; i++) {
 
 #endif // JSON_OUTPUT
 
-#if defined(CUSTOM_EVENTS)
-#include "CustomEventsImpl.h"
-#endif
+void Printer::pausePrint() {
+#if SDSUPPORT
+    if(Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+        sd.pausePrint(false);
+    } else 
+#endif    
+    if(Printer::isMenuMode(MENU_MODE_PRINTING)) {
+        GCodeSource::printAllFLN(PSTR("RequestPause:"));
+    }    
+}
+
+void Printer::continuePrint() {
+#if SDSUPPORT
+    if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
+        sd.continuePrint();
+    } else
+#endif    
+     if(Printer::isMenuMode(MENU_MODE_PRINTING)) {
+         GCodeSource::printAllFLN(PSTR("RequestContinue:"));
+    }
+}
+
+void Printer::stopPrint() {
+    flashSource.close(); // stop flash printing if busy
+#if SDSUPPORT
+    if(Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+        sd.stopPrint();
+    } else 
+#endif    
+    {
+        GCodeSource::printAllFLN(PSTR("RequestStop:"));
+    }
+    UI_RESET_MENU
+}
+
 

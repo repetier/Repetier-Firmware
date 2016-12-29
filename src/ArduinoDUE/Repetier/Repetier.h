@@ -27,6 +27,8 @@
 //#define REPETIER_VERSION "0.92.10"
 #define REPETIER_VERSION "1.0.0dev"
 
+// Use new communication model for multiple channels - only until stable, then old version gets deleted
+#define NEW_COMMUNICATION 1
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
@@ -72,6 +74,8 @@ usage or for searching for memory induced errors. Switch it off for production, 
 //#define DEBUG_SD_ERROR
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
+
+#define DEBUG_MSG(x) {Com::printFLN(PSTR(x));HAL::delayMilliseconds(20);}
 
 #define CARTESIAN 0
 #define XY_GANTRY 1
@@ -164,6 +168,8 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SPARKLCD_ADAPTER 23
 #define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_FELIX_DUE 405
+#define CONTROLLER_ORCABOTXXLPRO2 25
+#define CONTROLLER_AZSMZ_12864 26
 
 //direction flags
 #define X_DIRPOS 1
@@ -327,7 +333,8 @@ inline void memcopy4(void *dest,void *source) {
 #define Z2_MINMAX_PIN -1
 #endif
 
-#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1 
+#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1
+#undef MULTI_ZENDSTOP_HOMING 
 #define MULTI_ZENDSTOP_HOMING 1
 #define MULTI_ZENDSTOP_ALL 3
 #else
@@ -346,7 +353,7 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
-#define UI_SPEEDDEPENDENT_POSITIONING true
+#define UI_SPEEDDEPENDENT_POSITIONING 1
 #endif
 
 #if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
@@ -538,7 +545,7 @@ inline void memcopy4(void *dest,void *source) {
 
 #define MENU_MODE_SD_MOUNTED 1
 #define MENU_MODE_SD_PRINTING 2
-#define MENU_MODE_SD_PAUSED 4
+#define MENU_MODE_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
 #define MENU_MODE_FULL_PID 32
@@ -565,7 +572,6 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #include "HAL.h"
-#include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
@@ -585,12 +591,16 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
 #endif
+
 #ifndef SDSUPPORT
 #define SDSUPPORT 0
 #endif
+
 #if SDSUPPORT
 #include "SdFat.h"
 #endif
+
+#include "gcode.h"
 
 #if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
 #undef ENABLE_BACKLASH_COMPENSATION
@@ -952,7 +962,7 @@ public:
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
     char *shortname; // Pointer to start of filename itself
     char *pathend; // File to char where pathname in fullname ends
-    uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
+    uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new commands
     bool sdactive;
     //int16_t n;
     bool savetosd;

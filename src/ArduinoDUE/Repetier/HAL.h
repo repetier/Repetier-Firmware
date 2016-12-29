@@ -284,6 +284,7 @@ typedef unsigned int ufast8_t;
 #elif BLUETOOTH_SERIAL == 101
 #define BT_SERIAL SerialUSB
 #endif
+#define RFSERIAL2 BT_SERIAL
 
 class RFDoubleSerial : public Print
 {
@@ -301,22 +302,6 @@ class RFDoubleSerial : public Print
 extern RFDoubleSerial BTAdapter;
 
 #endif
-
-
-#define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) //Com::printFLN(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) //Com::printF(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) //Com::printFLN(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) //Com::printF(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) //Com::printFLN(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) //Com::printF(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) //Com::printFLN(PSTR(p),(float)(i),x)
-#define OUT_P(p) //Com::printF(PSTR(p))
-#define OUT_P_LN(p) //Com::printFLN(PSTR(p))
-#define OUT_ERROR_P(p) //Com::printErrorF(PSTR(p))
-#define OUT_ERROR_P_LN(p) {//Com::printErrorF(PSTR(p));//Com::println();}
-#define OUT(v) //Com::print(v)
-#define OUT_LN //Com::println()
 
 union eeval_t {
   uint8_t     b[4];

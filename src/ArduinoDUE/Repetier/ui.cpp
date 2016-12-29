@@ -39,7 +39,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #include <inttypes.h>
 #include <ctype.h>
 
-
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
 #if   UI_SERVO_CONTROL == 1 && defined(SERVO0_NEUTRAL_POS)
 uint16_t servoPosition = SERVO0_NEUTRAL_POS;
@@ -66,9 +65,6 @@ static TemperatureController *currHeaterForSetup;    // pointer to extruder or h
 
 #if UI_AUTORETURN_TO_MENU_AFTER != 0
 millis_t ui_autoreturn_time = 0;
-#endif
-#if FEATURE_BABYSTEPPING
-int zBabySteps = 0;
 #endif
 
 void beep(uint8_t duration,uint8_t count)
@@ -141,7 +137,7 @@ bool UIMenuEntry::showEntry() const
     uint8_t f, f2;
     f = HAL::readFlashByte((PGM_P)&filter);
     if(f != 0)
-        ret = (f & Printer::menuMode) != 0;
+        ret = (f & Printer::menuMode) == f;
     if(ret && (f2 = HAL::readFlashByte((PGM_P)&nofilter)) != 0)
         ret = (f2 & Printer::menuMode) == 0;
     return ret;
@@ -1380,6 +1376,8 @@ void UIDisplay::parse(const char *txt,bool ram)
         // dynamic parameter, parse meaning and replace
         char c1 = (ram ? *(txt++) : pgm_read_byte(txt++));
         char c2 = (ram ? *(txt++) : pgm_read_byte(txt++));
+        if(CUSTOM_TEXT_PARSER(c1,c2))
+            continue;
         switch(c1)
         {
         case '%':
@@ -1431,9 +1429,14 @@ void UIDisplay::parse(const char *txt,bool ram)
         break;
         case 'D':
 #if FEATURE_DITTO_PRINTING
-            if(c2>='0' && c2<='9')
+            if(c2 >= '0' && c2 <= '9')
             {
                 addStringP(Extruder::dittoMode==c2-'0' ? ui_selected : ui_unselected);
+            } 
+#endif
+#if DISTORTION_CORRECTION            
+            if(c2 == 'e') {
+                addStringOnOff((Printer::distortion.isEnabled()));        // Autolevel on/off
             }
 #endif
             break;
@@ -1516,7 +1519,8 @@ void UIDisplay::parse(const char *txt,bool ram)
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case 'F': // FAN speed
             if(c2 == 's') addInt(floor(Printer::getFanSpeed() * 100 / 255 + 0.5f), 3);
-            if(c2=='i') addStringP((Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND) ? ui_selected : ui_unselected);
+            else if(c2 == 'S') addInt(floor(Printer::getFan2Speed() * 100 / 255 + 0.5f), 3);
+            else if(c2=='i') addStringP((Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND) ? ui_selected : ui_unselected);
             break;
 #endif
         case 'f':
@@ -1609,7 +1613,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 == 'Y')
             {
 //                addInt(zBabySteps,0);
-                addFloat((float)zBabySteps * Printer::invAxisStepsPerMM[Z_AXIS], 2, 2);
+                addFloat(static_cast<float>(Printer::zBabysteps) * Printer::invAxisStepsPerMM[Z_AXIS], 2, 2);
                 break;
             }
 #endif
@@ -1855,6 +1859,20 @@ void UIDisplay::parse(const char *txt,bool ram)
             else
                 addFloat(-Printer::coordinateOffset[c2-'0'],4,0);
             break;
+            case 'w':
+                if(c2>='0' && c2<='7') {
+                    addLong(Printer::wizardStack[c2-'0'].l);
+                }
+                break;
+            case 'W':
+                if(c2>='0' && c2<='7') {
+                    addFloat(Printer::wizardStack[c2-'0'].l,0,2);
+                } else if(c2 == 'A') {
+                    addFloat(Printer::wizardStack[0].l,0,1);
+                } else if(c2 == 'B') {
+                    addFloat(Printer::wizardStack[0].l,0,1);                    
+                }                    
+                break;
         }
     }
     uid.printCols[col] = 0;
@@ -2385,7 +2403,7 @@ void UIDisplay::pushMenu(const UIMenu *men, bool refresh)
     {
         // Menu is Open files list
         updateSDFileCount();
-        // Keep menu positon in file list, more user friendly.
+        // Keep menu position in file list, more user friendly.
         // If file list changed, still need to reset position.
         if (menuPos[menuLevel] > nFilesOnCard)
         {
@@ -2417,6 +2435,25 @@ void UIDisplay::popMenu(bool refresh)
     if(refresh)
         refreshPage();
 }
+
+void UIDisplay::showMessage(int id) {
+    uid.menuLevel=0;
+    switch(id) {
+        case 1:
+            uid.pushMenu(&ui_msg_leveling_error,true);
+            break;
+        case 2:            
+            uid.pushMenu(&ui_msg_defectsensor,true);
+            break;
+        case 3:
+            uid.pushMenu(&ui_msg_decoupled,true);
+            break;
+        case 4:
+            uid.pushMenu(&ui_msg_slipping,true);
+            break;
+    }
+}    
+
 int UIDisplay::okAction(bool allowMoves)
 {
     if(Printer::isUIErrorMessage())
@@ -2436,7 +2473,7 @@ int UIDisplay::okAction(bool allowMoves)
     }
     const UIMenu *men = (const UIMenu*)menu[menuLevel];
     //uint8_t nr = pgm_read_word_near(&(menu->numEntries));
-    uint8_t mtype = pgm_read_byte(&(men->menuType));
+    uint8_t mtype = pgm_read_byte(&(men->menuType)) & 63;
     UIMenuEntry **entries;
     UIMenuEntry *ent;
     unsigned char entType;
@@ -2575,6 +2612,29 @@ int UIDisplay::okAction(bool allowMoves)
             break;
 #endif // EXTRUDER_JAM_CONTROL
 #endif
+        case UI_ACTION_MESSAGE:
+            popMenu(true);
+            break;
+        case UI_ACTION_STATE:
+            break;
+#if FEATURE_AUTOLEVEL
+        case UI_ACTION_AUTOLEVEL2:
+            uid.popMenu(false);
+            uid.pushMenu(&ui_msg_calibrating_bed,true);
+            runBedLeveling(2);
+            uid.popMenu(true);
+            break;
+#endif
+#if DISTORTION_CORRECTION
+        case UI_ACTION_MEASURE_DISTORTION2:
+            uid.pushMenu(&ui_msg_calibrating_bed,true);
+            Printer::measureDistortion();
+            uid.popMenu(true);
+            break;
+#endif
+        default:
+            EVENT_UI_OK_WIZARD(action);
+            break;
         }
         return 0;
     }
@@ -2582,9 +2642,6 @@ int UIDisplay::okAction(bool allowMoves)
     {
         pushMenu((UIMenu*)action, false);
 //        BEEP_SHORT
-#if FEATURE_BABYSTEPPING
-        zBabySteps = 0;
-#endif
 #if HAVE_HEATED_BED
         if(action == pgm_read_word(&ui_menu_conf_bed.action))  // enter Bed configuration menu
             currHeaterForSetup = &heatedBedController;
@@ -2729,7 +2786,6 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     unsigned int action = pgm_read_word(&(ent->action));
     if(mtype == UI_MENU_TYPE_SUBMENU && activeAction == 0)   // browse through menu items
     {
-Com::printF(PSTR("ud start:"),(int)menuPos[menuLevel]);
         if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
         {
             while(menuPos[menuLevel] + 1 < nr)
@@ -2785,6 +2841,9 @@ Com::printF(PSTR("ud start:"),(int)menuPos[menuLevel]);
     {
     case UI_ACTION_FANSPEED:
         Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3, true);
+        break;
+    case UI_ACTION_FAN2SPEED:
+        Commands::setFan2Speed(Printer::getFan2Speed() + increment * 3);
         break;
     case UI_ACTION_XPOSITION:
         if(!allowMoves) return false;
@@ -2880,11 +2939,12 @@ ZPOS2:
 #if UI_DYNAMIC_ENCODER_SPEED
         increment /= dynSp; // we need fixed speeds or we get in trouble here!
 #endif
-        if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 20000)
+        int16_t diff =  increment * BABYSTEP_MULTIPLICATOR;
+        if(abs((int)Printer::zBabysteps + diff) < 30000 && abs(diff) < 2000)
         {
 			InterruptProtectedBlock noint;
-            Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
-            zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
+            Printer::zBabystepsMissing += diff;
+            Printer::zBabysteps += diff;
         }
     }
 #endif
@@ -3074,15 +3134,15 @@ ZPOS2:
         break;
 #endif
     case UI_ACTION_X_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->xOffset, 1, -99999, 99999);
+        INCREMENT_MIN_MAX(Extruder::current->xOffset, 1, -9999999, 9900999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_Y_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->yOffset, 1, -99999, 99999);
+        INCREMENT_MIN_MAX(Extruder::current->yOffset, 1, -9999999, 9999999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_STEPS:
-        INCREMENT_MIN_MAX(Extruder::current->stepsPerMM, 0.1, 1, 9999);
+        INCREMENT_MIN_MAX(Extruder::current->stepsPerMM, 0.1, 1, 99999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_EXTR_ACCELERATION:
@@ -3123,6 +3183,19 @@ ZPOS2:
         INCREMENT_MIN_MAX(Extruder::current->advanceL, 1, 0, 600);
         break;
 #endif
+#if FEATURE_AUTOLEVEL
+    case UI_ACTION_AUTOLEVEL2:
+        popMenu(true);
+        break;
+#endif        
+#if DISTORTION_CORRECTION
+    case UI_ACTION_MEASURE_DISTORTION2:
+        popMenu(true);
+    break;
+#endif    
+    default:
+        EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment);
+        break;
     }
 #if UI_AUTORETURN_TO_MENU_AFTER!=0
     ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
@@ -3352,7 +3425,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_SELECT_EXTRUDER5:
 #endif
             if(!allowMoves) return action;
-            Extruder::selectExtruderById(action - UI_ACTION_SELECT_EXTRUDER0);
+            Extruder::selectExtruderById(static_cast<uint8_t>(action - UI_ACTION_SELECT_EXTRUDER0));
             currHeaterForSetup = &(Extruder::current->tempControl);
             Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1);
             Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
@@ -3424,7 +3497,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             if(!allowMoves) ret = UI_ACTION_SD_PRI_PAU_CONT;
             else
             {
-                if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_SD_PAUSED))
+                if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
                     sd.continuePrint();
                 else if(Printer::isMenuMode(MENU_MODE_SD_PRINTING))
                     sd.pausePrint(true);
@@ -3446,6 +3519,15 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&ui_menu_sd, false);
             break;
 #endif
+        case UI_ACTION_STOP:
+            pushMenu(&ui_menu_askstop,true);
+            break;
+        case UI_ACTION_STOP_CONFIRMED:            
+            Printer::stopPrint();
+            break;
+        case UI_ACTION_CONTINUE:
+            Printer::continuePrint();
+            break;
 #if FAN_PIN>-1 && FEATURE_FAN_CONTROL
         case UI_ACTION_FAN_OFF:
         case UI_ACTION_FAN_25:
@@ -3726,7 +3808,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             HAL::resetHardware();
             break;
         case UI_ACTION_PAUSE:
-            Com::printFLN(PSTR("RequestPause:"));
+            Printer::pausePrint();
+            //Com::printFLN(PSTR("RequestPause:"));
             break;
 #if UI_BED_COATING
         case UI_ACTION_NOCOATING:
@@ -3791,6 +3874,25 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start
 #endif
+            break;
+#if FEATURE_AUTOLEVEL
+       case UI_ACTION_AUTOLEVEL:
+            uid.pushMenu(&ui_msg_clearbed1,true);
+            break;
+#endif
+#if DISTORTION_CORRECTION            
+       case UI_ACTION_MEASURE_DISTORTION:
+            uid.pushMenu(&ui_msg_clearbed2,true);
+            break;
+       case UI_ACTION_TOGGLE_DISTORTION:
+            if(Printer::distortion.isEnabled())
+                 Printer::distortion.disable(true);
+            else
+                 Printer::distortion.enable(true);
+            break;
+#endif
+        default:
+            EVENT_UI_EXECUTE(action,allowMoves);
             break;
         }
     refreshPage();
@@ -3870,6 +3972,7 @@ void UIDisplay::slowAction(bool allowMoves)
         int newAction;
         if(encodeChange) // encoder changed
         {
+            Com::writeToAll = true;
             nextPreviousAction(encodeChange, allowMoves);
             BEEP_SHORT
             refresh = 1;
@@ -3888,6 +3991,7 @@ void UIDisplay::slowAction(bool allowMoves)
             {
                 lastAction = lastButtonAction;
                 BEEP_SHORT
+                Com::writeToAll = true;
                 if((newAction = executeAction(lastAction, allowMoves)) == 0)
                 {
                     nextRepeat = time + UI_KEY_FIRST_REPEAT;
@@ -4019,3 +4123,6 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 #endif
 #endif
 
+#if defined(CUSTOM_EVENTS)
+#include "CustomEventsImpl.h"
+#endif

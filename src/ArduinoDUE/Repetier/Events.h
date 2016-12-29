@@ -87,7 +87,19 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UPDATE_DERIVED {}
 
 // This gets called after the basic firmware functions have initialized.
-// Use this to initalize your hardware etc.
+// Use this to initialize your hardware etc.
 #define EVENT_INITIALIZE {}
+
+// Allows adding custom symbols in strings that get parsed. Return false if not replaced so defaults can trigger.
+// override function signature: bool parser(uint8_t c1,uint8_t c2)
+#define CUSTOM_TEXT_PARSER(c1,c2) false
+
+// User interface actions
+// These get only executed if there was no hot, so they are ideal to add new actions
+
+// ok button in wizard page is called
+#define EVENT_UI_OK_WIZARD(action) {}
+#define EVENT_UI_EXECUTE(action,allowMoves) {}
+#define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) {}
 
 #endif // EVENTS_H_INCLUDED

@@ -58,6 +58,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Felix Printers for arm       = 405
 // DAM&DICE DUE                 = 406
 // Smart RAMPS for Due          = 408
+// Smart RAMPS for Due with EEPROM = 413
 // Ultratronics Board           = 409
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
@@ -1634,7 +1635,8 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
-21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
+23 or CONTROLLER_SPARKLCD_ADAPTER  Sparkcube LCD on RADDS with adapter 
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */

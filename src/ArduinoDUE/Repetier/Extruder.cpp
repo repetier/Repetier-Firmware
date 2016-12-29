@@ -62,6 +62,7 @@ static uint8_t extruderTempErrors = 0;
 
 void Extruder::manageTemperatures()
 {
+    Com::writeToAll = true;
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -147,6 +148,7 @@ void Extruder::manageTemperatures()
 					newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
+                    UI_MESSAGE(2);
                 }
                 EVENT_HEATER_DEFECT(controller);
             }
@@ -201,6 +203,7 @@ void Extruder::manageTemperatures()
 						{
 							Printer::setAnyTempsensorDefect();
 							newDefectFound = true;
+                            UI_MESSAGE(3);
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -229,6 +232,7 @@ void Extruder::manageTemperatures()
 						{
 							Printer::setAnyTempsensorDefect();
 							newDefectFound = true;
+                            UI_MESSAGE(3);
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -679,6 +683,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		return;
 #endif
 #if NUM_EXTRUDER > 0
+	Commands::waitUntilEndOfAllMoves();
 #if MIXING_EXTRUDER
     if(extruderId >= VIRTUAL_EXTRUDER)
         extruderId = 0;
@@ -717,7 +722,15 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	float lastX = Printer::lastCmdPos[X_AXIS];
 	// Park current extruder
 	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps;
-	if(Printer::isXHomed() && executeSelect) {
+#if LAZY_DUAL_X_AXIS
+    if(Printer::sledParked)
+        dualXPos = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be
+#endif
+	if(Printer::isXHomed() && executeSelect
+#if LAZY_DUAL_X_AXIS    
+     && !Printer::sledParked
+#endif     
+     ) {
 		bool oldDestCheck = Printer::isNoDestinationCheck();
 		Printer::setNoDestinationCheck(true);
 		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
@@ -763,7 +776,11 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	}
 #if LAZY_DUAL_X_AXIS == 0
 	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPos;
-	if(Printer::isXHomed() && executeSelect) {
+	if(Printer::isXHomed() && executeSelect
+#if LAZY_DUAL_X_AXIS
+        && !Printer::sledParked
+#endif
+    ) {
 		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
 		Printer::currentPositionSteps[X_AXIS] = dualXPos + Printer::xMinSteps;		
 	}
@@ -959,9 +976,9 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 #if HAVE_HEATED_BED
     if(temperatureInCelsius > HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
-    if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
+    if(heatedBedController.targetTemperatureC == temperatureInCelsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temperatureInCelsius);
-    if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
+    if(beep && temperatureInCelsius > 30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
     if(temperatureInCelsius > 15)
         pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;    // turn on the mainboard cooling fan
@@ -2181,7 +2198,6 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
     }
     int currentTemperature = this->currentTemperature;
-    //OUT_P_I_LN("OC for raw ",raw_temp);
     switch(type)
     {
     case 0:
@@ -2217,8 +2233,6 @@ void TemperatureController::updateCurrentTemperature()
             newtemp = pgm_read_word(&temptable[i++]);
             if (newraw > currentTemperature)
             {
-                //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
-                //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp - oldtemp) / (newraw - oldraw));
                 return;
             }
@@ -2332,8 +2346,6 @@ void TemperatureController::updateCurrentTemperature()
             newtemp = temptable[i++];
             if (newraw > currentTemperature)
             {
-                //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
-                //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
                 return;
             }

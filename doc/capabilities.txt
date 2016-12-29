@@ -68,3 +68,23 @@ Supports enabling/disabling power with M80/M81
 Cap:TOGGLE_LIGHTS
 
 Supports toggling lights on/off with M355.
+
+Cap:PAUSESTOP
+
+Supports bidirectional pause/stop handling. What this means is that this
+system allows it to pause a print controlled by a host from firmware and
+from host. It even allows to pause on printer and continue on host and
+vice versa.
+
+From the firmware side this is achieved by sending
+RequestPause:
+to request host to start pausing and
+RequestContinue:
+to ask hosts to continue printing. The real action is done by the host in any case.
+To stop the print from firmware it would send
+RequestStop:
+
+For the host side the M539 command is used.
+M539 S1 ; enable pause protocol so firmware knows it is supported by host
+M539 P0 ; Host did continue
+M539 P1 ; Host entered pause state

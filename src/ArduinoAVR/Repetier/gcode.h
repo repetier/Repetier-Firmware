@@ -24,6 +24,70 @@
 enum FirmwareState {NotBusy=0,Processing,Paused,WaitHeater,DoorOpen};
 
 class SDCard;
+class Commands;
+
+
+
+
+
+class SerialGCodeSource: public GCodeSource {
+    Stream *stream;
+public:    
+    SerialGCodeSource(Stream *p);
+    virtual bool isOpen();
+    virtual bool supportsWrite(); ///< true if write is a non dummy function
+    virtual bool closeOnError(); // return true if the channel can not interactively correct errors.
+    virtual bool dataAvailable(); // would read return a new byte?
+    virtual int readByte();
+    virtual void writeByte(uint8_t byte);
+    virtual void close();
+};
+//#pragma message "Sd support: " XSTR(SDSUPPORT)  
+#if SDSUPPORT
+class SDCardGCodeSource: public GCodeSource {
+    public:
+    virtual bool isOpen();
+    virtual bool supportsWrite(); ///< true if write is a non dummy function
+    virtual bool closeOnError(); // return true if the channel can not interactively correct errors.
+    virtual bool dataAvailable(); // would read return a new byte?
+    virtual int readByte();
+    virtual void writeByte(uint8_t byte);
+    virtual void close();
+};
+#endif
+
+class FlashGCodeSource: public GCodeSource {
+    public:
+    FSTRINGPARAM(pointer);
+    volatile bool finished;
+    int actionOnFinish;
+    
+    FlashGCodeSource();
+    virtual bool isOpen();
+    virtual bool supportsWrite(); ///< true if write is a non dummy function
+    virtual bool closeOnError(); // return true if the channel can not interactively correct errors.
+    virtual bool dataAvailable(); // would read return a new byte?
+    virtual int readByte();
+    virtual void writeByte(uint8_t byte);
+    virtual void close();
+    
+    /** Execute the commands at the given memory. If already an other string is
+    running, the command will wait until that command finishes. If wait is true it
+    will also wait for given command to be enqueued completely. */
+    void executeCommands(FSTRINGPARAM(data),bool waitFinish,int action);
+};
+
+#if NEW_COMMUNICATION
+extern FlashGCodeSource flashSource;
+extern SerialGCodeSource serial0Source;
+#if BLUETOOTH_SERIAL > 0
+extern SerialGCodeSource serial1Source;
+#endif
+#if SDSUPPORT
+extern SDCardGCodeSource sdSource;
+#endif
+#endif
+
 class GCode   // 52 uint8_ts per command needed
 {
     uint16_t params;
@@ -205,7 +269,8 @@ public:
     friend class SDCard;
     friend class UIDisplay;
 	static FSTRINGPARAM(fatalErrorMsg);
-private:
+    friend class GCodeSource;    
+protected:
     void debugCommandBuffer();
     void checkAndPushCommand();
     static void requestResend();
@@ -232,18 +297,24 @@ private:
     static uint8_t commandReceiving[MAX_CMD_SIZE]; ///< Current received command.
     static uint8_t commandsReceivingWritePosition; ///< Writing position in gcode_transbuffer.
     static uint8_t sendAsBinary; ///< Flags the command as binary input.
-    static uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
     static uint8_t commentDetected; ///< Flags true if we are reading the comment part of a command.
     static uint8_t binaryCommandSize; ///< Expected size of the incoming binary command.
     static bool waitUntilAllCommandsAreParsed; ///< Don't read until all commands are parsed. Needed if gcode_buffer is misused as storage for strings.
-    static uint32_t lastLineNumber; ///< Last line number received.
     static uint32_t actLineNumber; ///< Line number of current command.
-    static int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
     static volatile uint8_t bufferLength; ///< Number of commands stored in gcode_buffer
-    static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
     static uint8_t formatErrors; ///< Number of sequential format errors
 	static millis_t lastBusySignal; ///< When was the last busy signal
+#if NEW_COMMUNICATION == 0
+    static int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
+    static uint32_t lastLineNumber; ///< Last line number received.
+    static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
+    static uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
+#else
+public:
+    GCodeSource *source;    
+#endif    
 };
+
 
 #if JSON_OUTPUT
 #include "SdFat.h"

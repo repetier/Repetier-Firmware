@@ -65,6 +65,14 @@ FSTRINGVALUE(Com::tP," P")
 FSTRINGVALUE(Com::tI," I")
 FSTRINGVALUE(Com::tJ," J")
 FSTRINGVALUE(Com::tR," R")
+FSTRINGVALUE(Com::tD," D")
+FSTRINGVALUE(Com::tC," C")
+FSTRINGVALUE(Com::tH," H")
+FSTRINGVALUE(Com::tA," A")
+FSTRINGVALUE(Com::tB," B")
+FSTRINGVALUE(Com::tK," K")
+FSTRINGVALUE(Com::tL," L")
+FSTRINGVALUE(Com::tO," O")
 FSTRINGVALUE(Com::tSDReadError,"SD read error")
 FSTRINGVALUE(Com::tExpectedLine,"Error:expected line ")
 FSTRINGVALUE(Com::tGot," got ")
@@ -449,6 +457,8 @@ FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
 #endif
 
+bool Com::writeToAll = true; // transmit start messages to all devices!
+
 void Com::cap(FSTRINGPARAM(text)) {
     printF(tCap);
     printFLN(text);
@@ -517,7 +527,7 @@ void Com::printFLN(FSTRINGPARAM(text),const char *msg) {
 void Com::printF(FSTRINGPARAM(ptr)) {
   char c;
   while ((c = HAL::readFlashByte(ptr++)) != 0)
-     HAL::serialWriteByte(c);
+     GCodeSource::writeToAll(c);
 }
 void Com::printF(FSTRINGPARAM(text),const char *msg) {
     printF(text);
@@ -563,12 +573,12 @@ void Com::printF(FSTRINGPARAM(text),float value,uint8_t digits) {
 
 void Com::print(const char *text) {
   while(*text) {
-    HAL::serialWriteByte(*text++);
+      GCodeSource::writeToAll(*text++);
   }
 }
 void Com::print(long value) {
     if(value<0) {
-        HAL::serialWriteByte('-');
+        GCodeSource::writeToAll('-');
         value = -value;
     }
     printNumber(value);

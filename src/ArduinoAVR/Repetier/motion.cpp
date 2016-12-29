@@ -112,7 +112,7 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
 			z = 0;
 #endif
 	}
-#endif
+#endif //  MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
 
     float savedFeedrate = Printer::feedrate;
     Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS] + x;
@@ -152,10 +152,14 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 			z = 0;
 #endif
 	}
-#endif
+#endif // MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     Printer::lastCmdPos[X_AXIS] += x * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::lastCmdPos[Y_AXIS] += y * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::lastCmdPos[Z_AXIS] += z * Printer::invAxisStepsPerMM[Z_AXIS];
+#if LAZY_DUAL_X_AXIS
+    Printer::sledParked = false;
+#endif
+    
     if(!Printer::isPositionAllowed( Printer::lastCmdPos[X_AXIS], Printer::lastCmdPos[Y_AXIS], Printer::lastCmdPos[Z_AXIS]))
     {
         return; // ignore move
@@ -1188,7 +1192,7 @@ void PrintLine::waitForXFreeLines(uint8_t b, bool allowMoves)
 {
     while(getLinesCount() + b > PRINTLINE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
-        GCode::readFromSerial();
+        //GCode::readFromSerial();
         Commands::checkForPeriodicalActions(allowMoves);
     }
 }
@@ -2222,7 +2226,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
 
         if((count & 3) == 0)
         {
-            GCode::readFromSerial();
+            //GCode::readFromSerial();
             Commands::checkForPeriodicalActions(false);
             UI_MEDIUM; // do check encoder
         }
@@ -2958,11 +2962,13 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
-    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing)
+#if FEATURE_BABYSTEPPING    
+    if(Printer::zBabystepsMissing)
     {
 		HAL::forbidInterrupts();
         Printer::zBabystep();
     }
+#endif    
     return interval;
 }
 #endif

@@ -161,7 +161,7 @@ STEPPER_CURRENT_CONTROL
 // Due analog pin #57
 #define TEMP_4_PIN       4 
 
-// Dua analog pin #59 = A5 -> AD 2
+// Due analog pin #59 = A5 -> AD 2
 #define THERMOCOUPLE_0_PIN  2   
 // There are no more analog pins freely available.
 // You can use direction and enable pin from extruder 0 socket as they are also 
@@ -545,7 +545,7 @@ STEPPER_CURRENT_CONTROL
 #define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 
-#if MOTHERBOARD == 408
+#if MOTHERBOARD == 408 || MOTHERBOARD == 413
 #ifndef __SAM3X8E__
 #erro oops! Be sure to have 'due Arduino' selected from the 'tools-> Boards menu'.
 #endif
@@ -606,12 +606,26 @@ STEPPER_CURRENT_CONTROL
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ          100000
+#if MOTHERBOARD == 408
 //	20 or 70
 #define SDA_PIN 			-1 
 // 21 or 71
 #define SCL_PIN 			-1 
 #define EEPROM_AVAILABLE EEPROM_NONE
+#else
+// this board supports eeprom
+#define SDA_PIN     20      // 20 or 70
+#define SCL_PIN     21      // 21 or 71
 
+#define TWI_CLOCK_FREQ          400000
+// see eeprom device data sheet for the following values, these are for 24xx256
+#define EEPROM_SERIAL_ADDR      0x50   // 7 bit i2c address (without R/W bit)
+#define EEPROM_PAGE_SIZE        64     // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME  7      // page write time in milliseconds (docs say 5ms but that is too short)
+// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
+#define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
+#define EEPROM_AVAILABLE 1
+#endif
 #endif
 
 
@@ -1058,9 +1072,9 @@ AD15 CH15
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
-#define SDA_PIN 				70  	
+#define SDA_PIN 				20 //70  	
 // 21 or 71
-#define SCL_PIN 				71  	
+#define SCL_PIN 				21 // 71  	
 
 // Servo pins: 5,6 und 39
 
@@ -1078,7 +1092,7 @@ AD15 CH15
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 1
+#define EEPROM_AVAILABLE 0
 #endif
 
 
