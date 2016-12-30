@@ -1913,9 +1913,9 @@ void Commands::processMCode(GCode *com) {
                 bool comp = com->S;
                 if(com->hasX()) {
                     if(com->X == 0)
-                        HAL::pinMode(com->S,INPUT);
+                        HAL::pinMode(com->P,INPUT);
                     else
-                        HAL::pinMode(com->S,INPUT_PULLUP);
+                        HAL::pinMode(com->P,INPUT_PULLUP);
                 }
                 do {
                     Commands::checkForPeriodicalActions(true);
