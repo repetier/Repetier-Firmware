@@ -306,8 +306,8 @@ struct UIMenuEntry_s {
   const char *text;    // Menu text
   uint8_t entryType;   // 0 = Info, 1 = Headline, 2 = sub menu ref, 3 = direct action command, 4 = modify action command,
   unsigned int action; // must be int so it gets 32 bit on arm!
-  uint8_t filter;      // allows dynamic menu filtering based on Printer::menuMode bits set.
-  uint8_t nofilter;    // Hide if one of these bits are set
+  uint16_t filter;      // allows dynamic menu filtering based on Printer::menuMode bits set.
+  uint16_t nofilter;    // Hide if one of these bits are set
   int translation;     // Translation id
   bool showEntry() const;
 } ;

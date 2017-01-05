@@ -134,11 +134,11 @@ void beep(uint8_t duration,uint8_t count)
 bool UIMenuEntry::showEntry() const
 {
     bool ret = true;
-    uint8_t f, f2;
+    uint16_t f, f2;
     f = HAL::readFlashByte((PGM_P)&filter);
     if(f != 0)
         ret = (f & Printer::menuMode) == f;
-    if(ret && (f2 = HAL::readFlashByte((PGM_P)&nofilter)) != 0)
+    if(ret && (f2 = HAL::readFlashWord((PGM_P)&nofilter)) != 0)
         ret = (f2 & Printer::menuMode) == 0;
     return ret;
 }
@@ -1420,12 +1420,42 @@ void UIDisplay::parse(const char *txt,bool ram)
             if (c2 == 'e') addStringOnOff(Printer::debugErrors());
             if (c2 == 'd') addStringOnOff(Printer::debugDryrun());
             if (c2 == 'p') addStringOnOff(Printer::debugEndStop());
-            if (c2 == 'x') addStringP(Endstops::xMin() ? ui_selected : ui_unselected);
-            if (c2 == 'X') addStringP(Endstops::xMax() ? ui_selected : ui_unselected);
-            if (c2 == 'y') addStringP(Endstops::yMin() ? ui_selected : ui_unselected);
-            if (c2 == 'Y') addStringP(Endstops::yMax() ? ui_selected : ui_unselected);
-            if (c2 == 'z') addStringP(Endstops::zMin() ? ui_selected : ui_unselected);
-            if (c2 == 'Z') addStringP(Endstops::zMax() ? ui_selected : ui_unselected);
+            if (c2 == 'x') 
+#if MIN_HARDWARE_ENDSTOP_X            
+                addStringP(Endstops::xMin() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif                
+            if (c2 == 'X') 
+#if MAX_HARDWARE_ENDSTOP_X
+                addStringP(Endstops::xMax() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif
+            if (c2 == 'y') 
+#if MIN_HARDWARE_ENDSTOP_Y
+                addStringP(Endstops::yMin() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif
+            if (c2 == 'Y') 
+#if MAX_HARDWARE_ENDSTOP_Y
+                addStringP(Endstops::yMax() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif
+            if (c2 == 'z') 
+#if MIN_HARDWARE_ENDSTOP_Z
+                addStringP(Endstops::zMin() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif
+            if (c2 == 'Z') 
+#if MAX_HARDWARE_ENDSTOP_Z
+                addStringP(Endstops::zMax() ? ui_selected : ui_unselected);
+#else
+                addStringP(Com::tSpace);
+#endif
         break;
         case 'D':
 #if FEATURE_DITTO_PRINTING

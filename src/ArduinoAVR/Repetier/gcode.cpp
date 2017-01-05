@@ -1368,11 +1368,12 @@ void GCodeSource::removeSource(GCodeSource *delSource) {
 }
 
 void GCodeSource::rotateSource() { ///< Move active to next source
-    fast8_t bestIdx = 0,oldIdx = 0;
+    fast8_t bestIdx = 0; //,oldIdx = 0;
     fast8_t i;
     for(i = 0; i < numSources; i++) {
         if(sources[i] == activeSource) {
-           oldIdx = bestIdx = i;
+           //oldIdx = 
+           bestIdx = i;
            break;
        }
     }    

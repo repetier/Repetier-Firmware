@@ -64,7 +64,7 @@ uint8_t Printer::flag2 = 0;
 uint8_t Printer::flag3 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 fast8_t Printer::stepsPerTimerCall = 1;
-uint8_t Printer::menuMode = 0;
+uint16_t Printer::menuMode = 0;
 uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 uint8_t Printer::fanSpeed = 0; // Last fan speed set with M106/M107
 float Printer::extrudeMultiplyError = 0;
@@ -205,14 +205,6 @@ void Endstops::update() {
 #ifdef EXTENDED_ENDSTOPS
     flag8_t newRead2 = 0;
 #endif
-#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-        if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING)
-            newRead |= ENDSTOP_X_MIN_ID;
-#endif
-#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-        if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING)
-            newRead |= ENDSTOP_X_MAX_ID;
-#endif
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
         if(READ(Y_MIN_PIN) != ENDSTOP_Y_MIN_INVERTING)
             newRead |= ENDSTOP_Y_MIN_ID;
@@ -220,6 +212,18 @@ void Endstops::update() {
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
         if(READ(Y_MAX_PIN) != ENDSTOP_Y_MAX_INVERTING)
             newRead |= ENDSTOP_Y_MAX_ID;
+#endif
+#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
+   // DEBUG_MSG2_FAST("test x min",(int)READ(X_MIN_PIN));
+    if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
+        newRead |= ENDSTOP_X_MIN_ID;
+     //   DEBUG_MSG("x min hit");
+    }
+#endif
+#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
+    //DEBUG_MSG2_FAST("test x max:",(int)READ(X_MAX_PIN));
+    if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING)
+        newRead |= ENDSTOP_X_MAX_ID;
 #endif
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
         if(READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING)
@@ -442,14 +446,18 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
 }
 
 void Printer::reportPrinterMode() {
+    Printer::setMenuMode(MENU_MODE_CNC + MENU_MODE_LASER + MENU_MODE_FDM,false);
     switch(Printer::mode) {
     case PRINTER_MODE_FFF:
+        Printer::setMenuMode(MENU_MODE_FDM,true);
         Com::printFLN(Com::tPrinterModeFFF);
         break;
     case PRINTER_MODE_LASER:
+        Printer::setMenuMode(MENU_MODE_LASER,true);
         Com::printFLN(Com::tPrinterModeLaser);
         break;
     case PRINTER_MODE_CNC:
+        Printer::setMenuMode(MENU_MODE_CNC,true);
         Com::printFLN(Com::tPrinterModeCNC);
         break;
     }

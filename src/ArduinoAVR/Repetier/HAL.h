@@ -565,7 +565,7 @@ public:
     }
 
     // Faster version of InterruptProtectedBlock.
-    // For safety it ma yonly be called from within an
+    // For safety it may only be called from within an
     // interrupt handler.
     static inline void forbidInterrupts()
     {
@@ -578,6 +578,10 @@ public:
     static inline char readFlashByte(PGM_P ptr)
     {
         return pgm_read_byte(ptr);
+    }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
     }
     static inline void serialSetBaudrate(long baud)
     {

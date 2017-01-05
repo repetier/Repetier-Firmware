@@ -1191,7 +1191,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_HAS_BACK_KEY 0
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_ENCODER 0
-#define UI_ENCODER_SPEED 2
+#define UI_ENCODER_SPEED 1
 
 //SD Card
 #undef SDSS

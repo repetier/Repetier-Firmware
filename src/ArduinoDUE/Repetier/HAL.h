@@ -147,7 +147,7 @@ typedef char prog_char;
 #define ADC_ISR_EOC(channel)    (0x1u << channel)
 #define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}
 
-#define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
+#define PULLUP(IO,v)            {::pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL       1024u  // 8sec  (~16 seconds max)
@@ -170,10 +170,12 @@ typedef char prog_char;
 #define		_WRITE(port, v)			do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
 #define WRITE(pin,v) _WRITE(pin,v)
 
-#define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
-  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
-#define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
-                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
+#define	SET_INPUT(pin) ::pinMode(pin,INPUT); 
+// pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); 
+//  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
+#define	SET_OUTPUT(pin) ::pinMode(pin,OUTPUT);
+//PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, 
+//                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
 #undef LOW
@@ -652,6 +654,11 @@ class HAL
     {
       return pgm_read_byte(ptr);
     }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
+    }
+
     static inline void serialSetBaudrate(long baud)
     {
       Serial.setInterruptPriority(1);

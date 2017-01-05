@@ -15,6 +15,9 @@ Printer::menuMode is set or not set. Currently these modes are defined:
 #define MENU_MODE_PRINTING    16
 #define MENU_MODE_FULL_PID    32
 #define MENU_MODE_DEADTIME    64
+#define MENU_MODE_FDM         128
+#define MENU_MODE_LASER       256
+#define MENU_MODE_CNC         512
 
 Base of the menu is the menu container described by UIMenu. It has one of the
 following types:

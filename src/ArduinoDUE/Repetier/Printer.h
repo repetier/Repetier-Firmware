@@ -309,7 +309,7 @@ public:
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
-    static uint8_t menuMode;
+    static uint16_t menuMode;
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
@@ -460,7 +460,7 @@ public:
             interruptEvent = evt;
     }
     static void reportPrinterMode();
-    static INLINE void setMenuMode(uint8_t mode,bool on)
+    static INLINE void setMenuMode(uint16_t mode,bool on)
     {
         if(on)
             menuMode |= mode;

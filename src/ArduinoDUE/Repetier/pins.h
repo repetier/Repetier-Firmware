@@ -1072,9 +1072,9 @@ AD15 CH15
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
-#define SDA_PIN 				20 //70  	
+#define SDA_PIN 				20  	
 // 21 or 71
-#define SCL_PIN 				21 // 71  	
+#define SCL_PIN 				21  	
 
 // Servo pins: 5,6 und 39
 
@@ -1092,7 +1092,7 @@ AD15 CH15
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES     TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 0
+#define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 
 

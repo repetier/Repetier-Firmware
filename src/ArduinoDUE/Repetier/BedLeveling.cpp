@@ -572,6 +572,8 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         currentNonlinearPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
         currentNonlinearPositionSteps[B_TOWER] += stepsRemainingAtZHit;
         currentNonlinearPositionSteps[C_TOWER] += stepsRemainingAtZHit;
+#elif NONLINEAR_SYSTEM        
+        currentNonlinearPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         sum += lastCorrection - currentPositionSteps[Z_AXIS];

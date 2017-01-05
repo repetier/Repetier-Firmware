@@ -75,7 +75,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 
-#define DEBUG_MSG(x) {Com::printFLN(PSTR(x));HAL::delayMilliseconds(20);}
+#define DEBUG_MSG(x) {if(Printer::debugEcho()) { Com::printFLN(PSTR(x));HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG2(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG_FAST(x) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x));}}
+#define DEBUG_MSG2_FAST(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);}}
 
 #define CARTESIAN 0
 #define XY_GANTRY 1
@@ -550,6 +553,9 @@ inline void memcopy4(void *dest,void *source) {
 #define MENU_MODE_PRINTING 16
 #define MENU_MODE_FULL_PID 32
 #define MENU_MODE_DEADTIME 64
+#define MENU_MODE_FDM 128
+#define MENU_MODE_LASER 256
+#define MENU_MODE_CNC 512
 
 #ifndef BENDING_CORRECTION_A
 #define BENDING_CORRECTION_A 0
