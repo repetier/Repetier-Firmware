@@ -2855,10 +2855,12 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
             else
                 menuPos[menuLevel] = 0;
         }
-        if(menuTop[menuLevel] > menuPos[menuLevel])
+        if(menuTop[menuLevel] > menuPos[menuLevel]) {
             menuTop[menuLevel] = menuPos[menuLevel];
-        else if(menuTop[menuLevel] + UI_ROWS - 1 < menuPos[menuLevel])
-            menuTop[menuLevel] = menuPos[menuLevel] + 1 - UI_ROWS;
+        } else if(menuTop[menuLevel] + UI_ROWS <= menuPos[menuLevel]) {
+            menuTop[menuLevel] = (menuPos[menuLevel] + 1);
+            menuTop[menuLevel] -= static_cast<uint16_t>(UI_ROWS); // DO NOT COMBINE IN ONE LINE - WILL NOT COMPILE CORRECTLY THEN!
+        }            
         shift = -2; // reset shift position
         return true;
     }

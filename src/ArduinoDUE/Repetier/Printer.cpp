@@ -745,7 +745,7 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f,bool pat
 
 void Printer::setOrigin(float xOff, float yOff, float zOff)
 {
-    coordinateOffset[X_AXIS] = xOff;
+    coordinateOffset[X_AXIS] = xOff;// offset from G92
     coordinateOffset[Y_AXIS] = yOff;
     coordinateOffset[Z_AXIS] = zOff;
 }
@@ -753,7 +753,12 @@ void Printer::setOrigin(float xOff, float yOff, float zOff)
 /** Computes currentPosition from currentPositionSteps including correction for offset. */
 void Printer::updateCurrentPosition(bool copyLastCmd)
 {
+#if DUAL_X_AXIS && LAZY_DUAL_X_AXIS 
+    if(!sledParked)
+        currentPosition[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
+#else
     currentPosition[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
+#endif    
     currentPosition[Y_AXIS] = static_cast<float>(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
 #if NONLINEAR_SYSTEM	
     currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS];
@@ -762,7 +767,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
 #endif	
    transformFromPrinter(currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS],
                         currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS]);
-    currentPosition[X_AXIS] -= Printer::offsetX;
+    currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
     currentPosition[Y_AXIS] -= Printer::offsetY;
     currentPosition[Z_AXIS] -= Printer::offsetZ;
     if(copyLastCmd)
@@ -834,6 +839,13 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         sledParked = false;
 #endif        
 	}
+#if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
+    else if(sledParked) {
+		destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS];
+		destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS];
+		destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS];        
+    }
+#endif    
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
@@ -1646,6 +1658,7 @@ void Printer::homeXAxis()
 #if LAZY_DUAL_X_AXIS 
 	currentPositionSteps[X_AXIS] = xMinSteps + Extruder::current->xOffset;
     sledParked = true;
+    currentPosition[X_AXIS] = lastCmdPos[X_AXIS] = xMin;
 #else	
 	// Now position current extrude on x = 0
 	PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
@@ -1995,7 +2008,9 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 	if(zaxis)
 		startZ = Z_UP_AFTER_HOME;
 #endif
+#if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+#endif    
 	updateCurrentPosition(true);
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS == 1
 	lastCmdPos[X_AXIS] = xMin;
