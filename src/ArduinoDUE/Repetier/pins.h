@@ -1050,8 +1050,8 @@ AD15 CH15
 #define ORIG_E2_ENABLE_PIN  49
 
 #define ORIG_E3_STEP_PIN    41
-#define ORIG_E3_DIR_PIN     99
-#define ORIG_E3_ENABLE_PIN  40
+#define ORIG_E3_DIR_PIN     40
+#define ORIG_E3_ENABLE_PIN  99
 
 #define ORIG_E4_STEP_PIN    5
 #define ORIG_E4_DIR_PIN     4
