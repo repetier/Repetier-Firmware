@@ -3312,6 +3312,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_ALL:
             if(!allowMoves) return UI_ACTION_HOME_ALL;
+            uid.menuLevel = 0;
+            uid.menuPos[0] = 0;
             Printer::homeAxis(true, true, true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
             break;

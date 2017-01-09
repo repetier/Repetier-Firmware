@@ -398,16 +398,16 @@ bool Printer::isPositionAllowed(float x,float y,float z)
 		allowed = allowed && z <= zMin + zLength + ENDSTOP_Z_BACK_ON_HOME + 0.01;	
 	}
 #endif 
-#if DUAL_X_AXIS
+/*#if DUAL_X_AXIS
 	// Prevent carriage hit by disallowing moves inside other parking direction.
 	if(Extruder::current->id == 0) {
-		if(x > xMin + xLength)
+		if(x > xMin + xLength + 0.01)
 			allowed = false;
 	} else {
-		if(x < xMin)
+		if(x < xMin - 0.01)
 			allowed = false;
 	}
-#endif
+#endif*/
     if(!allowed)
     {
         Printer::updateCurrentPosition(true);
@@ -791,6 +791,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 {
     register int32_t p;
     float x, y, z;
+    bool posAllowed = true;
 #if FEATURE_RETRACTION
     if(com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into auto retract
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
@@ -838,6 +839,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #if LAZY_DUAL_X_AXIS
         sledParked = false;
 #endif        
+        posAllowed = Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]);
 	}
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
     else if(sledParked) {
@@ -849,7 +851,6 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasE() && !Printer::debugDryrun())
     {
         p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
-
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
         {
             if(
@@ -879,7 +880,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         else
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
-    if(!Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]))
+    if(!posAllowed)
     {
         currentPositionSteps[E_AXIS] = destinationSteps[E_AXIS];
         return false; // ignore move

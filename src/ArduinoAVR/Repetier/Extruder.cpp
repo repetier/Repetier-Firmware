@@ -774,7 +774,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	// Unpark new current extruder
 	if(executeSelect) {// Run only when changing
 		Commands::waitUntilEndOfAllMoves();
-		Printer::updateCurrentPosition(true);
+		Printer::updateCurrentPosition(true); // does not update x in lazy mode!
 		GCode::executeFString(Extruder::current->selectCommands);
 	}
 #if LAZY_DUAL_X_AXIS == 0
