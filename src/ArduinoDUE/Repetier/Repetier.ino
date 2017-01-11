@@ -158,7 +158,7 @@ Custom M Codes
 - M531 filename - Define filename being printed
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
 - M600 Change filament
-- M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
+- M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Continue reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M603 - Simulate a jam
 - M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h

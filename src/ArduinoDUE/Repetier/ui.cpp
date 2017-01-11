@@ -1281,7 +1281,7 @@ void UIDisplay::addChar(const char c)
 }
 void UIDisplay::addGCode(GCode *code)
 {
-    // assume volatile and make copy so we dont "see" multple code lines as we go.
+    // assume volatile and make copy so we do not "see" multiple code lines as we go.
     //GCode myCode = *code; insuffeicnet memory for this safety check
     //code = &myCode;
     addChar('#');
@@ -1772,11 +1772,29 @@ void UIDisplay::parse(const char *txt,bool ram)
                 else if(c2=='1')
                     fvalue = Printer::realYPosition();
                 else if(c2=='2')
-                    fvalue = Printer::realZPosition();
+                    fvalue = Printer::realZPosition();                   
                 else
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
                 addFloat(fvalue,4,2);
-            }
+            } else if(c2>='a' && c2<='f') {
+                //  %xa-%xf : Extruder state icon 0x08 or 0x09 or 0x0a (off) - works only with graphic displays!
+                fast8_t exid = c2-'a';
+                TemperatureController &t = extruder[exid].tempControl;
+                if(t.targetTemperatureC < 30)
+                    addChar(0x0a);
+                else
+                    addChar((t.currentTemperatureC + 4 < t.targetTemperatureC) && Printer::isAnimation() ? 0x08 : 0x09);
+                break;
+            }                
+#if HAVE_HEATED_BED
+            else if(c2 == 'B') {
+                //  %xB : Bed icon state 0x0c or 0x0d or 0x0b (off) Bed state - works only with graphic displays!
+                if(heatedBedController.targetTemperatureC < 30)
+                    addChar(0x0b);
+                else
+                    addChar((heatedBedController.currentTemperatureC + 2 < heatedBedController.targetTemperatureC) && Printer::isAnimation() ? 0x0c : 0x0d);
+            }            
+#endif
             break;
 
         case 'X': // Extruder related
@@ -2423,7 +2441,7 @@ void UIDisplay::pushMenu(const UIMenu *men, bool refresh)
         refreshPage();
         return;
     }
-    if(menuLevel == 4) return; // Max. depth reached. No more memory to down further.
+    if(menuLevel+1 >= UI_MENU_MAXLEVEL) return; // Max. depth reached. No more memory to down further.
     menuLevel++;
     menu[menuLevel] = men;
     menuTop[menuLevel] = menuPos[menuLevel] = 0;
@@ -3312,25 +3330,31 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_ALL:
             if(!allowMoves) return UI_ACTION_HOME_ALL;
-            uid.menuLevel = 0;
-            uid.menuPos[0] = 0;
+            uid.pushMenu(&ui_msg_homing,true);
             Printer::homeAxis(true, true, true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOMEALL "));
+            uid.popMenu(true);
             break;
         case UI_ACTION_HOME_X:
             if(!allowMoves) return UI_ACTION_HOME_X;
+            uid.pushMenu(&ui_msg_homing,true);
             Printer::homeAxis(true, false, false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+            uid.popMenu(true);
             break;
         case UI_ACTION_HOME_Y:
             if(!allowMoves) return UI_ACTION_HOME_Y;
+            uid.pushMenu(&ui_msg_homing,true);
             Printer::homeAxis(false, true, false);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Y "));
+            uid.popMenu(true);
             break;
         case UI_ACTION_HOME_Z:
             if(!allowMoves) return UI_ACTION_HOME_Z;
+            uid.pushMenu(&ui_msg_homing,true);
             Printer::homeAxis(false, false, true);
             Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_Z "));
+            uid.popMenu(true);
             break;
         case UI_ACTION_SET_ORIGIN:
             if(!allowMoves) return UI_ACTION_SET_ORIGIN;
@@ -3692,10 +3716,12 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_EOF:
         {
+            DEBUG_MSG_FAST("JAM1");
             Extruder::markAllUnjammed();
             Printer::setJamcontrolDisabled(true);
             Printer::setBlockingReceive(true);
             pushMenu(&ui_wiz_jamreheat, true);
+            DEBUG_MSG_FAST("JAM2");
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
 			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
@@ -4058,7 +4084,7 @@ void UIDisplay::slowAction(bool allowMoves)
     noInts.unprotect();
 #endif
 #if UI_AUTORETURN_TO_MENU_AFTER != 0
-    if(menuLevel > 0 && ui_autoreturn_time < time && !uid.isSticky()) // Go to top menu after x seoonds
+    if(menuLevel > 0 && ui_autoreturn_time < time && !uid.isSticky()) // Go to top menu after x seconds
     {
         lastSwitch = time;
         menuLevel = 0;

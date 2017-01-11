@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 288
+#define NUM_TRANSLATED_WORDS 289
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -395,6 +395,7 @@
 #define UI_TEXT_CALIBRATING_ID 285 // "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_ID 286 // "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_ID 287 // "Autolevel bed"
+#define UI_TEXT_HOMING_ID 288 // "Homing..."
 
 // Universal definitions
 
@@ -715,6 +716,7 @@
 #define UI_TEXT_CALIBRATING_EN "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_EN "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_EN "Autolevel bed"
+#define UI_TEXT_HOMING_EN "Homing..."
 
 // *************** German translation ****************
 
@@ -1029,6 +1031,7 @@
 #define UI_TEXT_CALIBRATING_DE "Kalibriere Bed"
 #define UI_TEXT_CALIBRATION_ERROR_DE "Kalibrierungsfehler"
 #define UI_TEXT_AUTOLEVEL_BED_DE "Autolevel Bett"
+#define UI_TEXT_HOMING_DE "Homing..."
 
 // Dutch translation
 
@@ -1341,6 +1344,7 @@
 #define UI_TEXT_CALIBRATING_NL "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_NL "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_NL "Autolevel bed"
+#define UI_TEXT_HOMING_NL "Homing..."
 
 
 // *************** Brazilian portuguese translation ****************
@@ -1656,7 +1660,7 @@
 #define UI_TEXT_CALIBRATING_PT "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_PT "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_PT "Autolevel bed"
-
+#define UI_TEXT_HOMING_PT "Homing..."
 
 // *************** Italian translation ****************
 
@@ -1969,6 +1973,7 @@
 #define UI_TEXT_CALIBRATING_IT "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_IT "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_IT "Autolevel bed"
+#define UI_TEXT_HOMING_IT "Homing..."
 
 // Spanish translation
 
@@ -2281,6 +2286,7 @@
 #define UI_TEXT_CALIBRATING_ES "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_ES "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_ES "Autolevel bed"
+#define UI_TEXT_HOMING_ES "Homing..."
 
 
 // *************** Swedish translation ****************
@@ -2597,6 +2603,7 @@
 #define UI_TEXT_CALIBRATING_SE "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_SE "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_SE "Autolevel bed"
+#define UI_TEXT_HOMING_SE "Homing..."
 
 
 // *************** French translation ****************
@@ -2911,6 +2918,7 @@
 #define UI_TEXT_CALIBRATING_FR "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_FR "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_FR "Autolevel bed"
+#define UI_TEXT_HOMING_FR "Homing..."
 
 
 // *************** Czech translation ****************
@@ -3227,6 +3235,7 @@
 #define UI_TEXT_CALIBRATING_CZ "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_CZ "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_CZ "Autolevel bed"
+#define UI_TEXT_HOMING_CZ "Homing..."
 
 
 // *************** Polish translation ****************
@@ -3541,6 +3550,7 @@
 #define UI_TEXT_CALIBRATING_PL "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_PL "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_PL "Autolevel bed"
+#define UI_TEXT_HOMING_PL "Homing..."
 
 // Türk
 
@@ -3851,6 +3861,7 @@
 #define UI_TEXT_CALIBRATING_TR "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_TR "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_TR "Autolevel bed"
+#define UI_TEXT_HOMING_TR "Homing..."
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4164,6 +4175,7 @@
 #define UI_TEXT_CALIBRATING_FI "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_FI "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_FI "Autolevel bed"
+#define UI_TEXT_HOMING_FI "Homing..."
 
 
 #define TRANS(x) UI_STRING(F ## x,x)

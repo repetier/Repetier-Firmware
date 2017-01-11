@@ -41,7 +41,7 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 #endif
 
 //calculate rows and cols available with current font
-#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_CHARSET 3
 #else // 40x4 char display
@@ -1103,7 +1103,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_SPEED 2
 
 //calculate rows and cols available with current font
-#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_D0_PIN		-1
 #define UI_DISPLAY_D1_PIN		-1
@@ -1202,7 +1202,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define SPI_CHAN        0
 
 //calculate rows and cols available with current font
-#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_D0_PIN		-1
 #define UI_DISPLAY_D1_PIN		-1
@@ -1254,7 +1254,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
 
 //calculate rows and cols available with current font
-#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_CHARSET 3
 #define UI_INVERT_MENU_DIRECTION 0
@@ -1444,7 +1444,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ANIMATION 0  // Animations are too slow
 
 //calculate rows and cols available with current font
-#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
 #define UI_DISPLAY_CHARSET 3
 #define UI_INVERT_MENU_DIRECTION 0

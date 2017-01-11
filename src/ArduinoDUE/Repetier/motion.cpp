@@ -2516,12 +2516,14 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 if (cur->numNonlinearSegments && curd != NULL)
                 {
-                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
+#if FEATURE_BABYSTEPPING                    
+                    if(Printer::zBabystepsMissing/* && curd
                             && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
                     {
                         // execute a extra baby step
                         Printer::zBabystep();
                     }
+#endif                    
                     // Get the next delta segment
                     curd = &cur->segments[--cur->numNonlinearSegments];
 

@@ -555,7 +555,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #else
 #define MAX_COLS 28
 #endif
-#define UI_MENU_MAXLEVEL 6
+#define UI_MENU_MAXLEVEL 7
 
 #define UI_FLAG_FAST_KEY_ACTION 1
 #define UI_FLAG_SLOW_KEY_ACTION 2
@@ -566,7 +566,7 @@ class GCode;
 class UIDisplay {
   public:
     volatile uint8_t flags; // 1 = fast key action, 2 = slow key action, 4 = slow action running, 8 = key test running
-    uint8_t col; // current col for buffer prefill
+    uint8_t col; // current col for buffer pre fill
     uint8_t menuLevel; // current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
     uint16_t menuPos[UI_MENU_MAXLEVEL]; // Positions in menu
     const UIMenu *menu[UI_MENU_MAXLEVEL]; // Menus active

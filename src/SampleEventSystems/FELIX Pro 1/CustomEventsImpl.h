@@ -91,7 +91,7 @@ void cExecute(int action,bool allowMoves) {
   case UI_ACTION_XY2_CONT:
     uid.popMenu(false);
     uid.pushMenu(&ui_msg_printxycal,true);
-    flashSource.executeCommands(calibrationGCode,true,UI_ACTION_CALEX_XY3);
+    flashSource.executeCommands(calibrationGCode,false,UI_ACTION_CALEX_XY3);
     break;
   case UI_ACTION_CALEX_XY3:  
     uid.popMenu(false);
@@ -3008,9 +3008,9 @@ FSTRINGVALUE(extzCalibGCode,
 "M104 S0\n"
 "M107\n"
 "G91\n"
-"G1 Z120 F5000\n"
+"G1 Z2 F5000\n"
 "G90\n"
-"G1 X5 Y220 F3000.0\n"
+"G1 X5 Y230 F3000.0\n"
 "T0\n"
 "G92 E0\n"
 "G1 E-10 F3000\n"
