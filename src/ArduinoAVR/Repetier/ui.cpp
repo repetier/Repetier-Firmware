@@ -2665,7 +2665,7 @@ int UIDisplay::okAction(bool allowMoves)
             break;
         case UI_ACTION_STATE:
             break;
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL & FEATURE_Z_PROBE
         case UI_ACTION_AUTOLEVEL2:
             uid.popMenu(false);
             uid.pushMenu(&ui_msg_calibrating_bed,true);
