@@ -1875,6 +1875,15 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if !defined(HOMING_ORDER)
 #define HOMING_ORDER HOME_ORDER_XYZ
 #endif
+#if Z_HOME_DIR < 0
+#if ZHOME_PRE_RAISE == 1
+if(zaxis && Endstops::zProbe())
+    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
+#elif ZHOME_PRE_RAISE == 2
+if(zaxis)
+    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
+#endif
+#endif
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
 #if HOMING_ORDER != HOME_ORDER_XYZ && HOMING_ORDER != HOME_ORDER_YXZ && HOMING_ORDER != HOME_ORDER_ZXYTZ && HOMING_ORDER != HOME_ORDER_XYTZ
 	#error Illegal homing order for z probe based homing!
