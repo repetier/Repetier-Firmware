@@ -1539,9 +1539,9 @@ Always hard to say since the other angle is 89° in this case!
 #define AXISCOMP_TANXZ 0
 
 /** \brief Experimental calibration utility for delta printers
- * Change 1 to 0 to disable
-*/
-#define FEATURE_SOFTWARE_LEVELING 0
+ * Comment out next line to disable the feature
+ */
+//#define FEATURE_SOFTWARE_LEVELING 0
 
 /* Babystepping allows to change z height during print without changing official z height */
 #define FEATURE_BABYSTEPPING 0
