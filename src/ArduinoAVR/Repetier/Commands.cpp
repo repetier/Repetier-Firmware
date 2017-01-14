@@ -2043,6 +2043,9 @@ void Commands::processMCode(GCode *com) {
 				Extruder::selectExtruderById(0);
 			Printer::homeXAxis();
 			if(com->hasS() && com->S > 0) {
+#if LAZY_DUAL_X_AXIS                
+				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
+#endif                
 				Extruder::current = &extruder[1];
 				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
 				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
