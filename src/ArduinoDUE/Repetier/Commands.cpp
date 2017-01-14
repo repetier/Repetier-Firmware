@@ -1629,9 +1629,14 @@ void Commands::processMCode(GCode *com) {
 #endif
             if (com->hasS()) {
                 if(com->hasT() && com->T < NUM_EXTRUDER)
-                    Extruder::setTemperatureForExtruder(com->S, com->T, com->hasF() && com->F > 0);
+                    Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), com->T, com->hasF() && com->F > 0);
                 else
-                    Extruder::setTemperatureForExtruder(com->S, Extruder::current->id, com->hasF() && com->F > 0);
+                    Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), Extruder::current->id, com->hasF() && com->F > 0);
+            } else if(com->hasH()) {
+                if(com->hasT() && com->T < NUM_EXTRUDER)
+                    Extruder::setTemperatureForExtruder(extruder[com->T].tempControl.preheatTemperature + (com->hasO() ? com->O : 0), com->T, com->hasF() && com->F > 0);
+                else
+                    Extruder::setTemperatureForExtruder(Extruder::current->tempControl.preheatTemperature + (com->hasO() ? com->O : 0), Extruder::current->id, com->hasF() && com->F > 0);                
             }
 #endif
             break;
@@ -1639,7 +1644,8 @@ void Commands::processMCode(GCode *com) {
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
-            if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
+            if (com->hasS()) Extruder::setHeatedBedTemperature(com->S + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
+            else if(com->hasH()) Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
             break;
         case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
             Com::writeToAll = false;
@@ -1654,7 +1660,8 @@ void Commands::processMCode(GCode *com) {
                 Commands::waitUntilEndOfAllMoves();
                 Extruder *actExtruder = Extruder::current;
                 if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
-                if (com->hasS()) Extruder::setTemperatureForExtruder(com->S, actExtruder->id, com->hasF() && com->F > 0, true);
+                if (com->hasS()) Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), actExtruder->id, com->hasF() && com->F > 0, true);
+                else if(com->hasH())  Extruder::setTemperatureForExtruder(actExtruder->tempControl.preheatTemperature + (com->hasO() ? com->O : 0), actExtruder->id, com->hasF() && com->F > 0, true);
             }
 #endif
             previousMillisCmd = HAL::timeInMilliseconds();
@@ -1665,7 +1672,8 @@ void Commands::processMCode(GCode *com) {
                 UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
                 Commands::waitUntilEndOfAllMoves();
 #if HAVE_HEATED_BED
-                if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
+                if (com->hasS()) Extruder::setHeatedBedTemperature(com->S + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
+                else if(com->hasH())  Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN > 0
                 if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
@@ -1762,6 +1770,7 @@ void Commands::processMCode(GCode *com) {
             Com::cap(PSTR("TOGGLE_LIGHTS:0"));
 #endif
             Com::cap(PSTR("PAUSESTOP:1"));
+            Com::cap(PSTR("PREHEAT:1"));
             reportPrinterUsage();
             Printer::reportPrinterMode();
             break;
@@ -1803,7 +1812,7 @@ void Commands::processMCode(GCode *com) {
             Extruder::recomputeMixingExtruderSteps();
             break;
         case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
-            if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
+            if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illegal values
             for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
                 extruder[i].virtualWeights[com->S] = extruder[i].mixingW;
             }
@@ -1813,6 +1822,58 @@ void Commands::processMCode(GCode *com) {
 #endif
             break;
 #endif // MIXING_EXTRUDER
+        case 170: // preheat temperatures
+            /* M170 - Set or retrieve preheat temperatures
+            Parameter:
+            B<bedPreheat> : Sets bed preheat temperature
+            C<chamberPreheat> : Sets heated chamber temperature
+            T<extruder> S<preheatTemp> : Sets preheat temperature for given extruder
+            L0 : List preheat temperatures. Returns
+            PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
+            */
+            {
+                bool mod = false;
+#if HAVE_HEATED_BED                
+                if(com->hasB()) {
+                    mod |= heatedBedController.preheatTemperature != static_cast<int16_t>(com->B);
+                    heatedBedController.preheatTemperature = com->B;
+                }                    
+#endif                
+#if NUM_EXTRUDER > 0
+                if(com->hasT() && com->hasS() && com->T < NUM_EXTRUDER) {
+                    mod |= extruder[com->T].tempControl.preheatTemperature != static_cast<int16_t>(com->S);
+                    extruder[com->T].tempControl.preheatTemperature = com->S;                    
+                }
+#endif
+                if(com->hasL()) {
+#if HAVE_HEATED_BED
+                        Com::printF(PSTR("PREHEAT_BED:"),heatedBedController.preheatTemperature);
+#endif
+#if NUM_EXTRUDER > 0
+                    for(int i=0; i< NUM_EXTRUDER;i++) {
+                        Com::printF(PSTR(" PREHEAT"),i);
+                        Com::printF(Com::tColon, extruder[i].tempControl.preheatTemperature);
+                    }
+#endif
+                    Com::println();
+                }
+                if(mod) {
+#if EEPROM_MODE != 0
+#if HAVE_HEATED_BED
+                    HAL::eprSetInt16(EPR_BED_PREHEAT_TEMP,heatedBedController.preheatTemperature);
+#endif
+#if NUM_EXTRUDER > 0
+                    for(int i = 0; i < NUM_EXTRUDER;i++) {
+                        int o = i * EEPROM_EXTRUDER_LENGTH + EEPROM_EXTRUDER_OFFSET;
+                        Extruder *e = &extruder[i];
+                        HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
+                    }            
+#endif
+                    EEPROM::updateChecksum();
+#endif                    
+                }
+            }
+            break;
         case 200: { // M200 T<extruder> D<diameter>
                 uint8_t extruderId = Extruder::current->id;
                 if(com->hasT() && com->T < NUM_EXTRUDER)
@@ -2331,7 +2392,15 @@ void Commands::processMCode(GCode *com) {
 					ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
 			}
 			break;
-#endif			
+#endif		
+        case 670:
+#if EEPROM_MODE != 0        
+            if(com->hasS()) {
+                HAL::eprSetByte(EPR_VERSION,static_cast<uint8_t>(com->S));
+                HAL::eprSetByte(EPR_INTEGRITY_BYTE,EEPROM::computeChecksum());
+            }
+#endif            
+            break;	
         case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
                 // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.

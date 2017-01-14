@@ -1574,6 +1574,15 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addFloat(Printer::progress,3,1);
             }
             break;
+        case 'p': // preheat related
+            if(c2 >= '0' && c2 <='6') {
+                addInt(extruder[c2-'0'].tempControl.preheatTemperature,3,' ');
+            } else if(c2 == 'b') {
+                addInt(heatedBedController.preheatTemperature,3,' ');
+            } else if(c2 == 'c') {
+                addInt(Extruder::current->tempControl.preheatTemperature,3,' ');
+            }                
+            break;
         case 'l':
             if(c2 == 'a') addInt(lastAction,4);
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
@@ -2665,7 +2674,7 @@ int UIDisplay::okAction(bool allowMoves)
             break;
         case UI_ACTION_STATE:
             break;
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL & FEATURE_Z_PROBE
         case UI_ACTION_AUTOLEVEL2:
             uid.popMenu(false);
             uid.pushMenu(&ui_msg_calibrating_bed,true);
@@ -3039,6 +3048,29 @@ ZPOS2:
         Extruder::setTemperatureForExtruder(tmp, action - UI_ACTION_EXTRUDER0_TEMP);
     }
     break;
+    case UI_ACTION_BED_PREHEAT:
+#if HAVE_HEATED_BED
+{
+    int tmp = (int)heatedBedController.preheatTemperature + increment;
+    if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = UI_SET_MIN_HEATED_BED_TEMP;
+    else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
+    heatedBedController.preheatTemperature = static_cast<int16_t>(tmp);
+}
+#endif
+        break;
+    case UI_ACTION_EXT0_PREHEAT:
+    case UI_ACTION_EXT1_PREHEAT:
+    case UI_ACTION_EXT2_PREHEAT:
+    case UI_ACTION_EXT3_PREHEAT:
+    case UI_ACTION_EXT4_PREHEAT:
+    case UI_ACTION_EXT5_PREHEAT:
+    {
+        int tmp = (int)extruder[action - UI_ACTION_EXT0_PREHEAT].tempControl.preheatTemperature + increment;
+        if(tmp < UI_SET_MIN_EXTRUDER_TEMP) tmp = UI_SET_MIN_EXTRUDER_TEMP;
+        else if(tmp > UI_SET_MAX_EXTRUDER_TEMP) tmp = UI_SET_MAX_EXTRUDER_TEMP;
+        extruder[action - UI_ACTION_EXT0_PREHEAT].tempControl.preheatTemperature = static_cast<int16_t>(tmp);
+    }
+        break;
     case UI_ACTION_FEEDRATE_MULTIPLY:
     {
         int fr = Printer::feedrateMultiply;
@@ -3279,12 +3311,44 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men,float offset)
 
 void UIDisplay::finishAction(unsigned int action)
 {
+    if(EVENT_UI_FINISH_ACTION(action))
+        return;
+    switch(action) {
 #if UI_BED_COATING
-    if (action == UI_ACTION_COATING_CUSTOM)
-    {
+        case UI_ACTION_COATING_CUSTOM:
         menuAdjustHeight(&ui_menu_coating_custom,Printer::zBedOffset);
-    }
+        break;
 #endif
+ #if EEPROM_MODE != 0
+        case UI_ACTION_BED_PREHEAT:
+        #if HAVE_HEATED_BED
+        {
+            HAL::eprSetInt16(EPR_BED_PREHEAT_TEMP,heatedBedController.preheatTemperature);
+            EEPROM::updateChecksum();
+        }
+        #endif
+        break;
+        case UI_ACTION_EXT0_PREHEAT:
+        case UI_ACTION_EXT1_PREHEAT:
+        case UI_ACTION_EXT2_PREHEAT:
+        case UI_ACTION_EXT3_PREHEAT:
+        case UI_ACTION_EXT4_PREHEAT:
+        case UI_ACTION_EXT5_PREHEAT:
+        {
+            int i = action - UI_ACTION_EXT0_PREHEAT;
+            int o = i * EEPROM_EXTRUDER_LENGTH + EEPROM_EXTRUDER_OFFSET;
+            Extruder *e = &extruder[i];
+            HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
+            EEPROM::updateChecksum();
+        }
+        break;
+        case UI_ACTION_STORE_EEPROM:
+        EEPROM::storeDataIntoEEPROM(false);
+        pushMenu(&ui_menu_eeprom_saved, false);
+        BEEP_LONG;
+        break;
+ #endif
+    }
 }
 // Actions are events from user input. Depending on the current state, each
 // action can behave differently. Other actions do always the same like home, disable extruder etc.
@@ -3400,36 +3464,31 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             UI_STATUS_F(Com::translatedF(UI_TEXT_LIGHTS_ONOFF_ID));
             break;
 #endif
-        case UI_ACTION_PREHEAT_PLA:
-            UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_PLA_ID));
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,0);
-#if NUM_EXTRUDER > 1
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,1);
-#endif
-#if NUM_EXTRUDER > 2
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
-#endif
+        case UI_ACTION_PREHEAT_SINGLE:
+            UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_SINGLE_ID));
+#if NUM_EXTRUDER > 0                        
+            Extruder::setTemperatureForExtruder(extruder[0].tempControl.preheatTemperature,0);
+#endif            
 #if HAVE_HEATED_BED
-            Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
+            Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
 #endif
             break;
-        case UI_ACTION_PREHEAT_ABS:
-            UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_ABS_ID));
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,0);
-#if NUM_EXTRUDER > 1
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,1);
-#endif
-#if NUM_EXTRUDER > 2
-            Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
-#endif
+        case UI_ACTION_PREHEAT_ALL:
+            UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_ALL_ID));
+#if NUM_EXTRUDER > 0            
+            for(fast8_t i = 0; i < NUM_EXTRUDER;i++)
+                Extruder::setTemperatureForExtruder(extruder[i].tempControl.preheatTemperature,i);
+#endif                
 #if HAVE_HEATED_BED
-            Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
+            Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
 #endif
             break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS_F(Com::translatedF(UI_TEXT_COOLDOWN_ID));
+#if NUM_EXTRUDER > 0            
             for(int i = 0;i < NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0, i);
+#endif                
 #if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
 #endif
@@ -3512,11 +3571,6 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
 #endif
 #if EEPROM_MODE != 0
-        case UI_ACTION_STORE_EEPROM:
-            EEPROM::storeDataIntoEEPROM(false);
-            pushMenu(&ui_menu_eeprom_saved, false);
-            BEEP_LONG;
-            break;
         case UI_ACTION_LOAD_EEPROM:
             EEPROM::readDataFromEEPROM(true);
             Extruder::selectExtruderById(Extruder::current->id);

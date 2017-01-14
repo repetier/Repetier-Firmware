@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 16
+#define EEPROM_PROTOCOL_VERSION 17
 
 /** Where to start with our data block in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -127,7 +127,7 @@ have problems with other modules using the eeprom */
 #define EPR_BENDING_CORRECTION_A              1036
 #define EPR_BENDING_CORRECTION_B              1040
 #define EPR_BENDING_CORRECTION_C              1044
-
+#define EPR_BED_PREHEAT_TEMP                  1048
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
 #define EEPROM_INT32(x) HAL::eprGetInt32(EPR_##x)
@@ -169,7 +169,7 @@ have problems with other modules using the eeprom */
 // 55-57 free for byte sized parameter
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
 #define EPR_EXTRUDER_Z_OFFSET            90
-#define EPR_EXTRUDER_MATERIAL            94 // maybe better temperature
+#define EPR_EXTRUDER_PREHEAT             94 // maybe better temperature
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 5.0
 #endif
@@ -382,13 +382,10 @@ public:
       Printer::updateDerivedParameter();
 #if EEPROM_MODE != 0
       //This is an odd situation, the radius can only be changed if eeprom is on.
-      // The radius is not saved to printer variablke now, it is all derived parameters of
+      // The radius is not saved to printer variable now, it is all derived parameters of
       // fetching the radius, which if EEProm is off returns the Configuration constant.
       HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, mm);
-      Com::printFLN(PSTR("Rod Radius set to: "),mm,3);
-      uint8_t newcheck = computeChecksum();
-      if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-          HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
 #endif
     }
@@ -402,9 +399,7 @@ public:
       Com::printFLN(PSTR("X (A) tower floor set to: "),Printer::xMin,3);
 #if EEPROM_MODE != 0
         HAL::eprSetFloat(EPR_X_HOME_OFFSET,Printer::xMin);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
 #endif
     }
@@ -416,9 +411,7 @@ static inline void setTowerYFloor(float newZ) {
 #if EEPROM_MODE != 0
 
         HAL::eprSetFloat(EPR_Y_HOME_OFFSET,Printer::yMin);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
 #endif
 }
@@ -429,34 +422,26 @@ static inline void setTowerZFloor(float newZ) {
       Com::printFLN(PSTR("Z (C) tower floor set to: "), Printer::zMin, 3);
 #if EEPROM_MODE != 0
       HAL::eprSetFloat(EPR_Z_HOME_OFFSET,Printer::zMin);
-      uint8_t newcheck = computeChecksum();
-      if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-        HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
 #endif
     }
     static inline void setDeltaTowerXOffsetSteps(int16_t steps) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERX_OFFSET_STEPS,steps);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
     }
     static inline void setDeltaTowerYOffsetSteps(int16_t steps) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERY_OFFSET_STEPS,steps);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
     }
     static inline void setDeltaTowerZOffsetSteps(int16_t steps) {
 #if EEPROM_MODE != 0
         HAL::eprSetInt16(EPR_DELTA_TOWERZ_OFFSET_STEPS,steps);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
+        EEPROM::updateChecksum();
 #endif
     }
     static inline float deltaAlphaA() {
@@ -530,9 +515,7 @@ static inline void setTowerZFloor(float newZ) {
 #if EEPROM_MODE != 0
         if(isZCorrectionEnabled() == on) return;
         HAL::eprSetInt16(EPR_DISTORTION_CORRECTION_ENABLED, on);
-        uint8_t newcheck = computeChecksum();
-        if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
+        EEPROM::updateChecksum();
 #endif
     }
     static inline int8_t isZCorrectionEnabled() {

@@ -21,6 +21,22 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 #ifndef RF_DISPLAY
 #define RF_DISPLAY
 
+
+#if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
+#include "uiconfig.h"
+#endif
+// No controller at all
+#if FEATURE_CONTROLLER == NO_CONTROLLER
+#define UI_HAS_KEYS 0
+#define UI_DISPLAY_TYPE NO_DISPLAY
+#ifdef UI_MAIN
+void uiInitKeys() {}
+void uiCheckKeys(uint16_t &action) {}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(uint16_t &action) {}
+#endif // UI_MAIN
+#endif // NO_CONTROLLER
+
 #if (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS) || (FEATURE_CONTROLLER == CONTROLLER_GADGETS3D_SHIELD) || (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)  || (FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE)
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
@@ -1056,7 +1072,7 @@ void ui_check_slow_keys(int &action) {}
 #define USER_KEY1_PIN     36
 #define USER_KEY1_ACTION  UI_ACTION_LIGHTS_ONOFF
 #define USER_KEY2_PIN     40
-#define USER_KEY2_ACTION  UI_ACTION_PREHEAT_ABS
+#define USER_KEY2_ACTION  UI_ACTION_PREHEAT_ALL
 #define USER_KEY3_PIN     41
 #define USER_KEY3_ACTION  UI_ACTION_WIZARD_FILAMENTCHANGE
 #define USER_KEY4_PIN     -1
@@ -1638,6 +1654,119 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 
 #ifndef UI_HAS_I2C_ENCODER
 #define UI_HAS_I2C_ENCODER 0
+#endif
+
+
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+#if UI_ROWS==4
+#if UI_COLS==16
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
+#elif UI_COLS==20
+//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
+#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
+#else
+#if UI_DISPLAY_TYPE!=DISPLAY_GAMEDUINO2
+#error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
+#else
+#define UI_LINE_OFFSETS {} // dummy never used
+#endif
+#endif
+#else
+#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
+#endif
+#include "uilang.h"
+#endif
+
+#define UI_VERSION_STRING "Repetier " REPETIER_VERSION
+
+#ifdef UI_HAS_I2C_KEYS
+#define COMPILE_I2C_DRIVER
+#endif
+
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+
+
+#if UI_DISPLAY_TYPE == DISPLAY_I2C
+#define COMPILE_I2C_DRIVER
+#endif
+
+#ifndef UI_TEMP_PRECISION
+#if UI_COLS>16
+#define UI_TEMP_PRECISION 1
+#else
+#define UI_TEMP_PRECISION 0
+#endif
+#endif
+
+#define UI_INITIALIZE uid.initialize();
+#define UI_FAST if((counterPeriodical & 3) == 3) {uid.fastAction();}
+#define UI_MEDIUM uid.mediumAction();
+#define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
+#define UI_STATUS(status) uid.setStatusP(PSTR(status));
+#define UI_STATUS_F(status) uid.setStatusP(status);
+#define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
+#define UI_STATUS_UPD_F(status) {uid.setStatusP(status);uid.refreshPage();}
+#define UI_STATUS_RAM(status) uid.setStatus(status);
+#define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
+#define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
+#define UI_ERROR_P(status) uid.setStatusP(status,true);
+#define UI_ERROR_UPD(status) {uid.setStatusP(PSTR(status),true);uid.refreshPage();}
+#define UI_ERROR_RAM(status) uid.setStatus(status,true);
+#define UI_ERROR_UPD_RAM(status) {uid.setStatus(status,true);uid.refreshPage();}
+//#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
+#define UI_CLEAR_STATUS {uid.statusMsg[0]=0;}
+#define UI_RESET_MENU {uid.menuLevel=0;uid.refreshPage();}
+#define UI_MESSAGE(menu) {uid.showMessage(menu);}
+#define UI_ACTION(ac) {uid.executeAction(ac,true);}
+#else
+#define UI_INITIALIZE {}
+#define UI_FAST {}
+#define UI_MEDIUM {}
+#define UI_SLOW(allowMoves) {}
+#define UI_STATUS(status) {}
+#define UI_STATUS_F(status) {}
+#define UI_STATUS_RAM(status) {}
+#define UI_STATUS_UPD(status) {}
+#define UI_STATUS_UPD_F(status) {}
+#define UI_STATUS_UPD_RAM(status) {}
+#define UI_CLEAR_STATUS {}
+#define UI_ERROR(msg) {}
+#define UI_ERROR_P(status) {}
+#define UI_ERROR_UPD(status) {}
+#define UI_ERROR_RAM(status) {}
+#define UI_ERROR_UPD_RAM(status) {}
+#define UI_RESET_MENU {}
+#define UI_MESSAGE(menu) {}
+#define UI_ACTION(ac)
+#endif  // Display
+
+// Beeper methods
+#if BEEPER_TYPE==0 || FEATURE_BEEPER == 0
+#define BEEP_SHORT {}
+#define BEEP_LONG {}
+#else
+#define BEEP_SHORT beep(BEEPER_SHORT_SEQUENCE);
+#define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
+#endif
+
+
+extern void beep(uint8_t duration, uint8_t count);
+#if (defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)) || (defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)) || (defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)) || (defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION))
+#define HAS_USER_KEYS
+static void ui_check_Ukeys(uint16_t &action) {
+    #if defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY1_PIN, USER_KEY1_ACTION);
+    #endif
+    #if defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY2_PIN, USER_KEY2_ACTION);
+    #endif
+    #if defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY3_PIN, USER_KEY3_ACTION);
+    #endif
+    #if defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION)
+    UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
+    #endif
+}
 #endif
 
 

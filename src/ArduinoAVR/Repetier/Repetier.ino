@@ -70,7 +70,7 @@ RepRap M Codes
 - M105 - Read current temp
 - M106 S<speed> P<fan> - Fan on speed = 0..255, P = 0 or 1, 0 is default and can be omitted
 - M107 P<fan> - Fan off, P = 0 or 1, 0 is default and can be omitted
-- M109 - Wait for extruder current temp to reach target temp.
+- M109 - Wait for extruder current temp to reach target temp. Same params as M104
 - M114 S1 - Display current position, S1 = also write position in steps
 
 Custom M Codes
@@ -79,7 +79,7 @@ Custom M Codes
 - M4 - Spindle on, Counterclockwise.
 - M5 - Spindle off, Laser off.
 - M20  - List SD card
-- M21  - Init SD card
+- M21  - Initialize SD card
 - M22  - Release SD card
 - M23  - Select SD file (M23 filename.g)
 - M24  - Start/resume SD print
@@ -100,18 +100,19 @@ Custom M Codes
 - M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 - M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
-- M104 S<temp> T<extruder> P1 F1 - Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
+- M104 S<temp> T<extruder> P1 F1 H1 O<offset>- Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
+                O add offset to temperature in S, H1 use preheat temperature instead of S value.
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
 - M112 - Emergency kill
 - M115- Capabilities string
 - M116 - Wait for all temperatures in a +/- 1 degree range
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
-- M140 S<temp> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
+- M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
 - M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
-- M190 - Wait for bed current temp to reach target temp.
+- M190 - Wait for bed current temp to reach target temp. Same params as M109
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
@@ -120,10 +121,10 @@ Custom M Codes
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
-- M209 S<0/1> - Enable/disable autoretraction
+- M209 S<0/1> - Enable/disable auto retraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
-- M226 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pullup and X1 for input with pullup.
+- M226 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pull-up and X1 for input with pull-up.
 - M231 S<OPS_MODE> X<Min_Distance> Y<Retract> Z<Backlash> F<ReatrctMove> - Set OPS parameter
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
@@ -132,10 +133,10 @@ Custom M Codes
 - M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
-- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Autodetect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-- M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
-- M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
-- M322 - Reset autolevel matrix
+- M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
+- M320 S<0/1> - Activate auto level, S1 stores it in eeprom
+- M321 S<0/1> - Deactivate auto level, S1 stores it in eeprom
+- M322 - Reset auto level matrix
 - M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set micro stepping on RAMBO board
@@ -162,6 +163,9 @@ Custom M Codes
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M603 - Simulate a jam
 - M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
+- M666 - force communication error, required DEBUG_COM_ERRORS
+- M668 - set line number 0 without notice to simulate error
+- M670 S<version> - Set eeprom version to a value for testing eeprom upgrade path.
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */

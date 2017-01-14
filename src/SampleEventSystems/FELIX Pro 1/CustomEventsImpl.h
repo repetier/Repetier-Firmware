@@ -127,17 +127,18 @@ void cExecute(int action,bool allowMoves) {
     if(cstmIsHeating()) {
       cstmCooldown();
     } else {
-      Extruder::setHeatedBedTemperature(55);
-      Extruder::setTemperatureForExtruder(190,0,false);
+      Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
+      Extruder::setTemperatureForExtruder(extruder[0].tempControl.preheatTemperature,0,false);
+      Extruder::setTemperatureForExtruder(0,1,false);
     }
     break;    
   case UI_ACTION_PRECOOL2:
     if(cstmIsHeating()) {
       cstmCooldown();
     } else {
-      Extruder::setHeatedBedTemperature(55);
-      Extruder::setTemperatureForExtruder(190,0,false);
-      Extruder::setTemperatureForExtruder(190,1,false);
+      Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
+      Extruder::setTemperatureForExtruder(extruder[0].tempControl.preheatTemperature,0,false);
+      Extruder::setTemperatureForExtruder(extruder[1].tempControl.preheatTemperature,1,false);
     }
     break;
   case UI_ACTION_REMOVEBED: {

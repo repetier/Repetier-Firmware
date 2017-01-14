@@ -99,6 +99,7 @@ Each of the following events describe the parameter and when it is called.
 
 // ok button in wizard page is called
 #define EVENT_UI_OK_WIZARD(action) {}
+#define EVENT_UI_FINISH_ACTION(action) false
 #define EVENT_UI_EXECUTE(action,allowMoves) {}
 #define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) {}
 

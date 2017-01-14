@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 289
+#define NUM_TRANSLATED_WORDS 297
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -127,8 +127,8 @@
 #define UI_TEXT_HOME_X_ID 20 //           "Home X"
 #define UI_TEXT_HOME_Y_ID 21 //           "Home Y"
 #define UI_TEXT_HOME_Z_ID 22 //           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_ID 23 //      "Preheat PLA"
-#define UI_TEXT_PREHEAT_ABS_ID 24 //      "Preheat ABS"
+#define UI_TEXT_PREHEAT_SINGLE_ID 23 //      "Preheat PLA"
+#define UI_TEXT_PREHEAT_ALL_ID 24 //      "Preheat All"
 #define UI_TEXT_LIGHTS_ONOFF_ID 25 //     "Lights :%lo"
 #define UI_TEXT_COOLDOWN_ID 26 //         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN_ID 27 //    "Set to Origin"
@@ -396,6 +396,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_ID 286 // "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_ID 287 // "Autolevel bed"
 #define UI_TEXT_HOMING_ID 288 // "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_ID 289 // "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_ID 290 // "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_ID 291 // "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_ID 292 // "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_ID 293 // "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_ID 294 // "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_ID 295 // "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_ID 296 // "Bed    : %pb" cDEG "C"
 
 // Universal definitions
 
@@ -430,8 +438,8 @@
 #define UI_TEXT_HOME_X_EN           "Home X"
 #define UI_TEXT_HOME_Y_EN           "Home Y"
 #define UI_TEXT_HOME_Z_EN           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_EN      "Preheat PLA"
-#define UI_TEXT_PREHEAT_ABS_EN      "Preheat ABS"
+#define UI_TEXT_PREHEAT_SINGLE_EN      "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_EN      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_EN     "Lights:%lo"
 #define UI_TEXT_COOLDOWN_EN         "Cooldown"
 #define UI_TEXT_SET_TO_ORIGIN_EN    "Set to origin"
@@ -717,6 +725,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_EN "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_EN "Autolevel bed"
 #define UI_TEXT_HOMING_EN "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_EN "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_EN "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_EN "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_EN "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_EN "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_EN "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_EN "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_EN "Bed    : %pb" cDEG "C"
 
 // *************** German translation ****************
 
@@ -743,8 +759,8 @@
 #define UI_TEXT_HOME_X_DE           "Home X"
 #define UI_TEXT_HOME_Y_DE           "Home Y"
 #define UI_TEXT_HOME_Z_DE           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_DE      "Vorheizen PLA"
-#define UI_TEXT_PREHEAT_ABS_DE      "Vorheizen ABS"
+#define UI_TEXT_PREHEAT_SINGLE_DE   "Vorheizen Extr. 1"
+#define UI_TEXT_PREHEAT_ALL_DE      "Vorheizen alle"
 #define UI_TEXT_LIGHTS_ONOFF_DE     "Lampen: %lo"
 #define UI_TEXT_COOLDOWN_DE         "Abk" STR_uuml "hlen"
 #define UI_TEXT_SET_TO_ORIGIN_DE    "Setze Nullpunkt"
@@ -1032,6 +1048,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_DE "Kalibrierungsfehler"
 #define UI_TEXT_AUTOLEVEL_BED_DE "Autolevel Bett"
 #define UI_TEXT_HOMING_DE "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_DE "Vorheiztemperaturen"
+#define UI_TEXT_PREHEAT_E0_DE "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_DE "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_DE "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_DE "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_DE "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_DE "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_DE "Bed    : %pb" cDEG "C"
 
 // Dutch translation
 
@@ -1058,8 +1082,8 @@
 #define UI_TEXT_HOME_X_NL           "Home X"
 #define UI_TEXT_HOME_Y_NL           "Home Y"
 #define UI_TEXT_HOME_Z_NL           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_NL      "Voorverwarmen PLA"
-#define UI_TEXT_PREHEAT_ABS_NL      "Voorverwarmen ABS"
+#define UI_TEXT_PREHEAT_SINGLE_NL   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_NL      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_NL     "Lichten:%lo"
 #define UI_TEXT_COOLDOWN_NL         "Koelen"
 #define UI_TEXT_SET_TO_ORIGIN_NL    "Zet oorsprong"
@@ -1345,6 +1369,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_NL "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_NL "Autolevel bed"
 #define UI_TEXT_HOMING_NL "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_NL "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_NL "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_NL "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_NL "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_NL "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_NL "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_NL "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_NL "Bed    : %pb" cDEG "C"
 
 
 // *************** Brazilian portuguese translation ****************
@@ -1374,8 +1406,8 @@
 #define UI_TEXT_HOME_X_PT           "Home X"
 #define UI_TEXT_HOME_Y_PT           "Home Y"
 #define UI_TEXT_HOME_Z_PT           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_PT      "Pre-aquecer PLA"
-#define UI_TEXT_PREHEAT_ABS_PT      "Pre-aquecer ABS"
+#define UI_TEXT_PREHEAT_SINGLE_PT   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_PT      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_PT     "Luzes:%lo"
 #define UI_TEXT_COOLDOWN_PT         "Resfriar"
 #define UI_TEXT_SET_TO_ORIGIN_PT    "Definir como origem"
@@ -1661,6 +1693,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_PT "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_PT "Autolevel bed"
 #define UI_TEXT_HOMING_PT "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_PT "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_PT "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_PT "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_PT "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_PT "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_PT "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_PT "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_PT "Bed    : %pb" cDEG "C"
 
 // *************** Italian translation ****************
 
@@ -1687,8 +1727,8 @@
 #define UI_TEXT_HOME_X_IT           "Origine X"
 #define UI_TEXT_HOME_Y_IT           "Origine Y"
 #define UI_TEXT_HOME_Z_IT           "Origine Z"
-#define UI_TEXT_PREHEAT_PLA_IT      "Presicaldamento PLA"
-#define UI_TEXT_PREHEAT_ABS_IT      "Presicaldamento ABS"
+#define UI_TEXT_PREHEAT_SINGLE_IT   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_IT      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_IT     "Luci:%lo"
 #define UI_TEXT_COOLDOWN_IT         "Raffreddamento"
 #define UI_TEXT_SET_TO_ORIGIN_IT    "Imposta come Origine"
@@ -1974,6 +2014,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_IT "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_IT "Autolevel bed"
 #define UI_TEXT_HOMING_IT "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_IT "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_IT "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_IT "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_IT "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_IT "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_IT "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_IT "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_IT "Bed    : %pb" cDEG "C"
 
 // Spanish translation
 
@@ -2000,8 +2048,8 @@
 #define UI_TEXT_HOME_X_ES           "X Home"
 #define UI_TEXT_HOME_Y_ES           "Y Home"
 #define UI_TEXT_HOME_Z_ES           "Z Home"
-#define UI_TEXT_PREHEAT_PLA_ES      "Precalentar PLA"
-#define UI_TEXT_PREHEAT_ABS_ES      "Precalentar ABS"
+#define UI_TEXT_PREHEAT_SINGLE_ES   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_ES      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_ES     "Luces:%lo"
 #define UI_TEXT_COOLDOWN_ES         "Enfriar"
 #define UI_TEXT_SET_TO_ORIGIN_ES    "Fija a origen"
@@ -2287,6 +2335,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_ES "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_ES "Autolevel bed"
 #define UI_TEXT_HOMING_ES "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_ES "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_ES "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_ES "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_ES "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_ES "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_ES "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_ES "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_ES "Bed    : %pb" cDEG "C"
 
 
 // *************** Swedish translation ****************
@@ -2315,8 +2371,8 @@
 #define UI_TEXT_HOME_X_SE           "K" STR_ouml "r hem X"
 #define UI_TEXT_HOME_Y_SE           "K" STR_ouml "r hem Y"
 #define UI_TEXT_HOME_Z_SE           "K" STR_ouml "r hem Z"
-#define UI_TEXT_PREHEAT_PLA_SE      "F" STR_ouml "rv" STR_auml "rm f" STR_ouml "r PLA"
-#define UI_TEXT_PREHEAT_ABS_SE      "F" STR_ouml "rv" STR_auml "rm f" STR_ouml "r ABS"
+#define UI_TEXT_PREHEAT_SINGLE_SE   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_SE      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_SE     "Lights:%lo"
 #define UI_TEXT_COOLDOWN_SE         "Kyl ner"
 #define UI_TEXT_SET_TO_ORIGIN_SE    "S"  STR_auml "tt som origo"
@@ -2604,6 +2660,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_SE "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_SE "Autolevel bed"
 #define UI_TEXT_HOMING_SE "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_SE "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_SE "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_SE "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_SE "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_SE "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_SE "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_SE "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_SE "Bed    : %pb" cDEG "C"
 
 
 // *************** French translation ****************
@@ -2632,8 +2696,8 @@
 #define UI_TEXT_HOME_X_FR           "Accueil X"
 #define UI_TEXT_HOME_Y_FR           "Accueil Y"
 #define UI_TEXT_HOME_Z_FR           "Accueil Z"
-#define UI_TEXT_PREHEAT_PLA_FR      "Prechauf. PLA"
-#define UI_TEXT_PREHEAT_ABS_FR      "Prechauf. ABS"
+#define UI_TEXT_PREHEAT_SINGLE_FR   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_FR      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_FR     "Eclairage :%lo"
 #define UI_TEXT_COOLDOWN_FR         "Refroidir"
 #define UI_TEXT_SET_TO_ORIGIN_FR    "Reglez sur Origine"
@@ -2919,6 +2983,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_FR "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_FR "Autolevel bed"
 #define UI_TEXT_HOMING_FR "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_FR "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_FR "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_FR "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_FR "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_FR "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_FR "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_FR "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_FR "Bed    : %pb" cDEG "C"
 
 
 // *************** Czech translation ****************
@@ -2949,8 +3021,8 @@
 #define UI_TEXT_HOME_X_CZ           "Home X"
 #define UI_TEXT_HOME_Y_CZ           "Home Y"
 #define UI_TEXT_HOME_Z_CZ           "Home Z"
-#define UI_TEXT_PREHEAT_PLA_CZ      "Ohrat pro PLA"
-#define UI_TEXT_PREHEAT_ABS_CZ      "Ohrat pro ABS"
+#define UI_TEXT_PREHEAT_SINGLE_CZ   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_CZ      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_CZ     "Svetla:%lo"
 #define UI_TEXT_COOLDOWN_CZ         "Zchladit"
 #define UI_TEXT_SET_TO_ORIGIN_CZ    "Nastavit pocatek"
@@ -3236,6 +3308,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_CZ "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_CZ "Autolevel bed"
 #define UI_TEXT_HOMING_CZ "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_CZ "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_CZ "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_CZ "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_CZ "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_CZ "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_CZ "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_CZ "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_CZ "Bed    : %pb" cDEG "C"
 
 
 // *************** Polish translation ****************
@@ -3265,8 +3345,8 @@
 #define UI_TEXT_HOME_X_PL           "Zeruj X"
 #define UI_TEXT_HOME_Y_PL           "Zeruj Y"
 #define UI_TEXT_HOME_Z_PL           "Zeruj Z"
-#define UI_TEXT_PREHEAT_PLA_PL      "Rozgrzej PLA"
-#define UI_TEXT_PREHEAT_ABS_PL      "Rozgrzej ABS"
+#define UI_TEXT_PREHEAT_SINGLE_PL   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_PL      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_PL     "Oswietlenie :%lo"
 #define UI_TEXT_COOLDOWN_PL         "Chlodzenie"
 #define UI_TEXT_SET_TO_ORIGIN_PL    "Ustaw jako zero"
@@ -3551,6 +3631,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_PL "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_PL "Autolevel bed"
 #define UI_TEXT_HOMING_PL "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_PL "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_PL "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_PL "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_PL "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_PL "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_PL "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_PL "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_PL "Bed    : %pb" cDEG "C"
 
 // Türk
 
@@ -3577,8 +3665,8 @@
 #define UI_TEXT_HOME_X_TR           "X S.Gonder"
 #define UI_TEXT_HOME_Y_TR           "Y S.Gonder"
 #define UI_TEXT_HOME_Z_TR           "Z S.Gonder"
-#define UI_TEXT_PREHEAT_PLA_TR      "PLA On Isitma"
-#define UI_TEXT_PREHEAT_ABS_TR      "ABS On Isitma"
+#define UI_TEXT_PREHEAT_SINGLE_TR   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_TR      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_TR     "Isiklar :%lo"
 #define UI_TEXT_COOLDOWN_TR         "Soguma"
 #define UI_TEXT_SET_TO_ORIGIN_TR    "Orijine ayarla"
@@ -3862,6 +3950,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_TR "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_TR "Autolevel bed"
 #define UI_TEXT_HOMING_TR "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_TR "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_TR "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_TR "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_TR "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_TR "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_TR "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_TR "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_TR "Bed    : %pb" cDEG "C"
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -3889,8 +3985,8 @@
 #define UI_TEXT_HOME_X_FI           "Koti X"
 #define UI_TEXT_HOME_Y_FI           "Koti Y"
 #define UI_TEXT_HOME_Z_FI           "Koti Z"
-#define UI_TEXT_PREHEAT_PLA_FI      "Esilämmitys PLA"
-#define UI_TEXT_PREHEAT_ABS_FI      "Esilämmitys ABS"
+#define UI_TEXT_PREHEAT_SINGLE_FI   "Preheat Single Extr."
+#define UI_TEXT_PREHEAT_ALL_FI      "Preheat All Extr."
 #define UI_TEXT_LIGHTS_ONOFF_FI     "Valot:%lo"
 #define UI_TEXT_COOLDOWN_FI         "J" STR_auml STR_auml "hdytys"
 #define UI_TEXT_SET_TO_ORIGIN_FI    "Aseta l" STR_auml "ht" STR_ouml "piste"
@@ -4176,6 +4272,14 @@
 #define UI_TEXT_CALIBRATION_ERROR_FI "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_FI "Autolevel bed"
 #define UI_TEXT_HOMING_FI "Homing..."
+#define UI_TEXT_PREHEAT_TEMPS_FI "Preheat Temperatures"
+#define UI_TEXT_PREHEAT_E0_FI "Extr. 1: %p0" cDEG "C"
+#define UI_TEXT_PREHEAT_E1_FI "Extr. 2: %p1" cDEG "C"
+#define UI_TEXT_PREHEAT_E2_FI "Extr. 3: %p2" cDEG "C"
+#define UI_TEXT_PREHEAT_E3_FI "Extr. 4: %p3" cDEG "C"
+#define UI_TEXT_PREHEAT_E4_FI "Extr. 5: %p4" cDEG "C"
+#define UI_TEXT_PREHEAT_E5_FI "Extr. 6: %p5" cDEG "C"
+#define UI_TEXT_PREHEAT_BED_FI "Bed    : %pb" cDEG "C"
 
 
 #define TRANS(x) UI_STRING(F ## x,x)

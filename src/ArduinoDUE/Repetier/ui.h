@@ -147,7 +147,7 @@
 #define UI_ACTION_SET_ORIGIN            1073
 
 #define UI_ACTION_POWER                 1078
-#define UI_ACTION_PREHEAT_PLA           1079
+#define UI_ACTION_PREHEAT_SINGLE        1079
 #define UI_ACTION_COOLDOWN              1080
 #define UI_ACTION_HEATED_BED_OFF        1081
 #define UI_ACTION_EXTRUDER0_OFF         1082
@@ -163,7 +163,7 @@
 #define UI_ACTION_RESET_EXTRUDER        1092
 #define UI_ACTION_EXTRUDER_RELATIVE     1093
 #define UI_ACTION_ADVANCE_L             1094
-#define UI_ACTION_PREHEAT_ABS           1095
+#define UI_ACTION_PREHEAT_ALL           1095
 #define UI_ACTION_FLOWRATE_MULTIPLY     1096
 #define UI_ACTION_KILL                  1097
 #define UI_ACTION_RESET                 1098
@@ -238,6 +238,14 @@
 #define UI_ACTION_STATE                 1228
 #define UI_ACTION_AUTOLEVEL2            1229
 #define UI_ACTION_MEASURE_DISTORTION2   1230
+#define UI_ACTION_BED_PREHEAT           1231
+#define UI_ACTION_EXT0_PREHEAT          1232
+#define UI_ACTION_EXT1_PREHEAT          1233
+#define UI_ACTION_EXT2_PREHEAT          1234
+#define UI_ACTION_EXT3_PREHEAT          1235
+#define UI_ACTION_EXT4_PREHEAT          1236
+#define UI_ACTION_EXT5_PREHEAT          1237
+
 
 // 1500-1699 reserved for custom actions
 
@@ -316,8 +324,8 @@ typedef const UIMenuEntry_s UIMenuEntry;
 struct UIMenu_s {
   // 0 = info page
   // 1 = file selector
-  // 2 = submenu
-  // 3 = modififaction menu
+  // 2 = sub menu
+  // 3 = modification menu
   // 5 = Wizard menu
   // +128 = sticky -> no autoreturn to main menuü after timeout
   uint8_t menuType;
@@ -647,135 +655,7 @@ class UIDisplay {
 };
 extern UIDisplay uid;
 
-#if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
-#include "uiconfig.h"
-#endif
-// No controller at all
-#if FEATURE_CONTROLLER == NO_CONTROLLER
-#define UI_HAS_KEYS 0
-#define UI_DISPLAY_TYPE NO_DISPLAY
-#ifdef UI_MAIN
-void uiInitKeys() {}
-void uiCheckKeys(uint16_t &action) {}
-inline void uiCheckSlowEncoder() {}
-void uiCheckSlowKeys(uint16_t &action) {}
-#endif // UI_MAIN
-#endif // NO_CONTROLLER
 
-#include "DisplayList.h"
-
-
-#if FEATURE_CONTROLLER != NO_CONTROLLER
-#if UI_ROWS==4
-#if UI_COLS==16
-#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 4x16
-#elif UI_COLS==20
-//#define UI_LINE_OFFSETS {0,0x20,0x40,0x60} // 4x20 with KS0073
-#define UI_LINE_OFFSETS {0,0x40,0x14,0x54} // 4x20 with HD44780
-#else
-#if UI_DISPLAY_TYPE!=DISPLAY_GAMEDUINO2
-#error Unknown combination off rows/columns - define UI_LINE_OFFSETS manually.
-#else
-#define UI_LINE_OFFSETS {} // dummy never used
-#endif
-#endif
-#else
-#define UI_LINE_OFFSETS {0,0x40,0x10,0x50} // 2x16, 2x20, 2x24
-#endif
-#include "uilang.h"
-#endif
-
-#define UI_VERSION_STRING "Repetier " REPETIER_VERSION
-
-#ifdef UI_HAS_I2C_KEYS
-#define COMPILE_I2C_DRIVER
-#endif
-
-#if UI_DISPLAY_TYPE != NO_DISPLAY
-
-
-#if UI_DISPLAY_TYPE == DISPLAY_I2C
-#define COMPILE_I2C_DRIVER
-#endif
-
-#ifndef UI_TEMP_PRECISION
-#if UI_COLS>16
-#define UI_TEMP_PRECISION 1
-#else
-#define UI_TEMP_PRECISION 0
-#endif
-#endif
-
-#define UI_INITIALIZE uid.initialize();
-#define UI_FAST if((counterPeriodical & 3) == 3) {uid.fastAction();}
-#define UI_MEDIUM uid.mediumAction();
-#define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
-#define UI_STATUS(status) uid.setStatusP(PSTR(status));
-#define UI_STATUS_F(status) uid.setStatusP(status);
-#define UI_STATUS_UPD(status) {uid.setStatusP(PSTR(status));uid.refreshPage();}
-#define UI_STATUS_UPD_F(status) {uid.setStatusP(status);uid.refreshPage();}
-#define UI_STATUS_RAM(status) uid.setStatus(status);
-#define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
-#define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
-#define UI_ERROR_P(status) uid.setStatusP(status,true);
-#define UI_ERROR_UPD(status) {uid.setStatusP(PSTR(status),true);uid.refreshPage();}
-#define UI_ERROR_RAM(status) uid.setStatus(status,true);
-#define UI_ERROR_UPD_RAM(status) {uid.setStatus(status,true);uid.refreshPage();}
-//#define UI_ERROR(msg) {uid.errorMsg=(void*)PSTR(msg);pushMenu((void*)&ui_menu_error,true);}
-#define UI_CLEAR_STATUS {uid.statusMsg[0]=0;}
-#define UI_RESET_MENU {uid.menuLevel=0;uid.refreshPage();}
-#define UI_MESSAGE(menu) {uid.showMessage(menu);}
-#define UI_ACTION(ac) {uid.executeAction(ac,true);}    
-#else
-#define UI_INITIALIZE {}
-#define UI_FAST {}
-#define UI_MEDIUM {}
-#define UI_SLOW(allowMoves) {}
-#define UI_STATUS(status) {}
-#define UI_STATUS_F(status) {}
-#define UI_STATUS_RAM(status) {}
-#define UI_STATUS_UPD(status) {}
-#define UI_STATUS_UPD_F(status) {}
-#define UI_STATUS_UPD_RAM(status) {}
-#define UI_CLEAR_STATUS {}
-#define UI_ERROR(msg) {}
-#define UI_ERROR_P(status) {}
-#define UI_ERROR_UPD(status) {}
-#define UI_ERROR_RAM(status) {}
-#define UI_ERROR_UPD_RAM(status) {}
-#define UI_RESET_MENU {}
-#define UI_MESSAGE(menu) {}    
-#define UI_ACTION(ac)
-#endif  // Display
-
-// Beeper methods
-#if BEEPER_TYPE==0 || FEATURE_BEEPER == 0
-  #define BEEP_SHORT {}
-  #define BEEP_LONG {}
-#else
-  #define BEEP_SHORT beep(BEEPER_SHORT_SEQUENCE);
-  #define BEEP_LONG beep(BEEPER_LONG_SEQUENCE);
-#endif
-
-
-extern void beep(uint8_t duration, uint8_t count);
-#if (defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)) || (defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)) || (defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)) || (defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION))
-#define HAS_USER_KEYS
-static void ui_check_Ukeys(uint16_t &action) {
-#if defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)
-  UI_KEYS_BUTTON_LOW(USER_KEY1_PIN, USER_KEY1_ACTION);
-#endif
-#if defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)
-  UI_KEYS_BUTTON_LOW(USER_KEY2_PIN, USER_KEY2_ACTION);
-#endif
-#if defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)
-  UI_KEYS_BUTTON_LOW(USER_KEY3_PIN, USER_KEY3_ACTION);
-#endif
-#if defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION)
-  UI_KEYS_BUTTON_LOW(USER_KEY4_PIN, USER_KEY4_ACTION);
-#endif
-}
-#endif
 
 #endif
 

@@ -411,6 +411,8 @@ FSTRINGVAR(tEPRDistanceRetractHeating)
 FSTRINGVAR(tEPRExtruderCoolerSpeed)
 FSTRINGVAR(tEPRAdvanceK)
 FSTRINGVAR(tEPRAdvanceL)
+FSTRINGVAR(tEPRPreheatTemp)
+FSTRINGVAR(tEPRPreheatBedTemp)
 #endif
 #if SDSUPPORT
 //FSTRINGVAR(tSDRemoved)
@@ -505,7 +507,7 @@ static void printFloat(float number, uint8_t digits);
 static inline void print(float number) {printFloat(number, 6);}
 static inline void println() {GCodeSource::writeToAll('\r');GCodeSource::writeToAll('\n');}
 static bool writeToAll;    
-#if UI_DISPLAY_TYPE != NO_DISPLAY
+#if FEATURE_CONTROLLER != NO_CONTROLLER
 static const char* translatedF(int textId);
 static void selectLanguage(fast8_t lang);
 static uint8_t selectedLanguage;

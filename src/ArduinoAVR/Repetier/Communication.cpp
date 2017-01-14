@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-#if UI_DISPLAY_TYPE != NO_DISPLAY
+#if FEATURE_CONTROLLER != NO_CONTROLLER
 uint8_t Com::selectedLanguage;
 #endif
 
@@ -403,6 +403,8 @@ FSTRINGVALUE(Com::tEPRDistanceRetractHeating,"distance to retract when heating [
 FSTRINGVALUE(Com::tEPRExtruderCoolerSpeed,"extruder cooler speed [0-255]")
 FSTRINGVALUE(Com::tEPRAdvanceK,"advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL,"advance L [0=off]")
+FSTRINGVALUE(Com::tEPRPreheatTemp,"Preheat temp. [°C]")
+FSTRINGVALUE(Com::tEPRPreheatBedTemp,"Bed Preheat temp. [°C]")
 
 #endif
 #if SDSUPPORT

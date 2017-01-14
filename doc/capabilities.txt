@@ -88,3 +88,20 @@ For the host side the M539 command is used.
 M539 S1 ; enable pause protocol so firmware knows it is supported by host
 M539 P0 ; Host did continue
 M539 P1 ; Host entered pause state
+
+Cap:PREHEAT
+
+Supports storage and retrieval of preheat temperatures. Also allows setting
+preheat temperatures instead of individual temperature. Therefore the M codes
+104,140,109 and 190 have to additional parameter:
+H1 - Set to preheat temperature. Not effective if gcode also contains S param.
+O<offset> - Add offset to temperature. Especially usefull with preheat temperature as base.
+
+M170 - Set or retrieve preheat temperatures
+Parameter:
+  B<bedPreheat> : Sets bed preheat temperature
+  C<chamberPreheat> : Sets heated chamber temperature
+  T<extruder> S<preheatTemp> : Sets preheat temperature for given extruder
+  L0 : List preheat temperatures. Returns
+  PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
+    
