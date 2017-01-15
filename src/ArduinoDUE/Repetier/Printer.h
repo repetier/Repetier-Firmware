@@ -373,7 +373,7 @@ public:
     static int32_t stepsRemainingAtXHit;
     static int32_t stepsRemainingAtYHit;
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
     static int32_t levelingP1[3];
     static int32_t levelingP2[3];
     static int32_t levelingP3[3];
