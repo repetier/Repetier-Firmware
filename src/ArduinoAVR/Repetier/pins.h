@@ -361,8 +361,12 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 #define RAMPS_V_1_3
 #define AZTEEG_X3_PRO
+#elif MOTHERBOARD == 39
+#define KNOWN_BOARD 1
+#define RAMPS_V_1_3
+#define ZRIB_V2
 #endif
-#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35
+#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35 || MOTHERBOARD == 39
 #define KNOWN_BOARD 1
 
 #if !(defined (__AVR_ATmega1280__ ) || defined (__AVR_ATmega2560__ ))
@@ -572,6 +576,21 @@ STEPPER_CURRENT_CONTROL
 #define E5_PINS ORIG_E5_STEP_PIN,ORIG_E5_DIR_PIN,ORIG_E5_ENABLE_PIN,
 #define E6_PINS ORIG_E6_STEP_PIN,ORIG_E6_DIR_PIN,ORIG_E6_ENABLE_PIN,
 
+#endif
+
+// Zonestar ZRIB V2.1 Board
+#ifdef ZRIB_V2
+#undef HEATER_2_PIN
+#define HEATER_2_PIN       7
+#define ORIG_FAN2_PIN    6
+#define SD_DETECT_PIN     49
+#define LCD_PINS_RS     16
+#define LCD_PINS_ENABLE   17
+#define LCD_PINS_D4     23
+#define LCD_PINS_D5     25
+#define LCD_PINS_D6     27
+#define LCD_PINS_D7     29
+#define BEEPER_PIN      37
 #endif
 
 #endif

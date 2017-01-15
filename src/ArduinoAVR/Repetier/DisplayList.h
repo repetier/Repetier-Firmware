@@ -1586,16 +1586,42 @@ void uiCheckSlowKeys(uint16_t &action) {}
 //   #define UI_DISPLAY_DATA_PIN    29
 //   #define UI_DISPLAY_CLOCK_PIN   28
 //   #define UI_DISPLAY_ENABLE_PIN  -1 // for 2-wire or pin number for 3-wire
-#ifndef UI_DISPLAY_TYPE
+#undef UI_DISPLAY_TYPE
 #define UI_DISPLAY_TYPE          DISPLAY_4BIT
 
-#define UI_DISPLAY_ENABLE_PIN    29    // A2
-#define UI_DISPLAY_RS_PIN        28    // A3
+#if MOTHERBOARD == 39 // ZRIB
+#define BEEPER_TYPE            1
+#define UI_DISPLAY_RS_PIN      16
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  17
+#define UI_DISPLAY_D4_PIN      23
+#define UI_DISPLAY_D5_PIN      25
+#define UI_DISPLAY_D6_PIN      27
+#define UI_DISPLAY_D7_PIN      29
+#define UI_RESET_PIN           41
+
+#elif MOTHERBOARD == 703 // MEGATRONICS 3
+
+#define UI_DISPLAY_RS_PIN      32
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  31
+#define UI_DISPLAY_D4_PIN      14
+#define UI_DISPLAY_D5_PIN      30
+#define UI_DISPLAY_D6_PIN      39
+#define UI_DISPLAY_D7_PIN      15
+#define BEEPER_TYPE            1
+
+#elif MOTHERBOARD == 63 // Melzi
+
+#define UI_DISPLAY_ENABLE_PIN    29
+#define UI_DISPLAY_RS_PIN        28
 #define UI_DISPLAY_RW_PIN        -1
 #define UI_DISPLAY_D4_PIN        10
 #define UI_DISPLAY_D5_PIN        11
 #define UI_DISPLAY_D6_PIN        16
 #define UI_DISPLAY_D7_PIN        17
+#else
+#error Unknown display - board combination. Please add your pin mapping in DisplayList.h
 #endif
 
 #define UI_DISPLAY_CHARSET       1

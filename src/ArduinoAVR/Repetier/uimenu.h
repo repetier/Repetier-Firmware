@@ -1299,7 +1299,7 @@ UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
 Debug
 Preheat
 Z Calibrate
-Autlevel on/off
+Auto level on/off
 Distortion map
 Distortion on/off
 Ignore M106 Cmd
