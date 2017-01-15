@@ -747,7 +747,7 @@
 #define UI_TEXT_NOSDCARD_DE         "Keine SD Karte"
 #define UI_TEXT_ERROR_DE            "**** FEHLER ****"
 #define UI_TEXT_BACK_DE             "Zur" STR_uuml "ck " cUP
-#define UI_TEXT_QUICK_SETTINGS_DE   "Kontrolle"
+#define UI_TEXT_QUICK_SETTINGS_DE   "Steuerung"
 #define UI_TEXT_ERRORMSG_DE         "%oe"
 #define UI_TEXT_CONFIGURATION_DE    "Einstellungen"
 #define UI_TEXT_POSITION_DE         "Position"
