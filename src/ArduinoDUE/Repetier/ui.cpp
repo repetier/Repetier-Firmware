@@ -3900,6 +3900,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
 #endif
             break;
+        case UI_ACTION_MEASURE_ZPROBE_HEIGHT:
+        	Printer::measureZProbeHeight();
+        	break;
         case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED
         {

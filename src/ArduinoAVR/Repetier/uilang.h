@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 297
+#define NUM_TRANSLATED_WORDS 298
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -404,6 +404,7 @@
 #define UI_TEXT_PREHEAT_E4_ID 294 // "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_ID 295 // "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_ID 296 // "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_ID 297 // "Meas. Z-pr height"
 
 // Universal definitions
 
@@ -733,6 +734,7 @@
 #define UI_TEXT_PREHEAT_E4_EN "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_EN "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_EN "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_EN "Meas. Z-pr height"
 
 // *************** German translation ****************
 
@@ -1056,6 +1058,7 @@
 #define UI_TEXT_PREHEAT_E4_DE "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_DE "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_DE "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_DE "Meas. Z-pr height"
 
 // Dutch translation
 
@@ -1377,6 +1380,7 @@
 #define UI_TEXT_PREHEAT_E4_NL "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_NL "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_NL "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_NL "Meas. Z-pr height"
 
 
 // *************** Brazilian portuguese translation ****************
@@ -1701,6 +1705,7 @@
 #define UI_TEXT_PREHEAT_E4_PT "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_PT "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_PT "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_PT "Meas. Z-pr height"
 
 // *************** Italian translation ****************
 
@@ -2022,6 +2027,7 @@
 #define UI_TEXT_PREHEAT_E4_IT "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_IT "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_IT "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_IT "Meas. Z-pr height"
 
 // Spanish translation
 
@@ -2343,6 +2349,7 @@
 #define UI_TEXT_PREHEAT_E4_ES "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_ES "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_ES "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_ES "Meas. Z-pr height"
 
 
 // *************** Swedish translation ****************
@@ -2668,6 +2675,7 @@
 #define UI_TEXT_PREHEAT_E4_SE "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_SE "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_SE "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_SE "Meas. Z-pr height"
 
 
 // *************** French translation ****************
@@ -2991,6 +2999,7 @@
 #define UI_TEXT_PREHEAT_E4_FR "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_FR "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_FR "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_FR "Meas. Z-pr height"
 
 
 // *************** Czech translation ****************
@@ -3316,6 +3325,7 @@
 #define UI_TEXT_PREHEAT_E4_CZ "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_CZ "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_CZ "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_CZ "Meas. Z-pr height"
 
 
 // *************** Polish translation ****************
@@ -3639,6 +3649,7 @@
 #define UI_TEXT_PREHEAT_E4_PL "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_PL "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_PL "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_PL "Meas. Z-pr height"
 
 // Türk
 
@@ -3958,6 +3969,7 @@
 #define UI_TEXT_PREHEAT_E4_TR "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_TR "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_TR "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_TR "Meas. Z-pr height"
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4280,6 +4292,7 @@
 #define UI_TEXT_PREHEAT_E4_FI "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_FI "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_FI "Bed    : %pb" cDEG "C"
+#define UI_TEXT_MEAS_ZP_HEIGHT_FI "Meas. Z-pr height"
 
 
 #define TRANS(x) UI_STRING(F ## x,x)

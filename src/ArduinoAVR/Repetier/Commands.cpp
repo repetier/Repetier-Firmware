@@ -1059,13 +1059,19 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 30: 
-			{ // G30 single probe set Z0
-                uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-                if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G30 probing failed!"));
-					break;
+			{ 	// G30 [Pn] [S]
+				// G30 (the same as G30 P3) single probe set Z0
+				// G30 S - measures probe height (P is ignored)
+				if (com->hasS()) {
+					Printer::measureZProbeHeight();
+				} else {
+					uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
+					if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
+						GCode::fatalError(PSTR("G30 probing failed!"));
+						break;
+					}
+					Printer::updateCurrentPosition(p & 1);
 				}
-                Printer::updateCurrentPosition(p & 1);
             }
             break;
         case 31:  // G31 display hall sensor output
