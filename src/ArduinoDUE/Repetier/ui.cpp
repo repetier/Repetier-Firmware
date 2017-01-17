@@ -3342,11 +3342,6 @@ void UIDisplay::finishAction(unsigned int action)
             EEPROM::updateChecksum();
         }
         break;
-        case UI_ACTION_STORE_EEPROM:
-        EEPROM::storeDataIntoEEPROM(false);
-        pushMenu(&ui_menu_eeprom_saved, false);
-        BEEP_LONG;
-        break;
  #endif
     }
 }
@@ -3571,6 +3566,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
 #endif
 #if EEPROM_MODE != 0
+        case UI_ACTION_STORE_EEPROM:
+            EEPROM::storeDataIntoEEPROM(false);
+            pushMenu(&ui_menu_eeprom_saved, false);
+            BEEP_LONG;
+        break;
         case UI_ACTION_LOAD_EEPROM:
             EEPROM::readDataFromEEPROM(true);
             Extruder::selectExtruderById(Extruder::current->id);
