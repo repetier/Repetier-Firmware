@@ -113,7 +113,6 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
 #endif
 	}
 #endif //  MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
-
     float savedFeedrate = Printer::feedrate;
     Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS] + x;
     Printer::destinationSteps[Y_AXIS] = Printer::currentPositionSteps[Y_AXIS] + y;
@@ -303,10 +302,16 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
   wait communication and temperature control is enabled.
-  @param check_endstops Read endstop during move.
+  @param check_endstops Read end stop during move.
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 {
+    #if LAZY_DUAL_X_AXIS
+    if(Printer::sledParked && (Printer::currentPositionSteps[X_AXIS] != Printer::destinationSteps[X_AXIS] || 
+                               Printer::currentPositionSteps[Y_AXIS] != Printer::destinationSteps[Y_AXIS] || 
+                               Printer::currentPositionSteps[Z_AXIS] != Printer::destinationSteps[Z_AXIS]))
+        Printer::sledParked = false;
+    #endif
     Printer::constrainDestinationCoords();
     Printer::unsetAllSteppersDisabled();
 #if DISTORTION_CORRECTION

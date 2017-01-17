@@ -1785,11 +1785,11 @@ void Printer::homeZAxis() // Cartesian homing
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * steps,0,homingFeedrate[Z_AXIS],true,true);
-        currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,false);
+        currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
 #if defined(ZHOME_WAIT_UNSWING) && ZHOME_WAIT_UNSWING > 0
         HAL::delayMilliseconds(ZHOME_WAIT_UNSWING);
 #endif
@@ -1831,7 +1831,7 @@ void Printer::homeZAxis() // Cartesian homing
 		//Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
 #endif
 #if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
-// Special case where z probe is z min endstop and distortion correction is enabled
+// Special case where z probe is z min end stop and distortion correction is enabled
 		if(Printer::distortion.isEnabled()) {
 			Printer::zCorrectionStepsIncluded = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], currentPositionSteps[Y_AXIS], currentPositionSteps[Z_AXIS]);
 			currentPositionSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
@@ -1980,6 +1980,7 @@ if(zaxis)
         if(Z_HOME_DIR < 0) startZ = Printer::zMin;
         else startZ = Printer::zMin + Printer::zLength - zBedOffset;
 		moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
+        Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
         for(int i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
@@ -1990,8 +1991,8 @@ if(zaxis)
 #endif
     }
 }
-#endif
-#if HOMING_ORDER != HOME_ORDER_ZXYTZ
+#endif // elif HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
+#if HOMING_ORDER != HOME_ORDER_ZXYTZ && HOMING_ORDER != HOME_ORDER_XYTZ
     if(xaxis)
     {
 #if DUAL_X_AXIS
@@ -2020,6 +2021,11 @@ if(zaxis)
 #endif
 #if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+#else    
+    if(!sledParked) { // park sled
+        moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+        homeXAxis();
+    }        
 #endif    
 	updateCurrentPosition(true);
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS == 1

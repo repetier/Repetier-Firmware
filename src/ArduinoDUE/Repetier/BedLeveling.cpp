@@ -490,7 +490,11 @@ void Printer::finishProbing() {
     float oldOffZ = Printer::offsetZ;
     GCode::executeFString(Com::tZProbeEndScript);
     if(Extruder::current) {
+#if DUAL_X_AXIS
+        Printer::offsetX = 0; // offsets are parking positions for dual x axis!
+#else        
         Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
+#endif        
         Printer::offsetY = -Extruder::current->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
         Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     }
@@ -509,6 +513,7 @@ void Printer::finishProbing() {
 	float ZPOffsetX = 0;
 	float ZPOffsetY = 0;
 #endif		
+
     PrintLine::moveRelativeDistanceInSteps((xExtra - ZPOffsetX) * Printer::axisStepsPerMM[X_AXIS],
                                            (yExtra - ZPOffsetY) * Printer::axisStepsPerMM[Y_AXIS],
                                            (Printer::offsetZ - oldOffZ) * Printer::axisStepsPerMM[Z_AXIS], 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);
