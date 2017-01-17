@@ -209,6 +209,16 @@ public:
         return 0;
 #endif
     }
+#if FEATURE_Z_PROBE
+static inline void setZProbeHeight(float mm) {
+    #if EEPROM_MODE != 0
+    HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT, mm);
+    Com::printFLN(PSTR("Z-Probe height set to: "),mm,3);
+    EEPROM::updateChecksum();
+    #endif
+}
+#endif
+    
     static inline float zProbeZOffset() {
 #if EEPROM_MODE != 0
 	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
@@ -376,17 +386,6 @@ public:
 #endif
     }
 
-#if FEATURE_Z_PROBE
-    static inline void setZProbeHeight(float mm) {
-#if EEPROM_MODE != 0
-      HAL::eprSetFloat(EPR_Z_PROBE_HEIGHT, mm);
-      Com::printFLN(PSTR("Z-Probe height set to: "),mm,3);
-      uint8_t newcheck = computeChecksum();
-      if(newcheck!=HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-          HAL::eprSetByte(EPR_INTEGRITY_BYTE,newcheck);
-#endif
-    }
-#endif
     static inline void setRodRadius(float mm) {
 #if DRIVE_SYSTEM == DELTA
       Printer::radius0=mm;
@@ -396,7 +395,7 @@ public:
       // The radius is not saved to printer variable now, it is all derived parameters of
       // fetching the radius, which if EEProm is off returns the Configuration constant.
       HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS, mm);
-        EEPROM::updateChecksum();
+      EEPROM::updateChecksum();
 #endif
 #endif
     }

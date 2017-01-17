@@ -1067,9 +1067,9 @@ void Commands::processGCode(GCode *com) {
         case 30: 
 			{ 	// G30 [Pn] [S]
 				// G30 (the same as G30 P3) single probe set Z0
-				// G30 S - measures probe height (P is ignored)
+				// G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
 				if (com->hasS()) {
-					Printer::measureZProbeHeight();
+					Printer::measureZProbeHeight(com->hasZ() ? com->Z : Printer::currentPosition[Z_AXIS]);
 				} else {
 					uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
 					if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {

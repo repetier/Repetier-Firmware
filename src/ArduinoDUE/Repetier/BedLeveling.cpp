@@ -608,9 +608,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         distance += zCorr;
     }
 #endif
-#if SOFTWARE_LEVELING
     distance += bendingCorrectionAt(currentPosition[X_AXIS], currentPosition[Y_AXIS]);
-#endif
     Com::printF(Com::tZProbe, distance);
     Com::printF(Com::tSpaceXColon, realXPosition());
 #if DISTORTION_CORRECTION
@@ -640,13 +638,20 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
  * Having printer's height set properly (i.e. after calibration of Z=0), one can use this procedure to measure Z-probe height.
  * It deploys the sensor, takes several probes at center, then updates Z-probe height with average.
  */
-void Printer::measureZProbeHeight() {
-	float zProbeHeight = Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
-#if EEPROM_MODE // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
+void Printer::measureZProbeHeight(float curHeight) {
+#if FEATURE_Z_PROBE
+    currentPositionSteps[Z_AXIS] = curHeight * axisStepsPerMM[Z_AXIS];
+    updateCurrentPosition(true);
+    float startHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
+    moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+    
+	float zProbeHeight = EEPROM::zProbeHeight() + startHeight - Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
+#if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
 	Com::printFLN(Com::tZProbeHeight, zProbeHeight);
 	EEPROM::setZProbeHeight(zProbeHeight);
 #else
-	Com::printFLN(PSTR("Z-probe height [mm]"), zProbeHeight);
+	Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
+#endif
 #endif
 }
 

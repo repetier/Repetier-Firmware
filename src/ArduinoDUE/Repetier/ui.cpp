@@ -3901,7 +3901,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #endif
             break;
         case UI_ACTION_MEASURE_ZPROBE_HEIGHT:
-        	Printer::measureZProbeHeight();
+        	Printer::measureZProbeHeight(0);
         	break;
         case UI_ACTION_HEATED_BED_DOWN:
 #if HAVE_HEATED_BED
