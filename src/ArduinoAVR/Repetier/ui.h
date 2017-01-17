@@ -285,6 +285,8 @@
 #define UI_ACTION_YOFF                  4021
 #define UI_ACTION_ZOFF                  4022
 
+#define UI_ACTION_MEASURE_ZPROBE_HEIGHT	4030
+
 #define UI_ACTION_SHOW_USERMENU1        4101
 #define UI_ACTION_SHOW_USERMENU2        4102
 #define UI_ACTION_SHOW_USERMENU3        4103

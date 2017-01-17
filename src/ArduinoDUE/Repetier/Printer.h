@@ -1261,6 +1261,7 @@ public:
 	static void startProbing(bool runScript);
 	static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
+    static void measureZProbeHeight();
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x,float y);
 #endif
