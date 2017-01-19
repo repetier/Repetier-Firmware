@@ -411,7 +411,7 @@ bool Printer::isPositionAllowed(float x,float y,float z)
     if(!allowed)
     {
         Printer::updateCurrentPosition(true);
-        Commands::printCurrentPosition(PSTR("isPositionAllowed "));
+        Commands::printCurrentPosition();
     }
     return allowed;
 }
@@ -1308,7 +1308,7 @@ extruder[5].jamLastSignal = READ(EXT5_JAM_PIN);
         currentPositionSteps[i] = 0;
     }
     currentPosition[X_AXIS] = currentPosition[Y_AXIS]= currentPosition[Z_AXIS] =  0.0;
-    //Commands::printCurrentPosition(PSTR("Printer::setup 0 "));
+    //Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
     distortion.init();
 #endif // DISTORTION_CORRECTION
@@ -1331,7 +1331,7 @@ extruder[5].jamLastSignal = READ(EXT5_JAM_PIN);
 	homeAxis(true,true,true);
 #endif
 	setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
-	Commands::printCurrentPosition(PSTR("Printer::setup "));
+	Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
 	Extruder::selectExtruderById(0);
 
@@ -1560,7 +1560,7 @@ LaserDriver::laserOn = false;
     updateCurrentPosition(true);
 	updateHomedAll();
     UI_CLEAR_STATUS
-    Commands::printCurrentPosition(PSTR("homeAxis "));
+    Commands::printCurrentPosition();
     setAutolevelActive(autoLevel);
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 	LaserDriver::laserOn = oldLaser;
@@ -2019,11 +2019,9 @@ if(zaxis)
 	if(zaxis)
 		startZ = Z_UP_AFTER_HOME;
 #endif
-#if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
-#else    
-    if(!sledParked) { // park sled
-        moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+#if (DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
+    if(!sledParked && xaxis) { // park sled
         homeXAxis();
     }        
 #endif    
@@ -2033,7 +2031,7 @@ if(zaxis)
 #endif		
 	updateHomedAll();
     UI_CLEAR_STATUS
-    Commands::printCurrentPosition(PSTR("homeAxis "));
+    Commands::printCurrentPosition();
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 	LaserDriver::laserOn = oldLaser;
 #endif

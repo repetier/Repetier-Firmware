@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 298
+#define NUM_TRANSLATED_WORDS 304
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -404,7 +404,13 @@
 #define UI_TEXT_PREHEAT_E4_ID 294 // "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_ID 295 // "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_ID 296 // "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_ID 297 // "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_ID 297 // "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_ID 298 // "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_ID 299 // "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_ID 300 // "Continue"
+#define UI_TEXT_CLOSE_ID 301 // "Close"
+#define UI_TEXT_EXTR_ZOFF_ID 302 //         "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_ID 303 // "Measuring ..."
 
 // Universal definitions
 
@@ -734,7 +740,13 @@
 #define UI_TEXT_PREHEAT_E4_EN "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_EN "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_EN "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_EN "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_EN "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_EN "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_EN "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_EN "Continue"
+#define UI_TEXT_CLOSE_EN "Close"
+#define UI_TEXT_EXTR_ZOFF_EN "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_EN "Measuring ..."
 
 // *************** German translation ****************
 
@@ -1058,7 +1070,13 @@
 #define UI_TEXT_PREHEAT_E4_DE "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_DE "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_DE "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_DE "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_DE "Mess. Probenh" STR_ouml "he"
+#define UI_TEXT_CUR_TEMP_DE "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_DE "Echte Z Pos.:%W0mm"
+#define UI_TEXT_CONTINUE_DE "Weiter"
+#define UI_TEXT_CLOSE_DE "Abbruch"
+#define UI_TEXT_EXTR_ZOFF_DE "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_DE "Messe ..."
 
 // Dutch translation
 
@@ -1380,8 +1398,13 @@
 #define UI_TEXT_PREHEAT_E4_NL "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_NL "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_NL "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_NL "Meas. Z-pr height"
-
+#define UI_TEXT_MEAS_ZP_HEIGHT_NL "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_NL "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_NL "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_NL "Continue"
+#define UI_TEXT_CLOSE_NL "Close"
+#define UI_TEXT_EXTR_ZOFF_NL "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_NL "Measuring ..."
 
 // *************** Brazilian portuguese translation ****************
 
@@ -1705,7 +1728,13 @@
 #define UI_TEXT_PREHEAT_E4_PT "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_PT "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_PT "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_PT "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_PT "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_PT "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_PT "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_PT "Continue"
+#define UI_TEXT_CLOSE_PT "Close"
+#define UI_TEXT_EXTR_ZOFF_PT "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_PT "Measuring ..."
 
 // *************** Italian translation ****************
 
@@ -2027,7 +2056,13 @@
 #define UI_TEXT_PREHEAT_E4_IT "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_IT "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_IT "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_IT "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_IT "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_IT "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_IT "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_IT "Continue"
+#define UI_TEXT_CLOSE_IT "Close"
+#define UI_TEXT_EXTR_ZOFF_IT "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_IT "Measuring ..."
 
 // Spanish translation
 
@@ -2349,7 +2384,13 @@
 #define UI_TEXT_PREHEAT_E4_ES "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_ES "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_ES "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_ES "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_ES "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_ES "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_ES "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_ES "Continue"
+#define UI_TEXT_CLOSE_ES "Close"
+#define UI_TEXT_EXTR_ZOFF_ES "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_ES "Measuring ..."
 
 
 // *************** Swedish translation ****************
@@ -2675,8 +2716,13 @@
 #define UI_TEXT_PREHEAT_E4_SE "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_SE "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_SE "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_SE "Meas. Z-pr height"
-
+#define UI_TEXT_MEAS_ZP_HEIGHT_SE "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_SE "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_SE "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_SE "Continue"
+#define UI_TEXT_CLOSE_SE "Close"
+#define UI_TEXT_EXTR_ZOFF_SE "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_SE "Measuring ..."
 
 // *************** French translation ****************
 // ***************      By Doudou     ****************
@@ -2999,8 +3045,13 @@
 #define UI_TEXT_PREHEAT_E4_FR "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_FR "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_FR "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_FR "Meas. Z-pr height"
-
+#define UI_TEXT_MEAS_ZP_HEIGHT_FR "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_FR "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_FR "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_FR "Continue"
+#define UI_TEXT_CLOSE_FR "Close"
+#define UI_TEXT_EXTR_ZOFF_FR "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_FR "Measuring ..."
 
 // *************** Czech translation ****************
 // ***************      By Majkl     ****************
@@ -3325,8 +3376,13 @@
 #define UI_TEXT_PREHEAT_E4_CZ "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_CZ "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_CZ "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_CZ "Meas. Z-pr height"
-
+#define UI_TEXT_MEAS_ZP_HEIGHT_CZ "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_CZ "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_CZ "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_CZ "Continue"
+#define UI_TEXT_CLOSE_CZ "Close"
+#define UI_TEXT_EXTR_ZOFF_CZ "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_CZ "Measuring ..."
 
 // *************** Polish translation ****************
 // ***************       By MIS       ****************
@@ -3649,7 +3705,13 @@
 #define UI_TEXT_PREHEAT_E4_PL "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_PL "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_PL "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_PL "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_PL "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_PL "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_PL "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_PL "Continue"
+#define UI_TEXT_CLOSE_PL "Close"
+#define UI_TEXT_EXTR_ZOFF_PL "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_PL "Measuring ..."
 
 // Türk
 
@@ -3969,7 +4031,13 @@
 #define UI_TEXT_PREHEAT_E4_TR "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_TR "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_TR "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_TR "Meas. Z-pr height"
+#define UI_TEXT_MEAS_ZP_HEIGHT_TR "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_TR "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_TR "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_TR "Continue"
+#define UI_TEXT_CLOSE_TR "Close"
+#define UI_TEXT_EXTR_ZOFF_TR "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_TR "Measuring ..."
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4292,8 +4360,13 @@
 #define UI_TEXT_PREHEAT_E4_FI "Extr. 5: %p4" cDEG "C"
 #define UI_TEXT_PREHEAT_E5_FI "Extr. 6: %p5" cDEG "C"
 #define UI_TEXT_PREHEAT_BED_FI "Bed    : %pb" cDEG "C"
-#define UI_TEXT_MEAS_ZP_HEIGHT_FI "Meas. Z-pr height"
-
+#define UI_TEXT_MEAS_ZP_HEIGHT_FI "Meas. Probe Height"
+#define UI_TEXT_CUR_TEMP_FI "Temp. %ec/%Ec" cDEG "C"
+#define UI_TEXT_REAL_Z_FI "Real Z Pos:%W0mm"
+#define UI_TEXT_CONTINUE_FI "Continue"
+#define UI_TEXT_CLOSE_FI "Close"
+#define UI_TEXT_EXTR_ZOFF_FI "Z-Offset:%Xz"
+#define UI_TEXT_MEASURING_FI "Measuring ..."
 
 #define TRANS(x) UI_STRING(F ## x,x)
 #ifdef CUSTOM_TRANSLATIONS

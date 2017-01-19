@@ -377,7 +377,7 @@ Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],st
         EEPROM::storeDataIntoEEPROM();
     }
     Printer::updateCurrentPosition(true);
-    Commands::printCurrentPosition(PSTR("G32 "));
+    Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
     if(distEnabled)
         Printer::distortion.enable(false); // if level has changed, distortion is also invalid
@@ -473,12 +473,15 @@ void Printer::startProbing(bool runScript) {
 	if(ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)
 		yExtra = Printer::yMin + Printer::yLength + ZPOffsetY - Printer::currentPosition[Y_AXIS];
 	// Update position	
-    Printer::offsetX = -ZPOffsetX;
-    Printer::offsetY = -ZPOffsetY;
+    Printer::offsetX = xExtra-ZPOffsetX;
+    Printer::offsetY = yExtra-ZPOffsetY;
+    if(xExtra != 0 || yExtra != 0) {
+        Com::printErrorFLN(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inprecise!"));
+    }
 #endif	
     //Printer::offsetZ = 0; // we correct this with probe height
-    PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX + xExtra) * Printer::axisStepsPerMM[X_AXIS],
-                                           (Printer::offsetY - oldOffY + yExtra) * Printer::axisStepsPerMM[Y_AXIS],
+    PrintLine::moveRelativeDistanceInSteps((Printer::offsetX - oldOffX) * Printer::axisStepsPerMM[X_AXIS],
+                                           (Printer::offsetY - oldOffY) * Printer::axisStepsPerMM[Y_AXIS],
                                            0, 0, EEPROM::zProbeXYSpeed(), true, ALWAYS_CHECK_ENDSTOPS);
 	updateCurrentPosition(false);										  
 }
@@ -642,13 +645,15 @@ void Printer::measureZProbeHeight(float curHeight) {
 #if FEATURE_Z_PROBE
     currentPositionSteps[Z_AXIS] = curHeight * axisStepsPerMM[Z_AXIS];
     updateCurrentPosition(true);
+#if NONLINEAR_SYSTEM
+    transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
+#endif
     float startHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
-    moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
-    
+    moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);    
 	float zProbeHeight = EEPROM::zProbeHeight() + startHeight - Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
+    
 #if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
-	Com::printFLN(Com::tZProbeHeight, zProbeHeight);
-	EEPROM::setZProbeHeight(zProbeHeight);
+	EEPROM::setZProbeHeight(zProbeHeight); // will also report on output
 #else
 	Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
 #endif

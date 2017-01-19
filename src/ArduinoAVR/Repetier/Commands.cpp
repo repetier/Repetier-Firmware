@@ -125,12 +125,9 @@ void Commands::waitUntilEndOfAllBuffers() {
     }
 }
 
-void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
+void Commands::printCurrentPosition() {
     float x, y, z;
     Printer::realPosition(x, y, z);
-    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
-        Com::printErrorFLN(s); // flag where the error condition came from
-    }
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];
     z += Printer::coordinateOffset[Z_AXIS];
@@ -1041,7 +1038,7 @@ void Commands::processGCode(GCode *com) {
                         EEPROM::storeDataIntoEEPROM();
                 }
                 Printer::updateCurrentPosition(true);
-                printCurrentPosition(PSTR("G29 "));
+                printCurrentPosition();
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
 				if(!ok) {
@@ -1296,7 +1293,7 @@ void Commands::processGCode(GCode *com) {
 #endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
-            printCurrentPosition(PSTR("G135 "));
+            printCurrentPosition();
             break;
 
 #endif // DRIVE_SYSTEM
@@ -1788,7 +1785,7 @@ void Commands::processMCode(GCode *com) {
             break;
         case 114: // M114
             Com::writeToAll = false;
-            printCurrentPosition(PSTR("M114 "));
+            printCurrentPosition();
 			if(com->hasS() && com->S) {
 				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
 				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
@@ -2044,7 +2041,7 @@ void Commands::processMCode(GCode *com) {
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition(PSTR("M251 "));
+            Commands::printCurrentPosition();
             break;
 #endif
 #if FEATURE_DITTO_PRINTING
