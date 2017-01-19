@@ -1577,8 +1577,10 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'p': // preheat related
             if(c2 >= '0' && c2 <='6') {
                 addInt(extruder[c2-'0'].tempControl.preheatTemperature,3,' ');
+#if HAVE_HEATED_BED
             } else if(c2 == 'b') {
                 addInt(heatedBedController.preheatTemperature,3,' ');
+#endif                
             } else if(c2 == 'c') {
                 addInt(Extruder::current->tempControl.preheatTemperature,3,' ');
             }                
