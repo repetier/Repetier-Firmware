@@ -1476,7 +1476,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 // Mosi Pin: UI_DISPLAY_ENABLE_PIN
 // CD Pin:   UI_DISPLAY_RS_PIN
 
-#if MOTHERBOARD == 408 // SMART RAMPS
+#if MOTHERBOARD == 408 || MOTHERBOARD == 413 // SMART RAMPS
 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49 // sd card detect as shown on drawing

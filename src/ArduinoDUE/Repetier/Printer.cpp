@@ -151,6 +151,7 @@ float Printer::maxZJerk;                   ///< Maximum allowed jerk in z direct
 float Printer::offsetX;                     ///< X-offset for different extruder positions.
 float Printer::offsetY;                     ///< Y-offset for different extruder positions.
 float Printer::offsetZ;                     ///< Z-offset for different extruder positions.
+float Printer::offsetZ2=0;                  ///< Z-offset without rotation correction.
 speed_t Printer::vMaxReached;               ///< Maximum reached speed
 uint32_t Printer::msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;             ///< mm of filament printed since counting started
@@ -671,7 +672,7 @@ void Printer::updateAdvanceFlags()
 #endif
 }
 
-// This is for untransformed move to coordinates in printers absolute cartesian space
+// This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x,float y,float z,float e,float f)
 {
     if(x != IGNORE_COORDINATE)
@@ -685,7 +686,7 @@ uint8_t Printer::moveTo(float x,float y,float z,float e,float f)
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 #if NONLINEAR_SYSTEM
-    // Disable software endstop or we get wrong distances when length < real length
+    // Disable software end stop or we get wrong distances when length < real length
     if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, true, false))
     {
         Com::printWarningFLN(PSTR("moveTo / queueDeltaMove returns error"));
@@ -715,6 +716,7 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f,bool pat
     else
         currentPosition[Z_AXIS] = z;
     transformToPrinter(x + Printer::offsetX, y + Printer::offsetY, z + Printer::offsetZ, x, y, z);
+    z += offsetZ2;
     // There was conflicting use of IGNOR_COORDINATE
     destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
     destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
@@ -761,9 +763,9 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
 #endif    
     currentPosition[Y_AXIS] = static_cast<float>(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
 #if NONLINEAR_SYSTEM	
-    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS];
+    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
 #else
-    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS] - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS];
+    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS] - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
 #endif	
    transformFromPrinter(currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS],
                         currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS]);
@@ -833,6 +835,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 			if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
 		}
 		transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS] +  Printer::offsetZ, x, y, z);
+        z += offsetZ2;
 		destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
 		destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
 		destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
@@ -1421,7 +1424,7 @@ void Printer::deltaMoveToTopEndstops(float feedrate)
     setHoming(true);
     transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
     PrintLine::moveRelativeDistanceInSteps(0, 0, (zMaxSteps + EEPROM::deltaDiagonalRodLength()*axisStepsPerMM[Z_AXIS]) * 1.5, 0, feedrate, true, true);
-    offsetX = offsetY = offsetZ = 0;
+    offsetX = offsetY = offsetZ = offsetZ2 = 0;
     setHoming(false);
 }
 void Printer::homeXAxis()
@@ -1773,7 +1776,8 @@ void Printer::homeZAxis() // Cartesian homing
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1))
     {
-#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+        offsetZ2 = 0;
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
 		Printer::startProbing(true);
 #endif
 		coordinateOffset[Z_AXIS] = 0;
@@ -1794,7 +1798,7 @@ void Printer::homeZAxis() // Cartesian homing
         HAL::delayMilliseconds(ZHOME_WAIT_UNSWING);
 #endif
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
-#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
 		Printer::finishProbing();
 #endif
         setHoming(false);
@@ -1830,7 +1834,7 @@ void Printer::homeZAxis() // Cartesian homing
 #endif		
 		//Printer::offsetZ = -Extruder::current->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
 #endif
-#if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+#if DISTORTION_CORRECTION && Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
 // Special case where z probe is z min end stop and distortion correction is enabled
 		if(Printer::distortion.isEnabled()) {
 			Printer::zCorrectionStepsIncluded = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], currentPositionSteps[Y_AXIS], currentPositionSteps[Z_AXIS]);
@@ -1838,7 +1842,7 @@ void Printer::homeZAxis() // Cartesian homing
 		}
 #endif
 		updateCurrentPosition(true); 
-#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
 		//Com::printF(PSTR("uc pz:"),currentPosition[Z_AXIS]);Com::printFLN(PSTR(" sz:"),currentPositionSteps[Z_AXIS]);
 		// If we have software leveling enabled and are not at 0,0 z position is not zero, but we measured 
 		// for z = 0, so we need to correct for rotation.
@@ -1884,7 +1888,7 @@ if(zaxis)
     PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
 #endif
 #endif
-#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN
+#if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
 #if HOMING_ORDER != HOME_ORDER_XYZ && HOMING_ORDER != HOME_ORDER_YXZ && HOMING_ORDER != HOME_ORDER_ZXYTZ && HOMING_ORDER != HOME_ORDER_XYTZ
 	#error Illegal homing order for z probe based homing!
 #endif
@@ -2019,8 +2023,12 @@ if(zaxis)
 	if(zaxis)
 		startZ = Z_UP_AFTER_HOME;
 #endif
+#if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
-#if (DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
+#else
+#if HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
+    moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
+#endif    
     if(!sledParked && xaxis) { // park sled
         homeXAxis();
     }        
@@ -2416,7 +2424,8 @@ bool Distortion::measure(void)
     
     disable(false);
     float z = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
-	Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,EEPROM::zProbeHeight(),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
+    Com::printFLN(PSTR("Reference Z for measurement:"),z,3);
+    updateDerived();
     //Com::printFLN(PSTR("radiusCorr:"), radiusCorrectionSteps);
     //Com::printFLN(PSTR("steps:"), step);
 	int32_t zCorrection = 0;
@@ -2425,6 +2434,7 @@ bool Distortion::measure(void)
 #endif
 
 	Printer::startProbing(true);
+	Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,z,IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
         {

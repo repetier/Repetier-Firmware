@@ -138,6 +138,8 @@ void Commands::printCurrentPosition() {
 #ifdef DEBUG_POS
     Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
     Com::printF(PSTR(" OffY:"),Printer::offsetY);
+    Com::printF(PSTR(" OffZ:"),Printer::offsetZ);
+    Com::printF(PSTR(" OffZ2:"),Printer::offsetZ2);
     Com::printF(PSTR(" XS:"),Printer::currentPositionSteps[X_AXIS]);
     Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
     Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
@@ -2027,7 +2029,7 @@ void Commands::processMCode(GCode *com) {
             Printer::updateAdvanceFlags();
             break;
 #endif
-#if Z_HOME_DIR>0 && MAX_HARDWARE_ENDSTOP_Z
+#if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
         case 251: // M251
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;

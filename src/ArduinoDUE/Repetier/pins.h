@@ -545,6 +545,7 @@ STEPPER_CURRENT_CONTROL
 #define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 
+// Smart RAMPS without(408) and with EEPROM (413)
 #if MOTHERBOARD == 408 || MOTHERBOARD == 413
 #ifndef __SAM3X8E__
 #erro oops! Be sure to have 'due Arduino' selected from the 'tools-> Boards menu'.

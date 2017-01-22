@@ -103,4 +103,10 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UI_EXECUTE(action,allowMoves) {}
 #define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) {}
 
+// the following 2 events are equivalent to slow and fast key function and allow adding extra keys in event system.
+// make sure action is called by reference so it can be changed and returned.
+// Set action only if key is hit
+#define EVENT_CHECK_FAST_KEYS(action) {}
+#define EVENT_CHECK_SLOW_KEYS(action) {}
+
 #endif // EVENTS_H_INCLUDED

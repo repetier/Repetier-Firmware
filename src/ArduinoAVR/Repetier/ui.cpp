@@ -967,6 +967,9 @@ void initializeLCD()
 u8g_InitSPI(&u8g,&u8g_dev_st7565_nhd_c12864_sw_spi,UI_DISPLAY_D4_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_RS_PIN,UI_DISPLAY_D5_PIN,U8G_PIN_NONE);
 #endif
     u8g_Begin(&u8g);
+#ifdef LCD_CONTRAST
+    u8g_SetContrast(&u8g,LCD_CONTRAST);
+#endif    
 #ifdef UI_ROTATE_180
     u8g_SetRot180(&u8g);
 #endif
@@ -1123,7 +1126,10 @@ void  UIDisplay::waitForKey()
     lastButtonAction = 0;
     while(lastButtonAction == nextAction)
     {
+        EVENT_CHECK_SLOW_KEYS(nextAction);
+        EVENT_CHECK_FAST_KEYS(nextAction);
         uiCheckSlowKeys(nextAction);
+        uiCheckKeys(nextAction);
     }
 }
 
@@ -4099,6 +4105,7 @@ void UIDisplay::slowAction(bool allowMoves)
         }
 #endif
         uint16_t nextAction = 0;
+        EVENT_CHECK_SLOW_KEYS(nextAction);
         uiCheckSlowKeys(nextAction);
 #ifdef HAS_USER_KEYS        
         ui_check_Ukeys(nextAction);
@@ -4242,6 +4249,8 @@ void UIDisplay::fastAction()
     {
         flags |= UI_FLAG_KEY_TEST_RUNNING;
         uint16_t nextAction = 0;
+                EVENT_CHECK_SLOW_KEYS(nextAction);
+        EVENT_CHECK_FAST_KEYS(nextAction);
         uiCheckKeys(nextAction);
 //        ui_check_Ukeys(nextAction);
         if(lastButtonAction != nextAction)

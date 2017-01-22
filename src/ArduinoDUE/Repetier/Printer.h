@@ -416,7 +416,8 @@ public:
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
-    static float offsetZ;                     ///< Y-offset for different extruder positions.
+    static float offsetZ;                     ///< Z-offset for different extruder positions.
+    static float offsetZ2;                    ///< Z-offset without rotation correction. Required for z probe corrections
     static speed_t vMaxReached;               ///< Maximum reached speed
     static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;             ///< mm of filament printed since counting started
@@ -1258,7 +1259,7 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-	static void startProbing(bool runScript);
+	static bool startProbing(bool runScript);
 	static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void measureZProbeHeight(float curHeight);
