@@ -4249,7 +4249,6 @@ void UIDisplay::fastAction()
     {
         flags |= UI_FLAG_KEY_TEST_RUNNING;
         uint16_t nextAction = 0;
-                EVENT_CHECK_SLOW_KEYS(nextAction);
         EVENT_CHECK_FAST_KEYS(nextAction);
         uiCheckKeys(nextAction);
 //        ui_check_Ukeys(nextAction);

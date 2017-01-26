@@ -456,6 +456,7 @@ bool Printer::startProbing(bool runScript) {
         GCode::executeFString(Com::tZProbeStartScript);
     float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
     if(currentPosition[Z_AXIS] > maxStartHeight) {
+        cz = maxStartHeight; 
         moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
     }
 	// Fix position to be inside print area when probe is enabled

@@ -21,7 +21,7 @@
 #endif
 
 //Symbolic character values for specific symbols.
-//May be overridden for different controllers, charactersets, etc.
+//May be overridden for different controllers, character sets, etc.
 #define cUP "\001"
 #define cDEG "\002"
 #define cSEL "\003"
@@ -31,7 +31,7 @@
 #define bFOLD 6
 #define cARROW "\176"
 
-#if UI_DISPLAY_CHARSET == 0 // ASCII fallback
+#if UI_DISPLAY_CHARSET == 0 // ASCII fall back
 #define CHAR_RIGHT '-'
 #define CHAR_SELECTOR '>'
 #define CHAR_SELECTED '*'
