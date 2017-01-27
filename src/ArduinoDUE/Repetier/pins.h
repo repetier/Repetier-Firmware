@@ -1015,19 +1015,22 @@ AD15 CH15
 #define TEMP_0_PIN       7 
 // These pins are for bed !
 #define HEATER_1_PIN     98 
-#define TEMP_1_PIN       3 
+#define TEMP_1_PIN       6 
 #define HEATER_2_PIN     8
-#define TEMP_2_PIN       6 
+#define TEMP_2_PIN       5 
 #define HEATER_3_PIN     9
-#define TEMP_3_PIN       5 
+#define TEMP_3_PIN       4 
 // D7
 #define HEATER_4_PIN     11
-#define TEMP_4_PIN       4
+#define TEMP_4_PIN       3
 // D8 
 #define HEATER_5_PIN     12
 #define HEATER_6_PIN     13
 #define HEATER_7_PIN     100
 #define HEATER_8_PIN     72
+#define TEMP_5_PIN       0
+#define TEMP_6_PIN       1
+#define TEMP_7_PIN       2
 
 #define THERMOCOUPLE_0_PIN  10   
 #define THERMOCOUPLE_1_PIN  11 
