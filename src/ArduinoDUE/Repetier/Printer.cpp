@@ -2280,6 +2280,10 @@ void Printer::measureDistortion(void)
     #endif
     #endif
     float oldFeedrate = Printer::feedrate;
+    
+
+    Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
+
     if(!distortion.measure()) {
         GCode::fatalError(PSTR("G33 failed!"));
         return;
@@ -2426,6 +2430,18 @@ bool Distortion::measure(void)
     float z = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
     Com::printFLN(PSTR("Reference Z for measurement:"),z,3);
     updateDerived();
+#if DRIVE_SYSTEM == DELTA
+    // It is not possible to go to the edges at the top, also users try
+    // it often and wonder why the coordinate system is then wrong.
+    // For that reason we ensure a correct behavior by code.
+    Printer::homeAxis(true, true, true);
+    Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+#else
+    if(!Printer::isXHomed() || !Printer::isYHomed())
+        Printer::homeAxis(true,true,false);
+    Printer::updateCurrentPosition(true);
+    Printer::moveTo(Printer::invAxisStepsPerMM[X_AXIS] * ((isCorner(0, 0) ? 1 : 0) * xCorrectionSteps + xOffsetSteps), Printer::invAxisStepsPerMM[Y_AXIS] * ((DISTORTION_CORRECTION_POINTS - 1) * yCorrectionSteps + yOffsetSteps), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+#endif
     //Com::printFLN(PSTR("radiusCorr:"), radiusCorrectionSteps);
     //Com::printFLN(PSTR("steps:"), step);
 	int32_t zCorrection = 0;

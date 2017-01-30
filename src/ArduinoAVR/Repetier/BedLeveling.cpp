@@ -316,6 +316,11 @@ bool runBedLeveling(int s) {
     // For that reason we ensure a correct behavior by code.
     Printer::homeAxis(true, true, true);
     Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+#else
+    if(!Printer::isXHomed() || !Printer::isYHomed())
+        Printer::homeAxis(true,true,false);
+    Printer::updateCurrentPosition(true);
+    Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
 #endif
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
     Printer::startProbing(true);
