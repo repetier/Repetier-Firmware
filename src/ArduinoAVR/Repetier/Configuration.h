@@ -792,6 +792,7 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+#define LASER_WARMUP_TIME 0// wait x milliseconds to start material burning before move
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##

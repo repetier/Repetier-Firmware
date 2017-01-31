@@ -1172,6 +1172,18 @@ uint8_t PrintLine::insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExt
     return 0;
 }
 
+void PrintLine::LaserWarmUp( uint32_t wait)
+{
+    PrintLine *p = getNextWriteLine();
+    p->flags = FLAG_WARMUP;
+    p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
+    p->dir = 1;
+    p->setWaitForXLinesFilled(1);
+    p->setWaitTicks(long(wait*(F_CPU/1000)));//in ms 
+    pushLine();
+    Com::printFLN(PSTR("Laser Warmup"));
+}
+
 void PrintLine::logLine()
 {
 #ifdef DEBUG_QUEUE_MOVE
@@ -2327,6 +2339,12 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 return 2000;
             }
+#if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
+            if(cur->dir)
+            {   
+                  LaserDriver::changeIntensity(cur->secondSpeed);
+            }
+#endif            
             long wait = cur->getWaitTicks();
             removeCurrentLineForbidInterrupt();
             return(wait); // waste some time for path optimization to fill up
@@ -2718,6 +2736,12 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 #endif
                 return 2000;
             }
+#if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
+            if(cur->dir)
+            {
+                LaserDriver::changeIntensity(cur->secondSpeed);
+            }
+#endif
             long wait = cur->getWaitTicks();
             removeCurrentLineForbidInterrupt();
             return(wait); // waste some time for path optimization to fill up

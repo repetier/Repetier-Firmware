@@ -116,6 +116,7 @@ class LaserDriver {
 public:
     static uint8_t intensity; // Intensity to use for next move queued. This is NOT the current value!
     static bool laserOn; // Enabled by M3?
+    static bool firstMove ;
     static void initialize();
     static void changeIntensity(uint8_t newIntensity);
 };

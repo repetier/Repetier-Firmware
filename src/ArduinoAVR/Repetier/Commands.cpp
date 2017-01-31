@@ -61,6 +61,13 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
+#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER
+    if(READ(DOOR_PIN) != DOOR_INVERTING) {
+        if(Printer::mode == PRINTER_MODE_LASER) {
+            LaserDriver::changeIntensity(0);
+        }
+    }
+#endif            
     if(!executePeriodical) return; // gets true every 100ms
     executePeriodical = 0;
     EVENT_TIMER_100MS;
@@ -180,7 +187,7 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
 #if TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
-        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
+        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of auto tune when tuning!
 #endif
 		if((error = extruder[i].tempControl.errorState()) > 0) {
 			Com::printF(PSTR(" D"),(int)i);
@@ -882,9 +889,21 @@ void Commands::processGCode(GCode *com) {
             {
                 // disable laser for G0 moves
                 bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
+                if(Printer::mode == PRINTER_MODE_LASER) {
+                    if(com->G == 0) {
+                        LaserDriver::laserOn = false;
+                        LaserDriver::firstMove = true; //set G1 flag for Laser
+                    } else {
+#if LASER_WARMUP_TIME > 0                        
+                        uint8_t power = (com->hasX() || com->hasY()) && (LaserDriver::laserOn || com->hasE()) ? LaserDriver::intensity : 0;
+                        if(power > 0 && LaserDriver::firstMove) {
+                            PrintLine::waitForXFreeLines(1,true);
+                            PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
+                            LaserDriver::firstMove = false;
+                        }
+#endif                        
+                    }
+                }                
 #endif // defined
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
@@ -916,6 +935,7 @@ void Commands::processGCode(GCode *com) {
                         Com::printFLN(PSTR("Buffer corrupted"));
                 }
 #endif
+
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
                 LaserDriver::laserOn = laserOn;
             }
@@ -923,8 +943,23 @@ void Commands::processGCode(GCode *com) {
             break;
 #if ARC_SUPPORT
         case 2: // CW Arc
-        case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
-                processArc(com);
+        case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:   
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+        {
+            bool laserOn = LaserDriver::laserOn;
+#if LASER_WARMUP_TIME > 0
+            if(Printer::mode == PRINTER_MODE_LASER && LaserDriver::firstMove && (LaserDriver::laserOn || com->hasE())) {
+                PrintLine::waitForXFreeLines(1,true);
+                PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
+                LaserDriver::firstMove = false;
+            }
+#endif            
+#endif // defined
+            processArc(com);
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            LaserDriver::laserOn = laserOn;
+        }
+#endif // defined                
             break;
 #endif
         case 4: // G4 dwell

@@ -725,6 +725,7 @@ public:
     static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
+    static void LaserWarmUp(uint32_t  wait);
 #if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
 #if DISTORTION_CORRECTION
@@ -750,7 +751,7 @@ public:
     inline uint16_t calculateNonlinearSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
     static void calculatePlane(int32_t factors[], int32_t p1[], int32_t p2[], int32_t p3[]);
     static float calcZOffset(int32_t factors[], int32_t pointX, int32_t pointY);
 #endif
