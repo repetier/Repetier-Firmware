@@ -2513,8 +2513,14 @@ bool Distortion::measure(void)
 
 int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 {
-    if (!enabled || z > zEnd || Printer::isZProbingActive()) return 0;
-    if(false && z == 0) {
+    if (!enabled || z > zEnd || Printer::isZProbingActive()) {
+       /* Com::printF(PSTR("NoCor z:"),z);
+        Com::printF(PSTR(" zEnd:"),zEnd);
+        Com::printF(PSTR(" en:"),(int)enabled);
+        Com::printFLN(PSTR(" zp:"),(int)Printer::isZProbingActive());*/
+        return 0;
+    }        
+    if(false) {
   Com::printF(PSTR("correcting ("), x); Com::printF(PSTR(","), y);
     }
 #if DRIVE_SYSTEM == DELTA	
@@ -2529,19 +2535,25 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
     int32_t fyFloor = (y - (y < 0 ? yCorrectionSteps -1 : 0)) / yCorrectionSteps;
 #endif	
 // indexes to the matrix
-    if (fxFloor < 0)
-        fxFloor = 0;
-    else if (fxFloor > DISTORTION_CORRECTION_POINTS - 2)
-        fxFloor = DISTORTION_CORRECTION_POINTS - 2;
-    if (fyFloor < 0)
-        fyFloor = 0;
-    else if (fyFloor > DISTORTION_CORRECTION_POINTS - 2)
-        fyFloor = DISTORTION_CORRECTION_POINTS - 2;
 
 // position between cells of matrix, range=0 to 1 - outside of the matrix the value will be outside this range and the value will be extrapolated
 #if DRIVE_SYSTEM == DELTA
     int32_t fx = x - fxFloor * step; // Grid normalized coordinates
     int32_t fy = y - fyFloor * step;
+    if (fxFloor < 0) {
+        fxFloor = 0;
+        fx = 0;
+    } else if (fxFloor >= DISTORTION_CORRECTION_POINTS - 1) {
+        fxFloor = DISTORTION_CORRECTION_POINTS - 2;
+        fx = step;
+    }
+    if (fyFloor < 0) {
+        fyFloor = 0;
+        fy = 0;
+    } else if (fyFloor >= DISTORTION_CORRECTION_POINTS - 1) {
+        fyFloor = DISTORTION_CORRECTION_POINTS - 2;
+        fy = step;
+    }
 
     int32_t idx11 = matrixIndex(fxFloor, fyFloor);
     int32_t m11 = getMatrix(idx11), m12 = getMatrix(idx11 + 1);
@@ -2553,6 +2565,20 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
 #else
     int32_t fx = x - fxFloor * xCorrectionSteps; // Grid normalized coordinates
     int32_t fy = y - fyFloor * yCorrectionSteps;
+    if (fxFloor < 0) {
+        fxFloor = 0;
+        fx = 0;
+    } else if (fxFloor >= DISTORTION_CORRECTION_POINTS - 1) {
+        fxFloor = DISTORTION_CORRECTION_POINTS - 2;
+        fx = xCorrectionSteps;
+    }
+    if (fyFloor < 0) {
+        fyFloor = 0;
+        fy = 0;
+    } else if (fyFloor >= DISTORTION_CORRECTION_POINTS - 1) {
+        fyFloor = DISTORTION_CORRECTION_POINTS - 2;
+        fy = yCorrectionSteps;
+    }
 
     int32_t idx11 = matrixIndex(fxFloor, fyFloor);
     int32_t m11 = getMatrix(idx11), m12 = getMatrix(idx11 + 1);
@@ -2562,10 +2588,10 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
     int32_t zx2 = m21 + ((m22 - m21) * fx) / xCorrectionSteps;
     int32_t correction_z = zx1 + ((zx2 - zx1) * fy) / yCorrectionSteps;
 #endif
-    if(false && z == 0) {
+    if(false) {
       Com::printF(PSTR(") by "), correction_z);
-      Com::printF(PSTR(" ix= "), fxFloor); Com::printF(PSTR(" fx= "), fx);
-      Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), fy);
+      Com::printF(PSTR(" ix= "), fxFloor); Com::printF(PSTR(" fx= "), (float)fx/(float)xCorrectionSteps,3);
+      Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), (float)fy/(float)yCorrectionSteps,3);
     }
     if (z > zStart && z > 0)
         //All variables are type int. For calculation we need float values

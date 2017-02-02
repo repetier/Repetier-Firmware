@@ -125,6 +125,9 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
         Com::printWarningFLN(PSTR("moveRelativeDistanceInSteps / queueDeltaMove returns error"));
     }
 #else
+#if DISTORTION_CORRECTION
+    Printer::destinationSteps[Z_AXIS] -= Printer::zCorrectionStepsIncluded; // correct as it will be added later in cartesian move computation
+#endif
     queueCartesianMove(checkEndstop, pathOptimize);
 #endif
     Printer::feedrate = savedFeedrate;
@@ -185,8 +188,8 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 	Printer::destinationSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
 #if DEBUG_DISTORTION	
 	Com::printF(PSTR("zCorr:"),Printer::zCorrectionStepsIncluded*Printer::invAxisStepsPerMM[Z_AXIS],3);
-	Com::printF(PSTR(" atX:"),Printer::destinationSteps[0]*Printer::invAxisStepsPerMM[X_AXIS]);	
-	Com::printFLN(PSTR(" atY:"),Printer::destinationSteps[1]*Printer::invAxisStepsPerMM[Y_AXIS]);
+	Com::printF(PSTR(" atX:"),Printer::destinationSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS]);	
+	Com::printFLN(PSTR(" atY:"),Printer::destinationSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS]);
 #endif	
     PrintLine::waitForXFreeLines(1);
     uint8_t newPath = PrintLine::insertWaitMovesIfNeeded(pathOptimize, 0);
@@ -203,7 +206,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
     //Find direction
-    Printer::zCorrectionStepsIncluded = 0;
+    //Printer::zCorrectionStepsIncluded = 0;
     for(uint8_t axis = 0; axis < 4; axis++)
     {
 	    p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
@@ -302,6 +305,9 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
   wait communication and temperature control is enabled.
+  
+  destinationSteps must be excluding any z correction! We will add that if required here.
+  
   @param check_endstops Read end stop during move.
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
@@ -323,6 +329,8 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 			deltas[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
 			start[i] = Printer::currentPositionSteps[i];
 		}
+        deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded;
+        start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;
 		float dx = Printer::invAxisStepsPerMM[X_AXIS] * deltas[X_AXIS];
 		float dy = Printer::invAxisStepsPerMM[Y_AXIS] * deltas[Y_AXIS];
 		float len = dx * dx + dy * dy;
@@ -2342,7 +2350,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
             if(cur->dir)
             {   
-                  LaserDriver::changeIntensity(cur->secondSpeed);
+                  LaserDriver::changeIntensity(255);
             }
 #endif            
             long wait = cur->getWaitTicks();
@@ -2419,7 +2427,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
         else if(Printer::mode == PRINTER_MODE_LASER)
         {
-            LaserDriver::changeIntensity(cur->secondSpeed);
+            LaserDriver::changeIntensity(255);
         }
 #endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full

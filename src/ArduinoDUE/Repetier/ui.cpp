@@ -1784,13 +1784,19 @@ void UIDisplay::parse(const char *txt,bool ram)
 						}	
 					}					
 				}
-                if(c2=='0')
+                if(c2=='0') {
                     fvalue = Printer::realXPosition();
-                else if(c2=='1')
+                    if(Printer::mode != PRINTER_MODE_FFF)
+                        fvalue += Printer::coordinateOffset[X_AXIS];
+                } else if(c2=='1') {
                     fvalue = Printer::realYPosition();
-                else if(c2=='2')
+                    if(Printer::mode != PRINTER_MODE_FFF)
+                        fvalue += Printer::coordinateOffset[Y_AXIS];
+                } else if(c2=='2') {
                     fvalue = Printer::realZPosition();                   
-                else
+                    if(Printer::mode != PRINTER_MODE_FFF)
+                        fvalue += Printer::coordinateOffset[Z_AXIS];
+                } else
                     fvalue = (float)Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
                 addFloat(fvalue,4,2);
             } else if(c2>='a' && c2<='f') {
@@ -3242,15 +3248,15 @@ ZPOS2:
         break;
 #endif
     case UI_ACTION_X_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->xOffset, RMath::min(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] / 100)), -9999999, 9900999);
+        INCREMENT_MIN_MAX(Extruder::current->xOffset, RMath::max(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] / 100)), -9999999, 9999999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_Y_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->yOffset, RMath::min(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] / 100)), -9999999, 9999999);
+        INCREMENT_MIN_MAX(Extruder::current->yOffset, RMath::max(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] / 100)), -9999999, 9999999);
         Extruder::selectExtruderById(Extruder::current->id);
         break;
     case UI_ACTION_Z_OFFSET:
-        INCREMENT_MIN_MAX(Extruder::current->zOffset, RMath::min(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[Z_AXIS] / 100)), -9999999, 9999999);
+        INCREMENT_MIN_MAX(Extruder::current->zOffset, RMath::max(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[Z_AXIS] / 100)), -9999999, 9999999);
         Extruder::selectExtruderById(Extruder::current->id);
     break;
     case UI_ACTION_EXTR_STEPS:
