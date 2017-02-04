@@ -2524,7 +2524,7 @@ break;
 				GCode::resetFatalError();
 			break;
         default:
-            if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors()) {
+            if(Printer::debugErrors()) {
                 Com::writeToAll = false;
                 Com::printF(Com::tUnknownCommand);
                 com->printCommand();
