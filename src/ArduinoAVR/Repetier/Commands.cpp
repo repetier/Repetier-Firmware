@@ -881,6 +881,10 @@ void Commands::processArc(GCode *com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processGCode(GCode *com) {
+    if(EVENT_UNHANDLED_G_CODE(com)) {
+        previousMillisCmd = HAL::timeInMilliseconds();
+        return;
+    }        
     uint32_t codenum; //throw away variable
     switch(com->G) {
         case 0: // G0 -> G1
@@ -1446,7 +1450,7 @@ void Commands::processGCode(GCode *com) {
             break;
 #endif // defined
         default:
-            if(!EVENT_UNHANDLED_G_CODE(com) && Printer::debugErrors()) {
+            if(Printer::debugErrors()) {
                 Com::printF(Com::tUnknownCommand);
                 com->printCommand();
             }
@@ -1457,6 +1461,8 @@ void Commands::processGCode(GCode *com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processMCode(GCode *com) {
+    if(EVENT_UNHANDLED_M_CODE(com))
+        return;
     switch( com->M ) {
         case 3: // Spindle/laser on
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
