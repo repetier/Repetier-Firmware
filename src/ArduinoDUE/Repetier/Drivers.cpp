@@ -110,7 +110,7 @@ void initializeAllMotorDrivers()
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
 bool LaserDriver::laserOn = false;
-bool LaserDriver::firstMove = false;
+bool LaserDriver::firstMove = true;
 
 void LaserDriver::initialize()
 {
@@ -125,7 +125,7 @@ void LaserDriver::initialize()
 void LaserDriver::changeIntensity(uint8_t newIntensity)
 {
 #if defined(DOOR_PIN) && DOOR_PIN > -1
-    if(READ(DOOR_PIN) != DOOR_INVERTING) {
+    if(Printer::isDoorOpen()) {
         newIntensity = 0; // force laser off if door is open
     }
 #endif

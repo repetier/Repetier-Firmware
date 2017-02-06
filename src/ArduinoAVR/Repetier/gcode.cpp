@@ -432,7 +432,7 @@ It must be called frequently to empty the incoming buffer.
 void GCode::readFromSerial()
 {
 #if defined(DOOR_PIN) && DOOR_PIN > -1
-	if(READ(DOOR_PIN) != DOOR_INVERTING) {
+	if(Printer::isDoorOpen()) {
 		keepAlive(DoorOpen);
 		return; // do nothing while door is open
 	}

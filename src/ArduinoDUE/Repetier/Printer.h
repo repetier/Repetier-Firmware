@@ -101,6 +101,7 @@ union wizardVar
 #define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
 #define PRINTER_FLAG3_AUTOREPORT_TEMP       16
 #define PRINTER_FLAG3_SUPPORTS_STARTSTOP    32
+#define PRINTER_FLAG3_DOOR_OPEN             64
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -877,6 +878,29 @@ public:
         flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
     }
 
+    static INLINE uint8_t isDoorOpen()
+    {
+        return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
+    }
+
+    static INLINE bool updateDoorOpen()
+    {
+#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER        
+        bool isOpen = isDoorOpen();
+        uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
+        if(!b && isOpen) {
+            Com::printWarningFLN(Com::tDoorOpen);
+            UI_STATUS_UPD_F(Com::tDoorOpen);
+        } else if(!b && !isOpen) {
+            UI_STATUS_UPD_F(Com::tSpace);
+        }
+        flag3 = (b ? flag3 | PRINTER_FLAG3_DOOR_OPEN : flag3 & ~PRINTER_FLAG3_DOOR_OPEN);
+        return b;
+#else
+        return 0;
+#endif                
+    }
+    
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;

@@ -102,6 +102,7 @@ FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpaceSlash," /")
 FSTRINGVALUE(Com::tFatal,"fatal:")
+FSTRINGVALUE(Com::tDoorOpen,"Door open")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir,"{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles,"\",\"files\":[")
