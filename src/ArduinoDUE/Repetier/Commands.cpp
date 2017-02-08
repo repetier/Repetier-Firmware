@@ -61,7 +61,7 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
-#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER
+#if defined(DOOR_PIN) && DOOR_PIN > -1
     if(Printer::updateDoorOpen()) {
         if(Printer::mode == PRINTER_MODE_LASER) {
             LaserDriver::changeIntensity(0);

@@ -883,23 +883,7 @@ public:
         return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
     }
 
-    static INLINE bool updateDoorOpen()
-    {
-#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER        
-        bool isOpen = isDoorOpen();
-        uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
-        if(!b && isOpen) {
-            Com::printWarningFLN(Com::tDoorOpen);
-            UI_STATUS_UPD_F(Com::tDoorOpen);
-        } else if(!b && !isOpen) {
-            UI_STATUS_UPD_F(Com::tSpace);
-        }
-        flag3 = (b ? flag3 | PRINTER_FLAG3_DOOR_OPEN : flag3 & ~PRINTER_FLAG3_DOOR_OPEN);
-        return b;
-#else
-        return 0;
-#endif                
-    }
+    static bool updateDoorOpen();
     
     static INLINE uint8_t isHoming()
     {

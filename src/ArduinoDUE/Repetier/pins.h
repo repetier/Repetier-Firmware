@@ -282,6 +282,9 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_Z_MAX_PIN      34
 #define ORIG_Z_ENABLE_PIN   44
 
+// Caution - Heater 0 and 1 are likely reversed compared with other boards,
+// so you might need to assign HEATER_0_PIN to the heated bed.
+
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN     8
 // Due analog pin #54

@@ -446,6 +446,24 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
 	#endif
 }
 
+bool Printer::updateDoorOpen()
+{
+#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER
+    bool isOpen = isDoorOpen();
+    uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
+    if(!b && isOpen) {
+        Com::printWarningFLN(Com::tDoorOpen);
+        UI_STATUS_UPD_F(Com::tDoorOpen);
+   } else if(!b && !isOpen) {
+        UI_STATUS_UPD_F(Com::tSpace);
+   }
+   flag3 = (b ? flag3 | PRINTER_FLAG3_DOOR_OPEN : flag3 & ~PRINTER_FLAG3_DOOR_OPEN);
+   return b;
+#else
+   return 0;
+#endif
+}
+    
 void Printer::reportPrinterMode() {
     Printer::setMenuMode(MENU_MODE_CNC + MENU_MODE_LASER + MENU_MODE_FDM,false);
     switch(Printer::mode) {

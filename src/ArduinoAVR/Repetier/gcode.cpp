@@ -479,7 +479,7 @@ void GCode::readFromSerial()
         GCodeSource::activeSource->timeOfLastDataPacket = time; //HAL::timeInMilliseconds();
         commandReceiving[commandsReceivingWritePosition++] = GCodeSource::activeSource->readByte();
         // first lets detect, if we got an old type ascii command
-        if(commandsReceivingWritePosition == 1)
+        if(commandsReceivingWritePosition == 1 && commentDetected == false)
         {
             if(GCodeSource::activeSource->waitingForResend >= 0 && GCodeSource::activeSource->wasLastCommandReceivedAsBinary)
             {
