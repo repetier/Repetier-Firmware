@@ -166,6 +166,7 @@ void GCode::keepAlive(enum FirmwareState state) {
 			GCodeSource::printAllFLN(PSTR("busy:heating"));	
 		} else if(state == DoorOpen) {
 			GCodeSource::printAllFLN(PSTR("busy:door open"));
+            UI_STATUS_F(Com::tDoorOpen);
 		} else { // processing and uncaught cases
 			GCodeSource::printAllFLN(PSTR("busy:processing"));
 		}

@@ -452,10 +452,10 @@ bool Printer::updateDoorOpen()
     bool isOpen = isDoorOpen();
     uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
     if(!b && isOpen) {
+        UI_STATUS_F(Com::tSpace);
+   } else if(b && !isOpen) {
         Com::printWarningFLN(Com::tDoorOpen);
-        UI_STATUS_UPD_F(Com::tDoorOpen);
-   } else if(!b && !isOpen) {
-        UI_STATUS_UPD_F(Com::tSpace);
+        UI_STATUS_F(Com::tDoorOpen);
    }
    flag3 = (b ? flag3 | PRINTER_FLAG3_DOOR_OPEN : flag3 & ~PRINTER_FLAG3_DOOR_OPEN);
    return b;
