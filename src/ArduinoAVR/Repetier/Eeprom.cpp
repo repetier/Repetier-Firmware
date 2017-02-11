@@ -340,7 +340,12 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
 //#define EPR_ACCELERATION_TYPE 1
+#if DUAL_X_RESOLUTION
+    HAL::eprSetFloat(EPR_X2AXIS_STEPS_PER_MM,Printer::axisX2StepsPerMM);
+    HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisX1StepsPerMM);
+#else    
     HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[X_AXIS]);
+#endif    
     HAL::eprSetFloat(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Y_AXIS]);
     HAL::eprSetFloat(EPR_ZAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Z_AXIS]);
     HAL::eprSetFloat(EPR_X_MAX_FEEDRATE,Printer::maxFeedrate[X_AXIS]);
@@ -539,7 +544,12 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
 //#define EPR_ACCELERATION_TYPE 1
+#if DUAL_X_RESOLUTION
+    Printer::axisX1StepsPerMM = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
+    Printer::axisX2StepsPerMM = HAL::eprGetFloat(EPR_X2AXIS_STEPS_PER_MM);    
+#else
     Printer::axisStepsPerMM[X_AXIS] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
+#endif    
     Printer::axisStepsPerMM[Y_AXIS] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);
     Printer::axisStepsPerMM[Z_AXIS] = HAL::eprGetFloat(EPR_ZAXIS_STEPS_PER_MM);
     Printer::maxFeedrate[X_AXIS] = HAL::eprGetFloat(EPR_X_MAX_FEEDRATE);
@@ -780,6 +790,11 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             extruder[5].tempControl.preheatTemperature = EXT5_PREHEAT_TEMP;
 #endif
         }
+#if DUAL_X_RESOLUTION
+        if(version < 18) {
+            Printer::axisX2StepsPerMM = X2AXIS_STEPS_PER_MM;
+        }
+#endif        
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to version 8, the Cartesian max was stored in the zmax
@@ -893,6 +908,9 @@ void EEPROM::writeSettings()
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM, Com::tEPRXStepsPerMM, 4);
+#if DUAL_X_RESOLUTION
+writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
+#endif
     writeFloat(EPR_YAXIS_STEPS_PER_MM, Com::tEPRYStepsPerMM, 4);
 #endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM, Com::tEPRZStepsPerMM, 4);

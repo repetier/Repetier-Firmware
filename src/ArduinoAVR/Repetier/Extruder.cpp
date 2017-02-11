@@ -741,6 +741,9 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	}
 #endif	
     Extruder::current = &extruder[extruderId];
+#if DUAL_X_RESOLUTION
+    Printer::updateDerivedParameter(); // adjust to new resolution
+#endif    
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;

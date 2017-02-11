@@ -311,6 +311,10 @@ public:
 #endif
 #endif
     static uint16_t menuMode;
+#if DUAL_X_RESOLUTION
+    static float axisX1StepsPerMM;
+    static float axisX2StepsPerMM;
+#endif    
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];

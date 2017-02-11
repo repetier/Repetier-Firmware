@@ -355,6 +355,9 @@ FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM,"X-axis steps per mm")
+#if DUAL_X_RESOLUTION
+FSTRINGVALUE(Com::tEPRX2StepsPerMM,"X2-axis steps per mm")
+#endif
 FSTRINGVALUE(Com::tEPRYStepsPerMM,"Y-axis steps per mm")
 FSTRINGVALUE(Com::tEPRZStepsPerMM,"Z-axis steps per mm")
 FSTRINGVALUE(Com::tEPRXMaxFeedrate,"X-axis max. feedrate [mm/s]")

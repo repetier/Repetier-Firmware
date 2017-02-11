@@ -20,7 +20,7 @@
 #define _EEPROM_H
 
 // Id to distinguish version changes
-#define EEPROM_PROTOCOL_VERSION 17
+#define EEPROM_PROTOCOL_VERSION 18
 
 /** Where to start with our data block in memory. Can be moved if you
 have problems with other modules using the eeprom */
@@ -128,6 +128,7 @@ have problems with other modules using the eeprom */
 #define EPR_BENDING_CORRECTION_B              1040
 #define EPR_BENDING_CORRECTION_C              1044
 #define EPR_BED_PREHEAT_TEMP                  1048
+#define EPR_X2AXIS_STEPS_PER_MM               1052
 #if EEPROM_MODE != 0
 #define EEPROM_FLOAT(x) HAL::eprGetFloat(EPR_##x)
 #define EEPROM_INT32(x) HAL::eprGetInt32(EPR_##x)
