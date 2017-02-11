@@ -2606,11 +2606,11 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
     int32_t zx2 = m21 + ((m22 - m21) * fx) / xCorrectionSteps;
     int32_t correction_z = zx1 + ((zx2 - zx1) * fy) / yCorrectionSteps;
 #endif
-    if(false) {
+   /* if(false) {
       Com::printF(PSTR(") by "), correction_z);
       Com::printF(PSTR(" ix= "), fxFloor); Com::printF(PSTR(" fx= "), (float)fx/(float)xCorrectionSteps,3);
       Com::printF(PSTR(" iy= "), fyFloor); Com::printFLN(PSTR(" fy= "), (float)fy/(float)yCorrectionSteps,3);
-    }
+    }*/
     if (z > zStart && z > 0)
         //All variables are type int. For calculation we need float values
         correction_z = (correction_z * static_cast<float>(zEnd - z) / (zEnd - zStart));
