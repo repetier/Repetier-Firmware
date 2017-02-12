@@ -721,10 +721,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if DUAL_X_AXIS
 	float lastX = Printer::lastCmdPos[X_AXIS];
 	// Park current extruder
-	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps; // here the extruder should be
+	int32_t dualXPosSteps = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps; // here the extruder should be (steps from xmin pos)
 #if LAZY_DUAL_X_AXIS
     if(Printer::sledParked)
-        dualXPos = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be
+        dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be
 #endif // LAZY_DUAL_X_AXIS
 	if(Printer::isXHomed() && executeSelect
 #if LAZY_DUAL_X_AXIS    
@@ -733,7 +733,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
      ) { // park extruder that will become inactive
 		bool oldDestCheck = Printer::isNoDestinationCheck();
 		Printer::setNoDestinationCheck(true);
-		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
 		Printer::setNoDestinationCheck(oldDestCheck);
 #if LAZY_DUAL_X_AXIS
         Printer::sledParked = true;
@@ -741,8 +741,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	}
 #endif	
     Extruder::current = &extruder[extruderId];
+    // --------------------- Now new extruder is active --------------------
 #if DUAL_X_RESOLUTION
     Printer::updateDerivedParameter(); // adjust to new resolution
+  	dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be in new coordinates
 #endif    
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
@@ -781,10 +783,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		GCode::executeFString(Extruder::current->selectCommands);
 	}
 #if LAZY_DUAL_X_AXIS == 0
-	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPos;
+	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
 	if(Printer::isXHomed() && executeSelect) {
-		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
-		Printer::currentPositionSteps[X_AXIS] = dualXPos + Printer::xMinSteps;		
+		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+		Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
 	}
 #endif // LAZY_DUAL_X_AXIS == 0
     Printer::offsetX = 0;
