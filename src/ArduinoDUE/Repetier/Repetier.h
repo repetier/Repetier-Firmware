@@ -608,7 +608,7 @@ inline void memcopy4(void *dest,void *source) {
 
 #include "gcode.h"
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif

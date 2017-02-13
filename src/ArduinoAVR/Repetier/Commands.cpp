@@ -1797,9 +1797,9 @@ void Commands::processMCode(GCode *com) {
 #endif
             Com::cap(PSTR("AUTOREPORT_TEMP:1"));
 #if EEPROM_MODE != 0
-            Com::cap(PSTR("EEPROM:0"));
-#else
             Com::cap(PSTR("EEPROM:1"));
+#else
+            Com::cap(PSTR("EEPROM:0"));
 #endif
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
             Com::cap(PSTR("AUTOLEVEL:1"));

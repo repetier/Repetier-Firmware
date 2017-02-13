@@ -2666,7 +2666,9 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
         if(linesCount == 0) {
-            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(!Printer::isPrinting()) {
+                UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            }            
             if(Printer::mode == PRINTER_MODE_FFF) {
                 Printer::setFanSpeedDirectly(Printer::fanSpeed);
             }
@@ -2987,7 +2989,9 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         Printer::disableAllowedStepper();
         if(linesCount == 0)
         {
-            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(!Printer::isPrinting()) {
+                UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            }
             if(Printer::mode == PRINTER_MODE_FFF) {
                 Printer::setFanSpeedDirectly(Printer::fanSpeed);
             }
