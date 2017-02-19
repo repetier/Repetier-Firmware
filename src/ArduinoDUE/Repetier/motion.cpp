@@ -2427,7 +2427,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
         else if(Printer::mode == PRINTER_MODE_LASER)
         {
-            LaserDriver::changeIntensity(255);
+            LaserDriver::changeIntensity(cur->secondSpeed);
         }
 #endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full

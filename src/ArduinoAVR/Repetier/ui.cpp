@@ -3482,7 +3482,6 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if PS_ON_PIN >= 0 // avoid compiler errors when the power supply pin is disabled
             {
                 GCode gc; //not fully initialized but processMCode only needs M set for commands 80/81
-                TOGGLE(PS_ON_PIN);
                 gc.M = Printer::isPowerOn() ? 81 : 80;
                 Commands::processMCode(&gc);
             }

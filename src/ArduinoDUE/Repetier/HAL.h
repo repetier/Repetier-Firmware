@@ -835,7 +835,7 @@ class HAL
 
     // Watchdog support
     inline static void startWatchdog() {
-      WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);
+      WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | 0x0fff0000; //(WATCHDOG_INTERVAL << 16);
       WDT->WDT_CR = 0xA5000001;
     };
     inline static void stopWatchdog() {}
