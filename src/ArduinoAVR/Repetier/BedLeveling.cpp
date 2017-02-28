@@ -468,10 +468,18 @@ bool Printer::startProbing(bool runScript) {
 #if EXTRUDER_IS_Z_PROBE == 0	
 	float ZPOffsetX = EEPROM::zProbeXOffset();
 	float ZPOffsetY = EEPROM::zProbeYOffset();
+#if DRIVE_SYSTEM == DELA
+    float rad = EEPROM::deltaMaxRadius();
+    float dx = Printer::currentPosition[X_AXIS] - ZPOffsetX;
+    float dy = Printer::currentPosition[Y_AXIS] - ZPOffsetY;
+	if(sqrt(dx * dx + dy * dy) > rad)
+#else    
 	if((ZPOffsetX > 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX < Printer::xMin) ||
 	   (ZPOffsetY > 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY < Printer::yMin) ||
 	   (ZPOffsetX < 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX > Printer::xMin + Printer::xLength) ||
-   	   (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)) {
+   	   (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)) 
+#endif          
+          {
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inprecise!"));
         return false;
     } else {

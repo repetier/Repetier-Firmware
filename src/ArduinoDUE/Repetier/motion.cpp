@@ -2749,7 +2749,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 #if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
             if(cur->dir)
             {
-                LaserDriver::changeIntensity(cur->secondSpeed);
+                LaserDriver::changeIntensity(255);
             }
 #endif
             long wait = cur->getWaitTicks();
