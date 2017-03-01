@@ -1784,6 +1784,7 @@ Values must be in range 1..255
 
 #define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
+// #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
 #define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
 
 /*

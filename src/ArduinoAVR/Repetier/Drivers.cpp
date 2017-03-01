@@ -77,7 +77,7 @@ void commandG203(GCode &code)
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
     Com::printF(PSTR("Motor"),id);
-    Com::printFLN(PSTR("Pos:"),motorDrivers[id]->getPosition());
+    Com::printFLN(PSTR(" Pos:"),motorDrivers[id]->getPosition());
 }
 //G204 P<motorId> S<0/1>     - Enable/disable motor
 void commandG204(GCode &code)
@@ -92,6 +92,16 @@ void commandG204(GCode &code)
         motorDrivers[id]->enable();
     else
         motorDrivers[id]->disable();
+}
+// G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
+void commandG205(GCode &code)
+{
+	int id = 0;
+	if(code.hasP())
+		id = code.P;
+	if(id < 0) id = 0;
+	if(id >= NUM_MOTOR_DRIVERS) id = 0;
+	motorDrivers[id]->home(code.hasS() && code.S != 0, code.hasE() && code.E != 0);
 }
 
 void disableAllMotorDrivers()

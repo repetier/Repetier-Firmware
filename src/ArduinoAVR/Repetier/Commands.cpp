@@ -1448,6 +1448,9 @@ void Commands::processGCode(GCode *com) {
         case 204:
             commandG204(*com);
             break;
+        case 205:
+	        commandG205(*com);
+		    break;
 #endif // defined
         default:
             if(Printer::debugErrors()) {

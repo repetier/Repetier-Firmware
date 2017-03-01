@@ -1827,7 +1827,8 @@ If you have leveling with bed coating or fixed z min you can use this menu to ad
 
 #define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
-#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
+// #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
+#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(float stepsPerMM,float speed,float maxXPos)
 
 /*
   You can expand firmware functionality with events and you own event handler.

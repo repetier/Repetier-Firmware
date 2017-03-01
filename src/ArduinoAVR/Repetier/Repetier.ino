@@ -63,6 +63,7 @@ Implemented Codes
 - G202 P<motorId> X<setpos>  - Mark current position as X
 - G203 P<motorId>            - Report current motor position
 - G204 P<motorId> S<0/1>     - Enable/disable motor
+- G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
 
 RepRap M Codes
 
