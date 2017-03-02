@@ -468,7 +468,7 @@ bool Printer::startProbing(bool runScript) {
 #if EXTRUDER_IS_Z_PROBE == 0	
 	float ZPOffsetX = EEPROM::zProbeXOffset();
 	float ZPOffsetY = EEPROM::zProbeYOffset();
-#if DRIVE_SYSTEM == DELA
+#if DRIVE_SYSTEM == DELTA
     float rad = EEPROM::deltaMaxRadius();
     float dx = Printer::currentPosition[X_AXIS] - ZPOffsetX;
     float dy = Printer::currentPosition[Y_AXIS] - ZPOffsetY;
