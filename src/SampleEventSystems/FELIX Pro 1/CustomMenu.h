@@ -844,10 +844,19 @@ Continue
 Close */
 UI_MENU_HEADLINE_T(ui_menu_chf_head,UI_TEXT_CHANGE_FILAMENT_ID)
 UI_MENU_CHANGEACTION_T(ui_menu_chf_temp,UI_TEXT_CUR_TEMP_ID,UI_ACTION_EXTRUDER_TEMP)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla,"PLA",UI_ACTION_SPH_PLA_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg,"PETG",UI_ACTION_SPH_PETG_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva,"PVA",UI_ACTION_SPH_PVA_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex,"FLEX",UI_ACTION_SPH_FLEX_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs,"ABS",UI_ACTION_SPH_ABS_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass,"GLASS",UI_ACTION_SPH_GLASS_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood,"WOOD",UI_ACTION_SPH_WOOD_ACTIVE)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_continue,UI_TEXT_CONTINUE_ID,UI_ACTION_WIZARD_FILAMENTCHANGE)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_close,UI_TEXT_CLOSE_ID,UI_ACTION_BACK)
-#define UI_MENU_CHF_ITEMS {&ui_menu_chf_head UI_MENU_EXTSEL ,&ui_menu_chf_temp,&ui_menu_chf_continue,&ui_menu_chf_close}
-UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,4+UI_MENU_EXTSEL_CNT) 
+#define UI_MENU_CHF_ITEMS {&ui_menu_chf_head UI_MENU_EXTSEL ,&ui_menu_chf_temp,\
+&ui_menu_chf_sph_pla,&ui_menu_chf_sph_petg,&ui_menu_chf_sph_pva,&ui_menu_chf_sph_flex,&ui_menu_chf_sph_abs,&ui_menu_chf_sph_glass,&ui_menu_chf_sph_wood,\
+&ui_menu_chf_continue,&ui_menu_chf_close}
+UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,11+UI_MENU_EXTSEL_CNT) 
 UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf)   
 UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf,MENU_MODE_PRINTING,0)
 //UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_changefil, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE)
@@ -1190,8 +1199,17 @@ UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext5, UI_TEXT_PREHEAT_E5_ID, UI_ACTION_EX
 #define UI_MENU_PREHEAT_EXT5
 #endif
 
-#define UI_MENU_PREHEAT_SUB {&ui_menu_preheat_hdl UI_MENU_ADDCONDBACK_C UI_MENU_PREHEAT_BED UI_MENU_PREHEAT_EXT0 UI_MENU_PREHEAT_EXT1 UI_MENU_PREHEAT_EXT2 UI_MENU_PREHEAT_EXT3 UI_MENU_PREHEAT_EXT4 UI_MENU_PREHEAT_EXT5}
-UI_MENU(ui_menu_preheat_sub, UI_MENU_PREHEAT_SUB, UI_MENU_BACKCNT + 1 + HAVE_HEATED_BED + NUM_EXTRUDER)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla_a,"PLA",UI_ACTION_SPH_PLA_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg_a,"PETG",UI_ACTION_SPH_PETG_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva_a,"PVA",UI_ACTION_SPH_PVA_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex_a,"FLEX",UI_ACTION_SPH_FLEX_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs_a,"ABS",UI_ACTION_SPH_ABS_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass_a,"GLASS",UI_ACTION_SPH_GLASS_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood_a,"WOOD",UI_ACTION_SPH_WOOD_ALL)
+
+#define UI_MENU_PREHEAT_SUB {&ui_menu_preheat_hdl UI_MENU_ADDCONDBACK_C UI_MENU_PREHEAT_BED UI_MENU_PREHEAT_EXT0 UI_MENU_PREHEAT_EXT1 UI_MENU_PREHEAT_EXT2 UI_MENU_PREHEAT_EXT3 UI_MENU_PREHEAT_EXT4 UI_MENU_PREHEAT_EXT5\
+,&ui_menu_chf_sph_pla_a,&ui_menu_chf_sph_petg_a,&ui_menu_chf_sph_pva_a,&ui_menu_chf_sph_flex_a,&ui_menu_chf_sph_abs_a,&ui_menu_chf_sph_glass_a,&ui_menu_chf_sph_wood_a}
+UI_MENU(ui_menu_preheat_sub, UI_MENU_PREHEAT_SUB, UI_MENU_BACKCNT + 8 + HAVE_HEATED_BED + NUM_EXTRUDER)
 UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
 
 #define UI_MENU_PREHEAT ,&ui_menu_preheat
@@ -1200,6 +1218,16 @@ UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
 #define UI_MENU_PREHEAT 
 #define UI_MENU_PREHEAT_CNT 0
 #endif
+
+// Preheat info screen
+
+UI_MENU_HEADLINE_T(ui_msh_ph1, UI_TEXT_PREHEAT_TEMPS_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph2, UI_TEXT_PREHEAT_BED_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph3, UI_TEXT_PREHEAT_E0_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph4, UI_TEXT_PREHEAT_E1_ID)
+UI_MENU_ACTIONCOMMAND_T(ui_msg_ph_ok, UI_TEXT_OK_ID, UI_ACTION_MESSAGE)
+#define UI_MENU_PREHEAT_SET {&ui_msh_ph1,&ui_msh_ph2,&ui_msh_ph3,&ui_msh_ph4,&ui_msg_ph_ok}
+UI_STICKYMENU(ui_menu_preheatinfo,UI_MENU_PREHEAT_SET,5)
 
 // **** Setup Menu
 

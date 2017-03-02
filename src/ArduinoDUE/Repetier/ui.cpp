@@ -3406,6 +3406,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             if(uid.isWizardActive()) break; // wizards can not exit before finished
             popMenu(false);
             break;
+        case UI_ACTION_MESSAGE:
+	        popMenu(true);
+		    break;
         case UI_ACTION_NEXT:
             if(!nextPreviousAction(1, allowMoves))
                 ret = UI_ACTION_NEXT;

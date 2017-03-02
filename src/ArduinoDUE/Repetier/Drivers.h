@@ -44,6 +44,7 @@ public:
     StepperDriver(float _stepsPerMM,float speed)
     {
         stepsPerMM = _stepsPerMM;
+		position = 0;
         delayUS = 500000 / (speed * stepsPerMM);
     }
     void initialize() {

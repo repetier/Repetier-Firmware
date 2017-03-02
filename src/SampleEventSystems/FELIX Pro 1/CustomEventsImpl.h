@@ -75,7 +75,32 @@ bool cstmIsHeating() {
     extruder[1].tempControl.targetTemperatureC > 0 ||
     heatedBedController.targetTemperatureC > 0; 
 }
-
+void setPreheatTemps(int16_t extr,int16_t bed,bool all) {
+  bool mod = false;
+  mod |= heatedBedController.preheatTemperature != bed;
+  heatedBedController.preheatTemperature = bed;
+  if(all) {
+     mod |= extruder[0].tempControl.preheatTemperature != extr;
+     extruder[0].tempControl.preheatTemperature = extr;                    
+     mod |= extruder[1].tempControl.preheatTemperature != extr;
+     extruder[1].tempControl.preheatTemperature = extr;                    
+  } else {
+     mod |= Extruder::current->tempControl.preheatTemperature != extr;
+     Extruder::current->tempControl.preheatTemperature = extr;                    
+  }  
+  if(mod) {
+#if EEPROM_MODE != 0
+      HAL::eprSetInt16(EPR_BED_PREHEAT_TEMP,heatedBedController.preheatTemperature);
+      for(int i = 0; i < NUM_EXTRUDER;i++) {
+         int o = i * EEPROM_EXTRUDER_LENGTH + EEPROM_EXTRUDER_OFFSET;
+         Extruder *e = &extruder[i];
+         HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
+      }            
+      EEPROM::updateChecksum();
+#endif                    
+  }
+  uid.pushMenu(&ui_menu_preheatinfo,true);
+}
 void cExecute(int action,bool allowMoves) {
   switch(action) {
   case UI_ACTION_XY1_BACK:
@@ -151,7 +176,48 @@ void cExecute(int action,bool allowMoves) {
     Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE, 200, IGNORE_COORDINATE, 30,false);
     }      
     break;
-        
+  case UI_ACTION_SPH_PLA_ACTIVE: // 190/55
+    setPreheatTemps(190, 55, false);
+    break;
+  case UI_ACTION_SPH_PETG_ACTIVE:
+    setPreheatTemps(215, 70, false);
+    break;
+  case UI_ACTION_SPH_PVA_ACTIVE:
+    setPreheatTemps(185, 55, false);
+    break;
+  case UI_ACTION_SPH_FLEX_ACTIVE:
+    setPreheatTemps(185, 40, false);
+    break;
+  case UI_ACTION_SPH_ABS_ACTIVE:
+    setPreheatTemps(225, 85, false);
+    break;
+  case UI_ACTION_SPH_GLASS_ACTIVE:
+    setPreheatTemps(225, 85, false);
+    break;
+  case UI_ACTION_SPH_WOOD_ACTIVE:
+    setPreheatTemps(185, 55, false);
+    break;
+  case UI_ACTION_SPH_PLA_ALL:
+    setPreheatTemps(190, 55, true);
+    break;
+  case UI_ACTION_SPH_PETG_ALL:
+    setPreheatTemps(215, 70, true);
+    break;
+  case UI_ACTION_SPH_PVA_ALL:
+    setPreheatTemps(185, 55, true);
+    break;
+  case UI_ACTION_SPH_FLEX_ALL:
+    setPreheatTemps(185, 40, true);
+    break;
+  case UI_ACTION_SPH_ABS_ALL:
+    setPreheatTemps(225, 85, true);
+    break;
+  case UI_ACTION_SPH_GLASS_ALL:
+    setPreheatTemps(225, 85, true);
+    break;
+  case UI_ACTION_SPH_WOOD_ALL:
+    setPreheatTemps(185, 55, true);
+    break;        
   }
 }
 

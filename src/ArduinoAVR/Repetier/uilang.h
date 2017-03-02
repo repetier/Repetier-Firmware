@@ -1774,7 +1774,7 @@
 #define UI_TEXT_Z_POSITION_IT       "Posizione Z"
 #define UI_TEXT_Z_POS_FAST_IT       "Pos. Z Veloce"
 #define UI_TEXT_E_POSITION_IT       "Posizione Estrusore"
-#define UI_TEXT_BED_TEMP_IT         "Temp.Piatto:%Eb" cDEG "C"
+#define UI_TEXT_BED_TEMP_IT         "Temp.Piatto:%eb/%Eb" cDEG "C"
 #define UI_TEXT_EXTR0_TEMP_IT       "Temp. 1 :%e0/%E0" cDEG "C"
 #define UI_TEXT_EXTR1_TEMP_IT       "Temp. 2 :%e1/%E1" cDEG "C"
 #define UI_TEXT_EXTR2_TEMP_IT       "Temp. 3 :%e2/%E2" cDEG "C"
