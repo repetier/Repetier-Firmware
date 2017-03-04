@@ -880,6 +880,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
 #if SHARED_EXTRUDER_HEATER
 	}
+	tc = tempController[extr];
 #endif	
 #if FEATURE_DITTO_PRINTING
     if(Extruder::dittoMode && extr == 0)
