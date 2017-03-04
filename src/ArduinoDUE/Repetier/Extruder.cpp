@@ -99,6 +99,10 @@ void Extruder::manageTemperatures()
         // Handle automatic cooling of extruders
         if(controller < NUM_EXTRUDER)
         {
+#if SHARED_EXTRUDER_HEATER
+			if(controller > 0)
+				continue;
+#endif			
 #if ((SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN) || SHARED_COOLER_BOARD_EXT) && EXT0_EXTRUDER_COOLER_PIN > -1
             if(controller == 0)
             {
@@ -854,7 +858,12 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     if(temperatureInCelsius > MAXTEMP) temperatureInCelsius = MAXTEMP;
 #endif
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
+#if SHARED_EXTRUDER_HEATER
+    for(fast8_t eid = 0; eid < NUM_EXTRUDER; eid++) {
+		TemperatureController *tc = tempController[eid];
+#else	
     TemperatureController *tc = tempController[extr];
+#endif	
     if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
     if (temperatureInCelsius < MAX_ROOM_TEMPERATURE)
@@ -869,6 +878,9 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
+#if SHARED_EXTRUDER_HEATER
+	}
+#endif	
 #if FEATURE_DITTO_PRINTING
     if(Extruder::dittoMode && extr == 0)
     {
