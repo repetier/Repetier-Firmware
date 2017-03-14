@@ -61,7 +61,8 @@ public:
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
-    millis_t preheatStartTime;    ///< Time (in milliseconds) when heatup was started
+    millis_t preheatStartTime;    ///< Time (in milliseconds) when heat up was started
+    int16_t preheatTemperature;
 
     void setTargetTemperature(float target);
     void updateCurrentTemperature();

@@ -318,6 +318,8 @@ public:
             else
 #endif
 #if MULTI_ZENDSTOP_HOMING
+           {
+               if(Printer::isHoming()) {
            if(isZNegativeMove())
            {
 				if(Endstops::zMin())
@@ -329,7 +331,7 @@ public:
            }
            else if(isZPositiveMove())
            {
-				if(Endstops::zMin())
+				if(Endstops::zMax())
 					Printer::multiZHomeFlags &= ~1;
 				if(Endstops::z2MinMax())
 					Printer::multiZHomeFlags &= ~2;
@@ -340,6 +342,20 @@ public:
 					setZMoveFinished();
 				}
            }
+               } else {
+           if(isZNegativeMove() && Endstops::zMin())
+           {
+               setZMoveFinished();
+           }
+           else if(isZPositiveMove() && Endstops::zMax())
+           {
+               #if MAX_HARDWARE_ENDSTOP_Z
+               Printer::stepsRemainingAtZHit = stepsRemaining;
+               #endif
+               setZMoveFinished();
+           }                   
+               }                          
+}           
 #else
            if(isZNegativeMove() && Endstops::zMin())
            {
@@ -709,6 +725,7 @@ public:
     static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
+    static void LaserWarmUp(uint32_t  wait);
 #if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
 #if DISTORTION_CORRECTION

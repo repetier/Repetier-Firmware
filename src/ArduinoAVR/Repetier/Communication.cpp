@@ -21,7 +21,7 @@
 
 #include "Repetier.h"
 
-#if UI_DISPLAY_TYPE != NO_DISPLAY
+#if FEATURE_CONTROLLER != NO_CONTROLLER
 uint8_t Com::selectedLanguage;
 #endif
 
@@ -65,6 +65,14 @@ FSTRINGVALUE(Com::tP," P")
 FSTRINGVALUE(Com::tI," I")
 FSTRINGVALUE(Com::tJ," J")
 FSTRINGVALUE(Com::tR," R")
+FSTRINGVALUE(Com::tD," D")
+FSTRINGVALUE(Com::tC," C")
+FSTRINGVALUE(Com::tH," H")
+FSTRINGVALUE(Com::tA," A")
+FSTRINGVALUE(Com::tB," B")
+FSTRINGVALUE(Com::tK," K")
+FSTRINGVALUE(Com::tL," L")
+FSTRINGVALUE(Com::tO," O")
 FSTRINGVALUE(Com::tSDReadError,"SD read error")
 FSTRINGVALUE(Com::tExpectedLine,"Error:expected line ")
 FSTRINGVALUE(Com::tGot," got ")
@@ -94,6 +102,7 @@ FSTRINGVALUE(Com::tColon,":")
 FSTRINGVALUE(Com::tSlash,"/")
 FSTRINGVALUE(Com::tSpaceSlash," /")
 FSTRINGVALUE(Com::tFatal,"fatal:")
+FSTRINGVALUE(Com::tDoorOpen,"Door open")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir,"{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles,"\",\"files\":[")
@@ -346,6 +355,9 @@ FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM,"X-axis steps per mm")
+#if DUAL_X_RESOLUTION
+FSTRINGVALUE(Com::tEPRX2StepsPerMM,"X2-axis steps per mm")
+#endif
 FSTRINGVALUE(Com::tEPRYStepsPerMM,"Y-axis steps per mm")
 FSTRINGVALUE(Com::tEPRZStepsPerMM,"Z-axis steps per mm")
 FSTRINGVALUE(Com::tEPRXMaxFeedrate,"X-axis max. feedrate [mm/s]")
@@ -395,6 +407,8 @@ FSTRINGVALUE(Com::tEPRDistanceRetractHeating,"distance to retract when heating [
 FSTRINGVALUE(Com::tEPRExtruderCoolerSpeed,"extruder cooler speed [0-255]")
 FSTRINGVALUE(Com::tEPRAdvanceK,"advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL,"advance L [0=off]")
+FSTRINGVALUE(Com::tEPRPreheatTemp,"Preheat temp. [°C]")
+FSTRINGVALUE(Com::tEPRPreheatBedTemp,"Bed Preheat temp. [°C]")
 
 #endif
 #if SDSUPPORT
@@ -448,6 +462,8 @@ FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
 #endif
+
+bool Com::writeToAll = true; // transmit start messages to all devices!
 
 void Com::cap(FSTRINGPARAM(text)) {
     printF(tCap);
@@ -517,7 +533,7 @@ void Com::printFLN(FSTRINGPARAM(text),const char *msg) {
 void Com::printF(FSTRINGPARAM(ptr)) {
   char c;
   while ((c = HAL::readFlashByte(ptr++)) != 0)
-     HAL::serialWriteByte(c);
+     GCodeSource::writeToAll(c);
 }
 void Com::printF(FSTRINGPARAM(text),const char *msg) {
     printF(text);
@@ -563,12 +579,12 @@ void Com::printF(FSTRINGPARAM(text),float value,uint8_t digits) {
 
 void Com::print(const char *text) {
   while(*text) {
-    HAL::serialWriteByte(*text++);
+      GCodeSource::writeToAll(*text++);
   }
 }
 void Com::print(long value) {
     if(value<0) {
-        HAL::serialWriteByte('-');
+        GCodeSource::writeToAll('-');
         value = -value;
     }
     printNumber(value);

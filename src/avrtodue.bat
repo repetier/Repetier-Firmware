@@ -21,6 +21,7 @@ copy ArduinoAVR\Repetier\u8*.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\logo.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Events.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\BedLeveling.*  ArduinoDue\Repetier
+copy ArduinoAVR\Repetier\DisplayList.*  ArduinoDue\Repetier
 
 echo Copying finished. DUE tree is now up to date.
 REM pause

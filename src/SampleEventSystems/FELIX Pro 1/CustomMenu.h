@@ -1,4 +1,4 @@
-/*
+                                      /*
     This file is part of Repetier-Firmware.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -15,198 +15,70 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#if !defined(_UI_MENU_H)
-#define _UI_MENU_H
+#if !defined(_UI_CUSTOM_MENU_H)
+#define _UI_CUSTOM_MENU_H
 
-/*moved to uilang.h
-  #define cUP "\001"
-  #define cDEG "\002"
-  #define cSEL "\003"
-  #define cUNSEL "\004"
-  #define cTEMP "\005"
-  #define cFOLD "\006"
-  #define cARROW "\176"
-*/
-/*
-  The menu configuration uses dynamic strings. These dynamic strings can contain
-  a placeholder for special values. During print these placeholder are exchanged
-  by their current value. Everything else is printed exactly as written.
-
-  A placeholder always has 3 chars. It starts with a % followed by 2 characters
-  defining the value. You can use any placeholder in any position, also it doesn't
-  always make sense.
-
-  Special Characters
-  constant   description
-  cUP        Folder up arrow
-  cDEG       Degree mark
-  cSEL       Selected
-  cUNSEL     Unselected
-  cTEMP      Thermometer symbol
-  cFOLD      Folder symbol
-
-  List of placeholder:
-  %%% : The % char
-  %% :  The % char (also)
-
-  %?<c> : Conditional. Print c if current char is not c. Allows avoiding duplicate character, like space
-
-  acceleration
-  %ax : X acceleration during print moves
-  %ay : Y acceleration during print moves
-  %az : Z acceleration during print moves
-  %aX : X acceleration during travel moves
-  %aY : Y acceleration during travel moves
-  %aZ : Z acceleration during travel moves
-  %aj : Max. jerk
-  %aJ : Max. Z-jerk
-
-  debug
-  %do : Debug echo state.
-  %di : Debug info state.
-  %de : Debug error state.
-  %dd : Debug dry run state.
-  %dp : Debug end stop state.
-  endstop stats with only one char
-  %dx : Debug min x endstop
-  %dX : Debug max x endstop
-  %dy : Debug min y endstop
-  %dY : Debug max y endstop
-  %dz : Debug min z endstop
-  %dZ : Debug max z endstop
-  
-  extruder
-  %ec : Current extruder temperature
-  %ed : Number of copies for ditto mode
-  %eIc : Current extruder temperature integer (shorter)
-  %eb : Current heated bed temperature
-  %e0..9 : Temp. of extruder 0..9
-  %et : Thermo controlled fan temperature
-  %er : Extruder relative mode
-  %Ec : Target temperature of current extruder
-  %Eb : Target temperature of heated bed
-  %E0-9 : Target temperature of extruder 0..9
-  %D0-3 : Ditto mode selected
-  feed rate
-  %fx : Max. feedrate x direction
-  %fy : Max. feedrate y direction
-  %fz : Max. feedrate z direction
-  %fe : Max. feedrate current extruder
-  %fX : Homing feedrate x direction
-  %fY : Homing feedrate y direction
-  %fZ : Homing feedrate z direction
-  %Fs : Fan speed
-  %FS : Fan2 speed
-  %Fi : ignore M106 commands state
-
-  inactivity
-  %is : Stepper inactive time in minutes
-  %ip : Max. inactive time in minutes
-
-  random stuff
-  %os : Status message
-  %oe : Error message
-  %oB : Buffer length
-  %om : Speed multiplier
-  %of : flow multiplier
-  %oc : Connection baudrate
-  %o0..9 : Output level extruder 0..9 is % including %sign.
-  %oC : Output level current extruder
-  %ob : Output level heated bed
-  %PN : Printer name
-  %on : current extruder number (1,2,3...)
-  %oS : servo position
-  %oY : baby steps counter
-  %BC : Bed coating thickness
-
-  Print status related
-  %Pn : filename being printed
-  %Pl : current layer
-  %PL : num layer
-  %pp : Progress in percent, one digit 
-
-  stops
-  %sx : State of x min endstop.
-  %sX : State of x max endstop.
-  %sy : State of y min endstop.
-  %sY : State of y max endstop.
-  %sz : State of z min endstop.
-  %sZ : State of z max endstop.
-
-  steps
-  %Sx : Steps per mm x direction
-  %Sy : Steps per mm y direction
-  %Sz : Steps per mm z direction
-  %Se : Steps per mm current extruder
-
-  totals
-  %Ut : Shows printing time
-  %Uf : Shows total filament usage
-
-  extruder position
-  %x0 : X position
-  %x1 : Y position
-  %x2 : Z position
-  %x3 : Current extruder position
-  %x4 : Printed since temperature on in meters (for filament usage)
-  %xa-%xf : Extruder state icon 0x08 or 0x09 or 0x0a (off) - works only with graphic displays!
-  %xB : Bed icon state 0x0c or 0x0d or 0x0b (off) Bed state - works only with graphic displays!
-  
-  Print offsets
-  %T0 : X offset
-  %T1 : Y offset
-  %T2 : Z offset
-
-  extruder parameters
-  %X0..9 : Extruder selected marker
-  %Xi : PID I gain
-  %Xp : PID P gain
-  %Xd : PID D gain
-  %Xm : PID drive min
-  %XM : PID drive max
-  %XD : PID max
-  %Xw : Extruder watch period in seconds
-  %Xh : Extruder heat manager (BangBang/PID)
-  %Xa : Advance K value
-  %Xl : Advance L value
-  %Xx : x offset in mm
-  %Xy : y offset in mm
-  %Xz : z offset in mm
-  %Xf : Extruder max. start feedrate
-  %XF : Extruder max. feedrate
-  %XA : Extruder max. acceleration
-
-  delta stuff
-  %y0-3 : same as %y0-3 back calculated from delta position steps
-  %Y0-3 : raw delta position steps (no round off error to display it)
-  %yD : delta printer low tower distance
-  %YL : delta print envelope radius Limit
-  %yx : low towers x offset mm
-  %yy : low towers y offset mm
-  %Yx : low towers x offset steps
-  %Yy : low towers y offset steps
-  %yX : high (Z) tower x offset mm
-  %yY : high (Z) tower y offset mm
-  %YX : high (Z) tower x offset steps
-  %YY : high (Z) tower y offset steps
-
-  Z-Probing
-  %zh : z-probe height
-  %ll : Autolevel correction enabled
-  %De : Distortion correction enabled
-  
-  Wizard variables
-  %w0-7 : Wizard variables 0-7 as integer
-  %W0-7 : Wizard variables 0-7 as float 2 digit precision
-  %WA : Wizard variable 0 as float 1 digit precision
-  %WB : Wizard variable 0 as float 1 digit precision
-*/
 
 #if UI_DISPLAY_TYPE != NO_DISPLAY
 
-#ifdef CUSTOM_MENU
-#include "CustomMenu.h"
+UI_MENU_ACTIONCOMMAND_T(ui_menu_back, UI_TEXT_BACK_ID, UI_ACTION_BACK)
+#if UI_HAS_BACK_KEY == 0
+#define UI_MENU_ADDCONDBACK &ui_menu_back,
+#define UI_MENU_ADDCONDBACK_C ,&ui_menu_back
+#define UI_MENU_BACKCNT 1
 #else
+#define UI_MENU_ADDCONDBACK
+#define UI_MENU_ADDCONDBACK_C
+#define UI_MENU_BACKCNT 0
+#endif
+
+// new submenues and entries
+
+UI_MENU_HEADLINE_T(ui_exy1a,UI_CTEXT_XY_P1_1_ID)
+UI_MENU_HEADLINE_T(ui_exy1b,UI_CTEXT_XY_P1_2_ID)
+UI_MENU_HEADLINE_T(ui_exy1c,UI_CTEXT_XY_P1_3_ID)
+UI_MENU_ACTIONCOMMAND_T(ui_exy1d,UI_TEXT_BACK_ID,UI_ACTION_XY1_BACK)
+UI_MENU_ACTIONCOMMAND_T(ui_exy1e,UI_CTEXT_CONTINUE_ID,UI_ACTION_XY1_CONT)
+
+#define UI_EXY1_ITEMS {&ui_exy1a,&ui_exy1b,&ui_exy1c,&ui_exy1d,&ui_exy1e}
+UI_STICKYMENU(ui_exy1,UI_EXY1_ITEMS,5)
+
+UI_MENU_HEADLINE_T(ui_exy2a,UI_TEXT_CLEARBED1_ID)
+UI_MENU_HEADLINE_T(ui_exy2b,UI_TEXT_CLEARBED2_ID)
+UI_MENU_HEADLINE_T(ui_exy2c,UI_TEXT_CLEARBED3_ID)
+UI_MENU_ACTIONCOMMAND_T(ui_exy2d,UI_TEXT_BACK_ID,UI_ACTION_XY2_BACK)
+UI_MENU_ACTIONCOMMAND_T(ui_exy2e,UI_CTEXT_START_PRINTING_ID,UI_ACTION_XY2_CONT)
+
+#define UI_EXY2_ITEMS {&ui_exy2a,&ui_exy2b,&ui_exy2c,&ui_exy2d,&ui_exy2e}
+UI_STICKYMENU(ui_exy2,UI_EXY2_ITEMS,5)
+
+UI_MENU_HEADLINE_T(ui_exy3a,UI_CTEXT_XY_P3_1_ID)
+UI_MENU_HEADLINE_T(ui_exy3b,UI_CTEXT_XY_P3_2_ID)
+UI_MENU_CHANGEACTION_T(ui_exy3c,UI_CTEXT_XY_P3_X_ID,UI_ACTION_EXY_XOFFSET)
+UI_MENU_CHANGEACTION_T(ui_exy3d,UI_CTEXT_XY_P3_Y_ID,UI_ACTION_EXY_YOFFSET)
+UI_MENU_ACTIONCOMMAND_T(ui_exy3e,UI_CTEXT_CONTINUE_ID,UI_ACTION_EXY_STORE)
+
+#define UI_EXY3_ITEMS {&ui_exy3a,&ui_exy3b,&ui_exy3c,&ui_exy3d,&ui_exy3e}
+UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
+
+UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
+UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
+UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
+
+#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy,&ui_calex_z}
+UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
+
+UI_WIZARD4_T(ui_msg_printxycal, UI_ACTION_STATE,UI_CTEXT_PRINTXYCAL1_ID, UI_CTEXT_PRINTXYCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
+UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EXTZCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
+UI_WIZARD4_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+
+UI_MENU_ACTIONCOMMAND_T(ui_preheatcool1,UI_CTEXT_PREHEATCOOL_ID,UI_ACTION_PRECOOL1)
+UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECOOL2)
+UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
+
+
+// Define precision for temperatures. With small displays only integer values fit.
+#define UI_TEMP_PRECISION 1
 
 // Define precision for temperatures. With small displays only integer values fit.
 #ifndef UI_TEMP_PRECISION
@@ -401,16 +273,6 @@ UI_PAGE2_T(ui_page3, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_STATUS_ID)
   ok sets the value if not already done and goes back to previous menu.
 */
 
-UI_MENU_ACTIONCOMMAND_T(ui_menu_back, UI_TEXT_BACK_ID, UI_ACTION_BACK)
-#if UI_HAS_BACK_KEY == 0
-#define UI_MENU_ADDCONDBACK &ui_menu_back,
-#define UI_MENU_ADDCONDBACK_C ,&ui_menu_back
-#define UI_MENU_BACKCNT 1
-#else
-#define UI_MENU_ADDCONDBACK
-#define UI_MENU_ADDCONDBACK_C
-#define UI_MENU_BACKCNT 0
-#endif
 
 
 // Language selection menu
@@ -588,9 +450,9 @@ UI_WIZARD4_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, 
 UI_WIZARD4_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+
 UI_WIZARD4_T(ui_msg_calibrating_bed, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_CALIBRATING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_homing, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_HOMING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-
 #else
 UI_WIZARD2_T(ui_msg_decoupled, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_HEATER_DECOUPLED_ID)
 UI_WIZARD2_T(ui_msg_defectsensor, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_TEMPSENSOR_DEFECT_ID)
@@ -598,6 +460,7 @@ UI_WIZARD2_T(ui_msg_slipping, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEX
 UI_WIZARD2_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_LEVELING_ERROR_ID)
 UI_WIZARD2_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID)
 UI_WIZARD2_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID)
+
 UI_WIZARD2_T(ui_msg_calibrating_bed, UI_ACTION_STATE, UI_TEXT_CALIBRATING_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD2_T(ui_msg_homing, UI_ACTION_STATE, UI_TEXT_HOMING_ID, UI_TEXT_PLEASE_WAIT_ID)
 #endif
@@ -712,19 +575,13 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_measure_zprobe_height, UI_TEXT_MEAS_ZP_HEIGHT_ID
 
 // **** Delta calibration menu
 #if Z_HOME_DIR > 0
-#if FEATURE_Z_PROBE
-UI_MENU_ACTIONCOMMAND_T(ui_menu_set_measured_origin, UI_TEXT_SET_MEASURED_ORIGIN_ID, UI_ACTION_SET_MEASURED_ORIGIN)
-#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z_NOTEST, &ui_menu_set_measured_origin, &ui_menu_measure_zprobe_height}
-UI_MENU(ui_menu_delta, UI_MENU_DELTA, 3 + UI_SPEED + UI_MENU_BACKCNT)
-#else
 UI_MENU_ACTIONCOMMAND_T(ui_menu_set_measured_origin, UI_TEXT_SET_MEASURED_ORIGIN_ID, UI_ACTION_SET_MEASURED_ORIGIN)
 #define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z_NOTEST,&ui_menu_set_measured_origin}
 UI_MENU(ui_menu_delta, UI_MENU_DELTA, 2 + UI_SPEED + UI_MENU_BACKCNT)
 #endif
-#endif
 
 // **** Bed leveling menu
-#if SOFTWARE_LEVELING
+#ifdef SOFTWARE_LEVELING
 UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p1, UI_TEXT_SET_P1_ID, UI_ACTION_SET_P1)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p2, UI_TEXT_SET_P2_ID, UI_ACTION_SET_P2)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p3, UI_TEXT_SET_P3_ID, UI_ACTION_SET_P3)
@@ -793,7 +650,6 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_bed_temp_printing, UI_TEXT_BED_TEMP_ID, UI
 #if HAVE_HEATED_BED
 #define UI_BED_TEMP_PRINTING ,&ui_menu_bed_temp_printing
 #else
-#define UI_BED_TEMP_PRINTING
 #endif
 UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel0, UI_TEXT_EXTR0_SELECT_ID, UI_ACTION_SELECT_EXTRUDER0)
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
@@ -908,9 +764,6 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_50, UI_TEXT_FAN_50_ID, UI_ACTION_FAN_50)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_75, UI_TEXT_FAN_75_ID, UI_ACTION_FAN_75)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_full, UI_TEXT_FAN_FULL_ID, UI_ACTION_FAN_FULL)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_ignoreM106, UI_TEXT_IGNORE_M106_ID, UI_ACTION_IGNORE_M106)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_fan_ignoreM106_printing, UI_TEXT_IGNORE_M106_ID, UI_ACTION_IGNORE_M106,MENU_MODE_PRINTING,0)
-#define UI_IGNORE106_ENTRY ,&ui_menu_fan_ignoreM106
-#define UI_IGNORE106_ENTRY_PRINTING ,&ui_menu_fan_ignoreM106_printing
 #define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full,&ui_menu_fan_ignoreM106}
 UI_MENU(ui_menu_fan, UI_MENU_FAN, 7 + UI_MENU_BACKCNT)
 UI_MENU_SUBMENU_T(ui_menu_fan_sub, UI_TEXT_FANSPEED_ID, ui_menu_fan)
@@ -921,14 +774,12 @@ UI_MENU_SUBMENU_T(ui_menu_fan_sub, UI_TEXT_FANSPEED_ID, ui_menu_fan)
 #define UI_MENU_FAN_COND
 #define UI_FANSPEED
 #define UI_MENU_FAN_CNT 0
-#define UI_IGNORE106_ENTRY
-#define UI_IGNORE106_ENTRY_PRINTING
 #define UI_FANSPEED_PRINTING
 #endif
 
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_fan2_fanspeed_printing,UI_TEXT_ACTION_FAN2SPEED_ID, UI_ACTION_FAN2SPEED,MENU_MODE_PRINTING,0)
-UI_MENU_CHANGEACTION_T(ui_menu_fan2_fanspeed,UI_TEXT_ACTION_FAN2SPEED_ID, UI_ACTION_FAN2SPEED)
+UI_MENU_CHANGEACTION_FILTER(ui_menu_fan2_fanspeed_printing,"Fan 2 speed:%FS%%%" /* UI_TEXT_ACTION_FANSPEED_ID*/, UI_ACTION_FAN2SPEED,MENU_MODE_PRINTING,0)
+UI_MENU_CHANGEACTION(ui_menu_fan2_fanspeed,"Fan 2 speed:%FS%%%" /* UI_TEXT_ACTION_FANSPEED_ID*/, UI_ACTION_FAN2SPEED)
 #define UI_FAN2SPEED_PRINTING ,&ui_menu_fan2_fanspeed_printing
 #define UI_FAN2SPEED ,&ui_menu_fan2_fanspeed
 #define UI_MENU_FAN2_CNT 1
@@ -984,6 +835,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug, "Write Debug", UI_ACTION_WRITE_DEBUG)
 #define DEBUG_PRINT_COUNT 0
 #define DEBUG_PRINT_EXTRA
 #endif
+
 #if FEATURE_RETRACTION
 /* * Extruder 1
 O Extruder 2
@@ -992,10 +844,19 @@ Continue
 Close */
 UI_MENU_HEADLINE_T(ui_menu_chf_head,UI_TEXT_CHANGE_FILAMENT_ID)
 UI_MENU_CHANGEACTION_T(ui_menu_chf_temp,UI_TEXT_CUR_TEMP_ID,UI_ACTION_EXTRUDER_TEMP)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla,"PLA",UI_ACTION_SPH_PLA_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg,"PETG",UI_ACTION_SPH_PETG_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva,"PVA",UI_ACTION_SPH_PVA_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex,"FLEX",UI_ACTION_SPH_FLEX_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs,"ABS",UI_ACTION_SPH_ABS_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass,"GLASS",UI_ACTION_SPH_GLASS_ACTIVE)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood,"WOOD",UI_ACTION_SPH_WOOD_ACTIVE)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_continue,UI_TEXT_CONTINUE_ID,UI_ACTION_WIZARD_FILAMENTCHANGE)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_close,UI_TEXT_CLOSE_ID,UI_ACTION_BACK)
-#define UI_MENU_CHF_ITEMS {&ui_menu_chf_head UI_MENU_EXTSEL ,&ui_menu_chf_temp,&ui_menu_chf_continue,&ui_menu_chf_close}
-UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,4+UI_MENU_EXTSEL_CNT) 
+#define UI_MENU_CHF_ITEMS {&ui_menu_chf_head UI_MENU_EXTSEL ,&ui_menu_chf_temp,\
+&ui_menu_chf_sph_pla,&ui_menu_chf_sph_petg,&ui_menu_chf_sph_pva,&ui_menu_chf_sph_flex,&ui_menu_chf_sph_abs,&ui_menu_chf_sph_glass,&ui_menu_chf_sph_wood,\
+&ui_menu_chf_continue,&ui_menu_chf_close}
+UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,11+UI_MENU_EXTSEL_CNT) 
 UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf)   
 UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf,MENU_MODE_PRINTING,0)
 //UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_changefil, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE)
@@ -1009,8 +870,8 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #define UI_CHANGE_FIL_ENT_PRINTING
 #endif
 
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all BABY_ENTRY ,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply \
-    UI_TOOGLE_LIGHT_ENTRY UI_FANSPEED UI_FAN2SPEED UI_CHANGE_FIL_ENT,&ui_menu_quick_preheat_pla,&ui_menu_quick_preheat_abs,&ui_menu_quick_cooldown,&ui_menu_quick_origin, \
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all BABY_ENTRY ,&ui_preheatcool1,&ui_preheatcool2,&ui_removebed,&ui_menu_quick_speedmultiply,&ui_menu_quick_flowmultiply \
+    UI_TOOGLE_LIGHT_ENTRY UI_FANSPEED UI_FAN2SPEED UI_CHANGE_FIL_ENT,&ui_menu_quick_origin, \
     &ui_menu_quick_stopstepper MENU_PSON_ENTRY DEBUG_PRINT_EXTRA}
 UI_MENU(ui_menu_quick, UI_MENU_QUICK, 8 + BABY_CNT + UI_MENU_BACKCNT + MENU_PSON_COUNT + DEBUG_PRINT_COUNT + UI_TOGGLE_LIGHT_COUNT + UI_CHANGE_FIL_CNT + UI_MENU_FAN_CNT + UI_MENU_FAN2_CNT)
 
@@ -1071,7 +932,7 @@ UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, 
 // two versions of stop. Second is with security question since pausing can trigger stop with bad luck!
 //UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT_ID,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0)
 UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, ui_menu_askstop, MENU_MODE_SD_PRINTING, 0 )
-#define SD_PRINTFILE_ENTRY ,&ui_menu_sd_printfile
+#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,
 #define SD_PRINTFILE_ENTRY_CNT 1
 #if SDCARDDETECT > -1
 #define UI_MOUNT_CNT 0
@@ -1206,33 +1067,28 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax_dt,    UI_TEXT_EXTR_DMAX_DT_ID, 
 #if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_zoffset, UI_TEXT_EXTR_ZOFF_ID, UI_ACTION_Z_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,&ui_menu_cext_zoffset,
-#define UI_MENU_CONFEXTCNT 9
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 8
 #elif NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_zoffset, UI_TEXT_EXTR_ZOFF_ID, UI_ACTION_Z_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,&ui_menu_cext_zoffset,
-#define UI_MENU_CONFEXTCNT 8
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 7
 #elif NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_zoffset, UI_TEXT_EXTR_ZOFF_ID, UI_ACTION_Z_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,&ui_menu_cext_zoffset,
-#define UI_MENU_CONFEXTCNT 7
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 6
 #elif NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_zoffset, UI_TEXT_EXTR_ZOFF_ID, UI_ACTION_Z_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,&ui_menu_cext_zoffset,
-#define UI_MENU_CONFEXTCNT 6
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 5
 #elif NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_zoffset, UI_TEXT_EXTR_ZOFF_ID, UI_ACTION_Z_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,&ui_menu_cext_zoffset,
-#define UI_MENU_CONFEXTCNT 5
+#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
+#define UI_MENU_CONFEXTCNT 4
 #else
 #define UI_MENU_CONFEXTCOND
 #define UI_MENU_CONFEXTCNT 0
@@ -1278,7 +1134,7 @@ UI_MENU_ACTION2_T(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADEDA
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
 #endif
-#if SOFTWARE_LEVELING
+#if defined(SOFTWARE_LEVELING) && DRIVE_SYSTEM == DELTA
 #define UI_MENU_SL_COND ,&ui_menu_conf_level
 #define UI_MENU_SL_CNT 1
 UI_MENU_SUBMENU_T(ui_menu_conf_level, UI_TEXT_LEVEL_ID, ui_menu_level)
@@ -1297,6 +1153,7 @@ UI_MENU_SUBMENU_T(ui_menu_conf_delta, UI_TEXT_ZCALIB_ID, ui_menu_delta)
 #define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK LANGMENU_ENTRY &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive  ,&ui_menu_conf_accel,&ui_menu_conf_feed,&ui_menu_conf_extr UI_MENU_BEDCONF_COND UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
 UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + 6)
 
+
 // **** Preheat menu ****
 
 #if HAVE_HEATED_BED + NUM_EXTRUDER > 0
@@ -1304,8 +1161,6 @@ UI_MENU_HEADLINE_T(ui_menu_preheat_hdl,UI_TEXT_PREHEAT_TEMPS_ID)
 #if HAVE_HEATED_BED
 UI_MENU_CHANGEACTION_T(ui_menu_preheat_bed, UI_TEXT_PREHEAT_BED_ID, UI_ACTION_BED_PREHEAT)
 #define UI_MENU_PREHEAT_BED ,&ui_menu_preheat_bed
-#else
-#define UI_MENU_PREHEAT_BED
 #endif
 #if NUM_EXTRUDER > 0
 UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext0, UI_TEXT_PREHEAT_E0_ID, UI_ACTION_EXT0_PREHEAT)
@@ -1344,8 +1199,17 @@ UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext5, UI_TEXT_PREHEAT_E5_ID, UI_ACTION_EX
 #define UI_MENU_PREHEAT_EXT5
 #endif
 
-#define UI_MENU_PREHEAT_SUB {&ui_menu_preheat_hdl UI_MENU_ADDCONDBACK_C UI_MENU_PREHEAT_BED UI_MENU_PREHEAT_EXT0 UI_MENU_PREHEAT_EXT1 UI_MENU_PREHEAT_EXT2 UI_MENU_PREHEAT_EXT3 UI_MENU_PREHEAT_EXT4 UI_MENU_PREHEAT_EXT5}
-UI_MENU(ui_menu_preheat_sub, UI_MENU_PREHEAT_SUB, UI_MENU_BACKCNT + 1 + HAVE_HEATED_BED + NUM_EXTRUDER)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla_a,"PLA",UI_ACTION_SPH_PLA_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg_a,"PETG",UI_ACTION_SPH_PETG_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva_a,"PVA",UI_ACTION_SPH_PVA_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex_a,"FLEX",UI_ACTION_SPH_FLEX_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs_a,"ABS",UI_ACTION_SPH_ABS_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass_a,"GLASS",UI_ACTION_SPH_GLASS_ALL)
+UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood_a,"WOOD",UI_ACTION_SPH_WOOD_ALL)
+
+#define UI_MENU_PREHEAT_SUB {&ui_menu_preheat_hdl UI_MENU_ADDCONDBACK_C UI_MENU_PREHEAT_BED UI_MENU_PREHEAT_EXT0 UI_MENU_PREHEAT_EXT1 UI_MENU_PREHEAT_EXT2 UI_MENU_PREHEAT_EXT3 UI_MENU_PREHEAT_EXT4 UI_MENU_PREHEAT_EXT5\
+,&ui_menu_chf_sph_pla_a,&ui_menu_chf_sph_petg_a,&ui_menu_chf_sph_pva_a,&ui_menu_chf_sph_flex_a,&ui_menu_chf_sph_abs_a,&ui_menu_chf_sph_glass_a,&ui_menu_chf_sph_wood_a}
+UI_MENU(ui_menu_preheat_sub, UI_MENU_PREHEAT_SUB, UI_MENU_BACKCNT + 8 + HAVE_HEATED_BED + NUM_EXTRUDER)
 UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
 
 #define UI_MENU_PREHEAT ,&ui_menu_preheat
@@ -1355,13 +1219,22 @@ UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
 #define UI_MENU_PREHEAT_CNT 0
 #endif
 
+// Preheat info screen
+
+UI_MENU_HEADLINE_T(ui_msh_ph1, UI_TEXT_PREHEAT_TEMPS_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph2, UI_TEXT_PREHEAT_BED_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph3, UI_TEXT_PREHEAT_E0_ID)
+UI_MENU_HEADLINE_T(ui_msh_ph4, UI_TEXT_PREHEAT_E1_ID)
+UI_MENU_ACTIONCOMMAND_T(ui_msg_ph_ok, UI_TEXT_OK_ID, UI_ACTION_MESSAGE)
+#define UI_MENU_PREHEAT_SET {&ui_msh_ph1,&ui_msh_ph2,&ui_msh_ph3,&ui_msh_ph4,&ui_msg_ph_ok}
+UI_STICKYMENU(ui_menu_preheatinfo,UI_MENU_PREHEAT_SET,5)
+
 // **** Setup Menu
 
 /*
 Debug
-Preheat
 Z Calibrate
-Auto level on/off
+Autlevel on/off
 Distortion map
 Distortion on/off
 Ignore M106 Cmd
@@ -1377,8 +1250,9 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_distortion,UI_TEXT_DISTORTION_CORR_ID, UI
 #define UI_DISTORTION_ENTRY
 #define UI_DISTORTION_COUNT 0
 #endif
-#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY UI_IGNORE106_ENTRY}
-UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 1 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_MENU_FAN_CNT + UI_CAL_ZHEIGHT_CNT)
+
+#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
+UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT)
 UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_PRINTING)
 
 // Stop print security question
@@ -1400,12 +1274,12 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_extrudercontrol, UI_TEXT_EXTRUDER_ID, ui_menu_e
 UI_MENU_SUBMENU_FILTER_T(ui_menu_settings, UI_TEXT_CONFIGURATION_ID, ui_menu_configuration,0,MENU_MODE_PRINTING)
 #define UI_MENU_MAIN {UI_MENU_ADDCONDBACK &ui_menu_control ,&ui_stop,&ui_pause,&ui_continue \
     UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
-    UI_BED_TEMP_PRINTING ,&ui_menu_quick_speedmultiply_printing UI_CHANGE_FIL_ENT_PRINTING ,&ui_menu_quick_flowmultiply_printing UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING UI_IGNORE106_ENTRY_PRINTING BABY_ENTRY_PRINTING SD_PRINTFILE_ENTRY \
-    ,&ui_menu_move, &ui_menu_extrudercontrol, \
-    UI_MENU_COATING_COND UI_MENU_SD_COND &ui_setup, &ui_menu_settings}
+    UI_BED_TEMP_PRINTING ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_CHANGE_FIL_ENT_PRINTING UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING BABY_ENTRY_PRINTING , SD_PRINTFILE_ENTRY \
+    &ui_menu_move, &ui_menu_extrudercontrol, \
+    UI_MENU_COATING_COND &ui_setup, &ui_menu_settings}
     
-UI_MENU(ui_menu_main, UI_MENU_MAIN, 10 + UI_MENU_BACKCNT + UI_MENU_SD_CNT + SD_PRINTFILE_ENTRY_CNT + UI_MENU_COATING_CNT +UI_TEMP0_CNT+UI_TEMP1_CNT+UI_TEMP2_CNT+UI_TEMP3_CNT+\
-    UI_TEMP4_CNT+UI_TEMP5_CNT+ BABY_CNT+HAVE_HEATED_BED+2*UI_MENU_FAN_CNT+UI_MENU_FAN2_CNT+UI_CHANGE_FIL_CNT)
+UI_MENU(ui_menu_main, UI_MENU_MAIN, 10 + UI_MENU_BACKCNT + SD_PRINTFILE_ENTRY_CNT + UI_MENU_COATING_CNT +UI_TEMP0_CNT+UI_TEMP1_CNT+UI_TEMP2_CNT+UI_TEMP3_CNT+\
+    UI_TEMP4_CNT+UI_TEMP5_CNT+ BABY_CNT+HAVE_HEATED_BED+UI_MENU_FAN_CNT+UI_MENU_FAN2_CNT + UI_CHANGE_FIL_CNT)
 
 /* Define menus accessible by action commands
 
@@ -1422,10 +1296,9 @@ UI_MENU(ui_menu_main, UI_MENU_MAIN, 10 + UI_MENU_BACKCNT + UI_MENU_SD_CNT + SD_P
   Then you assign this menu to a user menu:
   #define UI_USERMENU2 ui_menu_extrtemp
 
-  Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a key and that will now show the temperature screen and allows
+  Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a key and that will now show the temperture screen and allows
   the change of temperature with the next/previous buttons.
 
 */
-#endif // else custom menu
 #endif
 #endif // __UI_MENU_H

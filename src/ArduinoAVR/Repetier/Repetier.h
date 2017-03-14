@@ -27,6 +27,8 @@
 //#define REPETIER_VERSION "0.92.10"
 #define REPETIER_VERSION "1.0.0dev"
 
+// Use new communication model for multiple channels - only until stable, then old version gets deleted
+#define NEW_COMMUNICATION 1
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
@@ -72,6 +74,11 @@ usage or for searching for memory induced errors. Switch it off for production, 
 //#define DEBUG_SD_ERROR
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
+
+#define DEBUG_MSG(x) {if(Printer::debugEcho()) { Com::printFLN(PSTR(x));HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG2(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);HAL::delayMilliseconds(20);}}
+#define DEBUG_MSG_FAST(x) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x));}}
+#define DEBUG_MSG2_FAST(x,y) {if(Printer::debugEcho()) {Com::printFLN(PSTR(x),y);}}
 
 #define CARTESIAN 0
 #define XY_GANTRY 1
@@ -164,6 +171,8 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_SPARKLCD_ADAPTER 23
 #define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_FELIX_DUE 405
+#define CONTROLLER_ORCABOTXXLPRO2 25
+#define CONTROLLER_AZSMZ_12864 26
 
 //direction flags
 #define X_DIRPOS 1
@@ -327,7 +336,8 @@ inline void memcopy4(void *dest,void *source) {
 #define Z2_MINMAX_PIN -1
 #endif
 
-#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1 
+#if MINMAX_HARDWARE_ENDSTOP_Z2 && Z2_MINMAX_PIN > -1
+#undef MULTI_ZENDSTOP_HOMING 
 #define MULTI_ZENDSTOP_HOMING 1
 #define MULTI_ZENDSTOP_ALL 3
 #else
@@ -338,7 +348,7 @@ inline void memcopy4(void *dest,void *source) {
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
+#define SOFTWARE_LEVELING ((FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
@@ -346,7 +356,7 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
-#define UI_SPEEDDEPENDENT_POSITIONING true
+#define UI_SPEEDDEPENDENT_POSITIONING 1
 #endif
 
 #if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
@@ -538,11 +548,14 @@ inline void memcopy4(void *dest,void *source) {
 
 #define MENU_MODE_SD_MOUNTED 1
 #define MENU_MODE_SD_PRINTING 2
-#define MENU_MODE_SD_PAUSED 4
+#define MENU_MODE_PAUSED 4
 #define MENU_MODE_FAN_RUNNING 8
 #define MENU_MODE_PRINTING 16
 #define MENU_MODE_FULL_PID 32
 #define MENU_MODE_DEADTIME 64
+#define MENU_MODE_FDM 128
+#define MENU_MODE_LASER 256
+#define MENU_MODE_CNC 512
 
 #ifndef BENDING_CORRECTION_A
 #define BENDING_CORRECTION_A 0
@@ -565,7 +578,6 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #include "HAL.h"
-#include "gcode.h"
 #define MAX_VFAT_ENTRIES (2)
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
@@ -585,14 +597,18 @@ inline void memcopy4(void *dest,void *source) {
 #ifndef SDCARDDETECT
 #define SDCARDDETECT       -1
 #endif
+
 #ifndef SDSUPPORT
 #define SDSUPPORT 0
 #endif
+
 #if SDSUPPORT
 #include "SdFat.h"
 #endif
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN
+#include "gcode.h"
+
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -952,7 +968,7 @@ public:
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
     char *shortname; // Pointer to start of filename itself
     char *pathend; // File to char where pathname in fullname ends
-    uint8_t sdmode;  // true if we are printing from sd card, 2 = stop accepting new commands
+    uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new commands
     bool sdactive;
     //int16_t n;
     bool savetosd;
@@ -1035,5 +1051,8 @@ extern int debugWaitLoop;
 #if defined(CUSTOM_EVENTS)
 #include "CustomEvents.h"
 #endif
+
+// must be after CustomEvents as it might include definitions from there
+#include "DisplayList.h"
 
 #endif

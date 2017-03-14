@@ -112,8 +112,7 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
 			z = 0;
 #endif
 	}
-#endif
-
+#endif //  MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     float savedFeedrate = Printer::feedrate;
     Printer::destinationSteps[X_AXIS] = Printer::currentPositionSteps[X_AXIS] + x;
     Printer::destinationSteps[Y_AXIS] = Printer::currentPositionSteps[Y_AXIS] + y;
@@ -126,6 +125,9 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
         Com::printWarningFLN(PSTR("moveRelativeDistanceInSteps / queueDeltaMove returns error"));
     }
 #else
+#if DISTORTION_CORRECTION
+    Printer::destinationSteps[Z_AXIS] -= Printer::zCorrectionStepsIncluded; // correct as it will be added later in cartesian move computation
+#endif
     queueCartesianMove(checkEndstop, pathOptimize);
 #endif
     Printer::feedrate = savedFeedrate;
@@ -152,10 +154,14 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 			z = 0;
 #endif
 	}
-#endif
+#endif // MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     Printer::lastCmdPos[X_AXIS] += x * Printer::invAxisStepsPerMM[X_AXIS];
     Printer::lastCmdPos[Y_AXIS] += y * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::lastCmdPos[Z_AXIS] += z * Printer::invAxisStepsPerMM[Z_AXIS];
+#if LAZY_DUAL_X_AXIS
+    Printer::sledParked = false;
+#endif
+    
     if(!Printer::isPositionAllowed( Printer::lastCmdPos[X_AXIS], Printer::lastCmdPos[Y_AXIS], Printer::lastCmdPos[Z_AXIS]))
     {
         return; // ignore move
@@ -182,8 +188,8 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 	Printer::destinationSteps[Z_AXIS] += Printer::zCorrectionStepsIncluded;
 #if DEBUG_DISTORTION	
 	Com::printF(PSTR("zCorr:"),Printer::zCorrectionStepsIncluded*Printer::invAxisStepsPerMM[Z_AXIS],3);
-	Com::printF(PSTR(" atX:"),Printer::destinationSteps[0]*Printer::invAxisStepsPerMM[X_AXIS]);	
-	Com::printFLN(PSTR(" atY:"),Printer::destinationSteps[1]*Printer::invAxisStepsPerMM[Y_AXIS]);
+	Com::printF(PSTR(" atX:"),Printer::destinationSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS]);	
+	Com::printFLN(PSTR(" atY:"),Printer::destinationSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS]);
 #endif	
     PrintLine::waitForXFreeLines(1);
     uint8_t newPath = PrintLine::insertWaitMovesIfNeeded(pathOptimize, 0);
@@ -200,7 +206,7 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
     //Find direction
-    Printer::zCorrectionStepsIncluded = 0;
+    //Printer::zCorrectionStepsIncluded = 0;
     for(uint8_t axis = 0; axis < 4; axis++)
     {
 	    p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
@@ -299,10 +305,19 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
   Put a move to the current destination coordinates into the movement cache.
   If the cache is full, the method will wait, until a place gets free. During
   wait communication and temperature control is enabled.
-  @param check_endstops Read endstop during move.
+  
+  destinationSteps must be excluding any z correction! We will add that if required here.
+  
+  @param check_endstops Read end stop during move.
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 {
+    #if LAZY_DUAL_X_AXIS
+    if(Printer::sledParked && (Printer::currentPositionSteps[X_AXIS] != Printer::destinationSteps[X_AXIS] || 
+                               Printer::currentPositionSteps[Y_AXIS] != Printer::destinationSteps[Y_AXIS] || 
+                               Printer::currentPositionSteps[Z_AXIS] != Printer::destinationSteps[Z_AXIS]))
+        Printer::sledParked = false;
+    #endif
     Printer::constrainDestinationCoords();
     Printer::unsetAllSteppersDisabled();
 #if DISTORTION_CORRECTION
@@ -314,6 +329,8 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 			deltas[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
 			start[i] = Printer::currentPositionSteps[i];
 		}
+        deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded;
+        start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;
 		float dx = Printer::invAxisStepsPerMM[X_AXIS] * deltas[X_AXIS];
 		float dy = Printer::invAxisStepsPerMM[Y_AXIS] * deltas[Y_AXIS];
 		float len = dx * dx + dy * dy;
@@ -1163,6 +1180,18 @@ uint8_t PrintLine::insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExt
     return 0;
 }
 
+void PrintLine::LaserWarmUp( uint32_t wait)
+{
+    PrintLine *p = getNextWriteLine();
+    p->flags = FLAG_WARMUP;
+    p->joinFlags = FLAG_JOIN_STEPPARAMS_COMPUTED | FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
+    p->dir = 1;
+    p->setWaitForXLinesFilled(1);
+    p->setWaitTicks(long(wait*(F_CPU/1000)));//in ms 
+    pushLine();
+    Com::printFLN(PSTR("Laser Warmup"));
+}
+
 void PrintLine::logLine()
 {
 #ifdef DEBUG_QUEUE_MOVE
@@ -1188,7 +1217,7 @@ void PrintLine::waitForXFreeLines(uint8_t b, bool allowMoves)
 {
     while(getLinesCount() + b > PRINTLINE_CACHE_SIZE)   // wait for a free entry in movement cache
     {
-        GCode::readFromSerial();
+        //GCode::readFromSerial();
         Commands::checkForPeriodicalActions(allowMoves);
     }
 }
@@ -2222,7 +2251,7 @@ void PrintLine::arc(float *position, float *target, float *offset, float radius,
 
         if((count & 3) == 0)
         {
-            GCode::readFromSerial();
+            //GCode::readFromSerial();
             Commands::checkForPeriodicalActions(false);
             UI_MEDIUM; // do check encoder
         }
@@ -2318,6 +2347,12 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #endif
                 return 2000;
             }
+#if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
+            if(cur->dir)
+            {   
+                  LaserDriver::changeIntensity(255);
+            }
+#endif            
             long wait = cur->getWaitTicks();
             removeCurrentLineForbidInterrupt();
             return(wait); // waste some time for path optimization to fill up
@@ -2512,12 +2547,14 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
             {
                 if (cur->numNonlinearSegments && curd != NULL)
                 {
-                    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing/* && curd
+#if FEATURE_BABYSTEPPING                    
+                    if(Printer::zBabystepsMissing/* && curd
                             && (curd->dir & XYZ_STEP) == XYZ_STEP*/)
                     {
                         // execute a extra baby step
                         Printer::zBabystep();
                     }
+#endif                    
                     // Get the next delta segment
                     curd = &cur->segments[--cur->numNonlinearSegments];
 
@@ -2629,7 +2666,9 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
         removeCurrentLineForbidInterrupt();
         Printer::disableAllowedStepper();
         if(linesCount == 0) {
-            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(!Printer::isPrinting()) {
+                UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            }            
             if(Printer::mode == PRINTER_MODE_FFF) {
                 Printer::setFanSpeedDirectly(Printer::fanSpeed);
             }
@@ -2707,6 +2746,12 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 #endif
                 return 2000;
             }
+#if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
+            if(cur->dir)
+            {
+                LaserDriver::changeIntensity(255);
+            }
+#endif
             long wait = cur->getWaitTicks();
             removeCurrentLineForbidInterrupt();
             return(wait); // waste some time for path optimization to fill up
@@ -2944,7 +2989,9 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         Printer::disableAllowedStepper();
         if(linesCount == 0)
         {
-            UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            if(!Printer::isPrinting()) {
+                UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
+            }
             if(Printer::mode == PRINTER_MODE_FFF) {
                 Printer::setFanSpeedDirectly(Printer::fanSpeed);
             }
@@ -2958,11 +3005,13 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;
     } // Do even
-    if(FEATURE_BABYSTEPPING && Printer::zBabystepsMissing)
+#if FEATURE_BABYSTEPPING    
+    if(Printer::zBabystepsMissing)
     {
 		HAL::forbidInterrupts();
         Printer::zBabystep();
     }
+#endif    
     return interval;
 }
 #endif

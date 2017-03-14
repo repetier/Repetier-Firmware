@@ -361,8 +361,12 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 #define RAMPS_V_1_3
 #define AZTEEG_X3_PRO
+#elif MOTHERBOARD == 39
+#define KNOWN_BOARD 1
+#define RAMPS_V_1_3
+#define ZRIB_V2
 #endif
-#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35
+#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35 || MOTHERBOARD == 39
 #define KNOWN_BOARD 1
 
 #if !(defined (__AVR_ATmega1280__ ) || defined (__AVR_ATmega2560__ ))
@@ -513,7 +517,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 #ifdef AZTEEG_X3_PRO
-#define SDSUPPORT true
+#define SDSUPPORT 1
 #define SDCARDDETECTINVERTED false
 #define ORIG_SDCARDDETECT 49
 #define SDSS               53
@@ -556,12 +560,37 @@ STEPPER_CURRENT_CONTROL
 #define THERMOCOUPLE_0_PIN         4  
 #define THERMOCOUPLE_1_PIN         5  
 
+// Special extension board for x3 pro allows 2 more extruders
+
+#define ORIG_E5_STEP_PIN         12
+#define ORIG_E5_DIR_PIN          47
+#define ORIG_E5_ENABLE_PIN       63
+#define ORIG_E6_STEP_PIN         39
+#define ORIG_E6_DIR_PIN          57
+#define ORIG_E6_ENABLE_PIN       31
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 #define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
 #define E4_PINS ORIG_E4_STEP_PIN,ORIG_E4_DIR_PIN,ORIG_E4_ENABLE_PIN,
+#define E5_PINS ORIG_E5_STEP_PIN,ORIG_E5_DIR_PIN,ORIG_E5_ENABLE_PIN,
+#define E6_PINS ORIG_E6_STEP_PIN,ORIG_E6_DIR_PIN,ORIG_E6_ENABLE_PIN,
 
+#endif
+
+// Zonestar ZRIB V2.1 Board
+#ifdef ZRIB_V2
+#undef HEATER_2_PIN
+#define HEATER_2_PIN       7
+#define ORIG_FAN2_PIN    6
+#define SD_DETECT_PIN     49
+#define LCD_PINS_RS     16
+#define LCD_PINS_ENABLE   17
+#define LCD_PINS_D4     23
+#define LCD_PINS_D5     25
+#define LCD_PINS_D6     27
+#define LCD_PINS_D7     29
+#define BEEPER_PIN      37
 #endif
 
 #endif
@@ -3044,6 +3073,10 @@ S3(ext)=9
 #define E5_STEP_PIN ORIG_E5_STEP_PIN
 #define E5_DIR_PIN ORIG_E5_DIR_PIN
 #define E5_ENABLE_PIN ORIG_E5_ENABLE_PIN
+
+#define E6_STEP_PIN ORIG_E6_STEP_PIN
+#define E6_DIR_PIN ORIG_E6_DIR_PIN
+#define E6_ENABLE_PIN ORIG_E6_ENABLE_PIN
 
 #define FAN_PIN ORIG_FAN_PIN
 #ifdef ORIG_FAN2_PIN

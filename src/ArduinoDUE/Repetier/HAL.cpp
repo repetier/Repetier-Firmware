@@ -864,10 +864,13 @@ void TIMER1_COMPA_VECTOR ()
   {
     delay = PrintLine::bresenhamStep();
   }
+#if FEATURE_BABYSTEPPING  
   else if (Printer::zBabystepsMissing != 0) {
     Printer::zBabystep();
     delay = Printer::interval;
-  } else {
+  } 
+#endif
+  else {
     if (waitRelax == 0)
     {
 #if USE_ADVANCE

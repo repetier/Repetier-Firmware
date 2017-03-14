@@ -26,7 +26,7 @@ int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
 void Commands::commandLoop() {
-    while(true) {
+    //while(true) {
 #ifdef DEBUG_PRINT
         debugWaitLoop = 1;
 #endif
@@ -55,12 +55,19 @@ void Commands::commandLoop() {
             UI_MEDIUM;
         }
         Printer::defaultLoopActions();
-    }
+    //}
 }
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+    if(Printer::updateDoorOpen()) {
+        if(Printer::mode == PRINTER_MODE_LASER) {
+            LaserDriver::changeIntensity(0);
+        }
+    }
+#endif            
     if(!executePeriodical) return; // gets true every 100ms
     executePeriodical = 0;
     EVENT_TIMER_100MS;
@@ -89,7 +96,7 @@ void Commands::waitUntilEndOfAllMoves() {
     debugWaitLoop = 8;
 #endif
     while(PrintLine::hasLines()) {
-        GCode::readFromSerial();
+        //GCode::readFromSerial();
         checkForPeriodicalActions(false);
 		GCode::keepAlive(Processing);
         UI_MEDIUM;
@@ -102,7 +109,7 @@ void Commands::waitUntilEndOfAllBuffers() {
     debugWaitLoop = 9;
 #endif
     while(PrintLine::hasLines() || (code != NULL)) {
-        GCode::readFromSerial();
+        //GCode::readFromSerial();
         code = GCode::peekCurrentCommand();
         UI_MEDIUM; // do check encoder
         if(code) {
@@ -125,12 +132,9 @@ void Commands::waitUntilEndOfAllBuffers() {
     }
 }
 
-void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
+void Commands::printCurrentPosition() {
     float x, y, z;
     Printer::realPosition(x, y, z);
-    if (isnan(x) || isinf(x) || isnan(y) || isinf(y) || isnan(z) || isinf(z)) {
-        Com::printErrorFLN(s); // flag where the error condition came from
-    }
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];
     z += Printer::coordinateOffset[Z_AXIS];
@@ -138,8 +142,16 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
     Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
     Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
     Com::printFLN(Com::tSpaceEColon, Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
-    //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
-    //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
+#ifdef DEBUG_POS
+    Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
+    Com::printF(PSTR(" OffY:"),Printer::offsetY);
+    Com::printF(PSTR(" OffZ:"),Printer::offsetZ);
+    Com::printF(PSTR(" OffZ2:"),Printer::offsetZ2);
+    Com::printF(PSTR(" XS:"),Printer::currentPositionSteps[X_AXIS]);
+    Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
+    Com::printFLN(PSTR(" ZS:"),Printer::currentPositionSteps[Z_AXIS]);
+
+#endif    
 }
 
 void Commands::printTemperatures(bool showRaw) {
@@ -175,7 +187,7 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
 #if TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
-        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of autotune when tuning!
+        Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of auto tune when tuning!
 #endif
 		if((error = extruder[i].tempControl.errorState()) > 0) {
 			Com::printF(PSTR(" D"),(int)i);
@@ -864,11 +876,15 @@ void Commands::processArc(GCode *com) {
     PrintLine::arc(position, target, offset, r, isclockwise);
 }
 #endif
-extern bool runBedLeveling(GCode *com);
+
 /**
 \brief Execute the G command stored in com.
 */
 void Commands::processGCode(GCode *com) {
+    if(EVENT_UNHANDLED_G_CODE(com)) {
+        previousMillisCmd = HAL::timeInMilliseconds();
+        return;
+    }        
     uint32_t codenum; //throw away variable
     switch(com->G) {
         case 0: // G0 -> G1
@@ -877,9 +893,21 @@ void Commands::processGCode(GCode *com) {
             {
                 // disable laser for G0 moves
                 bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
+                if(Printer::mode == PRINTER_MODE_LASER) {
+                    if(com->G == 0) {
+                        LaserDriver::laserOn = false;
+                        LaserDriver::firstMove = true; //set G1 flag for Laser
+                    } else {
+#if LASER_WARMUP_TIME > 0                        
+                        uint8_t power = (com->hasX() || com->hasY()) && (LaserDriver::laserOn || com->hasE()) ? LaserDriver::intensity : 0;
+                        if(power > 0 && LaserDriver::firstMove) {
+                            PrintLine::waitForXFreeLines(1,true);
+                            PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
+                            LaserDriver::firstMove = false;
+                        }
+#endif                        
+                    }
+                }                
 #endif // defined
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
@@ -911,6 +939,7 @@ void Commands::processGCode(GCode *com) {
                         Com::printFLN(PSTR("Buffer corrupted"));
                 }
 #endif
+
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
                 LaserDriver::laserOn = laserOn;
             }
@@ -918,8 +947,23 @@ void Commands::processGCode(GCode *com) {
             break;
 #if ARC_SUPPORT
         case 2: // CW Arc
-        case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
-                processArc(com);
+        case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:   
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+        {
+            bool laserOn = LaserDriver::laserOn;
+#if LASER_WARMUP_TIME > 0
+            if(Printer::mode == PRINTER_MODE_LASER && LaserDriver::firstMove && (LaserDriver::laserOn || com->hasE())) {
+                PrintLine::waitForXFreeLines(1,true);
+                PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
+                LaserDriver::firstMove = false;
+            }
+#endif            
+#endif // defined
+            processArc(com);
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+            LaserDriver::laserOn = laserOn;
+        }
+#endif // defined                
             break;
 #endif
         case 4: // G4 dwell
@@ -929,7 +973,7 @@ void Commands::processGCode(GCode *com) {
             if(com->hasS()) codenum = com->S * 1000; // seconds to wait
             codenum += HAL::timeInMilliseconds();  // keep track of when we started waiting
             while((uint32_t)(codenum-HAL::timeInMilliseconds())  < 2000000000 ) {
-                GCode::readFromSerial();
+                GCode::keepAlive(Processing);
                 Commands::checkForPeriodicalActions(true);
             }
             break;
@@ -1035,7 +1079,7 @@ void Commands::processGCode(GCode *com) {
                         EEPROM::storeDataIntoEEPROM();
                 }
                 Printer::updateCurrentPosition(true);
-                printCurrentPosition(PSTR("G29 "));
+                printCurrentPosition();
                 Printer::finishProbing();
                 Printer::feedrate = oldFeedrate;
 				if(!ok) {
@@ -1059,13 +1103,19 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 30: 
-			{ // G30 single probe set Z0
-                uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-                if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
-					GCode::fatalError(PSTR("G30 probing failed!"));
-					break;
+			{ 	// G30 [Pn] [S]
+				// G30 (the same as G30 P3) single probe set Z0
+				// G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
+				if (com->hasS()) {
+					Printer::measureZProbeHeight(com->hasZ() ? com->Z : Printer::currentPosition[Z_AXIS]);
+				} else {
+					uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
+					if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
+						GCode::fatalError(PSTR("G30 probing failed!"));
+						break;
+					}
+					Printer::updateCurrentPosition(p & 1);
 				}
-                Printer::updateCurrentPosition(p & 1);
             }
             break;
         case 31:  // G31 display hall sensor output
@@ -1077,45 +1127,9 @@ void Commands::processGCode(GCode *com) {
             break;
 #if FEATURE_AUTOLEVEL
         case 32: // G32 Auto-Bed leveling
-		{
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-            float actTemp[NUM_EXTRUDER];
-            for(int i = 0; i < NUM_EXTRUDER; i++)
-                actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-            Commands::waitUntilEndOfAllMoves();
-#if ZHOME_HEAT_ALL
-            for(int i = 0; i < NUM_EXTRUDER; i++) {
-                Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
-            }
-            for(int i = 0; i < NUM_EXTRUDER; i++) {
-                if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                    Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,true);
-            }
-#else
-            if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
-#endif
-#endif
-            if(!runBedLeveling(com)) {
+            if(!runBedLeveling(com->hasS() ? com->S : -1)) {
 				GCode::fatalError(PSTR("G32 leveling failed!"));
-				break;
 			}
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-#if ZHOME_HEAT_ALL
-            for(int i = 0; i < NUM_EXTRUDER; i++) {
-                Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
-            }
-            for(int i = 0; i < NUM_EXTRUDER; i++) {
-                if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                    Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,true);
-            }
-#else
-            if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
-#endif
-#endif
-            }
             break;
 #endif
 #if DISTORTION_CORRECTION
@@ -1131,41 +1145,7 @@ void Commands::processGCode(GCode *com) {
                         Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
                     }
                 } else { // G33
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-                    float actTemp[NUM_EXTRUDER];
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-		            Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-                    Commands::waitUntilEndOfAllMoves();
-#if ZHOME_HEAT_ALL
-                    for(int i = 0; i < NUM_EXTRUDER; i++) {
-                        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
-                    }
-                    for(int i = 0; i < NUM_EXTRUDER; i++) {
-                        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,true);
-                    }
-#else
-                    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
-#endif
-#endif
-                    float oldFeedrate = Printer::feedrate;
-                    if(!Printer::measureDistortion()) {
-						GCode::fatalError(PSTR("G33 failed!"));
-						break;
-					}
-                    Printer::feedrate = oldFeedrate;
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-#if ZHOME_HEAT_ALL
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        Extruder::setTemperatureForExtruder(actTemp[i],i,false, actTemp[i] > MAX_ROOM_TEMPERATURE);
-#else
-                    Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
-#endif
-#endif
+                    Printer::measureDistortion();
                 }
             }
             break;
@@ -1354,7 +1334,7 @@ void Commands::processGCode(GCode *com) {
 #endif
             Printer::updateCurrentPosition();
             Com::printF(PSTR("PosFromSteps:"));
-            printCurrentPosition(PSTR("G134 "));
+            printCurrentPosition();
             break;
 
 #endif // DRIVE_SYSTEM
@@ -1468,9 +1448,12 @@ void Commands::processGCode(GCode *com) {
         case 204:
             commandG204(*com);
             break;
+        case 205:
+	        commandG205(*com);
+		    break;
 #endif // defined
         default:
-            if(!EVENT_UNHANDLED_G_CODE(com) && Printer::debugErrors()) {
+            if(Printer::debugErrors()) {
                 Com::printF(Com::tUnknownCommand);
                 com->printCommand();
             }
@@ -1481,6 +1464,8 @@ void Commands::processGCode(GCode *com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processMCode(GCode *com) {
+    if(EVENT_UNHANDLED_M_CODE(com))
+        return;
     switch( com->M ) {
         case 3: // Spindle/laser on
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
@@ -1699,19 +1684,28 @@ void Commands::processMCode(GCode *com) {
 #endif
             if (com->hasS()) {
                 if(com->hasT() && com->T < NUM_EXTRUDER)
-                    Extruder::setTemperatureForExtruder(com->S, com->T, com->hasF() && com->F > 0);
+                    Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), com->T, com->hasF() && com->F > 0);
                 else
-                    Extruder::setTemperatureForExtruder(com->S, Extruder::current->id, com->hasF() && com->F > 0);
+                    Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), Extruder::current->id, com->hasF() && com->F > 0);
+            } else if(com->hasH()) {
+                if(com->hasT() && com->T < NUM_EXTRUDER)
+                    Extruder::setTemperatureForExtruder(extruder[com->T].tempControl.preheatTemperature + (com->hasO() ? com->O : 0), com->T, com->hasF() && com->F > 0);
+                else
+                    Extruder::setTemperatureForExtruder(Extruder::current->tempControl.preheatTemperature + (com->hasO() ? com->O : 0), Extruder::current->id, com->hasF() && com->F > 0);                
             }
 #endif
             break;
         case 140: // M140 set bed temp
+#if HAVE_HEATED_BED        
             if(reportTempsensorError()) break;
             previousMillisCmd = HAL::timeInMilliseconds();
             if(Printer::debugDryrun()) break;
-            if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
+            if (com->hasS()) Extruder::setHeatedBedTemperature(com->S + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);            
+            else if(com->hasH()) Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
+#endif            
             break;
         case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
+            Com::writeToAll = false;
             printTemperatures(com->hasX());
             break;
         case 109: // M109 - Wait for extruder heater to reach target.
@@ -1723,7 +1717,8 @@ void Commands::processMCode(GCode *com) {
                 Commands::waitUntilEndOfAllMoves();
                 Extruder *actExtruder = Extruder::current;
                 if(com->hasT() && com->T < NUM_EXTRUDER) actExtruder = &extruder[com->T];
-                if (com->hasS()) Extruder::setTemperatureForExtruder(com->S, actExtruder->id, com->hasF() && com->F > 0, true);
+                if (com->hasS()) Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0), actExtruder->id, com->hasF() && com->F > 0, true);
+                else if(com->hasH())  Extruder::setTemperatureForExtruder(actExtruder->tempControl.preheatTemperature + (com->hasO() ? com->O : 0), actExtruder->id, com->hasF() && com->F > 0, true);
             }
 #endif
             previousMillisCmd = HAL::timeInMilliseconds();
@@ -1733,14 +1728,13 @@ void Commands::processMCode(GCode *com) {
                 if(Printer::debugDryrun()) break;
                 UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
                 Commands::waitUntilEndOfAllMoves();
-#if HAVE_HEATED_BED
-                if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
+                if (com->hasS()) Extruder::setHeatedBedTemperature(com->S + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
+                else if(com->hasH())  Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature + (com->hasO() ? com->O : 0),com->hasF() && com->F > 0);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN > 0
                 if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
 #endif
                 EVENT_WAITING_HEATER(-1);
                 tempController[HEATED_BED_INDEX]->waitForTargetTemperature();
-#endif
                 EVENT_HEATING_FINISHED(-1);
 #endif
                 UI_CLEAR_STATUS;
@@ -1797,6 +1791,7 @@ void Commands::processMCode(GCode *com) {
             }
             break;
         case 115: // M115
+            Com::writeToAll = false;
             Com::printFLN(Com::tFirmware);
 #if FEATURE_CONTROLLER != NO_CONTROLLER
             Com::cap(PSTR("PROGRESS:1"));
@@ -1805,9 +1800,9 @@ void Commands::processMCode(GCode *com) {
 #endif
             Com::cap(PSTR("AUTOREPORT_TEMP:1"));
 #if EEPROM_MODE != 0
-            Com::cap(PSTR("EEPROM:0"));
-#else
             Com::cap(PSTR("EEPROM:1"));
+#else
+            Com::cap(PSTR("EEPROM:0"));
 #endif
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
             Com::cap(PSTR("AUTOLEVEL:1"));
@@ -1829,11 +1824,14 @@ void Commands::processMCode(GCode *com) {
 #else
             Com::cap(PSTR("TOGGLE_LIGHTS:0"));
 #endif
+            Com::cap(PSTR("PAUSESTOP:1"));
+            Com::cap(PSTR("PREHEAT:1"));
             reportPrinterUsage();
             Printer::reportPrinterMode();
             break;
         case 114: // M114
-            printCurrentPosition(PSTR("M114 "));
+            Com::writeToAll = false;
+            printCurrentPosition();
 			if(com->hasS() && com->S) {
 				Com::printF(PSTR("XS:"),Printer::currentPositionSteps[X_AXIS]);
 				Com::printF(PSTR(" YS:"),Printer::currentPositionSteps[Y_AXIS]);
@@ -1850,6 +1848,7 @@ void Commands::processMCode(GCode *com) {
             }
             break;
         case 119: // M119
+            Com::writeToAll = false;
             Commands::waitUntilEndOfAllMoves();
             Endstops::update();
             Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
@@ -1868,7 +1867,7 @@ void Commands::processMCode(GCode *com) {
             Extruder::recomputeMixingExtruderSteps();
             break;
         case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
-            if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
+            if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illegal values
             for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
                 extruder[i].virtualWeights[com->S] = extruder[i].mixingW;
             }
@@ -1878,6 +1877,58 @@ void Commands::processMCode(GCode *com) {
 #endif
             break;
 #endif // MIXING_EXTRUDER
+        case 170: // preheat temperatures
+            /* M170 - Set or retrieve preheat temperatures
+            Parameter:
+            B<bedPreheat> : Sets bed preheat temperature
+            C<chamberPreheat> : Sets heated chamber temperature
+            T<extruder> S<preheatTemp> : Sets preheat temperature for given extruder
+            L0 : List preheat temperatures. Returns
+            PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
+            */
+            {
+                bool mod = false;
+#if HAVE_HEATED_BED                
+                if(com->hasB()) {
+                    mod |= heatedBedController.preheatTemperature != static_cast<int16_t>(com->B);
+                    heatedBedController.preheatTemperature = com->B;
+                }                    
+#endif                
+#if NUM_EXTRUDER > 0
+                if(com->hasT() && com->hasS() && com->T < NUM_EXTRUDER) {
+                    mod |= extruder[com->T].tempControl.preheatTemperature != static_cast<int16_t>(com->S);
+                    extruder[com->T].tempControl.preheatTemperature = com->S;                    
+                }
+#endif
+                if(com->hasL()) {
+#if HAVE_HEATED_BED
+                        Com::printF(PSTR("PREHEAT_BED:"),heatedBedController.preheatTemperature);
+#endif
+#if NUM_EXTRUDER > 0
+                    for(int i=0; i< NUM_EXTRUDER;i++) {
+                        Com::printF(PSTR(" PREHEAT"),i);
+                        Com::printF(Com::tColon, extruder[i].tempControl.preheatTemperature);
+                    }
+#endif
+                    Com::println();
+                }
+                if(mod) {
+#if EEPROM_MODE != 0
+#if HAVE_HEATED_BED
+                    HAL::eprSetInt16(EPR_BED_PREHEAT_TEMP,heatedBedController.preheatTemperature);
+#endif
+#if NUM_EXTRUDER > 0
+                    for(int i = 0; i < NUM_EXTRUDER;i++) {
+                        int o = i * EEPROM_EXTRUDER_LENGTH + EEPROM_EXTRUDER_OFFSET;
+                        Extruder *e = &extruder[i];
+                        HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
+                    }            
+#endif
+                    EEPROM::updateChecksum();
+#endif                    
+                }
+            }
+            break;
         case 200: { // M200 T<extruder> D<diameter>
                 uint8_t extruderId = Extruder::current->id;
                 if(com->hasT() && com->T < NUM_EXTRUDER)
@@ -1938,9 +1989,11 @@ void Commands::processMCode(GCode *com) {
             }
             break;
         case 205: // M205 Show EEPROM settings
+            Com::writeToAll = false;
             EEPROM::writeSettings();
             break;
         case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
+            Com::writeToAll = false;
             EEPROM::update(com);
             break;
         case 207: // M207 X<XY jerk> Z<Z Jerk>
@@ -1976,9 +2029,9 @@ void Commands::processMCode(GCode *com) {
                 bool comp = com->S;
                 if(com->hasX()) {
                     if(com->X == 0)
-                        HAL::pinMode(com->S,INPUT);
+                        HAL::pinMode(com->P,INPUT);
                     else
-                        HAL::pinMode(com->S,INPUT_PULLUP);
+                        HAL::pinMode(com->P,INPUT_PULLUP);
                 }
                 do {
                     Commands::checkForPeriodicalActions(true);
@@ -2020,7 +2073,7 @@ void Commands::processMCode(GCode *com) {
             Printer::updateAdvanceFlags();
             break;
 #endif
-#if Z_HOME_DIR>0 && MAX_HARDWARE_ENDSTOP_Z
+#if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
         case 251: // M251
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
@@ -2034,7 +2087,7 @@ void Commands::processMCode(GCode *com) {
             EEPROM::storeDataIntoEEPROM(false);
             Com::printFLN(Com::tEEPROMUpdated);
 #endif
-            Commands::printCurrentPosition(PSTR("M251 "));
+            Commands::printCurrentPosition();
             break;
 #endif
 #if FEATURE_DITTO_PRINTING
@@ -2045,6 +2098,9 @@ void Commands::processMCode(GCode *com) {
 				Extruder::selectExtruderById(0);
 			Printer::homeXAxis();
 			if(com->hasS() && com->S > 0) {
+#if LAZY_DUAL_X_AXIS                
+				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
+#endif                
 				Extruder::current = &extruder[1];
 				PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength*0.5*Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
 				Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
@@ -2156,8 +2212,7 @@ void Commands::processMCode(GCode *com) {
             }
             break;
 #endif // FEATURE_SERVO
-        case 350: { // M350 Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
-                OUT_P_LN("Set Microstepping");
+        case 350: { // M350 Set micro stepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
                 if(com->hasS()) for(int i = 0; i <= 4; i++) microstepMode(i, com->S);
                 if(com->hasX()) microstepMode(0, (uint8_t)com->X);
@@ -2176,6 +2231,7 @@ void Commands::processMCode(GCode *com) {
                 Printer::reportCaseLightStatus();
             break;
         case 360: // M360 - show configuration
+            Com::writeToAll = false;
             Printer::showConfiguration();
             break;
         case 400: // M400 Finish all moves
@@ -2260,8 +2316,11 @@ void Commands::processMCode(GCode *com) {
                 Printer::maxLayer = static_cast<int>(com->L);
             if(com->hasS())
                 Printer::setPrinting(static_cast<uint8_t>(com->S));
-            else
+            else {
                 Printer::setPrinting(0);
+            }         
+                Printer::setMenuMode(MENU_MODE_PAUSED,false);
+            UI_RESET_MENU       
             break;
 //- M531 filename - Define filename being printed
         case 531:
@@ -2343,6 +2402,19 @@ void Commands::processMCode(GCode *com) {
             if(com->hasS())
             Com::printFLN(Com::tInfo,(int32_t)HAL::integerSqrt(com->S));
             break;*/
+        case 539:
+            if(com->hasS()) {
+                Printer::setSupportStartStop(com->S != 0);
+            }
+            if(com->hasP()) {
+                if(com->P) {
+                    Printer::setMenuMode(MENU_MODE_PAUSED,true);   
+                } else {
+                    Printer::setMenuMode(MENU_MODE_PAUSED,false);
+                    UI_RESET_MENU
+                }                    
+            }                
+            break;    
 #if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
         case 600:
             uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
@@ -2371,14 +2443,22 @@ void Commands::processMCode(GCode *com) {
 					break;
 				Extruder &ext = extruder[extId];
 				if(com->hasX())
-					ext.jamSlowdownSteps = static_cast<int16_t>(com->X);
+					ext.jamSlowdownSteps = static_cast<int32_t>(com->X);
 				if(com->hasY())
-					ext.jamErrorSteps = static_cast<int16_t>(com->Y);
+					ext.jamErrorSteps = static_cast<int32_t>(com->Y);
 				if(com->hasZ())
 					ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
 			}
 			break;
-#endif			
+#endif		
+        case 670:
+#if EEPROM_MODE != 0        
+            if(com->hasS()) {
+                HAL::eprSetByte(EPR_VERSION,static_cast<uint8_t>(com->S));
+                HAL::eprSetByte(EPR_INTEGRITY_BYTE,EEPROM::computeChecksum());
+            }
+#endif            
+            break;	
         case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
                 // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.
@@ -2447,7 +2527,8 @@ break;
 				GCode::resetFatalError();
 			break;
         default:
-            if(!EVENT_UNHANDLED_M_CODE(com) && Printer::debugErrors()) {
+            if(Printer::debugErrors()) {
+                Com::writeToAll = false;
                 Com::printF(Com::tUnknownCommand);
                 com->printCommand();
             }
@@ -2458,10 +2539,19 @@ break;
 \brief Execute the command stored in com.
 */
 void Commands::executeGCode(GCode *com) {
+#if NEW_COMMUNICATION    
+    // Set return channel for private commands. By default all commands send to all receivers.
+    GCodeSource *actSource = GCodeSource::activeSource;
+    GCodeSource::activeSource = com->source;
+    Com::writeToAll = true;
+#endif    
     if (INCLUDE_DEBUG_COMMUNICATION) {
         if(Printer::debugCommunication()) {
             if(com->hasG() || (com->hasM() && com->M != 111)) {
                 previousMillisCmd = HAL::timeInMilliseconds();
+#if NEW_COMMUNICATION
+                GCodeSource::activeSource = actSource;
+#endif                
                 return;
             }
         }
@@ -2485,7 +2575,9 @@ void Commands::executeGCode(GCode *com) {
         Printer::debugReset(8);
     }
 #endif
-
+#if NEW_COMMUNICATION
+    GCodeSource::activeSource = actSource;
+#endif
 }
 
 void Commands::emergencyStop() {

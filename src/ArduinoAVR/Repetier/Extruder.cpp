@@ -62,6 +62,7 @@ static uint8_t extruderTempErrors = 0;
 
 void Extruder::manageTemperatures()
 {
+    Com::writeToAll = true;
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
@@ -98,6 +99,10 @@ void Extruder::manageTemperatures()
         // Handle automatic cooling of extruders
         if(controller < NUM_EXTRUDER)
         {
+#if SHARED_EXTRUDER_HEATER
+			if(controller > 0)
+				continue;
+#endif			
 #if ((SHARED_COOLER && NUM_EXTRUDER >= 2 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN) || SHARED_COOLER_BOARD_EXT) && EXT0_EXTRUDER_COOLER_PIN > -1
             if(controller == 0)
             {
@@ -147,6 +152,7 @@ void Extruder::manageTemperatures()
 					newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
+                    UI_MESSAGE(2);
                 }
                 EVENT_HEATER_DEFECT(controller);
             }
@@ -201,6 +207,7 @@ void Extruder::manageTemperatures()
 						{
 							Printer::setAnyTempsensorDefect();
 							newDefectFound = true;
+                            UI_MESSAGE(3);
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -229,6 +236,7 @@ void Extruder::manageTemperatures()
 						{
 							Printer::setAnyTempsensorDefect();
 							newDefectFound = true;
+                            UI_MESSAGE(3);
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
@@ -679,6 +687,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		return;
 #endif
 #if NUM_EXTRUDER > 0
+	Commands::waitUntilEndOfAllMoves();
 #if MIXING_EXTRUDER
     if(extruderId >= VIRTUAL_EXTRUDER)
         extruderId = 0;
@@ -716,15 +725,31 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #if DUAL_X_AXIS
 	float lastX = Printer::lastCmdPos[X_AXIS];
 	// Park current extruder
-	int32_t dualXPos = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps;
-	if(Printer::isXHomed() && executeSelect) {
+	int32_t dualXPosSteps = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps; // here the extruder should be (steps from xmin pos)
+#if LAZY_DUAL_X_AXIS
+    if(Printer::sledParked)
+        dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be
+#endif // LAZY_DUAL_X_AXIS
+	if(Printer::isXHomed() && executeSelect
+#if LAZY_DUAL_X_AXIS    
+     && !Printer::sledParked
+#endif     
+     ) { // park extruder that will become inactive
 		bool oldDestCheck = Printer::isNoDestinationCheck();
 		Printer::setNoDestinationCheck(true);
-		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+		PrintLine::moveRelativeDistanceInSteps(Extruder::current->xOffset - dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
 		Printer::setNoDestinationCheck(oldDestCheck);
+#if LAZY_DUAL_X_AXIS
+        Printer::sledParked = true;
+#endif
 	}
 #endif	
     Extruder::current = &extruder[extruderId];
+    // --------------------- Now new extruder is active --------------------
+#if DUAL_X_RESOLUTION
+    Printer::updateDerivedParameter(); // adjust to new resolution
+  	dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be in new coordinates
+#endif    
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
@@ -752,28 +777,30 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     maxdist -= Extruder::current->maxStartFeedrate * Extruder::current->maxStartFeedrate * 0.5 / Extruder::current->maxAcceleration;
     float fmax = ((float)HAL::maxExtruderTimerFrequency() / ((float)Printer::maxExtruderSpeed * Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
     if(fmax < Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
-#endif
+#endif // USE_ADVANCE
     Extruder::current->tempControl.updateTempControlVars();
 #if DUAL_X_AXIS
 	// Unpark new current extruder
 	if(executeSelect) {// Run only when changing
 		Commands::waitUntilEndOfAllMoves();
-		Printer::updateCurrentPosition(true);
+		Printer::updateCurrentPosition(true); // does not update x in lazy mode!
 		GCode::executeFString(Extruder::current->selectCommands);
 	}
 #if LAZY_DUAL_X_AXIS == 0
-	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPos;
+	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
 	if(Printer::isXHomed() && executeSelect) {
-		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPos, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
-		Printer::currentPositionSteps[X_AXIS] = dualXPos + Printer::xMinSteps;		
+		PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+		Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
 	}
-#endif
+#endif // LAZY_DUAL_X_AXIS == 0
     Printer::offsetX = 0;
-#if LAZY_DUAL_X_AXIS == 1
-	Printer::lastCmdPos[X_AXIS] = lastX;
-	Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps + Extruder::current->xOffset;
-#endif	
 	Printer::updateCurrentPosition(false);
+#if LAZY_DUAL_X_AXIS
+    if(executeSelect) {
+	    Printer::currentPosition[X_AXIS] = Printer::lastCmdPos[X_AXIS] = lastX;
+	    Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps + Extruder::current->xOffset;
+    }    
+#endif	// LAZY_DUAL_X_AXIS
 	executeSelect = false;
 #else	// DUAL_X_AXIS
     Printer::offsetX = -Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
@@ -790,7 +817,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::updateCurrentPosition(false);
 #if USE_ADVANCE
     HAL::resetExtruderDirection();
-#endif
+#endif // USE_ADVANCE
 
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     if(executeSelect) {// Run only when changing
@@ -800,6 +827,8 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 #endif
 }
+
+
 #if MIXING_EXTRUDER
 	void Extruder::recomputeMixingExtruderSteps() {
 		int32_t sum_w = 0;
@@ -829,7 +858,12 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     if(temperatureInCelsius > MAXTEMP) temperatureInCelsius = MAXTEMP;
 #endif
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
+#if SHARED_EXTRUDER_HEATER
+    for(fast8_t eid = 0; eid < NUM_EXTRUDER; eid++) {
+		TemperatureController *tc = tempController[eid];
+#else	
     TemperatureController *tc = tempController[extr];
+#endif	
     if(tc->sensorType == 0) temperatureInCelsius = 0;
     //if(temperatureInCelsius==tc->targetTemperatureC) return;
     if (temperatureInCelsius < MAX_ROOM_TEMPERATURE)
@@ -844,6 +878,10 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
     if(temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
     Com::printF(Com::tTargetExtr,extr,0);
     Com::printFLN(Com::tColon,temperatureInCelsius,0);
+#if SHARED_EXTRUDER_HEATER
+	}
+	TemperatureController *tc = tempController[extr];
+#endif	
 #if FEATURE_DITTO_PRINTING
     if(Extruder::dittoMode && extr == 0)
     {
@@ -959,9 +997,9 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 #if HAVE_HEATED_BED
     if(temperatureInCelsius > HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
-    if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
+    if(heatedBedController.targetTemperatureC == temperatureInCelsius) return; // don't flood log with messages if killed
     heatedBedController.setTargetTemperature(temperatureInCelsius);
-    if(beep && temperatureInCelsius>30) heatedBedController.setAlarm(true);
+    if(beep && temperatureInCelsius > 30) heatedBedController.setAlarm(true);
     Com::printFLN(Com::tTargetBedColon,heatedBedController.targetTemperatureC,0);
     if(temperatureInCelsius > 15)
         pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;    // turn on the mainboard cooling fan
@@ -2181,7 +2219,6 @@ void TemperatureController::updateCurrentTemperature()
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
     }
     int currentTemperature = this->currentTemperature;
-    //OUT_P_I_LN("OC for raw ",raw_temp);
     switch(type)
     {
     case 0:
@@ -2217,8 +2254,6 @@ void TemperatureController::updateCurrentTemperature()
             newtemp = pgm_read_word(&temptable[i++]);
             if (newraw > currentTemperature)
             {
-                //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
-                //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp - oldtemp) / (newraw - oldraw));
                 return;
             }
@@ -2332,8 +2367,6 @@ void TemperatureController::updateCurrentTemperature()
             newtemp = temptable[i++];
             if (newraw > currentTemperature)
             {
-                //OUT_P_I("RC O:",oldtemp);OUT_P_I_LN(" OR:",oldraw);
-                //OUT_P_I("RC N:",newtemp);OUT_P_I_LN(" NR:",newraw);
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature-oldraw)*(float)(newtemp-oldtemp)/(newraw-oldraw));
                 return;
             }
@@ -2727,7 +2760,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD,0,EXT0_PREHEAT_TEMP
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2754,7 +2787,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD,0,EXT1_PREHEAT_TEMP
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2781,7 +2814,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD,0,EXT2_PREHEAT_TEMP
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2808,7 +2841,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD,0,EXT3_PREHEAT_TEMP
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2835,7 +2868,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD,0,EXT4_PREHEAT_TEMP
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2862,7 +2895,7 @@ Extruder extruder[NUM_EXTRUDER] =
 #if TEMP_PID
             ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-            ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD,0
+            ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD,0,EXT5_PREHEAT_TEMP
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
 #if EXTRUDER_JAM_CONTROL
@@ -2878,7 +2911,7 @@ TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TY
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
-        ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD,0};
+        ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD,0,HEATED_BED_PREHEAT_TEMP};
 #endif
 
 #if FAN_THERMO_PIN > -1
@@ -2886,7 +2919,7 @@ TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_T
 	#if TEMP_PID
 	,0,255,0,10,1,1,255,0,0,0,{0,0,0,0}
 	#endif
-,0,0,0,0,0};
+,0,0,0,0,0,0};
 #endif
 
 #if NUM_TEMPERATURE_LOOPS > 0
