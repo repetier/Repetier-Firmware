@@ -172,7 +172,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_ZONESTAR 24
 #define CONTROLLER_REPRAPWORLD_GLCD 25
 #define CONTROLLER_FELIX_DUE 405
-#define CONTROLLER_ORCABOTXXLPRO2 25
+#define CONTROLLER_ORCABOTXXLPRO2 27
 #define CONTROLLER_AZSMZ_12864 26
 
 //direction flags
