@@ -553,7 +553,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     //int32_t updateZ = 0;
     waitForZProbeStart();
     Endstops::update();
-    Endstops::update();
     if(Endstops::zProbe()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
