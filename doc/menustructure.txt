@@ -1,0 +1,245 @@
+Menu structure Repetier-Firmware
+
+Menu structure is defined in uimenu.h. If you have defined
+CUSTOM_MENU it is taken from customMenu.h instead.
+
+The complete menu structure is stored in flash memory, so it not possible to
+alter the menu structure at runtime. That would require ram we do not have.
+As an alternative each entry can have to filters. They can be shown when a flag in
+Printer::menuMode is set or not set. Currently these modes are defined:
+
+#define MENU_MODE_SD_MOUNTED  1
+#define MENU_MODE_SD_PRINTING 2
+#define MENU_MODE_PAUSED      4
+#define MENU_MODE_FAN_RUNNING 8
+#define MENU_MODE_PRINTING    16
+#define MENU_MODE_FULL_PID    32
+#define MENU_MODE_DEADTIME    64
+#define MENU_MODE_FDM         128
+#define MENU_MODE_LASER       256
+#define MENU_MODE_CNC         512
+
+Base of the menu is the menu container described by UIMenu. It has one of the
+following types:
+0 = info page
+1 = file selector
+2 = submenu
+3 = modififaction menu
+5 = Wizard menu
++128 = sticky -> no autoreturn to main menuü after timeout
+
+Info pages are the top level and contain each as many rows as display has.
+First info page on graphic display gets special treatment, so do not modify that
+unless you also change the graphic drawing code.
+
+File selector shows all files on sd card and is therefore the only dynamic menu.
+
+Submenu is a scrollable menu with many entries building the core of the menu structure.
+
+Modification menu is a single page for multiline output to change one value.
+
+Wizard menu is special in that it does not return to main screen after timeout.
+They are used for wizards that take user through some steps.
+
+Inside these containers we have one or more menu entries UIMenuEntry.
+
+#define UI_MENU_TYPE_INFO 0
+#define UI_MENU_TYPE_FILE_SELECTOR 1
+#define UI_MENU_TYPE_SUBMENU 2
+#define UI_MENU_TYPE_MODIFICATION_MENU 3
+#define UI_MENU_TYPE_WIZARD 5
+
+struct UIMenuEntry_s {
+  const char *text;    // Menu text
+  uint8_t entryType;   // 0 = Info, 1 = Headline, 2 = sub menu ref, 3 = direct action command, 4 = modify action command,
+  unsigned int action; // must be int so it gets 32 bit on arm!
+  uint8_t filter;      // allows dynamic menu filtering based on Printer::menuMode bits set.
+  uint8_t nofilter;    // Hide if one of these bits are set
+  int translation;     // Translation id
+  bool showEntry() const;
+} ;
+typedef const UIMenuEntry_s UIMenuEntry;
+
+Defining all these is quite hard so we have some helper macros to define the
+menu structure. Unfortuantely we have several row counts and variants of all
+these macros. But they follow a simple scheme, so it is easy to differentiate
+them. Lets start with the basic types:
+
+Define pages:
+------------
+UI_PAGE2(name,row1,row2)
+UI_PAGE4(name,row1,row2,row3,row4)
+UI_PAGE6(name,row1,row2,row3,row4,row5,row6) 
+
+These create the page container and 2-6 entries. The entries get names
+name_x with x = row number starting with 1.
+name_extries is the list of entries.
+name is the variable name of the created page container.
+
+Wizard pages:
+-------------
+UI_WIZARD4(name,action,row1,row2,row3,row4)
+UI_WIZARD2(name,action,row1,row2)
+
+Same logic as pages, only the pages described are wizard pages you can reference 
+with the name to show them.
+
+Actions:
+--------
+Actions are a modification menu together with 2 or 4 entries and a associated
+action id. This action id defines what left/right will do. They also have a ok
+action that will also go back but might also store the value just modified.
+
+UI_MENU_ACTION2(name,action,row1,row2)
+UI_MENU_ACTION4(name,action,row1,row2,row3,row4)
+
+Headline:
+---------
+Headline is just a text line in submenu without any function. If you scroll
+through a menu it gets ignored.
+
+UI_MENU_HEADLINE(name,text)
+
+Change action:
+--------------
+Change actions are the simple variant of actions. Instead of moving to a new
+submenu they change form menu scroll to value edit so left/right change the
+value of text. Ok stores and goes back to entry selection for left/right.
+
+UI_MENU_CHANGEACTION(name,row,action)
+
+Action command:
+---------------
+Simply executed a named action
+
+UI_MENU_ACTIONCOMMAND(name, text, action)
+
+Action selector:
+----------------
+Action selectors select the page action defined with name in "menu" parameter.
+
+UI_MENU_ACTIONSELECTOR(name,row,menu)
+
+Submenu selector:
+-----------------
+Selects the submenu defined in "submenu"
+
+UI_MENU_SUBMENU(name,row,submenu)
+
+Wizard selector:
+----------------
+Selects a wizard page.
+
+UI_MENU_WIZARD(name,row,wizardpage)
+
+Menus:
+------
+These buld the submenus with any length you want. They a pointer to an array with the entries and the number of entries in that array.
+
+UI_MENU(name,items,itemsCnt)
+UI_STICKYMENU(name,items,itemsCnt)
+UI_MENU_FILESELECT(name,items,itemsCnt)
+
+Stickymenu is the same as a normal menu only that it does not close unless you
+select back.
+
+The fileselect menu shows your menu entries and then the list of files appears.
+
+Modifyers:
+----------
+As already mentioned many of these macros have additional derivatives. You get
+the complete macro name if you just append the modifyer name in the order we
+ define them here.
+ 
+ _FILTER
+ 
+ add to parameter filter,nofilter which are by default 0 for above macros.
+ "filter" means if bit is set in Printer::menuMode it will be invisible.
+ "nofilter" means if bit is not set in Printer::menuMode it will be invisible.
+ 
+So if we want to show an entry while printing only, we set filters to 
+",MENU_MODE_PRINTING,0"
+if we want it to appear only when not printing we set
+",0,MENU_MODE_PRINTING"
+
+The last modifyer is for translateable text. All above macros take simple strings.
+Since we have only one menu and texts are static we can not change the text
+when selecting a different language. For translateable strings we use translation
+IDs that refer through our translation tables to the right text. So if we want a
+translateable entry we add
+
+_T
+
+and instead of strings we set translation ids.
+
+Main pages:
+
+
+Main menu Level 1:
+==================
+
+Back
+Cancel printing              - If printing
+Pause                        - If printing
+Extruder 1-6 temperature     - If printing
+Bed temperature              - If printing
+Speed                        - If printing
+Flow                         - If printing
+Fan speed                    - If printing
+Fan 2 speed                  - If printing
+Babystepping                 - If printing
+Lights                       - If printing
+Change filament              - If printing
+Control                      - If not printing
+SD Card                      - If not printing
+Setup                        - If not printing
+Settings                     - If not printing
+ 
+Submenu control Level 2
+=======================
+
+Control:
+--------
+Z Babystep.
+Speed mul.
+Flow mul.
+Lights: on
+Fan 1
+Fan 2
+Change filament
+Preheat PLA
+Preheat ABS
+Cooldown
+Disable stepper
+Set to origin
+
+SD Card:
+--------
+Back
+Print File
+Delete File
+Mount
+Unmount
+
+Setup:
+------
+Debug
+Z Calibrate
+Autlevel on/off
+Distortion map
+Distortion on/off
+Ignore M106 Cmd
+
+Settings:
+--------
+Language
+Baudrate
+Stepper inactiv.
+Max. inactive
+Acceleration
+Feedrate
+Extruder
+Heated Bed
+Store to EEPROM
+Load f. EEPROM
+

@@ -139,7 +139,6 @@ What display type do you use?
 #define UI_FONT_DEFAULT repetier_6x10
 #define UI_FONT_SMALL repetier_5x7
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
-#define UI_ANIMATION false  // Animations are too slow
 #endif
 
 //calculate rows and cols available with current font
@@ -360,7 +359,7 @@ Type 3: Show menu action. These actions have a _MENU_ in their name. If they are
 // Define your matrix actions
 #define UI_MATRIX_ACTIONS {UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU,       UI_ACTION_SET_ORIGIN,      UI_ACTION_NEXT,\
                            UI_ACTION_HOME_Z,   UI_ACTION_MENU_ZPOS,      UI_ACTION_COOLDOWN,        UI_ACTION_OK,\
-                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ABS,     UI_ACTION_PREVIOUS,\
+                           UI_ACTION_HOME_Y,   UI_ACTION_MENU_YPOSFAST,  UI_ACTION_PREHEAT_ALL,     UI_ACTION_PREVIOUS,\
                            UI_ACTION_HOME_X,   UI_ACTION_MENU_XPOSFAST,  UI_ACTION_DISABLE_STEPPER, UI_ACTION_BACK}
 #ifdef UI_MATRIX_ACTIONS
 const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;

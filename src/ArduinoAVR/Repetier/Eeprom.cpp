@@ -96,6 +96,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
+    heatedBedController.preheatTemperature = HEATED_BED_PREHEAT_TEMP;
 #if TEMP_PID
     heatedBedController.pidDriveMax = HEATED_BED_PID_INTEGRAL_DRIVE_MAX;
     heatedBedController.pidDriveMin = HEATED_BED_PID_INTEGRAL_DRIVE_MIN;
@@ -131,6 +132,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT0_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT0_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT0_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT0_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT0_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT0_PID_INTEGRAL_DRIVE_MIN;
@@ -161,6 +163,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT1_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT1_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT1_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT1_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT1_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT1_PID_INTEGRAL_DRIVE_MIN;
@@ -191,6 +194,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT2_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT2_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT2_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT2_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT2_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT2_PID_INTEGRAL_DRIVE_MIN;
@@ -221,6 +225,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT3_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT3_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT3_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT3_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT3_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT3_PID_INTEGRAL_DRIVE_MIN;
@@ -251,6 +256,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT4_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT4_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT4_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT4_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT4_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT4_PID_INTEGRAL_DRIVE_MIN;
@@ -281,6 +287,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxStartFeedrate = EXT5_MAX_START_FEEDRATE;
     e->maxAcceleration = EXT5_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT5_HEAT_MANAGER;
+    e->tempControl.preheatTemperature = EXT5_PREHEAT_TEMP;
 #if TEMP_PID
     e->tempControl.pidDriveMax = EXT5_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT5_PID_INTEGRAL_DRIVE_MIN;
@@ -333,7 +340,12 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetInt32(EPR_MAX_INACTIVE_TIME,maxInactiveTime);
     HAL::eprSetInt32(EPR_STEPPER_INACTIVE_TIME,stepperInactiveTime);
 //#define EPR_ACCELERATION_TYPE 1
+#if DUAL_X_RESOLUTION
+    HAL::eprSetFloat(EPR_X2AXIS_STEPS_PER_MM,Printer::axisX2StepsPerMM);
+    HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisX1StepsPerMM);
+#else    
     HAL::eprSetFloat(EPR_XAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[X_AXIS]);
+#endif    
     HAL::eprSetFloat(EPR_YAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Y_AXIS]);
     HAL::eprSetFloat(EPR_ZAXIS_STEPS_PER_MM,Printer::axisStepsPerMM[Z_AXIS]);
     HAL::eprSetFloat(EPR_X_MAX_FEEDRATE,Printer::maxFeedrate[X_AXIS]);
@@ -356,6 +368,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #endif
 #if HAVE_HEATED_BED
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
+    HAL::eprSetInt16(EPR_BED_PREHEAT_TEMP,heatedBedController.preheatTemperature);
 #else
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,HEATED_BED_HEAT_MANAGER);
 #endif
@@ -415,6 +428,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE,e->maxStartFeedrate);
         HAL::eprSetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,e->maxAcceleration);
         HAL::eprSetByte(o+EPR_EXTRUDER_HEAT_MANAGER,e->tempControl.heatManager);
+        HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
 #if TEMP_PID
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MAX,e->tempControl.pidDriveMax);
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MIN,e->tempControl.pidDriveMin);
@@ -517,20 +531,25 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_A,BENDING_CORRECTION_A);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
-    HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,Z_ACCELERATION_TOP);
+    HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,ACCELERATION_FACTOR_TOP);
 
 }
 
 void EEPROM::readDataFromEEPROM(bool includeExtruder)
 {
 #if EEPROM_MODE != 0
-    uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data not set in older versions!
-    //Com::printFLN(PSTR("Detected EEPROM version:"),(int)version);
+    uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data nor set it to older versions!
+    Com::printFLN(PSTR("Detected EEPROM version:"),(int)version);
     baudrate = HAL::eprGetInt32(EPR_BAUDRATE);
     maxInactiveTime = HAL::eprGetInt32(EPR_MAX_INACTIVE_TIME);
     stepperInactiveTime = HAL::eprGetInt32(EPR_STEPPER_INACTIVE_TIME);
 //#define EPR_ACCELERATION_TYPE 1
+#if DUAL_X_RESOLUTION
+    Printer::axisX1StepsPerMM = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
+    Printer::axisX2StepsPerMM = HAL::eprGetFloat(EPR_X2AXIS_STEPS_PER_MM);    
+#else
     Printer::axisStepsPerMM[X_AXIS] = HAL::eprGetFloat(EPR_XAXIS_STEPS_PER_MM);
+#endif    
     Printer::axisStepsPerMM[Y_AXIS] = HAL::eprGetFloat(EPR_YAXIS_STEPS_PER_MM);
     Printer::axisStepsPerMM[Z_AXIS] = HAL::eprGetFloat(EPR_ZAXIS_STEPS_PER_MM);
     Printer::maxFeedrate[X_AXIS] = HAL::eprGetFloat(EPR_X_MAX_FEEDRATE);
@@ -552,7 +571,8 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
 #if HAVE_HEATED_BED
-    heatedBedController.heatManager= HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
+    heatedBedController.heatManager = HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
+    heatedBedController.preheatTemperature = HAL::eprGetInt16(EPR_BED_PREHEAT_TEMP);
 #if TEMP_PID
     heatedBedController.pidDriveMax = HAL::eprGetByte(EPR_BED_DRIVE_MAX);
     heatedBedController.pidDriveMin = HAL::eprGetByte(EPR_BED_DRIVE_MIN);
@@ -619,6 +639,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             e->maxStartFeedrate = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_START_FEEDRATE);
             e->maxAcceleration = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION);
             e->tempControl.heatManager = HAL::eprGetByte(o+EPR_EXTRUDER_HEAT_MANAGER);
+            e->tempControl.preheatTemperature = HAL::eprGetInt16(o+EPR_EXTRUDER_PREHEAT);
 #if TEMP_PID
             e->tempControl.pidDriveMax = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MAX);
             e->tempControl.pidDriveMin = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MIN);
@@ -746,10 +767,38 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
             HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,ACCELERATION_FACTOR_TOP);
         }
+        if(version < 17) {
+#if HAVE_HEATED_BED            
+            heatedBedController.preheatTemperature = HEATED_BED_PREHEAT_TEMP;
+#endif
+#if NUM_EXTRUDER > 0
+            extruder[0].tempControl.preheatTemperature = EXT0_PREHEAT_TEMP;
+#endif            
+#if NUM_EXTRUDER > 1
+            extruder[1].tempControl.preheatTemperature = EXT1_PREHEAT_TEMP;
+#endif
+#if NUM_EXTRUDER > 2
+            extruder[2].tempControl.preheatTemperature = EXT2_PREHEAT_TEMP;
+#endif
+#if NUM_EXTRUDER > 3
+            extruder[3].tempControl.preheatTemperature = EXT3_PREHEAT_TEMP;
+#endif
+#if NUM_EXTRUDER > 4
+            extruder[4].tempControl.preheatTemperature = EXT4_PREHEAT_TEMP;
+#endif
+#if NUM_EXTRUDER > 5
+            extruder[5].tempControl.preheatTemperature = EXT5_PREHEAT_TEMP;
+#endif
+        }
+#if DUAL_X_RESOLUTION
+        if(version < 18) {
+            Printer::axisX2StepsPerMM = X2AXIS_STEPS_PER_MM;
+        }
+#endif        
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
-                  // Prior to verion 8, the cartesian max was stored in the zmax
-                  // Now, x,y and z max are used for tower a, b anc c
+                  // Prior to version 8, the Cartesian max was stored in the zmax
+                  // Now, x,y and z max are used for tower a, b and c
                   // Of tower min are all set at 0, tower max is larger than cartesian max
                   // by the height of any tower for coordinate 0,0,0
                   long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
@@ -775,7 +824,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 
 void EEPROM::initBaudrate()
 {
-    // Invariant - baudrate is intitalized with or without eeprom!
+    // Invariant - baudrate is initialized with or without eeprom!
     baudrate = BAUDRATE;
 #if EEPROM_MODE != 0
     if(HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE)
@@ -859,6 +908,9 @@ void EEPROM::writeSettings()
 //#define EPR_ACCELERATION_TYPE 1
 #if DRIVE_SYSTEM != DELTA
     writeFloat(EPR_XAXIS_STEPS_PER_MM, Com::tEPRXStepsPerMM, 4);
+#if DUAL_X_RESOLUTION
+writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
+#endif
     writeFloat(EPR_YAXIS_STEPS_PER_MM, Com::tEPRYStepsPerMM, 4);
 #endif
     writeFloat(EPR_ZAXIS_STEPS_PER_MM, Com::tEPRZStepsPerMM, 4);
@@ -954,13 +1006,14 @@ void EEPROM::writeSettings()
 #endif
 
 #if FEATURE_AXISCOMP
-    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY);
-    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ);
-    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ);
+    writeFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY,6);
+    writeFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ,6);
+    writeFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ,6);
 #endif
 
 
 #if HAVE_HEATED_BED
+    writeInt(EPR_BED_PREHEAT_TEMP, Com::tEPRPreheatBedTemp);
     writeByte(EPR_BED_HEAT_MANAGER, Com::tEPRBedHeatManager);
 #if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX, Com::tEPRBedPIDDriveMax);
@@ -993,6 +1046,7 @@ void EEPROM::writeSettings()
         writeFloat(o + EPR_EXTRUDER_MAX_FEEDRATE, Com::tEPRMaxFeedrate);
         writeFloat(o + EPR_EXTRUDER_MAX_START_FEEDRATE, Com::tEPRStartFeedrate);
         writeFloat(o + EPR_EXTRUDER_MAX_ACCELERATION, Com::tEPRAcceleration);
+        writeInt(o + EPR_EXTRUDER_PREHEAT, Com::tEPRPreheatTemp);
         writeByte(o + EPR_EXTRUDER_HEAT_MANAGER, Com::tEPRHeatManager);
 #if TEMP_PID
         writeByte(o + EPR_EXTRUDER_DRIVE_MAX, Com::tEPRDriveMax);

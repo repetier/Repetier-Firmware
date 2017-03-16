@@ -25,7 +25,7 @@ From 0.80 onwards the units used are unified for easier configuration, watch out
 
 Speed is in mm/s
 Acceleration in mm/s^2
-Temperature is in degrees celsius
+Temperature is in degrees Celsius
 
 
 ##########################################################################################
@@ -35,7 +35,7 @@ Temperature is in degrees celsius
 For easy configuration, the default settings enable parameter storage in EEPROM.
 This means, after the first upload many variables can only be changed using the special
 M commands as described in the documentation. Changing these values in the configuration.h
-file has no effect. Parameters overriden by EEPROM settings are calibration values, extruder
+file has no effect. Parameters overridden by EEPROM settings are calibration values, extruder
 values except thermistor tables and some other parameter likely to change during usage
 like advance steps or ops mode.
 To override EEPROM settings with config settings, set EEPROM_MODE 0
@@ -66,6 +66,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Open Motion Controller     = 91
 // Melzi board                = 63  // Define REPRAPPRO_HUXLEY if you have one for correct HEATER_1_PIN assignment!
 // Azteeg X1                  = 65
+// 3Drag/Velleman K8200 (experimental) = 66
 // Gen7 1.1 till 1.3.x        = 7
 // Gen7 1.4.1 and later       = 71
 // Sethi 3D_1                 = 72
@@ -85,6 +86,10 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // PiBot Controller V2.0      = 316
 // Sanguish Beta              = 501
 // Unique One rev. A          = 88
+// SAV MK1                    = 89
+// MJRice Pica Rev B          = 183
+// MJRice Pica Rev C          = 184
+// Zonestar ZRIB 2.1          = 39
 // User layout defined in userpins.h = 999
 
 #define MOTHERBOARD 33
@@ -245,6 +250,8 @@ controlled by settings in extruder 0 definition. */
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
+// 15 DYZE DESIGN 500°C Thermistor
+// 16 is B3 innovations 500°C sensor
 // 5 is userdefined thermistor table 0
 // 6 is userdefined thermistor table 1
 // 7 is userdefined thermistor table 2
@@ -361,7 +368,8 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_JAM_PIN -1
 /** Pull-up resistor for jam pin? */
 #define EXT0_JAM_PULLUP false
-
+/* Temperature when using preheat */
+#define EXT0_PREHEAT_TEMP 190
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 0
 #define EXT1_Y_OFFSET 0
@@ -481,6 +489,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_JAM_PIN -1
 /** Pull-up resistor for jam pin? */
 #define EXT1_JAM_PULLUP false
+#define EXT1_PREHEAT_TEMP 190
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -742,9 +751,18 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 #define MAXTEMP 260
 
+#define HEATED_BED_PREHEAT_TEMP 55
+
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
+
+//How many milliseconds a hot end will preheat before starting to check the
+//temperature. This value should NOT be set to the time it takes the
+//hot end to reach the target temperature, but should be set to the time it 
+//takes to reach the minimum temperature your thermistor can read. The lower
+//the better/safer, and shouldn't need to be more than 30 seconds (30000) 
+#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ##########################################################################################
 // ##                             Laser configuration                                      ##
@@ -774,6 +792,7 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+#define LASER_WARMUP_TIME 0// wait x milliseconds to start material burning before move
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##
@@ -1073,6 +1092,19 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.   
  * */
 #define HOMING_ORDER HOME_ORDER_ZXY
+/*
+  Raise Z befor ehoming z axis
+  0 = no
+  1 = if z min is triggered
+  2 = always
+  This is for printers with z probe used as z min. For homing the probe must be
+  at a minimum height for some endstop types, so raising it before will help
+  to make sure this is guaranteed. 
+*/
+#define ZHOME_PRE_RAISE 0
+// Distance in mm to raise if required
+#define ZHOME_PRE_RAISE_DISTANCE 10
+
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
 // needs to heat all extruders (1) or only current extruder (0)
@@ -1315,6 +1347,14 @@ instead of driving them with a single stepper. The same works for the other axis
 #define X2_DIR_PIN    E1_DIR_PIN
 #define X2_ENABLE_PIN E1_ENABLE_PIN
 
+/* Dual x axis mean having a printer with x motors and each controls one
+extruder position. In that case you can also have different resolutions for the
+2 motors. */
+#define DUAL_X_AXIS 0
+#define DUAL_X_RESOLUTION 0
+#define X2AXIS_STEPS_PER_MM 100
+
+
 #define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
 #define Y2_DIR_PIN    E1_DIR_PIN
@@ -1329,6 +1369,11 @@ instead of driving them with a single stepper. The same works for the other axis
 #define Z3_STEP_PIN   E2_STEP_PIN
 #define Z3_DIR_PIN    E2_DIR_PIN
 #define Z3_ENABLE_PIN E2_ENABLE_PIN
+
+#define FEATURE_FOUR_ZSTEPPER 0
+#define Z4_STEP_PIN   E2_STEP_PIN
+#define Z4_DIR_PIN    E2_DIR_PIN
+#define Z4_ENABLE_PIN E2_ENABLE_PIN
 
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
@@ -1387,6 +1432,8 @@ to recalibrate z.
 #define Z_PROBE_Z_OFFSET_MODE 0
 
 #define FEATURE_Z_PROBE 1
+// Especially if you have more then 1 extruder acting as z probe this is important!
+#define EXTRUDER_IS_Z_PROBE 0
 #define Z_PROBE_PIN 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 1
@@ -1587,6 +1634,9 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 //#define FAN_BOARD_PIN ORIG_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 255
+/* Speed when no cooling is required. Normally 0 but if you need slightly cooling
+it can be set here */
+#define BOARD_FAN_MIN_SPEED 0
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.
 */
@@ -1598,6 +1648,16 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 // Analog pin number or channel for due boards
 #define FAN_THERMO_THERMISTOR_PIN -1
 #define FAN_THERMO_THERMISTOR_TYPE 1
+
+/** The door pin is to detect a door opening. This will prevent new command
+ from serial or sd card getting executed. It will not stop immediately. Instead
+ it lets the move buffer run empty so closing the door allows continuing the print.
+ The exact behavior might change in the future.
+  */
+ 
+#define DOOR_PIN -1
+#define DOOR_PULLUP 1
+#define DOOR_INVERTING 1
 
 /** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
  * This essentially adds command M36/M408 and extends M20.
@@ -1645,17 +1705,20 @@ The following settings override uiconfig.h!
 /**
 Select the languages to use. On first startup user can select
 the language from a menu with activated languages. In Configuration->Language
-the language can be switched any time. */
+the language can be switched any time. 
+On 8 bit processors do not active all or you run out of text memory (64kb)
+and strange errors occur. 8-9 languages normally work.
+*/
 #define LANGUAGE_EN_ACTIVE 1 // English
 #define LANGUAGE_DE_ACTIVE 1 // German
-#define LANGUAGE_NL_ACTIVE 1 // Dutch
+#define LANGUAGE_NL_ACTIVE 0 // Dutch
 #define LANGUAGE_PT_ACTIVE 1 // Brazilian Portuguese
 #define LANGUAGE_IT_ACTIVE 1 // Italian
 #define LANGUAGE_ES_ACTIVE 1 // Spanish
-#define LANGUAGE_FI_ACTIVE 1 // Finnish
-#define LANGUAGE_SE_ACTIVE 1 // Swedish
+#define LANGUAGE_FI_ACTIVE 0 // Finnish
+#define LANGUAGE_SE_ACTIVE 0 // Swedish
 #define LANGUAGE_FR_ACTIVE 1 // French
-#define LANGUAGE_CZ_ACTIVE 1 // Czech
+#define LANGUAGE_CZ_ACTIVE 0 // Czech
 #define LANGUAGE_PL_ACTIVE 1 // Polish
 #define LANGUAGE_TR_ACTIVE 1 // Turkish
 
@@ -1671,8 +1734,9 @@ computations, so do not enable it if your display works stable!
 #define UI_PRINTER_COMPANY "Self Made"
 
 
-/** Animate switches between menus etc. */
-#define UI_ANIMATION 0
+/** For graphic displays you can have a fixed top line. It can also contain
+ * dynamic modifiers. Do not define it if you want full 6 rows of data */
+//#define UI_HEAD "E1:%e0/%E0 E2:%e1/%E1 B:%eb/%Eb"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1738,18 +1802,14 @@ If you have leveling with bed coating or fixed z min you can use this menu to ad
 0 height with a simple bed coating menu which adds coating thickness.
 */
 #define UI_BED_COATING 0
-// Values used for preheat
-#define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
-#define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
-#define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
 // Extreme values
-#define UI_SET_MIN_HEATED_BED_TEMP  55
+#define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 120
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
 #define UI_SET_EXTRUDER_FEEDRATE 2 // mm/sec
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3 // mm
+
 
 /*
 #define USER_KEY1_PIN     UI_DISPLAY_D5_PIN      // D5 to display (not used for graphics controller), change to other pin if you use character LCD !
@@ -1767,7 +1827,8 @@ If you have leveling with bed coating or fixed z min you can use this menu to ad
 
 #define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
-#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
+// #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
+#define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(float stepsPerMM,float speed,float maxXPos)
 
 /*
   You can expand firmware functionality with events and you own event handler.

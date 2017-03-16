@@ -1137,7 +1137,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
   const char *tempPtr;
   char newName[SHORT_FILENAME_LENGTH+2];
   boolean bShortName = false;
-  int8_t cVFATNeeded = -1, cVFATFoundCur;
+  int8_t cVFATNeeded = -1, cVFATFoundCur = 0;
   uint32_t wIndexPos = 0;
   uint8_t cbFilename;
   char *Filename = (char *)dname;

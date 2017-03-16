@@ -25,7 +25,7 @@ From 0.80 onwards the units used are unified for easier configuration, watch out
 
 Speed is in mm/s
 Acceleration in mm/s^2
-Temperature is in degrees celsius
+Temperature is in degrees Celsius
 
 
 ##########################################################################################
@@ -35,7 +35,7 @@ Temperature is in degrees celsius
 For easy configuration, the default settings enable parameter storage in EEPROM.
 This means, after the first upload many variables can only be changed using the special
 M commands as described in the documentation. Changing these values in the configuration.h
-file has no effect. Parameters overriden by EEPROM settings are calibration values, extruder
+file has no effect. Parameters overridden by EEPROM settings are calibration values, extruder
 values except thermistor tables and some other parameter likely to change during usage
 like advance steps or ops mode.
 To override EEPROM settings with config settings, set EEPROM_MODE 0
@@ -58,9 +58,13 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Felix Printers for arm       = 405
 // DAM&DICE DUE                 = 406
 // Smart RAMPS for Due          = 408
+// Smart RAMPS for Due with EEPROM = 413
+// Ultratronics Board           = 409
+// DUE3DOM                      = 410
+// DUE3DOM MINI                 = 411
+// STACKER 3D Superboard        = 412
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
-
 #define MOTHERBOARD 402
 
 #include "pins.h"
@@ -221,6 +225,8 @@ controlled by settings in extruder 0 definition. */
 // 12 is 100k RS thermistor 198-961
 // 13 is PT100 for E3D/Ultimaker
 // 14 is 100K NTC 3950
+// 15 DYZE DESIGN 500°C Thermistor
+// 16 is B3 innovations 500°C sensor
 // 50 is userdefined thermistor table 0 for PTC thermistors
 // 51 is userdefined thermistor table 0 for PTC thermistors
 // 52 is userdefined thermistor table 0 for PTC thermistors
@@ -334,7 +340,7 @@ The codes are only executed for multiple extruder when changing the extruder. */
 #define EXT0_JAM_PIN -1
 /** Pullup resistor for jam pin? */
 #define EXT0_JAM_PULLUP false
-
+#define EXT0_PREHEAT_TEMP 190
 
 // =========================== Configuration for second extruder ========================
 #define EXT1_X_OFFSET 0
@@ -453,6 +459,7 @@ cog. Direct drive extruder need 0. */
 #define EXT1_JAM_PIN -1
 /** Pull-up resistor for jam pin? */
 #define EXT1_JAM_PULLUP false
+#define EXT1_PREHEAT_TEMP 190
 
 /** If enabled you can select the distance your filament gets retracted during a
 M140 command, after a given temperature is reached. */
@@ -713,9 +720,18 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 #define MAXTEMP 260
 
+#define HEATED_BED_PREHEAT_TEMP 55
+
 /** Extreme values to detect defect thermistors. */
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 300
+
+//How many milliseconds a hot end will preheat before starting to check the
+//temperature. This value should NOT be set to the time it takes the
+//hot end to reach the target temperature, but should be set to the time it 
+//takes to reach the minimum temperature your thermistor can read. The lower
+//the better/safer, and shouldn't need to be more than 30 seconds (30000) 
+#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ##########################################################################################
 // ##                             Laser configuration                                      ##
@@ -745,6 +761,7 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
+#define LASER_WARMUP_TIME 0// wait x milliseconds to start material burning before move
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##
@@ -1042,6 +1059,19 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * heating to minimum ZHOME_MIN_TEMPERATURE will z home again for correct height.   
  * */
 #define HOMING_ORDER HOME_ORDER_ZXY
+/*
+  Raise Z befor ehoming z axis
+  0 = no
+  1 = if z min is triggered
+  2 = always
+  This is for printers with z probe used as z min. For homing the probe must be
+  at a minimum height for some endstop types, so raising it before will help
+  to make sure this is guaranteed. 
+*/
+#define ZHOME_PRE_RAISE 0
+// Distance in mm to raise if required
+#define ZHOME_PRE_RAISE_DISTANCE 10
+
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
 // needs to heat all extruders (1) or only current extruder (0)
@@ -1287,6 +1317,13 @@ instead of driving both with a single stepper. The same works for the other axis
 #define X2_DIR_PIN    E1_DIR_PIN
 #define X2_ENABLE_PIN E1_ENABLE_PIN
 
+/* Dual x axis mean having a printer with x motors and each controls one
+extruder position. In that case you can also have different resolutions for the
+2 motors. */
+#define DUAL_X_AXIS 0
+#define DUAL_X_RESOLUTION 0
+#define X2AXIS_STEPS_PER_MM 100
+
 #define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN
 #define Y2_DIR_PIN    E1_DIR_PIN
@@ -1301,6 +1338,11 @@ instead of driving both with a single stepper. The same works for the other axis
 #define Z3_STEP_PIN   E2_STEP_PIN
 #define Z3_DIR_PIN    E2_DIR_PIN
 #define Z3_ENABLE_PIN E2_ENABLE_PIN
+
+#define FEATURE_FOUR_ZSTEPPER 0
+#define Z4_STEP_PIN   E2_STEP_PIN
+#define Z4_DIR_PIN    E2_DIR_PIN
+#define Z4_ENABLE_PIN E2_ENABLE_PIN
 
 /* Ditto printing allows 2 extruders to do the same action. This effectively allows
 to print an object two times at the speed of one. Works only with dual extruder setup.
@@ -1363,7 +1405,9 @@ to recalibrate z.
 */
 #define Z_PROBE_Z_OFFSET_MODE 0
 
-#define FEATURE_Z_PROBE false
+#define FEATURE_Z_PROBE 0
+// Especially if you have more then 1 extruder acting as z probe this is important!
+#define EXTRUDER_IS_Z_PROBE 0
 #define Z_PROBE_PIN -1  // 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 1
@@ -1556,6 +1600,9 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 //#define FAN_BOARD_PIN ORIG_FAN_PIN
 /** Speed of board fan when on. 0 = off, 255 = max */
 #define BOARD_FAN_SPEED 255
+/* Speed when no cooling is required. Normally 0 but if you need slightly cooling
+it can be set here */
+#define BOARD_FAN_MIN_SPEED 0
 
 /* You can have one additional fan controlled by a temperature. You can set
    set at which temperature it should turn on and at which it should reach max. speed.
@@ -1569,6 +1616,15 @@ goes on as soon as moves occur. Mainly to prevent overheating of stepper drivers
 #define FAN_THERMO_THERMISTOR_PIN -1
 #define FAN_THERMO_THERMISTOR_TYPE 1
 
+/** The door pin is to detect a door opening. This will prevent new command
+ from serial or sd card getting executed. It will not stop immediately. Instead
+ it lets the move buffer run empty so closing the door allows continuing the print.
+ The exact behavior might change in the future.
+  */
+ 
+#define DOOR_PIN -1
+#define DOOR_PULLUP 1
+#define DOOR_INVERTING 1
 
 /** Adds support for ESP8266 Duet web interface, PanelDue and probably some other things. 
  * This essentially adds command M36/M408 and extends M20.
@@ -1603,7 +1659,8 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
 20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
-21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd 
+21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
+23 or CONTROLLER_SPARKLCD_ADAPTER  Sparkcube LCD on RADDS with adapter 
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */
@@ -1642,9 +1699,9 @@ computations, so do not enable it if your display works stable!
 #define UI_PRINTER_NAME "Ordbot"
 #define UI_PRINTER_COMPANY "RepRapDiscount"
 
-
-/** Animate switches between menus etc. */
-#define UI_ANIMATION 0
+/** For graphic displays you can have a fixed top line. It can also contain
+ * dynamic modifiers. Do not define it if you want full 6 rows of data */
+//#define UI_HEAD "E1:%e0/%E0 E2:%e1/%E1 B:%eb/%Eb"
 
 /** How many ms should a single page be shown, until it is switched to the next one.*/
 #define UI_PAGES_DURATION 4000
@@ -1704,13 +1761,8 @@ Values must be in range 1..255
 // ##                         Values for menu settings                          ##
 // ###############################################################################
 
-// Values used for preheat
-#define UI_SET_PRESET_HEATED_BED_TEMP_PLA 60
-#define UI_SET_PRESET_EXTRUDER_TEMP_PLA   180
-#define UI_SET_PRESET_HEATED_BED_TEMP_ABS 110
-#define UI_SET_PRESET_EXTRUDER_TEMP_ABS   240
 // Extreme values
-#define UI_SET_MIN_HEATED_BED_TEMP  55
+#define UI_SET_MIN_HEATED_BED_TEMP  50
 #define UI_SET_MAX_HEATED_BED_TEMP 120
 #define UI_SET_MIN_EXTRUDER_TEMP   160
 #define UI_SET_MAX_EXTRUDER_TEMP   270
@@ -1732,6 +1784,7 @@ Values must be in range 1..255
 
 #define NUM_MOTOR_DRIVERS 0
 // #define MOTOR_DRIVER_x StepperDriver<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable>(float stepsPerMM,float speed)
+// #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
 #define MOTOR_DRIVER_1(var) StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(100.0f,5.0f)
 
 /*

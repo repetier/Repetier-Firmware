@@ -26,7 +26,7 @@
 
 /**
   This is the main Hardware Abstraction Layer (HAL).
-  To make the firmware work with different processors and toolchains,
+  To make the firmware work with different processors and tool chains,
   all hardware related code should be packed into the hal files.
 */
 
@@ -56,7 +56,7 @@
 #include <avr/wdt.h>
 /** \brief Prescale factor, timer0 runs at.
 
-All known arduino boards use 64. This value is needed for the extruder timing. */
+All known Arduino boards use 64. This value is needed for the extruder timing. */
 #define TIMER0_PRESCALE 64
 
 #define ANALOG_PRESCALER _BV(ADPS0)|_BV(ADPS1)|_BV(ADPS2)
@@ -64,12 +64,18 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #if MOTHERBOARD==8 || MOTHERBOARD==88 || MOTHERBOARD==9 || MOTHERBOARD==92 || CPU_ARCH!=ARCH_AVR
 #define EXTERNALSERIAL
 #endif
-//#define EXTERNALSERIAL  // Force using arduino serial
+#if NEW_COMMUNICATION && defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#undef EXTERNALSERIAL
+#define EXTERNALSERIAL
+#endif
+
+//#define EXTERNALSERIAL  // Force using Arduino serial
 #ifndef EXTERNALSERIAL
+#undef HardwareSerial_h
 #define  HardwareSerial_h // Don't use standard serial console
 #endif
 #include <inttypes.h>
-#include "Print.h"
+#include "Stream.h"
 #ifdef EXTERNALSERIAL
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
@@ -134,7 +140,7 @@ public:
 #define I2C_WRITE   0
 
 #if NONLINEAR_SYSTEM
-// Maximum speed with 100% interrupt utilization is 27000 hz at 16MHz cpu
+// Maximum speed with 100% interrupt utilization is 27000 Hz at 16MHz cpu
 // leave some margin for all the extra transformations. So we keep inside clean timings.
 #define LIMIT_INTERVAL ((F_CPU/30000)+1)
 #else
@@ -180,11 +186,11 @@ typedef uint8_t ufast8_t;
 #undef SERIAL_TX_BUFFER_SIZE
 #undef SERIAL_TX_BUFFER_MASK
 #ifdef BIG_OUTPUT_BUFFER
-#define SERIAL_TX_BUFFER_SIZE 128
-#define SERIAL_TX_BUFFER_MASK 127
+  #define SERIAL_TX_BUFFER_SIZE 128
+  #define SERIAL_TX_BUFFER_MASK 127
 #else
-#define SERIAL_TX_BUFFER_SIZE 64
-#define SERIAL_TX_BUFFER_MASK 63
+  #define SERIAL_TX_BUFFER_SIZE 64
+  #define SERIAL_TX_BUFFER_MASK 63
 #endif
 
 struct ring_buffer
@@ -200,7 +206,7 @@ struct ring_buffer_tx
     volatile uint8_t tail;
 };
 
-class RFHardwareSerial : public Print
+class RFHardwareSerial : public Stream
 {
 public:
     ring_buffer *_rx_buffer;
@@ -242,22 +248,20 @@ extern RFHardwareSerial RFSerial;
 #define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}
 #else
 #define RFSERIAL Serial
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#if BLUETOOTH_SERIAL == 1
+#define RFSERIAL2 Serial1
+#elif BLUETOOTH_SERIAL == 2
+#define RFSERIAL2 Serial2
+#elif BLUETOOTH_SERIAL == 3
+#define RFSERIAL2 Serial3
+#elif BLUETOOTH_SERIAL == 4
+#define RFSERIAL2 Serial4
+#elif BLUETOOTH_SERIAL == 5
+#define RFSERIAL2 Serial5
 #endif
-
-#define OUT_P_I(p,i) Com::printF(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) Com::printFLN(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) Com::printF(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) Com::printFLN(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) Com::printF(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) Com::printFLN(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) Com::printF(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) Com::printFLN(PSTR(p),(float)(i),x)
-#define OUT_P(p) Com::printF(PSTR(p))
-#define OUT_P_LN(p) Com::printFLN(PSTR(p))
-#define OUT_ERROR_P(p) Com::printErrorF(PSTR(p))
-#define OUT_ERROR_P_LN(p) {Com::printErrorF(PSTR(p));Com::println();}
-#define OUT(v) Com::print(v)
-#define OUT_LN Com::println()
+#endif
+#endif
 
 class HAL
 {
@@ -269,13 +273,13 @@ public:
     virtual ~HAL();
     static inline void hwSetup(void)
     {}
-    // return val'val
+    // return val*val
     static uint16_t integerSqrt(uint32_t a);
     /** \brief Optimized division
 
     Normally the C compiler will compute a long/long division, which takes ~670 Ticks.
-    This version is optimized for a 16 bit dividend and recognises the special cases
-    of a 24 bit and 16 bit dividend, which offen, but not always occur in updating the
+    This version is optimized for a 16 bit dividend and recognizes the special cases
+    of a 24 bit and 16 bit dividend, which often, but not always occur in updating the
     interval.
     */
     static inline int32_t Div4U2U(uint32_t a,uint16_t b)
@@ -561,7 +565,7 @@ public:
     }
 
     // Faster version of InterruptProtectedBlock.
-    // For safety it ma yonly be called from within an
+    // For safety it may only be called from within an
     // interrupt handler.
     static inline void forbidInterrupts()
     {
@@ -574,6 +578,10 @@ public:
     static inline char readFlashByte(PGM_P ptr)
     {
         return pgm_read_byte(ptr);
+    }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
     }
     static inline void serialSetBaudrate(long baud)
     {

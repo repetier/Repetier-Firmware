@@ -4,7 +4,7 @@
 /*
 Event system in a nutshell:
 
-All printers are different and my need additions in th eone or other place.
+All printers are different and my need additions in the one or other place.
 It is not very convenient to add these code parts across the firmware. For this
 reason repetier-firmware uses a simple event system that comes at no cost if
 a event is not used.
@@ -17,7 +17,7 @@ How to use the system:
 1. In Configuration.h add
 #define CUSTOM_EVENTS
 2. Add a file "CustomEvents.h" which overrides all event macros you need.
-   It shoudl also include the function declarations used.
+   It should also include the function declarations used.
 3. Add a file "CustomEventsImpl.h" which includes all function definitions.
    Also it is named .h it will be included inside a cpp file only once.
    This is to compile only when selected and still keep ArduinoIDE happy.
@@ -87,7 +87,26 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UPDATE_DERIVED {}
 
 // This gets called after the basic firmware functions have initialized.
-// Use this to initalize your hardware etc.
+// Use this to initialize your hardware etc.
 #define EVENT_INITIALIZE {}
+
+// Allows adding custom symbols in strings that get parsed. Return false if not replaced so defaults can trigger.
+// override function signature: bool parser(uint8_t c1,uint8_t c2)
+#define CUSTOM_TEXT_PARSER(c1,c2) false
+
+// User interface actions
+// These get only executed if there was no hot, so they are ideal to add new actions
+
+// ok button in wizard page is called
+#define EVENT_UI_OK_WIZARD(action) {}
+#define EVENT_UI_FINISH_ACTION(action) false
+#define EVENT_UI_EXECUTE(action,allowMoves) {}
+#define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) {}
+
+// the following 2 events are equivalent to slow and fast key function and allow adding extra keys in event system.
+// make sure action is called by reference so it can be changed and returned.
+// Set action only if key is hit
+#define EVENT_CHECK_FAST_KEYS(action) {}
+#define EVENT_CHECK_SLOW_KEYS(action) {}
 
 #endif // EVENTS_H_INCLUDED

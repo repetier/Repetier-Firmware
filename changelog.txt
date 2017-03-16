@@ -1,4 +1,17 @@
-Version 92.9
+Version 1.0.0
+  Keep alive/busy signal for host timeout improvement.
+  M303 now keeps heaters/fans on.
+  Show axis compensation values with 6 digits.
+  Allow multiple MAX6675 sensors.
+  Per axis homing flags.
+  New handling for z probe = z min endstop.
+  Fixed I2C handling for due.
+  Fixed some communication error handlings.
+  Exit temperature wait 120s after reaching +/-5° corridor if real condition is not met.
+  Allow forbidding moves outside print reagion (MOVE_X_WHEN_HOMED 1).
+  
+  
+Version 0.92.9
   Extruder motor mirroring.
   Fixes in autoleveling.
   Dual x axis support.

@@ -30,6 +30,11 @@
   all hardware related code should be packed into the hal files.
 */
 
+// You can set different sizes if you want, but with binary mode it does not get faster
+#ifndef SERIAL_RX_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE 128
+#endif
+
 #ifndef HAL_H
 #define HAL_H
 
@@ -142,7 +147,7 @@ typedef char prog_char;
 #define ADC_ISR_EOC(channel)    (0x1u << channel)
 #define ENABLED_ADC_CHANNELS    {TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN}
 
-#define PULLUP(IO,v)            {pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
+#define PULLUP(IO,v)            {::pinMode(IO, (v!=LOW ? INPUT_PULLUP : INPUT)); }
 
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL       1024u  // 8sec  (~16 seconds max)
@@ -165,10 +170,12 @@ typedef char prog_char;
 #define		_WRITE(port, v)			do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
 #define WRITE(pin,v) _WRITE(pin,v)
 
-#define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
-  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
-#define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
-                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
+#define	SET_INPUT(pin) ::pinMode(pin,INPUT); 
+// pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); 
+//  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
+#define	SET_OUTPUT(pin) ::pinMode(pin,OUTPUT);
+//PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, 
+//                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
 #undef LOW
@@ -279,6 +286,7 @@ typedef unsigned int ufast8_t;
 #elif BLUETOOTH_SERIAL == 101
 #define BT_SERIAL SerialUSB
 #endif
+#define RFSERIAL2 BT_SERIAL
 
 class RFDoubleSerial : public Print
 {
@@ -297,22 +305,6 @@ extern RFDoubleSerial BTAdapter;
 
 #endif
 
-
-#define OUT_P_I(p,i) //Com::printF(PSTR(p),(int)(i))
-#define OUT_P_I_LN(p,i) //Com::printFLN(PSTR(p),(int)(i))
-#define OUT_P_L(p,i) //Com::printF(PSTR(p),(long)(i))
-#define OUT_P_L_LN(p,i) //Com::printFLN(PSTR(p),(long)(i))
-#define OUT_P_F(p,i) //Com::printF(PSTR(p),(float)(i))
-#define OUT_P_F_LN(p,i) //Com::printFLN(PSTR(p),(float)(i))
-#define OUT_P_FX(p,i,x) //Com::printF(PSTR(p),(float)(i),x)
-#define OUT_P_FX_LN(p,i,x) //Com::printFLN(PSTR(p),(float)(i),x)
-#define OUT_P(p) //Com::printF(PSTR(p))
-#define OUT_P_LN(p) //Com::printFLN(PSTR(p))
-#define OUT_ERROR_P(p) //Com::printErrorF(PSTR(p))
-#define OUT_ERROR_P_LN(p) {//Com::printErrorF(PSTR(p));//Com::println();}
-#define OUT(v) //Com::print(v)
-#define OUT_LN //Com::println()
-
 union eeval_t {
   uint8_t     b[4];
   float       f;
@@ -320,6 +312,10 @@ union eeval_t {
   uint16_t    s;
   long        l;
 } PACK;
+
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+extern millis_t eprSyncTime;
+#endif
 
 class HAL
 {
@@ -456,6 +452,11 @@ class HAL
       WRITE_VAR(pin, LOW);
     }
 
+#if EEPROM_AVAILABLE == EEPROM_SDCARD
+    static void syncEEPROM(); // store to disk if changed
+    static void importEEPROM();
+#endif
+
     static inline void eprSetByte(unsigned int pos, uint8_t value)
     {
       eeval_t v;
@@ -582,7 +583,9 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD
+      eprSyncTime = HAL::timeInMilliseconds() | 1UL; 
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -651,8 +654,14 @@ class HAL
     {
       return pgm_read_byte(ptr);
     }
+    static inline int16_t readFlashWord(PGM_P ptr)
+    {
+        return pgm_read_word(ptr);
+    }
+
     static inline void serialSetBaudrate(long baud)
     {
+      Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
       BTAdapter.begin(baud);
 #else
@@ -826,7 +835,7 @@ class HAL
 
     // Watchdog support
     inline static void startWatchdog() {
-      WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);
+      WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | 0x0fff0000; //(WATCHDOG_INTERVAL << 16);
       WDT->WDT_CR = 0xA5000001;
     };
     inline static void stopWatchdog() {}
@@ -844,9 +853,7 @@ class HAL
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
-#if ANALOG_INPUTS > 0
     static void analogStart(void);
-#endif
 #if USE_ADVANCE
     static void resetExtruderDirection();
 #endif

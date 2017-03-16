@@ -79,7 +79,7 @@ union wizardVar
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
 #define PRINTER_FLAG0_ZPROBEING             64
 #define PRINTER_FLAG0_LARGE_MACHINE         128
-#define PRINTER_FLAG1_HOMED                 1
+#define PRINTER_FLAG1_HOMED_ALL             1
 #define PRINTER_FLAG1_AUTOMOUNT             2
 #define PRINTER_FLAG1_ANIMATION             4
 #define PRINTER_FLAG1_ALLKILLED             8
@@ -95,6 +95,13 @@ union wizardVar
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
 #define PRINTER_FLAG2_HOMING                64
 #define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
+#define PRINTER_FLAG3_X_HOMED               1
+#define PRINTER_FLAG3_Y_HOMED               2
+#define PRINTER_FLAG3_Z_HOMED               4
+#define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
+#define PRINTER_FLAG3_AUTOREPORT_TEMP       16
+#define PRINTER_FLAG3_SUPPORTS_STARTSTOP    32
+#define PRINTER_FLAG3_DOOR_OPEN             64
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -104,10 +111,10 @@ union wizardVar
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3 5
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
-// define an integer number of steps more than large enough to get to endstop from anywhere
+// define an integer number of steps more than large enough to get to end stop from anywhere
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
-// Some defines to make clearer reading, as we overload these cartesian memory locations for delta
+// Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
 #define towerAMaxSteps Printer::xMaxSteps
 #define towerBMaxSteps Printer::yMaxSteps
 #define towerCMaxSteps Printer::zMaxSteps
@@ -171,6 +178,7 @@ private:
 #define ENDSTOP_Z_MIN_ID 16
 #define ENDSTOP_Z_MAX_ID 32
 #define ENDSTOP_Z2_MIN_ID 64
+#define ENDSTOP_Z2_MINMAX_ID 64
 #define ENDSTOP_Z_PROBE_ID 128
 
 // These endstops are only used with EXTENDED_ENDSTOPS
@@ -261,7 +269,7 @@ public:
     }
     static INLINE bool z2MinMax() {
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
-        return (lastState & ENDSTOP_Z2_MINMAX_ID) != 0;
+        return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
 #else
         return false;
 #endif
@@ -287,6 +295,8 @@ public:
 #endif
 #endif
 
+extern bool runBedLeveling(int save); // save = S parameter in gcode
+
 class Printer
 {
     static uint8_t debugLevel;
@@ -300,11 +310,16 @@ public:
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
-    static uint8_t menuMode;
+    static uint16_t menuMode;
+#if DUAL_X_RESOLUTION
+    static float axisX1StepsPerMM;
+    static float axisX2StepsPerMM;
+#endif    
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
+	static uint32_t maxInterval; // slowest allowed interval
     static float maxAccelerationMMPerSquareSecond[];
     static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
@@ -317,7 +332,7 @@ public:
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
     static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
-    static uint8_t flag2;
+    static uint8_t flag2,flag3;
     static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -327,6 +342,7 @@ public:
     static float currentPosition[Z_AXIS_ARRAY];
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
+    static millis_t lastTempReport;
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM
@@ -348,6 +364,10 @@ public:
     static int16_t printMovesPerSecond;
     static float radius0;
 #endif
+#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
+	static int32_t xMinStepsAdj,yMinStepsAdj,zMinStepsAdj;	// adjusted to cover extruder/probe offsets
+	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
+#endif
 #if DRIVE_SYSTEM != DELTA
 	static int32_t zCorrectionStepsIncluded; 	
 #endif
@@ -358,7 +378,7 @@ public:
     static int32_t stepsRemainingAtXHit;
     static int32_t stepsRemainingAtYHit;
 #endif
-#ifdef SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING
     static int32_t levelingP1[3];
     static int32_t levelingP2[3];
     static int32_t levelingP3[3];
@@ -370,9 +390,15 @@ public:
 	static float thermoMinTemp;
 	static float thermoMaxTemp;
 #endif
+#if LAZY_DUAL_X_AXIS
+    static bool sledParked;
+#endif
+#if FEATURE_BABYSTEPPING
     static int16_t zBabystepsMissing;
-    static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
-    static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
+    static int16_t zBabysteps;
+#endif    
+    //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
+    //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static int32_t yMaxSteps;                   ///< For software endstops, limit of move in positive direction.
     static int32_t zMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -387,7 +413,7 @@ public:
     static float zMin;
     static float feedrate;                   ///< Last requested feedrate.
     static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
-    static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
+    static unsigned int extrudeMultiply;     ///< Flow multiplier in percent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
     static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
 #if DRIVE_SYSTEM!=DELTA
@@ -395,15 +421,19 @@ public:
 #endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
-    static float offsetZ;                     ///< Y-offset for different extruder positions.
-    static speed_t vMaxReached;         ///< Maximumu reached speed
-    static uint32_t msecondsPrinting;            ///< Milliseconds of printing time (means time with heated extruder)
-    static float filamentPrinted;            ///< mm of filament printed since counting started
+    static float offsetZ;                     ///< Z-offset for different extruder positions.
+    static float offsetZ2;                    ///< Z-offset without rotation correction. Required for z probe corrections
+    static speed_t vMaxReached;               ///< Maximum reached speed
+    static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
+    static float filamentPrinted;             ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION
     static float backlashX;
     static float backlashY;
     static float backlashZ;
     static uint8_t backlashDir;
+#endif
+#if MULTI_ZENDSTOP_HOMING
+	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
     static float memoryX;
     static float memoryY;
@@ -420,6 +450,11 @@ public:
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
+    // Print status related
+    static int currentLayer;
+    static int maxLayer; // -1 = unknown
+    static char printName[21]; // max. 20 chars + 0
+    static float progress;
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
@@ -431,7 +466,7 @@ public:
             interruptEvent = evt;
     }
     static void reportPrinterMode();
-    static INLINE void setMenuMode(uint8_t mode,bool on)
+    static INLINE void setMenuMode(uint16_t mode,bool on)
     {
         if(on)
             menuMode |= mode;
@@ -537,6 +572,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
+#endif
     }
 
     /** \brief Enable stepper motor for x direction. */
@@ -571,6 +609,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
         WRITE(Z3_ENABLE_PIN, Z_ENABLE_ON);
+#endif
+#if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
+	WRITE(Z4_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
@@ -620,6 +661,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
+#endif
         }
         else
         {
@@ -629,6 +673,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
 #endif
         }
     }
@@ -668,14 +715,54 @@ public:
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
 
-    static INLINE uint8_t isHomed()
+    static INLINE uint8_t isHomedAll()
     {
-        return flag1 & PRINTER_FLAG1_HOMED;
+        return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
-    static INLINE void setHomed(uint8_t b)
+    static INLINE void updateHomedAll()
     {
-        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED : flag1 & ~PRINTER_FLAG1_HOMED);
+		bool b = isXHomed() && isYHomed() && isZHomed();
+        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED_ALL : flag1 & ~PRINTER_FLAG1_HOMED_ALL);
+    }
+
+    static INLINE uint8_t isXHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_X_HOMED;
+    }
+
+    static INLINE void setXHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
+    }
+
+    static INLINE uint8_t isYHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_Y_HOMED;
+    }
+
+    static INLINE void setYHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
+    }
+
+    static INLINE uint8_t isZHomed()
+    {
+	    return flag3 & PRINTER_FLAG3_Z_HOMED;
+    }
+
+    static INLINE void setZHomed(uint8_t b)
+    {
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
+    }
+    static INLINE uint8_t isAutoreportTemp()
+    {
+        return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
+    }
+
+    static INLINE void setAutoreportTemp(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
     }
 
     static INLINE uint8_t isAllKilled()
@@ -773,6 +860,35 @@ public:
         flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         Com::printFLN(PSTR("Autoretract:"),b);
     }
+
+    static INLINE uint8_t isPrinting()
+    {
+        return flag3 & PRINTER_FLAG3_PRINTING;
+    }
+
+    static INLINE void setPrinting(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
+        Printer::setMenuMode(MENU_MODE_PRINTING, b);
+    }
+
+    static INLINE uint8_t isStartStopSupported()
+    {
+        return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;
+    }
+
+    static INLINE void setSupportStartStop(uint8_t b)
+    {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
+    }
+
+    static INLINE uint8_t isDoorOpen()
+    {
+        return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
+    }
+
+    static bool updateDoorOpen();
+    
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;
@@ -941,6 +1057,9 @@ public:
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
             motorYorZ += 2;
         }
         else if(motorYorZ >= 2)
@@ -951,6 +1070,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
             WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
             motorYorZ -= 2;
         }
@@ -987,12 +1109,36 @@ public:
     }
     static INLINE void startZStep()
     {
+#if MULTI_ZENDSTOP_HOMING
+	if(Printer::multiZHomeFlags & 1) {
+        WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#if FEATURE_TWO_ZSTEPPER
+	if(Printer::multiZHomeFlags & 2) {
+        WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
+#if FEATURE_THREE_ZSTEPPER
+	if(Printer::multiZHomeFlags & 4) {
+        WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+	if(Printer::multiZHomeFlags & 8) {
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+	}
+#endif
+#else		
         WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+#endif
 #endif
     }
     static INLINE void endXYZSteps()
@@ -1011,6 +1157,9 @@ public:
 #endif
 #if FEATURE_THREE_ZSTEPPER
         WRITE(Z3_STEP_PIN,!START_STEP_WITH_HIGH);
+#endif
+#if FEATURE_FOUR_ZSTEPPER
+		WRITE(Z4_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
     }
     static INLINE speed_t updateStepsPerTimerCall(speed_t vbase)
@@ -1122,9 +1271,10 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-	static void startProbing(bool runScript);
+	static bool startProbing(bool runScript);
 	static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
+    static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x,float y);
 #endif
@@ -1138,7 +1288,7 @@ public:
     static void buildTransformationMatrix(Plane &plane);
 #endif
 #if DISTORTION_CORRECTION
-    static bool measureDistortion(void);
+    static void measureDistortion(void);
     static Distortion distortion;
 #endif
     static void MemoryPosition();
@@ -1166,6 +1316,9 @@ public:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
+    static void pausePrint();
+    static void continuePrint();
+    static void stopPrint();
 };
 
 #endif // PRINTER_H_INCLUDED

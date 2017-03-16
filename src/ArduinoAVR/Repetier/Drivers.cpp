@@ -77,7 +77,7 @@ void commandG203(GCode &code)
     if(id < 0) id = 0;
     if(id >= NUM_MOTOR_DRIVERS) id = 0;
     Com::printF(PSTR("Motor"),id);
-    Com::printFLN(PSTR("Pos:"),motorDrivers[id]->getPosition());
+    Com::printFLN(PSTR(" Pos:"),motorDrivers[id]->getPosition());
 }
 //G204 P<motorId> S<0/1>     - Enable/disable motor
 void commandG204(GCode &code)
@@ -92,6 +92,16 @@ void commandG204(GCode &code)
         motorDrivers[id]->enable();
     else
         motorDrivers[id]->disable();
+}
+// G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
+void commandG205(GCode &code)
+{
+	int id = 0;
+	if(code.hasP())
+		id = code.P;
+	if(id < 0) id = 0;
+	if(id >= NUM_MOTOR_DRIVERS) id = 0;
+	motorDrivers[id]->home(code.hasS() && code.S != 0, code.hasE() && code.E != 0);
 }
 
 void disableAllMotorDrivers()
@@ -110,6 +120,8 @@ void initializeAllMotorDrivers()
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
 bool LaserDriver::laserOn = false;
+bool LaserDriver::firstMove = true;
+
 void LaserDriver::initialize()
 {
     if(EVENT_INITALIZE_LASER)
@@ -122,6 +134,11 @@ void LaserDriver::initialize()
 }
 void LaserDriver::changeIntensity(uint8_t newIntensity)
 {
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+    if(Printer::isDoorOpen()) {
+        newIntensity = 0; // force laser off if door is open
+    }
+#endif
     if(EVENT_SET_LASER(newIntensity))
     {
         // Default implementation

@@ -361,8 +361,12 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 #define RAMPS_V_1_3
 #define AZTEEG_X3_PRO
+#elif MOTHERBOARD == 39
+#define KNOWN_BOARD 1
+#define RAMPS_V_1_3
+#define ZRIB_V2
 #endif
-#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35
+#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35 || MOTHERBOARD == 39
 #define KNOWN_BOARD 1
 
 #if !(defined (__AVR_ATmega1280__ ) || defined (__AVR_ATmega2560__ ))
@@ -483,6 +487,7 @@ STEPPER_CURRENT_CONTROL
 #define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
 #define ORIG_SDCARDDETECT 49
+#undef ORIG_FAN_PIN
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
 #define LIGHT_PIN         6
@@ -512,7 +517,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 #ifdef AZTEEG_X3_PRO
-#define SDSUPPORT true
+#define SDSUPPORT 1
 #define SDCARDDETECTINVERTED false
 #define ORIG_SDCARDDETECT 49
 #define SDSS               53
@@ -555,12 +560,37 @@ STEPPER_CURRENT_CONTROL
 #define THERMOCOUPLE_0_PIN         4  
 #define THERMOCOUPLE_1_PIN         5  
 
+// Special extension board for x3 pro allows 2 more extruders
+
+#define ORIG_E5_STEP_PIN         12
+#define ORIG_E5_DIR_PIN          47
+#define ORIG_E5_ENABLE_PIN       63
+#define ORIG_E6_STEP_PIN         39
+#define ORIG_E6_DIR_PIN          57
+#define ORIG_E6_ENABLE_PIN       31
 
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
 #define E3_PINS ORIG_E3_STEP_PIN,ORIG_E3_DIR_PIN,ORIG_E3_ENABLE_PIN,
 #define E4_PINS ORIG_E4_STEP_PIN,ORIG_E4_DIR_PIN,ORIG_E4_ENABLE_PIN,
+#define E5_PINS ORIG_E5_STEP_PIN,ORIG_E5_DIR_PIN,ORIG_E5_ENABLE_PIN,
+#define E6_PINS ORIG_E6_STEP_PIN,ORIG_E6_DIR_PIN,ORIG_E6_ENABLE_PIN,
 
+#endif
+
+// Zonestar ZRIB V2.1 Board
+#ifdef ZRIB_V2
+#undef HEATER_2_PIN
+#define HEATER_2_PIN       7
+#define ORIG_FAN2_PIN    6
+#define SD_DETECT_PIN     49
+#define LCD_PINS_RS     16
+#define LCD_PINS_ENABLE   17
+#define LCD_PINS_D4     23
+#define LCD_PINS_D5     25
+#define LCD_PINS_D6     27
+#define LCD_PINS_D7     29
+#define BEEPER_PIN      37
 #endif
 
 #endif
@@ -890,7 +920,7 @@ STEPPER_CURRENT_CONTROL
 
 #else
 
-#define HEATER_1_PIN       14  // (bed)
+#define HEATER_1_PIN       14
 #define ORIG_X_ENABLE_PIN       -1
 #define ORIG_Y_ENABLE_PIN       -1
 #define ORIG_Z_ENABLE_PIN       -1
@@ -2755,6 +2785,210 @@ S3(ext)=9
 #define E1_PINS
 #endif
 
+/****************************************************************************************
+ * SAV MK1 (ATMEGA90USB)
+ * Requires the Teensyduino software!
+ * See how to install software etc. here: http://reprap.org/wiki/SAV_MKI#Setting-up_the_environment
+ ****************************************************************************************/
+ #if MOTHERBOARD == 89
+ #define KNOWN_BOARD 1
+ 
+ #define ORIG_X_STEP_PIN         28
+ #define ORIG_X_DIR_PIN          29
+ #define ORIG_X_ENABLE_PIN       19
+ #define ORIG_X_MIN_PIN          25
+ #define ORIG_X_MAX_PIN          -1
+ 
+ #define ORIG_Y_STEP_PIN         30
+ #define ORIG_Y_DIR_PIN          31
+ #define ORIG_Y_ENABLE_PIN       18
+ #define ORIG_Y_MIN_PIN          26
+ #define ORIG_Y_MAX_PIN          -1
+ 
+ #define ORIG_Z_STEP_PIN         32
+ #define ORIG_Z_DIR_PIN          33
+ #define ORIG_Z_ENABLE_PIN       17
+ #define ORIG_Z_MIN_PIN          -1
+ #define ORIG_Z_MAX_PIN          27
+ 
+ #define ORIG_E0_STEP_PIN         34
+ #define ORIG_E0_DIR_PIN          35
+ #define ORIG_E0_ENABLE_PIN       13
+ 
+ // Extruder - ANALOG PIN NUMBER!
+ #define TEMP_0_PIN          7
+ // Bed - ANALOG PIN NUMBER!
+ #define TEMP_1_PIN          6
+ // Extruder
+ #define HEATER_0_PIN       15
+ // bed
+ #define HEATER_1_PIN       14
+ #define HEATER_2_PIN   -1
+ #define TEMP_2_PIN     -1
+ 
+ #define SDPOWER            -1
+ #define SDSS                20
+ #define LED_PIN            -1
+ // Fan
+ #define ORIG_FAN_PIN            16
+ #define ORIG_PS_ON_PIN          -1
+ 
+ #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+ #define E1_PINS
+ 
+ #if !SDSUPPORT
+ // these pins are defined in the SD library if building with SD support
+ #define SCK_PIN          21
+ #define MISO_PIN         23
+ #define MOSI_PIN         22
+ #endif
+ 
+ #endif
+
+/****************************************************************************************
+* MJRice Pica Rev B * 
+****************************************************************************************/
+#if MOTHERBOARD == 183
+#define KNOWN_BOARD 1
+
+#define ORIG_X_DIR_PIN 54
+#define ORIG_X_STEP_PIN 55
+#define ORIG_Y_DIR_PIN 56
+#define ORIG_Y_STEP_PIN 57
+#define ORIG_Z_DIR_PIN 58
+#define ORIG_Z_STEP_PIN 59
+#define ORIG_X_ENABLE_PIN 60
+#define ORIG_Y_ENABLE_PIN 61
+#define ORIG_Z_ENABLE_PIN 62
+#define ORIG_X_MIN_PIN 14
+#define ORIG_X_MAX_PIN 15
+#define ORIG_Y_MIN_PIN 16
+#define ORIG_Y_MAX_PIN 17
+#define ORIG_Z_MIN_PIN 23
+#define ORIG_Z_MAX_PIN 22
+
+#define ORIG_E0_STEP_PIN 67
+#define ORIG_E0_DIR_PIN 24
+#define ORIG_E0_ENABLE_PIN 26
+
+#define ORIG_E1_STEP_PIN 68
+#define ORIG_E1_DIR_PIN 28
+#define ORIG_E1_ENABLE_PIN 27
+
+#define SSR_PIN 6
+
+#define SDPOWER -1
+#define SDSS 53
+#define ORIG_SDCARDDETECT 49
+
+#define LED_PIN -1
+#define ORIG_FAN_PIN 11
+#define ORIG_FAN2_PIN 12
+#define ORIG_PS_ON_PIN -1
+
+#define HEATER_0_PIN 10
+#define HEATER_1_PIN 8
+#define HEATER_2_PIN 2
+// ANALOG NUMBERING
+#define TEMP_0_PIN 9
+
+#define TEMP_1_PIN 10
+#define TEMP_2_PIN 11
+#define TEMP_3_PIN 12
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+
+// LCD interface pins
+#define LCD_PINS_RS 33
+#define LCD_PINS_ENABLE 30
+#define LCD_PINS_D4 35
+#define LCD_PINS_D5 32
+#define LCD_PINS_D6 37
+#define LCD_PINS_D7 36
+#define BTN_EN1 47
+#define BTN_EN2 48
+#define BTN_ENC 31 //the click
+#define BLEN_C 2
+#define BLEN_B 1
+#define BLEN_A 0
+
+#endif
+
+/****************************************************************************************
+* MJRice Pica Rev C * 
+****************************************************************************************/
+#if MOTHERBOARD == 184
+#define KNOWN_BOARD 1
+
+#define ORIG_X_DIR_PIN 54
+#define ORIG_X_STEP_PIN 55
+#define ORIG_Y_DIR_PIN 56
+#define ORIG_Y_STEP_PIN 57
+#define ORIG_Z_DIR_PIN 58
+#define ORIG_Z_STEP_PIN 59
+#define ORIG_X_ENABLE_PIN 60
+#define ORIG_Y_ENABLE_PIN 61
+#define ORIG_Z_ENABLE_PIN 62
+#define ORIG_X_MIN_PIN 14
+#define ORIG_X_MAX_PIN 15
+#define ORIG_Y_MIN_PIN 16
+#define ORIG_Y_MAX_PIN 17
+#define ORIG_Z_MIN_PIN 23
+#define ORIG_Z_MAX_PIN 22
+
+#define ORIG_E0_STEP_PIN 67
+#define ORIG_E0_DIR_PIN 24
+#define ORIG_E0_ENABLE_PIN 26
+
+#define ORIG_E1_STEP_PIN 68
+#define ORIG_E1_DIR_PIN 28
+#define ORIG_E1_ENABLE_PIN 27
+
+#define SSR_PIN 6
+
+#define SDPOWER -1
+#define SDSS 53
+#define ORIG_SDCARDDETECT 49
+
+#define LED_PIN -1
+#define ORIG_FAN_PIN 9
+#define ORIG_FAN2_PIN 7
+#define ORIG_PS_ON_PIN -1
+
+#define HEATER_0_PIN 10
+#define HEATER_1_PIN 8
+#define HEATER_2_PIN 2
+// ANALOG NUMBERING
+#define TEMP_0_PIN 9
+
+#define TEMP_1_PIN 10
+#define TEMP_2_PIN 11
+#define TEMP_3_PIN 12
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+
+// LCD interface pins
+#define LCD_PINS_RS 33
+#define LCD_PINS_ENABLE 30
+#define LCD_PINS_D4 35
+#define LCD_PINS_D5 32
+#define LCD_PINS_D6 37
+#define LCD_PINS_D7 36
+#define BTN_EN1 47
+#define BTN_EN2 48
+#define BTN_ENC 31
+#define BLEN_C 2
+#define BLEN_B 1
+#define BLEN_A 0
+
+// these pins are defined in the SD library if building with SD support
+#define SCK_PIN 52
+#define MISO_PIN 50
+#define MOSI_PIN 51
+#define MAX6675_SS 53
+
+#endif
+
 
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
@@ -2839,6 +3073,10 @@ S3(ext)=9
 #define E5_STEP_PIN ORIG_E5_STEP_PIN
 #define E5_DIR_PIN ORIG_E5_DIR_PIN
 #define E5_ENABLE_PIN ORIG_E5_ENABLE_PIN
+
+#define E6_STEP_PIN ORIG_E6_STEP_PIN
+#define E6_DIR_PIN ORIG_E6_DIR_PIN
+#define E6_ENABLE_PIN ORIG_E6_ENABLE_PIN
 
 #define FAN_PIN ORIG_FAN_PIN
 #ifdef ORIG_FAN2_PIN
