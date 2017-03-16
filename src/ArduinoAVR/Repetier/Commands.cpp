@@ -1103,7 +1103,6 @@ void Commands::processGCode(GCode *com) {
             }
             break;
         case 30: 
-
 			{ 	// G30 [Pn] [S]
 				// G30 (the same as G30 P3) single probe set Z0
 				// G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
