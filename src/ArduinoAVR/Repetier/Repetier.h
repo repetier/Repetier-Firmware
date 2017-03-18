@@ -251,13 +251,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif
-#define XY_GANTRY 1
-#define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
-#define XZ_GANTRY 8
-#define ZX_GANTRY 9
+
 #if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
 #undef FAST_COREXYZ
 #endif
