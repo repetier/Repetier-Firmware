@@ -2120,7 +2120,7 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #endif  // Display
 
 // Beeper methods
-#if BEEPER_TYPE==0
+#if BEEPER_TYPE==0 or FEATURE_BEEPER==0
   #define BEEP_SHORT {}
   #define BEEP_LONG {}
 #else
