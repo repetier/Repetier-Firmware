@@ -1556,6 +1556,31 @@ void Printer::homeYAxis()
 }
 #endif
 
+#if (FEATURE_AUTOLEVEL || DISTORTION_CORRECTION)
+  bool Printer::SafeZ4Homing(){
+    //Check if there is enough space to move Z-Axis down. There is enough space, if Printer has Z-Max.
+    if((MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1)){
+      //TODO: calculate highest possible distortion, to move less up 
+      //check if z is higher than Z-Probe safty height (It is only correct, because after restart z is zero). If it is not move to the safty distance (mot more far)  
+      if(Printer::realZPosition() < EEPROM::zProbeBedDistance()){ 
+        float distance2SaftyDistance = EEPROM::zProbeBedDistance() - Printer::realZPosition();
+        PrintLine::moveRelativeDistanceInSteps(0,0,distance2SaftyDistance * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  int Printer::UnsafeZ4Homing(bool safedZ4Home, bool zaxis){
+    //check if it could crash, when Z-position before homing was lower bed at home position
+    //no need to move back, if z was homed. Because safeZ4Home only works, when z is homed to z max
+
+          return EEPROM::zProbeBedDistance();
+
+  }
+#endif //FEATURE_AUTOLEVEL || DISTORTION_CORRECTION
+
 void Printer::homeZAxis() // Cartesian homing
 {
     long steps;
@@ -1612,6 +1637,14 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     float startX,startY,startZ;
     realPosition(startX, startY, startZ);
     setHomed(true);
+#if (FEATURE_AUTOLEVEL || DISTORTION_CORRECTION)
+    bool safedZ4Home = false;
+    if(xaxis || yaxis){
+        // Move Z Plane to avoid crash (nozzle to bed)
+        safedZ4Home = SafeZ4Homing();
+    }
+#endif //FEATURE_AUTOLEVEL || DISTORTION_CORRECTION
+
 #if !defined(HOMING_ORDER)
 #define HOMING_ORDER HOME_ORDER_XYZ
 #endif
@@ -1718,7 +1751,12 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     }
 }
 #endif
+
 #if HOMING_ORDER != HOME_ORDER_ZXYTZ
+//Undo Z safe, if z was not homed
+#if (FEATURE_AUTOLEVEL || DISTORTION_CORRECTION)
+    startZ = UnsafeZ4Homing(safedZ4Home,zaxis);
+#endif //FEATURE_AUTOLEVEL || DISTORTION_CORRECTION
     if(xaxis)
     {
         if(X_HOME_DIR < 0) startX = Printer::xMin;
@@ -2221,6 +2259,19 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const
         correction_z = 0;
     }*/
     return correction_z;
+}
+
+int32_t Distortion::correctExtrusion(int32_t x, int32_t y, int32_t z, int32_t e) const
+{
+    //TODO Retracts are multiplied at the moment. This causes strings in layers. (zStart < layers < zEnd)
+    if (!enabled || z > zEnd || z < zStart || Printer::isZProbingActive()){
+      return e;
+    }
+    //calculate Extrusionmultiplier for zStart < z < zEnd
+    int32_t zCor = correct(x, y, 0); 
+    //float correction_e = static_cast<float>((zEnd - zStart) - zCor) / (zEnd - zStart);
+    float correction_e = static_cast<float>((zEnd - zStart) - zCor) / (zEnd - zStart);
+    return round(correction_e * e);
 }
 
 void Distortion::set(float x,float y,float z) {

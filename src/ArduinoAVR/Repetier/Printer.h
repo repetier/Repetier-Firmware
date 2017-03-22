@@ -133,7 +133,8 @@ public:
     void disable(bool permanent = true);
     bool measure(void);
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
-    void updateDerived();
+    int32_t correctExtrusion(int32_t x, int32_t y, int32_t z, int32_t e) const;
+	void updateDerived();
     void reportStatus();
 	bool isEnabled() {return enabled;}
 	int32_t zMaxSteps() {return zEnd;}	
@@ -1166,6 +1167,10 @@ public:
     static void homeXAxis();
     static void homeYAxis();
     static void homeZAxis();
+#if (FEATURE_AUTOLEVEL || DISTORTION_CORRECTION)
+    static bool SafeZ4Homing();
+    static int UnsafeZ4Homing(bool safedZ4Home, bool zaxis);
+#endif //FEATURE_AUTOLEVEL || DISTORTION_CORRECTION
 };
 
 #endif // PRINTER_H_INCLUDED

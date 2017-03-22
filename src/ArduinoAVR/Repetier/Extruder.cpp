@@ -1925,6 +1925,12 @@ const short temptable_14[NUMTEMPS_14][2] PROGMEM = {
 	{571*4,8*105}, {611*4,8*100}, {681*4,8*90}, {711*4,8*85}, {811*4,8*69}, {831*4,8*65}, {881*4,8*55}, 
 	{901*4,8*51},  {941*4,8*39}, {971*4,8*28}, {981*4,8*23}, {991*4,8*17}, {1001*4,8*9}, {1021*4,8*-27},{1023*4,8*-200}
 };
+#define NUMTEMPS_15 49 //PT100 on Thermistor Input
+const short temptable_15[NUMTEMPS_15][2] PROGMEM = {
+{85,0},{976,8},{1008,80},{1048,160},{1080,240},{1112,320},{1144,400},{1176,480},{1208,560},{1240,640},{1272,720},{1305,800},{1337,880},{1377,960},{1409,1040},
+{1433,1120},{1465,1200},{1497,1280},{1529,1360},{1561,1440},{1593,1520},{1625,1600},{1658,1680},{1690,1760},{1722,1840},{1746,1920},{1778,2000},{1810,2080},
+{1834,2160},{1866,2240},{1898,2320},{1922,2400},{1954,2480},{1986,2560},{2018,2640},{2043,2720},{2075,2800},{2099,2880},{2131,2960},{2155,3040},{2187,3120},
+{2219,3200},{2492,4000},{2756,4800},{2997,5600},{3238,6400},{3462,7200},{3679,8000},{3879,8800}};
 	
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
 const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0 ;
@@ -1935,7 +1941,7 @@ const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORT
 #if NUM_TEMPS_USERTHERMISTOR2 > 0
 const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2 ;
 #endif
-const short * const temptables[14] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
+const short * const temptables[15] PROGMEM = {(short int *)&temptable_1[0][0],(short int *)&temptable_2[0][0],(short int *)&temptable_3[0][0],(short int *)&temptable_4[0][0]
 #if NUM_TEMPS_USERTHERMISTOR0 > 0
         ,(short int *)&temptable_5[0][0]
 #else
@@ -1958,9 +1964,10 @@ const short * const temptables[14] PROGMEM = {(short int *)&temptable_1[0][0],(s
         ,(short int *)&temptable_12[0][0]
         ,(short int *)&temptable_13[0][0]
         ,(short int *)&temptable_14[0][0]
+        ,(short int *)&temptable_15[0][0]
                                              };
-const uint8_t temptables_num[14] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
-                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14
+const uint8_t temptables_num[15] PROGMEM = {NUMTEMPS_1,NUMTEMPS_2,NUMTEMPS_3,NUMTEMPS_4,NUM_TEMPS_USERTHERMISTOR0,NUM_TEMPS_USERTHERMISTOR1,NUM_TEMPS_USERTHERMISTOR2,NUMTEMPS_8,
+                                 NUMTEMPS_9,NUMTEMPS_10,NUMTEMPS_11,NUMTEMPS_12,NUMTEMPS_13,NUMTEMPS_14,NUMTEMPS_15
                                            };
 
 
@@ -1987,6 +1994,7 @@ void TemperatureController::updateCurrentTemperature()
     case 11:
     case 12:
 	case 14:
+	case 15:
     case 97:
     case 98:
     case 99:
@@ -2035,6 +2043,7 @@ void TemperatureController::updateCurrentTemperature()
     case 11:
     case 12:
 	case 14:
+	case 15:
     {
         type--;
         uint8_t num = pgm_read_byte(&temptables_num[type]) << 1;
