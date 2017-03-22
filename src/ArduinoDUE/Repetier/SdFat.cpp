@@ -3075,28 +3075,39 @@ static void spiInit(uint8_t spiRate) {
 //------------------------------------------------------------------------------
 /** SPI receive a byte */
 static uint8_t spiRec() {
-    return HAL::spiReceive();
+    WRITE(SDSS, LOW);
+    uint8_t retval = HAL::spiReceive();
+    WRITE(SDSS, HIGH);
+    return retval;
 }
 //------------------------------------------------------------------------------
 /** SPI read data - only one call so force inline */
 static inline __attribute__((always_inline))
   uint8_t spiRec(uint8_t* buf, uint16_t nbyte) {
-HAL::spiReadBlock(buf,nbyte);
-return 0;
+    WRITE(SDSS, LOW);
+    HAL::spiReadBlock(buf,nbyte);
+    WRITE(SDSS, HIGH);
+    return 0;
 }
 //------------------------------------------------------------------------------
 /** SPI send a byte */
 static void spiSend(uint8_t b) {
+    WRITE(SDSS, LOW);
     HAL::spiSend(b);
+    WRITE(SDSS, HIGH);
 }
 //------------------------------------------------------------------------------
 /** SPI send block - only one call so force inline */
 static inline __attribute__((always_inline))
   void spiSendBlock(uint8_t token, const uint8_t* buf) {
+    WRITE(SDSS, LOW);
       HAL::spiSendBlock(token,buf);
+      WRITE(SDSS, HIGH);
 }
 static void spiSend(const uint8_t* buf , size_t n) {
+    WRITE(SDSS, LOW);
     HAL::spiSend(buf,n);
+    WRITE(SDSS, HIGH);
 }
 
 //------------------------------------------------------------------------------

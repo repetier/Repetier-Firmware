@@ -2252,10 +2252,9 @@ void UIDisplay::refreshPage()
     uid.printCols[0] = 0;
     while(r < UI_ROWS) // delete trailing empty rows
         strcpy(cache[r++],uid.printCols);
-    // compute line scrolling values    
     uint8_t off0 = (shift <= 0 ? 0 : shift),y;
-    uint8_t off[UI_ROWS+UI_ROWS_EXTRA];
-    for(y = 0; y < UI_ROWS+UI_ROWS_EXTRA; y++)
+    uint8_t off[UI_ROWS];
+    for(y = 0; y < UI_ROWS; y++)
     {
         uint8_t len = strlen(cache[y]); // length of line content
         off[y] = len > UI_COLS ? RMath::min(len - UI_COLS,off0) : 0;
@@ -2288,7 +2287,7 @@ void UIDisplay::refreshPage()
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         int fanPercent = 0;
         char fanString[2];
-#endif // FAN_PIN > -1 && FEATURE_FAN_CONTROL
+#endif
         if(menuLevel == 0 && menuPos[0] == 0 ) // Main menu with special graphics
         {
           if(!Printer::isPrinting()) {
@@ -2297,7 +2296,7 @@ void UIDisplay::refreshPage()
             if(extruder[0].tempControl.targetTemperatureC > 30)
 #else
             if(Extruder::current->tempControl.targetTemperatureC > 30)
-#endif // NUM_EXTRUDER < 3
+#endif
                 cache[0][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[0][0] = '\x0a'; //off
@@ -2306,7 +2305,7 @@ void UIDisplay::refreshPage()
                 cache[1][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[1][0] = '\x0a'; //off
-#endif // NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#endif
 #if HAVE_HEATED_BED
             //heated bed animated icons
             uint8_t lin = 2 - ((NUM_EXTRUDER != 2) ? 1 : 0);
@@ -2327,7 +2326,7 @@ void UIDisplay::refreshPage()
             {
                 fanString[0] = '\x0e';
             }
-#endif // FAN_PIN > -1 && FEATURE_FAN_CONTROL
+#endif
 #if SDSUPPORT
             //SD Card
             if(sd.sdactive)
@@ -2350,10 +2349,13 @@ void UIDisplay::refreshPage()
         u8g_FirstPage(&u8g);
         do
         {
-          if(menuLevel == 0 && menuPos[0] == 0 )
-          {
-            if(Printer::isPrinting()) {
-#if defined(UI_HEAD)
+#endif
+
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
+                if(menuLevel == 0 && menuPos[0] == 0 )
+                {
+          if(Printer::isPrinting()) {
+              #if defined(UI_HEAD)
               // Show status line
               u8g_SetColorIndex(&u8g,1);
               u8g_draw_box(&u8g, 0, 0, u8g_GetWidth(&u8g), UI_FONT_SMALL_HEIGHT + 1);
@@ -2371,7 +2373,7 @@ void UIDisplay::refreshPage()
                   printU8GRow(0,UI_FONT_HEIGHT*5,cache[2]); // Layer
               if(u8g_IsBBXIntersection(&u8g, 0, UI_FONT_HEIGHT*6+4 - UI_FONT_HEIGHT, 1, UI_FONT_HEIGHT))
                   printU8GRow(0,UI_FONT_HEIGHT*6+2,cache[UI_ROWS-1]);
-#else
+              #else
               drawHProgressBar(0,UI_FONT_HEIGHT*1+2, 128, UI_FONT_HEIGHT-1, Printer::progress);
               if(u8g_IsBBXIntersection(&u8g, 0, UI_FONT_HEIGHT*3+2 - UI_FONT_HEIGHT, 1, UI_FONT_HEIGHT))
                     printU8GRow(85,UI_FONT_HEIGHT*3+2,cache[1]); // progress value
@@ -2379,9 +2381,12 @@ void UIDisplay::refreshPage()
               printU8GRow(0,UI_FONT_HEIGHT*4+8,cache[2]); // Layer
               if(u8g_IsBBXIntersection(&u8g, 0, UI_FONT_HEIGHT*6+4 - UI_FONT_HEIGHT, 1, UI_FONT_HEIGHT))
                   printU8GRow(0,UI_FONT_HEIGHT*6+2,cache[UI_ROWS-1]);
-#endif
+              #endif
               printRow(0, cache[0], NULL, UI_COLS); // Object name
-          } else { // not printing
+              //printRow(2, cache[1], NULL, UI_COLS);
+              //printRow(3, cache[2], NULL, UI_COLS); // Layer
+              //printRow(UI_ROWS-1, cache[UI_ROWS-1], NULL, UI_COLS); // status
+          } else {
                     u8g_SetFont(&u8g,UI_FONT_SMALL);
                     uint8_t py = 8;
                     for(uint8_t r = 0; r < 3; r++)
@@ -2407,7 +2412,7 @@ void UIDisplay::refreshPage()
                         printU8GRow(66,52,const_cast<char *>("SD"));
                         drawHProgressBar(79,46, 46, 6, sdPercent);
                     }
-#endif // SDSUPPORT
+#endif
                     //Status
                     py = u8g_GetHeight(&u8g) - 2;
                     if(u8g_IsBBXIntersection(&u8g, 70, py - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -2421,11 +2426,11 @@ void UIDisplay::refreshPage()
                         u8g_draw_vline(&u8g,62, 0, 54);
                     }
                     u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                    } // not printing
-                } // menu level 0 page 0
+                    }
+                }
                 else
                 {
-#endif //  UI_DISPLAY_TYPE == DISPLAY_U8G
+#endif
 #if defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
 					// Show status line
 					u8g_SetColorIndex(&u8g,1);
@@ -2449,11 +2454,11 @@ void UIDisplay::refreshPage()
 #endif
                     for(y = 0; y < UI_ROWS; y++)
                         printRow(y, &cache[y][off[y]], NULL, UI_COLS);
-#if  defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
                     }
+                
 #endif
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
-                }
         }
         while( u8g_NextPage(&u8g) );  //end picture loop
 #endif

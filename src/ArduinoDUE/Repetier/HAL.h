@@ -56,7 +56,7 @@
 #define SPR1    1
 
 // force SdFat to use HAL (whether or not using SW spi)
-#undef  SOFTWARE_SPI
+//#undef  SOFTWARE_SPI
 #define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM
@@ -748,49 +748,49 @@ class HAL
     }
     static inline uint8_t spiReceive()
     {
-      WRITE(SDSS, LOW);
+      //WRITE(SDSS, LOW);
       uint8_t b = spiTransfer(0xff);
-      WRITE(SDSS, HIGH);
+      //WRITE(SDSS, HIGH);
       return b;
     }
     static inline void spiReadBlock(uint8_t*buf, uint16_t nbyte)
     {
       if (nbyte == 0) return;
-      WRITE(SDSS, LOW);
+      //WRITE(SDSS, LOW);
       for (int i = 0; i < nbyte; i++)
       {
         buf[i] = spiTransfer(0xff);
       }
-      WRITE(SDSS, HIGH);
+      //WRITE(SDSS, HIGH);
 
     }
     static inline void spiSend(uint8_t b) {
-      WRITE(SDSS, LOW);
+      //WRITE(SDSS, LOW);
       uint8_t response = spiTransfer(b);
-      WRITE(SDSS, HIGH);
+      //WRITE(SDSS, HIGH);
     }
 
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
       if (n == 0) return;
-      WRITE(SDSS, LOW);
+     // WRITE(SDSS, LOW);
       for (uint16_t i = 0; i < n; i++) {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      //WRITE(SDSS, HIGH);
     }
 
     inline __attribute__((always_inline))
     static void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
-      WRITE(SDSS, LOW);
+      //WRITE(SDSS, LOW);
       spiTransfer(token);
 
       for (uint16_t i = 0; i < 512; i++)
       {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      //WRITE(SDSS, HIGH);
     }
 
 #else
