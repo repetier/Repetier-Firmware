@@ -715,7 +715,7 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER 	   -1
 // 4,10,52 if using HW SPI.
 #define SDSS 59
-#define NONSTANDARD_SDSS
+//#define NONSTANDARD_SDSS
 #define MOSI_PIN        75
 #define MISO_PIN        74
 #define SCK_PIN         76

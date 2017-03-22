@@ -1676,6 +1676,7 @@ The following settings override uiconfig.h!
 23 or CONTROLLER_SPARKLCD_ADAPTER  Sparkcube LCD on RADDS with adapter 
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 
