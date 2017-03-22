@@ -843,7 +843,7 @@ defined(__18CXX) || defined(__PIC32MX)
 #endif
 
 #ifndef U8G_COM_SSD_I2C
-#if defined(__AVR__)
+#if defined(__AVR__)  || defined(__SAM3X8E__)
 /* AVR variant can use the arduino version at the moment */
 #define U8G_COM_SSD_I2C u8g_com_arduino_ssd_i2c_fn
 #endif

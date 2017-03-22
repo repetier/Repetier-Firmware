@@ -105,6 +105,16 @@ Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get resu
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM 3
+/*
+  Normal core xy implementation needs 2 virtual steps for a motor step to guarantee
+  that every tiny move gets maximum one step regardless of direction. This can cost
+  some speed, so alternatively you can activate the FAST_COREXYZ by uncommenting
+  the define. This solves the core movements as nonlinear movements like done for
+  deltas but without the complicated transformations. Since transformations are still
+  linear you can reduce delta computations per second to 10 and also use 10 
+  subsegments instead of 20 to reduce memory usage.
+*/
+//#define FAST_COREXYZ
 
 /* You can write some GCODE to be executed on startup. Use this e.g. to set some 
 pins. Separate multiple GCODEs with \n
@@ -873,6 +883,9 @@ on this endstop.
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
 #define ENDSTOP_Z_BACK_MOVE 5
+// If you do z min homing, you might want to rise extruder a bit after homing so it does not heat
+// touching your bed.
+#define Z_UP_AFTER_HOME 0
 
 // For higher precision you can reduce the speed for the second test on the endstop
 // during homing operation. The homing speed is divided by the value. 1 = same speed, 2 = half speed

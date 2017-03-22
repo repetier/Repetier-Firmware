@@ -659,7 +659,7 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_Y_DIR_PIN      23
 #define ORIG_Y_MIN_PIN      12
 #define ORIG_Y_MAX_PIN      11
-#define ORIG_Y_ENABLE_PIN   9
+#define ORIG_Y_ENABLE_PIN   33
 
 #define ORIG_Z_STEP_PIN     25
 #define ORIG_Z_DIR_PIN      26

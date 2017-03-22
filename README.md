@@ -12,7 +12,7 @@ and test new features and bug fixes. From time to time we push these to master
 as a new version.
 2. Do not include your personal configuration files. If you need new configuration
 options, add them to the official configuration.h file.
-3. We have to folders for different processor architectures. So for most
+3. We have two folders for different processor architectures. So for most
 changes modifications need to be in both folders. The general files are identical.
 In fact we develop on avr and just copy them to due. Only pins.h/fastio.h/hal.*
 and configuration.h are architecture dependend, so chnages there need to be made
