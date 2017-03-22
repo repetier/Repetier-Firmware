@@ -715,18 +715,20 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER 	   -1
 // 4,10,52 if using HW SPI.
 #define SDSS 59
+#define NONSTANDARD_SDSS
 #define MOSI_PIN        75
 #define MISO_PIN        74
 #define SCK_PIN         76
 
 #define ORIG_SDCARDDETECT  60
 #define SDCARDDETECTINVERTED 0
-#define LED_PIN 	   -1
-#define ORIG_FAN_PIN 	5 
-#define ORIG_FAN2_PIN  -1 
+#define LED_PIN 	   13
+#define ORIG_FAN_PIN 	6 
+#define ORIG_FAN2_PIN  5 
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN	   -1
 #define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+#define ENC424_SS             61 
 
 // 20 or 70
 #define SDA_PIN 				70  	
@@ -753,6 +755,32 @@ STEPPER_CURRENT_CONTROL
 // the same sd card when powering up the printer
 //#define EEPROM_AVAILABLE EEPROM_NONE
 #define EEPROM_AVAILABLE EEPROM_SDCARD
+
+#define MB_SETUP SET_OUTPUT(ORIG_FAN_PIN); \
+     WRITE(ORIG_FAN_PIN,LOW);\
+     SET_OUTPUT(ORIG_FAN2_PIN);\
+     WRITE(ORIG_FAN2_PIN,LOW);\
+     SET_OUTPUT(HEATER_0_PIN);\
+     WRITE(HEATER_0_PIN,LOW);\
+     SET_OUTPUT(HEATER_1_PIN);\
+     WRITE(HEATER_1_PIN,LOW);\
+     SET_OUTPUT(HEATER_2_PIN);\
+     WRITE(HEATER_2_PIN,LOW);\
+     SET_OUTPUT(HEATER_3_PIN);\
+     WRITE(HEATER_3_PIN,LOW);\
+     SET_OUTPUT(THERMOCOUPLE_0_PIN);\
+     WRITE(THERMOCOUPLE_0_PIN,HIGH);\
+     SET_OUTPUT(THERMOCOUPLE_1_PIN);\
+     WRITE(THERMOCOUPLE_1_PIN,HIGH);\
+     SET_OUTPUT(THERMOCOUPLE_2_PIN);\
+     WRITE(THERMOCOUPLE_2_PIN,HIGH);\
+     SET_OUTPUT(THERMOCOUPLE_3_PIN);\
+     WRITE(THERMOCOUPLE_3_PIN,HIGH);\
+     SET_OUTPUT(ENC424_SS);\
+     WRITE(ENC424_SS,HIGH);\
+     SET_OUTPUT(SDSS);\
+     WRITE(SDSS,HIGH)
+
 #endif
 
 
@@ -1501,7 +1529,9 @@ AD15 CH15
 #define SCK_PIN         76
 //#define DUE_SOFTWARE_SPI
 #else
+#ifndef NONSTANDARD_SDSS
 #define DUE_SOFTWARE_SPI
+#endif
 /* could be any pin with software */
 #ifndef MOSI_PIN
 #define MOSI_PIN		51

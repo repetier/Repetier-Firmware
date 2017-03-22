@@ -173,6 +173,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_FELIX_DUE 405
 #define CONTROLLER_ORCABOTXXLPRO2 25
 #define CONTROLLER_AZSMZ_12864 26
+#define CONTROLLER_REPRAPWORLD_GLCD 27
 
 //direction flags
 #define X_DIRPOS 1

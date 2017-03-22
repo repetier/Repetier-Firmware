@@ -927,6 +927,9 @@ void Printer::setup()
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
+#if defined(MB_SETUP)
+    MB_SETUP;
+#endif
 #if UI_DISPLAY_TYPE != NO_DISPLAY
     Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
 #endif
