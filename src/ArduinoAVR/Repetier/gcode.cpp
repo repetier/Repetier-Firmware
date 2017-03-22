@@ -887,7 +887,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'C':
         case 'c':
         {
-	        D = parseFloatValue(pos);
+	        C = parseFloatValue(pos);
 	        params2 |= 16;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -895,7 +895,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'H':
         case 'h':
         {
-	        D = parseFloatValue(pos);
+	        H = parseFloatValue(pos);
 	        params2 |= 32;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -903,7 +903,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'A':
         case 'a':
         {
-	        D = parseFloatValue(pos);
+	        A = parseFloatValue(pos);
 	        params2 |= 64;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -911,7 +911,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'B':
         case 'b':
         {
-	        D = parseFloatValue(pos);
+	        B = parseFloatValue(pos);
 	        params2 |= 128;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -919,7 +919,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'K':
         case 'k':
         {
-	        D = parseFloatValue(pos);
+	        K = parseFloatValue(pos);
 	        params2 |= 256;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -927,7 +927,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'L':
         case 'l':
         {
-	        D = parseFloatValue(pos);
+	        L = parseFloatValue(pos);
 	        params2 |= 512;
 	        params |= 4096; // Needs V2 for saving
 	        break;
@@ -935,7 +935,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'O':
         case 'o':
         {
-	        D = parseFloatValue(pos);
+	        O = parseFloatValue(pos);
 	        params2 |= 1024;
 	        params |= 4096; // Needs V2 for saving
 	        break;
