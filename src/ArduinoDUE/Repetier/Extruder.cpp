@@ -2655,17 +2655,19 @@ int16_t read_max31855(uint8_t ss_pin)
 #endif
 
 #if FEATURE_RETRACTION
-void Extruder::retractDistance(float dist)
+void Extruder::retractDistance(float dist,bool extraLength)
 {
     float oldFeedrate = Printer::feedrate;
     int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
     int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
     float speed = distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED);
 #if MIXING_EXTRUDER
+		if(!extraLength)
             Printer::setAllEMotors(true);
 #endif
     PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance, RMath::max(speed, 1.f), false, false);
 #if MIXING_EXTRUDER
+	if(!extraLength)
             Printer::setAllEMotors(false);
 #endif
     Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
@@ -2697,12 +2699,16 @@ void Extruder::retract(bool isRetract,bool isLong)
     }
     else if(!isRetract && isRetracted())
     {
-        distance += (isLong ? EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH) );
         if(zlift > 0) {
             PrintLine::moveRelativeDistanceInStepsReal(0,0,-zlift,0,Printer::maxFeedrate[Z_AXIS], false);
             Printer::coordinateOffset[Z_AXIS] += zLiftF;
         }
+#if MIXING_EXTRUDER		
         retractDistance(-distance);
+		retractDistance(isLong ? -EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH) : -EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH), true); // Special case for mixing extruder
+#else
+        retractDistance(-distance - (isLong ? EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH)), false);
+#endif		
         setRetracted(false);
     }
     Printer::feedrate = oldFeedrate;

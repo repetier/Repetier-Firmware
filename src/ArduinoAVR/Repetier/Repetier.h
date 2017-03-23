@@ -257,11 +257,11 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #undef FAST_COREXYZ
 #endif
 #ifdef FAST_COREXYZ
-#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
+#if DELTA_SEGMENTS_PER_SECOND_PRINT > 30
 #undef DELTA_SEGMENTS_PER_SECOND_PRINT
 #define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
 #endif
-#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
+#if DELTA_SEGMENTS_PER_SECOND_MOVE > 30
 #undef DELTA_SEGMENTS_PER_SECOND_MOVE
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 30
 #endif
