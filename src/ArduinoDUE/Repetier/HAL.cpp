@@ -911,8 +911,8 @@ void TIMER1_COMPA_VECTOR ()
 #if HEATER_PWM_SPEED < 0
 #define HEATER_PWM_SPEED 0
 #endif
-#if HEATER_PWM_SPEED > 2
-#define HEATER_PWM_SPEED 2
+#if HEATER_PWM_SPEED > 4
+#define HEATER_PWM_SPEED 4
 #endif
 
 #if HEATER_PWM_SPEED == 0
@@ -921,9 +921,15 @@ void TIMER1_COMPA_VECTOR ()
 #elif HEATER_PWM_SPEED == 1
 #define HEATER_PWM_STEP 2
 #define HEATER_PWM_MASK 254
-#else
+#elif HEATER_PWM_SPEED == 2
 #define HEATER_PWM_STEP 4
 #define HEATER_PWM_MASK 252
+#elif HEATER_PWM_SPEED == 3
+#define HEATER_PWM_STEP 8
+#define HEATER_PWM_MASK 248
+#elif HEATER_PWM_SPEED == 2
+#define HEATER_PWM_STEP 16
+#define HEATER_PWM_MASK 240
 #endif
 
 #if !defined(COOLER_PWM_SPEED)
@@ -932,8 +938,8 @@ void TIMER1_COMPA_VECTOR ()
 #if COOLER_PWM_SPEED < 0
 #define COOLER_PWM_SPEED 0
 #endif
-#if COOLER_PWM_SPEED > 2
-#define COOLER_PWM_SPEED 2
+#if COOLER_PWM_SPEED > 4
+#define COOLER_PWM_SPEED 4
 #endif
 
 #if COOLER_PWM_SPEED == 0
@@ -942,10 +948,17 @@ void TIMER1_COMPA_VECTOR ()
 #elif COOLER_PWM_SPEED == 1
 #define COOLER_PWM_STEP 2
 #define COOLER_PWM_MASK 254
-#else
+#elif COOLER_PWM_SPEED == 2
 #define COOLER_PWM_STEP 4
 #define COOLER_PWM_MASK 252
+#elif COOLER_PWM_SPEED == 3
+#define COOLER_PWM_STEP 8
+#define COOLER_PWM_MASK 248
+#elif COOLER_PWM_SPEED == 2
+#define COOLER_PWM_STEP 16
+#define COOLER_PWM_MASK 240
 #endif
+
 
 #define pulseDensityModulate( pin, density,error,invert) {uint8_t carry;carry = error + (invert ? 255 - density : density); WRITE(pin, (carry < error)); error = carry;}
 
