@@ -372,6 +372,23 @@ bool runBedLeveling(int s) {
         if(fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025 )
             break;  // we reached achievable precision so we can stop
     } // for BED_LEVELING_REPETITIONS
+#if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
+    if(s >= 1) {
+		float zall = Printer::runZProbe(false, false, 1, false);
+		if(zall == ILLEGAL_Z_PROBE)
+			return false;
+		Printer::currentPosition[Z_AXIS] = zall;
+		Printer::currentPositionSteps[Z_AXIS] = zall * Printer::axisStepsPerMM[Z_AXIS];
+#if NONLINEAR_SYSTEM
+		transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+#endif
+		float zMax = Printer::runZMaxProbe();
+		if(zMax == ILLEGAL_Z_PROBE)
+			return false;
+		zall += zMax - ENDSTOP_Z_BACK_ON_HOME;
+		Printer::zLength = zall;
+	}
+#endif	
 #endif // BED_CORRECTION_METHOD == 1
     Printer::updateDerivedParameter();
     Printer::finishProbing();
@@ -429,10 +446,10 @@ float Printer::runZMaxProbe() {
     long startZ = realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
 #endif
     Commands::waitUntilEndOfAllMoves();
-    long probeDepth = 2*(Printer::zMaxSteps-Printer::zMinSteps);
+    long probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps);
     stepsRemainingAtZHit = -1;
     setZProbingActive(true);
-    PrintLine::moveRelativeDistanceInSteps(0,0,probeDepth,0,EEPROM::zProbeSpeed(),true,true);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, probeDepth, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, true);
     if(stepsRemainingAtZHit < 0) {
         Com::printErrorFLN(PSTR("z-max homing failed"));
         return ILLEGAL_Z_PROBE;
@@ -440,15 +457,16 @@ float Printer::runZMaxProbe() {
     setZProbingActive(false);
     currentPositionSteps[Z_AXIS] -= stepsRemainingAtZHit;
 #if NONLINEAR_SYSTEM
-    probeDepth -= (realDeltaPositionSteps[Z_AXIS] - startZ);
+	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+    probeDepth = (realDeltaPositionSteps[Z_AXIS] - startZ);
 #else
     probeDepth -= stepsRemainingAtZHit;
 #endif
     float distance = (float)probeDepth * invAxisStepsPerMM[Z_AXIS];
-    Com::printF(Com::tZProbeMax,distance);
-    Com::printF(Com::tSpaceXColon,realXPosition());
-    Com::printFLN(Com::tSpaceYColon,realYPosition());
-    PrintLine::moveRelativeDistanceInSteps(0,0,-probeDepth,0,EEPROM::zProbeSpeed(),true,true);
+    Com::printF(Com::tZProbeMax, distance);
+    Com::printF(Com::tSpaceXColon, realXPosition());
+    Com::printFLN(Com::tSpaceYColon, realYPosition());
+    PrintLine::moveRelativeDistanceInSteps(0, 0, -probeDepth, 0, homingFeedrate[Z_AXIS], true, true);
     return distance;
 }
 #endif
@@ -480,6 +498,9 @@ bool Printer::startProbing(bool runScript) {
    	   (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)) 
 #endif          
           {
+			  Com::printErrorF("Activating z-probe would lead to forbidden xy position: ");
+			  Com::print(Printer::currentPosition[X_AXIS] - ZPOffsetX);
+			  Com::printFLN(PSTR(", "),Printer::currentPosition[Y_AXIS] - ZPOffsetY);
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inprecise!"));
         return false;
     } else {
