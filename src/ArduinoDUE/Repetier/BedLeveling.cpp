@@ -269,6 +269,9 @@ void correctAutolevel(Plane &plane) {
     motor2->disable();
     motor3->disable(); // now bed is even
     Printer::currentPositionSteps[Z_AXIS] = h1 * Printer::axisStepsPerMM[Z_AXIS];
+#if NONLINEAR_SYSTEM
+	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+#endif
 #else
 #error Unknown bed correction method set
 #endif
@@ -373,15 +376,15 @@ bool runBedLeveling(int s) {
             break;  // we reached achievable precision so we can stop
     } // for BED_LEVELING_REPETITIONS
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
-    if(s >= 1) {
-		float zall = Printer::runZProbe(false, false, 1, false);
-		if(zall == ILLEGAL_Z_PROBE)
-			return false;
-		Printer::currentPosition[Z_AXIS] = zall;
-		Printer::currentPositionSteps[Z_AXIS] = zall * Printer::axisStepsPerMM[Z_AXIS];
+	float zall = Printer::runZProbe(false, false, 1, false);
+	if(zall == ILLEGAL_Z_PROBE)
+		return false;
+	Printer::currentPosition[Z_AXIS] = zall;
+	Printer::currentPositionSteps[Z_AXIS] = zall * Printer::axisStepsPerMM[Z_AXIS];
 #if NONLINEAR_SYSTEM
-		transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+	transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
+    if(s >= 1) {
 		float zMax = Printer::runZMaxProbe();
 		if(zMax == ILLEGAL_Z_PROBE)
 			return false;
