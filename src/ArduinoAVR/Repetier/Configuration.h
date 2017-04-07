@@ -57,6 +57,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // RAMPS 1.3/RAMPS 1.4        = 33
 // Azteeg X3                  = 34
 // Azteeg X3 Pro              = 35
+// MPX3  (mainly RAMPS compatible) = 38
 // Ultimaker Shield 1.5.7     = 37
 // Gen6                       = 5
 // Gen6 deluxe                = 51
@@ -1705,6 +1706,10 @@ The following settings override uiconfig.h!
 18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
 21 or CONTROLLER_VIKI2 Panucatt VIKI2 graphic lcd
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
+25 or CONTROLLER_ORCABOTXXLPRO2 
+26 or CONTROLLER_AZSMZ_12864 
+405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
+27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
 */
 
 #define FEATURE_CONTROLLER NO_CONTROLLER

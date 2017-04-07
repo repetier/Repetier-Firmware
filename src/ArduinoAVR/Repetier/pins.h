@@ -365,8 +365,11 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 #define RAMPS_V_1_3
 #define ZRIB_V2
+#elif MOTHERBOARD == 38
+#define RAMPS_V_1_3
+#define MPX3
 #endif
-#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35 || MOTHERBOARD == 39
+#if MOTHERBOARD == 3 || MOTHERBOARD == 33 || MOTHERBOARD == 34 || MOTHERBOARD == 35 || MOTHERBOARD == 39 || MOTHERBOARD == 38
 #define KNOWN_BOARD 1
 
 #if !(defined (__AVR_ATmega1280__ ) || defined (__AVR_ATmega2560__ ))
@@ -591,6 +594,20 @@ STEPPER_CURRENT_CONTROL
 #define LCD_PINS_D6     27
 #define LCD_PINS_D7     29
 #define BEEPER_PIN      37
+#endif
+
+#ifdef MPX3
+#undef HEATER_BED_PIN
+#define HEATER_BED_PIN    8
+
+#undef FAN_PIN
+#define FAN_PIN           9
+
+#undef HEATER_0_PIN
+#define HEATER_0_PIN     10
+
+#undef HEATER_1_PIN
+#define HEATER_1_PIN      7
 #endif
 
 #endif
