@@ -104,6 +104,8 @@ Custom M Codes
 - M104 S<temp> T<extruder> P1 F1 H1 O<offset>- Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
                 O add offset to temperature in S, H1 use preheat temperature instead of S value.
 - M105 X0 - Get temperatures. If X0 is added, the raw analog values are also written.
+- M111 S<debugflags> - Set debugging option. Add values for wanted options:
+            1 = echo commands, 2 = info, 4 = errors, 8 = dry run mode, 16 = only communication, no actions 
 - M112 - Emergency kill
 - M115- Capabilities string
 - M116 - Wait for all temperatures in a +/- 1 degree range

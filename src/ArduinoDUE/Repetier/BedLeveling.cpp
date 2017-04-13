@@ -501,10 +501,10 @@ bool Printer::startProbing(bool runScript) {
    	   (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength)) 
 #endif          
           {
-			  Com::printErrorF("Activating z-probe would lead to forbidden xy position: ");
+			  Com::printErrorF(PSTR("Activating z-probe would lead to forbidden xy position: "));
 			  Com::print(Printer::currentPosition[X_AXIS] - ZPOffsetX);
 			  Com::printFLN(PSTR(", "),Printer::currentPosition[Y_AXIS] - ZPOffsetY);
-        GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inprecise!"));
+        GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inaccurate!"));
         return false;
     } else {
 	    // Update position	
