@@ -56,7 +56,9 @@
 #define SPR1    1
 
 // force SdFat to use HAL (whether or not using SW spi)
+#if MOTHERBOARD != 409 // special case ultratronics
 #undef  SOFTWARE_SPI
+#endif
 #define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM

@@ -597,8 +597,8 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 #ifdef MPX3
-#undef HEATER_BED_PIN
-#define HEATER_BED_PIN    8
+#undef HEATER_1_PIN
+#define HEATER_1_PIN    8
 
 #undef FAN_PIN
 #define FAN_PIN           9
@@ -606,8 +606,8 @@ STEPPER_CURRENT_CONTROL
 #undef HEATER_0_PIN
 #define HEATER_0_PIN     10
 
-#undef HEATER_1_PIN
-#define HEATER_1_PIN      7
+#undef HEATER_2_PIN
+#define HEATER_2_PIN      7
 #endif
 
 #endif
