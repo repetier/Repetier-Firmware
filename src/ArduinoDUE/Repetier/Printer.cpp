@@ -828,8 +828,8 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
             Extruder::current->retract(com->E < 0,false);
         } else {
-            p = convertToMM(com->E * axisStepsPerMM[E_AXIS]); // current position
-            Extruder::current->retract(com->E < p,false);
+            p = convertToMM(com->E * axisStepsPerMM[E_AXIS]); // target position
+            Extruder::current->retract(p < currentPositionSteps[E_AXIS], false);
         }
         return 0; // Fake no move so nothing gets added
     }
