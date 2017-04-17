@@ -840,7 +840,9 @@ class HAL
       WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | 0x0fff0000; //(WATCHDOG_INTERVAL << 16);
       WDT->WDT_CR = 0xA5000001;
     };
-    inline static void stopWatchdog() {}
+    inline static void stopWatchdog() {
+      WDT_Disable(WDT);
+    }
     inline static void pingWatchdog() {
 #if FEATURE_WATCHDOG
       wdPinged = true;
