@@ -828,6 +828,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     }    
 #endif	// LAZY_DUAL_X_AXIS
 	executeSelect = false;
+	Printer::lastCmdPos[X_AXIS] = lastX;
 #else	// DUAL_X_AXIS
     Printer::offsetX = -next->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
 #endif
