@@ -184,6 +184,16 @@ float Printer::maxRealSegmentLength = 0;
 #ifdef DEBUG_REAL_JERK
 float Printer::maxRealJerk = 0;
 #endif
+
+//********************* Added IK
+#if MULTI_XENDSTOP_HOMING          
+fast8_t Printer::multiXHomeFlags;  // 1 = move X0, 2 = move X1
+#endif
+#if MULTI_YENDSTOP_HOMING       
+fast8_t Printer::multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+#endif
+//********************
+
 #if MULTI_ZENDSTOP_HOMING
 fast8_t Printer::multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
@@ -238,6 +248,18 @@ void Endstops::update() {
         if(READ(Z_MAX_PIN) != ENDSTOP_Z_MAX_INVERTING)
             newRead |= ENDSTOP_Z_MAX_ID;
 #endif
+
+//*** Added IK
+#if (X2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_X2
+        if(READ(X2_MINMAX_PIN) != ENDSTOP_X2_MINMAX_INVERTING)
+            newRead |= ENDSTOP_X2_MINMAX_ID;
+#endif
+#if (Y2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Y2
+        if(READ(Y2_MINMAX_PIN) != ENDSTOP_Y2_MINMAX_INVERTING)
+            newRead |= ENDSTOP_Y2_MINMAX_ID;
+#endif
+//** Added IK
+
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
         if(READ(Z2_MINMAX_PIN) != ENDSTOP_Z2_MINMAX_INVERTING)
             newRead |= ENDSTOP_Z2_MINMAX_ID;
@@ -307,6 +329,17 @@ void Endstops::report() {
         Com::printF(Com::tZMaxColon);
         Com::printF(zMax() ? Com::tHSpace : Com::tLSpace);
 #endif
+//*** Added IK
+#if (X2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_X2
+        Com::printF(PSTR("x2_minmax:"));
+        Com::printF(x2MinMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if (Y2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Y2
+        Com::printF(PSTR("y2_minmax:"));
+        Com::printF(y2MinMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+//** Added IK
+
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
         Com::printF(PSTR("z2_minmax:"));
         Com::printF(z2MinMax() ? Com::tHSpace : Com::tLSpace);
@@ -1102,6 +1135,32 @@ WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
 #error You have defined hardware z min endstop without pin assignment. Set pin number for Z_MIN_PIN
 #endif
 #endif
+
+//***** Added IK
+#if MINMAX_HARDWARE_ENDSTOP_X2
+#if X2_MINMAX_PIN > -1
+SET_INPUT(X2_MINMAX_PIN);
+#if ENDSTOP_PULLUP_X2_MINMAX
+PULLUP(X2_MINMAX_PIN, HIGH);
+#endif
+#else
+#error You have defined hardware X2 minmax endstop without pin assignment. Set pin number for X2_MINMAX_PIN
+#endif
+#endif
+
+#if MINMAX_HARDWARE_ENDSTOP_Y2
+#if Y2_MINMAX_PIN > -1
+SET_INPUT(Y2_MINMAX_PIN);
+#if ENDSTOP_PULLUP_Y2_MINMAX
+PULLUP(Y2_MINMAX_PIN, HIGH);
+#endif
+#else
+#error You have defined hardware Y2 minmax endstop without pin assignment. Set pin number for Y2_MINMAX_PIN
+#endif
+#endif
+
+//**** Added IK
+
 #if MINMAX_HARDWARE_ENDSTOP_Z2
 #if Z2_MINMAX_PIN > -1
 SET_INPUT(Z2_MINMAX_PIN);
