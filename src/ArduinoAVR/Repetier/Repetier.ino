@@ -38,6 +38,8 @@ Implemented Codes
 
 - G0  -> G1
 - G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
+- G2 - Clockwise arc  X,Y,E = end position, R = Radius or I,J = center
+- G3 - Counterclockwise arc   X,Y,E = end position, R = Radius or I,J = center
 - G4  - Dwell S<seconds> or P<milliseconds>
 - G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting

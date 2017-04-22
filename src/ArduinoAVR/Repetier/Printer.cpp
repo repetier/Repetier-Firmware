@@ -850,7 +850,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #endif
 	}
 #endif
+#if DISTORTION_CORRECTION == 0
 	if(!com->hasNoXYZ()) {
+#endif
 		if(!relativeCoordinateMode)
 		{
 			if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
@@ -872,7 +874,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         sledParked = false;
 #endif        
         posAllowed = Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]);
+#if DISTORTION_CORRECTION == 0
 	}
+#endif
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
     else if(sledParked) {
 		destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS];
