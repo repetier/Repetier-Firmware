@@ -828,6 +828,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     }    
 #endif	// LAZY_DUAL_X_AXIS
 	executeSelect = false;
+	Printer::lastCmdPos[X_AXIS] = lastX;
 #else	// DUAL_X_AXIS
     Printer::offsetX = -next->xOffset * Printer::invAxisStepsPerMM[X_AXIS];
 #endif
@@ -1369,7 +1370,7 @@ void Extruder::enable()
 #if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
     WRITE(EXT1_ENABLE_PIN, EXT1_ENABLE_ON );
 #if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-	WRITE(EX10_ENABLE2_PIN, EXT1_ENABLE_ON);
+	WRITE(EXT1_ENABLE2_PIN, EXT1_ENABLE_ON);
 #endif
 #endif
 #if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1

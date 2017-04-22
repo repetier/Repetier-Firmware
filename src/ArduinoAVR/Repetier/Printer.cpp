@@ -883,7 +883,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #endif
 	}
 #endif
+#if DISTORTION_CORRECTION == 0
 	if(!com->hasNoXYZ()) {
+#endif
 		if(!relativeCoordinateMode)
 		{
 			if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
@@ -905,7 +907,9 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         sledParked = false;
 #endif        
         posAllowed = Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]);
+#if DISTORTION_CORRECTION == 0
 	}
+#endif
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
     else if(sledParked) {
 		destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS];
@@ -1733,21 +1737,21 @@ void Printer::homeXAxis()
 	Extruder::current = &extruder[0];
     steps = (Printer::xMaxSteps - Printer::xMinSteps);
     currentPositionSteps[X_AXIS] = steps;
-    PrintLine::moveRelativeDistanceInSteps(-2 * steps, 0, 0, 0, homingFeedrate[X_AXIS], true, true); // first contact
-	PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE,0,0,0,homingFeedrate[X_AXIS], true, false); // back move
-    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true); // final contact
+    PrintLine::moveRelativeDistanceInSteps(-2 * steps * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true); // first contact
+	PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, false); // back move
+    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true); // final contact
 #if defined(ENDSTOP_X_BACK_ON_HOME)
     if(ENDSTOP_X_BACK_ON_HOME > 0)
-        PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME,0,0,0,homingFeedrate[X_AXIS], true, false);
+        PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, false);
 #endif
 	Extruder::current = &extruder[1];
     currentPositionSteps[X_AXIS] = -steps;
-    PrintLine::moveRelativeDistanceInSteps(2 * steps, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
-    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE,0,0,0,homingFeedrate[X_AXIS], true, false); // back move
-    PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
+    PrintLine::moveRelativeDistanceInSteps(2 * steps * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
+    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, false); // back move
+    PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 #if defined(ENDSTOP_X_BACK_ON_HOME)
     if(ENDSTOP_X_BACK_ON_HOME > 0)
-	    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME,0,0,0,homingFeedrate[X_AXIS], true, false);
+	    PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME * -X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS], true, false);
 #endif
 	Extruder::current = curExtruder;
 #if LAZY_DUAL_X_AXIS 
