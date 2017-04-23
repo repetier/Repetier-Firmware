@@ -21,19 +21,19 @@
 
 /**
 
-  Coordinate system transformations:
+Coordinate system transformations:
 
-  Level 1: G-code => Coordinates like send via g-codes.
+Level 1: G-code => Coordinates like send via g-codes.
 
-  Level 2: Real coordinates => Coordinates corrected by coordinate shift via G92
+Level 2: Real coordinates => Coordinates corrected by coordinate shift via G92
          currentPosition and lastCmdPos are from this level.
-  Level 3: Transformed and shifter => Include extruder offset and bed rotation.
+Level 3: Transformed and shifter => Include extruder offset and bed rotation.
          These variables are only stored temporary.
 
-  Level 4: Step position => Level 3 converted into steps for motor position
+Level 4: Step position => Level 3 converted into steps for motor position
         currentPositionSteps and destinationPositionSteps are from this level.
 
-  Level 5: Nonlinear motor step position, only for nonlinear drive systems
+Level 5: Nonlinear motor step position, only for nonlinear drive systems
          destinationDeltaSteps
 
 
@@ -44,31 +44,31 @@
 
 union floatLong
 {
-  float f;
-  uint32_t l;
+    float f;
+    uint32_t l;
 #ifdef SUPPORT_64_BIT_MATH
-  uint64_t L;
+    uint64_t L;
 #endif
 };
 
 union wizardVar
 {
-  float f;
-  int32_t l;
-  uint32_t ul;
-  int16_t i;
-  uint16_t ui;
-  int8_t c;
-  uint8_t uc;
+    float f;
+    int32_t l;
+    uint32_t ul;
+    int16_t i;
+    uint16_t ui;
+    int8_t c;
+    uint8_t uc;
 
-  wizardVar(): i(0) {}
-  wizardVar(float _f): f(_f) {}
-  wizardVar(int32_t _f): l(_f) {}
-  wizardVar(uint32_t _f): ul(_f) {}
-  wizardVar(int16_t _f): i(_f) {}
-  wizardVar(uint16_t _f): ui(_f) {}
-  wizardVar(int8_t _f): c(_f) {}
-  wizardVar(uint8_t _f): uc(_f) {}
+    wizardVar():i(0) {}
+    wizardVar(float _f):f(_f) {}
+    wizardVar(int32_t _f):l(_f) {}
+    wizardVar(uint32_t _f):ul(_f) {}
+    wizardVar(int16_t _f):i(_f) {}
+    wizardVar(uint16_t _f):ui(_f) {}
+    wizardVar(int8_t _f):c(_f) {}
+    wizardVar(uint8_t _f):uc(_f) {}
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED      1
@@ -123,17 +123,17 @@ union wizardVar
 #define towerCMinSteps Printer::zMinSteps
 
 class Plane {
-  public:
-    // f(x, y) = ax + by + c
-    float a, b, c;
-    float z(float x, float y) {
-      return a * x + y * b + c;
-    }
+	public:
+	// f(x, y) = ax + by + c
+	float a,b,c;
+	float z(float x,float y) {
+		return a * x + y * b + c;
+	}
 };
 #if DISTORTION_CORRECTION
 class Distortion
 {
-  public:
+public:
     Distortion();
     void init();
     void enable(bool permanent = true);
@@ -142,16 +142,12 @@ class Distortion
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
     void updateDerived();
     void reportStatus();
-    bool isEnabled() {
-      return enabled;
-    }
-    int32_t zMaxSteps() {
-      return zEnd;
-    }
-    void set(float x, float y, float z);
-    void showMatrix();
+	bool isEnabled() {return enabled;}
+	int32_t zMaxSteps() {return zEnd;}	
+	void set(float x,float y,float z);
+	void showMatrix();		
     void resetCorrection();
-  private:
+private:
     int matrixIndex(fast8_t x, fast8_t y) const;
     int32_t getMatrix(int index) const;
     void setMatrix(int32_t val, int index);
@@ -159,15 +155,15 @@ class Distortion
     INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners();
-    // attributes
-#if DRIVE_SYSTEM == DELTA
+// attributes
+#if DRIVE_SYSTEM == DELTA	
     int32_t step;
     int32_t radiusCorrectionSteps;
 #else
-    int32_t xCorrectionSteps, xOffsetSteps;
-    int32_t yCorrectionSteps, yOffsetSteps;
-#endif
-    int32_t zStart, zEnd;
+	int32_t xCorrectionSteps,xOffsetSteps;
+	int32_t yCorrectionSteps,yOffsetSteps;
+#endif	
+    int32_t zStart,zEnd;
 #if !DISTORTION_PERMANENT
     int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
 #endif
@@ -184,8 +180,6 @@ class Distortion
 #define ENDSTOP_Z2_MIN_ID 64
 #define ENDSTOP_Z2_MINMAX_ID 64
 #define ENDSTOP_Z_PROBE_ID 128
-#define ENDSTOP_X2_MINMAX_ID 256
-#define ENDSTOP_Y2_MINMAX_ID 512
 
 // These endstops are only used with EXTENDED_ENDSTOPS
 #define ENDSTOP_X2_MIN_ID 1
@@ -205,106 +199,86 @@ class Endstops {
     static flag8_t lastRead2;
     static flag8_t accumulator2;
 #endif
-  public:
+public:
     static void update();
     static void report();
     static INLINE bool anyXYZMax() {
-      return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID)) != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID)) != 0;
     }
     static INLINE bool anyXYZ() {
 #ifdef EXTENDED_ENDSTOPS
-      return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID | ENDSTOP_X_MIN_ID | ENDSTOP_Y_MIN_ID | ENDSTOP_Z_MIN_ID | ENDSTOP_X2_MIN_ID | ENDSTOP_Y2_MIN_ID | ENDSTOP_Z2_MIN_ID)) != 0 ||
-             lastState2 != 0;
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
+		lastState2 != 0;
 #else
-      return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID | ENDSTOP_X_MIN_ID | ENDSTOP_Y_MIN_ID | ENDSTOP_Z_MIN_ID | ENDSTOP_X2_MIN_ID | ENDSTOP_Y2_MIN_ID | ENDSTOP_Z2_MIN_ID)) != 0;
+	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
     static INLINE void resetAccumulator() {
-      accumulator = 0;
+        accumulator = 0;
 #ifdef EXTENDED_ENDSTOPS
-      accumulator2 = 0;
+        accumulator2 = 0;
 #endif
     }
     static INLINE void fillFromAccumulator() {
-      lastState = accumulator;
+        lastState = accumulator;
 #ifdef EXTENDED_ENDSTOPS
-      lastState2 = accumulator2;
+        lastState2 = accumulator2;
 #endif
     }
     static INLINE bool xMin() {
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-      return (lastState & ENDSTOP_X_MIN_ID) != 0;
+        return (lastState & ENDSTOP_X_MIN_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool xMax() {
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-      return (lastState & ENDSTOP_X_MAX_ID) != 0;
+        return (lastState & ENDSTOP_X_MAX_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool yMin() {
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
-      return (lastState & ENDSTOP_Y_MIN_ID) != 0;
+        return (lastState & ENDSTOP_Y_MIN_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool yMax() {
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-      return (lastState & ENDSTOP_Y_MAX_ID) != 0;
+        return (lastState & ENDSTOP_Y_MAX_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool zMin() {
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-      return (lastState & ENDSTOP_Z_MIN_ID) != 0;
+        return (lastState & ENDSTOP_Z_MIN_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool zMax() {
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-      return (lastState & ENDSTOP_Z_MAX_ID) != 0;
+        return (lastState & ENDSTOP_Z_MAX_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
-
-
-    static INLINE bool x2MinMax() {
-#if (X2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_X2
-      return (lastState & ENDSTOP_X2_MIN_ID) != 0;
-#else
-      return false;
-#endif
-    }
-
-    static INLINE bool y2MinMax() {
-#if (Y2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Y2
-      return (lastState & ENDSTOP_Y2_MIN_ID) != 0;
-#else
-      return false;
-#endif
-    }
-
-
-
     static INLINE bool z2MinMax() {
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
-      return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
+        return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
     static INLINE bool zProbe() {
 #if FEATURE_Z_PROBE
-      return (lastState & ENDSTOP_Z_PROBE_ID) != 0;
+        return (lastState & ENDSTOP_Z_PROBE_ID) != 0;
 #else
-      return false;
+        return false;
 #endif
     }
 };
@@ -326,7 +300,7 @@ extern bool runBedLeveling(int save); // save = S parameter in gcode
 class Printer
 {
     static uint8_t debugLevel;
-  public:
+public:
 #if USE_ADVANCE
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
     static ufast8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
@@ -340,12 +314,12 @@ class Printer
 #if DUAL_X_RESOLUTION
     static float axisX1StepsPerMM;
     static float axisX2StepsPerMM;
-#endif
+#endif    
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
     static float homingFeedrate[];
-    static uint32_t maxInterval; // slowest allowed interval
+	static uint32_t maxInterval; // slowest allowed interval
     static float maxAccelerationMMPerSquareSecond[];
     static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
@@ -357,8 +331,8 @@ class Printer
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
-    static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
-    static uint8_t flag2, flag3;
+    static uint8_t flag0,flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2,flag3;
     static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
@@ -391,11 +365,11 @@ class Printer
     static float radius0;
 #endif
 #if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
-    static int32_t xMinStepsAdj, yMinStepsAdj, zMinStepsAdj;	// adjusted to cover extruder/probe offsets
-    static int32_t xMaxStepsAdj, yMaxStepsAdj, zMaxStepsAdj;
+	static int32_t xMinStepsAdj,yMinStepsAdj,zMinStepsAdj;	// adjusted to cover extruder/probe offsets
+	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
 #endif
 #if DRIVE_SYSTEM != DELTA
-    static int32_t zCorrectionStepsIncluded;
+	static int32_t zCorrectionStepsIncluded; 	
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static int32_t stepsRemainingAtZHit;
@@ -413,8 +387,8 @@ class Printer
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
 #if FAN_THERMO_PIN > -1
-    static float thermoMinTemp;
-    static float thermoMaxTemp;
+	static float thermoMinTemp;
+	static float thermoMaxTemp;
 #endif
 #if LAZY_DUAL_X_AXIS
     static bool sledParked;
@@ -422,7 +396,7 @@ class Printer
 #if FEATURE_BABYSTEPPING
     static int16_t zBabystepsMissing;
     static int16_t zBabysteps;
-#endif
+#endif    
     //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -458,16 +432,8 @@ class Printer
     static float backlashZ;
     static uint8_t backlashDir;
 #endif
-
-#if MULTI_XENDSTOP_HOMING
-    static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
-#endif
-#if MULTI_YENDSTOP_HOMING
-    static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
-#endif
-
 #if MULTI_ZENDSTOP_HOMING
-    static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
+	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
     static float memoryX;
     static float memoryY;
@@ -496,81 +462,79 @@ class Printer
 
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority)
     {
-      if (highPriority || interruptEvent == 0)
-        interruptEvent = evt;
+        if(highPriority || interruptEvent == 0)
+            interruptEvent = evt;
     }
     static void reportPrinterMode();
-    static INLINE void setMenuMode(uint16_t mode, bool on)
+    static INLINE void setMenuMode(uint16_t mode,bool on)
     {
-      if (on)
-        menuMode |= mode;
-      else
-        menuMode &= ~mode;
+        if(on)
+            menuMode |= mode;
+        else
+            menuMode &= ~mode;
     }
 
     static INLINE bool isMenuMode(uint8_t mode)
     {
-      return (menuMode & mode) == mode;
+        return (menuMode & mode) == mode;
     }
-    static void setDebugLevel(uint8_t newLevel);
-    static void toggleEcho();
-    static void toggleInfo();
-    static void toggleErrors();
-    static void toggleDryRun();
-    static void toggleCommunication();
-    static void toggleNoMoves();
+	static void setDebugLevel(uint8_t newLevel);
+	static void toggleEcho();
+	static void toggleInfo();
+	static void toggleErrors();
+	static void toggleDryRun();
+	static void toggleCommunication();
+	static void toggleNoMoves();
     static void toggleEndStop();
-    static INLINE uint8_t getDebugLevel() {
-      return debugLevel;
-    }
+	static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
-      return ((debugLevel & 1) != 0);
+        return ((debugLevel & 1) != 0);
     }
 
     static INLINE bool debugInfo()
     {
-      return ((debugLevel & 2) != 0);
+        return ((debugLevel & 2) != 0);
     }
 
     static INLINE bool debugErrors()
     {
-      return ((debugLevel & 4) != 0);
+        return ((debugLevel & 4) != 0);
     }
 
     static INLINE bool debugDryrun()
     {
-      return ((debugLevel & 8) != 0);
+        return ((debugLevel & 8) != 0);
     }
 
     static INLINE bool debugCommunication()
     {
-      return ((debugLevel & 16) != 0);
+        return ((debugLevel & 16) != 0);
     }
 
     static INLINE bool debugNoMoves()
     {
-      return ((debugLevel & 32) != 0);
+        return ((debugLevel & 32) != 0);
     }
 
     static INLINE bool debugEndStop()
     {
-      return ((debugLevel & 64) != 0);
+        return ((debugLevel & 64) != 0);
     }
-
+    
     static INLINE bool debugFlag(uint8_t flags)
     {
-      return (debugLevel & flags);
+        return (debugLevel & flags);
     }
 
     static INLINE void debugSet(uint8_t flags)
     {
-      setDebugLevel(debugLevel | flags);
+        setDebugLevel(debugLevel | flags);
     }
 
     static INLINE void debugReset(uint8_t flags)
     {
-      setDebugLevel(debugLevel & ~flags);
+        setDebugLevel(debugLevel & ~flags);
     }
     /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
@@ -579,10 +543,10 @@ class Printer
     static INLINE void disableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
-      WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
+        WRITE(X_ENABLE_PIN, !X_ENABLE_ON);
 #endif
 #if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
-      WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, !X_ENABLE_ON);
 #endif
     }
 
@@ -590,26 +554,26 @@ class Printer
     static INLINE void disableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
-      WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
+        WRITE(Y_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-      WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, !Y_ENABLE_ON);
 #endif
     }
     /** \brief Disable stepper motor for z direction. */
     static INLINE void disableZStepper()
     {
 #if (Z_ENABLE_PIN > -1)
-      WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
+        WRITE(Z_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-      WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
-      WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
+        WRITE(Z3_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
 #if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
-      WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
+	WRITE(Z4_ENABLE_PIN, !Z_ENABLE_ON);
 #endif
     }
 
@@ -617,10 +581,10 @@ class Printer
     static INLINE void  enableXStepper()
     {
 #if (X_ENABLE_PIN > -1)
-      WRITE(X_ENABLE_PIN, X_ENABLE_ON);
+        WRITE(X_ENABLE_PIN, X_ENABLE_ON);
 #endif
 #if (FEATURE_TWO_XSTEPPER || DUAL_X_AXIS) && (X2_ENABLE_PIN > -1)
-      WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
+        WRITE(X2_ENABLE_PIN, X_ENABLE_ON);
 #endif
     }
 
@@ -628,685 +592,649 @@ class Printer
     static INLINE void  enableYStepper()
     {
 #if (Y_ENABLE_PIN > -1)
-      WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
+        WRITE(Y_ENABLE_PIN, Y_ENABLE_ON);
 #endif
 #if FEATURE_TWO_YSTEPPER && (Y2_ENABLE_PIN > -1)
-      WRITE(Y2_ENABLE_PIN, Y_ENABLE_ON);
+        WRITE(Y2_ENABLE_PIN, Y_ENABLE_ON);
 #endif
     }
     /** \brief Enable stepper motor for z direction. */
     static INLINE void  enableZStepper()
     {
 #if (Z_ENABLE_PIN > -1)
-      WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
+        WRITE(Z_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_TWO_ZSTEPPER && (Z2_ENABLE_PIN > -1)
-      WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
+        WRITE(Z2_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_THREE_ZSTEPPER && (Z3_ENABLE_PIN > -1)
-      WRITE(Z3_ENABLE_PIN, Z_ENABLE_ON);
+        WRITE(Z3_ENABLE_PIN, Z_ENABLE_ON);
 #endif
 #if FEATURE_FOUR_ZSTEPPER && (Z4_ENABLE_PIN > -1)
-      WRITE(Z4_ENABLE_PIN, Z_ENABLE_ON);
+	WRITE(Z4_ENABLE_PIN, Z_ENABLE_ON);
 #endif
     }
 
     static INLINE void setXDirection(bool positive)
     {
-      if (positive)
-      {
-        WRITE(X_DIR_PIN, !INVERT_X_DIR);
+        if(positive)
+        {
+            WRITE(X_DIR_PIN,!INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
-        WRITE(X2_DIR_PIN, !INVERT_X_DIR);
+            WRITE(X2_DIR_PIN,!INVERT_X_DIR);
 #endif
-      }
-      else
-      {
-        WRITE(X_DIR_PIN, INVERT_X_DIR);
+        }
+        else
+        {
+            WRITE(X_DIR_PIN,INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
-        WRITE(X2_DIR_PIN, INVERT_X_DIR);
+            WRITE(X2_DIR_PIN,INVERT_X_DIR);
 #endif
-      }
+        }
     }
 
     static INLINE void setYDirection(bool positive)
     {
-      if (positive)
-      {
-        WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
+        if(positive)
+        {
+            WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
 #endif
-      }
-      else
-      {
-        WRITE(Y_DIR_PIN, INVERT_Y_DIR);
+        }
+        else
+        {
+            WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
 #endif
-      }
+        }
     }
     static INLINE void setZDirection(bool positive)
     {
-      if (positive)
-      {
-        WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
+        if(positive)
+        {
+            WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-        WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-        WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
+            WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-        WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
+			WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
 #endif
-      }
-      else
-      {
-        WRITE(Z_DIR_PIN, INVERT_Z_DIR);
+        }
+        else
+        {
+            WRITE(Z_DIR_PIN, INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-        WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-        WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
+            WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-        WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
+			WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
 #endif
-      }
+        }
     }
 
     static INLINE bool getZDirection()
     {
-      return ((READ(Z_DIR_PIN) != 0) ^ INVERT_Z_DIR);
+        return ((READ(Z_DIR_PIN) != 0) ^ INVERT_Z_DIR);
     }
 
     static INLINE bool getYDirection()
     {
-      return ((READ(Y_DIR_PIN) != 0) ^ INVERT_Y_DIR);
+        return((READ(Y_DIR_PIN) != 0) ^ INVERT_Y_DIR);
     }
 
     static INLINE bool getXDirection()
     {
-      return ((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
+        return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
 
     static INLINE uint8_t isLargeMachine()
     {
-      return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
+        return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
 
     static INLINE void setLargeMachine(uint8_t b)
     {
-      flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
+        flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
     }
 
     static INLINE uint8_t isAdvanceActivated()
     {
-      return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
+        return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
 
     static INLINE void setAdvanceActivated(uint8_t b)
     {
-      flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
+        flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
     }
 
     static INLINE uint8_t isHomedAll()
     {
-      return flag1 & PRINTER_FLAG1_HOMED_ALL;
+        return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
     static INLINE void updateHomedAll()
     {
-      bool b = isXHomed() && isYHomed() && isZHomed();
-      flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED_ALL : flag1 & ~PRINTER_FLAG1_HOMED_ALL);
+		bool b = isXHomed() && isYHomed() && isZHomed();
+        flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED_ALL : flag1 & ~PRINTER_FLAG1_HOMED_ALL);
     }
 
     static INLINE uint8_t isXHomed()
     {
-      return flag3 & PRINTER_FLAG3_X_HOMED;
+	    return flag3 & PRINTER_FLAG3_X_HOMED;
     }
 
     static INLINE void setXHomed(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
     }
 
     static INLINE uint8_t isYHomed()
     {
-      return flag3 & PRINTER_FLAG3_Y_HOMED;
+	    return flag3 & PRINTER_FLAG3_Y_HOMED;
     }
 
     static INLINE void setYHomed(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
     }
 
     static INLINE uint8_t isZHomed()
     {
-      return flag3 & PRINTER_FLAG3_Z_HOMED;
+	    return flag3 & PRINTER_FLAG3_Z_HOMED;
     }
 
     static INLINE void setZHomed(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
+	    flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
     }
     static INLINE uint8_t isAutoreportTemp()
     {
-      return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
+        return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
     }
 
     static INLINE void setAutoreportTemp(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
+        flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
     }
 
     static INLINE uint8_t isAllKilled()
     {
-      return flag1 & PRINTER_FLAG1_ALLKILLED;
+        return flag1 & PRINTER_FLAG1_ALLKILLED;
     }
 
     static INLINE void setAllKilled(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ALLKILLED : flag1 & ~PRINTER_FLAG1_ALLKILLED);
     }
 
     static INLINE uint8_t isAutomount()
     {
-      return flag1 & PRINTER_FLAG1_AUTOMOUNT;
+        return flag1 & PRINTER_FLAG1_AUTOMOUNT;
     }
 
     static INLINE void setAutomount(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_AUTOMOUNT : flag1 & ~PRINTER_FLAG1_AUTOMOUNT);
     }
 
     static INLINE uint8_t isAnimation()
     {
-      return flag1 & PRINTER_FLAG1_ANIMATION;
+        return flag1 & PRINTER_FLAG1_ANIMATION;
     }
 
     static INLINE void setAnimation(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ANIMATION : flag1 & ~PRINTER_FLAG1_ANIMATION);
     }
 
     static INLINE uint8_t isUIErrorMessage()
     {
-      return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
+        return flag1 & PRINTER_FLAG1_UI_ERROR_MESSAGE;
     }
 
     static INLINE void setUIErrorMessage(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_UI_ERROR_MESSAGE : flag1 & ~PRINTER_FLAG1_UI_ERROR_MESSAGE);
     }
 
     static INLINE uint8_t isNoDestinationCheck()
     {
-      return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
+        return flag1 & PRINTER_FLAG1_NO_DESTINATION_CHECK;
     }
 
     static INLINE void setNoDestinationCheck(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_NO_DESTINATION_CHECK : flag1 & ~PRINTER_FLAG1_NO_DESTINATION_CHECK);
     }
 
     static INLINE uint8_t isPowerOn()
     {
-      return flag1 & PRINTER_FLAG1_POWER_ON;
+        return flag1 & PRINTER_FLAG1_POWER_ON;
     }
 
     static INLINE void setPowerOn(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_POWER_ON : flag1 & ~PRINTER_FLAG1_POWER_ON);
+        flag1 = (b ? flag1 | PRINTER_FLAG1_POWER_ON : flag1 & ~PRINTER_FLAG1_POWER_ON);
     }
 
     static INLINE uint8_t isColdExtrusionAllowed()
     {
-      return flag1 & PRINTER_FLAG1_ALLOW_COLD_EXTRUSION;
+        return flag1 & PRINTER_FLAG1_ALLOW_COLD_EXTRUSION;
     }
 
     static INLINE void setColdExtrusionAllowed(uint8_t b)
     {
-      flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
-      if (b)
-        Com::printFLN(PSTR("Cold extrusion allowed"));
-      else
-        Com::printFLN(PSTR("Cold extrusion disallowed"));
+        flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
+        if(b)
+            Com::printFLN(PSTR("Cold extrusion allowed"));
+        else
+            Com::printFLN(PSTR("Cold extrusion disallowed"));
     }
 
     static INLINE uint8_t isBlockingReceive()
     {
-      return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
+        return flag2 & PRINTER_FLAG2_BLOCK_RECEIVING;
     }
 
     static INLINE void setBlockingReceive(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
-      Com::printFLN(b ? Com::tPauseCommunication : Com::tContinueCommunication);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
+        Com::printFLN(b ? Com::tPauseCommunication : Com::tContinueCommunication);
     }
 
     static INLINE uint8_t isAutoretract()
     {
-      return flag2 & PRINTER_FLAG2_AUTORETRACT;
+        return flag2 & PRINTER_FLAG2_AUTORETRACT;
     }
 
     static INLINE void setAutoretract(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
-      Com::printFLN(PSTR("Autoretract:"), b);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
+        Com::printFLN(PSTR("Autoretract:"),b);
     }
 
     static INLINE uint8_t isPrinting()
     {
-      return flag3 & PRINTER_FLAG3_PRINTING;
+        return flag3 & PRINTER_FLAG3_PRINTING;
     }
 
     static INLINE void setPrinting(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
-      Printer::setMenuMode(MENU_MODE_PRINTING, b);
+        flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
+        Printer::setMenuMode(MENU_MODE_PRINTING, b);
     }
 
     static INLINE uint8_t isStartStopSupported()
     {
-      return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;
+        return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;
     }
 
     static INLINE void setSupportStartStop(uint8_t b)
     {
-      flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
+        flag3 = (b ? flag3 | PRINTER_FLAG3_SUPPORTS_STARTSTOP : flag3 & ~PRINTER_FLAG3_SUPPORTS_STARTSTOP);
     }
 
     static INLINE uint8_t isDoorOpen()
     {
-      return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
+        return (flag3 & PRINTER_FLAG3_DOOR_OPEN) != 0;
     }
 
     static bool updateDoorOpen();
-
+    
     static INLINE uint8_t isHoming()
     {
-      return flag2 & PRINTER_FLAG2_HOMING;
+        return flag2 & PRINTER_FLAG2_HOMING;
     }
 
     static INLINE void setHoming(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_HOMING : flag2 & ~PRINTER_FLAG2_HOMING);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_HOMING : flag2 & ~PRINTER_FLAG2_HOMING);
     }
     static INLINE uint8_t isAllEMotors()
     {
-      return flag2 & PRINTER_FLAG2_ALL_E_MOTORS;
+        return flag2 & PRINTER_FLAG2_ALL_E_MOTORS;
     }
 
     static INLINE void setAllEMotors(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_ALL_E_MOTORS : flag2 & ~PRINTER_FLAG2_ALL_E_MOTORS);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_ALL_E_MOTORS : flag2 & ~PRINTER_FLAG2_ALL_E_MOTORS);
     }
 
     static INLINE uint8_t isDebugJam()
     {
-      return (flag2 & PRINTER_FLAG2_DEBUG_JAM) != 0;
+        return (flag2 & PRINTER_FLAG2_DEBUG_JAM) != 0;
     }
 
     static INLINE uint8_t isDebugJamOrDisabled()
     {
-      return (flag2 & (PRINTER_FLAG2_DEBUG_JAM | PRINTER_FLAG2_JAMCONTROL_DISABLED)) != 0;
+        return (flag2 & (PRINTER_FLAG2_DEBUG_JAM | PRINTER_FLAG2_JAMCONTROL_DISABLED)) != 0;
     }
 
     static INLINE void setDebugJam(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_DEBUG_JAM : flag2 & ~PRINTER_FLAG2_DEBUG_JAM);
-      Com::printFLN(PSTR("Jam debugging:"), b);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_DEBUG_JAM : flag2 & ~PRINTER_FLAG2_DEBUG_JAM);
+        Com::printFLN(PSTR("Jam debugging:"),b);
     }
 
     static INLINE uint8_t isJamcontrolDisabled()
     {
-      return (flag2 & PRINTER_FLAG2_JAMCONTROL_DISABLED) != 0;
+        return (flag2 & PRINTER_FLAG2_JAMCONTROL_DISABLED) != 0;
     }
 
     static INLINE void setJamcontrolDisabled(uint8_t b)
     {
-      flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
-      Com::printFLN(PSTR("Jam control disabled:"), b);
+        flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
+        Com::printFLN(PSTR("Jam control disabled:"),b);
     }
 
     static INLINE void toggleAnimation()
     {
-      setAnimation(!isAnimation());
+        setAnimation(!isAnimation());
     }
     static INLINE float convertToMM(float x)
     {
-      return (unitIsInches ? x * 25.4 : x);
+        return (unitIsInches ? x*25.4 : x);
     }
     static INLINE bool areAllSteppersDisabled()
     {
-      return flag0 & PRINTER_FLAG0_STEPPER_DISABLED;
+        return flag0 & PRINTER_FLAG0_STEPPER_DISABLED;
     }
     static INLINE void setAllSteppersDiabled()
     {
-      flag0 |= PRINTER_FLAG0_STEPPER_DISABLED;
+        flag0 |= PRINTER_FLAG0_STEPPER_DISABLED;
     }
     static INLINE void unsetAllSteppersDisabled()
     {
-      flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
+        flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
 #if FAN_BOARD_PIN > -1
-      pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;
+        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;
 #endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect()
     {
-      return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
+        return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);
     }
     static INLINE void setAnyTempsensorDefect()
     {
-      flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
-      debugSet(8);
+        flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+		debugSet(8);
     }
     static INLINE void unsetAnyTempsensorDefect()
     {
-      flag0 &= ~PRINTER_FLAG0_TEMPSENSOR_DEFECT;
+        flag0 &= ~PRINTER_FLAG0_TEMPSENSOR_DEFECT;
     }
     static INLINE bool isManualMoveMode()
     {
-      return (flag0 & PRINTER_FLAG0_MANUAL_MOVE_MODE);
+        return (flag0 & PRINTER_FLAG0_MANUAL_MOVE_MODE);
     }
     static INLINE void setManualMoveMode(bool on)
     {
-      flag0 = (on ? flag0 | PRINTER_FLAG0_MANUAL_MOVE_MODE : flag0 & ~PRINTER_FLAG0_MANUAL_MOVE_MODE);
+        flag0 = (on ? flag0 | PRINTER_FLAG0_MANUAL_MOVE_MODE : flag0 & ~PRINTER_FLAG0_MANUAL_MOVE_MODE);
     }
     static INLINE bool isAutolevelActive()
     {
-      return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE) != 0;
+        return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE)!=0;
     }
     static void setAutolevelActive(bool on);
     static INLINE void setZProbingActive(bool on)
     {
-      flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING : flag0 & ~PRINTER_FLAG0_ZPROBEING);
+        flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING : flag0 & ~PRINTER_FLAG0_ZPROBEING);
     }
     static INLINE bool isZProbingActive()
     {
-      return (flag0 & PRINTER_FLAG0_ZPROBEING);
+        return (flag0 & PRINTER_FLAG0_ZPROBEING);
     }
     static INLINE void executeXYGantrySteps()
     {
 #if (GANTRY) && !defined(FAST_COREXYZ)
-      if (motorX <= -2)
-      {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+        if(motorX <= -2)
+        {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorX += 2;
-      }
-      else if (motorX >= 2)
-      {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+            motorX += 2;
+        }
+        else if(motorX >= 2)
+        {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorX -= 2;
-      }
-      if (motorYorZ <= -2)
-      {
-        WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+            motorX -= 2;
+        }
+        if(motorYorZ <= -2)
+        {
+            WRITE(Y_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Y2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorYorZ += 2;
-      }
-      else if (motorYorZ >= 2)
-      {
-        WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+            motorYorZ += 2;
+        }
+        else if(motorYorZ >= 2)
+        {
+            WRITE(Y_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Y2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorYorZ -= 2;
-      }
+            motorYorZ -= 2;
+        }
 #endif
     }
     static INLINE void executeXZGantrySteps()
     {
 #if (GANTRY) && !defined(FAST_COREXYZ)
-      if (motorX <= -2)
-      {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+        if(motorX <= -2)
+        {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorX += 2;
-      }
-      else if (motorX >= 2)
-      {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+            motorX += 2;
+        }
+        else if(motorX >= 2)
+        {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorX -= 2;
-      }
-      if (motorYorZ <= -2)
-      {
-        WRITE(Z_STEP_PIN, START_STEP_WITH_HIGH);
+            motorX -= 2;
+        }
+        if(motorYorZ <= -2)
+        {
+            WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
-        WRITE(Z2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-        WRITE(Z3_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-        WRITE(Z4_STEP_PIN, START_STEP_WITH_HIGH);
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorYorZ += 2;
-      }
-      else if (motorYorZ >= 2)
-      {
-        WRITE(Z_STEP_PIN, START_STEP_WITH_HIGH);
+            motorYorZ += 2;
+        }
+        else if(motorYorZ >= 2)
+        {
+            WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
-        WRITE(Z2_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-        WRITE(Z3_STEP_PIN, START_STEP_WITH_HIGH);
+            WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-        WRITE(Z4_STEP_PIN, START_STEP_WITH_HIGH);
+			WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-        motorYorZ -= 2;
-      }
+            motorYorZ -= 2;
+        }
 #endif
     }
     static INLINE void startXStep()
     {
-#if MULTI_XENDSTOP_HOMING
-      if (Printer::multiXHomeFlags & 1) {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
-      }
-#if FEATURE_TWO_XSTEPPER
-      if (Printer::multiXHomeFlags & 2) {
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
-      }
-#endif
-
-#else
-      WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
-#if FEATURE_TWO_XSTEPPER
-      WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
-#endif
-
-#endif
-
 #if DUAL_X_AXIS
 #if FEATURE_DITTO_PRINTING
-      if (Extruder::dittoMode) {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
-        return;
-      }
+		if(Extruder::dittoMode) {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+			return;
+		}
 #endif
-      if (Extruder::current->id) {
-        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
-      } else {
-        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
-      }
-#else
-      WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+		if(Extruder::current->id) {
+			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
+		} else {
+			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
+		}
+#else		
+        WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-      WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+        WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #endif
     }
     static INLINE void startYStep()
     {
-
-#if MULTI_YENDSTOP_HOMING
-      if (Printer::multiYHomeFlags & 1) {
-        WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+        WRITE(Y_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_YSTEPPER
-      if (Printer::multiYHomeFlags & 2) {
-        WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+        WRITE(Y2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
-
-#else
-      WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
-#if FEATURE_TWO_YSTEPPER
-      WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
-#endif
-
-#endif
-
     }
     static INLINE void startZStep()
     {
-
 #if MULTI_ZENDSTOP_HOMING
-      if (Printer::multiZHomeFlags & 1) {
-        WRITE(Z_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+	if(Printer::multiZHomeFlags & 1) {
+        WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
+	}
 #if FEATURE_TWO_ZSTEPPER
-      if (Printer::multiZHomeFlags & 2) {
-        WRITE(Z2_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+	if(Printer::multiZHomeFlags & 2) {
+        WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
+	}
 #endif
 #if FEATURE_THREE_ZSTEPPER
-      if (Printer::multiZHomeFlags & 4) {
-        WRITE(Z3_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+	if(Printer::multiZHomeFlags & 4) {
+        WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
+	}
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-      if (Printer::multiZHomeFlags & 8) {
-        WRITE(Z4_STEP_PIN, START_STEP_WITH_HIGH);
-      }
+	if(Printer::multiZHomeFlags & 8) {
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
+	}
 #endif
-#else
-      WRITE(Z_STEP_PIN, START_STEP_WITH_HIGH);
+#else		
+        WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
-      WRITE(Z2_STEP_PIN, START_STEP_WITH_HIGH);
+        WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-      WRITE(Z3_STEP_PIN, START_STEP_WITH_HIGH);
+        WRITE(Z3_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-      WRITE(Z4_STEP_PIN, START_STEP_WITH_HIGH);
+		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 #endif
 #endif
     }
-
-
     static INLINE void endXYZSteps()
     {
-      WRITE(X_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(X_STEP_PIN,!START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
-      WRITE(X2_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(X2_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
-      WRITE(Y_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(Y_STEP_PIN,!START_STEP_WITH_HIGH);
 #if FEATURE_TWO_YSTEPPER
-      WRITE(Y2_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(Y2_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
-      WRITE(Z_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(Z_STEP_PIN,!START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
-      WRITE(Z2_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(Z2_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-      WRITE(Z3_STEP_PIN, !START_STEP_WITH_HIGH);
+        WRITE(Z3_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-      WRITE(Z4_STEP_PIN, !START_STEP_WITH_HIGH);
+		WRITE(Z4_STEP_PIN,!START_STEP_WITH_HIGH);
 #endif
     }
     static INLINE speed_t updateStepsPerTimerCall(speed_t vbase)
     {
-      if (vbase > STEP_DOUBLER_FREQUENCY)
-      {
-#if ALLOW_QUADSTEPPING
-        if (vbase > STEP_DOUBLER_FREQUENCY * 2)
+        if(vbase > STEP_DOUBLER_FREQUENCY)
         {
-          Printer::stepsPerTimerCall = 4;
-          return vbase >> 2;
+#if ALLOW_QUADSTEPPING
+            if(vbase > STEP_DOUBLER_FREQUENCY * 2)
+            {
+                Printer::stepsPerTimerCall = 4;
+                return vbase >> 2;
+            }
+            else
+            {
+                Printer::stepsPerTimerCall = 2;
+                return vbase >> 1;
+            }
+#else
+            Printer::stepsPerTimerCall = 2;
+            return vbase >> 1;
+#endif
         }
         else
         {
-          Printer::stepsPerTimerCall = 2;
-          return vbase >> 1;
+            Printer::stepsPerTimerCall = 1;
         }
-#else
-        Printer::stepsPerTimerCall = 2;
-        return vbase >> 1;
-#endif
-      }
-      else
-      {
-        Printer::stepsPerTimerCall = 1;
-      }
-      return vbase;
+        return vbase;
     }
     static INLINE void disableAllowedStepper()
     {
 #if DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY
-      if (DISABLE_X && DISABLE_Z)
-      {
-        disableXStepper();
-        disableZStepper();
-      }
-      if (DISABLE_Y) disableYStepper();
+        if(DISABLE_X && DISABLE_Z)
+        {
+            disableXStepper();
+            disableZStepper();
+        }
+        if(DISABLE_Y) disableYStepper();
 #else
 #if GANTRY
-      if (DISABLE_X && DISABLE_Y)
-      {
-        disableXStepper();
-        disableYStepper();
-      }
+        if(DISABLE_X && DISABLE_Y)
+        {
+            disableXStepper();
+            disableYStepper();
+        }
 #else
-      if (DISABLE_X) disableXStepper();
-      if (DISABLE_Y) disableYStepper();
+        if(DISABLE_X) disableXStepper();
+        if(DISABLE_Y) disableYStepper();
 #endif
-      if (DISABLE_Z) disableZStepper();
+        if(DISABLE_Z) disableZStepper();
 #endif
     }
     static INLINE float realXPosition()
     {
-      return currentPosition[X_AXIS];
+        return currentPosition[X_AXIS];
     }
 
     static INLINE float realYPosition()
     {
-      return currentPosition[Y_AXIS];
+        return currentPosition[Y_AXIS];
     }
 
     static INLINE float realZPosition()
     {
-      return currentPosition[Z_AXIS];
+        return currentPosition[Z_AXIS];
     }
     static INLINE void realPosition(float &xp, float &yp, float &zp)
     {
-      xp = currentPosition[X_AXIS];
-      yp = currentPosition[Y_AXIS];
-      zp = currentPosition[Z_AXIS];
+        xp = currentPosition[X_AXIS];
+        yp = currentPosition[Y_AXIS];
+        zp = currentPosition[Z_AXIS];
     }
     static INLINE void insertStepperHighDelay()
     {
 #if STEPPER_HIGH_DELAY>0
-      HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
+        HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
     }
     static void constrainDestinationCoords();
@@ -1317,25 +1245,25 @@ class Printer
     static void setup();
     static void defaultLoopActions();
     static uint8_t setDestinationStepsFromGCode(GCode *com);
-    static uint8_t moveTo(float x, float y, float z, float e, float f);
-    static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
-    static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
-    static void setOrigin(float xOff, float yOff, float zOff);
-    static bool isPositionAllowed(float x, float y, float z);
+    static uint8_t moveTo(float x,float y,float z,float e,float f);
+    static uint8_t moveToReal(float x,float y,float z,float e,float f,bool pathOptimize = true);
+    static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis
+    static void setOrigin(float xOff,float yOff,float zOff);
+    static bool isPositionAllowed(float x,float y,float z);
     static INLINE int getFanSpeed()
     {
-      return (int)pwm_pos[PWM_FAN1];
+        return (int)pwm_pos[PWM_FAN1];
     }
     static INLINE int getFan2Speed()
     {
-      return (int)pwm_pos[PWM_FAN2];
+	    return (int)pwm_pos[PWM_FAN2];
     }
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
     {
-      currentNonlinearPositionSteps[A_TOWER] = xaxis;
-      currentNonlinearPositionSteps[B_TOWER] = yaxis;
-      currentNonlinearPositionSteps[C_TOWER] = zaxis;
+        currentNonlinearPositionSteps[A_TOWER] = xaxis;
+        currentNonlinearPositionSteps[B_TOWER] = yaxis;
+        currentNonlinearPositionSteps[C_TOWER] = zaxis;
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif
@@ -1343,17 +1271,17 @@ class Printer
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-    static bool startProbing(bool runScript);
-    static void finishProbing();
-    static float runZProbe(bool first, bool last, uint8_t repeat = Z_PROBE_REPETITIONS, bool runStartScript = true);
+	static bool startProbing(bool runScript);
+	static void finishProbing();
+    static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
-    static float bendingCorrectionAt(float x, float y);
+    static float bendingCorrectionAt(float x,float y);
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
-    static void transformToPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
-    static void transformFromPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
+    static void transformToPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
+    static void transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ);
 #if FEATURE_AUTOLEVEL
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
@@ -1364,20 +1292,20 @@ class Printer
     static Distortion distortion;
 #endif
     static void MemoryPosition();
-    static void GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed);
+    static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);
     static void zBabystep();
 
     static INLINE void resetWizardStack()
     {
-      wizardStackPos = 0;
+        wizardStackPos = 0;
     }
     static INLINE void pushWizardVar(wizardVar v)
     {
-      wizardStack[wizardStackPos++] = v;
+        wizardStack[wizardStackPos++] = v;
     }
     static INLINE wizardVar popWizardVar()
     {
-      return wizardStack[--wizardStackPos];
+        return wizardStack[--wizardStackPos];
     }
     static void showConfiguration();
     static void setCaseLight(bool on);

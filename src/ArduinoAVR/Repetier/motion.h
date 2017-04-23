@@ -301,124 +301,14 @@ public:
         if(isCheckEndstops())
         {
 			Endstops::update();
-     
-//** Added IK
-#if MULTI_XENDSTOP_HOMING
-           {
-               if(Printer::isHoming()) {
-           if(isXNegativeMove())
-           {
-        if(Endstops::xMin())
-          Printer::multiXHomeFlags &= ~1;
-        if(Endstops::x2MinMax())
-           Printer::multiXHomeFlags &= ~2;
-        if(Printer::multiXHomeFlags == 0)
-          setXMoveFinished();
-           }
-           else if(isXPositiveMove())
-           {
-        if(Endstops::xMax())
-          Printer::multiXHomeFlags &= ~1;
-        if(Endstops::x2MinMax())
-          Printer::multiXHomeFlags &= ~2;
-        if(Printer::multiXHomeFlags == 0) {
-             #if MAX_HARDWARE_ENDSTOP_X
-          Printer::stepsRemainingAtXHit = stepsRemaining;
-             #endif
-          setXMoveFinished();
-        }
-           }
-               } else {
-           if(isXNegativeMove() && Endstops::xMin())
-           {
-               setXMoveFinished();
-           }
-           else if(isXPositiveMove() && Endstops::xMax())
-           {
-               #if MAX_HARDWARE_ENDSTOP_X
-               Printer::stepsRemainingAtXHit = stepsRemaining;
-               #endif
-               setXMoveFinished();
-           }                   
-               }                          
-}           
-#else
-           if(isXNegativeMove() && Endstops::xMin())
-           {
-             setXMoveFinished();
-           }
-           else if(isXPositiveMove() && Endstops::xMax())
-           {
-             #if MAX_HARDWARE_ENDSTOP_X
-             Printer::stepsRemainingAtXHit = stepsRemaining;
-             #endif
-             setXMoveFinished();
-           }
-#endif
-
-#if MULTI_YENDSTOP_HOMING
-           {
-               if(Printer::isHoming()) {
-           if(isYNegativeMove())
-           {
-        if(Endstops::yMin())
-          Printer::multiYHomeFlags &= ~1;
-        if(Endstops::y2MinMax())
-           Printer::multiYHomeFlags &= ~2;
-        if(Printer::multiYHomeFlags == 0)
-          setYMoveFinished();
-           }
-           else if(isYPositiveMove())
-           {
-        if(Endstops::yMax())
-          Printer::multiYHomeFlags &= ~1;
-        if(Endstops::y2MinMax())
-          Printer::multiYHomeFlags &= ~2;
-        if(Printer::multiYHomeFlags == 0) {
-             #if MAX_HARDWARE_ENDSTOP_Y
-          Printer::stepsRemainingAtYHit = stepsRemaining;
-             #endif
-          setYMoveFinished();
-        }
-           }
-               } else {
-           if(isYNegativeMove() && Endstops::yMin())
-           {
-               setYMoveFinished();
-           }
-           else if(isYPositiveMove() && Endstops::yMax())
-           {
-               #if MAX_HARDWARE_ENDSTOP_Y
-               Printer::stepsRemainingAtYHit = stepsRemaining;
-               #endif
-               setYMoveFinished();
-           }                   
-               }                          
-}           
-#else
-           if(isYNegativeMove() && Endstops::yMin())
-           {
-             setYMoveFinished();
-           }
-           else if(isYPositiveMove() && Endstops::yMax())
-           {
-             #if MAX_HARDWARE_ENDSTOP_Y
-             Printer::stepsRemainingAtYHit = stepsRemaining;
-             #endif
-             setYMoveFinished();
-           }
-#endif
-//** Added IK
-//** Deleted IK
-//            if(isXNegativeMove() && Endstops::xMin())
-//                setXMoveFinished();
-//            else if(isXPositiveMove() && Endstops::xMax())
-//                setXMoveFinished();
-//            if(isYNegativeMove() && Endstops::yMin())
-//                setYMoveFinished();
-//            else if(isYPositiveMove() && Endstops::yMax())
-//                setYMoveFinished();
-// Deleted IK
+            if(isXNegativeMove() && Endstops::xMin())
+                setXMoveFinished();
+            else if(isXPositiveMove() && Endstops::xMax())
+                setXMoveFinished();
+            if(isYNegativeMove() && Endstops::yMin())
+                setYMoveFinished();
+            else if(isYPositiveMove() && Endstops::yMax())
+                setYMoveFinished();
 #if FEATURE_Z_PROBE
             if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
             {
