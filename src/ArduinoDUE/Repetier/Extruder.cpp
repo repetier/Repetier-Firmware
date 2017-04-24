@@ -707,6 +707,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 
 #if DUAL_X_AXIS
 	float lastX = Printer::lastCmdPos[X_AXIS];
+	float lastY = Printer::lastCmdPos[Y_AXIS];
 	// Park current extruder
 	int32_t dualXPosSteps = Printer::currentPositionSteps[X_AXIS] - Printer::xMinSteps; // here the extruder should be (steps from xmin pos)
 #endif
@@ -826,6 +827,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 			Printer::updateCurrentPosition(true);
 	    }
 	    Printer::currentPosition[X_AXIS] = Printer::lastCmdPos[X_AXIS] = lastX;
+		Printer::lastCmdPos[Y_AXIS] = lastY;
 	    Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps + next->xOffset;
     }    
 #endif	// LAZY_DUAL_X_AXIS
