@@ -803,10 +803,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		GCode::executeFString(next->selectCommands);
 	}
 #if LAZY_DUAL_X_AXIS == 0
-	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
-	if(Printer::isXHomed() && executeSelect) {
-		PrintLine::moveRelativeDistanceInSteps(-next->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
-		Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
+	if (executeSelect) {
+		Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
+		if(Printer::isXHomed()) {
+			PrintLine::moveRelativeDistanceInSteps(-next->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+			Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
+		}
 	}
 #endif // LAZY_DUAL_X_AXIS == 0
     Printer::offsetX = 0;
