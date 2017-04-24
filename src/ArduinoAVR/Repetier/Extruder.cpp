@@ -714,13 +714,6 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
 
-#if DUAL_X_AXIS
-  //there should be no need to run any more code as the next extruder is already the current one
-  //however for now better restrict this to DUAL_X configurations only as not to break other stuff
-  if (!executeSelect)
-    return;
-#endif
-
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     if(executeSelect)
     {
@@ -810,10 +803,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 		GCode::executeFString(next->selectCommands);
 	}
 #if LAZY_DUAL_X_AXIS == 0
-	Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
-	if(Printer::isXHomed() && executeSelect) {
-		PrintLine::moveRelativeDistanceInSteps(-next->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
-		Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
+	if (executeSelect) {
+		Printer::currentPositionSteps[X_AXIS] = Extruder::current->xOffset - dualXPosSteps;
+		if(Printer::isXHomed()) {
+			PrintLine::moveRelativeDistanceInSteps(-next->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+			Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;		
+		}
 	}
 #endif // LAZY_DUAL_X_AXIS == 0
     Printer::offsetX = 0;
