@@ -301,14 +301,114 @@ public:
         if(isCheckEndstops())
         {
 			Endstops::update();
-            if(isXNegativeMove() && Endstops::xMin())
+      #if MULTI_XENDSTOP_HOMING
+                 {
+                     if(Printer::isHoming()) {
+                 if(isXNegativeMove())
+                 {
+              if(Endstops::xMin())
+                Printer::multiXHomeFlags &= ~1;
+              if(Endstops::x2Min())
+                 Printer::multiXHomeFlags &= ~2;
+              if(Printer::multiXHomeFlags == 0)
                 setXMoveFinished();
-            else if(isXPositiveMove() && Endstops::xMax())
+                 }
+                 else if(isXPositiveMove())
+                 {
+       /*              if(Endstops::xMax())
+                Printer::multiXHomeFlags &= ~1;
+              if(Endstops::x2Min())
+                Printer::multiXHomeFlags &= ~2;
+              if(Printer::multiXHomeFlags == 0)*/
+					 {
+                   #if MAX_HARDWARE_ENDSTOP_X
+                Printer::stepsRemainingAtXHit = stepsRemaining;
+                   #endif
                 setXMoveFinished();
-            if(isYNegativeMove() && Endstops::yMin())
+              }
+                 }
+                     } else {
+                 if(isXNegativeMove() && Endstops::xMin())
+                 {
+                     setXMoveFinished();
+                 }
+                 else if(isXPositiveMove() && Endstops::xMax())
+                 {
+                     #if MAX_HARDWARE_ENDSTOP_X
+                     Printer::stepsRemainingAtXHit = stepsRemaining;
+                     #endif
+                     setXMoveFinished();
+                 }
+                     }
+      }
+      #else
+                 if(isXNegativeMove() && Endstops::xMin())
+                 {
+                   setXMoveFinished();
+                 }
+                 else if(isXPositiveMove() && Endstops::xMax())
+                 {
+                   #if MAX_HARDWARE_ENDSTOP_X
+                   Printer::stepsRemainingAtXHit = stepsRemaining;
+                   #endif
+                   setXMoveFinished();
+                 }
+      #endif
+
+      #if MULTI_YENDSTOP_HOMING
+                 {
+                     if(Printer::isHoming()) {
+                 if(isYNegativeMove())
+                 {
+              if(Endstops::yMin())
+                Printer::multiYHomeFlags &= ~1;
+              if(Endstops::y2Min())
+                 Printer::multiYHomeFlags &= ~2;
+              if(Printer::multiYHomeFlags == 0)
                 setYMoveFinished();
-            else if(isYPositiveMove() && Endstops::yMax())
+                 }
+                 else if(isYPositiveMove())
+                 {
+/*              if(Endstops::yMax())
+                Printer::multiYHomeFlags &= ~1;
+              if(Endstops::y2Min())
+                Printer::multiYHomeFlags &= ~2;
+              if(Printer::multiYHomeFlags == 0)*/
+					 {
+                   #if MAX_HARDWARE_ENDSTOP_Y
+                Printer::stepsRemainingAtYHit = stepsRemaining;
+                   #endif
                 setYMoveFinished();
+              }
+                 }
+                     } else {
+                 if(isYNegativeMove() && Endstops::yMin())
+                 {
+                     setYMoveFinished();
+                 }
+                 else if(isYPositiveMove() && Endstops::yMax())
+                 {
+                     #if MAX_HARDWARE_ENDSTOP_Y
+                     Printer::stepsRemainingAtYHit = stepsRemaining;
+                     #endif
+                     setYMoveFinished();
+                 }
+                     }
+      }
+      #else
+                 if(isYNegativeMove() && Endstops::yMin())
+                 {
+                   setYMoveFinished();
+                 }
+                 else if(isYPositiveMove() && Endstops::yMax())
+                 {
+                   #if MAX_HARDWARE_ENDSTOP_Y
+                   Printer::stepsRemainingAtYHit = stepsRemaining;
+                   #endif
+                   setYMoveFinished();
+                 }
+      #endif
+
 #if FEATURE_Z_PROBE
             if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
             {
@@ -353,9 +453,9 @@ public:
                Printer::stepsRemainingAtZHit = stepsRemaining;
                #endif
                setZMoveFinished();
-           }                   
-               }                          
-}           
+           }
+               }
+}
 #else
            if(isZNegativeMove() && Endstops::zMin())
            {
@@ -370,7 +470,7 @@ public:
            }
 #endif
 
-     
+
         }
 #if FEATURE_Z_PROBE
         else if(Printer::isZProbingActive() && isZNegativeMove()) {
@@ -388,7 +488,7 @@ public:
     {
 #if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
-#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
+#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
 		dir &= ~80
 #else
         dir &= ~16;
@@ -404,11 +504,11 @@ public:
     }
     inline void setZMoveFinished()
     {
-#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
+#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
 		dir &= ~80
-#else		
+#else
         dir &= ~64;
-#endif		
+#endif
     }
     inline void setXYMoveFinished()
     {
@@ -731,7 +831,7 @@ public:
 #if DISTORTION_CORRECTION
 	static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
 #endif
-#endif	
+#endif
     static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop,bool pathOptimize = true);
     static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool pathOptimize = true);
 #if ARC_SUPPORT
