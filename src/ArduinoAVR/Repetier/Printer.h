@@ -452,9 +452,11 @@ public:
 #endif
 #if MULTI_XENDSTOP_HOMING
     static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
+	static fast8_t lastXHomeFlag; 
 #endif
 #if MULTI_YENDSTOP_HOMING
     static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+	static fast8_t lastYHomeFlag;
 #endif
 #if MULTI_ZENDSTOP_HOMING
 	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
@@ -545,6 +547,10 @@ public:
     {
         return ((debugLevel & 64) != 0);
     }
+	static INLINE bool debugMultiHome()
+	{
+		return ((debugLevel & 128) != 0);
+	}
 
     static INLINE bool debugFlag(uint8_t flags)
     {
@@ -1105,7 +1111,8 @@ public:
     static INLINE void startXStep()
     {
 #if MULTI_XENDSTOP_HOMING
-		if (Printer::multiXHomeFlags & 1) {
+	if (Printer::debugEndStop()) Com::printFLN(PSTR("multiXHomeFlags:"), (int)multiXHomeFlags);
+		if (Printer::multiXHomeFlags & 1) {			
 			WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
 		}
 #if FEATURE_TWO_XSTEPPER
@@ -1146,6 +1153,7 @@ public:
     {
 
 #if MULTI_YENDSTOP_HOMING
+		if (Printer::debugEndStop()) Com::printFLN(PSTR("multiYHomeFlags:"), (int)multiYHomeFlags);
       if (Printer::multiYHomeFlags & 1) {
         WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
       }
