@@ -705,6 +705,10 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	Extruder *next = &extruder[extruderId];
     bool executeSelect = extruderId != current->id;
 
+#if RAISE_Z_ON_TOOLCHANGE > 0
+    float lastZ = Printer::lastCmdPos[Z_AXIS];
+#endif
+
 #if DUAL_X_AXIS
 	float lastX = Printer::lastCmdPos[X_AXIS];
 	float lastY = Printer::lastCmdPos[Y_AXIS];
@@ -725,6 +729,12 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 
     float oldfeedrate = Printer::feedrate;
     current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
+
+    #if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
+      if (executeSelect && Printer::isZHomed())
+        PrintLine::moveRelativeDistanceInSteps(0, 0, static_cast<int32_t>(floor(RAISE_Z_ON_TOOLCHANGE * Printer::axisStepsPerMM[Z_AXIS])), 0, Printer::homingFeedrate[Z_AXIS], true, false);
+    #endif  
+    
 #if DUAL_X_AXIS
 #if LAZY_DUAL_X_AXIS
     if(Printer::sledParked) {
@@ -839,7 +849,14 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::offsetY = -next->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -next->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
-#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0	
+#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
+    #if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
+      if (Printer::isZHomed()) {
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, cz, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+        Printer::lastCmdPos[Z_AXIS] = lastZ;
+      }
+    #endif	
+    
     if(Printer::isHomedAll()) {
         Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
 	}
