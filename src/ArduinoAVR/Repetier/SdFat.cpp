@@ -1993,7 +1993,7 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
 {
   int16_t n;
   uint8_t bLastPart = true;
-  uint8_t checksum;
+  uint8_t checksum(0);
 
     if (longFilename != NULL)
       *longFilename = 0;

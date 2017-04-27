@@ -219,7 +219,7 @@ void CNCDriver::spindleOnCCW(int32_t rpm)
         return;
     spindleOff();
     direction = -1;
-    if(EVENT_SPINDLE_CW(rpm)) {
+    if(EVENT_SPINDLE_CCW(rpm)) {
 #if CNC_DIRECTION_PIN > -1
         WRITE(CNC_DIRECTION_PIN, !CNC_DIRECTION_CW);
 #endif

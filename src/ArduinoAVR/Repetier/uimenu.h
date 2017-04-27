@@ -140,7 +140,8 @@
   %Se : Steps per mm current extruder
 
   totals
-  %Ut : Shows printing time
+  %Ut : Shows printing time in days hours:minutes
+  %Uh : Shows printing time in hours
   %Uf : Shows total filament usage
 
   extruder position
