@@ -452,7 +452,7 @@ public:
 #endif
 #if MULTI_XENDSTOP_HOMING
     static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
-	static fast8_t lastXHomeFlag; 
+	static fast8_t lastXHomeFlag;
 #endif
 #if MULTI_YENDSTOP_HOMING
     static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
@@ -1112,12 +1112,14 @@ public:
     {
 #if MULTI_XENDSTOP_HOMING
 	if (Printer::debugEndStop()) Com::printFLN(PSTR("multiXHomeFlags:"), (int)multiXHomeFlags);
-		if (Printer::multiXHomeFlags & 1) {			
+		if (Printer::multiXHomeFlags & 1) {
 			WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+      if (Printer::debugEndStop()) Com::printFLN(PSTR("Move X");
 		}
 #if FEATURE_TWO_XSTEPPER
 		if (Printer::multiXHomeFlags & 2) {
 			WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+      if (Printer::debugEndStop()) Com::printFLN(PSTR("Move X2");
 		}
 #endif
 
@@ -1156,10 +1158,12 @@ public:
 		if (Printer::debugEndStop()) Com::printFLN(PSTR("multiYHomeFlags:"), (int)multiYHomeFlags);
       if (Printer::multiYHomeFlags & 1) {
         WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+        if (Printer::debugEndStop()) Com::printFLN(PSTR("Move Y");
       }
 #if FEATURE_TWO_YSTEPPER
 		if (Printer::multiYHomeFlags & 2) {
         WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+        if (Printer::debugEndStop()) Com::printFLN(PSTR("Move Y2");
       }
 #endif
 
