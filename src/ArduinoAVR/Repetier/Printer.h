@@ -143,9 +143,9 @@ public:
     void updateDerived();
     void reportStatus();
 	bool isEnabled() {return enabled;}
-	int32_t zMaxSteps() {return zEnd;}	
+	int32_t zMaxSteps() {return zEnd;}
 	void set(float x,float y,float z);
-	void showMatrix();		
+	void showMatrix();
     void resetCorrection();
 private:
     int matrixIndex(fast8_t x, fast8_t y) const;
@@ -156,13 +156,13 @@ private:
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners();
 // attributes
-#if DRIVE_SYSTEM == DELTA	
+#if DRIVE_SYSTEM == DELTA
     int32_t step;
     int32_t radiusCorrectionSteps;
 #else
 	int32_t xCorrectionSteps,xOffsetSteps;
 	int32_t yCorrectionSteps,yOffsetSteps;
-#endif	
+#endif
     int32_t zStart,zEnd;
 #if !DISTORTION_PERMANENT
     int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
@@ -172,9 +172,11 @@ private:
 #endif //DISTORTION_CORRECTION
 
 #define ENDSTOP_X_MIN_ID 1
-#define ENDSTOP_X_MAX_ID 2
+//#define ENDSTOP_X_MAX_ID 2
+#define ENDSTOP_X2_MIN_ID 2
 #define ENDSTOP_Y_MIN_ID 4
-#define ENDSTOP_Y_MAX_ID 8
+//#define ENDSTOP_Y_MAX_ID 8
+#define ENDSTOP_Y2_MIN_ID 8
 #define ENDSTOP_Z_MIN_ID 16
 #define ENDSTOP_Z_MAX_ID 32
 #define ENDSTOP_Z2_MIN_ID 64
@@ -182,9 +184,11 @@ private:
 #define ENDSTOP_Z_PROBE_ID 128
 
 // These endstops are only used with EXTENDED_ENDSTOPS
-#define ENDSTOP_X2_MIN_ID 1
+//#define ENDSTOP_X2_MIN_ID 1
 #define ENDSTOP_X2_MAX_ID 2
-#define ENDSTOP_Y2_MIN_ID 4
+//#define ENDSTOP_Y2_MIN_ID 4
+#define ENDSTOP_X_MAX_ID 1  // temp move to here for testing
+#define ENDSTOP_Y_MAX_ID 4  // temp move to here for testing
 #define ENDSTOP_Y2_MAX_ID 8
 #define ENDSTOP_Z2_MAX_ID 16
 #define ENDSTOP_Z3_MIN_ID 32
@@ -210,7 +214,7 @@ public:
 	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
 		lastState2 != 0;
 #else
-	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
+	    return (lastState & (ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_X2_MIN_ID|ENDSTOP_Y2_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MINMAX_ID)) != 0;
 #endif
     }
     static INLINE void resetAccumulator() {
@@ -267,6 +271,20 @@ public:
         return false;
 #endif
     }
+    static INLINE bool x2Min() {
+#if (X2_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X2
+  return (lastState & ENDSTOP_X2_MIN_ID) != 0;
+#else
+  return false;
+#endif
+}
+static INLINE bool y2Min() {
+#if (Y2_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y2
+  return (lastState & ENDSTOP_Y2_MIN_ID) != 0;
+#else
+  return false;
+#endif
+}
     static INLINE bool z2MinMax() {
 #if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
         return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
@@ -314,7 +332,7 @@ public:
 #if DUAL_X_RESOLUTION
     static float axisX1StepsPerMM;
     static float axisX2StepsPerMM;
-#endif    
+#endif
     static float axisStepsPerMM[];
     static float invAxisStepsPerMM[];
     static float maxFeedrate[];
@@ -369,7 +387,7 @@ public:
 	static int32_t xMaxStepsAdj,yMaxStepsAdj,zMaxStepsAdj;
 #endif
 #if DRIVE_SYSTEM != DELTA
-	static int32_t zCorrectionStepsIncluded; 	
+	static int32_t zCorrectionStepsIncluded;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static int32_t stepsRemainingAtZHit;
@@ -396,7 +414,7 @@ public:
 #if FEATURE_BABYSTEPPING
     static int16_t zBabystepsMissing;
     static int16_t zBabysteps;
-#endif    
+#endif
     //static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
     //static float minimumZSpeed;              ///< lowest allowed speed to keep integration error small
     static int32_t xMaxSteps;                   ///< For software endstops, limit of move in positive direction.
@@ -431,6 +449,14 @@ public:
     static float backlashY;
     static float backlashZ;
     static uint8_t backlashDir;
+#endif
+#if MULTI_XENDSTOP_HOMING
+    static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
+	static fast8_t lastXHomeFlag;
+#endif
+#if MULTI_YENDSTOP_HOMING
+    static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+	static fast8_t lastYHomeFlag;
 #endif
 #if MULTI_ZENDSTOP_HOMING
 	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
@@ -521,7 +547,11 @@ public:
     {
         return ((debugLevel & 64) != 0);
     }
-    
+	static INLINE bool debugMultiHome()
+	{
+		return ((debugLevel & 128) != 0);
+	}
+
     static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);
@@ -888,7 +918,7 @@ public:
     }
 
     static bool updateDoorOpen();
-    
+
     static INLINE uint8_t isHoming()
     {
         return flag2 & PRINTER_FLAG2_HOMING;
@@ -1080,32 +1110,71 @@ public:
     }
     static INLINE void startXStep()
     {
-#if DUAL_X_AXIS
-#if FEATURE_DITTO_PRINTING
-		if(Extruder::dittoMode) {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
-			return;
+#if MULTI_XENDSTOP_HOMING
+	if (Printer::debugEndStop()) Com::printFLN(PSTR("multiXHomeFlags:"), (int)multiXHomeFlags);
+		if (Printer::multiXHomeFlags & 1) {
+			WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+      if (Printer::debugEndStop()) Com::printFLN(PSTR("Move X");
+		}
+#if FEATURE_TWO_XSTEPPER
+		if (Printer::multiXHomeFlags & 2) {
+			WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+      if (Printer::debugEndStop()) Com::printFLN(PSTR("Move X2");
 		}
 #endif
-		if(Extruder::current->id) {
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
-		} else {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
-		}
-#else		
-        WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+
+#else
+		WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
-        WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+		WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+#endif
+
+#endif
+
+#if DUAL_X_AXIS
+#if FEATURE_DITTO_PRINTING
+      if (Extruder::dittoMode) {
+        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+        return;
+      }
+#endif
+      if (Extruder::current->id) {
+        WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+      } else {
+        WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+      }
+#else
+      WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+#if FEATURE_TWO_XSTEPPER
+      WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
 #endif
 #endif
     }
     static INLINE void startYStep()
     {
-        WRITE(Y_STEP_PIN,START_STEP_WITH_HIGH);
+
+#if MULTI_YENDSTOP_HOMING
+		if (Printer::debugEndStop()) Com::printFLN(PSTR("multiYHomeFlags:"), (int)multiYHomeFlags);
+      if (Printer::multiYHomeFlags & 1) {
+        WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+        if (Printer::debugEndStop()) Com::printFLN(PSTR("Move Y");
+      }
 #if FEATURE_TWO_YSTEPPER
-        WRITE(Y2_STEP_PIN,START_STEP_WITH_HIGH);
+		if (Printer::multiYHomeFlags & 2) {
+        WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+        if (Printer::debugEndStop()) Com::printFLN(PSTR("Move Y2");
+      }
 #endif
+
+#else
+      WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+#if FEATURE_TWO_YSTEPPER
+      WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+#endif
+
+#endif
+
     }
     static INLINE void startZStep()
     {
@@ -1128,7 +1197,7 @@ public:
 		WRITE(Z4_STEP_PIN,START_STEP_WITH_HIGH);
 	}
 #endif
-#else		
+#else
         WRITE(Z_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_ZSTEPPER
         WRITE(Z2_STEP_PIN,START_STEP_WITH_HIGH);
