@@ -86,8 +86,8 @@ Each of the following events describe the parameter and when it is called.
 // or any other reason why dependent values may need recomputation.
 #define EVENT_UPDATE_DERIVED {}
 
-// Gets called after hal is initializied, but before the regular pin settings is defined.
-#define EVENT_INITILALIZE_EARLY {}
+// Gets called after hal is initialized, but before the regular pin settings is defined.
+#define EVENT_INITIALIZE_EARLY {}
 // This gets called after the basic firmware functions have initialized.
 // Use this to initialize your hardware etc.
 #define EVENT_INITIALIZE {}
