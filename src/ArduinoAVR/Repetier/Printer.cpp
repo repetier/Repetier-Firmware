@@ -942,7 +942,7 @@ void Printer::setup()
     HAL::spiBegin();
 #endif
     HAL::hwSetup();
-	EVENT_INITILAIZE_EARLY
+	EVENT_INITILALIZE_EARLY
 #ifdef ANALYZER
 // Channel->pin assignments
 #if ANALYZER_CH0>=0

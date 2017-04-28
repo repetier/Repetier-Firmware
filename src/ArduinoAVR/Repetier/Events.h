@@ -57,13 +57,13 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_CONTINUE_FROM_FATAL_ERROR
 
 // Called to initialize laser pins. Return false to prevent default initialization.
-#define EVENT_INITALIZE_LASER true
+#define EVENT_INITIALIZE_LASER true
 // Set laser to intensity level 0 = off, 255 = full. Return false if you have overridden the setting routine.
 // with true the default solution will set it as digital value.
 #define EVENT_SET_LASER(intensity) true
 
 // Called to initialize CNC pins. Return false to prevent default initialization.
-#define EVENT_INITALIZE_CNC true
+#define EVENT_INITIALIZE_CNC true
 // Turn off spindle
 #define EVENT_SPINDLE_OFF true
 // Turn spindle clockwise
@@ -87,7 +87,7 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UPDATE_DERIVED {}
 
 // Gets called after hal is initializied, but before the regular pin settings is defined.
-#define EVENT_INITILAIZE_EARLY {}
+#define EVENT_INITILALIZE_EARLY {}
 // This gets called after the basic firmware functions have initialized.
 // Use this to initialize your hardware etc.
 #define EVENT_INITIALIZE {}
