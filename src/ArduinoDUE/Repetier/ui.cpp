@@ -2703,7 +2703,6 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::unpauseExtruders();
             popMenu(false);
             pushMenu(&ui_wiz_filamentchange, true);
-			}
             break;
         case UI_ACTION_WIZARD_JAM_WAITHEAT: // called while heating - should do nothing user must wait
             BEEP_LONG;
