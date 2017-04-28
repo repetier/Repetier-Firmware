@@ -2666,7 +2666,7 @@ int UIDisplay::okAction(bool allowMoves)
         {
 #if FEATURE_RETRACTION
         case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
-		{
+			{
 //            BEEP_SHORT;
             popMenu(true);
 
@@ -2694,6 +2694,7 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::markAllUnjammed();
 #endif
             Printer::setJamcontrolDisabled(false);
+			}
             break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_REHEAT: // user saw problem and takes action
@@ -2760,7 +2761,7 @@ int UIDisplay::okAction(bool allowMoves)
 //#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
 
 // this version not have single byte variable rollover bug
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment*steps), _min, _max);
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment * steps), _min, _max);
 
 void UIDisplay::adjustMenuPos()
 {
