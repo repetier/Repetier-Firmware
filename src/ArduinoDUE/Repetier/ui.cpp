@@ -802,6 +802,9 @@ u8g_InitSPI(&u8g,&u8g_dev_st7565_nhd_c12864_sw_spi,UI_DISPLAY_D4_PIN,UI_DISPLAY_
 #ifdef UI_ROTATE_180
     u8g_SetRot180(&u8g);
 #endif
+#ifdef UI_LCD_CONTRAST
+    u8g_SetContrast(&u8g,UI_LCD_CONTRAST);
+#endif
     u8g_FirstPage(&u8g);
     do
     {

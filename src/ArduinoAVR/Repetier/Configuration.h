@@ -89,7 +89,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 // Smart RAMPS for Due          = 408
 
-#define MOTHERBOARD 33
+#define MOTHERBOARD 408
 
 #include "pins.h"
 

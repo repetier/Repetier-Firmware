@@ -1907,6 +1907,92 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 #endif // Controller VIKI 2
 
+////_______________________________________________ AZSMZ 12864 LCD ___________________________________________________\\\\\\
+
+#if FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864_LCD
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_U8G
+#define U8GLIB_ST7565_NHD_C2832_HW_SPI
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+//select font size
+#define UI_FONT_6X10 //default font
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#undef UI_ANIMATION
+#define UI_ANIMATION 0  // Animations are too slow
+
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3
+#define UI_INVERT_MENU_DIRECTION 0
+
+#undef UI_ENCODER_SPEED
+#define UI_ENCODER_SPEED 2
+
+#define UI_DISPLAY_RW_PIN -1
+#define UI_ROTATE_180
+
+#define BEEPER_TYPE 1
+
+// SCK Pin:  UI_DISPLAY_D4_PIN
+// Mosi Pin: UI_DISPLAY_ENABLE_PIN
+// CD Pin:   UI_DISPLAY_RS_PIN
+
+#define SDSUPPORT    1
+#define SDSS         53
+#undef SDCARDDETECT
+#define SDCARDDETECT 49 // sd card detect as shown on drawing
+
+#undef BEEPER_PIN
+#define BEEPER_PIN         66
+// Hardware SPI creates artifacts on display, so we use software SPI
+#undef U8GLIB_ST7565_NHD_C2832_HW_SPI
+#define U8GLIB_ST7565_NHD_C2832_SW_SPI
+#define UI_LCD_CONTRAST 59
+// SCK 
+#define UI_DISPLAY_D4_PIN  52
+// MOSI
+#define UI_DISPLAY_ENABLE_PIN 51
+// CS 
+#define UI_DISPLAY_RS_PIN 44 
+// A0
+#define UI_DISPLAY_D5_PIN 59
+
+#define UI_ENCODER_A 40
+#define UI_ENCODER_B 58
+#define UI_ENCODER_CLICK 67
+#define UI_RESET_PIN -1
+
+
+#ifdef UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+#endif
+}
+void uiCheckKeys(uint16_t &action) {
+  UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_B, UI_ENCODER_A);
+  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK);
+#if UI_RESET_PIN > -1
+  UI_KEYS_BUTTON_LOW(UI_RESET_PIN, UI_ACTION_RESET);
+#endif
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(uint16_t &action) {}
+#endif
+#endif // Controller AZSMZ 12864 LCD
+
+////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AZSMZ 12864 LCD ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\\\\\
+
 #if FEATURE_CONTROLLER == CONTROLLER_LCD_MP_PHARAOH_DUE
 #define UI_DISPLAY_TYPE 1
 #define UI_COLS 20

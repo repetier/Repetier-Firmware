@@ -61,7 +61,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 
-#define MOTHERBOARD 402
+#define MOTHERBOARD 408
 
 #include "pins.h"
 
@@ -78,7 +78,7 @@ gets used, or you will get problems with checksums etc.
 - 100 is programming port on due
 - 101 is native port on due. Us eit to support both ports at the same time!
 */
-#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RADDS use 1
+#define BLUETOOTH_SERIAL   2                      // Port number (1..3) - For RADDS use 1  - For SMART RAMPS use 2
 #define BLUETOOTH_BAUD     115200                 // communication speed
 
 
@@ -1607,7 +1607,9 @@ The following settings override uiconfig.h!
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 */
-#define FEATURE_CONTROLLER CONTROLLER_RADDS
+
+//#define FEATURE_CONTROLLER CONTROLLER_RADDS
+#define FEATURE_CONTROLLER CONTROLLER_AZSMZ_12864_LCD
 
 /* You can have one keypad connected via single analog pin as seen on
  some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be
