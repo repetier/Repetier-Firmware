@@ -1955,9 +1955,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #undef BEEPER_PIN
 #define BEEPER_PIN         66
+
 // Hardware SPI creates artifacts on display, so we use software SPI
-#undef U8GLIB_ST7565_NHD_C2832_HW_SPI
-#define U8GLIB_ST7565_NHD_C2832_SW_SPI
+//#undef U8GLIB_ST7565_NHD_C2832_HW_SPI
+//#define U8GLIB_ST7565_NHD_C2832_SW_SPI
+
 #define UI_LCD_CONTRAST 59
 // SCK 
 #define UI_DISPLAY_D4_PIN  52
