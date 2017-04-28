@@ -852,7 +852,7 @@ on this endstop.
 
 //If true, axis won't move to coordinates greater than the defined lengths below.
 #define max_software_endstop_x true
-#define max_software_endstop_y false
+#define max_software_endstop_y true
 #define max_software_endstop_z true
 
 // If during homing the endstop is reached, how many mm should the printer move back for the second try
@@ -1742,6 +1742,6 @@ Values must be in range 1..255
   You can expand firmware functionality with events and you own event handler.
   Read Events.h for more informations. To activate, uncomment the following define.
 */
-//#define CUSTOM_EVENTS
+#define CUSTOM_EVENTS
 
 #endif
