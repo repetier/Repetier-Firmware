@@ -54,3 +54,21 @@ extern void cOkWizard(int action);
 #define UI_ACTION_SPH_ABS_ALL   1527
 #define UI_ACTION_SPH_GLASS_ALL 1528
 #define UI_ACTION_SPH_WOOD_ALL  1529
+
+#define UI_ACTION_FC_SELECT1    1530
+#define UI_ACTION_FC_SELECT2    1531
+#define UI_ACTION_FC_PLA        1532
+#define UI_ACTION_FC_PETG       1533
+#define UI_ACTION_FC_PVA        1534
+#define UI_ACTION_FC_FLEX       1535
+#define UI_ACTION_FC_ABS        1536
+#define UI_ACTION_FC_GLASS      1537
+#define UI_ACTION_FC_WOOD       1538
+#define UI_ACTION_FC_CUSTOM     1539
+#define UI_ACTION_FC_CUSTOM_SET 1540
+#define UI_ACTION_FC_WAITHEAT   1541
+#define UI_ACTION_FC_BACK1      1542
+#define UI_ACTION_FC_BACK2      1543
+
+
+

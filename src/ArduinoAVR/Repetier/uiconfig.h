@@ -144,6 +144,7 @@ What display type do you use?
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#undef UI_DISPLAY_CHARSET
 #define UI_DISPLAY_CHARSET 3
 #else
 /** Number of columns per row
@@ -242,7 +243,8 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#define UI_HAS_KEYS 0
+#undef UI_HAS_KEYS
+#define UI_HAS_KEYS 1
 
 
 /** \brief Is a back key present.

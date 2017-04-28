@@ -1077,7 +1077,9 @@ void UIDisplay::initialize()
     u8g_FirstPage(&u8g);
     do
     {
+#if LOGO_WIDTH > 0
         u8g_DrawBitmapP(&u8g, 128 - LOGO_WIDTH, 0, ((LOGO_WIDTH + 7) / 8), LOGO_HEIGHT, logo);
+#endif
 #ifdef CUSTOM_LOGO
         printRowP(4, PSTR("Repetier"));
         printRowP(5, PSTR("Ver " REPETIER_VERSION));
@@ -1761,8 +1763,21 @@ void UIDisplay::parse(const char *txt,bool ram)
 #else
                 float dist = Printer::filamentPrinted * 0.001;
 #endif
-                addFloat(dist, 6, 1);
+                addFloat(dist, (dist > 9999 ? 6 : 4), (dist > 9999 ? 0 : 1));
             }
+			else if(c2 == 'h') // Printing time in hours
+			{
+#if EEPROM_MODE
+				bool alloff = true;
+#if NUM_TEMPERATURE_LOOPS > 0
+				for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+					if(tempController[i]->targetTemperatureC > 15) alloff = false;
+#endif
+				long seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + HAL::eprGetInt32(EPR_PRINTING_TIME);
+				long tmp = seconds / 3600;
+				addLong(tmp, 5); // 11 years of printing!
+#endif
+			}
             break;
 
         case 'x':
@@ -2651,21 +2666,27 @@ int UIDisplay::okAction(bool allowMoves)
         {
 #if FEATURE_RETRACTION
         case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
+			{
 //            BEEP_SHORT;
             popMenu(true);
+
             Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
 #if FILAMENTCHANGE_REHOME
+			if(Printer::isHomedAll()) {
 #if Z_HOME_DIR > 0
-            Printer::homeAxis(true, true, FILAMENTCHANGE_REHOME == 2);
+				Printer::homeAxis(true, true, FILAMENTCHANGE_REHOME == 2);
 #else
-            Printer::homeAxis(true, true, false);
+				Printer::homeAxis(true, true, false);
 #endif
+			}
 #endif
 			Printer::coordinateOffset[Z_AXIS] = Printer::popWizardVar().f;
 			Printer::coordinateOffset[Y_AXIS] = Printer::popWizardVar().f;
 			Printer::coordinateOffset[X_AXIS] = Printer::popWizardVar().f;
-            Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
-            Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
+			if(Printer::isHomedAll()) {
+				Printer::GoToMemoryPosition(true, true, false, false, Printer::homingFeedrate[X_AXIS]);
+				Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
+			}
             Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
             Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
             Printer::setBlockingReceive(false);
@@ -2673,6 +2694,7 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::markAllUnjammed();
 #endif
             Printer::setJamcontrolDisabled(false);
+			}
             break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_REHEAT: // user saw problem and takes action
@@ -2738,7 +2760,7 @@ int UIDisplay::okAction(bool allowMoves)
 //#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
 
 // this version not have single byte variable rollover bug
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment*steps), _min, _max);
+#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment * steps), _min, _max);
 
 void UIDisplay::adjustMenuPos()
 {
@@ -3806,8 +3828,10 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[E_AXIS] = 0;
-            Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
-            Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
+			if(Printer::isHomedAll()) { // for safety move only when homed!
+				Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
+				Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
+			}
             Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::current->disableCurrentExtruderMotor();
         }
@@ -3830,8 +3854,10 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[E_AXIS] = 0;
-            Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
-            Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
+			if(Printer::isHomedAll()) { // for safety move only when homed!
+				Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
+				Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
+			}
             //Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::pauseExtruders();
             Commands::waitUntilEndOfAllMoves();

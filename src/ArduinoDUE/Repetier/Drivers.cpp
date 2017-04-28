@@ -124,7 +124,7 @@ bool LaserDriver::firstMove = true;
 
 void LaserDriver::initialize()
 {
-    if(EVENT_INITALIZE_LASER)
+    if(EVENT_INITIALIZE_LASER)
     {
 #if LASER_PIN > -1
         SET_OUTPUT(LASER_PIN);
@@ -157,10 +157,10 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 */
 
 int8_t CNCDriver::direction = 0;
-/** Initialize cnc pins. EVENT_INITALIZE_CNC should return false to prevent default initalization.*/
+/** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
 void CNCDriver::initialize()
 {
-    if(EVENT_INITALIZE_CNC)
+    if(EVENT_INITIALIZE_CNC)
     {
 #if CNC_ENABLE_PIN > -1
         SET_OUTPUT(CNC_ENABLE_PIN);
@@ -219,7 +219,7 @@ void CNCDriver::spindleOnCCW(int32_t rpm)
         return;
     spindleOff();
     direction = -1;
-    if(EVENT_SPINDLE_CW(rpm)) {
+    if(EVENT_SPINDLE_CCW(rpm)) {
 #if CNC_DIRECTION_PIN > -1
         WRITE(CNC_DIRECTION_PIN, !CNC_DIRECTION_CW);
 #endif

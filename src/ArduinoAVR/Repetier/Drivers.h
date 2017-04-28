@@ -218,7 +218,7 @@ With laser support you can exchange a extruder by a laser. A laser gets controll
 By default all intensities > 200 are always on, and lower values are always off. You can overwrite
 this with a programmed event EVENT_SET_LASER(intensity) that return false to signal the default
 implementation that it has set it's value already.
-EVENT_INITALIZE_LASER should return false to prevent default initialization.
+EVENT_INITIALIZE_LASER should return false to prevent default initialization.
 */
 class LaserDriver {
 public:
@@ -239,7 +239,7 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 class CNCDriver {
 public:
     static int8_t direction;
-    /** Initialize cnc pins. EVENT_INITALIZE_CNC should return false to prevent default initalization.*/
+    /** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
     static void initialize();
     /** Turns off spindle. For event override implement
     EVENT_SPINDLE_OFF
