@@ -2678,8 +2678,8 @@ int UIDisplay::okAction(bool allowMoves)
 #else
 				Printer::homeAxis(true, true, false);
 #endif
-#endif
 			}
+#endif
 			Printer::coordinateOffset[Z_AXIS] = Printer::popWizardVar().f;
 			Printer::coordinateOffset[Y_AXIS] = Printer::popWizardVar().f;
 			Printer::coordinateOffset[X_AXIS] = Printer::popWizardVar().f;
