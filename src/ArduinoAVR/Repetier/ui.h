@@ -1953,27 +1953,40 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #undef SDCARDDETECT
 #define SDCARDDETECT 49 // sd card detect as shown on drawing
 
-#undef BEEPER_PIN
-#define BEEPER_PIN         66
-
 // Hardware SPI creates artifacts on display, so we use software SPI
 //#undef U8GLIB_ST7565_NHD_C2832_HW_SPI
 //#define U8GLIB_ST7565_NHD_C2832_SW_SPI
 
 #define UI_LCD_CONTRAST 59
-// SCK 
-#define UI_DISPLAY_D4_PIN  52
-// MOSI
-#define UI_DISPLAY_ENABLE_PIN 51
-// CS 
-#define UI_DISPLAY_RS_PIN 44 
-// A0
-#define UI_DISPLAY_D5_PIN 59
 
-#define UI_ENCODER_A 40
-#define UI_ENCODER_B 58
-#define UI_ENCODER_CLICK 67
-#define UI_RESET_PIN -1
+#if MOTHERBOARD == 408 // SMART RAMPS
+  // SCK 
+  #define UI_DISPLAY_D4_PIN  52
+  // MOSI
+  #define UI_DISPLAY_ENABLE_PIN 51
+  // CS 
+  #define UI_DISPLAY_RS_PIN 44 
+  // A0
+  #define UI_DISPLAY_D5_PIN 59
+  #undef BEEPER_PIN
+  #define BEEPER_PIN         66
+  #define UI_ENCODER_A 40
+  #define UI_ENCODER_B 58
+  #define UI_ENCODER_CLICK 67
+  #define UI_RESET_PIN -1
+#elif MOTHERBOARD == 33  // RAMPS 1.3/1.4
+  #define UI_LCD_CONTRAST 59
+  // CS 
+  #define UI_DISPLAY_RS_PIN 44 
+  // A0
+  #define UI_DISPLAY_D5_PIN 64
+  #undef BEEPER_PIN
+  #define BEEPER_PIN         65
+  #define UI_ENCODER_A 40
+  #define UI_ENCODER_B 63
+  #define UI_ENCODER_CLICK 66
+  #define UI_RESET_PIN -1
+#endif
 
 
 #ifdef UI_MAIN
