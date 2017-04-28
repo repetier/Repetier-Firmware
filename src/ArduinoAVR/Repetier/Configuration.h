@@ -87,7 +87,9 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Unique One rev. A          = 88
 // User layout defined in userpins.h = 999
 
-#define MOTHERBOARD 33
+// Smart RAMPS for Due          = 408
+
+#define MOTHERBOARD 408
 
 #include "pins.h"
 
@@ -106,7 +108,7 @@ We can connect BlueTooth to serial converter module directly to boards based on 
   c) pin 17 and 18 of AUX4 connector, then set BLUETOOTH_SERIAL to 2 (RX from BT to AUX4 p18, TX from BT to AUX4 p17)
   Comment out or set the BLUETOOTH_SERIAL to 0 or -1 to disable this feature.
 */
-#define BLUETOOTH_SERIAL   1                      // Port number (1..3) - For RUMBA use 3
+#define BLUETOOTH_SERIAL   2                      // Port number (1..3) - For RADDS use 1 - For SMART RAMPS use 2
 #define BLUETOOTH_BAUD     115200                 // communication speed
 
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
@@ -1635,7 +1637,8 @@ The following settings override uiconfig.h!
 24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
 */
 
-#define FEATURE_CONTROLLER NO_CONTROLLER
+//#define FEATURE_CONTROLLER NO_CONTROLLER
+#define FEATURE_CONTROLLER CONTROLLER_AZSMZ_12864_LCD
 
 /* You can have one keypad connected via single analog pin as seen on
  some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be
@@ -1648,16 +1651,16 @@ the language from a menu with activated languages. In Configuration->Language
 the language can be switched any time. */
 #define LANGUAGE_EN_ACTIVE 1 // English
 #define LANGUAGE_DE_ACTIVE 1 // German
-#define LANGUAGE_NL_ACTIVE 1 // Dutch
-#define LANGUAGE_PT_ACTIVE 1 // Brazilian Portuguese
-#define LANGUAGE_IT_ACTIVE 1 // Italian
-#define LANGUAGE_ES_ACTIVE 1 // Spanish
-#define LANGUAGE_FI_ACTIVE 1 // Finnish
-#define LANGUAGE_SE_ACTIVE 1 // Swedish
-#define LANGUAGE_FR_ACTIVE 1 // French
-#define LANGUAGE_CZ_ACTIVE 1 // Czech
-#define LANGUAGE_PL_ACTIVE 1 // Polish
-#define LANGUAGE_TR_ACTIVE 1 // Turkish
+#define LANGUAGE_NL_ACTIVE 0 // Dutch
+#define LANGUAGE_PT_ACTIVE 0 // Brazilian Portuguese
+#define LANGUAGE_IT_ACTIVE 0 // Italian
+#define LANGUAGE_ES_ACTIVE 0 // Spanish
+#define LANGUAGE_FI_ACTIVE 0 // Finnish
+#define LANGUAGE_SE_ACTIVE 0 // Swedish
+#define LANGUAGE_FR_ACTIVE 0 // French
+#define LANGUAGE_CZ_ACTIVE 0 // Czech
+#define LANGUAGE_PL_ACTIVE 0 // Polish
+#define LANGUAGE_TR_ACTIVE 0 // Turkish
 
 /* Some displays loose their settings from time to time. Try uncommenting the
 auto-repair function if this is the case. It is not supported for all display
