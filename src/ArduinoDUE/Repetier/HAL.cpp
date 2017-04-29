@@ -164,7 +164,7 @@ void HAL::setupTimer() {
 void HAL::analogStart(void)
 {
 
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD==502
   PIO_Configure(
     g_APinDescription[58].pPort,
     g_APinDescription[58].ulPinType,
@@ -175,7 +175,7 @@ void HAL::analogStart(void)
     g_APinDescription[59].ulPinType,
     g_APinDescription[59].ulPin,
     g_APinDescription[59].ulPinConfiguration);
-#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
 
   // ensure we can write to ADC registers
   ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
@@ -337,12 +337,12 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 bool spiInitMaded = false;
 #endif
 void HAL::spiBegin()
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif        // Configre SPI pins
@@ -366,7 +366,7 @@ void HAL::spiBegin()
     SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR |
                   SPI_MR_MODFDIS | SPI_MR_PS);
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     SET_OUTPUT(DAC0_SYNC);
 #if NUM_EXTRUDER > 1
     SET_OUTPUT(DAC1_SYNC);
@@ -380,14 +380,14 @@ void HAL::spiBegin()
     WRITE(SPI_EEPROM2_CS, HIGH );
     WRITE(SPI_FLASH_CS, HIGH );
     WRITE(SDSS , HIGH );
-#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501
+#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     PIO_Configure(
       g_APinDescription[SPI_PIN].pPort,
       g_APinDescription[SPI_PIN].ulPinType,
       g_APinDescription[SPI_PIN].ulPin,
       g_APinDescription[SPI_PIN].ulPinConfiguration);
     spiInit(1);
-#if (MOTHERBOARD==500) || (MOTHERBOARD==501)
+#if (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -396,12 +396,12 @@ void HAL::spiBegin()
 // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
 void HAL::spiInit(uint8_t spiClock)
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
   if (spiInitMaded == false)
   {
 #endif
     if (spiClock > 4) spiClock = 1;
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     // Set SPI mode 1, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_DAC,
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
@@ -410,13 +410,13 @@ void HAL::spiInit(uint8_t spiClock)
     SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
-#endif// MOTHERBOARD==500 || MOTHERBOARD==501
+#endif// MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502)
     // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
     SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
                       SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
                       SPI_CSR_DLYBCT(1));
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     spiInitMaded = true;
   }
 #endif
@@ -461,7 +461,7 @@ uint8_t HAL::spiReceive()
   //delayMicroseconds(1);
   return SPI0->SPI_RDR;
 }
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 
 void HAL::spiSend(uint32_t chan, byte b)
 {

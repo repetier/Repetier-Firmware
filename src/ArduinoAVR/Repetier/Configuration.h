@@ -1119,10 +1119,10 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define ZHOME_PRE_RAISE_DISTANCE 10
 
 /*
- Raises Z before swapping extruder (tool change) and lowers it after
+ Raises Z before swapping extruder (tool change) and lowers it afterwards
  Unit is mm (INTEGER NUMBERS ONLY)
  */
-//#define RAISE_Z_ON_TOOLCHANGE 6
+#define RAISE_Z_ON_TOOLCHANGE 0
 
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0

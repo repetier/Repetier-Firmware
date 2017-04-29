@@ -307,7 +307,7 @@ inline void memcopy4(void *dest,void *source) {
 #define MICROSTEP2 HIGH,LOW
 #define MICROSTEP4 LOW,HIGH
 #define MICROSTEP8 HIGH,HIGH
-#if (MOTHERBOARD == 501)
+#if (MOTHERBOARD == 501) || MOTHERBOARD==502
 #define MICROSTEP16 LOW,LOW
 #else
 #define MICROSTEP16 HIGH,HIGH

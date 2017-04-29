@@ -323,6 +323,19 @@
 #define DIO107_PORT PIOB
 #define DIO107_PIN PIO_PB10
 
+// 108 PB0
+#define DIO108_PORT PIOB
+#define DIO108_PIN PIO_PB0
+// 109 PB1
+#define DIO109_PORT PIOB
+#define DIO109_PIN PIO_PB1
+// 110 PB2
+#define DIO110_PORT PIOB
+#define DIO110_PIN PIO_PB2
+// 111 PB3
+#define DIO111_PORT PIOB
+#define DIO111_PIN PIO_PB3
+
 #ifndef	DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
 #endif

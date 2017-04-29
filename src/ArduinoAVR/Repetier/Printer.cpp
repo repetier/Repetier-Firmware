@@ -1335,6 +1335,12 @@ extruder[5].jamLastSignal = READ(EXT5_JAM_PIN);
 #if USE_ADVANCE
     extruderStepsNeeded = 0;
 #endif
+#if (MOTHERBOARD == 502)
+	SET_INPUT(FTDI_COM_RESET_PIN);
+	SET_INPUT(ESP_WIFI_MODULE_COM);
+	SET_INPUT(MOTOR_FAULT_PIN);
+	SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
+#endif //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
@@ -2060,9 +2066,8 @@ if(zaxis)
 	if(zaxis)
 		startZ = Z_UP_AFTER_HOME;
 #endif
-#if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
-#else
+#if (DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]); 
     if(!sledParked && xaxis) { // park sled
         homeXAxis();

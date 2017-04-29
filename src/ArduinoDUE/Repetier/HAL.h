@@ -637,7 +637,7 @@ class HAL
         v.b[i] = 0;
      }
      return v;       
-#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
     }
 
     static inline void allowInterrupts()
@@ -805,7 +805,7 @@ class HAL
     // Write single byte to SPI
     static void spiSend(byte b);
     static void spiSend(const uint8_t* buf , size_t n);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
+#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD==502
     static void spiSend(uint32_t chan , const uint8_t* buf , size_t n);
     static void spiSend(uint32_t chan, byte b);
     static uint8_t spiReceive(uint32_t chan);

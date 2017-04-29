@@ -65,6 +65,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // STACKER 3D Superboard        = 412
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
+// Alligator Board rev3         = 502
+
 #define MOTHERBOARD 402
 
 #include "pins.h"
@@ -932,7 +934,7 @@ on this endstop.
 #elif MOTHERBOARD==12
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
-#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
+#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502) // Alligator boards
 //#define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
 #define MOTOR_CURRENT_PERCENT {51,51,51,44,44,44,44}
 #endif
@@ -1086,10 +1088,10 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 #define ZHOME_PRE_RAISE_DISTANCE 10
 
 /*
- Raises Z before swapping extruder (tool change) and lowers it after
+ Raises Z before swapping extruder (tool change) and lowers it afterwards
  Unit is mm (INTEGER NUMBERS ONLY)
  */
-//#define RAISE_Z_ON_TOOLCHANGE 6
+#define RAISE_Z_ON_TOOLCHANGE 0
 
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0

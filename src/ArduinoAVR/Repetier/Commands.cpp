@@ -404,9 +404,9 @@ void setMotorCurrent(uint8_t channel, unsigned short value) {
     uint8_t externalDac_buf[2] = {0x10, 0x00};
 
     if(channel > 3)
-        externalDac_buf[0] |= ( 7 - channel << 6);
+        externalDac_buf[0] |= (7 - channel << 6);
     else
-        externalDac_buf[0] |= ( 3 - channel << 6);
+        externalDac_buf[0] |= (3 - channel << 6);
 
     externalDac_buf[0] |= (value >> 4);
     externalDac_buf[1] |= (value << 4);

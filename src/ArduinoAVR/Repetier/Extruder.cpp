@@ -732,7 +732,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 
     #if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
       if (executeSelect && Printer::isZHomed())
-        PrintLine::moveRelativeDistanceInSteps(0, 0, static_cast<int32_t>(floor(RAISE_Z_ON_TOOLCHANGE * Printer::axisStepsPerMM[Z_AXIS])), 0, Printer::homingFeedrate[Z_AXIS], true, false);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, static_cast<int32_t>(RAISE_Z_ON_TOOLCHANGE * Printer::axisStepsPerMM[Z_AXIS]), 0, Printer::homingFeedrate[Z_AXIS], true, false);
     #endif  
     
 #if DUAL_X_AXIS
