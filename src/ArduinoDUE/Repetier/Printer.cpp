@@ -2063,9 +2063,7 @@ if(zaxis)
 #if !(DUAL_X_AXIS && LAZY_DUAL_X_AXIS)
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
 #else
-#if HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
-    moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
-#endif    
+    moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]); 
     if(!sledParked && xaxis) { // park sled
         homeXAxis();
     }        

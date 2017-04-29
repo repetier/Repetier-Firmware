@@ -1085,6 +1085,12 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 // Distance in mm to raise if required
 #define ZHOME_PRE_RAISE_DISTANCE 10
 
+/*
+ Raises Z before swapping extruder (tool change) and lowers it after
+ Unit is mm (INTEGER NUMBERS ONLY)
+ */
+//#define RAISE_Z_ON_TOOLCHANGE 6
+
 // Used for homing order HOME_ORDER_ZXYTZ
 #define ZHOME_MIN_TEMPERATURE 0
 // needs to heat all extruders (1) or only current extruder (0)
