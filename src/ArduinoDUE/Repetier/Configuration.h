@@ -1742,6 +1742,6 @@ Values must be in range 1..255
   You can expand firmware functionality with events and you own event handler.
   Read Events.h for more informations. To activate, uncomment the following define.
 */
-#define CUSTOM_EVENTS
+//#define CUSTOM_EVENTS
 
 #endif
