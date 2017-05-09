@@ -774,6 +774,8 @@ automatically disabled.
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
 #define LASER_WARMUP_TIME 0// wait x milliseconds to start material burning before move
+#define LASER_PWM_MAX 255 //255 8-bit PWM 4095 for 12Bit PWM
+#define LASER_WATT 1.6  // Laser diode power
 
 // ##########################################################################################
 // ##                              CNC configuration                                       ##
@@ -793,6 +795,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
 #define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
+#define CNC_PWM_MAX 255  //255 8-bit PWM 4095 for 12Bit PWM
+#define CNC_RPM_MAX 25000   //max spindle RPM
 
 
 /* Select the default mode when the printer gets enables. Possible values are

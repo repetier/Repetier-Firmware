@@ -172,7 +172,7 @@ public:
     static ufast8_t linesWritePos; // Position where we write the next cached line move
     ufast8_t joinFlags;
     volatile ufast8_t flags;
-    uint8_t secondSpeed; // for laser intensity or fan control
+    secondspeed_t secondSpeed; // for laser intensity or fan control
 private:
     fast8_t primaryAxis;
     ufast8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
@@ -725,7 +725,7 @@ public:
     static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
-    static void LaserWarmUp(uint32_t  wait);
+    static void LaserWarmUp(uint32_t wait);
 #if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
 #if DISTORTION_CORRECTION

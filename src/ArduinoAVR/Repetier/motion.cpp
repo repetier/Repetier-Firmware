@@ -1943,7 +1943,7 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimiz
 	EVENT_CONTRAIN_DESTINATION_COORDINATES
     int32_t difference[E_AXIS_ARRAY];
     float axisDistanceMM[VIRTUAL_AXIS_ARRAY]; // Real cartesian axis movement in mm. Virtual axis in 4;
-    uint8_t secondSpeed = Printer::fanSpeed;
+    secondspeed_t secondSpeed = Printer::fanSpeed;
     for(fast8_t axis = 0; axis < E_AXIS_ARRAY; axis++)
     {
         difference[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
@@ -2350,7 +2350,7 @@ int32_t PrintLine::bresenhamStep() // Version for delta printer
 #if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
             if(cur->dir)
             {   
-                  LaserDriver::changeIntensity(255);
+             LaserDriver::changeIntensity(LASER_PWM_MAX);
             }
 #endif            
             long wait = cur->getWaitTicks();
@@ -2749,7 +2749,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 #if LASER_WARMUP_TIME > 0 && SUPPORT_LASER
             if(cur->dir)
             {
-                LaserDriver::changeIntensity(255);
+               LaserDriver::changeIntensity(LASER_PWM_MAX);
             }
 #endif
             long wait = cur->getWaitTicks();
@@ -2831,7 +2831,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
         if(Printer::mode == PRINTER_MODE_FFF) {
-            Printer::setFanSpeedDirectly(cur->secondSpeed);
+            Printer::setFanSpeedDirectly(static_cast<uint8_t>(cur->secondSpeed));
         }
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
         else if(Printer::mode == PRINTER_MODE_LASER)

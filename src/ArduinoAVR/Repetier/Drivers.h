@@ -222,11 +222,12 @@ EVENT_INITIALIZE_LASER should return false to prevent default initialization.
 */
 class LaserDriver {
 public:
-    static uint8_t intensity; // Intensity to use for next move queued. This is NOT the current value!
+    static secondspeed_t intensity; // Intensity to use for next move queued. This is NOT the current value!
+    static secondspeed_t intens;
     static bool laserOn; // Enabled by M3?
     static bool firstMove ;
     static void initialize();
-    static void changeIntensity(uint8_t newIntensity);
+    static void changeIntensity(secondspeed_t newIntensity);
 };
 #endif
 
@@ -239,6 +240,9 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 class CNCDriver {
 public:
     static int8_t direction;
+    static secondspeed_t spindleSpeed;
+    static uint16_t spindleRpm;
+ 
     /** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
     static void initialize();
     /** Turns off spindle. For event override implement

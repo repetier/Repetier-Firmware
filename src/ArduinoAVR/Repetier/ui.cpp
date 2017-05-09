@@ -1651,6 +1651,36 @@ void UIDisplay::parse(const char *txt,bool ram)
                 addInt(Extruder::current->id + 1, 1);
                 break;
             }
+            if(c2 == 'p')
+            { // pwm position
+#if SUPPORT_LASER
+                  if(Printer::mode == PRINTER_MODE_LASER) 
+                {
+                  if(LaserDriver::intens < LASER_PWM_MAX)
+                  {
+                    float power= LaserDriver::intens*LASER_WATT/LASER_PWM_MAX; // Output Power = DIODEPower / Resolution * Value)
+                    addFloat(power,2,1);
+                  }
+                  else
+                    addStringP(PSTR("Max."));
+                } 
+#endif
+
+#if SUPPORT_CNC                
+                if(Printer::mode == PRINTER_MODE_CNC) 
+                {
+                  if(CNCDriver::spindleRpm < CNC_RPM_MAX)
+                    addInt(CNCDriver::spindleRpm, 5);
+                  else
+                    addStringP(PSTR("Max."));
+                }    
+#endif                           
+                break;
+            }
+//#########
+
+
+            
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
             if(c2 == 'S')
             {
@@ -1788,33 +1818,48 @@ void UIDisplay::parse(const char *txt,bool ram)
                     addFloat(Printer::filamentPrinted * 0.001,3,2);
                     break;
                 }
-				if(c2>='0' && c2<='2') {
-					if(Printer::isHoming()) {
-						addStringP(PSTR(" Homing"));
-						break;
-					} else {
-						if(Printer::isAnimation() && ((c2=='0' && !Printer::isXHomed()) || (c2=='1' && !Printer::isYHomed()) || (c2=='2' && !Printer::isZHomed()))) {
-							addStringP(PSTR("   ?.??"));
-							break;
-						}	
-					}					
-				}
-                if(c2=='0') {
-                    fvalue = Printer::realXPosition();
-                    if(Printer::mode != PRINTER_MODE_FFF)
-                        fvalue += Printer::coordinateOffset[X_AXIS];
-                } else if(c2=='1') {
-                    fvalue = Printer::realYPosition();
-                    if(Printer::mode != PRINTER_MODE_FFF)
-                        fvalue += Printer::coordinateOffset[Y_AXIS];
-                } else if(c2=='2') {
-                    fvalue = Printer::realZPosition();                   
-                    if(Printer::mode != PRINTER_MODE_FFF)
-                        fvalue += Printer::coordinateOffset[Z_AXIS];
-                } else
-                    fvalue = (float)Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
-                addFloat(fvalue,4,2);
-            } else if(c2>='a' && c2<='f') {
+           
+           if((c2>='0' && c2<='2')||(c2>='5' && c2<='7')) 
+            {
+             if(Printer::isHoming())
+             {
+              addStringP(PSTR(" Homing"));
+              break;
+             } 
+           else 
+            {
+            if(Printer::isAnimation() && ((c2==('0') && !Printer::isXHomed()) || (c2==('1') && !Printer::isYHomed()) || (c2==('2')) && !Printer::isZHomed()))
+             { 
+              addStringP(PSTR("   ?.??"));
+              break;
+             }
+            }         
+           }
+            if(c2=='0')
+              fvalue = Printer::realXPosition();
+            else if(c2=='1')
+              fvalue = Printer::realYPosition();
+            else if(c2=='2')
+              fvalue = Printer::realZPosition();
+                 
+//################ Workpiece Coordinates#########################################################
+
+            else if(c2=='5')
+              fvalue = Printer::currentPosition[X_AXIS]+Printer::coordinateOffset[X_AXIS];                 
+            else if(c2=='6')
+              fvalue = Printer::currentPosition[Y_AXIS]+Printer::coordinateOffset[Y_AXIS];
+            else if(c2=='7')
+              fvalue = Printer::currentPosition[Z_AXIS]+Printer::coordinateOffset[Z_AXIS];
+
+//############ End Workpiece Coordinates #########################################################
+
+            else
+              fvalue = (float)Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+                    
+            addFloat(fvalue,4,2);
+            }
+           
+           else if(c2>='a' && c2<='f') {
                 //  %xa-%xf : Extruder state icon 0x08 or 0x09 or 0x0a (off) - works only with graphic displays!
                 fast8_t exid = c2-'a';
                 TemperatureController &t = extruder[exid].tempControl;
@@ -2195,7 +2240,57 @@ void UIDisplay::refreshPage()
                 parse(text,false);
                 strcpy(cache[r++],uid.printCols);
             }
-        } else {
+        } 
+//###RAyWB  Change Mainpage for CNC and Laser Mode
+        else if
+        (menuPos[0] == 0 && (Printer::mode != PRINTER_MODE_FFF)) {
+
+            col = 0;
+            r = 0;
+            if(UI_ROWS > 2) {
+                text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_1_C_ID);
+                parse(text,false);
+                strcpy(cache[r++],uid.printCols);
+            }
+            col = 0;
+            text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_2_C_ID);
+            parse(text,false);
+            strcpy(cache[r++],uid.printCols);
+            col = 0;
+            text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_3_C_ID);
+            parse(text,false);
+            strcpy(cache[r++],uid.printCols);
+            
+                if(UI_ROWS > 4) 
+                   {
+                    col = 0;
+                    if(Printer::mode == PRINTER_MODE_LASER)
+                    text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_4_L_ID);
+                    if(Printer::mode == PRINTER_MODE_CNC)
+                    text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_4_C_ID);
+                  
+                    parse(text,false);
+                    strcpy(cache[r++],uid.printCols);
+                   }       
+                    if(UI_ROWS > 5)
+                    {
+                    col = 0;
+                    text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_5_ID);
+                    parse(text,false);
+                    strcpy(cache[r++],uid.printCols);
+                    }
+                   
+                col = 0;
+                text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_6_ID);
+                parse(text,false);
+                strcpy(cache[r++],uid.printCols);
+            }
+         
+        
+//############################################################################################        
+        
+        
+        else {
             UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[menuPos[0]]));
             uint16_t nr = pgm_read_word_near(&(men->numEntries));
             UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
@@ -2307,6 +2402,8 @@ void UIDisplay::refreshPage()
         if(menuLevel == 0 && menuPos[0] == 0 ) // Main menu with special graphics
         {
           if(!Printer::isPrinting()) {
+
+if(Printer::mode == PRINTER_MODE_FFF) { //###RAy enabling symbols only in printer mode
 //ext1 and ext2 animation symbols
 #if NUM_EXTRUDER < 3
             if(extruder[0].tempControl.targetTemperatureC > 30)
@@ -2330,6 +2427,10 @@ void UIDisplay::refreshPage()
             else
                 cache[lin][0] = '\x0b';
 #endif // HAVE_HEATED_BED
+
+}//###Ray
+
+
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
             //fan
             fanPercent = Printer::getFanSpeed() * 100 / 255;

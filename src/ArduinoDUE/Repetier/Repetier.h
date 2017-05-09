@@ -210,6 +210,12 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
+typedef uint16_t secondspeed_t;
+#else
+typedef uint8_t secondspeed_t;
+#endif
+
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0
 #endif

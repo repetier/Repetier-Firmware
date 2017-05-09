@@ -118,7 +118,10 @@ void initializeAllMotorDrivers()
 #endif // NUM_MOTOR_DRIVERS
 
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
-uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+
+uint16_t LaserDriver::intensity = LASER_PWM_MAX; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+uint16_t LaserDriver::intens = 0;
+
 bool LaserDriver::laserOn = false;
 bool LaserDriver::firstMove = true;
 
@@ -132,7 +135,8 @@ void LaserDriver::initialize()
     }
     changeIntensity(0);
 }
-void LaserDriver::changeIntensity(uint8_t newIntensity)
+
+void LaserDriver::changeIntensity(secondspeed_t newIntensity)
 {
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if(Printer::isDoorOpen()) {
@@ -146,6 +150,7 @@ void LaserDriver::changeIntensity(uint8_t newIntensity)
         WRITE(LASER_PIN,(LASER_ON_HIGH ? newIntensity > 199 : newIntensity < 200));
 #endif
     }
+    intens=newIntensity;//for "Transfer" Status Page
 }
 #endif // SUPPORT_LASER
 
@@ -157,6 +162,10 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 */
 
 int8_t CNCDriver::direction = 0;
+uint16_t CNCDriver::spindleSpeed= 0;
+uint16_t CNCDriver::spindleRpm= 0;
+
+
 /** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
 void CNCDriver::initialize()
 {
@@ -177,6 +186,7 @@ returning false.
 */
 void CNCDriver::spindleOff()
 {
+    spindleRpm=0;
     if(direction == 0) return; // already off
     if(EVENT_SPINDLE_OFF)
     {
@@ -194,9 +204,13 @@ EVENT_SPINDLE_CW(rpm)
 */
 void CNCDriver::spindleOnCW(int32_t rpm)
 {
+  spindleSpeed=map(rpm,0,CNC_RPM_MAX,0,CNC_PWM_MAX);// linear interpolation
+
+  
     if(direction == 1)
         return;
     spindleOff();
+    spindleRpm=rpm;// for display
     direction = 1;
     if(EVENT_SPINDLE_CW(rpm)) {
 #if CNC_DIRECTION_PIN > -1
@@ -215,9 +229,12 @@ EVENT_SPINDLE_CCW(rpm)
 */
 void CNCDriver::spindleOnCCW(int32_t rpm)
 {
+        spindleSpeed=map(rpm,0,CNC_RPM_MAX,0,CNC_PWM_MAX);// linear interpolation
+   
     if(direction == -1)
         return;
     spindleOff();
+    spindleRpm=rpm;// for display
     direction = -1;
     if(EVENT_SPINDLE_CCW(rpm)) {
 #if CNC_DIRECTION_PIN > -1

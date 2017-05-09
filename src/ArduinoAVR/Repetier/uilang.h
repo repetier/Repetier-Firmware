@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 304
+#define NUM_TRANSLATED_WORDS 310
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -411,6 +411,12 @@
 #define UI_TEXT_CLOSE_ID 301 // "Close"
 #define UI_TEXT_EXTR_ZOFF_ID 302 //         "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_ID 303 // "Measuring ..."
+#define UI_TEXT_Z_PROBE_ID 304
+#define UI_TEXT_MAINPAGE6_1_C_ID 305 //"\xa %e0/%E0\xb0 X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_ID 306 //"\xa %e1/%E1\xb0 Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_ID 307 //"\xe %eb/%Eb\xb0 Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_C_ID 308 //""Mul: %om%%% Laser %op W"
+#define UI_TEXT_MAINPAGE6_4_L_ID 309 //""Mul: %om%%% Spindle %opRPM"
 
 // Universal definitions
 
@@ -747,6 +753,12 @@
 #define UI_TEXT_CLOSE_EN "Close"
 #define UI_TEXT_EXTR_ZOFF_EN "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_EN "Measuring ..."
+#define UI_TEXT_Z_PROBE_EN "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_EN "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_EN "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_EN "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_EN "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_EN "Mul: %om%%%    Spi:%opRPM "
 
 // *************** German translation ****************
 
@@ -1077,6 +1089,12 @@
 #define UI_TEXT_CLOSE_DE "Abbruch"
 #define UI_TEXT_EXTR_ZOFF_DE "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_DE "Messe ..."
+#define UI_TEXT_Z_PROBE_DE "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_DE "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_DE "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_DE "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_DE "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_DE "Mul: %om%%%    Spi:%opRPM"
 
 // Dutch translation
 
@@ -1405,6 +1423,12 @@
 #define UI_TEXT_CLOSE_NL "Close"
 #define UI_TEXT_EXTR_ZOFF_NL "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_NL "Measuring ..."
+#define UI_TEXT_Z_PROBE_NL "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_NL "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_NL "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_NL "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_NL "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_NL "Mul: %om%%%    Spi:%opRPM "
 
 // *************** Brazilian portuguese translation ****************
 
@@ -1735,6 +1759,12 @@
 #define UI_TEXT_CLOSE_PT "Close"
 #define UI_TEXT_EXTR_ZOFF_PT "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_PT "Measuring ..."
+#define UI_TEXT_Z_PROBE_PT "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_PT "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_PT "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_PT "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_PT "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_PT "Mul: %om%%%    Spi:%opRPM "
 
 // *************** Italian translation ****************
 
@@ -2063,6 +2093,12 @@
 #define UI_TEXT_CLOSE_IT "Close"
 #define UI_TEXT_EXTR_ZOFF_IT "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_IT "Measuring ..."
+#define UI_TEXT_Z_PROBE_IT "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_IT "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_IT "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_IT "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_IT "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_IT "Mul: %om%%%    Spi:%opRPM "
 
 // Spanish translation
 
@@ -2391,6 +2427,12 @@
 #define UI_TEXT_CLOSE_ES "Close"
 #define UI_TEXT_EXTR_ZOFF_ES "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_ES "Measuring ..."
+#define UI_TEXT_Z_PROBE_ES "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_ES "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_ES "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_ES "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_ES "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_ES "Mul: %om%%%    Spi:%opRPM "
 
 
 // *************** Swedish translation ****************
@@ -2723,6 +2765,13 @@
 #define UI_TEXT_CLOSE_SE "Close"
 #define UI_TEXT_EXTR_ZOFF_SE "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_SE "Measuring ..."
+#define UI_TEXT_Z_PROBE_SE "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_SE "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_SE "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_SE "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_SE "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_SE "Mul: %om%%%    Spi:%opRPM "
+
 
 // *************** French translation ****************
 // ***************      By Doudou     ****************
@@ -3052,6 +3101,12 @@
 #define UI_TEXT_CLOSE_FR "Ferme"
 #define UI_TEXT_EXTR_ZOFF_FR "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_FR "Mesure ..."
+#define UI_TEXT_Z_PROBE_FR "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_FR "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_FR "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_FR "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_FR "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_FR "Mul: %om%%%    Spi:%opRPM "
 
 // *************** Czech translation ****************
 // ***************      By Majkl     ****************
@@ -3383,6 +3438,12 @@
 #define UI_TEXT_CLOSE_CZ "Close"
 #define UI_TEXT_EXTR_ZOFF_CZ "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_CZ "Measuring ..."
+#define UI_TEXT_Z_PROBE_CZ "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_CZ "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_CZ "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_CZ "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_CZ "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_CZ "Mul: %om%%%    Spi:%opRPM "
 
 // *************** Polish translation ****************
 // ***************       By MIS       ****************
@@ -3712,6 +3773,12 @@
 #define UI_TEXT_CLOSE_PL "Close"
 #define UI_TEXT_EXTR_ZOFF_PL "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_PL "Measuring ..."
+#define UI_TEXT_Z_PROBE_PL "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_PL "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_PL "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_PL "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_PL "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_PL "Mul: %om%%%    Spi:%opRPM "
 
 // Türk
 
@@ -4038,6 +4105,12 @@
 #define UI_TEXT_CLOSE_TR "Close"
 #define UI_TEXT_EXTR_ZOFF_TR "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_TR "Measuring ..."
+#define UI_TEXT_Z_PROBE_TR "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_TR "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_TR "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_TR "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_TR "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_TR "Mul: %om%%%    Spi:%opRPM "
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4367,6 +4440,12 @@
 #define UI_TEXT_CLOSE_FI "Close"
 #define UI_TEXT_EXTR_ZOFF_FI "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_FI "Measuring ..."
+#define UI_TEXT_Z_PROBE_FI "Start Z-Probe"
+#define UI_TEXT_MAINPAGE6_1_C_FI "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_FI "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_FI "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_FI "Mul: %om%%%    Las:%op W"
+#define UI_TEXT_MAINPAGE6_4_C_FI "Mul: %om%%%    Spi:%opRPM "
 
 #define TRANS(x) UI_STRING(F ## x,x)
 #ifdef CUSTOM_TRANSLATIONS

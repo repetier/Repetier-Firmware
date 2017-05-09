@@ -1471,7 +1471,7 @@ void Commands::processMCode(GCode *com) {
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
             if(Printer::mode == PRINTER_MODE_LASER) {
                 if(com->hasS())
-                    LaserDriver::intensity = constrain(com->S,0,255);
+                    LaserDriver::intensity = constrain(com->S,0,LASER_PWM_MAX);
                 LaserDriver::laserOn = true;
                 Com::printFLN(PSTR("LaserOn:"),(int)LaserDriver::intensity);
             }
@@ -1479,7 +1479,7 @@ void Commands::processMCode(GCode *com) {
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
             if(Printer::mode == PRINTER_MODE_CNC) {
                 waitUntilEndOfAllMoves();
-                CNCDriver::spindleOnCW(com->hasS() ? com->S : 0);
+                CNCDriver::spindleOnCW(com->hasS() ? com->S : CNC_RPM_MAX);
             }
 #endif // defined
             break;
@@ -1487,7 +1487,7 @@ void Commands::processMCode(GCode *com) {
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
             if(Printer::mode == PRINTER_MODE_CNC) {
                 waitUntilEndOfAllMoves();
-                CNCDriver::spindleOnCCW(com->hasS() ? com->S : 0);
+                CNCDriver::spindleOnCCW(com->hasS() ? com->S : CNC_RPM_MAX);
             }
 #endif // defined
             break;

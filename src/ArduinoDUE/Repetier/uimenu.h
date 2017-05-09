@@ -118,6 +118,7 @@
   %oS : servo position
   %oY : baby steps counter
   %BC : Bed coating thickness
+  %oP : PWM position Laser/Spindle
 
   Print status related
   %Pn : filename being printed
@@ -149,7 +150,12 @@
   %x1 : Y position
   %x2 : Z position
   %x3 : Current extruder position
-  %x4 : Printed since temperature on in meters (for filament usage)
+  %x4 : Printed since temperature  
+  %x5 : X position include offset
+  %x6 : Y position include offset
+  %x7 : Z position include offset  
+ 
+ on in meters (for filament usage)
   %xa-%xf : Extruder state icon 0x08 or 0x09 or 0x0a (off) - works only with graphic displays!
   %xB : Bed icon state 0x0c or 0x0d or 0x0b (off) Bed state - works only with graphic displays!
   
