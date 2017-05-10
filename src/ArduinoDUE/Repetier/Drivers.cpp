@@ -119,8 +119,8 @@ void initializeAllMotorDrivers()
 
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 
-uint16_t LaserDriver::intensity = LASER_PWM_MAX; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
-uint16_t LaserDriver::intens = 0;
+secondspeed_t LaserDriver::intensity = LASER_PWM_MAX; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
+secondspeed_t LaserDriver::intens = 0;
 
 bool LaserDriver::laserOn = false;
 bool LaserDriver::firstMove = true;
@@ -162,7 +162,7 @@ the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reac
 */
 
 int8_t CNCDriver::direction = 0;
-uint16_t CNCDriver::spindleSpeed= 0;
+secondspeed_t CNCDriver::spindleSpeed= 0;
 uint16_t CNCDriver::spindleRpm= 0;
 
 

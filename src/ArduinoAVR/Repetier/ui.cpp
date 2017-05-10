@@ -1811,7 +1811,7 @@ void UIDisplay::parse(const char *txt,bool ram)
             break;
 
         case 'x':
-            if(c2>='0' && c2<='4')
+            if(c2>='0' && c2<='7')
             {
                 if(c2=='4') // this sequence save 14 bytes of flash
                 {
@@ -1828,7 +1828,7 @@ void UIDisplay::parse(const char *txt,bool ram)
              } 
            else 
             {
-            if(Printer::isAnimation() && ((c2==('0') && !Printer::isXHomed()) || (c2==('1') && !Printer::isYHomed()) || (c2==('2')) && !Printer::isZHomed()))
+            if(Printer::isAnimation() && ((c2=='0' && !Printer::isXHomed()) || (c2=='1' && !Printer::isYHomed()) || (c2=='2' && !Printer::isZHomed())))
              { 
               addStringP(PSTR("   ?.??"));
               break;
