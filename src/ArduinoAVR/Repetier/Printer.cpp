@@ -878,7 +878,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 	}
 #endif
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
-    else if(sledParked) {
+    if(sledParked) {
 		destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS];
 		destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS];
 		destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS];        
