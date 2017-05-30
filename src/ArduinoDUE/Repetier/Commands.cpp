@@ -2135,6 +2135,14 @@ void Commands::processMCode(GCode *com) {
             Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif
             break;
+#if FEATURE_BABYSTEPPING
+		case 290: // M290 Z<babysteps> - Correct by adding baby steps for Z mm
+			if(com->hasZ()) {
+				if(abs(com->Z) < (32700 - labs(Printer::zBabystepsMissing)) * Printer::axisStepsPerMM)
+				Printer::zBabystepsMissing += com->Z * Printer::axisStepsPerMM;
+			}
+			break;
+#endif
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0
         case 300: { // M300
                 int beepS = 1;

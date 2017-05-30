@@ -75,16 +75,19 @@ M452
 
 
    use:  M452 C0<1> for Gamma off/on 
-              L<value> for gamma curve(should be around 1...2.2) 
+              K<value> for gamma curve(should be around 1...2.2) 
               P<value> for start Power
+L<value> for limiting Power
 
 
  ##!!   my tests showed optimum for P at arund 10..15% of LASER_PWM MAX, as it's quite sensitive
  ##!!   i use the value, not percentage.
 
-    example: Gamma on , Gamma 1.4 , start value 500 (in my case i use LASER_PWM MAX 4095)
+    example: Gamma on , Gamma 1.4 , start value 500, Limitvalue 3000
 
-    Gcode command for this example is M452 C1 L1.4 S500
+    Gcode command for this example is 
+
+    M452 C1 K1.4 P500 L3000
 
 
 --------------------------------------------------------------

@@ -234,7 +234,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_VOLTAGE_LEVEL 1 // Set 1=5 o 0=3.3 V
 #endif
 
-#elif MOTHERBOARD == CONTROLLER_FELIX_DUE
+#elif MOTHERBOARD == 405 // Felix Pro 1
 
 #undef BEEPER_PIN
 #define BEEPER_PIN             -1

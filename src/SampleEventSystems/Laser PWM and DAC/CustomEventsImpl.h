@@ -28,7 +28,7 @@
 
 MCP23017 MCP1(0x24);  
 PCAPWM   EXTPWM1(0x41);
-MCP4725 DAC1(0x60);
+MCP4725  DAC1(0x60);
 
 // if you are not shure about the I2C Adresss of your components run Nick Gammon´s I2C Scanner
 // see:  http://www.gammon.com.au/i2c
@@ -44,9 +44,10 @@ MCP4725 DAC1(0x60);
 
 uint16_t Outval;
 bool Gamma_on=true;
-float GAMMA=1.3;
-uint16_t LASER_BASE_OFFSET=200;
-float newint;
+float GAMMA=1.4;
+uint16_t LASER_BASE_OFFSET=1000;
+uint16_t LASER_LIMIT=4095;
+float newintens;
 
 
 //#########################################################################################
@@ -489,15 +490,17 @@ bool Custom_MCode(GCode *com)
                       newint =(com->S);
                       if (Gamma_on)
                       {
-                      Outval=pow(newint/LASER_PWM_MAX,GAMMA)*LASER_PWM_MAX; //Gamma function
-                      LaserDriver::intensity = map((int)Outval,0,LASER_PWM_MAX,LASER_BASE_OFFSET,LASER_PWM_MAX);// scale gamma function and offset to max 
-                      Com::printFLN(PSTR("orig:"),(int)newint);
+                      Outval=pow(newintens/LASER_PWM_MAX,GAMMA)*LASER_PWM_MAX; //Gamma function
+                      LaserDriver::intensity = map((int)Outval,0,LASER_PWM_MAX,LASER_BASE_OFFSET,LASER_LIMIT);// scale gamma function and offset to max 
+                      Com::printFLN(PSTR("orig:"),(int)newintens);
                       }
                       else
                       {
-                      LaserDriver::intensity = constrain(com->S,0,LASER_PWM_MAX);
-                      Com::println("no Gamma correction");
+                      Outval=newintens;
+                      LaserDriver::intensity = map((int)Outval,0,LASER_PWM_MAX,LASER_BASE_OFFSET,LASER_LIMIT);// scale offset to max 
+                      Com::printFLN(PSTR("Gamma off LV:"),(int)newintens);
                       }
+                     
 #else
                 LaserDriver::intensity = constrain(com->S,0,LASER_PWM_MAX);
 #endif                
@@ -515,12 +518,21 @@ bool Custom_MCode(GCode *com)
             break;
  
 //########################################################################################################
-// Standard M452 just swtches to Laser mode
+// Standard M452 just switches to Laser mode
 // Here added for Gamma correction and base offset to start at where material begins to change colour
-// use:  M452 C0<1> for Gamma off/on S<value> for gamma curve(should be around 1...2.2) P<value> for start Power
-// example: Gamma on , Gamma 1.4 , start value 500 (in my case i use LASER_PWM MAX 4095)
-// so Gcode command for this example is M452 C1 L1.4 S500
+// and Limit value .
+// that makes a simple grayscale calibration possible.
+// 
+// Letters used in M452:
+//                       C (Correction)<0/1> 0=off 1 =on
+//                       K (K-factor) usually between 0.1 and 2.2
+//                       P (base Power) depends on Laser Power and material
+//                       L (Limit)  depends on Laser Power and material
+//
+// example for 12 bit PWM (LASER_PWM MAX 4095): Gamma on , Gamma 1.4 , start value 500 Limit 3000 
+// Gcode command for this example is  : M452 C1 K1.4 P500 L3000
 //########################################################################################################
+
        case 452:
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
             Commands::waitUntilEndOfAllMoves();
@@ -536,15 +548,21 @@ bool Custom_MCode(GCode *com)
               Com::printFLN(PSTR("GAMMA ON"));
              }
             }
-            if(com->hasL())
+            if(com->hasK())
             {
-              GAMMA=(float)(com->L);
+              GAMMA=(float)(com->K);
               Com::printFLN(PSTR("GAMMA_VALUE:"),(float)GAMMA,1);
             }
-            if(com->hasS())
+            if(com->hasP())
             {
-              LASER_BASE_OFFSET=(int)(com->S);
+              LASER_BASE_OFFSET=(int)(com->P);
               Com::printFLN(PSTR("LASER_BASE_VALUE:"),(int)LASER_BASE_OFFSET); 
+            }
+
+             if(com->hasL())
+            {
+              LASER_LIMIT=(int)(com->L);
+              Com::printFLN(PSTR("LASER_LIMIT:"),(int)LASER_LIMIT); 
             }
       
             
@@ -778,6 +796,19 @@ switch (buttonval) {
                     HAL::delayMilliseconds(200); 
                     Com::printFLN(PSTR("GAMMA_VALUE:"),(float)GAMMA,1); 
                     break;                   
+      
+      case 1024:    LASER_LIMIT-=50;
+                    if(LASER_LIMIT<LASER_PWM_MAX/4) LASER_LIMIT=LASER_PWM_MAX/4;
+                    HAL::delayMilliseconds(200); 
+                    Com::printFLN(PSTR("LIMIT:"),(int)LASER_LIMIT); 
+                    break;
+
+      case 2048:    LASER_LIMIT+=50;
+                    if(LASER_LIMIT>LASER_PWM_MAX) LASER_LIMIT=LASER_PWM_MAX;
+                    HAL::delayMilliseconds(200); 
+                    Com::printFLN(PSTR("LIMIT:"),(int)LASER_LIMIT); 
+                    break;
+     
       default: 
                     break;
    }
