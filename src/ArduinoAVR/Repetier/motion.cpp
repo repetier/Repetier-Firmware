@@ -2839,6 +2839,17 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
 #endif
+
+//*** Added IK
+#if MULTI_XENDSTOP_HOMING
+    Printer::multiXHomeFlags = MULTI_XENDSTOP_ALL;  // move all x motors until endstop says differently
+#endif
+
+#if MULTI_YENDSTOP_HOMING
+    Printer::multiYHomeFlags = MULTI_YENDSTOP_ALL;  // move all y motors until endstop says differently
+#endif
+//*** Added IK
+
 #if MULTI_ZENDSTOP_HOMING
 		Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
 #endif
