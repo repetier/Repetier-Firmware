@@ -1809,7 +1809,7 @@ inline uint16_t PrintLine::calculateNonlinearSubSegments(uint8_t softEndstop)
 #endif
                     d->deltaSteps[i] = static_cast<uint16_t>(delta);
                 }
-                else
+                else if (delta < 0)
                 {
                     d->setMoveOfAxis(i);
 #ifdef DEBUG_DELTA_OVERFLOW
