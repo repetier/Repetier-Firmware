@@ -719,6 +719,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 	Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
 #endif
 
+#if DUAL_X_AXIS
+  //there should be no need to run any more code as the next extruder is already the current one
+  //however for now better restrict this to DUAL_X configurations only as not to break other stuff
+  if (!executeSelect)
+    return;
+#endif
+
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     if(executeSelect)
     {
