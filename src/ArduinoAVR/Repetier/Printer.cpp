@@ -1925,10 +1925,10 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #if Z_HOME_DIR < 0
 #if ZHOME_PRE_RAISE == 1
 if(zaxis && Endstops::zProbe())
-    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS], 0, homingFeedrate[Z_AXIS], true, true);
 #elif ZHOME_PRE_RAISE == 2
 if(zaxis)
-    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS],0,homingFeedrate[Z_AXIS],true,true);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS], 0, homingFeedrate[Z_AXIS], true, true);
 #endif
 #endif
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
@@ -1977,6 +1977,7 @@ if(zaxis)
         Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,ZHOME_HEAT_HEIGHT,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]);
 #endif		
         Commands::waitUntilEndOfAllMoves();
+#if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
         for(int i = 0; i < NUM_EXTRUDER; i++) {
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZHOME_MIN_TEMPERATURE)),i,false,false);
@@ -1988,6 +1989,7 @@ if(zaxis)
 #else
         if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZHOME_MIN_TEMPERATURE)
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZHOME_MIN_TEMPERATURE)),Extruder::current->id,false,true);
+#endif
 #endif
     }
 #if ZHOME_X_POS == IGNORE_COORDINATE
@@ -2028,6 +2030,7 @@ if(zaxis)
         else startZ = Printer::zMin + Printer::zLength - zBedOffset;
 		moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
         Commands::waitUntilEndOfAllMoves();
+#if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
         for(int i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
@@ -2035,6 +2038,7 @@ if(zaxis)
 			Extruder::setTemperatureForExtruder(actTemp[i],i,false, actTemp[i] > MAX_ROOM_TEMPERATURE);
 #else
         Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
+#endif
 #endif
     }
 }
