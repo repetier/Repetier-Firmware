@@ -2066,7 +2066,9 @@ if(zaxis)
 #endif // HOMING_ORDER != HOME_ORDER_ZXYTZ
     updateCurrentPosition(true);
 #if defined(Z_UP_AFTER_HOME) && Z_HOME_DIR < 0
-	//PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+#ifdef HOME_ZUP_FIRST
+	PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR,0,homingFeedrate[Z_AXIS],true,false);
+#endif
 	if(zaxis)
 		startZ = Z_UP_AFTER_HOME;
 #endif

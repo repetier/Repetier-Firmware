@@ -111,4 +111,12 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_CHECK_FAST_KEYS(action) {}
 #define EVENT_CHECK_SLOW_KEYS(action) {}
 
+// Events on sd pause
+#define EVENT_SD_PAUSE_START(intern) {}
+#define EVENT_SD_PAUSE_END(intern) {}
+#define EVENT_SD_CONTINUE_START(intern) {}
+#define EVENT_SD_CONTINUE_END(intern) {}
+#define EVENT_SD_STOP_START {}
+#define EVENT_SD_STOP_END {}
+
 #endif // EVENTS_H_INCLUDED

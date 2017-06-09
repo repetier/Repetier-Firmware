@@ -827,7 +827,7 @@ It also can add a delay to wait for spindle to run on full speed.
 #define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
 #define CNC_PWM_MAX 255  //255 8-bit PWM 4095 for 12Bit PWM
 #define CNC_RPM_MAX 25000   //max spindle RPM
-
+#define CNC_SAFE_Z 150  // Safe Z height so tool is outside object, used for pause
 
 /* Select the default mode when the printer gets enables. Possible values are
 PRINTER_MODE_FFF 0
@@ -1110,7 +1110,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
  * */
 #define HOMING_ORDER HOME_ORDER_ZXY
 /*
-  Raise Z befor ehoming z axis
+  Raise Z before homing z axis
   0 = no
   1 = if z min is triggered
   2 = always
@@ -1135,7 +1135,7 @@ Mega. Used only for nonlinear systems like delta or tuga. */
 // Z-height for heating extruder during homing
 #define ZHOME_HEAT_HEIGHT 20
 // If your bed might bend while probing, because your sensor is the extruder tip
-// you can define a predefined x,y position so beding is always the same and
+// you can define a predefined x,y position so bending is always the same and
 // can be compensated. Set coordinate to 999999 to ignore positions and just
 // use the position you are at.
 #define ZHOME_X_POS IGNORE_COORDINATE
@@ -1241,7 +1241,7 @@ Overridden if EEPROM activated.
 
 /** \brief Number of moves we can cache in advance.
 
-This number of moves can be cached in advance. If you wan't to cache more, increase this. Especially on
+This number of moves can be cached in advance. If you want to cache more, increase this. Especially on
 many very short moves the cache may go empty. The minimum value is 5.
 */
 #define PRINTLINE_CACHE_SIZE 16
@@ -1298,7 +1298,7 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 
 /** \brief Communication speed.
 
-- 250000 : Fastes with errorrate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
+- 250000 : Fastest with error rate of 0% with 16 or 32 MHz - update wiring_serial.c in your board files. See boards/readme.txt
 - 115200 : Fast, but may produce communication errors on quite regular basis, Error rate -3,5%
 - 76800 : Best setting for Arduino with 16 MHz, Error rate 0,2% page 198 AVR1284 Manual. Result: Faster communication then 115200
 - 57600 : Should produce nearly no errors, on my gen 6 it's faster than 115200 because there are no errors slowing down the connection
@@ -1331,7 +1331,7 @@ boards you might need to make it inverting.
 #define ACK_WITH_LINENUMBER 1
 /** Communication errors can swallow part of the ok, which tells the host software to send
 the next command. Not receiving it will cause your printer to stop. Sending this string every
-second, if our queue is empty should prevent this. Comment it, if you don't wan't this feature. */
+second, if our queue is empty should prevent this. Comment it, if you don't want this feature. */
 #define WAITING_IDENTIFIER "wait"
 
 /** \brief Sets time for echo debug
@@ -1590,7 +1590,7 @@ set this to 1. It then omits the outer measurement points allowing a larger corr
 
 /* If your printer is not exactly square but is more like a parallelogram, you can
 use this to compensate the effect of printing squares like parallelograms. Set the
-parameter to then tangens of the deviation from 90° when you print a square object.
+parameter to then tangents of the deviation from 90° when you print a square object.
 E.g. if you angle is 91° enter tan(1) = 0.017. If error doubles you have the wrong sign.
 Always hard to say since the other angle is 89° in this case!
 */
@@ -1611,7 +1611,7 @@ Always hard to say since the other angle is 89° in this case!
 /* If you have a threaded rod, you want a higher multiplicator to see an effect. Limit value to 50 or you get easily overflows.*/
 #define BABYSTEP_MULTIPLICATOR 1
 
-/* Define a pin to tuen light on/off */
+/* Define a pin to turn light on/off */
 #define CASE_LIGHTS_PIN -1
 #define CASE_LIGHT_DEFAULT_ON 1
 
@@ -1626,7 +1626,7 @@ Always hard to say since the other angle is 89° in this case!
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_EXTENDED_DIR 1
-/** The GCODEs in this line get executed, when you stop a SD print befor it was ended.
+/** The GCODEs in this line get executed, when you stop a SD print before it was ended.
 Separate commands by \n */
 #define SD_RUN_ON_STOP ""
 /** Disable motors and heaters when print was stopped. */
