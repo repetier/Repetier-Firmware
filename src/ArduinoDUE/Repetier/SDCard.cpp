@@ -163,8 +163,8 @@ void SDCard::pausePrint(bool intern)
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                             Printer::memoryE - RETRACT_ON_PAUSE,
                             Printer::maxFeedrate[E_AXIS] / 2);
-#ifdef SAFE_Z
-		if(Printer::mode != PRINTER_MODE_CNC) {
+#ifdef CNC_SAFE_Z
+		if(Printer::mode == PRINTER_MODE_CNC) {
 			Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE,  CNC_SAFE_Z - Printer::coordinateOffset[Z_AXIS], IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS]);
 		}
 #endif
