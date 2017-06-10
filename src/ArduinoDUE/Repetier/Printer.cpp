@@ -3019,7 +3019,7 @@ for (int i = 0; i < NUM_EXTRUDER; i++) {
 void Printer::pausePrint() {
 #if SDSUPPORT
     if(Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
-        sd.pausePrint(false);
+        sd.pausePrint(true);
     } else 
 #endif    
     if(Printer::isMenuMode(MENU_MODE_PRINTING)) {

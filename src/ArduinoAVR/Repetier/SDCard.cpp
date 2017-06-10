@@ -192,6 +192,10 @@ void SDCard::continuePrint(bool intern)
         Printer::GoToMemoryPosition(false, false, false, true, Printer::maxFeedrate[E_AXIS] / 2.0f);
     }
 	EVENT_SD_CONTINUE_END(intern);
+    #if NEW_COMMUNICATION
+    GCodeSource::registerSource(&sdSource);
+    #endif
+    Printer::setPrinting(true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     sdmode = 1;
 }
@@ -208,13 +212,13 @@ void SDCard::stopPrint()
     #if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
     #endif
-	EVENT_SD_STOP_START
+	EVENT_SD_STOP_START;
     GCode::executeFString(PSTR(SD_RUN_ON_STOP));
     if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
         Commands::waitUntilEndOfAllMoves();
         Printer::kill(false);
     }
-	EVENT_SD_STOP_END
+	EVENT_SD_STOP_END;
 }
 
 void SDCard::writeCommand(GCode *code)
