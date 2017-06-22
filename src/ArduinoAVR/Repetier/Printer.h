@@ -931,6 +931,10 @@ public:
 
     static INLINE void setJamcontrolDisabled(uint8_t b)
     {
+	#if EXTRUDER_JAM_CONTROL
+		if(b)
+			Extruder::markAllUnjammed();
+	#endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"),b);
     }

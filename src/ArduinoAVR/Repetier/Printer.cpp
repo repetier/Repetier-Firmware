@@ -1601,6 +1601,7 @@ LaserDriver::laserOn = false;
     // The following movements would be meaningless unless it was zeroed for example.
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_DELTA_ID));
     // Homing Z axis means that you must home X and Y
+	EVENT_BEFORE_Z_HOME;
     homeZAxis();
     moveToReal(0,0,Printer::zLength - zBedOffset,IGNORE_COORDINATE,homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     updateCurrentPosition(true);
@@ -1942,6 +1943,9 @@ if(zaxis)
 			yaxis = true;			
 	}
 #endif
+if(zaxis) {
+	EVENT_BEFORE_Z_HOME;
+}
 #if HOMING_ORDER == HOME_ORDER_XYZ
     if(xaxis) homeXAxis();
     if(yaxis) homeYAxis();
@@ -1968,9 +1972,11 @@ if(zaxis)
     if(xaxis) homeXAxis();
 #elif HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
 {
+#if ZHOME_MIN_TEMPERATURE > 20
     float actTemp[NUM_EXTRUDER];
     for(int i = 0;i < NUM_EXTRUDER; i++)
         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
+#endif
     if(zaxis) {
 #if HOMING_ORDER == HOME_ORDER_ZXYTZ		
         homeZAxis();
@@ -2166,6 +2172,7 @@ void Printer::handleInterruptEvent() {
     switch(event) {
 #if EXTRUDER_JAM_CONTROL
     case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
+        if(isJamcontrolDisabled()) break;
         EVENT_JAM_DETECTED;
         Com::printFLN(PSTR("important:Extruder jam detected"));
         UI_ERROR_P(Com::translatedF(UI_TEXT_EXTRUDER_JAM_ID));

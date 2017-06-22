@@ -389,7 +389,7 @@ public:
 #if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
 #elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80
+		dir &= ~80;
 #else
         dir &= ~16;
 #endif
@@ -405,7 +405,7 @@ public:
     inline void setZMoveFinished()
     {
 #if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80
+		dir &= ~80;
 #else		
         dir &= ~64;
 #endif		

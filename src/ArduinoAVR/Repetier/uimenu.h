@@ -86,6 +86,7 @@
   %Ec : Target temperature of current extruder
   %Eb : Target temperature of heated bed
   %E0-9 : Target temperature of extruder 0..9
+  %ej : Checkbox with jam enabled state
   %D0-3 : Ditto mode selected
   feed rate
   %fx : Max. feedrate x direction

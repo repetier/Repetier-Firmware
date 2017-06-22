@@ -1756,6 +1756,12 @@ void Commands::processMCode(GCode *com) {
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case 106: // M106 Fan On
+			if(com->hasI()) {
+				if(com->I != 0)
+					Printer::flag2 |= PRINTER_FLAG2_IGNORE_M106_COMMAND;
+				else
+					Printer::flag2 &= ~PRINTER_FLAG2_IGNORE_M106_COMMAND;
+			}
             if(!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
                 if(com->hasP() && com->P == 1)
                     setFan2Speed(com->hasS() ? com->S : 255);

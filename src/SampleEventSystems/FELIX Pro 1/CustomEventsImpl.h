@@ -120,6 +120,29 @@ void preheatFCActive() {
   uid.pushMenu(&ui_menu_ch3,true);
 }
 
+bool cExecuteOverride(int action,bool allowMoves) {
+  switch(action) {
+    case UI_ACTION_LOAD_EEPROM:
+      EEPROM::readDataFromEEPROM(true);
+      EEPROM::storeDataIntoEEPROM(false);
+      Extruder::selectExtruderById(Extruder::current->id);
+      uid.pushMenu(&ui_menu_eeprom_loaded, false);
+      BEEP_LONG;
+      return true;
+#if FEATURE_AUTOLEVEL & FEATURE_Z_PROBE
+    case UI_ACTION_AUTOLEVEL2:
+      uid.popMenu(false);
+      uid.pushMenu(&ui_msg_calibrating_bed, true);
+      Printer::homeAxis(true, true, true);
+      Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 3, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+      runBedLeveling(2);
+      uid.popMenu(true);
+      return true;
+#endif      
+  }
+  return false;
+}
+
 void cExecute(int action,bool allowMoves) {
   switch(action) {
   case UI_ACTION_XY1_BACK:
@@ -341,11 +364,118 @@ void cOkWizard(int action) {
   }
 } 
 
+void cRelaxExtruderEndstop() {
+#ifndef NO_RELAX_ENDSTOPS
+  int activeExtruder = Extruder::current->id;
+  Printer::setColdExtrusionAllowed(true);
+  Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
+  Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
+  Extruder::selectExtruderById(1 - activeExtruder);
+  Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
+  Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
+  Printer::setColdExtrusionAllowed(false);
+  Extruder::selectExtruderById(activeExtruder);
+  Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
+#endif  
+}
+
+bool cRefreshPage() {
+  if(uid.menuLevel != 0)
+    return false;
+    if(uid.menuPos[0] == 0 && Printer::isPrinting())
+      return false;
+  // Use big chars, skip 5th line
+      uint16_t r;
+  uint8_t mtype = UI_MENU_TYPE_INFO;
+  char cache[UI_ROWS+UI_ROWS_EXTRA][MAX_COLS + 1];
+  uid.adjustMenuPos();
+#if defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
+  char head[MAX_COLS + 1];
+  uid.col = 0;
+  uid.parse(uiHead,false);
+  strcpy(head,uid.printCols);
+#endif
+  char *text;
+
+  UIMenu *men = (UIMenu*)pgm_read_word(&(ui_pages[uid.menuPos[0]]));
+  uint16_t nr = pgm_read_word_near(&(men->numEntries));
+  UIMenuEntry **entries = (UIMenuEntry**)pgm_read_word(&(men->entries));
+  for(r = 0; r < nr && r < UI_ROWS + UI_ROWS_EXTRA; r++) {
+    UIMenuEntry *ent = (UIMenuEntry *)pgm_read_word(&(entries[r]));
+    uid.col = 0;
+    text = (char*)pgm_read_word(&(ent->text));
+    if(text == NULL)
+       text = (char*)Com::translatedF(pgm_read_word(&(ent->translation)));
+    uid.parse(text,false);
+    strcpy(cache[r],uid.printCols);
+  }
+
+  uid.printCols[0] = 0;
+  while(r < UI_ROWS) // delete trailing empty rows
+    strcpy(cache[r++],uid.printCols);
+    // compute line scrolling values    
+    uint8_t off0 = (uid.shift <= 0 ? 0 : uid.shift), y;
+    uint8_t off[UI_ROWS + UI_ROWS_EXTRA];
+    for(y = 0; y < UI_ROWS + UI_ROWS_EXTRA; y++)
+    {
+        uint8_t len = strlen(cache[y]); // length of line content
+        off[y] = len > UI_COLS ? RMath::min(len - UI_COLS,off0) : 0;
+        if(len > UI_COLS)
+        {
+            off[y] = RMath::min(len - UI_COLS,off0);
+        }
+        else off[y] = 0;
+     }
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
+#define drawHProgressBar(x,y,width,height,progress) \
+     {u8g_DrawFrame(&u8g,x,y, width, height);  \
+     int p = ceil((width-2) * progress / 100); \
+     u8g_DrawBox(&u8g,x+1,y+1, p, height-2);}
+
+
+#define drawVProgressBar(x,y,width,height,progress) \
+     {u8g_DrawFrame(&u8g,x,y, width, height);  \
+     int p = height-1 - ceil((height-2) * progress / 100); \
+     u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
+
+        //u8g picture loop
+        u8g_FirstPage(&u8g);
+        do
+        {
+
+#endif //  UI_DISPLAY_TYPE == DISPLAY_U8G
+#if defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
+					// Show status line
+					u8g_SetColorIndex(&u8g,1);
+					u8g_draw_box(&u8g, 0, 0, u8g_GetWidth(&u8g), UI_FONT_SMALL_HEIGHT + 1);
+					u8g_SetColorIndex(&u8g, 0);
+					u8g_SetFont(&u8g,UI_FONT_SMALL);
+                    if(u8g_IsBBXIntersection(&u8g, 0, 1, 1, UI_FONT_SMALL_HEIGHT+1))
+						printU8GRow(1,UI_FONT_SMALL_HEIGHT,head);
+					u8g_SetFont(&u8g, UI_FONT_DEFAULT);		
+					u8g_SetColorIndex(&u8g,1);
+
+#endif
+           for(y = 0; y < UI_ROWS + UI_ROWS_EXTRA; y++) {
+             uint8_t l = y;
+             if(y == 4)
+                continue;
+             if(y == 5)
+              l = 4;   
+             uid.printRow(l, &cache[y][off[y]], NULL, UI_COLS);
+           }
+#if UI_DISPLAY_TYPE == DISPLAY_U8G
+        }
+        while( u8g_NextPage(&u8g) );  //end picture loop
+#endif
+  Printer::toggleAnimation();    
+  return true;
+}
+
 FSTRINGVALUE(removeBedGCode,
 "M140 S0\n"
-"G28 X\n"
-"G28 Y\n"
-"G1 X0 Y244 F5000\n"
+"G28 Y0\n"
+"M84\n"
 );
 
 FSTRINGVALUE(extzCalibGCode,
@@ -364,9 +494,8 @@ FSTRINGVALUE(extzCalibGCode,
  FSTRINGVALUE(calibrationGCode,
 "M140 S55\n"
 "M104 T0 S190\n"
-"M104 T1 S190\n"
+"M104 T1 S140\n"
 "M117 Homing\n"
-"G28\n"
 "G91\n"
 "G1 Z5 F7800\n"
 "G90\n"
@@ -378,24 +507,12 @@ FSTRINGVALUE(extzCalibGCode,
 "G92 E0\n"
 "G1 E0.25 F500\n"
 "M302 S0\n"
-//"G28 Z\n"
+"G28 Z\n"
 "M190 S55\n"
-"T1\n"
-"M109 T1 S190\n"
-"M117 Purge Extruder 2\n"
-"G92 E0\n"
-"G1 X1.0 Y243.8 Z0.3 F7800.0\n"
-"G1 X128.5 Y243.8 Z0.3 F1500.0 E15\n"
-"G1 E14 F3000\n"
-"G92 E0\n"
-"M104 T1 S190\n"
-"M117 Purge Extruder 1\n"
-"G92 E0\n"
-"G1 X236.0 Y243.2 Z5 F7800.0\n"
-"G1 E-0.5 F3000\n"
 "T0\n"
 "M109 S190\n"
-"G1 X236.0 Y243.2 Z0.3 F3000.0\n"
+"G1 X236.0 Y243.2 Z5.0 F7800.0\n"
+"G1 X236.0 Y243.2 Z0.3 F7800.0\n"
 "G1 X108.5 Y243.2 Z0.3 F1500.0 E15\n"
 "G1 E14.5 F3000\n"
 "G92 E0\n"
@@ -404,9 +521,8 @@ FSTRINGVALUE(extzCalibGCode,
 "G90\n"
 "M82\n"
 "G92 E0\n"
+"G1 E0.2 F3000\n"
 "T0\n"
-"G92 E0\n"
-"G1 E-0.75000 F3000.00000\n"
 "G92 E0\n"
 "G1 Z0.300 F7800.000\n"
 "G1 X123.501 Y191.179 F7800.000\n"
@@ -1129,11 +1245,39 @@ FSTRINGVALUE(extzCalibGCode,
 "G1 X100.956 Y180.358 E31.19691\n"
 "G92 E0\n"
 "G1 Z0.550 F7800.000\n"
+"\n"
+"\n"
+"\n"
+"\n"
 "M104 S140\n"
-"G1 X161.356 Y119.458 F7800.000\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"G1 X1.0 Y243.8 Z0.3 F7800.0\n"
 "T1\n"
+"M109 T1 S190\n"
+"M117 Purge Extruder 2\n"
 "G92 E0\n"
-"G1 E2 F200\n"
+"\n"
+"G1 X128.5 Y243.8 Z0.3 F1500.0 E15\n"
+"\n"
+"G1 E14 F3000\n"
+"G92 E0\n"
+"M104 T1 S190\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"M117 Purge Extruder 1\n"
+"G92 E0\n"
+"G1 E-0.5 F3000\n"
+"\n"
+"G1 X161.356 Y119.458 F7800.000\n"
+"G1 E0 F3000\n"
+"T1\n"
 "G92 E0\n"
 "G1 Z0.250 F7800.000\n"
 "G1 E0.75000 F3000.00000\n"
@@ -1483,14 +1627,16 @@ FSTRINGVALUE(extzCalibGCode,
 "G1 X220 Y243 F7800\n"
 "T0\n"
 "M104 T0 S0\n"
-"G1 E-10 F3000\n"
-"T1\n"
 "G92 E0\n"
-"M104 T1 S0\n"
 "G1 E-10 F3000\n"
-"M140 S0\n"
+"G92 E0\n"
+"T1\n"
+"M104 T1 S0\n"
+"G92 E0\n"
+"G1 E-10 F3000\n"
 "G92 E0\n"
 "T0\n"
+"M140 S0\n"
 "M107\n"
 "M84\n"
 "M117 Print Complete\n"

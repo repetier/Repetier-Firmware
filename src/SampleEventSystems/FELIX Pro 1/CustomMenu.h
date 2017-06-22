@@ -34,6 +34,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_back, UI_TEXT_BACK_ID, UI_ACTION_BACK)
 
 // new submenues and entries
 
+UI_MENU_HEADLINE_T(ui_empty,UI_TEXT_EMPTY_ID)
 UI_MENU_HEADLINE_T(ui_exy1a,UI_CTEXT_XY_P1_1_ID)
 UI_MENU_HEADLINE_T(ui_exy1b,UI_CTEXT_XY_P1_2_ID)
 UI_MENU_HEADLINE_T(ui_exy1c,UI_CTEXT_XY_P1_3_ID)
@@ -70,7 +71,7 @@ UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
 
 UI_WIZARD4_T(ui_msg_printxycal, UI_ACTION_STATE,UI_CTEXT_PRINTXYCAL1_ID, UI_CTEXT_PRINTXYCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EXTZCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD4_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool1,UI_CTEXT_PREHEATCOOL_ID,UI_ACTION_PRECOOL1)
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECOOL2)
@@ -180,9 +181,9 @@ UI_PAGE6_T(ui_page4, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4A_I
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1 UI_PRINTTIME_PAGES ,&ui_page4 UI_EXTRUDERS_PAGES}
+#define UI_PAGES {/*&ui_page1 UI_PRINTTIME_PAGES ,*/&ui_page4 UI_EXTRUDERS_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT+UI_EXTRUDERS_PAGES_COUNT
+#define UI_NUM_PAGES 1/*+UI_PRINTTIME_COUNT*/+UI_EXTRUDERS_PAGES_COUNT
 
 #elif UI_ROWS >= 4
 #if HAVE_HEATED_BED
@@ -239,9 +240,9 @@ UI_PAGE4_T(ui_page4, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1, &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
+#define UI_PAGES {/*&ui_page1,*/ &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT
+#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT
 #else
 #if HAVE_HEATED_BED
 UI_PAGE2_T(ui_page1, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_PAGE_BED_ID)
@@ -254,9 +255,9 @@ UI_PAGE2_T(ui_page3, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_STATUS_ID)
   Merge pages together. Use the following pattern:
   #define UI_PAGES {&name1,&name2,&name3}
 */
-#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3}
+#define UI_PAGES {/* &ui_page1,*/ &ui_page2,&ui_page3}
 // How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 3
+#define UI_NUM_PAGES 2
 #endif
 
 /* ============ MENU definition ================
@@ -448,8 +449,8 @@ UI_WIZARD4_T(ui_msg_defectsensor, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI
 UI_WIZARD4_T(ui_msg_slipping, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_SLIPPING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_LEVELING_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 UI_WIZARD4_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
+UI_WIZARD5_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID,  UI_TEXT_OK_ID)
 
 UI_WIZARD4_T(ui_msg_calibrating_bed, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_CALIBRATING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_homing, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_HOMING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
@@ -956,9 +957,10 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #define UI_CHANGE_FIL_ENT
 #define UI_CHANGE_FIL_ENT_PRINTING
 #endif
+UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
 
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_menu_home_all ,&ui_preheatcool1,&ui_preheatcool2,&ui_removebed \
-    UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed,&ui_calex , &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed,&ui_calex ,&ui_menu_move \
+      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
 UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT)
 
 UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)
@@ -1144,8 +1146,8 @@ UI_MENU(ui_menu_cextr, UI_MENU_CEXTR, 7 + UI_MENU_BACKCNT + UI_MENU_PIDCNT + UI_
 // HeatBed Configuration - use menu actions from extruder configuration
 #if HAVE_HEATED_BED
 #if TEMP_PID
-#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
-UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT)
+#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK UI_MENU_COATING_COND &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
+UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT + UI_MENU_COATING_CNT)
 #else
 #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_cext_manager, &ui_menu_cext_pmax}
 UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 2 + UI_MENU_BACKCNT)
@@ -1195,9 +1197,8 @@ UI_MENU_SUBMENU_T(ui_menu_conf_delta, UI_TEXT_ZCALIB_ID, ui_menu_delta)
 #define UI_MENU_DELTA_COND
 #define UI_MENU_DELTA_CNT 0
 #endif
-UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK LANGMENU_ENTRY UI_MENU_COATING_COND &ui_menu_general_baud,&ui_menu_sub_info,&ui_menu_move,&ui_menu_conf_extr UI_MENU_BEDCONF_COND UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + UI_MENU_COATING_CNT + 4)
+#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_sub_info, LANGMENU_ENTRY &ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_general_baud  UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
+UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + 3)
 
 
 // **** Preheat menu ****
@@ -1318,8 +1319,8 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_extrudercontrol, UI_TEXT_EXTRUDER_ID, ui_menu_e
 
 UI_MENU_SUBMENU_FILTER_T(ui_menu_settings, UI_TEXT_CONFIGURATION_ID, ui_menu_configuration,0,MENU_MODE_PRINTING)
 #define UI_MENU_MAIN {UI_MENU_ADDCONDBACK &ui_menu_control ,&ui_stop,&ui_pause,&ui_continue \
-    UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
-    UI_BED_TEMP_PRINTING ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_CHANGE_FIL_ENT_PRINTING UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING BABY_ENTRY_PRINTING , SD_PRINTFILE_ENTRY \
+    BABY_ENTRY_PRINTING  ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
+    UI_BED_TEMP_PRINTING  UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING  UI_CHANGE_FIL_ENT_PRINTING, SD_PRINTFILE_ENTRY \
     &ui_menu_settings}
    // &ui_menu_move, &ui_menu_extrudercontrol, 
     

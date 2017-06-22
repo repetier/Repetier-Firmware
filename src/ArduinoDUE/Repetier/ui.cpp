@@ -902,13 +902,13 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
 #ifdef UI_HEAD
 	y += UI_FONT_HEIGHT;
 #endif	
-    if(!u8g_IsBBXIntersection(&u8g,0,y,UI_LCD_WIDTH,UI_FONT_HEIGHT+2)) return; // row not visible
+    if(!u8g_IsBBXIntersection(&u8g, 0, y, UI_LCD_WIDTH, UI_FONT_HEIGHT + 2)) return; // row not visible
     u8_tx = 0;
-    u8_ty = y+UI_FONT_HEIGHT; //set position
+    u8_ty = y + UI_FONT_HEIGHT; //set position
     bool highlight = ((uint8_t)(*txt) == CHAR_SELECTOR) || ((uint8_t)(*txt) == CHAR_SELECTED);
     if(highlight)
     {
-        u8g_SetColorIndex(&u8g,1);
+        u8g_SetColorIndex(&u8g, 1);
         u8g_draw_box(&u8g, 0, y + 1, u8g_GetWidth(&u8g), UI_FONT_HEIGHT + 1);
         u8g_SetColorIndex(&u8g, 0);
     }
@@ -921,7 +921,7 @@ void UIDisplay::printRow(uint8_t r,char *txt,char *txt2,uint8_t changeAtCol)
     if(txt2 != NULL)
     {
         col = changeAtCol;
-        u8_tx = col*UI_FONT_WIDTH; //set position
+        u8_tx = col * UI_FONT_WIDTH; //set position
         while((c=*(txt2++)) != 0 && col < UI_COLS)
         {
             u8PrintChar(c);
@@ -1506,6 +1506,9 @@ void UIDisplay::parse(const char *txt,bool ram)
                 break;
             }
 #endif
+			if(c2 == 'j') { // jam control enabled
+				addStringOnOff(!Printer::isJamcontrolDisabled());
+			}
 #if NUM_TEMPERATURE_LOOPS > 0
             uint8_t eid = NUM_EXTRUDER;    // default = BED if c2 not specified extruder number
             if(c2 == 'c') eid = Extruder::current->id;
@@ -2181,6 +2184,8 @@ FSTRINGVALUE(uiHead,UI_HEAD)
 void UIDisplay::refreshPage()
 {
    Endstops::update();
+   if(EVENT_UI_REFRESH_PAGE)
+	return;
 #if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::refresh();
 #else
@@ -2769,6 +2774,7 @@ int UIDisplay::okAction(bool allowMoves)
     if(mtype == UI_MENU_TYPE_WIZARD)
     {
         action = pgm_read_word(&(men->id));
+		if(!EVENT_UI_OVERRIDE_EXECUTE(action,allowMoves))
         switch(action)
         {
 #if FEATURE_RETRACTION
@@ -2796,11 +2802,9 @@ int UIDisplay::okAction(bool allowMoves)
 			}
             Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
             Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
-            Printer::setBlockingReceive(false);
-#if EXTRUDER_JAM_CONTROL
-            Extruder::markAllUnjammed();
-#endif
+			Commands::waitUntilEndOfAllMoves(); // catch retract/extrude in case no filament was inserted no jam report occurs
             Printer::setJamcontrolDisabled(false);
+            Printer::setBlockingReceive(false);
 			}
             break;
 #if EXTRUDER_JAM_CONTROL
@@ -3526,6 +3530,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         setStatusP(Com::translatedF(UI_TEXT_STRING_ACTION_ID));
     }
     else
+		if(!EVENT_UI_OVERRIDE_EXECUTE(action,allowMoves))
         switch(action)
         {
         case UI_ACTION_OK:
@@ -3587,6 +3592,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             if(!allowMoves) return UI_ACTION_SET_ORIGIN;
             Printer::setOrigin(0, 0, 0);
             break;
+        case UI_ACTION_TOGGLE_JAMCONTROL:
+			Printer::setJamcontrolDisabled(!Printer::isJamcontrolDisabled());
+			break;
         case UI_ACTION_DEBUG_ECHO:
             Printer::toggleEcho();
             break;
@@ -3946,12 +3954,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_EOF:
         {
-            DEBUG_MSG_FAST("JAM1");
-            Extruder::markAllUnjammed();
             Printer::setJamcontrolDisabled(true);
             Printer::setBlockingReceive(true);
-            pushMenu(&ui_wiz_jamreheat, true);
-            DEBUG_MSG_FAST("JAM2");
             Printer::resetWizardStack();
             Printer::pushWizardVar(Printer::currentPositionSteps[E_AXIS]);
 			Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
@@ -3975,6 +3979,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::disableZStepper();
 #endif
 #endif
+            pushMenu(&ui_wiz_jamreheat, true);
         }
         break;
 #endif // EXTRUDER_JAM_CONTROL

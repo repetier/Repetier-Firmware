@@ -5,6 +5,9 @@ extern bool customMCode(GCode *com);
 extern void cExecute(int action,bool allowMoves);
 extern void cNextPrevious(int action,bool allowMoves,int increment);
 extern void cOkWizard(int action);
+extern bool cExecuteOverride(int action,bool allowMoves);
+extern void cRelaxExtruderEndstop();
+extern bool cRefreshPage();
 
 #undef EVENT_TIMER_100MS
 #undef EVENT_TIMER_500MS
@@ -13,14 +16,20 @@ extern void cOkWizard(int action);
 #undef EVENT_UI_EXECUTE
 #undef EVENT_UI_NEXTPREVIOUS
 #undef EVENT_UI_OK_WIZARD
+#undef EVENT_UI_OVERRIDE_EXECUTE
+#undef EVENT_BEFORE_Z_HOME
+#undef EVENT_UI_REFRESH_PAGE
 
 #define EVENT_TIMER_100MS {Felix100MS();}
 #define EVENT_TIMER_500MS {Felix500MS();}
 #define EVENT_CONTRAIN_DESTINATION_COORDINATES FelixContainCoordinates();
 #define EVENT_UNHANDLED_M_CODE(c) customMCode(c)
 #define EVENT_UI_EXECUTE(action,allowMoves) cExecute(action,allowMoves)
+#define EVENT_UI_OVERRIDE_EXECUTE(action,allowMoves) cExecuteOverride(action,allowMoves)
 #define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) cNextPrevious(action,allowMoves,increment)
 #define EVENT_UI_OK_WIZARD(action)  cOkWizard(action)
+#define EVENT_BEFORE_Z_HOME cRelaxExtruderEndstop()
+#define EVENT_UI_REFRESH_PAGE cRefreshPage()
 
 // New menu actions
 

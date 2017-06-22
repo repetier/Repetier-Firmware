@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 310
+#define NUM_TRANSLATED_WORDS 311
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -417,7 +417,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_ID 307 //"\xe %eb/%Eb\xb0 Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_C_ID 308 //""Mul: %om%%% Laser %op W"
 #define UI_TEXT_MAINPAGE6_4_L_ID 309 //""Mul: %om%%% Spindle %opRPM"
-
+#define UI_TEXT_JAMCONTROL_ID 310 // "%ej Jam Control
 // Universal definitions
 
 #define UI_TEXT_SEL              cSEL
@@ -759,6 +759,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_EN "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_EN "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_EN "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_EN "%ej Jam Control"
 
 // *************** German translation ****************
 
@@ -1095,6 +1096,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_DE "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_DE "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_DE "Mul: %om%%%    Spi:%opRPM"
+#define UI_TEXT_JAMCONTROL_DE "%ej Blockaden" STR_uuml "berw."
 
 // Dutch translation
 
@@ -1429,6 +1431,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_NL "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_NL "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_NL "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_NL "%ej Jam Control"
 
 // *************** Brazilian portuguese translation ****************
 
@@ -1765,6 +1768,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_PT "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_PT "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_PT "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_PT "%ej Jam Control"
 
 // *************** Italian translation ****************
 
@@ -2099,6 +2103,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_IT "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_IT "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_IT "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_IT "%ej Jam Control"
 
 // Spanish translation
 
@@ -2433,6 +2438,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_ES "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_ES "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_ES "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_ES "%ej Jam Control"
 
 
 // *************** Swedish translation ****************
@@ -2771,6 +2777,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_SE "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_SE "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_SE "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_SE "%ej Jam Control"
 
 
 // *************** French translation ****************
@@ -3107,6 +3114,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_FR "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_FR "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_FR "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_FR "%ej Jam Control"
 
 // *************** Czech translation ****************
 // ***************      By Majkl     ****************
@@ -3444,6 +3452,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_CZ "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_CZ "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_CZ "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_CZ "%ej Jam Control"
 
 // *************** Polish translation ****************
 // ***************       By MIS       ****************
@@ -3779,6 +3788,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_PL "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_PL "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_PL "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_PL "%ej Jam Control"
 
 // Türk
 
@@ -4111,6 +4121,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_TR "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_TR "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_TR "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_TR "%ej Jam Control"
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4446,6 +4457,7 @@
 #define UI_TEXT_MAINPAGE6_3_C_FI "Zw:%x7   Z:%x2"
 #define UI_TEXT_MAINPAGE6_4_L_FI "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_FI "Mul: %om%%%    Spi:%opRPM "
+#define UI_TEXT_JAMCONTROL_FI "%ej Jam Control"
 
 #define TRANS(x) UI_STRING(F ## x,x)
 #ifdef CUSTOM_TRANSLATIONS

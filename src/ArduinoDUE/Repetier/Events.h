@@ -103,7 +103,11 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_UI_OK_WIZARD(action) {}
 #define EVENT_UI_FINISH_ACTION(action) false
 #define EVENT_UI_EXECUTE(action,allowMoves) {}
+// Returns false if no function was executed
+#define EVENT_UI_OVERRIDE_EXECUTE(action,allowMoves) false
 #define EVENT_UI_NEXTPREVIOUS(action,allowMoves,increment) {}
+// replace by function call returning true if it handled refresh page it self.
+#define EVENT_UI_REFRESH_PAGE false
 
 // the following 2 events are equivalent to slow and fast key function and allow adding extra keys in event system.
 // make sure action is called by reference so it can be changed and returned.
@@ -118,5 +122,7 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_SD_CONTINUE_END(intern) {}
 #define EVENT_SD_STOP_START {}
 #define EVENT_SD_STOP_END {}
+
+#define EVENT_BEFORE_Z_HOME {}
 
 #endif // EVENTS_H_INCLUDED
