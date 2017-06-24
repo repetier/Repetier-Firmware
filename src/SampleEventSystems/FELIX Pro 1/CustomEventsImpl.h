@@ -171,7 +171,7 @@ void cExecute(int action,bool allowMoves) {
     {
       int32_t xcor = static_cast<int32_t>((Printer::axisStepsPerMM[X_AXIS] * (Printer::wizardStack[0].l - 5)) / 10);
       int32_t ycor = static_cast<int32_t>((Printer::axisStepsPerMM[Y_AXIS] * (Printer::wizardStack[1].l - 5)) / 10);
-      extruder[1].xOffset += xcor;
+      extruder[1].xOffset -= xcor;
       extruder[1].yOffset += ycor;
       if(xcor != 0 || ycor != 0)
         EEPROM::storeDataIntoEEPROM(false);

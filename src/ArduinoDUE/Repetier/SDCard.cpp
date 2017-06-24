@@ -155,7 +155,7 @@ void SDCard::pausePrint(bool intern)
     #if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
     #endif
-	EVENT_SD_PAUSE_START(intern);
+	if(EVENT_SD_PAUSE_START(intern)) {
     if(intern) {
         Commands::waitUntilEndOfAllBuffers();
         //sdmode = 0; // why ?
@@ -178,19 +178,21 @@ void SDCard::pausePrint(bool intern)
         Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
         GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
+	}
 	EVENT_SD_PAUSE_END(intern);
 }
 
 void SDCard::continuePrint(bool intern)
 {
     if(!sd.sdactive) return;
-	EVENT_SD_CONTINUE_START(intern);
+	if(EVENT_SD_CONTINUE_START(intern)) {
     if(intern) {
         GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
         Printer::GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
         Printer::GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] / 2.0f);
         Printer::GoToMemoryPosition(false, false, false, true, Printer::maxFeedrate[E_AXIS] / 2.0f);
     }
+	}
 	EVENT_SD_CONTINUE_END(intern);
     #if NEW_COMMUNICATION
     GCodeSource::registerSource(&sdSource);
@@ -212,12 +214,13 @@ void SDCard::stopPrint()
     #if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
     #endif
-	EVENT_SD_STOP_START;
-    GCode::executeFString(PSTR(SD_RUN_ON_STOP));
-    if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
-        Commands::waitUntilEndOfAllMoves();
-        Printer::kill(false);
-    }
+	if(EVENT_SD_STOP_START) {
+		GCode::executeFString(PSTR(SD_RUN_ON_STOP));
+		if(SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
+			Commands::waitUntilEndOfAllMoves();
+			Printer::kill(false);
+		}
+	}
 	EVENT_SD_STOP_END;
 }
 

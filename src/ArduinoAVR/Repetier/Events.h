@@ -116,11 +116,11 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_CHECK_SLOW_KEYS(action) {}
 
 // Events on sd pause
-#define EVENT_SD_PAUSE_START(intern) {}
+#define EVENT_SD_PAUSE_START(intern) true
 #define EVENT_SD_PAUSE_END(intern) {}
-#define EVENT_SD_CONTINUE_START(intern) {}
+#define EVENT_SD_CONTINUE_START(intern) true
 #define EVENT_SD_CONTINUE_END(intern) {}
-#define EVENT_SD_STOP_START {}
+#define EVENT_SD_STOP_START true
 #define EVENT_SD_STOP_END {}
 
 #define EVENT_BEFORE_Z_HOME {}
