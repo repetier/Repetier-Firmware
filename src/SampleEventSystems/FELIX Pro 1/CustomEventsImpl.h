@@ -366,6 +366,8 @@ void cOkWizard(int action) {
 
 void cRelaxExtruderEndstop() {
 #ifndef NO_RELAX_ENDSTOPS
+  uint8_t oldJam = Printer::isJamcontrolDisabled();
+  Printer::setJamcontrolDisabled(true); // prevent jam message when no filament is inserted 
   int activeExtruder = Extruder::current->id;
   Printer::setColdExtrusionAllowed(true);
   Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
@@ -376,6 +378,7 @@ void cRelaxExtruderEndstop() {
   Printer::setColdExtrusionAllowed(false);
   Extruder::selectExtruderById(activeExtruder);
   Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
+  Printer::setJamcontrolDisabled(oldJam);
 #endif  
 }
 
