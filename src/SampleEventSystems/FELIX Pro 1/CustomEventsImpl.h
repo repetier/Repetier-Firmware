@@ -120,6 +120,48 @@ void preheatFCActive() {
   uid.pushMenu(&ui_menu_ch3,true);
 }
 
+#ifdef HALFAUTOMATIC_LEVELING
+// Measure fixed point height and P1
+void halfautomaticLevel2() {
+  uid.popMenu(false);
+  uid.pushMenu(&cui_msg_measuring,true);
+  Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float halfRefHeight = Printer::runZProbe(false, false); 
+  Printer::moveToReal(HALF_P1_X, HALF_P1_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float p1 = Printer::runZProbe(false, false); 
+  Printer::moveToReal(HALF_P2_X, HALF_P2_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float p2 = Printer::runZProbe(false, false);
+  float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
+  float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
+  Printer::wizardStack[0].f = 360 * z1 / HALF_PITCH; 
+  Printer::wizardStack[0].f = 360 * z2 / HALF_PITCH; 
+  uid.popMenu(false);
+  uid.pushMenu(&ui_half_show,true);
+}
+// Finish leveling
+void halfautomaticLevel3() {
+  Printer::finishProbing();
+  uid.popMenu(false);
+}
+/* Start autoleveling */
+void halfautomaticLevel1() {
+  uid.pushMenu(&cui_msg_measuring,true);
+  Printer::homeAxis(true, true, true);
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::startProbing(true);
+  uid.popMenu(false);
+  halfautomaticLevel2();  
+}
+#endif
+
+bool cCustomParser(char c1, char c2) {
+
+  return false;
+}
+
 bool cExecuteOverride(int action,bool allowMoves) {
   switch(action) {
     case UI_ACTION_LOAD_EEPROM:
@@ -145,6 +187,17 @@ bool cExecuteOverride(int action,bool allowMoves) {
 
 void cExecute(int action,bool allowMoves) {
   switch(action) {
+#ifdef HALFAUTOMATIC_LEVELING
+  case UI_ACTION_HALFAUTO_LEV:
+    halfautomaticLevel1();
+    break;
+  case UI_ACTION_HALFAUTO_LEV2:
+    halfautomaticLevel2();
+    break;
+  case UI_ACTION_HALFAUTO_LEV3:
+    halfautomaticLevel3();
+    break;
+#endif  
   case UI_ACTION_XY1_BACK:
      uid.popMenu(true);
      break;

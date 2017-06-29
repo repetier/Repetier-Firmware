@@ -94,7 +94,7 @@ Each of the following events describe the parameter and when it is called.
 
 // Allows adding custom symbols in strings that get parsed. Return false if not replaced so defaults can trigger.
 // override function signature: bool parser(uint8_t c1,uint8_t c2)
-#define CUSTOM_TEXT_PARSER(c1,c2) false
+#define EVENT_CUSTOM_TEXT_PARSER(c1,c2) false
 
 // User interface actions
 // These get only executed if there was no hot, so they are ideal to add new actions

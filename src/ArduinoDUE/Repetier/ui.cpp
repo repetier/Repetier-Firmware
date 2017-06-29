@@ -1390,8 +1390,9 @@ void UIDisplay::parse(const char *txt,bool ram)
         // dynamic parameter, parse meaning and replace
         char c1 = (ram ? *(txt++) : pgm_read_byte(txt++));
         char c2 = (ram ? *(txt++) : pgm_read_byte(txt++));
-        if(CUSTOM_TEXT_PARSER(c1,c2))
+        if(EVENT_CUSTOM_TEXT_PARSER(c1,c2)) {
             continue;
+		}
         switch(c1)
         {
         case '%':
@@ -2014,7 +2015,7 @@ void UIDisplay::parse(const char *txt,bool ram)
                 } else if(c2 == 'A') {
                     addFloat(Printer::wizardStack[0].f,0,1);
                 } else if(c2 == 'B') {
-                    addFloat(Printer::wizardStack[0].f,0,1);                    
+                    addFloat(Printer::wizardStack[1].f,0,1);                    
                 }                    
                 break;
         }

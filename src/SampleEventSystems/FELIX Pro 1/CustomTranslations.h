@@ -1525,4 +1525,4 @@ TRANS(UI_CTEXT_WIZ_TEMP_FI);
 #define UI_TEXT_CONTINUE_EN "Continue"
 #define UI_TEXT_CLOSE_EN "Close"
 #define UI_TEXT_EXTR_ZOFF_EN "Z-Offset:%Xz"
-#define UI_TEXT_MEASURING_EN "Measuring ..."
+#define UI_TEXT_MEASURING_EN "    Measuring ..."

@@ -8,6 +8,7 @@ extern void cOkWizard(int action);
 extern bool cExecuteOverride(int action,bool allowMoves);
 extern void cRelaxExtruderEndstop();
 extern bool cRefreshPage();
+extern bool cCustomParser(char c1, char c2);
 
 #undef EVENT_TIMER_100MS
 #undef EVENT_TIMER_500MS
@@ -19,6 +20,7 @@ extern bool cRefreshPage();
 #undef EVENT_UI_OVERRIDE_EXECUTE
 #undef EVENT_BEFORE_Z_HOME
 #undef EVENT_UI_REFRESH_PAGE
+#undef EVENT_CUSTOM_TEXT_PARSER
 
 #define EVENT_TIMER_100MS {Felix100MS();}
 #define EVENT_TIMER_500MS {Felix500MS();}
@@ -30,7 +32,7 @@ extern bool cRefreshPage();
 #define EVENT_UI_OK_WIZARD(action)  cOkWizard(action)
 #define EVENT_BEFORE_Z_HOME cRelaxExtruderEndstop()
 #define EVENT_UI_REFRESH_PAGE cRefreshPage()
-
+#define EVENT_CUSTOM_TEXT_PARSER(c1,c2) cCustomParser(c1,c2)
 // New menu actions
 
 #define UI_ACTION_XY1_BACK     1500
@@ -78,6 +80,25 @@ extern bool cRefreshPage();
 #define UI_ACTION_FC_WAITHEAT   1541
 #define UI_ACTION_FC_BACK1      1542
 #define UI_ACTION_FC_BACK2      1543
+#define UI_ACTION_HALFAUTO_LEV  1544
+#define UI_ACTION_HALFAUTO_LEV2 1545
+#define UI_ACTION_HALFAUTO_LEV3 1546
+
+#ifndef HALF_P1_X
+#define HALF_P1_X 34
+#define HALF_P1_Y 0
+#define HALF_P2_X 34
+#define HALF_P2_Y 128
+#define HALF_FIX_X 132
+#define HALF_FIX_Y 64
+#define HALF_Z 3 
+// Wheel position
+#define HALF_WHEEL_P1 -71
+#define HALF_WHEEL_P2 199
+#endif
+#ifndef HALF_PITCH
+#define HALF_PITCH 0.7
+#endif
 
 
 
