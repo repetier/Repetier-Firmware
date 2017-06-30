@@ -137,7 +137,7 @@ void halfautomaticLevel2() {
   float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
   float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
   Printer::wizardStack[0].f = 360 * z1 / HALF_PITCH; 
-  Printer::wizardStack[0].f = 360 * z2 / HALF_PITCH; 
+  Printer::wizardStack[1].f = 360 * z2 / HALF_PITCH; 
   uid.popMenu(false);
   uid.pushMenu(&ui_half_show,true);
 }
