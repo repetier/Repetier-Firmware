@@ -83,6 +83,8 @@ extern bool cCustomParser(char c1, char c2);
 #define UI_ACTION_HALFAUTO_LEV  1544
 #define UI_ACTION_HALFAUTO_LEV2 1545
 #define UI_ACTION_HALFAUTO_LEV3 1546
+#define UI_ACTION_CZREFH        1547
+#define UI_ACTION_START_CZREFH  1548
 
 #ifndef HALF_P1_X
 #define HALF_P1_X 34
@@ -91,13 +93,17 @@ extern bool cCustomParser(char c1, char c2);
 #define HALF_P2_Y 128
 #define HALF_FIX_X 132
 #define HALF_FIX_Y 64
-#define HALF_Z 3 
+#define HALF_Z 5 
 // Wheel position
 #define HALF_WHEEL_P1 -71
 #define HALF_WHEEL_P2 199
 #endif
 #ifndef HALF_PITCH
 #define HALF_PITCH 0.7
+#endif
+
+#ifndef ZPROBE_REF_HEIGHT
+#define ZPROBE_REF_HEIGHT 0.4
 #endif
 
 

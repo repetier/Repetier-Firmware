@@ -3081,7 +3081,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
                 d *= Printer::maxFeedrate[Y_AXIS] * dtReal / (1000 * fabs(d));
             long steps = (long)(d * Printer::axisStepsPerMM[Y_AXIS]);
             steps = ( increment < 0 ? RMath::min(steps,(long)increment) : RMath::max(steps,(long)increment));
-            PrintLine::moveRelativeDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],false,false);
+            PrintLine::moveRelativeUI_ACTION_Z_OFFSETDistanceInStepsReal(0,steps,0,0,Printer::maxFeedrate[Y_AXIS],false,false);
         }
 #else
         PrintLine::moveRelativeDistanceInStepsReal(0,increment,0,0,Printer::homingFeedrate[Y_AXIS],false,false);

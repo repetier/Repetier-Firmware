@@ -78,8 +78,10 @@ UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECO
 UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
 
 UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_MENU_HEADLINE(ui_halfa," Turn back: %WB" cDEG)
-UI_MENU_HEADLINE(ui_halfb," Turn front: %WA" cDEG)
+UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Please wait")
+UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "Change Z with wheel", "until card fits with", "no force below and", "press the button.")
+UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
+UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
 UI_MENU_ACTIONCOMMAND(ui_halfc,"Measure Again",UI_ACTION_HALFAUTO_LEV2)
 UI_MENU_ACTIONCOMMAND(ui_halfd,"Finished",UI_ACTION_HALFAUTO_LEV3)
 
@@ -802,6 +804,15 @@ UI_MENU_ACTION2_T(ui_menu_maxinactive2, UI_ACTION_MAX_INACTIVE, UI_TEXT_POWER_IN
 UI_MENU_CHANGEACTION_T(ui_menu_general_baud, UI_TEXT_BAUDRATE_ID, UI_ACTION_BAUDRATE)
 UI_MENU_ACTIONSELECTOR_T(ui_menu_general_stepper_inactive, UI_TEXT_STEPPER_INACTIVE_ID, ui_menu_stepper2)
 UI_MENU_ACTIONSELECTOR_T(ui_menu_general_max_inactive, UI_TEXT_POWER_INACTIVE_ID, ui_menu_maxinactive2)
+#ifdef ZPROBE_HEIGHT_ROUTINE
+UI_MENU_ACTIONCOMMAND(ui_menu_calib_probe,"Calibrate Z-Probe",UI_ACTION_START_CZREFH);
+#define UI_CALIB_PROBE_ENTRY ,&ui_menu_calib_probe
+#define UI_CALIB_PROBE_COUNT 1
+#else
+#define UI_CALIB_PROBE_ENTRY
+#define UI_CALIB_PROBE_COUNT 0
+#endif
+
 #if FEATURE_AUTOLEVEL
 #ifdef HALFAUTOMATIC_LEVELING
 UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevelbed,UI_TEXT_AUTOLEVEL_BED_ID,UI_ACTION_HALFAUTO_LEV);
@@ -817,8 +828,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_autolevel, UI_TEXT_AUTOLEVEL_ONOFF_ID, UI
 #define UI_TOOGLE_AUTOLEVEL_ENTRY
 #define UI_TOGGLE_AUTOLEVEL_COUNT 0
 #endif
-#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY}
-UI_MENU(ui_menu_general, UI_MENU_GENERAL, 3 + UI_MENU_BACKCNT + UI_TOGGLE_AUTOLEVEL_COUNT)
+#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY}
+UI_MENU(ui_menu_general, UI_MENU_GENERAL, 3 + UI_MENU_BACKCNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_CALIB_PROBE_COUNT)
 
 
 // **** Bed Coating Menu
@@ -974,9 +985,9 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #endif
 UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
 
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed,&ui_calex ,&ui_menu_move \
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
       , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
-UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT)
+UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
 
 UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_sd_askstop_no, UI_TEXT_NO_ID, UI_ACTION_BACK)
@@ -996,6 +1007,11 @@ UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 3)
 
 #if SDSUPPORT
 
+// Dummy print menu to show missing card
+UI_MENU_HEADLINE(ui_menus_sd_pinsert, "Please insert SD card")
+#define UI_MENU_SD_NOCARD {UI_MENU_ADDCONDBACK &ui_menus_sd_pinsert}
+UI_MENU(ui_menu_sd_nocard, UI_MENU_SD_NOCARD, UI_MENU_BACKCNT + 1)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_printfile2, UI_TEXT_PRINT_FILE_ID,     ui_menu_sd_nocard,    0, MENU_MODE_SD_MOUNTED)
 
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector, UI_MENU_SD_FILESELECTOR, 1)
@@ -1005,8 +1021,8 @@ UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, 
 // two versions of stop. Second is with security question since pausing can trigger stop with bad luck!
 //UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT_ID,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0)
 UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, ui_menu_askstop, MENU_MODE_SD_PRINTING, 0 )
-#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,
-#define SD_PRINTFILE_ENTRY_CNT 1
+#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,&ui_menu_sd_printfile2,
+#define SD_PRINTFILE_ENTRY_CNT 2
 #if SDCARDDETECT > -1
 #define UI_MOUNT_CNT 0
 #define UI_MOUNT_CMD
@@ -1313,8 +1329,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_distortion,UI_TEXT_DISTORTION_CORR_ID, UI
 #define UI_DISTORTION_COUNT 0
 #endif
 
-#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
-UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT)
+#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
+UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT + UI_CALIB_PROBE_COUNT)
 UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_PRINTING)
 
 // Stop print security question

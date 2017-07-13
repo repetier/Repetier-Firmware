@@ -125,21 +125,35 @@ void preheatFCActive() {
 void halfautomaticLevel2() {
   uid.popMenu(false);
   uid.pushMenu(&cui_msg_measuring,true);
+  PlaneBuilder planeBuilder;
   Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
   Commands::waitUntilEndOfAllMoves();
   float halfRefHeight = Printer::runZProbe(false, false); 
+  planeBuilder.addPoint(HALF_FIX_X, HALF_FIX_Y, halfRefHeight);
   Printer::moveToReal(HALF_P1_X, HALF_P1_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
   Commands::waitUntilEndOfAllMoves();
-  float p1 = Printer::runZProbe(false, false); 
+  float p1 = Printer::runZProbe(false, false);
+  planeBuilder.addPoint(HALF_P1_X, HALF_P1_Y, p1); 
   Printer::moveToReal(HALF_P2_X, HALF_P2_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
   Commands::waitUntilEndOfAllMoves();
   float p2 = Printer::runZProbe(false, false);
-  float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
-  float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
-  Printer::wizardStack[0].f = 360 * z1 / HALF_PITCH; 
-  Printer::wizardStack[1].f = 360 * z2 / HALF_PITCH; 
+  planeBuilder.addPoint(HALF_P2_X, HALF_P2_Y, p2);
+  Plane plane;
+  planeBuilder.createPlane(plane);
+  // float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
+  // float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
+  float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight) * 360 / HALF_PITCH;
+  float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight) * 360 / HALF_PITCH;
+  Printer::wizardStack[0].f = z1; 
+  Printer::wizardStack[1].f = z2; 
   uid.popMenu(false);
-  uid.pushMenu(&ui_half_show,true);
+  if(fabs(z1)< 10 && fabs(z2) < 10) {
+    Printer::finishProbing();
+    uid.menuLevel = 0;
+    UI_STATUS_UPD("Build PLT. Levelled");
+  } else {
+    uid.pushMenu(&ui_half_show,true);
+  }
 }
 // Finish leveling
 void halfautomaticLevel3() {
@@ -157,8 +171,71 @@ void halfautomaticLevel1() {
 }
 #endif
 
-bool cCustomParser(char c1, char c2) {
+#ifdef ZPROBE_HEIGHT_ROUTINE
+/*
+- Click on function
+- Message preparing
+- Home, go to P1 from z leveling
+- Probe position for reference height.
+- Go to your preset z value.
+- Message to adjust hight with wheel
+Change Z with wheel
+until card fits with
+no force below and
+press the button
+- Compute new z probe height from this.
+- Back to menu.
 
+
+*/
+float refZ;
+void cZPHeight1() {
+  uid.pushMenu(&cui_msg_preparing,true);
+  Printer::homeAxis(true, true, true);
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  refZ = Printer::runZProbe(true, true) - HALF_Z;
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::updateCurrentPosition(true);
+  uid.popMenu(false);
+  uid.pushMenu(&cui_calib_zprobe, true);
+}
+void cZPHeight2() {
+#if FEATURE_Z_PROBE
+  float diff = refZ + Printer::currentPosition[Z_AXIS] - ZPROBE_REF_HEIGHT;
+  Printer::currentPositionSteps[Z_AXIS] = ZPROBE_REF_HEIGHT * Printer::axisStepsPerMM[Z_AXIS];
+  Printer::updateCurrentPosition(true);
+	float zProbeHeight = EEPROM::zProbeHeight() - diff;    
+#if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
+	EEPROM::setZProbeHeight(zProbeHeight); // will also report on output
+#else
+	Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
+#endif
+  uid.popMenu(false);
+  uid.menuLevel = 0;
+  UI_STATUS_UPD("Probe calibrated");
+#endif
+}
+#endif
+
+
+bool cCustomParser(char c1, char c2) {
+  if(c1 == 'b') {
+    if(c2 == 'a') {
+      float x = Printer::wizardStack[0].f;
+      uid.addFloat(fabs(x),0,0);
+      uid.addChar(2);
+      uid.addChar(x > 0 ? 'R' : 'L');
+      return true;
+    }
+    if(c2 == 'b') {
+      float x = Printer::wizardStack[1].f;
+      uid.addFloat(fabs(x),0,0);
+      uid.addChar(2);
+      uid.addChar(x > 0 ? 'R' : 'L');
+      return true;
+    }
+  }
   return false;
 }
 
@@ -374,6 +451,11 @@ void cExecute(int action,bool allowMoves) {
     uid.popMenu(false);
     uid.pushMenu(&ui_menu_ch2,true);
     break;
+#ifdef ZPROBE_HEIGHT_ROUTINE    
+  case UI_ACTION_START_CZREFH:
+    cZPHeight1();
+    break;
+#endif        
   }
 }
 
@@ -400,6 +482,9 @@ void cNextPrevious(int action,bool allowMoves,int increment) {
     if(Printer::wizardStack[0].l > 275)
       Printer::wizardStack[0].l = 275;
     break;
+  case UI_ACTION_CZREFH:
+    PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],false,false);
+    break;   
   }
 }
  
@@ -414,6 +499,11 @@ void cOkWizard(int action) {
     setPreheatTemps(Printer::wizardStack[0].l, 55, false, false);
     preheatFCActive();
     break;
+#ifdef ZPROBE_HEIGHT_ROUTINE    
+  case UI_ACTION_CZREFH:
+    cZPHeight2();
+    break;
+#endif    
   }
 } 
 
