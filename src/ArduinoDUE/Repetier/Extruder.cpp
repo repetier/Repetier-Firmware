@@ -2490,14 +2490,14 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxC
 		GCode::keepAlive(WaitHeater);
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
-        unsigned long time = HAL::timeInMilliseconds();
+        millis_t time = HAL::timeInMilliseconds();
         maxTemp = RMath::max(maxTemp,currentTemp);
         minTemp = RMath::min(minTemp,currentTemp);
         if(heating == true && currentTemp > temp)   // switch heating -> off
         {
             if(time - t2 > (controllerId < NUM_EXTRUDER ? 2500 : 1500))
             {
-                heating=false;
+                heating = false;
                 pwm_pos[pwmIndex] = (bias - d);
                 t1 = time;
                 t_high = t1 - t2;
@@ -2510,18 +2510,18 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxC
             {
                 heating = true;
                 t2 = time;
-                t_low=t2 - t1; // half wave length
+                t_low = t2 - t1; // half wave length
                 if(cycles > 0)
                 {
-                    bias += (d*(t_high - t_low))/(t_low + t_high);
+                    bias += (d*(t_high - t_low)) / (t_low + t_high);
                     bias = constrain(bias, 20 ,pidMax - 20);
                     if(bias > pidMax/2) d = pidMax - 1 - bias;
                     else d = bias;
 
-                    Com::printF(Com::tAPIDBias,bias);
-                    Com::printF(Com::tAPIDD,d);
-                    Com::printF(Com::tAPIDMin,minTemp);
-                    Com::printFLN(Com::tAPIDMax,maxTemp);
+                    Com::printF(Com::tAPIDBias, bias);
+                    Com::printF(Com::tAPIDD, d);
+                    Com::printF(Com::tAPIDMin, minTemp);
+                    Com::printFLN(Com::tAPIDMax, maxTemp);
                     if(cycles > 2)
                     {
                         // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method

@@ -571,7 +571,7 @@ public:
     {
         cli();
     }
-    static inline unsigned long timeInMilliseconds()
+    static inline millis_t timeInMilliseconds()
     {
         return millis();
     }

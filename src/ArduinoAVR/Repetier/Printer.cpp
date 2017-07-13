@@ -1829,6 +1829,9 @@ void Printer::homeZAxis() // Cartesian homing
         steps = (zMaxSteps - zMinSteps) * Z_HOME_DIR;
         currentPositionSteps[Z_AXIS] = -steps;
         setHoming(true);
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0 && Z_MIN_PIN == Z_PROBE_PIN && Z_HOME_DIR == -1
+HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
@@ -1840,6 +1843,9 @@ void Printer::homeZAxis() // Cartesian homing
         currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
 #if defined(ZHOME_WAIT_UNSWING) && ZHOME_WAIT_UNSWING > 0
         HAL::delayMilliseconds(ZHOME_WAIT_UNSWING);
+#endif
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0 && Z_MIN_PIN == Z_PROBE_PIN && Z_HOME_DIR == -1
+		HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
         PrintLine::moveRelativeDistanceInSteps(0,0,axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR,true,true);
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
@@ -2028,7 +2034,7 @@ if(zaxis) {
     }
     if(zaxis) {
 #if ZHOME_X_POS != IGNORE_COORDINATE || ZHOME_Y_POS != IGNORE_COORDINATE
-        moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[Y_AXIS]); // correct rotation!
+        moveToReal(ZHOME_X_POS,ZHOME_Y_POS,IGNORE_COORDINATE,IGNORE_COORDINATE,homingFeedrate[X_AXIS]); // correct rotation!
         Commands::waitUntilEndOfAllMoves();
 #endif
         homeZAxis(); // real z distance at that point to zero

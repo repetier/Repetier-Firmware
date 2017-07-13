@@ -460,7 +460,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     }
     else
         p->distance = fabs(axisDistanceMM[E_AXIS]);
-    p->calculateMove(axisDistanceMM,pathOptimize,p->primaryAxis);
+    p->calculateMove(axisDistanceMM, pathOptimize, p->primaryAxis);
 }
 #endif
 

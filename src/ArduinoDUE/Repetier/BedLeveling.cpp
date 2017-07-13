@@ -586,6 +586,9 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
         stepsRemainingAtZHit = -1; // Marker that we did not hit z probe
         setZProbingActive(true);
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+		HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, -probeDepth, 0, EEPROM::zProbeSpeed(), true, true);
         setZProbingActive(false);
         if(stepsRemainingAtZHit < 0) {
