@@ -117,6 +117,7 @@ Custom M Codes
 - M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
+- M170 B<bedtemp> T<extruderid> S<extrudertemp> L0 - Set preset temperatures for extruder (T+S) or bed (B) or list settings (L0)
 - M190 - Wait for bed current temp to reach target temp. Same params as M109
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)

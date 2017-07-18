@@ -144,10 +144,10 @@ void halfautomaticLevel2() {
   // float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
   float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight) * 360 / HALF_PITCH;
   float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight) * 360 / HALF_PITCH;
-  Printer::wizardStack[0].f = z1; 
-  Printer::wizardStack[1].f = z2; 
+  Printer::wizardStack[0].f = z2; 
+  Printer::wizardStack[1].f = z1; 
   uid.popMenu(false);
-  if(fabs(z1)< 10 && fabs(z2) < 10) {
+  if(fabs(z1) <= 10 && fabs(z2) <= 10) {
     Printer::finishProbing();
     uid.menuLevel = 0;
     UI_STATUS_UPD("Build PLT. Levelled");
@@ -198,7 +198,7 @@ void cZPHeight1() {
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::updateCurrentPosition(true);
   uid.popMenu(false);
-  uid.pushMenu(&cui_calib_zprobe, true);
+  uid.pushMenu(&cui_calib_zprobe_info, true);
 }
 void cZPHeight2() {
 #if FEATURE_Z_PROBE
@@ -225,14 +225,14 @@ bool cCustomParser(char c1, char c2) {
       float x = Printer::wizardStack[0].f;
       uid.addFloat(fabs(x),0,0);
       uid.addChar(2);
-      uid.addChar(x > 0 ? 'R' : 'L');
+      uid.addChar(x < 0 ? 'R' : 'L');
       return true;
     }
     if(c2 == 'b') {
       float x = Printer::wizardStack[1].f;
       uid.addFloat(fabs(x),0,0);
       uid.addChar(2);
-      uid.addChar(x > 0 ? 'R' : 'L');
+      uid.addChar(x < 0 ? 'R' : 'L');
       return true;
     }
   }
@@ -482,8 +482,12 @@ void cNextPrevious(int action,bool allowMoves,int increment) {
     if(Printer::wizardStack[0].l > 275)
       Printer::wizardStack[0].l = 275;
     break;
-  case UI_ACTION_CZREFH:
-    PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],false,false);
+  case UI_ACTION_CZREFH: {
+      bool old = Printer::isNoDestinationCheck();
+      Printer::setNoDestinationCheck(true);
+      PrintLine::moveRelativeDistanceInStepsReal(0, 0, ((long)increment * Printer::axisStepsPerMM[Z_AXIS]) / 100, 0, Printer::homingFeedrate[Z_AXIS],false,false);
+      Printer::setNoDestinationCheck(old);
+    }
     break;   
   }
 }
@@ -500,6 +504,10 @@ void cOkWizard(int action) {
     preheatFCActive();
     break;
 #ifdef ZPROBE_HEIGHT_ROUTINE    
+  case UI_ACTION_CZREFH_INFO:
+      uid.popMenu(false);
+      uid.pushMenu(&cui_calib_zprobe, true);
+      break;
   case UI_ACTION_CZREFH:
     cZPHeight2();
     break;

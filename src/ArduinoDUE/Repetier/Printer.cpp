@@ -655,6 +655,7 @@ void Printer::kill(uint8_t only_steppers)
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
     setAllSteppersDiabled();
+	unsetHomedAll();
 #else
     if(!only_steppers)
         disableZStepper();

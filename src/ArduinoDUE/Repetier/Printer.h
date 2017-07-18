@@ -720,6 +720,11 @@ public:
         return flag1 & PRINTER_FLAG1_HOMED_ALL;
     }
 
+	static INLINE void unsetHomedAll() {
+		flag1 &= ~PRINTER_FLAG1_HOMED_ALL;
+		flag3 &= ~(PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED);
+	}
+
     static INLINE void updateHomedAll()
     {
 		bool b = isXHomed() && isYHomed() && isZHomed();

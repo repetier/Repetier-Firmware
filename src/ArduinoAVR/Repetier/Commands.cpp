@@ -855,10 +855,10 @@ void Commands::processArc(GCode *com) {
         C  <-- Current position                                 */
 
 
-        // Negative R is g-code-alese for "I want a circle with more than 180 degrees of travel" (go figure!),
+        // Negative R is g-code-alias for "I want a circle with more than 180 degrees of travel" (go figure!),
         // even though it is advised against ever generating such circles in a single line of g-code. By
         // inverting the sign of h_x2_div_d the center of the circles is placed on the opposite side of the line of
-        // travel and thus we get the unadvisably long arcs as prescribed.
+        // travel and thus we get the inadvisable long arcs as prescribed.
         if (r < 0) {
             h_x2_div_d = -h_x2_div_d;
             r = -r; // Finished with r. Set to positive for mc_arc

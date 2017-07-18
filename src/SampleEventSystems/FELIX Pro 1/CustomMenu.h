@@ -79,7 +79,9 @@ UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
 
 UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Please wait")
-UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "Change Z with wheel", "until card fits with", "no force below and", "press the button.")
+              
+UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
+UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
 UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
 UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
 UI_MENU_ACTIONCOMMAND(ui_halfc,"Measure Again",UI_ACTION_HALFAUTO_LEV2)
