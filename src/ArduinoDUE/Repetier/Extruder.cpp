@@ -59,9 +59,12 @@ short temptable_generic3[GENERIC_THERM_NUM_ENTRIES][2];
 Is called every 100ms.
 */
 static uint8_t extruderTempErrors = 0;
-
+static uint8_t extrSecondFlag = 0;
 void Extruder::manageTemperatures()
 {
+	extrSecondFlag++;
+	if(extrSecondFlag == 10)
+		extrSecondFlag = 0;
     Com::writeToAll = true;
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
@@ -211,8 +214,8 @@ void Extruder::manageTemperatures()
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                        Com::printF(PSTR("Error:Temp. raised to slow. Rise = "),act->currentTemperatureC - act->lastDecoupleTemp);
-                        Com::printF(PSTR(" after "),(int32_t)(time-act->lastDecoupleTest));
+                        Com::printF(PSTR("Error:Temp. raised to slow. Rise = "), act->currentTemperatureC - act->lastDecoupleTemp);
+                        Com::printF(PSTR(" after "), (int32_t)(time - act->lastDecoupleTest));
                         Com::printFLN(PSTR(" ms"));
                         EVENT_HEATER_DECOUPLED(controller);
                     }
@@ -240,7 +243,7 @@ void Extruder::manageTemperatures()
 						}
                         UI_ERROR_P(Com::tHeaterDecoupled);
                         Com::printErrorFLN(Com::tHeaterDecoupledWarning);
-                        Com::printF(PSTR("Error:Could not hold temperature "),act->lastDecoupleTemp);
+                        Com::printF(PSTR("Error:Could not hold temperature "), act->lastDecoupleTemp);
                         Com::printF(PSTR(" measured "),act->currentTemperatureC);
                         Com::printFLN(PSTR(" deg. C"));
                         EVENT_HEATER_DECOUPLED(controller);
@@ -253,9 +256,6 @@ void Extruder::manageTemperatures()
             }
         }
 
-#if TEMP_PID
-        act->tempArray[act->tempPointer++] = act->currentTemperatureC;
-        act->tempPointer &= 3;
         uint8_t output = 0;
         float error = act->targetTemperatureC - act->currentTemperatureC;
         if(act->targetTemperatureC < 20.0f) // heating is off
@@ -267,6 +267,11 @@ void Extruder::manageTemperatures()
         {
             output = act->pidMax;
             act->startFullDecouple(time);
+			act->tempIState = act->tempIStateLimitMin;
+			if(act->heatManager == HTR_DEADTIME) {
+				act->tempIStateLimitMax = act->pidDriveMax;
+				act->tempIStateLimitMin = 0;
+			}
         }
         else if(error < -PID_CONTROL_RANGE) // control range left upper side!
             output = 0;
@@ -275,10 +280,12 @@ void Extruder::manageTemperatures()
             if(act->heatManager == HTR_PID)
             {
                 act->startHoldDecouple(time);
+				// Com::printF(PSTR(" CUR:"),act->currentTemperatureC); Com::printFLN(PSTR(" IST:"),(act->pidIGain * act->tempIState * 0.1),1);
                 float pidTerm = act->pidPGain * error;
                 act->tempIState = constrain(act->tempIState + error, act->tempIStateLimitMin, act->tempIStateLimitMax);
                 pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
-                float dgain = act->pidDGain * (act->tempArray[act->tempPointer] - act->currentTemperatureC) * 3.333f;
+                // float dgain = act->pidDGain * (act->tempArray[act->tempPointer] - act->currentTemperatureC) * 3.333f;
+                float dgain = act->pidDGain * (act->lastTemperatureC - act->temperatureC);
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX == 1
                 pidTerm = (pidTerm * act->pidMax) * 0.0039215;
@@ -288,12 +295,29 @@ void Extruder::manageTemperatures()
             else if(act->heatManager == HTR_DEADTIME)     // dead-time control
             {
                 act->startHoldDecouple(time);
-                float raising = 3.333 * (act->currentTemperatureC - act->tempArray[act->tempPointer]); // raising dT/dt, 3.33 = reciprocal of time interval (300 ms)
-                act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
-                output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
+                // output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
+                float raising = (act->temperatureC - act->lastTemperatureC); // raising dT/dt from 0.5 seconds
+                // act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising
+#ifndef SKIP_DEADTIME_ADJUSTMENT
+				if(raising < 0 && act->tempIState >= 0) { // peak reached
+					if(error < -0.5)
+						act->tempIStateLimitMax = constrain(act->tempIStateLimitMax - 10,act->tempIStateLimitMin, act->pidDriveMax);
+					else
+						act->tempIStateLimitMax = constrain(act->tempIStateLimitMax + 10,act->tempIStateLimitMin, act->pidDriveMax);
+					// Com::printF(PSTR("Raise:"), raising);Com::printF(PSTR(" er:"),error,2);Com::printFLN(PSTR(" LimitMax:"),act->tempIStateLimitMax,0);
+				} else if(raising > 0 && act->tempIState <= 0) { // bottom reached
+					if(error > 0.5)
+						act->tempIStateLimitMin = constrain(act->tempIStateLimitMin + 10,0, act->tempIStateLimitMax - 20);
+					else
+						act->tempIStateLimitMin = constrain(act->tempIStateLimitMin - 10,0, act->tempIStateLimitMax - 20);
+					// Com::printFLN(PSTR("LimitMin:"),act->tempIStateLimitMin,0);
+				}
+				// Com::printFLN(PSTR("Raise:"), raising);
+#endif
+                output = static_cast<uint8_t>(act->currentTemperatureC + raising * act->deadTime > act->targetTemperatureC ? act->tempIStateLimitMin : act->tempIStateLimitMax /* pidDriveMax */);
+				act->tempIState = raising;
             }
             else // bang bang and slow bang bang
-#endif // TEMP_PID
                 if(act->heatManager == HTR_SLOWBANG)    // Bang-bang with reduced change frequency to save relays life
                 {
                     if (time - act->lastTemperatureUpdate > HEATED_BED_SET_INTERVAL)
@@ -305,7 +329,7 @@ void Extruder::manageTemperatures()
                     }
                     else continue;
                 }
-                else     // Fast Bang-Bang fall back
+                else if(act->heatManager == HTR_OFF)     // Fast Bang-Bang fall back
                 {
                     output = (on ? act->pidMax : 0);
                     if(on) act->startFullDecouple(time);
@@ -317,6 +341,11 @@ void Extruder::manageTemperatures()
             output = 0;
 #endif // MAXTEMP
         pwm_pos[act->pwmIndex] = output; // set pwm signal
+		if(extrSecondFlag == 0 /*|| (act->heatManager == HTR_DEADTIME && extrSecondFlag == 5)*/) {
+			act->lastTemperatureC = act->temperatureC;
+			act->temperatureC = act->currentTemperatureC;
+		}
+
 #if LED_PIN > -1
         if(act == &Extruder::current->tempControl)
             WRITE(LED_PIN,on);
@@ -488,9 +517,7 @@ void Extruder::resetJamSteps()
 void Extruder::initHeatedBed()
 {
 #if HAVE_HEATED_BED
-#if TEMP_PID
     heatedBedController.updateTempControlVars();
-#endif
 
 #if defined(SUPPORT_MAX6675) || defined(SUPPORT_MAX31855)
 if(heatedBedController.sensorType == 101 || heatedBedController.sensorType == 102)
@@ -667,13 +694,11 @@ void Extruder::initExtruder()
 
 void TemperatureController::updateTempControlVars()
 {
-#if TEMP_PID
     if(heatManager == HTR_PID && pidIGain != 0)   // prevent division by zero
     {
         tempIStateLimitMax = (float)pidDriveMax * 10.0f / pidIGain;
         tempIStateLimitMin = (float)pidDriveMin * 10.0f / pidIGain;
     }
-#endif
 }
 
 /** \brief Select extruder ext_num.
@@ -2449,9 +2474,10 @@ void Extruder::disableAllHeater()
     autotuneIndex = 255;
 }
 
-#if TEMP_PID
-void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeValues)
+void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeValues, int method)
 {
+	if(method < 0) method = 0;
+	if(method > 3) method = 3;
     float currentTemp;
     int cycles = 0;
     bool heating = true;
@@ -2525,33 +2551,37 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxC
                     if(cycles > 2)
                     {
                         // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
-                        Ku = (4.0 * d) / (3.14159*(maxTemp-minTemp));
-                        Tu = ((float)(t_low + t_high)/1000.0);
+                        Ku = (4.0 * d) / (3.14159 * (maxTemp - minTemp));
+                        Tu = static_cast<float>(t_low + t_high) / 1000.0;
                         Com::printF(Com::tAPIDKu,Ku);
                         Com::printFLN(Com::tAPIDTu,Tu);
-                        Kp = 0.6*Ku;
-                        Ki = 2*Kp/Tu;
-                        Kd = Kp*Tu*0.125;
-                        Com::printFLN(Com::tAPIDClassic);
-                        Com::printFLN(Com::tAPIDKp,Kp);
-                        Com::printFLN(Com::tAPIDKi,Ki);
-                        Com::printFLN(Com::tAPIDKd,Kd);
-                        /*
-                        Kp = 0.33*Ku;
-                        Ki = Kp/Tu;
-                        Kd = Kp*Tu/3;
-                        OUT_P_LN(" Some overshoot");
-                        OUT_P_F_LN(" Kp: ",Kp);
-                        OUT_P_F_LN(" Ki: ",Ki);
-                        OUT_P_F_LN(" Kd: ",Kd);
-                        Kp = 0.2*Ku;
-                        Ki = 2*Kp/Tu;
-                        Kd = Kp*Tu/3;
-                        OUT_P_LN(" No overshoot");
-                        OUT_P_F_LN(" Kp: ",Kp);
-                        OUT_P_F_LN(" Ki: ",Ki);
-                        OUT_P_F_LN(" Kd: ",Kd);
-                        */
+						if(method == 0) {
+							Kp = 0.6 * Ku;
+							Ki = Kp * 2.0 / Tu;
+							Kd = Kp * Tu * 0.125;
+							Com::printFLN(Com::tAPIDClassic);
+						}
+						if(method == 1) {
+							Kp = 0.33 * Ku;
+							Ki = Kp * 2.0 / Tu;
+							Kd = Kp * Tu / 3.0;
+							Com::printFLN(Com::tAPIDSome);
+						}
+						if(method == 2) {
+							Kp = 0.2 * Ku;
+							Ki = Kp * 2.0 / Tu;
+							Kd = Kp * Tu / 3;
+							Com::printFLN(Com::tAPIDNone);
+						}
+						if(method == 3) {
+							Kp = 0.7*Ku;
+							Ki = Kp * 2.5 / Tu;
+							Kd = Kp * Tu * 3.0 / 20.0;
+							Com::printFLN(Com::tAPIDPessen);
+						}
+						Com::printFLN(Com::tAPIDKp,Kp);
+						Com::printFLN(Com::tAPIDKi,Ki);
+						Com::printFLN(Com::tAPIDKd,Kd);
                     }
                 }
                 pwm_pos[pwmIndex] = (bias + d);
@@ -2597,7 +2627,6 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,int maxC
         UI_SLOW(true);
     }
 }
-#endif
 
 /** \brief Writes monitored temperatures.
 
@@ -2810,10 +2839,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,EXT0_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,EXT0_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT0_PID_INTEGRAL_DRIVE_MAX,EXT0_PID_INTEGRAL_DRIVE_MIN,EXT0_PID_PGAIN_OR_DEAD_TIME,EXT0_PID_I,EXT0_PID_D,EXT0_PID_MAX,0,0
             ,0,0,0,EXT0_DECOUPLE_TEST_PERIOD,0,EXT0_PREHEAT_TEMP
         }
         ,ext0_select_cmd,ext0_deselect_cmd,EXT0_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2837,10 +2864,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,EXT1_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,EXT1_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT1_PID_INTEGRAL_DRIVE_MAX,EXT1_PID_INTEGRAL_DRIVE_MIN,EXT1_PID_PGAIN_OR_DEAD_TIME,EXT1_PID_I,EXT1_PID_D,EXT1_PID_MAX,0,0
             ,0,0,0,EXT1_DECOUPLE_TEST_PERIOD,0,EXT1_PREHEAT_TEMP
         }
         ,ext1_select_cmd,ext1_deselect_cmd,EXT1_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2864,10 +2889,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,EXT2_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,EXT2_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT2_PID_INTEGRAL_DRIVE_MAX,EXT2_PID_INTEGRAL_DRIVE_MIN,EXT2_PID_PGAIN_OR_DEAD_TIME,EXT2_PID_I,EXT2_PID_D,EXT2_PID_MAX,0,0
             ,0,0,0,EXT2_DECOUPLE_TEST_PERIOD,0,EXT2_PREHEAT_TEMP
         }
         ,ext2_select_cmd,ext2_deselect_cmd,EXT2_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2891,10 +2914,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,EXT3_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,EXT3_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT3_PID_INTEGRAL_DRIVE_MAX,EXT3_PID_INTEGRAL_DRIVE_MIN,EXT3_PID_PGAIN_OR_DEAD_TIME,EXT3_PID_I,EXT3_PID_D,EXT3_PID_MAX,0,0
             ,0,0,0,EXT3_DECOUPLE_TEST_PERIOD,0,EXT3_PREHEAT_TEMP
         }
         ,ext3_select_cmd,ext3_deselect_cmd,EXT3_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2918,10 +2939,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,EXT4_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,EXT4_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT4_PID_INTEGRAL_DRIVE_MAX,EXT4_PID_INTEGRAL_DRIVE_MIN,EXT4_PID_PGAIN_OR_DEAD_TIME,EXT4_PID_I,EXT4_PID_D,EXT4_PID_MAX,0,0
             ,0,0,0,EXT4_DECOUPLE_TEST_PERIOD,0,EXT4_PREHEAT_TEMP
         }
         ,ext4_select_cmd,ext4_deselect_cmd,EXT4_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2945,10 +2964,8 @@ Extruder extruder[NUM_EXTRUDER] =
         ,10,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
-            5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,EXT5_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-            ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+            5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,EXT5_HEAT_MANAGER,0,0,0,0,0,0
+            ,0,EXT5_PID_INTEGRAL_DRIVE_MAX,EXT5_PID_INTEGRAL_DRIVE_MIN,EXT5_PID_PGAIN_OR_DEAD_TIME,EXT5_PID_I,EXT5_PID_D,EXT5_PID_MAX,0,0
             ,0,0,0,EXT5_DECOUPLE_TEST_PERIOD,0,EXT5_PREHEAT_TEMP
         }
         ,ext5_select_cmd,ext5_deselect_cmd,EXT5_EXTRUDER_COOLER_SPEED,0,0,0
@@ -2961,18 +2978,14 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif // NUM_EXTRUDER
 
 #if HAVE_HEATED_BED
-TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,HEATED_BED_HEAT_MANAGER,0,0,0,0
-#if TEMP_PID
-        ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
-#endif
+TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,HEATED_BED_HEAT_MANAGER,0,0,0,0,0,0
+        ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0
         ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD,0,HEATED_BED_PREHEAT_TEMP};
 #endif
 
 #if FAN_THERMO_PIN > -1
-TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0
-	#if TEMP_PID
-	,0,255,0,10,1,1,255,0,0,0,{0,0,0,0}
-	#endif
+TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0,0,0
+	,0,255,0,10,1,1,255,0,0,0
 ,0,0,0,0,0,0};
 #endif
 

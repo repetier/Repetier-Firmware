@@ -97,14 +97,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
     heatedBedController.preheatTemperature = HEATED_BED_PREHEAT_TEMP;
-#if TEMP_PID
     heatedBedController.pidDriveMax = HEATED_BED_PID_INTEGRAL_DRIVE_MAX;
     heatedBedController.pidDriveMin = HEATED_BED_PID_INTEGRAL_DRIVE_MIN;
     heatedBedController.pidPGain = HEATED_BED_PID_PGAIN_OR_DEAD_TIME;
     heatedBedController.pidIGain = HEATED_BED_PID_IGAIN;
     heatedBedController.pidDGain = HEATED_BED_PID_DGAIN;
     heatedBedController.pidMax = HEATED_BED_PID_MAX;
-#endif
 #endif
     Printer::xLength = X_MAX_LENGTH;
     Printer::yLength = Y_MAX_LENGTH;
@@ -133,14 +131,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT0_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT0_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT0_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT0_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT0_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT0_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT0_PID_I;
     e->tempControl.pidDGain = EXT0_PID_D;
     e->tempControl.pidMax = EXT0_PID_MAX;
-#endif
     e->yOffset = EXT0_Y_OFFSET;
     e->xOffset = EXT0_X_OFFSET;
     e->watchPeriod = EXT0_WATCHPERIOD;
@@ -164,14 +160,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT1_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT1_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT1_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT1_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT1_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT1_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT1_PID_I;
     e->tempControl.pidDGain = EXT1_PID_D;
     e->tempControl.pidMax = EXT1_PID_MAX;
-#endif
     e->yOffset = EXT1_Y_OFFSET;
     e->xOffset = EXT1_X_OFFSET;
     e->watchPeriod = EXT1_WATCHPERIOD;
@@ -195,14 +189,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT2_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT2_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT2_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT2_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT2_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT2_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT2_PID_I;
     e->tempControl.pidDGain = EXT2_PID_D;
     e->tempControl.pidMax = EXT2_PID_MAX;
-#endif
     e->yOffset = EXT2_Y_OFFSET;
     e->xOffset = EXT2_X_OFFSET;
     e->watchPeriod = EXT2_WATCHPERIOD;
@@ -226,14 +218,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT3_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT3_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT3_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT3_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT3_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT3_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT3_PID_I;
     e->tempControl.pidDGain = EXT3_PID_D;
     e->tempControl.pidMax = EXT3_PID_MAX;
-#endif
     e->yOffset = EXT3_Y_OFFSET;
     e->xOffset = EXT3_X_OFFSET;
     e->watchPeriod = EXT3_WATCHPERIOD;
@@ -257,14 +247,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT4_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT4_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT4_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT4_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT4_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT4_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT4_PID_I;
     e->tempControl.pidDGain = EXT4_PID_D;
     e->tempControl.pidMax = EXT4_PID_MAX;
-#endif
     e->yOffset = EXT4_Y_OFFSET;
     e->xOffset = EXT4_X_OFFSET;
     e->watchPeriod = EXT4_WATCHPERIOD;
@@ -288,14 +276,12 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     e->maxAcceleration = EXT5_MAX_ACCELERATION;
     e->tempControl.heatManager = EXT5_HEAT_MANAGER;
     e->tempControl.preheatTemperature = EXT5_PREHEAT_TEMP;
-#if TEMP_PID
     e->tempControl.pidDriveMax = EXT5_PID_INTEGRAL_DRIVE_MAX;
     e->tempControl.pidDriveMin = EXT5_PID_INTEGRAL_DRIVE_MIN;
     e->tempControl.pidPGain = EXT5_PID_PGAIN_OR_DEAD_TIME;
     e->tempControl.pidIGain = EXT5_PID_I;
     e->tempControl.pidDGain = EXT5_PID_D;
     e->tempControl.pidMax = EXT5_PID_MAX;
-#endif
     e->yOffset = EXT5_Y_OFFSET;
     e->xOffset = EXT5_X_OFFSET;
     e->watchPeriod = EXT5_WATCHPERIOD;
@@ -372,7 +358,7 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #else
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,HEATED_BED_HEAT_MANAGER);
 #endif
-#if defined(TEMP_PID) && HAVE_HEATED_BED
+#if HAVE_HEATED_BED
     HAL::eprSetByte(EPR_BED_DRIVE_MAX,heatedBedController.pidDriveMax);
     HAL::eprSetByte(EPR_BED_DRIVE_MIN,heatedBedController.pidDriveMin);
     HAL::eprSetFloat(EPR_BED_PID_PGAIN,heatedBedController.pidPGain);
@@ -429,14 +415,12 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION,e->maxAcceleration);
         HAL::eprSetByte(o+EPR_EXTRUDER_HEAT_MANAGER,e->tempControl.heatManager);
         HAL::eprSetInt16(o+EPR_EXTRUDER_PREHEAT,e->tempControl.preheatTemperature);
-#if TEMP_PID
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MAX,e->tempControl.pidDriveMax);
         HAL::eprSetByte(o+EPR_EXTRUDER_DRIVE_MIN,e->tempControl.pidDriveMin);
         HAL::eprSetFloat(o+EPR_EXTRUDER_PID_PGAIN,e->tempControl.pidPGain);
         HAL::eprSetFloat(o+EPR_EXTRUDER_PID_IGAIN,e->tempControl.pidIGain);
         HAL::eprSetFloat(o+EPR_EXTRUDER_PID_DGAIN,e->tempControl.pidDGain);
         HAL::eprSetByte(o+EPR_EXTRUDER_PID_MAX,e->tempControl.pidMax);
-#endif
         HAL::eprSetInt32(o+EPR_EXTRUDER_X_OFFSET,e->xOffset);
         HAL::eprSetInt32(o+EPR_EXTRUDER_Y_OFFSET,e->yOffset);
         HAL::eprSetInt32(o+EPR_EXTRUDER_Z_OFFSET,e->zOffset);
@@ -573,14 +557,12 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #if HAVE_HEATED_BED
     heatedBedController.heatManager = HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
     heatedBedController.preheatTemperature = HAL::eprGetInt16(EPR_BED_PREHEAT_TEMP);
-#if TEMP_PID
     heatedBedController.pidDriveMax = HAL::eprGetByte(EPR_BED_DRIVE_MAX);
     heatedBedController.pidDriveMin = HAL::eprGetByte(EPR_BED_DRIVE_MIN);
     heatedBedController.pidPGain = HAL::eprGetFloat(EPR_BED_PID_PGAIN);
     heatedBedController.pidIGain = HAL::eprGetFloat(EPR_BED_PID_IGAIN);
     heatedBedController.pidDGain = HAL::eprGetFloat(EPR_BED_PID_DGAIN);
     heatedBedController.pidMax = HAL::eprGetByte(EPR_BED_PID_MAX);
-#endif
 #endif
     Printer::xMin = HAL::eprGetFloat(EPR_X_HOME_OFFSET);
     Printer::yMin = HAL::eprGetFloat(EPR_Y_HOME_OFFSET);
@@ -640,14 +622,12 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             e->maxAcceleration = HAL::eprGetFloat(o+EPR_EXTRUDER_MAX_ACCELERATION);
             e->tempControl.heatManager = HAL::eprGetByte(o+EPR_EXTRUDER_HEAT_MANAGER);
             e->tempControl.preheatTemperature = HAL::eprGetInt16(o+EPR_EXTRUDER_PREHEAT);
-#if TEMP_PID
             e->tempControl.pidDriveMax = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MAX);
             e->tempControl.pidDriveMin = HAL::eprGetByte(o+EPR_EXTRUDER_DRIVE_MIN);
             e->tempControl.pidPGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_PGAIN);
             e->tempControl.pidIGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_IGAIN);
             e->tempControl.pidDGain = HAL::eprGetFloat(o+EPR_EXTRUDER_PID_DGAIN);
             e->tempControl.pidMax = HAL::eprGetByte(o+EPR_EXTRUDER_PID_MAX);
-#endif
             e->xOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_X_OFFSET);
             e->yOffset = HAL::eprGetInt32(o+EPR_EXTRUDER_Y_OFFSET);
             e->watchPeriod = HAL::eprGetInt16(o+EPR_EXTRUDER_WATCH_PERIOD);
@@ -1015,14 +995,12 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
 #if HAVE_HEATED_BED
     writeInt(EPR_BED_PREHEAT_TEMP, Com::tEPRPreheatBedTemp);
     writeByte(EPR_BED_HEAT_MANAGER, Com::tEPRBedHeatManager);
-#if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX, Com::tEPRBedPIDDriveMax);
     writeByte(EPR_BED_DRIVE_MIN, Com::tEPRBedPIDDriveMin);
     writeFloat(EPR_BED_PID_PGAIN, Com::tEPRBedPGain);
     writeFloat(EPR_BED_PID_IGAIN, Com::tEPRBedIGain);
     writeFloat(EPR_BED_PID_DGAIN, Com::tEPRBedDGain);
     writeByte(EPR_BED_PID_MAX, Com::tEPRBedPISMaxValue);
-#endif
 #endif
 #if FEATURE_RETRACTION
     writeByte(EPR_AUTORETRACT_ENABLED,Com::tEPRAutoretractEnabled);
@@ -1048,14 +1026,12 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
         writeFloat(o + EPR_EXTRUDER_MAX_ACCELERATION, Com::tEPRAcceleration);
         writeInt(o + EPR_EXTRUDER_PREHEAT, Com::tEPRPreheatTemp);
         writeByte(o + EPR_EXTRUDER_HEAT_MANAGER, Com::tEPRHeatManager);
-#if TEMP_PID
         writeByte(o + EPR_EXTRUDER_DRIVE_MAX, Com::tEPRDriveMax);
         writeByte(o + EPR_EXTRUDER_DRIVE_MIN, Com::tEPRDriveMin);
         writeFloat(o + EPR_EXTRUDER_PID_PGAIN, Com::tEPRPGain,4);
         writeFloat(o + EPR_EXTRUDER_PID_IGAIN, Com::tEPRIGain,4);
         writeFloat(o + EPR_EXTRUDER_PID_DGAIN, Com::tEPRDGain,4);
         writeByte(o + EPR_EXTRUDER_PID_MAX, Com::tEPRPIDMaxValue);
-#endif
         writeLong(o + EPR_EXTRUDER_X_OFFSET, Com::tEPRXOffset);
         writeLong(o + EPR_EXTRUDER_Y_OFFSET, Com::tEPRYOffset);
         writeLong(o + EPR_EXTRUDER_Z_OFFSET, Com::tEPRZOffset);
@@ -1126,6 +1102,7 @@ void EEPROM::writeFloat(uint pos,PGM_P text,uint8_t digits)
     Com::print(' ');
     writeExtruderPrefix(pos);
     Com::printFLN(text);
+	HAL::delayMilliseconds(4); // reduces somehow transmission errors
 }
 
 void EEPROM::writeLong(uint pos,PGM_P text)
@@ -1136,6 +1113,7 @@ void EEPROM::writeLong(uint pos,PGM_P text)
     Com::print(' ');
     writeExtruderPrefix(pos);
     Com::printFLN(text);
+	HAL::delayMilliseconds(4); // reduces somehow transmission errors
 }
 
 void EEPROM::writeInt(uint pos,PGM_P text)
@@ -1146,6 +1124,7 @@ void EEPROM::writeInt(uint pos,PGM_P text)
     Com::print(' ');
     writeExtruderPrefix(pos);
     Com::printFLN(text);
+	HAL::delayMilliseconds(4); // reduces somehow transmission errors
 }
 
 void EEPROM::writeByte(uint pos,PGM_P text)
@@ -1156,6 +1135,7 @@ void EEPROM::writeByte(uint pos,PGM_P text)
     Com::print(' ');
     writeExtruderPrefix(pos);
     Com::printFLN(text);
+	HAL::delayMilliseconds(4); // reduces somehow transmission errors
 }
 
 #if MIXING_EXTRUDER

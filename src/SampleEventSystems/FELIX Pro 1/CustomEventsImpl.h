@@ -149,8 +149,7 @@ void halfautomaticLevel2() {
   uid.popMenu(false);
   if(fabs(z1) <= 10 && fabs(z2) <= 10) {
     Printer::finishProbing();
-    uid.menuLevel = 0;
-    UI_STATUS_UPD("Build PLT. Levelled");
+    uid.pushMenu(&cui_calib_zprobe_succ, true);
   } else {
     uid.pushMenu(&ui_half_show,true);
   }
@@ -192,17 +191,24 @@ float refZ;
 void cZPHeight1() {
   uid.pushMenu(&cui_msg_preparing,true);
   Printer::homeAxis(true, true, true);
-  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
-  refZ = Printer::runZProbe(true, true) - HALF_Z;
-  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  //refZ = Printer::runZProbe(true, true) - EEPROM::zProbeBedDistance() - Printer::zBedOffset;
+  refZ = 0;
+  Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3);Com::printF(PSTR(" refZ:"), refZ, 3);Com::printFLN(PSTR(" atZ:"), EEPROM::zProbeBedDistance(), 3);
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT - refZ, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::updateCurrentPosition(true);
   uid.popMenu(false);
   uid.pushMenu(&cui_calib_zprobe_info, true);
 }
 void cZPHeight2() {
 #if FEATURE_Z_PROBE
-  float diff = refZ + Printer::currentPosition[Z_AXIS] - ZPROBE_REF_HEIGHT;
+  // float diff = refZ + Printer::currentPosition[Z_AXIS] - ZPROBE_REF_HEIGHT;
+  Commands::printCurrentPosition();
+  float diff = (Printer::lastCmdPos[Z_AXIS] - refZ) - (ZPROBE_REF_HEIGHT - refZ);
+  Com::printF(PSTR("oldZPH:"),EEPROM::zProbeHeight(),3);Com::printF(PSTR(" diff:"), diff,3);Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3); Com::printFLN(PSTR(" REFH:"),(float)ZPROBE_REF_HEIGHT, 2);
+  if(diff > 1) diff = 1;
+  if(diff < -1) diff = -1;
   Printer::currentPositionSteps[Z_AXIS] = ZPROBE_REF_HEIGHT * Printer::axisStepsPerMM[Z_AXIS];
   Printer::updateCurrentPosition(true);
 	float zProbeHeight = EEPROM::zProbeHeight() - diff;    
@@ -255,6 +261,7 @@ bool cExecuteOverride(int action,bool allowMoves) {
       Printer::homeAxis(true, true, true);
       Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 3, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
       runBedLeveling(2);
+      Extruder::disableAllHeater();
       uid.popMenu(true);
       return true;
 #endif      
@@ -494,6 +501,9 @@ void cNextPrevious(int action,bool allowMoves,int increment) {
  
 void cOkWizard(int action) {
   switch(action) {
+  case UI_ACTION_CZREFH_SUCC:
+    uid.menuLevel = 0;
+    break;
   case UI_ACTION_CALEX_Z2:
      uid.popMenu(false);
      uid.pushMenu(&ui_msg_extzcalib,true);

@@ -1201,7 +1201,9 @@ if(fan2Kickstart == 0)
         adcSamplesMax[i] = 0;
         osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
         osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
-        osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        if(executePeriodical == 0 || i >= NUM_ANALOG_TEMP_SENSORS) {
+          osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
+        }
         osAnalogInputBuildup[i] = 0;
       } // adcCounter >= NUM_ADC_SAMPLES
     } // for i

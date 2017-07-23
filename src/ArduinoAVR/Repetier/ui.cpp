@@ -1896,7 +1896,6 @@ void UIDisplay::parse(const char *txt,bool ram)
             {
                 addStringP(Extruder::current->id==c2-'0'?ui_selected:ui_unselected);
             }
-#if TEMP_PID
             else if(c2=='i')
             {
                 addFloat(currHeaterForSetup->pidIGain, 4,2);
@@ -1921,7 +1920,6 @@ void UIDisplay::parse(const char *txt,bool ram)
             {
                 addInt(currHeaterForSetup->pidMax, 3);
             }
-#endif
             else if(c2=='w')
             {
                 addInt(Extruder::current->watchPeriod,4);
@@ -3359,7 +3357,6 @@ ZPOS2:
         HAL::servoMicroseconds(UI_SERVO_CONTROL - 1, servoPosition, 500);
 #endif
         break;
-#if TEMP_PID
     case UI_ACTION_PID_PGAIN:
         INCREMENT_MIN_MAX(currHeaterForSetup->pidPGain, 0.1, 0, 200);
         break;
@@ -3380,7 +3377,6 @@ ZPOS2:
     case UI_ACTION_PID_MAX:
         INCREMENT_MIN_MAX(currHeaterForSetup->pidMax, 1, 1, 255);
         break;
-#endif
     case UI_ACTION_X_OFFSET:
         INCREMENT_MIN_MAX(Extruder::current->xOffset, RMath::max(static_cast<int32_t>(1),static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] / 100)), -9999999, 9999999);
         Extruder::selectExtruderById(Extruder::current->id);

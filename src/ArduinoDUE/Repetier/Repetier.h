@@ -195,9 +195,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define X_STEP_DIRPOS 17
 #define Z_STEP_DIRPOS 68
 
-// add pid control
-#define TEMP_PID 1
-
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
@@ -540,6 +537,7 @@ inline void memcopy4(void *dest,void *source) {
 #define DEBUG_MEMORY Commands::checkFreeMemory();
 #endif
 
+#define NUM_ANALOG_TEMP_SENSORS EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS
 /** \brief number of analog input signals. Normally 1 for each temperature sensor */
 #define ANALOG_INPUTS (EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS+BED_ANALOG_INPUTS+THERMO_ANALOG_INPUTS+KEYPAD_ANALOG_INPUTS)
 #if ANALOG_INPUTS > 0

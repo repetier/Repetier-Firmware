@@ -600,7 +600,7 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     //Commands::printCurrentPosition();
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
 #if FEATURE_AUTOLEVEL
-    // we must change z for the z change from moving in rotated coords away from real position
+    // we must change z for the z change from moving in rotated coordinates away from real position
     float dx,dy,dz;
     transformToPrinter(0,0,currentPosition[Z_AXIS],dx,dy,dz); // what is our x,y offset from z position
     dz -= currentPosition[Z_AXIS];

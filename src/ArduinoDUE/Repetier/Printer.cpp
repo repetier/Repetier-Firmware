@@ -1873,8 +1873,6 @@ HAL::delayMilliseconds(Z_PROBE_DELAY);
 #if Z_PROBE_Z_OFFSET_MODE == 0  // Only if measure through coating e.g. inductive
 		zCorrection += axisStepsPerMM[Z_AXIS] * zBedOffset;
 #endif        
-#else
-		currentPositionSteps[Z_AXIS] -= zBedOffset * axisStepsPerMM[Z_AXIS]; // Correct bed coating	
 #endif
 		//Com::printFLN(PSTR("Z-Correction-Steps:"),zCorrection); // TEST
         PrintLine::moveRelativeDistanceInSteps(0, 0, zCorrection, 0, homingFeedrate[Z_AXIS], true, false);
@@ -1894,25 +1892,18 @@ HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
 		updateCurrentPosition(true); 
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
-		//Com::printF(PSTR("uc pz:"),currentPosition[Z_AXIS]);Com::printFLN(PSTR(" sz:"),currentPositionSteps[Z_AXIS]);
 		// If we have software leveling enabled and are not at 0,0 z position is not zero, but we measured 
 		// for z = 0, so we need to correct for rotation.
-#if 0 && EXTRUDER_IS_Z_PROBE
-		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * (currentPosition[Z_AXIS] - offsetZ);
-		currentPosition[Z_AXIS] = offsetZ;
-#else		
 		currentPositionSteps[Z_AXIS] -= axisStepsPerMM[Z_AXIS] * currentPosition[Z_AXIS];
 		currentPosition[Z_AXIS] = 0;
-#endif		
-		//Com::printF(PSTR("uc2 pz:"),currentPosition[Z_AXIS]);Com::printFLN(PSTR(" sz:"),currentPositionSteps[Z_AXIS]);
 #endif		
 #if NONLINEAR_SYSTEM
 		transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
 		setZHomed(true);
-        #if FEATURE_BABYSTEPPING
+#if FEATURE_BABYSTEPPING
         Printer::zBabysteps = 0;
-        #endif
+#endif
     }
 }
 
@@ -3038,6 +3029,8 @@ void Printer::pausePrint() {
 #endif    
     if(Printer::isMenuMode(MENU_MODE_PRINTING)) {
         GCodeSource::printAllFLN(PSTR("RequestPause:"));
+		Printer::setMenuMode(MENU_MODE_PAUSED, true);
+		Printer::setPrinting(false);
     }    
 }
 

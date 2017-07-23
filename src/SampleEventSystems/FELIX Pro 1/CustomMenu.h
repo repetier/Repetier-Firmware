@@ -82,13 +82,15 @@ UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Pl
               
 UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
 UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
+UI_WIZARD4(cui_calib_zprobe_succ, UI_ACTION_CZREFH_SUCC, "     Build PLT."," Levelled Correctly","","     >>> OK <<<")
+UI_MENU_HEADLINE(ui_halfw," Max. 10" cDEG)
 UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
 UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
 UI_MENU_ACTIONCOMMAND(ui_halfc,"Measure Again",UI_ACTION_HALFAUTO_LEV2)
-UI_MENU_ACTIONCOMMAND(ui_halfd,"Finished",UI_ACTION_HALFAUTO_LEV3)
+UI_MENU_ACTIONCOMMAND(ui_halfd,"Cancel",UI_ACTION_HALFAUTO_LEV3)
 
-#define UI_HALF_ITEMS {&ui_halfa,&ui_halfb,&ui_halfc,&ui_halfd}
-UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,4)
+#define UI_HALF_ITEMS {&ui_halfw,&ui_halfa,&ui_halfb,&ui_halfc,&ui_halfd}
+UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,5)
 
 
 // Define precision for temperatures. With small displays only integer values fit.
@@ -1013,7 +1015,7 @@ UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 3)
 UI_MENU_HEADLINE(ui_menus_sd_pinsert, "Please insert SD card")
 #define UI_MENU_SD_NOCARD {UI_MENU_ADDCONDBACK &ui_menus_sd_pinsert}
 UI_MENU(ui_menu_sd_nocard, UI_MENU_SD_NOCARD, UI_MENU_BACKCNT + 1)
-UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_printfile2, UI_TEXT_PRINT_FILE_ID,     ui_menu_sd_nocard,    0, MENU_MODE_SD_MOUNTED)
+UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_printfile2, UI_TEXT_PRINT_FILE_ID,     ui_menu_sd_nocard,    0, MENU_MODE_SD_MOUNTED + MENU_MODE_SD_PRINTING)
 
 #define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
 UI_MENU_FILESELECT(ui_menu_sd_fileselector, UI_MENU_SD_FILESELECTOR, 1)
@@ -1130,7 +1132,6 @@ UI_MENU_CHANGEACTION_T(ui_menu_cext_advancel, UI_TEXT_EXTR_ADVANCE_L_ID, UI_ACTI
 #endif
 UI_MENU_CHANGEACTION_T(       ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER_ID, UI_ACTION_EXTR_HEATMANAGER)
 UI_MENU_CHANGEACTION_T(       ui_menu_cext_pmax,    UI_TEXT_EXTR_PMAX_ID,    UI_ACTION_PID_MAX)
-#if TEMP_PID
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain,   UI_TEXT_EXTR_PGAIN_ID,   UI_ACTION_PID_PGAIN, MENU_MODE_FULL_PID, 0)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_igain,   UI_TEXT_EXTR_IGAIN_ID,   UI_ACTION_PID_IGAIN,  MENU_MODE_FULL_PID, 0)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dgain,   UI_TEXT_EXTR_DGAIN_ID,   UI_ACTION_PID_DGAIN,  MENU_MODE_FULL_PID, 0)
@@ -1140,10 +1141,6 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain_dt,   UI_TEXT_EXTR_DEADTIME_ID,
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax_dt,    UI_TEXT_EXTR_DMAX_DT_ID,    UI_ACTION_DRIVE_MAX,  MENU_MODE_DEADTIME, 0)
 #define UI_MENU_PIDCOND ,&ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax, &ui_menu_cext_pgain_dt,&ui_menu_cext_dmax_dt,&ui_menu_cext_pmax
 #define UI_MENU_PIDCNT 9
-#else
-#define UI_MENU_PIDCOND ,&ui_menu_cext_manager, &ui_menu_cext_pmax
-#define UI_MENU_PIDCNT 2
-#endif
 #if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
 UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
@@ -1178,13 +1175,8 @@ UI_MENU(ui_menu_cextr, UI_MENU_CEXTR, 7 + UI_MENU_BACKCNT + UI_MENU_PIDCNT + UI_
 
 // HeatBed Configuration - use menu actions from extruder configuration
 #if HAVE_HEATED_BED
-#if TEMP_PID
 #define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK UI_MENU_COATING_COND &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
 UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT + UI_MENU_COATING_CNT)
-#else
-#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK &ui_menu_cext_manager, &ui_menu_cext_pmax}
-UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 2 + UI_MENU_BACKCNT)
-#endif
 #endif
 
 
@@ -1343,7 +1335,7 @@ UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_P
 // stop/pause/continue entries
 
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_pause,UI_TEXT_PAUSE_PRINT_ID,UI_ACTION_PAUSE,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_continue,UI_TEXT_CONTINUE_PRINT_ID,UI_ACTION_CONTINUE,MENU_MODE_PRINTING+MENU_MODE_PAUSED,0)
+UI_MENU_ACTIONCOMMAND_FILTER_T(ui_continue,UI_TEXT_CONTINUE_PRINT_ID,UI_ACTION_CONTINUE,MENU_MODE_PAUSED,0)
 UI_MENU_ACTIONCOMMAND_FILTER_T(ui_stop,UI_TEXT_STOP_PRINT_ID,UI_ACTION_STOP,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
 
 

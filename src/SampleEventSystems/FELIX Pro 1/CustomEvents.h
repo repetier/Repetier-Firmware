@@ -86,6 +86,7 @@ extern bool cCustomParser(char c1, char c2);
 #define UI_ACTION_CZREFH        1547
 #define UI_ACTION_START_CZREFH  1548
 #define UI_ACTION_CZREFH_INFO   1549
+#define UI_ACTION_CZREFH_SUCC   1550
 
 #ifndef HALF_P1_X
 #define HALF_P1_X 34

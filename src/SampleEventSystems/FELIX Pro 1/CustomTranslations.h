@@ -136,7 +136,7 @@ TRANS(UI_CTEXT_WIZ_TEMP_EN);
 #define UI_CTEXT_TOT_FILAMENT_DE "Tot. Filam.: %Ufm"
 #define UI_CTEXT_HEATINGUP1_DE "Heize auf," 
 #define UI_CTEXT_HEATINGUP2_DE "Bitte warten.."
-#define UI_CTEXT_SELECT_TEMP_DE "Wähle Temperatur"
+#define UI_CTEXT_SELECT_TEMP_DE "WÃ¤hle Temperatur"
 #define UI_CTEXT_SELECT_EX1_DE "Extruder 1"
 #define UI_CTEXT_SELECT_EX2_DE "Extruder 2"
 #define UI_CTEXT_WIZ_TEMP_DE "%w0\002C"

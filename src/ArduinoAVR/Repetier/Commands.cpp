@@ -177,18 +177,14 @@ void Commands::printTemperatures(bool showRaw) {
     Com::printF(Com::tSpaceBAtColon,(pwm_pos[heatedBedController.pwmIndex])); // Show output of auto tune when tuning!
 #endif
 #endif
-#if TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex == 255 ? pwm_pos[Extruder::current->id] : pwm_pos[autotuneIndex])); // Show output of auto tune when tuning!
-#endif
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
         Com::printF(Com::tSpaceT,(int)i);
         Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
         Com::printF(Com::tSpaceSlash,extruder[i].tempControl.targetTemperatureC,0);
-#if TEMP_PID
         Com::printF(Com::tSpaceAt,(int)i);
         Com::printF(Com::tColon,(pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of auto tune when tuning!
-#endif
 		if((error = extruder[i].tempControl.errorState()) > 0) {
 			Com::printF(PSTR(" D"),(int)i);
 			Com::printF(Com::tColon,error);
@@ -2165,16 +2161,18 @@ void Commands::processMCode(GCode *com) {
             Printer::setColdExtrusionAllowed(!com->hasS() || (com->hasS() && com->S != 0));
             break;
         case 303: { // M303
-#if defined(TEMP_PID) && NUM_TEMPERATURE_LOOPS > 0
+#if NUM_TEMPERATURE_LOOPS > 0
                 int temp = 150;
                 int cont = 0;
                 int cycles = 5;
+				int method = 0;
                 if(com->hasS()) temp = com->S;
                 if(com->hasP()) cont = com->P;
                 if(com->hasR()) cycles = static_cast<int>(com->R);
+				if(com->hasC()) method = static_cast<int>(com->C);
                 if(cont >= HEATED_BED_INDEX) cont = HEATED_BED_INDEX;
 				if(cont < 0) cont = 0;
-                tempController[cont]->autotunePID(temp,cont,cycles,com->hasX());
+                tempController[cont]->autotunePID(temp,cont,cycles,com->hasX(), method);
 #endif
             }
             break;

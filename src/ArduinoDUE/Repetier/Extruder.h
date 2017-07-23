@@ -4,10 +4,6 @@
 #define CELSIUS_EXTRA_BITS 3
 #define VIRTUAL_EXTRUDER 16 // don't change this to more then 16 without modifying the eeprom positions
 
-//#if TEMP_PID
-//extern uint8_t current_extruder_out;
-//#endif
-
 // Updates the temperature of all extruders and heated bed if it's time.
 // Toggles the heater power if necessary.
 extern bool reportTempsensorError(); ///< Report defect sensors
@@ -26,6 +22,10 @@ extern uint8_t manageMonitor;
 #define TEMPERATURE_CONTROLLER_FLAG_SLOWDOWN      64   ///< Indicates a slowed down extruder
 #define TEMPERATURE_CONTROLLER_FLAG_FILAMENTCHANGE 128 ///< Indicates we are switching filament
 
+#ifndef PID_TEMP_CORRECTION
+#define PID_TEMP_CORRECTION 2.0
+#endif
+
 /** TemperatureController manages one heater-temperature sensor loop. You can have up to
 4 loops allowing pid/bang bang for up to 3 extruder and the heated bed.
 
@@ -41,8 +41,9 @@ public:
     //int16_t targetTemperature; ///< Target temperature value in units of sensor.
     float currentTemperatureC; ///< Current temperature in degC.
     float targetTemperatureC; ///< Target temperature in degC.
+	float temperatureC; ///< For 1s updates temperature and last build a short time history
+	float lastTemperatureC; ///< Used to compute D errors.
     uint32_t lastTemperatureUpdate; ///< Time in millis of the last temperature update.
-#if TEMP_PID
     float tempIState; ///< Temp. var. for PID computation.
     uint8_t pidDriveMax; ///< Used for windup in PID calculation.
     uint8_t pidDriveMin; ///< Used for windup in PID calculation.
@@ -54,9 +55,6 @@ public:
     uint8_t pidMax; ///< Maximum PWM value, the heater should be set.
     float tempIStateLimitMax;
     float tempIStateLimitMin;
-    uint8_t tempPointer;
-    float tempArray[4];
-#endif
     uint8_t flags;
     millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
     float  lastDecoupleTemp;  ///< Temperature on last test
@@ -157,9 +155,7 @@ public:
 
 #endif
     void waitForTargetTemperature();
-#if TEMP_PID
-    void autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeResult);
-#endif
+    void autotunePID(float temp,uint8_t controllerId,int maxCycles,bool storeResult, int method);
    inline void startPreheatTime()
    {
        preheatStartTime = HAL::timeInMilliseconds();

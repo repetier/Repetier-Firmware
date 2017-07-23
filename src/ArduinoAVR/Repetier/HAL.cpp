@@ -1030,17 +1030,20 @@ if(fan2Kickstart == 0)
         osAnalogInputBuildup[osAnalogInputPos] += ADCW;
         if(++osAnalogInputCounter[osAnalogInputPos] >= _BV(ANALOG_INPUT_SAMPLE))
         {
+			// update temperatures only when values have been read
+			if(executePeriodical == 0 || osAnalogInputPos >= NUM_ANALOG_TEMP_SENSORS) {
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE < 12
-            osAnalogInputValues[osAnalogInputPos] =
+				osAnalogInputValues[osAnalogInputPos] =
                 osAnalogInputBuildup[osAnalogInputPos] << (12 - ANALOG_INPUT_BITS - ANALOG_INPUT_SAMPLE);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE > 12
-            osAnalogInputValues[osAnalogInputPos] =
+				osAnalogInputValues[osAnalogInputPos] =
                 osAnalogInputBuildup[osAnalogInputPos] >> (ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE - 12);
 #endif
 #if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE == 12
-            osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
+				osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
 #endif
+			}
             osAnalogInputBuildup[osAnalogInputPos] = 0;
             osAnalogInputCounter[osAnalogInputPos] = 0;
             // Start next conversion
