@@ -3022,13 +3022,13 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves)
     {
         if((UI_INVERT_MENU_DIRECTION && next < 0) || (!UI_INVERT_MENU_DIRECTION && next > 0))
         {
-            menuPos[menuLevel] += abs(next);
+            menuPos[menuLevel] += 1; // abs(next);
             if(menuPos[menuLevel] > nFilesOnCard) menuPos[menuLevel] = nFilesOnCard;
         }
         else if(menuPos[menuLevel] > 0)
         {
-            if(menuPos[menuLevel] > abs(next))
-                menuPos[menuLevel] -= abs(next);
+            if(menuPos[menuLevel] > 1 /* abs(next) */)
+                menuPos[menuLevel] -= 1; // abs(next);
             else
                 menuPos[menuLevel] = 0;
         }
