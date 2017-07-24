@@ -318,6 +318,9 @@ public:
     void retract(bool isRetract,bool isLong);
     void retractDistance(float dist,bool extraLength = false);
 #endif
+#if HEATED_BED_AND_EXTRUDER_PID_MAX
+static uint8_t dynamicHeatingBedCap(uint8_t pidMax);
+#endif	
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();
