@@ -421,7 +421,7 @@ void cExecute(int action,bool allowMoves) {
     preheatFCActive();
     break;
   case UI_ACTION_FC_PVA:
-    setPreheatTemps(185, 55, false, false);
+    setPreheatTemps(210, 55, false, false);
     preheatFCActive();
     break;
   case UI_ACTION_FC_FLEX:
@@ -656,7 +656,7 @@ FSTRINGVALUE(extzCalibGCode,
 );
 
  FSTRINGVALUE(calibrationGCode,
-"M140 S55\n"
+/* "M140 S55\n"
 "M104 T0 S190\n"
 "M104 T1 S140\n"
 "M117 Homing\n"
@@ -679,7 +679,7 @@ FSTRINGVALUE(extzCalibGCode,
 "G1 X236.0 Y243.2 Z0.3 F7800.0\n"
 "G1 X108.5 Y243.2 Z0.3 F1500.0 E15\n"
 "G1 E14.5 F3000\n"
-"G92 E0\n"
+"G92 E0\n"*/
 "M117 FELIXprinting...\n"
 "G21\n"
 "G90\n"
