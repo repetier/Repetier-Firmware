@@ -2985,7 +2985,7 @@ TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TY
 
 #if FAN_THERMO_PIN > -1
 TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0,0,0
-	,0,255,0,10,1,1,255,0,0,0
+	,0,255,0,10,1,1,255,0,0
 ,0,0,0,0,0,0};
 #endif
 

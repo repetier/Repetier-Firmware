@@ -151,7 +151,9 @@ void SDCard::pausePrint(bool intern)
     if(!sdactive) return;
     sdmode = 2; // finish running line
     Printer::setMenuMode(MENU_MODE_PAUSED, true);
+#if !defined(DISABLE_PRINTMODE_ON_PAUSE) || DISABLE_PRINTMODE_ON_PAUSE==1
     Printer::setPrinting(false);
+#endif
     #if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
     #endif
