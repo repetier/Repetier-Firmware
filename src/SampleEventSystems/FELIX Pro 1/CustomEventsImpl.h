@@ -164,6 +164,7 @@ void halfautomaticLevel1() {
   uid.pushMenu(&cui_msg_measuring,true);
   Printer::homeAxis(true, true, true);
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
   Printer::startProbing(true);
   uid.popMenu(false);
   halfautomaticLevel2();  
@@ -195,7 +196,7 @@ void cZPHeight1() {
   Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
   //refZ = Printer::runZProbe(true, true) - EEPROM::zProbeBedDistance() - Printer::zBedOffset;
   refZ = 0;
-  Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3);Com::printF(PSTR(" refZ:"), refZ, 3);Com::printFLN(PSTR(" atZ:"), EEPROM::zProbeBedDistance(), 3);
+  // Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3);Com::printF(PSTR(" refZ:"), refZ, 3);Com::printFLN(PSTR(" atZ:"), EEPROM::zProbeBedDistance(), 3);
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT - refZ, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::updateCurrentPosition(true);
   uid.popMenu(false);
@@ -206,7 +207,7 @@ void cZPHeight2() {
   // float diff = refZ + Printer::currentPosition[Z_AXIS] - ZPROBE_REF_HEIGHT;
   Commands::printCurrentPosition();
   float diff = (Printer::lastCmdPos[Z_AXIS] - refZ) - (ZPROBE_REF_HEIGHT - refZ);
-  Com::printF(PSTR("oldZPH:"),EEPROM::zProbeHeight(),3);Com::printF(PSTR(" diff:"), diff,3);Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3); Com::printFLN(PSTR(" REFH:"),(float)ZPROBE_REF_HEIGHT, 2);
+  // Com::printF(PSTR("oldZPH:"),EEPROM::zProbeHeight(),3);Com::printF(PSTR(" diff:"), diff,3);Com::printF(PSTR(" cur:"),Printer::currentPosition[Z_AXIS],3); Com::printFLN(PSTR(" REFH:"),(float)ZPROBE_REF_HEIGHT, 2);
   if(diff > 1) diff = 1;
   if(diff < -1) diff = -1;
   Printer::currentPositionSteps[Z_AXIS] = ZPROBE_REF_HEIGHT * Printer::axisStepsPerMM[Z_AXIS];
