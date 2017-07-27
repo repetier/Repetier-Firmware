@@ -73,6 +73,9 @@ void Extruder::manageTemperatures()
 #ifdef RED_BLUE_STATUS_LEDS
     bool hot = false;
 #endif
+#if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP == 2 && (PS_ON_PIN>-1)
+    bool haveHeatDemand = false;
+#endif // ENABLE_POWER_ON_STARTUP == 2
 	bool newDefectFound = false;
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
 #if NUM_TEMPERATURE_LOOPS > 0
@@ -81,6 +84,9 @@ void Extruder::manageTemperatures()
         TemperatureController *act = tempController[controller];
         // Get Temperature
         act->updateCurrentTemperature();
+#if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP == 2 && (PS_ON_PIN>-1)
+        haveHeatDemand |= (act->targetTemperatureC >= 20); //PID defines off as < 20
+#endif // ENABLE_POWER_ON_STARTUP == 2
 #if FAN_THERMO_PIN > -1
 		// Special case thermistor controlled fan
         if(act == &thermoController) {
@@ -388,6 +394,21 @@ void Extruder::manageTemperatures()
 		GCode::fatalError(PSTR("Heater/sensor failure"));
     } // any sensor defect
 #endif // NUM_TEMPERATURE_LOOPS
+
+#if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP == 2 && (PS_ON_PIN>-1)
+    if(haveHeatDemand && !Printer::isAnyTempsensorDefect()){
+      if(!Printer::isPowerOn()) {
+        GCode gc; //not fully initialised but processMCode only needs M set for commands 80/81
+        gc.M=80;
+        Commands::processMCode(&gc);
+      }
+    }
+    else if(Printer::isPowerOn()) {
+      GCode gc; //not fully initialised but processMCode only needs M set for commands 80/81
+      gc.M=81;
+      Commands::processMCode(&gc);
+    }
+#endif //ENABLE_POWER_ON_STARTUP == 2
 
     // Report temperatures every second, so we do not need to send M105
     if(Printer::isAutoreportTemp()) {

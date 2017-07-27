@@ -1286,6 +1286,9 @@ to activate the quadratic term. Only adds lots of computations and storage usage
 /**
 Some boards like Gen7 have a power on pin, to enable the ATX power supply. If this is defined,
 the power will be turned on without the need to call M80 if initially started.
+0 = Do not power on
+1 = Power on startup
+2 = Only power on when heaters / heatbed target temp >= 20 and power off again when heaters & heatbed all off (or on sensor defect)
 */
 #define ENABLE_POWER_ON_STARTUP 1
 
