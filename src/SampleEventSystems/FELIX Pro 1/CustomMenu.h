@@ -74,7 +74,9 @@ UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EX
 UI_WIZARD5_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
 
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool1,UI_CTEXT_PREHEATCOOL_ID,UI_ACTION_PRECOOL1)
+#if NUM_EXTRUDER > 1
 UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECOOL2)
+#endif
 UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
 
 UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
@@ -83,6 +85,7 @@ UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Pl
 UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
 UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
 UI_WIZARD4(cui_calib_zprobe_succ, UI_ACTION_CZREFH_SUCC, "     Build PLT."," Levelled Correctly","","     >>> OK <<<")
+UI_WIZARD4(cui_calib_zprobe_dist, UI_ACTION_STATE, "",   now measuring","    buildsurface","")
 UI_MENU_HEADLINE(ui_halfw," Max. 10" cDEG)
 UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
 UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
@@ -988,9 +991,13 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #define UI_CHANGE_FIL_ENT_PRINTING
 #endif
 UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
-
+#if NUM_EXTRUDER > 1
 #define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
       , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+#else
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
+      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+#endif      
 UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
 
 UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)

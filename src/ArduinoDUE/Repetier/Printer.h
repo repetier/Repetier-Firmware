@@ -1328,6 +1328,9 @@ public:
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();
+#if FEATURE_Z_PROBE
+	static void prepareForProbing();
+#endif
 };
 
 #endif // PRINTER_H_INCLUDED

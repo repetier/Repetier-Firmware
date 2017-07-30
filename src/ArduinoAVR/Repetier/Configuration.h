@@ -1558,6 +1558,8 @@ motorized bed leveling */
 
 #define DISTORTION_CORRECTION         1
 #define DISTORTION_CORRECTION_POINTS  5
+/** Max. distortion value to enter. Used to prevent dangerous errors with big values. */
+#define DISTORTION_LIMIT_TO 2
 /* For delta printers you simply define the measured radius around origin */
 #define DISTORTION_CORRECTION_R       80
 /* For all others you define the correction rectangle by setting the min/max coordinates. Make sure the the probe can reach all points! */

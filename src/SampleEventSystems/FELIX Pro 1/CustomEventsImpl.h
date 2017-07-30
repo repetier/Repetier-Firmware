@@ -88,9 +88,11 @@ void setPreheatTemps(int16_t extr,int16_t bed,bool all,bool showMenu = true) {
   heatedBedController.preheatTemperature = bed;
   if(all) {
      mod |= extruder[0].tempControl.preheatTemperature != extr;
-     extruder[0].tempControl.preheatTemperature = extr;                    
+     extruder[0].tempControl.preheatTemperature = extr;
+#if NUM_EXTRUDER > 1                         
      mod |= extruder[1].tempControl.preheatTemperature != extr;
-     extruder[1].tempControl.preheatTemperature = extr;                    
+     extruder[1].tempControl.preheatTemperature = extr;
+#endif                         
   } else {
      mod |= Extruder::current->tempControl.preheatTemperature != extr;
      Extruder::current->tempControl.preheatTemperature = extr;                    
@@ -149,6 +151,9 @@ void halfautomaticLevel2() {
   uid.popMenu(false);
   if(fabs(z1) <= 10 && fabs(z2) <= 10) {
     Printer::finishProbing();
+    uid.pushMenu(&cui_calib_zprobe_dist, true);
+    Printer::measureDistortion();
+    uid.popMenu(false);
     uid.pushMenu(&cui_calib_zprobe_succ, true);
   } else {
     uid.pushMenu(&ui_half_show,true);
@@ -162,6 +167,8 @@ void halfautomaticLevel3() {
 /* Start autoleveling */
 void halfautomaticLevel1() {
   uid.pushMenu(&cui_msg_measuring,true);
+  Printer::distortion.resetCorrection();
+  Printer::distortion.enable(false); // not permanent disabled
   Printer::homeAxis(true, true, true);
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
