@@ -1169,7 +1169,6 @@ if(fan2Kickstart == 0)
   if (pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK) WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
 #endif
-  //noInt.unprotect();
   counterPeriodical++; // Appxoimate a 100ms timer
   if (counterPeriodical >= 390) //  (int)(F_CPU/40960))
   {
