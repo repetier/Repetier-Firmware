@@ -85,7 +85,7 @@ UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Pl
 UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
 UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
 UI_WIZARD4(cui_calib_zprobe_succ, UI_ACTION_CZREFH_SUCC, "     Build PLT."," Levelled Correctly","","     >>> OK <<<")
-UI_WIZARD4(cui_calib_zprobe_dist, UI_ACTION_STATE, "",   now measuring","    buildsurface","")
+UI_WIZARD4(cui_calib_zprobe_dist, UI_ACTION_STATE, "", "   now measuring", "    buildsurface", "")
 UI_MENU_HEADLINE(ui_halfw," Max. 10" cDEG)
 UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
 UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")

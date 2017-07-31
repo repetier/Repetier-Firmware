@@ -2441,7 +2441,7 @@ bool Distortion::measure(void) {
             Printer::moveToReal(mtx, mty, z, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
             float zp = Printer::runZProbe(false, false, Z_PROBE_REPETITIONS);
 #if defined(DISTORTION_LIMIT_TO) && DISTORTION_LIMIT_TO != 0
-            if(zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
+            if(zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * Printer::invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
 #else
             if(zp == ILLEGAL_Z_PROBE) {
 #endif
