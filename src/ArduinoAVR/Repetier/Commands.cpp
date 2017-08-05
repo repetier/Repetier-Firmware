@@ -203,6 +203,11 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tColon, (1023 << (2 - ANALOG_REDUCE_BITS)) - extruder[0].tempControl.currentTemperature);
     }
 #endif
+#ifdef FAKE_CHAMBER
+   Com::printF(PSTR(" C:"),extruder[0].tempControl.currentTemperatureC);
+   Com::printF(Com::tSpaceSlash, extruder[0].tempControl.targetTemperatureC, 0);
+   Com::printF(PSTR(" @:"), (pwm_pos[extruder[0].tempControl.pwmIndex]));
+#endif
     Com::println();
 #endif
 }
@@ -2435,9 +2440,9 @@ void Commands::processMCode(GCode *com) {
 #endif
     case 601:
         if(com->hasS() && com->S > 0)
-            Extruder::pauseExtruders();
+            Extruder::pauseExtruders(com->hasB() && com->B != 0);
         else
-            Extruder::unpauseExtruders();
+            Extruder::unpauseExtruders(com->hasP() && com->P != 1);
         break;
 #if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
     case 602:

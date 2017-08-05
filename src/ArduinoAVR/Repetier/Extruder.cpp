@@ -397,22 +397,50 @@ fast8_t TemperatureController::errorState() {
 }
 /* For pausing we negate target temperature, so negative value means paused extruder.
 Since temp. is negative no heating will occur. */
-void Extruder::pauseExtruders() {
+void Extruder::pauseExtruders(bool bed) {
+#if NUM_EXTRUDER > 0
     disableAllExtruderMotors();
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
-        if(extruder[i].tempControl.targetTemperatureC > 0)
-            extruder[i].tempControl.targetTemperatureC = -extruder[i].tempControl.targetTemperatureC;
+        if(extruder[i].tempControl.targetTemperatureC > 0) {
+            extruder[i].tempControl.targetTemperatureC = -fabs(extruder[i].tempControl.targetTemperatureC);
+            pwm_pos[extruder[i].tempControl.pwmIndex] = 0;
+        }
     }
+#endif
+#if HAVE_HEATED_BED
+    if(bed) {
+        heatedBedController.targetTemperatureC = -fabs(heatedBedController.targetTemperatureC);
+        pwm_pos[heatedBedController.pwmIndex] = 0;
+    }
+#endif
 }
 
-void Extruder::unpauseExtruders() {
+void Extruder::unpauseExtruders(bool wait) {
+#if NUM_EXTRUDER > 0
     // activate temperatures
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
         if(extruder[i].tempControl.targetTemperatureC < 0)
             extruder[i].tempControl.targetTemperatureC = -extruder[i].tempControl.targetTemperatureC;
     }
-    for(fast8_t i = 0; i < NUM_EXTRUDER; i++)
-        extruder[i].tempControl.waitForTargetTemperature();
+#endif
+#if HAVE_HEATED_BED
+    bool waitBed = false;
+    if(heatedBedController.targetTemperatureC) {
+        heatedBedController.targetTemperatureC = -heatedBedController.targetTemperatureC;
+        waitBed = true;
+    }
+#endif
+    if(wait) {
+#if NUM_EXTRUDER > 0
+        for(fast8_t i = 0; i < NUM_EXTRUDER; i++)
+            extruder[i].tempControl.waitForTargetTemperature();
+#endif
+#if HAVE_HEATED_BED
+        if(waitBed) {
+            heatedBedController.waitForTargetTemperature();
+        }
+#endif
+    }
 }
 
 void TemperatureController::resetAllErrorStates() {

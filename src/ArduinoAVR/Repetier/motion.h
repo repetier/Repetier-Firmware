@@ -55,113 +55,87 @@
 // Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
 
 class PrintLine;
-typedef struct
-{
-    flag8_t dir; 									///< Direction of delta movement.
-    uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
-    inline bool checkEndstops(PrintLine *cur,bool checkall);
-    inline void setXMoveFinished()
-    {
+typedef struct {
+    flag8_t dir;                                    ///< Direction of delta movement.
+    uint16_t deltaSteps[TOWER_ARRAY];                       ///< Number of steps in move.
+    inline bool checkEndstops(PrintLine *cur, bool checkall);
+    inline void setXMoveFinished() {
         dir &= ~XSTEP;
     }
-    inline void setYMoveFinished()
-    {
+    inline void setYMoveFinished() {
         dir &= ~YSTEP;
     }
-    inline void setZMoveFinished()
-    {
+    inline void setZMoveFinished() {
         dir &= ~ZSTEP;
     }
-    inline void setXYMoveFinished()
-    {
+    inline void setXYMoveFinished() {
         dir &= ~XY_STEP;
     }
-    inline bool isXPositiveMove()
-    {
+    inline bool isXPositiveMove() {
         return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
     }
-    inline bool isXNegativeMove()
-    {
+    inline bool isXNegativeMove() {
         return (dir & X_STEP_DIRPOS) == XSTEP;
     }
-    inline bool isYPositiveMove()
-    {
+    inline bool isYPositiveMove() {
         return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
     }
-    inline bool isYNegativeMove()
-    {
+    inline bool isYNegativeMove() {
         return (dir & Y_STEP_DIRPOS) == YSTEP;
     }
-    inline bool isZPositiveMove()
-    {
+    inline bool isZPositiveMove() {
         return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
     }
-    inline bool isZNegativeMove()
-    {
+    inline bool isZNegativeMove() {
         return (dir & Z_STEP_DIRPOS) == ZSTEP;
     }
-    inline bool isEPositiveMove()
-    {
+    inline bool isEPositiveMove() {
         return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
-    inline bool isENegativeMove()
-    {
+    inline bool isENegativeMove() {
         return (dir & E_STEP_DIRPOS) == ESTEP;
     }
-    inline bool isXMove()
-    {
+    inline bool isXMove() {
         return (dir & XSTEP);
     }
-    inline bool isYMove()
-    {
+    inline bool isYMove() {
         return (dir & YSTEP);
     }
-    inline bool isXOrYMove()
-    {
+    inline bool isXOrYMove() {
         return dir & XY_STEP;
     }
-    inline bool isZMove()
-    {
+    inline bool isZMove() {
         return (dir & ZSTEP);
     }
-    inline bool isEMove()
-    {
+    inline bool isEMove() {
         return (dir & ESTEP);
     }
-    inline bool isEOnlyMove()
-    {
-        return (dir & XYZE_STEP)==ESTEP;
+    inline bool isEOnlyMove() {
+        return (dir & XYZE_STEP) == ESTEP;
     }
-    inline bool isNoMove()
-    {
+    inline bool isNoMove() {
         return (dir & XYZE_STEP) == 0;
     }
-    inline bool isXYZMove()
-    {
+    inline bool isXYZMove() {
         return dir & XYZ_STEP;
     }
-    inline bool isMoveOfAxis(uint8_t axis)
-    {
-        return (dir & (XSTEP<<axis));
+    inline bool isMoveOfAxis(uint8_t axis) {
+        return (dir & (XSTEP << axis));
     }
-    inline void setMoveOfAxis(uint8_t axis)
-    {
+    inline void setMoveOfAxis(uint8_t axis) {
         dir |= XSTEP << axis;
     }
-    inline void setPositiveMoveOfAxis(uint8_t axis)
-    {
+    inline void setPositiveMoveOfAxis(uint8_t axis) {
         dir |= X_STEP_DIRPOS << axis;
     }
-    inline void setPositiveDirectionForAxis(uint8_t axis)
-    {
+    inline void setPositiveDirectionForAxis(uint8_t axis) {
         dir |= X_DIRPOS << axis;
     }
 } NonlinearSegment;
 extern uint8_t lastMoveID;
 #endif
 class UIDisplay;
-class PrintLine   // RAM usage: 24*4+15 = 113 Byte
-{
+class PrintLine { // RAM usage: 24*4+15 = 113 Byte
     friend class UIDisplay;
 #if CPU_ARCH == ARCH_ARM
     static volatile bool nlFlag;
@@ -192,9 +166,9 @@ private:
     float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
-    uint8_t numNonlinearSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
-    uint8_t moveID;					///< ID used to identify moves which are all part of the same line
-    int32_t numPrimaryStepPerSegment;	///< Number of primary Bresenham axis steps in each delta segment
+    uint8_t numNonlinearSegments;       ///< Number of delta segments left in line. Decremented by stepper timer.
+    uint8_t moveID;                 ///< ID used to identify moves which are all part of the same line
+    int32_t numPrimaryStepPerSegment;   ///< Number of primary Bresenham axis steps in each delta segment
     NonlinearSegment segments[DELTASEGMENTS_PER_PRINTLINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
@@ -221,300 +195,239 @@ public:
     int32_t stepsRemaining;            ///< Remaining steps, until move is finished
     static PrintLine *cur;
     static volatile ufast8_t linesCount; // Number of lines cached 0 = nothing to do
-    inline bool areParameterUpToDate()
-    {
+    inline bool areParameterUpToDate() {
         return joinFlags & FLAG_JOIN_STEPPARAMS_COMPUTED;
     }
-    inline void invalidateParameter()
-    {
+    inline void invalidateParameter() {
         joinFlags &= ~FLAG_JOIN_STEPPARAMS_COMPUTED;
     }
-    inline void setParameterUpToDate()
-    {
+    inline void setParameterUpToDate() {
         joinFlags |= FLAG_JOIN_STEPPARAMS_COMPUTED;
     }
-    inline bool isStartSpeedFixed()
-    {
+    inline bool isStartSpeedFixed() {
         return joinFlags & FLAG_JOIN_START_FIXED;
     }
-    inline void setStartSpeedFixed(bool newState)
-    {
+    inline void setStartSpeedFixed(bool newState) {
         joinFlags = (newState ? joinFlags | FLAG_JOIN_START_FIXED : joinFlags & ~FLAG_JOIN_START_FIXED);
     }
-    inline void fixStartAndEndSpeed()
-    {
+    inline void fixStartAndEndSpeed() {
         joinFlags |= FLAG_JOIN_END_FIXED | FLAG_JOIN_START_FIXED;
     }
-    inline bool isEndSpeedFixed()
-    {
+    inline bool isEndSpeedFixed() {
         return joinFlags & FLAG_JOIN_END_FIXED;
     }
-    inline void setEndSpeedFixed(bool newState)
-    {
+    inline void setEndSpeedFixed(bool newState) {
         joinFlags = (newState ? joinFlags | FLAG_JOIN_END_FIXED : joinFlags & ~FLAG_JOIN_END_FIXED);
     }
-    inline bool isWarmUp()
-    {
+    inline bool isWarmUp() {
         return flags & FLAG_WARMUP;
     }
-    inline uint8_t getWaitForXLinesFilled()
-    {
+    inline uint8_t getWaitForXLinesFilled() {
         return primaryAxis;
     }
-    inline void setWaitForXLinesFilled(uint8_t b)
-    {
+    inline void setWaitForXLinesFilled(uint8_t b) {
         primaryAxis = b;
     }
-    inline bool isExtruderForwardMove()
-    {
-        return (dir & E_STEP_DIRPOS)==E_STEP_DIRPOS;
+    inline bool isExtruderForwardMove() {
+        return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
-    inline void block()
-    {
+    inline void block() {
         flags |= FLAG_BLOCKED;
     }
-    inline void unblock()
-    {
+    inline void unblock() {
         flags &= ~FLAG_BLOCKED;
     }
-    inline bool isBlocked()
-    {
+    inline bool isBlocked() {
         return flags & FLAG_BLOCKED;
     }
     inline bool isAllEMotors() {
         return flags & FLAG_ALL_E_MOTORS;
     }
-    inline bool isCheckEndstops()
-    {
+    inline bool isCheckEndstops() {
         return flags & FLAG_CHECK_ENDSTOPS;
     }
-    inline bool isNominalMove()
-    {
+    inline bool isNominalMove() {
         return flags & FLAG_NOMINAL;
     }
-    inline void setNominalMove()
-    {
+    inline void setNominalMove() {
         flags |= FLAG_NOMINAL;
     }
-    inline void checkEndstops()
-    {
-        if(isCheckEndstops())
-        {
-			Endstops::update();
-            if(isXNegativeMove() && Endstops::xMin())
-                setXMoveFinished();
-            else if(isXPositiveMove() && Endstops::xMax())
-                setXMoveFinished();
-            if(isYNegativeMove() && Endstops::yMin())
-                setYMoveFinished();
-            else if(isYPositiveMove() && Endstops::yMax())
-                setYMoveFinished();
+    inline void checkEndstops() {
+        if(isCheckEndstops()) {
+            Endstops::update();
+            if(Endstops::anyEndstopHit()) {
+                if(isXNegativeMove() && Endstops::xMin())
+                    setXMoveFinished();
+                else if(isXPositiveMove() && Endstops::xMax())
+                    setXMoveFinished();
+                if(isYNegativeMove() && Endstops::yMin())
+                    setYMoveFinished();
+                else if(isYPositiveMove() && Endstops::yMax())
+                    setYMoveFinished();
 #if FEATURE_Z_PROBE
-            if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe())
-            {
-                setZMoveFinished();
-                Printer::stepsRemainingAtZHit = stepsRemaining;
-            }
-            else
+                if(Printer::isZProbingActive() && isZNegativeMove() && Endstops::zProbe()) {
+                    setZMoveFinished();
+                    Printer::stepsRemainingAtZHit = stepsRemaining;
+                } else
 #endif
 #if MULTI_ZENDSTOP_HOMING
-           {
-               if(Printer::isHoming()) {
-           if(isZNegativeMove())
-           {
-				if(Endstops::zMin())
-					Printer::multiZHomeFlags &= ~1;
-				if(Endstops::z2MinMax())
-				   Printer::multiZHomeFlags &= ~2;
-				if(Printer::multiZHomeFlags == 0)
-					setZMoveFinished();
-           }
-           else if(isZPositiveMove())
-           {
-				if(Endstops::zMax())
-					Printer::multiZHomeFlags &= ~1;
-				if(Endstops::z2MinMax())
-					Printer::multiZHomeFlags &= ~2;
-				if(Printer::multiZHomeFlags == 0) {
-	           #if MAX_HARDWARE_ENDSTOP_Z
-					Printer::stepsRemainingAtZHit = stepsRemaining;
-	           #endif
-					setZMoveFinished();
-				}
-           }
-               } else {
-           if(isZNegativeMove() && Endstops::zMin())
-           {
-               setZMoveFinished();
-           }
-           else if(isZPositiveMove() && Endstops::zMax())
-           {
-               #if MAX_HARDWARE_ENDSTOP_Z
-               Printer::stepsRemainingAtZHit = stepsRemaining;
-               #endif
-               setZMoveFinished();
-           }                   
-               }                          
-}           
+                {
+                    if(Printer::isHoming()) {
+                        if(isZNegativeMove()) {
+                            if(Endstops::zMin())
+                                Printer::multiZHomeFlags &= ~1;
+                            if(Endstops::z2MinMax())
+                                Printer::multiZHomeFlags &= ~2;
+                            if(Printer::multiZHomeFlags == 0)
+                                setZMoveFinished();
+                        } else if(isZPositiveMove()) {
+                            if(Endstops::zMax())
+                                Printer::multiZHomeFlags &= ~1;
+                            if(Endstops::z2MinMax())
+                                Printer::multiZHomeFlags &= ~2;
+                            if(Printer::multiZHomeFlags == 0) {
+#if MAX_HARDWARE_ENDSTOP_Z
+                                Printer::stepsRemainingAtZHit = stepsRemaining;
+#endif
+                                setZMoveFinished();
+                            }
+                        }
+                    } else {
+                        if(isZNegativeMove() && Endstops::zMin()) {
+                            setZMoveFinished();
+                        } else if(isZPositiveMove() && Endstops::zMax()) {
+#if MAX_HARDWARE_ENDSTOP_Z
+                            Printer::stepsRemainingAtZHit = stepsRemaining;
+#endif
+                            setZMoveFinished();
+                        }
+                    }
+                }
 #else
-           if(isZNegativeMove() && Endstops::zMin())
-           {
-	           setZMoveFinished();
-           }
-           else if(isZPositiveMove() && Endstops::zMax())
-           {
-	           #if MAX_HARDWARE_ENDSTOP_Z
-	           Printer::stepsRemainingAtZHit = stepsRemaining;
-	           #endif
-	           setZMoveFinished();
-           }
+                    if(isZNegativeMove() && Endstops::zMin()) {
+                        setZMoveFinished();
+                    } else if(isZPositiveMove() && Endstops::zMax()) {
+#if MAX_HARDWARE_ENDSTOP_Z
+                        Printer::stepsRemainingAtZHit = stepsRemaining;
 #endif
-
-     
-        }
+                        setZMoveFinished();
+                    }
+#endif
+            }
 #if FEATURE_Z_PROBE
-        else if(Printer::isZProbingActive() && isZNegativeMove()) {
-			Endstops::update();
-			if(Endstops::zProbe())
-			{
-				setZMoveFinished();
-				Printer::stepsRemainingAtZHit = stepsRemaining;
-			}
-        }
+            else if(Printer::isZProbingActive() && isZNegativeMove()) {
+                Endstops::update();
+                if(Endstops::zProbe()) {
+                    setZMoveFinished();
+                    Printer::stepsRemainingAtZHit = stepsRemaining;
+                }
+            }
 #endif
+        }
     }
 
-    inline void setXMoveFinished()
-    {
+    inline void setXMoveFinished() {
 #if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
-#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80;
+#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
+        dir &= ~80;
 #else
         dir &= ~16;
 #endif
     }
-    inline void setYMoveFinished()
-    {
+    inline void setYMoveFinished() {
 #if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
 #else
         dir &= ~32;
 #endif
     }
-    inline void setZMoveFinished()
-    {
-#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80;
-#else		
+    inline void setZMoveFinished() {
+#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
+        dir &= ~80;
+#else
         dir &= ~64;
-#endif		
+#endif
     }
-    inline void setXYMoveFinished()
-    {
+    inline void setXYMoveFinished() {
         dir &= ~48;
     }
-    inline bool isXPositiveMove()
-    {
+    inline bool isXPositiveMove() {
         return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
     }
-    inline bool isXNegativeMove()
-    {
+    inline bool isXNegativeMove() {
         return (dir & X_STEP_DIRPOS) == XSTEP;
     }
-    inline bool isYPositiveMove()
-    {
+    inline bool isYPositiveMove() {
         return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
     }
-    inline bool isYNegativeMove()
-    {
+    inline bool isYNegativeMove() {
         return (dir & Y_STEP_DIRPOS) == YSTEP;
     }
-    inline bool isZPositiveMove()
-    {
+    inline bool isZPositiveMove() {
         return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
     }
-    inline bool isZNegativeMove()
-    {
+    inline bool isZNegativeMove() {
         return (dir & Z_STEP_DIRPOS) == ZSTEP;
     }
-    inline bool isEPositiveMove()
-    {
+    inline bool isEPositiveMove() {
         return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
     }
-    inline bool isENegativeMove()
-    {
+    inline bool isENegativeMove() {
         return (dir & E_STEP_DIRPOS) == ESTEP;
     }
-    inline bool isXMove()
-    {
+    inline bool isXMove() {
         return (dir & XSTEP);
     }
-    inline bool isYMove()
-    {
+    inline bool isYMove() {
         return (dir & YSTEP);
     }
-    inline bool isXOrYMove()
-    {
+    inline bool isXOrYMove() {
         return dir & XY_STEP;
     }
-    inline bool isXOrZMove()
-    {
+    inline bool isXOrZMove() {
         return dir & (XSTEP | YSTEP);
     }
-    inline bool isZMove()
-    {
+    inline bool isZMove() {
         return (dir & ZSTEP);
     }
-    inline bool isEMove()
-    {
+    inline bool isEMove() {
         return (dir & ESTEP);
     }
-    inline bool isEOnlyMove()
-    {
+    inline bool isEOnlyMove() {
         return (dir & XYZE_STEP) == ESTEP;
     }
-    inline bool isNoMove()
-    {
+    inline bool isNoMove() {
         return (dir & XYZE_STEP) == 0;
     }
-    inline bool isXYZMove()
-    {
+    inline bool isXYZMove() {
         return dir & XYZ_STEP;
     }
-    inline bool isMoveOfAxis(uint8_t axis)
-    {
+    inline bool isMoveOfAxis(uint8_t axis) {
         return (dir & (XSTEP << axis));
     }
-    inline void setMoveOfAxis(uint8_t axis)
-    {
+    inline void setMoveOfAxis(uint8_t axis) {
         dir |= XSTEP << axis;
     }
-    inline void setPositiveDirectionForAxis(uint8_t axis)
-    {
+    inline void setPositiveDirectionForAxis(uint8_t axis) {
         dir |= X_DIRPOS << axis;
     }
-    inline static void resetPathPlanner()
-    {
+    inline static void resetPathPlanner() {
         linesCount = 0;
         linesPos = linesWritePos;
         Printer::setMenuMode(MENU_MODE_PRINTING, Printer::isPrinting());
     }
     // Only called from bresenham -> inside interrupt handle
-    inline void updateAdvanceSteps(speed_t v, uint8_t max_loops, bool accelerate)
-    {
+    inline void updateAdvanceSteps(speed_t v, uint8_t max_loops, bool accelerate) {
 #if USE_ADVANCE
         if(!Printer::isAdvanceActivated()) return;
 #if ENABLE_QUADRATIC_ADVANCE
         long advanceTarget = Printer::advanceExecuted;
-        if(accelerate)
-        {
+        if(accelerate) {
             for(uint8_t loop = 0; loop < max_loops; loop++) advanceTarget += advanceRate;
             if(advanceTarget > advanceFull)
                 advanceTarget = advanceFull;
-        }
-        else
-        {
+        } else {
             for(uint8_t loop = 0; loop < max_loops; loop++) advanceTarget -= advanceRate;
             if(advanceTarget < advanceEnd)
                 advanceTarget = advanceEnd;
@@ -543,48 +456,36 @@ public:
 #endif
 #endif
     }
-    INLINE bool moveDecelerating()
-    {
-        if(stepsRemaining <= static_cast<int32_t>(decelSteps))
-        {
-            if (!(flags & FLAG_DECELERATING))
-            {
+    INLINE bool moveDecelerating() {
+        if(stepsRemaining <= static_cast<int32_t>(decelSteps)) {
+            if (!(flags & FLAG_DECELERATING)) {
                 Printer::timer = 0;
                 flags |= FLAG_DECELERATING;
             }
             return true;
-        }
-        else return false;
+        } else return false;
     }
-    INLINE bool moveAccelerating()
-    {
+    INLINE bool moveAccelerating() {
         return Printer::stepNumber <= accelSteps;
     }
-    INLINE void startXStep()
-    {
+    INLINE void startXStep() {
 #if !(GANTRY) || defined(FAST_COREXYZ)
         Printer::startXStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
-        if(isXPositiveMove())
-        {
+        if(isXPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ++;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ--;
         }
 #endif
 #if DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == ZX_GANTRY
-        if(isXPositiveMove())
-        {
+        if(isXPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ--;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ++;
         }
@@ -594,31 +495,24 @@ public:
         totalStepsRemaining--;
 #endif
     }
-    INLINE void startYStep()
-    {
+    INLINE void startYStep() {
 #if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || defined(FAST_COREXYZ)
         Printer::startYStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY
-        if(isYPositiveMove())
-        {
+        if(isYPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ--;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ++;
         }
 #endif
 #if DRIVE_SYSTEM == YX_GANTRY
-        if(isYPositiveMove())
-        {
+        if(isYPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ++;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ--;
         }
@@ -629,31 +523,24 @@ public:
 #endif
 
     }
-    INLINE void startZStep()
-    {
+    INLINE void startZStep() {
 #if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY || defined(FAST_COREXYZ)
         Printer::startZStep();
 #else
 #if DRIVE_SYSTEM == XZ_GANTRY
-        if(isZPositiveMove())
-        {
+        if(isZPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ--;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ++;
         }
 #endif
 #if DRIVE_SYSTEM == ZX_GANTRY
-        if(isZPositiveMove())
-        {
+        if(isZPositiveMove()) {
             Printer::motorX++;
             Printer::motorYorZ++;
-        }
-        else
-        {
+        } else {
             Printer::motorX--;
             Printer::motorYorZ--;
         }
@@ -665,31 +552,26 @@ public:
     }
     void updateStepsParameter();
     float safeSpeed(fast8_t drivingAxis);
-    void calculateMove(float axis_diff[],uint8_t pathOptimize,fast8_t distanceBase);
+    void calculateMove(float axis_diff[], uint8_t pathOptimize, fast8_t distanceBase);
     void logLine();
-    INLINE long getWaitTicks()
-    {
+    INLINE long getWaitTicks() {
         return timeInTicks;
     }
-    INLINE void setWaitTicks(long wait)
-    {
+    INLINE void setWaitTicks(long wait) {
         timeInTicks = wait;
     }
 
-    static INLINE bool hasLines()
-    {
+    static INLINE bool hasLines() {
         return linesCount;
     }
-    static INLINE void setCurrentLine()
-    {
+    static INLINE void setCurrentLine() {
         cur = &lines[linesPos];
 #if CPU_ARCH==ARCH_ARM
         PrintLine::nlFlag = true;
 #endif
     }
     // Only called from within interrupts
-    static INLINE void removeCurrentLineForbidInterrupt()
-    {
+    static INLINE void removeCurrentLineForbidInterrupt() {
         linesPos++;
         if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos = 0;
         cur = NULL;
@@ -701,53 +583,48 @@ public:
         if(!linesCount)
             Printer::setMenuMode(MENU_MODE_PRINTING, Printer::isPrinting());
     }
-    static INLINE void pushLine()
-    {
+    static INLINE void pushLine() {
         linesWritePos++;
         if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
         Printer::setMenuMode(MENU_MODE_PRINTING, true);
         InterruptProtectedBlock noInts;
         linesCount++;
     }
-    static uint8_t getLinesCount()
-    {
+    static uint8_t getLinesCount() {
         InterruptProtectedBlock noInts;
         return linesCount;
     }
-    static PrintLine *getNextWriteLine()
-    {
+    static PrintLine *getNextWriteLine() {
         return &lines[linesWritePos];
     }
-    static inline void computeMaxJunctionSpeed(PrintLine *previous,PrintLine *current);
+    static inline void computeMaxJunctionSpeed(PrintLine *previous, PrintLine *current);
     static int32_t bresenhamStep();
-    static void waitForXFreeLines(uint8_t b=1, bool allowMoves = false);
+    static void waitForXFreeLines(uint8_t b = 1, bool allowMoves = false);
     static inline void forwardPlanner(ufast8_t p);
-    static inline void backwardPlanner(ufast8_t p,ufast8_t last);
+    static inline void backwardPlanner(ufast8_t p, ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
     static void LaserWarmUp(uint32_t wait);
 #if !NONLINEAR_SYSTEM
-    static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
+    static void queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize);
 #if DISTORTION_CORRECTION
-	static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
+    static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
 #endif
-#endif	
-    static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop,bool pathOptimize = true);
-    static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool pathOptimize = true);
+#endif
+    static void moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool check_endstop, bool pathOptimize = true);
+    static void moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool pathOptimize = true);
 #if ARC_SUPPORT
     static void arc(float *position, float *target, float *offset, float radius, uint8_t isclockwise);
 #endif
-    static INLINE void previousPlannerIndex(ufast8_t &p)
-    {
+    static INLINE void previousPlannerIndex(ufast8_t &p) {
         p = (p ? p - 1 : PRINTLINE_CACHE_SIZE - 1);
     }
-    static INLINE void nextPlannerIndex(ufast8_t& p)
-    {
+    static INLINE void nextPlannerIndex(ufast8_t& p) {
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
-    static uint8_t queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
-    static inline void queueEMove(int32_t e_diff,uint8_t check_endstops,uint8_t pathOptimize);
+    static uint8_t queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimize, uint8_t softEndstop);
+    static inline void queueEMove(int32_t e_diff, uint8_t check_endstops, uint8_t pathOptimize);
     inline uint16_t calculateNonlinearSubSegments(uint8_t softEndstop);
     static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
     static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);

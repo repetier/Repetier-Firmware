@@ -64,10 +64,22 @@ UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
 
 UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
 UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
+//added by FELIX
+//====================
+#ifdef TEC4
+#else
 UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
+#endif
 
+#ifdef TEC4
+#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy}
+UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,2)
+#else
 #define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy,&ui_calex_z}
 UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
+#endif
+//====================
+//added by FELIX
 
 UI_WIZARD4_T(ui_msg_printxycal, UI_ACTION_STATE,UI_CTEXT_PRINTXYCAL1_ID, UI_CTEXT_PRINTXYCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
 UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EXTZCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
@@ -97,12 +109,12 @@ UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,5)
 
 
 // Define precision for temperatures. With small displays only integer values fit.
-#define UI_TEMP_PRECISION 1
+#define UI_TEMP_PRECISION 0
 
 // Define precision for temperatures. With small displays only integer values fit.
 #ifndef UI_TEMP_PRECISION
 #if UI_COLS>16
-#define UI_TEMP_PRECISION 1
+#define UI_TEMP_PRECISION 0
 #else
 #define UI_TEMP_PRECISION 0
 #endif

@@ -2806,7 +2806,7 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves) {
                 d *= Printer::maxFeedrate[Y_AXIS] * dtReal / (1000 * fabs(d));
             long steps = (long)(d * Printer::axisStepsPerMM[Y_AXIS]);
             steps = ( increment < 0 ? RMath::min(steps, (long)increment) : RMath::max(steps, (long)increment));
-            PrintLine::moveRelativeUI_ACTION_Z_OFFSETDistanceInStepsReal(0, steps, 0, 0, Printer::maxFeedrate[Y_AXIS], false, false);
+            PrintLine::moveRelativeDistanceInStepsReal(0, steps, 0, 0, Printer::maxFeedrate[Y_AXIS], false, false);
         }
 #else
         PrintLine::moveRelativeDistanceInStepsReal(0, increment, 0, 0, Printer::homingFeedrate[Y_AXIS], false, false);
@@ -3488,7 +3488,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             if(!allowMoves) ret = UI_ACTION_SD_PRI_PAU_CONT;
             else {
                 if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
-                    sd.continuePrint();
+                    sd.continuePrint(true);
                 else if(Printer::isMenuMode(MENU_MODE_SD_PRINTING))
                     sd.pausePrint(true);
                 else if(sd.sdactive)
@@ -3633,7 +3633,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
             Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
             Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
-            Printer::MemoryPosition();
+			if(!Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
+				Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[E_AXIS] = 0;

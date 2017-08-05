@@ -328,8 +328,8 @@ public:
     static void setHeatedBedTemperature(float temp_celsius,bool beep = false);
     static float getHeatedBedTemperature();
     static void setTemperatureForExtruder(float temp_celsius,uint8_t extr,bool beep = false,bool wait = false);
-    static void pauseExtruders();
-    static void unpauseExtruders();
+    static void pauseExtruders(bool bed = false);
+    static void unpauseExtruders(bool wait = true);
 };
 
 #if HAVE_HEATED_BED

@@ -213,6 +213,13 @@ public:
 	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
+	static INLINE bool anyEndstopHit() {
+#ifdef EXTENDED_ENDSTOPS
+		return lastState != 0 || lastState2 != 0;
+#else
+		return lastState != 0;
+#endif
+	}
     static INLINE void resetAccumulator() {
         accumulator = 0;
 #ifdef EXTENDED_ENDSTOPS

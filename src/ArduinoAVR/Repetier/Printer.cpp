@@ -253,6 +253,7 @@ void Endstops::update() {
         newRead |= ENDSTOP_Z_PROBE_ID;
 #endif
 #endif
+	InterruptProtectedBlock noInts; // bad idea to run this from different interrupts at once!
     lastRead &= newRead;
 #ifdef EXTENDED_ENDSTOPS
     lastRead2 &= newRead2;
@@ -2971,7 +2972,7 @@ void Printer::pausePrint() {
 void Printer::continuePrint() {
 #if SDSUPPORT
     if(Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
-        sd.continuePrint();
+        sd.continuePrint(true);
     } else
 #endif
         if(Printer::isMenuMode(MENU_MODE_PRINTING)) {

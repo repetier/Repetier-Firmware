@@ -588,6 +588,10 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
     }
+#if Z_PROBE_DISABLE_HEATERS
+	Extruder::pauseExtruders(true);
+	HAL::delayMilliseconds(70);
+#endif
     for(int8_t r = 0; r < repeat; r++) {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
         stepsRemainingAtZHit = -1; // Marker that we did not hit z probe
@@ -627,6 +631,10 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
     }
+#if Z_PROBE_DISABLE_HEATERS
+	Extruder::unpauseExtruders(false);
+#endif
+
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, HOMING_FEEDRATE_Z, true, true);
     if(Endstops::zProbe()) { // did we untrigger? If not don't trust result!

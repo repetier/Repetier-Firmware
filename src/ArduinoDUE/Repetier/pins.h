@@ -1719,6 +1719,7 @@ AD15 CH15
 #else
 #ifndef NONSTANDARD_SDSS
 #define DUE_SOFTWARE_SPI
+#define SPI_PIN SDSS 
 #endif
 /* could be any pin with software */
 #ifndef MOSI_PIN

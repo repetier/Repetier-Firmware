@@ -1457,6 +1457,8 @@ to recalibrate z.
 #define FEATURE_Z_PROBE 1
 // Especially if you have more then 1 extruder acting as z probe this is important!
 #define EXTRUDER_IS_Z_PROBE 0
+// Disable all heaters before probing - required for inductive sensors
+#define Z_PROBE_DISABLE_HEATERS 0
 #define Z_PROBE_PIN 63
 #define Z_PROBE_PULLUP 1
 #define Z_PROBE_ON_HIGH 1
