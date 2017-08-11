@@ -24,6 +24,88 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
+int currentExtruder = -1;
+
+bool eventUnhandledGCode(GCode *com)
+{
+  if(com->hasG())
+  {
+    switch(com->G)
+    {
+      case 28:
+        if(com->hasX() || com->hasY())
+        {
+          GCode::executeFString(PSTR("G50028 Y\n"));
+        }
+        if(com->hasX())
+        {
+          GCode::executeFString(PSTR("G50028 X\n"));
+        }
+        if(com->hasZ())
+        {
+          GCode::executeFString(PSTR("G50028 Z\n"));
+        }
+        previousMillisCmd = HAL::timeInMilliseconds();
+        return true;
+        break;
+      default:
+        return false;
+        break;
+      }
+      return false;
+  }
+  if(com->hasM())
+  {
+    switch(com->M)
+    {
+      case -1:
+        //  do something
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+    return false;
+  }
+  if(com->hasT())
+  {
+    if(currentExtruder == (int)com->T)
+    {
+      return true;
+    }
+    else
+    {
+      currentExtruder = (int)com->T;
+    }
+    switch(com->T)
+    {
+      case 0:
+        GCode::executeFString(PSTR("G1 X574 F6000\n"));
+        GCode::executeFString(PSTR("G1 Y506 S1\n"));
+        GCode::executeFString(PSTR("G1 X564\n"));
+        GCode::executeFString(PSTR("G1 Y496\n"));
+        GCode::executeFString(PSTR("G1 X0 S0\n"));
+        GCode::executeFString(PSTR("G92 E0\n"));
+        return true;
+        break;
+      case 1:
+        GCode::executeFString(PSTR("G0 X0 F6000\n"));
+        GCode::executeFString(PSTR("G0 Y506 S1\n"));
+        GCode::executeFString(PSTR("G0 X10\n"));
+        GCode::executeFString(PSTR("G0 Y496\n"));
+        GCode::executeFString(PSTR("G0 X574 S0\n"));
+        GCode::executeFString(PSTR("G92 E0\n"));
+        return true;
+        break;
+      default:
+        return false;
+        break;
+    }
+    return false;
+  }
+  return true;
+}
 
 void Commands::commandLoop() {
     while(true) {
@@ -47,7 +129,7 @@ void Commands::commandLoop() {
 #endif
                 } else
 #endif
-                    Commands::executeGCode(code);
+                Commands::executeGCode(code);
                 code->popCurrentCommand();
             }
         } else {
@@ -117,7 +199,8 @@ void Commands::waitUntilEndOfAllBuffers() {
 #endif
             } else
 #endif
-                Commands::executeGCode(code);
+            
+            Commands::executeGCode(code);
             code->popCurrentCommand();
         }
         Commands::checkForPeriodicalActions(false); // only called from memory
@@ -956,7 +1039,7 @@ void Commands::processGCode(GCode *com) {
         case 21: // G21 Units to mm
             Printer::unitIsInches = 0;
             break;
-        case 28: { //G28 Home all Axis one at a time
+        case 50028: { //G28 Home all Axis one at a time
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
 				bool oldLaser = LaserDriver::laserOn;
 			    LaserDriver::laserOn = false;
@@ -2391,12 +2474,25 @@ void Commands::executeGCode(GCode *com) {
             }
         }
     }
-    if(com->hasG()) processGCode(com);
-    else if(com->hasM()) processMCode(com);
+    if(com->hasG())
+    {
+      if(!eventUnhandledGCode(com))
+      {
+        processGCode(com);
+      }
+    }
+    else if(com->hasM())
+    {
+      if(!eventUnhandledGCode(com))
+      {
+        processMCode(com);
+      }
+    }
     else if(com->hasT()) {    // Process T code
         //com->printCommand(); // for testing if this the source of extruder switches
         Commands::waitUntilEndOfAllMoves();
         Extruder::selectExtruderById(com->T);
+        eventUnhandledGCode(com);
     } else {
         if(Printer::debugErrors()) {
             Com::printF(Com::tUnknownCommand);

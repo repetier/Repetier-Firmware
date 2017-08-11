@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 267
+#define NUM_TRANSLATED_WORDS 285
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -124,7 +124,7 @@
 #define UI_TEXT_DEBUGGING_ID 17 //        "Debugging"
 #define UI_TEXT_HOME_DELTA_ID 18 //       "Home Delta"
 #define UI_TEXT_HOME_ALL_ID 19 //         "Home All"
-#define UI_TEXT_HOME_X_ID 20 //           "Home X"
+#define UI_TEXT_HOME_X_ID 20 //           "Home X after Y"
 #define UI_TEXT_HOME_Y_ID 21 //           "Home Y"
 #define UI_TEXT_HOME_Z_ID 22 //           "Home Z"
 #define UI_TEXT_PREHEAT_PLA_ID 23 //      "Preheat PLA"
@@ -354,9 +354,9 @@
 #define UI_TEXT_TEMP_SET_ID 245 //cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_ID 246 //cTEMP "%ec" cDEG
 #define UI_TEXT_COATING_THICKNESS_ID 247 //" %oCmm"
-#define UI_TEXT_EXTR3_TEMP_ID 248 //       "Temp. 4 : %E3" cDEG "C"
-#define UI_TEXT_EXTR4_TEMP_ID 249 //       "Temp. 5 : %E4" cDEG "C"
-#define UI_TEXT_EXTR5_TEMP_ID 250 //       "Temp. 6 : %E5" cDEG "C"
+#define UI_TEXT_EXTR3_TEMP_ID 248 // "Temp. 4 : %E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_ID 249 // "Temp. 5 : %E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_ID 250 // "Temp. 6 : %E5" cDEG "C"
 #define UI_TEXT_EXTR3_OFF_ID 251
 #define UI_TEXT_EXTR4_OFF_ID 252
 #define UI_TEXT_EXTR5_OFF_ID 253
@@ -373,6 +373,23 @@
 #define UI_TEXT_Y_OFFSET_ID 264
 #define UI_TEXT_Z_OFFSET_ID 265
 #define UI_TEXT_DBG_ENDSTOP_ID 266 //     "EndStop:%dp"
+#define UI_TEXT_BED_LEVEL_ID 267
+#define UI_TEXT_WIZ_BED_LEVEL1_ID 268
+#define UI_TEXT_WIZ_BED_LEVEL2_ID 269
+#define UI_TEXT_WIZ_BED_LEVEL3_ID 270
+#define UI_TEXT_WIZ_BED_LEVEL4_ID 271
+#define UI_TEXT_WIZ_MANUAL_PROBE1_ID 272
+#define UI_TEXT_WIZ_MANUAL_PROBE2_ID 273
+#define UI_TEXT_WIZ_MANUAL_PROBE3_ID 274
+#define UI_TEXT_WIZ_MANUAL_PROBE4_ID 275
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT1_ID 276
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT2_ID 277
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT3_ID 278
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT4_ID 279
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT1_ID 280
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT2_ID 281
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT3_ID 282
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT4_ID 283
 
 // Universal definitions
 
@@ -400,11 +417,11 @@
 #define UI_TEXT_CONFIGURATION_EN    "Configuration"
 #define UI_TEXT_POSITION_EN         "Position"
 #define UI_TEXT_EXTRUDER_EN         "Extruder"
-#define UI_TEXT_SD_CARD_EN          "SD card"
+#define UI_TEXT_SD_CARD_EN          "Print"
 #define UI_TEXT_DEBUGGING_EN        "Debugging"
 #define UI_TEXT_HOME_DELTA_EN       "Home delta"
 #define UI_TEXT_HOME_ALL_EN         "Home all"
-#define UI_TEXT_HOME_X_EN           "Home X"
+#define UI_TEXT_HOME_X_EN           "Home X after Y"
 #define UI_TEXT_HOME_Y_EN           "Home Y"
 #define UI_TEXT_HOME_Z_EN           "Home Z"
 #define UI_TEXT_PREHEAT_PLA_EN      "Preheat PLA"
@@ -672,7 +689,28 @@
 #define UI_TEXT_Y_OFFSET_EN "Set Y offset:%T1mm"
 #define UI_TEXT_Z_OFFSET_EN "Set Z offset:%T2mm"
 
-
+//                            12345679901234567990
+#define UI_TEXT_BED_LEVEL_EN "Bed leveling wiz."
+//                                 12345679901234567990
+#define UI_TEXT_WIZ_BED_LEVEL1_EN "IMPORTANT: use 5mm"
+#define UI_TEXT_WIZ_BED_LEVEL2_EN "strip under nozzle"
+#define UI_TEXT_WIZ_BED_LEVEL3_EN "Click to confirm"
+#define UI_TEXT_WIZ_BED_LEVEL4_EN cTEMP "%e0/%E0" cDEG // only showing extruder 0 temperature
+//                                    12345679901234567990
+#define UI_TEXT_WIZ_MANUAL_PROBE1_EN "Turn display knob"
+#define UI_TEXT_WIZ_MANUAL_PROBE2_EN "until strip touches"
+#define UI_TEXT_WIZ_MANUAL_PROBE3_EN "nozzle and click"
+#define UI_TEXT_WIZ_MANUAL_PROBE4_EN "Z: %x2 mm"
+//                                          12345679901234567990
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT1_EN "Turn LEFT bed-knob"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT2_EN "until strip touches"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT3_EN "nozzle"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT4_EN "Click to confirm"
+//                                           12345679901234567990
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT1_EN "Turn RIGHT bed-knob"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT2_EN "until strip touches"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT3_EN "nozzle"
+#define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT4_EN "Click to confirm"
 
 // *************** German translation ****************
 
@@ -1266,8 +1304,7 @@
 #define UI_TEXT_OFF_PT              "Off"
 #define UI_TEXT_NA_PT               "N/A" // Output for not available
 #define UI_TEXT_YES_PT              "Sim"
-#define UI_TEXT_NO_PT               "Não"
-#define UI_TEXT_SEL_PT              cSEL
+#define UI_TEXT_NO_PT               #define UI_TEXT_SEL_PT              cSEL
 #define UI_TEXT_NOSEL_PT            cUNSEL
 #define UI_TEXT_PRINT_POS_PT        "Imprimindo..."
 #define UI_TEXT_PRINTING_PT         "Imprimindo"
@@ -2508,8 +2545,7 @@
 #define UI_TEXT_OPS_RETRACT_FR      "Retract. :%Or"
 #define UI_TEXT_OPS_BACKSLASH_FR    "Backsl. :%Ob"
 #define UI_TEXT_OPS_MINDIST_FR      "Min.dist:%Od"
-#define UI_TEXT_OPS_MOVE_AFTER_FR   "DÃ©plac. Apres:%Oa"
-#define UI_TEXT_ANTI_OOZE_FR        "Anti Ooze"
+#define UI_TEXT_OPS_MOVE_AFTER_FR   #define UI_TEXT_ANTI_OOZE_FR        "Anti Ooze"
 #define UI_TEXT_PRINT_FILE_FR       "Imprim. fichier"
 #define UI_TEXT_PAUSE_PRINT_FR      "Pause Impress."
 #define UI_TEXT_CONTINUE_PRINT_FR   "Continuer Impress."
@@ -2912,7 +2948,7 @@
 #define UI_TEXT_PAGE_BED_CZ          " B:%eb/%Eb\002C\176%ob"
 #define UI_TEXT_SPEED_MULTIPLY_CZ    "Rychlost:%om%%%"
 #define UI_TEXT_FLOW_MULTIPLY_CZ     "Flow nasobit:%of%%%"
-#define UI_TEXT_SHOW_MEASUREMENT_CZ  "Ukazat merení"
+#define UI_TEXT_SHOW_MEASUREMENT_CZ  "Ukazat meren"
 #define UI_TEXT_RESET_MEASUREMENT_CZ "Obnovit mereni"
 #define UI_TEXT_SET_MEASURED_ORIGIN_CZ "Set Z=0"
 #define UI_TEXT_ZCALIB_CZ             "Z kalib."
@@ -2947,7 +2983,7 @@
 #define UI_TEXT_AUTOLEVEL_ONOFF_CZ  "Autolevel: %ll"
 #define UI_TEXT_SERVOPOS_CZ "Servo pozice: %oS"
 #define UI_TEXT_IGNORE_M106_CZ      "Ignorovat M106 %Fi"
-#define UI_TEXT_WIZ_REHEAT1_CZ "Klikněte ohrat"
+#define UI_TEXT_WIZ_REHEAT1_CZ "Kliknohrat"
 #define UI_TEXT_WIZ_REHEAT2_CZ "extruders."
 #define UI_TEXT_WIZ_WAITTEMP1_CZ "Pockejte na cilove"
 #define UI_TEXT_WIZ_WAITTEMP2_CZ "teploty ..."
@@ -3240,7 +3276,7 @@
 #define UI_TEXT_AUTOLEVEL_ONOFF_PL  "Autopoziomow.: %ll"
 #define UI_TEXT_SERVOPOS_PL         "Pozycja Serwa: %oS"
 #define UI_TEXT_IGNORE_M106_PL      "Ignoruj kom. M106 %Fi"
-#define UI_TEXT_WIZ_REHEAT1_PL "Kliknij aby znów"
+#define UI_TEXT_WIZ_REHEAT1_PL "Kliknij aby"
 #define UI_TEXT_WIZ_REHEAT2_PL "rozgrzac ekstrudery"
 #define UI_TEXT_WIZ_WAITTEMP1_PL "Poczekaj na zadane"
 #define UI_TEXT_WIZ_WAITTEMP2_PL "temperatury ..."
@@ -3313,8 +3349,7 @@
 #define UI_TEXT_Y_OFFSET_PL "Przesun w Y : %T1mm"
 #define UI_TEXT_Z_OFFSET_PL "Przesun w Z :%T2mm"
 
-// Türk
-
+//
 #define UI_TEXT_ON_TR               "Acik"
 #define UI_TEXT_OFF_TR              "Kapali"
 #define UI_TEXT_NA_TR               "N/A" // Output for not available
@@ -3585,12 +3620,12 @@
 #define UI_TEXT_EXTR3_TEMP_TR       "Sic. 4 : %E3" cDEG "C"
 #define UI_TEXT_EXTR4_TEMP_TR       "Sic. 5 : %E4" cDEG "C"
 #define UI_TEXT_EXTR5_TEMP_TR       "Sic. 6 : %E5" cDEG "C"
-#define UI_TEXT_EXTR3_OFF_TR "Ext. 4’u kapat"
-#define UI_TEXT_EXTR4_OFF_TR " Ext. 5’i kapat "
-#define UI_TEXT_EXTR5_OFF_TR " Ext. 6’yi kapat "
-#define UI_TEXT_EXTR3_SELECT_TR "%X3 Ext. 4’u sec "
-#define UI_TEXT_EXTR4_SELECT_TR "%X4 Ext. 5’i sec "
-#define UI_TEXT_EXTR5_SELECT_TR "%X5 Ext. 6’yi sec "
+#define UI_TEXT_EXTR3_OFF_TR "Ext. 4 kapat"
+#define UI_TEXT_EXTR4_OFF_TR " Ext. 5 kapat "
+#define UI_TEXT_EXTR5_OFF_TR " Ext. 6 kapat "
+#define UI_TEXT_EXTR3_SELECT_TR "%X3 Ext. 4 sec "
+#define UI_TEXT_EXTR4_SELECT_TR "%X4 Ext. 5 sec "
+#define UI_TEXT_EXTR5_SELECT_TR "%X5 Ext. 6 sec "
 #define UI_TEXT_DITTO_0_TR "%D0 Kopyalama"
 #define UI_TEXT_DITTO_1_TR "%D1 1 kopya"
 #define UI_TEXT_DITTO_2_TR "%D2 2 kopya"
@@ -3627,8 +3662,7 @@
 #define UI_TEXT_HOME_X_FI           "Koti X"
 #define UI_TEXT_HOME_Y_FI           "Koti Y"
 #define UI_TEXT_HOME_Z_FI           "Koti Z"
-#define UI_TEXT_PREHEAT_PLA_FI      "Esilämmitys PLA"
-#define UI_TEXT_PREHEAT_ABS_FI      "Esilämmitys ABS"
+#define UI_TEXT_PREHEAT_PLA_FI      "Esilmmitys ABS"
 #define UI_TEXT_LIGHTS_ONOFF_FI     "Valot:%lo"
 #define UI_TEXT_COOLDOWN_FI         "J" STR_auml STR_auml "hdytys"
 #define UI_TEXT_SET_TO_ORIGIN_FI    "Aseta l" STR_auml "ht" STR_ouml "piste"
@@ -3831,7 +3865,7 @@
 #define UI_TEXT_BUILDTAK_FI "BuildTak"
 #define UI_TEXT_KAPTON_FI "Kapton"
 #define UI_TEXT_BLUETAPE_FI "Sininen paperi teippi"
-#define UI_TEXT_PETTAPE_FI "Vihreä PET teippi"
+#define UI_TEXT_PETTAPE_FI "Vihre PET teippi"
 #define UI_TEXT_GLUESTICK_FI "Liimapuikko"
 #define UI_TEXT_CUSTOM_FI "Mukautettu"
 #define UI_TEXT_COATING_CUSTOM_FI "Mukautettu:%BCmm"

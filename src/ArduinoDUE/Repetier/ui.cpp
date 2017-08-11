@@ -59,6 +59,21 @@ millis_t ui_autoreturn_time = 0;
 int zBabySteps = 0;
 #endif
 
+enum bedLevelStates
+{
+  stopped = 0,
+  started,
+  //preparation,
+  firstStage,
+  secondStage,
+  thirdStage,
+  secondNozzle,
+  finish
+};
+
+int bedLevelState = stopped;
+//float zPosition;
+
 void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
@@ -2381,7 +2396,7 @@ int UIDisplay::okAction(bool allowMoves)
         switch(action)
         {
 #if FEATURE_RETRACTION
-        case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
+        case UI_ACTION_WIZARD_FILAMENTCHANGE: // Knob clicked callback. Filament change is finished
 //            BEEP_SHORT;
             popMenu(true);
             Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
@@ -2401,6 +2416,61 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::markAllUnjammed();
 #endif
             Printer::setJamcontrolDisabled(false);
+            break;
+        case UI_ACTION_WIZARD_BED_LEVEL:    // knob clicked callback
+            bedLevelState++;
+            switch(bedLevelState)
+            {
+              //case preparation:
+                //popMenu(true);
+                //pushMenu(&ui_wiz_preparation, true); // present menu to prepare for the following procedure, and confirm by clicking
+                //GCode::executeFString(PSTR("M109 T0 S60\n")); // heat up extruders
+                //GCode::executeFString(PSTR("M109 T1 S60\n")); // heat up extruders
+                //break;
+              case firstStage:
+                GCode::executeFString(PSTR("G28 X Y Z\n")); // home all
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("T0\n")); // select extruder 0, leaving extruder 1 in parking position
+                GCode::executeFString(PSTR("G0 X310 Y398 F6000\n")); // go to first level position
+                popMenu(true);
+                pushMenu(&ui_wiz_manual_probe, true); // present menu to raise bed to extruder 0, and confirm by clicking
+                break;
+              case secondStage:
+                Printer::setOrigin(0, 0, 5);
+                //GCode::executeFString(PSTR("G92 Z5\n")); // set current position to strip thickness
+                // store zPosition extruder0
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("G0 X140 Y98 F6000\n")); // go to second level position
+                GCode::executeFString(PSTR("G1 Z5\n")); // raise bed to height of firstStage
+                popMenu(true);
+                pushMenu(&ui_wiz_hardware_knob_left, true); // ask user to level with hardware knob under the bed, and confirm by clicking
+                break;
+              case thirdStage:
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("G0 X480 F6000\n")); // go to third level position
+                GCode::executeFString(PSTR("G1 Z5\n")); // raise bed to height of firstStage
+                popMenu(true);
+                pushMenu(&ui_wiz_hardware_knob_right, true); // ask user to level with hardware knob under the bed, and confirm by clicking
+                break;
+             case secondNozzle:
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("T1\n")); // activate extruder 1
+                GCode::executeFString(PSTR("G0 X264 Y398 F6000\n")); //
+                popMenu(true);
+                pushMenu(&ui_wiz_manual_probe, true); // present menu to user asking to raise bed until second nozzle touches, and confirm by clicking
+                break;
+              case finish:
+                // store zPosition extruder1
+                GCode::executeFString(PSTR("G90\n")); // set back to absolute positioning
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                // GCode::executeFString(PSTR("T0\n"));
+                // GCode::executeFString(PSTR("G1 X0 Y0\n"));
+                bedLevelState = stopped;
+                popMenu(true);
+                break;
+              default:
+                break;
+            }
             break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_REHEAT: // user saw problem and takes action
@@ -2708,6 +2778,49 @@ ZPOS2:
         Extruder::current->retractDistance(-increment);
         Commands::waitUntilEndOfAllMoves();
         Extruder::current->disableCurrentExtruderMotor();
+        break;
+    case UI_ACTION_WIZARD_BED_LEVEL:      // knob turned callback
+        switch(bedLevelState)
+        {
+          case firstStage:
+            if(increment > 0)
+            {
+              if(Printer::currentPosition[Z_AXIS] < (Z_PROBE_BED_DISTANCE + Z_PROBE_HEIGHT))
+              {
+                PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+                Printer::setNoDestinationCheck(false);
+              }
+            }
+            else
+            {
+              if(Printer::currentPosition[Z_AXIS] > Z_PROBE_BED_DISTANCE)
+              {
+                PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+                Printer::setNoDestinationCheck(false);
+              }
+            }
+            break;
+          case secondNozzle:
+          if(increment > 0)
+          {
+            if(Printer::currentPosition[Z_AXIS] < (Z_PROBE_BED_DISTANCE + Z_PROBE_HEIGHT))
+            {
+              PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+              Printer::setNoDestinationCheck(false);
+            }
+          }
+          else
+          {
+            if(Printer::currentPosition[Z_AXIS] > Z_PROBE_BED_DISTANCE)
+            {
+              PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+              Printer::setNoDestinationCheck(false);
+            }
+          }
+            break;
+          default:
+            break;
+        }
         break;
 #endif
     case UI_ACTION_Z_BABYSTEPS:
@@ -3049,8 +3162,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_X:
             if(!allowMoves) return UI_ACTION_HOME_X;
-            Printer::homeAxis(true, false, false);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+//            Printer::homeAxis(true, false, false);
+//            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+            GCode::executeFString(PSTR("G28 X\n"));
             break;
         case UI_ACTION_HOME_Y:
             if(!allowMoves) return UI_ACTION_HOME_Y;
@@ -3371,12 +3485,21 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&UI_USERMENU10, false);
             break;
 #endif
+        case UI_ACTION_WIZARD_BED_LEVEL:  //  Menu activated callback
+            BEEP_LONG;
+            if(bedLevelState == stopped)
+            {
+              bedLevelState = started;
+              pushMenu(&ui_wiz_bed_level, true);
+            }
+        break;
 #if FEATURE_RETRACTION
-        case UI_ACTION_WIZARD_FILAMENTCHANGE:
+        case UI_ACTION_WIZARD_FILAMENTCHANGE: //  Menu activated callback
         {
             if(Printer::isBlockingReceive()) break;
+            Printer::enableZStepper();
             Printer::setJamcontrolDisabled(true);
-            Com::printFLN(PSTR("important: Filament change required!"));
+            Com::printFLN(PSTR("Important: Filament change required!"));
             Printer::setBlockingReceive(true);
             BEEP_LONG;
             pushMenu(&ui_wiz_filamentchange, true);
@@ -3591,6 +3714,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_TEMP_DEFECT:
             Printer::setAnyTempsensorDefect();
             break;
+		    //case UI_ACTION_500XL_TEST:
+			    //if (!allowMoves) return UI_ACTION_500XL_TEST;
+			    // HOME Y
+			    //GCode::executeFString(PSTR("G28 Y\n"));
+			  //break;
         case UI_ACTION_LANGUAGE_EN:
         case UI_ACTION_LANGUAGE_DE:
         case UI_ACTION_LANGUAGE_NL:
@@ -3661,7 +3789,7 @@ void UIDisplay::slowAction(bool allowMoves)
 #endif
         uint16_t nextAction = 0;
         uiCheckSlowKeys(nextAction);
-#ifdef HAS_USER_KEYS        
+#ifdef HAS_USER_KEYS
         ui_check_Ukeys(nextAction);
 #endif
         if(lastButtonAction != nextAction)
@@ -3834,4 +3962,3 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 #endif
 #endif
 #endif
-

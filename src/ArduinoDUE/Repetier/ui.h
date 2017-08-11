@@ -58,22 +58,22 @@
 #define UI_ACTION_NEXT 1
 #define UI_ACTION_PREVIOUS 2
 
-#define UI_ACTION_X_UP                 100
-#define UI_ACTION_X_DOWN               101
-#define UI_ACTION_Y_UP                 102
-#define UI_ACTION_Y_DOWN               103
-#define UI_ACTION_Z_UP                 104
-#define UI_ACTION_Z_DOWN               105
-#define UI_ACTION_EXTRUDER_UP          106
-#define UI_ACTION_EXTRUDER_DOWN        107
-#define UI_ACTION_EXTRUDER_TEMP_UP     108
-#define UI_ACTION_EXTRUDER_TEMP_DOWN   109
-#define UI_ACTION_HEATED_BED_UP        110
-#define UI_ACTION_HEATED_BED_DOWN      111
-#define UI_ACTION_FAN_UP               112
-#define UI_ACTION_FAN_DOWN             113
+#define UI_ACTION_X_UP                   100
+#define UI_ACTION_X_DOWN                 101
+#define UI_ACTION_Y_UP                   102
+#define UI_ACTION_Y_DOWN                 103
+#define UI_ACTION_Z_UP                   104
+#define UI_ACTION_Z_DOWN                 105
+#define UI_ACTION_EXTRUDER_UP            106
+#define UI_ACTION_EXTRUDER_DOWN          107
+#define UI_ACTION_EXTRUDER_TEMP_UP       108
+#define UI_ACTION_EXTRUDER_TEMP_DOWN     109
+#define UI_ACTION_HEATED_BED_UP          110
+#define UI_ACTION_HEATED_BED_DOWN        111
+#define UI_ACTION_FAN_UP                 112
+#define UI_ACTION_FAN_DOWN               113
 
-#define UI_ACTION_DUMMY 10000
+#define UI_ACTION_DUMMY                 10000
 #define UI_ACTION_BACK                  1000
 #define UI_ACTION_OK                    1001
 #define UI_ACTION_MENU_UP               1002
@@ -251,11 +251,11 @@
 #define UI_ACTION_MENU_POSITIONS        4009
 //#define UI_ACTION_SHOW_MEASUREMENT		4010
 //#define UI_ACTION_RESET_MEASUREMENT		4011
-#define UI_ACTION_SET_MEASURED_ORIGIN	4012
-#define UI_ACTION_SET_P1				4013
-#define UI_ACTION_SET_P2				4014
-#define UI_ACTION_SET_P3				4015
-#define UI_ACTION_CALC_LEVEL			4016
+#define UI_ACTION_SET_MEASURED_ORIGIN	  4012
+#define UI_ACTION_SET_P1				        4013
+#define UI_ACTION_SET_P2				        4014
+#define UI_ACTION_SET_P3				        4015
+#define UI_ACTION_CALC_LEVEL			      4016
 #define UI_ACTION_XOFF                  4020
 #define UI_ACTION_YOFF                  4021
 #define UI_ACTION_ZOFF                  4022
@@ -271,19 +271,20 @@
 #define UI_ACTION_SHOW_USERMENU9        4109
 #define UI_ACTION_SHOW_USERMENU10       4110
 
-#define UI_ACTION_WIZARD_FILAMENTCHANGE  5000
-#define UI_ACTION_WIZARD_JAM_REHEAT      5001
-#define UI_ACTION_WIZARD_JAM_WAITHEAT    5002
-#define UI_ACTION_WIZARD_JAM_EOF         5003
+#define UI_ACTION_WIZARD_FILAMENTCHANGE 5000
+#define UI_ACTION_WIZARD_JAM_REHEAT     5001
+#define UI_ACTION_WIZARD_JAM_WAITHEAT   5002
+#define UI_ACTION_WIZARD_JAM_EOF        5003
+#define UI_ACTION_WIZARD_BED_LEVEL      5004
 
 // Load basic language definition to make sure all values are defined
 //#include "uilang.h"
 
-#define UI_MENU_TYPE_INFO 0
-#define UI_MENU_TYPE_FILE_SELECTOR 1
-#define UI_MENU_TYPE_SUBMENU 2
-#define UI_MENU_TYPE_MODIFICATION_MENU 3
-#define UI_MENU_TYPE_WIZARD 5
+#define UI_MENU_TYPE_INFO                   0
+#define UI_MENU_TYPE_FILE_SELECTOR          1
+#define UI_MENU_TYPE_SUBMENU                2
+#define UI_MENU_TYPE_MODIFICATION_MENU      3
+#define UI_MENU_TYPE_WIZARD                 5
 
 struct UIMenuEntry_s {
   const char *text; // Menu text
@@ -302,7 +303,7 @@ struct UIMenu_s {
   // 2 = submenu
   // 3 = modififaction menu
   // 5 = Wizard menu
-  // +128 = sticky -> no autoreturn to main menuü after timeout
+  // +128 = sticky -> no autoreturn to main
   uint8_t menuType;
   int id; // Type of modification
   int numEntries;
@@ -323,10 +324,6 @@ extern const int8_t encoder_table[16] PROGMEM ;
   Target:   any AVR device
   Usage:    see Doxygen manual
 **************************************************************************/
-
-
-
-
 
 //extern const int matrixActions[] PROGMEM;
 // Key codes
@@ -434,6 +431,13 @@ extern const int8_t encoder_table[16] PROGMEM ;
   const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
   const UIMenu name PROGMEM = {5,action,4,name ## _entries};
 #define UI_WIZARD4_T(name,action,row1,row2,row3,row4) \
+  UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
+  UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
+  UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
+  UIMenuEntry name ## _4 PROGMEM ={0,0,0,0,0,row4};\
+  const UIMenuEntry * const name ## _entries [] PROGMEM = {&name ## _1,&name ## _2,&name ## _3,&name ## _4};\
+  const UIMenu name PROGMEM = {5,action,4,name ## _entries};
+#define UI_BED_WIZARD_T(name,action,row1,row2,row3,row4) \
   UIMenuEntry name ## _1 PROGMEM ={0,0,0,0,0,row1};\
   UIMenuEntry name ## _2 PROGMEM ={0,0,0,0,0,row2};\
   UIMenuEntry name ## _3 PROGMEM ={0,0,0,0,0,row3};\
@@ -1190,7 +1194,7 @@ void uiCheckSlowKeys(uint16_t &action) {
 #define UI_ENCODER_B           52
 #define UI_ENCODER_CLICK       48
 #define UI_RESET_PIN           -1
-#define UI_DELAYPERCHAR 50
+#define UI_DELAYPERCHAR        50
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 #ifdef UI_MAIN
@@ -1248,12 +1252,12 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B           62
 #define UI_ENCODER_CLICK       63
 #define UI_RESET_PIN           28
-#define UI_DELAYPERCHAR 50
-#define UI_BUTTON_OK       49
-#define UI_BUTTON_NEXT     48
-#define UI_BUTTON_PREVIOUS 47
-#define UI_BUTTON_BACK     46
-#define UI_BUTTON_SD_PRINT 29
+#define UI_DELAYPERCHAR        50
+#define UI_BUTTON_OK           49
+#define UI_BUTTON_NEXT         48
+#define UI_BUTTON_PREVIOUS     47
+#define UI_BUTTON_BACK         46
+#define UI_BUTTON_SD_PRINT     29
 #endif
 
 #if PiBot_V_1_4==true || PiBot_V_1_6==true
@@ -1274,12 +1278,12 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B           31
 #define UI_ENCODER_CLICK       35
 #define UI_RESET_PIN           41
-#define UI_DELAYPERCHAR 50
-#define UI_BUTTON_OK       4
-#define UI_BUTTON_NEXT     6
-#define UI_BUTTON_PREVIOUS 5
-#define UI_BUTTON_BACK     11
-#define UI_BUTTON_SD_PRINT 42
+#define UI_DELAYPERCHAR        50
+#define UI_BUTTON_OK            4
+#define UI_BUTTON_NEXT          6
+#define UI_BUTTON_PREVIOUS      5
+#define UI_BUTTON_BACK         11
+#define UI_BUTTON_SD_PRINT     42
 #endif
 
 #if PiBot_V_2_0
@@ -1304,7 +1308,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 // if you want, you can get the CNC Pin used 11
 #define UI_RESET_PIN           -1
 
-#define UI_DELAYPERCHAR        320
+#define UI_DELAYPERCHAR       320
 #define UI_BUTTON_OK           47
 #define UI_BUTTON_NEXT         46
 #define UI_BUTTON_PREVIOUS     45
@@ -1359,7 +1363,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_A           35
 #define UI_ENCODER_B           37
 #define UI_ENCODER_CLICK       31
-#define UI_DELAYPERCHAR 50
+#define UI_DELAYPERCHAR        50
 #define UI_INVERT_MENU_DIRECTION 0
 #ifdef UI_MAIN
 void uiInitKeys() {
@@ -1400,7 +1404,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B           77
 #define UI_ENCODER_CLICK       78
 #define UI_KILL_PIN            80
-#define UI_DELAYPERCHAR       50
+#define UI_DELAYPERCHAR        50
 #define UI_INVERT_MENU_DIRECTION 0
 #ifdef UI_MAIN
 void uiInitKeys() {
@@ -2136,4 +2140,3 @@ static void ui_check_Ukeys(uint16_t &action) {
 #endif
 
 #endif
-

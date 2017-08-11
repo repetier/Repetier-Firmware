@@ -170,7 +170,7 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
 #define EPR_EXTRUDER_Z_OFFSET            90
 #ifndef Z_PROBE_BED_DISTANCE
-#define Z_PROBE_BED_DISTANCE 5.0
+#define Z_PROBE_BED_DISTANCE 3.0 //???
 #endif
 
 class EEPROM
