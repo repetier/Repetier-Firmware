@@ -32,4 +32,5 @@ src/ArduinoDUE/Repetier.zip
 src/ArduinoAVR/Repetier.zip
 
 .vs
-CppProperties.json
+.vscode
+.build
