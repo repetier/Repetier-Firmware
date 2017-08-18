@@ -31,20 +31,20 @@ bool EventUnhandledGCode(GCode *com)
 		}
 		return false;
 	}
-	if (com->hasM())
-	{
-		switch (com->M)
-		{
-		case -1:
-			//  do something
-			return true;
-			break;
-		default:
-			return false;
-			break;
-		}
-		return false;
-	}
+	// if (com->hasM())
+	// {
+	// 	switch (com->M)
+	// 	{
+	// 	case -1:
+	// 		//  do something
+	// 		return true;
+	// 		break;
+	// 	default:
+	// 		return false;
+	// 		break;
+	// 	}
+	// 	return false;
+	// }
 	if (com->hasT())
 	{
 		if (currentExtruder == (int)com->T)
