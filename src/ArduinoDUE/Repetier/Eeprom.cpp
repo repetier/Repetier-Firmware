@@ -63,12 +63,12 @@ void EEPROM::update(GCode *com)
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration()
 {
-	// can only be done right if we also update permanent values not cached!
+    // can only be done right if we also update permanent values not cached!
 #if EEPROM_MODE != 0
-	EEPROM::initalizeUncached();
+    EEPROM::initalizeUncached();
     uint8_t newcheck = computeChecksum();
     if(newcheck != HAL::eprGetByte(EPR_INTEGRITY_BYTE))
-		HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);	
+        HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
     baudrate = BAUDRATE;
     maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
     stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
@@ -113,10 +113,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::zMin = Z_MIN_POS;
 #if NONLINEAR_SYSTEM
 #ifdef ROD_RADIUS
-	Printer::radius0 = ROD_RADIUS;
+    Printer::radius0 = ROD_RADIUS;
 #else
-	Printer::radius0 = 0;
-#endif	
+    Printer::radius0 = 0;
+#endif
 #endif
 #if ENABLE_BACKLASH_COMPENSATION
     Printer::backlashX = X_BACKLASH;
@@ -480,10 +480,10 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_AXISCOMP_TANXZ,AXISCOMP_TANXZ);
     HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
     Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
-	#if NONLINEAR_SYSTEM
+    #if NONLINEAR_SYSTEM
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
     HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
-	#endif
+    #endif
 #if DRIVE_SYSTEM == DELTA
     HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
     HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,ROD_RADIUS);
@@ -670,7 +670,7 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #if NONLINEAR_SYSTEM
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_PRINT,DELTA_SEGMENTS_PER_SECOND_PRINT);
             HAL::eprSetInt16(EPR_DELTA_SEGMENTS_PER_SECOND_MOVE,DELTA_SEGMENTS_PER_SECOND_MOVE);
-#endif			
+#endif
 #if DRIVE_SYSTEM == DELTA
             HAL::eprSetFloat(EPR_DELTA_DIAGONAL_ROD_LENGTH,DELTA_DIAGONAL_ROD);
             HAL::eprSetFloat(EPR_DELTA_HORIZONTAL_RADIUS,ROD_RADIUS);

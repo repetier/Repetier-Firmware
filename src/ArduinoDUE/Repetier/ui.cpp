@@ -232,52 +232,52 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
                                   460800,500000,921600,1000000,1500000,0
                                  };
 
-#define LCD_ENTRYMODE			0x04			/**< Set entrymode */
+#define LCD_ENTRYMODE            0x04 /**< Set entrymode */
 
 /** @name GENERAL COMMANDS */
 /*@{*/
-#define LCD_CLEAR			0x01	/**< Clear screen */
-#define LCD_HOME			0x02	/**< Cursor move to first digit */
+#define LCD_CLEAR                0x01 /**< Clear screen */
+#define LCD_HOME                 0x02 /**< Cursor move to first digit */
 /*@}*/
 
 /** @name ENTRYMODES */
 /*@{*/
-#define LCD_ENTRYMODE			0x04			/**< Set entrymode */
-#define LCD_INCREASE		LCD_ENTRYMODE | 0x02	/**<	Set cursor move direction -- Increase */
-#define LCD_DECREASE		LCD_ENTRYMODE | 0x00	/**<	Set cursor move direction -- Decrease */
-#define LCD_DISPLAYSHIFTON	LCD_ENTRYMODE | 0x01	/**<	Display is shifted */
-#define LCD_DISPLAYSHIFTOFF	LCD_ENTRYMODE | 0x00	/**<	Display is not shifted */
+#define LCD_ENTRYMODE            0x04                    /**< Set entrymode */
+#define LCD_INCREASE             LCD_ENTRYMODE | 0x02    /**<    Set cursor move direction -- Increase */
+#define LCD_DECREASE             LCD_ENTRYMODE | 0x00    /**<    Set cursor move direction -- Decrease */
+#define LCD_DISPLAYSHIFTON       LCD_ENTRYMODE | 0x01    /**<    Display is shifted */
+#define LCD_DISPLAYSHIFTOFF      LCD_ENTRYMODE | 0x00    /**<    Display is not shifted */
 /*@}*/
 
 /** @name DISPLAYMODES */
 /*@{*/
-#define LCD_DISPLAYMODE			0x08			/**< Set displaymode */
-#define LCD_DISPLAYON		LCD_DISPLAYMODE | 0x04	/**<	Display on */
-#define LCD_DISPLAYOFF		LCD_DISPLAYMODE | 0x00	/**<	Display off */
-#define LCD_CURSORON		LCD_DISPLAYMODE | 0x02	/**<	Cursor on */
-#define LCD_CURSOROFF		LCD_DISPLAYMODE | 0x00	/**<	Cursor off */
-#define LCD_BLINKINGON		LCD_DISPLAYMODE | 0x01	/**<	Blinking on */
-#define LCD_BLINKINGOFF		LCD_DISPLAYMODE | 0x00	/**<	Blinking off */
+#define LCD_DISPLAYMODE          0x08                   /**< Set displaymode */
+#define LCD_DISPLAYON            LCD_DISPLAYMODE | 0x04 /**< Display on */
+#define LCD_DISPLAYOFF           LCD_DISPLAYMODE | 0x00 /**< Display off */
+#define LCD_CURSORON             LCD_DISPLAYMODE | 0x02 /**< Cursor on */
+#define LCD_CURSOROFF            LCD_DISPLAYMODE | 0x00 /**< Cursor off */
+#define LCD_BLINKINGON           LCD_DISPLAYMODE | 0x01 /**< Blinking on */
+#define LCD_BLINKINGOFF          LCD_DISPLAYMODE | 0x00 /**< Blinking off */
 /*@}*/
 
 /** @name SHIFTMODES */
 /*@{*/
-#define LCD_SHIFTMODE			0x10			/**< Set shiftmode */
-#define LCD_DISPLAYSHIFT	LCD_SHIFTMODE | 0x08	/**<	Display shift */
-#define LCD_CURSORMOVE		LCD_SHIFTMODE | 0x00	/**<	Cursor move */
-#define LCD_RIGHT		LCD_SHIFTMODE | 0x04	/**<	Right shift */
-#define LCD_LEFT		LCD_SHIFTMODE | 0x00	/**<	Left shift */
+#define LCD_SHIFTMODE            0x10                 /**< Set shiftmode */
+#define LCD_DISPLAYSHIFT         LCD_SHIFTMODE | 0x08 /**< Display shift */
+#define LCD_CURSORMOVE           LCD_SHIFTMODE | 0x00 /**< Cursor move */
+#define LCD_RIGHT                LCD_SHIFTMODE | 0x04 /**< Right shift */
+#define LCD_LEFT                 LCD_SHIFTMODE | 0x00 /**< Left shift */
 /*@}*/
 
 /** @name DISPLAY_CONFIGURATION */
 /*@{*/
-#define LCD_CONFIGURATION		0x20				/**< Set function */
-#define LCD_8BIT		LCD_CONFIGURATION | 0x10	/**<	8 bits interface */
-#define LCD_4BIT		LCD_CONFIGURATION | 0x00	/**<	4 bits interface */
-#define LCD_2LINE		LCD_CONFIGURATION | 0x08	/**<	2 line display */
-#define LCD_1LINE		LCD_CONFIGURATION | 0x00	/**<	1 line display */
-#define LCD_5X10		LCD_CONFIGURATION | 0x04	/**<	5 X 10 dots */
-#define LCD_5X7			LCD_CONFIGURATION | 0x00	/**<	5 X 7 dots */
+#define LCD_CONFIGURATION        0x20                     /**< Set function */
+#define LCD_8BIT                 LCD_CONFIGURATION | 0x10 /**< 8 bits interface */
+#define LCD_4BIT                 LCD_CONFIGURATION | 0x00 /**< 4 bits interface */
+#define LCD_2LINE                LCD_CONFIGURATION | 0x08 /**< 2 line display */
+#define LCD_1LINE                LCD_CONFIGURATION | 0x00 /**< 1 line display */
+#define LCD_5X10                 LCD_CONFIGURATION | 0x04 /**< 5 X 10 dots */
+#define LCD_5X7                  LCD_CONFIGURATION | 0x00 /**< 5 X 7 dots */
 
 #define LCD_SETCGRAMADDR 0x40
 
@@ -383,10 +383,10 @@ void initializeLCD()
     HAL::delayMicroseconds(180);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    lcdCommand(LCD_CLEAR);//- Clear Screen
     HAL::delayMilliseconds(4); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -509,8 +509,8 @@ void repairLCD()
     HAL::delayMicroseconds(160);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1, character_back);
     uid.createChar(2, character_degree);
@@ -567,10 +567,10 @@ void initializeLCD()
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
 
-    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    lcdCommand(LCD_CLEAR); //- Clear Screen
     HAL::delayMilliseconds(3); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1, character_back);
     uid.createChar(2, character_degree);
@@ -796,7 +796,7 @@ void initializeLCD()
     u8g_InitSPI(&u8g,&u8g_dev_ssd1306_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
 #ifdef U8GLIB_SH1106_SW_SPI
-	u8g_InitSPI(&u8g,&u8g_dev_sh1106_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
+    u8g_InitSPI(&u8g,&u8g_dev_sh1106_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
 #ifdef U8GLIB_KS0108_FAST
     u8g_Init8Bit(&u8g,&u8g_dev_ks0108_128x64_fast,UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_CS1,UI_DISPLAY_CS2,
@@ -1268,13 +1268,13 @@ void UIDisplay::parse(const char *txt,bool ram)
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
 #endif
             break;
-		case 'B':
-            if(c2 == 'C')	 //Custom coating
+        case 'B':
+            if(c2 == 'C') //Custom coating
             {
-	            addFloat(Printer::zBedOffset, 3, 2);
-	            break;
+                addFloat(Printer::zBedOffset, 3, 2);
+                break;
             }
-			break;
+            break;
         case 'd':  // debug boolean
             if (c2 == 'o') addStringOnOff(Printer::debugEcho());
             if (c2 == 'i') addStringOnOff(Printer::debugInfo());
@@ -2108,9 +2108,9 @@ void UIDisplay::refreshPage()
                     drawVProgressBar(116, 0, 9, 20, fanPercent);
 #endif
                     if(u8g_IsBBXIntersection(&u8g, 0, 42 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-					   printU8GRow(0,42,cache[3]); //multiplier + extruded
+                       printU8GRow(0,42,cache[3]); //multiplier + extruded
                     if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-						printU8GRow(0,52,cache[4]); //buffer usage
+                        printU8GRow(0,52,cache[4]); //buffer usage
 #if SDSUPPORT
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 66, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -2828,7 +2828,7 @@ ZPOS2:
 #endif
         if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 20000)
         {
-			InterruptProtectedBlock noint;
+            InterruptProtectedBlock noint;
             Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
             zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
         }
@@ -3710,11 +3710,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_TEMP_DEFECT:
             Printer::setAnyTempsensorDefect();
             break;
-		    //case UI_ACTION_500XL_TEST:
-			    //if (!allowMoves) return UI_ACTION_500XL_TEST;
-			    // HOME Y
-			    //GCode::executeFString(PSTR("G28 Y\n"));
-			  //break;
+            //case UI_ACTION_500XL_TEST:
+                //if (!allowMoves) return UI_ACTION_500XL_TEST;
+                // HOME Y
+                //GCode::executeFString(PSTR("G28 Y\n"));
+              //break;
         case UI_ACTION_LANGUAGE_EN:
         case UI_ACTION_LANGUAGE_DE:
         case UI_ACTION_LANGUAGE_NL:

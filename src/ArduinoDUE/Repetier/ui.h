@@ -249,13 +249,13 @@
 #define UI_ACTION_MENU_QUICKSETTINGS    4007
 #define UI_ACTION_MENU_EXTRUDER         4008
 #define UI_ACTION_MENU_POSITIONS        4009
-//#define UI_ACTION_SHOW_MEASUREMENT		4010
-//#define UI_ACTION_RESET_MEASUREMENT		4011
-#define UI_ACTION_SET_MEASURED_ORIGIN	  4012
-#define UI_ACTION_SET_P1				        4013
-#define UI_ACTION_SET_P2				        4014
-#define UI_ACTION_SET_P3				        4015
-#define UI_ACTION_CALC_LEVEL			      4016
+//#define UI_ACTION_SHOW_MEASUREMENT    4010
+//#define UI_ACTION_RESET_MEASUREMENT   4011
+#define UI_ACTION_SET_MEASURED_ORIGIN   4012
+#define UI_ACTION_SET_P1                4013
+#define UI_ACTION_SET_P2                4014
+#define UI_ACTION_SET_P3                4015
+#define UI_ACTION_CALC_LEVEL            4016
 #define UI_ACTION_XOFF                  4020
 #define UI_ACTION_YOFF                  4021
 #define UI_ACTION_ZOFF                  4022
@@ -952,27 +952,27 @@ void uiCheckSlowKeys(uint16_t &action) {
 #define UI_COLS 20
 #define UI_ROWS 4
 // PINK.1, 88, D_RS
-#define UI_DISPLAY_RS_PIN		63
-#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_RS_PIN 63
+#define UI_DISPLAY_RW_PIN -1
 // PINK.3, 86, D_E
-#define UI_DISPLAY_ENABLE_PIN	        65
+#define UI_DISPLAY_ENABLE_PIN 65
 // PINF.5, 92, D_D4
-#define UI_DISPLAY_D0_PIN		59
+#define UI_DISPLAY_D0_PIN 59
 // PINK.2, 87, D_D5
-#define UI_DISPLAY_D1_PIN		64
+#define UI_DISPLAY_D1_PIN 64
 // PINL.5, 40, D_D6
-#define UI_DISPLAY_D2_PIN		44
+#define UI_DISPLAY_D2_PIN 44
 // PINK.4, 85, D_D7
-#define UI_DISPLAY_D3_PIN		66
+#define UI_DISPLAY_D3_PIN 66
 // PINF.5, 92, D_D4
-#define UI_DISPLAY_D4_PIN		59
+#define UI_DISPLAY_D4_PIN 59
 // PINK.2, 87, D_D5
-#define UI_DISPLAY_D5_PIN		64
+#define UI_DISPLAY_D5_PIN 64
 // PINL.5, 40, D_D6
-#define UI_DISPLAY_D6_PIN		44
+#define UI_DISPLAY_D6_PIN 44
 // PINK.4, 85, D_D7
-#define UI_DISPLAY_D7_PIN		66
-#define UI_DELAYPERCHAR		   50
+#define UI_DISPLAY_D7_PIN 66
+#define UI_DELAYPERCHAR   50
 #define UI_INVERT_MENU_DIRECTION 0
 #ifdef UI_MAIN
 void uiInitKeys() {
@@ -1483,7 +1483,7 @@ void uiCheckSlowKeys(uint16_t &action) {
 #endif // Controller 14
 
 /*
-	Sanguinololu + panelolu2
+  Sanguinololu + panelolu2
 */
 #if FEATURE_CONTROLLER == CONTROLLER_SANGUINOLOLU_PANELOLU2
 #define UI_HAS_KEYS 1
@@ -1508,17 +1508,17 @@ void uiCheckSlowKeys(uint16_t &action) {
 #define BEEPER_ADDRESS UI_DISPLAY_I2C_ADDRESS
 #define COMPILE_I2C_DRIVER
 
-#define UI_DISPLAY_RS_PIN 		_BV(15)
-#define UI_DISPLAY_RW_PIN 		_BV(14)
-#define UI_DISPLAY_ENABLE_PIN 	_BV(13)
-#define UI_DISPLAY_D0_PIN 		_BV(12)
-#define UI_DISPLAY_D1_PIN 		_BV(11)
-#define UI_DISPLAY_D2_PIN 		_BV(10)
-#define UI_DISPLAY_D3_PIN 		_BV(9)
-#define UI_DISPLAY_D4_PIN 		_BV(12)
-#define UI_DISPLAY_D5_PIN 		_BV(11)
-#define UI_DISPLAY_D6_PIN 		_BV(10)
-#define UI_DISPLAY_D7_PIN 		_BV(9)
+#define UI_DISPLAY_RS_PIN     _BV(15)
+#define UI_DISPLAY_RW_PIN     _BV(14)
+#define UI_DISPLAY_ENABLE_PIN _BV(13)
+#define UI_DISPLAY_D0_PIN     _BV(12)
+#define UI_DISPLAY_D1_PIN     _BV(11)
+#define UI_DISPLAY_D2_PIN     _BV(10)
+#define UI_DISPLAY_D3_PIN     _BV(9)
+#define UI_DISPLAY_D4_PIN     _BV(12)
+#define UI_DISPLAY_D5_PIN     _BV(11)
+#define UI_DISPLAY_D6_PIN     _BV(10)
+#define UI_DISPLAY_D7_PIN     _BV(9)
 #undef BEEPER_PIN
 #define BEEPER_PIN _BV(5)
 #define UI_I2C_HEATBED_LED    _BV(8)
@@ -1680,7 +1680,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
 #undef UI_ANIMATION
 #define UI_ANIMATION 0  // Animations are too slow
-#define UI_DELAYPERCHAR		  50
+#define UI_DELAYPERCHAR 50
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_INVERT_MENU_DIRECTION 0
@@ -1690,33 +1690,33 @@ void uiCheckSlowKeys(uint16_t &action) {}
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
-#define UI_DISPLAY_D0_PIN		-1
-#define UI_DISPLAY_D1_PIN		-1
-#define UI_DISPLAY_D2_PIN		-1
-#define UI_DISPLAY_D3_PIN		-1
-#define UI_DISPLAY_D5_PIN		-1
-#define UI_DISPLAY_D6_PIN		-1
-#define UI_DISPLAY_D7_PIN		-1
+#define UI_DISPLAY_D0_PIN -1
+#define UI_DISPLAY_D1_PIN -1
+#define UI_DISPLAY_D2_PIN -1
+#define UI_DISPLAY_D3_PIN -1
+#define UI_DISPLAY_D5_PIN -1
+#define UI_DISPLAY_D6_PIN -1
+#define UI_DISPLAY_D7_PIN -1
 
 #if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
 // PINK.1, 88, D_RS
-#define UI_DISPLAY_RS_PIN		25
-#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_RS_PIN 25
+#define UI_DISPLAY_RW_PIN -1
 // PINK.3, 86, D_E
-#define UI_DISPLAY_ENABLE_PIN	        27
+#define UI_DISPLAY_ENABLE_PIN 27
 // PINF.5, 92, D_D4
 // PINF.5, 92, D_D4
-#define UI_DISPLAY_D4_PIN		29
+#define UI_DISPLAY_D4_PIN 29
 #define UI_ENCODER_A 35
 #define UI_ENCODER_B 33
 #define UI_ENCODER_CLICK 37
 #else
 // PINK.1, 88, D_RS
-#define UI_DISPLAY_RS_PIN		44
-#define UI_DISPLAY_RW_PIN		-1
+#define UI_DISPLAY_RS_PIN 44
+#define UI_DISPLAY_RW_PIN -1
 // PINK.3, 86, D_E
-#define UI_DISPLAY_ENABLE_PIN	       45
-#define UI_DISPLAY_D4_PIN		46
+#define UI_DISPLAY_ENABLE_PIN 45
+#define UI_DISPLAY_D4_PIN 46
 #define UI_ENCODER_A 52
 #define UI_ENCODER_B 50
 #define UI_ENCODER_CLICK 48
@@ -1919,18 +1919,18 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_HAS_BACK_KEY 0
 #define UI_INVERT_MENU_DIRECTION 1
 #define UI_DISPLAY_CHARSET 1
-#define UI_DISPLAY_RS_PIN		42		// PINK.1, 88, D_RS
-#define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	43		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		44		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		45		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		46		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		47		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		44		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		45		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		46		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		47		// PINK.4, 85, D_D7
-#define UI_DELAYPERCHAR		   50
+#define UI_DISPLAY_RS_PIN 42 // PINK.1, 88, D_RS
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 43  // PINK.3, 86, D_E
+#define UI_DISPLAY_D0_PIN 44      // PINF.5, 92, D_D4
+#define UI_DISPLAY_D1_PIN 45      // PINK.2, 87, D_D5
+#define UI_DISPLAY_D2_PIN 46      // PINL.5, 40, D_D6
+#define UI_DISPLAY_D3_PIN 47      // PINK.4, 85, D_D7
+#define UI_DISPLAY_D4_PIN 44      // PINF.5, 92, D_D4
+#define UI_DISPLAY_D5_PIN 45      // PINK.2, 87, D_D5
+#define UI_DISPLAY_D6_PIN 46      // PINL.5, 40, D_D6
+#define UI_DISPLAY_D7_PIN 47      // PINK.4, 85, D_D7
+#define UI_DELAYPERCHAR   50
 
 #ifdef UI_MAIN
 void uiInitKeys() {
@@ -1998,29 +1998,29 @@ inline void uiInitKeys() {}
 
 // Read and decode ADC keypad (fast reads)
 void uiCheckKeys(uint16_t &action) {
-	struct {
-		uint16_t min;
-		uint16_t max;
-		uint16_t action;
-		} keys[] = {
-		{   300,   500, UI_ACTION_BACK           },    // Left
-		{   570,   870, UI_ACTION_PREVIOUS       },    // Up
-		{  1150,  1450, ADC_KEYPAD_CENTER_ACTION },    // Center
-		{  1900,  2200, UI_ACTION_OK             },    // Right
-		{  2670,  2870, UI_ACTION_NEXT           }     // Down
-	};
-	const uint8_t numOfKeys = sizeof(keys) / sizeof(keys[0]);
+  struct {
+    uint16_t min;
+    uint16_t max;
+    uint16_t action;
+    } keys[] = {
+    {   300,   500, UI_ACTION_BACK           },    // Left
+    {   570,   870, UI_ACTION_PREVIOUS       },    // Up
+    {  1150,  1450, ADC_KEYPAD_CENTER_ACTION },    // Center
+    {  1900,  2200, UI_ACTION_OK             },    // Right
+    {  2670,  2870, UI_ACTION_NEXT           }     // Down
+  };
+  const uint8_t numOfKeys = sizeof(keys) / sizeof(keys[0]);
 
-	extern volatile uint16_t osAnalogInputValues[ANALOG_INPUTS];
-	uint16_t adc = osAnalogInputValues[KEYPAD_ANALOG_INDEX] >> (ANALOG_REDUCE_BITS);
-	if (adc < 4000) {
-		for (int8_t i = 0; i < numOfKeys; ++i) {
-			if ((adc > keys[i].min) && (adc < keys[i].max)) {
-				action = keys[i].action;
-				return;
-			}
-		}
-	}
+  extern volatile uint16_t osAnalogInputValues[ANALOG_INPUTS];
+  uint16_t adc = osAnalogInputValues[KEYPAD_ANALOG_INDEX] >> (ANALOG_REDUCE_BITS);
+  if (adc < 4000) {
+    for (int8_t i = 0; i < numOfKeys; ++i) {
+      if ((adc > keys[i].min) && (adc < keys[i].max)) {
+        action = keys[i].action;
+        return;
+      }
+    }
+  }
 }
 
 // Read and decode ADC keypad (slow reads)

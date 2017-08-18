@@ -57,8 +57,8 @@
 class PrintLine;
 typedef struct
 {
-    flag8_t dir; 									///< Direction of delta movement.
-    uint16_t deltaSteps[TOWER_ARRAY];   				    ///< Number of steps in move.
+    flag8_t dir;                        ///< Direction of delta movement.
+    uint16_t deltaSteps[TOWER_ARRAY];   ///< Number of steps in move.
     inline bool checkEndstops(PrintLine *cur,bool checkall);
     inline void setXMoveFinished()
     {
@@ -192,9 +192,9 @@ private:
     float minSpeed;
     float distance;
 #if NONLINEAR_SYSTEM
-    uint8_t numNonlinearSegments;		///< Number of delta segments left in line. Decremented by stepper timer.
-    uint8_t moveID;					///< ID used to identify moves which are all part of the same line
-    int32_t numPrimaryStepPerSegment;	///< Number of primary Bresenham axis steps in each delta segment
+    uint8_t numNonlinearSegments;   ///< Number of delta segments left in line. Decremented by stepper timer.
+    uint8_t moveID;                 ///< ID used to identify moves which are all part of the same line
+    int32_t numPrimaryStepPerSegment; ///< Number of primary Bresenham axis steps in each delta segment
     NonlinearSegment segments[DELTASEGMENTS_PER_PRINTLINE];
 #endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
@@ -300,7 +300,7 @@ public:
     {
         if(isCheckEndstops())
         {
-			Endstops::update();
+            Endstops::update();
             if(isXNegativeMove() && Endstops::xMin())
                 setXMoveFinished();
             else if(isXPositiveMove() && Endstops::xMax())
@@ -331,12 +331,12 @@ public:
         }
 #if FEATURE_Z_PROBE
         else if(Printer::isZProbingActive() && isZNegativeMove()) {
-			Endstops::update();
-			if(Endstops::zProbe())
-			{
-				setZMoveFinished();
-				Printer::stepsRemainingAtZHit = stepsRemaining;
-			}
+            Endstops::update();
+            if(Endstops::zProbe())
+            {
+                setZMoveFinished();
+                Printer::stepsRemainingAtZHit = stepsRemaining;
+            }
         }
 #endif
     }
@@ -345,8 +345,8 @@ public:
     {
 #if DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY
         dir &= ~48;
-#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80
+#elif DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
+        dir &= ~80
 #else
         dir &= ~16;
 #endif
@@ -361,11 +361,11 @@ public:
     }
     inline void setZMoveFinished()
     {
-#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY		
-		dir &= ~80
-#else		
+#if DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY
+        dir &= ~80
+#else
         dir &= ~64;
-#endif		
+#endif
     }
     inline void setXYMoveFinished()
     {
@@ -685,9 +685,9 @@ public:
 #if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
 #if DISTORTION_CORRECTION
-	static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
+    static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
 #endif
-#endif	
+#endif
     static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop,bool pathOptimize = true);
     static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool pathOptimize = true);
 #if ARC_SUPPORT

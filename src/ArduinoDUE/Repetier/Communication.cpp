@@ -596,11 +596,11 @@ void Com::printArrayFLN(FSTRINGPARAM(text),int32_t *arr,uint8_t n) {
 void Com::printFloat(float number, uint8_t digits)
 {
   if (isnan(number)) {
-	printF(tNAN);
+    printF(tNAN);
     return;
   }
   if (isinf(number)) {
-	printF(tINF);
+    printF(tINF);
     return;
   }
   // Handle negative numbers

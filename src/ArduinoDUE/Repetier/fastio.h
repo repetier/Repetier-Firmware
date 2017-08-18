@@ -1,10 +1,10 @@
 /*
-	This code contibuted by Triffid_Hunter and modified by Kliment
-	why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+  This code contibuted by Triffid_Hunter and modified by Kliment
+  why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
         2012/3/10 AT90USB128x modified by lincomatic to match Teensyduino
 */
-#ifndef	_FASTIO_H
-#define	_FASTIO_H
+#ifndef _FASTIO_H
+#define _FASTIO_H
 
 #include <sam.h>
 #include <sam3xa/include/pio/pio_sam3x8h.h>
@@ -304,7 +304,7 @@
 
 
 
-#ifndef	DIO0_PIN
+#ifndef DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
 #endif
 
