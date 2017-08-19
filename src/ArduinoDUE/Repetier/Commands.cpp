@@ -957,7 +957,7 @@ void Commands::processGCode(GCode *com) {
         case 21: // G21 Units to mm
             Printer::unitIsInches = 0;
             break;
-        case 50028: { //G28 Home all Axis one at a time
+        case 28: { //G28 Home all Axis one at a time
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
                 bool oldLaser = LaserDriver::laserOn;
                 LaserDriver::laserOn = false;
