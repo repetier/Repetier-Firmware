@@ -5,32 +5,32 @@ int currentExtruder = -1;
 
 bool EventUnhandledGCode(GCode *com)
 {
-    // if (com->hasG())
-    // {
-    //     switch (com->G)
-    //     {
-    //     case 28:
-    //         if (com->hasX() || com->hasY())
-    //         {
-    //             GCode::executeFString(PSTR("G50028 Y\n"));
-    //         }
-    //         if (com->hasX())
-    //         {
-    //             GCode::executeFString(PSTR("G50028 X\n"));
-    //         }
-    //         if (com->hasZ())
-    //         {
-    //             GCode::executeFString(PSTR("G50028 Z\n"));
-    //         }
-    //         previousMillisCmd = HAL::timeInMilliseconds();
-    //         return true;
-    //         break;
-    //     default:
-    //         return false;
-    //         break;
-    //     }
-    //     return false;
-    // }
+    if (com->hasG())
+    {
+        switch (com->G)
+        {
+        case 28:
+            if (com->hasX() || com->hasY())
+            {
+                GCode::executeFString(PSTR("G50028 Y\n"));
+            }
+            if (com->hasX())
+            {
+                GCode::executeFString(PSTR("G50028 X\n"));
+            }
+            if (com->hasZ())
+            {
+                GCode::executeFString(PSTR("G50028 Z\n"));
+            }
+            previousMillisCmd = HAL::timeInMilliseconds();
+            return true;
+            break;
+        default:
+            return false;
+            break;
+        }
+        return false;
+    }
     // if (com->hasM())
     // {
     //     switch (com->M)
