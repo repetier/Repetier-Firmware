@@ -1083,12 +1083,12 @@ Overridden if EEPROM activated.
 */
 #define MAX_FEEDRATE_X 100 // mm/s // was 50
 #define MAX_FEEDRATE_Y 100 // mm/s // was 50
-#define MAX_FEEDRATE_Z 20 // mm/s // was 40
+#define MAX_FEEDRATE_Z 15 // mm/s // was 40
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 40 // mm/s
 #define HOMING_FEEDRATE_Y 40 // mm/s
-#define HOMING_FEEDRATE_Z 20 // mm/s
+#define HOMING_FEEDRATE_Z 15 // mm/s
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order.
 * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this
