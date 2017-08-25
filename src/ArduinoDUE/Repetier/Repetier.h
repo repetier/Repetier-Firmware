@@ -247,10 +247,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #endif
 
 inline void memcopy2(void *dest,void *source) {
-	*((int16_t*)dest) = *((int16_t*)source);
+    *((int16_t*)dest) = *((int16_t*)source);
 }
 inline void memcopy4(void *dest,void *source) {
-	*((int32_t*)dest) = *((int32_t*)source);
+    *((int32_t*)dest) = *((int32_t*)source);
 }
 
 #ifndef JSON_OUTPUT
@@ -811,21 +811,21 @@ public:
         return t.normalize();
     }
 };
-	inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
-	{
-		lhs.x += rhs.x;
-		lhs.y += rhs.y;
-		lhs.z += rhs.z;
-		return lhs;
-	}
+    inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+    {
+        lhs.x += rhs.x;
+        lhs.y += rhs.y;
+        lhs.z += rhs.z;
+        return lhs;
+    }
 
-	inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
-	{
-		lhs.x -= rhs.x;
-		lhs.y -= rhs.y;
-		lhs.z -= rhs.z;
-		return lhs;
-	}
+    inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+    {
+        lhs.x -= rhs.x;
+        lhs.y -= rhs.y;
+        lhs.z -= rhs.z;
+        return lhs;
+    }
 
     inline RVector3 operator*(const RVector3 &lhs,float rhs) {
         return lhs.scale(rhs);

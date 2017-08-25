@@ -1,29 +1,8 @@
 
-extern bool CustomMCodeHandler(GCode *com);
+extern bool EventUnhandledGCode(GCode *com);
 
-#undef EVENT_UNHANDLED_M_CODE(c)
+#undef EVENT_UNHANDLED_G_CODE
+#undef EVENT_UNHANDLED_M_CODE
 
-#define EVENT_UNHANDLED_M_CODE(c) CustomMCodeHandler(c)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#define EVENT_UNHANDLED_G_CODE(c) EventUnhandledGCode(c)
+#define EVENT_UNHANDLED_M_CODE(c) EventUnhandledGCode(c)
