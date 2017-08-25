@@ -1,8 +1,7 @@
 
 extern bool EventUnhandledGCode(GCode *com);
+extern void SelectExtruder500XL(uint8_t t);
 
 #undef EVENT_UNHANDLED_G_CODE
-#undef EVENT_UNHANDLED_M_CODE
 
 #define EVENT_UNHANDLED_G_CODE(c) EventUnhandledGCode(c)
-#define EVENT_UNHANDLED_M_CODE(c) EventUnhandledGCode(c)

@@ -2398,6 +2398,7 @@ void Commands::executeGCode(GCode *com) {
         //com->printCommand(); // for testing if this the source of extruder switches
         Commands::waitUntilEndOfAllMoves();
         Extruder::selectExtruderById(com->T);
+        SelectExtruder500XL(com->T);
     } else {
         if(Printer::debugErrors()) {
             Com::printF(Com::tUnknownCommand);
