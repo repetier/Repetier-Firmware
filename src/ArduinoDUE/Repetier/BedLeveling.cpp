@@ -126,9 +126,9 @@ requires the extruder to bend the coating thickness without harm!
 class PlaneBuilder {
         float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
     public:
-		PlaneBuilder() {
-			reset();
-		}
+        PlaneBuilder() {
+            reset();
+        }
         void reset() {
             sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
         }
@@ -148,11 +148,11 @@ class PlaneBuilder {
             plane.a = ((sum_xy * sum_y  - sum_x * sum_yy)  * sum_z + (sum_x * sum_y  - n      * sum_xy) * sum_yz + sum_xz * (n      * sum_yy - sum_y * sum_y))  / det;
             plane.b = ((sum_x  * sum_xy - sum_xx * sum_y)  * sum_z + (n     * sum_xx - sum_x  * sum_x)  * sum_yz + sum_xz * (sum_x  * sum_y  - n     * sum_xy)) / det;
             plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y)  * sum_yz + sum_xz * (sum_xy * sum_y  - sum_x * sum_yy)) / det;
-			if(!silent) {
-				Com::printF(PSTR("plane: a = "),plane.a,4);
-				Com::printF(PSTR(" b = "),plane.b,4);
-				Com::printFLN(PSTR(" c = "),plane.c,4);
-			}
+            if(!silent) {
+                Com::printF(PSTR("plane: a = "),plane.a,4);
+                Com::printF(PSTR(" b = "),plane.b,4);
+                Com::printFLN(PSTR(" c = "),plane.c,4);
+            }
         }
 };
 
@@ -242,7 +242,7 @@ bool measureAutolevelPlane(Plane &plane) {
 void correctAutolevel(GCode *code,Plane &plane) {
 #if BED_CORRECTION_METHOD == 0 // rotation matrix
     //Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
-	Printer::buildTransformationMatrix(plane);
+    Printer::buildTransformationMatrix(plane);
 #elif BED_CORRECTION_METHOD == 1 // motorized correction
 #if !defined(NUM_MOTOR_DRIVERS) || NUM_MOTOR_DRIVERS < 2
 #error You need to define 2 motors for motorized bed correction
@@ -255,11 +255,11 @@ void correctAutolevel(GCode *code,Plane &plane) {
     h2 -= h1;
     h3 -= h1;
 #if defined(LIMIT_MOTORIZED_CORRECTION)
-	if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
-	if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
-	if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
-	if(h3 > LIMIT_MOTORIZED_CORRECTION) h3 = LIMIT_MOTORIZED_CORRECTION;
-#endif	
+    if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
+    if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
+    if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
+    if(h3 > LIMIT_MOTORIZED_CORRECTION) h3 = LIMIT_MOTORIZED_CORRECTION;
+#endif
     MotorDriverInterface *motor2 = getMotorDriver(0);
     MotorDriverInterface *motor3 = getMotorDriver(1);
     motor2->setCurrentAs(0);
@@ -359,7 +359,7 @@ bool runBedLeveling(GCode *com) {
     Printer::homeAxis(true, true, true); // shifting z makes positioning invalid, need to recalibrate
 #endif
     Printer::feedrate = oldFeedrate;
-	return true;
+    return true;
 }
 
 #endif
@@ -546,13 +546,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 }
 
 float Printer::bendingCorrectionAt(float x, float y) {
-	PlaneBuilder builder;
+    PlaneBuilder builder;
     builder.addPoint(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
     builder.addPoint(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
     builder.addPoint(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
-	Plane plane;
-	builder.createPlane(plane,true);
-	return plane.z(x,y);
+    Plane plane;
+    builder.createPlane(plane,true);
+    return plane.z(x,y);
 }
 
 void Printer::waitForZProbeStart() {
@@ -594,37 +594,37 @@ void Printer::transformToPrinter(float x,float y,float z,float &transX,float &tr
     y = y + z * EEPROM::axisCompTanYZ();
 #endif
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-	if(isAutolevelActive()) {
-		transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
-		transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
-		transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
-	} else {
-		transX = x;
-		transY = y;
-		transZ = z;		
-	}
+    if(isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
+        transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
+        transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
 #else
-	transX = x;
-	transY = y;
-	transZ = z;
-#endif	
+    transX = x;
+    transY = y;
+    transZ = z;
+#endif
 }
 
 void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-	if(isAutolevelActive()) {
-		transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
-		transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
-		transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
-	} else {
-		transX = x;
-		transY = y;
-		transZ = z;		
-	}
+    if(isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
+        transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
+        transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
 #else
-	transX = x;
-	transY = y;
-	transZ = z;
+    transX = x;
+    transY = y;
+    transZ = z;
 #endif
 #if FEATURE_AXISCOMP
     // Axis compensation:
@@ -642,9 +642,9 @@ void Printer::resetTransformationMatrix(bool silent) {
 }
 
 void Printer::buildTransformationMatrix(Plane &plane) {
-	float z0 = plane.z(0,0);
-	float az = z0-plane.z(1,0); // ax = 1, ay = 0
-	float bz = z0-plane.z(0,1); // bx = 0, by = 1
+    float z0 = plane.z(0,0);
+    float az = z0-plane.z(1,0); // ax = 1, ay = 0
+    float bz = z0-plane.z(0,1); // bx = 0, by = 1
     // First z direction
     autolevelTransformation[6] = -az;
     autolevelTransformation[7] = -bz;
@@ -668,7 +668,7 @@ void Printer::buildTransformationMatrix(Plane &plane) {
     autolevelTransformation[3] /= len;
     autolevelTransformation[4] /= len;
     autolevelTransformation[5] /= len;
-	
+    
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
 /* 

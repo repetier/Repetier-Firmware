@@ -306,12 +306,12 @@ cog. Direct drive extruder need 0.
 #define EXT0_ADVANCE_BACKLASH_STEPS 0
 
 /* \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated. */
-#define EXT0_WAIT_RETRACT_TEMP 		150
+#define EXT0_WAIT_RETRACT_TEMP 150
 
 /** \brief Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
 to 0 to disable.
 */
-#define EXT0_WAIT_RETRACT_UNITS 	0
+#define EXT0_WAIT_RETRACT_UNITS 0
 
 /** You can run any GCODE command on extruder deselect/select. Separate multiple commands with a new line \n.
 That way you can execute some mechanical components needed for extruder selection or retract filament or whatever you need.
@@ -458,8 +458,8 @@ cog. Direct drive extruder need 0.
 */
 #define EXT1_ADVANCE_BACKLASH_STEPS EXT0_ADVANCE_BACKLASH_STEPS
 
-#define EXT1_WAIT_RETRACT_TEMP 	EXT0_WAIT_RETRACT_TEMP
-#define EXT1_WAIT_RETRACT_UNITS	EXT0_WAIT_RETRACT_UNITS
+#define EXT1_WAIT_RETRACT_TEMP  EXT0_WAIT_RETRACT_TEMP
+#define EXT1_WAIT_RETRACT_UNITS EXT0_WAIT_RETRACT_UNITS
 #define EXT1_SELECT_COMMANDS ""
 #define EXT1_DESELECT_COMMANDS ""
 
@@ -604,7 +604,7 @@ Number of entries in the user thermistor table 0. Set to 0 to disable it.
 #define USER_THERMISTORTABLE0  {\
   {1*4,864*8},{21*4,300*8},{25*4,290*8},{29*4,280*8},{33*4,270*8},{39*4,260*8},{46*4,250*8},{54*4,240*8},{64*4,230*8},{75*4,220*8},\
   {90*4,210*8},{107*4,200*8},{128*4,190*8},{154*4,180*8},{184*4,170*8},{221*4,160*8},{265*4,150*8},{316*4,140*8},{375*4,130*8},\
-  {441*4,120*8},{513*4,110*8},{588*4,100*8},{734*4,80*8},{856*4,60*8},{938*4,40*8},{986*4,20*8},{1008*4,0*8},{1018*4,-20*8}	}
+  {441*4,120*8},{513*4,110*8},{588*4,100*8},{734*4,80*8},{856*4,60*8},{938*4,40*8},{986*4,20*8},{1008*4,0*8},{1018*4,-20*8} }
 
 /* Number of entries in the user thermistor table 1. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR1 0
@@ -1083,12 +1083,12 @@ Overridden if EEPROM activated.
 */
 #define MAX_FEEDRATE_X 100 // mm/s // was 50
 #define MAX_FEEDRATE_Y 100 // mm/s // was 50
-#define MAX_FEEDRATE_Z 20 // mm/s // was 40
+#define MAX_FEEDRATE_Z 15 // mm/s // was 40
 
 /** Home position speed in mm/s. Overridden if EEPROM activated. */
 #define HOMING_FEEDRATE_X 40 // mm/s
 #define HOMING_FEEDRATE_Y 40 // mm/s
-#define HOMING_FEEDRATE_Z 20 // mm/s
+#define HOMING_FEEDRATE_Z 15 // mm/s
 
 /** Set order of axis homing. Use HOME_ORDER_XYZ and replace XYZ with your order.
 * If you measure Z with your extruder tip you need a hot extruder to get right measurement. In this

@@ -108,9 +108,9 @@ have problems with other modules using the eeprom */
 #define EPR_TOUCHSCREEN           946 // - 975 = 30 byte for touchscreen calibration data
 
 // Axis compensation
-#define EPR_AXISCOMP_TANXY			976
-#define EPR_AXISCOMP_TANYZ			980
-#define EPR_AXISCOMP_TANXZ			984
+#define EPR_AXISCOMP_TANXY                     976
+#define EPR_AXISCOMP_TANYZ                     980
+#define EPR_AXISCOMP_TANXZ                     984
 
 #define EPR_DISTORTION_CORRECTION_ENABLED      988
 #define EPR_RETRACTION_LENGTH                  992
@@ -121,7 +121,7 @@ have problems with other modules using the eeprom */
 #define EPR_RETRACTION_UNDO_EXTRA_LONG_LENGTH 1012
 #define EPR_RETRACTION_UNDO_SPEED             1016
 #define EPR_AUTORETRACT_ENABLED               1020
-#define EPR_Z_PROBE_Z_OFFSET			      1024
+#define EPR_Z_PROBE_Z_OFFSET                  1024
 #define EPR_SELECTED_LANGUAGE                 1028
 #define EPR_ACCELERATION_FACTOR_TOP           1032
 #define EPR_BENDING_CORRECTION_A              1036
@@ -163,12 +163,12 @@ have problems with other modules using the eeprom */
 #define EPR_EXTRUDER_ADVANCE_K          41
 #define EPR_EXTRUDER_DRIVE_MIN          45
 #define EPR_EXTRUDER_ADVANCE_L          46
-#define EPR_EXTRUDER_WAIT_RETRACT_TEMP 50
+#define EPR_EXTRUDER_WAIT_RETRACT_TEMP  50
 #define EPR_EXTRUDER_WAIT_RETRACT_UNITS 52
 #define EPR_EXTRUDER_COOLER_SPEED       54
 // 55-57 free for byte sized parameter
-#define EPR_EXTRUDER_MIXING_RATIOS  58 // 16*2 byte ratios = 32 byte -> end = 89
-#define EPR_EXTRUDER_Z_OFFSET            90
+#define EPR_EXTRUDER_MIXING_RATIOS      58 // 16*2 byte ratios = 32 byte -> end = 89
+#define EPR_EXTRUDER_Z_OFFSET           90
 #ifndef Z_PROBE_BED_DISTANCE
 #define Z_PROBE_BED_DISTANCE 3.0 //???
 #endif
@@ -210,9 +210,9 @@ public:
     }
     static inline float zProbeZOffset() {
 #if EEPROM_MODE != 0
-	    return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
+            return HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
 #else
-	    return Z_PROBE_Z_OFFSET;
+            return Z_PROBE_Z_OFFSET;
 #endif
     }
     static inline float zProbeSpeed() {
