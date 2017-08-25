@@ -34,3 +34,4 @@ src/ArduinoAVR/Repetier.zip
 .vs
 .vscode
 .build
+CppProperties.json
