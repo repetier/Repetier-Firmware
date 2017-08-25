@@ -695,7 +695,7 @@
 #define UI_TEXT_WIZ_BED_LEVEL1_EN "IMPORTANT: use 5mm"
 #define UI_TEXT_WIZ_BED_LEVEL2_EN "strip under nozzle"
 #define UI_TEXT_WIZ_BED_LEVEL3_EN "Click to confirm"
-#define UI_TEXT_WIZ_BED_LEVEL4_EN cTEMP "%e0/%E0" cDEG // only showing extruder 0 temperature
+#define UI_TEXT_WIZ_BED_LEVEL4_EN cTEMP "%e0/%e1" cDEG
 //                                    12345679901234567990
 #define UI_TEXT_WIZ_MANUAL_PROBE1_EN "Turn display knob"
 #define UI_TEXT_WIZ_MANUAL_PROBE2_EN "until strip touches"
