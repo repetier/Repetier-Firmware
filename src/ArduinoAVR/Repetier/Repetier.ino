@@ -139,7 +139,7 @@ Custom M Codes
 - M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M290 Z<babysteps> - Correct by adding baby steps for Z mm
 - M300 S<Frequency> P<DurationMillis> play frequency
-- M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will disallow.
+- M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will allow, S0 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions> C<method>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
 				method 0 = classic, 1 = some overshoot, 2 = no overshoot
 - M320 S<0/1> - Activate auto level, S1 stores it in eeprom

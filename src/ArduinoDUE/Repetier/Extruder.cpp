@@ -780,8 +780,6 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
 #else
     if(Printer::maxExtruderSpeed > 15) Printer::maxExtruderSpeed = 15;
 #endif
-    float maxdist = Extruder::current->maxFeedrate * Extruder::current->maxFeedrate * 0.00013888 / next->maxAcceleration;
-    maxdist -= Extruder::current->maxStartFeedrate * Extruder::current->maxStartFeedrate * 0.5 / next->maxAcceleration;
     float fmax = ((float)HAL::maxExtruderTimerFrequency() / ((float)Printer::maxExtruderSpeed * Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
     if(fmax < Printer::maxFeedrate[E_AXIS]) Printer::maxFeedrate[E_AXIS] = fmax;
 #endif // USE_ADVANCE

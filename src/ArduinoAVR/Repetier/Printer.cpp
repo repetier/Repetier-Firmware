@@ -641,13 +641,13 @@ void Printer::kill(uint8_t only_steppers) {
     disableYStepper();
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
-    setAllSteppersDiabled();
-    unsetHomedAll();
 #else
     if(!only_steppers)
         disableZStepper();
 #endif
     Extruder::disableAllExtruderMotors();
+    setAllSteppersDiabled();
+    unsetHomedAll();
     if(!only_steppers) {
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(0, i);

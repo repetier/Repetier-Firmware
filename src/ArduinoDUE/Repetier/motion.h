@@ -572,8 +572,7 @@ public:
     }
     // Only called from within interrupts
     static INLINE void removeCurrentLineForbidInterrupt() {
-        linesPos++;
-        if(linesPos >= PRINTLINE_CACHE_SIZE) linesPos = 0;
+		nextPlannerIndex(linesPos);
         cur = NULL;
 #if CPU_ARCH == ARCH_ARM
         nlFlag = false;
@@ -584,8 +583,7 @@ public:
             Printer::setMenuMode(MENU_MODE_PRINTING, Printer::isPrinting());
     }
     static INLINE void pushLine() {
-        linesWritePos++;
-        if(linesWritePos >= PRINTLINE_CACHE_SIZE) linesWritePos = 0;
+		nextPlannerIndex(linesWritePos);
         Printer::setMenuMode(MENU_MODE_PRINTING, true);
         InterruptProtectedBlock noInts;
         linesCount++;
@@ -620,7 +618,7 @@ public:
         p = (p ? p - 1 : PRINTLINE_CACHE_SIZE - 1);
     }
     static INLINE void nextPlannerIndex(ufast8_t& p) {
-        p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
+        p = (p >= PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
 #if NONLINEAR_SYSTEM
     static uint8_t queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimize, uint8_t softEndstop);
