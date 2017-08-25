@@ -116,12 +116,12 @@ union wizardVar
 #define towerCMinSteps Printer::zMinSteps
 
 class Plane {
-	public:
-	// f(x, y) = ax + by + c
-	float a,b,c;
-	float z(float x,float y) {
-		return a * x + y * b + c;
-	}
+    public:
+    // f(x, y) = ax + by + c
+    float a,b,c;
+    float z(float x,float y) {
+        return a * x + y * b + c;
+    }
 };
 #if DISTORTION_CORRECTION
 class Distortion
@@ -135,10 +135,10 @@ public:
     int32_t correct(int32_t x, int32_t y, int32_t z) const;
     void updateDerived();
     void reportStatus();
-	bool isEnabled() {return enabled;}
-	int32_t zMaxSteps() {return zEnd;}	
-	void set(float x,float y,float z);
-	void showMatrix();		
+    bool isEnabled() {return enabled;}
+    int32_t zMaxSteps() {return zEnd;}
+    void set(float x,float y,float z);
+    void showMatrix();
     void resetCorrection();
 private:
     int matrixIndex(fast8_t x, fast8_t y) const;
@@ -149,13 +149,13 @@ private:
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners();
 // attributes
-#if DRIVE_SYSTEM == DELTA	
+#if DRIVE_SYSTEM == DELTA
     int32_t step;
     int32_t radiusCorrectionSteps;
 #else
-	int32_t xCorrectionSteps,xOffsetSteps;
-	int32_t yCorrectionSteps,yOffsetSteps;
-#endif	
+    int32_t xCorrectionSteps,xOffsetSteps;
+    int32_t yCorrectionSteps,yOffsetSteps;
+#endif
     int32_t zStart,zEnd;
 #if !DISTORTION_PERMANENT
     int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
@@ -199,10 +199,10 @@ public:
     }
     static INLINE bool anyXYZ() {
 #ifdef EXTENDED_ENDSTOPS
-	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
-		lastState2 != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
+        lastState2 != 0;
 #else
-	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
     static INLINE void resetAccumulator() {
@@ -349,7 +349,7 @@ public:
     static float radius0;
 #endif
 #if DRIVE_SYSTEM != DELTA
-	static int32_t zCorrectionStepsIncluded; 	
+    static int32_t zCorrectionStepsIncluded;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
     static int32_t stepsRemainingAtZHit;
@@ -367,8 +367,8 @@ public:
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
 #if FAN_THERMO_PIN > -1
-	static float thermoMinTemp;
-	static float thermoMaxTemp;
+    static float thermoMinTemp;
+    static float thermoMaxTemp;
 #endif
     static int16_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
@@ -443,15 +443,15 @@ public:
     {
         return (menuMode & mode) == mode;
     }
-	static void setDebugLevel(uint8_t newLevel);
-	static void toggleEcho();
-	static void toggleInfo();
-	static void toggleErrors();
-	static void toggleDryRun();
-	static void toggleCommunication();
-	static void toggleNoMoves();
+    static void setDebugLevel(uint8_t newLevel);
+    static void toggleEcho();
+    static void toggleInfo();
+    static void toggleErrors();
+    static void toggleDryRun();
+    static void toggleCommunication();
+    static void toggleNoMoves();
     static void toggleEndStop();
-	static INLINE uint8_t getDebugLevel() {return debugLevel;}
+    static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
         return ((debugLevel & 1) != 0);
@@ -486,7 +486,7 @@ public:
     {
         return ((debugLevel & 64) != 0);
     }
-    
+
     static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);
@@ -849,7 +849,7 @@ public:
     static INLINE void setAnyTempsensorDefect()
     {
         flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
-		debugSet(8);
+        debugSet(8);
     }
     static INLINE void unsetAnyTempsensorDefect()
     {
@@ -960,18 +960,18 @@ public:
     {
 #if DUAL_X_AXIS
 #if FEATURE_DITTO_PRINTING
-		if(Extruder::dittoMode) {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
-			return;
-		}
+        if(Extruder::dittoMode) {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+            return;
+        }
 #endif
-		if(Extruder::current->id) {
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
-		} else {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
-		}
-#else		
+        if(Extruder::current->id) {
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+        } else {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+        }
+#else
         WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
@@ -1107,7 +1107,7 @@ public:
     }
     static INLINE int getFan2Speed()
     {
-	    return (int)pwm_pos[PWM_FAN2];
+        return (int)pwm_pos[PWM_FAN2];
     }
 #if NONLINEAR_SYSTEM
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
@@ -1122,8 +1122,8 @@ public:
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-	static void startProbing(bool runScript);
-	static void finishProbing();
+    static void startProbing(bool runScript);
+    static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x,float y);

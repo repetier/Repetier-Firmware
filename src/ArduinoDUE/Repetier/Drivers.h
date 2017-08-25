@@ -78,8 +78,8 @@ public:
             HAL::pingWatchdog();
             if((target & 127) == 0) {
                 Commands::checkForPeriodicalActions(false);
-				GCode::keepAlive(Processing);
-			}
+                GCode::keepAlive(Processing);
+            }
         }
     }
     void enable()

@@ -19,7 +19,7 @@
 #define _GCODE_H
 
 #define MAX_CMD_SIZE 96
-#define ARRAY_SIZE(_x)	(sizeof(_x)/sizeof(_x[0]))
+#define ARRAY_SIZE(_x) (sizeof(_x)/sizeof(_x[0]))
 
 enum FirmwareState {NotBusy=0,Processing,Paused,WaitHeater};
 
@@ -185,14 +185,14 @@ public:
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static uint8_t computeBinarySize(char *ptr);
-	static void fatalError(FSTRINGPARAM(message));
-	static void reportFatalError();
-	static void resetFatalError();
-	inline static bool hasFatalError() {
-		return fatalErrorMsg != NULL;
-	}
-	static void keepAlive(enum FirmwareState state);
-	static uint32_t keepAliveInterval;
+    static void fatalError(FSTRINGPARAM(message));
+    static void reportFatalError();
+    static void resetFatalError();
+    inline static bool hasFatalError() {
+        return fatalErrorMsg != NULL;
+    }
+    static void keepAlive(enum FirmwareState state);
+    static uint32_t keepAliveInterval;
     friend class SDCard;
     friend class UIDisplay;
 private:
@@ -216,7 +216,7 @@ private:
         return l;
     }
 
-	static FSTRINGPARAM(fatalErrorMsg);
+    static FSTRINGPARAM(fatalErrorMsg);
     static GCode commandsBuffered[GCODE_BUFFER_SIZE]; ///< Buffer for received commands.
     static uint8_t bufferReadIndex; ///< Read position in gcode_buffer.
     static uint8_t bufferWriteIndex; ///< Write position in gcode_buffer.
@@ -233,7 +233,7 @@ private:
     static volatile uint8_t bufferLength; ///< Number of commands stored in gcode_buffer
     static millis_t timeOfLastDataPacket; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
     static uint8_t formatErrors; ///< Number of sequential format errors
-	static millis_t lastBusySignal; ///< When was the last busy signal
+    static millis_t lastBusySignal; ///< When was the last busy signal
 };
 
 #if JSON_OUTPUT

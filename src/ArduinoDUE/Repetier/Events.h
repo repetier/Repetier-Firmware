@@ -72,13 +72,12 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_SPINDLE_CCW(rpm) true
 
 // Allow adding new G and M codes. To implement it create a function
-bool eventUnhandledGCode(GCode *com);
+// bool eventUnhandledGCode(GCode *com);
 // that returns true if it handled the code, otherwise false.
 // Event define would then be
- #define EVENT_UNHANDLED_G_CODE(c) eventUnhandledGCode(c)
- #define EVENT_UNHANDLED_M_CODE(c) eventUnhandledGCode(c)
-//#define EVENT_UNHANDLED_G_CODE(c) false
-//#define EVENT_UNHANDLED_M_CODE(c) false
+// #define EVENT_UNHANDLED_G_CODE(c) eventUnhandledGCode(c)
+#define EVENT_UNHANDLED_G_CODE(c) false
+#define EVENT_UNHANDLED_M_CODE(c) false
 
 // Called when bed temperature is set
 #define EVENT_SET_BED_TEMP(temp,boop)

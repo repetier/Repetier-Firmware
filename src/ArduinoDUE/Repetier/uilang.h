@@ -689,24 +689,24 @@
 #define UI_TEXT_Y_OFFSET_EN "Set Y offset:%T1mm"
 #define UI_TEXT_Z_OFFSET_EN "Set Z offset:%T2mm"
 
-//                            12345679901234567990
+//                            12345678901234567890
 #define UI_TEXT_BED_LEVEL_EN "Bed leveling wiz."
-//                                 12345679901234567990
+//                                 12345678901234567890
 #define UI_TEXT_WIZ_BED_LEVEL1_EN "IMPORTANT: use 5mm"
 #define UI_TEXT_WIZ_BED_LEVEL2_EN "strip under nozzle"
 #define UI_TEXT_WIZ_BED_LEVEL3_EN "Click to confirm"
 #define UI_TEXT_WIZ_BED_LEVEL4_EN cTEMP "%e0/%e1" cDEG
-//                                    12345679901234567990
+//                                    12345678901234567890
 #define UI_TEXT_WIZ_MANUAL_PROBE1_EN "Turn display knob"
 #define UI_TEXT_WIZ_MANUAL_PROBE2_EN "until strip touches"
 #define UI_TEXT_WIZ_MANUAL_PROBE3_EN "nozzle and click"
 #define UI_TEXT_WIZ_MANUAL_PROBE4_EN "Z: %x2 mm"
-//                                          12345679901234567990
+//                                          12345678901234567890
 #define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT1_EN "Turn LEFT bed-knob"
 #define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT2_EN "until strip touches"
 #define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT3_EN "nozzle"
 #define UI_TEXT_WIZ_HARDWARE_KNOB_LEFT4_EN "Click to confirm"
-//                                           12345679901234567990
+//                                           12345678901234567890
 #define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT1_EN "Turn RIGHT bed-knob"
 #define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT2_EN "until strip touches"
 #define UI_TEXT_WIZ_HARDWARE_KNOB_RIGHT3_EN "nozzle"

@@ -205,9 +205,9 @@ struct biosParmBlock {
            * Bits 0-3 -- Zero-based number of active FAT.
            *             Only valid if mirroring is disabled.
            * Bits 4-6 -- Reserved.
-           * Bit 7	-- 0 means the FAT is mirrored at runtime into all FATs.
-	         *        -- 1 means only one FAT is active; it is the one referenced in bits 0-3.
-           * Bits 8-15 	-- Reserved.
+           * Bit 7    -- 0 means the FAT is mirrored at runtime into all FATs.
+                 *    -- 1 means only one FAT is active; it is the one referenced in bits 0-3.
+           * Bits 8-15 -- Reserved.
            */
   uint16_t fat32Flags;
           /**

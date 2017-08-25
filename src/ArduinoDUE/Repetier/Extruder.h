@@ -77,9 +77,9 @@ public:
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL;
     }
-	inline void removeErrorStates() {
+    inline void removeErrorStates() {
         flags &= ~(TEMPERATURE_CONTROLLER_FLAG_ALARM | TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT | TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED);
-	}
+    }
     inline bool isDecoupleFullOrHold()
     {
         return flags & (TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_FULL | TEMPERATURE_CONTROLLER_FLAG_DECOUPLE_HOLD);
@@ -125,7 +125,7 @@ public:
     {
         return flags & TEMPERATURE_CONTROLLER_FLAG_SENSDECOUPLED;
     }
-	static void resetAllErrorStates();
+    static void resetAllErrorStates();
 #if EXTRUDER_JAM_CONTROL
     inline bool isJammed()
     {
@@ -202,7 +202,7 @@ public:
     static int mixingS; ///< Sum of all weights
     static uint8_t mixingDir; ///< Direction flag
     static uint8_t activeMixingExtruder;
-	static void recomputeMixingExtruderSteps();
+    static void recomputeMixingExtruderSteps();
 #endif
     uint8_t id;
     int32_t xOffset;
