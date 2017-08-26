@@ -257,329 +257,6 @@ void Commands::reportPrinterUsage() {
     Com::printFLN(Com::tSpaceMin);
 #endif
 }
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_DIGIPOT
-// Digipot methods for controling current and microstepping
-
-#if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
-int digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotControl example
-    if(value > 255)
-        value = 255;
-    WRITE(DIGIPOTSS_PIN,LOW); // take the SS pin low to select the chip
-    HAL::spiSend(address); //  send in the address and value via SPI:
-    HAL::spiSend(value);
-    WRITE(DIGIPOTSS_PIN,HIGH); // take the SS pin high to de-select the chip:
-    //delay(10);
-}
-
-void setMotorCurrent(uint8_t driver, uint16_t current) {
-    if(driver > 4) return;
-    const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
-    digitalPotWrite(digipot_ch[driver], current);
-}
-
-void setMotorCurrentPercent( uint8_t channel, float level) {
-    uint16_t raw_level = ( level * 255 / 100 );
-    setMotorCurrent(channel,raw_level);
-}
-#endif
-
-void motorCurrentControlInit() { //Initialize Digipot Motor Current
-#if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
-    HAL::spiInit(0); //SPI.begin();
-    SET_OUTPUT(DIGIPOTSS_PIN);
-#ifdef MOTOR_CURRENT_PERCENT
-    const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
-    for(int i = 0; i <= 4; i++)
-        //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
-        setMotorCurrentPercent(i,digipot_motor_current[i]);
-#else
-    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-    for(int i = 0; i <= 4; i++)
-        //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
-        setMotorCurrent(i,digipot_motor_current[i]);
-#endif
-#endif
-}
-#endif
-
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_LTC2600
-
-void setMotorCurrent( uint8_t channel, unsigned short level ) {
-    if(channel >= LTC2600_NUM_CHANNELS) return;
-    const uint8_t ltc_channels[] =  LTC2600_CHANNELS;
-    if(channel > LTC2600_NUM_CHANNELS) return;
-    uint8_t address = ltc_channels[channel];
-    fast8_t i;
-
-
-    // NOTE: Do not increase the current endlessly. In case the engine reaches its current saturation, the engine and the driver can heat up and loss power.
-    // When the saturation is reached, more current causes more heating and more power loss.
-    // In case of engines with lower quality, the saturation current may be reached before the nominal current.
-
-    // configure the pins
-    WRITE( LTC2600_CS_PIN, HIGH );
-    SET_OUTPUT( LTC2600_CS_PIN );
-    WRITE( LTC2600_SCK_PIN, LOW );
-    SET_OUTPUT( LTC2600_SCK_PIN );
-    WRITE( LTC2600_SDI_PIN, LOW );
-    SET_OUTPUT( LTC2600_SDI_PIN );
-
-    // enable the command interface of the LTC2600
-    WRITE( LTC2600_CS_PIN, LOW );
-
-    // transfer command and address
-    for( i = 7; i >= 0; i-- ) {
-        WRITE( LTC2600_SDI_PIN, address & (0x01 << i));
-        WRITE( LTC2600_SCK_PIN, 1 );
-        WRITE( LTC2600_SCK_PIN, 0 );
-    }
-
-    // transfer the data word
-    for( i = 15; i >= 0; i-- ) {
-        WRITE( LTC2600_SDI_PIN, level & (0x01 << i));
-        WRITE( LTC2600_SCK_PIN, 1 );
-        WRITE( LTC2600_SCK_PIN, 0 );
-    }
-
-    // disable the ommand interface of the LTC2600 -
-    // this carries out the specified command
-    WRITE( LTC2600_CS_PIN, HIGH );
-
-} // setLTC2600
-void setMotorCurrentPercent( uint8_t channel, float level) {
-    if(level > 100.0f) level = 100.0f;
-    uint16_t raw_level = static_cast<uint16_t>( (long)level * 65535L / 100L );
-    setMotorCurrent(channel,raw_level);
-}
-
-void motorCurrentControlInit() { //Initialize LTC2600 Motor Current
-    uint8_t i;
-#ifdef MOTOR_CURRENT_PERCENT
-    const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
-    for(int i = 0; i < LTC2600_NUM_CHANNELS; i++)
-        //digitalPotWrite(digipot_ch[i], digipot_motor_current[i]);
-        setMotorCurrentPercent(i,digipot_motor_current[i]);
-#else
-    const unsigned int ltc_current[] =  MOTOR_CURRENT;
-    for(i = 0; i < LTC2600_NUM_CHANNELS; i++) {
-        setMotorCurrent(i, ltc_current[i] );
-    }
-#endif
-}
-#endif
-
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
-void setMotorCurrent(uint8_t channel, unsigned short value) {
-    if(channel >= 7) // max channel (X,Y,Z,E0,E1,E2,E3)
-        return;
-    if(value > 255)
-        value=255;
-
-    uint8_t externalDac_buf[2] = {0x10, 0x00};
-
-    if(channel > 3)
-        externalDac_buf[0] |= ( 7 - channel << 6);
-    else
-        externalDac_buf[0] |= ( 3 - channel << 6);
-
-    externalDac_buf[0] |= (value >> 4);
-    externalDac_buf[1] |= (value << 4);
-
-    // All SPI chip-select HIGH
-    WRITE(DAC0_SYNC, HIGH);
-    WRITE(DAC1_SYNC, HIGH);
-    WRITE(SPI_EEPROM1_CS, HIGH);
-    WRITE(SPI_EEPROM2_CS, HIGH);
-    WRITE(SPI_FLASH_CS, HIGH);
-    WRITE(SDSS, HIGH);
-
-    if(channel > 3) { // DAC Piggy E1,E2,E3
-        WRITE(DAC1_SYNC,LOW);
-        HAL::delayMicroseconds(2);
-        WRITE(DAC1_SYNC,HIGH);
-        HAL::delayMicroseconds(2);
-        WRITE(DAC1_SYNC,LOW);
-    } else { // DAC onboard X,Y,Z,E0
-        WRITE(DAC0_SYNC,LOW);
-        HAL::delayMicroseconds(2);
-        WRITE(DAC0_SYNC,HIGH);
-        HAL::delayMicroseconds(2);
-        WRITE(DAC0_SYNC,LOW);
-    }
-
-    HAL::delayMicroseconds(2);
-    HAL::spiSend(SPI_CHAN_DAC, externalDac_buf, 2);
-}
-
-void setMotorCurrentPercent( uint8_t channel, float level) {
-    uint16_t raw_level = ( level * 255 / 100 );
-    setMotorCurrent(channel,raw_level);
-}
-
-void motorCurrentControlInit() { //Initialize Motor Current
-    uint8_t externalDac_buf[2] = {0x20, 0x00};//all off
-
-    // All SPI chip-select HIGH
-    WRITE(DAC0_SYNC, HIGH);
-    WRITE(DAC1_SYNC, HIGH);
-    WRITE(SPI_EEPROM1_CS, HIGH);
-    WRITE(SPI_EEPROM2_CS, HIGH);
-    WRITE(SPI_FLASH_CS, HIGH);
-    WRITE(SDSS, HIGH);
-
-    // init onboard DAC
-    WRITE(DAC0_SYNC, LOW);
-    HAL::delayMicroseconds(2);
-    WRITE(DAC0_SYNC, HIGH);
-    HAL::delayMicroseconds(2);
-    WRITE(DAC0_SYNC, LOW);
-
-    HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
-    WRITE(DAC0_SYNC, HIGH);
-
-#if NUM_EXTRUDER > 1
-    // init Piggy DAC
-    WRITE(DAC1_SYNC, LOW);
-    HAL::delayMicroseconds(2);
-    WRITE(DAC1_SYNC, HIGH);
-    HAL::delayMicroseconds(2);
-    WRITE(DAC1_SYNC, LOW);
-
-    HAL::spiSend(SPI_CHAN_DAC,externalDac_buf, 2);
-    WRITE(DAC1_SYNC, HIGH);
-#endif
-
-#ifdef MOTOR_CURRENT_PERCENT
-    const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
-    for(int i = 0; i < NUM_EXTRUDER+3; i++)
-        setMotorCurrentPercent(i,digipot_motor_current[i]);
-#else
-    const uint8_t digipot_motor_current[] = MOTOR_CURRENT;
-    for(uint8_t i = 0; i < NUM_EXTRUDER+3; i++)
-        setMotorCurrent(i,digipot_motor_current[i]);
-#endif
-}
-#endif
-
-
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-uint8_t   _intVref[]     = {MCP4728_VREF, MCP4728_VREF, MCP4728_VREF, MCP4728_VREF};
-uint8_t   _gain[]        = {MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN};
-uint8_t   _powerDown[]   = {0,0,0,0};
-int16_t   dac_motor_current[] =  {0,0,0,0};
-
-uint8_t   _intVrefEp[]   = {MCP4728_VREF, MCP4728_VREF, MCP4728_VREF, MCP4728_VREF};
-uint8_t   _gainEp[]      = {MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN, MCP4728_GAIN};
-uint8_t   _powerDownEp[] = {0,0,0,0};
-int16_t    _valuesEp[]   = {0,0,0,0};
-
-uint8_t   dac_stepper_channel[] = MCP4728_STEPPER_ORDER;
-
-int dacSimpleCommand(uint8_t simple_command) {
-    HAL::i2cStartWait(MCP4728_GENERALCALL_ADDRESS + I2C_WRITE);
-    HAL::i2cWrite(simple_command);
-    HAL::i2cStop();
-}
-
-void dacReadStatus() {
-    HAL::delayMilliseconds(500);
-    HAL::i2cStartWait(MCP4728_I2C_ADDRESS | I2C_READ);
-
-    for (int i = 0; i < 8; i++) { // 2 sets of 4 Channels (1 EEPROM, 1 Runtime)
-        uint8_t deviceID = HAL::i2cReadAck();
-        uint8_t  hiByte  = HAL::i2cReadAck();
-        uint8_t  loByte  = ((i < 7) ? HAL::i2cReadAck() : HAL::i2cReadNak());
-
-        uint8_t isEEPROM = (deviceID & 0B00001000) >> 3;
-        uint8_t channel  = (deviceID & 0B00110000) >> 4;
-        if (isEEPROM == 1) {
-            _intVrefEp[channel] = (hiByte & 0B10000000) >> 7;
-            _gainEp[channel] = (hiByte & 0B00010000) >> 4;
-            _powerDownEp[channel] = (hiByte & 0B01100000) >> 5;
-            _valuesEp[channel] = word((hiByte & 0B00001111), loByte);
-        } else {
-            _intVref[channel] = (hiByte & 0B10000000) >> 7;
-            _gain[channel] = (hiByte & 0B00010000) >> 4;
-            _powerDown[channel] = (hiByte & 0B01100000) >> 5;
-            dac_motor_current[channel] = word((hiByte & 0B00001111), loByte);
-        }
-    }
-
-    HAL::i2cStop();
-}
-
-void dacAnalogUpdate(bool saveEEPROM = false) {
-    uint8_t dac_write_cmd = MCP4728_CMD_SEQ_WRITE;
-
-    HAL::i2cStartWait(MCP4728_I2C_ADDRESS + I2C_WRITE);
-    if (saveEEPROM) HAL::i2cWrite(dac_write_cmd);
-
-    for (int i = 0; i < MCP4728_NUM_CHANNELS; i++) {
-        uint16_t level = dac_motor_current[i];
-
-        uint8_t highbyte = ( _intVref[i] << 7 | _gain[i] << 4 | (uint8_t)((level) >> 8) );
-        uint8_t lowbyte =  ( (uint8_t) ((level) & 0xff) );
-        dac_write_cmd = MCP4728_CMD_MULTI_WRITE | (i << 1);
-
-        if (!saveEEPROM) HAL::i2cWrite(dac_write_cmd);
-        HAL::i2cWrite(highbyte);
-        HAL::i2cWrite(lowbyte);
-    }
-
-    HAL::i2cStop();
-
-    // Instruct the MCP4728 to reflect our updated value(s) on its DAC Outputs
-    dacSimpleCommand((uint8_t)MCP4728_CMD_GC_UPDATE); // MCP4728 General Command Software Update (Update all DAC Outputs to reflect settings)
-
-    // if (saveEEPROM) dacReadStatus(); // Not necessary, just a read-back sanity check.
-}
-
-void dacCommitEeprom() {
-    dacAnalogUpdate(true);
-    dacReadStatus(); // Refresh EEPROM Values with values actually stored in EEPROM. .
-}
-
-void dacPrintSet(int dacChannelSettings[], const char* dacChannelPrefixes[]) {
-    for (int i = 0; i < MCP4728_NUM_CHANNELS; i++) {
-        uint8_t dac_channel = dac_stepper_channel[i]; // DAC Channel is a mapped lookup.
-        Com::printF(dacChannelPrefixes[i], ((float)dacChannelSettings[dac_channel] * 100 / MCP4728_VOUT_MAX));
-        Com::printF(Com::tSpaceRaw);
-        Com::printFLN(Com::tColon,dacChannelSettings[dac_channel]);
-    }
-}
-
-void dacPrintValues() {
-    const char* dacChannelPrefixes[] = {Com::tSpaceXColon, Com::tSpaceYColon, Com::tSpaceZColon, Com::tSpaceEColon};
-
-    Com::printFLN(Com::tMCPEpromSettings);
-    dacPrintSet(_valuesEp, dacChannelPrefixes); // Once for the EEPROM set
-
-    Com::printFLN(Com::tMCPCurrentSettings);
-    dacPrintSet(dac_motor_current, dacChannelPrefixes); // And another for the RUNTIME set
-}
-
-void setMotorCurrent( uint8_t xyz_channel, uint16_t level ) {
-    if (xyz_channel >= MCP4728_NUM_CHANNELS) return;
-    uint8_t stepper_channel = dac_stepper_channel[xyz_channel];
-    dac_motor_current[stepper_channel] = level < MCP4728_VOUT_MAX ? level : MCP4728_VOUT_MAX;
-    dacAnalogUpdate();
-}
-
-void setMotorCurrentPercent( uint8_t channel, float level) {
-    uint16_t raw_level = ( level * MCP4728_VOUT_MAX / 100 );
-    setMotorCurrent(channel,raw_level);
-}
-
-void motorCurrentControlInit() { //Initialize MCP4728 Motor Current
-    HAL::i2cInit(400000); // Initialize the i2c bus.
-    dacSimpleCommand((uint8_t)MCP4728_CMD_GC_RESET); // MCP4728 General Command Reset
-    dacReadStatus(); // Load Values from EEPROM.
-
-    for(int i = 0; i < MCP4728_NUM_CHANNELS; i++) {
-        setMotorCurrent(dac_stepper_channel[i], _valuesEp[i] ); // This is not strictly necessary, but serves as a good sanity check to ensure we're all on the same page.
-    }
-}
-#endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2) {
@@ -1902,86 +1579,50 @@ void Commands::processMCode(GCode *com) {
 #endif
 
 #if FEATURE_RETRACTION
-        case 600:
+        case 600: // M600
             uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
             break;
 #endif
-        case 601:
+        case 601: // M601
             if(com->hasS() && com->S > 0)
                 Extruder::pauseExtruders();
             else
                 Extruder::unpauseExtruders();
             break;
-        case 602:
+        case 602: // M602
             Commands::waitUntilEndOfAllMoves();
             if(com->hasS()) Printer::setDebugJam(com->S > 0);
             if(com->hasP()) Printer::setJamcontrolDisabled(com->P > 0);
             break;
-        case 603:
+        case 603: // M03
             Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
-            break;
-        case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
-                // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.
-                if(com->hasS()) {
-                    for(int i = 0; i < 10; i++) {
-                        setMotorCurrentPercent(i, com->S);
-                    }
-                }
-
-                if(com->hasX()) setMotorCurrentPercent(0, (float)com->X);
-                if(com->hasY()) setMotorCurrentPercent(1, (float)com->Y);
-                if(com->hasZ()) setMotorCurrentPercent(2, (float)com->Z);
-                if(com->hasE()) setMotorCurrentPercent(3, (float)com->E);
-#endif
-            }
-            break;
-        case 908: { // M908 Control digital trimpot directly.
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
-                uint8_t channel,current;
-                if(com->hasP() && com->hasS())
-                    setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
-#endif
-            }
-            break;
-        case 909: { // M909 Read digital trimpot settings.
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-                dacPrintValues();
-#endif
-            }
-            break;
-        case 910: // M910 - Commit digipot/DAC value to external EEPROM
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-            dacCommitEeprom();
-#endif
             break;
 #if 0 && UI_DISPLAY_TYPE != NO_DISPLAY
         // some debugging commands normally disabled
-        case 888:
+        case 888: // M888
             Com::printFLN(PSTR("Selected language:"),(int)Com::selectedLanguage);
             Com::printF(PSTR("Translation:"));
             Com::printFLN(Com::translatedF(0));
             break;
-        case 889:
+        case 889: // M889
             uid.showLanguageSelectionWizard();
             break;
-        case 891:
+        case 891: // M891
             if(com->hasS())
                 EEPROM::setVersion(com->S);
             break;
 #endif
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
-        case 890: {
+        case 890: // M890
             if(com->hasX() && com->hasY()) {
                 float c = Printer::bendingCorrectionAt(com->X,com->Y);
                 Com::printF(PSTR("Bending at ("),com->X);
                 Com::printF(PSTR(","),com->Y);
                 Com::printFLN(PSTR(") = "),c);
             }
-        }
-break;
+            break;
 #endif
-        case 999: // Stop fatal error take down
+        case 999: // M999 Stop fatal error take down
             if(com->hasS())
                 GCode::fatalError(PSTR("Testing fatal error"));
             else

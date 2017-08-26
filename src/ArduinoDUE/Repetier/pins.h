@@ -10,20 +10,11 @@ CPU_ARCH
   ARCH_AVR for AVR based boards
   ARCH_ARM for all arm based boards
 
-STEPPER_CURRENT_CONTROL
-  CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
-  CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
-  CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
-  CURRENT_CONTROL_ALLIGATOR 4  //Use External DAC like Alligator
 */
 
 #define ARCH_AVR 1
 #define ARCH_ARM 2
 #define CPU_ARCH ARCH_ARM
-#define CURRENT_CONTROL_MANUAL  1  // mechanical poti, default if not defined
-#define CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
-#define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
-#define CURRENT_CONTROL_ALLIGATOR 4  //Use External DAC like Alligator
 
 /*
   arm does not have a eeprom build in. Therefore boards can add a
@@ -167,10 +158,6 @@ STEPPER_CURRENT_CONTROL
 
 #ifndef SDSSORIG
 #define SDSSORIG -1
-#endif
-
-#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
-#define STEPPER_CURRENT_CONTROL  CURRENT_CONTROL_MANUAL
 #endif
 
 #ifndef FAN_BOARD_PIN

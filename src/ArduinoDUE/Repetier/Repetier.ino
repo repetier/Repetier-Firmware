@@ -135,7 +135,6 @@ Custom M Codes
 - M600 Change filament
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
-- M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */
 
