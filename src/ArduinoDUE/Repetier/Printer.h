@@ -119,41 +119,6 @@ class Plane {
         return a * x + y * b + c;
     }
 };
-#if DISTORTION_CORRECTION
-class Distortion
-{
-public:
-    Distortion();
-    void init();
-    void enable(bool permanent = true);
-    void disable(bool permanent = true);
-    bool measure(void);
-    int32_t correct(int32_t x, int32_t y, int32_t z) const;
-    void updateDerived();
-    void reportStatus();
-    bool isEnabled() {return enabled;}
-    int32_t zMaxSteps() {return zEnd;}
-    void set(float x,float y,float z);
-    void showMatrix();
-    void resetCorrection();
-private:
-    int matrixIndex(fast8_t x, fast8_t y) const;
-    int32_t getMatrix(int index) const;
-    void setMatrix(int32_t val, int index);
-    bool isCorner(fast8_t i, fast8_t j) const;
-    INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
-    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
-    void extrapolateCorners();
-// attributes
-    int32_t xCorrectionSteps,xOffsetSteps;
-    int32_t yCorrectionSteps,yOffsetSteps;
-    int32_t zStart,zEnd;
-#if !DISTORTION_PERMANENT
-    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
-#endif
-    bool enabled;
-};
-#endif //DISTORTION_CORRECTION
 
 #define ENDSTOP_X_MIN_ID 1
 #define ENDSTOP_X_MAX_ID 2
@@ -1087,10 +1052,6 @@ public:
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane &plane);
-#endif
-#if DISTORTION_CORRECTION
-    static bool measureDistortion(void);
-    static Distortion distortion;
 #endif
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);

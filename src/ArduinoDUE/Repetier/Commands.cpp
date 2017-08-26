@@ -1113,58 +1113,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #endif
-#if DISTORTION_CORRECTION
-        case 33: {
-                if(com->hasL()) { // G33 L0 - List distortion matrix
-                    Printer::distortion.showMatrix();
-                } else if(com->hasR()) { // G33 R0 - Reset distortion matrix
-                    Printer::distortion.resetCorrection();
-                } else if(com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
-                    if(com->hasX() && com->hasY() && com->hasZ()) {
-                        Printer::distortion.set(com->X, com->Y, com->Z);
-                    } else {
-                        Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
-                    }
-                } else { // G33
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-                    float actTemp[NUM_EXTRUDER];
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-                    Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::max(EEPROM::zProbeHeight(),static_cast<float>(ZHOME_HEAT_HEIGHT)),IGNORE_COORDINATE,Printer::homingFeedrate[Z_AXIS]);
-                    Commands::waitUntilEndOfAllMoves();
-#if ZHOME_HEAT_ALL
-                    for(int i = 0; i < NUM_EXTRUDER; i++) {
-                        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,false);
-                    }
-                    for(int i = 0; i < NUM_EXTRUDER; i++) {
-                        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),i,false,true);
-                    }
-#else
-                    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-                        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id],static_cast<float>(ZPROBE_MIN_TEMPERATURE)),Extruder::current->id,false,true);
-#endif
-#endif
-                    float oldFeedrate = Printer::feedrate;
-                    if(!Printer::measureDistortion()) {
-                        GCode::fatalError(PSTR("G33 failed!"));
-                        break;
-                    }
-                    Printer::feedrate = oldFeedrate;
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-#if ZHOME_HEAT_ALL
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        Extruder::setTemperatureForExtruder(actTemp[i],i,false,false);
-                    for(int i = 0; i < NUM_EXTRUDER; i++)
-                        Extruder::setTemperatureForExtruder(actTemp[i],i,false, actTemp[i] > MAX_ROOM_TEMPERATURE);
-#else
-                    Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
-#endif
-#endif
-                }
-            }
-            break;
-#endif
+
 #endif
         case 90: // G90
             Printer::relativeCoordinateMode = false;
@@ -1889,18 +1838,6 @@ void Commands::processMCode(GCode *com) {
             }
             break;
 #endif // FEATURE_AUTOLEVEL
-#if DISTORTION_CORRECTION
-        case 323: // M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
-            if(com->hasS()) {
-                if(com->S > 0)
-                    Printer::distortion.enable(com->hasP() && com->P == 1);
-                else
-                    Printer::distortion.disable(com->hasP() && com->P == 1);
-            } else {
-                Printer::distortion.reportStatus();
-            }
-            break;
-#endif // DISTORTION_CORRECTION
 #if FEATURE_SERVO
         case 340: // M340
             if(com->hasP() && com->P<4 && com->P>=0) {

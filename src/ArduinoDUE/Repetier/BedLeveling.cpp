@@ -88,7 +88,7 @@ point 1 is mirrored to 1m across the axis. Using the symmetry we then remove the
 from 1 and use that as plane.
 
 By now the leveling process is finished. All errors that remain are measuring errors and bumps on
-the bed it self. For deltas you can enable distortion correction to follow the bumps.
+the bed it self.
 
 There are 2 ways to consider a changing bed coating, which are defined by Z_PROBE_Z_OFFSET_MODE.
 Z_PROBE_Z_OFFSET_MODE = 0 means we measure the surface of the bed below any coating. This is e.g. 
@@ -284,10 +284,6 @@ S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 bool runBedLeveling(GCode *com) {
     float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
     int s = com->hasS() ? com->S : -1;
-#if DISTORTION_CORRECTION
-    bool distEnabled = Printer::distortion.isEnabled();
-    Printer::distortion.disable(false); // if level has changed, distortion is also invalid
-#endif
     Printer::setAutolevelActive(false); // iterate
     Printer::resetTransformationMatrix(true); // in case we switch from matrix to motorized!
     Printer::startProbing(true);
@@ -336,10 +332,6 @@ bool runBedLeveling(GCode *com) {
     }
     Printer::updateCurrentPosition(true);
     Commands::printCurrentPosition(PSTR("G32 "));
-#if DISTORTION_CORRECTION
-    if(distEnabled)
-        Printer::distortion.enable(false); // if level has changed, distortion is also invalid
-#endif
     Printer::feedrate = oldFeedrate;
     return true;
 }
@@ -476,27 +468,10 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 #if Z_PROBE_Z_OFFSET_MODE == 1
     distance += EEPROM::zProbeZOffset(); // We measured including coating, so we need to add coating thickness!
 #endif
-#if DISTORTION_CORRECTION
-    float zCorr = 0;
-    if(Printer::distortion.isEnabled()) {
-        zCorr = distortion.correct(currentPositionSteps[X_AXIS] + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS],currentPositionSteps[Y_AXIS]
-                                   + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS],0) * invAxisStepsPerMM[Z_AXIS];
-        distance += zCorr;
-    }
-#endif
     distance += bendingCorrectionAt(currentPosition[X_AXIS], currentPosition[Y_AXIS]);
     Com::printF(Com::tZProbe, distance);
     Com::printF(Com::tSpaceXColon, realXPosition());
-#if DISTORTION_CORRECTION
-    if(Printer::distortion.isEnabled()) {
-        Com::printF(Com::tSpaceYColon, realYPosition());
-        Com::printFLN(PSTR(" zCorr:"), zCorr);
-    } else {
-        Com::printFLN(Com::tSpaceYColon, realYPosition());
-    }
-#else
     Com::printFLN(Com::tSpaceYColon, realYPosition());
-#endif
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, EEPROM::zProbeSpeed(), true, true);
     if(Endstops::zProbe()) {

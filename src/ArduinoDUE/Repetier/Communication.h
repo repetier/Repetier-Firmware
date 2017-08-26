@@ -350,10 +350,6 @@ FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
-#if DISTORTION_CORRECTION
-FSTRINGVAR(tZCorrectionEnabled)
-FSTRINGVAR(tZCorrectionDisabled)
-#endif
 #if FEATURE_RETRACTION
 FSTRINGVAR(tEPRAutoretractEnabled)
 FSTRINGVAR(tEPRRetractionLength)

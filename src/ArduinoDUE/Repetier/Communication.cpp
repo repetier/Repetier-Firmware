@@ -362,10 +362,6 @@ FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
 FSTRINGVALUE(Com::tHeaterDecoupled,"Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning,"One heater seems decoupled from thermistor - disabling all for safety!")
-#if DISTORTION_CORRECTION
-FSTRINGVALUE(Com::tZCorrectionEnabled,"Z correction enabled")
-FSTRINGVALUE(Com::tZCorrectionDisabled,"Z correction disabled")
-#endif
 #if FEATURE_RETRACTION
 FSTRINGVALUE(Com::tEPRAutoretractEnabled,"Enable retraction conversion [0/1]")
 FSTRINGVALUE(Com::tEPRRetractionLength,"Retraction length [mm]")

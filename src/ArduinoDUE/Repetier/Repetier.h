@@ -220,12 +220,6 @@ inline void memcopy4(void *dest,void *source) {
 #error You need to define Z_PROBE_PIN to use z probe!
 #endif
 
-#if DISTORTION_CORRECTION
-#if !FEATURE_Z_PROBE
-#error Distortion correction requires the z probe feature to be enabled and configured!
-#endif
-#endif
-
 #ifndef MAX_ROOM_TEMPERATURE
 #define MAX_ROOM_TEMPERATURE 40
 #endif
