@@ -158,13 +158,10 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         p->secondSpeed = Printer::fanSpeed;
         if(axis == E_AXIS)
         {
-            if(Printer::mode == PRINTER_MODE_FFF)
-            {
-                Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
-                p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
-                Printer::extrudeMultiplyError -= p->delta[E_AXIS];
-                Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
-            }
+            Printer::extrudeMultiplyError += (static_cast<float>(p->delta[E_AXIS]) * Printer::extrusionFactor);
+            p->delta[E_AXIS] = static_cast<int32_t>(Printer::extrudeMultiplyError);
+            Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+            Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -1138,9 +1135,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
 #endif
         cur->updateAdvanceSteps(cur->vStart, 0, false);
 #endif
-        if(Printer::mode == PRINTER_MODE_FFF) {
-            Printer::setFanSpeedDirectly(cur->secondSpeed);
-        }
+        Printer::setFanSpeedDirectly(cur->secondSpeed);
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     cur->checkEndstops();
@@ -1285,9 +1280,7 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         if(linesCount == 0)
         {
             UI_STATUS_F(Com::translatedF(UI_TEXT_IDLE_ID));
-            if(Printer::mode == PRINTER_MODE_FFF) {
-                Printer::setFanSpeedDirectly(Printer::fanSpeed);
-            }
+            Printer::setFanSpeedDirectly(Printer::fanSpeed);
         }
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;

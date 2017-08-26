@@ -379,9 +379,6 @@ FSTRINGVALUE(Com::tExtrDot,"Extr.")
 FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
 FSTRINGVALUE(Com::tMCPCurrentSettings,"MCP4728 DAC Current Settings:")
 #endif
-FSTRINGVALUE(Com::tPrinterModeFFF,"PrinterMode:FFF")
-FSTRINGVALUE(Com::tPrinterModeLaser,"PrinterMode:Laser")
-FSTRINGVALUE(Com::tPrinterModeCNC,"PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode,STARTUP_GCODE)
 #endif

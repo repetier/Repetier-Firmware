@@ -64,9 +64,6 @@ RepRap M Codes
 
 Custom M Codes
 
-- M3 - Spindle on, Clockwise during G1 moves.
-- M4 - Spindle on, Counterclockwise.
-- M5 - Spindle off.
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card
@@ -130,9 +127,6 @@ Custom M Codes
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
-- M450 - Reports printer mode
-- M451 - Set printer mode to FFF
-- M453 - Set printer mode to CNC
 - M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM

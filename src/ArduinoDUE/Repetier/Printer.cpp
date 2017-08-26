@@ -54,7 +54,6 @@ uint8_t Printer::flag2 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 fast8_t Printer::stepsPerTimerCall = 1;
 uint8_t Printer::menuMode = 0;
-uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 uint8_t Printer::fanSpeed = 0; // Last fan speed set with M106/M107
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
@@ -346,16 +345,6 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
     #endif
 }
 
-void Printer::reportPrinterMode() {
-    switch(Printer::mode) {
-    case PRINTER_MODE_FFF:
-        Com::printFLN(Com::tPrinterModeFFF);
-        break;
-    case PRINTER_MODE_CNC:
-        Com::printFLN(Com::tPrinterModeCNC);
-        break;
-    }
-}
 void Printer::updateDerivedParameter()
 {
     xMaxSteps = static_cast<int32_t>(axisStepsPerMM[X_AXIS] * (xMin + xLength));
@@ -900,9 +889,6 @@ void Printer::setup()
     SET_OUTPUT(EXP_VOLTAGE_LEVEL_PIN);
     WRITE(EXP_VOLTAGE_LEVEL_PIN,UI_VOLTAGE_LEVEL);
 #endif // UI_VOLTAGE_LEVEL
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    CNCDriver::initialize();
-#endif // defined
 
 #if GANTRY
     Printer::motorX = 0;

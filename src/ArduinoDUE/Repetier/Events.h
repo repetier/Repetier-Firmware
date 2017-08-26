@@ -56,15 +56,6 @@ Each of the following events describe the parameter and when it is called.
 // Gets called after a M999 to continue from fatal errors
 #define EVENT_CONTINUE_FROM_FATAL_ERROR
 
-// Called to initialize CNC pins. Return false to prevent default initialization.
-#define EVENT_INITALIZE_CNC true
-// Turn off spindle
-#define EVENT_SPINDLE_OFF true
-// Turn spindle clockwise
-#define EVENT_SPINDLE_CW(rpm) true
-// Turn spindle counter clockwise
-#define EVENT_SPINDLE_CCW(rpm) true
-
 // Allow adding new G and M codes. To implement it create a function
 // bool eventUnhandledGCode(GCode *com);
 // that returns true if it handled the code, otherwise false.

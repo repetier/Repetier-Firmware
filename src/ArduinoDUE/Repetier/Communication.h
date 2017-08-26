@@ -367,9 +367,6 @@ FSTRINGVAR(tExtrDot)
 FSTRINGVAR(tMCPEpromSettings)
 FSTRINGVAR(tMCPCurrentSettings)
 #endif
-FSTRINGVAR(tPrinterModeFFF)
-FSTRINGVAR(tPrinterModeLaser)
-FSTRINGVAR(tPrinterModeCNC)
 #ifdef STARTUP_GCODE
 FSTRINGVAR(tStartupGCode)
 #endif

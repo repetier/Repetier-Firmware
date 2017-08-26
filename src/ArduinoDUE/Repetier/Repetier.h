@@ -155,9 +155,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
-#define PRINTER_MODE_FFF 0
-#define PRINTER_MODE_CNC 2
-
 #define ILLEGAL_Z_PROBE -888
 
 // we can not prevent this as some configurations need a parameter and others not

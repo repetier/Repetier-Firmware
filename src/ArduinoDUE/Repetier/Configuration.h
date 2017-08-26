@@ -753,30 +753,6 @@ A good start is 30 lower then the optimal value. You need to leave room for cool
 #define MAX_DEFECT_TEMPERATURE 300 // Felix 300
 
 // ##########################################################################################
-// ##                              CNC configuration                                       ##
-// ##########################################################################################
-
-/** If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works
-similar to laser mode, but mill keeps enabled during G0 moves and it allows
-setting rpm (only with event extension that supports this) and milling direction.
-It also can add a delay to wait for spindle to run on full speed.
-*/
-
-#define SUPPORT_CNC 0 // Set 1 for CNC support
-#define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
-#define CNC_WAIT_ON_DISABLE 0 // delay in milliseconds after disabling spindle. May be required for direction changes.
-#define CNC_ENABLE_PIN -1 // Pin to enable mill
-#define CNC_ENABLE_WITH 1 // Set 0 if low enables spindle
-#define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
-#define CNC_DIRECTION_CW 1 // Set signal required for clockwise rotation
-
-/** Select the default mode when the printer gets enables. Possible values are
-PRINTER_MODE_FFF 0
-PRINTER_MODE_CNC 2
-*/
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
-
-// ##########################################################################################
 // ##                            Endstop configuration                                     ##
 // ##########################################################################################
 

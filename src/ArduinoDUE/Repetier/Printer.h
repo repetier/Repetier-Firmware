@@ -231,16 +231,6 @@ public:
     }
 };
 
-#ifndef DEFAULT_PRINTER_MODE
-#if NUM_EXTRUDER > 0
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
-#elif defined(SUPPORT_CNC) && SUPPORT_CNC
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_CNC
-#else
-#error No supported printer mode compiled
-#endif
-#endif
-
 class Printer
 {
     static uint8_t debugLevel;
@@ -353,7 +343,6 @@ public:
         if(highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
-    static void reportPrinterMode();
     static INLINE void setMenuMode(uint8_t mode,bool on)
     {
         if(on)

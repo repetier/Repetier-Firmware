@@ -220,10 +220,8 @@ void Commands::setFanSpeed(int speed, bool immediately) {
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed != 0);
     Printer::fanSpeed = speed;
     if(PrintLine::linesCount == 0 || immediately) {
-        if(Printer::mode == PRINTER_MODE_FFF) {
-            for(fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
-                PrintLine::lines[i].secondSpeed = speed;         // fill all printline buffers with new fan speed value
-        }
+        for(fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+            PrintLine::lines[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
         Printer::setFanSpeedDirectly(speed);
     }
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
@@ -1231,30 +1229,6 @@ void Commands::processGCode(GCode *com) {
 */
 void Commands::processMCode(GCode *com) {
     switch( com->M ) {
-        case 3: // Spindle on
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-            if(Printer::mode == PRINTER_MODE_CNC) {
-                waitUntilEndOfAllMoves();
-                CNCDriver::spindleOnCW(com->hasS() ? com->S : 0);
-            }
-#endif // defined
-            break;
-        case 4: // Spindle CCW
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-            if(Printer::mode == PRINTER_MODE_CNC) {
-                waitUntilEndOfAllMoves();
-                CNCDriver::spindleOnCCW(com->hasS() ? com->S : 0);
-            }
-#endif // defined
-            break;
-        case 5: // Spindle off
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-            if(Printer::mode == PRINTER_MODE_CNC) {
-                waitUntilEndOfAllMoves();
-                CNCDriver::spindleOff();
-            }
-#endif // defined
-            break;
 #if SDSUPPORT
         case 20: // M20 - list SD card
 #if JSON_OUTPUT
@@ -1532,7 +1506,6 @@ void Commands::processMCode(GCode *com) {
         case 115: // M115
             Com::printFLN(Com::tFirmware);
             reportPrinterUsage();
-            Printer::reportPrinterMode();
             break;
         case 114: // M114
             printCurrentPosition(PSTR("M114 "));
@@ -1839,23 +1812,10 @@ void Commands::processMCode(GCode *com) {
             Printer::GoToMemoryPosition(com->hasX(),com->hasY(),com->hasZ(),com->hasE(),(com->hasF() ? com->F : Printer::feedrate));
             break;
 #if JSON_OUTPUT
-        case 408:
+        case 408: // M408
             Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
             break;
 #endif
-        case 450:
-            Printer::reportPrinterMode();
-            break;
-        case 451:
-            Printer::mode = PRINTER_MODE_FFF;
-            Printer::reportPrinterMode();
-            break;
-        case 453:
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-            Printer::mode = PRINTER_MODE_CNC;
-#endif
-            Printer::reportPrinterMode();
-            break;
 #if FAN_THERMO_PIN > -1
         case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
             if(com->hasX())
