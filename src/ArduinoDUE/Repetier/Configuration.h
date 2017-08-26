@@ -74,12 +74,10 @@ is a full cartesian system where x, y and z moves are handled by separate motors
 0 = full cartesian system, xyz have separate motors.
 1 = z axis + xy H-gantry (x_motor = x+y, y_motor = x-y)
 2 = z axis + xy H-gantry (x_motor = x+y, y_motor = y-x)
-3 = Delta printers (Rostock, Kossel, RostockMax, Cerberus, etc)
-4 = Tuga printer (Scott-Russell mechanism)
-5 = Bipod system (not implemented)
 8 = y axis + xz H-gantry (x_motor = x+z, z_motor = x-z)
 9 = y axis + xz H-gantry (x_motor = x+z, z_motor = z-x)
-Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get results mirrored etc. you can swap motor connections for x and y.
+Cases 1, 2, 8 and 9 cover all needed xy and xz H gantry systems. If you get results mirrored etc. 
+  you can swap motor connections for x and y.
 If a motor turns in the wrong direction change INVERT_X_DIR or INVERT_Y_DIR.
 */
 #define DRIVE_SYSTEM 1
@@ -95,28 +93,24 @@ pins. Separate multiple GCODEs with \n
 // ##                               Calibration                                            ##
 // ##########################################################################################
 
-/* Drive settings for the Delta printers */
-#if DRIVE_SYSTEM == DELTA
-#else
-  // *******************************************************
-  // *** These parameter are for all other printer types ***
-  // *******************************************************
+// *******************************************************
+// *** These parameter are for all other printer types ***
+// *******************************************************
 
-  /** Drive settings for printers with cartesian drive systems.
-  \brief Number of steps for a 1mm move in x direction.
-  For xy gantry use 2*belt moved!
-  Overridden if EEPROM activated.
-  */
-  #define XAXIS_STEPS_PER_MM 400.0 * 64.0 * 2 / (18.0 * 3.0) // motor steps/rev * microsteps * 2 for CoreXY / (belt wheel teeth * pitch)
-  /** \brief Number of steps for a 1mm move in y direction.
-  For xy gantry use 2*belt moved!
-  Overridden if EEPROM activated.
-  */
-  #define YAXIS_STEPS_PER_MM 400.0 * 64.0 * 2 / (18.0 * 3.0) // motor steps/rev * microsteps * 2 for CoreXY / (belt wheel teeth * pitch)
-  /** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.
-  */
-  #define ZAXIS_STEPS_PER_MM 400.0 * 64.0 / 5.0 // motor steps/rev * pitch
-#endif
+/** Drive settings for printers with cartesian drive systems.
+\brief Number of steps for a 1mm move in x direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated.
+*/
+#define XAXIS_STEPS_PER_MM 400.0 * 64.0 * 2 / (18.0 * 3.0) // motor steps/rev * microsteps * 2 for CoreXY / (belt wheel teeth * pitch)
+/** \brief Number of steps for a 1mm move in y direction.
+For xy gantry use 2*belt moved!
+Overridden if EEPROM activated.
+*/
+#define YAXIS_STEPS_PER_MM 400.0 * 64.0 * 2 / (18.0 * 3.0) // motor steps/rev * microsteps * 2 for CoreXY / (belt wheel teeth * pitch)
+/** \brief Number of steps for a 1mm move in z direction  Overridden if EEPROM activated.
+*/
+#define ZAXIS_STEPS_PER_MM 400.0 * 64.0 / 5.0 // motor steps/rev * pitch
 
 // ##########################################################################################
 // ##                           Extruder configuration                                     ##
@@ -933,107 +927,6 @@ turn z off when heaters get also disabled.
 
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU. Currently only works for RAMBO boards
 #define MICROSTEP_MODES {128,128,128,128,128} // [1,2,4,8,16]
-
-/* \brief Number of segments to generate for delta conversions per second of move. */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 600 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 600 // Less accurate setting for other moves
-
-// Delta settings
-#if DRIVE_SYSTEM == DELTA
-
-/* \brief Delta rod length (mm). */
-#define DELTA_DIAGONAL_ROD 345 // mm
-
-
-/**  =========== Parameter essential for delta calibration ===================
-
-            C, Y-Axis
-            |                        |___| CARRIAGE_HORIZONTAL_OFFSET (recommend set it to 0)
-            |                        |   \------------------------------------------
-            |_________ X-axis        |    \                                        |
-           / \                       |     \  DELTA_DIAGONAL_ROD (length)    Each move this Rod Height
-          /   \                             \                                 is calculated
-         /     \                             \    Carriage is at printer center!   |
-         A      B                             \_____/--------------------------------
-                                              |--| END_EFFECTOR_HORIZONTAL_OFFSET (recommend set it to 0)
-                                         |----| ROD_RADIUS (Horizontal rod pivot to pivot measure)
-                                     |-----------| PRINTER_RADIUS (recommend set it to ROD_RADIUS)
-
-Column angles are measured from X-axis counterclockwise
-"Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
-*/
-
-/* \brief column positions - change only to correct build imperfections! */
-#define DELTA_ALPHA_A 210
-#define DELTA_ALPHA_B 330
-#define DELTA_ALPHA_C 90
-
-/* Correct radius by this value for each column. Perfect builds have 0 everywhere. */
-#define DELTA_RADIUS_CORRECTION_A 0
-#define DELTA_RADIUS_CORRECTION_B 0
-#define DELTA_RADIUS_CORRECTION_C 0
-
-/* Correction of the default diagonal size. Value gets added.*/
-#define DELTA_DIAGONAL_CORRECTION_A 0
-#define DELTA_DIAGONAL_CORRECTION_B 0
-#define DELTA_DIAGONAL_CORRECTION_C 0
-
-/* Max. radius (mm) the printer should be able to reach. */
-#define DELTA_MAX_RADIUS 200
-
-// Margin (mm) to avoid above tower minimum (xMin xMinsteps)
-// If your printer can put its carriage low enough the rod is horizontal without hitting the floor
-// set this to zero. Otherwise, measure how high the carriage is from horizontal rod
-// Also, movement speeds are 10x to 20x cartesian speeds at tower bottom.
-// You may need to leave a few mm for safety.
-// Hitting floor at high speed can damage your printer (motors, drives, etc)
-// THIS MAY NEED UPDATING IF THE HOT END HEIGHT CHANGES!
-#define DELTA_FLOOR_SAFETY_MARGIN_MM 15
-
-/* \brief Horizontal offset of the universal joints on the end effector (moving platform). */
-#define END_EFFECTOR_HORIZONTAL_OFFSET 0
-
-/** \brief Horizontal offset of the universal joints on the vertical carriages. */
-#define CARRIAGE_HORIZONTAL_OFFSET 0
-
-/** \brief Printer radius in mm,
-measured from the center of the print area to the vertical smooth tower.
-Alternately set this to the pivot to pivot horizontal rod distance, when head is at (0,0)
-*/
-#define PRINTER_RADIUS 265.25
-
-/** When true the delta will home to z max when reset/powered over cord. That way you start with well defined coordinates.
-If you don't do it, make sure to home first before your first move.
-*/
-#define DELTA_HOME_ON_POWER 0
-
-/** To allow software correction of misaligned endstops, you can set the correction in steps here. If you have EEPROM enabled
-you can also change the values online and autoleveling will store the results here.
-*/
-#define DELTA_X_ENDSTOP_OFFSET_STEPS 0
-#define DELTA_Y_ENDSTOP_OFFSET_STEPS 0
-#define DELTA_Z_ENDSTOP_OFFSET_STEPS 0
-
-#endif
-
-// ========== Tuga special settings =============
-#if DRIVE_SYSTEM==TUGA
-
-/* Radius of the long arm in mm. */
-#define DELTA_DIAGONAL_ROD 240
-#endif
-
-/** \brief Number of delta moves in each line. Moves that exceed this figure will be split into multiple lines.
-Increasing this figure can use a lot of memory since 7 bytes * size of line buffer * MAX_SELTA_SEGMENTS_PER_LINE
-will be allocated for the delta buffer.
-PrintLine PrintLine::lines[PRINTLINE_CACHE_SIZE (default 16?)];
-Printline is about 200 bytes + 7 * DELTASEGMENTS_PER_PRINTLINE
-or 16 * (200 + (7*22=154) = 354) = 5664 bytes! !1
-min is 5 * (200 + (7*10=70) =270) = 1350
-This leaves ~1K free RAM on an Arduino which has only 8k
-Mega. Used only for nonlinear systems like delta or tuga.
-*/
-#define DELTASEGMENTS_PER_PRINTLINE 22
 
 /** After x seconds of inactivity, the stepper motors are disabled.
 Set to 0 to leave them enabled.

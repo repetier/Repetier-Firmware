@@ -556,7 +556,7 @@ union csd_t {
 /**
  * Don't use mult-block read/write on small AVR boards
  */
-#if defined(RAMEND) && (RAMEND < 3000 || (NONLINEAR_SYSTEM && RAMEND<8000))
+#if defined(RAMEND) && (RAMEND < 3000)
 #define USE_MULTI_BLOCK_SD_IO 0
 #else
 #define USE_MULTI_BLOCK_SD_IO 1

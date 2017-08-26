@@ -26,9 +26,7 @@ uint8_t Com::selectedLanguage;
 #endif
 
 #ifndef MACHINE_TYPE
-#if DRIVE_SYSTEM == DELTA
-#define MACHINE_TYPE "Delta"
-#elif DRIVE_SYSTEM == CARTESIAN
+#if DRIVE_SYSTEM == CARTESIAN
 #define MACHINE_TYPE "Mendel"
 #else
 #define MACHINE_TYPE "Core_XY"
@@ -148,39 +146,7 @@ FSTRINGVALUE(Com::tQuadraticKColon," quadratic K:")
 FSTRINGVALUE(Com::tFilamentSlipping,"Filament slipping")
 FSTRINGVALUE(Com::tPauseCommunication,"// action:pause")
 FSTRINGVALUE(Com::tContinueCommunication,"// action:resume")
-#if DRIVE_SYSTEM == DELTA
-FSTRINGVALUE(Com::tMeasurementReset,"Measurement reset.")
-FSTRINGVALUE(Com::tMeasureDeltaSteps,"Measure/delta (Steps) =")
-FSTRINGVALUE(Com::tMeasureDelta,"Measure/delta =")
-FSTRINGVALUE(Com::tMeasureOriginReset,"Measured origin set. Measurement reset.")
-FSTRINGVALUE(Com::tMeasurementAbortedOrigin,"Origin measurement cannot be set.  Use only Z-Cartesian (straight up and down) movements and try again.")
-FSTRINGVALUE(Com::tLevelingCalc,"Leveling calc:")
-FSTRINGVALUE(Com::tTower1,"Tower 1:")
-FSTRINGVALUE(Com::tTower2,"Tower 2:")
-FSTRINGVALUE(Com::tTower3,"Tower 3:")
-FSTRINGVALUE(Com::tDeltaAlphaA,"Alpha A(210):")
-FSTRINGVALUE(Com::tDeltaAlphaB,"Alpha B(330):")
-FSTRINGVALUE(Com::tDeltaAlphaC,"Alpha C(90):")
-FSTRINGVALUE(Com::tDeltaRadiusCorrectionA,"Delta Radius A(0):")
-FSTRINGVALUE(Com::tDeltaRadiusCorrectionB,"Delta Radius B(0):")
-FSTRINGVALUE(Com::tDeltaRadiusCorrectionC,"Delta Radius C(0):")
-#endif // DRIVE_SYSTEM
-#if NONLINEAR_SYSTEM
-#if DRIVE_SYSTEM == TUGA
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#elif DRIVE_SYSTEM == DELTA
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid delta coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#else
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate,"Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment,"No move in segment with > 1 segment. This should never happen and may cause a problem!")
-#endif
-#endif
 
-#if DRIVE_SYSTEM==TUGA
-FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Long arm length [mm]")
-#endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
 FSTRINGVALUE(Com::tGenTemp,"GenTemp:")
 #endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
@@ -318,30 +284,7 @@ FSTRINGVALUE(Com::tEPRYBacklash,"Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash,"Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk,"Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop,"Acceleration factor at top [%,100=like bottom]")
-#if NONLINEAR_SYSTEM
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint,"Segments/s for printing")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel,"Segments/s for travel")
-#endif
-#if DRIVE_SYSTEM==DELTA
-FSTRINGVALUE(Com::tEPRZAcceleration,"Acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Travel acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZStepsPerMM,"Steps per mm")
-FSTRINGVALUE(Com::tEPRZMaxFeedrate,"Max. feedrate [mm/s]")
-FSTRINGVALUE(Com::tEPRZHomingFeedrate,"Homing feedrate [mm/s]")
 
-FSTRINGVALUE(Com::tEPRDiagonalRodLength,"Diagonal rod length [mm]")
-FSTRINGVALUE(Com::tEPRHorizontalRadius,"Horizontal rod radius at 0,0 [mm]")
-
-FSTRINGVALUE(Com::tEPRTowerXOffset,"Tower X endstop offset [steps]")
-FSTRINGVALUE(Com::tEPRTowerYOffset,"Tower Y endstop offset [steps]")
-FSTRINGVALUE(Com::tEPRTowerZOffset,"Tower Z endstop offset [steps]")
-
-FSTRINGVALUE(Com::tEPRDeltaMaxRadius,"Max printable radius [mm]")
-FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA,"Corr. diagonal A [mm]")
-FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB,"Corr. diagonal B [mm]")
-FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC,"Corr. diagonal C [mm]")
-
-#else
 FSTRINGVALUE(Com::tEPRMaxZJerk,"Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM,"X-axis steps per mm")
 FSTRINGVALUE(Com::tEPRYStepsPerMM,"Y-axis steps per mm")
@@ -358,7 +301,7 @@ FSTRINGVALUE(Com::tEPRZAcceleration,"Z-axis acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRXTravelAcceleration,"X-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRYTravelAcceleration,"Y-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Z-axis travel acceleration [mm/s^2]")
-#endif
+
 FSTRINGVALUE(Com::tEPROPSMode,"OPS operation mode [0=Off,1=Classic,2=Fast]")
 FSTRINGVALUE(Com::tEPROPSMoveAfter,"OPS move after x% retract [%]")
 FSTRINGVALUE(Com::tEPROPSMinDistance,"OPS min. distance for fil. retraction [mm]")

@@ -73,9 +73,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CARTESIAN 0
 #define XY_GANTRY 1
 #define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
 #define GANTRY_FAKE 10
@@ -200,24 +197,9 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #endif
 #define XY_GANTRY 1
 #define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
-#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
-#undef FAST_COREXYZ
-#endif
-#ifdef FAST_COREXYZ
-#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
-#undef DELTA_SEGMENTS_PER_SECOND_PRINT
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
-#endif
-#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
-#undef DELTA_SEGMENTS_PER_SECOND_MOVE
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 30
-#endif
-#endif
+
 
 inline void memcopy2(void *dest,void *source) {
     *((int16_t*)dest) = *((int16_t*)source);
@@ -283,21 +265,8 @@ inline void memcopy4(void *dest,void *source) {
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
-/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
-*/
-#if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
-#define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
-#endif
-
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
-#endif
-
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
-#define NONLINEAR_SYSTEM 1
-#else
-#define NONLINEAR_SYSTEM 0
 #endif
 
 #ifdef FEATURE_Z_PROBE
@@ -831,13 +800,6 @@ extern float maxadvspeed;
 void manage_inactivity(uint8_t debug);
 
 extern void finishNextSegment();
-#if NONLINEAR_SYSTEM
-extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#if SOFTWARE_LEVELING
-extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
-extern float calcZOffset(long factors[], long pointX, long pointY);
-#endif
-#endif
 extern void linear_move(long steps_remaining[]);
 #ifndef FEATURE_DITTO_PRINTING
 #define FEATURE_DITTO_PRINTING false
@@ -951,9 +913,6 @@ extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 extern int debugWaitLoop;
 #endif
 
-#if NONLINEAR_SYSTEM
-#define NUM_AXIS 4
-#endif
 
 #define STR(s) #s
 #define XSTR(s) STR(s)

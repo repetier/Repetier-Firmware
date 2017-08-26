@@ -290,27 +290,12 @@ bool runBedLeveling(GCode *com) {
 #endif
     Printer::setAutolevelActive(false); // iterate
     Printer::resetTransformationMatrix(true); // in case we switch from matrix to motorized!
-#if DRIVE_SYSTEM == DELTA
-    // It is not possible to go to the edges at the top, also users try
-    // it often and wonder why the coordinate system is then wrong.
-    // For that reason we ensure a correct behavior by code.
-    Printer::homeAxis(true, true, true);
-    Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-#endif
     Printer::startProbing(true);
     //GCode::executeFString(Com::tZProbeStartScript);
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
     Plane plane;
 #if BED_CORRECTION_METHOD == 1
     for(int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
-#if DRIVE_SYSTEM == DELTA
-        if(r > 0) {
-            Printer::finishProbing();
-            Printer::homeAxis(true, true, true);
-            Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-            Printer::startProbing(true);
-        }
-#endif
 #endif
         if(!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
@@ -355,9 +340,6 @@ bool runBedLeveling(GCode *com) {
     if(distEnabled)
         Printer::distortion.enable(false); // if level has changed, distortion is also invalid
 #endif
-#if DRIVE_SYSTEM == DELTA
-    Printer::homeAxis(true, true, true); // shifting z makes positioning invalid, need to recalibrate
-#endif
     Printer::feedrate = oldFeedrate;
     return true;
 }
@@ -377,9 +359,6 @@ void Printer::setAutolevelActive(bool on) {
 }
 #if MAX_HARDWARE_ENDSTOP_Z
 float Printer::runZMaxProbe() {
-#if NONLINEAR_SYSTEM
-    long startZ = realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
-#endif
     Commands::waitUntilEndOfAllMoves();
     long probeDepth = 2*(Printer::zMaxSteps-Printer::zMinSteps);
     stepsRemainingAtZHit = -1;
@@ -391,11 +370,7 @@ float Printer::runZMaxProbe() {
     }
     setZProbingActive(false);
     currentPositionSteps[Z_AXIS] -= stepsRemainingAtZHit;
-#if NONLINEAR_SYSTEM
-    probeDepth -= (realDeltaPositionSteps[Z_AXIS] - startZ);
-#else
     probeDepth -= stepsRemainingAtZHit;
-#endif
     float distance = (float)probeDepth * invAxisStepsPerMM[Z_AXIS];
     Com::printF(Com::tZProbeMax,distance);
     Com::printF(Com::tSpaceXColon,realXPosition());
@@ -465,9 +440,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     int32_t sum = 0, probeDepth;
     int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
     int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
-#if NONLINEAR_SYSTEM
-    realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
-#endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
     Endstops::update();
@@ -489,14 +461,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
             return ILLEGAL_Z_PROBE;
         }
         setZProbingActive(false);
-#if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentNonlinearPositionSteps[C_TOWER]; // nonlinear moves may split z so stepsRemainingAtZHit is only what is left from last segment not total move. This corrects the problem.
-#endif
-#if DRIVE_SYSTEM == DELTA
-        currentNonlinearPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
-        currentNonlinearPositionSteps[B_TOWER] += stepsRemainingAtZHit;
-        currentNonlinearPositionSteps[C_TOWER] += stepsRemainingAtZHit;
-#endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
         if(r + 1 < repeat) {

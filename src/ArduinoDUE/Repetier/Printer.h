@@ -33,10 +33,6 @@ Level 3: Transformed and shifter => Include extruder offset and bed rotation.
 Level 4: Step position => Level 3 converted into steps for motor position
         currentPositionSteps and destinationPositionSteps are from this level.
 
-Level 5: Nonlinear motor step position, only for nonlinear drive systems
-         destinationDeltaSteps
-
-
 */
 
 #ifndef PRINTER_H_INCLUDED
@@ -149,13 +145,8 @@ private:
     void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
     void extrapolateCorners();
 // attributes
-#if DRIVE_SYSTEM == DELTA
-    int32_t step;
-    int32_t radiusCorrectionSteps;
-#else
     int32_t xCorrectionSteps,xOffsetSteps;
     int32_t yCorrectionSteps,yOffsetSteps;
-#endif
     int32_t zStart,zEnd;
 #if !DISTORTION_PERMANENT
     int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
@@ -329,40 +320,11 @@ public:
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
-#if NONLINEAR_SYSTEM
-    static int32_t maxDeltaPositionSteps;
-    static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
-    static floatLong deltaDiagonalStepsSquaredA;
-    static floatLong deltaDiagonalStepsSquaredB;
-    static floatLong deltaDiagonalStepsSquaredC;
-    static float deltaMaxRadiusSquared;
-    static int32_t deltaFloorSafetyMarginSteps;
-    static int32_t deltaAPosXSteps;
-    static int32_t deltaAPosYSteps;
-    static int32_t deltaBPosXSteps;
-    static int32_t deltaBPosYSteps;
-    static int32_t deltaCPosXSteps;
-    static int32_t deltaCPosYSteps;
-    static int32_t realDeltaPositionSteps[TOWER_ARRAY];
-    static int16_t travelMovesPerSecond;
-    static int16_t printMovesPerSecond;
-    static float radius0;
-#endif
-#if DRIVE_SYSTEM != DELTA
     static int32_t zCorrectionStepsIncluded;
-#endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
     static int32_t stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM == DELTA
-    static int32_t stepsRemainingAtXHit;
-    static int32_t stepsRemainingAtYHit;
-#endif
-#ifdef SOFTWARE_LEVELING
-    static int32_t levelingP1[3];
-    static int32_t levelingP2[3];
-    static int32_t levelingP3[3];
-#endif
+
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
@@ -390,9 +352,7 @@ public:
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
     static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
-#if DRIVE_SYSTEM!=DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
-#endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
     static float offsetZ;                     ///< Y-offset for different extruder positions.
@@ -410,7 +370,7 @@ public:
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#if GANTRY && !defined(FAST_COREXYZ)
+#if GANTRY
     static int8_t motorX;
     static int8_t motorYorZ;
 #endif
@@ -878,7 +838,7 @@ public:
     }
     static INLINE void executeXYGantrySteps()
     {
-#if (GANTRY) && !defined(FAST_COREXYZ)
+#if (GANTRY)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -915,7 +875,7 @@ public:
     }
     static INLINE void executeXZGantrySteps()
     {
-#if (GANTRY) && !defined(FAST_COREXYZ)
+#if (GANTRY)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -1109,15 +1069,6 @@ public:
     {
         return (int)pwm_pos[PWM_FAN2];
     }
-#if NONLINEAR_SYSTEM
-    static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
-    {
-        currentNonlinearPositionSteps[A_TOWER] = xaxis;
-        currentNonlinearPositionSteps[B_TOWER] = yaxis;
-        currentNonlinearPositionSteps[C_TOWER] = zaxis;
-    }
-    static void deltaMoveToTopEndstops(float feedrate);
-#endif
 #if MAX_HARDWARE_ENDSTOP_Z
     static float runZMaxProbe();
 #endif

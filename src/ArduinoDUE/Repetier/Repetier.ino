@@ -51,9 +51,6 @@ Implemented Codes
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to coordinates given
-- G131 - set extruder offset position to 0 - needed for calibration with G132
-- G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
-- G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
 - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
 
 RepRap M Codes

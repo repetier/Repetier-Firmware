@@ -51,114 +51,6 @@
 /** Wait for the extruder to finish it's down movement */
 #define FLAG_JOIN_WAIT_EXTRUDER_DOWN 128
 // Printing related data
-#if NONLINEAR_SYSTEM
-// Allow the delta cache to store segments for every line in line cache. Beware this gets big ... fast.
-
-class PrintLine;
-typedef struct
-{
-    flag8_t dir;                        ///< Direction of delta movement.
-    uint16_t deltaSteps[TOWER_ARRAY];   ///< Number of steps in move.
-    inline bool checkEndstops(PrintLine *cur,bool checkall);
-    inline void setXMoveFinished()
-    {
-        dir &= ~XSTEP;
-    }
-    inline void setYMoveFinished()
-    {
-        dir &= ~YSTEP;
-    }
-    inline void setZMoveFinished()
-    {
-        dir &= ~ZSTEP;
-    }
-    inline void setXYMoveFinished()
-    {
-        dir &= ~XY_STEP;
-    }
-    inline bool isXPositiveMove()
-    {
-        return (dir & X_STEP_DIRPOS) == X_STEP_DIRPOS;
-    }
-    inline bool isXNegativeMove()
-    {
-        return (dir & X_STEP_DIRPOS) == XSTEP;
-    }
-    inline bool isYPositiveMove()
-    {
-        return (dir & Y_STEP_DIRPOS) == Y_STEP_DIRPOS;
-    }
-    inline bool isYNegativeMove()
-    {
-        return (dir & Y_STEP_DIRPOS) == YSTEP;
-    }
-    inline bool isZPositiveMove()
-    {
-        return (dir & Z_STEP_DIRPOS) == Z_STEP_DIRPOS;
-    }
-    inline bool isZNegativeMove()
-    {
-        return (dir & Z_STEP_DIRPOS) == ZSTEP;
-    }
-    inline bool isEPositiveMove()
-    {
-        return (dir & E_STEP_DIRPOS) == E_STEP_DIRPOS;
-    }
-    inline bool isENegativeMove()
-    {
-        return (dir & E_STEP_DIRPOS) == ESTEP;
-    }
-    inline bool isXMove()
-    {
-        return (dir & XSTEP);
-    }
-    inline bool isYMove()
-    {
-        return (dir & YSTEP);
-    }
-    inline bool isXOrYMove()
-    {
-        return dir & XY_STEP;
-    }
-    inline bool isZMove()
-    {
-        return (dir & ZSTEP);
-    }
-    inline bool isEMove()
-    {
-        return (dir & ESTEP);
-    }
-    inline bool isEOnlyMove()
-    {
-        return (dir & XYZE_STEP)==ESTEP;
-    }
-    inline bool isNoMove()
-    {
-        return (dir & XYZE_STEP) == 0;
-    }
-    inline bool isXYZMove()
-    {
-        return dir & XYZ_STEP;
-    }
-    inline bool isMoveOfAxis(uint8_t axis)
-    {
-        return (dir & (XSTEP<<axis));
-    }
-    inline void setMoveOfAxis(uint8_t axis)
-    {
-        dir |= XSTEP << axis;
-    }
-    inline void setPositiveMoveOfAxis(uint8_t axis)
-    {
-        dir |= X_STEP_DIRPOS << axis;
-    }
-    inline void setPositiveDirectionForAxis(uint8_t axis)
-    {
-        dir |= X_DIRPOS << axis;
-    }
-} NonlinearSegment;
-extern uint8_t lastMoveID;
-#endif
 class UIDisplay;
 class PrintLine   // RAM usage: 24*4+15 = 113 Byte
 {
@@ -191,12 +83,6 @@ private:
     float endSpeed;                 ///< Exit speed in mm/s
     float minSpeed;
     float distance;
-#if NONLINEAR_SYSTEM
-    uint8_t numNonlinearSegments;   ///< Number of delta segments left in line. Decremented by stepper timer.
-    uint8_t moveID;                 ///< ID used to identify moves which are all part of the same line
-    int32_t numPrimaryStepPerSegment; ///< Number of primary Bresenham axis steps in each delta segment
-    NonlinearSegment segments[DELTASEGMENTS_PER_PRINTLINE];
-#endif
     ticks_t fullInterval;     ///< interval at full speed in ticks/step.
     uint16_t accelSteps;        ///< How much steps does it take, to reach the plateau.
     uint16_t decelSteps;        ///< How much steps does it take, to reach the end speed.
@@ -519,7 +405,7 @@ public:
     }
     INLINE void startXStep()
     {
-#if !(GANTRY) || defined(FAST_COREXYZ)
+#if !(GANTRY)
         Printer::startXStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
@@ -553,7 +439,7 @@ public:
     }
     INLINE void startYStep()
     {
-#if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || defined(FAST_COREXYZ)
+#if !(GANTRY) || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY
         Printer::startYStep();
 #else
 #if DRIVE_SYSTEM == XY_GANTRY
@@ -588,7 +474,7 @@ public:
     }
     INLINE void startZStep()
     {
-#if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY || defined(FAST_COREXYZ)
+#if !(GANTRY) || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XY_GANTRY
         Printer::startZStep();
 #else
 #if DRIVE_SYSTEM == XZ_GANTRY
@@ -682,11 +568,9 @@ public:
     static inline void backwardPlanner(ufast8_t p,ufast8_t last);
     static void updateTrapezoids();
     static uint8_t insertWaitMovesIfNeeded(uint8_t pathOptimize, uint8_t waitExtraLines);
-#if !NONLINEAR_SYSTEM
     static void queueCartesianMove(uint8_t check_endstops,uint8_t pathOptimize);
 #if DISTORTION_CORRECTION
     static void queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOptimize);
-#endif
 #endif
     static void moveRelativeDistanceInSteps(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool check_endstop,bool pathOptimize = true);
     static void moveRelativeDistanceInStepsReal(int32_t x,int32_t y,int32_t z,int32_t e,float feedrate,bool waitEnd,bool pathOptimize = true);
@@ -701,17 +585,6 @@ public:
     {
         p = (p == PRINTLINE_CACHE_SIZE - 1 ? 0 : p + 1);
     }
-#if NONLINEAR_SYSTEM
-    static uint8_t queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimize, uint8_t softEndstop);
-    static inline void queueEMove(int32_t e_diff,uint8_t check_endstops,uint8_t pathOptimize);
-    inline uint16_t calculateNonlinearSubSegments(uint8_t softEndstop);
-    static inline void calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]);
-    static inline uint8_t calculateDistance(float axis_diff[], uint8_t dir, float *distance);
-#if SOFTWARE_LEVELING && DRIVE_SYSTEM == DELTA
-    static void calculatePlane(int32_t factors[], int32_t p1[], int32_t p2[], int32_t p3[]);
-    static float calcZOffset(int32_t factors[], int32_t pointX, int32_t pointY);
-#endif
-#endif
 };
 
 

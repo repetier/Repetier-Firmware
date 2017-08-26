@@ -871,13 +871,7 @@ void Commands::processGCode(GCode *com) {
 #endif // defined
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
-#if NONLINEAR_SYSTEM
-                    if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, true, true)) {
-                        Com::printWarningFLN(PSTR("executeGCode / queueDeltaMove returns error"));
-                    }
-#else
                     PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS, true);
-#endif
 #if UI_HAS_KEYS
                 // ui can only execute motion commands if we are not waiting inside a move for an
                 // old move to finish. For normal response times, we always leave one free after
@@ -1017,19 +1011,12 @@ void Commands::processGCode(GCode *com) {
                     Com::printFLN(Com::tZProbeAverage, sum);
                     if(com->hasS() && com->S) {
 #if MAX_HARDWARE_ENDSTOP_Z
-#if DRIVE_SYSTEM == DELTA
-                        Printer::updateCurrentPosition();
-                        Printer::zLength += sum - Printer::currentPosition[Z_AXIS];
-                        Printer::updateDerivedParameter();
-                        Printer::homeAxis(true,true,true);
-#else
                         Printer::currentPositionSteps[Z_AXIS] = sum * Printer::axisStepsPerMM[Z_AXIS];
                         float zup = Printer::runZMaxProbe();
                         if(zup == ILLEGAL_Z_PROBE) {
                             ok = false;
                         } else
                         Printer::zLength = zup + sum - ENDSTOP_Z_BACK_ON_HOME;
-#endif // DELTA
                         Com::printInfoFLN(Com::tZProbeZReset);
                         Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #else
@@ -1202,170 +1189,6 @@ void Commands::processGCode(GCode *com) {
                 }
             }
             break;
-#if DRIVE_SYSTEM == DELTA
-        case 100: { // G100 Calibrate floor or rod radius
-                // Using manual control, adjust hot end to contact floor.
-                // G100 <no arguments> No action. Avoid accidental floor reset.
-                // G100 [X] [Y] [Z] set floor for argument passed in. Number ignored and may be absent.
-                // G100 R with X Y or Z flag error, sets only floor or radius, not both.
-                // G100 R[n] Add n to radius. Adjust to be above floor if necessary
-                // G100 R[0] set radius based on current z measurement. Moves to (0,0,0)
-                float currentZmm = Printer::currentPosition[Z_AXIS];
-                if (currentZmm/Printer::zLength > 0.1) {
-                    Com::printErrorFLN(PSTR("Calibration code is limited to bottom 10% of Z height"));
-                    break;
-                }
-                if (com->hasR()) {
-                    if (com->hasX() || com->hasY() || com->hasZ())
-                        Com::printErrorFLN(PSTR("Cannot set radius and floor at same time."));
-                    else if (com->R != 0) {
-                        //add r to radius
-                        if (abs(com->R) <= 10) EEPROM::incrementRodRadius(com->R);
-                        else Com::printErrorFLN(PSTR("Calibration movement is limited to 10mm."));
-                    } else {
-                        // auto set radius. Head must be at 0,0 and touching
-                        // Z offset will be corrected for.
-                        if (Printer::currentPosition[X_AXIS] == 0
-                                && Printer::currentPosition[Y_AXIS] == 0) {
-                            if(Printer::isLargeMachine()) {
-                                // calculate radius assuming we are at surface
-                                // If Z is greater than 0 it will get calculated out for correct radius
-                                // Use either A or B tower as they acnhor x cartesian axis and always have
-                                // Radius distance to center in simplest set up.
-                                float h = Printer::deltaDiagonalStepsSquaredB.f;
-                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
-                                // The correct Rod Radius would put us here at z==0 and B height is
-                                // square root (rod length squared minus rod radius squared)
-                                // Reverse that to get calculated Rod Radius given B height
-                                h -= RMath::sqr((float)bSteps);
-                                h = sqrt(h);
-                                EEPROM::setRodRadius(h*Printer::invAxisStepsPerMM[Z_AXIS]);
-                            } else {
-                                // calculate radius assuming we are at surface
-                                // If Z is greater than 0 it will get calculated out for correct radius
-                                // Use either A or B tower as they acnhor x cartesian axis and always have
-                                // Radius distance to center in simplest set up.
-                                unsigned long h = Printer::deltaDiagonalStepsSquaredB.l;
-                                unsigned long bSteps = Printer::currentNonlinearPositionSteps[B_TOWER];
-                                // The correct Rod Radius would put us here at z==0 and B height is
-                                // square root (rod length squared minus rod radius squared)
-                                // Reverse that to get calculated Rod Radius given B height
-                                h -= RMath::sqr(bSteps);
-                                h = SQRT(h);
-                                EEPROM::setRodRadius(h*Printer::invAxisStepsPerMM[Z_AXIS]);
-                            }
-                        } else
-                            Com::printErrorFLN(PSTR("First move to touch at x,y=0,0 to auto-set radius."));
-                    }
-                } else {
-                    bool tooBig = false;
-                    if (com->hasX()) {
-                        if (abs(com->X) <= 10)
-                            EEPROM::setTowerXFloor(com->X + currentZmm + Printer::xMin);
-                        else tooBig = true;
-                    }
-                    if (com->hasY()) {
-                        if (abs(com->Y) <= 10)
-                            EEPROM::setTowerYFloor(com->Y + currentZmm + Printer::yMin);
-                        else tooBig = true;
-                    }
-                    if (com->hasZ()) {
-                        if (abs(com->Z) <= 10)
-                            EEPROM::setTowerZFloor(com->Z + currentZmm + Printer::zMin);
-                        else tooBig = true;
-                    }
-                    if (tooBig)
-                        Com::printErrorFLN(PSTR("Calibration movement is limited to 10mm."));
-                }
-                // after adjusting zero, physical position is out of sync with memory position
-                // this could cause jerky movement or push head into print surface.
-                // moving gets back into safe zero'ed position with respect to newle set floor or Radius.
-                Printer::moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,12.0,IGNORE_COORDINATE,IGNORE_COORDINATE);
-                break;
-            }
-        case 131: { // G131 Remove offset
-                float cx,cy,cz;
-                Printer::realPosition(cx,cy,cz);
-                float oldfeedrate = Printer::feedrate;
-                Printer::offsetX = 0;
-                Printer::offsetY = 0;
-                Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
-                Printer::feedrate = oldfeedrate;
-                Printer::updateCurrentPosition();
-            }
-            break;
-        case 132: { // G132 Calibrate endstop offsets
-                // This has the probably unintended side effect of turning off leveling.
-                Printer::setAutolevelActive(false); // don't let transformations change result!
-                Printer::coordinateOffset[X_AXIS] = 0;
-                Printer::coordinateOffset[Y_AXIS] = 0;
-                Printer::coordinateOffset[Z_AXIS] = 0;
-                // I think this is coded incorrectly, as it depends on the biginning position of the
-                // of the hot end, and so should first move to x,y,z= 0,0,0, but as that may not
-                // be possible if the printer is not in the homes/zeroed state, the printer
-                // cannot safely move to 0 z coordinate without crashong into the print surface.
-                // so other than commenting, I'm not meddling.
-                // but you will always get different counts from different positions.
-                Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-                int32_t m = RMath::max(Printer::stepsRemainingAtXHit,RMath::max(Printer::stepsRemainingAtYHit,Printer::stepsRemainingAtZHit));
-                int32_t offx = m - Printer::stepsRemainingAtXHit;
-                int32_t offy = m - Printer::stepsRemainingAtYHit;
-                int32_t offz = m - Printer::stepsRemainingAtZHit;
-                Com::printFLN(Com::tTower1, offx);
-                Com::printFLN(Com::tTower2, offy);
-                Com::printFLN(Com::tTower3, offz);
-#if EEPROM_MODE != 0
-                if(com->hasS() && com->S > 0) {
-                    EEPROM::setDeltaTowerXOffsetSteps(offx);
-                    EEPROM::setDeltaTowerYOffsetSteps(offy);
-                    EEPROM::setDeltaTowerZOffsetSteps(offz);
-                }
-#endif
-                PrintLine::moveRelativeDistanceInSteps(0, 0, -5*Printer::axisStepsPerMM[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], true, true);
-                Printer::homeAxis(true,true,true);
-            }
-            break;
-        case 133: { // G133 Measure steps to top
-                bool oldAuto = Printer::isAutolevelActive();
-                Printer::setAutolevelActive(false); // don't let transformations change result!
-                Printer::currentPositionSteps[X_AXIS] = 0;
-                Printer::currentPositionSteps[Y_AXIS] = 0;
-                Printer::currentPositionSteps[Z_AXIS] = 0;
-                Printer::coordinateOffset[X_AXIS] = 0;
-                Printer::coordinateOffset[Y_AXIS] = 0;
-                Printer::coordinateOffset[Z_AXIS] = 0;
-                Printer::currentNonlinearPositionSteps[A_TOWER] = 0;
-                Printer::currentNonlinearPositionSteps[B_TOWER] = 0;
-                Printer::currentNonlinearPositionSteps[C_TOWER] = 0;
-                // similar to comment above, this will get a different answer from any different starting point
-                // so it is unclear how this is helpful. It must start at a well defined point.
-                Printer::deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
-                int32_t offx = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtXHit;
-                int32_t offy = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtYHit;
-                int32_t offz = HOME_DISTANCE_STEPS - Printer::stepsRemainingAtZHit;
-                Com::printFLN(Com::tTower1,offx);
-                Com::printFLN(Com::tTower2,offy);
-                Com::printFLN(Com::tTower3,offz);
-                Printer::setAutolevelActive(oldAuto);
-                PrintLine::moveRelativeDistanceInSteps(0, 0, Printer::axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-                Printer::homeAxis(true,true,true);
-            }
-            break;
-        case 135: // G135
-            Com::printF(PSTR("CompDelta:"),Printer::currentNonlinearPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentNonlinearPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentNonlinearPositionSteps[C_TOWER]);
-#ifdef DEBUG_REAL_POSITION
-            Com::printF(PSTR("RealDelta:"),Printer::realDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::realDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::realDeltaPositionSteps[C_TOWER]);
-#endif
-            Printer::updateCurrentPosition();
-            Com::printF(PSTR("PosFromSteps:"));
-            printCurrentPosition(PSTR("G134 "));
-            break;
-
-#endif // DRIVE_SYSTEM
 #if FEATURE_Z_PROBE && NUM_EXTRUDER > 1
         case 134: 
             { // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
@@ -1894,14 +1717,10 @@ void Commands::processMCode(GCode *com) {
                 Extruder::current->maxStartFeedrate = com->E;
                 Extruder::selectExtruderById(Extruder::current->id);
             }
-#if DRIVE_SYSTEM != DELTA
             if(com->hasZ())
                 Printer::maxZJerk = com->Z;
             Com::printF(Com::tJerkColon,Printer::maxJerk);
             Com::printFLN(Com::tZJerkColon,Printer::maxZJerk);
-#else
-            Com::printFLN(Com::tJerkColon,Printer::maxJerk);
-#endif
             break;
         case 209: // M209 S<0/1> Enable/disable autoretraction
             if(com->hasS())
@@ -1969,9 +1788,6 @@ void Commands::processMCode(GCode *com) {
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
-#if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
-#endif
             Printer::updateCurrentPosition();
             Com::printFLN(Com::tZProbePrinterHeight,Printer::zLength);
 #if EEPROM_MODE != 0
@@ -2237,26 +2053,7 @@ void Commands::processMCode(GCode *com) {
                 Printer::maxRealJerk = 0;
             break;
 #endif
-            /*      case 535:  // M535
-            Com::printF(PSTR("Last commanded position:"),Printer::lastCmdPos[X_AXIS]);
-            Com::printF(Com::tComma,Printer::lastCmdPos[Y_AXIS]);
-            Com::printFLN(Com::tComma,Printer::lastCmdPos[Z_AXIS]);
-            Com::printF(PSTR("Current position:"),Printer::currentPosition[X_AXIS]);
-            Com::printF(Com::tComma,Printer::currentPosition[Y_AXIS]);
-            Com::printFLN(Com::tComma,Printer::currentPosition[Z_AXIS]);
-            Com::printF(PSTR("Position steps:"),Printer::currentPositionSteps[X_AXIS]);
-            Com::printF(Com::tComma,Printer::currentPositionSteps[Y_AXIS]);
-            Com::printFLN(Com::tComma,Printer::currentPositionSteps[Z_AXIS]);
-            #if NONLINEAR_SYSTEM
-            Com::printF(PSTR("Nonlin. position steps:"),Printer::currentDeltaPositionSteps[A_TOWER]);
-            Com::printF(Com::tComma,Printer::currentDeltaPositionSteps[B_TOWER]);
-            Com::printFLN(Com::tComma,Printer::currentDeltaPositionSteps[C_TOWER]);
-            #endif // NONLINEAR_SYSTEM
-            break;*/
-            /* case 700: // M700 test new square root function
-            if(com->hasS())
-            Com::printFLN(Com::tInfo,(int32_t)HAL::integerSqrt(com->S));
-            break;*/
+
 #if FEATURE_RETRACTION
         case 600:
             uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
