@@ -48,16 +48,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 #define MIXING_EXTRUDER 0
 
 // The following define selects which electronics board you have. Please choose the one that matches your setup
-// Arduino Due with RADDS       = 402
-// Arduino Due with RAMPS-FD    = 403
-// Arduino Due with RAMPS-FD V2 = 404
-// Felix Printers for arm       = 405
-// DAM&DICE DUE                 = 406
-// Smart RAMPS for Due          = 408
-// Alligator Board rev1         = 500
-// Alligator Board rev2         = 501
-
-#define MOTHERBOARD 402
+// Arduino Due with RADDS
 
 #include "pins.h"
 
@@ -946,21 +937,6 @@ turn z off when heaters get also disabled.
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU. Currently only works for RAMBO boards
 #define MICROSTEP_MODES {128,128,128,128,128} // [1,2,4,8,16]
 
-// Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
-#if MOTHERBOARD==301
-
-//#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
-#define MOTOR_CURRENT_PERCENT {53,53,53,53,53}
-#elif MOTHERBOARD==12
-
-//#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
-#define MOTOR_CURRENT_PERCENT {55,55,55,55,55}
-#elif (MOTHERBOARD==500) || (MOTHERBOARD==501) // Alligator boards
-
-// #define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
-#define MOTOR_CURRENT_PERCENT {51,51,51,44,44,44,44}
-#endif
-
 /* \brief Number of segments to generate for delta conversions per second of move. */
 #define DELTA_SEGMENTS_PER_SECOND_PRINT 600 // Move accurate setting for print moves
 #define DELTA_SEGMENTS_PER_SECOND_MOVE 600 // Less accurate setting for other moves
@@ -1670,39 +1646,6 @@ set at which temperature it should turn on and at which it should reach max. spe
 * Since it requires some memory do not enable it unless you have such a display!
 */
 #define FEATURE_JSON 0
-
-/** For displays and keys there are too many permutations to handle them all in once.
-For the most common available combinations you can set the controller type here, so
-you don't need to configure uicong.h at all. Controller settings > 1 disable usage
-of uiconfig.h
-
-0 or NO_CONTROLLER = no display
-1 or UICONFIG_CONTROLLER = Manual definition of display and keys parameter in uiconfig.h
-
-The following settings override uiconfig.h!
-2 or CONTROLLER_SMARTRAMPS = Smartcontroller from reprapdiscount on a RAMPS or RUMBA board
-3 or CONTROLLER_ADAFRUIT = Adafruit RGB controller
-4 or CONTROLLER_FOLTYN = Foltyn 3DMaster with display attached
-5 or CONTROLLER_VIKI = ViKi LCD - Check pin configuration in ui.h for feature controller 5!!! sd card disabled by default!
-6 or CONTROLLER_MEGATRONIC = ReprapWorld Keypad / LCD, predefined pins for Megatronics v2.0 and RAMPS 1.4. Please check if you have used the defined pin layout in ui.h.
-7 or CONTROLLER_RADDS = RADDS Extension Port
-8 or CONTROLLER_PIBOT20X4 = PiBot Display/Controller extension with 20x4 character display
-9 or CONTROLLER_PIBOT16X2 = PiBot Display/Controller extension with 16x2 character display
-10 or CONTROLLER_GADGETS3D_SHIELD = Gadgets3D shield on RAMPS 1.4, see http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
-11 or CONTROLLER_REPRAPDISCOUNT_GLCD = RepRapDiscount Full Graphic Smart Controller
-12 or CONTROLLER_FELIX = FELIXPrinters Controller
-13 or CONTROLLER_RAMBO = SeeMeCNC Display on Rambo (ORION)
-14 or CONTROLLER_OPENHARDWARE_LCD2004 = OpenHardware.co.za LCD2004 V2014
-15 or CONTROLLER_SANGUINOLOLU_PANELOLU2 = Sanguinololu + Panelolu2
-17 or CONTROLLER_MIREGLI 17
-18 or CONTROLLER_GATE_3NOVATICA Gate Controller from 3Novatica
-19 or CONTROLLER_SPARKLCD Sparkcube LCD on RADDS
-20 or CONTROLLER_BAM_DICE_DUE  DAM&DICE Due LCD Display
-21 or CONTROLLER_VIKI2 Panucatt Viki2 graphic lcd
-24 or CONTROLLER_ZONESTAR = Zonestar P802M with LCD 20x4 and 5 ADC button keypad
-405 or CONTROLLER_FELIX_DUE Felix LCD
-*/
-#define FEATURE_CONTROLLER CONTROLLER_RADDS
 
 /** You can have one keypad connected via single analog pin as seen on
 some printers with Melzi V2.0 board, 20x4 LCD and 5 buttons keypad. This must be

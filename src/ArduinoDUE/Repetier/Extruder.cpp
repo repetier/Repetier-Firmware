@@ -2109,11 +2109,7 @@ void TemperatureController::updateCurrentTemperature()
 #if CPU_ARCH == ARCH_AVR
         currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
 #else
-#if FEATURE_CONTROLLER == CONTROLLER_LCD_MP_PHARAOH_DUE
-        currentTemperatureC = ((float)currentTemperature * 500.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
-#else
         currentTemperatureC = ((float)currentTemperature * 330.0f / (1024 << (2 - ANALOG_REDUCE_BITS)));
-#endif
 #endif
         break;
 #ifdef SUPPORT_MAX6675

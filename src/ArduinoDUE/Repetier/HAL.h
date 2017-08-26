@@ -582,7 +582,7 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -632,7 +632,7 @@ class HAL
         v.b[i] = 0;
      }
      return v;       
-#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif
     }
 
     static inline void allowInterrupts()
@@ -794,11 +794,6 @@ class HAL
     // Write single byte to SPI
     static void spiSend(byte b);
     static void spiSend(const uint8_t* buf , size_t n);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-    static void spiSend(uint32_t chan , const uint8_t* buf , size_t n);
-    static void spiSend(uint32_t chan, byte b);
-    static uint8_t spiReceive(uint32_t chan);
-#endif
     // Read single byte from SPI
     static uint8_t spiReceive();
     // Read from SPI into buffer

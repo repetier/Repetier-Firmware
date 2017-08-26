@@ -2274,7 +2274,7 @@ void Commands::processMCode(GCode *com) {
             if(com->hasS())
             Com::printFLN(Com::tInfo,(int32_t)HAL::integerSqrt(com->S));
             break;*/
-#if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
+#if FEATURE_RETRACTION
         case 600:
             uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
             break;
