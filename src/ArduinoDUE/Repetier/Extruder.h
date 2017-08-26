@@ -198,12 +198,6 @@ public:
 #if FEATURE_DITTO_PRINTING
     static uint8_t dittoMode;
 #endif
-#if MIXING_EXTRUDER > 0
-    static int mixingS; ///< Sum of all weights
-    static uint8_t mixingDir; ///< Direction flag
-    static uint8_t activeMixingExtruder;
-    static void recomputeMixingExtruderSteps();
-#endif
     uint8_t id;
     int32_t xOffset;
     int32_t yOffset;
@@ -228,11 +222,6 @@ public:
     float advanceL;
     int16_t advanceBacklash;
 #endif // USE_ADVANCE
-#if MIXING_EXTRUDER > 0
-    int mixingW;   ///< Weight for this extruder when mixing steps
-    int mixingE;   ///< Cumulated error for this step.
-    int virtualWeights[VIRTUAL_EXTRUDER]; // Virtual extruder weights
-#endif // MIXING_EXTRUDER > 0
     TemperatureController tempControl;
     const char * PROGMEM selectCommands;
     const char * PROGMEM deselectCommands;
@@ -262,9 +251,6 @@ public:
     }
     static void markAllUnjammed();
     void resetJamSteps();
-#endif
-#if MIXING_EXTRUDER > 0
-    static void setMixingWeight(uint8_t extr,int weight);
 #endif
     static void step();
     static void unstep();

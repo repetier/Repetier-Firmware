@@ -1866,7 +1866,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("InputBuffer:"),SERIAL_BUFFER_SIZE - 1);
 #endif
     Com::config(PSTR("NumExtruder:"),NUM_EXTRUDER);
-    Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
+    Com::config(PSTR("MixingExtruder:"),0);
     Com::config(PSTR("HeatedBed:"),true);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
     Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);

@@ -2023,7 +2023,7 @@ void UIDisplay::refreshPage()
                 cache[0][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[0][0] = '\x0a'; //off
-#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2
             if(extruder[1].tempControl.targetTemperatureC > 30)
                 cache[1][0] = Printer::isAnimation()?'\x08':'\x09';
             else

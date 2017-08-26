@@ -28,11 +28,6 @@ uint8_t counter500ms = 5;
 #if FEATURE_DITTO_PRINTING
 uint8_t Extruder::dittoMode = 0;
 #endif
-#if MIXING_EXTRUDER > 0
-int Extruder::mixingS;
-uint8_t Extruder::mixingDir = 10;
-uint8_t Extruder::activeMixingExtruder = 0;
-#endif // MIXING_EXTRUDER
 #ifdef SUPPORT_MAX6675
 extern int16_t read_max6675(uint8_t ss_pin);
 #endif
@@ -124,10 +119,6 @@ void Extruder::manageTemperatures()
         } // extruder controller
         // do skip temperature control while auto tuning is in progress
         if(controller == autotuneIndex) continue;
-#if MIXING_EXTRUDER
-        if(controller > 0 && controller < NUM_EXTRUDER) continue; // Mixing extruder only test for ext 0
-#endif // MIXING_EXTRUDER
-
 
         // Check for obvious sensor errors
         if(act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE)   // no temp sensor or short in sensor, disable heater
@@ -611,20 +602,9 @@ This function changes and initializes a new extruder. This is also called, after
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
 #if NUM_EXTRUDER > 0
-#if MIXING_EXTRUDER
-    if(extruderId >= VIRTUAL_EXTRUDER)
-        extruderId = 0;
-    activeMixingExtruder = extruderId;
-    for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
-        Extruder::setMixingWeight(i, extruder[i].virtualWeights[extruderId]);
-    Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
-    extruderId = 0;
-#endif
     if(extruderId >= NUM_EXTRUDER)
         extruderId = 0;
-#if !MIXING_EXTRUDER
     Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
-#endif
     if(Printer::isHomed() && extruder[extruderId].zOffset < Extruder::current->zOffset) { // prevent extruder from hitting bed
         Printer::offsetZ = -extruder[extruderId].zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
@@ -632,7 +612,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
         Printer::updateCurrentPosition(true);
     }
 
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1
     bool executeSelect = false;
     if(extruderId != Extruder::current->id)
     {
@@ -656,13 +636,9 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
     Printer::currentPositionSteps[E_AXIS] = Extruder::current->extrudePosition;
 #endif
-    #if MIXING_EXTRUDER
-        recomputeMixingExtruderSteps();
-    #else
-        Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
-        Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
-        Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
-    #endif
+    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+    Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
+    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
     Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
 //   max_start_speed_units_per_second[E_AXIS] = Extruder::current->maxStartFeedrate;
     Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = Extruder::current->maxAcceleration;
@@ -710,7 +686,7 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     HAL::resetExtruderDirection();
 #endif
 
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1
     if(executeSelect) {// Run only when changing
         Commands::waitUntilEndOfAllMoves();
         GCode::executeFString(Extruder::current->selectCommands);
@@ -718,28 +694,13 @@ void Extruder::selectExtruderById(uint8_t extruderId)
 #endif
 #endif
 }
-#if MIXING_EXTRUDER
-    void Extruder::recomputeMixingExtruderSteps() {
-        int32_t sum_w = 0;
-        float sum = 0;
-        for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
-            sum_w += extruder[i].mixingW;
-            sum += extruder[i].stepsPerMM * extruder[i].mixingW;
-        }
-        sum /= sum_w;
-        Printer::currentPositionSteps[E_AXIS] =  Printer::currentPositionSteps[E_AXIS] * sum / Printer::axisStepsPerMM[E_AXIS]; // reposition according resolution change
-        Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
-        Printer::axisStepsPerMM[E_AXIS] = sum;
-        Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
-    }
-#endif
 
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t extr, bool beep, bool wait)
 {
 #if NUM_EXTRUDER > 0
-#if MIXING_EXTRUDER || SHARED_EXTRUDER_HEATER
+#if SHARED_EXTRUDER_HEATER
     extr = 0; // map any virtual extruder number to 0
-#endif // MIXING_EXTRUDER
+#endif // SHARED_EXTRUDER_HEATER
     bool alloffs = true;
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         if(tempController[i]->targetTemperatureC > 15) alloffs = false;
@@ -877,354 +838,6 @@ float Extruder::getHeatedBedTemperature()
     return c->currentTemperatureC;
 }
 
-#if MIXING_EXTRUDER > 0
-void Extruder::setMixingWeight(uint8_t extr,int weight)
-{
-    uint8_t i;
-    mixingS = 0;
-    extruder[extr].mixingW = weight;
-    for(i=0; i<NUM_EXTRUDER; i++)
-    {
-        extruder[i].mixingE = extruder[i].mixingW;
-        mixingS += extruder[i].mixingW;
-    }
-}
-void Extruder::step()
-{
-    if(PrintLine::cur != NULL && PrintLine::cur->isAllEMotors()) {
-#if NUM_EXTRUDER > 0
-        WRITE(EXT0_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-        WRITE(EXT0_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif		
-#if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(0)
-#endif
-#endif
-#if NUM_EXTRUDER > 1
-        WRITE(EXT1_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-    WRITE(EXT1_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(1)
-#endif
-#endif
-#if NUM_EXTRUDER > 2
-        WRITE(EXT2_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-    WRITE(EXT2_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(2)
-#endif
-#endif
-#if NUM_EXTRUDER > 3
-        WRITE(EXT3_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-    WRITE(EXT3_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(3)
-#endif
-#endif
-#if NUM_EXTRUDER > 4
-        WRITE(EXT4_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-        WRITE(EXT4_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(4)
-#endif
-#endif
-#if NUM_EXTRUDER > 5
-        WRITE(EXT5_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-        WRITE(EXT5_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(5)
-#endif
-#endif
-        return;
-    }
-    uint8_t best = 255,i;
-    int bestError;
-    if(mixingDir)
-    {
-        bestError = -10000;
-        for(i = 0; i < NUM_EXTRUDER; i++)
-        {
-            if(extruder[i].mixingW == 0) continue;
-            if(extruder[i].mixingE > bestError)
-            {
-                bestError = extruder[i].mixingE;
-                best = i;
-            }
-            extruder[i].mixingE += extruder[i].mixingW;
-        }
-        if(best == 255) return; // no extruder has weight!
-        extruder[best].mixingE -= mixingS;
-    }
-    else
-    {
-        bestError = 10000;
-        for(i = 0; i < NUM_EXTRUDER; i++)
-        {
-            if(extruder[i].mixingW == 0) continue;
-            if(extruder[i].mixingE < bestError)
-            {
-                bestError = extruder[i].mixingE;
-                best = i;
-            }
-            extruder[i].mixingE -= extruder[i].mixingW;
-        }
-        if(best == 255) return; // no extruder has weight!
-        extruder[best].mixingE += mixingS;
-    }
-#if NUM_EXTRUDER > 0
-    if(best == 0)
-    {
-        WRITE(EXT0_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-        WRITE(EXT0_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(0)
-#endif
-    }
-#endif
-#if NUM_EXTRUDER > 1
-    if(best == 1)
-    {
-        WRITE(EXT1_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-        WRITE(EXT1_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(1)
-#endif
-    }
-#endif
-#if NUM_EXTRUDER > 2
-    if(best == 2)
-    {
-        WRITE(EXT2_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-        WRITE(EXT2_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(2)
-#endif
-    }
-#endif
-#if NUM_EXTRUDER > 3
-    if(best == 3)
-    {
-        WRITE(EXT3_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-        WRITE(EXT3_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(3)
-#endif
-    }
-#endif
-#if NUM_EXTRUDER > 4
-    if(best == 4)
-    {
-        WRITE(EXT4_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-        WRITE(EXT4_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(4)
-#endif
-    }
-#endif
-#if NUM_EXTRUDER > 5
-    if(best == 5)
-    {
-        WRITE(EXT5_STEP_PIN, START_STEP_WITH_HIGH);
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-        WRITE(EXT5_STEP2_PIN, START_STEP_WITH_HIGH);
-#endif
-#if EXTRUDER_JAM_CONTROL && defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-        TEST_EXTRUDER_JAM(5)
-#endif
-    }
-#endif
-}
-
-void Extruder::unstep()
-{
-#if NUM_EXTRUDER > 0
-    WRITE(EXT0_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-    WRITE(EXT0_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-#if NUM_EXTRUDER > 1
-    WRITE(EXT1_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-    WRITE(EXT1_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-#if NUM_EXTRUDER > 2
-    WRITE(EXT2_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-    WRITE(EXT2_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-#if NUM_EXTRUDER > 3
-    WRITE(EXT3_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-    WRITE(EXT3_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-#if NUM_EXTRUDER > 4
-    WRITE(EXT4_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-    WRITE(EXT4_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-#if NUM_EXTRUDER > 5
-    WRITE(EXT5_STEP_PIN, !START_STEP_WITH_HIGH);
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-    WRITE(EXT5_STEP2_PIN, !START_STEP_WITH_HIGH);
-#endif
-#endif
-}
-
-void Extruder::setDirection(uint8_t dir)
-{
-    mixingDir = dir;
-#if NUM_EXTRUDER > 0
-    if(dir) {
-        WRITE(EXT0_DIR_PIN,!EXT0_INVERSE);
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-        WRITE(EXT0_DIR2_PIN, !EXT0_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT0_DIR_PIN,EXT0_INVERSE);
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-        WRITE(EXT0_DIR2_PIN, EXT0_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(0, dir)
-#endif
-#if defined(EXT1_DIR_PIN) && NUM_EXTRUDER > 1
-    if(dir) {
-        WRITE(EXT1_DIR_PIN,!EXT1_INVERSE);
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-        WRITE(EXT1_DIR2_PIN, !EXT1_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT1_DIR_PIN,EXT1_INVERSE);
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-        WRITE(EXT1_DIR2_PIN, EXT1_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(1, dir)
-#endif
-#if defined(EXT2_DIR_PIN) && NUM_EXTRUDER > 2
-    if(dir) {
-        WRITE(EXT2_DIR_PIN,!EXT2_INVERSE);
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-        WRITE(EXT2_DIR2_PIN, !EXT2_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT2_DIR_PIN,EXT2_INVERSE);
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-        WRITE(EXT2_DIR2_PIN, EXT2_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(2, dir)
-#endif
-#if defined(EXT3_DIR_PIN) && NUM_EXTRUDER > 3
-    if(dir) {
-        WRITE(EXT3_DIR_PIN,!EXT3_INVERSE);
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-        WRITE(EXT3_DIR2_PIN, !EXT3_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT3_DIR_PIN,EXT3_INVERSE);
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-        WRITE(EXT3_DIR2_PIN, EXT3_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(3, dir)
-#endif
-#if defined(EXT4_DIR_PIN) && NUM_EXTRUDER > 4
-    if(dir) {
-        WRITE(EXT4_DIR_PIN,!EXT4_INVERSE);
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-        WRITE(EXT4_DIR2_PIN, !EXT4_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT4_DIR_PIN,EXT4_INVERSE);
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-        WRITE(EXT4_DIR2_PIN, EXT4_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(4, dir)
-#endif
-#if defined(EXT5_DIR_PIN) && NUM_EXTRUDER > 5
-    if(dir) {
-        WRITE(EXT5_DIR_PIN,!EXT5_INVERSE);
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-        WRITE(EXT5_DIR2_PIN, !EXT5_INVERSE2);
-#endif
-    } else {
-        WRITE(EXT5_DIR_PIN,EXT5_INVERSE);
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-        WRITE(EXT5_DIR2_PIN, EXT5_INVERSE2);
-#endif
-    }
-    RESET_EXTRUDER_JAM(5, dir)
-#endif
-}
-
-void Extruder::enable()
-{
-#if NUM_EXTRUDER > 0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN > -1
-    WRITE(EXT0_ENABLE_PIN, EXT0_ENABLE_ON );
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-    WRITE(EXT0_ENABLE2_PIN, EXT0_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
-    WRITE(EXT1_ENABLE_PIN, EXT1_ENABLE_ON );
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-    WRITE(EX10_ENABLE2_PIN, EXT1_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1
-    WRITE(EXT2_ENABLE_PIN, EXT2_ENABLE_ON );
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-    WRITE(EXT2_ENABLE2_PIN, EXT2_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN > -1
-    WRITE(EXT3_ENABLE_PIN, EXT3_ENABLE_ON );
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-    WRITE(EXT3_ENABLE2_PIN, EXT3_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN > -1
-    WRITE(EXT4_ENABLE_PIN, EXT4_ENABLE_ON );
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-    WRITE(EXT4_ENABLE2_PIN, EXT4_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN > -1
-    WRITE(EXT5_ENABLE_PIN, EXT5_ENABLE_ON );
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-    WRITE(EXT5_ENABLE2_PIN, EXT5_ENABLE_ON);
-#endif
-#endif
-}
-#else // Normal extruder
 /** \brief Sends the high-signal to the stepper for next extruder step.
 Call this function only, if interrupts are disabled.
 */
@@ -1687,48 +1300,8 @@ void Extruder::enable()
 #endif
 }
 
-#endif  // MIXING_EXTRUDER > 0
-
 void Extruder::disableCurrentExtruderMotor()
 {
-#if MIXING_EXTRUDER
-#if NUM_EXTRUDER > 0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN > -1
-    WRITE(EXT0_ENABLE_PIN, !EXT0_ENABLE_ON );
-#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
-    WRITE(EXT0_ENABLE2_PIN, !EXT0_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
-    WRITE(EXT1_ENABLE_PIN, !EXT1_ENABLE_ON );
-#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
-    WRITE(EXT1_ENABLE2_PIN, !EXT1_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1
-    WRITE(EXT2_ENABLE_PIN, !EXT2_ENABLE_ON );
-#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
-    WRITE(EXT2_ENABLE2_PIN, !EXT2_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN > -1
-    WRITE(EXT3_ENABLE_PIN, !EXT3_ENABLE_ON );
-#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
-    WRITE(EXT3_ENABLE2_PIN, !EXT3_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN > -1
-    WRITE(EXT4_ENABLE_PIN, !EXT4_ENABLE_ON );
-#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
-    WRITE(EXT4_ENABLE2_PIN, !EXT4_ENABLE_ON);
-#endif
-#endif
-#if NUM_EXTRUDER > 5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN > -1
-    WRITE(EXT5_ENABLE_PIN, !EXT5_ENABLE_ON );
-#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
-    WRITE(EXT5_ENABLE2_PIN, !EXT5_ENABLE_ON);
-#endif
-#endif
-#else // MIXING_EXTRUDER
 #if NUM_EXTRUDER > 0
     switch(Extruder::current->id) {
     #if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER && NUM_EXTRUDER > 0
@@ -1792,8 +1365,8 @@ void Extruder::disableCurrentExtruderMotor()
     }
 #endif	
 #endif
-#endif // MIXING_EXTRUDER
 }
+
 void Extruder::disableAllExtruderMotors()
 {
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++)
@@ -2433,13 +2006,7 @@ void Extruder::retractDistance(float dist)
     int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
     int32_t oldEPos = Printer::currentPositionSteps[E_AXIS];
     float speed = distance > 0 ? EEPROM_FLOAT(RETRACTION_SPEED) : EEPROM_FLOAT(RETRACTION_UNDO_SPEED);
-#if MIXING_EXTRUDER
-            Printer::setAllEMotors(true);
-#endif
     PrintLine::moveRelativeDistanceInSteps(0, 0, 0, -distance, RMath::max(speed, 1.f), false, false);
-#if MIXING_EXTRUDER
-            Printer::setAllEMotors(false);
-#endif
     Printer::currentPositionSteps[E_AXIS] = oldEPos; // restore previous extruder position
     Printer::feedrate = oldFeedrate;
 }
@@ -2516,9 +2083,6 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT0_ADVANCE_L,EXT0_ADVANCE_BACKLASH_STEPS
 #endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
-#endif
         ,{
             0,EXT0_TEMPSENSOR_TYPE,EXT0_SENSOR_INDEX,EXT0_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
@@ -2542,9 +2106,6 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT1_ADVANCE_K
 #endif
         ,EXT1_ADVANCE_L,EXT1_ADVANCE_BACKLASH_STEPS
-#endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             1,EXT1_TEMPSENSOR_TYPE,EXT1_SENSOR_INDEX,EXT1_HEAT_MANAGER,0,0,0,0
@@ -2570,9 +2131,6 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT2_ADVANCE_L,EXT2_ADVANCE_BACKLASH_STEPS
 #endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
-#endif
         ,{
             2,EXT2_TEMPSENSOR_TYPE,EXT2_SENSOR_INDEX,EXT2_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
@@ -2596,9 +2154,6 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT3_ADVANCE_K
 #endif
         ,EXT3_ADVANCE_L,EXT3_ADVANCE_BACKLASH_STEPS
-#endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             3,EXT3_TEMPSENSOR_TYPE,EXT3_SENSOR_INDEX,EXT3_HEAT_MANAGER,0,0,0,0
@@ -2624,9 +2179,6 @@ Extruder extruder[NUM_EXTRUDER] =
 #endif
         ,EXT4_ADVANCE_L,EXT4_ADVANCE_BACKLASH_STEPS
 #endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
-#endif
         ,{
             4,EXT4_TEMPSENSOR_TYPE,EXT4_SENSOR_INDEX,EXT4_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
@@ -2650,9 +2202,6 @@ Extruder extruder[NUM_EXTRUDER] =
         ,EXT5_ADVANCE_K
 #endif
         ,EXT5_ADVANCE_L,EXT5_ADVANCE_BACKLASH_STEPS
-#endif
-#if MIXING_EXTRUDER > 0
-        ,10,10,{10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10}
 #endif
         ,{
             5,EXT5_TEMPSENSOR_TYPE,EXT5_SENSOR_INDEX,EXT5_HEAT_MANAGER,0,0,0,0

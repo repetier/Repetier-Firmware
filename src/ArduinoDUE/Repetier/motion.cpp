@@ -157,11 +157,6 @@ void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z,
 
     float axisDistanceMM[E_AXIS_ARRAY]; // Axis movement in mm
     p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
-    #if MIXING_EXTRUDER
-    if(Printer::isAllEMotors()) {
-        p->flags |= FLAG_ALL_E_MOTORS;
-    }
-    #endif
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
@@ -309,11 +304,6 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 
     float axisDistanceMM[E_AXIS_ARRAY]; // Axis movement in mm
     p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
-#if MIXING_EXTRUDER
-    if(Printer::isAllEMotors()) {
-        p->flags |= FLAG_ALL_E_MOTORS;
-    }
-#endif
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     p->dir = 0;
@@ -1824,11 +1814,6 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff,uint8_t check_endstops,uin
     float axisDistanceMM[VIRTUAL_AXIS_ARRAY]; // Axis movement in mm
     if(check_endstops) p->flags = FLAG_CHECK_ENDSTOPS;
     else p->flags = 0;
-#if MIXING_EXTRUDER
-    if(Printer::isAllEMotors()) {
-        p->flags |= FLAG_ALL_E_MOTORS;
-    }
-#endif
     p->joinFlags = 0;
     if(!pathOptimize) p->setEndSpeedFixed(true);
     //Find direction
@@ -2016,11 +2001,6 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops,uint8_t pathOptimiz
             p->setEndSpeedFixed(true);
 
         p->flags = (check_endstops ? FLAG_CHECK_ENDSTOPS : 0);
-#if MIXING_EXTRUDER
-        if(Printer::isAllEMotors()) {
-            p->flags |= FLAG_ALL_E_MOTORS;
-        }
-#endif
         p->numNonlinearSegments = segmentsPerLine;
 
         uint16_t maxStepsPerSegment = p->calculateNonlinearSubSegments(softEndstop);

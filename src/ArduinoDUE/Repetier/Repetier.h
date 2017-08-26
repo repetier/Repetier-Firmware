@@ -178,7 +178,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define DUAL_X_AXIS 0
 #endif
 
-#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
+#if SHARED_EXTRUDER_HEATER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN
 #undef EXT3_HEATER_PIN

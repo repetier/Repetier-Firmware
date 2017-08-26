@@ -51,11 +51,7 @@ void EEPROM::update(GCode *com)
         HAL::eprSetByte(EPR_INTEGRITY_BYTE, newcheck);
     bool includesEeprom = com->P >= EEPROM_EXTRUDER_OFFSET && com->P < EEPROM_EXTRUDER_OFFSET + 6 * EEPROM_EXTRUDER_LENGTH;
     readDataFromEEPROM(includesEeprom);
-#if MIXING_EXTRUDER
-    Extruder::selectExtruderById(Extruder::activeMixingExtruder);
-#else
     Extruder::selectExtruderById(Extruder::current->id);
-#endif
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
 #endif
@@ -306,16 +302,9 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::setAutolevelActive(false);
     Printer::resetTransformationMatrix(true);
 #endif
-#if MIXING_EXTRUDER
-    restoreMixingRatios();
-#endif
     initalizeUncached();
     Printer::updateDerivedParameter();
-#if MIXING_EXTRUDER
-    Extruder::selectExtruderById(Extruder::activeMixingExtruder);
-#else
     Extruder::selectExtruderById(Extruder::current->id);
-#endif
     Extruder::initHeatedBed();
     Com::printInfoFLN(Com::tEPRConfigResetDefaults);
 #else
@@ -441,9 +430,6 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
         HAL::eprSetFloat(o+EPR_EXTRUDER_ADVANCE_L,0);
 #endif
     }
-#if MIXING_EXTRUDER
-    storeMixingRatios(false);
-#endif
     if(corrupted)
     {
         HAL::eprSetInt32(EPR_PRINTING_TIME,0);
@@ -594,9 +580,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
 #endif
     if(includeExtruder)
     {
-#if MIXING_EXTRUDER
-        readMixingRatios();
-#endif
         // now the extruder
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
         {
@@ -695,12 +678,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
         if(version < 8)
         {
             HAL::eprSetFloat(EPR_Z_PROBE_BED_DISTANCE,Z_PROBE_BED_DISTANCE);
-        }
-        if(version < 9)
-        {
-#if MIXING_EXTRUDER
-            storeMixingRatios(false);
-#endif
         }
         if(version < 10)
         {
@@ -1007,18 +984,6 @@ void EEPROM::writeSettings()
 #endif
         writeFloat(o + EPR_EXTRUDER_ADVANCE_L, Com::tEPRAdvanceL);
 #endif
-#if MIXING_EXTRUDER
-        for(uint8_t v = 0; v < VIRTUAL_EXTRUDER; v++)
-        {
-            uint16_t pos = o + EPR_EXTRUDER_MIXING_RATIOS + 2 * v;
-            Com::printF(Com::tEPR1,(int)pos);
-            Com::print(' ');
-            Com::print(HAL::eprGetInt16(pos));
-            Com::print(' ');
-            writeExtruderPrefix(pos);
-            Com::printFLN(PSTR("Weight "), (int)(v + 1));
-        }
-#endif
     }
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
@@ -1093,44 +1058,6 @@ void EEPROM::writeByte(uint pos,PGM_P text)
     writeExtruderPrefix(pos);
     Com::printFLN(text);
 }
-
-#if MIXING_EXTRUDER
-void EEPROM::storeMixingRatios(bool _updateChecksum)
-{
-    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
-    {
-        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
-        {
-            HAL::eprSetInt16(EEPROM_EXTRUDER_OFFSET + e * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * i, extruder[e].virtualWeights[i]);
-        }
-    }
-    if(_updateChecksum)
-        updateChecksum();
-}
-
-void EEPROM::readMixingRatios()
-{
-    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
-    {
-        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
-        {
-            extruder[e].virtualWeights[i] = HAL::eprGetInt16(EEPROM_EXTRUDER_OFFSET + e * EEPROM_EXTRUDER_LENGTH + EPR_EXTRUDER_MIXING_RATIOS + 2 * i);
-        }
-    }
-}
-
-void EEPROM::restoreMixingRatios()
-{
-    for(uint8_t e = 0; e < NUM_EXTRUDER; e++)
-    {
-        for(uint8_t i = 0; i < VIRTUAL_EXTRUDER; i++)
-        {
-            extruder[e].virtualWeights[i] = 10;
-        }
-    }
-}
-
-#endif
 
 void EEPROM::setZCorrection(int32_t c,int index)
 {

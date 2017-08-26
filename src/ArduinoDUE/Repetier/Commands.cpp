@@ -163,7 +163,7 @@ void Commands::printTemperatures(bool showRaw) {
 #if TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex == 255 ? pwm_pos[Extruder::current->id] : pwm_pos[autotuneIndex])); // Show output of auto tune when tuning!
 #endif
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER > 1
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
         Com::printF(Com::tSpaceT,(int)i);
         Com::printF(Com::tColon,extruder[i].tempControl.currentTemperatureC);
@@ -1826,23 +1826,6 @@ void Commands::processMCode(GCode *com) {
                 beep(com->S, com->P); // Beep test
             break;
 #endif
-#if MIXING_EXTRUDER > 0
-        case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
-            if(com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
-                Extruder::setMixingWeight(com->S, com->P);
-            Extruder::recomputeMixingExtruderSteps();
-            break;
-        case 164: /// M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
-            if(!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER) break; // ignore illigal values
-            for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
-                extruder[i].virtualWeights[com->S] = extruder[i].mixingW;
-            }
-#if EEPROM_MODE != 0
-            if(com->hasP() && com->P != 0)  // store permanently to eeprom
-                EEPROM::storeMixingRatios();
-#endif
-            break;
-#endif // MIXING_EXTRUDER
         case 200: { // M200 T<extruder> D<diameter>
                 uint8_t extruderId = Extruder::current->id;
                 if(com->hasT() && com->T < NUM_EXTRUDER)

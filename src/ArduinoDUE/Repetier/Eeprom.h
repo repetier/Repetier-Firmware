@@ -515,11 +515,6 @@ static inline void setTowerZFloor(float newZ) {
 
 #endif
     static void initalizeUncached();
-#if MIXING_EXTRUDER
-    static void storeMixingRatios(bool updateChecksums = true);
-    static void readMixingRatios();
-    static void restoreMixingRatios();
-#endif
 
     static void setZCorrection(int32_t c,int index);
     static inline int32_t getZCorrection(int index) {

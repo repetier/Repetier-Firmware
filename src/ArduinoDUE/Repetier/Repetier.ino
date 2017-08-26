@@ -100,7 +100,6 @@ Custom M Codes
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
 - M140 S<temp> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
-- M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
