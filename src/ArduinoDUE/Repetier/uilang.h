@@ -641,12 +641,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_EN "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_EN "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_EN "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_EN "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_EN "Copies: %ed    Z:%x2"
@@ -954,12 +952,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_DE "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_DE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_DE "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_DE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_DE "Kopien: %ed    Z:%x2"
@@ -1247,12 +1243,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_NL "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_NL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_NL "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_NL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_NL "Kopieen: %ed   Z:%x2"
@@ -1541,12 +1535,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_PT "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_PT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PT "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_PT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_PT "Copias: %ed    Z:%x2"
@@ -1834,12 +1826,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_IT "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_IT "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_IT "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_IT "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_IT "Copie: %ed     Z:%x2"
@@ -2127,12 +2117,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_ES "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_ES "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_ES "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_ES "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_ES "Copias: %ed    Z:%x2"
@@ -2420,12 +2408,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_SE "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_SE "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_SE "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_SE "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_SE "Kopior: %ed    Z:%x2"
@@ -2713,12 +2699,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_FR "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_FR "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FR "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_FR "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_FR "Copies: %ed    Z:%x2"
@@ -3009,12 +2993,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_CZ "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_CZ "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_CZ "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_CZ "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_CZ "Kopii: %ed     Z:%x2"
@@ -3301,12 +3283,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_PL "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_PL "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_PL "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_PL "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_PL "Kopie: %ed     Z:%x2"
@@ -3589,12 +3569,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_TR "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_TR "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_TR "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_TR "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_TR "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_TR "Kopie: %ed     Z:%x2"
@@ -3878,12 +3856,10 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_FI "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
-#define UI_TEXT_MAINPAGE6_2_FI "\xe %eb/%Eb\xb0 Y:%x1"
 #else
-#define UI_TEXT_MAINPAGE6_2_FI "             Y:%x1"
+#define UI_TEXT_MAINPAGE6_2_FI "\xe %eb/%Eb\xb0 Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_FI "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_FI "Kopiot: %ed    Z:%x2"

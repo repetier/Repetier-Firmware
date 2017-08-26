@@ -152,7 +152,6 @@ void Commands::printTemperatures(bool showRaw) {
 #else
     Com::printF(Com::tTColon,temp);
     Com::printF(Com::tSpaceSlash,Extruder::current->tempControl.targetTemperatureC,0);
-#if HAVE_HEATED_BED
     Com::printF(Com::tSpaceBColon,Extruder::getHeatedBedTemperature());
     Com::printF(Com::tSpaceSlash,heatedBedController.targetTemperatureC,0);
     if(showRaw) {
@@ -160,7 +159,6 @@ void Commands::printTemperatures(bool showRaw) {
         Com::printF(Com::tColon,(1023 << (2 - ANALOG_REDUCE_BITS)) - heatedBedController.currentTemperature);
     }
     Com::printF(Com::tSpaceBAtColon,(pwm_pos[heatedBedController.pwmIndex])); // Show output of auto tune when tuning!
-#endif
 #endif
 #if TEMP_PID
     Com::printF(Com::tSpaceAtColon,(autotuneIndex == 255 ? pwm_pos[Extruder::current->id] : pwm_pos[autotuneIndex])); // Show output of auto tune when tuning!
@@ -1739,11 +1737,9 @@ void Commands::processMCode(GCode *com) {
             previousMillisCmd = HAL::timeInMilliseconds();
             break;
         case 190: { // M190 - Wait bed for heater to reach target.
-#if HAVE_HEATED_BED
                 if(Printer::debugDryrun()) break;
                 UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
                 Commands::waitUntilEndOfAllMoves();
-#if HAVE_HEATED_BED
                 if (com->hasS()) Extruder::setHeatedBedTemperature(com->S,com->hasF() && com->F > 0);
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN > 0
                 if(abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) break;
@@ -1759,9 +1755,7 @@ void Commands::processMCode(GCode *com) {
                     Commands::checkForPeriodicalActions(true);
                     GCode::keepAlive(WaitHeater);
                 }
-#endif
                 EVENT_HEATING_FINISHED(-1);
-#endif
                 UI_CLEAR_STATUS;
                 previousMillisCmd = HAL::timeInMilliseconds();
             }
@@ -1804,9 +1798,7 @@ void Commands::processMCode(GCode *com) {
 #else
                 Extruder::setTemperatureForExtruder(0, 0);
 #endif
-#if HAVE_HEATED_BED != 0
                 Extruder::setHeatedBedTemperature(0,false);
-#endif
             }
             break;
         case 115: // M115
@@ -1898,11 +1890,7 @@ void Commands::processMCode(GCode *com) {
                 if(com->hasS()) {
                     if(com->S < 0) break;
                     if(com->S < NUM_EXTRUDER) temp = &extruder[com->S].tempControl;
-#if HAVE_HEATED_BED
                     else temp = &heatedBedController;
-#else
-                    else break;
-#endif
                 }
                 if(com->hasX()) temp->pidPGain = com->X;
                 if(com->hasY()) temp->pidIGain = com->Y;
@@ -2445,7 +2433,7 @@ void Commands::emergencyStop() {
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     WRITE(FAN_PIN, 0);
 #endif
-#if HAVE_HEATED_BED && HEATED_BED_HEATER_PIN > -1
+#if HEATED_BED_HEATER_PIN > -1
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));

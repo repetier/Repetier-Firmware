@@ -147,7 +147,6 @@ void Extruder::manageTemperatures()
                 EVENT_HEATER_DEFECT(controller);
             }
         }
-#if HAVE_HEATED_BED
         else if(controller == HEATED_BED_INDEX && Extruder::getHeatedBedTemperature() > HEATED_BED_MAX_TEMP + 5) {
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -165,7 +164,6 @@ void Extruder::manageTemperatures()
                 EVENT_HEATER_DEFECT(controller);
             }			
         }
-#endif // HAVE_HEATED_BED
 #ifdef RED_BLUE_STATUS_LEDS
         if(act->currentTemperatureC > 50)
             hot = true;
@@ -436,10 +434,8 @@ void Extruder::resetJamSteps()
 
 void Extruder::initHeatedBed()
 {
-#if HAVE_HEATED_BED
 #if TEMP_PID
     heatedBedController.updateTempControlVars();
-#endif
 #endif
 }
 
@@ -862,7 +858,6 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
 
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 {
-#if HAVE_HEATED_BED
     if(temperatureInCelsius > HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius < 0) temperatureInCelsius = 0;
     if(heatedBedController.targetTemperatureC==temperatureInCelsius) return; // don't flood log with messages if killed
@@ -873,18 +868,13 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
         pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;    // turn on the mainboard cooling fan
     else if(Printer::areAllSteppersDisabled())
         pwm_pos[PWM_BOARD_FAN] = 0;      // turn off the mainboard cooling fan only if steppers disabled
-#endif
     EVENT_SET_BED_TEMP(temperatureInCelsius,beep);
 }
 
 float Extruder::getHeatedBedTemperature()
 {
-#if HAVE_HEATED_BED
     TemperatureController *c = tempController[HEATED_BED_INDEX];
     return c->currentTemperatureC;
-#else
-    return -1;
-#endif
 }
 
 #if MIXING_EXTRUDER > 0
@@ -2364,9 +2354,7 @@ bool reportTempsensorError()
     for(uint8_t i = 0; i < NUM_TEMPERATURE_LOOPS; i++)
     {
         if(i == NUM_EXTRUDER) Com::printF(Com::tHeatedBed);
-#if HAVE_HEATED_BED		
         else if(i == HEATED_BED_INDEX) Com::printF(Com::tExtruderSpace,i);
-#endif		
         else Com::printF(PSTR("Other:"));
         TemperatureController *act = tempController[i];
         int temp = act->currentTemperatureC;
@@ -2686,13 +2674,11 @@ Extruder extruder[NUM_EXTRUDER] =
 };
 #endif // NUM_EXTRUDER
 
-#if HAVE_HEATED_BED
 TemperatureController heatedBedController = {PWM_HEATED_BED,HEATED_BED_SENSOR_TYPE,BED_SENSOR_INDEX,HEATED_BED_HEAT_MANAGER,0,0,0,0
 #if TEMP_PID
         ,0,HEATED_BED_PID_INTEGRAL_DRIVE_MAX,HEATED_BED_PID_INTEGRAL_DRIVE_MIN,HEATED_BED_PID_PGAIN_OR_DEAD_TIME,HEATED_BED_PID_IGAIN,HEATED_BED_PID_DGAIN,HEATED_BED_PID_MAX,0,0,0,{0,0,0,0}
 #endif
         ,0,0,0,HEATED_BED_DECOUPLE_TEST_PERIOD};
-#endif
 
 #if FAN_THERMO_PIN > -1
 TemperatureController thermoController = {PWM_FAN_THERMO,FAN_THERMO_THERMISTOR_TYPE,THERMO_ANALOG_INDEX,0,0,0,0,0
@@ -2723,19 +2709,13 @@ TemperatureController *tempController[NUM_TEMPERATURE_LOOPS] =
 #if NUM_EXTRUDER > 5
     ,&extruder[5].tempControl
 #endif
-#if HAVE_HEATED_BED
 #if NUM_EXTRUDER == 0
     &heatedBedController
 #else
     ,&heatedBedController
 #endif
-#endif
 #if FAN_THERMO_PIN > -1
-#if NUM_EXTRUDER == 0 && !HAVE_HEATED_BED
-    &thermoController
-#else
     ,&thermoController
-#endif
 #endif // FAN_THERMO_PIN
 };
 #endif

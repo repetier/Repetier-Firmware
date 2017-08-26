@@ -94,7 +94,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
 #endif
-#if HAVE_HEATED_BED
     heatedBedController.heatManager= HEATED_BED_HEAT_MANAGER;
 #if TEMP_PID
     heatedBedController.pidDriveMax = HEATED_BED_PID_INTEGRAL_DRIVE_MAX;
@@ -103,7 +102,6 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     heatedBedController.pidIGain = HEATED_BED_PID_IGAIN;
     heatedBedController.pidDGain = HEATED_BED_PID_DGAIN;
     heatedBedController.pidMax = HEATED_BED_PID_MAX;
-#endif
 #endif
     Printer::xLength = X_MAX_LENGTH;
     Printer::yLength = Y_MAX_LENGTH;
@@ -354,12 +352,8 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_Y_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
     HAL::eprSetFloat(EPR_Z_MAX_TRAVEL_ACCEL,Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS]);
 #endif
-#if HAVE_HEATED_BED
     HAL::eprSetByte(EPR_BED_HEAT_MANAGER,heatedBedController.heatManager);
-#else
-    HAL::eprSetByte(EPR_BED_HEAT_MANAGER,HEATED_BED_HEAT_MANAGER);
-#endif
-#if defined(TEMP_PID) && HAVE_HEATED_BED
+#if defined(TEMP_PID)
     HAL::eprSetByte(EPR_BED_DRIVE_MAX,heatedBedController.pidDriveMax);
     HAL::eprSetByte(EPR_BED_DRIVE_MIN,heatedBedController.pidDriveMin);
     HAL::eprSetFloat(EPR_BED_PID_PGAIN,heatedBedController.pidPGain);
@@ -551,7 +545,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = HAL::eprGetFloat(EPR_Y_MAX_TRAVEL_ACCEL);
     Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_TRAVEL_ACCEL);
 #endif
-#if HAVE_HEATED_BED
     heatedBedController.heatManager= HAL::eprGetByte(EPR_BED_HEAT_MANAGER);
 #if TEMP_PID
     heatedBedController.pidDriveMax = HAL::eprGetByte(EPR_BED_DRIVE_MAX);
@@ -560,7 +553,6 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     heatedBedController.pidIGain = HAL::eprGetFloat(EPR_BED_PID_IGAIN);
     heatedBedController.pidDGain = HAL::eprGetFloat(EPR_BED_PID_DGAIN);
     heatedBedController.pidMax = HAL::eprGetByte(EPR_BED_PID_MAX);
-#endif
 #endif
     Printer::xMin = HAL::eprGetFloat(EPR_X_HOME_OFFSET);
     Printer::yMin = HAL::eprGetFloat(EPR_Y_HOME_OFFSET);
@@ -960,7 +952,6 @@ void EEPROM::writeSettings()
 #endif
 
 
-#if HAVE_HEATED_BED
     writeByte(EPR_BED_HEAT_MANAGER, Com::tEPRBedHeatManager);
 #if TEMP_PID
     writeByte(EPR_BED_DRIVE_MAX, Com::tEPRBedPIDDriveMax);
@@ -969,7 +960,6 @@ void EEPROM::writeSettings()
     writeFloat(EPR_BED_PID_IGAIN, Com::tEPRBedIGain);
     writeFloat(EPR_BED_PID_DGAIN, Com::tEPRBedDGain);
     writeByte(EPR_BED_PID_MAX, Com::tEPRBedPISMaxValue);
-#endif
 #endif
 #if FEATURE_RETRACTION
     writeByte(EPR_AUTORETRACT_ENABLED,Com::tEPRAutoretractEnabled);

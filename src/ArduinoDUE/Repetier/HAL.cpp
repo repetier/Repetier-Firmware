@@ -929,7 +929,7 @@ void PWM_TIMER_VECTOR ()
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
     if ((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0) WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1
     if ((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER]) > 0) WRITE(HEATED_BED_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
   }
@@ -1094,7 +1094,7 @@ if(fan2Kickstart == 0)
   if(pwm_pos_set[PWM_FAN_THERMO] == pwm_count_cooler && pwm_pos_set[PWM_FAN_THERMO] != COOLER_PWM_MASK) WRITE(FAN_THERMO_PIN,0);
   #endif
 #endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER], pwm_pos_set[NUM_EXTRUDER], HEATER_PINS_INVERTED);
 #else

@@ -552,9 +552,7 @@ void Printer::kill(uint8_t only_steppers)
     }
     else UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
 #if FAN_BOARD_PIN > -1
-#if HAVE_HEATED_BED
     if(heatedBedController.targetTemperatureC < 15)      // turn off FAN_BOARD only if bed heater is off
-#endif
        pwm_pos[PWM_BOARD_FAN] = 0;
 #endif // FAN_BOARD_PIN
     Commands::printTemperatures(false);
@@ -1872,7 +1870,7 @@ void Printer::showConfiguration() {
 #endif
     Com::config(PSTR("NumExtruder:"),NUM_EXTRUDER);
     Com::config(PSTR("MixingExtruder:"),MIXING_EXTRUDER);
-    Com::config(PSTR("HeatedBed:"),HAVE_HEATED_BED);
+    Com::config(PSTR("HeatedBed:"), true);
     Com::config(PSTR("SDCard:"),SDSUPPORT);
     Com::config(PSTR("Fan:"),FAN_PIN > -1 && FEATURE_FAN_CONTROL);
 #if FEATURE_FAN2_CONTROL && defined(FAN2_PIN) && FAN2_PIN > -1
@@ -2313,7 +2311,6 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("]},"));
     // SEQ??
     Com::printF(PSTR("\"temps\": {"));
-#if HAVE_HEATED_BED
     Com::printF(PSTR("\"bed\": {\"current\":"));
     Com::print(heatedBedController.currentTemperatureC);
     Com::printF(PSTR(",\"active\":"));
@@ -2321,7 +2318,6 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR(",\"state\":"));
     Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
     Com::printF(PSTR("},"));
-#endif
     Com::printF(PSTR("\"heads\": {\"current\": ["));
     firstOccurrence = true;
     for (int i = 0; i < NUM_EXTRUDER; i++) {

@@ -702,7 +702,7 @@ Value is used for all generic tables created.
 // ############# Heated bed configuration ########################
 
 /* \brief Set true if you have a heated bed connected to your board, false if not */
-#define HAVE_HEATED_BED true
+//#define HAVE_HEATED_BED true
 
 #define HEATED_BED_MAX_TEMP 110
 

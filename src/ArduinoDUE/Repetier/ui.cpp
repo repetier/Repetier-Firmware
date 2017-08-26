@@ -1361,9 +1361,7 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'E': // Target extruder temperature
             if(c2 == 'c') fvalue = Extruder::current->tempControl.targetTemperatureC;
             else if(c2 >= '0' && c2 <= '9') fvalue = extruder[c2 - '0'].tempControl.targetTemperatureC;
-#if HAVE_HEATED_BED
             else if(c2 == 'b') fvalue = heatedBedController.targetTemperatureC;
-#endif
             addFloat(fvalue, 3, 0 /*UI_TEMP_PRECISION*/);
             break;
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
@@ -1457,9 +1455,7 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
-#if HAVE_HEATED_BED
             else if(c2 == 'b') ivalue = pwm_pos[heatedBedController.pwmIndex];
-#endif
             else if(c2 == 'C') ivalue = pwm_pos[Extruder::current->id];
             ivalue = (ivalue * 100) / 255;
             addInt(ivalue, 3);
@@ -2045,14 +2041,12 @@ void UIDisplay::refreshPage()
             else
                 cache[1][0] = '\x0a'; //off
 #endif
-#if HAVE_HEATED_BED
             //heated bed animated icons
             uint8_t lin = 2 - ((NUM_EXTRUDER != 2) ? 1 : 0);
             if(heatedBedController.targetTemperatureC > 30)
                 cache[lin][0] = Printer::isAnimation() ? '\x0c' : '\x0d';
             else
                 cache[lin][0] = '\x0b';
-#endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
             //fan
             fanPercent = Printer::getFanSpeed() * 100 / 255;
@@ -2491,11 +2485,9 @@ int UIDisplay::okAction(bool allowMoves)
 #if FEATURE_BABYSTEPPING
         zBabySteps = 0;
 #endif
-#if HAVE_HEATED_BED
         if(action == pgm_read_word(&ui_menu_conf_bed.action))  // enter Bed configuration menu
             currHeaterForSetup = &heatedBedController;
         else
-#endif
             currHeaterForSetup = &(Extruder::current->tempControl);
         Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1);
         Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
@@ -2836,7 +2828,6 @@ ZPOS2:
 #endif
     break;
     case UI_ACTION_HEATED_BED_TEMP:
-#if HAVE_HEATED_BED
     {
         int tmp = (int)heatedBedController.targetTemperatureC;
         if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
@@ -2846,7 +2837,6 @@ ZPOS2:
         else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
         Extruder::setHeatedBedTemperature(tmp);
     }
-#endif
     break;
 
     case UI_ACTION_EXTRUDER0_TEMP:
@@ -3194,9 +3184,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             {
                 for(int i = 0;i < NUM_EXTRUDER; i++)
                     Extruder::setTemperatureForExtruder(0, i);
-#if HAVE_HEATED_BED
                 Extruder::setHeatedBedTemperature(0);
-#endif
             }
             break;
         case UI_ACTION_POWER:
@@ -3225,9 +3213,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
 #endif
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
-#endif
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_ABS_ID));
@@ -3238,22 +3224,16 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
 #endif
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
-#endif
             break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS_F(Com::translatedF(UI_TEXT_COOLDOWN_ID));
             for(int i = 0;i < NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0, i);
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
-#endif
             break;
         case UI_ACTION_HEATED_BED_OFF:
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
-#endif
             break;
         case UI_ACTION_EXTRUDER0_OFF:
 #if NUM_EXTRUDER > 1
@@ -3576,14 +3556,12 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         }
         break;
         case UI_ACTION_HEATED_BED_UP:
-#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC + 1;
             if(tmp == 1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
             else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
             Extruder::setHeatedBedTemperature(tmp);
         }
-#endif
         break;
 #if MAX_HARDWARE_ENDSTOP_Z
         case UI_ACTION_SET_MEASURED_ORIGIN:
@@ -3640,13 +3618,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:
-#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC - 1;
             if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
             Extruder::setHeatedBedTemperature(tmp);
         }
-#endif
         break;
         case UI_ACTION_FAN_UP:
             Commands::setFanSpeed(Printer::getFanSpeed() + 32, true);
@@ -3773,7 +3749,7 @@ void UIDisplay::slowAction(bool allowMoves)
 #if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
-#if HAVE_HEATED_BED && defined(UI_I2C_HEATBED_LED)
+#if defined(UI_I2C_HEATBED_LED)
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
 #if FAN_PIN>=0 && defined(UI_I2C_FAN_LED)
