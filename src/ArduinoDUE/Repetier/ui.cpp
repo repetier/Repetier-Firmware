@@ -954,19 +954,15 @@ void UIDisplay::initialize()
     for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
     printRowP(0, versionString);
     printRowP(1, PSTR(UI_PRINTER_NAME));
-#if UI_ROWS>2
     printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
-#endif
 #endif
 #else
     slideIn(0, versionString);
     strcpy(displayCache[0], uid.printCols);
     slideIn(1, PSTR(UI_PRINTER_NAME));
     strcpy(displayCache[1], uid.printCols);
-#if UI_ROWS>2
     slideIn(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
     strcpy(displayCache[UI_ROWS-1], uid.printCols);
-#endif
 #endif
 #endif // gameduino2
     HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
