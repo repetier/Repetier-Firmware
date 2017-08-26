@@ -104,23 +104,6 @@ extern void initializeAllMotorDrivers();
 #endif
 
 
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-/**
-With laser support you can exchange a extruder by a laser. A laser gets controlled by a digital pin.
-By default all intensities > 200 are always on, and lower values are always off. You can overwrite
-this with a programmed event EVENT_SET_LASER(intensity) that return false to signal the default
-implementation that it has set it's value already.
-EVENT_INITALIZE_LASER should return false to prevent default initialization.
-*/
-class LaserDriver {
-public:
-    static uint8_t intensity; // Intensity to use for next move queued. This is NOT the current value!
-    static bool laserOn; // Enabled by M3?
-    static void initialize();
-    static void changeIntensity(uint8_t newIntensity);
-};
-#endif
-
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
 /**
 The CNC driver differs a bit from laser driver. Here only M3,M4,M5 have an influence on the spindle.

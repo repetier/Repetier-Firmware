@@ -351,9 +351,6 @@ void Printer::reportPrinterMode() {
     case PRINTER_MODE_FFF:
         Com::printFLN(Com::tPrinterModeFFF);
         break;
-    case PRINTER_MODE_LASER:
-        Com::printFLN(Com::tPrinterModeLaser);
-        break;
     case PRINTER_MODE_CNC:
         Com::printFLN(Com::tPrinterModeCNC);
         break;
@@ -903,9 +900,6 @@ void Printer::setup()
     SET_OUTPUT(EXP_VOLTAGE_LEVEL_PIN);
     WRITE(EXP_VOLTAGE_LEVEL_PIN,UI_VOLTAGE_LEVEL);
 #endif // UI_VOLTAGE_LEVEL
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    LaserDriver::initialize();
-#endif // defined
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
     CNCDriver::initialize();
 #endif // defined

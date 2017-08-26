@@ -861,14 +861,6 @@ void Commands::processGCode(GCode *com) {
     switch(com->G) {
         case 0: // G0 -> G1
         case 1: // G1
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            {
-                // disable laser for G0 moves
-                bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
-#endif // defined
                 if(com->hasS()) Printer::setNoDestinationCheck(com->S != 0);
                 if(Printer::setDestinationStepsFromGCode(com)) // For X Y Z E F
                     PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS, true);
@@ -893,27 +885,11 @@ void Commands::processGCode(GCode *com) {
                         Com::printFLN(PSTR("Buffer corrupted"));
                 }
 #endif
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                LaserDriver::laserOn = laserOn;
-            }
-#endif // defined
             break;
 #if ARC_SUPPORT
         case 2: // CW Arc
         case 3: // CCW Arc MOTION_MODE_CW_ARC: case MOTION_MODE_CCW_ARC:
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            {
-                // disable laser for G0 moves
-                bool laserOn = LaserDriver::laserOn;
-                if(com->G == 0 && Printer::mode == PRINTER_MODE_LASER) {
-                    LaserDriver::laserOn = false;
-                }
-#endif // defined
                 processArc(com);
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                LaserDriver::laserOn = laserOn;
-            }
-#endif // defined
             break;
 #endif
         case 4: // G4 dwell
@@ -950,18 +926,11 @@ void Commands::processGCode(GCode *com) {
             Printer::unitIsInches = 0;
             break;
         case 50028: { //G28 Home all Axis one at a time
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                bool oldLaser = LaserDriver::laserOn;
-                LaserDriver::laserOn = false;
-#endif
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
                     Printer::currentPositionSteps[E_AXIS] = 0;
                 if(homeAllAxis || !com->hasNoXYZ())
                     Printer::homeAxis(homeAllAxis || com->hasX(),homeAllAxis || com->hasY(),homeAllAxis || com->hasZ());
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-                LaserDriver::laserOn = oldLaser;
-#endif
                 Printer::updateCurrentPosition();
             }
             break;
@@ -1262,15 +1231,7 @@ void Commands::processGCode(GCode *com) {
 */
 void Commands::processMCode(GCode *com) {
     switch( com->M ) {
-        case 3: // Spindle/laser on
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            if(Printer::mode == PRINTER_MODE_LASER) {
-                if(com->hasS())
-                    LaserDriver::intensity = constrain(com->S,0,255);
-                LaserDriver::laserOn = true;
-                Com::printFLN(PSTR("LaserOn:"),(int)LaserDriver::intensity);
-            }
-#endif // defined
+        case 3: // Spindle on
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
             if(Printer::mode == PRINTER_MODE_CNC) {
                 waitUntilEndOfAllMoves();
@@ -1286,12 +1247,7 @@ void Commands::processMCode(GCode *com) {
             }
 #endif // defined
             break;
-        case 5: // Spindle/laser off
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            if(Printer::mode == PRINTER_MODE_LASER) {
-                LaserDriver::laserOn = false;
-            }
-#endif // defined
+        case 5: // Spindle off
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
             if(Printer::mode == PRINTER_MODE_CNC) {
                 waitUntilEndOfAllMoves();
@@ -1892,12 +1848,6 @@ void Commands::processMCode(GCode *com) {
             break;
         case 451:
             Printer::mode = PRINTER_MODE_FFF;
-            Printer::reportPrinterMode();
-            break;
-        case 452:
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            Printer::mode = PRINTER_MODE_LASER;
-#endif
             Printer::reportPrinterMode();
             break;
         case 453:

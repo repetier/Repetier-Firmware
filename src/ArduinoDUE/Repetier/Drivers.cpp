@@ -107,30 +107,6 @@ void initializeAllMotorDrivers()
 
 #endif // NUM_MOTOR_DRIVERS
 
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-uint8_t LaserDriver::intensity = 255; // Intensity to use for next move queued if we want lasers. This is NOT the current value!
-bool LaserDriver::laserOn = false;
-void LaserDriver::initialize()
-{
-    if(EVENT_INITALIZE_LASER)
-    {
-#if LASER_PIN > -1
-        SET_OUTPUT(LASER_PIN);
-#endif
-    }
-    changeIntensity(0);
-}
-void LaserDriver::changeIntensity(uint8_t newIntensity)
-{
-    if(EVENT_SET_LASER(newIntensity))
-    {
-        // Default implementation
-#if LASER_PIN > -1
-        WRITE(LASER_PIN,(LASER_ON_HIGH ? newIntensity > 199 : newIntensity < 200));
-#endif
-    }
-}
-#endif // SUPPORT_LASER
 
 #if defined(SUPPORT_CNC) && SUPPORT_CNC
 /**

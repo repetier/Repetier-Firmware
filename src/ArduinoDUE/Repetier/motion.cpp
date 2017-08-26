@@ -165,13 +165,6 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
                 Printer::extrudeMultiplyError -= p->delta[E_AXIS];
                 Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
             }
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            else if(Printer::mode == PRINTER_MODE_LASER)
-            {
-                p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
-                p->delta[E_AXIS] = 0;
-            }
-#endif
         }
         if(p->delta[axis] >= 0)
             p->setPositiveDirectionForAxis(axis);
@@ -1148,12 +1141,6 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
         if(Printer::mode == PRINTER_MODE_FFF) {
             Printer::setFanSpeedDirectly(cur->secondSpeed);
         }
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-        else if(Printer::mode == PRINTER_MODE_LASER)
-        {
-            LaserDriver::changeIntensity(cur->secondSpeed);
-        }
-#endif
         return Printer::interval; // Wait an other 50% from last step to make the 100% full
     } // End cur=0
     cur->checkEndstops();
@@ -1301,12 +1288,6 @@ int32_t PrintLine::bresenhamStep() // version for Cartesian printer
             if(Printer::mode == PRINTER_MODE_FFF) {
                 Printer::setFanSpeedDirectly(Printer::fanSpeed);
             }
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            else if(Printer::mode == PRINTER_MODE_LASER) // Last move disables laser for safety!
-            {
-                LaserDriver::changeIntensity(0);
-            }
-#endif
         }
         interval = Printer::interval = interval >> 1; // 50% of time to next call to do cur=0
         DEBUG_MEMORY;

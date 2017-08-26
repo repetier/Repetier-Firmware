@@ -64,13 +64,13 @@ public:
     static ufast8_t linesWritePos; // Position where we write the next cached line move
     ufast8_t joinFlags;
     volatile ufast8_t flags;
-    uint8_t secondSpeed; // for laser intensity or fan control
+    uint8_t secondSpeed; // for fan control
 private:
     fast8_t primaryAxis;
-    ufast8_t dir;                       ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
+    ufast8_t dir;                   ///< Direction of movement. 1 = X+, 2 = Y+, 4= Z+, values can be combined.
     int32_t timeInTicks;
-    int32_t delta[E_AXIS_ARRAY];                  ///< Steps we want to move.
-    int32_t error[E_AXIS_ARRAY];                  ///< Error calculation for Bresenham algorithm
+    int32_t delta[E_AXIS_ARRAY];    ///< Steps we want to move.
+    int32_t error[E_AXIS_ARRAY];    ///< Error calculation for Bresenham algorithm
     float speedX;                   ///< Speed in x direction at fullInterval in mm/s
     float speedY;                   ///< Speed in y direction at fullInterval in mm/s
     float speedZ;                   ///< Speed in z direction at fullInterval in mm/s

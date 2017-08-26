@@ -156,7 +156,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define TEMP_PID 1
 
 #define PRINTER_MODE_FFF 0
-#define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
 
 #define ILLEGAL_Z_PROBE -888
