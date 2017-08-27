@@ -135,7 +135,7 @@ typedef char prog_char;
 #define SERVO2500US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
 #define SERVO5000US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
 
-#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock 
+#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock
 #define AD_TRACKING_CYCLES      4   // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
@@ -328,7 +328,7 @@ class HAL
     // as long as hal eeprom functions are used.
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
-    
+
     HAL();
     virtual ~HAL();
 
@@ -339,9 +339,9 @@ class HAL
         // Disable watchdog
         WDT_Disable(WDT);
       #endif
-  
+
       #if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEprom installed or using i2c display
-      HAL::i2cInit(TWI_CLOCK_FREQ); 
+      HAL::i2cInit(TWI_CLOCK_FREQ);
       #endif
       // make debugging startup easier
       //Serial.begin(115200);
@@ -631,7 +631,7 @@ class HAL
         // read an incomming byte
         v.b[i] = 0;
      }
-     return v;       
+     return v;
 #endif
     }
 

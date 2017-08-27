@@ -117,7 +117,7 @@ void Commands::waitUntilEndOfAllBuffers() {
 #endif
             } else
 #endif
-            
+
             Commands::executeGCode(code);
             code->popCurrentCommand();
         }
@@ -227,6 +227,7 @@ void Commands::setFanSpeed(int speed, bool immediately) {
     Com::printFLN(Com::tFanspeed,speed); // send only new values to break update loops!
 #endif
 }
+
 void Commands::setFan2Speed(int speed) {
 #if FAN2_PIN >- 1 && FEATURE_FAN2_CONTROL
     speed = constrain(speed,0,255);
@@ -697,7 +698,7 @@ void Commands::processGCode(GCode *com) {
 #endif
             }
             break;
-        case 30: 
+        case 30:
             { // G30 single probe set Z0
                 uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
                 if(Printer::runZProbe(p & 1,p & 2) == ILLEGAL_Z_PROBE) {
@@ -783,7 +784,7 @@ void Commands::processGCode(GCode *com) {
             }
             break;
 #if FEATURE_Z_PROBE && NUM_EXTRUDER > 1
-        case 134: 
+        case 134:
             { // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
                 float z = com->hasZ() ? com->Z : 0;
                 int p = com->hasP() ? com->P : 0;

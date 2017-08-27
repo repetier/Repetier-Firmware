@@ -784,7 +784,7 @@ extern int maxadv2;
 extern float maxadvspeed;
 #endif
 
-
+#include "TemperatureController.h"
 #include "Extruder.h"
 
 void manage_inactivity(uint8_t debug);
