@@ -95,7 +95,11 @@ extern bool cCustomParser(char c1, char c2);
 #define HALF_P2_Y 170
 #define HALF_FIX_X 132
 #define HALF_FIX_Y 110
-#define HALF_Z 1.6 
+#ifdef TEC4
+#define HALF_Z 1.8
+#else
+#define HALF_Z 3
+#endif 
 // Wheel position
 #define HALF_WHEEL_P1 -71
 #define HALF_WHEEL_P2 199

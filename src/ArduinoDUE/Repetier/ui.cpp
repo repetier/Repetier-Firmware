@@ -3664,7 +3664,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
                 Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
             }
             //Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
-            Extruder::pauseExtruders();
+            Extruder::pauseExtruders(false);
             Commands::waitUntilEndOfAllMoves();
 #if FILAMENTCHANGE_REHOME
             Printer::disableXStepper();

@@ -425,7 +425,7 @@ void Extruder::unpauseExtruders(bool wait) {
 #endif
 #if HAVE_HEATED_BED
     bool waitBed = false;
-    if(heatedBedController.targetTemperatureC) {
+    if(heatedBedController.targetTemperatureC < 0) {
         heatedBedController.targetTemperatureC = -heatedBedController.targetTemperatureC;
         waitBed = true;
     }

@@ -577,7 +577,7 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
     //   p->vMax = 46000;
     //p->plateauN = (p->vMax*p->vMax/p->accelerationPrim)>>1;
 #if USE_ADVANCE
-    if(!isXYZMove() || !isEMove()) {
+    if(!isXYZMove() || !isEPositiveMove()) {
 #if ENABLE_QUADRATIC_ADVANCE
         advanceRate = 0; // No head move or E move only or sucking filament back
         advanceFull = 0;
