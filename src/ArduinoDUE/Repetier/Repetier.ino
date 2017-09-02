@@ -41,8 +41,6 @@ Implemented Codes
 - G4  - Dwell S<seconds> or P<milliseconds>
 - G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
-- G20 - Units for G0/G1 are inches.
-- G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement

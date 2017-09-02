@@ -290,7 +290,7 @@ cog. Direct drive extruder need 0.
 /* \brief Temperature to retract filament when extruder is heating up. Overridden if EEPROM activated. */
 #define EXT0_WAIT_RETRACT_TEMP 150
 
-/** \brief Units (mm/inches) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
+/** \brief Units (mm) to retract filament when extruder is heating up. Overridden if EEPROM activated. Set
 to 0 to disable.
 */
 #define EXT0_WAIT_RETRACT_UNITS 0

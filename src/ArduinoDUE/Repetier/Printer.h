@@ -256,7 +256,6 @@ public:
     static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
     static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-    static uint8_t unitIsInches;
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
@@ -734,10 +733,6 @@ public:
     static INLINE void toggleAnimation()
     {
         setAnimation(!isAnimation());
-    }
-    static INLINE float convertToMM(float x)
-    {
-        return (unitIsInches ? x*25.4 : x);
     }
     static INLINE bool areAllSteppersDisabled()
     {

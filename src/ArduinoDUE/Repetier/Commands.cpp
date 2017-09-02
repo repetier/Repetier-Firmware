@@ -135,10 +135,10 @@ void Commands::printCurrentPosition(FSTRINGPARAM(s)) {
     x += Printer::coordinateOffset[X_AXIS];
     y += Printer::coordinateOffset[Y_AXIS];
     z += Printer::coordinateOffset[Z_AXIS];
-    Com::printF(Com::tXColon, x * (Printer::unitIsInches ? 0.03937 : 1), 2);
-    Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
-    Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
-    Com::printFLN(Com::tSpaceEColon, Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
+    Com::printF(Com::tXColon, x, 2);
+    Com::printF(Com::tSpaceYColon, y, 2);
+    Com::printF(Com::tSpaceZColon, z, 3);
+    Com::printFLN(Com::tSpaceEColon, Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS], 4);
     //Com::printF(PSTR("OffX:"),Printer::offsetX); // to debug offset handling
     //Com::printFLN(PSTR(" OffY:"),Printer::offsetY);
 }
@@ -420,7 +420,7 @@ void Commands::processArc(GCode *com) {
     float position[Z_AXIS_ARRAY];
     Printer::realPosition(position[X_AXIS],position[Y_AXIS],position[Z_AXIS]);
     if(!Printer::setDestinationStepsFromGCode(com)) return; // For X Y Z E F
-    float offset[2] = {Printer::convertToMM(com->hasI() ? com->I : 0),Printer::convertToMM(com->hasJ() ? com->J : 0)};
+    float offset[2] = {(com->hasI() ? com->I : 0),(com->hasJ() ? com->J : 0)};
     float target[E_AXIS_ARRAY] = {Printer::realXPosition(),Printer::realYPosition(),Printer::realZPosition(),Printer::destinationSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]};
     float r;
     if (com->hasR()) {
@@ -473,7 +473,7 @@ void Commands::processArc(GCode *com) {
         j = (y + (x * h_x2_div_d))/2
 
         */
-        r = Printer::convertToMM(com->R);
+        r = com->R;
         // Calculate the change in position along each selected axis
         double x = target[X_AXIS]-position[X_AXIS];
         double y = target[Y_AXIS]-position[Y_AXIS];
@@ -595,12 +595,6 @@ void Commands::processGCode(GCode *com) {
 #endif
             break;
 #endif // FEATURE_RETRACTION
-        case 20: // G20 Units to inches
-            Printer::unitIsInches = 1;
-            break;
-        case 21: // G21 Units to mm
-            Printer::unitIsInches = 0;
-            break;
         case 50028: { //G28 Home all Axis one at a time
                 uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
                 if(com->hasE())
@@ -774,12 +768,12 @@ void Commands::processGCode(GCode *com) {
                 float xOff = Printer::coordinateOffset[X_AXIS];
                 float yOff = Printer::coordinateOffset[Y_AXIS];
                 float zOff = Printer::coordinateOffset[Z_AXIS];
-                if(com->hasX()) xOff = Printer::convertToMM(com->X) - Printer::currentPosition[X_AXIS];
-                if(com->hasY()) yOff = Printer::convertToMM(com->Y) - Printer::currentPosition[Y_AXIS];
-                if(com->hasZ()) zOff = Printer::convertToMM(com->Z) - Printer::currentPosition[Z_AXIS];
+                if(com->hasX()) xOff = com->X - Printer::currentPosition[X_AXIS];
+                if(com->hasY()) yOff = com->Y - Printer::currentPosition[Y_AXIS];
+                if(com->hasZ()) zOff = com->Z - Printer::currentPosition[Z_AXIS];
                 Printer::setOrigin(xOff, yOff, zOff);
                 if(com->hasE()) {
-                    Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
+                    Printer::currentPositionSteps[E_AXIS] = com->E * Printer::axisStepsPerMM[E_AXIS];
                 }
             }
             break;

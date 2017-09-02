@@ -23,7 +23,6 @@ ufast8_t Printer::maxExtruderSpeed;            ///< Timer delay for end extruder
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
 //uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
 #endif
-uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 float Printer::axisStepsPerMM[E_AXIS_ARRAY] = {XAXIS_STEPS_PER_MM, YAXIS_STEPS_PER_MM, ZAXIS_STEPS_PER_MM, 1}; ///< Number of steps per mm needed.
 float Printer::invAxisStepsPerMM[E_AXIS_ARRAY]; ///< Inverse of axisStepsPerMM for faster conversion
@@ -520,7 +519,6 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
   \brief Sets the destination coordinates to values stored in com.
 
   For the computation of the destination, the following facts are considered:
-  - Are units inches or mm.
   - Relative or absolute positioning with special case only extruder relative.
   - Offset in x and y direction for multiple extruder support.
 */
@@ -534,7 +532,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(relativeCoordinateMode || relativeExtruderCoordinateMode) {
             Extruder::current->retract(com->E < 0,false);
         } else {
-            p = convertToMM(com->E * axisStepsPerMM[E_AXIS]); // current position
+            p = com->E * axisStepsPerMM[E_AXIS]; // current position
             Extruder::current->retract(com->E < p,false);
         }
         return 0; // Fake no move so nothing gets added
@@ -542,15 +540,15 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
 #endif
     if(!relativeCoordinateMode)
     {
-        if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
-        if(com->hasY()) lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS] = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
-        if(com->hasZ()) lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS] = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
+        if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = com->X - coordinateOffset[X_AXIS];
+        if(com->hasY()) lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS] = com->Y - coordinateOffset[Y_AXIS];
+        if(com->hasZ()) lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS] = com->Z - coordinateOffset[Z_AXIS];
     }
     else
     {
-        if(com->hasX()) currentPosition[X_AXIS] = (lastCmdPos[X_AXIS] += convertToMM(com->X));
-        if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
-        if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
+        if(com->hasX()) currentPosition[X_AXIS] = (lastCmdPos[X_AXIS] += com->X);
+        if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += com->Y);
+        if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += com->Z);
     }
     transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS] +  Printer::offsetZ, x, y, z);
     destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
@@ -558,7 +556,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
     if(com->hasE() && !Printer::debugDryrun())
     {
-        p = convertToMM(com->E * axisStepsPerMM[E_AXIS]);
+        p = com->E * axisStepsPerMM[E_AXIS];
 
         if(relativeCoordinateMode || relativeExtruderCoordinateMode)
         {
@@ -584,10 +582,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     else Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
     if(com->hasF())
     {
-        if(unitIsInches)
-            feedrate = com->F * 0.0042333f * (float)feedrateMultiply;  // Factor is 25.5/60/100
-        else
-            feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
+        feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
     if(!Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]))
     {
