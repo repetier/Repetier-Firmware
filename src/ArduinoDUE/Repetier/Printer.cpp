@@ -845,7 +845,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
 #if LAZY_DUAL_X_AXIS
         sledParked = false;
 #endif
-        posAllowed = Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]);
+        posAllowed = com->hasNoXYZ() || Printer::isPositionAllowed(lastCmdPos[X_AXIS], lastCmdPos[Y_AXIS], lastCmdPos[Z_AXIS]);
 #if DISTORTION_CORRECTION == 0
     }
 #endif

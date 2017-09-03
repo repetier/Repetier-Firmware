@@ -124,7 +124,7 @@ void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int
     }
 #else
 #if DISTORTION_CORRECTION
-    Printer::destinationSteps[Z_AXIS] -= Printer::zCorrectionStepsIncluded; // correct as it will be added later in cartesian move computation
+    Printer::destinationSteps[Z_AXIS] -= Printer::zCorrectionStepsIncluded; // correct as it will be added later in Cartesian move computation
 #endif
     queueCartesianMove(checkEndstop, pathOptimize);
 #endif

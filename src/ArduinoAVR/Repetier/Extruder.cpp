@@ -840,7 +840,7 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     }
 #endif
     Printer::feedrate = oldfeedrate;
-    Printer::updateCurrentPosition(false);
+    Printer::updateCurrentPosition(true);
 #if USE_ADVANCE
     HAL::resetExtruderDirection();
 #endif // USE_ADVANCE
