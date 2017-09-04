@@ -219,14 +219,11 @@ void Endstops::update() {
         newRead |= ENDSTOP_Y_MAX_ID;
 #endif
 #if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-    // DEBUG_MSG2_FAST("test x min",(int)READ(X_MIN_PIN));
     if(READ(X_MIN_PIN) != ENDSTOP_X_MIN_INVERTING) {
         newRead |= ENDSTOP_X_MIN_ID;
-        //   DEBUG_MSG("x min hit");
     }
 #endif
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-    //DEBUG_MSG2_FAST("test x max:",(int)READ(X_MAX_PIN));
     if(READ(X_MAX_PIN) != ENDSTOP_X_MAX_INVERTING)
         newRead |= ENDSTOP_X_MAX_ID;
 #endif
@@ -253,7 +250,39 @@ void Endstops::update() {
         newRead |= ENDSTOP_Z_PROBE_ID;
 #endif
 #endif
-	InterruptProtectedBlock noInts; // bad idea to run this from different interrupts at once!
+#ifdef EXTENDED_ENDSTOPS
+#if HAS_PIN(Y2_MIN_PIN) && MIN_HARDWARE_ENDSTOP_Y2
+    if(READ(Y2_MIN_PIN) != ENDSTOP_Y2_MIN_INVERTING)
+        newRead2 |= ENDSTOP_Y2_MIN_ID;
+#endif
+#if HAS_PIN(Y2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Y2
+    if(READ(Y2_MAX_PIN) != ENDSTOP_Y2_MAX_INVERTING)
+        newRead2 |= ENDSTOP_Y2_MAX_ID;
+#endif
+#if HAS_PIN(X2_MIN_PIN) && MIN_HARDWARE_ENDSTOP_X2
+    if(READ(X2_MIN_PIN) != ENDSTOP_X2_MIN_INVERTING) {
+        newRead2 |= ENDSTOP_X2_MIN_ID;
+    }
+#endif
+#if HAS_PIN(X2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_X2
+    if(READ(X2_MAX_PIN) != ENDSTOP_X2_MAX_INVERTING)
+        newRead2 |= ENDSTOP_X2_MAX_ID;
+#endif
+#if HAS_PIN(Z2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Z2
+    if(READ(Z2_MAX_PIN) != ENDSTOP_Z2_MAX_INVERTING)
+        newRead2 |= ENDSTOP_Z2_MAX_ID;
+#endif
+#if HAS_PIN(Z3_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Z3
+    if(READ(Z3_MAX_PIN) != ENDSTOP_Z3_MAX_INVERTING)
+        newRead2 |= ENDSTOP_Z3_MAX_ID;
+#endif
+#if HAS_PIN(Z3_MIN_PIN) && MIN_HARDWARE_ENDSTOP_Z3
+    if(READ(Z3_MIN_PIN) != ENDSTOP_Z3_MIN_INVERTING)
+        newRead2 |= ENDSTOP_Z3_MIN_ID;
+#endif
+
+#endif
+    InterruptProtectedBlock noInts; // bad idea to run this from different interrupts at once!
     lastRead &= newRead;
 #ifdef EXTENDED_ENDSTOPS
     lastRead2 &= newRead2;
@@ -2883,7 +2912,7 @@ void Printer::showJSONStatus(int type) {
             float fraction;
             if (sd.filesize < 2000000) fraction = sd.sdpos / sd.filesize;
             else fraction = (sd.sdpos >> 8) / (sd.filesize >> 8);
-            Com::print((float) floorf(fraction * 1000) / 1000); // ONE DECIMAL, COULD BE DONE BY SHIFTING, BUT MEH
+            Com::print((float) floor(fraction * 1000) / 1000); // ONE DECIMAL, COULD BE DONE BY SHIFTING, BUT MEH
             Com::print(',');
         }
 #endif

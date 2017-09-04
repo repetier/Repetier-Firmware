@@ -436,7 +436,9 @@ void cExecute(int action,bool allowMoves) {
     } else {
       Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
       Extruder::setTemperatureForExtruder(extruder[0].tempControl.preheatTemperature,0,false);
+#if NUM_EXTRUDER > 0      
       Extruder::setTemperatureForExtruder(extruder[1].tempControl.preheatTemperature,1,false);
+#endif      
     }
     break;
   case UI_ACTION_REMOVEBED: {

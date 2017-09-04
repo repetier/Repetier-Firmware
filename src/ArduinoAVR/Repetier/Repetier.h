@@ -93,6 +93,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
 
+#define IS_MAC_TRUE(x) (defined(x) && x!=0)
+#define IS_MAC_FALSE(x) (!defined(x) || x==0)
+#define HAS_PIN(x) (defined(x) && x > -1)
+
 // Uncomment if no analyzer is connected
 //#define ANALYZER
 // Channel->pin assignments
