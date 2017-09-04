@@ -121,8 +121,6 @@ void SDCard::unmount()
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
-    if(Printer::isMenuMode(MENU_MODE_SD_PRINTING))
-        Printer::setMenuMode(MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
 #if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
     uid.cwd[0] = '/';

@@ -629,9 +629,9 @@ UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp0_printing, UI_TEXT_EXTR0_TEMP_ID,
 #define UI_TEMP0_PRINTING
 #define UI_TEMP0_CNT 0
 #endif
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 UI_MENU_CHANGEACTION_T(ui_menu_ext_temp1, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP)
 UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp1_printing, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
+#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
 #define UI_TEMP1_PRINTING ,&ui_menu_ext_temp1_printing
 #define UI_TEMP1_CNT 1
 #else
@@ -1000,7 +1000,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_close,UI_TEXT_CLOSE_ID,UI_ACTION_BACK)
 &ui_menu_chf_continue,&ui_menu_chf_close}
 //UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,11+UI_MENU_EXTSEL_CNT) 
 #if NUM_EXTRUDER == 1
-UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf2)   
+UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2)   
 UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2,MENU_MODE_PRINTING,0)
 #else
 UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf)   
