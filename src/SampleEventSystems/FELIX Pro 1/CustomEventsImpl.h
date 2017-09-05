@@ -92,7 +92,9 @@ void cstmCooldown() {
 } 
 bool cstmIsHeating() {
   return extruder[0].tempControl.targetTemperatureC > 0 ||
+#if NUM_EXTRUDER > 1  
     extruder[1].tempControl.targetTemperatureC > 0 ||
+#endif    
     heatedBedController.targetTemperatureC > 0; 
 }
 void setPreheatTemps(int16_t extr,int16_t bed,bool all,bool showMenu = true) {
@@ -427,7 +429,9 @@ void cExecute(int action,bool allowMoves) {
     } else {
       Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature);
       Extruder::setTemperatureForExtruder(extruder[0].tempControl.preheatTemperature,0,false);
+#if NUM_EXTRUDER > 1      
       Extruder::setTemperatureForExtruder(0,1,false);
+#endif      
     }
     break;    
   case UI_ACTION_PRECOOL2:
